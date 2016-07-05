@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Simonykees
+Bundle-SymbolicName: simonykees;singleton:=true
+Bundle-Version: 0.0.1.gubachspitze
+Bundle-Vendor: Splendit IT-Consultion
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
