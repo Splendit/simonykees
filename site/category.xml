@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/simonykees.feature_0.0.0.jar" id="simonykees.feature" version="0.0.0">
+    <category name="simonykees"/>
+   </feature>
+   <feature url="features/simonykees.feature.source_0.0.0.jar" id="simonykees.feature.source" version="0.0.0">
+    <category name="simonykees Developer Resources"/>
+   </feature>
+</site>
