@@ -3,6 +3,9 @@ package at.splendit.simonykees.core;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -28,7 +31,13 @@ public class SampleHandler extends AbstractHandler {
      */
     @Override
     public Object execute(ExecutionEvent event) throws ExecutionException {
-        MessageDialog.openInformation(window.getShell(), "Eclipse Plugin Archetype", "Hello, Maven+Eclipse world,\n simonykees is built with Tycho");
+    	IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+    	IProject[] project = root.getProjects(0);
+    	String p = "";
+    	for (IProject iProject : project) {
+			p += iProject.getName() + "\n";
+		}
+        MessageDialog.openInformation(window.getShell(), "Eclipse Plugin Archetype", "Hello, Maven+Eclipse world,\n simonykees is built with Tycho\n" + p);
         return null;
     }
 
