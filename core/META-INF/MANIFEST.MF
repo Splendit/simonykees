@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: simonykees Core Plugin
 Bundle-SymbolicName: simonykees.core;singleton:=true
-Bundle-Version: 0.0.1.gubachspitze
+Bundle-Version: 0.0.1.qualifier
 Bundle-Activator: at.splendit.simonykees.core.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime
