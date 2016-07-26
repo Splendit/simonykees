@@ -4,6 +4,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -20,7 +21,7 @@ public class RefactorHandler extends AbstractHandler {
 		final Shell shell = HandlerUtil.getActiveShell(event);
 		final String activePartId = HandlerUtil.getActivePartId(event);
 		
-		MessageDialog.openError(shell, "activePartId", activePartId);
+		log("activePartId [" + activePartId + "]");
 		
 		final RefactorASTVisitor refactorASTVisitor = new RefactorASTVisitor();
 		
@@ -36,6 +37,14 @@ public class RefactorHandler extends AbstractHandler {
 	public static void log(int severity, String message, Exception e) {
 		final ILog log = Activator.getDefault().getLog();
 		log.log(new Status(severity, Activator.PLUGIN_ID, message, e));
+	}
+	
+	public static void log(String message, Exception e) {
+		log(IStatus.INFO, message, e);
+	}
+	
+	public static void log(String message) {
+		log(message, null);
 	}
 
 
