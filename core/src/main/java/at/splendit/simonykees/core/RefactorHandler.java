@@ -5,6 +5,8 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -23,6 +25,12 @@ public class RefactorHandler extends AbstractHandler {
 		final RefactorASTVisitor refactorASTVisitor = new RefactorASTVisitor();
 		
 		return null;
+	}
+	
+	private static void resetParser(ICompilationUnit compilationUnit, ASTParser astParser) {
+		astParser.setSource(compilationUnit);
+		astParser.setResolveBindings(true);
+//		astParser.setCompilerOptions(null);
 	}
 	
 	public static void log(int severity, String message, Exception e) {
