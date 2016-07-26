@@ -5,8 +5,28 @@
 
    <extension
          point="org.eclipse.ui.menus">
+      <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=org.eclipse.jdt.ui.refactoring.menu">
+         <menu
+               label="Simonykees">
+            <command
+                  commandId="simonykees.core.command1"
+                  label="Simony magic"
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
       <menuContribution
             locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=org.eclipse.jdt.ui.refactoring.menu">
+         <menu
+               label="Simonykees">
+            <command
+                  commandId="simonykees.core.command1"
+                  label="Simony magic"
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.refactoring.menu">
          <menu
                label="Simonykees">
             <command
