@@ -1,5 +1,8 @@
 package at.splendit.simonykees.core;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -7,9 +10,13 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 
@@ -23,9 +30,35 @@ public class RefactorHandler extends AbstractHandler {
 		
 		log("activePartId [" + activePartId + "]");
 		
+		switch (activePartId) {
+		case "org.eclipse.jdt.ui.CompilationUnitEditor":
+			getFromEditor(shell, HandlerUtil.getActiveEditor(event));
+			break;
+		case "org.eclipse.jdt.ui.PackageExplorer":
+		case "org.eclipse.ui.navigator.ProjectExplorer":
+			HandlerUtil.getCurrentStructuredSelection(event);
+			log(Status.ERROR, "activePartId [" + activePartId + "] must be coded next", null);
+			break;
+
+		default:
+			log(Status.ERROR, "activePartId [" + activePartId + "] unknown", null);
+			break;
+		}
+		
 		final RefactorASTVisitor refactorASTVisitor = new RefactorASTVisitor();
 		
+		new RefactoringJob().schedule();
+		
 		return null;
+	}
+	
+	private static List<IJavaElement> getFromEditor(Shell shell, IEditorPart editorPart) {
+		final IEditorInput editorInput = editorPart.getEditorInput();
+		final IJavaElement javaElement = JavaUI.getEditorInputJavaElement(editorInput);
+		if (javaElement instanceof ICompilationUnit) {
+			return Collections.singletonList(javaElement);
+		}
+		return Collections.emptyList();
 	}
 	
 	private static void resetParser(ICompilationUnit compilationUnit, ASTParser astParser) {
