@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -32,7 +33,9 @@ public class RefactorHandler extends AbstractHandler {
 		
 		switch (activePartId) {
 		case "org.eclipse.jdt.ui.CompilationUnitEditor":
-			getFromEditor(shell, HandlerUtil.getActiveEditor(event));
+			ICompilationUnit compilationUnit = getFromEditor(shell, HandlerUtil.getActiveEditor(event));
+			final ASTParser astParser = ASTParser.newParser(AST.JLS8);
+			resetParser(compilationUnit, astParser);
 			break;
 		case "org.eclipse.jdt.ui.PackageExplorer":
 		case "org.eclipse.ui.navigator.ProjectExplorer":
@@ -52,13 +55,13 @@ public class RefactorHandler extends AbstractHandler {
 		return null;
 	}
 	
-	private static List<IJavaElement> getFromEditor(Shell shell, IEditorPart editorPart) {
+	private static ICompilationUnit getFromEditor(Shell shell, IEditorPart editorPart) {
 		final IEditorInput editorInput = editorPart.getEditorInput();
 		final IJavaElement javaElement = JavaUI.getEditorInputJavaElement(editorInput);
 		if (javaElement instanceof ICompilationUnit) {
-			return Collections.singletonList(javaElement);
+			return (ICompilationUnit) javaElement;
 		}
-		return Collections.emptyList();
+		return null;
 	}
 	
 	private static void resetParser(ICompilationUnit compilationUnit, ASTParser astParser) {
