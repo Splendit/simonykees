@@ -1,12 +1,9 @@
 package at.splendit.simonykees.core;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Assignment.Operator;
 import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 public class RefactorASTVisitor extends ASTVisitor {
 
