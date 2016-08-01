@@ -3,18 +3,27 @@ package at.splendit.simonykees.core;
 import java.util.Collections;
 import java.util.List;
 
+import org.autorefactor.AutoRefactorPlugin;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+import org.eclipse.core.filebuffers.LocationKind;
 import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -36,6 +45,16 @@ public class RefactorHandler extends AbstractHandler {
 			ICompilationUnit compilationUnit = getFromEditor(shell, HandlerUtil.getActiveEditor(event));
 			final ASTParser astParser = ASTParser.newParser(AST.JLS8);
 			resetParser(compilationUnit, astParser);
+			CompilationUnit cu = (CompilationUnit) astParser.createAST(null);
+			cu.accept(new RefactorASTVisitor());
+			try {
+				log(String.valueOf(compilationUnit.hasUnsavedChanges()));
+			} catch (JavaModelException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			log(cu.toString());	
+			
 			break;
 		case "org.eclipse.jdt.ui.PackageExplorer":
 		case "org.eclipse.ui.navigator.ProjectExplorer":
