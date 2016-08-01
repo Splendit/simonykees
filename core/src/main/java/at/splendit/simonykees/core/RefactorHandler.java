@@ -13,7 +13,11 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -34,15 +38,37 @@ public class RefactorHandler extends AbstractHandler {
 			ICompilationUnit compilationUnit = getFromEditor(shell, HandlerUtil.getActiveEditor(event));
 			final ASTParser astParser = ASTParser.newParser(AST.JLS8);
 			resetParser(compilationUnit, astParser);
-			CompilationUnit cu = (CompilationUnit) astParser.createAST(null);
-			cu.accept(new RefactorASTVisitor());
+			CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
+			
+			/*
+			 * 1/2
+			 * see http://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Fguide%2Fjdt_api_manip.htm
+			 * "The modifying API allows to modify directly the AST"
+			 */
+			astRoot.recordModifications();
+			
+			// we let the visitor do his job
+			astRoot.accept(new RefactorASTVisitor());
+			
+			/*
+			 * 2/2 
+			 */
 			try {
-				log(String.valueOf(compilationUnit.hasUnsavedChanges()));
-			} catch (JavaModelException e) {
+				String source = compilationUnit.getSource();
+				Document document = new Document(source);
+				TextEdit edits = astRoot.rewrite(document, compilationUnit.getJavaProject().getOptions(true));
+				
+				edits.apply(document);
+				String newSource = document.get();
+				
+				compilationUnit.getBuffer().setContents(newSource);
+				
+			} catch (JavaModelException | MalformedTreeException | BadLocationException e1) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				e1.printStackTrace();
 			}
-			log(cu.toString());	
+			
+			log(astRoot.toString());	
 			
 			break;
 		case "org.eclipse.jdt.ui.PackageExplorer":
@@ -56,9 +82,7 @@ public class RefactorHandler extends AbstractHandler {
 			break;
 		}
 		
-		final RefactorASTVisitor refactorASTVisitor = new RefactorASTVisitor();
-		
-		new RefactoringJob().schedule();
+//		new RefactoringJob().schedule();
 		
 		return null;
 	}
