@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -24,6 +25,8 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 
 public class RefactorHandler extends AbstractHandler {
+	
+	final ASTParser astParser = ASTParser.newParser(AST.JLS8);
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -35,9 +38,16 @@ public class RefactorHandler extends AbstractHandler {
 		
 		switch (activePartId) {
 		case "org.eclipse.jdt.ui.CompilationUnitEditor":
-			ICompilationUnit compilationUnit = getFromEditor(shell, HandlerUtil.getActiveEditor(event));
-			final ASTParser astParser = ASTParser.newParser(AST.JLS8);
-			resetParser(compilationUnit, astParser);
+			ICompilationUnit originalUnit = getFromEditor(shell, HandlerUtil.getActiveEditor(event));
+			ICompilationUnit workingCopy;
+			try {
+				workingCopy = originalUnit.getWorkingCopy(null);
+			} catch (JavaModelException e) {
+				// TODO Auto-generated catch block
+				throw new ExecutionException("Unable to create workingCopy",e);
+			}
+			
+			resetParser(workingCopy, astParser);
 			CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
 			
 			/*
@@ -54,16 +64,26 @@ public class RefactorHandler extends AbstractHandler {
 			 * 2/2 
 			 */
 			try {
-				String source = compilationUnit.getSource();
+				String source = workingCopy.getSource();
 				Document document = new Document(source);
-				TextEdit edits = astRoot.rewrite(document, compilationUnit.getJavaProject().getOptions(true));
+				TextEdit edits = astRoot.rewrite(document, workingCopy.getJavaProject().getOptions(true));
 				
-				edits.apply(document);
-				String newSource = document.get();
+//				edits.apply(document);
+//				String newSource = document.get();
+//				
+//				originalUnit.getBuffer().setContents(newSource);
 				
-				compilationUnit.getBuffer().setContents(newSource);
+				// Modify buffer and reconcile
+			    workingCopy.applyTextEdit(edits, null);
+			    workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+			    
+			    // Commit changes
+			    workingCopy.commitWorkingCopy(false, null);
+			    
+			    // Destroy working copy
+			    workingCopy.discardWorkingCopy();
 				
-			} catch (JavaModelException | MalformedTreeException | BadLocationException e1) {
+			} catch (JavaModelException | MalformedTreeException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
