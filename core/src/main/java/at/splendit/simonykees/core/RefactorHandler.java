@@ -68,6 +68,16 @@ public class RefactorHandler extends AbstractHandler {
 				
 				// Modify buffer and reconcile
 			    workingCopy.applyTextEdit(edits, null);
+			    
+				/*
+				 * Note about bindings:
+				 * 
+				 * "If requested, a DOM AST representing the compilation unit is returned. 
+				 * Its bindings are computed only if the problem requestor is active."
+				 * Source: http://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FICompilationUnit.html&anchor=reconcile(int,%20boolean,%20org.eclipse.jdt.core.WorkingCopyOwner,%20org.eclipse.core.runtime.IProgressMonitor)
+				 * 
+				 * The IProblemRequestor can be passed via the becomeWorkingCopy method. 
+				 */
 			    workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
 			    
 			    // Commit changes
