@@ -24,6 +24,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 public class RefactorHandler extends AbstractHandler {
 	
+	// TODO should there be a parser for every execution
 	final ASTParser astParser = ASTParser.newParser(AST.JLS8);
 
 	@Override
