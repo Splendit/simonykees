@@ -45,7 +45,7 @@ public class RefactorHandler extends AbstractHandler {
 				throw new ExecutionException("Unable to create workingCopy",e);
 			}
 			
-			resetParser(workingCopy, astParser);
+			resetParser(workingCopy);
 			CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
 			
 			/*
@@ -119,7 +119,7 @@ public class RefactorHandler extends AbstractHandler {
 		return null;
 	}
 	
-	private static void resetParser(ICompilationUnit compilationUnit, ASTParser astParser) {
+	private void resetParser(ICompilationUnit compilationUnit) {
 		astParser.setSource(compilationUnit);
 		astParser.setResolveBindings(true);
 //		astParser.setCompilerOptions(null);
