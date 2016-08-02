@@ -9,12 +9,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -67,11 +65,6 @@ public class RefactorHandler extends AbstractHandler {
 				String source = workingCopy.getSource();
 				Document document = new Document(source);
 				TextEdit edits = astRoot.rewrite(document, workingCopy.getJavaProject().getOptions(true));
-				
-//				edits.apply(document);
-//				String newSource = document.get();
-//				
-//				originalUnit.getBuffer().setContents(newSource);
 				
 				// Modify buffer and reconcile
 			    workingCopy.applyTextEdit(edits, null);
