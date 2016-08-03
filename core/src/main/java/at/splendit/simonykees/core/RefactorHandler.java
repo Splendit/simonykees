@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.text.Document;
 import org.eclipse.swt.widgets.Shell;
@@ -54,10 +55,12 @@ public class RefactorHandler extends AbstractHandler {
 			 * see http://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Fguide%2Fjdt_api_manip.htm
 			 * "The modifying API allows to modify directly the AST"
 			 */
-			astRoot.recordModifications();
+//			astRoot.recordModifications();
+			
+			ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 			
 			// we let the visitor do his job
-			astRoot.accept(new RefactorASTVisitor());
+			astRoot.accept(new RefactorASTVisitor(astRewrite));
 			
 			/*
 			 * 2/2 
@@ -65,7 +68,8 @@ public class RefactorHandler extends AbstractHandler {
 			try {
 				String source = workingCopy.getSource();
 				Document document = new Document(source);
-				TextEdit edits = astRoot.rewrite(document, workingCopy.getJavaProject().getOptions(true));
+//				TextEdit edits = astRoot.rewrite(document, workingCopy.getJavaProject().getOptions(true));
+				TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
 				
 				// Modify buffer and reconcile
 			    workingCopy.applyTextEdit(edits, null);
@@ -92,7 +96,7 @@ public class RefactorHandler extends AbstractHandler {
 				e1.printStackTrace();
 			}
 			
-			log(astRoot.toString());	
+			log("new ast\n" + astRoot.toString());	
 			
 			break;
 		case "org.eclipse.jdt.ui.PackageExplorer":
