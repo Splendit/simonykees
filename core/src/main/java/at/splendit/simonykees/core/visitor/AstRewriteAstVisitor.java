@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import at.splendit.simonykees.core.Activator;
@@ -48,11 +49,12 @@ public class AstRewriteAstVisitor extends ASTVisitor {
 //						node.setOperator(Operator.PLUS_ASSIGN);
 //						node.setRightHandSide(node.getRoot().getAST().newNumberLiteral(((NumberLiteral) right).getToken()));
 						
-						Assignment newNode = (Assignment) astRewrite.createCopyTarget(node);
-						ASTNode.copySubtree(newNode.getAST(), node);
+//						Assignment newNode = (Assignment) astRewrite.createCopyTarget(node);
+						Assignment newNode = node.getAST().newAssignment();
+//						Assignment newNode = (Assignment) ASTNode.copySubtree(node.getAST(), node);
 						newNode.setOperator(Operator.PLUS_ASSIGN);
-						newNode.setLeftHandSide(node.getRoot().getAST().newSimpleName(leftHandSide.getIdentifier()));
-						newNode.setRightHandSide(node.getRoot().getAST().newNumberLiteral(((NumberLiteral) right).getToken()));
+						newNode.setLeftHandSide(newNode.getRoot().getAST().newSimpleName(leftHandSide.getIdentifier()));
+						newNode.setRightHandSide(newNode.getRoot().getAST().newNumberLiteral(((NumberLiteral) right).getToken()));
 						
 						astRewrite.replace(node, newNode, null);
 					}
@@ -68,5 +70,15 @@ public class AstRewriteAstVisitor extends ASTVisitor {
 		return false;
 	}
 	
+	@Override
+	public boolean visit(TypeDeclaration node) {
+		
+		SimpleName oldName = node.getName();
+		
+		SimpleName newName = node.getRoot().getAST().newSimpleName("Y");
+		astRewrite.replace(oldName, newName, null);
+		
+		return true;
+	}
 
 }
