@@ -9,8 +9,13 @@
          <menu
                label="Simonykees">
             <command
-                  commandId="simonykees.core.command1"
-                  label="Simony magic"
+                  commandId="at.splendit.simonykees.simonykees.core.AstRecord"
+                  label="AstRecord"
+                  style="push">
+            </command>
+            <command
+                  commandId="at.splendit.simonykees.simonykees.core.AstRewrite"
+                  label="AstRewrite"
                   style="push">
             </command>
          </menu>
@@ -20,8 +25,13 @@
          <menu
                label="Simonykees">
             <command
-                  commandId="simonykees.core.command1"
-                  label="Simony magic"
+                  commandId="at.splendit.simonykees.simonykees.core.AstRecord"
+                  label="AstRecord"
+                  style="push">
+            </command>
+            <command
+                  commandId="at.splendit.simonykees.simonykees.core.AstRewrite"
+                  label="AstRewrite"
                   style="push">
             </command>
          </menu>
@@ -30,8 +40,13 @@
          <menu
                label="Simonykees">
             <command
-                  commandId="simonykees.core.command1"
-                  label="Simony magic"
+                  commandId="at.splendit.simonykees.simonykees.core.AstRecord"
+                  label="AstRecord"
+                  style="push">
+            </command>
+            <command
+                  commandId="at.splendit.simonykees.simonykees.core.AstRewrite"
+                  label="AstRewrite"
                   style="push">
             </command>
          </menu>
@@ -40,9 +55,14 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="at.splendit.simonykees.core.RefactorHandler"
-            id="simonykees.core.command1"
-            name="AwesomeCommand">
+            defaultHandler="at.splendit.simonykees.core.handler.AstRecordHandler"
+            id="at.splendit.simonykees.simonykees.core.AstRecord"
+            name="AstRecord">
+      </command>
+      <command
+            defaultHandler="at.splendit.simonykees.core.handler.AstRewriteHandler"
+            id="at.splendit.simonykees.simonykees.core.AstRewrite"
+            name="AstRewrite">
       </command>
    </extension>
 
