@@ -11,9 +11,9 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import at.splendit.simonykees.core.Activator;
 
-public class AstRecordAstVisitor extends ASTVisitor {
+public class ModifyingRewriteASTVisitor extends ASTVisitor {
 	
-	public AstRecordAstVisitor() {	}
+	public ModifyingRewriteASTVisitor() {	}
 
 	@Override
 	public boolean visit(IfStatement node) {

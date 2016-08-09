@@ -1,6 +1,5 @@
 package at.splendit.simonykees.core.visitor;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Assignment.Operator;
@@ -14,11 +13,11 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import at.splendit.simonykees.core.Activator;
 
-public class AstRewriteAstVisitor extends ASTVisitor {
+public class DescriptiveRewriteASTVisitor extends ASTVisitor {
 	
 	private ASTRewrite astRewrite;
 	
-	public AstRewriteAstVisitor(ASTRewrite astRewrite) {
+	public DescriptiveRewriteASTVisitor(ASTRewrite astRewrite) {
 		 this.astRewrite = astRewrite;
 	}
 

@@ -15,10 +15,10 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.visitor.AstRecordAstVisitor;
+import at.splendit.simonykees.core.visitor.ModifyingRewriteASTVisitor;
 
 
-public class AstRecordHandler extends AbstractSimonykeesHandler {
+public class ModifyingRewriteHandler extends AbstractSimonykeesHandler {
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -50,7 +50,7 @@ public class AstRecordHandler extends AbstractSimonykeesHandler {
 			astRoot.recordModifications();
 			
 			// we let the visitor do his job
-			astRoot.accept(new AstRecordAstVisitor());
+			astRoot.accept(new ModifyingRewriteASTVisitor());
 			
 			/*
 			 * 2/2 
