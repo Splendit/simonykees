@@ -1,5 +1,8 @@
 package at.splendit.simonykees.core.visitor.arithmetic;
 
+import java.util.List;
+
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -21,6 +24,7 @@ public class ArithmeticExpressionASTVisitor extends ASTVisitor {
 	}
 	
 	@Override
+	@SuppressWarnings("unchecked")
 	public boolean visit(InfixExpression node) {
 		if(newOperator != null){
 			return false;
@@ -29,6 +33,7 @@ public class ArithmeticExpressionASTVisitor extends ASTVisitor {
 		Expression infixLeftOperand = node.getLeftOperand();
 		Expression infixRightOperand = node.getRightOperand();
 		InfixExpression.Operator currentOperator = node.getOperator();
+		List<Expression> extendedOperands = node.extendedOperands();
 
 		if (InfixExpression.Operator.PLUS.equals(currentOperator) || 
 				InfixExpression.Operator.MINUS.equals(currentOperator)) {
@@ -36,12 +41,24 @@ public class ArithmeticExpressionASTVisitor extends ASTVisitor {
 				SimpleName simpleLeftOperand = (SimpleName) infixLeftOperand;
 				if (simpleLeftOperand.getIdentifier().equals(varName)) {
 					newOperator = currentOperator;
-					astRewrite.replace(node, infixRightOperand, null);
+					if(extendedOperands.isEmpty()){
+						astRewrite.replace(node, infixRightOperand, null);
+					}
+					else {
+						InfixExpression replacement = node.getAST().newInfixExpression();
+						Expression firstAdditional = extendedOperands.remove(0);
+						astRewrite.replace(infixLeftOperand, infixRightOperand, null);
+						Expression newInfixRightOperand =(Expression) ASTNode.copySubtree(infixRightOperand.getAST(), infixRightOperand);
+						replacement.setOperator(currentOperator);
+						replacement.setLeftOperand(newInfixRightOperand);
+						replacement.setRightOperand(firstAdditional);
+						replacement.extendedOperands().addAll(extendedOperands);
+						astRewrite.replace(node, replacement, null);
+					}
 					return false;
 				}
 			} else if (infixLeftOperand instanceof InfixExpression) {
-				// TODO go deeper
-				throw new RuntimeException("NotYetImplemented");
+				return true;
 			}
 			//Other Types of nodes are not relevant for this use case 
 			return true;
