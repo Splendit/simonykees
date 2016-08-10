@@ -34,9 +34,9 @@ public class ArithmeticAssignOperatorsTest extends AbstractTest {
 		astParser.setCompilerOptions(JavaCore.getDefaultOptions());
 		astParser.setKind(ASTParser.K_EXPRESSION);
 	}
-	
+
 	@After
-	public void tearDown(){
+	public void tearDown() {
 		astParser = null;
 	}
 
@@ -47,7 +47,9 @@ public class ArithmeticAssignOperatorsTest extends AbstractTest {
 
 	@Parameterized.Parameters
 	public static Collection primeNumbers() {
-		return Arrays.asList(new Object[][] { { "i = i + 3", "i += 3" }, { "i = i + 4 - 3", "i += 4 - 3" }, { "i = i + 4 + 3", "i += 4 + 3" } });
+		return Arrays.asList(new Object[][] { { "i = i + 3", "i += 3" }, { "i = i + 4 - 3", "i += 4 - 3" },
+				{ "i = i + 4 + 3", "i += 4 + 3" }, { "i = 7 + 4 - 3", "i = 7 + 4 - 3" }
+				 });
 	}
 
 	@Test
