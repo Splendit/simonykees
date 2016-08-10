@@ -31,10 +31,6 @@ public class ArithmethicAssignmentASTVisitor extends ASTVisitor {
 				
 				rightHandSide.accept(arithExpASTVisitor);
 				
-				
-				//Pair<InfixExpression, Expression> nodesToChange = ArithmeticHelper.extractSimpleName(leftHandSide,
-				//		rightHandSide);
-
 				if(arithExpASTVisitor.getNewOperator() != null){
 					replacementNode.setOperator(ArithmeticHelper.generateOperator(arithExpASTVisitor.getNewOperator()));					
 					astRewrite.replace(node, replacementNode, null);
