@@ -20,7 +20,7 @@ public class ArithmeticAssignOperatorsTest extends AbstractTest {
 	
 	@Test
 	public void veryStupidTest() throws Exception {
-		String inputString = "i = i + 3 ";
+		String inputString = "i = i + 3";
 		String expectedString = "i += 3";
 
 		final ASTParser astParser = ASTParser.newParser(AST.JLS8);

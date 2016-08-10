@@ -28,15 +28,19 @@ public class ArithmethicAssignmentASTVisitor extends ASTVisitor {
 	public boolean visit(Assignment node) {
 		if (node.getOperator() != null && node.getOperator().equals(Operator.ASSIGN)) {
 			if (node.getLeftHandSide() instanceof SimpleName && node.getRightHandSide() instanceof InfixExpression) {
-				SimpleName leftHandSide = (SimpleName) node.getLeftHandSide();
-				InfixExpression rightHandSide = (InfixExpression) node.getRightHandSide();
+
+				Assignment replacementNode = (Assignment) ASTNode.copySubtree(node.getAST(), node);
+				SimpleName leftHandSide = (SimpleName) replacementNode.getLeftHandSide();
+				InfixExpression rightHandSide = (InfixExpression) replacementNode.getRightHandSide();
+				
 				Pair<InfixExpression, Expression> nodesToChange = ArithmeticHelper.extractSimpleName(leftHandSide,
 						rightHandSide);
-				Assignment replacementNode = (Assignment) ASTNode.copySubtree(node.getAST(), node);
-				
-				replacementNode.setOperator(generateOperator(nodesToChange.getLeft().getOperator()));
-				astRewrite.replace(nodesToChange.getLeft(), nodesToChange.getRight(), null);
-				astRewrite.replace(node, replacementNode, null);
+
+				if(nodesToChange.getLeft() != null){
+					replacementNode.setOperator(generateOperator(nodesToChange.getLeft().getOperator()));					
+					astRewrite.replace(nodesToChange.getLeft(), nodesToChange.getRight(), null);
+					astRewrite.replace(node, replacementNode, null);
+				}
 			}
 		}
 		return true;
