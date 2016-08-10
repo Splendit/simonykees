@@ -2,11 +2,9 @@ package at.splendit.simonykees.core.helper;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
-//import org.apache.commons.lang.NotImplementedException;
 
 public class ArithmeticHelper {
 
