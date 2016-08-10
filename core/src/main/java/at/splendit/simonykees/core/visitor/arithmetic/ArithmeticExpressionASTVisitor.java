@@ -36,6 +36,10 @@ public class ArithmeticExpressionASTVisitor extends ASTVisitor {
 		Expression infixRightOperand = node.getRightOperand();
 		InfixExpression.Operator currentOperator = node.getOperator();
 
+		if (recursionOperator == null){
+			recursionOperator = currentOperator;
+		}
+		
 		if (!hasSameOperationLevel(recursionOperator, currentOperator)) {
 			return false;
 		}
