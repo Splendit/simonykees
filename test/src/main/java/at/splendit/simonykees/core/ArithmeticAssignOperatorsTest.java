@@ -12,7 +12,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEdit;
 import org.junit.Test;
 
-import at.splendit.simonykees.core.visitor.ArithmethicAssignmentASTVisitor;
+import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 
 
 

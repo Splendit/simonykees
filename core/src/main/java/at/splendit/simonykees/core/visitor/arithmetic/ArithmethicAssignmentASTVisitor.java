@@ -1,11 +1,9 @@
-package at.splendit.simonykees.core.visitor;
+package at.splendit.simonykees.core.visitor.arithmetic;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Assignment.Operator;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -29,12 +27,16 @@ public class ArithmethicAssignmentASTVisitor extends ASTVisitor {
 				SimpleName leftHandSide = (SimpleName) replacementNode.getLeftHandSide();
 				InfixExpression rightHandSide = (InfixExpression) replacementNode.getRightHandSide();
 				
-				Pair<InfixExpression, Expression> nodesToChange = ArithmeticHelper.extractSimpleName(leftHandSide,
-						rightHandSide);
+				ArithmeticExpressionASTVisitor arithExpASTVisitor = new ArithmeticExpressionASTVisitor(astRewrite, leftHandSide);
+				
+				rightHandSide.accept(arithExpASTVisitor);
+				
+				
+				//Pair<InfixExpression, Expression> nodesToChange = ArithmeticHelper.extractSimpleName(leftHandSide,
+				//		rightHandSide);
 
-				if(nodesToChange.getLeft() != null){
-					replacementNode.setOperator(generateOperator(nodesToChange.getLeft().getOperator()));					
-					astRewrite.replace(nodesToChange.getLeft(), nodesToChange.getRight(), null);
+				if(arithExpASTVisitor.getNewOperator() != null){
+					replacementNode.setOperator(ArithmeticHelper.generateOperator(arithExpASTVisitor.getNewOperator()));					
 					astRewrite.replace(node, replacementNode, null);
 				}
 			}
@@ -42,17 +44,5 @@ public class ArithmethicAssignmentASTVisitor extends ASTVisitor {
 		return true;
 	}
 
-	private Assignment.Operator generateOperator(InfixExpression.Operator oldOperator) {
-		if (InfixExpression.Operator.PLUS.equals(oldOperator)) {
-			return Assignment.Operator.PLUS_ASSIGN;
-		} else if (InfixExpression.Operator.MINUS.equals(oldOperator)) {
-			return Assignment.Operator.MINUS_ASSIGN;
-		} else if (InfixExpression.Operator.TIMES.equals(oldOperator)) {
-			return Assignment.Operator.TIMES_ASSIGN;
-		} else if (InfixExpression.Operator.DIVIDE.equals(oldOperator)) {
-			return Assignment.Operator.DIVIDE_ASSIGN;
-		}
-		return null;
-	}
-
+	
 }
