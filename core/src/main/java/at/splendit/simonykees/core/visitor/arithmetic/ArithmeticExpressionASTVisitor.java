@@ -10,47 +10,52 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 public class ArithmeticExpressionASTVisitor extends ASTVisitor {
-	
+
 	private String varName;
-	
+
 	private ASTRewrite astRewrite;
 	private InfixExpression.Operator newOperator;
-	
-	public ArithmeticExpressionASTVisitor(ASTRewrite astRewrite, SimpleName optimizationVariable){
+	private InfixExpression.Operator recursionOperator;
+
+	public ArithmeticExpressionASTVisitor(ASTRewrite astRewrite, SimpleName optimizationVariable) {
 		super();
 		this.astRewrite = astRewrite;
 		newOperator = null;
 		varName = optimizationVariable.getIdentifier();
 	}
-	
-	//extendedOperands are unchecked
+
+	// extendedOperands are unchecked
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(InfixExpression node) {
-		if(newOperator != null){
+		if (newOperator != null) {
 			return false;
 		}
-		
+
 		Expression infixLeftOperand = node.getLeftOperand();
 		Expression infixRightOperand = node.getRightOperand();
 		InfixExpression.Operator currentOperator = node.getOperator();
-		
+
+		if (!hasSameOperationLevel(recursionOperator, currentOperator)) {
+			return false;
+		}
+
 		List<Expression> extendedOperands = node.extendedOperands();
 
-		if (InfixExpression.Operator.PLUS.equals(currentOperator) || 
-				InfixExpression.Operator.MINUS.equals(currentOperator)) {
+		if (InfixExpression.Operator.PLUS.equals(currentOperator)
+				|| InfixExpression.Operator.MINUS.equals(currentOperator)) {
 			if (infixLeftOperand instanceof SimpleName) {
 				SimpleName simpleLeftOperand = (SimpleName) infixLeftOperand;
 				if (simpleLeftOperand.getIdentifier().equals(varName)) {
 					newOperator = currentOperator;
-					if(extendedOperands.isEmpty()){
+					if (extendedOperands.isEmpty()) {
 						astRewrite.replace(node, infixRightOperand, null);
-					}
-					else {
+					} else {
 						InfixExpression replacement = node.getAST().newInfixExpression();
 						Expression firstAdditional = extendedOperands.remove(0);
 						astRewrite.replace(infixLeftOperand, infixRightOperand, null);
-						Expression newInfixRightOperand =(Expression) ASTNode.copySubtree(infixRightOperand.getAST(), infixRightOperand);
+						Expression newInfixRightOperand = (Expression) ASTNode.copySubtree(infixRightOperand.getAST(),
+								infixRightOperand);
 						replacement.setOperator(currentOperator);
 						replacement.setLeftOperand(newInfixRightOperand);
 						replacement.setRightOperand(firstAdditional);
@@ -59,19 +64,45 @@ public class ArithmeticExpressionASTVisitor extends ASTVisitor {
 					}
 					return false;
 				}
-			} else if (infixLeftOperand instanceof InfixExpression) {
-				return true;
 			}
-			//Other Types of nodes are not relevant for this use case 
+			if (infixRightOperand instanceof SimpleName && InfixExpression.Operator.PLUS.equals(currentOperator)) {
+				newOperator = currentOperator;
+				if (extendedOperands.isEmpty()) {
+					astRewrite.replace(node, infixLeftOperand, null);
+				} else {
+					Expression firstAdditional = extendedOperands.remove(0);
+					astRewrite.replace(infixRightOperand, firstAdditional, null);
+				}
+				return false;
+			}
+
+			// Other Types of nodes are not relevant for this use case
 			return true;
-		} else if (InfixExpression.Operator.DIVIDE.equals(currentOperator) ||
-				InfixExpression.Operator.TIMES.equals(currentOperator)) {
+		} else if (InfixExpression.Operator.DIVIDE.equals(currentOperator)
+				|| InfixExpression.Operator.TIMES.equals(currentOperator)) {
 			throw new RuntimeException("NotYetImplemented");
 		}
 		return false;
 	}
-	
+
 	public InfixExpression.Operator getNewOperator() {
 		return newOperator;
+	}
+
+	private boolean hasSameOperationLevel(InfixExpression.Operator operator1, InfixExpression.Operator operator2) {
+		if (operator1 == null || operator2 == null) {
+			return false;
+		}
+		if ((InfixExpression.Operator.PLUS.equals(operator1) || InfixExpression.Operator.MINUS.equals(operator1))
+				&& (InfixExpression.Operator.PLUS.equals(operator2)
+						|| InfixExpression.Operator.MINUS.equals(operator2))) {
+			return true;
+		}
+		if ((InfixExpression.Operator.TIMES.equals(operator1) || InfixExpression.Operator.DIVIDE.equals(operator1))
+				&& (InfixExpression.Operator.TIMES.equals(operator2)
+						|| InfixExpression.Operator.DIVIDE.equals(operator2))) {
+			return true;
+		}
+		return false;
 	}
 }
