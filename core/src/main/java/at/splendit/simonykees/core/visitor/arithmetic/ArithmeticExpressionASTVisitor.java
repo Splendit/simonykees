@@ -23,8 +23,9 @@ public class ArithmeticExpressionASTVisitor extends ASTVisitor {
 		varName = optimizationVariable.getIdentifier();
 	}
 	
-	@Override
+	//extendedOperands are unchecked
 	@SuppressWarnings("unchecked")
+	@Override
 	public boolean visit(InfixExpression node) {
 		if(newOperator != null){
 			return false;
@@ -33,6 +34,7 @@ public class ArithmeticExpressionASTVisitor extends ASTVisitor {
 		Expression infixLeftOperand = node.getLeftOperand();
 		Expression infixRightOperand = node.getRightOperand();
 		InfixExpression.Operator currentOperator = node.getOperator();
+		
 		List<Expression> extendedOperands = node.extendedOperands();
 
 		if (InfixExpression.Operator.PLUS.equals(currentOperator) || 
