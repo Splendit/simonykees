@@ -1,39 +1,32 @@
-package at.splendit.simonykees.core;
+package at.splendit.simonykees.core.handler;
 
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.ILog;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.text.Document;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.handlers.HandlerUtil;
 
+import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.visitor.ModifyingRewriteASTVisitor;
 
-public class RefactorHandler extends AbstractHandler {
+
+public class ModifyingRewriteHandler extends AbstractSimonykeesHandler {
 	
-	// TODO should there be a parser for every execution
-	final ASTParser astParser = ASTParser.newParser(AST.JLS8);
-
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
 		final Shell shell = HandlerUtil.getActiveShell(event);
 		final String activePartId = HandlerUtil.getActivePartId(event);
+		final ASTParser astParser = ASTParser.newParser(AST.JLS8);
 		
-		log("activePartId [" + activePartId + "]");
+		Activator.log("activePartId [" + activePartId + "]");
 		
 		switch (activePartId) {
 		case "org.eclipse.jdt.ui.CompilationUnitEditor":
@@ -46,7 +39,7 @@ public class RefactorHandler extends AbstractHandler {
 				throw new ExecutionException("Unable to create workingCopy",e);
 			}
 			
-			resetParser(workingCopy);
+			resetParser(workingCopy, astParser);
 			CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
 			
 			/*
@@ -57,7 +50,7 @@ public class RefactorHandler extends AbstractHandler {
 			astRoot.recordModifications();
 			
 			// we let the visitor do his job
-			astRoot.accept(new RefactorASTVisitor());
+			astRoot.accept(new ModifyingRewriteASTVisitor());
 			
 			/*
 			 * 2/2 
@@ -92,17 +85,17 @@ public class RefactorHandler extends AbstractHandler {
 				e1.printStackTrace();
 			}
 			
-			log(astRoot.toString());	
+			Activator.log("new ast\n" + astRoot.toString());	
 			
 			break;
 		case "org.eclipse.jdt.ui.PackageExplorer":
 		case "org.eclipse.ui.navigator.ProjectExplorer":
 			HandlerUtil.getCurrentStructuredSelection(event);
-			log(Status.ERROR, "activePartId [" + activePartId + "] must be coded next", null);
+			Activator.log(Status.ERROR, "activePartId [" + activePartId + "] must be coded next", null);
 			break;
 
 		default:
-			log(Status.ERROR, "activePartId [" + activePartId + "] unknown", null);
+			Activator.log(Status.ERROR, "activePartId [" + activePartId + "] unknown", null);
 			break;
 		}
 		
@@ -111,33 +104,4 @@ public class RefactorHandler extends AbstractHandler {
 		return null;
 	}
 	
-	private static ICompilationUnit getFromEditor(Shell shell, IEditorPart editorPart) {
-		final IEditorInput editorInput = editorPart.getEditorInput();
-		final IJavaElement javaElement = JavaUI.getEditorInputJavaElement(editorInput);
-		if (javaElement instanceof ICompilationUnit) {
-			return (ICompilationUnit) javaElement;
-		}
-		return null;
-	}
-	
-	private void resetParser(ICompilationUnit compilationUnit) {
-		astParser.setSource(compilationUnit);
-		astParser.setResolveBindings(true);
-//		astParser.setCompilerOptions(null);
-	}
-	
-	public static void log(int severity, String message, Exception e) {
-		final ILog log = Activator.getDefault().getLog();
-		log.log(new Status(severity, Activator.PLUGIN_ID, message, e));
-	}
-	
-	public static void log(String message, Exception e) {
-		log(IStatus.INFO, message, e);
-	}
-	
-	public static void log(String message) {
-		log(message, null);
-	}
-
-
 }

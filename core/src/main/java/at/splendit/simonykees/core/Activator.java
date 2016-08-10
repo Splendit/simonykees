@@ -1,5 +1,8 @@
 package at.splendit.simonykees.core;
 
+import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -60,5 +63,18 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+	}
+	
+	public static void log(int severity, String message, Exception e) {
+		final ILog log = getDefault().getLog();
+		log.log(new Status(severity, PLUGIN_ID, message, e));
+	}
+	
+	public static void log(String message, Exception e) {
+		log(IStatus.INFO, message, e);
+	}
+	
+	public static void log(String message) {
+		log(message, null);
 	}
 }

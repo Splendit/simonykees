@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core;
+package at.splendit.simonykees.core.visitor;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -9,7 +9,11 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 
-public class RefactorASTVisitor extends ASTVisitor {
+import at.splendit.simonykees.core.Activator;
+
+public class ModifyingRewriteASTVisitor extends ASTVisitor {
+	
+	public ModifyingRewriteASTVisitor() {	}
 
 	@Override
 	public boolean visit(IfStatement node) {
@@ -42,10 +46,11 @@ public class RefactorASTVisitor extends ASTVisitor {
 			} else if (rightHandSide instanceof NumberLiteral) {
 				((NumberLiteral) rightHandSide).getToken();
 			} else {
-				RefactorHandler.log("implement [" + rightHandSide.getClass().getSimpleName() + "]");
+				Activator.log("implement [" + rightHandSide.getClass().getSimpleName() + "]");
 			}
 //			node.setOperator(Operator.PLUS_ASSIGN);
 		}
+		// TODO true or false?
 		return true;
 	}
 	
