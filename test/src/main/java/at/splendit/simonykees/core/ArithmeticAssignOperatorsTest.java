@@ -18,6 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 
@@ -45,11 +46,17 @@ public class ArithmeticAssignOperatorsTest extends AbstractTest {
 		this.expectedString = expectedString;
 	}
 
+<<<<<<< b040a72ced2a41c4549ac9189c398fd962697ae4
 	@Parameterized.Parameters
 	public static Collection primeNumbers() {
 		return Arrays.asList(new Object[][] { { "i = i + 3", "i += 3" }, { "i = i + 4 - 3", "i += 4 - 3" },
 				{ "i = i + 4 + 3", "i += 4 + 3" }, { "i = 7 + 4 - 3", "i = 7 + 4 - 3" }
 				 });
+=======
+	@Parameters(name = "{index}: input[{0}] output[{1}]")
+	public static Collection<Object[]> assignments() {
+		return Arrays.asList(new Object[][] { { "i = i + 3", "i += 3" }, { "i = i + 4 - 3", "i += 4 - 3" }, { "i = i + 4 + 3", "i += 4 + 3" } });
+>>>>>>> LJA-78 CHANGE more information for tests
 	}
 
 	@Test
