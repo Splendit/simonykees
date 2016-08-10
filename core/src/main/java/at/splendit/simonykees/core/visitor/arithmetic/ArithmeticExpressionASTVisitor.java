@@ -36,10 +36,10 @@ public class ArithmeticExpressionASTVisitor extends ASTVisitor {
 		Expression infixRightOperand = node.getRightOperand();
 		InfixExpression.Operator currentOperator = node.getOperator();
 
-		if (recursionOperator == null){
+		if (recursionOperator == null) {
 			recursionOperator = currentOperator;
 		}
-		
+
 		if (!hasSameOperationLevel(recursionOperator, currentOperator)) {
 			return false;
 		}
@@ -48,28 +48,26 @@ public class ArithmeticExpressionASTVisitor extends ASTVisitor {
 
 		if (InfixExpression.Operator.PLUS.equals(currentOperator)
 				|| InfixExpression.Operator.MINUS.equals(currentOperator)) {
-			if (infixLeftOperand instanceof SimpleName) {
-				SimpleName simpleLeftOperand = (SimpleName) infixLeftOperand;
-				if (simpleLeftOperand.getIdentifier().equals(varName)) {
-					newOperator = currentOperator;
-					if (extendedOperands.isEmpty()) {
-						astRewrite.replace(node, infixRightOperand, null);
-					} else {
-						InfixExpression replacement = node.getAST().newInfixExpression();
-						Expression firstAdditional = extendedOperands.remove(0);
-						astRewrite.replace(infixLeftOperand, infixRightOperand, null);
-						Expression newInfixRightOperand = (Expression) ASTNode.copySubtree(infixRightOperand.getAST(),
-								infixRightOperand);
-						replacement.setOperator(currentOperator);
-						replacement.setLeftOperand(newInfixRightOperand);
-						replacement.setRightOperand(firstAdditional);
-						replacement.extendedOperands().addAll(extendedOperands);
-						astRewrite.replace(node, replacement, null);
-					}
-					return false;
+
+			if (isSimpleNameAndEqualsVarName(infixLeftOperand)) {
+				newOperator = currentOperator;
+				if (extendedOperands.isEmpty()) {
+					astRewrite.replace(node, infixRightOperand, null);
+				} else {
+					InfixExpression replacement = node.getAST().newInfixExpression();
+					Expression firstAdditional = extendedOperands.remove(0);
+					astRewrite.replace(infixLeftOperand, infixRightOperand, null);
+					Expression newInfixRightOperand = (Expression) ASTNode.copySubtree(infixRightOperand.getAST(),
+							infixRightOperand);
+					replacement.setOperator(currentOperator);
+					replacement.setLeftOperand(newInfixRightOperand);
+					replacement.setRightOperand(firstAdditional);
+					replacement.extendedOperands().addAll(extendedOperands);
+					astRewrite.replace(node, replacement, null);
 				}
+				return false;
 			}
-			if (infixRightOperand instanceof SimpleName && InfixExpression.Operator.PLUS.equals(currentOperator)) {
+			if (isSimpleNameAndEqualsVarName(infixRightOperand) && InfixExpression.Operator.PLUS.equals(currentOperator)) {
 				newOperator = currentOperator;
 				if (extendedOperands.isEmpty()) {
 					astRewrite.replace(node, infixLeftOperand, null);
@@ -91,6 +89,10 @@ public class ArithmeticExpressionASTVisitor extends ASTVisitor {
 
 	public InfixExpression.Operator getNewOperator() {
 		return newOperator;
+	}
+
+	private boolean isSimpleNameAndEqualsVarName(Expression expression) {
+		return expression instanceof SimpleName && ((SimpleName) expression).getIdentifier().equals(varName);
 	}
 
 	private boolean hasSameOperationLevel(InfixExpression.Operator operator1, InfixExpression.Operator operator2) {
