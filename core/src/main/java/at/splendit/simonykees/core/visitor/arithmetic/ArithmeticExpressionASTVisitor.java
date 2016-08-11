@@ -47,13 +47,17 @@ public class ArithmeticExpressionASTVisitor extends ASTVisitor {
 		List<Expression> extendedOperands = node.extendedOperands();
 
 		if (InfixExpression.Operator.PLUS.equals(currentOperator)
-				|| InfixExpression.Operator.MINUS.equals(currentOperator)) {
+				|| InfixExpression.Operator.MINUS.equals(currentOperator)
+				|| InfixExpression.Operator.DIVIDE.equals(currentOperator)
+				|| InfixExpression.Operator.TIMES.equals(currentOperator)) {
 
 			if (isSimpleNameAndEqualsVarName(infixLeftOperand)) {
 				newOperator = currentOperator;
 				if (extendedOperands.isEmpty()) {
 					astRewrite.replace(node, infixRightOperand, null);
 				} else {
+					// Moving all child nodes one leaf left if extendedOperands
+					// are present
 					InfixExpression replacement = node.getAST().newInfixExpression();
 					Expression firstAdditional = extendedOperands.remove(0);
 					astRewrite.replace(infixLeftOperand, infixRightOperand, null);
@@ -67,7 +71,9 @@ public class ArithmeticExpressionASTVisitor extends ASTVisitor {
 				}
 				return false;
 			}
-			if (isSimpleNameAndEqualsVarName(infixRightOperand) && InfixExpression.Operator.PLUS.equals(currentOperator)) {
+			if (isSimpleNameAndEqualsVarName(infixRightOperand)
+					&& (InfixExpression.Operator.PLUS.equals(currentOperator)
+							|| InfixExpression.Operator.TIMES.equals(currentOperator))) {
 				newOperator = currentOperator;
 				if (extendedOperands.isEmpty()) {
 					astRewrite.replace(node, infixLeftOperand, null);
@@ -80,9 +86,6 @@ public class ArithmeticExpressionASTVisitor extends ASTVisitor {
 
 			// Other Types of nodes are not relevant for this use case
 			return true;
-		} else if (InfixExpression.Operator.DIVIDE.equals(currentOperator)
-				|| InfixExpression.Operator.TIMES.equals(currentOperator)) {
-			throw new RuntimeException("NotYetImplemented");
 		}
 		return false;
 	}

@@ -45,7 +45,8 @@ public class ArithmeticAssignOperatorsTest extends AbstractTest {
 		this.inputString = inputString;
 		this.expectedString = expectedString;
 	}
-
+	
+	//TODO add more tests for arithmetic optimization
 	@Parameters(name = "{index}: input[{0}] output[{1}]")
 	public static Collection<Object[]> assignments() {
 		return Arrays.asList(new Object[][] {
@@ -58,7 +59,10 @@ public class ArithmeticAssignOperatorsTest extends AbstractTest {
 				{ "i = 3 + i - 4", "i += 3 - 4" },
 				{ "i = a + i - 4", "i += a - 4" },
 				{ "i = a + b", "i = a + b" },
-				{ "i = i + i", "i += i" },
+				{ "i = f + i", "i += f" },
+				{ "i = i * a", "i *= a" },
+				{ "b = 4 * b", "b *= 4" },
+				{ "q = (3 + 4) * q", "q *= (3 + 4)"}
 			});
 	}
 
