@@ -62,7 +62,9 @@ public class ArithmeticAssignOperatorsTest extends AbstractTest {
 				{ "i = f + i", "i += f" },
 				{ "i = i * a", "i *= a" },
 				{ "b = 4 * b", "b *= 4" },
-				{ "q = (3 + 4) * q", "q *= (3 + 4)"}
+				{ "q = (3 + 4) * q", "q *= (3 + 4)"},
+				{ "q = a * b / c * q * 3 - i", "q = a * b / c * q * 3 - i"},
+				{ "r = r/4","r /= 4"},
 			});
 	}
 

@@ -35,6 +35,9 @@ public class ArithmethicAssignmentASTVisitor extends ASTVisitor {
 					replacementNode.setOperator(ArithmeticHelper.generateOperator(arithExpASTVisitor.getNewOperator()));					
 					astRewrite.replace(node, replacementNode, null);
 				}
+				else {
+					replacementNode.delete();
+				}
 			}
 		}
 		return true;
