@@ -1,57 +1,33 @@
 package at.splendit.simonykees.core.helper;
 
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.SimpleName;
-//import org.apache.commons.lang.NotImplementedException;
 
 public class ArithmeticHelper {
 
-	public static void extractSimpleName(SimpleName simpleName, InfixExpression infixExpression,
-			MutablePair<InfixExpression, Expression> result) {
-
-		String varName = simpleName.getIdentifier();
-		Expression infixLeftOperand = infixExpression.getLeftOperand();
-		Expression infixRightOperand = infixExpression.getRightOperand();
-
-		/**
-		 * * InfixOperator:<code> <b>*</b> TIMES <b>/</b> DIVIDE <b>%</b>
-		 * REMAINDER <b>+</b> PLUS <b>-</b> MINUS
-		 */
-		InfixExpression.Operator currentOperator = infixExpression.getOperator();
-
-		if (InfixExpression.Operator.PLUS.equals(currentOperator) || 
-				InfixExpression.Operator.MINUS.equals(currentOperator)) {
-			if (infixLeftOperand instanceof SimpleName) {
-				SimpleName simpleLeftOperand = (SimpleName) infixLeftOperand;
-				if (simpleLeftOperand.getIdentifier().equals(varName)) {
-					result.setLeft(infixExpression);
-					result.setRight(infixRightOperand);
-					return;
-				}
-			} else if (infixLeftOperand instanceof InfixExpression) {
-				// TODO go deeper
-				throw new RuntimeException("NotYetImplemented");
-			}
-			//Other Types of nodes are not relevant for this use case 
-			return;
-		} else if (InfixExpression.Operator.DIVIDE.equals(currentOperator) ||
-				InfixExpression.Operator.TIMES.equals(currentOperator)) {
-			throw new RuntimeException("NotYetImplemented");
+	/**
+	 *  Generates a corresponding arithmetic assignment operator to an arithmetic operator.
+	 *  Works only for the four base arithmetic operations.
+	 *  Throws UnsupportedOperationException if other type is inserted
+	 *  + transforms to +=
+	 *  - transforms to -=
+	 *  * transforms to *=
+	 *  / transforms to /=
+	 * @param infixExpressionOperator is an InfixExpression.Operator that is converted
+	 * @return returns an Assignment.Operator that is corresponding to the {@link infixExpressionOperator}
+	 */
+	public static Assignment.Operator generateOperator(InfixExpression.Operator infixExpressionOperator) {
+		if (InfixExpression.Operator.PLUS.equals(infixExpressionOperator)) {
+			return Assignment.Operator.PLUS_ASSIGN;
+		} else if (InfixExpression.Operator.MINUS.equals(infixExpressionOperator)) {
+			return Assignment.Operator.MINUS_ASSIGN;
+		} else if (InfixExpression.Operator.TIMES.equals(infixExpressionOperator)) {
+			return Assignment.Operator.TIMES_ASSIGN;
+		} else if (InfixExpression.Operator.DIVIDE.equals(infixExpressionOperator)) {
+			return Assignment.Operator.DIVIDE_ASSIGN;
 		}
-		return;
-	}
-	
-	
-
-	public static Pair<InfixExpression, Expression> extractSimpleName(SimpleName simpleName,
-			InfixExpression infixExpression) {
-		MutablePair<InfixExpression, Expression> result = new MutablePair<>();
-		extractSimpleName(simpleName, infixExpression, result);
-		return result;
+		
+		throw new UnsupportedOperationException();
 	}
 
 }

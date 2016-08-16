@@ -1,14 +1,18 @@
 package at.splendit.simonykees.core.visitor;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Assignment.Operator;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import at.splendit.simonykees.core.Activator;
@@ -32,7 +36,7 @@ public class DescriptiveRewriteASTVisitor extends ASTVisitor {
 		//RefactorHandler.log(IStatus.INFO, "endVisit(IfStatement node) [" + node.toString() + "]", null);
 	}
 	
-	
+	/*
 	@Override
 	public boolean visit(Assignment node) {
 		if(node.getOperator() != null && node.getOperator().equals(Operator.ASSIGN)) {
@@ -67,8 +71,22 @@ public class DescriptiveRewriteASTVisitor extends ASTVisitor {
 		}
 		// TODO true or false?
 		return false;
+	}*/
+	
+	@Override
+	public boolean visit(TryStatement node) {
+		return true;
 	}
 	
+	@Override
+	public boolean visit(VariableDeclarationStatement node) {
+		ITypeBinding typeBind = node.getType().resolveBinding();
+		ITypeBinding superTypeBind = typeBind.getSuperclass();
+        ITypeBinding[] interfaceBinds = typeBind.getInterfaces(); 
+		return true;
+	}
+	
+	/*
 	@Override
 	public boolean visit(TypeDeclaration node) {
 		
@@ -78,6 +96,6 @@ public class DescriptiveRewriteASTVisitor extends ASTVisitor {
 		astRewrite.replace(oldName, newName, null);
 		
 		return true;
-	}
+	}*/
 
 }

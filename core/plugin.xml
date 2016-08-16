@@ -9,13 +9,13 @@
          <menu
                label="Simonykees">
             <command
-                  commandId="at.splendit.simonykees.simonykees.core.AstRecord"
-                  label="AstRecord"
+                  commandId="at.splendit.simonykees.simonykees.core.ModifyingRewriteHandler"
+                  label="ModifyingRewriteHandle"
                   style="push">
             </command>
             <command
-                  commandId="at.splendit.simonykees.simonykees.core.AstRewrite"
-                  label="AstRewrite"
+                  commandId="at.splendit.simonykees.simonykees.core.DescriptiveRewriteHandler"
+                  label="DescriptiveRewriteHandler"
                   style="push">
             </command>
          </menu>
@@ -25,13 +25,13 @@
          <menu
                label="Simonykees">
             <command
-                  commandId="at.splendit.simonykees.simonykees.core.AstRecord"
-                  label="AstRecord"
+                  commandId="at.splendit.simonykees.simonykees.core.ModifyingRewriteHandler"
+                  label="ModifyingRewriteHandle"
                   style="push">
             </command>
             <command
-                  commandId="at.splendit.simonykees.simonykees.core.AstRewrite"
-                  label="AstRewrite"
+                  commandId="at.splendit.simonykees.simonykees.core.DescriptiveRewriteHandler"
+                  label="DescriptiveRewriteHandler"
                   style="push">
             </command>
          </menu>
@@ -40,13 +40,13 @@
          <menu
                label="Simonykees">
             <command
-                  commandId="at.splendit.simonykees.simonykees.core.AstRecord"
-                  label="AstRecord"
+                  commandId="at.splendit.simonykees.simonykees.core.ModifyingRewriteHandler"
+                  label="ModifyingRewriteHandler"
                   style="push">
             </command>
             <command
-                  commandId="at.splendit.simonykees.simonykees.core.AstRewrite"
-                  label="AstRewrite"
+                  commandId="at.splendit.simonykees.simonykees.core.DescriptiveRewriteHandler"
+                  label="DescriptiveRewriteHandler"
                   style="push">
             </command>
          </menu>
@@ -55,14 +55,14 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            defaultHandler="at.splendit.simonykees.core.handler.AstRecordHandler"
-            id="at.splendit.simonykees.simonykees.core.AstRecord"
-            name="AstRecord">
+            defaultHandler="at.splendit.simonykees.core.handler.ModifyingRewriteHandler"
+            id="at.splendit.simonykees.simonykees.core.ModifyingRewriteHandler"
+            name="ModifyingRewriteHandle">
       </command>
       <command
-            defaultHandler="at.splendit.simonykees.core.handler.AstRewriteHandler"
-            id="at.splendit.simonykees.simonykees.core.AstRewrite"
-            name="AstRewrite">
+            defaultHandler="at.splendit.simonykees.core.handler.DescriptiveRewriteHandler"
+            id="at.splendit.simonykees.simonykees.core.DescriptiveRewriteHandler"
+            name="DescriptiveRewriteHandler">
       </command>
    </extension>
 
