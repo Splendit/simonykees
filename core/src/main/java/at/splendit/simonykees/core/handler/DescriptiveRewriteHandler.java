@@ -50,6 +50,7 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 			 */
 //			astRoot.recordModifications();
 			
+			
 			ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 			
 			// we let the visitor do his job
@@ -89,7 +90,7 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 				e1.printStackTrace();
 			}
 			
-			Activator.log("new ast\n" + astRoot.toString());	
+			//Activator.log("new ast\n" + astRoot.toString());	
 			
 			break;
 		case "org.eclipse.jdt.ui.PackageExplorer":
