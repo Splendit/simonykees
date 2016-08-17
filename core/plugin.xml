@@ -49,6 +49,11 @@
                   label="DescriptiveRewriteHandler"
                   style="push">
             </command>
+            <command
+                  commandId="at.splendit.simonykees.simonykees.core.TryWithResourceHandler"
+                  label="TryWithResourceHandler"
+                  style="push">
+            </command>
          </menu>
       </menuContribution>
    </extension>
@@ -63,6 +68,11 @@
             defaultHandler="at.splendit.simonykees.core.handler.DescriptiveRewriteHandler"
             id="at.splendit.simonykees.simonykees.core.DescriptiveRewriteHandler"
             name="DescriptiveRewriteHandler">
+      </command>
+      <command
+            defaultHandler="at.splendit.simonykees.core.handler.TryWithResourceHandler"
+            id="at.splendit.simonykees.simonykees.core.TryWithResourceHandler"
+            name="ModifyingRewriteHandle">
       </command>
    </extension>
 
