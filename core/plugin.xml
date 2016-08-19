@@ -51,6 +51,31 @@
             </command>
          </menu>
       </menuContribution>
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               id="simonykees.core.menus.sampleMenu"
+               label="Sample Menu"
+               mnemonic="M">
+            <command
+                  commandId="simonykees.core.commands.sampleCommand"
+                  id="simonykees.core.menus.sampleCommand"
+                  mnemonic="S">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="simonykees.core.toolbars.sampleToolbar">
+            <command
+                  commandId="simonykees.core.commands.sampleCommand"
+                  icon="icons/sample.gif"
+                  id="simonykees.core.toolbars.sampleCommand"
+                  tooltip="Say hello world">
+            </command>
+         </toolbar>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -64,6 +89,45 @@
             id="at.splendit.simonykees.simonykees.core.DescriptiveRewriteHandler"
             name="DescriptiveRewriteHandler">
       </command>
+      <command
+            defaultHandler="at.splendit.simonykees.core.handler.TryWithResourceHandler"
+            id="at.splendit.simonykees.simonykees.core.TryWithResourceHandler"
+            name="TryWithResourceHandler">
+      </command>
+      <category
+            id="simonykees.core.commands.category"
+            name="Sample Category">
+      </category>
+      <command
+            categoryId="simonykees.core.commands.category"
+            id="simonykees.core.commands.sampleCommand"
+            name="Sample Command">
+      </command>
+   </extension>
+   
+   
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="simonykees.core.handlers.SampleHandler"
+            commandId="simonykees.core.commands.sampleCommand">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="simonykees.core.commands.sampleCommand"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+6">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.workingSets">
+      <workingSet
+            id="simonykees.core.workingSet1"
+            name="name">
+      </workingSet>
    </extension>
 
 </plugin>
