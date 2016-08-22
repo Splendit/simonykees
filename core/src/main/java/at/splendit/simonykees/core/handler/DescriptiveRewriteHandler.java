@@ -31,7 +31,8 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 		
 		switch (activePartId) {
 		case "org.eclipse.jdt.ui.CompilationUnitEditor":
-			ICompilationUnit originalUnit = getFromEditor(shell, HandlerUtil.getActiveEditor(event));
+			// FIXME should use some fancy logic not just a plain cast
+			ICompilationUnit originalUnit = (ICompilationUnit) getFromEditor(shell, HandlerUtil.getActiveEditor(event)).get(0);
 			ICompilationUnit workingCopy;
 			try {
 				workingCopy = originalUnit.getWorkingCopy(null);
@@ -95,7 +96,7 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 			break;
 		case "org.eclipse.jdt.ui.PackageExplorer":
 		case "org.eclipse.ui.navigator.ProjectExplorer":
-			HandlerUtil.getCurrentStructuredSelection(event);
+			getFromExplorer(shell, HandlerUtil.getCurrentStructuredSelection(event));
 			Activator.log(Status.ERROR, "activePartId [" + activePartId + "] must be coded next", null);
 			break;
 

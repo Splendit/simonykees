@@ -30,7 +30,8 @@ public class ModifyingRewriteHandler extends AbstractSimonykeesHandler {
 		
 		switch (activePartId) {
 		case "org.eclipse.jdt.ui.CompilationUnitEditor":
-			ICompilationUnit originalUnit = getFromEditor(shell, HandlerUtil.getActiveEditor(event));
+			// FIXME should use some fancy logic not just a plain cast
+			ICompilationUnit originalUnit = (ICompilationUnit) getFromEditor(shell, HandlerUtil.getActiveEditor(event)).get(0);
 			ICompilationUnit workingCopy;
 			try {
 				workingCopy = originalUnit.getWorkingCopy(null);
