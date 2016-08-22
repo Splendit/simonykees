@@ -7,12 +7,15 @@ import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -61,6 +64,11 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 					object instanceof IPackageFragmentRoot ||
 					object instanceof IJavaProject) {
 				javaElements.add((IJavaElement) object);
+			} else if(object instanceof IProject) {
+				IProject project = (IProject) object;
+				if (hasNature(project, JavaCore.NATURE_ID)) {
+					javaElements.add(JavaCore.create(project));
+				}
 			} else {
 				Activator.log(Status.ERROR, "unexpected object class in explorer [" + object.getClass().getName() + "]", null);
 			}
@@ -72,6 +80,15 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 		astParser.setSource(compilationUnit);
 		astParser.setResolveBindings(true);
 //		astParser.setCompilerOptions(null);
+	}
+	
+	static boolean hasNature(IProject project, String natureId) {
+		try {
+			return project.hasNature(natureId);
+		} catch (CoreException e) {
+			// FIXME find a useful exception
+			throw new RuntimeException(e.getCause());
+		}
 	}
 
 }
