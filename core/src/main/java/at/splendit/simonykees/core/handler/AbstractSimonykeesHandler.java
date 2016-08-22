@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -18,10 +19,27 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
 
 public abstract class AbstractSimonykeesHandler extends AbstractHandler {
+	
+	static List<IJavaElement> getSelectedJavaElements(ExecutionEvent event) {
+		final Shell shell = HandlerUtil.getActiveShell(event);
+		final String activePartId = HandlerUtil.getActivePartId(event);
+		
+		switch (activePartId) {
+		case "org.eclipse.jdt.ui.CompilationUnitEditor":
+			return getFromEditor(shell, HandlerUtil.getActiveEditor(event));
+		case "org.eclipse.jdt.ui.PackageExplorer":
+		case "org.eclipse.ui.navigator.ProjectExplorer":
+			return getFromExplorer(shell, HandlerUtil.getCurrentStructuredSelection(event));
+		default:
+			Activator.log(Status.ERROR, "activePartId [" + activePartId + "] unknown", null);
+			return Collections.emptyList();
+		}
+	}
 
 	static List<IJavaElement> getFromEditor(Shell shell, IEditorPart editorPart) {
 		final IEditorInput editorInput = editorPart.getEditorInput();
