@@ -11,11 +11,12 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 /**
  * This is a subtree visitor for InfixExpressions of an AssignExpression to find if there is an
- * expression that could be optimized.
+ * expression that could be optimized
+ * public modifier removed, because an ArithmeticExpressionASTVisitor may not be unique
  * @author mgh
  *
  */
-public class ArithmeticExpressionASTVisitor extends ASTVisitor {
+class ArithmeticExpressionASTVisitor extends ASTVisitor {
 
 	private String varName;
 
