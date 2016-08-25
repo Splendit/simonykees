@@ -63,6 +63,7 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 			
 		} catch (JavaModelException e) {
 			Activator.log(Status.ERROR, e.getMessage(), null);
+			throw new ExecutionException(e.getMessage(), e);
 		}
 		
 		return null;
