@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
@@ -28,6 +29,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeException;
 import at.splendit.simonykees.core.visitor.tryWithResource.TryWithResourceASTVisitor;
 
 public class TryWithResourceHandler extends AbstractSimonykeesHandler {
@@ -44,7 +46,6 @@ public class TryWithResourceHandler extends AbstractSimonykeesHandler {
 		case "org.eclipse.jdt.ui.CompilationUnitEditor":
 
 			ICompilationUnit originalUnit = getFromEditor(shell, HandlerUtil.getActiveEditor(event));
-			IJavaProject iJavaProject = originalUnit.getJavaProject();
 
 			ICompilationUnit workingCopy;
 			try {
@@ -59,16 +60,12 @@ public class TryWithResourceHandler extends AbstractSimonykeesHandler {
 
 			ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 
-			List<IType> iTypes = new ArrayList<>();
-			try {
-				iTypes.add(iJavaProject.findType("java.lang.AutoCloseable"));
-				iTypes.add(iJavaProject.findType("java.io.Closeable"));
-			} catch (JavaModelException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			try{
+				astRoot.accept(new TryWithResourceASTVisitor(astRewrite));
+			}catch (ITypeNotFoundRuntimeException e) {
+				MessageDialog.openError(shell, "Class not found", "Java language level 7 or higher required");
 			}
-
-			astRoot.accept(new TryWithResourceASTVisitor(astRewrite, iTypes));
+			
 			// astRoot.accept(new TryWithResourceASTVisitor(astRewrite,
 			// iJavaProject.findType("java.lang.AutoCloseable")));
 
