@@ -19,7 +19,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEdit;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.visitor.DescriptiveRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.RulesContainer;
 
 
@@ -40,36 +39,33 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 			
 			for (ICompilationUnit compilationUnit : compilationUnits) {
 				ICompilationUnit workingCopy;
-				
-				workingCopy = compilationUnit.getWorkingCopy(null);
-				
-				final ASTParser astParser = ASTParser.newParser(AST.JLS8);
-				
-				resetParser(workingCopy, astParser);
-				
-				final CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
-				
-				final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
-				
 				for (Class<? extends ASTVisitor> ruleClazz : RulesContainer.getAllRules()) {
 					try {
+						workingCopy = compilationUnit.getWorkingCopy(null);
+						final ASTParser astParser = ASTParser.newParser(AST.JLS8);
+						resetParser(workingCopy, astParser);
+						final CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
+						final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
+						
 						Activator.log("Init rule [" + ruleClazz.getName() + "]");
 						ASTVisitor rule = ruleClazz.getConstructor(ASTRewrite.class).newInstance(astRewrite);
 						astRoot.accept(rule);
+						
+						String source = workingCopy.getSource();
+						Document document = new Document(source);
+						TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
+						
+						workingCopy.applyTextEdit(edits, null);
+						workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+						workingCopy.commitWorkingCopy(false, null);
+						workingCopy.discardWorkingCopy();
+						
 					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 						Activator.log(Status.ERROR, "Cannot init rule [" + ruleClazz.getName() + "]", e);
 					}
 				}
 				
-				String source = workingCopy.getSource();
-				Document document = new Document(source);
-				TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
-				
-				workingCopy.applyTextEdit(edits, null);
-			    workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
-			    workingCopy.commitWorkingCopy(false, null);
-			    workingCopy.discardWorkingCopy();
 			}
 			
 			
