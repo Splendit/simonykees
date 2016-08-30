@@ -17,7 +17,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.visitor.ModifyingRewriteASTVisitor;
 
-
+@Deprecated
 public class ModifyingRewriteHandler extends AbstractSimonykeesHandler {
 	
 	@Override
