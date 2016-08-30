@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.handler;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.Document;
@@ -18,6 +20,7 @@ import org.eclipse.text.edits.TextEdit;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.visitor.DescriptiveRewriteASTVisitor;
+import at.splendit.simonykees.core.visitor.RulesContainer;
 
 
 public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
@@ -44,11 +47,25 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 				
 				resetParser(workingCopy, astParser);
 				
-				CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
+				final CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
 				
-				ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
+				final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 				
-				astRoot.accept(new DescriptiveRewriteASTVisitor(astRewrite));
+				RulesContainer.getAllRules().forEach(ruleClazz -> {
+					try {
+						Activator.log("Init rule [" + ruleClazz.getName() + "]");
+						ASTVisitor rule = ruleClazz.getConstructor(ASTRewrite.class).newInstance(astRewrite);
+						astRoot.accept(rule);
+						
+						// FIXME check what to do with multiple rules
+						
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+						Activator.log(Status.ERROR, "Cannot init rule [" + ruleClazz.getName() + "]", e);
+					}
+				});
+				
+//				astRoot.accept(new DescriptiveRewriteASTVisitor(astRewrite));
 				
 				String source = workingCopy.getSource();
 				Document document = new Document(source);
