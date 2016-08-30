@@ -91,7 +91,7 @@ public class ModifyingRewriteHandler extends AbstractSimonykeesHandler {
 			break;
 		case "org.eclipse.jdt.ui.PackageExplorer":
 		case "org.eclipse.ui.navigator.ProjectExplorer":
-			HandlerUtil.getCurrentStructuredSelection(event);
+			HandlerUtil.getCurrentSelection(event);
 			Activator.log(Status.ERROR, "activePartId [" + activePartId + "] must be coded next", null);
 			break;
 

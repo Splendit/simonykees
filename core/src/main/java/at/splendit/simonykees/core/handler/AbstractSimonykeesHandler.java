@@ -20,7 +20,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -39,7 +41,7 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 			return getFromEditor(shell, HandlerUtil.getActiveEditor(event));
 		case "org.eclipse.jdt.ui.PackageExplorer":
 		case "org.eclipse.ui.navigator.ProjectExplorer":
-			return getFromExplorer(shell, HandlerUtil.getCurrentStructuredSelection(event));
+			return getFromExplorer(shell, getCurrentStructuredSelection(event));
 		default:
 			Activator.log(Status.ERROR, "activePartId [" + activePartId + "] unknown", null);
 			return Collections.emptyList();
@@ -76,6 +78,23 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 			}
 		}
 		return javaElements;
+	}
+	
+	/**
+	 * Return the current structured selection, or <code>StructuredSelection.EMPTY</code>
+	 * if the current selection is not a structured selection or <code>null</code>.
+	 *
+	 * @param event
+	 *            The execution event that contains the application context
+	 * @return the current IStructuredSelection, or
+	 *         <code>StructuredSelection.EMPTY</code>.
+	 */
+	static IStructuredSelection getCurrentStructuredSelection(ExecutionEvent event) {
+		ISelection selection = HandlerUtil.getCurrentSelection(event);
+		if (selection instanceof IStructuredSelection) {
+			return (IStructuredSelection) selection;
+		}
+		return StructuredSelection.EMPTY;
 	}
 	
 	static void resetParser(ICompilationUnit compilationUnit, ASTParser astParser) {
