@@ -51,21 +51,16 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 				
 				final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 				
-				RulesContainer.getAllRules().forEach(ruleClazz -> {
+				for (Class<? extends ASTVisitor> ruleClazz : RulesContainer.getAllRules()) {
 					try {
 						Activator.log("Init rule [" + ruleClazz.getName() + "]");
 						ASTVisitor rule = ruleClazz.getConstructor(ASTRewrite.class).newInstance(astRewrite);
 						astRoot.accept(rule);
-						
-						// FIXME check what to do with multiple rules
-						
 					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 						Activator.log(Status.ERROR, "Cannot init rule [" + ruleClazz.getName() + "]", e);
 					}
-				});
-				
-//				astRoot.accept(new DescriptiveRewriteASTVisitor(astRewrite));
+				}
 				
 				String source = workingCopy.getSource();
 				Document document = new Document(source);
