@@ -9,7 +9,14 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-public class ArithmeticExpressionASTVisitor extends ASTVisitor {
+/**
+ * This is a subtree visitor for InfixExpressions of an AssignExpression to find if there is an
+ * expression that could be optimized
+ * public modifier removed, because an ArithmeticExpressionASTVisitor may not be unique
+ * @author mgh
+ *
+ */
+class ArithmeticExpressionASTVisitor extends ASTVisitor {
 
 	private String varName;
 

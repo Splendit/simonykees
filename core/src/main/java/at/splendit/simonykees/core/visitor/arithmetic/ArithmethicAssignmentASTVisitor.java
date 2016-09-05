@@ -10,6 +10,17 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import at.splendit.simonykees.core.helper.ArithmeticHelper;
 
+
+/**
+ * This visitor is build for assignments of arithmetic expressions for base numeric types
+ * 
+ * 
+ * Examples: 
+ * 
+ * a = a + 3; => a += 3;
+ * @author mgh
+ *
+ */
 public class ArithmethicAssignmentASTVisitor extends ASTVisitor {
 
 	private ASTRewrite astRewrite;
@@ -25,6 +36,8 @@ public class ArithmethicAssignmentASTVisitor extends ASTVisitor {
 
 				Assignment replacementNode = (Assignment) ASTNode.copySubtree(node.getAST(), node);
 				SimpleName leftHandSide = (SimpleName) replacementNode.getLeftHandSide();
+				//TODO: check if the leftHandSide is a basic arithmetic type.
+				// String concatenations could be messed up by optimization. 
 				InfixExpression rightHandSide = (InfixExpression) replacementNode.getRightHandSide();
 				
 				ArithmeticExpressionASTVisitor arithExpASTVisitor = new ArithmeticExpressionASTVisitor(astRewrite, leftHandSide);
