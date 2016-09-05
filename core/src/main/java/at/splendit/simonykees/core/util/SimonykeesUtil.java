@@ -10,10 +10,16 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
+
+import at.splendit.simonykees.core.Activator;
 
 public final class SimonykeesUtil {
 	
@@ -63,16 +69,68 @@ public final class SimonykeesUtil {
 		}
 	}
 
+	/**
+	 * Reset parser
+	 * @param compilationUnit
+	 * @param astParser
+	 * @param options
+	 */
 	public static void resetParser(ICompilationUnit compilationUnit, ASTParser astParser, Map<String, String> options) {
 		astParser.setSource(compilationUnit);
 		astParser.setResolveBindings(true);
 		astParser.setCompilerOptions(options);
 	}
 
-	public static DocumentChange generateDocumentChange(String name, Document document, TextEdit edits) {
+	/**
+	 * Generate a {@code DocumentChange} from a {@code Document} and a {@code TextEdit}
+	 * @param name of the change
+	 * @param document
+	 * @param edit
+	 * @return
+	 */
+	public static DocumentChange generateDocumentChange(String name, Document document, TextEdit edit) {
 		DocumentChange documentChange = new DocumentChange(name, document);
-		documentChange.setEdit(edits);
+		documentChange.setEdit(edit);
 		return documentChange;
+	}
+
+	/**
+	 * Commit changes to a {@code ICompilationUnit} and discard the working copy
+	 * @param workingCopy
+	 * @throws JavaModelException
+	 */
+	public static void commitAndDiscardWorkingCopy(ICompilationUnit workingCopy) throws JavaModelException {
+		workingCopy.commitWorkingCopy(false, null);
+		workingCopy.discardWorkingCopy();
+	}
+	
+	/**
+	 * Apply a single rule to a {@code ICompilationUnit}, changes are not committed to {@code workingCopy}
+	 * 
+	 * @param workingCopy
+	 * @param ruleClazz
+	 * @return a {@code DocumentChange} containing the old and new source
+	 * @throws ReflectiveOperationException
+	 * @throws JavaModelException
+	 */
+	public static DocumentChange applyRule(ICompilationUnit workingCopy, Class<? extends ASTVisitor> ruleClazz) throws ReflectiveOperationException, JavaModelException {
+		final ASTParser astParser = ASTParser.newParser(AST.JLS8);
+		resetParser(workingCopy, astParser, workingCopy.getJavaProject().getOptions(true));
+		final CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
+		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
+		
+		Activator.log("Init rule [" + ruleClazz.getName() + "]");
+		ASTVisitor rule = ruleClazz.getConstructor(ASTRewrite.class).newInstance(astRewrite);
+		astRoot.accept(rule);
+		
+		String source = workingCopy.getSource();
+		Document document = new Document(source);
+		TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
+		
+		workingCopy.applyTextEdit(edits, null);
+		workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+		
+		return generateDocumentChange(ruleClazz.getSimpleName(), document, edits);
 	}
 
 }
