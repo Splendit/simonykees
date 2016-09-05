@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.refactorer;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,6 +34,26 @@ public abstract class AbstractRefactorer {
 		this.rules = rules;
 	}
 	
+	public DocumentChange applyRule(ICompilationUnit workingCopy, Class<? extends ASTVisitor> ruleClazz) throws ReflectiveOperationException, JavaModelException {
+		final ASTParser astParser = ASTParser.newParser(AST.JLS8);
+		resetParser(workingCopy, astParser);
+		final CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
+		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
+		
+		Activator.log("Init rule [" + ruleClazz.getName() + "]");
+		ASTVisitor rule = ruleClazz.getConstructor(ASTRewrite.class).newInstance(astRewrite);
+		astRoot.accept(rule);
+		
+		String source = workingCopy.getSource();
+		Document document = new Document(source);
+		TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
+		
+		workingCopy.applyTextEdit(edits, null);
+		workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+		
+		return generateDocumentChange(ruleClazz.getSimpleName(), document, edits);
+	}
+	
 	public void doRefactoring() {
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
 		
@@ -62,9 +83,7 @@ public abstract class AbstractRefactorer {
 						Document document = new Document(source);
 						TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
 						
-						DocumentChange documentChange = new DocumentChange(rule.getClass().getSimpleName(), document);
-						documentChange.setEdit(edits);
-						documentChanges.add(documentChange);
+						documentChanges.add(generateDocumentChange(ruleClazz.getSimpleName(), document, edits));
 						
 						workingCopy.applyTextEdit(edits, null);
 						workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
