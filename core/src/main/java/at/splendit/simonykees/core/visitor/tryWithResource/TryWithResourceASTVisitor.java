@@ -12,8 +12,6 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
 
 public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor {
 
-	private ASTRewrite astRewrite;
-	private List<IType> itypes;
 
 	public TryWithResourceASTVisitor(ASTRewrite astRewrite, List<IType> itypes) {
 		super(astRewrite, itypes);
@@ -27,11 +25,11 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor
 	@Override
 	public boolean visit(TryStatement node) {
 		VariableDeclarationStatmentASTVisitor variableDeclarationStatmentASTVisitor = new VariableDeclarationStatmentASTVisitor(
-				astRewrite, itypes);
-		TryStatement replacementNode = (TryStatement) ASTNode.copySubtree(node.getAST(), node);
+				astRewrite, registeredITypes);
 		node.accept(variableDeclarationStatmentASTVisitor);
 		List<VariableDeclarationExpression> listVDE = variableDeclarationStatmentASTVisitor.getListVDE();
 		if (!listVDE.isEmpty()) {
+			TryStatement replacementNode = (TryStatement) ASTNode.copySubtree(node.getAST(), node);
 			replacementNode.resources().addAll(listVDE);
 			astRewrite.replace(node, replacementNode, null);
 		}

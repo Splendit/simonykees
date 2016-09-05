@@ -48,9 +48,9 @@ class VariableDeclarationStatmentASTVisitor extends AbstractCompilationUnitAstVi
 					removeList.add(iterator);
 					variableDeclarationExpression.setType((Type) ASTNode.copySubtree(node.getAST(), node.getType()));
 					listVDE.add(variableDeclarationExpression);
-					astRewrite.remove(node, null);
 				}
 			}
+			node.delete();
 		}
 		return false;
 	}

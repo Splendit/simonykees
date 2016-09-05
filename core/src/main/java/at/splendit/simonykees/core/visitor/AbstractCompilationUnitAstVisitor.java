@@ -20,11 +20,11 @@ public abstract class AbstractCompilationUnitAstVisitor extends ASTVisitor {
 
 	protected AbstractCompilationUnitAstVisitor(ASTRewrite astRewrite) {
 		this.astRewrite = astRewrite;
+		this.registeredITypes = new ArrayList<>();
 	}
 	
 	protected AbstractCompilationUnitAstVisitor(ASTRewrite astRewrite, List<IType> registeredITypes) {
 		this(astRewrite);
-		this.registeredITypes = new ArrayList<>();
 		this.registeredITypes.addAll(registeredITypes);
 	}
 
