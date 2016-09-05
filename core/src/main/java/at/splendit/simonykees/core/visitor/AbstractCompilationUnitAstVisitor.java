@@ -16,16 +16,16 @@ import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeExcepti
 public abstract class AbstractCompilationUnitAstVisitor extends ASTVisitor {
 
 	protected ASTRewrite astRewrite;
-	protected List<IType> itypes;
+	protected List<IType> registeredITypes;
 
 	protected AbstractCompilationUnitAstVisitor(ASTRewrite astRewrite) {
 		this.astRewrite = astRewrite;
 	}
 	
-	protected AbstractCompilationUnitAstVisitor(ASTRewrite astRewrite, List<IType> itypes) {
+	protected AbstractCompilationUnitAstVisitor(ASTRewrite astRewrite, List<IType> registeredITypes) {
 		this(astRewrite);
-		this.itypes = new ArrayList<>();
-		this.itypes.addAll(itypes);
+		this.registeredITypes = new ArrayList<>();
+		this.registeredITypes.addAll(registeredITypes);
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public abstract class AbstractCompilationUnitAstVisitor extends ASTVisitor {
 			for (String javaclass : relevantClasses()) {
 				IType classtype = iJavaProject.findType(javaclass);
 				if (classtype != null) {
-					itypes.add(classtype);
+					registeredITypes.add(classtype);
 				} else {
 					throw new ITypeNotFoundRuntimeException();
 				}
@@ -56,12 +56,12 @@ public abstract class AbstractCompilationUnitAstVisitor extends ASTVisitor {
 			return false;
 		}
 		
-		if(itypes.contains(iTypeBinding)){
+		if(registeredITypes.contains(iTypeBinding)){
 			return true;
 		}
 		
 		for (ITypeBinding interfaceBind : iTypeBinding.getInterfaces()) {
-			if (itypes.contains(interfaceBind.getJavaElement())) {
+			if (registeredITypes.contains(interfaceBind.getJavaElement())) {
 				return true;
 			}
 			result = result || isContentofRegistertITypes(interfaceBind.getSuperclass());
