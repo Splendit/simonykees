@@ -78,8 +78,7 @@ public abstract class AbstractRefactorer {
 						Activator.log(Status.ERROR, "Cannot init rule [" + ruleClazz.getName() + "]", e);
 					}
 					
-					workingCopy.commitWorkingCopy(false, null);
-					workingCopy.discardWorkingCopy();
+					commitRefactoring(workingCopy);
 				}
 				
 			}
@@ -88,6 +87,11 @@ public abstract class AbstractRefactorer {
 			Activator.log(Status.ERROR, e.getMessage(), null);
 			// FIXME should also throw an exception
 		}
+	}
+	
+	public void commitRefactoring(ICompilationUnit workingCopy) throws JavaModelException {
+		workingCopy.commitWorkingCopy(false, null);
+		workingCopy.discardWorkingCopy();
 	}
 	
 	public Multimap<IPath, DocumentChange> getDocumentChanges() {
