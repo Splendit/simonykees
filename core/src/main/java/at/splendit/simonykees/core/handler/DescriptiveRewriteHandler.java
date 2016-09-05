@@ -10,13 +10,20 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.dialogs.ChangePreviewWizard;
+import at.splendit.simonykees.core.dialogs.DiffViewWizard;
 import at.splendit.simonykees.core.visitor.DescriptiveRewriteASTVisitor;
+import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 
 
 public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
@@ -54,7 +61,7 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 			ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 			
 			// we let the visitor do his job
-			astRoot.accept(new DescriptiveRewriteASTVisitor(astRewrite));
+			astRoot.accept(new ArithmethicAssignmentASTVisitor(astRewrite));
 			
 			/*
 			 * 2/2 
@@ -64,6 +71,20 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 				Document document = new Document(source);
 //				TextEdit edits = astRoot.rewrite(document, workingCopy.getJavaProject().getOptions(true));
 				TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
+				
+				DocumentChange documentChange = new DocumentChange("lala", document);
+				documentChange.setEdit(edits);
+				
+				IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+
+				// Create the wizard
+				Wizard wizard = new ChangePreviewWizard(documentChange);
+//				wizard.init(window.getWorkbench(), null);
+
+				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
+				
+				// Open the wizard dialog
+				dialog.open();
 				
 				// Modify buffer and reconcile
 			    workingCopy.applyTextEdit(edits, null);
