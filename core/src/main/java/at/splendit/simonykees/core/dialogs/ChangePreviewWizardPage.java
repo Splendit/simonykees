@@ -4,9 +4,9 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
@@ -26,24 +26,30 @@ public class ChangePreviewWizardPage extends WizardPage {
 
 	@Override
 	public void createControl(Composite parent) {
-//		Composite container = new Composite(parent, SWT.NULL);
-		
-		ViewForm viewForm = new ViewForm(parent, SWT.BORDER_SOLID);
-//		PageBook viewForm = new PageBook(parent, SWT.BORDER_SOLID);
-		viewForm.setBounds(10, 10, 548, 296);
+		Composite container = new Composite(parent, SWT.NULL);
+		container.setBounds(10, 10, 548, 296);
 		Display display = Display.getCurrent();
 		RGB rgb = new RGB(128, 128, 128);
-		viewForm.setBackground(new Color(display, rgb));
+		container.setBackground(new Color(display, rgb));
 		
-
+		setControl(container);
+//		FormLayout layout = new FormLayout();
+		GridLayout layout = new GridLayout();
+//		layout.marginWidth = 3;
+//		layout.marginHeight = 3;
+		layout.marginLeft = 10;
+		layout.marginRight = 3;
+		layout.marginTop = 3;
+		layout.marginBottom = 3;
+		container.setLayout(layout);
 		
 //		ViewForm viewForm = new ViewForm(parent, INFORMATION);
 		TextEditChangePreviewViewer viewer = new TextEditChangePreviewViewer();
-		viewer.createControl(viewForm);
+		viewer.createControl(container);
 //		viewer.setInput(new ChangePreviewViewerInput(textEditBasedChange));
 		viewer.setInput(TextEditChangePreviewViewer.createInput(textEditBasedChange));
 
-		setControl(viewForm);
+//		setControl(viewForm);
 		
 	}
 	
