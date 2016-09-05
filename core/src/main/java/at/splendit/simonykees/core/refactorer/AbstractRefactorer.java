@@ -1,10 +1,10 @@
 package at.splendit.simonykees.core.refactorer;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -21,13 +21,16 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
 import at.splendit.simonykees.core.Activator;
 
 public abstract class AbstractRefactorer {
 	
 	protected List<IJavaElement> javaElements;
 	protected List<Class<? extends ASTVisitor>> rules;
-	protected List<DocumentChange> documentChanges = new ArrayList<>();
+	protected Multimap<IPath, DocumentChange> documentChanges = ArrayListMultimap.create();
 	
 	public AbstractRefactorer(List<IJavaElement> javaElements, List<Class<? extends ASTVisitor>> rules) {
 		this.javaElements = javaElements;
@@ -70,28 +73,12 @@ public abstract class AbstractRefactorer {
 					ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(null);
 					
 					try {
-						final ASTParser astParser = ASTParser.newParser(AST.JLS8);
-						resetParser(workingCopy, astParser);
-						final CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
-						final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
-						
-						Activator.log("Init rule [" + ruleClazz.getName() + "]");
-						ASTVisitor rule = ruleClazz.getConstructor(ASTRewrite.class).newInstance(astRewrite);
-						astRoot.accept(rule);
-						
-						String source = workingCopy.getSource();
-						Document document = new Document(source);
-						TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
-						
-						documentChanges.add(generateDocumentChange(ruleClazz.getSimpleName(), document, edits));
-						
-						workingCopy.applyTextEdit(edits, null);
-						workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
-						workingCopy.commitWorkingCopy(false, null);
+						documentChanges.put(workingCopy.getPath(), applyRule(workingCopy, ruleClazz));
 					} catch (ReflectiveOperationException e) {
 						Activator.log(Status.ERROR, "Cannot init rule [" + ruleClazz.getName() + "]", e);
 					}
 					
+					workingCopy.commitWorkingCopy(false, null);
 					workingCopy.discardWorkingCopy();
 				}
 				
@@ -103,7 +90,7 @@ public abstract class AbstractRefactorer {
 		}
 	}
 	
-	public List<DocumentChange> getDocumentChanges() {
+	public Multimap<IPath, DocumentChange> getDocumentChanges() {
 		return documentChanges;
 	}
 	
