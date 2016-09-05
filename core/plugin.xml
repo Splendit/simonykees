@@ -54,6 +54,11 @@
                   label="TryWithResourceHandler"
                   style="push">
             </command>
+            <command
+                  commandId="at.splendit.simonykees.simonykees.core.StringUtilsHandler"
+                  label="StringUtils"
+                  style="push">
+            </command>
          </menu>
       </menuContribution>
       <menuContribution
@@ -98,6 +103,11 @@
             defaultHandler="at.splendit.simonykees.core.handler.TryWithResourceHandler"
             id="at.splendit.simonykees.simonykees.core.TryWithResourceHandler"
             name="TryWithResourceHandler">
+      </command>
+      <command
+            defaultHandler="at.splendit.simonykees.core.handler.StringUtilsHandler"
+            id="at.splendit.simonykees.simonykees.core.StringUtilsHandler"
+            name="StringUtilsHandler">
       </command>
       <category
             id="simonykees.core.commands.category"
