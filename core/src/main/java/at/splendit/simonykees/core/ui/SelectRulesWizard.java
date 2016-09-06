@@ -1,0 +1,37 @@
+package at.splendit.simonykees.core.ui;
+
+import java.util.List;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jface.wizard.Wizard;
+
+import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
+
+public class SelectRulesWizard extends Wizard {
+
+	private final SelectRulesPage selectRulesPage = new SelectRulesPage();
+	private final List<IJavaElement> javaElements;
+	
+	public SelectRulesWizard(List<IJavaElement> javaElements) {
+		this.javaElements = javaElements;
+	}
+	
+	@Override
+	public void addPages() {
+		addPage(selectRulesPage);
+	}
+
+	@Override
+	public String getWindowTitle() {
+		return "Select Rules";
+	}
+
+	@Override
+	public boolean performFinish() {
+		final List<Class<? extends ASTVisitor>> rules = selectRulesPage.getSelectedRules();
+		//new AbstractRefactorer(javaElements, rules) {}.doRefactoring();
+		return false;
+	}
+
+}
