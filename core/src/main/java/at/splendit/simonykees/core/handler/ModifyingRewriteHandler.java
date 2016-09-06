@@ -17,7 +17,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.visitor.ModifyingRewriteASTVisitor;
 
-
+@Deprecated
 public class ModifyingRewriteHandler extends AbstractSimonykeesHandler {
 	
 	@Override
@@ -30,7 +30,8 @@ public class ModifyingRewriteHandler extends AbstractSimonykeesHandler {
 		
 		switch (activePartId) {
 		case "org.eclipse.jdt.ui.CompilationUnitEditor":
-			ICompilationUnit originalUnit = getFromEditor(shell, HandlerUtil.getActiveEditor(event));
+			// FIXME should use some fancy logic not just a plain cast
+			ICompilationUnit originalUnit = (ICompilationUnit) getFromEditor(shell, HandlerUtil.getActiveEditor(event)).get(0);
 			ICompilationUnit workingCopy;
 			try {
 				workingCopy = originalUnit.getWorkingCopy(null);
@@ -90,7 +91,7 @@ public class ModifyingRewriteHandler extends AbstractSimonykeesHandler {
 			break;
 		case "org.eclipse.jdt.ui.PackageExplorer":
 		case "org.eclipse.ui.navigator.ProjectExplorer":
-			HandlerUtil.getCurrentStructuredSelection(event);
+			HandlerUtil.getCurrentSelection(event);
 			Activator.log(Status.ERROR, "activePartId [" + activePartId + "] must be coded next", null);
 			break;
 

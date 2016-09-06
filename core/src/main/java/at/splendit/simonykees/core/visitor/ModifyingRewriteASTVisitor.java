@@ -11,8 +11,10 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import at.splendit.simonykees.core.Activator;
 
+@Deprecated
 public class ModifyingRewriteASTVisitor extends ASTVisitor {
 	
+	@Deprecated
 	public ModifyingRewriteASTVisitor() {	}
 
 	@Override

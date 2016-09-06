@@ -9,6 +9,11 @@
          <menu
                label="Simonykees">
             <command
+                  commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
+                  label="SelectRulesWizardHandler"
+                  style="push">
+            </command>
+            <command
                   commandId="at.splendit.simonykees.simonykees.core.ModifyingRewriteHandler"
                   label="ModifyingRewriteHandle"
                   style="push">
@@ -25,6 +30,11 @@
          <menu
                label="Simonykees">
             <command
+                  commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
+                  label="SelectRulesWizardHandler"
+                  style="push">
+            </command>
+            <command
                   commandId="at.splendit.simonykees.simonykees.core.ModifyingRewriteHandler"
                   label="ModifyingRewriteHandle"
                   style="push">
@@ -39,6 +49,11 @@
       <menuContribution locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.refactoring.menu">
          <menu
                label="Simonykees">
+            <command
+                  commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
+                  label="SelectRulesWizardHandler"
+                  style="push">
+            </command>
             <command
                   commandId="at.splendit.simonykees.simonykees.core.ModifyingRewriteHandler"
                   label="ModifyingRewriteHandler"
@@ -84,6 +99,11 @@
    </extension>
    <extension
          point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="at.splendit.simonykees.core.handler.SelectRulesWizardHandler"
+            id="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
+            name="SelectRulesWizardHandler">
+      </command>
       <command
             defaultHandler="at.splendit.simonykees.core.handler.ModifyingRewriteHandler"
             id="at.splendit.simonykees.simonykees.core.ModifyingRewriteHandler"

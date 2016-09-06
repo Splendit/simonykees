@@ -1,110 +1,78 @@
 package at.splendit.simonykees.core.handler;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.Document;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
-import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.visitor.DescriptiveRewriteASTVisitor;
+import at.splendit.simonykees.core.visitor.RulesContainer;
 
 
 public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		final Shell shell = HandlerUtil.getActiveShell(event);
-		final String activePartId = HandlerUtil.getActivePartId(event);
-		final ASTParser astParser = ASTParser.newParser(AST.JLS8);
+		List<IJavaElement> selectedJavaElements = getSelectedJavaElements(event);
+		List<ICompilationUnit> compilationUnits = new ArrayList<>();
 		
-		Activator.log("activePartId [" + activePartId + "]");
-		
-		switch (activePartId) {
-		case "org.eclipse.jdt.ui.CompilationUnitEditor":
-			ICompilationUnit originalUnit = getFromEditor(shell, HandlerUtil.getActiveEditor(event));
-			ICompilationUnit workingCopy;
-			try {
-				workingCopy = originalUnit.getWorkingCopy(null);
-			} catch (JavaModelException e) {
-				// TODO Auto-generated catch block
-				throw new ExecutionException("Unable to create workingCopy",e);
+		try {
+			getCompilationUnits(compilationUnits, selectedJavaElements);
+			
+			if (compilationUnits.isEmpty()) {
+				Activator.log(Status.WARNING, "No compilation units found", null);
+				return null;
 			}
 			
-			resetParser(workingCopy, astParser);
-			CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
-			
-			/*
-			 * 1/2
-			 * see http://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Fguide%2Fjdt_api_manip.htm
-			 * "The modifying API allows to modify directly the AST"
-			 */
-//			astRoot.recordModifications();
-			
-			
-			ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
-			
-			// we let the visitor do his job
-			astRoot.accept(new DescriptiveRewriteASTVisitor(astRewrite));
-			
-			/*
-			 * 2/2 
-			 */
-			try {
-				String source = workingCopy.getSource();
-				Document document = new Document(source);
-//				TextEdit edits = astRoot.rewrite(document, workingCopy.getJavaProject().getOptions(true));
-				TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
+			for (ICompilationUnit compilationUnit : compilationUnits) {
+				ICompilationUnit workingCopy;
+				for (Class<? extends ASTVisitor> ruleClazz : RulesContainer.getAllRules()) {
+					try {
+						workingCopy = compilationUnit.getWorkingCopy(null);
+						final ASTParser astParser = ASTParser.newParser(AST.JLS8);
+						resetParser(workingCopy, astParser);
+						final CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
+						final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
+						
+						Activator.log("Init rule [" + ruleClazz.getName() + "]");
+						ASTVisitor rule = ruleClazz.getConstructor(ASTRewrite.class).newInstance(astRewrite);
+						astRoot.accept(rule);
+						
+						String source = workingCopy.getSource();
+						Document document = new Document(source);
+						TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
+						
+						workingCopy.applyTextEdit(edits, null);
+						workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+						workingCopy.commitWorkingCopy(false, null);
+						workingCopy.discardWorkingCopy();
+						
+					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
+						Activator.log(Status.ERROR, "Cannot init rule [" + ruleClazz.getName() + "]", e);
+					}
+				}
 				
-				// Modify buffer and reconcile
-			    workingCopy.applyTextEdit(edits, null);
-			    
-				/*
-				 * Note about bindings:
-				 * 
-				 * "If requested, a DOM AST representing the compilation unit is returned. 
-				 * Its bindings are computed only if the problem requestor is active."
-				 * Source: http://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FICompilationUnit.html&anchor=reconcile(int,%20boolean,%20org.eclipse.jdt.core.WorkingCopyOwner,%20org.eclipse.core.runtime.IProgressMonitor)
-				 * 
-				 * The IProblemRequestor can be passed via the becomeWorkingCopy method. 
-				 */
-			    workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
-			    
-			    // Commit changes
-			    workingCopy.commitWorkingCopy(false, null);
-			    
-			    // Destroy working copy
-			    workingCopy.discardWorkingCopy();
-				
-			} catch (JavaModelException | MalformedTreeException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
 			}
 			
-			//Activator.log("new ast\n" + astRoot.toString());	
 			
-			break;
-		case "org.eclipse.jdt.ui.PackageExplorer":
-		case "org.eclipse.ui.navigator.ProjectExplorer":
-			HandlerUtil.getCurrentStructuredSelection(event);
-			Activator.log(Status.ERROR, "activePartId [" + activePartId + "] must be coded next", null);
-			break;
-
-		default:
-			Activator.log(Status.ERROR, "activePartId [" + activePartId + "] unknown", null);
-			break;
+		} catch (JavaModelException e) {
+			Activator.log(Status.ERROR, e.getMessage(), null);
+			throw new ExecutionException(e.getMessage(), e);
 		}
-		
-//		new RefactoringJob().schedule();
 		
 		return null;
 	}
