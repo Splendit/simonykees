@@ -1,7 +1,7 @@
 package at.splendit.simonykees.core.dialogs;
 
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -12,18 +12,19 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
+@SuppressWarnings("restriction") // XXX TextEditChangePreviewViewer is internal, hence the warning
 public class ChangePreviewWizardPage extends WizardPage {
 
-	private TextEditBasedChange textEditBasedChange;
+	private DocumentChange documentChange;
 
 	/**
 	 * Create the wizard.
 	 */
-	public ChangePreviewWizardPage(TextEditBasedChange textEditBasedChange) {
+	public ChangePreviewWizardPage(DocumentChange documentChange) {
 		super("wizardPage");
 		setTitle("Wizard Page title");
 		setDescription("Wizard Page description");
-		this.textEditBasedChange = textEditBasedChange;
+		this.documentChange = documentChange;
 	}
 
 	@Override
@@ -37,7 +38,7 @@ public class ChangePreviewWizardPage extends WizardPage {
 		container.setBackground(new Color(display, rgb)); // useless; just to illustrate the size of the Composite
 
 		GridLayout layout = new GridLayout();
-		layout.marginHeight = 0; // margin to the Composite
+		layout.marginHeight = 0; // margin from TextEditChangePreviewViewer to Composite
 		layout.marginWidth = 0;
 		container.setLayout(layout); // without setting the layout, nothing displays
 
@@ -52,7 +53,7 @@ public class ChangePreviewWizardPage extends WizardPage {
 		TextEditChangePreviewViewer viewer = new TextEditChangePreviewViewer();
 		viewer.createControl(sashForm);
 		// viewer.setInput(new ChangePreviewViewerInput(textEditBasedChange));
-		viewer.setInput(TextEditChangePreviewViewer.createInput(textEditBasedChange));
+		viewer.setInput(TextEditChangePreviewViewer.createInput(documentChange));
 
 	}
 

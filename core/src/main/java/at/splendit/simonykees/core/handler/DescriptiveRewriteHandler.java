@@ -21,10 +21,8 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.dialogs.ChangePreviewWizard;
-import at.splendit.simonykees.core.dialogs.DiffViewWizard;
-import at.splendit.simonykees.core.visitor.DescriptiveRewriteASTVisitor;
+import at.splendit.simonykees.core.dialogs.DisposableDocumentChange;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
-
 
 public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 
@@ -33,9 +31,9 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 		final Shell shell = HandlerUtil.getActiveShell(event);
 		final String activePartId = HandlerUtil.getActivePartId(event);
 		final ASTParser astParser = ASTParser.newParser(AST.JLS8);
-		
+
 		Activator.log("activePartId [" + activePartId + "]");
-		
+
 		switch (activePartId) {
 		case "org.eclipse.jdt.ui.CompilationUnitEditor":
 			ICompilationUnit originalUnit = getFromEditor(shell, HandlerUtil.getActiveEditor(event));
@@ -44,75 +42,78 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 				workingCopy = originalUnit.getWorkingCopy(null);
 			} catch (JavaModelException e) {
 				// TODO Auto-generated catch block
-				throw new ExecutionException("Unable to create workingCopy",e);
+				throw new ExecutionException("Unable to create workingCopy", e);
 			}
-			
+
 			resetParser(workingCopy, astParser);
 			CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
-			
+
 			/*
-			 * 1/2
-			 * see http://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Fguide%2Fjdt_api_manip.htm
+			 * 1/2 see
+			 * http://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.
+			 * doc.isv%2Fguide%2Fjdt_api_manip.htm
 			 * "The modifying API allows to modify directly the AST"
 			 */
-//			astRoot.recordModifications();
-			
-			
+			// astRoot.recordModifications();
+
 			ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
-			
+
 			// we let the visitor do his job
 			astRoot.accept(new ArithmethicAssignmentASTVisitor(astRewrite));
-			
+
 			/*
-			 * 2/2 
+			 * 2/2
 			 */
 			try {
 				String source = workingCopy.getSource();
 				Document document = new Document(source);
-//				TextEdit edits = astRoot.rewrite(document, workingCopy.getJavaProject().getOptions(true));
+				// TextEdit edits = astRoot.rewrite(document,
+				// workingCopy.getJavaProject().getOptions(true));
 				TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
-				
-				DocumentChange documentChange = new DocumentChange("lala", document);
+
+				DisposableDocumentChange documentChange = new DisposableDocumentChange("current", document);
 				documentChange.setEdit(edits);
-				
+
 				IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 
 				// Create the wizard
 				Wizard wizard = new ChangePreviewWizard(documentChange);
-//				wizard.init(window.getWorkbench(), null);
+				// wizard.init(window.getWorkbench(), null);
 
 				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
-				
+
 				// Open the wizard dialog
 				dialog.open();
-				
-				// Modify buffer and reconcile
-			    workingCopy.applyTextEdit(edits, null);
-			    
-				/*
-				 * Note about bindings:
-				 * 
-				 * "If requested, a DOM AST representing the compilation unit is returned. 
-				 * Its bindings are computed only if the problem requestor is active."
-				 * Source: http://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FICompilationUnit.html&anchor=reconcile(int,%20boolean,%20org.eclipse.jdt.core.WorkingCopyOwner,%20org.eclipse.core.runtime.IProgressMonitor)
-				 * 
-				 * The IProblemRequestor can be passed via the becomeWorkingCopy method. 
-				 */
-			    workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
-			    
-			    // Commit changes
-			    workingCopy.commitWorkingCopy(false, null);
-			    
-			    // Destroy working copy
-			    workingCopy.discardWorkingCopy();
-				
+
+				if (!documentChange.isDisposed()) {
+					// Modify buffer and reconcile
+					workingCopy.applyTextEdit(edits, null);
+
+					/*
+					 * Note about bindings:
+					 * 
+					 * "If requested, a DOM AST representing the compilation unit is returned. 
+					 * Its bindings are computed only if the problem requestor is active."
+					 * Source: http://help.eclipse.org/mars/index.jsp?topic=%2Forg.eclipse.jdt.doc.isv%2Freference%2Fapi%2Forg%2Feclipse%2Fjdt%2Fcore%2FICompilationUnit.html&anchor=reconcile(int,%20boolean,%20org.eclipse.jdt.core.WorkingCopyOwner,%20org.eclipse.core.runtime.IProgressMonitor)
+					 * 
+					 * The IProblemRequestor can be passed via the becomeWorkingCopy method. 
+					 */
+					workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+
+					// Commit changes
+					workingCopy.commitWorkingCopy(false, null);
+				}
+
+				// Destroy working copy
+				workingCopy.discardWorkingCopy();
+
 			} catch (JavaModelException | MalformedTreeException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			
-			//Activator.log("new ast\n" + astRoot.toString());	
-			
+
+			// Activator.log("new ast\n" + astRoot.toString());
+
 			break;
 		case "org.eclipse.jdt.ui.PackageExplorer":
 		case "org.eclipse.ui.navigator.ProjectExplorer":
@@ -124,9 +125,9 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 			Activator.log(Status.ERROR, "activePartId [" + activePartId + "] unknown", null);
 			break;
 		}
-		
-//		new RefactoringJob().schedule();
-		
+
+		// new RefactoringJob().schedule();
+
 		return null;
 	}
 

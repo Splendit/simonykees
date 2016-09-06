@@ -1,26 +1,33 @@
 package at.splendit.simonykees.core.dialogs;
 
 import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 public class ChangePreviewWizard extends Wizard {
 	
-	private TextEditBasedChange textEditBasedChange;
+	private DocumentChange documentChange;
 	
-	public ChangePreviewWizard(TextEditBasedChange textEditBasedChange) {
+	public ChangePreviewWizard(DocumentChange documentChange) {
 		setWindowTitle("AWESOME PREVIEW");
-		this.textEditBasedChange = textEditBasedChange;
-	}
-	
-	@Override
-	public boolean performFinish() {
-		return false;
+		this.documentChange = documentChange;
 	}
 
 	@Override
 	public void addPages() {
-		addPage(new ChangePreviewWizardPage(this.textEditBasedChange));
+		addPage(new ChangePreviewWizardPage(this.documentChange));
+	}
+	
+	@Override
+	public boolean performFinish() {
+		return true;
 	}
 
+	@Override
+	public boolean performCancel() {
+		if (documentChange != null) {
+			documentChange.dispose();
+		}
+		return super.performCancel();
+	}
 
 }
