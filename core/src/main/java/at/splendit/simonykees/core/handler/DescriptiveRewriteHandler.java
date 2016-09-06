@@ -16,16 +16,24 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.dialogs.ChangePreviewWizard;
+import at.splendit.simonykees.core.dialogs.DisposableDocumentChange;
 import at.splendit.simonykees.core.visitor.RulesContainer;
-
 
 public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+
 		List<IJavaElement> selectedJavaElements = getSelectedJavaElements(event);
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
 		
@@ -54,10 +62,28 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 						String source = workingCopy.getSource();
 						Document document = new Document(source);
 						TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
-						
-						workingCopy.applyTextEdit(edits, null);
-						workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
-						workingCopy.commitWorkingCopy(false, null);
+
+						DisposableDocumentChange documentChange = new DisposableDocumentChange("current", document);
+						documentChange.setEdit(edits);
+
+						IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
+
+						// Create the wizard
+						Wizard wizard = new ChangePreviewWizard(documentChange);
+						// wizard.init(window.getWorkbench(), null);
+
+						WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
+						Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
+						dialog.setPageSize(rectangle.width, rectangle.height);
+
+						// Open the wizard dialog
+						dialog.open();
+
+						if (!documentChange.isDisposed()) {
+							workingCopy.applyTextEdit(edits, null);
+							workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+							workingCopy.commitWorkingCopy(false, null);
+						}
 						workingCopy.discardWorkingCopy();
 						
 					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
