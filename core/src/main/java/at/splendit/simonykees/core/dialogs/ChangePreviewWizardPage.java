@@ -5,12 +5,9 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 
 @SuppressWarnings("restriction") // XXX TextEditChangePreviewViewer is internal, hence the warning
 public class ChangePreviewWizardPage extends WizardPage {
@@ -31,11 +28,6 @@ public class ChangePreviewWizardPage extends WizardPage {
 	public void createControl(Composite parent) {
 
 		Composite container = new Composite(parent, SWT.NONE);
-
-		container.setBounds(10, 10, 548, 296);
-		Display display = Display.getCurrent();
-		RGB rgb = new RGB(128, 128, 128); 
-		container.setBackground(new Color(display, rgb)); // useless; just to illustrate the size of the Composite
 
 		GridLayout layout = new GridLayout();
 		layout.marginHeight = 0; // margin from TextEditChangePreviewViewer to Composite

@@ -12,7 +12,8 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
@@ -81,6 +82,8 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 				// wizard.init(window.getWorkbench(), null);
 
 				WizardDialog dialog = new WizardDialog(window.getShell(), wizard);
+				Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
+				dialog.setPageSize(rectangle.width, rectangle.height);
 
 				// Open the wizard dialog
 				dialog.open();

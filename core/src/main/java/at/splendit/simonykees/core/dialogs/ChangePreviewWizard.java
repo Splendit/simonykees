@@ -8,7 +8,7 @@ public class ChangePreviewWizard extends Wizard {
 	private DocumentChange documentChange;
 	
 	public ChangePreviewWizard(DocumentChange documentChange) {
-		setWindowTitle("AWESOME PREVIEW");
+		setWindowTitle("Change preview");
 		this.documentChange = documentChange;
 	}
 
