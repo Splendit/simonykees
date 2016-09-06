@@ -10,7 +10,6 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeException;
 
