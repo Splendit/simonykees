@@ -123,8 +123,7 @@ public final class SimonykeesUtil {
 		ASTVisitor rule = ruleClazz.getConstructor(ASTRewrite.class).newInstance(astRewrite);
 		astRoot.accept(rule);
 		
-		String source = workingCopy.getSource();
-		Document document = new Document(source);
+		Document document = new Document(workingCopy.getSource());
 		TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
 		
 		workingCopy.applyTextEdit(edits, null);
