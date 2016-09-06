@@ -17,7 +17,8 @@ public class RulesContainer {
 	public static List<Class<? extends ASTVisitor>> getAllRules() {
 		return Arrays.asList(
 				ArithmethicAssignmentASTVisitor.class,
-				TryWithResourceASTVisitor.class
+				TryWithResourceASTVisitor.class,
+				StringUtilsASTVisitor.class				
 				);
 	}
 
