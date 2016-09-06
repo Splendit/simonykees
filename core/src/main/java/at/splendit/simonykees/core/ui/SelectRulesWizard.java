@@ -30,8 +30,8 @@ public class SelectRulesWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		final List<Class<? extends ASTVisitor>> rules = selectRulesPage.getSelectedRules();
-		//new AbstractRefactorer(javaElements, rules) {}.doRefactoring();
-		return false;
+		new AbstractRefactorer(javaElements, rules) {}.doRefactoring();
+		return true;
 	}
 
 }
