@@ -25,9 +25,10 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.ui.ChangePreviewWizard;
 import at.splendit.simonykees.core.ui.DisposableDocumentChange;
-import at.splendit.simonykees.core.visitor.RulesContainer;
 
 public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 
@@ -47,7 +48,7 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 			
 			for (ICompilationUnit compilationUnit : compilationUnits) {
 				ICompilationUnit workingCopy;
-				for (Class<? extends ASTVisitor> ruleClazz : RulesContainer.getAllRules()) {
+				for (RefactoringRule<? extends ASTVisitor> rule : RulesContainer.getAllRules()) {
 					try {
 						workingCopy = compilationUnit.getWorkingCopy(null);
 						final ASTParser astParser = ASTParser.newParser(AST.JLS8);
@@ -55,9 +56,9 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 						final CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
 						final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 						
-						Activator.log("Init rule [" + ruleClazz.getName() + "]");
-						ASTVisitor rule = ruleClazz.getConstructor(ASTRewrite.class).newInstance(astRewrite);
-						astRoot.accept(rule);
+						Activator.log("Init rule [" + rule.getName() + "]");
+						ASTVisitor visitor = rule.getVisitor().getConstructor(ASTRewrite.class).newInstance(astRewrite);
+						astRoot.accept(visitor);
 						
 						String source = workingCopy.getSource();
 						Document document = new Document(source);
@@ -88,7 +89,7 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 						
 					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-						Activator.log(Status.ERROR, "Cannot init rule [" + ruleClazz.getName() + "]", e);
+						Activator.log(Status.ERROR, "Cannot init rule [" + rule.getName() + "]", e);
 					}
 				}
 				

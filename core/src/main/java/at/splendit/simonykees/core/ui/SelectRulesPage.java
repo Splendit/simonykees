@@ -16,7 +16,8 @@ import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
-import at.splendit.simonykees.core.visitor.RulesContainer;
+import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.rule.RulesContainer;
 
 public class SelectRulesPage extends NewTypeWizardPage {
 	
@@ -39,7 +40,7 @@ public class SelectRulesPage extends NewTypeWizardPage {
 	}
 
 	private void createRulesCheckboxTableViewer(Composite parent) {
-		List<Class<? extends ASTVisitor>> rules = RulesContainer.getAllRules();
+		List<RefactoringRule<? extends ASTVisitor>> rules = RulesContainer.getAllRules();
 		
 		rulesCheckboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.CHECK);
 		rulesCheckboxTableViewer.setContentProvider(new ArrayContentProvider());
@@ -50,18 +51,18 @@ public class SelectRulesPage extends NewTypeWizardPage {
 		
 		// set label text
 		rulesCheckboxTableViewer.setLabelProvider(new StyledCellLabelProvider() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void update(ViewerCell cell) {
-				// FIXME provide a useful name
-				super.update(cell);
+				cell.setText(((RefactoringRule<? extends ASTVisitor>) cell.getElement()).getName());
 			}
 		});
 	}
 	
 	@SuppressWarnings("unchecked")
-	protected List<Class<? extends ASTVisitor>> getSelectedRules() {
-		List<Class<? extends ASTVisitor>> rules = new ArrayList<>();
-		Arrays.asList(rulesCheckboxTableViewer.getCheckedElements()).forEach(rule -> rules.add((Class<? extends ASTVisitor>) rule));;
+	protected List<RefactoringRule<? extends ASTVisitor>> getSelectedRules() {
+		List<RefactoringRule<? extends ASTVisitor>> rules = new ArrayList<>();
+		Arrays.asList(rulesCheckboxTableViewer.getCheckedElements()).forEach(rule -> rules.add((RefactoringRule<? extends ASTVisitor>) rule));;
 		return rules;
 	}
 	
