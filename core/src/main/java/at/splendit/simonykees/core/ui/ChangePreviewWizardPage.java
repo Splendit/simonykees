@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.dialogs;
+package at.splendit.simonykees.core.ui;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.DocumentChange;

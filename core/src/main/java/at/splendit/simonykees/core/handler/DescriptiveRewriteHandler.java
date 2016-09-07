@@ -25,8 +25,8 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.dialogs.ChangePreviewWizard;
-import at.splendit.simonykees.core.dialogs.DisposableDocumentChange;
+import at.splendit.simonykees.core.ui.ChangePreviewWizard;
+import at.splendit.simonykees.core.ui.DisposableDocumentChange;
 import at.splendit.simonykees.core.visitor.RulesContainer;
 
 public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
