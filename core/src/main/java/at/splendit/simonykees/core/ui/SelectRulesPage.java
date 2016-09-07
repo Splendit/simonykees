@@ -7,25 +7,25 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateProvider;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import at.splendit.simonykees.core.visitor.RulesContainer;
 
-public class SelectRulesPage extends NewTypeWizardPage {
+public class SelectRulesPage extends WizardPage {
 	
 	private CheckboxTableViewer rulesCheckboxTableViewer;
 	
 	private final Map<Object, Boolean> checkedRules = new HashMap<>();
 
 	protected SelectRulesPage() {
-		super(true, "Select Rules");
+		super("Select Rules");
 		setTitle("Select Rules");
 	}
 
