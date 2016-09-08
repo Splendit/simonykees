@@ -48,8 +48,10 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 				break;
 			case "toUpperCase":
 				replacementOperation = "upperCase";
+				break;
 			case "toLowerCase":
 				replacementOperation = "lowerCase";
+				break;
 			case "startsWith":
 				if (node.arguments().size() == 1) {
 					replacementOperation = "startsWith";
