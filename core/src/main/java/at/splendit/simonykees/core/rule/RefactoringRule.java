@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.rule;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,7 @@ public abstract class RefactoringRule<T extends ASTVisitor> {
 	 * @return Map containing {@code ICompilationUnit}s as key and corresponding {@code DocumentChange}s as value
 	 */
 	public Map<ICompilationUnit, DocumentChange> getDocumentChanges() {
-		return changes;
+		return Collections.unmodifiableMap(changes);
 	}
 	
 	/**
