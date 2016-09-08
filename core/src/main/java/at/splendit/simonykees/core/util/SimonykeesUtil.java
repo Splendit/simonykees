@@ -109,7 +109,7 @@ public final class SimonykeesUtil {
 	 * 
 	 * @param workingCopy
 	 * @param ruleClazz
-	 * @return a {@code DocumentChange} containing the old and new source
+	 * @return a {@code DocumentChange} containing the old and new source or null if no changes were detected
 	 * @throws ReflectiveOperationException
 	 * @throws JavaModelException
 	 */
@@ -126,10 +126,15 @@ public final class SimonykeesUtil {
 		Document document = new Document(workingCopy.getSource());
 		TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
 		
-		workingCopy.applyTextEdit(edits, null);
-		workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+		if (edits.hasChildren()) {
+			workingCopy.applyTextEdit(edits, null);
+			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+			
+			return generateDocumentChange(ruleClazz.getSimpleName(), document, edits);
+		} else {
+			return null; 
+		}
 		
-		return generateDocumentChange(ruleClazz.getSimpleName(), document, edits);
 	}
 
 }
