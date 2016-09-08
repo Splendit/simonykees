@@ -46,12 +46,15 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 			case "replace":
 				replacementOperation = op;
 				break;
+			case "toUpperCase":
+				replacementOperation = "upperCase";
+			case "toLowerCase":
+				replacementOperation = "lowerCase";
 			case "startsWith":
 				if (node.arguments().size() == 1) {
 					replacementOperation = "startsWith";
 				}
 				break;
-			case "":
 			default:
 				break;
 			}
@@ -63,10 +66,9 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 						null);
 				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY)
 						.insertFirst((Expression) ASTNode.copySubtree(currentAST, node.getExpression()), null);
+				return false;
 			}
-			return false;
 		}
-
 		return true;
 	}
 
