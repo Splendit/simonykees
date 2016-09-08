@@ -1,34 +1,94 @@
 package at.splendit.simonykees.core.refactorer;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 
 public abstract class AbstractRefactorer {
 	
 	protected List<IJavaElement> javaElements;
-	protected List<Class<? extends ASTVisitor>> rules;
-	protected Multimap<IPath, DocumentChange> documentChanges = ArrayListMultimap.create();
+	protected List<RefactoringRule<? extends ASTVisitor>> rules;
+	protected List<ICompilationUnit> workingCopies = new ArrayList<>();
 	
-	public AbstractRefactorer(List<IJavaElement> javaElements, List<Class<? extends ASTVisitor>> rules) {
+	public AbstractRefactorer(List<IJavaElement> javaElements, List<RefactoringRule<? extends ASTVisitor>> rules) {
 		this.javaElements = javaElements;
 		this.rules = rules;
 	}
 	
+	public void prepareRefactoring() {
+		List<ICompilationUnit> compilationUnits = new ArrayList<>();
+		try {
+			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements);
+			if (compilationUnits.isEmpty()) {
+				Activator.log(Status.WARNING, "No compilation units found", null);
+				// FIXME should also throw an exception
+				return;
+			} else if (!workingCopies.isEmpty()) {
+				Activator.log(Status.WARNING, "working copies alread generated", null);
+				// FIXME should also throw an exception
+				return;
+			} else {
+				for (ICompilationUnit compilationUnit : compilationUnits) {
+					workingCopies.add(compilationUnit.getWorkingCopy(null));
+				}
+			}
+		} catch (JavaModelException e) {
+			Activator.log(Status.ERROR, e.getMessage(), null);
+			// FIXME should also throw an exception
+		}
+	}
+	
 	public void doRefactoring() {
+		if (workingCopies.isEmpty()) {
+			Activator.log(Status.WARNING, "No working copies found", null);
+			// FIXME should also throw an exception
+			return;
+		}
+		for (RefactoringRule<? extends ASTVisitor> refactoringRule : rules) {
+			try {
+				refactoringRule.generateDocumentChanges(workingCopies);
+			} catch (JavaModelException | ReflectiveOperationException e) {
+				Activator.log(Status.ERROR, e.getMessage(), null);
+				// FIXME should also throw an exception
+			}
+		}
+	}
+	
+	public void commitRefactoring() {
+		if (workingCopies.isEmpty()) {
+			Activator.log(Status.WARNING, "No working copies found", null);
+			// FIXME should also throw an exception
+			return;
+		}
+		for (Iterator<ICompilationUnit> iterator = workingCopies.iterator(); iterator.hasNext();) {
+			ICompilationUnit workingCopy = (ICompilationUnit) iterator.next();
+			try {
+				SimonykeesUtil.commitAndDiscardWorkingCopy(workingCopy);
+				iterator.remove();
+			} catch (JavaModelException e) {
+				Activator.log(Status.ERROR, e.getMessage(), null);
+				// FIXME should also throw an exception
+			}
+		}
+	}
+	
+	public List<RefactoringRule<? extends ASTVisitor>> getRules() {
+		return Collections.unmodifiableList(rules);
+	}
+	
+	@Deprecated
+	public void doOldRefactoring() {
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
 		
 		try {
@@ -40,13 +100,13 @@ public abstract class AbstractRefactorer {
 			}
 			
 			for (ICompilationUnit compilationUnit : compilationUnits) {
-				for (Class<? extends ASTVisitor> ruleClazz : rules) {
+				for (RefactoringRule<? extends ASTVisitor> rule : rules) {
 					ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(null);
 					
 					try {
-						documentChanges.put(workingCopy.getPath(), SimonykeesUtil.applyRule(workingCopy, ruleClazz));
+						SimonykeesUtil.applyRule(workingCopy, rule.getVisitor());
 					} catch (ReflectiveOperationException e) {
-						Activator.log(Status.ERROR, "Cannot init rule [" + ruleClazz.getName() + "]", e);
+						Activator.log(Status.ERROR, "Cannot init rule [" + rule.getName() + "]", e);
 					}
 					
 					SimonykeesUtil.commitAndDiscardWorkingCopy(workingCopy);
@@ -58,10 +118,6 @@ public abstract class AbstractRefactorer {
 			Activator.log(Status.ERROR, e.getMessage(), null);
 			// FIXME should also throw an exception
 		}
-	}
-	
-	public Multimap<IPath, DocumentChange> getDocumentChanges() {
-		return documentChanges;
 	}
 	
 }
