@@ -17,7 +17,7 @@ public abstract class AbstractCompilationUnitAstVisitor extends ASTVisitor {
 
 	protected ASTRewrite astRewrite;
 	protected List<IType> registeredITypes;
-
+	
 	protected AbstractCompilationUnitAstVisitor(ASTRewrite astRewrite) {
 		this.astRewrite = astRewrite;
 		this.registeredITypes = new ArrayList<>();
