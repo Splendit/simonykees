@@ -48,7 +48,9 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 		TextEditChangePreviewViewer viewer = new TextEditChangePreviewViewer();
 		viewer.createControl(sashForm);
-		// viewer.setInput(new ChangePreviewViewerInput(textEditBasedChange));
+		
+		// FIXME show more than just the first element
+		// FIXME handle empty changes for a rule (changes only get created if there is a change)
 		viewer.setInput(TextEditChangePreviewViewer.createInput(refactoringRule.getDocumentChanges().values().stream().findFirst().get()));
 
 	}
