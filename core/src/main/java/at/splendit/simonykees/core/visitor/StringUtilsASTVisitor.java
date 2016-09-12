@@ -10,7 +10,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
@@ -25,7 +24,6 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 		super(astRewrite);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(MethodInvocation node) {
 		Expression optionalExpression = node.getExpression();
@@ -34,23 +32,45 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 		}
 		if (isContentofRegistertITypes(optionalExpression.resolveTypeBinding())) {
 			AST currentAST = node.getAST();
-			switch (node.getName().getFullyQualifiedName()) {
+			String replacementOperation = null;
+			String op = null;
+			switch (op = node.getName().getFullyQualifiedName()) {
 			case "isEmpty":
-				// TODO implement improvement for isEmpty
-				SimpleName stringUtils = currentAST.newSimpleName("StringUtils");
-				MethodInvocation replacementMethodInvocation = currentAST.newMethodInvocation();
-				replacementMethodInvocation.setExpression(stringUtils);
-				replacementMethodInvocation.setName((SimpleName) ASTNode.copySubtree(currentAST, node.getName()));
-				replacementMethodInvocation.arguments().add(ASTNode.copySubtree(currentAST, node.getExpression()));
-				astRewrite.replace(node, replacementMethodInvocation, null);
-				stringUtilsRequired = true;
+			case "trim":
+			case "equals":
+			case "endsWith":
+			case "indexOf":
+			case "contains":
+			case "substring":
+			case "split":
+			case "replace":
+				replacementOperation = op;
+				break;
+			case "toUpperCase":
+				replacementOperation = "upperCase";
+				break;
+			case "toLowerCase":
+				replacementOperation = "lowerCase";
+				break;
+			case "startsWith":
+				if (node.arguments().size() == 1) {
+					replacementOperation = "startsWith";
+				}
 				break;
 			default:
 				break;
 			}
-			return false;
+			if (replacementOperation != null) {
+				stringUtilsRequired = true;
+				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, currentAST.newSimpleName("StringUtils"),
+						null);
+				astRewrite.set(node, MethodInvocation.NAME_PROPERTY, node.getAST().newSimpleName(replacementOperation),
+						null);
+				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY)
+						.insertFirst((Expression) ASTNode.copySubtree(currentAST, node.getExpression()), null);
+				return false;
+			}
 		}
-
 		return true;
 	}
 
@@ -60,9 +80,9 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 			node.imports();
 			ImportDeclaration stringUtilsImport = node.getAST().newImportDeclaration();
 			stringUtilsImport.setName(node.getAST().newName("org.apache.commons.lang3.StringUtils"));
-			if (node.imports().stream().noneMatch(
-					importDeclaration -> (new ASTMatcher()).match((ImportDeclaration) importDeclaration, stringUtilsImport))) {
-				//node.imports().add(stringUtilsImport);
+			if (node.imports().stream().noneMatch(importDeclaration -> (new ASTMatcher())
+					.match((ImportDeclaration) importDeclaration, stringUtilsImport))) {
+				// node.imports().add(stringUtilsImport);
 				astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY).insertLast(stringUtilsImport, null);
 			}
 		}
