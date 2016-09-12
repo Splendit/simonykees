@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
@@ -118,6 +119,15 @@ public final class SimonykeesUtil {
 		resetParser(workingCopy, astParser, workingCopy.getJavaProject().getOptions(true));
 		final CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
 		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
+		//FIXME resolves that comments are manipulated during astrewrite
+		//
+		// Solution from https://bugs.eclipse.org/bugs/show_bug.cgi?id=250142
+		// The best solution for such problems is usually to call
+		// ASTRewrite#setTargetSourceRangeComputer(TargetSourceRangeComputer)
+		// and set a NoCommentSourceRangeComputer or a properly configured
+		// TightSourceRangeComputer.
+		
+		astRewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 		
 		Activator.log("Init rule [" + ruleClazz.getName() + "]");
 		ASTVisitor rule = ruleClazz.getConstructor(ASTRewrite.class).newInstance(astRewrite);
