@@ -7,7 +7,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
@@ -42,7 +44,10 @@ public class SelectRulesWizard extends Wizard {
 		
 		Activator.log(formatRuleAndFileAndChange(refactorer.getRules()));
 		
-		refactorer.commitRefactoring();
+//		refactorer.commitRefactoring();
+
+		final WizardDialog dialog = new WizardDialog(getShell(), new RefactoringPreviewWizard(refactorer));
+		dialog.open();
 		
 		return true;
 	}
