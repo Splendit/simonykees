@@ -9,6 +9,8 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
@@ -47,6 +49,10 @@ public class SelectRulesWizard extends Wizard {
 //		refactorer.commitRefactoring();
 
 		final WizardDialog dialog = new WizardDialog(getShell(), new RefactoringPreviewWizard(refactorer));
+		
+		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
+		dialog.setPageSize(rectangle.width, rectangle.height); // maximizes the RefactoringPreviewWizard 
+		
 		dialog.open();
 		
 		return true;
