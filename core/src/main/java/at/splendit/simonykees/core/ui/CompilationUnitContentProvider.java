@@ -13,7 +13,6 @@ public class CompilationUnitContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		// TODO Auto-generated method stub
 		ITreeContentProvider.super.inputChanged(viewer, oldInput, newInput);
 	}
 

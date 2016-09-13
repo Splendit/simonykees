@@ -38,7 +38,6 @@ public class RefactoringPreviewWizard extends Wizard {
 	 */
 	@Override
 	public boolean performCancel() {
-		// TODO Auto-generated method stub
 		return super.performCancel();
 	}
 

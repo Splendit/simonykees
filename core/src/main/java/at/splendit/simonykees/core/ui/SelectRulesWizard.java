@@ -1,19 +1,16 @@
 package at.splendit.simonykees.core.ui;
 
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 
-import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 
@@ -33,7 +30,7 @@ public class SelectRulesWizard extends Wizard {
 
 	@Override
 	public String getWindowTitle() {
-		return "Select Rules";
+		return Messages.SelectRulesWizard_title;
 	}
 	
 	@Override
@@ -44,10 +41,6 @@ public class SelectRulesWizard extends Wizard {
 		refactorer.prepareRefactoring();
 		refactorer.doRefactoring();
 		
-		Activator.log(formatRuleAndFileAndChange(refactorer.getRules()));
-		
-//		refactorer.commitRefactoring();
-		
 		if (refactorer.hasChanges()) {
 			final WizardDialog dialog = new WizardDialog(getShell(), new RefactoringPreviewWizard(refactorer));
 			
@@ -56,26 +49,11 @@ public class SelectRulesWizard extends Wizard {
 			
 			dialog.open();
 		} else {
-			MessageDialog dialog = new MessageDialog(getShell(), "Simonykees", null, "No refactoring have to be applied!", MessageDialog.INFORMATION, 1, "OK");
+			MessageDialog dialog = new MessageDialog(getShell(), Messages.aa_codename, null, Messages.SelectRulesWizard_warning_no_refactorings, MessageDialog.INFORMATION, 1, Messages.ui_ok);
 			dialog.open();
 		}
 		
 		return true;
-	}
-	
-	private String formatRuleAndFileAndChange(List<RefactoringRule<? extends ASTVisitor>> rules) {
-		String output = "";
-		
-		for (RefactoringRule<? extends ASTVisitor> rule : rules) {
-			output += "\nRule [" + rule.getName() + "]\n";
-			Map<ICompilationUnit, DocumentChange> changes = rule.getDocumentChanges();
-			for (ICompilationUnit cu : changes.keySet()) {
-				output += "\tFile\t[" + cu.getPath().toString() + "]\n";
-				output += "\tChange\t[\n" + changes.get(cu).getEdit() + "\n\t]\n"; 
-			}
-		}
-		
-		return output;
 	}
 
 }
