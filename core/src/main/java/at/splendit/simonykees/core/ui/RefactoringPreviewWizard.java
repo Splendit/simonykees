@@ -21,7 +21,7 @@ public class RefactoringPreviewWizard extends Wizard {
 	 */
 	@Override
 	public void addPages() {
-		abstractRefactorer.getRules().forEach(rule -> addPage(new RefactoringPreviewWizardPage(rule)));
+		abstractRefactorer.getRules().stream().filter(rule -> !rule.getDocumentChanges().isEmpty()).forEach(rule -> addPage(new RefactoringPreviewWizardPage(rule)));
 	}
 
 	/* (non-Javadoc)

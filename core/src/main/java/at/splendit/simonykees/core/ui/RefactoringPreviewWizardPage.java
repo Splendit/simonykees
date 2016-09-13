@@ -33,9 +33,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		setDescription(rule.getDescription());
 		this.refactoringRule = rule;
 
-		// FIXME make it null safe
 		this.currentCompilationUnitNode = new CompilationUnitNode(
-				refactoringRule.getDocumentChanges().keySet().stream().findFirst().get());
+				refactoringRule.getDocumentChanges().keySet().stream().findFirst().orElse(null));
 	}
 
 	/*

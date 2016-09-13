@@ -87,6 +87,15 @@ public abstract class AbstractRefactorer {
 		return Collections.unmodifiableList(rules);
 	}
 	
+	public boolean hasChanges() {
+		for (RefactoringRule<? extends ASTVisitor> rule : rules) {
+			if (!rule.getDocumentChanges().isEmpty()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	@Deprecated
 	public void doOldRefactoring() {
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
