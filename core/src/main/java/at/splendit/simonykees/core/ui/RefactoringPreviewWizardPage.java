@@ -4,6 +4,7 @@
 package at.splendit.simonykees.core.ui;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.swt.SWT;
@@ -39,9 +40,16 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		container.setLayout(layout); // without setting the layout, nothing displays
 
 		setControl(container);
-
+		
 		SashForm sashForm = new SashForm(container, SWT.VERTICAL);
-
+		
+//		ViewerPane
+		TreeViewer treeViewer = new TreeViewer(sashForm);
+		CompilationUnitContentProvider contentProvider = new CompilationUnitContentProvider();
+		
+		treeViewer.setContentProvider(contentProvider);
+		treeViewer.setInput(refactoringRule.getDocumentChanges().keySet()); 
+		
 		GridData gridData = new GridData(GridData.FILL_BOTH); // GridData works with GridLayout
 //		gridData.widthHint = convertWidthInCharsToPixels(80);
 		sashForm.setLayoutData(gridData);

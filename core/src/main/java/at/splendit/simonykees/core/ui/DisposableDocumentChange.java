@@ -3,6 +3,7 @@ package at.splendit.simonykees.core.ui;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
+@Deprecated
 public class DisposableDocumentChange extends DocumentChange {
 	
 	private boolean disposed = false;
