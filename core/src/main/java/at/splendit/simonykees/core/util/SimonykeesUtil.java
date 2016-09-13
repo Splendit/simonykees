@@ -137,10 +137,18 @@ public final class SimonykeesUtil {
 		TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
 		
 		if (edits.hasChildren()) {
+			
+			/*
+			 *  The TextEdit instance changes as soon as it is applied to the working copy. 
+			 *  This results in an incorrect preview of the DocumentChange. 
+			 *  To fix this issue, a copy of the TextEdit is used for the DocumentChange. 
+			 */
+			DocumentChange documentChange = generateDocumentChange(ruleClazz.getSimpleName(), document, edits.copy());
+			
 			workingCopy.applyTextEdit(edits, null);
 			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
 			
-			return generateDocumentChange(ruleClazz.getSimpleName(), document, edits);
+			return documentChange;
 		} else {
 			return null; 
 		}

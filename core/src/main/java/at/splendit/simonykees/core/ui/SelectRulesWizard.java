@@ -6,8 +6,12 @@ import java.util.Map;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
@@ -42,7 +46,19 @@ public class SelectRulesWizard extends Wizard {
 		
 		Activator.log(formatRuleAndFileAndChange(refactorer.getRules()));
 		
-		refactorer.commitRefactoring();
+//		refactorer.commitRefactoring();
+		
+		if (refactorer.hasChanges()) {
+			final WizardDialog dialog = new WizardDialog(getShell(), new RefactoringPreviewWizard(refactorer));
+			
+			Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
+			dialog.setPageSize(rectangle.width, rectangle.height); // maximizes the RefactoringPreviewWizard 
+			
+			dialog.open();
+		} else {
+			MessageDialog dialog = new MessageDialog(getShell(), "Simonykees", null, "No refactoring have to be applied!", MessageDialog.INFORMATION, 1, "OK");
+			dialog.open();
+		}
 		
 		return true;
 	}
