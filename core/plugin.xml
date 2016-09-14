@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-
-
    <extension
          point="org.eclipse.ui.menus">
       <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=org.eclipse.jdt.ui.refactoring.menu">
          <menu
-               label="Simonykees">
+               label="%menu.label">
             <command
                   commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
-                  label="SelectRulesWizardHandler"
+                  label="%command.label.select_rules_wizard"
                   style="push">
             </command>
             <command
                   commandId="at.splendit.simonykees.simonykees.core.DescriptiveRewriteHandler"
-                  label="DescriptiveRewriteHandler"
+                  label="%command.label.no_wizard"
                   style="push">
             </command>
          </menu>
@@ -23,30 +21,30 @@
       <menuContribution
             locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=org.eclipse.jdt.ui.refactoring.menu">
          <menu
-               label="Simonykees">
+               label="%menu.label">
             <command
                   commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
-                  label="SelectRulesWizardHandler"
+                  label="%command.label.select_rules_wizard"
                   style="push">
             </command>
             <command
                   commandId="at.splendit.simonykees.simonykees.core.DescriptiveRewriteHandler"
-                  label="DescriptiveRewriteHandler"
+                  label="%command.label.no_wizard"
                   style="push">
             </command>
          </menu>
       </menuContribution>
       <menuContribution locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.refactoring.menu">
          <menu
-               label="Simonykees">
+               label="%menu.label">
             <command
                   commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
-                  label="SelectRulesWizardHandler"
+                  label="%command.label.select_rules_wizard"
                   style="push">
             </command>
             <command
                   commandId="at.splendit.simonykees.simonykees.core.DescriptiveRewriteHandler"
-                  label="DescriptiveRewriteHandler"
+                  label="%command.label.no_wizard"
                   style="push">
             </command>
          </menu>
@@ -57,12 +55,12 @@
       <command
             defaultHandler="at.splendit.simonykees.core.handler.SelectRulesWizardHandler"
             id="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
-            name="SelectRulesWizardHandler">
+            name="%command.name.select_rules_wizard_handler">
       </command>
       <command
             defaultHandler="at.splendit.simonykees.core.handler.DescriptiveRewriteHandler"
             id="at.splendit.simonykees.simonykees.core.DescriptiveRewriteHandler"
-            name="DescriptiveRewriteHandler">
+            name="%command.name.no_wizard_handler">
       </command>
    </extension>
 </plugin>
