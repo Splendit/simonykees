@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
+import at.splendit.simonykees.core.visitor.tryWithResource.MultiCatchASTVisitor;
 import at.splendit.simonykees.core.visitor.tryWithResource.TryWithResourceASTVisitor;
 
 public class RulesContainer {
@@ -19,7 +20,8 @@ public class RulesContainer {
 		return Arrays.asList(
 				new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
 				new TryWithResourceRule(TryWithResourceASTVisitor.class),
-				new StringUtilsRule(StringUtilsASTVisitor.class)
+				new StringUtilsRule(StringUtilsASTVisitor.class),
+				new MultiCatchRule(MultiCatchASTVisitor.class)
 				);
 	}
 
