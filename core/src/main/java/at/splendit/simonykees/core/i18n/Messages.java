@@ -7,6 +7,9 @@ public class Messages extends NLS {
 	public static String aa_codename;
 	public static String ui_ok;
 	public static String ui_cancel;
+	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
+	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
+	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
 	public static String ArithmethicAssignmentRule_description;
 	public static String ArithmethicAssignmentRule_name;
 	public static String RefactoringRule_default_description;
