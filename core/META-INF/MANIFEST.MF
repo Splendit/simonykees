@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: simonykees Core Plugin
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: simonykees.core;singleton:=true
 Bundle-Version: 0.0.1.qualifier
 Bundle-Activator: at.splendit.simonykees.core.Activator

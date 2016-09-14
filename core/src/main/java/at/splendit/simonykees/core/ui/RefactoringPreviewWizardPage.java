@@ -29,7 +29,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 	public RefactoringPreviewWizardPage(RefactoringRule<? extends ASTVisitor> rule) {
 		super(rule.getName());
-		setTitle(rule.getName()); // FIXME
+		setTitle(rule.getName());
 		setDescription(rule.getDescription());
 		this.refactoringRule = rule;
 

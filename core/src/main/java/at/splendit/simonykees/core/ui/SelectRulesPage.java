@@ -16,6 +16,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
 
@@ -26,8 +27,9 @@ public class SelectRulesPage extends WizardPage {
 	private final Map<Object, Boolean> checkedRules = new HashMap<>();
 
 	protected SelectRulesPage() {
-		super("Select Rules");
-		setTitle("Select Rules");
+		super(Messages.SelectRulesPage_page_name);
+		setTitle(Messages.SelectRulesPage_title);
+		setDescription(Messages.SelectRulesPage_description);
 	}
 
 	@Override

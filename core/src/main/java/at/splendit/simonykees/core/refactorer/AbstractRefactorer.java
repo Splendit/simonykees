@@ -10,8 +10,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.osgi.util.NLS;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 
@@ -31,11 +33,11 @@ public abstract class AbstractRefactorer {
 		try {
 			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements);
 			if (compilationUnits.isEmpty()) {
-				Activator.log(Status.WARNING, "No compilation units found", null);
+				Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_no_compilation_units_found, null);
 				// FIXME should also throw an exception
 				return;
 			} else if (!workingCopies.isEmpty()) {
-				Activator.log(Status.WARNING, "working copies alread generated", null);
+				Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_working_copies_already_generated, null);
 				// FIXME should also throw an exception
 				return;
 			} else {
@@ -51,7 +53,7 @@ public abstract class AbstractRefactorer {
 	
 	public void doRefactoring() {
 		if (workingCopies.isEmpty()) {
-			Activator.log(Status.WARNING, "No working copies found", null);
+			Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_no_working_copies_foung, null);
 			// FIXME should also throw an exception
 			return;
 		}
@@ -67,7 +69,7 @@ public abstract class AbstractRefactorer {
 	
 	public void commitRefactoring() {
 		if (workingCopies.isEmpty()) {
-			Activator.log(Status.WARNING, "No working copies found", null);
+			Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_no_working_copies_foung, null);
 			// FIXME should also throw an exception
 			return;
 		}
@@ -104,7 +106,7 @@ public abstract class AbstractRefactorer {
 			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements);
 			
 			if (compilationUnits.isEmpty()) {
-				Activator.log(Status.WARNING, "No compilation units found", null);
+				Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_no_compilation_units_found, null);
 				return;
 			}
 			
@@ -115,7 +117,7 @@ public abstract class AbstractRefactorer {
 					try {
 						SimonykeesUtil.applyRule(workingCopy, rule.getVisitor());
 					} catch (ReflectiveOperationException e) {
-						Activator.log(Status.ERROR, "Cannot init rule [" + rule.getName() + "]", e);
+						Activator.log(Status.ERROR, NLS.bind(Messages.AbstractRefactorer_error_cannot_init_rule, rule.getName()), e);
 					}
 					
 					SimonykeesUtil.commitAndDiscardWorkingCopy(workingCopy);
