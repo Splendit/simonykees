@@ -16,6 +16,8 @@ public class Messages extends NLS {
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
 	public static String ArithmethicAssignmentRule_description;
 	public static String ArithmethicAssignmentRule_name;
+	public static String MultiCatchRule_description;
+	public static String MultiCatchRule_name;
 	public static String RefactoringRule_default_description;
 	public static String RefactoringRule_default_name;
 	public static String RefactoringRule_warning_workingcopy_already_present;
