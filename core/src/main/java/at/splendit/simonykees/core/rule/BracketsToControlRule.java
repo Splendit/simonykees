@@ -10,5 +10,4 @@ public class BracketsToControlRule extends RefactoringRule<BracketsToControlASTV
 		this.name = Messages.BracketsToControlRule_name;
 		this.description = Messages.BracketsToControlRule_description;
 	}
-
 }

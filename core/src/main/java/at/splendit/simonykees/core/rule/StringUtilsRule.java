@@ -10,5 +10,4 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 		this.name = Messages.StringUtilsRule_name;
 		this.description = Messages.StringUtilsRule_description;
 	}
-
 }
