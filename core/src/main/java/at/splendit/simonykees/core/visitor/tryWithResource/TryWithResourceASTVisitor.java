@@ -19,6 +19,9 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
 
 public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor {
 	
+	private static final String AUTO_CLOSEABLE = "java.lang.AutoCloseable";
+	private static final String CLOSEABLE = "java.io.Closeable";
+	
 	private TryStatement invokingTryStatement = null;
 	private List<VariableDeclarationExpression> listVDE = new ArrayList<>();
 
@@ -76,7 +79,7 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor
 
 	@Override
 	protected String[] relevantClasses() {
-		return new String[] { "java.lang.AutoCloseable", "java.io.Closeable" };
+		return new String[] { AUTO_CLOSEABLE, CLOSEABLE };
 	}
 	
 	private List<VariableDeclarationExpression> getListVDE() {

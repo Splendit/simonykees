@@ -15,6 +15,19 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 
 	private boolean stringUtilsRequired = false;
+	private static final String STRING = "java.lang.String";
+			
+	private static final String STRING_UTILS = "org.apache.commons.lang3.StringUtils";
+	private static final String IS_EMPTY = "isEmpty";
+	private static final String TRIM = "trim";
+	private static final String EQUALS = "equals";
+	private static final String ENDSWITH = "endsWith";
+	private static final String INDEXOF = "indexOf";
+	private static final String CONTAINS = "contains";
+	private static final String SUBSTRING = "substring";
+	private static final String SPLIT = "split";
+	private static final String REPLACE = "replace";
+	private static final String STARTS_WITH = "startsWith";
 
 	public StringUtilsASTVisitor(ASTRewrite astRewrite, List<IType> itypes) {
 		super(astRewrite, itypes);
@@ -35,15 +48,15 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 			String replacementOperation = null;
 			String op = null;
 			switch (op = node.getName().getFullyQualifiedName()) {
-			case "isEmpty":
-			case "trim":
-			case "equals":
-			case "endsWith":
-			case "indexOf":
-			case "contains":
-			case "substring":
-			case "split":
-			case "replace":
+			case IS_EMPTY:
+			case TRIM:
+			case EQUALS:
+			case ENDSWITH:
+			case INDEXOF:
+			case CONTAINS:
+			case SUBSTRING:
+			case SPLIT:
+			case REPLACE:
 				replacementOperation = op;
 				break;
 			case "toUpperCase":
@@ -52,9 +65,9 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 			case "toLowerCase":
 				replacementOperation = "lowerCase";
 				break;
-			case "startsWith":
+			case STARTS_WITH:
 				if (node.arguments().size() == 1) {
-					replacementOperation = "startsWith";
+					replacementOperation = STARTS_WITH;
 				}
 				break;
 			default:
@@ -79,7 +92,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 		if (stringUtilsRequired) {
 			node.imports();
 			ImportDeclaration stringUtilsImport = node.getAST().newImportDeclaration();
-			stringUtilsImport.setName(node.getAST().newName("org.apache.commons.lang3.StringUtils"));
+			stringUtilsImport.setName(node.getAST().newName(STRING_UTILS));
 			if (node.imports().stream().noneMatch(importDeclaration -> (new ASTMatcher())
 					.match((ImportDeclaration) importDeclaration, stringUtilsImport))) {
 				// node.imports().add(stringUtilsImport);
@@ -90,7 +103,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 
 	@Override
 	protected String[] relevantClasses() {
-		return new String[] { "java.lang.String" };
+		return new String[] { STRING };
 	}
 
 }
