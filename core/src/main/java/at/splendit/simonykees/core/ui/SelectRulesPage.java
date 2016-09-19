@@ -10,11 +10,16 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Text;
 
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
@@ -23,6 +28,8 @@ import at.splendit.simonykees.core.rule.RulesContainer;
 public class SelectRulesPage extends WizardPage {
 	
 	private CheckboxTableViewer rulesCheckboxTableViewer;
+	private Text descriptionText;
+	private RefactoringRule<? extends ASTVisitor> selectedRefactoringRule;
 	
 	private final Map<Object, Boolean> checkedRules = new HashMap<>();
 
@@ -36,7 +43,15 @@ public class SelectRulesPage extends WizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 		
+		GridLayout layout = new GridLayout(2, false);
+//		layout.numColumns = 2;
+//		GridData gridData = new GridData(GridData.FILL_BOTH);
+		
+		parent.setLayout(layout);
+//		parent.setLayoutData(gridData);
+		
 		createRulesCheckboxTableViewer(parent);
+		createRuleDescriptionViewer(parent);
 		
 		setControl(parent);
 	}
@@ -46,6 +61,7 @@ public class SelectRulesPage extends WizardPage {
 		
 		rulesCheckboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.CHECK);
 		rulesCheckboxTableViewer.setContentProvider(new ArrayContentProvider());
+		rulesCheckboxTableViewer.addSelectionChangedListener(createSelectionChangedListener());
 		rulesCheckboxTableViewer.setInput(rules);
 
 		// FIXME check if this is needed
@@ -59,6 +75,36 @@ public class SelectRulesPage extends WizardPage {
 				cell.setText(((RefactoringRule<? extends ASTVisitor>) cell.getElement()).getName());
 			}
 		});
+	}
+	
+	private void createRuleDescriptionViewer(Composite parent) {
+		selectedRefactoringRule = RulesContainer.getAllRules().stream().findFirst().get(); // de facto null safe
+		
+		descriptionText = new Text(parent, INFORMATION);
+		
+		populateDescriptionTextViewer();
+	}
+	
+	private void populateDescriptionTextViewer() {
+		descriptionText.setText(selectedRefactoringRule.getDescription());
+	}
+	
+	private ISelectionChangedListener createSelectionChangedListener() {
+		return new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				IStructuredSelection sel = (IStructuredSelection) event.getSelection();
+
+				if (sel.size() == 1) {
+					@SuppressWarnings("unchecked")
+					RefactoringRule<? extends ASTVisitor> newSelection = (RefactoringRule<? extends ASTVisitor>) sel.getFirstElement();
+					if (!newSelection.equals(selectedRefactoringRule)) {
+						selectedRefactoringRule = newSelection;
+						populateDescriptionTextViewer();
+					}
+				}
+			}
+		};
 	}
 	
 	@SuppressWarnings("unchecked")
