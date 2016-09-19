@@ -24,11 +24,11 @@ import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 
 public class RulesTest {
 	
-	private static final String POSTRULE_PACKAGE = "package at.splendit.simonykees.sample.postRule;";
-	private static final String PRERULE_PACKAGE = "package at.splendit.simonykees.sample.preRule;";
-	private static final String SAMPLE_DIRECTORY = "../sample/src/test/java/at/splendit/simonykees/sample/";
-	private static final String PRERULE_DIRECTORY = SAMPLE_DIRECTORY + "preRule";
-	private static final String POSTRULE_DIRECTORY = SAMPLE_DIRECTORY + "postRule";
+	public static final String POSTRULE_PACKAGE = "package at.splendit.simonykees.sample.postRule;";
+	public static final String PRERULE_PACKAGE = "package at.splendit.simonykees.sample.preRule;";
+	public static final String SAMPLE_DIRECTORY = "../sample/src/test/java/at/splendit/simonykees/sample/";
+	public static final String PRERULE_DIRECTORY = SAMPLE_DIRECTORY + "preRule";
+	public static final String POSTRULE_DIRECTORY = SAMPLE_DIRECTORY + "postRule";
 
 	@Test
 	public void allRulesTest() throws Exception {
@@ -38,11 +38,15 @@ public class RulesTest {
 		Files.newDirectoryStream(Paths.get(PRERULE_DIRECTORY), "*Rule.java").forEach(System.out::println);
 		Files.newDirectoryStream(Paths.get(POSTRULE_DIRECTORY), "*Rule.java").forEach(System.out::println);
 		
-		for (Path path : Files.newDirectoryStream(Paths.get(PRERULE_DIRECTORY), "*Rule.java")) {
-			String content = new String(Files.readAllBytes(path));
+		for (Path preRulePath : Files.newDirectoryStream(Paths.get(PRERULE_DIRECTORY), "*Rule.java")) {
+			
+			Path postRulePath = Paths.get(POSTRULE_DIRECTORY, preRulePath.getFileName().toString());
+			String expectedSource = new String(Files.readAllBytes(postRulePath));
+			
+			String content = new String(Files.readAllBytes(preRulePath));
 			
 			IPackageFragment packageFragment = RulesTestUtil.getPackageFragement();
-			ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(path.getFileName().toString(), content, true, null);
+			ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(preRulePath.getFileName().toString(), content, true, null);
 			
 			List<IJavaElement> javaElements = new ArrayList<>();
 			javaElements.add(compilationUnit);
@@ -53,7 +57,9 @@ public class RulesTest {
 			refactorer.doRefactoring();
 			refactorer.commitRefactoring();
 			
-			System.out.println(compilationUnit.getSource());
+			String compilationUnitSource = StringUtils.replace(compilationUnit.getSource(), PRERULE_PACKAGE, POSTRULE_PACKAGE);
+			
+			assertEquals(expectedSource, compilationUnitSource);
 		}
 		
 	}
