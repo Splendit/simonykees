@@ -7,15 +7,15 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
-public abstract class RefactoringRule<T extends ASTVisitor> {
+public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	
 	protected String name = Messages.RefactoringRule_default_name;
 	

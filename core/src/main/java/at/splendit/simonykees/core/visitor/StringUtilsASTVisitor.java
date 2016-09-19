@@ -10,18 +10,17 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 
 	private boolean stringUtilsRequired = false;
 
-	public StringUtilsASTVisitor(ASTRewrite astRewrite, List<IType> itypes) {
-		super(astRewrite, itypes);
+	public StringUtilsASTVisitor() {
+		super();
 	}
-
-	public StringUtilsASTVisitor(ASTRewrite astRewrite) {
-		super(astRewrite);
+	
+	public StringUtilsASTVisitor(List<IType> itypes) {
+		super(itypes);
 	}
 
 	@Override

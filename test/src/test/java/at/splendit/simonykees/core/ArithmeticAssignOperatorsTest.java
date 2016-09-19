@@ -78,7 +78,9 @@ public class ArithmeticAssignOperatorsTest extends AbstractTest {
 
 		// ASTPrinter.print(astRoot, 0);
 
-		astRoot.accept(new ArithmethicAssignmentASTVisitor(astRewrite));
+		ArithmethicAssignmentASTVisitor arithmethicAssignmentASTVisitor = new ArithmethicAssignmentASTVisitor();
+		arithmethicAssignmentASTVisitor.setAstRewrite(astRewrite);
+		astRoot.accept(arithmethicAssignmentASTVisitor);
 		Document document = new Document(inputString);
 		TextEdit edits = astRewrite.rewriteAST(document, null);
 
