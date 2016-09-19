@@ -22,6 +22,8 @@ public class Messages extends NLS {
 	public static String ChangePreviewWizard_Wizard_Page_Description;
 	public static String ChangePreviewWizard_WizardPage;
 	public static String ChangePreviewWizard_WizardPageTitle;
+	public static String HelpMessageDialog_default_message;
+	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;
 	public static String MultiCatchRule_name;
 	public static String RefactoringRule_default_description;

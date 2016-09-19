@@ -1,6 +1,5 @@
 package at.splendit.simonykees.core.ui;
 
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.swt.SWT;
@@ -12,7 +11,7 @@ import org.eclipse.swt.widgets.Composite;
 import at.splendit.simonykees.core.i18n.Messages;
 
 @SuppressWarnings("restriction") // XXX TextEditChangePreviewViewer is internal, hence the warning
-public class ChangePreviewWizardPage extends WizardPage {
+public class ChangePreviewWizardPage extends AbstractWizardPage {
 
 	private DocumentChange documentChange;
 
