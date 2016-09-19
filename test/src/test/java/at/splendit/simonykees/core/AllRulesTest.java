@@ -62,7 +62,7 @@ public class AllRulesTest {
 		refactorer.commitRefactoring();
 		
 		String compilationUnitSource = StringUtils.replace(compilationUnit.getSource(), RulesTest.PRERULE_PACKAGE, RulesTest.POSTRULE_PACKAGE);
-		
+		// TODO check if tabs and newlines make a difference
 		assertEquals(expectedSource, compilationUnitSource);
 	}
 }
