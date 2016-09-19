@@ -17,20 +17,20 @@ import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
 
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
 
 public class SelectRulesPage extends WizardPage {
-	
+
 	private CheckboxTableViewer rulesCheckboxTableViewer;
-	private Text descriptionText;
+	private StyledText descriptionStyledText;
 	private RefactoringRule<? extends ASTVisitor> selectedRefactoringRule;
-	
+
 	private final Map<Object, Boolean> checkedRules = new HashMap<>();
 
 	protected SelectRulesPage() {
@@ -42,31 +42,27 @@ public class SelectRulesPage extends WizardPage {
 	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
-		
-		GridLayout layout = new GridLayout(2, false);
-//		layout.numColumns = 2;
-//		GridData gridData = new GridData(GridData.FILL_BOTH);
-		
-		parent.setLayout(layout);
-//		parent.setLayoutData(gridData);
-		
-		createRulesCheckboxTableViewer(parent);
-		createRuleDescriptionViewer(parent);
-		
+
 		setControl(parent);
+
+		SashForm sashForm = new SashForm(parent, SWT.HORIZONTAL);
+
+		createRulesCheckboxTableViewer(sashForm);
+		createRuleDescriptionViewer(sashForm);
 	}
 
 	private void createRulesCheckboxTableViewer(Composite parent) {
 		List<RefactoringRule<? extends ASTVisitor>> rules = RulesContainer.getAllRules();
-		
-		rulesCheckboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.CHECK);
+
+		rulesCheckboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.CHECK | SWT.BORDER);
 		rulesCheckboxTableViewer.setContentProvider(new ArrayContentProvider());
 		rulesCheckboxTableViewer.addSelectionChangedListener(createSelectionChangedListener());
 		rulesCheckboxTableViewer.setInput(rules);
 
 		// FIXME check if this is needed
-//		rulesCheckboxTableViewer.setCheckStateProvider(new CheckStateProvider(rules));
-		
+		// rulesCheckboxTableViewer.setCheckStateProvider(new
+		// CheckStateProvider(rules));
+
 		// set label text
 		rulesCheckboxTableViewer.setLabelProvider(new StyledCellLabelProvider() {
 			@SuppressWarnings("unchecked")
@@ -76,19 +72,27 @@ public class SelectRulesPage extends WizardPage {
 			}
 		});
 	}
-	
+
 	private void createRuleDescriptionViewer(Composite parent) {
-		selectedRefactoringRule = RulesContainer.getAllRules().stream().findFirst().get(); // de facto null safe
+
+		/*
+		 *  There is a known issue with automatically showing and hiding scrollbars and SWT.WRAP.
+		 *  Using StyledText and setAlwaysShowScrollBars(false) makes the vertical scroll work correctly at least. 
+		 */
+		descriptionStyledText = new StyledText(parent, SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
+		descriptionStyledText.setAlwaysShowScrollBars(false);
 		
-		descriptionText = new Text(parent, INFORMATION);
-		
+		descriptionStyledText.setEditable(false);
+
 		populateDescriptionTextViewer();
 	}
-	
+
 	private void populateDescriptionTextViewer() {
-		descriptionText.setText(selectedRefactoringRule.getDescription());
+		if (selectedRefactoringRule != null) {
+			descriptionStyledText.setText(selectedRefactoringRule.getDescription());
+		}
 	}
-	
+
 	private ISelectionChangedListener createSelectionChangedListener() {
 		return new ISelectionChangedListener() {
 			@Override
@@ -97,7 +101,8 @@ public class SelectRulesPage extends WizardPage {
 
 				if (sel.size() == 1) {
 					@SuppressWarnings("unchecked")
-					RefactoringRule<? extends ASTVisitor> newSelection = (RefactoringRule<? extends ASTVisitor>) sel.getFirstElement();
+					RefactoringRule<? extends ASTVisitor> newSelection = (RefactoringRule<? extends ASTVisitor>) sel
+							.getFirstElement();
 					if (!newSelection.equals(selectedRefactoringRule)) {
 						selectedRefactoringRule = newSelection;
 						populateDescriptionTextViewer();
@@ -106,16 +111,18 @@ public class SelectRulesPage extends WizardPage {
 			}
 		};
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	protected List<RefactoringRule<? extends ASTVisitor>> getSelectedRules() {
 		List<RefactoringRule<? extends ASTVisitor>> rules = new ArrayList<>();
-		Arrays.asList(rulesCheckboxTableViewer.getCheckedElements()).forEach(rule -> rules.add((RefactoringRule<? extends ASTVisitor>) rule));;
+		Arrays.asList(rulesCheckboxTableViewer.getCheckedElements())
+				.forEach(rule -> rules.add((RefactoringRule<? extends ASTVisitor>) rule));
+		;
 		return rules;
 	}
-	
+
 	private final class CheckStateProvider implements ICheckStateProvider {
-		
+
 		protected CheckStateProvider(List<? extends Object> rules) {
 			rules.forEach(rule -> checkedRules.put(rule, Boolean.FALSE));
 		}
@@ -129,7 +136,7 @@ public class SelectRulesPage extends WizardPage {
 		public boolean isGrayed(Object element) {
 			return false;
 		}
-		
+
 	}
 
 }
