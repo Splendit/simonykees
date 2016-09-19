@@ -27,8 +27,7 @@ public class FunctionalInterfaceASTVisitor extends ASTVisitor {
 		ClassInstanceCreation parentNode = (ClassInstanceCreation) node.getParent();
 		ITypeBinding parentNodeTypeBinding = parentNode.getType().resolveBinding();
 		if (parentNodeTypeBinding != null){
-			IMethodBinding functionInterfaceMethodBinding = parentNodeTypeBinding.getFunctionalInterfaceMethod();
-			if(functionInterfaceMethodBinding != null){
+			if(parentNodeTypeBinding.getFunctionalInterfaceMethod() != null){
 				LambdaExpression newInitializer = node.getAST().newLambdaExpression();
 				MethodBlockASTVisitor methodBlockASTVisitor = new MethodBlockASTVisitor(astRewrite);
 				node.accept(methodBlockASTVisitor);
