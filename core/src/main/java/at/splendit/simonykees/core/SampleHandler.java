@@ -33,11 +33,11 @@ public class SampleHandler extends AbstractHandler {
     public Object execute(ExecutionEvent event) throws ExecutionException {
     	IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     	IProject[] project = root.getProjects(0);
-    	String p = "";
+    	String p = ""; //$NON-NLS-1$
     	for (IProject iProject : project) {
-			p += iProject.getName() + "\n";
+			p += iProject.getName() + "\n"; //$NON-NLS-1$
 		}
-        MessageDialog.openInformation(window.getShell(), "Eclipse Plugin Archetype", "Hello, Maven+Eclipse world,\n simonykees is built with Tycho\n" + p);
+        MessageDialog.openInformation(window.getShell(), "Eclipse Plugin Archetype", "Hello, Maven+Eclipse world,\n simonykees is built with Tycho\n" + p); //$NON-NLS-1$ //$NON-NLS-2$
         return null;
     }
 

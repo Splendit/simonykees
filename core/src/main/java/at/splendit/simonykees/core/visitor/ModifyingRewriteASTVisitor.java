@@ -48,7 +48,7 @@ public class ModifyingRewriteASTVisitor extends ASTVisitor {
 			} else if (rightHandSide instanceof NumberLiteral) {
 				((NumberLiteral) rightHandSide).getToken();
 			} else {
-				Activator.log("implement [" + rightHandSide.getClass().getSimpleName() + "]");
+				Activator.log("implement [" + rightHandSide.getClass().getSimpleName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 //			node.setOperator(Operator.PLUS_ASSIGN);
 		}

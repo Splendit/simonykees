@@ -15,19 +15,27 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 
 	private boolean stringUtilsRequired = false;
-	private static final String STRING = "java.lang.String";
+	private static final String STRING = "java.lang.String"; //$NON-NLS-1$
 			
-	private static final String STRING_UTILS = "org.apache.commons.lang3.StringUtils";
-	private static final String IS_EMPTY = "isEmpty";
-	private static final String TRIM = "trim";
-	private static final String EQUALS = "equals";
-	private static final String ENDSWITH = "endsWith";
-	private static final String INDEXOF = "indexOf";
-	private static final String CONTAINS = "contains";
-	private static final String SUBSTRING = "substring";
-	private static final String SPLIT = "split";
-	private static final String REPLACE = "replace";
-	private static final String STARTS_WITH = "startsWith";
+	private static final String STRING_UTILS_PACKAGE = "org.apache.commons.lang3.StringUtils"; //$NON-NLS-1$
+	private static final String STRING_UTILS = "StringUtils"; //$NON-NLS-1$
+	private static final String IS_EMPTY = "isEmpty"; //$NON-NLS-1$
+	private static final String TRIM = "trim"; //$NON-NLS-1$
+	private static final String EQUALS = "equals"; //$NON-NLS-1$
+	private static final String ENDSWITH = "endsWith"; //$NON-NLS-1$
+	private static final String INDEXOF = "indexOf"; //$NON-NLS-1$
+	private static final String CONTAINS = "contains"; //$NON-NLS-1$
+	private static final String SUBSTRING = "substring"; //$NON-NLS-1$
+	private static final String SPLIT = "split"; //$NON-NLS-1$
+	private static final String REPLACE = "replace"; //$NON-NLS-1$
+	private static final String STARTS_WITH = "startsWith"; //$NON-NLS-1$
+	
+	private static final String TO_UPPER_CASE = "toUpperCase"; //$NON-NLS-1$
+	private static final String UPPER_CASE = "upperCase"; //$NON-NLS-1$
+	
+	private static final String TO_LOWER_CASE = "toLowerCase"; //$NON-NLS-1$
+	private static final String LOWER_CASE = "lowerCase"; //$NON-NLS-1$
+	
 
 	public StringUtilsASTVisitor(ASTRewrite astRewrite, List<IType> itypes) {
 		super(astRewrite, itypes);
@@ -59,11 +67,11 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 			case REPLACE:
 				replacementOperation = op;
 				break;
-			case "toUpperCase":
-				replacementOperation = "upperCase";
+			case TO_UPPER_CASE:
+				replacementOperation = UPPER_CASE;
 				break;
-			case "toLowerCase":
-				replacementOperation = "lowerCase";
+			case TO_LOWER_CASE:
+				replacementOperation = LOWER_CASE;
 				break;
 			case STARTS_WITH:
 				if (node.arguments().size() == 1) {
@@ -75,7 +83,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 			}
 			if (replacementOperation != null) {
 				stringUtilsRequired = true;
-				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, currentAST.newSimpleName("StringUtils"),
+				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, currentAST.newSimpleName(STRING_UTILS),
 						null);
 				astRewrite.set(node, MethodInvocation.NAME_PROPERTY, node.getAST().newSimpleName(replacementOperation),
 						null);
@@ -92,7 +100,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 		if (stringUtilsRequired) {
 			node.imports();
 			ImportDeclaration stringUtilsImport = node.getAST().newImportDeclaration();
-			stringUtilsImport.setName(node.getAST().newName(STRING_UTILS));
+			stringUtilsImport.setName(node.getAST().newName(STRING_UTILS_PACKAGE));
 			if (node.imports().stream().noneMatch(importDeclaration -> (new ASTMatcher())
 					.match((ImportDeclaration) importDeclaration, stringUtilsImport))) {
 				// node.imports().add(stringUtilsImport);

@@ -42,7 +42,7 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 			getCompilationUnits(compilationUnits, selectedJavaElements);
 			
 			if (compilationUnits.isEmpty()) {
-				Activator.log(Status.WARNING, "No compilation units found", null);
+				Activator.log(Status.WARNING, "No compilation units found", null); //$NON-NLS-1$
 				return null;
 			}
 			
@@ -56,7 +56,7 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 						final CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
 						final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 						
-						Activator.log("Init rule [" + rule.getName() + "]");
+						Activator.log("Init rule [" + rule.getName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 						ASTVisitor visitor = rule.getVisitor().getConstructor(ASTRewrite.class).newInstance(astRewrite);
 						astRoot.accept(visitor);
 						
@@ -64,7 +64,7 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 						Document document = new Document(source);
 						TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
 
-						DisposableDocumentChange documentChange = new DisposableDocumentChange("current", document);
+						DisposableDocumentChange documentChange = new DisposableDocumentChange("current", document); //$NON-NLS-1$
 						documentChange.setEdit(edits);
 
 						IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
@@ -89,7 +89,7 @@ public class DescriptiveRewriteHandler extends AbstractSimonykeesHandler {
 						
 					} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 							| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-						Activator.log(Status.ERROR, "Cannot init rule [" + rule.getName() + "]", e);
+						Activator.log(Status.ERROR, "Cannot init rule [" + rule.getName() + "]", e); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 				}
 				

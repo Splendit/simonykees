@@ -26,10 +26,10 @@ public class ModifyingRewriteHandler extends AbstractSimonykeesHandler {
 		final String activePartId = HandlerUtil.getActivePartId(event);
 		final ASTParser astParser = ASTParser.newParser(AST.JLS8);
 		
-		Activator.log("activePartId [" + activePartId + "]");
+		Activator.log("activePartId [" + activePartId + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		switch (activePartId) {
-		case "org.eclipse.jdt.ui.CompilationUnitEditor":
+		case "org.eclipse.jdt.ui.CompilationUnitEditor": //$NON-NLS-1$
 			// FIXME should use some fancy logic not just a plain cast
 			ICompilationUnit originalUnit = (ICompilationUnit) getFromEditor(shell, HandlerUtil.getActiveEditor(event)).get(0);
 			ICompilationUnit workingCopy;
@@ -37,7 +37,7 @@ public class ModifyingRewriteHandler extends AbstractSimonykeesHandler {
 				workingCopy = originalUnit.getWorkingCopy(null);
 			} catch (JavaModelException e) {
 				// TODO Auto-generated catch block
-				throw new ExecutionException("Unable to create workingCopy",e);
+				throw new ExecutionException("Unable to create workingCopy",e); //$NON-NLS-1$
 			}
 			
 			resetParser(workingCopy, astParser);
@@ -86,17 +86,17 @@ public class ModifyingRewriteHandler extends AbstractSimonykeesHandler {
 				e1.printStackTrace();
 			}
 			
-			Activator.log("new ast\n" + astRoot.toString());	
+			Activator.log("new ast\n" + astRoot.toString());	 //$NON-NLS-1$
 			
 			break;
-		case "org.eclipse.jdt.ui.PackageExplorer":
-		case "org.eclipse.ui.navigator.ProjectExplorer":
+		case "org.eclipse.jdt.ui.PackageExplorer": //$NON-NLS-1$
+		case "org.eclipse.ui.navigator.ProjectExplorer": //$NON-NLS-1$
 			HandlerUtil.getCurrentSelection(event);
-			Activator.log(Status.ERROR, "activePartId [" + activePartId + "] must be coded next", null);
+			Activator.log(Status.ERROR, "activePartId [" + activePartId + "] must be coded next", null); //$NON-NLS-1$ //$NON-NLS-2$
 			break;
 
 		default:
-			Activator.log(Status.ERROR, "activePartId [" + activePartId + "] unknown", null);
+			Activator.log(Status.ERROR, "activePartId [" + activePartId + "] unknown", null); //$NON-NLS-1$ //$NON-NLS-2$
 			break;
 		}
 		

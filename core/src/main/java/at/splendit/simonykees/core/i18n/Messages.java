@@ -18,6 +18,10 @@ public class Messages extends NLS {
 	public static String ArithmethicAssignmentRule_name;
 	public static String BracketsToControlRule_description;
 	public static String BracketsToControlRule_name;
+	public static String ChangePreviewWizard_ChangePreview;
+	public static String ChangePreviewWizard_Wizard_Page_Description;
+	public static String ChangePreviewWizard_WizardPage;
+	public static String ChangePreviewWizard_WizardPageTitle;
 	public static String MultiCatchRule_description;
 	public static String MultiCatchRule_name;
 	public static String RefactoringRule_default_description;

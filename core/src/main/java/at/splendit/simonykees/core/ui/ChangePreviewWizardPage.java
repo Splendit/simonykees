@@ -9,6 +9,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
+import at.splendit.simonykees.core.i18n.Messages;
+
 @SuppressWarnings("restriction") // XXX TextEditChangePreviewViewer is internal, hence the warning
 public class ChangePreviewWizardPage extends WizardPage {
 
@@ -18,9 +20,9 @@ public class ChangePreviewWizardPage extends WizardPage {
 	 * Create the wizard.
 	 */
 	public ChangePreviewWizardPage(DocumentChange documentChange) {
-		super("wizardPage");
-		setTitle("Wizard Page title");
-		setDescription("Wizard Page description");
+		super(Messages.ChangePreviewWizard_WizardPage);
+		setTitle(Messages.ChangePreviewWizard_WizardPageTitle);
+		setDescription(Messages.ChangePreviewWizard_Wizard_Page_Description);
 		this.documentChange = documentChange;
 	}
 
