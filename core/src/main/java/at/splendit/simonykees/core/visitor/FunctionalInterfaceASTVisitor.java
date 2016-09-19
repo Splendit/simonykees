@@ -2,10 +2,15 @@ package at.splendit.simonykees.core.visitor;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
 import at.splendit.simonykees.core.Activator;
 
@@ -18,30 +23,43 @@ public class FunctionalInterfaceASTVisitor extends ASTVisitor {
 	}
 	
 	@Override
-	public boolean visit(CompilationUnit node){
-		Activator.log("lalelu");
-		return true;
-	}
-	
-	@Override
-	public boolean visit(VariableDeclarationFragment node){
-		Activator.log("lalelu");
-		return true;
-	}
-	
-	@Override
-	public boolean visit(ClassInstanceCreation node){
-		if(node.getAnonymousClassDeclaration() != null){
-			Activator.log("lalelu");
-		}
-		Activator.log("lalelu");
-		return true;
-	}
-	
-	@Override
 	public boolean visit(AnonymousClassDeclaration node){
-		Activator.log("lalelu");
+		ClassInstanceCreation parentNode = (ClassInstanceCreation) node.getParent();
+		ITypeBinding parentNodeTypeBinding = parentNode.getType().resolveBinding();
+		if (parentNodeTypeBinding != null){
+			IMethodBinding functionInterfaceMethodBinding = parentNodeTypeBinding.getFunctionalInterfaceMethod();
+			if(functionInterfaceMethodBinding != null){
+				LambdaExpression newInitializer = node.getAST().newLambdaExpression();
+				MethodBlockASTVisitor methodBlockASTVisitor = new MethodBlockASTVisitor(astRewrite);
+				node.accept(methodBlockASTVisitor);
+				Block moveBlock = methodBlockASTVisitor.getMethodBlock();
+				if(moveBlock != null){
+					newInitializer.setBody(moveBlock);
+					astRewrite.replace(parentNode, newInitializer, null);
+				}
+			}
+		}
 		return true;
 	}
 
+	
+	private class MethodBlockASTVisitor extends ASTVisitor {
+		ASTRewrite astRewrite;
+		private Block methodBlock = null;
+
+		public MethodBlockASTVisitor(ASTRewrite astRewrite) {
+			this.astRewrite = astRewrite;
+		}
+		
+		@Override
+		public boolean visit(Block node){
+			methodBlock = (Block) astRewrite.createMoveTarget(node);
+			astRewrite.remove(node, null);
+			return false;
+		}
+
+		public Block getMethodBlock() {
+			return methodBlock;
+		}
+	}
 }
