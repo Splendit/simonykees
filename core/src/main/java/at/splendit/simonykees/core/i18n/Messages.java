@@ -29,6 +29,8 @@ public class Messages extends NLS {
 	public static String RefactoringRule_warning_workingcopy_already_present;
 	public static String SelectRulesPage_description;
 	public static String SelectRulesPage_page_name;
+	public static String SelectRulesPage_rule_description_default_text;
+	public static String SelectRulesPage_select_unselect_all;
 	public static String SelectRulesPage_title;
 	public static String SelectRulesWizard_title;
 	public static String SelectRulesWizard_warning_no_refactorings;

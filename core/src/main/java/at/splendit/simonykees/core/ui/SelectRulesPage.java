@@ -19,6 +19,11 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 import at.splendit.simonykees.core.i18n.Messages;
@@ -44,11 +49,35 @@ public class SelectRulesPage extends WizardPage {
 		initializeDialogUnits(parent);
 
 		setControl(parent);
-
+		GridLayout layout = new GridLayout();
+		
+		parent.setLayout(layout);
+		
+		createSelectAllButton(parent);	
+		
 		SashForm sashForm = new SashForm(parent, SWT.HORIZONTAL);
+		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		createRulesCheckboxTableViewer(sashForm);
 		createRuleDescriptionViewer(sashForm);
+		
+	}
+	
+	private void createSelectAllButton(Composite parent) {
+		Button selectAllButton = new Button(parent, SWT.CHECK);
+		selectAllButton.setText(Messages.SelectRulesPage_select_unselect_all);
+		selectAllButton.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				rulesCheckboxTableViewer.setAllChecked(selectAllButton.getSelection());
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});	
 	}
 
 	private void createRulesCheckboxTableViewer(Composite parent) {
@@ -56,7 +85,10 @@ public class SelectRulesPage extends WizardPage {
 
 		rulesCheckboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.CHECK | SWT.BORDER);
 		rulesCheckboxTableViewer.setContentProvider(new ArrayContentProvider());
+		
+		// the selection listener for the selected row (has nothing to do with the checkbox)
 		rulesCheckboxTableViewer.addSelectionChangedListener(createSelectionChangedListener());
+		
 		rulesCheckboxTableViewer.setInput(rules);
 
 		// FIXME check if this is needed
@@ -88,7 +120,9 @@ public class SelectRulesPage extends WizardPage {
 	}
 
 	private void populateDescriptionTextViewer() {
-		if (selectedRefactoringRule != null) {
+		if (selectedRefactoringRule == null) {
+			descriptionStyledText.setText(Messages.SelectRulesPage_rule_description_default_text);
+		} else {
 			descriptionStyledText.setText(selectedRefactoringRule.getDescription());
 		}
 	}

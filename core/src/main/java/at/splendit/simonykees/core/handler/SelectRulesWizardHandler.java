@@ -13,8 +13,8 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		final WizardDialog dialog = new WizardDialog(HandlerUtil.getActiveShell(event), new SelectRulesWizard(getSelectedJavaElements(event)));
 		
-		// the dialog is made as small as possible (we want line breaks for rule descriptions)
-		dialog.setPageSize(1, 1); 
+		// the dialog is made as small as possible horizontally (we want line breaks for rule descriptions)
+		dialog.setPageSize(1, 200); 
 		
 		dialog.open();
 		return null;
