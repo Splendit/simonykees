@@ -37,7 +37,7 @@ public class AllRulesTest {
 	@Parameters(name = "{index}: test file[{0}]")
 	public static Collection<Object[]> data() throws Exception {
 		List<Object[]> data = new ArrayList<>();
-		for (Path preRulePath : Files.newDirectoryStream(Paths.get(RulesTest.PRERULE_DIRECTORY), "*Rule.java")) {
+		for (Path preRulePath : Files.newDirectoryStream(Paths.get(RulesTest.PRERULE_DIRECTORY), RulesTest.RULE_SUFFIX)) { 
 			Path postRulePath = Paths.get(RulesTest.POSTRULE_DIRECTORY, preRulePath.getFileName().toString());
 			data.add(new Object[] {preRulePath.getFileName().toString(), preRulePath, postRulePath});
 		}
