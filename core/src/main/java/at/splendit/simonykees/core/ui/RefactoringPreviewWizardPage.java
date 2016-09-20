@@ -3,6 +3,7 @@
  */
 package at.splendit.simonykees.core.ui;
 
+import org.eclipse.compare.CompareViewerSwitchingPane;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -103,6 +104,7 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 	
 	private void populatePreviewViewer() {
 		currentPreviewViewer.setInput(TextEditChangePreviewViewer.createInput(getCurrentDocumentChange()));
+		((CompareViewerSwitchingPane) currentPreviewViewer.getControl()).setTitleArgument(currentCompilationUnitNode.getClassName());
 	}
 
 	private DocumentChange getCurrentDocumentChange() {

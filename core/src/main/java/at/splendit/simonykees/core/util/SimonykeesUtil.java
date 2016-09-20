@@ -92,6 +92,7 @@ public final class SimonykeesUtil {
 	public static DocumentChange generateDocumentChange(String name, Document document, TextEdit edit) {
 		DocumentChange documentChange = new DocumentChange(name, document);
 		documentChange.setEdit(edit);
+		documentChange.setTextType("java"); //$NON-NLS-1$
 		return documentChange;
 	}
 
