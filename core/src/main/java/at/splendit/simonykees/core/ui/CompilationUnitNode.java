@@ -13,7 +13,7 @@ public class CompilationUnitNode {
 	public CompilationUnitNode(ICompilationUnit compilationUnit) {
 		super();
 		this.compilationUnit = compilationUnit;
-		this.displayText = compilationUnit.getPath().toOSString();
+		this.displayText = String.format("%s - %s", getClassName(), getPackage()); //$NON-NLS-1$
 	}
 	
 	public static Object[] createCompilationUnitNodes(Set<ICompilationUnit> compilationUnits) {
@@ -33,6 +33,14 @@ public class CompilationUnitNode {
 	@Override
 	public String toString() {
 		return this.displayText;
+	}
+	
+	public String getClassName() {
+		return this.compilationUnit.getElementName();
+	}
+	
+	public String getPackage() {
+		return this.compilationUnit.getParent().getElementName();
 	}
 	
 }
