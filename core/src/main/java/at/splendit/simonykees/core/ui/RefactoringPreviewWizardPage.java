@@ -8,7 +8,6 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
@@ -21,7 +20,7 @@ import org.eclipse.swt.widgets.Composite;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 
 @SuppressWarnings("restriction")
-public class RefactoringPreviewWizardPage extends WizardPage {
+public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 
 	private RefactoringRule<? extends ASTVisitor> refactoringRule;
 	private CompilationUnitNode currentCompilationUnitNode;
@@ -57,25 +56,32 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		container.setLayout(layout);
 
 		setControl(container);
-
+		
 		SashForm sashForm = new SashForm(container, SWT.VERTICAL);
-
-		TreeViewer treeViewer = new TreeViewer(sashForm);
+		
+		createFileView(sashForm);
+		createPreviewViewer(sashForm);
+	}
+	
+	private void createFileView(Composite parent) {
+		TreeViewer treeViewer = new TreeViewer(parent);
 		CompilationUnitContentProvider contentProvider = new CompilationUnitContentProvider();
 
 		treeViewer.setContentProvider(contentProvider);
 		treeViewer.addSelectionChangedListener(createSelectionChangedListener());
 		treeViewer.setInput(refactoringRule.getDocumentChanges().keySet());
-
+	}
+	
+	private void createPreviewViewer(Composite parent) {
+		
 		// GridData works with GridLayout
 		GridData gridData = new GridData(GridData.FILL_BOTH);
-		sashForm.setLayoutData(gridData);
+		parent.setLayoutData(gridData);
 
 		currentPreviewViewer = new TextEditChangePreviewViewer();
-		currentPreviewViewer.createControl(sashForm);
+		currentPreviewViewer.createControl(parent);
 
 		populatePreviewViewer();
-
 	}
 
 	private ISelectionChangedListener createSelectionChangedListener() {

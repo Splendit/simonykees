@@ -22,6 +22,8 @@ public class Messages extends NLS {
 	public static String ChangePreviewWizard_Wizard_Page_Description;
 	public static String ChangePreviewWizard_WizardPage;
 	public static String ChangePreviewWizard_WizardPageTitle;
+	public static String HelpMessageDialog_default_message;
+	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;
 	public static String MultiCatchRule_name;
 	public static String RefactoringRule_default_description;
@@ -29,6 +31,8 @@ public class Messages extends NLS {
 	public static String RefactoringRule_warning_workingcopy_already_present;
 	public static String SelectRulesPage_description;
 	public static String SelectRulesPage_page_name;
+	public static String SelectRulesPage_rule_description_default_text;
+	public static String SelectRulesPage_select_unselect_all;
 	public static String SelectRulesPage_title;
 	public static String SelectRulesWizard_title;
 	public static String SelectRulesWizard_warning_no_refactorings;
