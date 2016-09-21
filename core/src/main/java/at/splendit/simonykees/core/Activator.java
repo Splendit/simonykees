@@ -79,16 +79,20 @@ public class Activator extends AbstractUIPlugin {
 	}
 	
 	public static void log(int severity, String message, Exception e) {
-		final ILog log = getDefault().getLog();
-		log.log(new Status(severity, PLUGIN_ID, message, e));
+		log(new SimonykeesStatus(severity, PLUGIN_ID, message, e));
 	}
 	
 	public static void log(String message, Exception e) {
-		log(IStatus.INFO, message, e);
+		log(new SimonykeesStatus(IStatus.INFO, PLUGIN_ID, message, e));
 	}
 	
 	public static void log(String message) {
-		log(message, null);
+		log(new SimonykeesStatus(IStatus.INFO, PLUGIN_ID, message));
+	}
+	
+	private static void log(Status status) {
+		final ILog log = getDefault().getLog();
+		log.log(status);
 	}
 	
 	public static void registerJob(Job job) {
