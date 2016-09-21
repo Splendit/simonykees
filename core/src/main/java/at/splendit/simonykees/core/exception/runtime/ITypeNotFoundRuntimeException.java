@@ -1,9 +1,9 @@
 package at.splendit.simonykees.core.exception.runtime;
 
 public class ITypeNotFoundRuntimeException extends RuntimeException {
+	private static final long serialVersionUID = -4800792235524391680L;
 
-
-    public ITypeNotFoundRuntimeException() {
+	public ITypeNotFoundRuntimeException() {
         super();
     }
 

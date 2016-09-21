@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -14,15 +13,10 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.UnionType;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-public class MultiCatchASTVisitor extends ASTVisitor {
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
-	ASTRewrite astRewrite;
-
-	public MultiCatchASTVisitor(ASTRewrite astRewrite) {
-		this.astRewrite = astRewrite;
-	}
+public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@SuppressWarnings("unchecked")
 	@Override

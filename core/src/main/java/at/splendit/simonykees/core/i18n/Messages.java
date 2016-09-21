@@ -26,6 +26,8 @@ public class Messages extends NLS {
 	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;
 	public static String MultiCatchRule_name;
+	public static String FunctionalInterfaceRule_description;
+	public static String FunctionalInterfaceRule_name;
 	public static String RefactoringRule_default_description;
 	public static String RefactoringRule_default_name;
 	public static String RefactoringRule_warning_workingcopy_already_present;

@@ -26,11 +26,11 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor
 	private List<VariableDeclarationExpression> listVDE = new ArrayList<>();
 
 	public TryWithResourceASTVisitor(ASTRewrite astRewrite, List<IType> itypes) {
-		super(astRewrite, itypes);
+		super(itypes);
 	}
 
-	public TryWithResourceASTVisitor(ASTRewrite astRewrite) {
-		super(astRewrite);
+	public TryWithResourceASTVisitor() {
+		super();
 	}
 	
 	private TryWithResourceASTVisitor(ASTRewrite astRewrite, List<IType> itypes, TryStatement invokingTryStatement) {

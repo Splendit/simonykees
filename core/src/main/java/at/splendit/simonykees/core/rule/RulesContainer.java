@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
+import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import at.splendit.simonykees.core.visitor.tryWithResource.MultiCatchASTVisitor;
@@ -23,7 +24,8 @@ public class RulesContainer {
 				new TryWithResourceRule(TryWithResourceASTVisitor.class),
 				new StringUtilsRule(StringUtilsASTVisitor.class),
 				new MultiCatchRule(MultiCatchASTVisitor.class),
-				new BracketsToControlRule(BracketsToControlASTVisitor.class)
+				new BracketsToControlRule(BracketsToControlASTVisitor.class),
+				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class)
 				);
 	}
 

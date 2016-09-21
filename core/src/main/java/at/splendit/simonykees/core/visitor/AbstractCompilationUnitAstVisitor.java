@@ -6,25 +6,22 @@ import java.util.List;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeException;
 
-public abstract class AbstractCompilationUnitAstVisitor extends ASTVisitor {
+public abstract class AbstractCompilationUnitAstVisitor extends AbstractASTRewriteASTVisitor {
 
-	protected ASTRewrite astRewrite;
 	protected List<IType> registeredITypes;
 	
-	protected AbstractCompilationUnitAstVisitor(ASTRewrite astRewrite) {
-		this.astRewrite = astRewrite;
+	protected AbstractCompilationUnitAstVisitor() {
+		super();
 		this.registeredITypes = new ArrayList<>();
 	}
 	
-	protected AbstractCompilationUnitAstVisitor(ASTRewrite astRewrite, List<IType> registeredITypes) {
-		this(astRewrite);
+	protected AbstractCompilationUnitAstVisitor(List<IType> registeredITypes) {
+		this();
 		this.registeredITypes.addAll(registeredITypes);
 	}
 

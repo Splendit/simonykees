@@ -1,14 +1,13 @@
 package at.splendit.simonykees.core.visitor.arithmetic;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Assignment.Operator;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import at.splendit.simonykees.core.helper.ArithmeticHelper;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 
 /**
@@ -21,13 +20,7 @@ import at.splendit.simonykees.core.helper.ArithmeticHelper;
  * @author mgh
  *
  */
-public class ArithmethicAssignmentASTVisitor extends ASTVisitor {
-
-	private ASTRewrite astRewrite;
-
-	public ArithmethicAssignmentASTVisitor(ASTRewrite astRewrite) {
-		this.astRewrite = astRewrite;
-	}
+public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(Assignment node) {
@@ -55,6 +48,4 @@ public class ArithmethicAssignmentASTVisitor extends ASTVisitor {
 		}
 		return true;
 	}
-
-	
 }

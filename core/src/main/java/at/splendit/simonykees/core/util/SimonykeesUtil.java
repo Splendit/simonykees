@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 //import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
@@ -21,6 +20,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 public final class SimonykeesUtil {
 	
@@ -115,7 +115,7 @@ public final class SimonykeesUtil {
 	 * @throws ReflectiveOperationException
 	 * @throws JavaModelException
 	 */
-	public static DocumentChange applyRule(ICompilationUnit workingCopy, Class<? extends ASTVisitor> ruleClazz) throws ReflectiveOperationException, JavaModelException {
+	public static DocumentChange applyRule(ICompilationUnit workingCopy, Class<? extends AbstractASTRewriteASTVisitor> ruleClazz) throws ReflectiveOperationException, JavaModelException {
 		final ASTParser astParser = ASTParser.newParser(AST.JLS8);
 		resetParser(workingCopy, astParser, workingCopy.getJavaProject().getOptions(true));
 		final CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
@@ -130,8 +130,9 @@ public final class SimonykeesUtil {
 		
 		//astRewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 		
-		Activator.log("Init rule [" + ruleClazz.getName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-		ASTVisitor rule = ruleClazz.getConstructor(ASTRewrite.class).newInstance(astRewrite);
+		Activator.log("Init rule [" + ruleClazz.getName() + "]");
+		AbstractASTRewriteASTVisitor rule = ruleClazz.newInstance();
+		rule.setAstRewrite(astRewrite);
 		astRoot.accept(rule);
 		
 		Document document = new Document(workingCopy.getSource());
