@@ -2,8 +2,8 @@ package at.splendit.simonykees.sample.preRule;
 
 import java.util.Arrays;
 
-public class BracketsToControlRule {
-	public static void main(String[] args) {
+public class TestBracketsToControlRule {
+	public static void testforIf() {
 		int i = 0;
 
 		if (i == 0) {

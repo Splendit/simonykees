@@ -21,7 +21,7 @@ import org.junit.Test;
  *
  */
 
-public class StringUtilsRefactorTest {
+public class TestStringUtilsRefactorRule {
 	
 
 	@Test

@@ -22,7 +22,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  */
 
-public class StringUtilsRefactorTest {
+public class TestStringUtilsRefactorRule {
 	
 
 	@Test
