@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
+//import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
@@ -128,7 +128,7 @@ public final class SimonykeesUtil {
 		// and set a NoCommentSourceRangeComputer or a properly configured
 		// TightSourceRangeComputer.
 		
-		astRewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
+		//astRewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 		
 		Activator.log("Init rule [" + ruleClazz.getName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 		ASTVisitor rule = ruleClazz.getConstructor(ASTRewrite.class).newInstance(astRewrite);
