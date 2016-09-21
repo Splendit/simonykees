@@ -8,9 +8,6 @@ public class TestArithmethicAssignmentRule {
 	private int q = 3;
 
 	public void doSomething(int i) {
-		i = i + 1;
-		i = 7 + 4 - 3;
-		i = i + 3;
 		i = i - 3;
 		i = i + 4 - 3;
 		i = i + 4 + 3;
@@ -24,5 +21,20 @@ public class TestArithmethicAssignmentRule {
 		q = (3 + 4) * q;
 		q = a * b / c * q * 3 - i;
 		a = a / 4;
+	}
+	
+	public int a(int i) {
+		i = i + 1;
+		return i;
+	}
+	
+	public int b(int i) {
+		i = 7 + 4 - 3;
+		return i;
+	}
+	
+	public int c(int i) {
+		i = i + 3;
+		return i;
 	}
 }
