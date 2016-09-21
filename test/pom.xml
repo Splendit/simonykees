@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
 		<artifactId>simonykees</artifactId>
 		<groupId>at.splendit.simonykees</groupId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-  <artifactId>simonykees.test</artifactId>
-  <packaging>eclipse-test-plugin</packaging>
-  <name>simonykees :: test</name>
-  <description>simonykees Test Plugin</description>
-  
-  <dependencies>
-  	<dependency>
-  		<groupId>at.splendit.simonykees</groupId>
-  		<artifactId>simonykees.sample</artifactId>
-  		<version>${project.version}</version>
-  	</dependency>
-  </dependencies>
+	<artifactId>simonykees.test</artifactId>
+	<packaging>eclipse-test-plugin</packaging>
+	<name>simonykees :: test</name>
+	<description>simonykees Test Plugin</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>at.splendit.simonykees</groupId>
+			<artifactId>simonykees.sample</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 </project>
