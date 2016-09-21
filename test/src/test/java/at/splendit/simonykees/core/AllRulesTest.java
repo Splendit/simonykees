@@ -37,8 +37,8 @@ public class AllRulesTest {
 	@Parameters(name = "{index}: test file[{0}]")
 	public static Collection<Object[]> data() throws Exception {
 		List<Object[]> data = new ArrayList<>();
-		for (Path preRulePath : Files.newDirectoryStream(Paths.get(RulesTest.PRERULE_DIRECTORY), RulesTest.RULE_SUFFIX)) { 
-			Path postRulePath = Paths.get(RulesTest.POSTRULE_DIRECTORY, preRulePath.getFileName().toString());
+		for (Path preRulePath : Files.newDirectoryStream(Paths.get(RulesTestUtil.PRERULE_DIRECTORY), RulesTestUtil.RULE_SUFFIX)) { 
+			Path postRulePath = Paths.get(RulesTestUtil.POSTRULE_DIRECTORY, preRulePath.getFileName().toString());
 			data.add(new Object[] {preRulePath.getFileName().toString(), preRulePath, postRulePath});
 		}
 		return data;
@@ -61,7 +61,7 @@ public class AllRulesTest {
 		refactorer.doRefactoring();
 		refactorer.commitRefactoring();
 		
-		String compilationUnitSource = StringUtils.replace(compilationUnit.getSource(), RulesTest.PRERULE_PACKAGE, RulesTest.POSTRULE_PACKAGE);
+		String compilationUnitSource = StringUtils.replace(compilationUnit.getSource(), RulesTestUtil.PRERULE_PACKAGE, RulesTestUtil.POSTRULE_PACKAGE);
 		// TODO check if tabs and newlines make a difference
 		assertEquals(expectedSource, compilationUnitSource);
 	}
