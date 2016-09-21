@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
 
@@ -25,23 +24,20 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor
 	private TryStatement invokingTryStatement = null;
 	private List<VariableDeclarationExpression> listVDE = new ArrayList<>();
 
-	public TryWithResourceASTVisitor(ASTRewrite astRewrite, List<IType> itypes) {
-		super(itypes);
-	}
-
 	public TryWithResourceASTVisitor() {
 		super();
 	}
 	
-	private TryWithResourceASTVisitor(ASTRewrite astRewrite, List<IType> itypes, TryStatement invokingTryStatement) {
-		this(astRewrite, itypes);
+	private TryWithResourceASTVisitor(List<IType> itypes, TryStatement invokingTryStatement) {
+		super(itypes);
 		this.invokingTryStatement = invokingTryStatement;
 	}
 
 	@Override
 	public boolean visit(TryStatement node) {
 		if (!node.equals(invokingTryStatement)){
-			TryWithResourceASTVisitor tryWithRes = new TryWithResourceASTVisitor(astRewrite, registeredITypes, node);
+			TryWithResourceASTVisitor tryWithRes = new TryWithResourceASTVisitor(registeredITypes, node);
+			tryWithRes.setAstRewrite(astRewrite);
 			node.accept(tryWithRes);
 			List<VariableDeclarationExpression> listVDE = tryWithRes.getListVDE();
 			if (!listVDE.isEmpty()) {

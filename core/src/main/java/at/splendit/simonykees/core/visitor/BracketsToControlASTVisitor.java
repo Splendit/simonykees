@@ -3,7 +3,6 @@ package at.splendit.simonykees.core.visitor;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -11,11 +10,9 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-public class BracketsToControlASTVisitor extends ASTVisitor {
+public class BracketsToControlASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	ASTRewrite astRewrite;
 	private static final Predicate<Statement> NOT_BLOCK_TEST = (nodeToTest) -> {
 		return !(nodeToTest instanceof Block);
 	};
@@ -23,9 +20,6 @@ public class BracketsToControlASTVisitor extends ASTVisitor {
 		return nodeToTest != null && !(nodeToTest instanceof Block) && !(nodeToTest instanceof IfStatement);
 	};
 
-	public BracketsToControlASTVisitor(ASTRewrite astRewrite) {
-		this.astRewrite = astRewrite;
-	}
 
 	@Override
 	public boolean visit(ForStatement node) {
