@@ -19,6 +19,7 @@ import org.junit.Test;
  * @author mgh
  *
  */
+@SuppressWarnings("nls")
 public class TestMultiCatchRule {
 
 	@Test
