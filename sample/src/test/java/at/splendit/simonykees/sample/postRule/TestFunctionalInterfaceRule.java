@@ -1,28 +1,20 @@
-package at.splendit.simonykees.sample.preRule;
+package at.splendit.simonykees.sample.postRule;
 
 
 import org.junit.Test;
 
 @SuppressWarnings("nls")
-public class FunctionalInterfaceTest {
+public class TestFunctionalInterfaceRule {
 
 	@Test
 	public void Test1() {
 
-		Runnable runnable = new Runnable() {
-			
-			@Override
-			public void run() {
-				System.out.println("xx");
-			}
+		Runnable runnable = ()->{
+			System.out.println("xx");
 		};
 
-		MyClass mYClass = new MyClass(new Runnable() {
-			
-			@Override
-			public void run() {
-				System.out.println("xy");
-			}
+		MyClass mYClass = new MyClass(()->{
+			System.out.println("xy");
 		});
 		
 		NonFunctionalInterface nonFunctionalInterface = new NonFunctionalInterface() {
