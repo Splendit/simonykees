@@ -2,6 +2,7 @@ package at.splendit.simonykees.sample.preRule;
 
 import java.util.Arrays;
 
+@SuppressWarnings("nls")
 public class TestBracketsToControlRule {
 	public static void testforIf() {
 		int i = 0;
