@@ -21,6 +21,7 @@ import org.junit.Test;
  *
  */
 
+@SuppressWarnings("nls")
 public class TestStringUtilsRefactorRule {
 	
 

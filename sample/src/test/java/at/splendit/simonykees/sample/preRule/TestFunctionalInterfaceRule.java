@@ -1,6 +1,5 @@
 package at.splendit.simonykees.sample.preRule;
 
-
 import org.junit.Test;
 
 @SuppressWarnings("nls")
@@ -16,6 +15,8 @@ public class TestFunctionalInterfaceRule {
 				System.out.println("xx");
 			}
 		};
+		
+		runnable.run();
 
 		MyClass mYClass = new MyClass(new Runnable() {
 			
@@ -24,6 +25,8 @@ public class TestFunctionalInterfaceRule {
 				System.out.println("xy");
 			}
 		});
+		
+		mYClass.test();
 		
 		NonFunctionalInterface nonFunctionalInterface = new NonFunctionalInterface() {
 			
@@ -38,9 +41,7 @@ public class TestFunctionalInterfaceRule {
 			}
 		};
 		
-		
-
-		
+		nonFunctionalInterface.method();
 	}
 	
 	private interface NonFunctionalInterface {
@@ -49,8 +50,14 @@ public class TestFunctionalInterfaceRule {
 	}
 
 	private class MyClass {
-		public MyClass(Runnable runnable) {
+		Runnable runnable;
 
+		public MyClass(Runnable runnable) {
+			this.runnable = runnable;
+		}
+
+		public void test() {
+			runnable.run();
 		}
 	}
 }

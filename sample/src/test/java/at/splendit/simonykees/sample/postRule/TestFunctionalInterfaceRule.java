@@ -1,6 +1,5 @@
 package at.splendit.simonykees.sample.postRule;
 
-
 import org.junit.Test;
 
 @SuppressWarnings("nls")
@@ -12,10 +11,14 @@ public class TestFunctionalInterfaceRule {
 		Runnable runnable = ()->{
 			System.out.println("xx");
 		};
+		
+		runnable.run();
 
 		MyClass mYClass = new MyClass(()->{
 			System.out.println("xy");
 		});
+		
+		mYClass.test();
 		
 		NonFunctionalInterface nonFunctionalInterface = new NonFunctionalInterface() {
 			
@@ -30,9 +33,7 @@ public class TestFunctionalInterfaceRule {
 			}
 		};
 		
-		
-
-		
+		nonFunctionalInterface.method();
 	}
 	
 	private interface NonFunctionalInterface {
@@ -41,8 +42,14 @@ public class TestFunctionalInterfaceRule {
 	}
 
 	private class MyClass {
-		public MyClass(Runnable runnable) {
+		Runnable runnable;
 
+		public MyClass(Runnable runnable) {
+			this.runnable = runnable;
+		}
+
+		public void test() {
+			runnable.run();
 		}
 	}
 }

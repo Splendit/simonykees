@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  */
 
+@SuppressWarnings("nls")
 public class TestStringUtilsRefactorRule {
 	
 
