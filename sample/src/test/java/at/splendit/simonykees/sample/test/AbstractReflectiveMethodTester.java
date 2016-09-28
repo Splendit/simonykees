@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertArrayEquals;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
@@ -11,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.junit.Test;
+import org.junit.internal.ArrayComparisonFailure;
 
 /**
  * This class makes it easy to take two classes with the same methods and assert
@@ -37,14 +39,14 @@ public abstract class AbstractReflectiveMethodTester {
 	@SuppressWarnings("nls")
 	@Test
 	public void test() throws Exception {
-		System.out.println(String.format("Class: %s, Values: %s", this.holder.getPreObject().getClass().getSimpleName(),
-				Arrays.toString(this.parameterizedValues)));
+		System.out.println(String.format("Class: [%s], Values: [%s]",
+				this.holder.getPreObject().getClass().getSimpleName(), Arrays.toString(this.parameterizedValues)));
 
 		for (Method m : this.holder.getPreMethods().values()) {
 
 			boolean isArrayRetVal = m.getReturnType().isArray();
 
-			System.out.print(String.format("\tMethod: %s, isArrayRetVal: %b", m.getName(), isArrayRetVal));
+			System.out.print(String.format("\tMethod: [%s], isArrayRetVal: [%b]", m.getName(), isArrayRetVal));
 
 			Method postMethod = this.holder.getPostMethod(m.getName());
 
@@ -57,32 +59,67 @@ public abstract class AbstractReflectiveMethodTester {
 					m.getReturnType(), postMethod.getReturnType());
 
 			if (isArrayRetVal) {
-				Object[] preRetVal = (Object[]) m.invoke(this.holder.getPreObject(), this.parameterizedValues);
-
-				System.out.print(String.format(", preRetVal: %s", Arrays.toString(preRetVal)));
-
-				Object[] postRetVal = (Object[]) postMethod.invoke(this.holder.getPostObject(), parameterizedValues);
-
-				System.out.println(String.format(", postRetVal: %s", Arrays.toString(postRetVal)));
-
-				assertArrayEquals(String.format("Return value mismatch. [%s.%s] expected [%s] but was [%s]",
-						holder.preObject.getClass().getName(), m.getName(), Arrays.toString(preRetVal),
-						Arrays.toString(postRetVal)), preRetVal, preRetVal);
+				testArrayReturnValue(m, postMethod);
 			} else {
-				Object preRetVal = m.invoke(this.holder.getPreObject(), this.parameterizedValues);
-
-				System.out.print(String.format(", preRetVal: %s", preRetVal));
-
-				Object postRetVal = postMethod.invoke(this.holder.getPostObject(), parameterizedValues);
-
-				System.out.println(String.format(", postRetVal: %s", postRetVal));
-
-				assertEquals(
-						String.format("Return value mismatch. [%s.%s] expected [%s] but was [%s]",
-								holder.preObject.getClass().getName(), m.getName(), preRetVal, postRetVal),
-						preRetVal, postRetVal);
+				testSingleReturnValue(m, postMethod);
 			}
 		}
+	}
+
+	/**
+	 * Compares return values of two methods, where the return value is an
+	 * array.
+	 * 
+	 * @param m1
+	 *            method to invoke
+	 * @param m2
+	 *            method to invoke
+	 * @throws IllegalAccessException
+	 * @throws InvocationTargetException
+	 * @throws ArrayComparisonFailure
+	 */
+	@SuppressWarnings("nls")
+	private void testArrayReturnValue(Method m1, Method m2)
+			throws IllegalAccessException, InvocationTargetException, ArrayComparisonFailure {
+		Object[] preRetVal = (Object[]) m1.invoke(this.holder.getPreObject(), this.parameterizedValues);
+
+		System.out.print(String.format(", preRetVal: [%s]", Arrays.toString(preRetVal)));
+
+		Object[] postRetVal = (Object[]) m2.invoke(this.holder.getPostObject(), parameterizedValues);
+
+		System.out.println(String.format(", postRetVal: [%s]", Arrays.toString(postRetVal)));
+
+		assertArrayEquals(String.format("Return value mismatch for parameter [%s]. [%s.%s] expected [%s] but was [%s]",
+				Arrays.toString(parameterizedValues), holder.preObject.getClass().getSimpleName(), m1.getName(),
+				Arrays.toString(preRetVal), Arrays.toString(postRetVal)), preRetVal, postRetVal);
+	}
+
+	/**
+	 * Compares return values of two methods, where the return value is a
+	 * non-array type.
+	 * 
+	 * @param m1
+	 *            method to invoke
+	 * @param m2
+	 *            method to invoke
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 */
+	@SuppressWarnings("nls")
+	private void testSingleReturnValue(Method m1, Method m2)
+			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		Object preRetVal = m1.invoke(this.holder.getPreObject(), this.parameterizedValues);
+
+		System.out.print(String.format(", preRetVal: [%s]", preRetVal));
+
+		Object postRetVal = m2.invoke(this.holder.getPostObject(), parameterizedValues);
+
+		System.out.println(String.format(", postRetVal: [%s]", postRetVal));
+
+		assertEquals(String.format("Return value mismatch for parameter [%s]. [%s.%s]",
+				Arrays.toString(parameterizedValues), holder.preObject.getClass().getSimpleName(), m1.getName()),
+				preRetVal, postRetVal);
 	}
 
 	/**
@@ -115,6 +152,7 @@ public abstract class AbstractReflectiveMethodTester {
 			return postMethods.get(name);
 		}
 
+		@SuppressWarnings("nls")
 		static PreAndPostClassHolder getInstance(Class<?> preClass, Class<?> postClass, Object... parameterizedValues) {
 			if (instance == null) {
 				instance = new PreAndPostClassHolder();
@@ -128,6 +166,25 @@ public abstract class AbstractReflectiveMethodTester {
 
 				instance.preMethods = initMethodMap(preClass, parameterizedValues);
 				instance.postMethods = initMethodMap(postClass, parameterizedValues);
+
+				/**
+				 * We only need to check this case here, because the other case
+				 * (where there are more methods in the pre-Class), already gets
+				 * tested in the AbstractReflectiveMethodTester.test() method.
+				 * 
+				 * Additionally, we do not want to simply compare the number of
+				 * methods, because that would not give us the information which
+				 * method exactly is missing.
+				 */
+				if (instance.postMethods.size() > instance.preMethods.size()) {
+					for (Method m : instance.postMethods.values()) {
+
+						Method preMethod = instance.preMethods.get(m.getName());
+
+						assertNotNull(String.format("Expected method [%s] not present in class [%s]", m.getName(),
+								instance.preObject.getClass().getName()), preMethod);
+					}
+				}
 			}
 			return instance;
 		}
