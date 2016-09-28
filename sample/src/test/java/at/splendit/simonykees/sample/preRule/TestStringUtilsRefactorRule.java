@@ -20,7 +20,7 @@ package at.splendit.simonykees.sample.preRule;
 
 @SuppressWarnings("nls")
 public class TestStringUtilsRefactorRule {
-	
+
 	public boolean testEmpty(String testString) {
 		return testString.isEmpty();
 	}
@@ -53,7 +53,7 @@ public class TestStringUtilsRefactorRule {
 
 	public boolean testContains(String testString) {
 		String sometimesExpectedString = "tain";
-		
+
 		return testString.contains(sometimesExpectedString);
 	}
 
