@@ -15,6 +15,8 @@ import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 /**
+ * TODO: discuss logging: use logger / leave as is / toggle logging / remove logging
+ * 
  * This class makes it easy to take two classes with the same methods and assert
  * that every corresponding return value (of methods with the same name),
  * returns the same value.
