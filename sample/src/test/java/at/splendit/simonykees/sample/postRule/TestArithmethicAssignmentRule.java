@@ -7,22 +7,84 @@ public class TestArithmethicAssignmentRule {
 	private int b = 3;
 	private int q = 3;
 
-	public void doSomething(int i) {
+	public int a(int i) {
 		i += 1;
-		i = 7 + 4 - 3;
-		i += 3;
-		i -= 3;
-		i += 4 - 3;
-		i += 4 + 3;
-		i += 3 + 4;
-		i += 3 - 4;
-		i += a - 4;
-		i = a + b;
-		i += a;
-		i *= a;
-		b *= 4;
-		q *= (3 + 4);
-		q = a * b / c * q * 3 - i;
-		a /= 4;
+		return i;
 	}
+
+	public int b(int i) {
+		i = 7 + 4 - 3;
+		return i;
+	}
+
+	public int c(int i) {
+		i += 3;
+		return i;
+	}
+
+	public int d(int i) {
+		i -= 3;
+		return i;
+	}
+
+	public int e(int i) {
+		i += 4 - 3;
+		return i;
+	}
+
+	public int f(int i) {
+		i += 4 + 3;
+		return i;
+	}
+
+	public int g(int i) {
+		i += 3 + 4;
+		return i;
+	}
+
+	public int h(int i) {
+		i += 3 - 4;
+		return i;
+	}
+
+	public int i(int i) {
+		i += a - 4;
+		return i;
+	}
+
+	public int j(int i) {
+		i = a + b;
+		return i;
+	}
+
+	public int k(int i) {
+		i += a;
+		return i;
+	}
+
+	public int l(int i) {
+		i *= a;
+		return i;
+	}
+
+	public int m(int i) {
+		i *= 4;
+		return i;
+	}
+
+	public int n(int i) {
+		i *= (3 + 4);
+		return i;
+	}
+
+	public int o(int i) {
+		i = a * b / c * q * 3 - i;
+		return i;
+	}
+
+	public int p(int i) {
+		i /= 4;
+		return i;
+	}
+
 }

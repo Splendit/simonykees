@@ -1,7 +1,5 @@
 package at.splendit.simonykees.sample.postRule;
 
-import org.junit.Assert;
-import org.junit.Test;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -24,112 +22,57 @@ import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings("nls")
 public class TestStringUtilsRefactorRule {
-	
 
-	@Test
-	public void testEmpty() {
-		String testString = "";
-		
-		Assert.assertTrue("Test for empty failed",StringUtils.isEmpty(testString));
-		
-		testString = "notEmpty";
-		
-		Assert.assertFalse("Test for not empty failed",StringUtils.isEmpty(testString));
+	public boolean testEmpty(String testString) {
+		return StringUtils.isEmpty(testString);
 	}
-	
-	@Test
-	public void testTrim() {
-		String testString = "  trimMe  ";
-		String expectedString = "trimMe";
-		
-		Assert.assertEquals("Test for trim failed",StringUtils.trim(testString),expectedString);
-	}
-	
-	@Test
-	public void testEquals() {
-		String testString = "equal";
-		String expectedString = "equal";
-		
-		Assert.assertTrue("Test for equals failed",StringUtils.equals(testString, expectedString));
-		
-		testString = "notEqual";
-		
-		Assert.assertFalse("Test for false equals failed", StringUtils.equals(testString, expectedString));
-	}
-	
-	@Test
-	public void testEndsWith() {
-		String testString = "endsWith";
-		String expectedString = "With";
-		
-		Assert.assertTrue("Test for endsWith failed",StringUtils.endsWith(testString, expectedString));
-		
-		testString = "WithEnds";
-		
-		Assert.assertFalse("Test for false endsWith failed", StringUtils.endsWith(testString, expectedString));
-	}
-	
-	@Test
-	public void testStartWith() {
-		String testString = "startWith";
-		String expectedString = "start";
-		
-		Assert.assertTrue("Test for endsWith failed",StringUtils.startsWith(testString, expectedString));
-		
-		testString = "withstart";
-		
-		Assert.assertFalse("Test for false endsWith failed", StringUtils.startsWith(testString, expectedString));
-	}
-	
-	@Test
-	public void testIndexOf() {
-		String testString = "alalelu";
 
-		Assert.assertEquals("Test for indexOf failed",StringUtils.indexOf(testString, "e"),4);
-		Assert.assertEquals("Test for indexOf failed",StringUtils.indexOf(testString, ""),0);
+	public String testTrim(String testString) {
+		return StringUtils.trim(testString);
+	}
+
+	public boolean testEquals(String testString) {
+		String sometimesExpectedString = testString.replaceAll("a", "b");
+		
+		return StringUtils.equals(testString, sometimesExpectedString);
+	}
+
+	public boolean testEndsWith(String testString) {
+		String sometimesExpectedString = "With";
+
+		return StringUtils.endsWith(testString, sometimesExpectedString);
+	}
+
+	public boolean testStartWith(String testString) {
+		String sometimesExpectedString = "start";
+
+		return StringUtils.startsWith(testString, sometimesExpectedString);
+	}
+
+	public int testIndexOf(String testString) {
+		return StringUtils.indexOf(testString, "e");
+	}
+
+	public boolean testContains(String testString) {
+		String sometimesExpectedString = "tain";
+
+		return StringUtils.contains(testString, sometimesExpectedString);
+	}
+
+	public String testReplace(String testString) {
+		return StringUtils.replace(testString, "M", "m");
+	}
+
+	public String testLowerCase(String testString) {
+		return StringUtils.lowerCase(testString);
+	}
+
+	public String testUpperCase(String testString) {
+		return StringUtils.upperCase(testString);
+	}
+
+	public String[] testSplit(String testString) {
+		return StringUtils.split(testString, ",");
 	}
 	
-	@Test
-	public void testContains() {
-		String testString = "contains";
-		String expectedString = "tain";
-		
-		Assert.assertTrue("Test for contains failed",StringUtils.contains(testString, expectedString));
-		
-		testString = "conta";
-		
-		Assert.assertFalse("Test for false contains failed", StringUtils.contains(testString, expectedString));
-	}
-	
-	@Test
-	public void testReplace() {
-		String testString = "replaceMe";
-		String expectedString = "replaceme";
-		
-		Assert.assertEquals("Test for replace failed",StringUtils.replace(testString, "M","m"),expectedString);
-	}
-	
-	@Test
-	public void testLowerCase() {
-		String testString = "lowerCASE";
-		String expectedString = "lowercase";
-		
-		Assert.assertEquals("Test for lowerCase failed",StringUtils.lowerCase(testString),expectedString);
-	}
-	
-	@Test
-	public void testUpperCase() {
-		String testString = "UPPERcase";
-		String expectedString = "UPPERCASE";
-		
-		Assert.assertEquals("Test for lowerCase failed",StringUtils.upperCase(testString),expectedString);
-	}
-	
-	@Test
-	public void testSplit() {
-		String testString = "please,dont,split,me";
-		String[] expectedString = {"please","dont","split","me"};
-		
-		Assert.assertArrayEquals("Test for split String failed",StringUtils.split(testString, ","),expectedString);
-	}
 }
