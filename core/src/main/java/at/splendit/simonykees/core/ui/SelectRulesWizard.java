@@ -10,7 +10,6 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 
-import at.splendit.simonykees.core.exception.MalformedInputException;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.i18n.Messages;

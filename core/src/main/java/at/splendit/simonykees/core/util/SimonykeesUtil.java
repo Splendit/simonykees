@@ -19,7 +19,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
 
-import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 public final class SimonykeesUtil {
