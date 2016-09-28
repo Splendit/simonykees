@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Display;
 
 import at.splendit.simonykees.core.exception.MalformedInputException;
 import at.splendit.simonykees.core.exception.RefactoringException;
+import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
 import at.splendit.simonykees.core.rule.RefactoringRule;
@@ -45,8 +46,16 @@ public class SelectRulesWizard extends Wizard {
 			refactorer.prepareRefactoring();
 		} catch (RefactoringException e) {
 			SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+			return true;
 		}
-		refactorer.doRefactoring();
+		try {
+			refactorer.doRefactoring();
+		} catch (RefactoringException e) {
+			SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+			return true;
+		} catch (RuleException e) {
+			SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+		}
 		
 		if (refactorer.hasChanges()) {
 			final WizardDialog dialog = new WizardDialog(getShell(), new RefactoringPreviewWizard(refactorer));

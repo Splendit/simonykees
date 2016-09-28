@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -14,7 +15,9 @@ import org.eclipse.osgi.util.NLS;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.MalformedInputException;
+import at.splendit.simonykees.core.exception.ReconcileException;
 import at.splendit.simonykees.core.exception.RefactoringException;
+import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
@@ -53,28 +56,33 @@ public abstract class AbstractRefactorer {
 		}
 	}
 
-	public void doRefactoring() {
+	public void doRefactoring() throws RefactoringException, RuleException {
 		if (workingCopies.isEmpty()) {
 			Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_no_working_copies_foung, null);
-			// FIXME should also throw an exception
-			return;
+			throw new RefactoringException(Messages.AbstractRefactorer_warn_no_working_copies_foung);
 		}
+		List<String> notWorkingRules = new ArrayList<>();
 		for (RefactoringRule<? extends ASTVisitor> refactoringRule : rules) {
 			try {
 				refactoringRule.generateDocumentChanges(workingCopies);
 			} catch (JavaModelException | ReflectiveOperationException e) {
 				Activator.log(Status.ERROR, e.getMessage(), e);
-				// FIXME should also throw an exception
+				notWorkingRules.add(refactoringRule.getName());
 			}
+		}
+		if (!notWorkingRules.isEmpty()) {
+			String notWorkingRulesCollected = notWorkingRules.stream().collect(Collectors.joining(", "));
+			throw new RuleException(NLS.bind("Could not execute the following rules\n[{0}]", notWorkingRulesCollected),
+					NLS.bind("Could not execute the following rules\n[{0}]", notWorkingRulesCollected));
 		}
 	}
 
-	public void commitRefactoring() {
+	public void commitRefactoring() throws RefactoringException, ReconcileException {
 		if (workingCopies.isEmpty()) {
 			Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_no_working_copies_foung, null);
-			// FIXME should also throw an exception
-			return;
+			throw new RefactoringException(Messages.AbstractRefactorer_warn_no_working_copies_foung);
 		}
+		List<String> workingCopiesNotCommited = new ArrayList<>();
 		for (Iterator<ICompilationUnit> iterator = workingCopies.iterator(); iterator.hasNext();) {
 			ICompilationUnit workingCopy = (ICompilationUnit) iterator.next();
 			try {
@@ -82,8 +90,13 @@ public abstract class AbstractRefactorer {
 				iterator.remove();
 			} catch (JavaModelException e) {
 				Activator.log(Status.ERROR, e.getMessage(), e);
-				// FIXME should also throw an exception
+				workingCopiesNotCommited.add(workingCopy.getPath().toString());
 			}
+		}
+		if (!workingCopiesNotCommited.isEmpty()) {
+			String notWorkingRulesCollected = workingCopiesNotCommited.stream().collect(Collectors.joining("\n"));
+			throw new ReconcileException(NLS.bind("Could not commit the following working copies:\n[{0}]", notWorkingRulesCollected),
+					NLS.bind("Could not commit the changes to the following files:\n[{0}]", notWorkingRulesCollected));
 		}
 	}
 

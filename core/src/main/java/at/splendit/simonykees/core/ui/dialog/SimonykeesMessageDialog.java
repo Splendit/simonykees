@@ -18,6 +18,7 @@ import at.splendit.simonykees.core.i18n.Messages;
  */
 public class SimonykeesMessageDialog extends MessageDialog {
 
+	private static final String MAIL_BUGREPORT = "bugreport@splendit.at";
 	private static final String dialogTitle = Messages.aa_codename;
 	private static final Image dialogTitleImage = null;
 	private static final String dialogInformationMessage = Messages.HelpMessageDialog_default_message;
@@ -36,25 +37,14 @@ public class SimonykeesMessageDialog extends MessageDialog {
 				MessageDialog.INFORMATION, defaultIndex, dialogButtonLabels).open() == 0;
 	}
 
-	public static boolean openDefaultErrorMessageDialog(Shell parentShell) {
-		Function<Composite, Control> customAreaFunction = parent -> {
-			Link link = new Link(parent, SWT.NONE | SWT.RIGHT);
-			link.setText("bugreport@splendit.at");
-			return link;
-		};
-		return new SimonykeesMessageDialog(customAreaFunction, parentShell, dialogTitle, dialogTitleImage,
-				dialogErrorMessage, MessageDialog.ERROR, defaultIndex, dialogButtonLabels).open() == 0;
-	}
-
 	public static boolean openErrorMessageDialog(Shell parentShell, SimonykeesException simonykeesException) {
 		Function<Composite, Control> customAreaFunction = parent -> {
 			Link link = new Link(parent, SWT.NONE | SWT.RIGHT);
-			link.setText("bugreport@splendit.at");
+			link.setText(MAIL_BUGREPORT);
 			return link;
 		};
 		return new SimonykeesMessageDialog(customAreaFunction, parentShell, dialogTitle, dialogTitleImage,
-				(simonykeesException != null) ? simonykeesException.getUiMessage()
-						: "Internal Error!\nPlease contact support.",
+				(simonykeesException != null) ? simonykeesException.getUiMessage() : dialogErrorMessage,
 				MessageDialog.ERROR, defaultIndex, dialogButtonLabels).open() == 0;
 	}
 

@@ -130,7 +130,6 @@ public final class SimonykeesUtil {
 		
 		//astRewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 		
-		Activator.log("Init rule [" + ruleClazz.getName() + "]");
 		AbstractASTRewriteASTVisitor rule = ruleClazz.newInstance();
 		rule.setAstRewrite(astRewrite);
 		astRoot.accept(rule);
