@@ -13,44 +13,46 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.osgi.util.NLS;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.exception.MalformedInputException;
+import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 
 public abstract class AbstractRefactorer {
-	
+
 	protected List<IJavaElement> javaElements;
 	protected List<RefactoringRule<? extends ASTVisitor>> rules;
 	protected List<ICompilationUnit> workingCopies = new ArrayList<>();
-	
+
 	public AbstractRefactorer(List<IJavaElement> javaElements, List<RefactoringRule<? extends ASTVisitor>> rules) {
 		this.javaElements = javaElements;
 		this.rules = rules;
 	}
-	
-	public void prepareRefactoring() {
+
+	public void prepareRefactoring() throws RefactoringException {
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
 		try {
 			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements);
 			if (compilationUnits.isEmpty()) {
 				Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_no_compilation_units_found, null);
-				// FIXME should also throw an exception
-				return;
+				throw new RefactoringException(Messages.AbstractRefactorer_warn_no_compilation_units_found,
+						"Selection did not contain any Java files.");
 			} else if (!workingCopies.isEmpty()) {
 				Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_working_copies_already_generated, null);
-				// FIXME should also throw an exception
-				return;
+				throw new RefactoringException(Messages.AbstractRefactorer_warn_working_copies_already_generated);
 			} else {
 				for (ICompilationUnit compilationUnit : compilationUnits) {
 					workingCopies.add(compilationUnit.getWorkingCopy(null));
 				}
 			}
 		} catch (JavaModelException e) {
-			Activator.log(Status.ERROR, e.getMessage(), null);
-			// FIXME should also throw an exception
+			Activator.log(Status.ERROR, e.getMessage(), e);
+			throw new RefactoringException("Could not get compilation unit from java elements",
+					"Error parsing java files,\n please check your workspace and try again.", e);
 		}
 	}
-	
+
 	public void doRefactoring() {
 		if (workingCopies.isEmpty()) {
 			Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_no_working_copies_foung, null);
@@ -61,12 +63,12 @@ public abstract class AbstractRefactorer {
 			try {
 				refactoringRule.generateDocumentChanges(workingCopies);
 			} catch (JavaModelException | ReflectiveOperationException e) {
-				Activator.log(Status.ERROR, e.getMessage(), null);
+				Activator.log(Status.ERROR, e.getMessage(), e);
 				// FIXME should also throw an exception
 			}
 		}
 	}
-	
+
 	public void commitRefactoring() {
 		if (workingCopies.isEmpty()) {
 			Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_no_working_copies_foung, null);
@@ -79,16 +81,16 @@ public abstract class AbstractRefactorer {
 				SimonykeesUtil.commitAndDiscardWorkingCopy(workingCopy);
 				iterator.remove();
 			} catch (JavaModelException e) {
-				Activator.log(Status.ERROR, e.getMessage(), null);
+				Activator.log(Status.ERROR, e.getMessage(), e);
 				// FIXME should also throw an exception
 			}
 		}
 	}
-	
+
 	public List<RefactoringRule<? extends ASTVisitor>> getRules() {
 		return Collections.unmodifiableList(rules);
 	}
-	
+
 	public boolean hasChanges() {
 		for (RefactoringRule<? extends ASTVisitor> rule : rules) {
 			if (!rule.getDocumentChanges().isEmpty()) {
@@ -97,38 +99,39 @@ public abstract class AbstractRefactorer {
 		}
 		return false;
 	}
-	
+
 	@Deprecated
 	public void doOldRefactoring() {
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
-		
+
 		try {
 			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements);
-			
+
 			if (compilationUnits.isEmpty()) {
 				Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_no_compilation_units_found, null);
 				return;
 			}
-			
+
 			for (ICompilationUnit compilationUnit : compilationUnits) {
 				for (RefactoringRule<? extends ASTVisitor> rule : rules) {
 					ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(null);
-					
+
 					try {
 						SimonykeesUtil.applyRule(workingCopy, rule.getVisitor());
 					} catch (ReflectiveOperationException e) {
-						Activator.log(Status.ERROR, NLS.bind(Messages.AbstractRefactorer_error_cannot_init_rule, rule.getName()), e);
+						Activator.log(Status.ERROR,
+								NLS.bind(Messages.AbstractRefactorer_error_cannot_init_rule, rule.getName()), e);
 					}
-					
+
 					SimonykeesUtil.commitAndDiscardWorkingCopy(workingCopy);
 				}
-				
+
 			}
-			
+
 		} catch (JavaModelException e) {
 			Activator.log(Status.ERROR, e.getMessage(), null);
 			// FIXME should also throw an exception
 		}
 	}
-	
+
 }

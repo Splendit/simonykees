@@ -3,6 +3,8 @@ package at.splendit.simonykees.core.ui;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.WizardPage;
 
+import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
+
 /**
  * This class has common functionality for all Simonykees WizardPages. 
  * At the moment, this only includes a help page. 
@@ -22,7 +24,7 @@ public abstract class AbstractWizardPage extends WizardPage {
 	 */
 	@Override
 	public void performHelp() {
-	    HelpMessageDialog.openDefaultHelpMessageDialog(getShell());
+	    SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
 	}
 
 }
