@@ -1,6 +1,8 @@
 package at.splendit.simonykees.sample.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertArrayEquals;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -12,11 +14,12 @@ import org.junit.Test;
 
 /**
  * This class makes it easy to take two classes with the same methods and assert
- * that every corresponding return value (of methods with the same name), returns
- * the same value.
+ * that every corresponding return value (of methods with the same name),
+ * returns the same value.
  * 
- * Only methods with return values are taken into account. 
- * Only methods where the parameter types match the types of parameterizedValues, are taken into account.
+ * Only methods with return values are taken into account. Only methods where
+ * the parameter types match the types of parameterizedValues, are taken into
+ * account.
  */
 public abstract class AbstractReflectiveMethodTester {
 
@@ -34,14 +37,51 @@ public abstract class AbstractReflectiveMethodTester {
 	@SuppressWarnings("nls")
 	@Test
 	public void test() throws Exception {
+		System.out.println(String.format("Class: %s, Values: %s", this.holder.getPreObject().getClass().getSimpleName(),
+				Arrays.toString(this.parameterizedValues)));
+
 		for (Method m : this.holder.getPreMethods().values()) {
-			Object preRetVal = m.invoke(this.holder.getPreObject(), parameterizedValues);
-			Object postRetVal = holder.getPostMethod(m.getName()).invoke(this.holder.getPostObject(),
-					parameterizedValues);
-			System.out.println(String.format("Class: %s, Method: %s, values: %s, preRetVal: %s, postRetVal: %s",
-					this.holder.getPreObject().getClass().getSimpleName(), m.getName(),
-					Arrays.toString(parameterizedValues), preRetVal, postRetVal));
-			assertEquals(preRetVal, postRetVal);
+
+			boolean isArrayRetVal = m.getReturnType().isArray();
+
+			System.out.print(String.format("\tMethod: %s, isArrayRetVal: %b", m.getName(), isArrayRetVal));
+
+			Method postMethod = this.holder.getPostMethod(m.getName());
+
+			assertNotNull(String.format("Expected method [%s] not present in class [%s]", m.getName(),
+					this.holder.getPostObject().getClass().getName()), postMethod);
+
+			assertEquals(
+					String.format("Return values mismatch for method [%s]: [%s] does not match [%s]", m.getName(),
+							m.getReturnType(), postMethod.getReturnType()),
+					m.getReturnType(), postMethod.getReturnType());
+
+			if (isArrayRetVal) {
+				Object[] preRetVal = (Object[]) m.invoke(this.holder.getPreObject(), this.parameterizedValues);
+
+				System.out.print(String.format(", preRetVal: %s", Arrays.toString(preRetVal)));
+
+				Object[] postRetVal = (Object[]) postMethod.invoke(this.holder.getPostObject(), parameterizedValues);
+
+				System.out.println(String.format(", postRetVal: %s", Arrays.toString(postRetVal)));
+
+				assertArrayEquals(String.format("Return value mismatch. [%s.%s] expected [%s] but was [%s]",
+						holder.preObject.getClass().getName(), m.getName(), Arrays.toString(preRetVal),
+						Arrays.toString(postRetVal)), preRetVal, preRetVal);
+			} else {
+				Object preRetVal = m.invoke(this.holder.getPreObject(), this.parameterizedValues);
+
+				System.out.print(String.format(", preRetVal: %s", preRetVal));
+
+				Object postRetVal = postMethod.invoke(this.holder.getPostObject(), parameterizedValues);
+
+				System.out.println(String.format(", postRetVal: %s", postRetVal));
+
+				assertEquals(
+						String.format("Return value mismatch. [%s.%s] expected [%s] but was [%s]",
+								holder.preObject.getClass().getName(), m.getName(), preRetVal, postRetVal),
+						preRetVal, postRetVal);
+			}
 		}
 	}
 
@@ -104,9 +144,9 @@ public abstract class AbstractReflectiveMethodTester {
 		private static Map<String, Method> initMethodMap(Class<?> clazz, Object... parameterizedValues) {
 			Map<String, Method> retVal = Arrays.stream(clazz.getDeclaredMethods())
 					// only take methods with a return value
-					.filter(m -> !m.getReturnType().equals(Void.TYPE)) 
+					.filter(m -> !m.getReturnType().equals(Void.TYPE))
 					// only take methods where the parameters fit
-					.filter(m2 -> hasDesiredParameters(m2.getParameterTypes(), parameterizedValues)) 
+					.filter(m2 -> hasDesiredParameters(m2.getParameterTypes(), parameterizedValues))
 					.collect(Collectors.toMap(Method::getName, Function.identity()));
 			return retVal;
 		}
