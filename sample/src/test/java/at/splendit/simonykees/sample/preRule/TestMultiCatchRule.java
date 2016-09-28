@@ -27,7 +27,7 @@ public class TestMultiCatchRule {
 		// TODO meaningful Asserts?
 		try {
 			String.class.getConstructor(String.class).newInstance("aa");
-		} catch (InstantiationException  e) {
+		} catch (InstantiationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {

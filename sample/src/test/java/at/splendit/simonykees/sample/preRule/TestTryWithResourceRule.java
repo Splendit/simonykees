@@ -9,8 +9,7 @@ public class TestTryWithResourceRule {
 
 	static void readFirstLineFromFile(String path) {
 
-		try (BufferedReader br = new BufferedReader(new FileReader(path))
-				) {
+		try (BufferedReader br = new BufferedReader(new FileReader(path))) {
 			BufferedReader br2 = new BufferedReader(new FileReader(path));
 			Closeable cl = new BufferedReader(new FileReader(path));
 			br.close();

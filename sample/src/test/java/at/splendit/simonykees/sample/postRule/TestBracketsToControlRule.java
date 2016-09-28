@@ -13,7 +13,7 @@ public class TestBracketsToControlRule {
 			i = 0;
 		}
 	}
-	
+
 	public static void testforLoop() {
 		for (int i = 1; i < 2; i++) {
 			;
