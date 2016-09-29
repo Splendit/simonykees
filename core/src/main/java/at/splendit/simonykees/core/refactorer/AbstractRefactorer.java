@@ -115,41 +115,4 @@ public abstract class AbstractRefactorer {
 		}
 		return false;
 	}
-
-	@Deprecated
-	public void doOldRefactoring() {
-		List<ICompilationUnit> compilationUnits = new ArrayList<>();
-
-		try {
-			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements);
-
-			if (compilationUnits.isEmpty()) {
-				Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found,
-						null);
-				return;
-			}
-
-			for (ICompilationUnit compilationUnit : compilationUnits) {
-				for (RefactoringRule<? extends ASTVisitor> rule : rules) {
-					ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(null);
-
-					try {
-						SimonykeesUtil.applyRule(workingCopy, rule.getVisitor());
-					} catch (ReflectiveOperationException e) {
-						Activator.log(Status.ERROR,
-								NLS.bind(ExceptionMessages.AbstractRefactorer_error_cannot_init_rule, rule.getName()),
-								e);
-					}
-
-					SimonykeesUtil.commitAndDiscardWorkingCopy(workingCopy);
-				}
-
-			}
-
-		} catch (JavaModelException e) {
-			Activator.log(Status.ERROR, e.getMessage(), null);
-			// FIXME should also throw an exception
-		}
-	}
-
 }
