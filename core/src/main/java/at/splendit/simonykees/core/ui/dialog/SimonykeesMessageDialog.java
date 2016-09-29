@@ -18,11 +18,11 @@ import at.splendit.simonykees.core.i18n.Messages;
  */
 public class SimonykeesMessageDialog extends MessageDialog {
 
-	private static final String MAIL_BUGREPORT = "bugreport@splendit.at";
+	private static final String MAIL_BUGREPORT = Messages.SimonykeesMessageDialog_bugreport_email;
 	private static final String dialogTitle = Messages.aa_codename;
 	private static final Image dialogTitleImage = null;
 	private static final String dialogInformationMessage = Messages.HelpMessageDialog_default_message;
-	private static final String dialogErrorMessage = "An unexpected Error has occured!\nPlease contact Support!";
+	private static final String dialogErrorMessage = Messages.SimonykeesMessageDialog_default_error_message;
 	private static final int defaultIndex = 1;
 	private static final String[] dialogButtonLabels = { Messages.ui_ok };
 	private static final String splenditUrl = Messages.HelpMessageDialog_homepage_url;

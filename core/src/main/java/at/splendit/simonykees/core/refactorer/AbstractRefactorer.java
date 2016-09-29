@@ -14,11 +14,10 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.osgi.util.NLS;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.exception.MalformedInputException;
 import at.splendit.simonykees.core.exception.ReconcileException;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
-import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.core.i18n.ExceptionMessages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 
@@ -38,12 +37,15 @@ public abstract class AbstractRefactorer {
 		try {
 			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements);
 			if (compilationUnits.isEmpty()) {
-				Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_no_compilation_units_found, null);
-				throw new RefactoringException(Messages.AbstractRefactorer_warn_no_compilation_units_found,
-						"Selection did not contain any Java files.");
+				Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found,
+						null);
+				throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found,
+						ExceptionMessages.AbstractRefactorer_user_warn_no_compilation_units_found);
 			} else if (!workingCopies.isEmpty()) {
-				Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_working_copies_already_generated, null);
-				throw new RefactoringException(Messages.AbstractRefactorer_warn_working_copies_already_generated);
+				Activator.log(Status.WARNING,
+						ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated, null);
+				throw new RefactoringException(
+						ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated);
 			} else {
 				for (ICompilationUnit compilationUnit : compilationUnits) {
 					workingCopies.add(compilationUnit.getWorkingCopy(null));
@@ -51,15 +53,15 @@ public abstract class AbstractRefactorer {
 			}
 		} catch (JavaModelException e) {
 			Activator.log(Status.ERROR, e.getMessage(), e);
-			throw new RefactoringException("Could not get compilation unit from java elements",
-					"Error parsing java files,\n please check your workspace and try again.", e);
+			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_java_element_resoltuion_failed,
+					ExceptionMessages.AbstractRefactorer_user_java_element_resoltuion_failed, e);
 		}
 	}
 
 	public void doRefactoring() throws RefactoringException, RuleException {
 		if (workingCopies.isEmpty()) {
-			Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_no_working_copies_foung, null);
-			throw new RefactoringException(Messages.AbstractRefactorer_warn_no_working_copies_foung);
+			Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung, null);
+			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
 		}
 		List<String> notWorkingRules = new ArrayList<>();
 		for (RefactoringRule<? extends ASTVisitor> refactoringRule : rules) {
@@ -71,16 +73,16 @@ public abstract class AbstractRefactorer {
 			}
 		}
 		if (!notWorkingRules.isEmpty()) {
-			String notWorkingRulesCollected = notWorkingRules.stream().collect(Collectors.joining(", "));
-			throw new RuleException(NLS.bind("Could not execute the following rules\n[{0}]", notWorkingRulesCollected),
-					NLS.bind("Could not execute the following rules\n[{0}]", notWorkingRulesCollected));
+			String notWorkingRulesCollected = notWorkingRules.stream().collect(Collectors.joining(", ")); //$NON-NLS-1$
+			throw new RuleException(NLS.bind(ExceptionMessages.AbstractRefactorer_rule_execute_failed, notWorkingRulesCollected),
+					NLS.bind(ExceptionMessages.AbstractRefactorer_user_rule_execute_failed, notWorkingRulesCollected));
 		}
 	}
 
 	public void commitRefactoring() throws RefactoringException, ReconcileException {
 		if (workingCopies.isEmpty()) {
-			Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_no_working_copies_foung, null);
-			throw new RefactoringException(Messages.AbstractRefactorer_warn_no_working_copies_foung);
+			Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung, null);
+			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
 		}
 		List<String> workingCopiesNotCommited = new ArrayList<>();
 		for (Iterator<ICompilationUnit> iterator = workingCopies.iterator(); iterator.hasNext();) {
@@ -94,9 +96,10 @@ public abstract class AbstractRefactorer {
 			}
 		}
 		if (!workingCopiesNotCommited.isEmpty()) {
-			String notWorkingRulesCollected = workingCopiesNotCommited.stream().collect(Collectors.joining("\n"));
-			throw new ReconcileException(NLS.bind("Could not commit the following working copies:\n[{0}]", notWorkingRulesCollected),
-					NLS.bind("Could not commit the changes to the following files:\n[{0}]", notWorkingRulesCollected));
+			String notWorkingRulesCollected = workingCopiesNotCommited.stream().collect(Collectors.joining("\n")); //$NON-NLS-1$
+			throw new ReconcileException(
+					NLS.bind(ExceptionMessages.AbstractRefactorer_reconcile_failed, notWorkingRulesCollected),
+					NLS.bind(ExceptionMessages.AbstractRefactorer_user_reconcile_failed, notWorkingRulesCollected));
 		}
 	}
 
@@ -121,7 +124,8 @@ public abstract class AbstractRefactorer {
 			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements);
 
 			if (compilationUnits.isEmpty()) {
-				Activator.log(Status.WARNING, Messages.AbstractRefactorer_warn_no_compilation_units_found, null);
+				Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found,
+						null);
 				return;
 			}
 
@@ -133,7 +137,8 @@ public abstract class AbstractRefactorer {
 						SimonykeesUtil.applyRule(workingCopy, rule.getVisitor());
 					} catch (ReflectiveOperationException e) {
 						Activator.log(Status.ERROR,
-								NLS.bind(Messages.AbstractRefactorer_error_cannot_init_rule, rule.getName()), e);
+								NLS.bind(ExceptionMessages.AbstractRefactorer_error_cannot_init_rule, rule.getName()),
+								e);
 					}
 
 					SimonykeesUtil.commitAndDiscardWorkingCopy(workingCopy);
