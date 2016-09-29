@@ -86,10 +86,6 @@ public class SelectRulesPage extends AbstractWizardPage {
 
 		rulesCheckboxTableViewer.setInput(rules);
 
-		// FIXME check if this is needed
-		// rulesCheckboxTableViewer.setCheckStateProvider(new
-		// CheckStateProvider(rules));
-
 		// set label text
 		rulesCheckboxTableViewer.setLabelProvider(new StyledCellLabelProvider() {
 			@SuppressWarnings("unchecked")

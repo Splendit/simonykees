@@ -14,7 +14,6 @@ public class FullRefactoringJob extends AbstractRefactoringJob {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		Activator.registerJob(this);
-		// TODO Auto-generated method stub
 		Activator.unregisterJob(this);
 		return null;
 	}

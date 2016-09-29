@@ -30,7 +30,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-//TODO check nls
 @SuppressWarnings("nls")
 public class RulesTestUtil {
 

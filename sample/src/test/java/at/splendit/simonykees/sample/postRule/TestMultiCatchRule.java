@@ -28,7 +28,7 @@ public class TestMultiCatchRule {
 		try {
 			String.class.getConstructor(String.class).newInstance("aa");
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException  e) {
-			// TODO Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
