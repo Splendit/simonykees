@@ -7,10 +7,6 @@ public class Messages extends NLS {
 	public static String aa_codename;
 	public static String ui_ok;
 	public static String ui_cancel;
-	public static String AbstractRefactorer_error_cannot_init_rule;
-	public static String AbstractRefactorer_warn_no_compilation_units_found;
-	public static String AbstractRefactorer_warn_no_working_copies_foung;
-	public static String AbstractRefactorer_warn_working_copies_already_generated;
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
@@ -38,6 +34,8 @@ public class Messages extends NLS {
 	public static String SelectRulesPage_title;
 	public static String SelectRulesWizard_title;
 	public static String SelectRulesWizard_warning_no_refactorings;
+	public static String SimonykeesMessageDialog_bugreport_email;
+	public static String SimonykeesMessageDialog_default_error_message;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
 	public static String TryWithResourceRule_description;

@@ -19,7 +19,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
 
-import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 public final class SimonykeesUtil {
@@ -130,7 +129,6 @@ public final class SimonykeesUtil {
 		
 		//astRewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 		
-		Activator.log("Init rule [" + ruleClazz.getName() + "]");
 		AbstractASTRewriteASTVisitor rule = ruleClazz.newInstance();
 		rule.setAstRewrite(astRewrite);
 		astRoot.accept(rule);

@@ -10,9 +10,12 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 
+import at.splendit.simonykees.core.exception.RefactoringException;
+import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
 import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 
 public class SelectRulesWizard extends Wizard {
 
@@ -38,8 +41,20 @@ public class SelectRulesWizard extends Wizard {
 		final List<RefactoringRule<? extends ASTVisitor>> rules = selectRulesPage.getSelectedRules();
 		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {};
 		
-		refactorer.prepareRefactoring();
-		refactorer.doRefactoring();
+		try {
+			refactorer.prepareRefactoring();
+		} catch (RefactoringException e) {
+			SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+			return true;
+		}
+		try {
+			refactorer.doRefactoring();
+		} catch (RefactoringException e) {
+			SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+			return true;
+		} catch (RuleException e) {
+			SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+		}
 		
 		if (refactorer.hasChanges()) {
 			final WizardDialog dialog = new WizardDialog(getShell(), new RefactoringPreviewWizard(refactorer));

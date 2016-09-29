@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeException;
+import at.splendit.simonykees.core.i18n.ExceptionMessages;
 
 public abstract class AbstractCompilationUnitAstVisitor extends AbstractASTRewriteASTVisitor {
 
@@ -28,8 +29,7 @@ public abstract class AbstractCompilationUnitAstVisitor extends AbstractASTRewri
 	@Override
 	public boolean visit(CompilationUnit node) {
 		if (node.getJavaElement() == null && node.getJavaElement().getJavaProject() == null){
-			//FIXME find a better exception for the node without context
-			throw new ITypeNotFoundRuntimeException();
+			throw new ITypeNotFoundRuntimeException(ExceptionMessages.AbstractCompilationUnitAstVisitor_compilation_unit_no_context);
 		}
 		IJavaProject iJavaProject = node.getJavaElement().getJavaProject();
 		try {

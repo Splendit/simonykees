@@ -5,7 +5,10 @@ package at.splendit.simonykees.core.ui;
 
 import org.eclipse.jface.wizard.Wizard;
 
+import at.splendit.simonykees.core.exception.ReconcileException;
+import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
+import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 
 public class RefactoringPreviewWizard extends Wizard {
 	
@@ -29,7 +32,14 @@ public class RefactoringPreviewWizard extends Wizard {
 	 */
 	@Override
 	public boolean performFinish() {
-		abstractRefactorer.commitRefactoring();
+		try {
+			abstractRefactorer.commitRefactoring();
+		} catch (RefactoringException e) {
+			SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+			return true;
+		} catch (ReconcileException e) {
+			SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+		}
 		return true;
 	}
 

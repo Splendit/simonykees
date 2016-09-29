@@ -2,14 +2,11 @@ package at.splendit.simonykees.core.ui;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.ICheckStateProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -35,8 +32,6 @@ public class SelectRulesPage extends AbstractWizardPage {
 	private StyledText descriptionStyledText;
 	private RefactoringRule<? extends ASTVisitor> selectedRefactoringRule;
 
-	private final Map<Object, Boolean> checkedRules = new HashMap<>();
-
 	protected SelectRulesPage() {
 		super(Messages.SelectRulesPage_page_name);
 		setTitle(Messages.SelectRulesPage_title);
@@ -49,34 +44,34 @@ public class SelectRulesPage extends AbstractWizardPage {
 
 		setControl(parent);
 		GridLayout layout = new GridLayout();
-		
+
 		parent.setLayout(layout);
-		
-		createSelectAllButton(parent);	
-		
+
+		createSelectAllButton(parent);
+
 		SashForm sashForm = new SashForm(parent, SWT.HORIZONTAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		createRulesCheckboxTableViewer(sashForm);
 		createRuleDescriptionViewer(sashForm);
-		
+
 	}
-	
+
 	private void createSelectAllButton(Composite parent) {
 		Button selectAllButton = new Button(parent, SWT.CHECK);
 		selectAllButton.setText(Messages.SelectRulesPage_select_unselect_all);
 		selectAllButton.addSelectionListener(new SelectionListener() {
-			
+
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				rulesCheckboxTableViewer.setAllChecked(selectAllButton.getSelection());
 			}
-			
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// nothing
 			}
-		});	
+		});
 	}
 
 	private void createRulesCheckboxTableViewer(Composite parent) {
@@ -84,15 +79,12 @@ public class SelectRulesPage extends AbstractWizardPage {
 
 		rulesCheckboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.CHECK | SWT.BORDER);
 		rulesCheckboxTableViewer.setContentProvider(new ArrayContentProvider());
-		
-		// the selection listener for the selected row (has nothing to do with the checkbox)
-		rulesCheckboxTableViewer.addSelectionChangedListener(createSelectionChangedListener());
-		
-		rulesCheckboxTableViewer.setInput(rules);
 
-		// FIXME check if this is needed
-		// rulesCheckboxTableViewer.setCheckStateProvider(new
-		// CheckStateProvider(rules));
+		// the selection listener for the selected row (has nothing to do with
+		// the checkbox)
+		rulesCheckboxTableViewer.addSelectionChangedListener(createSelectionChangedListener());
+
+		rulesCheckboxTableViewer.setInput(rules);
 
 		// set label text
 		rulesCheckboxTableViewer.setLabelProvider(new StyledCellLabelProvider() {
@@ -107,12 +99,14 @@ public class SelectRulesPage extends AbstractWizardPage {
 	private void createRuleDescriptionViewer(Composite parent) {
 
 		/*
-		 *  There is a known issue with automatically showing and hiding scrollbars and SWT.WRAP.
-		 *  Using StyledText and setAlwaysShowScrollBars(false) makes the vertical scroll work correctly at least. 
+		 * There is a known issue with automatically showing and hiding
+		 * scrollbars and SWT.WRAP. Using StyledText and
+		 * setAlwaysShowScrollBars(false) makes the vertical scroll work
+		 * correctly at least.
 		 */
 		descriptionStyledText = new StyledText(parent, SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
 		descriptionStyledText.setAlwaysShowScrollBars(false);
-		
+
 		descriptionStyledText.setEditable(false);
 
 		populateDescriptionTextViewer();
@@ -153,23 +147,4 @@ public class SelectRulesPage extends AbstractWizardPage {
 		;
 		return rules;
 	}
-
-	private final class CheckStateProvider implements ICheckStateProvider {
-
-		protected CheckStateProvider(List<? extends Object> rules) {
-			rules.forEach(rule -> checkedRules.put(rule, Boolean.FALSE));
-		}
-
-		@Override
-		public boolean isChecked(Object element) {
-			return Boolean.TRUE.equals(checkedRules.get(element));
-		}
-
-		@Override
-		public boolean isGrayed(Object element) {
-			return false;
-		}
-
-	}
-
 }
