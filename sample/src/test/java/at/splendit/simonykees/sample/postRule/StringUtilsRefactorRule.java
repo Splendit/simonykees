@@ -1,4 +1,6 @@
-package at.splendit.simonykees.sample.preRule;
+package at.splendit.simonykees.sample.postRule;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * This test is a manual test to provide tests for the StringUtils replacement
@@ -19,58 +21,58 @@ package at.splendit.simonykees.sample.preRule;
  */
 
 @SuppressWarnings("nls")
-public class TestStringUtilsRefactorRule {
+public class StringUtilsRefactorRule {
 
 	public boolean testEmpty(String testString) {
-		return testString.isEmpty();
+		return StringUtils.isEmpty(testString);
 	}
 
 	public String testTrim(String testString) {
-		return testString.trim();
+		return StringUtils.trim(testString);
 	}
 
 	public boolean testEquals(String testString) {
 		String sometimesExpectedString = testString.replaceAll("a", "b");
 		
-		return testString.equals(sometimesExpectedString);
+		return StringUtils.equals(testString, sometimesExpectedString);
 	}
 
 	public boolean testEndsWith(String testString) {
 		String sometimesExpectedString = "With";
 
-		return testString.endsWith(sometimesExpectedString);
+		return StringUtils.endsWith(testString, sometimesExpectedString);
 	}
 
 	public boolean testStartWith(String testString) {
 		String sometimesExpectedString = "start";
 
-		return testString.startsWith(sometimesExpectedString);
+		return StringUtils.startsWith(testString, sometimesExpectedString);
 	}
 
 	public int testIndexOf(String testString) {
-		return testString.indexOf("e");
+		return StringUtils.indexOf(testString, "e");
 	}
 
 	public boolean testContains(String testString) {
 		String sometimesExpectedString = "tain";
 
-		return testString.contains(sometimesExpectedString);
+		return StringUtils.contains(testString, sometimesExpectedString);
 	}
 
 	public String testReplace(String testString) {
-		return testString.replace("M", "m");
+		return StringUtils.replace(testString, "M", "m");
 	}
 
 	public String testLowerCase(String testString) {
-		return testString.toLowerCase();
+		return StringUtils.lowerCase(testString);
 	}
 
 	public String testUpperCase(String testString) {
-		return testString.toUpperCase();
+		return StringUtils.upperCase(testString);
 	}
 
 	public String[] testSplit(String testString) {
-		return testString.split(",");
+		return StringUtils.split(testString, ",");
 	}
 	
 }

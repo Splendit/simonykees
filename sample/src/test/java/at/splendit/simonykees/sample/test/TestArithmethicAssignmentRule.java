@@ -11,8 +11,8 @@ import org.junit.runners.Parameterized.Parameters;
 public class TestArithmethicAssignmentRule extends AbstractReflectiveMethodTester {
 
 	public TestArithmethicAssignmentRule(Integer value) {
-		super(at.splendit.simonykees.sample.preRule.TestArithmethicAssignmentRule.class,
-				at.splendit.simonykees.sample.postRule.TestArithmethicAssignmentRule.class, value);
+		super(at.splendit.simonykees.sample.preRule.ArithmethicAssignmentRule.class,
+				at.splendit.simonykees.sample.postRule.ArithmethicAssignmentRule.class, value);
 	}
 
 	@Parameters(name = "{index}: {0}")

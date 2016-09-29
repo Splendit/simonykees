@@ -1,6 +1,4 @@
-package at.splendit.simonykees.sample.postRule;
-
-import org.apache.commons.lang3.StringUtils;
+package at.splendit.simonykees.sample.preRule;
 
 /**
  * This test is a manual test to provide tests for the StringUtils replacement
@@ -21,58 +19,58 @@ import org.apache.commons.lang3.StringUtils;
  */
 
 @SuppressWarnings("nls")
-public class TestStringUtilsRefactorRule {
+public class StringUtilsRefactorRule {
 
 	public boolean testEmpty(String testString) {
-		return StringUtils.isEmpty(testString);
+		return testString.isEmpty();
 	}
 
 	public String testTrim(String testString) {
-		return StringUtils.trim(testString);
+		return testString.trim();
 	}
 
 	public boolean testEquals(String testString) {
 		String sometimesExpectedString = testString.replaceAll("a", "b");
 		
-		return StringUtils.equals(testString, sometimesExpectedString);
+		return testString.equals(sometimesExpectedString);
 	}
 
 	public boolean testEndsWith(String testString) {
 		String sometimesExpectedString = "With";
 
-		return StringUtils.endsWith(testString, sometimesExpectedString);
+		return testString.endsWith(sometimesExpectedString);
 	}
 
 	public boolean testStartWith(String testString) {
 		String sometimesExpectedString = "start";
 
-		return StringUtils.startsWith(testString, sometimesExpectedString);
+		return testString.startsWith(sometimesExpectedString);
 	}
 
 	public int testIndexOf(String testString) {
-		return StringUtils.indexOf(testString, "e");
+		return testString.indexOf("e");
 	}
 
 	public boolean testContains(String testString) {
 		String sometimesExpectedString = "tain";
 
-		return StringUtils.contains(testString, sometimesExpectedString);
+		return testString.contains(sometimesExpectedString);
 	}
 
 	public String testReplace(String testString) {
-		return StringUtils.replace(testString, "M", "m");
+		return testString.replace("M", "m");
 	}
 
 	public String testLowerCase(String testString) {
-		return StringUtils.lowerCase(testString);
+		return testString.toLowerCase();
 	}
 
 	public String testUpperCase(String testString) {
-		return StringUtils.upperCase(testString);
+		return testString.toUpperCase();
 	}
 
 	public String[] testSplit(String testString) {
-		return StringUtils.split(testString, ",");
+		return testString.split(",");
 	}
 	
 }

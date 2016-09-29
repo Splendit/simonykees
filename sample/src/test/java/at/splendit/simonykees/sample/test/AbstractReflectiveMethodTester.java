@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
@@ -36,6 +38,11 @@ public abstract class AbstractReflectiveMethodTester {
 	public AbstractReflectiveMethodTester(Class<?> preClass, Class<?> postClass, Object... parameterizedValues) {
 		this.parameterizedValues = parameterizedValues;
 		this.holder = PreAndPostClassHolder.getInstance(preClass, postClass, parameterizedValues);
+	}
+	
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+		PreAndPostClassHolder.reset();
 	}
 
 	@SuppressWarnings("nls")
@@ -140,6 +147,11 @@ public abstract class AbstractReflectiveMethodTester {
 
 		public Object getPreObject() {
 			return preObject;
+		}
+
+		public static void reset() {
+			instance = null;
+			
 		}
 
 		public Object getPostObject() {

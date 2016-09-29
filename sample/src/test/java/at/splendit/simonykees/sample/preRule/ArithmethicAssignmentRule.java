@@ -1,6 +1,6 @@
 package at.splendit.simonykees.sample.preRule;
 
-public class TestArithmethicAssignmentRule {
+public class ArithmethicAssignmentRule {
 
 	private int a = 3;
 	private int c = 3;

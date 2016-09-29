@@ -11,8 +11,8 @@ import org.junit.runners.Parameterized.Parameters;
 public class TestStringUtilsRefactorRule extends AbstractReflectiveMethodTester {
 
 	public TestStringUtilsRefactorRule(String value) {
-		super(at.splendit.simonykees.sample.preRule.TestStringUtilsRefactorRule.class,
-				at.splendit.simonykees.sample.postRule.TestStringUtilsRefactorRule.class, value);
+		super(at.splendit.simonykees.sample.preRule.StringUtilsRefactorRule.class,
+				at.splendit.simonykees.sample.postRule.StringUtilsRefactorRule.class, value);
 	}
 
 	@SuppressWarnings("nls")
