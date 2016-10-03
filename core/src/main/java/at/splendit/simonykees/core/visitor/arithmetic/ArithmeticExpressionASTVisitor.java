@@ -2,7 +2,6 @@ package at.splendit.simonykees.core.visitor.arithmetic;
 
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -65,16 +64,10 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 				} else {
 					// Moving all child nodes one leaf left if extendedOperands
 					// are present
-					InfixExpression replacement = node.getAST().newInfixExpression();
-					Expression firstAdditional = extendedOperands.remove(0);
 					astRewrite.replace(infixLeftOperand, infixRightOperand, null);
-					Expression newInfixRightOperand = (Expression) ASTNode.copySubtree(infixRightOperand.getAST(),
-							infixRightOperand);
-					replacement.setOperator(currentOperator);
-					replacement.setLeftOperand(newInfixRightOperand);
-					replacement.setRightOperand(firstAdditional);
-					replacement.extendedOperands().addAll(extendedOperands);
-					astRewrite.replace(node, replacement, null);
+					Expression moveTarget = extendedOperands.get(0);
+					astRewrite.getListRewrite(node , InfixExpression.EXTENDED_OPERANDS_PROPERTY).remove(moveTarget, null);
+					astRewrite.replace(infixRightOperand, astRewrite.createMoveTarget(moveTarget), null);
 				}
 				return false;
 			}
@@ -85,8 +78,9 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 				if (extendedOperands.isEmpty()) {
 					astRewrite.replace(node, infixLeftOperand, null);
 				} else {
-					Expression firstAdditional = extendedOperands.remove(0);
-					astRewrite.replace(infixRightOperand, firstAdditional, null);
+					Expression moveTarget = extendedOperands.get(0);
+					astRewrite.getListRewrite(node , InfixExpression.EXTENDED_OPERANDS_PROPERTY).remove(moveTarget, null);
+					astRewrite.replace(infixRightOperand, astRewrite.createMoveTarget(moveTarget), null);
 				}
 				return false;
 			}

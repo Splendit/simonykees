@@ -1,6 +1,5 @@
 package at.splendit.simonykees.core.visitor.arithmetic;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Assignment.Operator;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -27,10 +26,7 @@ public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisito
 	public boolean visit(Assignment node) {
 		if (node.getOperator() != null && node.getOperator().equals(Operator.ASSIGN)) {
 			if (node.getLeftHandSide() instanceof SimpleName && node.getRightHandSide() instanceof InfixExpression) {
-
-				Assignment replacementNode = (Assignment) ASTNode.copySubtree(node.getAST(), node);
-				SimpleName leftHandSide = (SimpleName) replacementNode.getLeftHandSide();
-				InfixExpression rightHandSide = (InfixExpression) replacementNode.getRightHandSide();
+				SimpleName leftHandSide = (SimpleName) node.getLeftHandSide();
 
 				if (!node.getRightHandSide().resolveTypeBinding().isPrimitive()) {
 					return true;
@@ -39,13 +35,11 @@ public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisito
 				ArithmeticExpressionASTVisitor arithExpASTVisitor = new ArithmeticExpressionASTVisitor(astRewrite,
 						leftHandSide);
 
-				rightHandSide.accept(arithExpASTVisitor);
+				node.getRightHandSide().accept(arithExpASTVisitor);
 
 				if (arithExpASTVisitor.getNewOperator() != null) {
-					replacementNode.setOperator(ArithmeticHelper.generateOperator(arithExpASTVisitor.getNewOperator()));
-					astRewrite.replace(node, replacementNode, null);
-				} else {
-					replacementNode.delete();
+					astRewrite.set(node, Assignment.OPERATOR_PROPERTY,
+							ArithmeticHelper.generateOperator(arithExpASTVisitor.getNewOperator()), null);
 				}
 			}
 		}
