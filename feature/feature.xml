@@ -2,23 +2,23 @@
 <feature
       id="simonykees.feature"
       label="simonykees Feature"
-      version="0.0.1.qualifier">
+      version="0.9.0">
 
-   <description url="http://www.example.com/description">
+   <description url="https://splendit.at/simonykees/description">
       [Enter Feature Description here.]
    </description>
 
-   <copyright url="http://www.example.com/copyright">
+   <copyright url="https://splendit.at/simonykees/copyright">
       [Enter Copyright Description here.]
    </copyright>
 
-   <license url="http://www.example.com/license">
+   <license url="https://splendit.at/simonykees/license">
       [Enter License Description here.]
    </license>
 
    <url>
       <update label="simonykees Update Site" url="https://splendit.at/update"/>
-      <discovery label="simonykees Discovery Site" url="http://www.example.com/update"/>
+      <discovery label="simonykees Discovery Site" url="https://splendit.at/update"/>
    </url>
 
    <plugin
