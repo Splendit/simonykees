@@ -1,8 +1,8 @@
 package at.splendit.simonykees.sample.test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertArrayEquals;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -11,13 +11,14 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
 /**
- * TODO: discuss logging: use logger / leave as is / toggle logging / remove logging
+ * TODO: discuss logging: use logger / leave as is / toggle logging / remove
+ * logging
  * 
  * This class makes it easy to take two classes with the same methods and assert
  * that every corresponding return value (of methods with the same name),
@@ -29,38 +30,43 @@ import org.junit.internal.ArrayComparisonFailure;
  */
 public abstract class AbstractReflectiveMethodTester {
 
+	private static Logger log = LogManager.getLogger(AbstractReflectiveMethodTester.class);
+
 	// parameterized values
 	private Object[] parameterizedValues;
 
-	// we want this to be initialized only once for all parameterized values
-	private PreAndPostClassHolder holder;
-
-	public AbstractReflectiveMethodTester(Class<?> preClass, Class<?> postClass, Object... parameterizedValues) {
+	public AbstractReflectiveMethodTester(Object... parameterizedValues) {
 		this.parameterizedValues = parameterizedValues;
-		this.holder = PreAndPostClassHolder.getInstance(preClass, postClass, parameterizedValues);
 	}
-	
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		PreAndPostClassHolder.reset();
-	}
+
+	/**
+	 * A subclass needs to implement a method to return a holder. The subclass
+	 * should have a static holder field like this:
+	 * 
+	 * <pre>
+	 * <code>
+	 * private static PreAndPostClassHolder holder;
+	 * </code>
+	 * </pre>
+	 * 
+	 * @return PreAndPostClassHolder instance
+	 */
+	protected abstract PreAndPostClassHolder getHolder();
 
 	@SuppressWarnings("nls")
 	@Test
 	public void test() throws Exception {
-		System.out.println(String.format("Class: [%s], Values: [%s]",
-				this.holder.getPreObject().getClass().getSimpleName(), Arrays.toString(this.parameterizedValues)));
+		log.debug(String.format("Class: [%s], Values: [%s]", getHolder().getPreObject().getClass().getSimpleName(),
+				Arrays.toString(this.parameterizedValues)));
 
-		for (Method m : this.holder.getPreMethods().values()) {
+		for (Method m : getHolder().getPreMethods().values()) {
 
 			boolean isArrayRetVal = m.getReturnType().isArray();
 
-			System.out.print(String.format("\tMethod: [%s], isArrayRetVal: [%b]", m.getName(), isArrayRetVal));
-
-			Method postMethod = this.holder.getPostMethod(m.getName());
+			Method postMethod = getHolder().getPostMethod(m.getName());
 
 			assertNotNull(String.format("Expected method [%s] not present in class [%s]", m.getName(),
-					this.holder.getPostObject().getClass().getName()), postMethod);
+					getHolder().getPostObject().getClass().getName()), postMethod);
 
 			assertEquals(
 					String.format("Return values mismatch for method [%s]: [%s] does not match [%s]", m.getName(),
@@ -90,16 +96,15 @@ public abstract class AbstractReflectiveMethodTester {
 	@SuppressWarnings("nls")
 	private void testArrayReturnValue(Method m1, Method m2)
 			throws IllegalAccessException, InvocationTargetException, ArrayComparisonFailure {
-		Object[] preRetVal = (Object[]) m1.invoke(this.holder.getPreObject(), this.parameterizedValues);
+		Object[] preRetVal = (Object[]) m1.invoke(getHolder().getPreObject(), this.parameterizedValues);
 
-		System.out.print(String.format(", preRetVal: [%s]", Arrays.toString(preRetVal)));
+		Object[] postRetVal = (Object[]) m2.invoke(getHolder().getPostObject(), parameterizedValues);
 
-		Object[] postRetVal = (Object[]) m2.invoke(this.holder.getPostObject(), parameterizedValues);
-
-		System.out.println(String.format(", postRetVal: [%s]", Arrays.toString(postRetVal)));
+		log.debug(String.format("Method: [%s], isArrayRetVal: [%b], preRetVal: [%s], postRetVal: [%s]", m1.getName(),
+				true, Arrays.toString(preRetVal), Arrays.toString(postRetVal)));
 
 		assertArrayEquals(String.format("Return value mismatch for parameter [%s]. [%s.%s] expected [%s] but was [%s]",
-				Arrays.toString(parameterizedValues), holder.preObject.getClass().getSimpleName(), m1.getName(),
+				Arrays.toString(parameterizedValues), getHolder().preObject.getClass().getSimpleName(), m1.getName(),
 				Arrays.toString(preRetVal), Arrays.toString(postRetVal)), preRetVal, postRetVal);
 	}
 
@@ -118,16 +123,15 @@ public abstract class AbstractReflectiveMethodTester {
 	@SuppressWarnings("nls")
 	private void testSingleReturnValue(Method m1, Method m2)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Object preRetVal = m1.invoke(this.holder.getPreObject(), this.parameterizedValues);
+		Object preRetVal = m1.invoke(getHolder().getPreObject(), this.parameterizedValues);
 
-		System.out.print(String.format(", preRetVal: [%s]", preRetVal));
+		Object postRetVal = m2.invoke(getHolder().getPostObject(), parameterizedValues);
 
-		Object postRetVal = m2.invoke(this.holder.getPostObject(), parameterizedValues);
-
-		System.out.println(String.format(", postRetVal: [%s]", postRetVal));
+		log.debug(String.format("Method: [%s], isArrayRetVal: [%b], preRetVal: [%s], postRetVal: [%s]", m1.getName(),
+				false, preRetVal, postRetVal));
 
 		assertEquals(String.format("Return value mismatch for parameter [%s]. [%s.%s]",
-				Arrays.toString(parameterizedValues), holder.preObject.getClass().getSimpleName(), m1.getName()),
+				Arrays.toString(parameterizedValues), getHolder().preObject.getClass().getSimpleName(), m1.getName()),
 				preRetVal, postRetVal);
 	}
 
@@ -135,9 +139,7 @@ public abstract class AbstractReflectiveMethodTester {
 	 * Singleton holder class to avoid having to create the method map and class
 	 * instance of pre- and post-classes for every parameterized value.
 	 */
-	private static class PreAndPostClassHolder {
-
-		private static PreAndPostClassHolder instance;
+	protected static class PreAndPostClassHolder {
 
 		private Object preObject;
 		private Object postObject;
@@ -147,11 +149,6 @@ public abstract class AbstractReflectiveMethodTester {
 
 		public Object getPreObject() {
 			return preObject;
-		}
-
-		public static void reset() {
-			instance = null;
-			
 		}
 
 		public Object getPostObject() {
@@ -167,40 +164,36 @@ public abstract class AbstractReflectiveMethodTester {
 		}
 
 		@SuppressWarnings("nls")
-		static PreAndPostClassHolder getInstance(Class<?> preClass, Class<?> postClass, Object... parameterizedValues) {
-			if (instance == null) {
-				instance = new PreAndPostClassHolder();
-				try {
-					instance.preObject = preClass.newInstance();
-					instance.postObject = postClass.newInstance();
-				} catch (InstantiationException | IllegalAccessException e) {
-					// this should never happen
-					e.printStackTrace();
-				}
+		public PreAndPostClassHolder(Class<?> preClass, Class<?> postClass, Class<?>... parameterizedValues) {
+			try {
+				this.preObject = preClass.newInstance();
+				this.postObject = postClass.newInstance();
+			} catch (InstantiationException | IllegalAccessException e) {
+				// this should never happen
+				e.printStackTrace();
+			}
 
-				instance.preMethods = initMethodMap(preClass, parameterizedValues);
-				instance.postMethods = initMethodMap(postClass, parameterizedValues);
+			this.preMethods = initMethodMap(preClass, parameterizedValues);
+			this.postMethods = initMethodMap(postClass, parameterizedValues);
 
-				/**
-				 * We only need to check this case here, because the other case
-				 * (where there are more methods in the pre-Class), already gets
-				 * tested in the AbstractReflectiveMethodTester.test() method.
-				 * 
-				 * Additionally, we do not want to simply compare the number of
-				 * methods, because that would not give us the information which
-				 * method exactly is missing.
-				 */
-				if (instance.postMethods.size() > instance.preMethods.size()) {
-					for (Method m : instance.postMethods.values()) {
+			/**
+			 * We only need to check this case here, because the other case
+			 * (where there are more methods in the pre-Class), already gets
+			 * tested in the AbstractReflectiveMethodTester.test() method.
+			 * 
+			 * Additionally, we do not want to simply compare the number of
+			 * methods, because that would not give us the information which
+			 * method exactly is missing.
+			 */
+			if (this.postMethods.size() > this.preMethods.size()) {
+				for (Method m : this.postMethods.values()) {
 
-						Method preMethod = instance.preMethods.get(m.getName());
+					Method preMethod = this.preMethods.get(m.getName());
 
-						assertNotNull(String.format("Expected method [%s] not present in class [%s]", m.getName(),
-								instance.preObject.getClass().getName()), preMethod);
-					}
+					assertNotNull(String.format("Expected method [%s] not present in class [%s]", m.getName(),
+							this.preObject.getClass().getName()), preMethod);
 				}
 			}
-			return instance;
 		}
 
 		/**
@@ -212,7 +205,7 @@ public abstract class AbstractReflectiveMethodTester {
 		 * @param parameterizedValues
 		 * @return
 		 */
-		private static Map<String, Method> initMethodMap(Class<?> clazz, Object... parameterizedValues) {
+		private static Map<String, Method> initMethodMap(Class<?> clazz, Class<?>... parameterizedValues) {
 			Map<String, Method> retVal = Arrays.stream(clazz.getDeclaredMethods())
 					// only take methods with a return value
 					.filter(m -> !m.getReturnType().equals(Void.TYPE))
@@ -227,7 +220,8 @@ public abstract class AbstractReflectiveMethodTester {
 		 * parameterTypes) needs a method name and thus only returns one
 		 * method..
 		 */
-		private static boolean hasDesiredParameters(Class<?>[] methodParameterClasses, Object... parameterizedValues) {
+		private static boolean hasDesiredParameters(Class<?>[] methodParameterClasses,
+				Class<?>... parameterizedValues) {
 
 			if (methodParameterClasses == null) {
 				return parameterizedValues == null || parameterizedValues.length == 0;
@@ -238,7 +232,7 @@ public abstract class AbstractReflectiveMethodTester {
 			}
 
 			for (int i = 0; i < methodParameterClasses.length; i++) {
-				if (!isEquivalentClass(methodParameterClasses[i], parameterizedValues[i].getClass())) {
+				if (!isEquivalentClass(methodParameterClasses[i], parameterizedValues[i])) {
 					return false;
 				}
 			}

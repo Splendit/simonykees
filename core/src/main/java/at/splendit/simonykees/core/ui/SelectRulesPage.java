@@ -80,8 +80,10 @@ public class SelectRulesPage extends AbstractWizardPage {
 		rulesCheckboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.CHECK | SWT.BORDER);
 		rulesCheckboxTableViewer.setContentProvider(new ArrayContentProvider());
 
-		// the selection listener for the selected row (has nothing to do with
-		// the checkbox)
+		/*
+		 * the selection listener for the selected row (has nothing to do with
+		 * the checkbox)
+		 */
 		rulesCheckboxTableViewer.addSelectionChangedListener(createSelectionChangedListener());
 
 		rulesCheckboxTableViewer.setInput(rules);
@@ -144,7 +146,6 @@ public class SelectRulesPage extends AbstractWizardPage {
 		List<RefactoringRule<? extends ASTVisitor>> rules = new ArrayList<>();
 		Arrays.asList(rulesCheckboxTableViewer.getCheckedElements())
 				.forEach(rule -> rules.add((RefactoringRule<? extends ASTVisitor>) rule));
-		;
 		return rules;
 	}
 }
