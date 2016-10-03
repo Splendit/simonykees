@@ -7,6 +7,11 @@ public class ArithmethicAssignmentRule {
 	private int b = 3;
 	private int q = 3;
 
+	public String a(String i) {
+		i = i + "aaa"; //$NON-NLS-1$
+		return i;
+	}
+	
 	public int a(int i) {
 		i = i + 1;
 		return i;

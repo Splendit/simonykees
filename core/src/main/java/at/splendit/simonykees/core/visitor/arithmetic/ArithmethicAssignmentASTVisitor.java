@@ -9,14 +9,15 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import at.splendit.simonykees.core.helper.ArithmeticHelper;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
-
 /**
- * This visitor is build for assignments of arithmetic expressions for base numeric types
+ * This visitor is build for assignments of arithmetic expressions for base
+ * numeric types
  * 
  * 
- * Examples: 
+ * Examples:
  * 
  * a = a + 3; => a += 3;
+ * 
  * @author mgh
  *
  */
@@ -29,19 +30,21 @@ public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisito
 
 				Assignment replacementNode = (Assignment) ASTNode.copySubtree(node.getAST(), node);
 				SimpleName leftHandSide = (SimpleName) replacementNode.getLeftHandSide();
-				//TODO: check if the leftHandSide is a basic arithmetic type.
-				// String concatenations could be messed up by optimization. 
 				InfixExpression rightHandSide = (InfixExpression) replacementNode.getRightHandSide();
-				
-				ArithmeticExpressionASTVisitor arithExpASTVisitor = new ArithmeticExpressionASTVisitor(astRewrite, leftHandSide);
-				
-				rightHandSide.accept(arithExpASTVisitor);
-				
-				if(arithExpASTVisitor.getNewOperator() != null){
-					replacementNode.setOperator(ArithmeticHelper.generateOperator(arithExpASTVisitor.getNewOperator()));					
-					astRewrite.replace(node, replacementNode, null);
+
+				if (!node.getRightHandSide().resolveTypeBinding().isPrimitive()) {
+					return true;
 				}
-				else {
+
+				ArithmeticExpressionASTVisitor arithExpASTVisitor = new ArithmeticExpressionASTVisitor(astRewrite,
+						leftHandSide);
+
+				rightHandSide.accept(arithExpASTVisitor);
+
+				if (arithExpASTVisitor.getNewOperator() != null) {
+					replacementNode.setOperator(ArithmeticHelper.generateOperator(arithExpASTVisitor.getNewOperator()));
+					astRewrite.replace(node, replacementNode, null);
+				} else {
 					replacementNode.delete();
 				}
 			}
