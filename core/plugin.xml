@@ -2,53 +2,45 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
-         point="org.eclipse.ui.commands">
-      <category
-            name="sample category"
-            id="category.sample.id">
-      </category>
-      <command
-            name="sample command"
-            categoryId="category.sample.id"
-            id="command.sample.id">
-      </command>
-   </extension>
-
-   <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            commandId="command.sample.id"
-            class="at.splendit.simonykees.core.SampleHandler">
-      </handler>
-   </extension>
-
-   <extension
          point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+      <menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=org.eclipse.jdt.ui.refactoring.menu">
          <menu
-               id="menu.sample.id"
-               label="Sample &amp;Menu">
+               label="%menu.label">
             <command
-                  commandId="command.sample.id"
-                  mnemonic="S"
-                  id="command.sample.menu.memonic.id">
+                  commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
+                  label="%command.label.select_rules_wizard"
+                  style="push">
             </command>
          </menu>
       </menuContribution>
       <menuContribution
-            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
-         <toolbar
-               id="toolbar.sample.id">
+            locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=org.eclipse.jdt.ui.refactoring.menu">
+         <menu
+               label="%menu.label">
             <command
-                  commandId="command.sample.id"
-                  icon="icons/sample.gif"
-                  tooltip="&amp;sample Sample Action"
-                  id="sampleAction.id">
+                  commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
+                  label="%command.label.select_rules_wizard"
+                  style="push">
             </command>
-         </toolbar>
+         </menu>
+      </menuContribution>
+      <menuContribution locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.refactoring.menu">
+         <menu
+               label="%menu.label">
+            <command
+                  commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
+                  label="%command.label.select_rules_wizard"
+                  style="push">
+            </command>
+         </menu>
       </menuContribution>
    </extension>
-
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="at.splendit.simonykees.core.handler.SelectRulesWizardHandler"
+            id="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
+            name="%command.name.select_rules_wizard_handler">
+      </command>
+   </extension>
 </plugin>

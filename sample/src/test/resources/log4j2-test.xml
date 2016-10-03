@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="error" strict="true" name="simonykees">
+    <appenders>
+        <appender type="Console" name="Console">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        </appender>
+    </appenders>
+    <loggers>
+        <root level="debug">
+            <appender-ref ref="Console" />
+        </root>
+    </loggers>
+</configuration>

@@ -1,0 +1,14 @@
+package at.splendit.simonykees.core.rule;
+
+import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.core.visitor.tryWithResource.TryWithResourceASTVisitor;
+
+public class TryWithResourceRule extends RefactoringRule<TryWithResourceASTVisitor> {
+
+	public TryWithResourceRule(Class<TryWithResourceASTVisitor> visitor) {
+		super(visitor);
+		this.name = Messages.TryWithResourceRule_name;
+		this.description = Messages.TryWithResourceRule_description;
+	}
+
+}

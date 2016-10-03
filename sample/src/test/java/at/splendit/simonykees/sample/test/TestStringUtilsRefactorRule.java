@@ -1,0 +1,44 @@
+package at.splendit.simonykees.sample.test;
+
+import java.util.Arrays;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+@RunWith(Parameterized.class)
+public class TestStringUtilsRefactorRule extends AbstractReflectiveMethodTester {
+
+	private static PreAndPostClassHolder holder;
+
+	public TestStringUtilsRefactorRule(String value) {
+		super(value);
+	}
+
+	@SuppressWarnings("nls")
+	@Parameters(name = "{index}: {0}")
+	public static Iterable<? extends String> data() {
+		// return Arrays.asList(""); // FIXME this case does not work. See JIRA: https://jira.splendit.loc/browse/LJA-119.
+		return Arrays.asList("notEmpty", "  trimMe  ", "equal", "endsWith", "startWith", "contains", "replaceMe",
+				"lowerCASE", "UPPERcase", "please,dont,split,me", "please;dont split,me");
+	}
+
+	@Test
+	public void test() throws Exception {
+		super.test();
+	}
+
+	@Override
+	protected PreAndPostClassHolder getHolder() {
+		return holder;
+	}
+
+	@BeforeClass
+	public static void setUptHolderInstance() throws Exception {
+		holder = new PreAndPostClassHolder(at.splendit.simonykees.sample.preRule.StringUtilsRefactorRule.class,
+				at.splendit.simonykees.sample.postRule.StringUtilsRefactorRule.class, String.class);
+	}
+
+}
