@@ -22,7 +22,7 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 	private ASTRewrite astRewrite;
 	private InfixExpression.Operator newOperator;
 	private InfixExpression.Operator recursionOperator;
-
+	
 	public ArithmeticExpressionASTVisitor(ASTRewrite astRewrite, SimpleName optimizationVariable) {
 		super();
 		this.astRewrite = astRewrite;
@@ -30,16 +30,12 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 		varName = optimizationVariable.getIdentifier();
 	}
 
-	// extendedOperands are unchecked
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(InfixExpression node) {
 		if (newOperator != null) {
 			return false;
 		}
 
-		Expression infixLeftOperand = node.getLeftOperand();
-		Expression infixRightOperand = node.getRightOperand();
 		InfixExpression.Operator currentOperator = node.getOperator();
 
 		if (recursionOperator == null) {
@@ -50,45 +46,60 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 			return false;
 		}
 
-		List<Expression> extendedOperands = node.extendedOperands();
-
 		if (InfixExpression.Operator.PLUS.equals(currentOperator)
 				|| InfixExpression.Operator.MINUS.equals(currentOperator)
 				|| InfixExpression.Operator.DIVIDE.equals(currentOperator)
 				|| InfixExpression.Operator.TIMES.equals(currentOperator)) {
 
-			if (isSimpleNameAndEqualsVarName(infixLeftOperand)) {
-				newOperator = currentOperator;
-				if (extendedOperands.isEmpty()) {
-					astRewrite.replace(node, infixRightOperand, null);
-				} else {
-					// Moving all child nodes one leaf left if extendedOperands
-					// are present
-					astRewrite.replace(infixLeftOperand, infixRightOperand, null);
-					Expression moveTarget = extendedOperands.get(0);
-					astRewrite.getListRewrite(node , InfixExpression.EXTENDED_OPERANDS_PROPERTY).remove(moveTarget, null);
-					astRewrite.replace(infixRightOperand, astRewrite.createMoveTarget(moveTarget), null);
-				}
+			if (isSimpleNameAndEqualsVarName(node.getLeftOperand())) {
+				replace(node, true);
 				return false;
 			}
-			if (isSimpleNameAndEqualsVarName(infixRightOperand)
+			if (isSimpleNameAndEqualsVarName(node.getRightOperand())
 					&& (InfixExpression.Operator.PLUS.equals(currentOperator)
 							|| InfixExpression.Operator.TIMES.equals(currentOperator))) {
-				newOperator = currentOperator;
-				if (extendedOperands.isEmpty()) {
-					astRewrite.replace(node, infixLeftOperand, null);
-				} else {
-					Expression moveTarget = extendedOperands.get(0);
-					astRewrite.getListRewrite(node , InfixExpression.EXTENDED_OPERANDS_PROPERTY).remove(moveTarget, null);
-					astRewrite.replace(infixRightOperand, astRewrite.createMoveTarget(moveTarget), null);
+				replace(node, false);
+				return false;
+			}
+			
+			@SuppressWarnings("unchecked")
+			List<Expression> extendedOperands = node.extendedOperands();
+			
+			for (Expression extendedOperand: extendedOperands){
+				if (isSimpleNameAndEqualsVarName(extendedOperand)
+						&& (InfixExpression.Operator.PLUS.equals(currentOperator)
+								|| InfixExpression.Operator.TIMES.equals(currentOperator))) {
+					newOperator = node.getOperator();
+					astRewrite.getListRewrite(node , InfixExpression.EXTENDED_OPERANDS_PROPERTY).remove(extendedOperand, null);
 				}
 				return false;
 			}
+			
+			
 
 			// Other Types of nodes are not relevant for this use case
 			return true;
 		}
 		return false;
+	}
+	/**	Replacement implementation for variable substitution 
+	 * 
+	 * @param replace node that is manipulated and got the variable as a leaf
+	 * @param left true if the left leaf contains variable, otherwise false
+	 */
+	private void replace(InfixExpression replace, boolean left){
+		newOperator = replace.getOperator();
+		if (replace.extendedOperands().isEmpty()) {
+			astRewrite.replace(replace, left ? replace.getRightOperand(): replace.getLeftOperand(), null);
+		} else {
+			if(left){
+				astRewrite.replace(replace.getLeftOperand(), replace.getRightOperand(), null);
+			}
+			
+			Expression moveTarget = (Expression) replace.extendedOperands().get(0);
+			astRewrite.getListRewrite(replace , InfixExpression.EXTENDED_OPERANDS_PROPERTY).remove(moveTarget, null);
+			astRewrite.replace(replace.getRightOperand(), astRewrite.createMoveTarget(moveTarget), null);
+		}
 	}
 
 	public InfixExpression.Operator getNewOperator() {
