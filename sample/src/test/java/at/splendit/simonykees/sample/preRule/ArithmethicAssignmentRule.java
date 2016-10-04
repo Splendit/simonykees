@@ -97,4 +97,29 @@ public class ArithmethicAssignmentRule {
 		return i;
 	}
 
+	public int r(int i) {
+		i = 1 + 2 + i + 4 + i;
+		return i;
+	}
+
+	public int s(int i) {
+		i = 1 * 2 + 4 * i;
+		return i;
+	}
+
+	public int t(int i) {
+		i = i * 4 + i;
+		return i;
+	}
+
+	public int u(int i) {
+		i = 1 - i + i + 4 + i;
+		return i;
+	}
+
+	public int v(int i) {
+		i = i * (2 + 4 + i);
+		return i;
+	}
+
 }
