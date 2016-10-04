@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.visitor.arithmetic;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -50,11 +51,13 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 				|| InfixExpression.Operator.MINUS.equals(currentOperator)
 				|| InfixExpression.Operator.DIVIDE.equals(currentOperator)
 				|| InfixExpression.Operator.TIMES.equals(currentOperator)) {
-
+			
+			//leftOperand all operators are legal
 			if (isSimpleNameAndEqualsVarName(node.getLeftOperand())) {
 				replace(node, true);
 				return false;
 			}
+			//rightOperand & extendedOperands ony +/* are legal
 			if (isSimpleNameAndEqualsVarName(node.getRightOperand())
 					&& (InfixExpression.Operator.PLUS.equals(currentOperator)
 							|| InfixExpression.Operator.TIMES.equals(currentOperator))) {
@@ -74,10 +77,6 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 					return false;
 				}
 			}
-			
-			
-
-			// Other Types of nodes are not relevant for this use case
 			return true;
 		}
 		return false;
@@ -106,8 +105,8 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 		return newOperator;
 	}
 
-	private boolean isSimpleNameAndEqualsVarName(Expression expression) {
-		return expression instanceof SimpleName && ((SimpleName) expression).getIdentifier().equals(varName);
+	private boolean isSimpleNameAndEqualsVarName(ASTNode astNode) {
+		return astNode instanceof SimpleName && ((SimpleName) astNode).getIdentifier().equals(varName);
 	}
 
 	private boolean hasSameOperationLevel(InfixExpression.Operator operator1, InfixExpression.Operator operator2) {
