@@ -11,7 +11,7 @@ public class ArithmethicAssignmentRule {
 		i = i + "aaa"; //$NON-NLS-1$
 		return i;
 	}
-	
+
 	public int a(int i) {
 		i += 1;
 		return i;
@@ -89,6 +89,11 @@ public class ArithmethicAssignmentRule {
 
 	public int p(int i) {
 		i /= 4;
+		return i;
+	}
+
+	public int q(int i) {
+		i += 1 + 2 + 3 + 4;
 		return i;
 	}
 

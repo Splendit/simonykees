@@ -71,8 +71,8 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 								|| InfixExpression.Operator.TIMES.equals(currentOperator))) {
 					newOperator = node.getOperator();
 					astRewrite.getListRewrite(node , InfixExpression.EXTENDED_OPERANDS_PROPERTY).remove(extendedOperand, null);
+					return false;
 				}
-				return false;
 			}
 			
 			
