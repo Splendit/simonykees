@@ -21,6 +21,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 	private static final String IS_EMPTY = "isEmpty"; //$NON-NLS-1$
 	private static final String TRIM = "trim"; //$NON-NLS-1$
 	private static final String EQUALS = "equals"; //$NON-NLS-1$
+	private static final String EQUALS_IGNORE_CASE = "equalsIgnoreCase"; //$NON-NLS-1$
 	private static final String ENDSWITH = "endsWith"; //$NON-NLS-1$
 	private static final String INDEXOF = "indexOf"; //$NON-NLS-1$
 	private static final String CONTAINS = "contains"; //$NON-NLS-1$
@@ -58,6 +59,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 			case IS_EMPTY:
 			case TRIM:
 			case EQUALS:
+			case EQUALS_IGNORE_CASE:
 			case ENDSWITH:
 			case INDEXOF:
 			case CONTAINS:
