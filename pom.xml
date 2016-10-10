@@ -176,4 +176,41 @@
 			<url>http://nexus.splendit.loc/repository/maven-simonykees-snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
+	
+	<developers>
+		<developer>
+			<id>hannes.schweighofer</id>
+			<name>Hannes Schweighofer</name>
+			<email>hannes.schweighofer@splendit.at</email>
+		</developer>
+		<developer>
+			<id>ludwig.werzowa</id>
+			<name>Ludwig Werzova</name>
+			<email>ludwig.werzowa@splendit.at</email>
+		</developer>
+		<developer>
+			<id>martin.huter</id>
+			<name>Martin Huter</name>
+			<email>martin.huter@splendit.at</email>
+		</developer>
+	</developers>
+	
+	<issueManagement>
+		<system>JIRA</system>
+		<url>https://jira.splendit.loc/browse/SIM</url>
+	</issueManagement>
+	
+	<scm>
+		<connection>scm:git:ssh://git@bitbucket.splendit.loc:7999/lm/simonykees.git</connection>
+		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees</url>
+	</scm>
+	
+	<licenses>
+		<!-- TODO -->
+	</licenses>
+	
+	<organization>
+		<name>Splendit IT-Consulting GmbH</name>
+		<url>https://splendit.at/</url>
+	</organization>
 </project>
