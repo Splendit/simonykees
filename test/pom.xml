@@ -19,4 +19,8 @@
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
+	
+	<scm>
+		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/test</url>
+	</scm>
 </project>

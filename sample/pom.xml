@@ -37,4 +37,8 @@
 		</dependency>
 	</dependencies>
 
+	<scm>
+		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/sample</url>
+	</scm>
+
 </project>
