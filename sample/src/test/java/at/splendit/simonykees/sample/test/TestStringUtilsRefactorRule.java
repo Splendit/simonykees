@@ -20,9 +20,11 @@ public class TestStringUtilsRefactorRule extends AbstractReflectiveMethodTester 
 	@SuppressWarnings("nls")
 	@Parameters(name = "{index}: {0}")
 	public static Iterable<? extends String> data() {
-		// return Arrays.asList(""); // FIXME this case does not work. See JIRA: https://jira.splendit.loc/browse/LJA-119.
+		// return Arrays.asList(""); // FIXME this case does not work. See JIRA:
+		// https://jira.splendit.loc/browse/LJA-119.
 		return Arrays.asList("notEmpty", "  trimMe  ", "equal", "endsWith", "startWith", "contains", "replaceMe",
-				"lowerCASE", "UPPERcase", "please,dont,split,me", "please;dont split,me");
+				"lowerCASE", "UPPERcase", "please,dont,split,me", "please;dont split,me",
+				"5|12345|value1|value2|value3|value4+5|777|value1|value2|value3|value4?5|777|value1|value2|value3|value4+");
 	}
 
 	@Test

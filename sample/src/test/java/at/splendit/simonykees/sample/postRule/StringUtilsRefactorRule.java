@@ -1,5 +1,6 @@
 package at.splendit.simonykees.sample.postRule;
 
+import java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -33,13 +34,13 @@ public class StringUtilsRefactorRule {
 
 	public boolean testEquals(String testString) {
 		String sometimesExpectedString = testString.replaceAll("a", "b");
-		
+
 		return StringUtils.equals(testString, sometimesExpectedString);
 	}
 
 	public boolean testEqualsIgnoreCase(String testString) {
 		String sometimesExpectedString = testString.replaceAll("a", "b");
-		
+
 		return StringUtils.equalsIgnoreCase(testString, sometimesExpectedString);
 	}
 
@@ -78,7 +79,39 @@ public class StringUtilsRefactorRule {
 	}
 
 	public String[] testSplit(String testString) {
-		return StringUtils.split(testString, ",");
+		return testString.split(",");
 	}
-	
+
+	public String complexSplit(String testString) {
+		testString = split(testString, "?");
+		testString = split(testString, "|");
+		testString = split(testString, ",");
+		testString = split(testString, "a");
+
+		return testString;
+	}
+
+	private String split(String input, String splitSign) {
+		if (StringUtils.contains(input, splitSign)) {
+			if (StringUtils.equals("?", splitSign)) {
+				/*
+				 * We need to escape the "?" because otherwise there is the
+				 * following exception: java.util.regex.PatternSyntaxException:
+				 * Dangling meta character '?' near index 0
+				 */
+				splitSign = StringUtils.replace(splitSign, "?", "\\?");
+			}
+			if (StringUtils.equals("|", splitSign)) {
+				/*
+				 * We need to escape the "|" because otherwise an empty String
+				 * is taken as split sign.
+				 */
+				splitSign = StringUtils.replace(splitSign, "|", "\\|");
+			}
+			return Arrays.toString(input.split(splitSign));
+		} else {
+			return input;
+		}
+	}
+
 }

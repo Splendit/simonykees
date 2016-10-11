@@ -1,5 +1,7 @@
 package at.splendit.simonykees.sample.preRule;
 
+import java.util.Arrays;
+
 /**
  * This test is a manual test to provide tests for the StringUtils replacement
  * 
@@ -31,13 +33,13 @@ public class StringUtilsRefactorRule {
 
 	public boolean testEquals(String testString) {
 		String sometimesExpectedString = testString.replaceAll("a", "b");
-		
+
 		return testString.equals(sometimesExpectedString);
 	}
 
 	public boolean testEqualsIgnoreCase(String testString) {
 		String sometimesExpectedString = testString.replaceAll("a", "b");
-		
+
 		return testString.equalsIgnoreCase(sometimesExpectedString);
 	}
 
@@ -78,5 +80,36 @@ public class StringUtilsRefactorRule {
 	public String[] testSplit(String testString) {
 		return testString.split(",");
 	}
-	
+
+	public String complexSplit(String testString) {
+		testString = split(testString, "?");
+		testString = split(testString, "|");
+		testString = split(testString, ",");
+		testString = split(testString, "a");
+
+		return testString;
+	}
+
+	private String split(String input, String splitSign) {
+		if (input.contains(splitSign)) {
+			if ("?".equals(splitSign)) {
+				/*
+				 * We need to escape the "?" because otherwise there is the
+				 * following exception: java.util.regex.PatternSyntaxException:
+				 * Dangling meta character '?' near index 0
+				 */
+				splitSign = splitSign.replace("?", "\\?");
+			}
+			if ("|".equals(splitSign)) {
+				/*
+				 * We need to escape the "|" because otherwise an empty String
+				 * is taken as split sign.
+				 */
+				splitSign = splitSign.replace("|", "\\|");
+			}
+			return Arrays.toString(input.split(splitSign));
+		} else
+			return input;
+	}
+
 }
