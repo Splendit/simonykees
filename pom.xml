@@ -7,7 +7,7 @@
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>simonykees :: parent</name>
-	<description>simonykees parent</description>
+	<description>simonykees Parent</description>
 
 	<licenses>
 		<license>

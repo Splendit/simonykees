@@ -10,6 +10,7 @@
 	<artifactId>simonykees.feature</artifactId>
 	<packaging>eclipse-feature</packaging>
 	<name>simonykees :: feature</name>
+	<description>simonykees Feature</description>
 
 	<scm>
 		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/feature</url>

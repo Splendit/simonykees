@@ -10,6 +10,7 @@
 	<artifactId>simonykees.site</artifactId>
 	<packaging>eclipse-repository</packaging>
 	<name>simonykees :: update site</name>
+	<description>simonykees Update Site</description>
 
 	<scm>
 		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/site</url>
