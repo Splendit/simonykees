@@ -178,6 +178,18 @@ public final class SimonykeesUtil {
 	 * @throws JavaModelException
 	 *             if an exception occurs while accessing its corresponding
 	 *             resource
+	 * 
+	 *             if this edit can not be applied to the compilation unit's
+	 *             buffer. Reasons include: This compilation unit does not exist
+	 *             (IJavaModelStatusConstants.ELEMENT_DOES_NOT_EXIST). The
+	 *             provided edit can not be applied as there is a problem with
+	 *             the text edit locations
+	 *             (IJavaModelStatusConstants.BAD_TEXT_EDIT_LOCATION).
+	 * 
+	 *             if the contents of the original element cannot be accessed.
+	 *             Reasons include: The original Java element does not exist
+	 *             (ELEMENT_DOES_NOT_EXIST)
+	 * 
 	 */
 	public static DocumentChange applyRule(ICompilationUnit workingCopy,
 			Class<? extends AbstractASTRewriteASTVisitor> ruleClazz)
