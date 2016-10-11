@@ -9,9 +9,76 @@
 	<name>simonykees :: parent</name>
 	<description>simonykees parent</description>
 
+	<licenses>
+		<license>
+			<name>Splendit IT-Consulting GmbH</name>
+			<comments>Proprietary and confidential</comments>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>Splendit IT-Consulting GmbH</name>
+		<url>https://splendit.at/</url>
+	</organization>
+
+	<developers>
+		<developer>
+			<id>hannes.schweighofer</id>
+			<name>Hannes Schweighofer</name>
+			<email>hannes.schweighofer@splendit.at</email>
+		</developer>
+		<developer>
+			<id>ludwig.werzowa</id>
+			<name>Ludwig Werzova</name>
+			<email>ludwig.werzowa@splendit.at</email>
+		</developer>
+		<developer>
+			<id>martin.huter</id>
+			<name>Martin Huter</name>
+			<email>martin.huter@splendit.at</email>
+		</developer>
+	</developers>
+
 	<prerequisites>
 		<maven>3.0</maven>
 	</prerequisites>
+
+	<modules>
+		<module>core</module>
+		<module>test</module>
+		<module>feature</module>
+		<module>site</module>
+		<module>sample</module>
+	</modules>
+
+	<scm>
+		<connection>scm:git:ssh://git@bitbucket.splendit.loc:7999/lm/simonykees.git</connection>
+		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse</url>
+		<developerConnection>scm:git:ssh://git@bitbucket.splendit.loc:7999/lm/simonykees.git</developerConnection>
+	</scm>
+
+	<issueManagement>
+		<system>JIRA</system>
+		<url>https://jira.splendit.loc/browse/SIM</url>
+	</issueManagement>
+
+	<distributionManagement>
+		<repository>
+			<id>nexus</id>
+			<name>Nexus Simonykees Releases</name>
+			<url>http://nexus.splendit.loc/repository/maven-simonykees-releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>nexus</id>
+			<name>Nexus Simonykees Snapshots</name>
+			<url>http://nexus.splendit.loc/repository/maven-simonykees-snapshots/</url>
+		</snapshotRepository>
+		<site>
+			<id>nexus</id>
+			<name>Nexus Simonykees Site</name>
+			<url>dav:https://nexus.splendit.loc/repository/maven-simonykees-site/</url>
+		</site>
+	</distributionManagement>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,7 +87,7 @@
 		<tycho.extras.version>0.25.0</tycho.extras.version>
 		<tycho.test.platformArgs />
 		<tycho.test.jvmArgs>-Xmx512m</tycho.test.jvmArgs>
-		
+
 		<maven.site.version>3.5.1</maven.site.version>
 		<maven.wagon.version>2.10</maven.wagon.version>
 		<maven.javadoc.version>2.10.4</maven.javadoc.version>
@@ -31,7 +98,7 @@
 		<maven.cobertura.version>2.7</maven.cobertura.version>
 		<maven.findbugs.version>3.0.4</maven.findbugs.version>
 		<maven.changelog.version>2.3</maven.changelog.version>
-		
+
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -130,6 +197,7 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+
 	<profiles>
 		<profile>
 			<id>macosx</id>
@@ -183,70 +251,7 @@
 			</build>
 		</profile>
 	</profiles>
-	<modules>
-		<module>core</module>
-		<module>test</module>
-		<module>feature</module>
-		<module>site</module>
-		<module>sample</module>
-	</modules>
-	
-	<distributionManagement>
-		<repository>
-			<id>nexus</id>
-			<name>Nexus Simonykees Releases</name>
-			<url>http://nexus.splendit.loc/repository/maven-simonykees-releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>nexus</id>
-			<name>Nexus Simonykees Snapshots</name>
-			<url>http://nexus.splendit.loc/repository/maven-simonykees-snapshots/</url>
-		</snapshotRepository>
-		<site>
-			<id>nexus</id>
-			<name>Nexus Simonykees Site</name>
-			<url>dav:https://nexus.splendit.loc/repository/maven-simonykees-site/</url>
-		</site>
-	</distributionManagement>
-	
-	<developers>
-		<developer>
-			<id>hannes.schweighofer</id>
-			<name>Hannes Schweighofer</name>
-			<email>hannes.schweighofer@splendit.at</email>
-		</developer>
-		<developer>
-			<id>ludwig.werzowa</id>
-			<name>Ludwig Werzova</name>
-			<email>ludwig.werzowa@splendit.at</email>
-		</developer>
-		<developer>
-			<id>martin.huter</id>
-			<name>Martin Huter</name>
-			<email>martin.huter@splendit.at</email>
-		</developer>
-	</developers>
-	
-	<issueManagement>
-		<system>JIRA</system>
-		<url>https://jira.splendit.loc/browse/SIM</url>
-	</issueManagement>
-	
-	<scm>
-		<connection>scm:git:ssh://git@bitbucket.splendit.loc:7999/lm/simonykees.git</connection>
-		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse</url>
-		<developerConnection>scm:git:ssh://git@bitbucket.splendit.loc:7999/lm/simonykees.git</developerConnection>
-	</scm>
-	
-	<licenses>
-		<!-- TODO -->
-	</licenses>
-	
-	<organization>
-		<name>Splendit IT-Consulting GmbH</name>
-		<url>https://splendit.at/</url>
-	</organization>
-	
+
 	<reporting>
 		<plugins>
 			<plugin>
@@ -272,16 +277,10 @@
 				<artifactId>maven-surefire-report-plugin</artifactId>
 				<version>${maven.surefire.version}</version>
 			</plugin>
-			<!-- <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pmd-plugin</artifactId>
-				<version>${maven.pmd.version}</version>
-			</plugin> -->
-			<!-- <plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>${maven.cobertura.version}</version>
-			</plugin> -->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-pmd-plugin</artifactId> 
+				<version>${maven.pmd.version}</version> </plugin> -->
+			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>cobertura-maven-plugin</artifactId> 
+				<version>${maven.cobertura.version}</version> </plugin> -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>findbugs-maven-plugin</artifactId>
@@ -294,4 +293,5 @@
 			</plugin>
 		</plugins>
 	</reporting>
+
 </project>
