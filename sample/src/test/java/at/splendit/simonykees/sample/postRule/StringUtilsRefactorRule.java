@@ -37,6 +37,12 @@ public class StringUtilsRefactorRule {
 		return StringUtils.equals(testString, sometimesExpectedString);
 	}
 
+	public boolean testEqualsIgnoreCase(String testString) {
+		String sometimesExpectedString = testString.replaceAll("a", "b");
+		
+		return StringUtils.equalsIgnoreCase(testString, sometimesExpectedString);
+	}
+
 	public boolean testEndsWith(String testString) {
 		String sometimesExpectedString = "With";
 
