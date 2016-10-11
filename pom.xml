@@ -20,6 +20,9 @@
 		<tycho.extras.version>0.25.0</tycho.extras.version>
 		<tycho.test.platformArgs />
 		<tycho.test.jvmArgs>-Xmx512m</tycho.test.jvmArgs>
+		
+		<maven.site.version>3.5.1</maven.site.version>
+		<maven.wagon.version>2.10</maven.wagon.version>
 
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -75,6 +78,20 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>${maven.site.version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.maven.wagon</groupId>
+						<artifactId>wagon-webdav-jackrabbit</artifactId>
+						<version>${maven.wagon.version}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<locales>en,fr,de</locales>
+				</configuration>
 			</plugin>
 		</plugins>
 
@@ -175,6 +192,11 @@
 			<name>Nexus Simonykees Snapshots</name>
 			<url>http://nexus.splendit.loc/repository/maven-simonykees-snapshots/</url>
 		</snapshotRepository>
+		<site>
+			<id>nexus</id>
+			<name>Nexus Simonykees Site</name>
+			<url>dav:https://nexus.splendit.loc/repository/maven-simonykees-site/</url>
+		</site>
 	</distributionManagement>
 	
 	<developers>
@@ -202,7 +224,8 @@
 	
 	<scm>
 		<connection>scm:git:ssh://git@bitbucket.splendit.loc:7999/lm/simonykees.git</connection>
-		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees</url>
+		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse</url>
+		<developerConnection>scm:git:ssh://git@bitbucket.splendit.loc:7999/lm/simonykees.git</developerConnection>
 	</scm>
 	
 	<licenses>
