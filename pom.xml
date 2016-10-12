@@ -120,27 +120,27 @@
 		<dependencies>
 			<!-- simonykees -->
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>at.splendit.simonykees</groupId>
 				<artifactId>simonykees.core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>at.splendit.simonykees</groupId>
 				<artifactId>simonykees.test</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>at.splendit.simonykees</groupId>
 				<artifactId>simonykees.feature</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>at.splendit.simonykees</groupId>
 				<artifactId>simonykees.site</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>${project.groupId}</groupId>
+				<groupId>at.splendit.simonykees</groupId>
 				<artifactId>simonykees.sample</artifactId>
 				<version>${project.version}</version>
 			</dependency>
