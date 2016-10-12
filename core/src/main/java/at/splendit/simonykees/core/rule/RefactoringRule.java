@@ -15,6 +15,17 @@ import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Wrapper Class for {@link AbstractASTRewriteASTVisitor} that holds UI name,
+ * description, if its enabled and the document changes for
+ * {@link ICompilationUnit} that are processed
+ * 
+ * @author Martin Huter, Hannes Schweithofer, Ludwig Werzowa
+ *
+ * @param <T>
+ *            is the {@link AbstractASTRewriteASTVisitor} implementation that is
+ *            applied by this rule
+ */
 public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	protected String name = Messages.RefactoringRule_default_name;
