@@ -7,8 +7,14 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+/** Helper Class to generate new ASTNodes
+ * 
+ * @author Martin Huter
+ *
+ */
 public class NodeBuilder {
 
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public static MethodInvocation newMethodInvocation(AST ast, Expression optinoalExpression, SimpleName name,
 			Expression argument) {
@@ -19,6 +25,7 @@ public class NodeBuilder {
 		return resultMI;
 	}
 	
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public static MethodInvocation newMethodInvocation(AST ast, Expression optinoalExpression, SimpleName name,
 			List<Expression> arguments) {

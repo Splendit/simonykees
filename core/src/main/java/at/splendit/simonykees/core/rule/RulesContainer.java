@@ -12,12 +12,22 @@ import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVi
 import at.splendit.simonykees.core.visitor.tryWithResource.MultiCatchASTVisitor;
 import at.splendit.simonykees.core.visitor.tryWithResource.TryWithResourceASTVisitor;
 
+/** {@link RulesContainer} is a HelperClass that holds a static list of all implemented rules
+ * 
+ * @author Hannes Schweighofer
+ *
+ */
 public class RulesContainer {
 
 	private RulesContainer() {
 		// hiding the default constructor
 	}
 
+	
+	/** Is a static List of all implemented rules
+	 * 
+	 * @return a List of {@link RefactoringRule} with all used Rules is returned.
+	 */
 	public static List<RefactoringRule<? extends ASTVisitor>> getAllRules() {
 		return Arrays.asList(
 				new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),

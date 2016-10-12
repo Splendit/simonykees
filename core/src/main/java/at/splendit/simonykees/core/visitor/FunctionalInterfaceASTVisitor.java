@@ -6,20 +6,27 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 
+/**
+ * Finds anonymous classes an converts it to lambdas, if they are functional
+ * interfaces.
+ * 
+ * @author Martin Huter
+ *
+ */
 public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor {
-	
+
 	@Override
-	public boolean visit(AnonymousClassDeclaration node){
+	public boolean visit(AnonymousClassDeclaration node) {
 		ClassInstanceCreation parentNode = (ClassInstanceCreation) node.getParent();
 		ITypeBinding parentNodeTypeBinding = parentNode.getType().resolveBinding();
-		if (parentNodeTypeBinding != null){
-			if(parentNodeTypeBinding.getFunctionalInterfaceMethod() != null){
+		if (parentNodeTypeBinding != null) {
+			if (parentNodeTypeBinding.getFunctionalInterfaceMethod() != null) {
 				LambdaExpression newInitializer = node.getAST().newLambdaExpression();
 				MethodBlockASTVisitor methodBlockASTVisitor = new MethodBlockASTVisitor();
 				methodBlockASTVisitor.setAstRewrite(astRewrite);
 				node.accept(methodBlockASTVisitor);
 				Block moveBlock = methodBlockASTVisitor.getMethodBlock();
-				if(moveBlock != null){
+				if (moveBlock != null) {
 					newInitializer.setBody(moveBlock);
 					getAstRewrite().replace(parentNode, newInitializer, null);
 				}
@@ -27,12 +34,12 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 		return true;
 	}
-	
+
 	private class MethodBlockASTVisitor extends AbstractASTRewriteASTVisitor {
 		private Block methodBlock = null;
 
 		@Override
-		public boolean visit(Block node){
+		public boolean visit(Block node) {
 			methodBlock = (Block) getAstRewrite().createMoveTarget(node);
 			getAstRewrite().remove(node, null);
 			return false;
