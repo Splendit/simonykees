@@ -3,20 +3,7 @@ package at.splendit.simonykees.sample.postRule;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * This test is a manual test to provide tests for the StringUtils replacement
- * 
- * 
- * How to Test: Do unit Test -> All tests should pass. Apply the [Usage] on the
- * file. Test the file again -> All tests should still pass and all methods of
- * Strings should be replaced by the corresponding StrinUtils implementation.
- * 
- * Usage: [Right Click in Editor] -> [Simoneykees/SelectRuleWizardHandler] ->
- * [StringUtils auswählen] -> Finish This triggers the Event.
- * 
- * Event: All operations on a String should be replaced by the corresponding
- * StringUtils method.
- * 
- * @author mgh
+ * @author Martin Huter
  *
  */
 

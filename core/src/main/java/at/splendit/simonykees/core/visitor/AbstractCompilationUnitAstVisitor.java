@@ -64,7 +64,7 @@ public abstract class AbstractCompilationUnitAstVisitor extends AbstractASTRewri
 	 * @param iTypeBinding
 	 *            Is an {@link ITypeBinding} that is compared to the list of
 	 *            injected java-classes if it is related to it by polymorphism
-	 * @return
+	 * @return if the {@link ITypeBinding} is part of the registered types the return value is true
 	 */
 	protected boolean isContentofRegistertITypes(ITypeBinding iTypeBinding) {
 		boolean result = false;
