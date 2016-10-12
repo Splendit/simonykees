@@ -2,8 +2,6 @@ package at.splendit.simonykees.core.visitor.tryWithResource;
 
 import java.io.Closeable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.jdt.core.IType;
@@ -64,14 +62,12 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor
 	public boolean visit(VariableDeclarationStatement node) {
 		ITypeBinding typeBind = node.getType().resolveBinding();
 		if (isContentofRegistertITypes(typeBind)) {
-			Collection<Object> removeList = new HashSet<>();
 			for (Object iterator : node.fragments()) {
 				if (iterator instanceof VariableDeclarationFragment) {
 					VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) iterator;
 					VariableDeclarationExpression variableDeclarationExpression = node.getAST()
 							.newVariableDeclarationExpression((VariableDeclarationFragment) ASTNode
 									.copySubtree(variableDeclarationFragment.getAST(), variableDeclarationFragment));
-					removeList.add(iterator);
 					variableDeclarationExpression.setType((Type) ASTNode.copySubtree(node.getAST(), node.getType()));
 					listVDE.add(variableDeclarationExpression);
 				}

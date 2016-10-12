@@ -25,7 +25,6 @@ public class Activator extends AbstractUIPlugin {
 	
 	private static List<Job> jobs = Collections.synchronizedList(new ArrayList<>());
 	
-	boolean started;
 	/**
 	 * The constructor
 	 */
@@ -39,7 +38,6 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin  = this;
-		started = true;
 	}
 
 	/*
@@ -54,7 +52,6 @@ public class Activator extends AbstractUIPlugin {
 			jobs.clear();
 		}
 		
-		started = false;
 		super.stop(context);
 	}
 

@@ -106,12 +106,10 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 	@SuppressWarnings("unchecked")
 	public void endVisit(CompilationUnit node) {
 		if (stringUtilsRequired) {
-			node.imports();
 			ImportDeclaration stringUtilsImport = node.getAST().newImportDeclaration();
 			stringUtilsImport.setName(node.getAST().newName(STRING_UTILS_PACKAGE));
 			if (node.imports().stream().noneMatch(importDeclaration -> (new ASTMatcher())
 					.match((ImportDeclaration) importDeclaration, stringUtilsImport))) {
-				// node.imports().add(stringUtilsImport);
 				astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY).insertLast(stringUtilsImport, null);
 			}
 		}
