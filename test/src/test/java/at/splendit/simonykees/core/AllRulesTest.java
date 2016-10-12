@@ -47,7 +47,7 @@ public class AllRulesTest {
 	@Test
 	public void test() throws Exception {
 		String expectedSource = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
-		String content = new String(Files.readAllBytes(preRule));
+		String content = new String(Files.readAllBytes(preRule), StandardCharsets.UTF_8);
 		
 		IPackageFragment packageFragment = RulesTestUtil.getPackageFragement();
 		ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);
