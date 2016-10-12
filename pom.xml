@@ -59,8 +59,13 @@
 
 	<issueManagement>
 		<system>JIRA</system>
-		<url>https://jira.splendit.loc/browse/SIM</url>
+		<url>https://jira.splendit.loc/browse/SIM/</url>
 	</issueManagement>
+	
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>https://jenkins.splendit.loc/view/simonykees/</url>
+	</ciManagement>
 
 	<distributionManagement>
 		<repository>
