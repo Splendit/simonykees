@@ -83,6 +83,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<eclipse.jdt.core.version>3.10.0</eclipse.jdt.core.version>
 		<tycho.version>0.25.0</tycho.version>
 		<tycho.extras.version>0.25.0</tycho.extras.version>
 		<tycho.test.platformArgs />
@@ -117,11 +118,37 @@
 	<!-- don't manage simoneykees.samples dependencies -->
 	<dependencyManagement>
 		<dependencies>
+			<!-- simonykees -->
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>simonykees.core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>simonykees.test</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>simonykees.feature</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>simonykees.site</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>simonykees.sample</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!-- eclipse -->
 			<dependency>
 				<groupId>org.eclipse.jdt</groupId>
 				<artifactId>org.eclipse.jdt.core</artifactId>
-				<version>3.10.0</version>
+				<version>${eclipse.jdt.core.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
