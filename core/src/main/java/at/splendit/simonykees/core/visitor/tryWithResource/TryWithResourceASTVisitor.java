@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.visitor.tryWithResource;
 
+import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -16,18 +17,27 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
 
+/**
+ * The {@link TryWithResourceASTVisitor} is used to find resources in an
+ * Try-Block and moves it to the resource-head of try. A resource is a source
+ * that implements {@link Closeable} or {@link AutoCloseable}
+ * 
+ * @author Martin Huter
+ *
+ */
+
 public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor {
-	
+
 	private static final String AUTO_CLOSEABLE = "java.lang.AutoCloseable"; //$NON-NLS-1$
 	private static final String CLOSEABLE = "java.io.Closeable"; //$NON-NLS-1$
-	
+
 	private TryStatement invokingTryStatement = null;
 	private List<VariableDeclarationExpression> listVDE = new ArrayList<>();
 
 	public TryWithResourceASTVisitor() {
 		super();
 	}
-	
+
 	private TryWithResourceASTVisitor(List<IType> itypes, TryStatement invokingTryStatement) {
 		super(itypes);
 		this.invokingTryStatement = invokingTryStatement;
@@ -35,7 +45,7 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor
 
 	@Override
 	public boolean visit(TryStatement node) {
-		if (!node.equals(invokingTryStatement)){
+		if (!node.equals(invokingTryStatement)) {
 			TryWithResourceASTVisitor tryWithRes = new TryWithResourceASTVisitor(registeredITypes, node);
 			tryWithRes.setAstRewrite(astRewrite);
 			node.accept(tryWithRes);
@@ -45,12 +55,11 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor
 						.insertLast(iteratorNode, null));
 			}
 			return false;
-		}
-		else {
+		} else {
 			return true;
 		}
 	}
-	
+
 	@Override
 	public boolean visit(VariableDeclarationStatement node) {
 		ITypeBinding typeBind = node.getType().resolveBinding();
@@ -77,7 +86,7 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor
 	protected String[] relevantClasses() {
 		return new String[] { AUTO_CLOSEABLE, CLOSEABLE };
 	}
-	
+
 	private List<VariableDeclarationExpression> getListVDE() {
 		return listVDE;
 	}

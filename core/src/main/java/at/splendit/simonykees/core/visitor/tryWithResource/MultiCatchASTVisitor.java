@@ -15,6 +15,12 @@ import org.eclipse.jdt.core.dom.UnionType;
 
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * This visitor finds duplicated catch-blocks and combines it to a multi-catch-block
+ * 
+ * @author Martin Huter
+ *
+ */
 public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	// TODO: match exceptions with different name in header
@@ -35,9 +41,8 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 					SingleVariableDeclaration compareExceptionDeclaration = compareCatch.getException();
 					if (referenceExceptionType instanceof UnionType) {
 						astRewrite.getListRewrite((UnionType) referenceExceptionType, UnionType.TYPES_PROPERTY)
-								.insertLast(astRewrite.createMoveTarget(compareExceptionDeclaration.getType()),
-										null);
-						
+								.insertLast(astRewrite.createMoveTarget(compareExceptionDeclaration.getType()), null);
+
 					} else if (referenceExceptionType instanceof SimpleType) {
 						// Convert to UnionType
 						UnionType uniontype = node.getAST().newUnionType();

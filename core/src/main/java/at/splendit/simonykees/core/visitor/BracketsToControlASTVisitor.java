@@ -11,6 +11,13 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+/**
+ * ASTVisitor that searches control statements for non-block bodies and wraps it
+ * into a block.
+ * 
+ * @author Martin Huter
+ *
+ */
 public class BracketsToControlASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final Predicate<Statement> NOT_BLOCK_TEST = (nodeToTest) -> {
@@ -19,7 +26,6 @@ public class BracketsToControlASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final Predicate<Statement> NOT_BLOCK_TEST_FOR_ELSE = (nodeToTest) -> {
 		return nodeToTest != null && !(nodeToTest instanceof Block) && !(nodeToTest instanceof IfStatement);
 	};
-
 
 	@Override
 	public boolean visit(ForStatement node) {
