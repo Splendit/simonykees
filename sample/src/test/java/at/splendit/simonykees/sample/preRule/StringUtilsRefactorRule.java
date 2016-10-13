@@ -1,6 +1,7 @@
 package at.splendit.simonykees.sample.preRule;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 /**
  * This test is a manual test to provide tests for the StringUtils replacement
@@ -81,16 +82,27 @@ public class StringUtilsRefactorRule {
 		return testString.split(",");
 	}
 
-	public String complexSplit(String testString) {
-		testString = split(testString, "?");
-		testString = split(testString, "|");
-		testString = split(testString, ",");
-		testString = split(testString, "a");
+	public String testSplitCornerCase(String testString) {
+		testString = complexSplit(testString, "?", 0);
+		testString = complexSplit(testString, "|", 0);
+		testString = complexSplit(testString, ",", 0);
+		testString = complexSplit(testString, "a", 0);
 
 		return testString;
 	}
+	
+	public String testSplitCornerCaseLimit(String testString) {
+		int limit = 3;
+		
+		testString = complexSplit(testString, "?", limit);
+		testString = complexSplit(testString, "|", limit);
+		testString = complexSplit(testString, ",", limit);
+		testString = complexSplit(testString, "a", limit);
+		
+		return testString;
+	}
 
-	private String split(String input, String splitSign) {
+	private String complexSplit(String input, String splitSign, int limit) {
 		if (input.contains(splitSign)) {
 			if ("?".equals(splitSign)) {
 				/*
@@ -107,22 +119,51 @@ public class StringUtilsRefactorRule {
 				 */
 				splitSign = splitSign.replace("|", "\\|");
 			}
-			return Arrays.toString(input.split(splitSign));
+			return limit == 0 ? Arrays.toString(input.split(splitSign))
+					: Arrays.toString(input.split(splitSign, limit));
 		} else
 			return input;
 	}
-	
-	public String testReplaceCornerCase(String testString) {
+
+	public String testReplaceCornerCaseCharSequence(String testString) {
 		CharSequence c1 = new StringBuilder("a");
 		CharSequence c2 = new StringBuilder("b");
-		
-		return testString.replace(c1.toString(), c2.toString()); // FIXME see SIM-85
+
+		// FIXME see SIM-85 
+		return testString.replace(String.valueOf(c1), String.valueOf(c2));
 	}
-	
+
+	public String testReplaceCornerCaseChar(String testString) {
+		char c1 = 'a';
+		char c2 = 'b';
+
+		// FIXME see SIM-85
+		return testString.replace(String.valueOf(c1), String.valueOf(c2));
+	}
+
 	public boolean testEqualsCornerCase(String testString) {
 		Object o = "s";
+
+		return testString.equals(String.valueOf(o)); // FIXME see SIM-86
+	}
+
+	public boolean testStartsWithCornerCase(String testString) {
+		String prefix = "a";
+		int toffset = 1;
+
+		return testString.startsWith(prefix, toffset);
+	}
+	
+	public String testUpperCaseCornerCase(String testString) {
+		Locale l = Locale.GERMAN;
 		
-		return testString.equals(o.toString()); // FIXME see SIM-86
+		return testString.toUpperCase(l);
+	}
+	
+	public String testLowerCaseCornerCase(String testString) {
+		Locale l = Locale.GERMAN;
+		
+		return testString.toLowerCase(l);
 	}
 
 }
