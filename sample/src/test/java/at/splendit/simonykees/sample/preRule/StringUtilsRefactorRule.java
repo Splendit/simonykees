@@ -111,5 +111,18 @@ public class StringUtilsRefactorRule {
 		} else
 			return input;
 	}
+	
+	public String testReplaceCornerCase(String testString) {
+		CharSequence c1 = new StringBuilder("a");
+		CharSequence c2 = new StringBuilder("b");
+		
+		return testString.replace(c1.toString(), c2.toString()); // FIXME see SIM-85
+	}
+	
+	public boolean testEqualsCornerCase(String testString) {
+		Object o = "s";
+		
+		return testString.equals(o.toString()); // FIXME see SIM-86
+	}
 
 }
