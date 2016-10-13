@@ -2,7 +2,7 @@
 <feature
       id="simonykees.feature"
       label="simonykees Feature"
-      version="0.9.1">
+      version="0.9.2.qualifier">
 
    <description url="https://splendit.at/simonykees/description">
       [Enter Feature Description here.]
