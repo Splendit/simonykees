@@ -10,13 +10,15 @@ import org.eclipse.swt.widgets.Composite;
 
 import at.splendit.simonykees.core.i18n.Messages;
 
-@SuppressWarnings("restriction") // XXX TextEditChangePreviewViewer is internal, hence the warning
+@SuppressWarnings("restriction") // XXX TextEditChangePreviewViewer is internal,
+									// hence the warning
 public class ChangePreviewWizardPage extends AbstractWizardPage {
 
 	private DocumentChange documentChange;
 
-	/**
-	 * Create the wizard.
+	/** Create the WizardPage for the {@link DocumentChange}
+	 * 
+	 * @param documentChange the change in the document that is displayed with this WizardPage
 	 */
 	public ChangePreviewWizardPage(DocumentChange documentChange) {
 		super(Messages.ChangePreviewWizard_WizardPage);
@@ -31,16 +33,20 @@ public class ChangePreviewWizardPage extends AbstractWizardPage {
 		Composite container = new Composite(parent, SWT.NONE);
 
 		GridLayout layout = new GridLayout();
-		layout.marginHeight = 0; // margin from TextEditChangePreviewViewer to Composite
+		layout.marginHeight = 0; // margin from TextEditChangePreviewViewer to
+									// Composite
 		layout.marginWidth = 0;
-		container.setLayout(layout); // without setting the layout, nothing displays
+		container.setLayout(layout); // without setting the layout, nothing
+										// displays
 
 		setControl(container);
 
 		SashForm sashForm = new SashForm(container, SWT.VERTICAL);
 
-		GridData gridData = new GridData(GridData.FILL_BOTH); // GridData works with GridLayout
-//		gridData.widthHint = convertWidthInCharsToPixels(80);
+		GridData gridData = new GridData(GridData.FILL_BOTH); // GridData works
+																// with
+																// GridLayout
+		// gridData.widthHint = convertWidthInCharsToPixels(80);
 		sashForm.setLayoutData(gridData);
 
 		TextEditChangePreviewViewer viewer = new TextEditChangePreviewViewer();

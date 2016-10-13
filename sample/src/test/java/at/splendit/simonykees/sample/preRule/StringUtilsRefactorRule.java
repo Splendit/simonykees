@@ -1,20 +1,10 @@
 package at.splendit.simonykees.sample.preRule;
 
+import java.util.Arrays;
+import java.util.Locale;
+
 /**
- * This test is a manual test to provide tests for the StringUtils replacement
- * 
- * 
- * How to Test: Do unit Test -> All tests should pass. Apply the [Usage] on the
- * file. Test the file again -> All tests should still pass and all methods of
- * Strings should be replaced by the corresponding StrinUtils implementation.
- * 
- * Usage: [Right Click in Editor] -> [Simoneykees/SelectRuleWizardHandler] ->
- * [StringUtils auswählen] -> Finish This triggers the Event.
- * 
- * Event: All operations on a String should be replaced by the corresponding
- * StringUtils method.
- * 
- * @author mgh
+ * @author Martin Huter
  *
  */
 
@@ -31,8 +21,14 @@ public class StringUtilsRefactorRule {
 
 	public boolean testEquals(String testString) {
 		String sometimesExpectedString = testString.replaceAll("a", "b");
-		
+
 		return testString.equals(sometimesExpectedString);
+	}
+
+	public boolean testEqualsIgnoreCase(String testString) {
+		String sometimesExpectedString = testString.replaceAll("a", "b");
+
+		return testString.equalsIgnoreCase(sometimesExpectedString);
 	}
 
 	public boolean testEndsWith(String testString) {
@@ -72,5 +68,89 @@ public class StringUtilsRefactorRule {
 	public String[] testSplit(String testString) {
 		return testString.split(",");
 	}
+
+	public String testSplitCornerCase(String testString) {
+		testString = complexSplit(testString, "?", 0);
+		testString = complexSplit(testString, "|", 0);
+		testString = complexSplit(testString, ",", 0);
+		testString = complexSplit(testString, "a", 0);
+
+		return testString;
+	}
 	
+	public String testSplitCornerCaseLimit(String testString) {
+		int limit = 3;
+		
+		testString = complexSplit(testString, "?", limit);
+		testString = complexSplit(testString, "|", limit);
+		testString = complexSplit(testString, ",", limit);
+		testString = complexSplit(testString, "a", limit);
+		
+		return testString;
+	}
+
+	private String complexSplit(String input, String splitSign, int limit) {
+		if (input.contains(splitSign)) {
+			if ("?".equals(splitSign)) {
+				/*
+				 * We need to escape the "?" because otherwise there is the
+				 * following exception: java.util.regex.PatternSyntaxException:
+				 * Dangling meta character '?' near index 0
+				 */
+				splitSign = splitSign.replace("?", "\\?");
+			}
+			if ("|".equals(splitSign)) {
+				/*
+				 * We need to escape the "|" because otherwise an empty String
+				 * is taken as split sign.
+				 */
+				splitSign = splitSign.replace("|", "\\|");
+			}
+			return limit == 0 ? Arrays.toString(input.split(splitSign))
+					: Arrays.toString(input.split(splitSign, limit));
+		} else
+			return input;
+	}
+
+	public String testReplaceCornerCaseCharSequence(String testString) {
+		CharSequence c1 = new StringBuilder("a");
+		CharSequence c2 = new StringBuilder("b");
+
+		// FIXME see SIM-85 
+		return testString.replace(String.valueOf(c1), String.valueOf(c2));
+	}
+
+	public String testReplaceCornerCaseChar(String testString) {
+		char c1 = 'a';
+		char c2 = 'b';
+
+		// FIXME see SIM-85
+		return testString.replace(String.valueOf(c1), String.valueOf(c2));
+	}
+
+	public boolean testEqualsCornerCase(String testString) {
+		Object o = "s";
+
+		return testString.equals(String.valueOf(o)); // FIXME see SIM-86
+	}
+
+	public boolean testStartsWithCornerCase(String testString) {
+		String prefix = "a";
+		int toffset = 1;
+
+		return testString.startsWith(prefix, toffset);
+	}
+	
+	public String testUpperCaseCornerCase(String testString) {
+		Locale l = Locale.GERMAN;
+		
+		return testString.toUpperCase(l);
+	}
+	
+	public String testLowerCaseCornerCase(String testString) {
+		Locale l = Locale.GERMAN;
+		
+		return testString.toLowerCase(l);
+	}
+
 }

@@ -7,6 +7,11 @@ public class ArithmethicAssignmentRule {
 	private int b = 3;
 	private int q = 3;
 
+	public String a(String i) {
+		i = i + "aaa"; //$NON-NLS-1$
+		return i;
+	}
+
 	public int a(int i) {
 		i += 1;
 		return i;
@@ -84,6 +89,36 @@ public class ArithmethicAssignmentRule {
 
 	public int p(int i) {
 		i /= 4;
+		return i;
+	}
+
+	public int q(int i) {
+		i += 1 + 2 + 3 + 4;
+		return i;
+	}
+
+	public int r(int i) {
+		i += 1 + 2 + 4 + i;
+		return i;
+	}
+
+	public int s(int i) {
+		i = 1 * 2 + 4 * i;
+		return i;
+	}
+
+	public int t(int i) {
+		i += i * 4;
+		return i;
+	}
+
+	public int u(int i) {
+		i += 1 - i + i + 4;
+		return i;
+	}
+
+	public int v(int i) {
+		i *= (2 + 4 + i);
 		return i;
 	}
 

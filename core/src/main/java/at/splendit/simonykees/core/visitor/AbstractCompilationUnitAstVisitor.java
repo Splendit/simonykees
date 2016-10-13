@@ -12,24 +12,36 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeException;
 import at.splendit.simonykees.core.i18n.ExceptionMessages;
 
+/**
+ * Extended {@link AbstractASTRewriteASTVisitor} where a list of java classes
+ * can be injected by fully qualified name to enable a comparison.
+ * 
+ * @author Martin Huter
+ *
+ */
 public abstract class AbstractCompilationUnitAstVisitor extends AbstractASTRewriteASTVisitor {
 
 	protected List<IType> registeredITypes;
-	
+
 	protected AbstractCompilationUnitAstVisitor() {
 		super();
 		this.registeredITypes = new ArrayList<>();
 	}
-	
+
 	protected AbstractCompilationUnitAstVisitor(List<IType> registeredITypes) {
 		this();
 		this.registeredITypes.addAll(registeredITypes);
 	}
 
+	/**
+	 * Find the corresponding types of the {@link #relevantClasses()} in the
+	 * java project of the {@link CompilationUnit} that accepts the ASTVisitor
+	 */
 	@Override
 	public boolean visit(CompilationUnit node) {
-		if (node.getJavaElement() == null && node.getJavaElement().getJavaProject() == null){
-			throw new ITypeNotFoundRuntimeException(ExceptionMessages.AbstractCompilationUnitAstVisitor_compilation_unit_no_context);
+		if (node.getJavaElement() == null && node.getJavaElement().getJavaProject() == null) {
+			throw new ITypeNotFoundRuntimeException(
+					ExceptionMessages.AbstractCompilationUnitAstVisitor_compilation_unit_no_context);
 		}
 		IJavaProject iJavaProject = node.getJavaElement().getJavaProject();
 		try {
@@ -46,17 +58,24 @@ public abstract class AbstractCompilationUnitAstVisitor extends AbstractASTRewri
 		}
 		return true;
 	}
-	
+
+	/**
+	 * 
+	 * @param iTypeBinding
+	 *            Is an {@link ITypeBinding} that is compared to the list of
+	 *            injected java-classes if it is related to it by polymorphism
+	 * @return if the {@link ITypeBinding} is part of the registered types the return value is true
+	 */
 	protected boolean isContentofRegistertITypes(ITypeBinding iTypeBinding) {
 		boolean result = false;
 		if (iTypeBinding == null) {
 			return false;
 		}
-		
-		if(registeredITypes.contains(iTypeBinding.getJavaElement())){
+
+		if (registeredITypes.contains(iTypeBinding.getJavaElement())) {
 			return true;
 		}
-		
+
 		for (ITypeBinding interfaceBind : iTypeBinding.getInterfaces()) {
 			if (registeredITypes.contains(interfaceBind.getJavaElement())) {
 				return true;
@@ -65,8 +84,8 @@ public abstract class AbstractCompilationUnitAstVisitor extends AbstractASTRewri
 		}
 		return result || isContentofRegistertITypes(iTypeBinding.getSuperclass());
 	}
-	
-	protected String[] relevantClasses(){
+
+	protected String[] relevantClasses() {
 		return new String[] {};
 	}
 

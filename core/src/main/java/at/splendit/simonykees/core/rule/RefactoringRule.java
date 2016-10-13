@@ -15,19 +15,30 @@ import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Wrapper Class for {@link AbstractASTRewriteASTVisitor} that holds UI name,
+ * description, if its enabled and the document changes for
+ * {@link ICompilationUnit} that are processed
+ * 
+ * @author Martin Huter, Hannes Schweithofer, Ludwig Werzowa
+ *
+ * @param <T>
+ *            is the {@link AbstractASTRewriteASTVisitor} implementation that is
+ *            applied by this rule
+ */
 public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
-	
+
 	protected String name = Messages.RefactoringRule_default_name;
-	
+
 	protected String description = Messages.RefactoringRule_default_description;
-	
+
 	protected boolean enabled = true;
-	
+
 	private Class<T> visitor;
-	
+
 	private Map<ICompilationUnit, DocumentChange> changes = new HashMap<ICompilationUnit, DocumentChange>();
-	
-	public RefactoringRule(Class <T> visitor) {
+
+	public RefactoringRule(Class<T> visitor) {
 		this.visitor = visitor;
 	}
 
@@ -46,28 +57,37 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	public Class<T> getVisitor() {
 		return visitor;
 	}
-	
+
 	/**
-	 * Changes should be generated with {@code generateDocumentChanges} first  
-	 * @return Map containing {@code ICompilationUnit}s as key and corresponding {@code DocumentChange}s as value
+	 * Changes should be generated with {@code generateDocumentChanges} first
+	 * 
+	 * @return Map containing {@code ICompilationUnit}s as key and corresponding
+	 *         {@code DocumentChange}s as value
 	 */
 	public Map<ICompilationUnit, DocumentChange> getDocumentChanges() {
 		return Collections.unmodifiableMap(changes);
 	}
-	
+
 	/**
 	 * Changes are applied to working copy but <b>not</b> committed
 	 * 
 	 * @param workingCopies
+	 *            List of {@link ICompilationUnit} for which a
+	 *            {@link DocumentChange} for each selected rule is created
 	 * @throws JavaModelException
+	 *             if this element does not exist or if an exception occurs
+	 *             while accessing its corresponding resource.
 	 * @throws ReflectiveOperationException
+	 *             is thrown if the default constructor of {@link #visitor} is
+	 *             not present and the reflective construction fails.
 	 */
-	public void generateDocumentChanges(List<ICompilationUnit> workingCopies) throws JavaModelException, ReflectiveOperationException {
+	public void generateDocumentChanges(List<ICompilationUnit> workingCopies)
+			throws JavaModelException, ReflectiveOperationException {
 		for (ICompilationUnit wc : workingCopies) {
 			applyRule(wc);
 		}
 	}
-	
+
 	private void applyRule(ICompilationUnit workingCopy) throws JavaModelException, ReflectiveOperationException {
 		if (changes.containsKey(workingCopy)) {
 			// already have changes

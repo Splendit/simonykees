@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <artifactId>simonykees</artifactId>
-    <groupId>at.splendit.simonykees</groupId>
-    <version>0.9.0</version>
-  </parent>
-  <artifactId>simonykees.feature</artifactId>
-  <packaging>eclipse-feature</packaging>
-  <name>simonykees :: feature</name>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>simonykees</artifactId>
+		<groupId>at.splendit.simonykees</groupId>
+		<version>0.9.1</version>
+	</parent>
+	<artifactId>simonykees.feature</artifactId>
+	<packaging>eclipse-feature</packaging>
+	<name>simonykees :: feature</name>
+	<description>simonykees Feature</description>
+
+	<scm>
+		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/feature</url>
+	</scm>
 </project>

@@ -23,7 +23,7 @@ public class SimonykeesStatus extends Status {
 
 	@Override
 	public String getMessage() {
-		return String.format("%s\n%s.%s (%s:%d)\n%s", getSeverityLevel(), caller.getClassName(), caller.getMethodName(), //$NON-NLS-1$
+		return String.format("%s%n%s.%s (%s:%d)%n%s", getSeverityLevel(), caller.getClassName(), caller.getMethodName(), //$NON-NLS-1$
 				caller.getFileName(), caller.getLineNumber(), super.getMessage());
 	}
 

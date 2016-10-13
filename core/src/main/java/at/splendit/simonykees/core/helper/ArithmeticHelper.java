@@ -14,7 +14,7 @@ public class ArithmeticHelper {
 	 *  * transforms to *=
 	 *  / transforms to /=
 	 * @param infixExpressionOperator is an InfixExpression.Operator that is converted
-	 * @return returns an Assignment.Operator that is corresponding to the {@link infixExpressionOperator}
+	 * @return returns an Assignment.Operator that is corresponding to the given {@link InfixExpression.Operator}
 	 */
 	public static Assignment.Operator generateOperator(InfixExpression.Operator infixExpressionOperator) {
 		if (InfixExpression.Operator.PLUS.equals(infixExpressionOperator)) {

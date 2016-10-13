@@ -2,6 +2,7 @@ package at.splendit.simonykees.core;
 
 import static org.junit.Assert.assertEquals;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,7 +25,6 @@ import at.splendit.simonykees.core.util.RulesTestUtil;
 
 @RunWith(Parameterized.class)
 public class AllRulesTest {
-
 	private String fileName;
 	private Path preRule, postRule;
 	
@@ -46,8 +46,8 @@ public class AllRulesTest {
 	
 	@Test
 	public void test() throws Exception {
-		String expectedSource = new String(Files.readAllBytes(postRule));
-		String content = new String(Files.readAllBytes(preRule));
+		String expectedSource = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		String content = new String(Files.readAllBytes(preRule), StandardCharsets.UTF_8);
 		
 		IPackageFragment packageFragment = RulesTestUtil.getPackageFragement();
 		ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);

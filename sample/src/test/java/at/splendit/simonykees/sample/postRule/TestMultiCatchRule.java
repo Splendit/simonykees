@@ -5,18 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.junit.Test;
 
 /**
- * This test is a manual test to provide tests for the TryWithResource
- * replacement
- * 
- * 
- * How to Test: Do unit Test -> All tests should pass. Apply the [Usage] on the
- * file. Test the file again -> All tests should still pass and all methods of
- * Strings should be replaced by the corresponding StrinUtils implementation.
- * 
- * Usage: [Right Click in Editor] -> [Simoneykees/SelectRuleWizardHandler] ->
- * [MultiCatchTest auswählen] -> Finish This triggers the Event.
- * 
- * @author mgh
+ * @author Martin Huter
  *
  */
 @SuppressWarnings("nls")
