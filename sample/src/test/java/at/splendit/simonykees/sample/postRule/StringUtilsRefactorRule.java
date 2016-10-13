@@ -2,7 +2,6 @@ package at.splendit.simonykees.sample.postRule;
 
 import java.util.Arrays;
 import java.util.Locale;
-
 import org.apache.commons.lang3.StringUtils;
 
 /**
