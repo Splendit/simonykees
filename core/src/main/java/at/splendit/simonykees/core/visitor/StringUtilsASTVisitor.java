@@ -34,7 +34,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 	private static final String INDEXOF = "indexOf"; //$NON-NLS-1$
 	private static final String CONTAINS = "contains"; //$NON-NLS-1$
 	private static final String SUBSTRING = "substring"; //$NON-NLS-1$
-	private static final String SPLIT = "split"; //$NON-NLS-1$
+//	private static final String SPLIT = "split"; //$NON-NLS-1$ // FIXME: see SIM-78
 	private static final String REPLACE = "replace"; //$NON-NLS-1$
 	private static final String STARTS_WITH = "startsWith"; //$NON-NLS-1$
 
@@ -71,7 +71,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 			case INDEXOF:
 			case CONTAINS:
 			case SUBSTRING:
-			case SPLIT:
+//			case SPLIT: // see SIM-78
 			case REPLACE:
 				replacementOperation = op;
 				break;
