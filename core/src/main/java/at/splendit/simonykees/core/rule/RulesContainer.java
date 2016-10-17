@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
@@ -35,7 +36,8 @@ public class RulesContainer {
 				new StringUtilsRule(StringUtilsASTVisitor.class),
 				new MultiCatchRule(MultiCatchASTVisitor.class),
 				new BracketsToControlRule(BracketsToControlASTVisitor.class),
-				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class)
+				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class),
+				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class)
 				);
 	}
 

@@ -1,0 +1,83 @@
+package at.splendit.simonykees.core.rule;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jface.text.Document;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.text.edits.TextEdit;
+
+import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.core.util.SimonykeesUtil;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+
+public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
+
+	private static final String LINESEPARATOR = System.getProperty("line.separator", "\n");
+
+	private Map<ICompilationUnit, DocumentChange> changes = new HashMap<ICompilationUnit, DocumentChange>();
+
+	public CodeFormatterRule(Class<AbstractASTRewriteASTVisitor> visitor) {
+		super(visitor);
+		this.name = "CodeFormatterRule";
+		this.description = "There shall be formating";
+	}
+
+	@Override
+	public Map<ICompilationUnit, DocumentChange> getDocumentChanges() {
+		return Collections.unmodifiableMap(changes);
+	}
+
+	@Override
+	public void generateDocumentChanges(List<ICompilationUnit> workingCopies)
+			throws JavaModelException, ReflectiveOperationException {
+		for (ICompilationUnit wc : workingCopies) {
+			applyFormating(wc);
+		}
+	}
+
+	private void applyFormating(ICompilationUnit workingCopy) throws JavaModelException {
+		if (changes.containsKey(workingCopy)) {
+			// already have changes
+			Activator.log(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
+		} else {
+			ISourceRange sourceRange = workingCopy.getSourceRange();
+			// TODO check formating style
+			CodeFormatter formatter = ToolFactory
+					.createCodeFormatter(DefaultCodeFormatterConstants.getEclipseDefaultSettings());
+			int formatingKind = CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS
+					| CodeFormatter.K_UNKNOWN;
+			TextEdit edit = formatter.format(formatingKind, workingCopy.getSource(), sourceRange.getOffset(),
+					sourceRange.getLength(), 0, LINESEPARATOR);
+
+			if (edit.hasChildren()) {
+				Document document = new Document(workingCopy.getSource());
+				DocumentChange documentChange = SimonykeesUtil
+						.generateDocumentChange(CodeFormatterRule.class.getSimpleName(), document, edit.copy());
+
+				workingCopy.applyTextEdit(edit, null);
+				workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+
+				if (documentChange != null) {
+					changes.put(workingCopy, documentChange);
+				} else {
+					// no changes
+				}
+			} else {
+				// no changes
+			}
+		}
+
+	}
+
+}
