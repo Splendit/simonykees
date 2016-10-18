@@ -37,7 +37,7 @@ public final class SimonykeesUtil {
 	 *            contains java elements which should be split up into
 	 *            compilation units
 	 * @throws JavaModelException
-	 *             * if this element does not exist or if an exception occurs
+	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
 	 */
 	public static void collectICompilationUnits(List<ICompilationUnit> result, List<IJavaElement> javaElements)
