@@ -1,5 +1,6 @@
 package at.splendit.simonykees.sample.preRule;
 
+@SuppressWarnings("nls")
 public class ArithmethicAssignmentRule {
 
 	private int a = 3;
@@ -8,12 +9,12 @@ public class ArithmethicAssignmentRule {
 	private int q = 3;
 
 	public String a(String i) {
-		i = i + "aaa"; //$NON-NLS-1$
+		i = i + "aaa"; 
 		return i;
 	}
 
 	public int a(int i) {
-		i = i + 1;
+		i = (int) i + 1;
 		return i;
 	}
 
@@ -121,5 +122,52 @@ public class ArithmethicAssignmentRule {
 		i = i * (2 + 4 + i);
 		return i;
 	}
+
+	/* FIXME see SIM-94
+	public Integer cornerCaseInteger(Integer i) {
+		i = i + 1;
+		return i;
+	}
+	
+	public Double cornerCaseDouble(Double d) {
+		d = d + 1;
+		return d;
+	}
+	
+	public Float cornerCaseFloat(Float f) {
+		f = f + 1;
+		return f;
+	}
+	
+	public Long cornerCaseLong(Long l) {
+		l = l + 1;
+		return l;
+	}
+	
+	public Short cornerCaseShort(Short s) {
+		s = (short) (s + 1);
+		return s;
+	}
+	
+	public Byte cornerCaseByte(Byte b) {
+		b = (byte) (b + 1);
+		return b;
+	}
+	
+	public Character cornerCaseCharacter(Character c) {
+		c = (char) (c + 1);
+		return c;
+	}
+	
+	public CharSequence cornerCaseByte(CharSequence cs) {
+		cs = cs + "a" + 'b';
+		return cs;
+	}
+	
+	public Number cornerCaseNumber(Number n) {
+		n = (Integer)n + 27;
+		return n;
+	}
+	*/
 
 }
