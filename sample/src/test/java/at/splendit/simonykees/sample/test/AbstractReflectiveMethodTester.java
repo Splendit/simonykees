@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -236,26 +235,11 @@ public abstract class AbstractReflectiveMethodTester {
 		 * @return
 		 */
 		private static Table<ParameterType, String, Method> initMethodTable(Class<?> clazz) {
-			// Map<String, Method> retVal =
-			// Arrays.stream(clazz.getDeclaredMethods())
-			// // only take methods with a return value
-			// .filter(m -> !m.getReturnType().equals(Void.TYPE))
-			// // only take methods where the parameters fit
-			// .filter(m2 -> hasDesiredParameters(m2.getParameterTypes(),
-			// parameterizedValues))
-			// .collect(Collectors.toMap(Method::getName, Function.identity()));
 			List<Method> methods = Arrays.stream(clazz.getDeclaredMethods())
 					// only take methods with a return value
 					.filter(m -> !m.getReturnType().equals(Void.TYPE))
-
-					// only take methods where the parameters fit
-					// .filter(m2 ->
-					// hasDesiredParameters(m2.getParameterTypes(),
-					// parameterizedValues))
-
 					// only methods with exactly one parameter
 					.filter(m2 -> m2.getParameterCount() == 1)
-
 					.collect(Collectors.toList());
 
 			Table<ParameterType, String, Method> retVal = HashBasedTable.create();
@@ -282,53 +266,6 @@ public abstract class AbstractReflectiveMethodTester {
 			}
 		}
 
-		// /*
-		// * Too bad, Class.getDeclaredMethod(String name, Class<?>...
-		// * parameterTypes) needs a method name and thus only returns one
-		// * method..
-		// */
-		// private static boolean hasDesiredParameters(Class<?>[]
-		// methodParameterClasses,
-		// Class<?>... parameterizedValues) {
-		//
-		// if (methodParameterClasses == null) {
-		// return parameterizedValues == null || parameterizedValues.length ==
-		// 0;
-		// }
-		//
-		// if (methodParameterClasses.length != parameterizedValues.length) {
-		// return false;
-		// }
-		//
-		// for (int i = 0; i < methodParameterClasses.length; i++) {
-		// if (!isEquivalentClass(methodParameterClasses[i],
-		// parameterizedValues[i])) {
-		// return false;
-		// }
-		// }
-		//
-		// return true;
-		//
-		// }
-		//
-		// /**
-		// * To ignore mismatches if one is a primitive type and the other isn't
-		// *
-		// * @param c1
-		// * @param c2
-		// * @return
-		// */
-		// private static boolean isEquivalentClass(Class<?> c1, Class<?> c2) {
-		// if (c1.equals(c2))
-		// return true;
-		// if (c1.equals(Integer.TYPE) && c2.equals(Integer.class))
-		// return true;
-		// if (c1.equals(Integer.class) && c2.equals(Integer.TYPE))
-		// return true;
-		//
-		// return false;
-		// }
-
 	}
 
 	private static class MethodAndValueCounter {
@@ -345,7 +282,7 @@ public abstract class AbstractReflectiveMethodTester {
 
 		@Override
 		public String toString() {
-			return "methods: [" + methodCounter + "], values: [" + valueCounter + "]";
+			return "[methods: [" + methodCounter + "], values: [" + valueCounter + "]]";
 		}
 
 	}
