@@ -37,7 +37,8 @@ public class RulesContainer {
 				new MultiCatchRule(MultiCatchASTVisitor.class),
 				new BracketsToControlRule(BracketsToControlASTVisitor.class),
 				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class),
-				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class)
+				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
+				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class)
 				);
 	}
 
