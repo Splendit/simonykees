@@ -8,13 +8,13 @@ public class TestFunctionalInterfaceRule {
 	@Test
 	public void Test1() {
 
-		Runnable runnable = ()->{
+		Runnable runnable = () -> {
 			System.out.println("xx");
 		};
 
 		runnable.run();
 
-		MyClass mYClass = new MyClass(()->{
+		MyClass mYClass = new MyClass(() -> {
 			System.out.println("xy");
 		});
 

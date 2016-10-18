@@ -2,6 +2,7 @@ package at.splendit.simonykees.sample.postRule;
 
 import java.util.Arrays;
 import java.util.Locale;
+
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -78,15 +79,15 @@ public class StringUtilsRefactorRule {
 
 		return testString;
 	}
-	
+
 	public String testSplitCornerCaseLimit(String testString) {
 		int limit = 3;
-		
+
 		testString = complexSplit(testString, "?", limit);
 		testString = complexSplit(testString, "|", limit);
 		testString = complexSplit(testString, ",", limit);
 		testString = complexSplit(testString, "a", limit);
-		
+
 		return testString;
 	}
 
@@ -118,7 +119,7 @@ public class StringUtilsRefactorRule {
 		CharSequence c1 = new StringBuilder("a");
 		CharSequence c2 = new StringBuilder("b");
 
-		// FIXME see SIM-85 
+		// FIXME see SIM-85
 		return StringUtils.replace(testString, String.valueOf(c1), String.valueOf(c2));
 	}
 
@@ -133,7 +134,8 @@ public class StringUtilsRefactorRule {
 	public boolean testEqualsCornerCase(String testString) {
 		Object o = "s";
 
-		return StringUtils.equals(testString, String.valueOf(o)); // FIXME see SIM-86
+		return StringUtils.equals(testString, String.valueOf(o)); // FIXME see
+																	// SIM-86
 	}
 
 	public boolean testStartsWithCornerCase(String testString) {
@@ -142,16 +144,16 @@ public class StringUtilsRefactorRule {
 
 		return testString.startsWith(prefix, toffset);
 	}
-	
+
 	public String testUpperCaseCornerCase(String testString) {
 		Locale l = Locale.GERMAN;
-		
+
 		return StringUtils.upperCase(testString, l);
 	}
-	
+
 	public String testLowerCaseCornerCase(String testString) {
 		Locale l = Locale.GERMAN;
-		
+
 		return StringUtils.lowerCase(testString, l);
 	}
 
