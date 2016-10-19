@@ -1,5 +1,9 @@
 package at.splendit.simonykees.sample.postRule;
 
+/**
+ * See comment in <a href="https://jira.splendit.loc/browse/SIM-88">SIM-88</a> 
+ * for help concerning adaption from int tests to other datatypes.
+ */
 @SuppressWarnings("nls")
 public class ArithmethicAssignmentRule {
 
@@ -15,8 +19,6 @@ public class ArithmethicAssignmentRule {
 
 	/*
 	 * INTEGER
-	 * use this sed to convert to other datatypes:
-	 * sed -r 's_int\b_double_g;s_\bi\b_d_g'
 	 */
 
 	public int testA(int i) {
@@ -129,6 +131,52 @@ public class ArithmethicAssignmentRule {
 		return i;
 	}
 	
+	public int testW(int i) {
+		i += 1 + 2 - 3 * 4 / 5;
+		return i;
+	}
+	
+	public int testX(int i) {
+		i += -1; // FIXME SIM-95
+		return i;
+	}
+	
+    public int testY(int i) {
+        i -= 1; // SIM-95
+        return i;
+    }
+	
+	// FIXME SIM-96
+//	public int testABC(int i) {
+//		i = i - 1 + 2; 
+//		return i;
+//	}
+	
+	public int testACB(int i) {
+		i += 2 - 1;
+		return i;
+	}
+	
+	public int testBAC(int i) {
+		i += -1 + 2;
+		return i;
+	}
+	
+	public int testBCA(int i) {
+		i += -1 + 2;
+		return i;
+	}
+	
+	public int testCAB(int i) {
+		i += 2 - 1;
+		return i;
+	}
+	
+	public int testCBA(int i) {
+		i += 2 - 1;
+		return i;
+	}
+	
 	/*
 	 * Corner cases
 	 */
@@ -174,13 +222,14 @@ public class ArithmethicAssignmentRule {
 		return cs;
 	}
 	
+	// TODO add mean corner cases with Number parameters
 	public Number cornerCaseNumber(Number n) {
 		n = (Integer)n + 27;
 		return n;
 	}
 	*/
 	
-    public double addMaxInt(int i) {
+    public double cornerCaseAddMaxInt(int i) {
         double d = Integer.MAX_VALUE;
         d += ((double) i + Integer.MAX_VALUE);
         return d;
@@ -300,6 +349,52 @@ public class ArithmethicAssignmentRule {
 		return d;
 	}
 	
+	public double testW(double d) {
+		d += 1 + 2 - 3 * 4 / 5;
+		return d;
+	}
+	
+	public double testX(double d) {
+		d += -1; // FIXME SIM-95
+		return d;
+	}
+	
+    public double testY(double d) {
+        d -= 1; // SIM-95
+        return d;
+    }
+	
+	// FIXME SIM-96
+//	public double testABC(double d) {
+//		d = d - 1 + 2; 
+//		return d;
+//	}
+	
+	public double testACB(double d) {
+		d += 2 - 1;
+		return d;
+	}
+	
+	public double testBAC(double d) {
+		d += -1 + 2;
+		return d;
+	}
+	
+	public double testBCA(double d) {
+		d += -1 + 2;
+		return d;
+	}
+	
+	public double testCAB(double d) {
+		d += 2 - 1;
+		return d;
+	}
+	
+	public double testCBA(double d) {
+		d += 2 - 1;
+		return d;
+	}
+	
 	/*
 	 * FLOAT
 	 */
@@ -411,6 +506,52 @@ public class ArithmethicAssignmentRule {
 
 	public float testV(float f) {
 		f *= (2 + 4 + f);
+		return f;
+	}
+	
+	public float testW(float f) {
+		f += 1 + 2 - 3 * 4 / 5;
+		return f;
+	}
+	
+	public float testX(float f) {
+		f += -1; // FIXME SIM-95
+		return f;
+	}
+	
+    public float testY(float f) {
+        f -= 1; // SIM-95
+        return f;
+    }
+	
+	// FIXME SIM-96
+//	public float testABC(float f) {
+//		f = f - 1 + 2; 
+//		return f;
+//	}
+	
+	public float testACB(float f) {
+		f += 2 - 1;
+		return f;
+	}
+	
+	public float testBAC(float f) {
+		f += -1 + 2;
+		return f;
+	}
+	
+	public float testBCA(float f) {
+		f += -1 + 2;
+		return f;
+	}
+	
+	public float testCAB(float f) {
+		f += 2 - 1;
+		return f;
+	}
+	
+	public float testCBA(float f) {
+		f += 2 - 1;
 		return f;
 	}
     
@@ -528,6 +669,52 @@ public class ArithmethicAssignmentRule {
 		return l;
 	}
 	
+	public long testW(long l) {
+		l += 1 + 2 - 3 * 4 / 5;
+		return l;
+	}
+	
+	public long testX(long l) {
+		l += -1; // FIXME SIM-95
+		return l;
+	}
+	
+    public long testY(long l) {
+        l -= 1; // SIM-95
+        return l;
+    }
+	
+	// FIXME SIM-96
+//	public long testABC(long l) {
+//		l = l - 1 + 2; 
+//		return l;
+//	}
+	
+	public long testACB(long l) {
+		l += 2 - 1;
+		return l;
+	}
+	
+	public long testBAC(long l) {
+		l += -1 + 2;
+		return l;
+	}
+	
+	public long testBCA(long l) {
+		l += -1 + 2;
+		return l;
+	}
+	
+	public long testCAB(long l) {
+		l += 2 - 1;
+		return l;
+	}
+	
+	public long testCBA(long l) {
+		l += 2 - 1;
+		return l;
+	}
+
 	/*
 	 * SHORT
 	 */
@@ -639,6 +826,52 @@ public class ArithmethicAssignmentRule {
 
 	public short testV(short s) {
 		s = (short) (s * (2 + 4 + s));
+		return s;
+	}
+	
+	public short testW(short s) {
+		s = (short) (1 + s + 2 - 3 * 4 / 5);
+		return s;
+	}
+	
+	public short testX(short s) {
+		s = (short) (-1 + s); // FIXME SIM-95
+		return s;
+	}
+	
+    public short testY(short s) {
+        s = (short) (s - 1); // SIM-95
+        return s;
+    }
+	
+	// FIXME SIM-96
+//	public short testABC(short s) {
+//		s = s - 1 + 2; 
+//		return s;
+//	}
+	
+	public short testACB(short s) {
+		s = (short) (s + 2 - 1);
+		return s;
+	}
+	
+	public short testBAC(short s) {
+		s = (short) (-1 + s + 2);
+		return s;
+	}
+	
+	public short testBCA(short s) {
+		s = (short) (-1 + 2 + s);
+		return s;
+	}
+	
+	public short testCAB(short s) {
+		s = (short) (2 + s - 1);
+		return s;
+	}
+	
+	public short testCBA(short s) {
+		s = (short) (2 - 1 + s);
 		return s;
 	}
 	
@@ -756,6 +989,53 @@ public class ArithmethicAssignmentRule {
 		return b;
 	}
 	
+	public byte testW(byte b) {
+		b = (byte) (1 + b + 2 - 3 * 4 / 5);
+		return b;
+	}
+	
+	public byte testX(byte b) {
+		b = (byte) (-1 + b); // FIXME SIM-95
+		return b;
+	}
+	
+    public byte testY(byte b) {
+        b = (byte) (b - 1); // SIM-95
+        return b;
+    }
+	
+	// FIXME SIM-96
+//	public byte testABC(byte b) {
+//		b = b - 1 + 2; 
+//		return b;
+//	}
+	
+	public byte testACB(byte b) {
+		b = (byte) (b + 2 - 1);
+		return b;
+	}
+	
+	public byte testBAC(byte b) {
+		b = (byte) (-1 + b + 2);
+		return b;
+	}
+	
+	public byte testBCA(byte b) {
+		b = (byte) (-1 + 2 + b);
+		return b;
+	}
+	
+	public byte testCAB(byte b) {
+		b = (byte) (2 + b - 1);
+		return b;
+	}
+	
+	public byte testCBA(byte b) {
+		b = (byte) (2 - 1 + b);
+		return b;
+	}
+
+	
 	/*
 	 * CHAR
 	 */
@@ -867,6 +1147,52 @@ public class ArithmethicAssignmentRule {
 
 	public char testV(char c) {
 		c = (char) (c * (2 + 4 + c));
+		return c;
+	}
+	
+	public char testW(char c) {
+		c = (char) (1 + c + 2 - 3 * 4 / 5);
+		return c;
+	}
+	
+	public char testX(char c) {
+		c = (char) (-1 + c); // FIXME SIM-95
+		return c;
+	}
+	
+    public char testY(char c) {
+        c = (char) (c - 1); // SIM-95
+        return c;
+    }
+	
+	// FIXME SIM-96
+//	public char testABC(char c) {
+//		c = c - 1 + 2; 
+//		return c;
+//	}
+	
+	public char testACB(char c) {
+		c = (char) (c + 2 - 1);
+		return c;
+	}
+	
+	public char testBAC(char c) {
+		c = (char) (-1 + c + 2);
+		return c;
+	}
+	
+	public char testBCA(char c) {
+		c = (char) (-1 + 2 + c);
+		return c;
+	}
+	
+	public char testCAB(char c) {
+		c = (char) (2 + c - 1);
+		return c;
+	}
+	
+	public char testCBA(char c) {
+		c = (char) (2 - 1 + c);
 		return c;
 	}
 
