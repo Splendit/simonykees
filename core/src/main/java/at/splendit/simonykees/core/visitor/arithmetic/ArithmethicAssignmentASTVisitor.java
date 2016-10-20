@@ -28,7 +28,8 @@ public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisito
 			if (node.getLeftHandSide() instanceof SimpleName && node.getRightHandSide() instanceof InfixExpression) {
 				SimpleName leftHandSide = (SimpleName) node.getLeftHandSide();
 
-				if (!node.getRightHandSide().resolveTypeBinding().isPrimitive()) {
+				//TODO verbessern, dass alle kombinationen von typen abgefangen werden, die nicht weiter untersucht werden sollen.
+				if (node.getRightHandSide().resolveTypeBinding() != null && !node.getRightHandSide().resolveTypeBinding().isPrimitive()) {
 					return true;
 				}
 

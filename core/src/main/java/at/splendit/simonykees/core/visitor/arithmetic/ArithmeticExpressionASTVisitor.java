@@ -54,14 +54,14 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 			
 			//leftOperand all operators are legal
 			if (isSimpleNameAndEqualsVarName(node.getLeftOperand())) {
-				replace(node, true);
+				replaceLeft(node);
 				return false;
 			}
 			//rightOperand & extendedOperands ony +/* are legal
 			if (isSimpleNameAndEqualsVarName(node.getRightOperand())
 					&& (InfixExpression.Operator.PLUS.equals(currentOperator)
 							|| InfixExpression.Operator.TIMES.equals(currentOperator))) {
-				replace(node, false);
+				replaceRight(node);
 				return false;
 			}
 			
@@ -81,6 +81,24 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 		}
 		return false;
 	}
+	
+	/**
+	 * Introduced for better readability
+	 * @param replace node that is manipulated and got the variable as a leaf
+	 */
+	private void replaceLeft(InfixExpression replace){
+		replace(replace, true);
+	}
+	
+	/**
+	 * Introduced for better readability
+	 * @param replace node that is manipulated and got the variable as a leaf
+	 */
+	private void replaceRight(InfixExpression replace){
+		replace(replace, true);
+	}
+	
+	
 	/**	Replacement implementation for variable substitution 
 	 * 
 	 * @param replace node that is manipulated and got the variable as a leaf
