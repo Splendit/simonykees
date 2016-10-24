@@ -24,6 +24,8 @@ public class Messages extends NLS {
 	public static String MultiCatchRule_name;
 	public static String FunctionalInterfaceRule_description;
 	public static String FunctionalInterfaceRule_name;
+	public static String OrganiseImportsRule_description;
+	public static String OrganiseImportsRule_name;
 	public static String RefactoringRule_default_description;
 	public static String RefactoringRule_default_name;
 	public static String RefactoringRule_warning_workingcopy_already_present;
