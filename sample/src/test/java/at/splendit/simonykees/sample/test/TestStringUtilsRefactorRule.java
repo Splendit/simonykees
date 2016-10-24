@@ -65,11 +65,10 @@ public class TestStringUtilsRefactorRule extends AbstractReflectiveMethodTester 
 				at.splendit.simonykees.sample.postRule.StringUtilsRefactorRule.class);
 	}
 	
-//	@AfterClass
-//	public static void printStatistics() {
-//		log.info(String.format("Test for class [%s] with [%d] methods and [%d] values finished ([%d] total executions)", //$NON-NLS-1$
-//				holder.getPreObject().getClass().getSimpleName(), holder.getPreMethods().size(), holder.getValueCount(),
-//				holder.getPreMethods().size() * holder.getValueCount()));
-//	}
+	@AfterClass
+	public static void printStatistics() {
+		log.info(String.format("Test for class [%s] finished with the following stats: %n[%s]", //$NON-NLS-1$
+				holder.getPreObject().getClass().getSimpleName(), holder.getCounterToString()));
+	}
 
 }
