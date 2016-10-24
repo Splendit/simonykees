@@ -32,14 +32,12 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
 
-	private static final String LINESEPARATOR = System.getProperty("line.separator", "\n");
-
 	private Map<ICompilationUnit, DocumentChange> changes = new HashMap<ICompilationUnit, DocumentChange>();
 
 	public CodeFormatterRule(Class<AbstractASTRewriteASTVisitor> visitor) {
 		super(visitor);
-		this.name = "CodeFormatterRule";
-		this.description = "There shall be formating";
+		this.name = Messages.CodeFormatterRule_name;
+		this.description = Messages.CodeFormatterRule_description;
 	}
 
 	@Override
@@ -67,7 +65,7 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 			int formatingKind = CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS
 					| CodeFormatter.K_UNKNOWN;
 			TextEdit edit = formatter.format(formatingKind, workingCopy.getSource(), sourceRange.getOffset(),
-					sourceRange.getLength(), 0, LINESEPARATOR);
+					sourceRange.getLength(), 0, SimonykeesUtil.LINE_SEPARATOR);
 
 			if (edit.hasChildren()) {
 				Document document = new Document(workingCopy.getSource());

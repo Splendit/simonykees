@@ -30,8 +30,18 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public final class SimonykeesUtil {
 
+	private static final String BACKSLASH_N = "\n"; //$NON-NLS-1$
+	private static final String LINE_SEPARATOR_PROPERTY = "line.separator"; //$NON-NLS-1$
 	/**
-	 * Constructor should never be called 
+	 * Get the line separator for the current system, if none is found
+	 * <code>&#92n</code> is used
+	 * 
+	 * @since 0.9.2
+	 */
+	public static final String LINE_SEPARATOR = System.getProperty(LINE_SEPARATOR_PROPERTY, BACKSLASH_N);
+
+	/**
+	 * Constructor should never be called
 	 */
 	private SimonykeesUtil() {
 		// no constructor for a utility class
