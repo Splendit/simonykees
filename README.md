@@ -2,7 +2,7 @@
 
 ## build ##
 
-    mvn clean package
+    mvn clean verify -fae
 
 ## release ##
 
