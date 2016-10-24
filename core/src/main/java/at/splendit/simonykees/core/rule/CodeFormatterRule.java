@@ -21,6 +21,15 @@ import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Format a Java class, the rule does not use an
+ * {@link AbstractASTRewriteASTVisitor} so the abstract class itself can be
+ * passed to the constructor.
+ * 
+ * @author Hannes Schweighofer
+ * @since 0.9.2
+ *
+ */
 public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
 
 	private static final String LINESEPARATOR = System.getProperty("line.separator", "\n");
