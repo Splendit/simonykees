@@ -177,10 +177,12 @@ public class ArithmethicAssignmentRule {
 		return i;
 	}
 	
-	public int testDivABC(int i) {
-		i /= 5 * 7;
-		return i;
-	}
+	// FIXME SIM-96
+//	public int testDivABC(int i) {
+//		Before: i = i / 5 * 7;
+//		After:  i /= 5 * 7;
+//		return i;
+//	}
 	
 	public int testDivBCA(int i) {
 		i *= 5 / 7;
@@ -188,26 +190,34 @@ public class ArithmethicAssignmentRule {
 	}
 	
 	public int testDivCAB(int i) {
-		if (i == 0) i++;
+		if (i == 0) {
+			i++;
+		}
 		i = 7 / i * 5;
 		return i;
 	}
 	
-	public int testMultiABC(int i) {
-		i *= 5 / 7;
-		return i;
-	}
+	// FIXME SIM-96
+//	public int testMultiABC(int i) {
+//		Before: i = i * 5 / 7;
+//		After:  i *= 5 / 7;
+//		return i;
+//	}
 	
 	public int testMultiBCA(int i) {
-		if (i == 0) i++;
+		if (i == 0) {
+			i++;
+		}
 		i = 5 * 7 / i;
 		return i;
 	}
 	
-	public int testMultiCAB(int i) {
-		i *= 7 / 5;
-		return i;
-	}
+	// FIXME SIM-96
+//	public int testMultiCAB(int i) {
+//		Before: i = 7 * i / 5;
+//		After:  i *= 7 / 5;
+//		return i;
+//	}
 	
 	/*
 	 * Corner cases
