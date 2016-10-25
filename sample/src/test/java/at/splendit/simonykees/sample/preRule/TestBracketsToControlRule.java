@@ -43,4 +43,9 @@ public class TestBracketsToControlRule {
 		else
 			;
 	}
+	
+	public int testMultipleThings(int input) {
+		if (input > 0) for (int i = 0; i < 10; i++) if (i > 2) input++; else input--; else if (input > -200) if (input != 0) do input++; while (input < 10); else input--; else try {input /= 0;} catch (ArithmeticException e) {input /= 2;} finally {return ++input;}
+		return input;
+	}
 }
