@@ -1,7 +1,5 @@
 package at.splendit.simonykees.core.visitor.arithmetic;
 
-import java.util.List;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Expression;
@@ -37,34 +35,42 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 			return false;
 		}
 
+		// only simple operations with two arguments are supported
+		if (!node.extendedOperands().isEmpty()) {
+			return false;
+		}
+
 		InfixExpression.Operator currentOperator = node.getOperator();
 
 		if (InfixExpression.Operator.PLUS.equals(currentOperator)
 				|| InfixExpression.Operator.TIMES.equals(currentOperator)) {
 
 			// leftOperand all operators are legal
-			if (isSimpleNameAndEqualsVarName(node.getLeftOperand())) {
+			if (isSimpleNameAndEqualsVarName(node.getLeftOperand())
+					&& !(node.getRightOperand() instanceof InfixExpression)) {
 				replaceLeft(node);
 				return false;
 			}
 
 			// rightOperand & extendedOperands only +/* are legal
-			if (isSimpleNameAndEqualsVarName(node.getRightOperand())) {
+			if (isSimpleNameAndEqualsVarName(node.getRightOperand())
+					&& !(node.getLeftOperand() instanceof InfixExpression)) {
 				replaceRight(node);
 				return false;
 			}
 
-			@SuppressWarnings("unchecked")
-			List<Expression> extendedOperands = node.extendedOperands();
-
-			for (Expression extendedOperand : extendedOperands) {
-				if (isSimpleNameAndEqualsVarName(extendedOperand)) {
-					newOperator = node.getOperator();
-					astRewrite.getListRewrite(node, InfixExpression.EXTENDED_OPERANDS_PROPERTY).remove(extendedOperand,
-							null);
-					return false;
-				}
-			}
+			/*
+			 * Unused code Check if removeable
+			 * 
+			 * @SuppressWarnings("unchecked") List<Expression> extendedOperands
+			 * = node.extendedOperands();
+			 * 
+			 * for (Expression extendedOperand : extendedOperands) { if
+			 * (isSimpleNameAndEqualsVarName(extendedOperand)) { newOperator =
+			 * node.getOperator(); astRewrite.getListRewrite(node,
+			 * InfixExpression.EXTENDED_OPERANDS_PROPERTY).remove(
+			 * extendedOperand, null); return false; } }
+			 */
 		} else if (InfixExpression.Operator.MINUS.equals(currentOperator)
 				|| InfixExpression.Operator.DIVIDE.equals(currentOperator)) {
 			if (isSimpleNameAndEqualsVarName(node.getLeftOperand())

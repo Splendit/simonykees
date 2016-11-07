@@ -42,27 +42,27 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public int testE(int i) {
-		i += 4 - 3;
+		i = i + 4 - 3;
 		return i;
 	}
 
 	public int testF(int i) {
-		i += 4 + 3;
+		i = i + 4 + 3;
 		return i;
 	}
 
 	public int testG(int i) {
-		i += 3 + 4;
+		i = 3 + i + 4;
 		return i;
 	}
 
 	public int testH(int i) {
-		i += 3 - 4;
+		i = 3 + i - 4;
 		return i;
 	}
 
 	public int testI(int i) {
-		i += int_a - 4;
+		i = int_a + i - 4;
 		return i;
 	}
 
@@ -102,12 +102,12 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public int testQ(int i) {
-		i += 1 + 2 + 3 + 4;
+		i = 1 + 2 + 3 + 4 + i;
 		return i;
 	}
 
 	public int testR(int i) {
-		i += 1 + 2 + 4 + i;
+		i = 1 + 2 + i + 4 + i;
 		return i;
 	}
 
@@ -117,12 +117,12 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public int testT(int i) {
-		i += i * 4;
+		i = i * 4 + i;
 		return i;
 	}
 
 	public int testU(int i) {
-		i += 1 - i + i + 4;
+		i = 1 - i + i + 4 + i;
 		return i;
 	}
 
@@ -132,7 +132,7 @@ public class ArithmethicAssignmentRule {
 	}
 	
 	public int testW(int i) {
-		i += 1 + 2 - 3 * 4 / 5;
+		i = 1 + i + 2 - 3 * 4 / 5;
 		return i;
 	}
 	
@@ -153,27 +153,27 @@ public class ArithmethicAssignmentRule {
 //	}
 	
 	public int testACB(int i) {
-		i += 2 - 1;
+		i = i + 2 - 1;
 		return i;
 	}
 	
 	public int testBAC(int i) {
-		i += -1 + 2;
+		i = -1 + i + 2;
 		return i;
 	}
 	
 	public int testBCA(int i) {
-		i += -1 + 2;
+		i = -1 + 2 + i;
 		return i;
 	}
 	
 	public int testCAB(int i) {
-		i += 2 - 1;
+		i = 2 + i - 1;
 		return i;
 	}
 	
 	public int testCBA(int i) {
-		i += 2 - 1;
+		i = 2 - 1 + i;
 		return i;
 	}
 	
@@ -185,7 +185,7 @@ public class ArithmethicAssignmentRule {
 //	}
 	
 	public int testDivBCA(int i) {
-		i *= 5 / 7;
+		i = 5 / 7 * i;
 		return i;
 	}
 	
@@ -302,27 +302,27 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public double testE(double d) {
-		d += 4 - 3;
+		d = d + 4 - 3;
 		return d;
 	}
 
 	public double testF(double d) {
-		d += 4 + 3;
+		d = d + 4 + 3;
 		return d;
 	}
 
 	public double testG(double d) {
-		d += 3 + 4;
+		d = 3 + d + 4;
 		return d;
 	}
 
 	public double testH(double d) {
-		d += 3 - 4;
+		d = 3 + d - 4;
 		return d;
 	}
 
 	public double testI(double d) {
-		d += int_a - 4;
+		d = int_a + d - 4;
 		return d;
 	}
 
@@ -362,12 +362,12 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public double testQ(double d) {
-		d += 1 + 2 + 3 + 4;
+		d = 1 + 2 + 3 + 4 + d;
 		return d;
 	}
 
 	public double testR(double d) {
-		d += 1 + 2 + 4 + d;
+		d = 1 + 2 + d + 4 + d;
 		return d;
 	}
 
@@ -377,12 +377,12 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public double testT(double d) {
-		d += d * 4;
+		d = d * 4 + d;
 		return d;
 	}
 
 	public double testU(double d) {
-		d += 1 - d + d + 4;
+		d = 1 - d + d + 4 + d;
 		return d;
 	}
 
@@ -392,7 +392,7 @@ public class ArithmethicAssignmentRule {
 	}
 	
 	public double testW(double d) {
-		d += 1 + 2 - 3 * 4 / 5;
+		d = 1 + d + 2 - 3 * 4 / 5;
 		return d;
 	}
 	
@@ -413,27 +413,27 @@ public class ArithmethicAssignmentRule {
 //	}
 	
 	public double testACB(double d) {
-		d += 2 - 1;
+		d = d + 2 - 1;
 		return d;
 	}
 	
 	public double testBAC(double d) {
-		d += -1 + 2;
+		d = -1 + d + 2;
 		return d;
 	}
 	
 	public double testBCA(double d) {
-		d += -1 + 2;
+		d = -1 + 2 + d;
 		return d;
 	}
 	
 	public double testCAB(double d) {
-		d += 2 - 1;
+		d = 2 + d - 1;
 		return d;
 	}
 	
 	public double testCBA(double d) {
-		d += 2 - 1;
+		d = 2 - 1 + d;
 		return d;
 	}
 	
@@ -462,27 +462,27 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public float testE(float f) {
-		f += 4 - 3;
+		f = f + 4 - 3;
 		return f;
 	}
 
 	public float testF(float f) {
-		f += 4 + 3;
+		f = f + 4 + 3;
 		return f;
 	}
 
 	public float testG(float f) {
-		f += 3 + 4;
+		f = 3 + f + 4;
 		return f;
 	}
 
 	public float testH(float f) {
-		f += 3 - 4;
+		f = 3 + f - 4;
 		return f;
 	}
 
 	public float testI(float f) {
-		f += int_a - 4;
+		f = int_a + f - 4;
 		return f;
 	}
 
@@ -522,12 +522,12 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public float testQ(float f) {
-		f += 1 + 2 + 3 + 4;
+		f = 1 + 2 + 3 + 4 + f;
 		return f;
 	}
 
 	public float testR(float f) {
-		f += 1 + 2 + 4 + f;
+		f = 1 + 2 + f + 4 + f;
 		return f;
 	}
 
@@ -537,12 +537,12 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public float testT(float f) {
-		f += f * 4;
+		f = f * 4 + f;
 		return f;
 	}
 
 	public float testU(float f) {
-		f += 1 - f + f + 4;
+		f = 1 - f + f + 4 + f;
 		return f;
 	}
 
@@ -552,7 +552,7 @@ public class ArithmethicAssignmentRule {
 	}
 	
 	public float testW(float f) {
-		f += 1 + 2 - 3 * 4 / 5;
+		f = 1 + f + 2 - 3 * 4 / 5;
 		return f;
 	}
 	
@@ -573,27 +573,27 @@ public class ArithmethicAssignmentRule {
 //	}
 	
 	public float testACB(float f) {
-		f += 2 - 1;
+		f = f + 2 - 1;
 		return f;
 	}
 	
 	public float testBAC(float f) {
-		f += -1 + 2;
+		f = -1 + f + 2;
 		return f;
 	}
 	
 	public float testBCA(float f) {
-		f += -1 + 2;
+		f = -1 + 2 + f;
 		return f;
 	}
 	
 	public float testCAB(float f) {
-		f += 2 - 1;
+		f = 2 + f - 1;
 		return f;
 	}
 	
 	public float testCBA(float f) {
-		f += 2 - 1;
+		f = 2 - 1 + f;
 		return f;
 	}
     
@@ -622,27 +622,27 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public long testE(long l) {
-		l += 4 - 3;
+		l = l + 4 - 3;
 		return l;
 	}
 
 	public long testF(long l) {
-		l += 4 + 3;
+		l = l + 4 + 3;
 		return l;
 	}
 
 	public long testG(long l) {
-		l += 3 + 4;
+		l = 3 + l + 4;
 		return l;
 	}
 
 	public long testH(long l) {
-		l += 3 - 4;
+		l = 3 + l - 4;
 		return l;
 	}
 
 	public long testI(long l) {
-		l += int_a - 4;
+		l = int_a + l - 4;
 		return l;
 	}
 
@@ -682,12 +682,12 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public long testQ(long l) {
-		l += 1 + 2 + 3 + 4;
+		l = 1 + 2 + 3 + 4 + l;
 		return l;
 	}
 
 	public long testR(long l) {
-		l += 1 + 2 + 4 + l;
+		l = 1 + 2 + l + 4 + l;
 		return l;
 	}
 
@@ -697,12 +697,12 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public long testT(long l) {
-		l += l * 4;
+		l = l * 4 + l;
 		return l;
 	}
 
 	public long testU(long l) {
-		l += 1 - l + l + 4;
+		l = 1 - l + l + 4 + l;
 		return l;
 	}
 
@@ -712,7 +712,7 @@ public class ArithmethicAssignmentRule {
 	}
 	
 	public long testW(long l) {
-		l += 1 + 2 - 3 * 4 / 5;
+		l = 1 + l + 2 - 3 * 4 / 5;
 		return l;
 	}
 	
@@ -733,27 +733,27 @@ public class ArithmethicAssignmentRule {
 //	}
 	
 	public long testACB(long l) {
-		l += 2 - 1;
+		l = l + 2 - 1;
 		return l;
 	}
 	
 	public long testBAC(long l) {
-		l += -1 + 2;
+		l = -1 + l + 2;
 		return l;
 	}
 	
 	public long testBCA(long l) {
-		l += -1 + 2;
+		l = -1 + 2 + l;
 		return l;
 	}
 	
 	public long testCAB(long l) {
-		l += 2 - 1;
+		l = 2 + l - 1;
 		return l;
 	}
 	
 	public long testCBA(long l) {
-		l += 2 - 1;
+		l = 2 - 1 + l;
 		return l;
 	}
 

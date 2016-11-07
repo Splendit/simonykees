@@ -10,12 +10,15 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * This visitor is build for assignments of arithmetic expressions for base
- * numeric types
- * 
+ * numeric types.
+ * The only transformed expressions are those with only two operands.
+ * An parenthesis is counted as one operand.
+ * Complex arithmetic expressions are not evaluated, because the risk of an miscalculation is to high.
  * 
  * Examples:
  * 
  * a = a + 3; =&gt; a += 3;
+ * a = a + (3 * 3); =&gt; a += (3 * 3);
  * 
  * @author Martin Huter
  *
@@ -29,7 +32,8 @@ public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisito
 				SimpleName leftHandSide = (SimpleName) node.getLeftHandSide();
 
 				//TODO verbessern, dass alle kombinationen von typen abgefangen werden, die nicht weiter untersucht werden sollen.
-				if (node.getRightHandSide().resolveTypeBinding() != null && !node.getRightHandSide().resolveTypeBinding().isPrimitive()) {
+				if (node.getRightHandSide().resolveTypeBinding() != null && !node.getRightHandSide().resolveTypeBinding().isPrimitive() ||
+						node.getLeftHandSide().resolveTypeBinding() != null && !node.getLeftHandSide().resolveTypeBinding().isPrimitive()) {
 					return true;
 				}
 
