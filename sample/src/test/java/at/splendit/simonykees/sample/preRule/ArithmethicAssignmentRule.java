@@ -137,7 +137,7 @@ public class ArithmethicAssignmentRule {
 	}
 	
 	public int testX(int i) {
-		i = -1 + i; // FIXME SIM-95
+		i = -1 + i; // SIM-95
 		return i;
 	}
 	
@@ -146,11 +146,11 @@ public class ArithmethicAssignmentRule {
         return i;
     }
 	
-	// FIXME SIM-96
-//	public int testABC(int i) {
-//		i = i - 1 + 2; 
-//		return i;
-//	}
+	// SIM-96
+	public int testABC(int i) {
+		i = i - 1 + 2; 
+		return i;
+	}
 	
 	public int testACB(int i) {
 		i = i + 2 - 1;
@@ -177,12 +177,11 @@ public class ArithmethicAssignmentRule {
 		return i;
 	}
 	
-	// FIXME SIM-96
-//	public int testDivABC(int i) {
-//		Before: i = i / 5 * 7;
-//		After:  i /= 5 * 7;
-//		return i;
-//	}
+	// SIM-96
+	public int testDivABC(int i) {
+		i = i / 5 * 7;
+		return i;
+	}
 	
 	public int testDivBCA(int i) {
 		i = 5 / 7 * i;
@@ -195,12 +194,11 @@ public class ArithmethicAssignmentRule {
 		return i;
 	}
 	
-	// FIXME SIM-96
-//	public int testMultiABC(int i) {
-//		Before: i = i * 5 / 7;
-//		After:  i *= 5 / 7;
-//		return i;
-//	}
+	// SIM-96
+	public int testMultiABC(int i) {
+		i = i * 5 / 7;
+		return i;
+	}
 	
 	public int testMultiBCA(int i) {
 		if (i == 0) i++;
@@ -208,12 +206,11 @@ public class ArithmethicAssignmentRule {
 		return i;
 	}
 	
-	// FIXME SIM-96
-//	public int testMultiCAB(int i) {
-//		Before: i = 7 * i / 5;
-//		After:  i *= 7 / 5;
-//		return i;
-//	}
+	// SIM-96
+	public int testMultiCAB(int i) {
+		i = 7 * i / 5;
+		return i;
+	}
 	
 	/*
 	 * Corner cases
@@ -391,7 +388,7 @@ public class ArithmethicAssignmentRule {
 	}
 	
 	public double testX(double d) {
-		d = -1 + d; // FIXME SIM-95
+		d = -1 + d; // SIM-95
 		return d;
 	}
 	
@@ -400,11 +397,11 @@ public class ArithmethicAssignmentRule {
         return d;
     }
 	
-	// FIXME SIM-96
-//	public double testABC(double d) {
-//		d = d - 1 + 2; 
-//		return d;
-//	}
+	// SIM-96
+	public double testABC(double d) {
+		d = d - 1 + 2; 
+		return d;
+	}
 	
 	public double testACB(double d) {
 		d = d + 2 - 1;
@@ -551,7 +548,7 @@ public class ArithmethicAssignmentRule {
 	}
 	
 	public float testX(float f) {
-		f = -1 + f; // FIXME SIM-95
+		f = -1 + f; // SIM-95
 		return f;
 	}
 	
@@ -560,11 +557,11 @@ public class ArithmethicAssignmentRule {
         return f;
     }
 	
-	// FIXME SIM-96
-//	public float testABC(float f) {
-//		f = f - 1 + 2; 
-//		return f;
-//	}
+	// SIM-96
+	public float testABC(float f) {
+		f = f - 1 + 2; 
+		return f;
+	}
 	
 	public float testACB(float f) {
 		f = f + 2 - 1;
@@ -711,7 +708,7 @@ public class ArithmethicAssignmentRule {
 	}
 	
 	public long testX(long l) {
-		l = -1 + l; // FIXME SIM-95
+		l = -1 + l; // SIM-95
 		return l;
 	}
 	
@@ -720,11 +717,11 @@ public class ArithmethicAssignmentRule {
         return l;
     }
 	
-	// FIXME SIM-96
-//	public long testABC(long l) {
-//		l = l - 1 + 2; 
-//		return l;
-//	}
+	// SIM-96
+	public long testABC(long l) {
+		l = l - 1 + 2; 
+		return l;
+	}
 	
 	public long testACB(long l) {
 		l = l + 2 - 1;
@@ -871,7 +868,7 @@ public class ArithmethicAssignmentRule {
 	}
 	
 	public short testX(short s) {
-		s = (short) (-1 + s); // FIXME SIM-95
+		s = (short) (-1 + s); // SIM-95
 		return s;
 	}
 	
@@ -880,11 +877,11 @@ public class ArithmethicAssignmentRule {
         return s;
     }
 	
-	// FIXME SIM-96
-//	public short testABC(short s) {
-//		s = s - 1 + 2; 
-//		return s;
-//	}
+	// SIM-96
+	public short testABC(short s) {
+		s = (short) (s - 1 + 2); 
+		return s;
+	}
 	
 	public short testACB(short s) {
 		s = (short) (s + 2 - 1);
@@ -1031,7 +1028,7 @@ public class ArithmethicAssignmentRule {
 	}
 	
 	public byte testX(byte b) {
-		b = (byte) (-1 + b); // FIXME SIM-95
+		b = (byte) (-1 + b); // SIM-95
 		return b;
 	}
 	
@@ -1040,11 +1037,11 @@ public class ArithmethicAssignmentRule {
         return b;
     }
 	
-	// FIXME SIM-96
-//	public byte testABC(byte b) {
-//		b = b - 1 + 2; 
-//		return b;
-//	}
+	// SIM-96
+	public byte testABC(byte b) {
+		b = (byte) (b - 1 + 2); 
+		return b;
+	}
 	
 	public byte testACB(byte b) {
 		b = (byte) (b + 2 - 1);
@@ -1192,7 +1189,7 @@ public class ArithmethicAssignmentRule {
 	}
 	
 	public char testX(char c) {
-		c = (char) (-1 + c); // FIXME SIM-95
+		c = (char) (-1 + c); // SIM-95
 		return c;
 	}
 	
@@ -1201,11 +1198,11 @@ public class ArithmethicAssignmentRule {
         return c;
     }
 	
-	// FIXME SIM-96
-//	public char testABC(char c) {
-//		c = c - 1 + 2; 
-//		return c;
-//	}
+	// SIM-96
+	public char testABC(char c) {
+		c = (char) (c - 1 + 2); 
+		return c;
+	}
 	
 	public char testACB(char c) {
 		c = (char) (c + 2 - 1);
