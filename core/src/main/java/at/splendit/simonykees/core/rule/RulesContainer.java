@@ -9,8 +9,8 @@ import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
-import at.splendit.simonykees.core.visitor.tryWithResource.MultiCatchASTVisitor;
-import at.splendit.simonykees.core.visitor.tryWithResource.TryWithResourceASTVisitor;
+import at.splendit.simonykees.core.visitor.tryStatement.MultiCatchASTVisitor;
+import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisitor;
 
 /** {@link RulesContainer} is a HelperClass that holds a static list of all implemented rules
  * 

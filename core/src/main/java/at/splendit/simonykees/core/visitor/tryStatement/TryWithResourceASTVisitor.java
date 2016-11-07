@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.visitor.tryWithResource;
+package at.splendit.simonykees.core.visitor.tryStatement;
 
 import java.io.Closeable;
 import java.util.ArrayList;

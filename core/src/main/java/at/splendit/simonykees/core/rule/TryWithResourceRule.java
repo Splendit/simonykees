@@ -1,7 +1,7 @@
 package at.splendit.simonykees.core.rule;
 
 import at.splendit.simonykees.core.i18n.Messages;
-import at.splendit.simonykees.core.visitor.tryWithResource.TryWithResourceASTVisitor;
+import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisitor;
 
 public class TryWithResourceRule extends RefactoringRule<TryWithResourceASTVisitor> {
 

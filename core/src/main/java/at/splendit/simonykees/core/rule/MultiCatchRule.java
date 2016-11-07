@@ -1,7 +1,7 @@
 package at.splendit.simonykees.core.rule;
 
 import at.splendit.simonykees.core.i18n.Messages;
-import at.splendit.simonykees.core.visitor.tryWithResource.MultiCatchASTVisitor;
+import at.splendit.simonykees.core.visitor.tryStatement.MultiCatchASTVisitor;
 
 public class MultiCatchRule extends RefactoringRule<MultiCatchASTVisitor> {
 

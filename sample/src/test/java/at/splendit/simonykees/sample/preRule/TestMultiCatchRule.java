@@ -35,6 +35,11 @@ public class TestMultiCatchRule {
 	public int cornerCaseInheritance(int i) {
 		try {
 			throwSomethingWithInheritance(i);
+			/*
+			 * FIXME SIM-3: as seen here, only FirstException and
+			 * SecondException should be in the multi-catch clause, otherwise a
+			 * compilation error will occur.
+			 */
 		} catch (SecondChildChildException e) {
 			log.log(Level.TRACE, e);
 			i++;
