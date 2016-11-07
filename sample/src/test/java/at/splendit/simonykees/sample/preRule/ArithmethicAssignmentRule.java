@@ -35,12 +35,17 @@ public class ArithmethicAssignmentRule {
 		i = i + 3;
 		return i;
 	}
-
+	
+	public int testCC(int i) {
+		i = 3 + i;
+		return i;
+	}
+	
 	public int testD(int i) {
 		i = i - 3;
 		return i;
 	}
-
+	
 	public int testE(int i) {
 		i = i + 4 - 3;
 		return i;
@@ -145,7 +150,47 @@ public class ArithmethicAssignmentRule {
         i = i - 1; // SIM-95
         return i;
     }
-	
+    
+    public int testOperandParenthesisA(int i) {
+    	i = i + (16 + 8 + 4);
+    	return i;
+    }
+    
+    public int testOperandParenthesisB(int i) {
+    	i = i - (16 + 8 - 4);
+    	return i;
+    }
+
+    public int testOperandParenthesisC(int i) {
+    	i = i * (16 - 8 + 4);
+    	return i;
+    }
+    
+    public int testOperandParenthesisD(int i) {
+    	i = i / (16 + 8 * 4);
+    	return i;
+    }
+
+    public int testOperandParenthesisE(int i) {
+    	i = i + (16 * 8 + 4);
+    	return i;
+    }
+
+    public int testOperandParenthesisF(int i) {
+    	i = i - (16 + 8 / 4);
+    	return i;
+    }
+
+    public int testOperandParenthesisG(int i) {
+    	i = i * (16 / 8 + 4);
+    	return i;
+    }
+
+    public int testOperandParenthesisH(int i) {
+    	i = i / (16 * 8 / 4);
+    	return i;
+    }
+    
 	// SIM-96
 	public int testABC(int i) {
 		i = i - 1 + 2; 
