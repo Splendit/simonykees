@@ -223,7 +223,6 @@ public class ArithmethicAssignmentRule {
 	 * Corner cases
 	 */
 
-	/* FIXME see SIM-94
 	public Integer cornerCaseInteger(Integer i) {
 		i = i + 1;
 		return i;
@@ -269,7 +268,6 @@ public class ArithmethicAssignmentRule {
 		n = (Integer)n + 27;
 		return n;
 	}
-	*/
 	
     public double cornerCaseAddMaxInt(int i) {
         double d = Integer.MAX_VALUE;
