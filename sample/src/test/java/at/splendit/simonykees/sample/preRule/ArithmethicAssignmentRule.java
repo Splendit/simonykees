@@ -216,46 +216,55 @@ public class ArithmethicAssignmentRule {
 	 * Corner cases
 	 */
 
+	// SIM-94
 	public Integer cornerCaseInteger(Integer i) {
 		i = i + 1;
 		return i;
 	}
 	
+	// SIM-94
 	public Double cornerCaseDouble(Double d) {
 		d = d + 1;
 		return d;
 	}
 	
+	// SIM-94
 	public Float cornerCaseFloat(Float f) {
 		f = f + 1;
 		return f;
 	}
 	
+	// SIM-94
 	public Long cornerCaseLong(Long l) {
 		l = l + 1;
 		return l;
 	}
 	
+	// SIM-94
 	public Short cornerCaseShort(Short s) {
 		s = (short) (s + 1);
 		return s;
 	}
 	
+	// SIM-94
 	public Byte cornerCaseByte(Byte b) {
 		b = (byte) (b + 1);
 		return b;
 	}
 	
+	// SIM-94
 	public Character cornerCaseCharacter(Character c) {
 		c = (char) (c + 1);
 		return c;
 	}
 	
+	// SIM-94
 	public CharSequence cornerCaseByte(CharSequence cs) {
 		cs = cs + "a" + 'b';
 		return cs;
 	}
 	
+	// SIM-94
 	// TODO add mean corner cases with Number parameters
 	public Number cornerCaseNumber(Number n) {
 		n = (Integer)n + 27;
