@@ -27,7 +27,6 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	// TODO: match exceptions with different name in header
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(TryStatement node) {
