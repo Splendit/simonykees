@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -15,6 +14,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.UnionType;
 
+import at.splendit.simonykees.core.matcher.tryStatement.DifferentExceptionNameASTMatcher;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -33,23 +33,24 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 		List<CatchClause> catchClauses = (List<CatchClause>) node.catchClauses();
 		List<Block> blockList = catchClauses.stream().map(catchClase -> catchClase.getBody())
 				.collect(Collectors.toList());
-		ASTMatcher astMatcher = new ASTMatcher();
-		Type referenceExceptionType = null;
 		while (!blockList.isEmpty()) {
 			boolean combined = false;
 			Block reference = blockList.remove(0);
-			referenceExceptionType = ((CatchClause) reference.getParent()).getException().getType();
+			SingleVariableDeclaration referenceException = ((CatchClause) reference.getParent()).getException();
+			Type referenceExceptionType = referenceException.getType();
+
 			List<Type> allNewTypes = new ArrayList<>();
 			addTypesFromBlock(allNewTypes, referenceExceptionType);
 			for (Iterator<Block> blockIterator = blockList.iterator(); blockIterator.hasNext();) {
 				Block compareBlock = blockIterator.next();
-				if (reference.subtreeMatch(astMatcher, compareBlock)) {
-					CatchClause compareCatch = (CatchClause) compareBlock.getParent();
-					Type compareExceptionType = compareCatch.getException().getType();
+				CatchClause compareCatch = (CatchClause) compareBlock.getParent();
+				SingleVariableDeclaration compareException = compareCatch.getException();
+				Type compareExceptionType = compareException.getType();
+				if (reference.subtreeMatch(
+						new DifferentExceptionNameASTMatcher(referenceException.getName(), compareException.getName()),
+						compareBlock)) {
 					combined = true;
 					addTypesFromBlock(allNewTypes, compareExceptionType);
-					// addExceptionToHeader(allNewTypes, referenceExceptionType,
-					// compareExceptionDeclaration.getType());
 					astRewrite.remove(compareCatch, null);
 					blockIterator.remove();
 				}
@@ -69,7 +70,6 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private void removeSubTypes(List<Type> allNewTypes) {
-		// TODO remove the subtypes of the list
 		List<Type> filtedTypes = new ArrayList<>();
 		for (Type iterationType : allNewTypes) {
 			boolean add = true;
