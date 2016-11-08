@@ -22,7 +22,7 @@ import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 
 /**
- * Applies {@link RefactoringRule}s to {@link IJavaElement}s.<br/>
+ * Applies {@link RefactoringRule}s to {@link IJavaElement}s.<br>
  * The work flow should be
  * <ol>
  * <li>{@link #prepareRefactoring()}</li>
@@ -57,7 +57,7 @@ public abstract class AbstractRefactorer {
 	}
 
 	/**
-	 * Prepare working copies for refactoring<br/>
+	 * Prepare working copies for refactoring<br>
 	 * Find {@link ICompilationUnit}s and create working copies for the
 	 * {@link IJavaElement}s
 	 * 
