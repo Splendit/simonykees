@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  * {@link StringUtils} commands.
  * 
  * @author Martin Huter
+ * @since 0.9
  *
  */
 public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {

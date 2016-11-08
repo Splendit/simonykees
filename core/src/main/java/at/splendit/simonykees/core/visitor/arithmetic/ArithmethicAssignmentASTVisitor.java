@@ -21,6 +21,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * a = a + (3 * 3); =&gt; a += (3 * 3);
  * 
  * @author Martin Huter
+ * @since 0.9
  *
  */
 public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisitor {

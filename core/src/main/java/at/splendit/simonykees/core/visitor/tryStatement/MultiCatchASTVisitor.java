@@ -22,6 +22,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * multi-catch-block
  * 
  * @author Martin Huter
+ * @since 0.9
  *
  */
 public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {

@@ -21,6 +21,7 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
  * that implements {@link Closeable} or {@link AutoCloseable}
  * 
  * @author Martin Huter
+ * @since 0.9
  *
  */
 
