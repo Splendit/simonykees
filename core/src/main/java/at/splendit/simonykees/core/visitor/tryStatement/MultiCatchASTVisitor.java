@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.UnionType;
 
-import at.splendit.simonykees.core.matcher.tryStatement.DifferentExceptionNameASTMatcher;
+import at.splendit.simonykees.core.matcher.BijectiveSimpleNameASTMatcher;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -47,7 +47,7 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 				SingleVariableDeclaration compareException = compareCatch.getException();
 				Type compareExceptionType = compareException.getType();
 				if (reference.subtreeMatch(
-						new DifferentExceptionNameASTMatcher(referenceException.getName(), compareException.getName()),
+						new BijectiveSimpleNameASTMatcher(referenceException.getName(), compareException.getName()),
 						compareBlock)) {
 					combined = true;
 					addTypesFromBlock(allNewTypes, compareExceptionType);
