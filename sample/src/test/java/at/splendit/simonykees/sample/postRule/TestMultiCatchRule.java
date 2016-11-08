@@ -25,11 +25,20 @@ public class TestMultiCatchRule {
 	public int cornerCaseInheritance(int i) {
 		try {
 			throwSomethingWithInheritance(i);
-			/*
-			 * FIXME SIM-3: as seen here, only FirstException and
-			 * SecondException should be in the multi-catch clause, otherwise a
-			 * compilation error will occur.
-			 */
+		} catch (FirstException | SecondException e) {
+			log.log(Level.TRACE, e);
+			i++;
+		}
+		return i;
+	}
+	
+	/*
+	 * UnionType cornercase
+	 */
+	
+	public int unionTypeCornerCaseInheritance(int i) {
+		try {
+			throwSomethingWithInheritance(i);
 		} catch (FirstException | SecondException e) {
 			log.log(Level.TRACE, e);
 			i++;
@@ -43,14 +52,6 @@ public class TestMultiCatchRule {
 	public int cornerCaseDifferentExceptionNames(int i) {
 		try {
 			throwSomethingWithInheritance(i);
-			/*
-			 * FIXME SIM-3: as seen here, only FirstException and
-			 * SecondException should be in the multi-catch clause, otherwise a
-			 * compilation error will occur. 
-			 * FIXME SIM-104: the exception name
-			 * should not matter in this case and the bodies should be reduced
-			 * as seen below
-			 */
 		} catch (FirstException | SecondException e) {
 			log.log(Level.TRACE, e);
 			i++;
@@ -65,11 +66,6 @@ public class TestMultiCatchRule {
 	public int cornerCaseDifferentExceptionNamesNoReferenceInBody(int i) {
 		try {
 			throwSomethingWithInheritance(i);
-			/*
-			 * FIXME SIM-3: as seen here, only FirstException and
-			 * SecondException should be in the multi-catch clause, otherwise a
-			 * compilation error will occur.
-			 */
 		} catch (FirstException | SecondException e) {
 			i++;
 		}
