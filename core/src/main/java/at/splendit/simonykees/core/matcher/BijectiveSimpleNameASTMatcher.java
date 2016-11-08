@@ -15,8 +15,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 public class BijectiveSimpleNameASTMatcher extends ASTMatcher {
 
-	SimpleName ownSimpleName;
-	SimpleName otherSimpleName;
+	private SimpleName ownSimpleName;
+	private SimpleName otherSimpleName;
 
 	public BijectiveSimpleNameASTMatcher(SimpleName ownSimpleName, SimpleName otherSimpleName) {
 		this.ownSimpleName = ownSimpleName;
