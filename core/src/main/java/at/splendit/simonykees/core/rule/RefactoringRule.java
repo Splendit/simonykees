@@ -33,6 +33,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	protected String description = Messages.RefactoringRule_default_description;
 
 	protected boolean enabled = true;
+	
+	protected boolean selected = false;
 
 	private Class<T> visitor;
 

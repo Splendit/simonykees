@@ -1,14 +1,11 @@
-/**
- * 
- */
 package at.splendit.simonykees.core.ui.preference;
 
-import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.preference.BooleanFieldEditor;
+import org.eclipse.jface.preference.ComboFieldEditor;
+import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -16,44 +13,33 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
  * @author Ludwig Werzowa
  * @since 0.9.2
  */
-public class SimonykeesPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+public class SimonykeesPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+	
+	private static final String DEFAULT_PROFILE_NAME = "Default";
+	private static final String DEFAULT_PROFILE_VALUE = "default";
+	
+	private static final String JAVA8_PROFILE_NAME = "Java 8";
+	private static final String JAVA8_PROFILE_VALUE = "java8";
+	
+	private String[][] profileNamesAndValues = {
+				{DEFAULT_PROFILE_NAME, DEFAULT_PROFILE_VALUE},
+				{JAVA8_PROFILE_NAME, JAVA8_PROFILE_VALUE}
+			};
+	
+	private ComboFieldEditor profileSelectionComboField;
+	private BooleanFieldEditor codeFormatterSelected;
 
-	/**
-	 * 
-	 */
 	public SimonykeesPreferencePage() {
-		// TODO Auto-generated constructor stub
+		super(GRID);
 	}
-
-	/**
-	 * @param title
-	 */
-	public SimonykeesPreferencePage(String title) {
-		super(title);
-		// TODO Auto-generated constructor stub
-	}
-
-	/**
-	 * @param title
-	 * @param image
-	 */
-	public SimonykeesPreferencePage(String title, ImageDescriptor image) {
-		super(title, image);
-		// TODO Auto-generated constructor stub
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
-	 */
+	
 	@Override
-	protected Control createContents(Composite parent) {
-		Composite container = new Composite(parent, SWT.NULL);
+	protected void createFieldEditors() {
+		Composite composite = new Composite(getFieldEditorParent(), SWT.NONE);
+		composite.setLayout(new GridLayout(1, false));
 		
-		Label lblNewLabel = new Label(container, SWT.NONE);
-		lblNewLabel.setBounds(10, 10, 58, 17);
-		lblNewLabel.setText("New Label");
-		
-		return container;
+		profileSelectionComboField = new ComboFieldEditor("profileSelection", "Select profile", profileNamesAndValues, composite);
+		addField(profileSelectionComboField);
 	}
 
 	@Override
