@@ -34,7 +34,7 @@ public final class SimonykeesUtil {
 	private static final String LINE_SEPARATOR_PROPERTY = "line.separator"; //$NON-NLS-1$
 	/**
 	 * Get the line separator for the current system, if none is found
-	 * <code>&#92n</code> is used
+	 * <code>&#92;n</code> is used
 	 * 
 	 * @since 0.9.2
 	 */

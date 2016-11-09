@@ -81,7 +81,7 @@
 		<site>
 			<id>nexus</id>
 			<name>Nexus Simonykees Site</name>
-			<url>dav:http://nexus.splendit.loc/repository/maven-simonykees-site/</url>
+			<url>dav:https://javadoc.splendit.loc/simonykees</url>
 		</site>
 	</distributionManagement>
 
