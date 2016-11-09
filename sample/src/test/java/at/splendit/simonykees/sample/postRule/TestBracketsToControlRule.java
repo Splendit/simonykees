@@ -50,7 +50,7 @@ public class TestBracketsToControlRule {
 			;
 		}
 	}
-	
+
 	public int testMultipleThings(int input) {
 		if (input > 0) {
 			for (int i = 0; i < 10; i++) {
@@ -69,7 +69,13 @@ public class TestBracketsToControlRule {
 				input--;
 			}
 		} else {
-			try {input /= 0;} catch (ArithmeticException e) {input /= 2;} finally {return ++input;}
+			try {
+				input /= 0;
+			} catch (ArithmeticException e) {
+				input /= 2;
+			} finally {
+				return ++input;
+			}
 		}
 		return input;
 	}

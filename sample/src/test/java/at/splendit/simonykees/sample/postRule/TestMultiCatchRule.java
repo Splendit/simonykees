@@ -17,7 +17,8 @@ public class TestMultiCatchRule {
 		// TODO meaningful Asserts?
 		try {
 			String.class.getConstructor(String.class).newInstance("aa");
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
 			log.log(Level.TRACE, e);
 		}
 	}
@@ -31,11 +32,11 @@ public class TestMultiCatchRule {
 		}
 		return i;
 	}
-	
+
 	/*
 	 * UnionType cornercase
 	 */
-	
+
 	public int unionTypeCornerCaseInheritance(int i) {
 		try {
 			throwSomethingWithInheritance(i);
@@ -58,7 +59,7 @@ public class TestMultiCatchRule {
 		}
 		return i;
 	}
-	
+
 	/**
 	 * Same as cornerCaseDifferentExceptionNames but without reference to the
 	 * Exception variable in the Exception body
@@ -76,21 +77,22 @@ public class TestMultiCatchRule {
 		try {
 			throwSomething(i);
 		} catch (FirstException | SecondException e) {
-			i++; 						// A
+			i++; // A
 		} catch (ThirdException e) {
-			i += 10; 					// B
+			i += 10; // B
 		} catch (FourthException | FifthException e) {
-			i--; 						// C
+			i--; // C
 		} catch (SixthException e) {
-			i -= 10; 					// D
+			i -= 10; // D
 		}
 		return i;
 	}
-	
+
 	public int cornerCaseMixedCheckedUnchecked(int i) {
 		try {
 			throwSomethingMixedCheckedAndUnchecked(i);
-		} catch (FirstException | FirstUncheckedException | SecondException | SecondtUncheckedException | ThirdException | ThirdUncheckedException e) {
+		} catch (FirstException | FirstUncheckedException | SecondException | SecondtUncheckedException | ThirdException
+				| ThirdUncheckedException e) {
 			i++;
 		}
 		return i;
