@@ -29,14 +29,14 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 	private static final String STRING_UTILS = "StringUtils"; //$NON-NLS-1$
 	private static final String IS_EMPTY = "isEmpty"; //$NON-NLS-1$
 	private static final String TRIM = "trim"; //$NON-NLS-1$
-	private static final String EQUALS = "equals"; //$NON-NLS-1$
+//	private static final String EQUALS = "equals"; //$NON-NLS-1$ // FIXME: see SIM-86
 	private static final String EQUALS_IGNORE_CASE = "equalsIgnoreCase"; //$NON-NLS-1$
 	private static final String ENDSWITH = "endsWith"; //$NON-NLS-1$
 	private static final String INDEXOF = "indexOf"; //$NON-NLS-1$
 	private static final String CONTAINS = "contains"; //$NON-NLS-1$
 	private static final String SUBSTRING = "substring"; //$NON-NLS-1$
 //	private static final String SPLIT = "split"; //$NON-NLS-1$ // FIXME: see SIM-78
-	private static final String REPLACE = "replace"; //$NON-NLS-1$
+//	private static final String REPLACE = "replace"; //$NON-NLS-1$ // FIXME: see SIM-85
 	private static final String STARTS_WITH = "startsWith"; //$NON-NLS-1$
 
 	private static final String TO_UPPER_CASE = "toUpperCase"; //$NON-NLS-1$
@@ -66,14 +66,14 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 			switch (op = node.getName().getFullyQualifiedName()) {
 			case IS_EMPTY:
 			case TRIM:
-			case EQUALS:
+//			case EQUALS: // see SIM-86
 			case EQUALS_IGNORE_CASE:
 			case ENDSWITH:
 			case INDEXOF:
 			case CONTAINS:
 			case SUBSTRING:
 //			case SPLIT: // see SIM-78
-			case REPLACE:
+//			case REPLACE: // see SIM-85
 				replacementOperation = op;
 				break;
 			case TO_UPPER_CASE:

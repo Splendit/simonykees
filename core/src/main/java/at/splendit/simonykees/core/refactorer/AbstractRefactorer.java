@@ -21,17 +21,54 @@ import at.splendit.simonykees.core.i18n.ExceptionMessages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 
+/**
+ * Applies {@link RefactoringRule}s to {@link IJavaElement}s.<br/>
+ * The work flow should be
+ * <ol>
+ * <li>{@link #prepareRefactoring()}</li>
+ * <li>{@link #doRefactoring()}</li>
+ * <li>{@link #commitRefactoring()}</li>
+ * </ol>
+ * 
+ * @author Hannes Schweighofer
+ * @since 0.9
+ *
+ */
 public abstract class AbstractRefactorer {
 
 	protected List<IJavaElement> javaElements;
 	protected List<RefactoringRule<? extends ASTVisitor>> rules;
 	protected List<ICompilationUnit> workingCopies = new ArrayList<>();
 
+	/**
+	 * 
+	 * @param javaElements
+	 *            {@link List} of {@link IJavaElement}s which should be
+	 *            refactored
+	 * @param rules
+	 *            {@link List} of {@link RefactoringRule}s to apply to the
+	 *            {@link IJavaElement}s
+	 *            
+	 * @since 0.9
+	 */
 	public AbstractRefactorer(List<IJavaElement> javaElements, List<RefactoringRule<? extends ASTVisitor>> rules) {
 		this.javaElements = javaElements;
 		this.rules = rules;
 	}
 
+	/**
+	 * Prepare working copies for refactoring<br/>
+	 * Find {@link ICompilationUnit}s and create working copies for the
+	 * {@link IJavaElement}s
+	 * 
+	 * @throws RefactoringException
+	 *             if this element does not exist or if an exception occurs
+	 *             while accessing its corresponding resource.
+	 * 
+	 * @since 0.9
+	 * 
+	 * @see SimonykeesUtil#collectICompilationUnits(List, List)
+	 */
 	public void prepareRefactoring() throws RefactoringException {
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
 		try {
@@ -58,6 +95,21 @@ public abstract class AbstractRefactorer {
 		}
 	}
 
+	/**
+	 * Apply {@link RefactoringRule}s to the working copies
+	 * 
+	 * @throws RefactoringException
+	 *             if no working copies were found to apply
+	 *             {@link RefactoringRule}s to
+	 * @throws RuleException
+	 *             if the {@link RefactoringRule} could no be initialised or not
+	 *             applied
+	 * 
+	 * @since 0.9
+	 * 
+	 * @see RefactoringRule#generateDocumentChanges(List)
+	 * 
+	 */
 	public void doRefactoring() throws RefactoringException, RuleException {
 		if (workingCopies.isEmpty()) {
 			Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung, null);
@@ -74,11 +126,26 @@ public abstract class AbstractRefactorer {
 		}
 		if (!notWorkingRules.isEmpty()) {
 			String notWorkingRulesCollected = notWorkingRules.stream().collect(Collectors.joining(", ")); //$NON-NLS-1$
-			throw new RuleException(NLS.bind(ExceptionMessages.AbstractRefactorer_rule_execute_failed, notWorkingRulesCollected),
+			throw new RuleException(
+					NLS.bind(ExceptionMessages.AbstractRefactorer_rule_execute_failed, notWorkingRulesCollected),
 					NLS.bind(ExceptionMessages.AbstractRefactorer_user_rule_execute_failed, notWorkingRulesCollected));
 		}
 	}
 
+	/**
+	 * Commit the working copies to the underlying {@link ICompilationUnit}s
+	 * 
+	 * 
+	 * @throws RefactoringException
+	 *             if no working copies were found
+	 * @throws ReconcileException
+	 *             if a working copy cannot be applied to the underlying
+	 *             {@link ICompilationUnit}
+	 * 
+	 * @since 0.9
+	 * 
+	 * @see SimonykeesUtil#commitAndDiscardWorkingCopy(ICompilationUnit)
+	 */
 	public void commitRefactoring() throws RefactoringException, ReconcileException {
 		if (workingCopies.isEmpty()) {
 			Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung, null);
@@ -103,10 +170,30 @@ public abstract class AbstractRefactorer {
 		}
 	}
 
+	/**
+	 * Get all {@link RefactoringRule}s available to the
+	 * {@link AbstractRefactorer}
+	 * 
+	 * @return a {@link List} containing all {@link RefactoringRule}s
+	 * 
+	 * @since 0.9
+	 */
 	public List<RefactoringRule<? extends ASTVisitor>> getRules() {
 		return Collections.unmodifiableList(rules);
 	}
 
+	/**
+	 * Check if changes were made by any {@link RefactoringRule}
+	 * 
+	 * @return
+	 *         <ul>
+	 *         <li>{@code true} if changes were made by any
+	 *         {@link RefactoringRule}</li>
+	 *         <li>{@code false} if no changes were made</li>
+	 *         </ul>
+	 * 
+	 * @since 0.9
+	 */
 	public boolean hasChanges() {
 		for (RefactoringRule<? extends ASTVisitor> rule : rules) {
 			if (!rule.getDocumentChanges().isEmpty()) {
