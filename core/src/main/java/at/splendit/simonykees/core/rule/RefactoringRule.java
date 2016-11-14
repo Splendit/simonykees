@@ -28,13 +28,15 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
+	protected String id;
+	
 	protected String name = Messages.RefactoringRule_default_name;
 
 	protected String description = Messages.RefactoringRule_default_description;
 
 	protected boolean enabled = true;
 	
-	protected boolean selected = false;
+	protected boolean defaultRule = false;
 
 	private Class<T> visitor;
 
@@ -42,6 +44,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	public RefactoringRule(Class<T> visitor) {
 		this.visitor = visitor;
+		this.id = this.getClass().getSimpleName(); // FIXME maybe add a better id
 	}
 
 	public String getName() {
@@ -58,6 +61,14 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	public Class<T> getVisitor() {
 		return visitor;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public boolean isDefaultRule() {
+		return defaultRule;
 	}
 
 	/**

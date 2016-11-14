@@ -38,6 +38,7 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 		super(visitor);
 		this.name = Messages.CodeFormatterRule_name;
 		this.description = Messages.CodeFormatterRule_description;
+		this.defaultRule = true;
 	}
 
 	@Override

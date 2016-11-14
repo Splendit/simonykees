@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
+import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
 
 public class SelectRulesPage extends AbstractWizardPage {
 
@@ -96,6 +97,9 @@ public class SelectRulesPage extends AbstractWizardPage {
 				cell.setText(((RefactoringRule<? extends ASTVisitor>) cell.getElement()).getName());
 			}
 		});
+
+		rulesCheckboxTableViewer.setCheckedElements(
+				rules.stream().filter(r -> SimonykeesPreferenceManager.isRuleSelected(r.getId())).toArray());
 	}
 
 	private void createRuleDescriptionViewer(Composite parent) {

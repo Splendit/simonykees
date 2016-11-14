@@ -43,6 +43,7 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 		super(visitor);
 		this.name = Messages.OrganiseImportsRule_name;
 		this.description = Messages.OrganiseImportsRule_description;
+		this.defaultRule = true;
 	}
 
 	@Override
