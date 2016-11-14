@@ -1,5 +1,9 @@
 package at.splendit.simonykees.core;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,22 +22,41 @@ public class AbstractRulesTest {
 		super();
 	}
 
+	/**
+	 * loads all pairs of {@link Path}s for the postRule domain defined by the
+	 * {@linkplain postRuleDirectory} to assure that only pairs are loaded that
+	 * are defined in the realm of the {@linkplain postRuleDirectory}.
+	 * 
+	 * @return the object array list used for tests
+	 * @return the list of loaded parameters
+	 * @throws Exception
+	 *             junit test default
+	 */
+	protected static List<Object[]> load(String postRuleDirectory) throws IOException {
+		List<Object[]> data = new ArrayList<>();
+		for (Path postRulePath : Files.newDirectoryStream(Paths.get(postRuleDirectory), RulesTestUtil.RULE_SUFFIX)) {
+			Path preRulePath = Paths.get(RulesTestUtil.PRERULE_DIRECTORY, postRulePath.getFileName().toString());
+			data.add(new Object[] { preRulePath.getFileName().toString(), preRulePath, postRulePath });
+		}
+		return data;
+	}
+
 	protected String processFile(String fileName, String content,
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) throws Exception {
-	
+
 		IPackageFragment packageFragment = RulesTestUtil.getPackageFragement();
 		ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);
-	
+
 		List<IJavaElement> javaElements = new ArrayList<>();
 		javaElements.add(compilationUnit);
-	
+
 		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
 		};
-	
+
 		refactorer.prepareRefactoring();
 		refactorer.doRefactoring();
 		refactorer.commitRefactoring();
-	
+
 		return compilationUnit.getSource();
 	}
 

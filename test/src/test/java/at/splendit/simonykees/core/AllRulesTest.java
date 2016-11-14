@@ -35,12 +35,19 @@ public class AllRulesTest extends AbstractRulesTest {
 		this.postRule = postRule;
 	}
 
+	/**
+	 * All files in the preRule package are matched with its corresponding allRules match.
+	 * If an preRule File exists with no postRule complement there is an file not found exception raised.
+	 * This assures that a postRule file for each preRule File exists in case of the allRules test
+	 * @return the object array list used for tests
+	 * @throws Exception junit test default 
+	 */
 	@Parameters(name = "{index}: test file[{0}]")
 	public static Collection<Object[]> data() throws Exception {
 		List<Object[]> data = new ArrayList<>();
 		for (Path preRulePath : Files.newDirectoryStream(Paths.get(RulesTestUtil.PRERULE_DIRECTORY),
 				RulesTestUtil.RULE_SUFFIX)) {
-			Path postRulePath = Paths.get(AllRulesTest.POSTRULE_DIRECTORY, preRulePath.getFileName().toString());
+			Path postRulePath = Paths.get(POSTRULE_DIRECTORY, preRulePath.getFileName().toString());
 			data.add(new Object[] { preRulePath.getFileName().toString(), preRulePath, postRulePath });
 		}
 		return data;
@@ -55,7 +62,7 @@ public class AllRulesTest extends AbstractRulesTest {
 		
 		//Replace the package for comparison
 		compilationUnitSource = StringUtils.replace(compilationUnitSource, RulesTestUtil.PRERULE_PACKAGE,
-					AllRulesTest.POSTRULE_PACKAGE);
+					POSTRULE_PACKAGE);
 
 		// TODO check if tabs and newlines make a difference
 		assertEquals(expectedSource, compilationUnitSource);
