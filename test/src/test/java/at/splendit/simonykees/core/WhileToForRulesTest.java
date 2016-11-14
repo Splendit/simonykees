@@ -11,25 +11,27 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import at.splendit.simonykees.core.rule.RulesContainer;
+import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
-public class AllRulesTest extends AbstractRulesTest {
+public class WhileToForRulesTest extends AbstractRulesTest {
 
-	public static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.allRules";
-	public static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/allRules";
+	public static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.whileToFor";
+	public static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/whileToFor";
 
 	private String fileName;
 	private Path preRule, postRule;
 
-	public AllRulesTest(String fileName, Path preRule, Path postRule) {
+	public WhileToForRulesTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
@@ -47,15 +49,22 @@ public class AllRulesTest extends AbstractRulesTest {
 	}
 
 	@Test
+	@Ignore
 	public void testTransformation() throws Exception {
 		String expectedSource = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		String content = new String(Files.readAllBytes(preRule), StandardCharsets.UTF_8);
-		
-		String compilationUnitSource = processFile(fileName, content, RulesContainer.getAllRules());
-		
-		//Replace the package for comparison
+
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
+
+		// Actial Rule!!
+		rulesList.add(new RefactoringRule<AbstractASTRewriteASTVisitor>(AbstractASTRewriteASTVisitor.class) {
+		});
+
+		String compilationUnitSource = processFile(fileName, content, rulesList);
+
+		// Replace the package for comparison
 		compilationUnitSource = StringUtils.replace(compilationUnitSource, RulesTestUtil.PRERULE_PACKAGE,
-					AllRulesTest.POSTRULE_PACKAGE);
+				AllRulesTest.POSTRULE_PACKAGE);
 
 		// TODO check if tabs and newlines make a difference
 		assertEquals(expectedSource, compilationUnitSource);

@@ -34,14 +34,13 @@ import org.w3c.dom.NodeList;
 public class RulesTestUtil {
 
 	private static final Path[] EMPTY_PATHS = new Path[0];
-	
-	public static final String POSTRULE_PACKAGE = "package at.splendit.simonykees.sample.postRule;"; 
-	public static final String PRERULE_PACKAGE = "package at.splendit.simonykees.sample.preRule;"; 
-	public static final String SAMPLE_DIRECTORY = "../sample/src/test/java/at/splendit/simonykees/sample/"; 
-	public static final String PRERULE_DIRECTORY = SAMPLE_DIRECTORY + "preRule"; 
-	public static final String POSTRULE_DIRECTORY = SAMPLE_DIRECTORY + "postRule"; 
-	
 	public static final String RULE_SUFFIX = "*Rule.java"; 
+	
+	public static final String BASE_PACKAGE = "package at.splendit.simonykees.sample";
+	public static final String PRERULE_PACKAGE = "package at.splendit.simonykees.sample.preRule";
+	public static final String BASE_DIRECTORY = "../sample/src/test/java/at/splendit/simonykees/sample";
+	public static final String PRERULE_DIRECTORY = "../sample/src/test/java/at/splendit/simonykees/sample/preRule";
+	
 
 	private RulesTestUtil() {
 		// hiding

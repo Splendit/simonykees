@@ -3,8 +3,6 @@ package at.splendit.simonykees.core.rule;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.ASTVisitor;
-
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
@@ -29,7 +27,7 @@ public class RulesContainer {
 	 * 
 	 * @return a List of {@link RefactoringRule} with all used Rules is returned.
 	 */
-	public static List<RefactoringRule<? extends ASTVisitor>> getAllRules() {
+	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules() {
 		return Arrays.asList(
 				new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
 				new TryWithResourceRule(TryWithResourceASTVisitor.class),

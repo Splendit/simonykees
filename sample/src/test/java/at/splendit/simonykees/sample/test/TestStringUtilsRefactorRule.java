@@ -62,7 +62,7 @@ public class TestStringUtilsRefactorRule extends AbstractReflectiveMethodTester 
 	@BeforeClass
 	public static void setUptHolderInstance() throws Exception {
 		holder = new PreAndPostClassHolder(at.splendit.simonykees.sample.preRule.StringUtilsRefactorRule.class,
-				at.splendit.simonykees.sample.postRule.StringUtilsRefactorRule.class);
+				at.splendit.simonykees.sample.postRule.allRules.StringUtilsRefactorRule.class);
 	}
 	
 	@AfterClass

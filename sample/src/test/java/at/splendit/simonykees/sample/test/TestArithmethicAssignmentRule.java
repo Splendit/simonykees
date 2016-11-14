@@ -93,7 +93,7 @@ public class TestArithmethicAssignmentRule extends AbstractReflectiveMethodTeste
 	@BeforeClass
 	public static void setUptHolderInstance() throws Exception {
 		holder = new PreAndPostClassHolder(at.splendit.simonykees.sample.preRule.ArithmethicAssignmentRule.class,
-				at.splendit.simonykees.sample.postRule.ArithmethicAssignmentRule.class);
+				at.splendit.simonykees.sample.postRule.allRules.ArithmethicAssignmentRule.class);
 	}
 	
 	@AfterClass

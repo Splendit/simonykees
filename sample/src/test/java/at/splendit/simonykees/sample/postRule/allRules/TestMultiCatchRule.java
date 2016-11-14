@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule;
+package at.splendit.simonykees.sample.postRule.allRules;
 
 import java.lang.reflect.InvocationTargetException;
 

@@ -1,11 +1,10 @@
 package at.splendit.simonykees.sample.preRule;
 
-import org.apache.commons.lang3.StringUtils;
-import java.util.Locale;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.TreeSet;
+import java.util.List;
+import java.util.Locale;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class OrganiseImportsRule {
 

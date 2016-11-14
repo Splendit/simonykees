@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule;
+package at.splendit.simonykees.sample.postRule.allRules;
 
 /**
  * See comment in <a href="https://jira.splendit.loc/browse/SIM-88">SIM-88</a>

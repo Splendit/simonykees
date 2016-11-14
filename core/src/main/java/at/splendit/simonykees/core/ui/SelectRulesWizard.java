@@ -3,7 +3,6 @@ package at.splendit.simonykees.core.ui;
 import java.util.List;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -16,6 +15,7 @@ import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 public class SelectRulesWizard extends Wizard {
 
@@ -38,7 +38,7 @@ public class SelectRulesWizard extends Wizard {
 	
 	@Override
 	public boolean performFinish() {
-		final List<RefactoringRule<? extends ASTVisitor>> rules = selectRulesPage.getSelectedRules();
+		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = selectRulesPage.getSelectedRules();
 		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {};
 		
 		try {

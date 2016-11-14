@@ -51,7 +51,7 @@ public class TestBracketsToControlRule extends AbstractReflectiveMethodTester {
 	@BeforeClass
 	public static void setUptHolderInstance() throws Exception {
 		holder = new PreAndPostClassHolder(at.splendit.simonykees.sample.preRule.TestBracketsToControlRule.class,
-				at.splendit.simonykees.sample.postRule.TestBracketsToControlRule.class);
+				at.splendit.simonykees.sample.postRule.allRules.TestBracketsToControlRule.class);
 	}
 	
 	@AfterClass
