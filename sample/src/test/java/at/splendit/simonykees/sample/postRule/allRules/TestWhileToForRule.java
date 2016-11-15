@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.preRule;
+package at.splendit.simonykees.sample.postRule.allRules;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -12,9 +12,7 @@ public class TestWhileToForRule {
 	public void testWhileToFor() {
 		List<String> l = new ArrayList<>();
 
-		Iterator<String> iterator = l.iterator();
-		while (iterator.hasNext()) {
-			String s = iterator.next();
+		for (String s : l) {
 			System.out.println(s);
 		}
 	}
