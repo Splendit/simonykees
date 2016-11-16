@@ -26,7 +26,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * {@link AbstractASTRewriteASTVisitor} so the abstract class itself can be
  * passed to the constructor.
  * 
- * @author Hannes Schweighofer
+ * @author Hannes Schweighofer, Ludwig Werzowa
  * @since 0.9.2
  *
  */
@@ -38,7 +38,6 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 		super(visitor);
 		this.name = Messages.CodeFormatterRule_name;
 		this.description = Messages.CodeFormatterRule_description;
-		this.defaultRule = true;
 	}
 
 	@Override

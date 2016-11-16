@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
@@ -33,11 +34,11 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	protected String name = Messages.RefactoringRule_default_name;
 
 	protected String description = Messages.RefactoringRule_default_description;
+	
+	protected JavaVersion requiredJavaVersion = JavaVersion.JAVA_1_4;
 
 	protected boolean enabled = true;
 	
-	protected boolean defaultRule = false;
-
 	private Class<T> visitor;
 
 	private Map<ICompilationUnit, DocumentChange> changes = new HashMap<ICompilationUnit, DocumentChange>();
@@ -67,8 +68,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		return id;
 	}
 
-	public boolean isDefaultRule() {
-		return defaultRule;
+	public JavaVersion getRequiredJavaVersion() {
+		return requiredJavaVersion;
 	}
 
 	/**
