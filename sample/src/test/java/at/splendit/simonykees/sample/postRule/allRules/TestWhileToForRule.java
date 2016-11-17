@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.junit.Test;
-
 public class TestWhileToForRule {
 
-	@Test
 	public void testWhileToFor() {
 		List<String> l = new ArrayList<>();
 
@@ -17,7 +14,6 @@ public class TestWhileToForRule {
 		}
 	}
 
-	@Test
 	public void testWhileToFor2() {
 		List<String> l = new ArrayList<>();
 
@@ -29,7 +25,6 @@ public class TestWhileToForRule {
 		}
 	}
 
-	@Test
 	public void testWhileToFor3() {
 		List<String> l = new ArrayList<>();
 
@@ -42,7 +37,6 @@ public class TestWhileToForRule {
 		}
 	}
 
-	@Test
 	public void testWhileToFor4() {
 		List<String> l = new ArrayList<>();
 
@@ -55,7 +49,6 @@ public class TestWhileToForRule {
 		}
 	}
 
-	@Test
 	public void testWhileToFor5() {
 		List<String> l = new ArrayList<>();
 
