@@ -52,9 +52,7 @@ public class TestWhileToForRule {
 	public void testWhileToFor5() {
 		List<String> l = new ArrayList<>();
 
-		Iterator<String> iterator = l.iterator();
-		String s;
-		while ((s = iterator.next()) != null) {
+		for (String s : l) {
 			System.out.println(s);
 		}
 	}

@@ -1,8 +1,11 @@
 package at.splendit.simonykees.core.visitor;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -67,6 +70,9 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 							SingleVariableDeclaration svd = node.getAST().newSingleVariableDeclaration();
 							svd.setName((SimpleName) astRewrite
 									.createMoveTarget(findNextVariableAstVisitor.getVariableName()));
+							if(findNextVariableAstVisitor.getIteratorVariableType() == null){
+								//variable is not in while defined check if unused in other context and extract type
+							}
 							svd.setType((Type) astRewrite
 									.createMoveTarget(findNextVariableAstVisitor.getIteratorVariableType()));
 							newFor.setParameter(svd);
@@ -141,6 +147,7 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 		private Type iteratorVariableType = null;
 		private SimpleName variableName = null;
 		private boolean transformable = false;
+		private boolean doubleNext = false;
 
 		public FindNextVariableAstVisitor(SimpleName iteratorName) {
 			this.iteratorName = iteratorName;
@@ -162,10 +169,11 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 					return false;
 				}
 				else if ("next".equals(node.getName().getFullyQualifiedName())) { //$NON-NLS-1$
-					if(transformable){
+					if(transformable || doubleNext){
 						iteratorVariableType = null;
 						variableName = null;
 						transformable = false;
+						doubleNext = true;
 						return false;
 					}
 					//this.astRewrite.remove(node.getInitializer(), null);
@@ -177,10 +185,28 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 			return true;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public void endVisit(VariableDeclarationStatement node) {
-			if (transformable) {
-				iteratorVariableType = node.getType();
+			if (transformable && iteratorVariableType == null && variableName != null) {
+				for (VariableDeclarationFragment fragment : (List<VariableDeclarationFragment>) node.fragments()){
+					if(fragment.getName().getFullyQualifiedName().equals(variableName.getFullyQualifiedName())){
+						iteratorVariableType = node.getType();
+						break;
+					}
+				}
+			}
+		}
+		
+		@Override
+		public void endVisit(Assignment node) {
+			if (transformable && variableName == null) {
+				if(node.getLeftHandSide() instanceof SimpleName){
+					variableName = (SimpleName) node.getLeftHandSide();
+				}
+				else {
+					transformable = false;
+				}
 			}
 
 		}

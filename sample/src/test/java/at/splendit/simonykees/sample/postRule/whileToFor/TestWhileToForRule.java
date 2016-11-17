@@ -48,14 +48,4 @@ public class TestWhileToForRule {
 			iterator.forEachRemaining(null);
 		}
 	}
-
-	public void testWhileToFor5() {
-		List<String> l = new ArrayList<>();
-
-		Iterator<String> iterator = l.iterator();
-		String s;
-		while ((s = iterator.next()) != null) {
-			System.out.println(s);
-		}
-	}
 }
