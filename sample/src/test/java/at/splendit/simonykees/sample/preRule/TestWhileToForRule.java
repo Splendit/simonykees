@@ -50,4 +50,42 @@ public class TestWhileToForRule {
 			iterator.forEachRemaining(null);
 		}
 	}
+
+	public void testWhileToFor5() {
+		List<String> l = new ArrayList<>();
+
+		Iterator<String> iterator = l.iterator();
+		String s;
+		while (iterator.hasNext()) {
+			Object k;
+			s = iterator.next();
+			System.out.println(s);
+		}
+	}
+
+	public void testWhileToFor6() {
+		List<String> l = new ArrayList<>();
+
+		Iterator<String> iterator = l.iterator();
+		String s;
+		s="lalelu";
+		while (iterator.hasNext()) {
+			Object k;
+			s = iterator.next();
+			System.out.println(s);
+		}
+	}
+
+	public void testWhileToFor7() {
+		List<String> l = new ArrayList<>();
+
+		Iterator<String> iterator = l.iterator();
+		String s;
+		while (iterator.hasNext()) {
+			Object k;
+			s = iterator.next();
+			System.out.println(s);
+		}
+		s="lalelu";
+	}
 }

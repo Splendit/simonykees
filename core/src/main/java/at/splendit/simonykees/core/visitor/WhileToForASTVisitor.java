@@ -41,10 +41,7 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 				if (iteratorExpression != null && iteratorExpression instanceof SimpleName) {
 					ITypeBinding iteratorBinding = iteratorExpression.resolveTypeBinding();
 					if (isContentofRegistertITypes(iteratorBinding)) {
-						ASTNode parentNode = node.getParent();
-						while (!(parentNode instanceof Block) && parentNode != null) {
-							parentNode = parentNode.getParent();
-						}
+						ASTNode parentNode = findParentBlock(node);
 						if (parentNode == null) {
 							// No surrounding parent block found
 							// should not happen, because the Iterator has to be
@@ -62,6 +59,24 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 						if (iteratorDefinitionAstVisior.getList() != null
 								&& findNextVariableAstVisitor.getVariableName() != null
 								&& findNextVariableAstVisitor.isTransformable()) {
+							Type svdType;
+							if (findNextVariableAstVisitor.getIteratorVariableType() == null) {
+								// variable is not in while defined check if
+								// unused in other context and extract type
+								VariableDefinitionAstVisiotr variableDefinitionAstVisior = new VariableDefinitionAstVisiotr(
+										findNextVariableAstVisitor.getVariableName(), node);
+								parentNode.accept(variableDefinitionAstVisior);
+								if (variableDefinitionAstVisior.getVariableDeclarationStatement() != null) {
+									svdType = variableDefinitionAstVisior.getVariableDeclarationStatement().getType();
+									astRewrite.remove(variableDefinitionAstVisior.getVariableDeclarationStatement(),
+											null);
+								} else {
+									// exclusion ground found
+									return false;
+								}
+							} else {
+								svdType = findNextVariableAstVisitor.getIteratorVariableType();
+							}
 							EnhancedForStatement newFor = node.getAST().newEnhancedForStatement();
 							newFor.setBody((Statement) astRewrite.createMoveTarget(node.getBody()));
 							newFor.setExpression(
@@ -70,24 +85,29 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 							SingleVariableDeclaration svd = node.getAST().newSingleVariableDeclaration();
 							svd.setName((SimpleName) astRewrite
 									.createMoveTarget(findNextVariableAstVisitor.getVariableName()));
-							if(findNextVariableAstVisitor.getIteratorVariableType() == null){
-								//variable is not in while defined check if unused in other context and extract type
-							}
-							svd.setType((Type) astRewrite
-									.createMoveTarget(findNextVariableAstVisitor.getIteratorVariableType()));
+							svd.setType((Type) astRewrite.createMoveTarget(svdType));
 							newFor.setParameter(svd);
 							astRewrite.replace(node, newFor, null);
 							// executed here, because a breaking statement can
 							// be found after the setting of the type
-							this.astRewrite.remove(findNextVariableAstVisitor.getIteratorVariableType().getParent(),
-									null);
-							this.astRewrite.remove(iteratorDefinitionAstVisior.getIteratorDeclarationStatement(), null);
+							astRewrite.remove(findNextVariableAstVisitor.removeWithTransformation, null);
+							astRewrite.remove(iteratorDefinitionAstVisior.getIteratorDeclarationStatement(), null);
 						}
 					}
 				}
 			}
 		}
 		return true;
+	}
+
+	private Block findParentBlock(ASTNode node) {
+		if (node == null) {
+			return null;
+		}
+		if (node.getParent() instanceof Block) {
+			return (Block) node.getParent();
+		}
+		return findParentBlock(node.getParent());
 	}
 
 	@Override
@@ -135,6 +155,58 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 		}
 	}
 
+	private class VariableDefinitionAstVisiotr extends AbstractCompilationUnitAstVisitor {
+		private SimpleName variableName;
+		private WhileStatement whileStatement;
+		private boolean useableLoopVariable = false;
+		private VariableDeclarationStatement variableDeclarationStatement = null;
+
+		public VariableDefinitionAstVisiotr(SimpleName variableName, WhileStatement whileStatement) {
+			this.variableName = variableName;
+			this.whileStatement = whileStatement;
+		}
+
+		@Override
+		public boolean visit(VariableDeclarationFragment node) {
+			if (node.getName().getIdentifier().equals(variableName.getIdentifier())) {
+				// this case can only happen once in the scope of the tree
+				useableLoopVariable = true;
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public void endVisit(VariableDeclarationStatement node) {
+			if (useableLoopVariable && variableDeclarationStatement == null) {
+				variableDeclarationStatement = node;
+			}
+
+		}
+
+		@Override
+		public boolean visit(WhileStatement node) {
+			if (whileStatement.equals(node)) {
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public boolean visit(SimpleName node) {
+			if ((node.getFullyQualifiedName().equals(variableName.getFullyQualifiedName()))) {
+				useableLoopVariable = false;
+				variableDeclarationStatement = null;
+				return false;
+			}
+			return true;
+		}
+
+		public VariableDeclarationStatement getVariableDeclarationStatement() {
+			return variableDeclarationStatement;
+		}
+	}
+
 	/**
 	 * also checks if remove or forEachRemaining is used on the iterator.
 	 * 
@@ -146,6 +218,7 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 
 		private Type iteratorVariableType = null;
 		private SimpleName variableName = null;
+		private Statement removeWithTransformation;
 		private boolean transformable = false;
 		private boolean doubleNext = false;
 
@@ -155,7 +228,7 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 
 		@Override
 		public void endVisit(VariableDeclarationFragment node) {
-			if (transformable){
+			if (transformable) {
 				variableName = node.getName();
 			}
 		}
@@ -167,16 +240,15 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 						"forEachRemaining".equals(node.getName().getFullyQualifiedName())) { //$NON-NLS-1$
 					transformable = false;
 					return false;
-				}
-				else if ("next".equals(node.getName().getFullyQualifiedName())) { //$NON-NLS-1$
-					if(transformable || doubleNext){
+				} else if ("next".equals(node.getName().getFullyQualifiedName())) { //$NON-NLS-1$
+					if (transformable || doubleNext) {
 						iteratorVariableType = null;
 						variableName = null;
 						transformable = false;
 						doubleNext = true;
 						return false;
 					}
-					//this.astRewrite.remove(node.getInitializer(), null);
+					// this.astRewrite.remove(node.getInitializer(), null);
 					//
 					transformable = true;
 					return true;
@@ -189,22 +261,25 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 		@Override
 		public void endVisit(VariableDeclarationStatement node) {
 			if (transformable && iteratorVariableType == null && variableName != null) {
-				for (VariableDeclarationFragment fragment : (List<VariableDeclarationFragment>) node.fragments()){
-					if(fragment.getName().getFullyQualifiedName().equals(variableName.getFullyQualifiedName())){
+				for (VariableDeclarationFragment fragment : (List<VariableDeclarationFragment>) node.fragments()) {
+					if (fragment.getName().getFullyQualifiedName().equals(variableName.getFullyQualifiedName())) {
 						iteratorVariableType = node.getType();
+						removeWithTransformation = node;
 						break;
 					}
 				}
 			}
 		}
-		
+
 		@Override
 		public void endVisit(Assignment node) {
 			if (transformable && variableName == null) {
-				if(node.getLeftHandSide() instanceof SimpleName){
-					variableName = (SimpleName) node.getLeftHandSide();
-				}
-				else {
+				if (node.getLeftHandSide() instanceof SimpleName) {
+					if (node.getParent() instanceof Statement) {
+						variableName = (SimpleName) node.getLeftHandSide();
+						removeWithTransformation = (Statement) node.getParent();
+					}
+				} else {
 					transformable = false;
 				}
 			}

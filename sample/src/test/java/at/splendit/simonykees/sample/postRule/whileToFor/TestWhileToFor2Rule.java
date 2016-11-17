@@ -5,15 +5,17 @@ import java.util.Iterator;
 import java.util.List;
 
 public class TestWhileToFor2Rule {
-
-	public void testWhileToFor5() {
-		List<String> l = new ArrayList<>();
-
-		for (String s:l){
+	/* Pre
+	public void testNextOnlyIterator(){
+		List<String> stringList = new ArrayList<>();
+		
+		Iterator<String> stringIterator = stringList.iterator();
+		String s = null;
+		while((s = stringIterator.next()) != null){
 			System.out.println(s);
 		}
-	}
-	/*
+	}*/
+	/* Post
 	public void testNextOnlyIterator(){
 		List<String> stringList = new ArrayList<>();
 		
