@@ -10,7 +10,10 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -30,74 +33,122 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 
 	private static String ITERATOR = "java.util.Iterator"; //$NON-NLS-1$
+	private SimpleName iterationVariable = null;;
 
 	@Override
 	public boolean visit(WhileStatement node) {
-		if (node.getExpression() instanceof MethodInvocation) {
-			MethodInvocation methodInvocation = (MethodInvocation) node.getExpression();
-			// check for hasNext operation on Iterator
-			if (StringUtils.equals("hasNext", methodInvocation.getName().getFullyQualifiedName())) { //$NON-NLS-1$
-				Expression iteratorExpression = methodInvocation.getExpression();
-				if (iteratorExpression != null && iteratorExpression instanceof SimpleName) {
-					ITypeBinding iteratorBinding = iteratorExpression.resolveTypeBinding();
-					if (isContentofRegistertITypes(iteratorBinding)) {
-						ASTNode parentNode = findParentBlock(node);
-						if (parentNode == null) {
-							// No surrounding parent block found
-							// should not happen, because the Iterator has to be
-							// defined in an parent block.
+		iterationVariable = null;
+		SimpleName iteratorExpression = replaceAbleWhileCondition(node.getExpression());
+		if (iteratorExpression != null) {
+			ITypeBinding iteratorBinding = iteratorExpression.resolveTypeBinding();
+			if (isContentofRegistertITypes(iteratorBinding)) {
+				ASTNode parentNode = findParentBlock(node);
+				if (parentNode == null) {
+					// No surrounding parent block found
+					// should not happen, because the Iterator has to be
+					// defined in an parent block.
+					return false;
+				}
+				IteratorDefinitionAstVisior iteratorDefinitionAstVisior = new IteratorDefinitionAstVisior(
+						(SimpleName) iteratorExpression);
+				iteratorDefinitionAstVisior.setAstRewrite(this.astRewrite);
+				parentNode.accept(iteratorDefinitionAstVisior);
+				Type svdType = null;
+				FindNextVariableAstVisitor findNextVariableAstVisitor = null;
+				if(iterationVariable == null){
+					findNextVariableAstVisitor = new FindNextVariableAstVisitor(
+							(SimpleName) iteratorExpression);
+					findNextVariableAstVisitor.setAstRewrite(this.astRewrite);
+					node.getBody().accept(findNextVariableAstVisitor);
+					if ( findNextVariableAstVisitor.getVariableName() != null
+							&& findNextVariableAstVisitor.isTransformable()) {
+						iterationVariable = findNextVariableAstVisitor.getVariableName();
+						svdType = findNextVariableAstVisitor.getIteratorVariableType();
+					}
+				}
+
+				if (iteratorDefinitionAstVisior.getList() != null
+						&& iterationVariable != null) {
+					
+					if (svdType == null) {
+						// variable is not in while defined check if
+						// unused in other context and extract type
+						VariableDefinitionAstVisiotr variableDefinitionAstVisior = new VariableDefinitionAstVisiotr(
+								iterationVariable, node);
+						parentNode.accept(variableDefinitionAstVisior);
+						if (variableDefinitionAstVisior.getVariableDeclarationStatement() != null) {
+							svdType = variableDefinitionAstVisior.getVariableDeclarationStatement().getType();
+							astRewrite.remove(variableDefinitionAstVisior.getVariableDeclarationStatement(), null);
+						} else {
+							// exclusion ground found
 							return false;
 						}
-						IteratorDefinitionAstVisior iteratorDefinitionAstVisior = new IteratorDefinitionAstVisior(
-								(SimpleName) iteratorExpression);
-						iteratorDefinitionAstVisior.setAstRewrite(this.astRewrite);
-						parentNode.accept(iteratorDefinitionAstVisior);
-						FindNextVariableAstVisitor findNextVariableAstVisitor = new FindNextVariableAstVisitor(
-								(SimpleName) iteratorExpression);
-						findNextVariableAstVisitor.setAstRewrite(this.astRewrite);
-						node.getBody().accept(findNextVariableAstVisitor);
-						if (iteratorDefinitionAstVisior.getList() != null
-								&& findNextVariableAstVisitor.getVariableName() != null
-								&& findNextVariableAstVisitor.isTransformable()) {
-							Type svdType;
-							if (findNextVariableAstVisitor.getIteratorVariableType() == null) {
-								// variable is not in while defined check if
-								// unused in other context and extract type
-								VariableDefinitionAstVisiotr variableDefinitionAstVisior = new VariableDefinitionAstVisiotr(
-										findNextVariableAstVisitor.getVariableName(), node);
-								parentNode.accept(variableDefinitionAstVisior);
-								if (variableDefinitionAstVisior.getVariableDeclarationStatement() != null) {
-									svdType = variableDefinitionAstVisior.getVariableDeclarationStatement().getType();
-									astRewrite.remove(variableDefinitionAstVisior.getVariableDeclarationStatement(),
-											null);
-								} else {
-									// exclusion ground found
-									return false;
-								}
-							} else {
-								svdType = findNextVariableAstVisitor.getIteratorVariableType();
+					} else {
+						
+					}
+					EnhancedForStatement newFor = node.getAST().newEnhancedForStatement();
+					newFor.setBody((Statement) astRewrite.createMoveTarget(node.getBody()));
+					newFor.setExpression(
+							(Expression) astRewrite.createMoveTarget(iteratorDefinitionAstVisior.getList()));
+					// need to find the parameter in the block!
+					SingleVariableDeclaration svd = node.getAST().newSingleVariableDeclaration();
+					svd.setName((SimpleName) astRewrite.createMoveTarget(iterationVariable));
+					svd.setType((Type) astRewrite.createMoveTarget(svdType));
+					newFor.setParameter(svd);
+					astRewrite.replace(node, newFor, null);
+					// executed here, because a breaking statement can
+					// be found after the setting of the type
+					if(findNextVariableAstVisitor != null){
+						astRewrite.remove(findNextVariableAstVisitor.removeWithTransformation, null);
+					}
+					astRewrite.remove(iteratorDefinitionAstVisior.getIteratorDeclarationStatement(), null);
+				}
+			}
+		}
+		return true;
+	}
+
+	private SimpleName replaceAbleWhileCondition(Expression node) {
+		if (node instanceof MethodInvocation) {
+			MethodInvocation methodInvocation = (MethodInvocation) node;
+			// check for hasNext operation on Iterator
+			if (StringUtils.equals("hasNext", methodInvocation.getName().getFullyQualifiedName()) //$NON-NLS-1$
+					&& methodInvocation.getExpression() instanceof SimpleName) {
+				return (SimpleName) methodInvocation.getExpression();
+			}
+		}
+		if (node instanceof InfixExpression) {
+			InfixExpression infixExpression = (InfixExpression) node;
+			if (InfixExpression.Operator.NOT_EQUALS.equals(infixExpression.getOperator())) {
+				Expression possibleNextOperation = null;
+				if (infixExpression.getLeftOperand() instanceof NullLiteral) {
+					possibleNextOperation = infixExpression.getRightOperand();
+				}
+				if (infixExpression.getRightOperand() instanceof NullLiteral) {
+					possibleNextOperation = infixExpression.getLeftOperand();
+				}
+				if (possibleNextOperation != null) {
+					if (possibleNextOperation instanceof ParenthesizedExpression
+							&& ((ParenthesizedExpression) possibleNextOperation)
+									.getExpression() instanceof Assignment) {
+						Assignment loopVariableAssignment = (Assignment) ((ParenthesizedExpression) possibleNextOperation)
+								.getExpression();
+						if (loopVariableAssignment.getRightHandSide() instanceof MethodInvocation) {
+							MethodInvocation methodInvocation = (MethodInvocation) loopVariableAssignment
+									.getRightHandSide();
+							// check for hasNext operation on Iterator
+							if (StringUtils.equals("next", methodInvocation.getName().getFullyQualifiedName()) //$NON-NLS-1$
+									&& methodInvocation.getExpression() instanceof SimpleName
+									&& loopVariableAssignment.getLeftHandSide() instanceof SimpleName) {
+								iterationVariable = (SimpleName) loopVariableAssignment.getLeftHandSide();
+								return (SimpleName) methodInvocation.getExpression();
 							}
-							EnhancedForStatement newFor = node.getAST().newEnhancedForStatement();
-							newFor.setBody((Statement) astRewrite.createMoveTarget(node.getBody()));
-							newFor.setExpression(
-									(Expression) astRewrite.createMoveTarget(iteratorDefinitionAstVisior.getList()));
-							// need to find the parameter in the block!
-							SingleVariableDeclaration svd = node.getAST().newSingleVariableDeclaration();
-							svd.setName((SimpleName) astRewrite
-									.createMoveTarget(findNextVariableAstVisitor.getVariableName()));
-							svd.setType((Type) astRewrite.createMoveTarget(svdType));
-							newFor.setParameter(svd);
-							astRewrite.replace(node, newFor, null);
-							// executed here, because a breaking statement can
-							// be found after the setting of the type
-							astRewrite.remove(findNextVariableAstVisitor.removeWithTransformation, null);
-							astRewrite.remove(iteratorDefinitionAstVisior.getIteratorDeclarationStatement(), null);
 						}
 					}
 				}
 			}
 		}
-		return true;
+		return null;
 	}
 
 	private Block findParentBlock(ASTNode node) {

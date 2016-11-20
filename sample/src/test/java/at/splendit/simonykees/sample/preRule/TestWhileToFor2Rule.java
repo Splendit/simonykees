@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 
 public class TestWhileToFor2Rule {
-	/* Pre
 	public void testNextOnlyIterator(){
 		List<String> stringList = new ArrayList<>();
 		
@@ -14,13 +13,5 @@ public class TestWhileToFor2Rule {
 		while((s = stringIterator.next()) != null){
 			System.out.println(s);
 		}
-	}*/
-	/* Post
-	public void testNextOnlyIterator(){
-		List<String> stringList = new ArrayList<>();
-		
-		for(String s : stringList){
-			System.out.println(s);
-		}
-	}*/
+	}
 }
