@@ -83,4 +83,12 @@ public class TestWhileToForRule {
 		}
 		s="lalelu";
 	}
+
+	public void testNextOnlyIterator(){
+		List<String> stringList = new ArrayList<>();
+		
+		for (String s:stringList){
+			System.out.println(s);
+		}
+	}
 }
