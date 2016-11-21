@@ -41,12 +41,14 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 		SimpleName iteratorExpression = replaceAbleWhileCondition(node.getExpression());
 		if (iteratorExpression != null) {
 			ITypeBinding iteratorBinding = iteratorExpression.resolveTypeBinding();
-			if (isContentofRegistertITypes(iteratorBinding)) {
+			if (isContentOfRegistertITypes(iteratorBinding)) {
 				ASTNode parentNode = findParentBlock(node);
 				if (parentNode == null) {
-					// No surrounding parent block found
-					// should not happen, because the Iterator has to be
-					// defined in an parent block.
+					/*
+					 * No surrounding parent block found. Should not happen,
+					 * because the Iterator has to be defined in an parent
+					 * block.
+					 */
 					return false;
 				}
 				IteratorDefinitionAstVisior iteratorDefinitionAstVisior = new IteratorDefinitionAstVisior(
@@ -55,24 +57,24 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 				parentNode.accept(iteratorDefinitionAstVisior);
 				Type svdType = null;
 				FindNextVariableAstVisitor findNextVariableAstVisitor = null;
-				if(iterationVariable == null){
-					findNextVariableAstVisitor = new FindNextVariableAstVisitor(
-							(SimpleName) iteratorExpression);
+				if (iterationVariable == null) {
+					findNextVariableAstVisitor = new FindNextVariableAstVisitor((SimpleName) iteratorExpression);
 					findNextVariableAstVisitor.setAstRewrite(this.astRewrite);
 					node.getBody().accept(findNextVariableAstVisitor);
-					if ( findNextVariableAstVisitor.getVariableName() != null
+					if (findNextVariableAstVisitor.getVariableName() != null
 							&& findNextVariableAstVisitor.isTransformable()) {
 						iterationVariable = findNextVariableAstVisitor.getVariableName();
 						svdType = findNextVariableAstVisitor.getIteratorVariableType();
 					}
 				}
 
-				if (iteratorDefinitionAstVisior.getList() != null
-						&& iterationVariable != null) {
-					
+				if (iteratorDefinitionAstVisior.getList() != null && iterationVariable != null) {
+
 					if (svdType == null) {
-						// variable is not in while defined check if
-						// unused in other context and extract type
+						/*
+						 * variable is not defined in while check if unused in
+						 * other context and extract type
+						 */
 						VariableDefinitionAstVisiotr variableDefinitionAstVisior = new VariableDefinitionAstVisiotr(
 								iterationVariable, node);
 						parentNode.accept(variableDefinitionAstVisior);
@@ -84,7 +86,7 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 							return false;
 						}
 					} else {
-						
+
 					}
 					EnhancedForStatement newFor = node.getAST().newEnhancedForStatement();
 					newFor.setBody((Statement) astRewrite.createMoveTarget(node.getBody()));
@@ -96,9 +98,11 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 					svd.setType((Type) astRewrite.createMoveTarget(svdType));
 					newFor.setParameter(svd);
 					astRewrite.replace(node, newFor, null);
-					// executed here, because a breaking statement can
-					// be found after the setting of the type
-					if(findNextVariableAstVisitor != null){
+					/*
+					 * executed here, because a breaking statement can be found
+					 * after the setting of the type
+					 */
+					if (findNextVariableAstVisitor != null) {
 						astRewrite.remove(findNextVariableAstVisitor.removeWithTransformation, null);
 					}
 					astRewrite.remove(iteratorDefinitionAstVisior.getIteratorDeclarationStatement(), null);

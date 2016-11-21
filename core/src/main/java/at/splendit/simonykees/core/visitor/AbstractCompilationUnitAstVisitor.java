@@ -66,7 +66,7 @@ public abstract class AbstractCompilationUnitAstVisitor extends AbstractASTRewri
 	 *            injected java-classes if it is related to it by polymorphism
 	 * @return if the {@link ITypeBinding} is part of the registered types the return value is true
 	 */
-	protected boolean inheritsContentofRegistertITypes(ITypeBinding iTypeBinding) {
+	protected boolean isInheritingContentOfRegistertITypes(ITypeBinding iTypeBinding) {
 		boolean result = false;
 		if (iTypeBinding == null) {
 			return false;
@@ -80,12 +80,12 @@ public abstract class AbstractCompilationUnitAstVisitor extends AbstractASTRewri
 			if (registeredITypes.contains(interfaceBind.getJavaElement())) {
 				return true;
 			}
-			result = result || inheritsContentofRegistertITypes(interfaceBind.getSuperclass());
+			result = result || isInheritingContentOfRegistertITypes(interfaceBind.getSuperclass());
 		}
-		return result || inheritsContentofRegistertITypes(iTypeBinding.getSuperclass());
+		return result || isInheritingContentOfRegistertITypes(iTypeBinding.getSuperclass());
 	}
 	
-	protected boolean isContentofRegistertITypes(ITypeBinding iTypeBinding) {
+	protected boolean isContentOfRegistertITypes(ITypeBinding iTypeBinding) {
 		if (iTypeBinding == null) {
 			return false;
 		}
