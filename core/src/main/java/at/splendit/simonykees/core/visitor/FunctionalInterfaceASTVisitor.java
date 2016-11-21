@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
  * interfaces.
  * 
  * @author Martin Huter
+ * @since 0.9
  *
  */
 public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor {

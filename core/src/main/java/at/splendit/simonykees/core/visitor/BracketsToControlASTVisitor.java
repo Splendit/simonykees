@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
  * into a block.
  * 
  * @author Martin Huter
+ * @since 0.9
  *
  */
 public class BracketsToControlASTVisitor extends AbstractASTRewriteASTVisitor {

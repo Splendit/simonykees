@@ -5,9 +5,12 @@ import org.apache.commons.lang3.JavaVersion;
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
 
-/**
- * @author Ludwig Werzowa, Hannes Schweighofer
- * @since 0.9.2
+/** 
+ * @see FunctionalInterfaceASTVisitor
+ * 
+ * @author Martin Huter
+ * @since 0.9
+ *
  */
 public class FunctionalInterfaceRule extends RefactoringRule<FunctionalInterfaceASTVisitor> {
 

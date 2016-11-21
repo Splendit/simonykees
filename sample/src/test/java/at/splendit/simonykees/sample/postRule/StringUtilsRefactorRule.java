@@ -24,7 +24,7 @@ public class StringUtilsRefactorRule {
 	public boolean testEquals(String testString) {
 		String sometimesExpectedString = testString.replaceAll("a", "b");
 
-		return StringUtils.equals(testString, sometimesExpectedString);
+		return testString.equals(sometimesExpectedString);
 	}
 
 	public boolean testEqualsIgnoreCase(String testString) {
@@ -56,7 +56,7 @@ public class StringUtilsRefactorRule {
 	}
 
 	public String testReplace(String testString) {
-		return StringUtils.replace(testString, "M", "m");
+		return testString.replace("M", "m");
 	}
 
 	public String testLowerCase(String testString) {
@@ -93,20 +93,20 @@ public class StringUtilsRefactorRule {
 
 	private String complexSplit(String input, String splitSign, int limit) {
 		if (StringUtils.contains(input, splitSign)) {
-			if (StringUtils.equals("?", splitSign)) {
+			if ("?".equals(splitSign)) {
 				/*
 				 * We need to escape the "?" because otherwise there is the
 				 * following exception: java.util.regex.PatternSyntaxException:
 				 * Dangling meta character '?' near index 0
 				 */
-				splitSign = StringUtils.replace(splitSign, "?", "\\?");
+				splitSign = splitSign.replace("?", "\\?");
 			}
-			if (StringUtils.equals("|", splitSign)) {
+			if ("|".equals(splitSign)) {
 				/*
 				 * We need to escape the "|" because otherwise an empty String
 				 * is taken as split sign.
 				 */
-				splitSign = StringUtils.replace(splitSign, "|", "\\|");
+				splitSign = splitSign.replace("|", "\\|");
 			}
 			return limit == 0 ? Arrays.toString(input.split(splitSign))
 					: Arrays.toString(input.split(splitSign, limit));
@@ -120,7 +120,7 @@ public class StringUtilsRefactorRule {
 		CharSequence c2 = new StringBuilder("b");
 
 		// FIXME see SIM-85
-		return StringUtils.replace(testString, String.valueOf(c1), String.valueOf(c2));
+		return testString.replace(String.valueOf(c1), String.valueOf(c2));
 	}
 
 	public String testReplaceCornerCaseChar(String testString) {
@@ -128,14 +128,13 @@ public class StringUtilsRefactorRule {
 		char c2 = 'b';
 
 		// FIXME see SIM-85
-		return StringUtils.replace(testString, String.valueOf(c1), String.valueOf(c2));
+		return testString.replace(String.valueOf(c1), String.valueOf(c2));
 	}
 
 	public boolean testEqualsCornerCase(String testString) {
 		Object o = "s";
 
-		return StringUtils.equals(testString, String.valueOf(o)); // FIXME see
-																	// SIM-86
+		return testString.equals(String.valueOf(o)); // FIXME see SIM-86
 	}
 
 	public boolean testStartsWithCornerCase(String testString) {

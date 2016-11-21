@@ -81,7 +81,7 @@
 		<site>
 			<id>nexus</id>
 			<name>Nexus Simonykees Site</name>
-			<url>dav:http://nexus.splendit.loc/repository/maven-simonykees-site/</url>
+			<url>dav:https://javadoc.splendit.loc/simonykees</url>
 		</site>
 	</distributionManagement>
 
@@ -389,6 +389,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-changelog-plugin</artifactId>
 				<version>${maven.changelog.version}</version>
+				<configuration>
+					<type>range</type>
+					<range>365</range>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
