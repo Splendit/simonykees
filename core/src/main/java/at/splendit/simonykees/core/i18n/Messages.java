@@ -28,6 +28,8 @@ public class Messages extends NLS {
 	public static String FunctionalInterfaceRule_name;
 	public static String OrganiseImportsRule_description;
 	public static String OrganiseImportsRule_name;
+	public static String Profile_DefaultProfile_profileName;
+	public static String Profile_Java8Profile_profileName;
 	public static String RefactoringRule_default_description;
 	public static String RefactoringRule_default_name;
 	public static String RefactoringRule_warning_workingcopy_already_present;
@@ -40,6 +42,7 @@ public class Messages extends NLS {
 	public static String SelectRulesWizard_warning_no_refactorings;
 	public static String SimonykeesMessageDialog_bugreport_email;
 	public static String SimonykeesMessageDialog_default_error_message;
+	public static String SimonykeesPreferencePage_selectProfile;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
 	public static String TryWithResourceRule_description;
