@@ -15,23 +15,24 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import at.splendit.simonykees.core.rule.ForToForEachRule;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.WhileToForRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
-import at.splendit.simonykees.core.visitor.loop.WhileToForASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
 
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
-public class WhileToForRulesTest extends AbstractRulesTest {
+public class ForToForEachRulesTest extends AbstractRulesTest {
 
-	public static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.whileToFor";
-	public static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/whileToFor";
+	public static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.forToForEach";
+	public static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/forToForEach";
 
 	private String fileName;
 	private Path preRule, postRule;
 
-	public WhileToForRulesTest(String fileName, Path preRule, Path postRule) {
+	public ForToForEachRulesTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
@@ -49,7 +50,7 @@ public class WhileToForRulesTest extends AbstractRulesTest {
 
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
 
-		rulesList.add(new WhileToForRule(WhileToForASTVisitor.class));
+		rulesList.add(new ForToForEachRule(ForToForEachASTVisitor.class));
 
 		String compilationUnitSource = processFile(fileName, content, rulesList);
 
