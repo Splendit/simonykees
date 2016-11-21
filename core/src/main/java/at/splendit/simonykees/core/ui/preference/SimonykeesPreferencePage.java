@@ -6,6 +6,7 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ComboFieldEditor;
+import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
@@ -20,6 +21,9 @@ import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
 
 /**
+ * Main preference page for the plug-in. {@link FieldEditor}s are used for
+ * convenient preference handling.
+ * 
  * @author Ludwig Werzowa, Hannes Schweighofer
  * @since 0.9.2
  */
@@ -59,8 +63,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		List<RefactoringRule<? extends ASTVisitor>> rules = RulesContainer.getAllRules();
 		for (RefactoringRule<? extends ASTVisitor> refactoringRule : rules) {
 
-			BooleanFieldEditor editor = new BooleanFieldEditor(String.format("%s.%s", currentProfileId, //$NON-NLS-1$
-					refactoringRule.getId()), refactoringRule.getName(), composite);
+			BooleanFieldEditor editor = new BooleanFieldEditor(
+					SimonykeesPreferenceManager.getProfileRuleKey(currentProfileId, refactoringRule.getId()),
+					refactoringRule.getName(), composite);
 			booleanFieldEditors.add(editor);
 			addField(editor);
 		}
@@ -76,9 +81,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	}
 
 	/**
-	 * Eclipse doesn't like normal property change listeners for some reason. 
-	 * Adding a change listener directly to the combo field never fires an event. 
-	 * See: http://stackoverflow.com/a/11361344
+	 * Eclipse doesn't like normal property change listeners for some reason.
+	 * Adding a change listener directly to the combo field never fires an
+	 * event. See: http://stackoverflow.com/a/11361344
 	 */
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
@@ -90,8 +95,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	@Override
 	public void init(IWorkbench workbench) {
-		// TODO Auto-generated method stub
-
+		// we have to override this method, even though we don't need it.
 	}
 
 }

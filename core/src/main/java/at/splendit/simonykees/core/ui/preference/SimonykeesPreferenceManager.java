@@ -40,12 +40,40 @@ public class SimonykeesPreferenceManager {
 		return StringUtils.join(items, "|"); //$NON-NLS-1$
 	}
 
-	public static String flattenArray(String... items) {
-		return StringUtils.join(items, "|"); //$NON-NLS-1$
-	}
-
 	public static String[] parseString(String stringList) {
 		return StringUtils.split(stringList, "|"); //$NON-NLS-1$
+	}
+
+	/**
+	 * Convenience method that returns the key for a specific rule in a specific
+	 * profile.
+	 * 
+	 * @param profileId
+	 * @param ruleId
+	 * @return preference page key
+	 */
+	public static String getProfileRuleKey(String profileId, String ruleId) {
+		return String.format("%s.%s", profileId, ruleId); //$NON-NLS-1$
+	}
+
+	/**
+	 * Convenience method that returns the "name"-key for a specific profile.
+	 * 
+	 * @param profileId
+	 * @return preference page key
+	 */
+	public static String getProfileNameKey(String profileId) {
+		return String.format("%s.%s", profileId, SimonykeesPreferenceConstants.PROFILE_NAME); //$NON-NLS-1$
+	}
+	
+	/**
+	 * Convenience method that returns the "builtIn"-key for a specific profile.
+	 * 
+	 * @param profileId
+	 * @return
+	 */
+	public static String getProfileBuiltInKey(String profileId) {
+		return String.format("%s.%s", profileId, SimonykeesPreferenceConstants.PROFILE_IS_BUILT_IN); //$NON-NLS-1$
 	}
 
 }
