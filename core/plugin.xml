@@ -43,7 +43,7 @@
       </command>
    </extension>
    <extension point = "org.eclipse.ui.preferencePages">
-       <page id="at.splendit.simonykees.core.ui.preference.Page1"
+       <page id="at.splendit.simonykees.core.ui.preference.ProfilePreferencePage"
 	    class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferencePage"
             name="%preferencePage.name">
        </page>
