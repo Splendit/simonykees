@@ -23,15 +23,21 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
  */
 public class ForToForEachASTVisitor extends AbstractCompilationUnitAstVisitor {
 
+	private static String ITERATOR = "java.util.Iterator"; //$NON-NLS-1$
+	
 	@Override
 	public boolean visit(ForStatement node) {
 		if (node.getExpression() instanceof MethodInvocation) {
 			MethodInvocation methodInvocation = (MethodInvocation) node.getExpression();
 			// check for hasNext operation on Iterator
+			
 			if (StringUtils.equals("hasNext", methodInvocation.getName().getFullyQualifiedName()) //$NON-NLS-1$
 					&& methodInvocation.getExpression() instanceof SimpleName) {
 				SimpleName iteratorName = (SimpleName) methodInvocation.getExpression();
-				
+				if (iteratorName != null && !isContentofRegistertITypes(iteratorName.resolveTypeBinding())) {
+					//Type is not an Iterator
+					return false;
+				}
 				IteratorDefinitionAstVisior iteratorDefinitionAstVisior = new IteratorDefinitionAstVisior(iteratorName);
 				if(1 == node.initializers().size()){
 					((ASTNode)node.initializers().get(0)).accept(iteratorDefinitionAstVisior);
@@ -65,4 +71,8 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitAstVisitor {
 		return true;
 	}
 
+	@Override
+	protected String[] relevantClasses() {
+		return new String[] { ITERATOR };
+	}
 }

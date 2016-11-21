@@ -31,7 +31,7 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
 public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 
 	private static String ITERATOR = "java.util.Iterator"; //$NON-NLS-1$
-	private SimpleName iterationVariable = null;;
+	private SimpleName iterationVariable = null;
 
 	@Override
 	public boolean visit(WhileStatement node) {
@@ -158,5 +158,4 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 	protected String[] relevantClasses() {
 		return new String[] { ITERATOR };
 	}
-
 }
