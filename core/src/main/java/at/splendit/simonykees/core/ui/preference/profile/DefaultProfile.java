@@ -3,6 +3,7 @@ package at.splendit.simonykees.core.ui.preference.profile;
 import java.util.Arrays;
 import java.util.List;
 
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.CodeFormatterRule;
 import at.splendit.simonykees.core.rule.OrganiseImportsRule;
 import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceConstants;
@@ -28,7 +29,7 @@ public class DefaultProfile implements SimonykeesProfile {
 
 	@Override
 	public String getProfileName() {
-		return "Default";
+		return Messages.Profile_DefaultProfile_profileName;
 	}
 
 	@Override

@@ -15,6 +15,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
 
@@ -42,7 +43,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		loadCurrentProfileId();
 
 		profileSelectionComboField = new ComboFieldEditor(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT,
-				"Select profile", SimonykeesPreferenceManager.getProfileNamesAndValues(), composite);
+				Messages.SimonykeesPreferencePage_selectProfile, SimonykeesPreferenceManager.getProfileNamesAndValues(),
+				composite);
 		addField(profileSelectionComboField);
 
 		generateRulesCheckboxList(composite);

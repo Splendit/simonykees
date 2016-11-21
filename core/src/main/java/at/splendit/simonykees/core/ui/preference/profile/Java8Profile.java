@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.JavaVersion;
 
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceConstants;
@@ -29,7 +30,7 @@ public class Java8Profile implements SimonykeesProfile {
 
 	@Override
 	public String getProfileName() {
-		return "Java 8";
+		return Messages.Profile_Java8Profile_profileName;
 	}
 
 	@Override
