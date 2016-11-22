@@ -3,15 +3,15 @@ package at.splendit.simonykees.core.ui.preference;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -43,7 +43,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	@Override
 	protected void createFieldEditors() {
 		Composite composite = new Composite(getFieldEditorParent(), SWT.NONE);
-		composite.setLayout(new GridLayout(1, false));
+		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 		loadCurrentProfileId();
 
@@ -61,15 +61,23 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	}
 
 	private void generateRulesCheckboxList(Composite composite) {
+		
+		Group checkboxGroup = new Group(composite, SWT.SHADOW_ETCHED_IN);
+		GridData data = new GridData(GridData.FILL_HORIZONTAL);
+		data.horizontalSpan = 2;
+		checkboxGroup.setLayoutData(data);
+		checkboxGroup.setText(Messages.SimonykeesPreferencePage_rules);
+		
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
 
 			BooleanFieldEditor editor = new BooleanFieldEditor(
 					SimonykeesPreferenceManager.getProfileRuleKey(currentProfileId, refactoringRule.getId()),
-					refactoringRule.getName(), composite);
+					refactoringRule.getName(), checkboxGroup);
 			booleanFieldEditors.add(editor);
 			addField(editor);
 		}
+		
 	}
 
 	private void updateRulesCheckboxList(String profileId) {
