@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule;
+package at.splendit.simonykees.sample.postRule.allRules;
 
 public class CodeFormatterRule {
 
@@ -25,6 +25,7 @@ public class CodeFormatterRule {
 	 *            dolore eu fugiat nulla pariatur. Excepteur sint occaecat
 	 *            cupidatat non proident, sunt in culpa qui officia deserunt
 	 *            mollit anim id est laborum.
+	 * @return evaluated in
 	 */
 	public int c(int i) {
 		return i + 3;

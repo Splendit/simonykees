@@ -62,7 +62,7 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor
 	@Override
 	public boolean visit(VariableDeclarationStatement node) {
 		ITypeBinding typeBind = node.getType().resolveBinding();
-		if (isContentofRegistertITypes(typeBind)) {
+		if (isInheritingContentOfRegistertITypes(typeBind)) {
 			for (Object iterator : node.fragments()) {
 				if (iterator instanceof VariableDeclarationFragment) {
 					VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) iterator;

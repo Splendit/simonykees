@@ -20,6 +20,7 @@ import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.i18n.ExceptionMessages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Applies {@link RefactoringRule}s to {@link IJavaElement}s.<br>
@@ -37,7 +38,7 @@ import at.splendit.simonykees.core.util.SimonykeesUtil;
 public abstract class AbstractRefactorer {
 
 	protected List<IJavaElement> javaElements;
-	protected List<RefactoringRule<? extends ASTVisitor>> rules;
+	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 	protected List<ICompilationUnit> workingCopies = new ArrayList<>();
 
 	/**
@@ -51,7 +52,7 @@ public abstract class AbstractRefactorer {
 	 *            
 	 * @since 0.9
 	 */
-	public AbstractRefactorer(List<IJavaElement> javaElements, List<RefactoringRule<? extends ASTVisitor>> rules) {
+	public AbstractRefactorer(List<IJavaElement> javaElements, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		this.javaElements = javaElements;
 		this.rules = rules;
 	}

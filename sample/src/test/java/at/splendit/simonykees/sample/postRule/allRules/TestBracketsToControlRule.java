@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule;
+package at.splendit.simonykees.sample.postRule.allRules;
 
 import java.util.Arrays;
 
@@ -51,6 +51,7 @@ public class TestBracketsToControlRule {
 		}
 	}
 
+	@SuppressWarnings("finally")
 	public int testMultipleThings(int input) {
 		if (input > 0) {
 			for (int i = 0; i < 10; i++) {

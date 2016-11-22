@@ -19,6 +19,7 @@ import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Main preference page for the plug-in. {@link FieldEditor}s are used for
@@ -60,8 +61,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	}
 
 	private void generateRulesCheckboxList(Composite composite) {
-		List<RefactoringRule<? extends ASTVisitor>> rules = RulesContainer.getAllRules();
-		for (RefactoringRule<? extends ASTVisitor> refactoringRule : rules) {
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
+		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
 
 			BooleanFieldEditor editor = new BooleanFieldEditor(
 					SimonykeesPreferenceManager.getProfileRuleKey(currentProfileId, refactoringRule.getId()),

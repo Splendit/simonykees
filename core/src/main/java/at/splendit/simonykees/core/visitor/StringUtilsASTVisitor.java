@@ -59,7 +59,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 		if (optionalExpression == null) {
 			return true;
 		}
-		if (isContentofRegistertITypes(optionalExpression.resolveTypeBinding())) {
+		if (isContentOfRegistertITypes(optionalExpression.resolveTypeBinding())) {
 			AST currentAST = node.getAST();
 			String replacementOperation = null;
 			String op = null;

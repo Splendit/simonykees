@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
 
 public class SelectRulesPage extends AbstractWizardPage {
@@ -76,7 +77,7 @@ public class SelectRulesPage extends AbstractWizardPage {
 	}
 
 	private void createRulesCheckboxTableViewer(Composite parent) {
-		List<RefactoringRule<? extends ASTVisitor>> rules = RulesContainer.getAllRules();
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
 
 		rulesCheckboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.CHECK | SWT.BORDER);
 		rulesCheckboxTableViewer.setContentProvider(new ArrayContentProvider());
@@ -94,7 +95,7 @@ public class SelectRulesPage extends AbstractWizardPage {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void update(ViewerCell cell) {
-				cell.setText(((RefactoringRule<? extends ASTVisitor>) cell.getElement()).getName());
+				cell.setText(((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) cell.getElement()).getName());
 			}
 		});
 
@@ -146,10 +147,10 @@ public class SelectRulesPage extends AbstractWizardPage {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected List<RefactoringRule<? extends ASTVisitor>> getSelectedRules() {
-		List<RefactoringRule<? extends ASTVisitor>> rules = new ArrayList<>();
+	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRules() {
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = new ArrayList<>();
 		Arrays.asList(rulesCheckboxTableViewer.getCheckedElements())
-				.forEach(rule -> rules.add((RefactoringRule<? extends ASTVisitor>) rule));
+				.forEach(rule -> rules.add((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) rule));
 		return rules;
 	}
 }

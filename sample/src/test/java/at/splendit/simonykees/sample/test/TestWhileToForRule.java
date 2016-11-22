@@ -13,29 +13,20 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
-public class TestBracketsToControlRule extends AbstractReflectiveMethodTester {
-	
-	private static Logger log = LogManager.getLogger(TestBracketsToControlRule.class);
+public class TestWhileToForRule extends AbstractReflectiveMethodTester {
 
-	// we want this to be initialized only once for all parameterized values
+	private static Logger log = LogManager.getLogger(TestWhileToForRule.class);
+
 	private static PreAndPostClassHolder holder;
 
-	public TestBracketsToControlRule(ParameterType parameterType, Object value) {
+	public TestWhileToForRule(ParameterType parameterType, String value) {
 		super(parameterType, value);
 	}
 
+	@SuppressWarnings("nls")
 	@Parameters(name = "{index}: {0}, {1}")
 	public static Collection<Object[]> data() {
-		return Arrays.asList(new Object[][] {
-			{ ParameterType.INTEGER, Integer.MIN_VALUE },
-			{ ParameterType.INTEGER, -256 },
-			{ ParameterType.INTEGER, -190 },
-			{ ParameterType.INTEGER, 0 },
-			{ ParameterType.INTEGER, 1 },
-			{ ParameterType.INTEGER, 2 },
-			{ ParameterType.INTEGER, 17 },
-			{ ParameterType.INTEGER, Integer.MAX_VALUE }
-		});
+		return Arrays.asList(new Object[][] { { ParameterType.STRING, "a;b;c" } });
 	}
 
 	@Test
@@ -50,13 +41,14 @@ public class TestBracketsToControlRule extends AbstractReflectiveMethodTester {
 
 	@BeforeClass
 	public static void setUptHolderInstance() throws Exception {
-		holder = new PreAndPostClassHolder(at.splendit.simonykees.sample.preRule.TestBracketsToControlRule.class,
-				at.splendit.simonykees.sample.postRule.allRules.TestBracketsToControlRule.class);
+		holder = new PreAndPostClassHolder(at.splendit.simonykees.sample.preRule.TestWhileToForRule.class,
+				at.splendit.simonykees.sample.postRule.allRules.TestWhileToForRule.class);
 	}
-	
+
 	@AfterClass
 	public static void printStatistics() {
 		log.info(String.format("Test for class [%s] finished with the following stats: %n[%s]", //$NON-NLS-1$
 				holder.getPreObject().getClass().getSimpleName(), holder.getCounterToString()));
 	}
+
 }

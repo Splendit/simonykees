@@ -47,6 +47,8 @@ public class Messages extends NLS {
 	public static String StringUtilsRule_name;
 	public static String TryWithResourceRule_description;
 	public static String TryWithResourceRule_name;
+	public static String WhileToForRule_description;
+	public static String WhileToForRule_name;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

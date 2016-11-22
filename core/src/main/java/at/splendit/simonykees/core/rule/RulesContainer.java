@@ -3,12 +3,11 @@ package at.splendit.simonykees.core.rule;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.ASTVisitor;
-
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
+import at.splendit.simonykees.core.visitor.WhileToForASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.MultiCatchASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisitor;
@@ -29,7 +28,7 @@ public class RulesContainer {
 	 * 
 	 * @return a List of {@link RefactoringRule} with all used Rules is returned.
 	 */
-	public static List<RefactoringRule<? extends ASTVisitor>> getAllRules() {
+	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules() {
 		return Arrays.asList(
 				new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
 				new TryWithResourceRule(TryWithResourceASTVisitor.class),
@@ -37,6 +36,7 @@ public class RulesContainer {
 				new MultiCatchRule(MultiCatchASTVisitor.class),
 				new BracketsToControlRule(BracketsToControlASTVisitor.class),
 				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class),
+				new WhileToForRule(WhileToForASTVisitor.class),
 				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
 				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class)
 				);

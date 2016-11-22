@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule;
+package at.splendit.simonykees.sample.postRule.allRules;
 
 import org.junit.Test;
 
@@ -6,7 +6,7 @@ import org.junit.Test;
 public class TestFunctionalInterfaceRule {
 
 	@Test
-	public void Test1() {
+	public void test1() {
 
 		Runnable runnable = () -> {
 			System.out.println("xx");
