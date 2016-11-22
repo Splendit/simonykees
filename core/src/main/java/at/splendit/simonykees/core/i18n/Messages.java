@@ -42,6 +42,8 @@ public class Messages extends NLS {
 	public static String SelectRulesWizard_warning_no_refactorings;
 	public static String SimonykeesMessageDialog_bugreport_email;
 	public static String SimonykeesMessageDialog_default_error_message;
+	public static String SimonykeesPreferenceManager_builtIn;
+	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_selectProfile;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
