@@ -10,9 +10,8 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
 
 /**
  * 
+ * @author Martin Huter
  * @since 9.2.0
- * @author mgh
- *
  */
 class IteratorDefinitionAstVisior extends AbstractCompilationUnitAstVisitor {
 

@@ -7,11 +7,10 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
 
-
 /**
+ * 
+ * @author Martin Huter
  * @since 9.2.0
- * @author mgh
- *
  */
 class VariableDefinitionAstVisiotr extends AbstractCompilationUnitAstVisitor {
 	private SimpleName variableName;

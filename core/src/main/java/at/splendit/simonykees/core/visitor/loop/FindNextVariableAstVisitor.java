@@ -17,7 +17,7 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
  * also checks if remove or forEachRemaining is used on the iterator.
  * 
  * @since 9.2.0
- * @author mgh
+ * @author Martin Huter
  *
  */
 class FindNextVariableAstVisitor extends AbstractCompilationUnitAstVisitor {

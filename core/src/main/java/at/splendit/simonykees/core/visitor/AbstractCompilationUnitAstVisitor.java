@@ -80,6 +80,7 @@ public abstract class AbstractCompilationUnitAstVisitor extends AbstractASTRewri
 			if (registeredITypes.contains(interfaceBind.getJavaElement())) {
 				return true;
 			}
+<<<<<<< 3bff72b70a2f321baf34144ed6f817fcca050209
 			result = result || isInheritingContentOfRegistertITypes(interfaceBind.getSuperclass());
 		}
 		return result || isInheritingContentOfRegistertITypes(iTypeBinding.getSuperclass());

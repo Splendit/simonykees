@@ -67,6 +67,15 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitAstVisitor {
 					astRewrite.replace(node, newFor, null);
 				}
 			}
+			if (StringUtils.equals("size", methodInvocation.getName().getFullyQualifiedName()) //$NON-NLS-1$
+					&& methodInvocation.getExpression() instanceof SimpleName) {
+				SimpleName listName = (SimpleName)methodInvocation.getExpression();
+				if (listName != null && !isContentofRegistertITypes(listName.resolveTypeBinding())) {
+					//Type is not an Iterator
+					return false;
+				}
+				
+			}
 		}
 		return true;
 	}
