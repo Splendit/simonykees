@@ -1,114 +1,137 @@
 package at.splendit.simonykees.sample.preRule;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+@SuppressWarnings("nls")
 public class TestWhileToForRule {
 
-	public void testWhileToFor() {
-		List<String> l = new ArrayList<>();
+	private List<String> generateList(String input) {
+		return Arrays.asList(input.split(";")); //$NON-NLS-1$
+	}
+
+	public String testWhileToFor(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
 
 		Iterator<String> iterator = l.iterator();
 		while (iterator.hasNext()) {
 			String s = iterator.next();
-			System.out.println(s);
+			sb.append(s);
 		}
+		return sb.toString();
 	}
 
-	public void testWhileToFor2() {
-		List<String> l = new ArrayList<>();
+	public String testWhileToFor2(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
 
 		Iterator<String> iterator = l.iterator();
 		while (iterator.hasNext()) {
 			String s = iterator.next();
 			s = iterator.next();
-			System.out.println(s);
+			sb.append(s);
 		}
+		return sb.toString();
 	}
 
-	public void testWhileToFor3() {
-		List<String> l = new ArrayList<>();
+	public String testWhileToFor3(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
 
 		Iterator<String> iterator = l.iterator();
 		while (iterator.hasNext()) {
 			String s = iterator.next();
 			s = iterator.next();
 			s = iterator.next();
-			System.out.println(s);
+			sb.append(s);
 		}
+		return sb.toString();
 	}
 
-	public void testWhileToFor4() {
-		List<String> l = new ArrayList<>();
+	public String testWhileToFor4(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
 
 		Iterator<String> iterator = l.iterator();
 		while (iterator.hasNext()) {
 			String s = iterator.next();
-			System.out.println(s);
+			sb.append(s);
 			iterator.remove();
 			iterator.forEachRemaining(null);
 		}
+		return sb.toString();
 	}
 
-	public void testWhileToFor5() {
-		List<String> l = new ArrayList<>();
+	public String testWhileToFor5(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
 
 		Iterator<String> iterator = l.iterator();
 		String s;
 		while (iterator.hasNext()) {
 			Object k;
 			s = iterator.next();
-			System.out.println(s);
+			sb.append(s);
 		}
+		return sb.toString();
 	}
 
-	public void testWhileToFor6() {
-		List<String> l = new ArrayList<>();
+	public String testWhileToFor6(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
 
 		Iterator<String> iterator = l.iterator();
 		String s;
-		s="lalelu";
+		s = "lalelu";
 		while (iterator.hasNext()) {
 			Object k;
 			s = iterator.next();
-			System.out.println(s);
+			sb.append(s);
 		}
+		return sb.toString();
 	}
 
-	public void testWhileToFor7() {
-		List<String> l = new ArrayList<>();
+	public String testWhileToFor7(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
 
 		Iterator<String> iterator = l.iterator();
 		String s;
 		while (iterator.hasNext()) {
 			Object k;
 			s = iterator.next();
-			System.out.println(s);
+			sb.append(s);
 		}
-		s="lalelu";
+		s = "lalelu";
+		return sb.toString();
 	}
 
-	public void testWhileToFor8() {
-		List<String> l = new ArrayList<>();
+	public String testWhileToFor8(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
 
 		Iterator<String> iterator = l.iterator();
 		String s = "";
 		while (iterator.hasNext()) {
 			Object k;
 			s = iterator.next();
-			System.out.println(s);
+			sb.append(s);
 		}
-		System.out.println(s);
+		sb.append(s);
+		return sb.toString();
 	}
 
-	public void testNextOnlyIterator(){
-		List<String> stringList = new ArrayList<>();
-		
-		Iterator<String> stringIterator = stringList.iterator();
+	public String testNextOnlyIterator(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		Iterator<String> stringIterator = l.iterator();
 		String s = null;
-		while((s = stringIterator.next()) != null){
-			System.out.println(s);
+		while ((s = stringIterator.next()) != null) {
+			sb.append(s);
 		}
+		return sb.toString();
 	}
 }

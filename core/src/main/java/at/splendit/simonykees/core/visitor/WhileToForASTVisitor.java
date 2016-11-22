@@ -121,37 +121,6 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 				return (SimpleName) methodInvocation.getExpression();
 			}
 		}
-		if (node instanceof InfixExpression) {
-			InfixExpression infixExpression = (InfixExpression) node;
-			if (InfixExpression.Operator.NOT_EQUALS.equals(infixExpression.getOperator())) {
-				Expression possibleNextOperation = null;
-				if (infixExpression.getLeftOperand() instanceof NullLiteral) {
-					possibleNextOperation = infixExpression.getRightOperand();
-				}
-				if (infixExpression.getRightOperand() instanceof NullLiteral) {
-					possibleNextOperation = infixExpression.getLeftOperand();
-				}
-				if (possibleNextOperation != null) {
-					if (possibleNextOperation instanceof ParenthesizedExpression
-							&& ((ParenthesizedExpression) possibleNextOperation)
-									.getExpression() instanceof Assignment) {
-						Assignment loopVariableAssignment = (Assignment) ((ParenthesizedExpression) possibleNextOperation)
-								.getExpression();
-						if (loopVariableAssignment.getRightHandSide() instanceof MethodInvocation) {
-							MethodInvocation methodInvocation = (MethodInvocation) loopVariableAssignment
-									.getRightHandSide();
-							// check for hasNext operation on Iterator
-							if (StringUtils.equals("next", methodInvocation.getName().getFullyQualifiedName()) //$NON-NLS-1$
-									&& methodInvocation.getExpression() instanceof SimpleName
-									&& loopVariableAssignment.getLeftHandSide() instanceof SimpleName) {
-								iterationVariable = (SimpleName) loopVariableAssignment.getLeftHandSide();
-								return (SimpleName) methodInvocation.getExpression();
-							}
-						}
-					}
-				}
-			}
-		}
 		return null;
 	}
 
