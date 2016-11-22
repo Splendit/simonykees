@@ -1,17 +1,23 @@
 package at.splendit.simonykees.sample.postRule.forToForEach;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 @SuppressWarnings("nls")
 public class TestForToForEachRule {
 	
-	public void testForToForEach() {
-		List<String> foo = new ArrayList<>();
+	private List<String> generateList(String input) {
+		return Arrays.asList(input.split(";"));
+	}
+	
+	public String testForToForEach(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
 
 		for (String s:foo){
-		    System.out.println(s);
+		    sb.append(s);
 		}
+		return sb.toString();
 	}
 }
