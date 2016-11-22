@@ -84,6 +84,19 @@ public class TestWhileToForRule {
 		s="lalelu";
 	}
 
+	public void testWhileToFor8() {
+		List<String> l = new ArrayList<>();
+
+		Iterator<String> iterator = l.iterator();
+		String s = "";
+		while (iterator.hasNext()) {
+			Object k;
+			s = iterator.next();
+			System.out.println(s);
+		}
+		System.out.println(s);
+	}
+
 	public void testNextOnlyIterator(){
 		List<String> stringList = new ArrayList<>();
 		

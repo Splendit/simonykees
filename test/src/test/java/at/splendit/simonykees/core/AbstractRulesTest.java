@@ -23,13 +23,13 @@ public class AbstractRulesTest {
 	}
 
 	/**
-	 * loads all pairs of {@link Path}s for the postRule domain defined by the
-	 * {@linkplain postRuleDirectory} to assure that only pairs are loaded that
-	 * are defined in the realm of the {@linkplain postRuleDirectory}.
+	 * loads all pairs of Paths for the postRule domain defined by the
+	 * postRuleDirectory to assure that only pairs are loaded that
+	 * are defined in the realm of the postRuleDirectory.
 	 * 
+	 * @param postRuleDirectory directory of the reference sources
 	 * @return the object array list used for tests
-	 * @return the list of loaded parameters
-	 * @throws Exception
+	 * @throws IOException if path could not be found
 	 *             junit test default
 	 */
 	protected static List<Object[]> load(String postRuleDirectory) throws IOException {
