@@ -81,6 +81,8 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitAstVisitor {
 					astRewrite.replace(node, newFor, null);
 				}
 			}
+			//TODO i < list.size() ... first infix expression then method invocation
+			// accept list.size() > i ??
 			if (StringUtils.equals("size", methodInvocation.getName().getFullyQualifiedName()) //$NON-NLS-1$
 					&& methodInvocation.getExpression() instanceof SimpleName) {
 				SimpleName listName = (SimpleName) methodInvocation.getExpression();
