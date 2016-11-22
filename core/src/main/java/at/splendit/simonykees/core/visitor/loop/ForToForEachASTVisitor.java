@@ -34,7 +34,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitAstVisitor {
 			if (StringUtils.equals("hasNext", methodInvocation.getName().getFullyQualifiedName()) //$NON-NLS-1$
 					&& methodInvocation.getExpression() instanceof SimpleName) {
 				SimpleName iteratorName = (SimpleName) methodInvocation.getExpression();
-				if (iteratorName != null && !isContentofRegistertITypes(iteratorName.resolveTypeBinding())) {
+				if (iteratorName != null && !isContentOfRegistertITypes(iteratorName.resolveTypeBinding())) {
 					//Type is not an Iterator
 					return false;
 				}
@@ -70,7 +70,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitAstVisitor {
 			if (StringUtils.equals("size", methodInvocation.getName().getFullyQualifiedName()) //$NON-NLS-1$
 					&& methodInvocation.getExpression() instanceof SimpleName) {
 				SimpleName listName = (SimpleName)methodInvocation.getExpression();
-				if (listName != null && !isContentofRegistertITypes(listName.resolveTypeBinding())) {
+				if (listName != null && !isContentOfRegistertITypes(listName.resolveTypeBinding())) {
 					//Type is not an Iterator
 					return false;
 				}

@@ -39,7 +39,7 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 		SimpleName iteratorExpression = replaceAbleWhileCondition(node.getExpression());
 		if (iteratorExpression != null) {
 			ITypeBinding iteratorBinding = iteratorExpression.resolveTypeBinding();
-			if (isContentofRegistertITypes(iteratorBinding)) {
+			if (isContentOfRegistertITypes(iteratorBinding)) {
 				ASTNode parentNode = findParentBlock(node);
 				if (parentNode == null) {
 					// No surrounding parent block found
