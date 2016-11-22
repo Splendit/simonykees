@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
@@ -28,18 +29,23 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
+	protected String id;
+	
 	protected String name = Messages.RefactoringRule_default_name;
 
 	protected String description = Messages.RefactoringRule_default_description;
+	
+	protected JavaVersion requiredJavaVersion = JavaVersion.JAVA_1_4;
 
 	protected boolean enabled = true;
-
+	
 	private Class<T> visitor;
 
 	private Map<ICompilationUnit, DocumentChange> changes = new HashMap<ICompilationUnit, DocumentChange>();
 
 	public RefactoringRule(Class<T> visitor) {
 		this.visitor = visitor;
+		this.id = this.getClass().getSimpleName(); // FIXME maybe add a better id
 	}
 
 	public String getName() {
@@ -56,6 +62,14 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	public Class<T> getVisitor() {
 		return visitor;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public JavaVersion getRequiredJavaVersion() {
+		return requiredJavaVersion;
 	}
 
 	/**

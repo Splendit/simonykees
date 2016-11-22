@@ -26,6 +26,7 @@ import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
 
 public class SelectRulesPage extends AbstractWizardPage {
 
@@ -97,6 +98,9 @@ public class SelectRulesPage extends AbstractWizardPage {
 				cell.setText(((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) cell.getElement()).getName());
 			}
 		});
+
+		rulesCheckboxTableViewer.setCheckedElements(
+				rules.stream().filter(r -> SimonykeesPreferenceManager.isRuleSelected(r.getId())).toArray());
 	}
 
 	private void createRuleDescriptionViewer(Composite parent) {
