@@ -1,9 +1,6 @@
 package at.splendit.simonykees.core.visitor;
 
-import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -11,6 +8,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
  * This ASTVisitor finds the usage of specified string operation and wraps it in
@@ -23,20 +22,26 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 
 	private boolean stringUtilsRequired = false;
-	private static final String STRING = "java.lang.String"; //$NON-NLS-1$
 
-	private static final String STRING_UTILS_PACKAGE = "org.apache.commons.lang3.StringUtils"; //$NON-NLS-1$
+	private static final Integer STRING_KEY = 1;
+	private static final String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
+
+	private static final String STRING_UTILS_FULLY_QUALLIFIED_NAME = "org.apache.commons.lang3.StringUtils"; //$NON-NLS-1$
+
 	private static final String STRING_UTILS = "StringUtils"; //$NON-NLS-1$
 	private static final String IS_EMPTY = "isEmpty"; //$NON-NLS-1$
 	private static final String TRIM = "trim"; //$NON-NLS-1$
-//	private static final String EQUALS = "equals"; //$NON-NLS-1$ // FIXME: see SIM-86
+	// private static final String EQUALS = "equals"; //$NON-NLS-1$ // FIXME:
+	// see SIM-86
 	private static final String EQUALS_IGNORE_CASE = "equalsIgnoreCase"; //$NON-NLS-1$
 	private static final String ENDSWITH = "endsWith"; //$NON-NLS-1$
 	private static final String INDEXOF = "indexOf"; //$NON-NLS-1$
 	private static final String CONTAINS = "contains"; //$NON-NLS-1$
 	private static final String SUBSTRING = "substring"; //$NON-NLS-1$
-//	private static final String SPLIT = "split"; //$NON-NLS-1$ // FIXME: see SIM-78
-//	private static final String REPLACE = "replace"; //$NON-NLS-1$ // FIXME: see SIM-85
+	// private static final String SPLIT = "split"; //$NON-NLS-1$ // FIXME: see
+	// SIM-78
+	// private static final String REPLACE = "replace"; //$NON-NLS-1$ // FIXME:
+	// see SIM-85
 	private static final String STARTS_WITH = "startsWith"; //$NON-NLS-1$
 
 	private static final String TO_UPPER_CASE = "toUpperCase"; //$NON-NLS-1$
@@ -47,10 +52,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 
 	public StringUtilsASTVisitor() {
 		super();
-	}
-
-	public StringUtilsASTVisitor(List<IType> itypes) {
-		super(itypes);
+		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
 	}
 
 	@Override
@@ -59,21 +61,23 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 		if (optionalExpression == null) {
 			return true;
 		}
-		if (isContentOfRegistertITypes(optionalExpression.resolveTypeBinding())) {
+
+		if (ClassRelationUtil.isContentOfRegistertITypes(optionalExpression.resolveTypeBinding(),
+				this.iTypeMap.get(STRING_KEY))) {
 			AST currentAST = node.getAST();
 			String replacementOperation = null;
 			String op = null;
 			switch (op = node.getName().getFullyQualifiedName()) {
 			case IS_EMPTY:
 			case TRIM:
-//			case EQUALS: // see SIM-86
+				// case EQUALS: // see SIM-86
 			case EQUALS_IGNORE_CASE:
 			case ENDSWITH:
 			case INDEXOF:
 			case CONTAINS:
 			case SUBSTRING:
-//			case SPLIT: // see SIM-78
-//			case REPLACE: // see SIM-85
+				// case SPLIT: // see SIM-78
+				// case REPLACE: // see SIM-85
 				replacementOperation = op;
 				break;
 			case TO_UPPER_CASE:
@@ -108,17 +112,11 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
 	public void endVisit(CompilationUnit node) {
 		if (stringUtilsRequired) {
 			ImportDeclaration stringUtilsImport = node.getAST().newImportDeclaration();
-			stringUtilsImport.setName(node.getAST().newName(STRING_UTILS_PACKAGE));
+			stringUtilsImport.setName(node.getAST().newName(STRING_UTILS_FULLY_QUALLIFIED_NAME));
 			if (node.imports().stream().noneMatch(importDeclaration -> (new ASTMatcher())
 					.match((ImportDeclaration) importDeclaration, stringUtilsImport))) {
 				astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY).insertLast(stringUtilsImport, null);
 			}
 		}
 	}
-
-	@Override
-	protected String[] relevantClasses() {
-		return new String[] { STRING };
-	}
-
 }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-@SuppressWarnings("nls")
+@SuppressWarnings({ "nls", "unused" })
 public class TestForToForEachRuleTODO {
 
 	public void testForToForEach2() {

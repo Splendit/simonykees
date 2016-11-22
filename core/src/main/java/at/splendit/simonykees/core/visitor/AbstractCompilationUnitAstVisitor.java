@@ -1,13 +1,16 @@
 package at.splendit.simonykees.core.visitor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeException;
 import at.splendit.simonykees.core.i18n.ExceptionMessages;
@@ -21,16 +24,13 @@ import at.splendit.simonykees.core.i18n.ExceptionMessages;
  */
 public abstract class AbstractCompilationUnitAstVisitor extends AbstractASTRewriteASTVisitor {
 
-	protected List<IType> registeredITypes;
+	protected Map<Integer, List<IType>> iTypeMap;
+	protected Map<Integer, List<String>> fullyQuallifiedNameMap;
 
 	protected AbstractCompilationUnitAstVisitor() {
 		super();
-		this.registeredITypes = new ArrayList<>();
-	}
-
-	protected AbstractCompilationUnitAstVisitor(List<IType> registeredITypes) {
-		this();
-		this.registeredITypes.addAll(registeredITypes);
+		this.iTypeMap = new HashMap<>();
+		this.fullyQuallifiedNameMap = new HashMap<>();
 	}
 
 	/**
@@ -45,12 +45,21 @@ public abstract class AbstractCompilationUnitAstVisitor extends AbstractASTRewri
 		}
 		IJavaProject iJavaProject = node.getJavaElement().getJavaProject();
 		try {
-			for (String javaclass : relevantClasses()) {
-				IType classtype = iJavaProject.findType(javaclass);
-				if (classtype != null) {
-					registeredITypes.add(classtype);
-				} else {
-					throw new ITypeNotFoundRuntimeException();
+			for (Entry<Integer, List<String>> fullyQualifiedNameEntryp : fullyQuallifiedNameMap.entrySet()) {
+				for (String fullyQuallifiedClassName : fullyQualifiedNameEntryp.getValue()) {
+					IType classtype = iJavaProject.findType(fullyQuallifiedClassName);
+					if (classtype != null) {
+						List<IType> categoryTypeList = iTypeMap.get(fullyQualifiedNameEntryp.getKey());
+						if (categoryTypeList == null) {
+							categoryTypeList = new ArrayList<>();
+							categoryTypeList.add(classtype);
+							iTypeMap.put(fullyQualifiedNameEntryp.getKey(), categoryTypeList);
+						} else {
+							categoryTypeList.add(classtype);
+						}
+					} else {
+						throw new ITypeNotFoundRuntimeException();
+					}
 				}
 			}
 		} catch (JavaModelException e) {
@@ -58,46 +67,8 @@ public abstract class AbstractCompilationUnitAstVisitor extends AbstractASTRewri
 		}
 		return true;
 	}
-
-	/**
-	 * 
-	 * @param iTypeBinding
-	 *            Is an {@link ITypeBinding} that is compared to the list of
-	 *            injected java-classes if it is related to it by polymorphism
-	 * @return if the {@link ITypeBinding} is part of the registered types the return value is true
-	 */
-	protected boolean isInheritingContentOfRegistertITypes(ITypeBinding iTypeBinding) {
-		boolean result = false;
-		if (iTypeBinding == null) {
-			return false;
-		}
-
-		if (registeredITypes.contains(iTypeBinding.getJavaElement())) {
-			return true;
-		}
-
-		for (ITypeBinding interfaceBind : iTypeBinding.getInterfaces()) {
-			if (registeredITypes.contains(interfaceBind.getJavaElement())) {
-				return true;
-			}
-			result = result || isInheritingContentOfRegistertITypes(interfaceBind.getSuperclass());
-		}
-		return result || isInheritingContentOfRegistertITypes(iTypeBinding.getSuperclass());
-	}
 	
-	protected boolean isContentOfRegistertITypes(ITypeBinding iTypeBinding) {
-		if (iTypeBinding == null) {
-			return false;
-		}
-
-		if (registeredITypes.contains(iTypeBinding.getJavaElement())) {
-			return true;
-		}
-		return false;
+	protected List<String> generateFullyQuallifiedNameList(String... fullyQuallifiedName) {
+		return Arrays.asList(fullyQuallifiedName);
 	}
-
-	protected String[] relevantClasses() {
-		return new String[] {};
-	}
-
 }

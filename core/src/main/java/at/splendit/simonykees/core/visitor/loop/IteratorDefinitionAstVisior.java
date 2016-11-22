@@ -6,17 +6,15 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * 
  * @author Martin Huter
  * @since 9.2.0
  */
-class IteratorDefinitionAstVisior extends AbstractCompilationUnitAstVisitor {
+class IteratorDefinitionAstVisior extends AbstractASTRewriteASTVisitor {
 
-	private static String ITERATOR = "java.util.Iterator"; //$NON-NLS-1$
-	
 	private SimpleName iteratorName;
 	private Expression listName = null;
 	private VariableDeclarationStatement iteratorDeclarationStatement = null;
@@ -53,10 +51,5 @@ class IteratorDefinitionAstVisior extends AbstractCompilationUnitAstVisitor {
 
 	public VariableDeclarationStatement getIteratorDeclarationStatement() {
 		return iteratorDeclarationStatement;
-	}
-	
-	@Override
-	protected String[] relevantClasses() {
-		return new String[] { ITERATOR };
 	}
 }

@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
 
 /**
@@ -23,32 +24,43 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
  */
 public class ForToForEachASTVisitor extends AbstractCompilationUnitAstVisitor {
 
-	private static String ITERATOR = "java.util.Iterator"; //$NON-NLS-1$
+	private static Integer ITERATOR_KEY = 1;
+	private static String ITERATOR_FULLY_QUALLIFIED_NAME = "java.util.Iterator"; //$NON-NLS-1$
 	
+	
+	private static Integer COLLECTION_KEY = 2;
+	private static String COLLECTION_FULLY_QUALLIFIED_NAME = "java.util.Collection"; //$NON-NLS-1$
+
+	public ForToForEachASTVisitor() {
+		this.fullyQuallifiedNameMap.put(ITERATOR_KEY, generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME));
+		this.fullyQuallifiedNameMap.put(ITERATOR_KEY, generateFullyQuallifiedNameList(COLLECTION_FULLY_QUALLIFIED_NAME));
+	}
+
 	@Override
 	public boolean visit(ForStatement node) {
 		if (node.getExpression() instanceof MethodInvocation) {
 			MethodInvocation methodInvocation = (MethodInvocation) node.getExpression();
 			// check for hasNext operation on Iterator
-			
+
 			if (StringUtils.equals("hasNext", methodInvocation.getName().getFullyQualifiedName()) //$NON-NLS-1$
 					&& methodInvocation.getExpression() instanceof SimpleName) {
 				SimpleName iteratorName = (SimpleName) methodInvocation.getExpression();
-				if (iteratorName != null && !isContentOfRegistertITypes(iteratorName.resolveTypeBinding())) {
-					//Type is not an Iterator
+
+				if (iteratorName != null && ClassRelationUtil
+						.isContentOfRegistertITypes(iteratorName.resolveTypeBinding(), iTypeMap.get(ITERATOR_KEY))) {
+					// Type is not an Iterator
 					return false;
 				}
 				IteratorDefinitionAstVisior iteratorDefinitionAstVisior = new IteratorDefinitionAstVisior(iteratorName);
-				if(1 == node.initializers().size()){
-					((ASTNode)node.initializers().get(0)).accept(iteratorDefinitionAstVisior);
+				if (1 == node.initializers().size()) {
+					((ASTNode) node.initializers().get(0)).accept(iteratorDefinitionAstVisior);
 				}
 
 				FindNextVariableAstVisitor findNextVariableAstVisitor = new FindNextVariableAstVisitor(
 						(SimpleName) iteratorName);
 				findNextVariableAstVisitor.setAstRewrite(this.astRewrite);
 				node.getBody().accept(findNextVariableAstVisitor);
-				if (findNextVariableAstVisitor.isTransformable()
-						&& iteratorDefinitionAstVisior.getList() != null) {
+				if (findNextVariableAstVisitor.isTransformable() && iteratorDefinitionAstVisior.getList() != null) {
 
 					SimpleName iterationVariable = findNextVariableAstVisitor.getVariableName();
 					Type iterationType = findNextVariableAstVisitor.getIteratorVariableType();
@@ -59,29 +71,26 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitAstVisitor {
 							node.getAST(), (SimpleName) astRewrite.createMoveTarget(iterationVariable),
 							(Type) astRewrite.createMoveTarget(iterationType));
 
-					Expression iterationList = (Expression) astRewrite.createMoveTarget(iteratorDefinitionAstVisior.getList());
-					
+					Expression iterationList = (Expression) astRewrite
+							.createMoveTarget(iteratorDefinitionAstVisior.getList());
+
 					EnhancedForStatement newFor = NodeBuilder.newEnhandesForStatement(node.getAST(),
-							(Statement) astRewrite.createMoveTarget(node.getBody()), iterationList, iterationVariableDefinition);
+							(Statement) astRewrite.createMoveTarget(node.getBody()), iterationList,
+							iterationVariableDefinition);
 					astRewrite.remove(findNextVariableAstVisitor.getRemoveWithTransformation(), null);
 					astRewrite.replace(node, newFor, null);
 				}
 			}
 			if (StringUtils.equals("size", methodInvocation.getName().getFullyQualifiedName()) //$NON-NLS-1$
 					&& methodInvocation.getExpression() instanceof SimpleName) {
-				SimpleName listName = (SimpleName)methodInvocation.getExpression();
-				if (listName != null && !isContentOfRegistertITypes(listName.resolveTypeBinding())) {
-					//Type is not an Iterator
+				SimpleName listName = (SimpleName) methodInvocation.getExpression();
+				if (listName != null && ClassRelationUtil.isInheritingContentOfRegistertITypes(listName.resolveTypeBinding(), iTypeMap.get(COLLECTION_KEY))) {
+					// Type is not an Iterator
 					return false;
 				}
-				
+
 			}
 		}
 		return true;
-	}
-
-	@Override
-	protected String[] relevantClasses() {
-		return new String[] { ITERATOR };
 	}
 }

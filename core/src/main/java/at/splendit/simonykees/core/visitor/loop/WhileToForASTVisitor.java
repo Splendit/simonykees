@@ -2,15 +2,10 @@ package at.splendit.simonykees.core.visitor.loop;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.NullLiteral;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -18,6 +13,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
 
 /**
@@ -29,17 +25,24 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
  *
  */
 public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
+	
+	private static Integer ITERATOR_KEY = 1;
+	private static String ITERATOR_FULLY_QUALLIFIED_NAME = "java.util.Iterator"; //$NON-NLS-1$
 
-	private static String ITERATOR = "java.util.Iterator"; //$NON-NLS-1$
 	private SimpleName iterationVariable = null;
+	
+	public WhileToForASTVisitor() {
+		super();
+		this.fullyQuallifiedNameMap.put(ITERATOR_KEY, generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME));
+	}
 
 	@Override
 	public boolean visit(WhileStatement node) {
 		iterationVariable = null;
 		SimpleName iteratorExpression = replaceAbleWhileCondition(node.getExpression());
 		if (iteratorExpression != null) {
-			ITypeBinding iteratorBinding = iteratorExpression.resolveTypeBinding();
-			if (isContentOfRegistertITypes(iteratorBinding)) {
+			if (ClassRelationUtil
+					.isContentOfRegistertITypes(iteratorExpression.resolveTypeBinding(), iTypeMap.get(ITERATOR_KEY))) {
 				ASTNode parentNode = findParentBlock(node);
 				if (parentNode == null) {
 					// No surrounding parent block found
@@ -121,10 +124,5 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 			return (Block) node.getParent();
 		}
 		return findParentBlock(node.getParent());
-	}
-
-	@Override
-	protected String[] relevantClasses() {
-		return new String[] { ITERATOR };
 	}
 }
