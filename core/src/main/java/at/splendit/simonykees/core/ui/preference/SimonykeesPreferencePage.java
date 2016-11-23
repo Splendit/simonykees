@@ -31,10 +31,10 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 public class SimonykeesPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
 	private ComboFieldEditor profileSelectionComboField;
-	private List<BooleanFieldEditor> ruleCheckboxes = new ArrayList<>();
+	private List<BooleanFieldEditor> ruleCheckboxList = new ArrayList<>();
 
 	private String currentProfileId;
-	private Group checkboxGroup;
+	private Group ruleCheckboxGroup;
 
 	public SimonykeesPreferencePage() {
 		super(GRID);
@@ -63,42 +63,27 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	private void generateRuleCheckboxList(Composite composite) {
 
-		checkboxGroup = new Group(composite, SWT.SHADOW_ETCHED_IN);
+		ruleCheckboxGroup = new Group(composite, SWT.SHADOW_ETCHED_IN);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
-		checkboxGroup.setLayoutData(data);
-		checkboxGroup.setText(Messages.SimonykeesPreferencePage_rules);
+		ruleCheckboxGroup.setLayoutData(data);
+		ruleCheckboxGroup.setText(Messages.SimonykeesPreferencePage_rules);
 
+		boolean builtInProfile = SimonykeesPreferenceManager.isProfileBuiltIn(this.currentProfileId);
+		
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
 
 			BooleanFieldEditor ruleCheckbox = new BooleanFieldEditor(
 					SimonykeesPreferenceManager.getProfileRuleKey(currentProfileId, refactoringRule.getId()),
-					refactoringRule.getName(), checkboxGroup);
-			ruleCheckboxes.add(ruleCheckbox);
+					refactoringRule.getName(), ruleCheckboxGroup);
+			ruleCheckbox.setEnabled(!builtInProfile, ruleCheckboxGroup);
+			ruleCheckboxList.add(ruleCheckbox);
 			addField(ruleCheckbox);
 		}
 
 	}
-
-	/**
-	 * Changes the "binding" for each rule checkbox whenever another profile is
-	 * selected.
-	 * 
-	 * @param profileId
-	 *            use the given profileId for each rule checkbox
-	 */
-	private void updateRulesCheckboxList(String profileId) {
-		boolean builtInProfile = SimonykeesPreferenceManager.isProfileBuiltIn(profileId);
-		for (BooleanFieldEditor ruleCheckbox : ruleCheckboxes) {
-			String newPreferenceName = ruleCheckbox.getPreferenceName().replace(currentProfileId, profileId);
-			ruleCheckbox.setPreferenceName(newPreferenceName);
-			ruleCheckbox.load();
-			ruleCheckbox.setEnabled(!builtInProfile, checkboxGroup);
-		}
-		currentProfileId = profileId;
-	}
-
+	
 	/**
 	 * Eclipse doesn't like normal property change listeners for some reason.
 	 * Adding a change listener directly to the combo field never fires an
@@ -110,6 +95,24 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		if (event.getSource() == profileSelectionComboField) {
 			updateRulesCheckboxList(event.getNewValue().toString());
 		}
+	}
+
+	/**
+	 * Changes the "binding" for each rule checkbox whenever another profile is
+	 * selected.
+	 * 
+	 * @param profileId
+	 *            use the given profileId for each rule checkbox
+	 */
+	private void updateRulesCheckboxList(String profileId) {
+		boolean builtInProfile = SimonykeesPreferenceManager.isProfileBuiltIn(profileId);
+		for (BooleanFieldEditor ruleCheckbox : ruleCheckboxList) {
+			String newPreferenceName = ruleCheckbox.getPreferenceName().replace(currentProfileId, profileId);
+			ruleCheckbox.setPreferenceName(newPreferenceName);
+			ruleCheckbox.load();
+			ruleCheckbox.setEnabled(!builtInProfile, ruleCheckboxGroup);
+		}
+		currentProfileId = profileId;
 	}
 
 	@Override
