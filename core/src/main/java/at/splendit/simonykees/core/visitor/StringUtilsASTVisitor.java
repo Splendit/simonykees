@@ -19,7 +19,7 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * @since 0.9
  *
  */
-public class StringUtilsASTVisitor extends AbstractCompilationUnitAstVisitor {
+public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 
 	private boolean stringUtilsRequired = false;
 

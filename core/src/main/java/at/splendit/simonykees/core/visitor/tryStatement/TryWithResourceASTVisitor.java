@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import at.splendit.simonykees.core.util.ClassRelationUtil;
-import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
+import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
 
 /**
  * The {@link TryWithResourceASTVisitor} is used to find resources in an
@@ -27,7 +27,7 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
  *
  */
 
-public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor {
+public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor {
 
 	private static final Integer AUTO_CLOSEABLE_KEY = 1;
 	private static final String AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME = "java.lang.AutoCloseable"; //$NON-NLS-1$

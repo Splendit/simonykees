@@ -22,12 +22,12 @@ import at.splendit.simonykees.core.i18n.ExceptionMessages;
  * @author Martin Huter
  *
  */
-public abstract class AbstractCompilationUnitAstVisitor extends AbstractASTRewriteASTVisitor {
+public abstract class AbstractCompilationUnitASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	protected Map<Integer, List<IType>> iTypeMap;
 	protected Map<Integer, List<String>> fullyQuallifiedNameMap;
 
-	protected AbstractCompilationUnitAstVisitor() {
+	protected AbstractCompilationUnitASTVisitor() {
 		super();
 		this.iTypeMap = new HashMap<>();
 		this.fullyQuallifiedNameMap = new HashMap<>();
