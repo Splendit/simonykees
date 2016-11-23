@@ -99,8 +99,8 @@ public class SelectRulesPage extends AbstractWizardPage {
 			}
 		});
 
-		rulesCheckboxTableViewer.setCheckedElements(
-				rules.stream().filter(r -> SimonykeesPreferenceManager.isRuleSelected(r.getId())).toArray());
+		rulesCheckboxTableViewer.setCheckedElements(rules.stream()
+				.filter(r -> SimonykeesPreferenceManager.isRuleSelectedInCurrentProfile(r.getId())).toArray());
 	}
 
 	private void createRuleDescriptionViewer(Composite parent) {

@@ -17,8 +17,8 @@ public class SimonykeesPreferenceManager {
 
 	private static IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 
-	public static boolean isRuleSelected(String ruleId) {
-		return store.getBoolean(ruleId);
+	public static boolean isRuleSelectedInCurrentProfile(String ruleId) {
+		return store.getBoolean(getProfileRuleKey(getCurrentProfileId(), ruleId));
 	}
 
 	/**
@@ -49,6 +49,15 @@ public class SimonykeesPreferenceManager {
 		}
 
 		return retVal;
+	}
+	
+	/**
+	 * Returns the current profileId.
+	 * 
+	 * @return the current profileId
+	 */
+	public static String getCurrentProfileId() {
+		return store.getString(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT);
 	}
 
 	/**
@@ -101,5 +110,5 @@ public class SimonykeesPreferenceManager {
 	public static String getProfileBuiltInKey(String profileId) {
 		return String.format("%s.%s", profileId, SimonykeesPreferenceConstants.PROFILE_IS_BUILT_IN); //$NON-NLS-1$
 	}
-
+	
 }
