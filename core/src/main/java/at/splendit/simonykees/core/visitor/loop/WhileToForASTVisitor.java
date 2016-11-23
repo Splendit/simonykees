@@ -1,7 +1,6 @@
 package at.splendit.simonykees.core.visitor.loop;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -13,8 +12,9 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
+import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
-import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
+import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
 
 /**
  * While-loops over Iterators that could be expressed with a for-loop are
@@ -24,7 +24,7 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
  * @since 0.9.2
  *
  */
-public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
+public class WhileToForASTVisitor extends AbstractCompilationUnitASTVisitor {
 	
 	private static Integer ITERATOR_KEY = 1;
 	private static String ITERATOR_FULLY_QUALLIFIED_NAME = "java.util.Iterator"; //$NON-NLS-1$
@@ -43,21 +43,21 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 		if (iteratorExpression != null) {
 			if (ClassRelationUtil
 					.isContentOfRegistertITypes(iteratorExpression.resolveTypeBinding(), iTypeMap.get(ITERATOR_KEY))) {
-				ASTNode parentNode = findParentBlock(node);
+				Block parentNode = ASTNodeUtil.getSurroundingBlock(node);
 				if (parentNode == null) {
 					// No surrounding parent block found
 					// should not happen, because the Iterator has to be
 					// defined in an parent block.
 					return false;
 				}
-				IteratorDefinitionAstVisior iteratorDefinitionAstVisior = new IteratorDefinitionAstVisior(
+				IteratorDefinitionASTVisior iteratorDefinitionAstVisior = new IteratorDefinitionASTVisior(
 						(SimpleName) iteratorExpression);
 				iteratorDefinitionAstVisior.setAstRewrite(this.astRewrite);
 				parentNode.accept(iteratorDefinitionAstVisior);
 				Type svdType = null;
-				FindNextVariableAstVisitor findNextVariableAstVisitor = null;
+				FindNextVariableASTVisitor findNextVariableAstVisitor = null;
 				if (iterationVariable == null) {
-					findNextVariableAstVisitor = new FindNextVariableAstVisitor((SimpleName) iteratorExpression);
+					findNextVariableAstVisitor = new FindNextVariableASTVisitor((SimpleName) iteratorExpression);
 					findNextVariableAstVisitor.setAstRewrite(this.astRewrite);
 					node.getBody().accept(findNextVariableAstVisitor);
 					if (findNextVariableAstVisitor.getVariableName() != null
@@ -72,12 +72,12 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 					if (svdType == null) {
 						// variable is not in while defined check if
 						// unused in other context and extract type
-						VariableDefinitionAstVisiotr variableDefinitionAstVisior = new VariableDefinitionAstVisiotr(
+						VariableDefinitionASTVisitor variableDefinitionAstVisitor = new VariableDefinitionASTVisitor(
 								iterationVariable, node);
-						parentNode.accept(variableDefinitionAstVisior);
-						if (variableDefinitionAstVisior.getVariableDeclarationStatement() != null) {
-							svdType = variableDefinitionAstVisior.getVariableDeclarationStatement().getType();
-							astRewrite.remove(variableDefinitionAstVisior.getVariableDeclarationStatement(), null);
+						parentNode.accept(variableDefinitionAstVisitor);
+						if (variableDefinitionAstVisitor.getVariableDeclarationStatement() != null) {
+							svdType = variableDefinitionAstVisitor.getVariableDeclarationStatement().getType();
+							astRewrite.remove(variableDefinitionAstVisitor.getVariableDeclarationStatement(), null);
 						} else {
 							// exclusion ground found
 							return false;
@@ -114,15 +114,5 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitAstVisitor {
 			}
 		}
 		return null;
-	}
-
-	private Block findParentBlock(ASTNode node) {
-		if (node == null) {
-			return null;
-		}
-		if (node.getParent() instanceof Block) {
-			return (Block) node.getParent();
-		}
-		return findParentBlock(node.getParent());
 	}
 }

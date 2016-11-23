@@ -13,13 +13,13 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * @author Martin Huter
  * @since 9.2.0
  */
-class IteratorDefinitionAstVisior extends AbstractASTRewriteASTVisitor {
+class IteratorDefinitionASTVisior extends AbstractASTRewriteASTVisitor {
 
 	private SimpleName iteratorName;
 	private Expression listName = null;
 	private VariableDeclarationStatement iteratorDeclarationStatement = null;
 
-	public IteratorDefinitionAstVisior(SimpleName iteratorName) {
+	public IteratorDefinitionASTVisior(SimpleName iteratorName) {
 		this.iteratorName = iteratorName;
 	}
 

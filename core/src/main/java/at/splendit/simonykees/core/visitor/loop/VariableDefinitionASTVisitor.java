@@ -1,26 +1,28 @@
 package at.splendit.simonykees.core.visitor.loop;
 
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
+import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
 
 /**
  * 
  * @author Martin Huter
  * @since 9.2.0
  */
-class VariableDefinitionAstVisiotr extends AbstractCompilationUnitAstVisitor {
+class VariableDefinitionASTVisitor extends AbstractCompilationUnitASTVisitor {
 	private SimpleName variableName;
-	private WhileStatement whileStatement;
+	private Statement statement;
 	private boolean useableLoopVariable = false;
 	private VariableDeclarationStatement variableDeclarationStatement = null;
 
-	public VariableDefinitionAstVisiotr(SimpleName variableName, WhileStatement whileStatement) {
+	public VariableDefinitionASTVisitor(SimpleName variableName, Statement statement) {
 		this.variableName = variableName;
-		this.whileStatement = whileStatement;
+		this.statement = statement;
 	}
 
 	@Override
@@ -43,7 +45,15 @@ class VariableDefinitionAstVisiotr extends AbstractCompilationUnitAstVisitor {
 
 	@Override
 	public boolean visit(WhileStatement node) {
-		if (whileStatement.equals(node)) {
+		if (statement.equals(node)) {
+			return false;
+		}
+		return true;
+	}
+	
+	@Override
+	public boolean visit(ForStatement node) {
+		if (statement.equals(node)) {
 			return false;
 		}
 		return true;
@@ -61,5 +71,9 @@ class VariableDefinitionAstVisiotr extends AbstractCompilationUnitAstVisitor {
 
 	public VariableDeclarationStatement getVariableDeclarationStatement() {
 		return variableDeclarationStatement;
+	}
+
+	public boolean isUseableLoopVariable() {
+		return useableLoopVariable;
 	}
 }
