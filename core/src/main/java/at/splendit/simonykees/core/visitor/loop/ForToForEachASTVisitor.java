@@ -139,8 +139,10 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 							return true;
 						}
 					} else {
-						return true;
+						
 					}
+				} else {
+					return true;
 				}
 			}
 			/*
