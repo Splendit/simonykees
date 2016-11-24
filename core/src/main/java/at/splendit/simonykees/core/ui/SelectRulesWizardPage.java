@@ -20,7 +20,9 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
@@ -55,7 +57,14 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 		GridLayout layout = new GridLayout();
 
 		parent.setLayout(layout);
-
+		
+		Combo combo = new Combo(parent, SWT.READ_ONLY);
+		combo.add("Default");
+		
+		// Create a horizontal separator
+		Label separator = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
+		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
 		createSelectAllButton(parent);
 
 		SashForm sashForm = new SashForm(parent, SWT.HORIZONTAL);
@@ -89,6 +98,12 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 	}
 
 	private void createRulesCheckboxTableViewer(Composite parent) {
+		
+//		SashForm sashForm = new SashForm(parent, SWT.VERTICAL);
+//		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+//		createSelectAllButton(sashForm);
+		
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
 
 		rulesCheckboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.CHECK | SWT.BORDER);
@@ -111,6 +126,7 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 			}
 		});
 
+		// set selected rules according to the current profile
 		rulesCheckboxTableViewer.setCheckedElements(rules.stream()
 				.filter(r -> SimonykeesPreferenceManager.isRuleSelectedInCurrentProfile(r.getId())).toArray());
 	}
