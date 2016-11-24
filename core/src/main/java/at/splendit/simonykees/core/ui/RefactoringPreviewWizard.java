@@ -1,6 +1,3 @@
-/**
- * 
- */
 package at.splendit.simonykees.core.ui;
 
 import org.eclipse.jface.wizard.Wizard;
