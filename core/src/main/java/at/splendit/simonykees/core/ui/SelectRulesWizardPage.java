@@ -28,6 +28,13 @@ import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
 
+/**
+ * Lists all rules as checkboxes and a description for the currently selected
+ * rule.
+ * 
+ * @author Ludwig Werzowa
+ * @since 0.9
+ */
 public class SelectRulesWizardPage extends AbstractWizardPage {
 
 	private CheckboxTableViewer rulesCheckboxTableViewer;
@@ -59,6 +66,11 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 
 	}
 
+	/**
+	 * Adds a button to select / deselect all rules.
+	 * 
+	 * @param parent
+	 */
 	private void createSelectAllButton(Composite parent) {
 		Button selectAllButton = new Button(parent, SWT.CHECK);
 		selectAllButton.setText(Messages.SelectRulesWizardPage_select_unselect_all);
@@ -127,6 +139,12 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 		}
 	}
 
+	/**
+	 * {@link ISelectionChangedListener} used to get the currently selected
+	 * rule, which is needed to populate the rule description.
+	 * 
+	 * @return
+	 */
 	private ISelectionChangedListener createSelectionChangedListener() {
 		return new ISelectionChangedListener() {
 			@Override
