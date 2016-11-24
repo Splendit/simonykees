@@ -1,5 +1,8 @@
 package at.splendit.simonykees.core.visitor.loop;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -9,6 +12,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -104,6 +108,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 				&& node.initializers().size() == 1) {
 			// needed components for refactoring
 			SimpleName listName = null;
+			Type listGenericType = null;
 			SimpleName iterationVariable = null;
 
 			/*
@@ -133,13 +138,20 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 							&& lesserSide instanceof SimpleName) {
 						listName = (SimpleName) methodInvocation.getExpression();
 						iterationVariable = (SimpleName) lesserSide;
-						if (listName != null && !ClassRelationUtil.isInheritingContentOfRegistertITypes(
-								listName.resolveTypeBinding(), iTypeMap.get(LIST_KEY))) {
+						ITypeBinding listBinding = listName.resolveTypeBinding();
+
+						if (!ClassRelationUtil.isInheritingContentOfRegistertITypes(listBinding,
+								iTypeMap.get(LIST_KEY))) {
 							// Iteration objects are no List
 							return true;
 						}
+
+						ITypeBinding[] genericListTypes = listBinding.getTypeArguments();
+						if (genericListTypes != null && genericListTypes.length == 1) {
+							listGenericType = NodeBuilder.typeFromBinding(node.getAST(), genericListTypes[0]);
+						}
 					} else {
-						
+
 					}
 				} else {
 					return true;
@@ -182,20 +194,29 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 			/**
 			 * forth condition: the list is only used with get in the loop body
 			 */
-			{
-				ListOnlyGetMethodInvocationASTVisitor listOnlyGetMethodInvocationASTVisitor = new ListOnlyGetMethodInvocationASTVisitor(
-						iterationVariable, listName);
-				node.getBody().accept(listOnlyGetMethodInvocationASTVisitor);
-				if (!listOnlyGetMethodInvocationASTVisitor.isEligible()) {
-					return false;
-				}
+			ListOnlyGetMethodInvocationASTVisitor listOnlyGetMethodInvocationASTVisitor = new ListOnlyGetMethodInvocationASTVisitor(
+					iterationVariable, listName);
+			node.getBody().accept(listOnlyGetMethodInvocationASTVisitor);
+			if (!listOnlyGetMethodInvocationASTVisitor.isEligible()) {
+				return false;
 			}
 
 			/*
 			 * All Conditions met Do refactoring
 			 */
-			{
-				Activator.log("WE DID IT"); //$NON-NLS-1$
+
+			Activator.log("WE DID IT"); //$NON-NLS-1$
+			String listIteratorName = listName.getFullyQualifiedName() + "Iterator"; //$NON-NLS-1$
+			SingleVariableDeclaration svd = NodeBuilder.newSingleVariableDeclaration(node.getAST(), NodeBuilder.newSimpleName(node.getAST(), listIteratorName),
+					listGenericType);
+
+			EnhancedForStatement efs = NodeBuilder.newEnhandesForStatement(node.getAST(),
+					(Block) astRewrite.createMoveTarget(node.getBody()),
+					(SimpleName) astRewrite.createMoveTarget(listName), svd);
+			efs.toString();
+			astRewrite.replace(node, efs, null);
+			for(MethodInvocation methodIterator : listOnlyGetMethodInvocationASTVisitor.getMethodInvocationList()){
+				astRewrite.replace(methodIterator, NodeBuilder.newSimpleName(node.getAST(), listIteratorName), null);
 			}
 		}
 		return true;
@@ -204,6 +225,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 	private class ListOnlyGetMethodInvocationASTVisitor extends ASTVisitor {
 
 		private boolean eligible = true;
+		private List<MethodInvocation> methodInvocationList = new ArrayList<>();
 		private ASTMatcher astMatcher = new ASTMatcher();
 
 		private SimpleName iterationVariable;
@@ -222,24 +244,42 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 			if (astMatcher.match(listVariable, node.getExpression())) {
 				if ("get".equals(node.getName().getFullyQualifiedName())) { //$NON-NLS-1$
 					if (node.arguments().size() == 1 && astMatcher.match(iterationVariable, node.arguments().get(0))) {
-						eligible = eligible && true;
+						eligible = eligible && addToMethodListClearIfNull(node);
 					} else {
-						eligible = eligible && false;
+						eligible = eligible && addToMethodListClearIfNull(node);
 						return false;
 					}
 
 				}
 				// other function called on the list
 				else {
-					eligible = eligible && false;
+					eligible = eligible && addToMethodListClearIfNull(node);
 					return false;
 				}
 			}
 			return true;
 		}
 
+		/**
+		 * 
+		 * @return
+		 */
+		private boolean addToMethodListClearIfNull(MethodInvocation methodInvocation) {
+			if (methodInvocation == null) {
+				methodInvocationList.clear();
+				return false;
+			} else {
+				methodInvocationList.add(methodInvocation);
+				return true;
+			}
+		}
+
 		public boolean isEligible() {
 			return eligible;
+		}
+
+		public List<MethodInvocation> getMethodInvocationList() {
+			return methodInvocationList;
 		}
 	}
 
@@ -256,7 +296,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 		@Override
 		public boolean visit(PostfixExpression node) {
 			if (astMatcher.match(iterationVariable, node.getOperand())
-					&& PostfixExpression.Operator.INCREMENT.equals(node.getOperand())) {
+					&& PostfixExpression.Operator.INCREMENT.equals(node.getOperator())) {
 				eligible = true;
 			}
 			return false;
@@ -265,7 +305,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 		@Override
 		public boolean visit(PrefixExpression node) {
 			if (astMatcher.match(iterationVariable, node.getOperand())
-					&& PrefixExpression.Operator.INCREMENT.equals(node.getOperand())) {
+					&& PrefixExpression.Operator.INCREMENT.equals(node.getOperator())) {
 				eligible = true;
 			}
 			return false;

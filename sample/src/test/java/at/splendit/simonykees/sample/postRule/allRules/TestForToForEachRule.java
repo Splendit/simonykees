@@ -19,4 +19,15 @@ public class TestForToForEachRule {
 		}
 		return sb.toString();
 	}
+
+	public void testForToForEach2(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		for (java.lang.String fooIterator : foo) {
+			String s = fooIterator;
+			sb.append(s);
+			sb.append(fooIterator);
+		}
+	}
 }
