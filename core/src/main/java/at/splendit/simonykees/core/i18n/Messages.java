@@ -33,11 +33,11 @@ public class Messages extends NLS {
 	public static String RefactoringRule_default_description;
 	public static String RefactoringRule_default_name;
 	public static String RefactoringRule_warning_workingcopy_already_present;
-	public static String SelectRulesPage_description;
-	public static String SelectRulesPage_page_name;
-	public static String SelectRulesPage_rule_description_default_text;
-	public static String SelectRulesPage_select_unselect_all;
-	public static String SelectRulesPage_title;
+	public static String SelectRulesWizardPage_description;
+	public static String SelectRulesWizardPage_page_name;
+	public static String SelectRulesWizardPage_rule_description_default_text;
+	public static String SelectRulesWizardPage_select_unselect_all;
+	public static String SelectRulesWizardPage_title;
 	public static String SelectRulesWizard_title;
 	public static String SelectRulesWizard_warning_no_refactorings;
 	public static String SimonykeesMessageDialog_bugreport_email;

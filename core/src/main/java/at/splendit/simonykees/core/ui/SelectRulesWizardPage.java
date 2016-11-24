@@ -28,16 +28,16 @@ import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
 
-public class SelectRulesPage extends AbstractWizardPage {
+public class SelectRulesWizardPage extends AbstractWizardPage {
 
 	private CheckboxTableViewer rulesCheckboxTableViewer;
 	private StyledText descriptionStyledText;
 	private RefactoringRule<? extends ASTVisitor> selectedRefactoringRule;
 
-	protected SelectRulesPage() {
-		super(Messages.SelectRulesPage_page_name);
-		setTitle(Messages.SelectRulesPage_title);
-		setDescription(Messages.SelectRulesPage_description);
+	protected SelectRulesWizardPage() {
+		super(Messages.SelectRulesWizardPage_page_name);
+		setTitle(Messages.SelectRulesWizardPage_title);
+		setDescription(Messages.SelectRulesWizardPage_description);
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class SelectRulesPage extends AbstractWizardPage {
 
 	private void createSelectAllButton(Composite parent) {
 		Button selectAllButton = new Button(parent, SWT.CHECK);
-		selectAllButton.setText(Messages.SelectRulesPage_select_unselect_all);
+		selectAllButton.setText(Messages.SelectRulesWizardPage_select_unselect_all);
 		selectAllButton.addSelectionListener(new SelectionListener() {
 
 			@Override
@@ -121,7 +121,7 @@ public class SelectRulesPage extends AbstractWizardPage {
 
 	private void populateDescriptionTextViewer() {
 		if (selectedRefactoringRule == null) {
-			descriptionStyledText.setText(Messages.SelectRulesPage_rule_description_default_text);
+			descriptionStyledText.setText(Messages.SelectRulesWizardPage_rule_description_default_text);
 		} else {
 			descriptionStyledText.setText(selectedRefactoringRule.getDescription());
 		}
