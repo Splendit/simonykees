@@ -14,7 +14,7 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
  * the variable is only used in the statement of the executed AST
  * 
  * @author Martin Huter
- * @since 9.2.0
+ * @since 0.9.2
  */
 class VariableDefinitionASTVisitor extends AbstractCompilationUnitASTVisitor {
 	private SimpleName variableName;

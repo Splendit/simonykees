@@ -24,7 +24,6 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
  * 
  * @author Martin Huter
  * @since 0.9
- *
  */
 
 public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor {

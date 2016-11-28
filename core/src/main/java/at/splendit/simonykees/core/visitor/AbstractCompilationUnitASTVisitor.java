@@ -20,7 +20,7 @@ import at.splendit.simonykees.core.i18n.ExceptionMessages;
  * can be injected by fully qualified name to enable a comparison.
  * 
  * @author Martin Huter
- *
+ * @since 0.9.2
  */
 public abstract class AbstractCompilationUnitASTVisitor extends AbstractASTRewriteASTVisitor {
 

@@ -14,7 +14,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * Finds the definition of the given {@link Iterator}
  * 
  * @author Martin Huter
- * @since 9.2.0
+ * @since 0.9.2
  */
 class IteratorDefinitionASTVisior extends AbstractASTRewriteASTVisitor {
 
