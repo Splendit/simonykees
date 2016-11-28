@@ -17,7 +17,6 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * 
  * @author Martin Huter
  * @since 0.9
- *
  */
 public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 
@@ -31,17 +30,22 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 	private static final String STRING_UTILS = "StringUtils"; //$NON-NLS-1$
 	private static final String IS_EMPTY = "isEmpty"; //$NON-NLS-1$
 	private static final String TRIM = "trim"; //$NON-NLS-1$
-	// private static final String EQUALS = "equals"; //$NON-NLS-1$ // FIXME:
-	// see SIM-86
+
+	// removed due to SIM-86
+	// private static final String EQUALS = "equals"; //$NON-NLS-1$
+
 	private static final String EQUALS_IGNORE_CASE = "equalsIgnoreCase"; //$NON-NLS-1$
 	private static final String ENDSWITH = "endsWith"; //$NON-NLS-1$
 	private static final String INDEXOF = "indexOf"; //$NON-NLS-1$
 	private static final String CONTAINS = "contains"; //$NON-NLS-1$
 	private static final String SUBSTRING = "substring"; //$NON-NLS-1$
-	// private static final String SPLIT = "split"; //$NON-NLS-1$ // FIXME: see
-	// SIM-78
-	// private static final String REPLACE = "replace"; //$NON-NLS-1$ // FIXME:
-	// see SIM-85
+
+	// removed due to SIM-78
+	// private static final String SPLIT = "split"; //$NON-NLS-1$
+
+	// removed due to SIM-85
+	// private static final String REPLACE = "replace"; //$NON-NLS-1$
+
 	private static final String STARTS_WITH = "startsWith"; //$NON-NLS-1$
 
 	private static final String TO_UPPER_CASE = "toUpperCase"; //$NON-NLS-1$
