@@ -15,10 +15,11 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WildcardType;
 
-/** Helper Class to generate new ASTNodes
+/**
+ * Helper Class to generate new ASTNodes
  * 
  * @author Martin Huter
- *
+ * @sice 0.9.2
  */
 public class NodeBuilder {
 
@@ -32,7 +33,7 @@ public class NodeBuilder {
 		resultMI.arguments().add(argument);
 		return resultMI;
 	}
-	
+
 	@Deprecated
 	@SuppressWarnings("unchecked")
 	public static MethodInvocation newMethodInvocation(AST ast, Expression optinoalExpression, SimpleName name,
@@ -43,12 +44,12 @@ public class NodeBuilder {
 		resultMI.arguments().addAll(arguments);
 		return resultMI;
 	}
-	
-	public static SimpleName newSimpleName(AST ast, String identifier){
+
+	public static SimpleName newSimpleName(AST ast, String identifier) {
 		return ast.newSimpleName(identifier);
 	}
-	
-	public static EnhancedForStatement newEnhandesForStatement(AST ast, Statement body, Expression expression,
+
+	public static EnhancedForStatement newEnhancesForStatement(AST ast, Statement body, Expression expression,
 			SingleVariableDeclaration parameter) {
 		EnhancedForStatement newFor = ast.newEnhancedForStatement();
 		newFor.setBody(body);
@@ -56,59 +57,57 @@ public class NodeBuilder {
 		newFor.setParameter(parameter);
 		return newFor;
 	}
-	
-	public static SingleVariableDeclaration newSingleVariableDeclaration(AST ast, SimpleName name, Type variableType){
+
+	public static SingleVariableDeclaration newSingleVariableDeclaration(AST ast, SimpleName name, Type variableType) {
 		SingleVariableDeclaration svd = ast.newSingleVariableDeclaration();
 		svd.setName(name);
 		svd.setType(variableType);
 		return svd;
 	}
-	
+
 	public static Type typeFromBinding(AST ast, ITypeBinding typeBinding) {
-	    if( ast == null ) 
-	        throw new NullPointerException("ast is null"); //$NON-NLS-1$
-	    if( typeBinding == null )
-	        throw new NullPointerException("typeBinding is null"); //$NON-NLS-1$
+		if (ast == null)
+			throw new NullPointerException("ast is null"); //$NON-NLS-1$
+		if (typeBinding == null)
+			throw new NullPointerException("typeBinding is null"); //$NON-NLS-1$
 
-	    if( typeBinding.isPrimitive() ) {
-	        return ast.newPrimitiveType(
-	            PrimitiveType.toCode(typeBinding.getName()));
-	    }
+		if (typeBinding.isPrimitive()) {
+			return ast.newPrimitiveType(PrimitiveType.toCode(typeBinding.getName()));
+		}
 
-	    if( typeBinding.isCapture() ) {
-	        ITypeBinding wildCard = typeBinding.getWildcard();
-	        WildcardType capType = ast.newWildcardType();
-	        ITypeBinding bound = wildCard.getBound();
-	        if( bound != null ) {
-	            capType.setBound(typeFromBinding(ast, bound));//),
-	                //wildCard.isUpperbound());
-	        }
-	        return capType;
-	    }
+		if (typeBinding.isCapture()) {
+			ITypeBinding wildCard = typeBinding.getWildcard();
+			WildcardType capType = ast.newWildcardType();
+			ITypeBinding bound = wildCard.getBound();
+			if (bound != null) {
+				capType.setBound(typeFromBinding(ast, bound));// ),
+				// wildCard.isUpperbound());
+			}
+			return capType;
+		}
 
-	    if( typeBinding.isArray() ) {
-	        Type elType = typeFromBinding(ast, typeBinding.getElementType());
-	        return ast.newArrayType(elType, typeBinding.getDimensions());
-	    }
+		if (typeBinding.isArray()) {
+			Type elType = typeFromBinding(ast, typeBinding.getElementType());
+			return ast.newArrayType(elType, typeBinding.getDimensions());
+		}
 
-	    if( typeBinding.isParameterizedType() ) {
-	        ParameterizedType type = ast.newParameterizedType(
-	            typeFromBinding(ast, typeBinding.getErasure()));
+		if (typeBinding.isParameterizedType()) {
+			ParameterizedType type = ast.newParameterizedType(typeFromBinding(ast, typeBinding.getErasure()));
 
-	        @SuppressWarnings("unchecked")
-	        List<Type> newTypeArgs = type.typeArguments();
-	        for( ITypeBinding typeArg : typeBinding.getTypeArguments() ) {
-	            newTypeArgs.add(typeFromBinding(ast, typeArg));
-	        }
+			@SuppressWarnings("unchecked")
+			List<Type> newTypeArgs = type.typeArguments();
+			for (ITypeBinding typeArg : typeBinding.getTypeArguments()) {
+				newTypeArgs.add(typeFromBinding(ast, typeArg));
+			}
 
-	        return type;
-	    }
+			return type;
+		}
 
-	    // simple or raw type
-	    String qualName = typeBinding.getQualifiedName();
-	    if( "".equals(qualName) ) { //$NON-NLS-1$
-	        throw new IllegalArgumentException("No name for type binding."); //$NON-NLS-1$
-	    }
-	    return ast.newSimpleType(ast.newName(qualName));
+		// simple or raw type
+		String qualName = typeBinding.getQualifiedName();
+		if ("".equals(qualName)) { //$NON-NLS-1$
+			throw new IllegalArgumentException("No name for type binding."); //$NON-NLS-1$
+		}
+		return ast.newSimpleType(ast.newName(qualName));
 	}
 }

@@ -88,7 +88,7 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitASTVisitor {
 					SingleVariableDeclaration svd = NodeBuilder.newSingleVariableDeclaration(node.getAST(),
 							(SimpleName) astRewrite.createMoveTarget(iterationVariable),
 							(Type) astRewrite.createMoveTarget(svdType));
-					EnhancedForStatement newFor = NodeBuilder.newEnhandesForStatement(node.getAST(),
+					EnhancedForStatement newFor = NodeBuilder.newEnhancesForStatement(node.getAST(),
 							(Statement) astRewrite.createMoveTarget(node.getBody()),
 							(Expression) astRewrite.createMoveTarget(iteratorDefinitionAstVisior.getList()), svd);
 					astRewrite.replace(node, newFor, null);
