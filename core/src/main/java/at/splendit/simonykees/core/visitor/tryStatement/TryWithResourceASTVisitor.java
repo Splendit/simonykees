@@ -38,7 +38,8 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 
 	public TryWithResourceASTVisitor() {
 		super();
-		this.fullyQuallifiedNameMap.put(AUTO_CLOSEABLE_KEY, generateFullyQuallifiedNameList(AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME, CLOSEABLE_FULLY_QUALLIFIED_NAME));
+		this.fullyQuallifiedNameMap.put(AUTO_CLOSEABLE_KEY,
+				generateFullyQuallifiedNameList(AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME, CLOSEABLE_FULLY_QUALLIFIED_NAME));
 	}
 
 	private TryWithResourceASTVisitor(Map<Integer, List<IType>> iTypeMap, TryStatement invokingTryStatement) {
@@ -67,11 +68,8 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 	@Override
 	public boolean visit(VariableDeclarationStatement node) {
 		ITypeBinding typeBind = null;
-		//if(node.getType() != null && node.getType().resolveBinding() != null){
-			typeBind = node.getType().resolveBinding();
-		//}
-		if (ClassRelationUtil
-				.isInheritingContentOfRegistertITypes(typeBind, iTypeMap.get(AUTO_CLOSEABLE_KEY))) {
+		typeBind = node.getType().resolveBinding();
+		if (ClassRelationUtil.isInheritingContentOfRegistertITypes(typeBind, iTypeMap.get(AUTO_CLOSEABLE_KEY))) {
 			for (Object iterator : node.fragments()) {
 				if (iterator instanceof VariableDeclarationFragment) {
 					VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) iterator;
@@ -87,7 +85,7 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 		}
 		return true;
 	}
-	
+
 	private List<VariableDeclarationExpression> getListVDE() {
 		return listVDE;
 	}

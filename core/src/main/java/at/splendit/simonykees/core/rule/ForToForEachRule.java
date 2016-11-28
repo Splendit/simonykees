@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.rule;
 
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
 
 /**
@@ -13,8 +14,8 @@ public class ForToForEachRule extends RefactoringRule<ForToForEachASTVisitor> {
 
 	public ForToForEachRule(Class<ForToForEachASTVisitor> visitor) {
 		super(visitor);
-		this.name = "TODO NAME";
-		this.description = "TODO DESCRIPTION";
+		this.name = Messages.ForToForEachRule_name;
+		this.description = Messages.ForToForEachRule_description;
 	}
 
 }

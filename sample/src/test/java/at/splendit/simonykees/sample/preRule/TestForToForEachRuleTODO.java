@@ -8,6 +8,8 @@ import javax.net.ssl.ExtendedSSLSession;
 
 @SuppressWarnings({ "nls", "unused" })
 public class TestForToForEachRuleTODO {
+	
+	//TODO add tests to integration
 
 	public void testForToForEach22() {
 		List<String> foo = new ArrayList<>();

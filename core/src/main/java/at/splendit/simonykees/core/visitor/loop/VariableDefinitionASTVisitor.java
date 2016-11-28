@@ -10,6 +10,8 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
 
 /**
+ * Finds the definition of the variable thats given at construction. Checks if
+ * the variable is only used in the statement of the executed AST
  * 
  * @author Martin Huter
  * @since 9.2.0
@@ -50,7 +52,7 @@ class VariableDefinitionASTVisitor extends AbstractCompilationUnitASTVisitor {
 		}
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(ForStatement node) {
 		if (statement.equals(node)) {

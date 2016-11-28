@@ -16,7 +16,7 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
 /**
  * also checks if remove or forEachRemaining is used on the iterator.
  * 
- * @since 9.2.0
+ * @since 0.9.2
  * @author Martin Huter
  *
  */

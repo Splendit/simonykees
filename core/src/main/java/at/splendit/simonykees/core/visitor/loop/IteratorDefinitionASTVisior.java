@@ -1,5 +1,7 @@
 package at.splendit.simonykees.core.visitor.loop;
 
+import java.util.Iterator;
+
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -9,6 +11,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
+ * Finds the definition of the given {@link Iterator}
  * 
  * @author Martin Huter
  * @since 9.2.0

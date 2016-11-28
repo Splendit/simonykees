@@ -102,7 +102,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 
 		/*
 		 * Preconditions for second case node expression is an infixExpression
-		 * of iterationVariable < listName.size() updaters have only one entry
+		 * of iterationVariable < listName.size(); updaters have only one entry;
 		 * initializers have only one entry
 		 */
 		if (node.getExpression() instanceof InfixExpression && node.updaters().size() == 1
@@ -239,7 +239,8 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 		}
 
 		/**
-		 * TODO Javadoc
+		 * Checks if only legal use on the collection is performed. Get is the
+		 * only legal methodInvocation
 		 */
 		@Override
 		public boolean visit(MethodInvocation node) {
