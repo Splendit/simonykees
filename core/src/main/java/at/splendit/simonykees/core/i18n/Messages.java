@@ -20,6 +20,8 @@ public class Messages extends NLS {
 	public static String ChangePreviewWizard_WizardPageTitle;
 	public static String CodeFormatterRule_description;
 	public static String CodeFormatterRule_name;
+	public static String CollectionRemoveAllRule_description;
+	public static String CollectionRemoveAllRule_name;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;

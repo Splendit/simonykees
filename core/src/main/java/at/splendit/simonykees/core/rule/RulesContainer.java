@@ -5,6 +5,7 @@ import java.util.List;
 
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
+import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
@@ -39,6 +40,7 @@ public class RulesContainer {
 				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class),
 				new WhileToForRule(WhileToForASTVisitor.class),
 				new ForToForEachRule(ForToForEachASTVisitor.class),
+				new CollectionRemoveAllRule(CollectionRemoveAllASTVisitor.class),
 				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
 				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class)
 				);
