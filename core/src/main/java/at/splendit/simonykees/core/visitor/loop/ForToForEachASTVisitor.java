@@ -91,7 +91,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 					Expression iterationList = (Expression) astRewrite
 							.createMoveTarget(iteratorDefinitionAstVisior.getList());
 
-					EnhancedForStatement newFor = NodeBuilder.newEnhancesForStatement(node.getAST(),
+					EnhancedForStatement newFor = NodeBuilder.newEnhancedForStatement(node.getAST(),
 							(Statement) astRewrite.createMoveTarget(node.getBody()), iterationList,
 							iterationVariableDefinition);
 					astRewrite.remove(findNextVariableAstVisitor.getRemoveWithTransformation(), null);
@@ -212,7 +212,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 			SingleVariableDeclaration svd = NodeBuilder.newSingleVariableDeclaration(node.getAST(),
 					NodeBuilder.newSimpleName(node.getAST(), listIteratorName), listGenericType);
 
-			EnhancedForStatement efs = NodeBuilder.newEnhancesForStatement(node.getAST(),
+			EnhancedForStatement efs = NodeBuilder.newEnhancedForStatement(node.getAST(),
 					(Block) astRewrite.createMoveTarget(node.getBody()),
 					(SimpleName) astRewrite.createMoveTarget(listName), svd);
 			efs.toString();

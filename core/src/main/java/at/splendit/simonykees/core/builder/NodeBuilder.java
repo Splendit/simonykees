@@ -3,6 +3,7 @@ package at.splendit.simonykees.core.builder;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -24,7 +25,19 @@ import org.eclipse.jdt.core.dom.WildcardType;
  */
 public class NodeBuilder {
 
-	@Deprecated
+	/**
+	 * Creates an method invocation on an expression with
+	 * 
+	 * @param ast
+	 *            the AbastractSyntaxTree thats the target of the node
+	 * @param optinoalExpression
+	 *            target of the invocation
+	 * @param name
+	 *            is the name of the invoked method
+	 * @param argument
+	 *            argument of the invoked method
+	 * @return returns a new method with fills with the parameters
+	 */
 	@SuppressWarnings("unchecked")
 	public static MethodInvocation newMethodInvocation(AST ast, Expression optinoalExpression, SimpleName name,
 			Expression argument) {
@@ -35,7 +48,19 @@ public class NodeBuilder {
 		return resultMI;
 	}
 
-	@Deprecated
+	/**
+	 * Creates an method invocation on an expression with
+	 * 
+	 * @param ast
+	 *            the AbastractSyntaxTree thats the target of the node
+	 * @param optinoalExpression
+	 *            target of the invocation
+	 * @param name
+	 *            is the name of the invoked method
+	 * @param arguments
+	 *            arguments of the invoked method
+	 * @return returns a new method with fills with the parameters
+	 */
 	@SuppressWarnings("unchecked")
 	public static MethodInvocation newMethodInvocation(AST ast, Expression optinoalExpression, SimpleName name,
 			List<Expression> arguments) {
@@ -50,7 +75,8 @@ public class NodeBuilder {
 	 * 
 	 * @param ast
 	 *            the AbastractSyntaxTree thats the target of the node
-	 * @param identifier name that is used for the SimpleName
+	 * @param identifier
+	 *            name that is used for the SimpleName
 	 * @return an {@link SimpleName} that capsules the identifier
 	 */
 	public static SimpleName newSimpleName(AST ast, String identifier) {
@@ -59,24 +85,26 @@ public class NodeBuilder {
 
 	/**
 	 * Generates an enhanced for Statement with the following parameters:
-	 * for([expression]:[parameter]{[block]} 
+	 * for([expression]:[parameter]{[block]}
 	 * 
 	 * @param ast
-		return ast.newSimpleName(identifier);
-	}
-
-	/**
-	 * Generates an enhanced for Statement with the following parameters:
-	 * for([expression]:[parameter]{[block]} 
+	 *            return ast.newSimpleName(identifier); }
+	 * 
+	 *            /** Generates an enhanced for Statement with the following
+	 *            parameters: for([expression]:[parameter]{[block]}
 	 * 
 	 * @param ast
 	 *            the AbastractSyntaxTree thats the target of the node
-	 * @param body are the statements in of the for loop 
-	 * @param expression iteration variable
-	 * @param parameter iteration base object
-	 * @return an {@link EnhancedForStatement} that combines all the input parameters
+	 * @param body
+	 *            are the statements in of the for loop
+	 * @param expression
+	 *            iteration variable
+	 * @param parameter
+	 *            iteration base object
+	 * @return an {@link EnhancedForStatement} that combines all the input
+	 *         parameters
 	 */
-	public static EnhancedForStatement newEnhandesForStatement(AST ast, Statement body, Expression expression,
+	public static EnhancedForStatement newEnhancedForStatement(AST ast, Statement body, Expression expression,
 			SingleVariableDeclaration parameter) {
 		EnhancedForStatement newFor = ast.newEnhancedForStatement();
 		newFor.setBody(body);
@@ -89,9 +117,12 @@ public class NodeBuilder {
 	 * 
 	 * @param ast
 	 *            the AbastractSyntaxTree thats the target of the node
-	 * @param name is the name of the generated variable
-	 * @param variableType is the type of the generated variable
-	 * @return {@link SingleVariableDeclaration} with the name as identifier name and variableType as object type
+	 * @param name
+	 *            is the name of the generated variable
+	 * @param variableType
+	 *            is the type of the generated variable
+	 * @return {@link SingleVariableDeclaration} with the name as identifier
+	 *         name and variableType as object type
 	 */
 	public static SingleVariableDeclaration newSingleVariableDeclaration(AST ast, SimpleName name, Type variableType) {
 		SingleVariableDeclaration svd = ast.newSingleVariableDeclaration();
@@ -104,7 +135,8 @@ public class NodeBuilder {
 	 * 
 	 * @param ast
 	 *            the AbastractSyntaxTree thats the target of the node
-	 * @param typeBinding is a type binding of a variable that is resolved to its Type
+	 * @param typeBinding
+	 *            is a type binding of a variable that is resolved to its Type
 	 * @return {@link Type} of the given {@link ITypeBinding}
 	 */
 	public static Type typeFromBinding(AST ast, ITypeBinding typeBinding) {
