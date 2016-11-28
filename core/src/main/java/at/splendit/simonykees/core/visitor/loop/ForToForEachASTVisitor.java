@@ -36,7 +36,6 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
  * 
  * @author Martin Huter
  * @since 0.9.2
- *
  */
 public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 
@@ -56,8 +55,8 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 	public boolean visit(ForStatement node) {
 		if (node.getExpression() instanceof MethodInvocation) {
 			MethodInvocation methodInvocation = (MethodInvocation) node.getExpression();
-			// check for hasNext operation on Iterator
 
+			// check for hasNext operation on Iterator
 			if (StringUtils.equals("hasNext", methodInvocation.getName().getFullyQualifiedName()) //$NON-NLS-1$
 					&& methodInvocation.getExpression() instanceof SimpleName) {
 				SimpleName iteratorName = (SimpleName) methodInvocation.getExpression();
@@ -80,9 +79,11 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 
 					SimpleName iterationVariable = findNextVariableAstVisitor.getVariableName();
 					Type iterationType = findNextVariableAstVisitor.getIteratorVariableType();
-					// wenn der typ == null ist muss der typ wieder außerhab
-					// gesucht werden
 
+					/*
+					 * wenn der typ == null ist muss der typ wieder außerhab
+					 * gesucht werden
+					 */
 					SingleVariableDeclaration iterationVariableDefinition = NodeBuilder.newSingleVariableDeclaration(
 							node.getAST(), (SimpleName) astRewrite.createMoveTarget(iterationVariable),
 							(Type) astRewrite.createMoveTarget(iterationType));
@@ -99,11 +100,11 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 			}
 		}
 
-		// Preconditions for second case
-		// node expression is an infixExpression of iterationVariable <
-		// listName.size()
-		// updaters have only one entry
-		// initializers have only one entry
+		/*
+		 * Preconditions for second case node expression is an infixExpression
+		 * of iterationVariable < listName.size() updaters have only one entry
+		 * initializers have only one entry
+		 */
 		if (node.getExpression() instanceof InfixExpression && node.updaters().size() == 1
 				&& node.initializers().size() == 1) {
 			// needed components for refactoring
@@ -157,6 +158,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 					return true;
 				}
 			}
+
 			/*
 			 * second condition: updater is only an increment on variable
 			 */
@@ -169,6 +171,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 					return true;
 				}
 			}
+
 			/*
 			 * third condition: iteration variable is initialized to 0 and only
 			 * used in while
@@ -204,18 +207,17 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 			/*
 			 * All Conditions met Do refactoring
 			 */
-
 			Activator.log("WE DID IT"); //$NON-NLS-1$
 			String listIteratorName = listName.getFullyQualifiedName() + "Iterator"; //$NON-NLS-1$
-			SingleVariableDeclaration svd = NodeBuilder.newSingleVariableDeclaration(node.getAST(), NodeBuilder.newSimpleName(node.getAST(), listIteratorName),
-					listGenericType);
+			SingleVariableDeclaration svd = NodeBuilder.newSingleVariableDeclaration(node.getAST(),
+					NodeBuilder.newSimpleName(node.getAST(), listIteratorName), listGenericType);
 
 			EnhancedForStatement efs = NodeBuilder.newEnhancesForStatement(node.getAST(),
 					(Block) astRewrite.createMoveTarget(node.getBody()),
 					(SimpleName) astRewrite.createMoveTarget(listName), svd);
 			efs.toString();
 			astRewrite.replace(node, efs, null);
-			for(MethodInvocation methodIterator : listOnlyGetMethodInvocationASTVisitor.getMethodInvocationList()){
+			for (MethodInvocation methodIterator : listOnlyGetMethodInvocationASTVisitor.getMethodInvocationList()) {
 				astRewrite.replace(methodIterator, NodeBuilder.newSimpleName(node.getAST(), listIteratorName), null);
 			}
 		}
@@ -237,7 +239,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 		}
 
 		/**
-		 * 
+		 * TODO Javadoc
 		 */
 		@Override
 		public boolean visit(MethodInvocation node) {
