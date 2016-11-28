@@ -126,6 +126,11 @@
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/releases/neon</url>
 		</repository>
+		<repository>
+			<id>p2-custom-site</id>
+			<layout>p2</layout>
+			<url>http://nexus.splendit.loc/repository/p2-custom-site/repository/</url>
+		</repository>
 	</repositories>
 
 	<!-- don't manage simoneykees.samples dependencies -->
