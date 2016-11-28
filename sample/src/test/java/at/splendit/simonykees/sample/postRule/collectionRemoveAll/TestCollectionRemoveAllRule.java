@@ -6,13 +6,13 @@ import java.util.List;
 @SuppressWarnings("nls")
 public class TestCollectionRemoveAllRule {
 	private List<String> generateList(String input) {
-		return Arrays.asList(input.split(";")); //$NON-NLS-1$
+		return Arrays.asList(input.split(";"));
 	}
 
 	public String testIfCollectionIsEmpty(String input){
 		List<String> resultList = generateList(input);
 		
-		resultList.removeAll(resultList);
+		resultList.clear();
 		
 		StringBuilder sb = new StringBuilder();
 		

@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.preRule;
+package at.splendit.simonykees.sample.postRule.allRules;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,15 +9,15 @@ public class TestCollectionRemoveAllRule {
 		return Arrays.asList(input.split(";"));
 	}
 
-	public String testIfCollectionIsEmpty(String input){
+	public String testIfCollectionIsEmpty(String input) {
 		List<String> resultList = generateList(input);
-		
-		resultList.removeAll(resultList);
-		
+
+		resultList.clear();
+
 		StringBuilder sb = new StringBuilder();
-		
-		resultList.stream().forEach((s)->sb.append(s));
-		
+
+		resultList.stream().forEach((s) -> sb.append(s));
+
 		return sb.toString();
 	}
 }

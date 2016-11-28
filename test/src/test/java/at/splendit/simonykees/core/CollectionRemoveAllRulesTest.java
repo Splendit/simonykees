@@ -17,11 +17,9 @@ import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.rule.CollectionRemoveAllRule;
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.rule.WhileToForRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
-import at.splendit.simonykees.core.visitor.WhileToForASTVisitor;
 
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)

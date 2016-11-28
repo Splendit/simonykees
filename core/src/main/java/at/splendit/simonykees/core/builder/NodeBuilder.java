@@ -40,9 +40,7 @@ public class NodeBuilder {
 	@SuppressWarnings("unchecked")
 	public static MethodInvocation newMethodInvocation(AST ast, Expression optinoalExpression, SimpleName name,
 			Expression argument) {
-		MethodInvocation resultMI = ast.newMethodInvocation();
-		resultMI.setExpression(optinoalExpression);
-		resultMI.setName(name);
+		MethodInvocation resultMI = newMethodInvocation(ast, optinoalExpression, name);
 		resultMI.arguments().add(argument);
 		return resultMI;
 	}
@@ -63,10 +61,26 @@ public class NodeBuilder {
 	@SuppressWarnings("unchecked")
 	public static MethodInvocation newMethodInvocation(AST ast, Expression optinoalExpression, SimpleName name,
 			List<Expression> arguments) {
+		MethodInvocation resultMI = newMethodInvocation(ast, optinoalExpression, name);
+		resultMI.arguments().addAll(arguments);
+		return resultMI;
+	}
+
+	/**
+	 * Creates an method invocation on an expression with
+	 * 
+	 * @param ast
+	 *            the AbastractSyntaxTree thats the target of the node
+	 * @param optinoalExpression
+	 *            target of the invocation
+	 * @param name
+	 *            is the name of the invoked method
+	 * @return returns a new method with fills with the parameters
+	 */
+	public static MethodInvocation newMethodInvocation(AST ast, Expression optinoalExpression, SimpleName name) {
 		MethodInvocation resultMI = ast.newMethodInvocation();
 		resultMI.setExpression(optinoalExpression);
 		resultMI.setName(name);
-		resultMI.arguments().addAll(arguments);
 		return resultMI;
 	}
 
