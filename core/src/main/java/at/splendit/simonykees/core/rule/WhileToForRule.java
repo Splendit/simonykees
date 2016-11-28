@@ -1,7 +1,7 @@
 package at.splendit.simonykees.core.rule;
 
 import at.splendit.simonykees.core.i18n.Messages;
-import at.splendit.simonykees.core.visitor.WhileToForASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.WhileToForASTVisitor;
 
 /**
  * @see WhileToForRule

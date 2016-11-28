@@ -5,7 +5,7 @@ import org.eclipse.jdt.core.dom.Assignment.Operator;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 
-import at.splendit.simonykees.core.helper.ArithmeticHelper;
+import at.splendit.simonykees.core.util.ArithmeticUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -45,7 +45,7 @@ public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisito
 
 				if (arithExpASTVisitor.getNewOperator() != null) {
 					astRewrite.set(node, Assignment.OPERATOR_PROPERTY,
-							ArithmeticHelper.generateOperator(arithExpASTVisitor.getNewOperator()), null);
+							ArithmeticUtil.generateOperator(arithExpASTVisitor.getNewOperator()), null);
 				}
 			}
 		}
