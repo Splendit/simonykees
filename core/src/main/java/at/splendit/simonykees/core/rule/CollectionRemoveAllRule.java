@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.rule;
 
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 
 /**
@@ -13,8 +14,8 @@ public class CollectionRemoveAllRule extends RefactoringRule<CollectionRemoveAll
 
 	public CollectionRemoveAllRule(Class<CollectionRemoveAllASTVisitor> visitor) {
 		super(visitor);
-		this.name = "TODO NAME";
-		this.description = "TODO DESCRIPTION";
+		this.name = Messages.CollectionRemoveAllRule_name;
+		this.description = Messages.CollectionRemoveAllRule_description;
 	}
 
 }
