@@ -6,6 +6,8 @@ import java.util.List;
 
 @SuppressWarnings({ "nls", "unused" })
 public class TestForToForEachRuleTODO {
+	
+	//TODO add tests to integration
 
 	public void testForToForEach2() {
 		List<String> foo = new ArrayList<>();
