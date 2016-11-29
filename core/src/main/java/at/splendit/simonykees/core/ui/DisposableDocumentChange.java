@@ -3,6 +3,12 @@ package at.splendit.simonykees.core.ui;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
+/**
+ * 
+ * @author Ludwig Werzowa
+ * @since 0.9
+ *
+ */
 @Deprecated
 public class DisposableDocumentChange extends DocumentChange {
 	

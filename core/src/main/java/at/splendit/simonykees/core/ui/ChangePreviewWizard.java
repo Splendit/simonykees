@@ -5,6 +5,13 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import at.splendit.simonykees.core.i18n.Messages;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter, Ludwig Werzowa
+ * @since 0.9
+ * 
+ */
 public class ChangePreviewWizard extends Wizard {
 	
 	private DocumentChange documentChange;

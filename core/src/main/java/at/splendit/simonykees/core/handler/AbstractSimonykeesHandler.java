@@ -32,6 +32,13 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.i18n.Messages;
 
+/**
+ * TODO SIM-103 class description
+ * 
+ * @author Hannes Schweighofer
+ * @since 0.9
+ * 
+ */
 public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 	
 	private static final String EDITOR = "org.eclipse.jdt.ui.CompilationUnitEditor"; //$NON-NLS-1$

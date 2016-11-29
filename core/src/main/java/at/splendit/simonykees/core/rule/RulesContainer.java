@@ -17,7 +17,8 @@ import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisito
 
 /** {@link RulesContainer} is a HelperClass that holds a static list of all implemented rules
  * 
- * @author Hannes Schweighofer
+ * @author Martin Huter, Hannes Schweighofer
+ * @since 0.9
  *
  */
 public class RulesContainer {

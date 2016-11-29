@@ -1,5 +1,12 @@
 package at.splendit.simonykees.core.exception;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter
+ * @since 0.9
+ * 
+ */
 public class RuleException extends SimonykeesException {
 	private static final long serialVersionUID = 226771914518618608L;
 

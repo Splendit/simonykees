@@ -1,5 +1,12 @@
 package at.splendit.simonykees.core.exception.runtime;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter
+ * @since 0.9
+ * 
+ */
 public class ITypeNotFoundRuntimeException extends RuntimeException {
 	private static final long serialVersionUID = -4800792235524391680L;
 

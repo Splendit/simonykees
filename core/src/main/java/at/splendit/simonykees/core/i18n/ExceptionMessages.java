@@ -2,6 +2,13 @@ package at.splendit.simonykees.core.i18n;
 
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter
+ * @since 0.9
+ * 
+ */
 public class ExceptionMessages extends NLS {
 	private static final String BUNDLE_NAME = "at.splendit.simonykees.core.i18n.exceptionMessages"; //$NON-NLS-1$
 	public static String AbstractCompilationUnitAstVisitor_compilation_unit_no_context;

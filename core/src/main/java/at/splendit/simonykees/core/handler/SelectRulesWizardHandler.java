@@ -7,6 +7,13 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.ui.SelectRulesWizard;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Hannes Schweighofer, Ludwig Werzowa
+ * @since 0.9
+ * 
+ */
 public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 
 	@Override

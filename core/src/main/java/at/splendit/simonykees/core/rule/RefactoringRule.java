@@ -22,6 +22,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * {@link ICompilationUnit} that are processed
  * 
  * @author Martin Huter, Hannes Schweithofer, Ludwig Werzowa
+ * @since 0.9
  *
  * @param <T>
  *            is the {@link AbstractASTRewriteASTVisitor} implementation that is

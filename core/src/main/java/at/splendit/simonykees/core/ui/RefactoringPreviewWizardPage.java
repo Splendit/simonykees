@@ -20,6 +20,13 @@ import org.eclipse.swt.widgets.Composite;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Hannes Schweighofer, Ludwig Werzowa
+ * @since 0.9
+ * 
+ */
 @SuppressWarnings("restriction")
 public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 
