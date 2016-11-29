@@ -16,6 +16,12 @@ import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @since 0.9.2
+ */
 public class AbstractRulesTest {
 
 	public AbstractRulesTest() {
@@ -24,13 +30,14 @@ public class AbstractRulesTest {
 
 	/**
 	 * loads all pairs of Paths for the postRule domain defined by the
-	 * postRuleDirectory to assure that only pairs are loaded that
-	 * are defined in the realm of the postRuleDirectory.
+	 * postRuleDirectory to assure that only pairs are loaded that are defined
+	 * in the realm of the postRuleDirectory.
 	 * 
-	 * @param postRuleDirectory directory of the reference sources
+	 * @param postRuleDirectory
+	 *            directory of the reference sources
 	 * @return the object array list used for tests
-	 * @throws IOException if path could not be found
-	 *             junit test default
+	 * @throws IOException
+	 *             if path could not be found junit test default
 	 */
 	protected static List<Object[]> load(String postRuleDirectory) throws IOException {
 		List<Object[]> data = new ArrayList<>();
