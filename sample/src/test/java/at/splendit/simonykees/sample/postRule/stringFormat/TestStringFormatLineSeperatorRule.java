@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.preRule;
+package at.splendit.simonykees.sample.postRule.stringFormat;
 
 import java.util.Locale;
 
@@ -7,25 +7,25 @@ public class TestStringFormatLineSeperatorRule {
 
 	public String testStringFormatLineSeperator01() {
 
-		return String.format("\n\n");
+		return String.format("%n%n");
 
 	}
 
 	public String testStringFormatLineSeperator02() {
 
-		return String.format(Locale.GERMAN, "\n\n");
+		return String.format(Locale.GERMAN, "%n%n");
 
 	}
 
 	public String testStringFormatLineSeperator03() {
 
-		return String.format("\r\n\r\n");
+		return String.format("%n%n");
 
 	}
 
 	public String testStringFormatLineSeperator04() {
 
-		return String.format(Locale.GERMAN, "\r\n\r\n%n");
+		return String.format(Locale.GERMAN, "%n%n%n");
 
 	}
 

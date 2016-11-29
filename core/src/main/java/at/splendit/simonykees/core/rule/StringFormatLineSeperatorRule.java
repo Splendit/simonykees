@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.rule;
 
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.visitor.StringFormatLineSeperatorASTVisitor;
 
 /**
@@ -13,8 +14,8 @@ public class StringFormatLineSeperatorRule extends RefactoringRule<StringFormatL
 
 	public StringFormatLineSeperatorRule(Class<StringFormatLineSeperatorASTVisitor> visitor) {
 		super(visitor);
-		this.name = "TODO name";
-		this.description = "TODO description";
+		this.name = Messages.StringFormatLineSeperatorRule_name;
+		this.description = Messages.StringFormatLineSeperatorRule_description;
 	}
 
 }
