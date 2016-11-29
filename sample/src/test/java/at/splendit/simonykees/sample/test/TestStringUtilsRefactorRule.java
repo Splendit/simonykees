@@ -13,6 +13,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter, Ludwig Werzowa
+ * @since 0.9
+ */
 @RunWith(Parameterized.class)
 public class TestStringUtilsRefactorRule extends AbstractReflectiveMethodTester {
 	

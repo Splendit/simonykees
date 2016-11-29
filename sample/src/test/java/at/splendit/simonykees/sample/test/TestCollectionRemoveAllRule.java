@@ -12,6 +12,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter
+ * @since 0.9.2
+ */
 @RunWith(Parameterized.class)
 public class TestCollectionRemoveAllRule extends AbstractReflectiveMethodTester {
 
