@@ -43,6 +43,8 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 	private StyledText descriptionStyledText;
 	private RefactoringRule<? extends ASTVisitor> selectedRefactoringRule;
 
+	private Combo selectProfileCombo;
+
 	protected SelectRulesWizardPage() {
 		super(Messages.SelectRulesWizardPage_page_name);
 		setTitle(Messages.SelectRulesWizardPage_title);
@@ -57,14 +59,17 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 		GridLayout layout = new GridLayout();
 
 		parent.setLayout(layout);
+
+		selectProfileCombo = new Combo(parent, SWT.READ_ONLY);
+		populateSelectProfileCombo();
 		
-		Combo combo = new Combo(parent, SWT.READ_ONLY);
-		combo.add("Default");
+		// TODO maybe select the current profile name
+		selectProfileCombo.select(0); 
 		
 		// Create a horizontal separator
 		Label separator = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
+
 		createSelectAllButton(parent);
 
 		SashForm sashForm = new SashForm(parent, SWT.HORIZONTAL);
@@ -73,6 +78,11 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 		createRulesCheckboxTableViewer(sashForm);
 		createRuleDescriptionViewer(sashForm);
 
+	}
+
+	private void populateSelectProfileCombo() {
+		SimonykeesPreferenceManager.getAllProfileNamesWithBuiltInSuffix().stream()
+				.forEach(profileName -> selectProfileCombo.add(profileName));
 	}
 
 	/**
@@ -98,12 +108,12 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 	}
 
 	private void createRulesCheckboxTableViewer(Composite parent) {
-		
-//		SashForm sashForm = new SashForm(parent, SWT.VERTICAL);
-//		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-//		createSelectAllButton(sashForm);
-		
+
+		// SashForm sashForm = new SashForm(parent, SWT.VERTICAL);
+		// sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		// createSelectAllButton(sashForm);
+
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
 
 		rulesCheckboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.CHECK | SWT.BORDER);
