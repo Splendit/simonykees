@@ -12,8 +12,11 @@ import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
- * String.format() where /n is used is replaced by %n to use the
- * {@link lookuplinesep}
+ * Every {@link String#format(String, Object...)} or
+ * {@link String#format(java.util.Locale, String, Object...)} where the
+ * parameter {@link String} is a StringLiteral is transformed so that all
+ * occurrences of "\r\n" and "\n" are replaces by "%n" which is matched to
+ * {@link System#lineSeparator()} by {@link String#format}
  * 
  * @author Martin Huter
  * @since 0.9.2
@@ -33,6 +36,10 @@ public class StringFormatLineSeperatorASTVisitor extends AbstractCompilationUnit
 		this.fullyQuallifiedNameMap.put(LOCALE_KEY, generateFullyQuallifiedNameList(LOCALE_FULLY_QUALLIFIED_NAME));
 	}
 
+	/**
+	 * checks every String.format invocation for a static format string and
+	 * replaces all basic line breaks with the String.format() default %n
+	 */
 	@Override
 	public boolean visit(MethodInvocation node) {
 		if (StringUtils.equals("format", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
@@ -57,10 +64,10 @@ public class StringFormatLineSeperatorASTVisitor extends AbstractCompilationUnit
 			}
 			// StringLiteral for refactoring found
 			if (formatString != null) {
-				//replace complete windows strings
+				// replace complete windows strings
 				String formatedString = StringUtils.replace(formatString.getEscapedValue(), "\\r\\n", "%n"); //$NON-NLS-1$//$NON-NLS-2$
-				//replace complete unix strings
-				//FIXME are there possible side effects?
+				// replace complete unix strings
+				// FIXME are there possible side effects?
 				formatedString = StringUtils.replace(formatedString, "\\n", "%n"); //$NON-NLS-1$//$NON-NLS-2$
 				StringLiteral newFormatString = NodeBuilder.newStringLiteral(node.getAST(), formatedString);
 				astRewrite.replace(formatString, newFormatString, null);
