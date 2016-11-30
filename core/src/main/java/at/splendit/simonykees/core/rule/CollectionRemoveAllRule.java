@@ -4,7 +4,7 @@ import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 
 /**
- * @see CollectionRemoveAllRule
+ * @see CollectionRemoveAllASTVisitor
  * 
  * @author Martin Huter
  * @since 0.9.2
