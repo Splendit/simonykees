@@ -4,10 +4,20 @@ import java.io.Serializable;
 
 @SuppressWarnings("nls")
 public class TestSerialVersionUidRule implements Serializable {
-	/**
-	 * 
-	 */
-	private long serialVersionUID = 1L;
-	private long otherField;
-	private Object objectField;
+
+	private class Test01 implements Serializable {
+		/**
+		 * 
+		 */
+		private long serialVersionUID = 1L;
+		private long otherField;
+		private Object objectField;
+	}
+
+	private class Test02 implements Serializable {
+		/**
+		 * 
+		 */
+		private long testLong, serialVersionUID = 1L;
+	}
 }

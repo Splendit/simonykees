@@ -5,14 +5,17 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WildcardType;
 
 /**
@@ -142,6 +145,15 @@ public class NodeBuilder {
 		svd.setName(name);
 		svd.setType(variableType);
 		return svd;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static FieldDeclaration newFieldDeclaration(AST ast, Type type, VariableDeclarationFragment serialUidNode,
+			List<Modifier> newModifier) {
+		FieldDeclaration fieldDeclaration = ast.newFieldDeclaration(serialUidNode);
+		fieldDeclaration.setType(type);
+		fieldDeclaration.modifiers().addAll(newModifier);
+		return fieldDeclaration;
 	}
 
 	/**
