@@ -43,15 +43,21 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 	private CheckboxTableViewer rulesCheckboxTableViewer;
 	private StyledText descriptionStyledText;
 	private RefactoringRule<? extends ASTVisitor> selectedRefactoringRule;
-	
+
 	private Combo selectProfileCombo;
-	
-	private Map<String, String> profileIdsAndNames = SimonykeesPreferenceManager.getAllProfileIdsAndNames();
-	
+
+	private Map<String, String> profileNamesAndIds;
+	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
+
+	private String currentProfileId;
+
 	protected SelectRulesWizardPage() {
 		super(Messages.SelectRulesWizardPage_page_name);
 		setTitle(Messages.SelectRulesWizardPage_title);
 		setDescription(Messages.SelectRulesWizardPage_description);
+
+		profileNamesAndIds = SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap();
+		rules = RulesContainer.getAllRules();
 	}
 
 	@Override
@@ -66,15 +72,12 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 		selectProfileCombo = new Combo(parent, SWT.READ_ONLY);
 		populateSelectProfileCombo();
 
-		// TODO maybe select the current profile name
-		selectProfileCombo.select(0);
-		
 		selectProfileCombo.addSelectionListener(createSelectProfileSelectionListener());
 
 		// Create a horizontal separator
 		/*
 		 * TODO doesn't display a line, even though there is an element spanning
-		 * the whole horizontal space. 
+		 * the whole horizontal space.
 		 */
 		Label separator = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -91,25 +94,29 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 
 	private SelectionListener createSelectProfileSelectionListener() {
 		return new SelectionListener() {
-			
+
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				selectProfileCombo.getSelection();
-				
+				String selectedProfileId = profileNamesAndIds
+						.get(selectProfileCombo.getItem(selectProfileCombo.getSelectionIndex()));
+				if (selectedProfileId.equals(currentProfileId)) {
+					// nothing
+				} else {
+					currentProfileId = selectedProfileId;
+					doSelectCheckedRules();
+				}
 			}
-			
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
 		};
 	}
 
 	private void populateSelectProfileCombo() {
-		profileIdsAndNames.values().stream().forEach(profileName -> selectProfileCombo.add(profileName));
-//		SimonykeesPreferenceManager.getAllProfileNamesWithBuiltInSuffix().stream()
-//				.forEach(profileName -> selectProfileCombo.add(profileName));
+		profileNamesAndIds.keySet().stream().forEach(profileName -> selectProfileCombo.add(profileName));
+		selectProfileCombo.select(0);
+		currentProfileId = profileNamesAndIds.get(selectProfileCombo.getItem(0));
 	}
 
 	/**
@@ -136,13 +143,6 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 
 	private void createRulesCheckboxTableViewer(Composite parent) {
 
-		// SashForm sashForm = new SashForm(parent, SWT.VERTICAL);
-		// sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		// createSelectAllButton(sashForm);
-
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
-
 		rulesCheckboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.CHECK | SWT.BORDER);
 		rulesCheckboxTableViewer.setContentProvider(new ArrayContentProvider());
 
@@ -163,9 +163,17 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 			}
 		});
 
-		// set selected rules according to the current profile
+		doSelectCheckedRules();
+
+	}
+
+	/**
+	 * Selects the checked rules according to the current profile.
+	 */
+	private void doSelectCheckedRules() {
 		rulesCheckboxTableViewer.setCheckedElements(rules.stream()
-				.filter(r -> SimonykeesPreferenceManager.isRuleSelectedInCurrentProfile(r.getId())).toArray());
+				.filter(r -> SimonykeesPreferenceManager.isRuleSelectedInProfile(currentProfileId, r.getId()))
+				.toArray());
 	}
 
 	private void createRuleDescriptionViewer(Composite parent) {
@@ -216,7 +224,7 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 			}
 		};
 	}
-	
+
 	/**
 	 * Returns a {@link List} of all selected {@link RefactoringRule}s, to be
 	 * used by the {@link SelectRulesWizard}.

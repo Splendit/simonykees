@@ -25,14 +25,17 @@ public class SimonykeesPreferenceManager {
 	private static IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 
 	/**
-	 * Whether or not a specific rule is selected in the current profile.
+	 * Whether or not a specific rule is selected in the given profile.
 	 * 
+	 * @param profileId
+	 *            the {@link SimonykeesProfile#getProfileId()} of a profile
 	 * @param ruleId
 	 *            the {@link RefactoringRule#getId()} of a rule
-	 * @return whether or not the given rule is selected in the current profile
+	 * 
+	 * @return whether or not the given rule is selected in the given profile
 	 */
-	public static boolean isRuleSelectedInCurrentProfile(String ruleId) {
-		return store.getBoolean(getProfileRuleKey(getCurrentProfileId(), ruleId));
+	public static boolean isRuleSelectedInProfile(String profileId, String ruleId) {
+		return store.getBoolean(getProfileRuleKey(profileId, ruleId));
 	}
 
 	/**
@@ -42,7 +45,7 @@ public class SimonykeesPreferenceManager {
 	 * @return String[][] array with profile names (with built-in suffix) and
 	 *         values (keys for the preference page)
 	 */
-	public static String[][] getAllProfileNamesAndIds() {
+	public static String[][] getAllProfileNamesAndIdsArray() {
 		String[] profileIds = getAllProfileIds();
 		String[][] retVal = new String[profileIds.length][profileIds.length];
 		for (int i = 0; i < profileIds.length; i++) {
@@ -69,9 +72,9 @@ public class SimonykeesPreferenceManager {
 				.collect(Collectors.toList());
 	}
 
-	public static Map<String, String> getAllProfileIdsAndNames() {
+	public static Map<String, String> getAllProfileNamesAndIdsMap() {
 		return Arrays.stream(getAllProfileIds()).collect(
-				Collectors.toMap(profileId -> profileId, profileId -> getProfileNameWithBuiltInSuffix(profileId)));
+				Collectors.toMap(profileId -> getProfileNameWithBuiltInSuffix(profileId), profileId -> profileId));
 	}
 
 	/**
