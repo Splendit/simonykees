@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.ui.preference;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +15,7 @@ import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.ui.preference.profile.SimonykeesProfile;
 
 /**
- * Central point to access property values. 
+ * Central point to access property values.
  * 
  * @author Ludwig Werzowa, Hannes Schweighofer
  * @since 0.9.2
@@ -38,10 +39,10 @@ public class SimonykeesPreferenceManager {
 	 * Convenience method to get the needed entryNamesAndValues array for
 	 * {@link ComboFieldEditor}.
 	 * 
-	 * @return String[][] array with profile names (displayed in UI) and values
-	 *         (keys for the preference page)
+	 * @return String[][] array with profile names (with built-in suffix) and
+	 *         values (keys for the preference page)
 	 */
-	public static String[][] getAllProfileNamesAndValues() {
+	public static String[][] getAllProfileNamesAndIds() {
 		String[] profileIds = getAllProfileIds();
 		String[][] retVal = new String[profileIds.length][profileIds.length];
 		for (int i = 0; i < profileIds.length; i++) {
@@ -68,6 +69,11 @@ public class SimonykeesPreferenceManager {
 				.collect(Collectors.toList());
 	}
 
+	public static Map<String, String> getAllProfileIdsAndNames() {
+		return Arrays.stream(getAllProfileIds()).collect(
+				Collectors.toMap(profileId -> profileId, profileId -> getProfileNameWithBuiltInSuffix(profileId)));
+	}
+
 	/**
 	 * Returns the current profileId.
 	 * 
@@ -85,7 +91,7 @@ public class SimonykeesPreferenceManager {
 	private static String[] getAllProfileIds() {
 		return parseString(store.getString(SimonykeesPreferenceConstants.PROFILE_LIST));
 	}
-	
+
 	/**
 	 * Returns the built-in status of a given profile.
 	 * 
@@ -96,7 +102,7 @@ public class SimonykeesPreferenceManager {
 	public static boolean isProfileBuiltIn(String profileId) {
 		return store.getBoolean(getProfileBuiltInKey(profileId));
 	}
-	
+
 	/**
 	 * This is the counterpart to {@link #parseString(String)}.
 	 * 
@@ -110,7 +116,7 @@ public class SimonykeesPreferenceManager {
 	public static String flattenArray(List<String> items) {
 		return StringUtils.join(items, "|"); //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * This is the counterpart to {@link #flattenArray(List)}.
 	 * 
@@ -124,7 +130,7 @@ public class SimonykeesPreferenceManager {
 	private static String[] parseString(String stringList) {
 		return StringUtils.split(stringList, "|"); //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Returns the profile name of a given profileId.
 	 * 

@@ -49,7 +49,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		loadCurrentProfileId();
 
 		profileSelectionComboField = new ComboFieldEditor(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT,
-				Messages.SimonykeesPreferencePage_selectProfile, SimonykeesPreferenceManager.getAllProfileNamesAndValues(),
+				Messages.SimonykeesPreferencePage_selectProfile, SimonykeesPreferenceManager.getAllProfileNamesAndIds(),
 				composite);
 		addField(profileSelectionComboField);
 

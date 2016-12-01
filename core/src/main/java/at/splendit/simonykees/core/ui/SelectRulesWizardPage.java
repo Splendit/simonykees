@@ -3,6 +3,7 @@ package at.splendit.simonykees.core.ui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -42,9 +43,11 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 	private CheckboxTableViewer rulesCheckboxTableViewer;
 	private StyledText descriptionStyledText;
 	private RefactoringRule<? extends ASTVisitor> selectedRefactoringRule;
-
+	
 	private Combo selectProfileCombo;
-
+	
+	private Map<String, String> profileIdsAndNames = SimonykeesPreferenceManager.getAllProfileIdsAndNames();
+	
 	protected SelectRulesWizardPage() {
 		super(Messages.SelectRulesWizardPage_page_name);
 		setTitle(Messages.SelectRulesWizardPage_title);
@@ -62,11 +65,17 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 
 		selectProfileCombo = new Combo(parent, SWT.READ_ONLY);
 		populateSelectProfileCombo();
-		
+
 		// TODO maybe select the current profile name
-		selectProfileCombo.select(0); 
+		selectProfileCombo.select(0);
 		
+		selectProfileCombo.addSelectionListener(createSelectProfileSelectionListener());
+
 		// Create a horizontal separator
+		/*
+		 * TODO doesn't display a line, even though there is an element spanning
+		 * the whole horizontal space. 
+		 */
 		Label separator = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
@@ -80,9 +89,27 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 
 	}
 
+	private SelectionListener createSelectProfileSelectionListener() {
+		return new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				selectProfileCombo.getSelection();
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		};
+	}
+
 	private void populateSelectProfileCombo() {
-		SimonykeesPreferenceManager.getAllProfileNamesWithBuiltInSuffix().stream()
-				.forEach(profileName -> selectProfileCombo.add(profileName));
+		profileIdsAndNames.values().stream().forEach(profileName -> selectProfileCombo.add(profileName));
+//		SimonykeesPreferenceManager.getAllProfileNamesWithBuiltInSuffix().stream()
+//				.forEach(profileName -> selectProfileCombo.add(profileName));
 	}
 
 	/**
@@ -189,7 +216,13 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 			}
 		};
 	}
-
+	
+	/**
+	 * Returns a {@link List} of all selected {@link RefactoringRule}s, to be
+	 * used by the {@link SelectRulesWizard}.
+	 * 
+	 * @return {@link List} of all selected {@link RefactoringRule}s
+	 */
 	@SuppressWarnings("unchecked")
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRules() {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = new ArrayList<>();
