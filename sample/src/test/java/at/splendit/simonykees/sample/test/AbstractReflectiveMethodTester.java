@@ -30,7 +30,7 @@ import com.google.common.collect.Table;
  * the parameter types match the types of parameterizedValues, are taken into
  * account.
  * 
- * @author Martin Huter, Ludwig Werzowa
+ * @author Ludwig Werzowa, Martin Huter
  * @since 0.9
  */
 @SuppressWarnings("nls")

@@ -20,9 +20,8 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 /**
  * TODO SIM-103 class description
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter
  * @since 0.9
- * 
  */
 public class SelectRulesWizard extends Wizard {
 

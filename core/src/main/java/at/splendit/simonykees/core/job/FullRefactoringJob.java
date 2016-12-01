@@ -10,10 +10,9 @@ import at.splendit.simonykees.core.Activator;
  * 
  * @author Martin Huter, Hannes Schweighofer
  * @since 0.9
- * 
  */
 public class FullRefactoringJob extends AbstractRefactoringJob {
-	
+
 	public FullRefactoringJob() {
 		super(FullRefactoringJob.class.getSimpleName());
 	}

@@ -10,7 +10,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
  * 
  * @author Martin Huter
  * @since 0.9.2
- * 
  */
 public class ClassRelationUtil {
 	/**

@@ -7,9 +7,8 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 /**
  * 
- * @author Hannes Schweighofer, Ludwig Werzowa
+ * @author Ludwig Werzowa
  * @since 0.9
- * 
  */
 public class CompilationUnitContentProvider implements ITreeContentProvider {
 

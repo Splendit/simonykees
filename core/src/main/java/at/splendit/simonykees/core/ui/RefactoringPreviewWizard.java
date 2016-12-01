@@ -10,7 +10,7 @@ import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 /**
  * TODO SIM-103 class description
  * 
- * @author Martin Huter, Ludwig Werzowa
+ * @author Ludwig Werzowa, Martin Huter, Hannes Schweighofer
  * @since 0.9
  *
  */

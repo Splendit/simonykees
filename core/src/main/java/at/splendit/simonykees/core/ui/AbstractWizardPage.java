@@ -9,9 +9,8 @@ import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
  * This class has common functionality for all Simonykees WizardPages. At the
  * moment, this only includes a help page.
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @author Ludwig Werzowa
  * @since 0.9
- * 
  */
 public abstract class AbstractWizardPage extends WizardPage {
 

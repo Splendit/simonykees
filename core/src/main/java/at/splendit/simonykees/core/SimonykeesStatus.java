@@ -5,7 +5,7 @@ import org.eclipse.core.runtime.Status;
 /**
  * TODO SIM-103 add class description
  * 
- * @author Martin Huter, Ludwig Werzowa
+ * @author Ludwig Werzowa
  * @since 0.9
  */
 public class SimonykeesStatus extends Status {

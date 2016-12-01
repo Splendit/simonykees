@@ -8,7 +8,6 @@ import org.eclipse.jdt.core.dom.Block;
  * 
  * @author Martin Huter
  * @since 0.9.2
- * 
  */
 public class ASTNodeUtil {
 

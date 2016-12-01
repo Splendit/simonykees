@@ -7,7 +7,6 @@ import org.eclipse.core.runtime.jobs.Job;
  * 
  * @author Hannes Schweighofer
  * @since 0.9
- * 
  */
 public abstract class AbstractRefactoringJob extends Job {
 

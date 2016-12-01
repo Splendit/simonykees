@@ -8,7 +8,6 @@ import org.eclipse.jdt.core.dom.InfixExpression;
  * 
  * @author Martin Huter
  * @since 0.9
- * 
  */
 public class ArithmeticUtil {
 

@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.dom.WildcardType;
  * 
  * @since 0.9.0
  * @author Martin Huter
- * @sice 0.9.2
+ * @since 0.9.2
  */
 public class NodeBuilder {
 

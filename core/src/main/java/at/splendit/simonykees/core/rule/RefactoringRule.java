@@ -31,22 +31,23 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	protected String id;
-	
+
 	protected String name = Messages.RefactoringRule_default_name;
 
 	protected String description = Messages.RefactoringRule_default_description;
-	
+
 	protected JavaVersion requiredJavaVersion = JavaVersion.JAVA_1_4;
 
 	protected boolean enabled = true;
-	
+
 	private Class<T> visitor;
 
 	private Map<ICompilationUnit, DocumentChange> changes = new HashMap<ICompilationUnit, DocumentChange>();
 
 	public RefactoringRule(Class<T> visitor) {
 		this.visitor = visitor;
-		this.id = this.getClass().getSimpleName(); // FIXME maybe add a better id
+		this.id = this.getClass().getSimpleName(); // FIXME maybe add a better
+													// id
 	}
 
 	public String getName() {

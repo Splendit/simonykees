@@ -8,14 +8,13 @@ import at.splendit.simonykees.core.i18n.Messages;
 /**
  * TODO SIM-103 add class description
  * 
- * @author Martin Huter, Ludwig Werzowa
+ * @author Ludwig Werzowa
  * @since 0.9
- * 
  */
 public class ChangePreviewWizard extends Wizard {
-	
+
 	private DocumentChange documentChange;
-	
+
 	public ChangePreviewWizard(DocumentChange documentChange) {
 		setWindowTitle(Messages.ChangePreviewWizard_ChangePreview);
 		this.documentChange = documentChange;
@@ -25,7 +24,7 @@ public class ChangePreviewWizard extends Wizard {
 	public void addPages() {
 		addPage(new ChangePreviewWizardPage(this.documentChange));
 	}
-	
+
 	@Override
 	public boolean performFinish() {
 		return true;

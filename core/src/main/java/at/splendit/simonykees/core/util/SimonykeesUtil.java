@@ -26,7 +26,6 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * 
  * @author Hannes Schweighofer
  * @since 0.9
- *
  */
 public final class SimonykeesUtil {
 
