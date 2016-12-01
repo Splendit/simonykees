@@ -19,9 +19,8 @@ import org.eclipse.jdt.core.dom.WildcardType;
 /**
  * Helper Class to generate new ASTNodes
  * 
- * @since 0.9.0
  * @author Martin Huter
- * @since 0.9.2
+ * @since 0.9.0
  */
 public class NodeBuilder {
 
