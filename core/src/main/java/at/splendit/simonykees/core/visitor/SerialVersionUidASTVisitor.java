@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.visitor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -9,6 +10,7 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -37,6 +39,14 @@ public class SerialVersionUidASTVisitor extends AbstractCompilationUnitASTVisito
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(FieldDeclaration node) {
+
+		// test if it a primitive long, otherwise ignore this node
+		if (!(node.getType().isPrimitiveType()
+				&& PrimitiveType.LONG.equals(((PrimitiveType) node.getType()).getPrimitiveTypeCode()))) {
+			return true;
+		}
+
+		// check if improvements can be done
 		CheckSerialUidASTVisitor checkSerialUidASTVisitor = new CheckSerialUidASTVisitor();
 		node.accept(checkSerialUidASTVisitor);
 		if (checkSerialUidASTVisitor.getSerialUidNode() != null
@@ -87,7 +97,7 @@ public class SerialVersionUidASTVisitor extends AbstractCompilationUnitASTVisito
 
 		@Override
 		public boolean visit(VariableDeclarationFragment node) {
-			if (StringUtils.equals(node.getName().getIdentifier(), "serialVersionUID")) {
+			if (StringUtils.equals(node.getName().getIdentifier(), "serialVersionUID")) { //$NON-NLS-1$
 				serialUidNode = node;
 			}
 			return true;
