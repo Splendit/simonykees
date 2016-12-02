@@ -28,6 +28,12 @@ import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter
+ * @since 0.9
+ */
 public class SelectRulesPage extends AbstractWizardPage {
 
 	private CheckboxTableViewer rulesCheckboxTableViewer;

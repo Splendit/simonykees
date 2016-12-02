@@ -21,6 +21,12 @@ import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter
+ * @since 0.9.2
+ */
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
 public class CollectionRemoveAllRulesTest extends AbstractRulesTest {

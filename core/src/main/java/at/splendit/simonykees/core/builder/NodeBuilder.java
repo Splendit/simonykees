@@ -12,15 +12,15 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WildcardType;
 
 /**
  * Helper Class to generate new ASTNodes
  * 
- * @since 0.9.0
  * @author Martin Huter
- * @sice 0.9.2
+ * @since 0.9.0
  */
 public class NodeBuilder {
 
@@ -142,6 +142,21 @@ public class NodeBuilder {
 		svd.setName(name);
 		svd.setType(variableType);
 		return svd;
+	}
+
+	/**
+	 * Creates an {@link StringLiteral} from an escaped string value
+	 * 
+	 * @param ast
+	 *            the AbastractSyntaxTree thats the target of the node
+	 * @param escapedString
+	 *            is the value of the resulting {@link StringLiteral}
+	 * @return the wrapped string value
+	 */
+	public static StringLiteral newStringLiteral(AST ast, String escapedString) {
+		StringLiteral result = ast.newStringLiteral();
+		result.setEscapedValue(escapedString);
+		return result;
 	}
 
 	/**

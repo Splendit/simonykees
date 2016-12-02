@@ -5,8 +5,14 @@ import org.eclipse.core.runtime.IStatus;
 
 import at.splendit.simonykees.core.Activator;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter, Hannes Schweighofer
+ * @since 0.9
+ */
 public class CustomRefactoringJob extends AbstractRefactoringJob {
-	
+
 	public CustomRefactoringJob() {
 		super(CustomRefactoringJob.class.getSimpleName());
 	}

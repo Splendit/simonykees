@@ -20,6 +20,12 @@ import org.eclipse.swt.widgets.Composite;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Ludwig Werzowa, Hannes Schweighofer
+ * @since 0.9
+ */
 @SuppressWarnings("restriction")
 public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 
@@ -57,13 +63,13 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 		container.setLayout(layout);
 
 		setControl(container);
-		
+
 		SashForm sashForm = new SashForm(container, SWT.VERTICAL);
-		
+
 		createFileView(sashForm);
 		createPreviewViewer(sashForm);
 	}
-	
+
 	private void createFileView(Composite parent) {
 		TreeViewer treeViewer = new TreeViewer(parent);
 		CompilationUnitContentProvider contentProvider = new CompilationUnitContentProvider();
@@ -72,9 +78,9 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 		treeViewer.addSelectionChangedListener(createSelectionChangedListener());
 		treeViewer.setInput(refactoringRule.getDocumentChanges().keySet());
 	}
-	
+
 	private void createPreviewViewer(Composite parent) {
-		
+
 		// GridData works with GridLayout
 		GridData gridData = new GridData(GridData.FILL_BOTH);
 		parent.setLayoutData(gridData);
@@ -101,10 +107,11 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 			}
 		};
 	}
-	
+
 	private void populatePreviewViewer() {
 		currentPreviewViewer.setInput(TextEditChangePreviewViewer.createInput(getCurrentDocumentChange()));
-		((CompareViewerSwitchingPane) currentPreviewViewer.getControl()).setTitleArgument(currentCompilationUnitNode.getClassName());
+		((CompareViewerSwitchingPane) currentPreviewViewer.getControl())
+				.setTitleArgument(currentCompilationUnitNode.getClassName());
 	}
 
 	private DocumentChange getCurrentDocumentChange() {

@@ -5,7 +5,11 @@ import java.util.Set;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-
+/**
+ * 
+ * @author Ludwig Werzowa
+ * @since 0.9
+ */
 public class CompilationUnitContentProvider implements ITreeContentProvider {
 
 	/* (non-Javadoc)
