@@ -22,7 +22,7 @@ public class TestForToForEachRule {
 		return fooHashCodes;
 	}
 	
-	public String testForToForEach(String input) {
+	public String testConvertIteratorToForEach(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
@@ -44,7 +44,7 @@ public class TestForToForEachRule {
 		}
 	}
 	
-	public String testForToForEachIteratingIndex(String input) {
+	public String testIteratingIndex(String input) {
 		List<String> foo = generateList(input);
 		
 		StringBuilder sb = new StringBuilder();
@@ -58,7 +58,7 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 	
-	public String testForToForEachBiggerThanOneIterationStep(String input) {
+	public String testBiggerThanOneIterationStep(String input) {
 		List<String> foo = generateList(input);
 
 		StringBuilder sb = new StringBuilder();
@@ -72,7 +72,7 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 
-	public String testForToForEachMultipleInitForStatement(String input) {
+	public String testMultipleInitStatements(String input) {
 		List<String> foo = generateList(input);
 		
 		StringBuilder sb = new StringBuilder();
@@ -86,7 +86,7 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 
-	public String testForToForEachMultipleInitAndIncStatement(String input) {
+	public String testMultipleIncStatements(String input) {
 		List<String> foo = generateList(input);
 		
 		StringBuilder sb = new StringBuilder();
@@ -114,7 +114,7 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 	
-//	public String testForToForEachNumberCollection(String input) {
+//	public String testIterateNumberCollection(String input) {
 //		List<? extends Number> foo = generateHashCodeList(input);
 //		
 //		StringBuilder sb = new StringBuilder();
@@ -129,7 +129,7 @@ public class TestForToForEachRule {
 //		return sb.toString();
 //	}
 	
-	public String testForToForEachNumberCollectionBigIterayionStep(String input) {
+	public String testCollectionBiggerIterationStep(String input) {
 		List<? extends Number> foo = generateHashCodeList(input);
 		
 		StringBuilder sb = new StringBuilder();
