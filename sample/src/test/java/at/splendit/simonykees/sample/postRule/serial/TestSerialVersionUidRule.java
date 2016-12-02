@@ -2,7 +2,6 @@ package at.splendit.simonykees.sample.postRule.serial;
 
 import java.io.Serializable;
 
-@SuppressWarnings("nls")
 public class TestSerialVersionUidRule implements Serializable {
 
 	private class Test01 implements Serializable {
