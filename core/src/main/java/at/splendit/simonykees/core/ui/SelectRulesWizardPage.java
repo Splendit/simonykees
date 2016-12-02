@@ -23,13 +23,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
-import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Lists all rules as checkboxes and a description for the currently selected
@@ -60,6 +59,9 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 		rules = RulesContainer.getAllRules();
 	}
 
+	/**
+	 * Gets called when the page gets created.
+	 */
 	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
@@ -74,14 +76,6 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 
 		selectProfileCombo.addSelectionListener(createSelectProfileSelectionListener());
 
-		// Create a horizontal separator
-		/*
-		 * TODO doesn't display a line, even though there is an element spanning
-		 * the whole horizontal space.
-		 */
-		Label separator = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
-		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
 		createSelectAllButton(parent);
 
 		SashForm sashForm = new SashForm(parent, SWT.HORIZONTAL);
@@ -92,6 +86,27 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 
 	}
 
+	/**
+	 * Set all items for the dropdown ({@link Combo}) and select the current
+	 * profile according to
+	 * {@link SimonykeesPreferenceManager#getCurrentProfileId()}
+	 */
+	private void populateSelectProfileCombo() {
+		currentProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
+		profileNamesAndIds.entrySet().stream().forEach((entry) -> {
+			selectProfileCombo.add(entry.getKey());
+			if (entry.getValue().equals(currentProfileId)) {
+				selectProfileCombo.select(selectProfileCombo.indexOf(entry.getKey()));
+			}
+		});
+	}
+
+	/**
+	 * {@link SelectionListener} for the profile dropdown ({@link Combo}).
+	 * 
+	 * @return {@link SelectionListener} that reacts to changes of the selected
+	 *         element.
+	 */
 	private SelectionListener createSelectProfileSelectionListener() {
 		return new SelectionListener() {
 
@@ -111,12 +126,6 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 			public void widgetDefaultSelected(SelectionEvent e) {
 			}
 		};
-	}
-
-	private void populateSelectProfileCombo() {
-		profileNamesAndIds.keySet().stream().forEach(profileName -> selectProfileCombo.add(profileName));
-		selectProfileCombo.select(0);
-		currentProfileId = profileNamesAndIds.get(selectProfileCombo.getItem(0));
 	}
 
 	/**
@@ -141,6 +150,11 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 		});
 	}
 
+	/**
+	 * Create all the rule checkboxes.
+	 * 
+	 * @param parent
+	 */
 	private void createRulesCheckboxTableViewer(Composite parent) {
 
 		rulesCheckboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.CHECK | SWT.BORDER);
@@ -176,6 +190,11 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 				.toArray());
 	}
 
+	/**
+	 * Creates the rule description viewer and sets the default text.
+	 * 
+	 * @param parent
+	 */
 	private void createRuleDescriptionViewer(Composite parent) {
 
 		/*
@@ -192,6 +211,10 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 		populateDescriptionTextViewer();
 	}
 
+	/**
+	 * Sets the rule description text according to the currently selected rule
+	 * or to the default text if no rule is selected.
+	 */
 	private void populateDescriptionTextViewer() {
 		if (selectedRefactoringRule == null) {
 			descriptionStyledText.setText(Messages.SelectRulesWizardPage_rule_description_default_text);
