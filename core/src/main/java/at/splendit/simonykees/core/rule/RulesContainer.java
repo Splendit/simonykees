@@ -7,6 +7,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
+import at.splendit.simonykees.core.visitor.SerialVersionUidASTVisitor;
 import at.splendit.simonykees.core.visitor.StringFormatLineSeperatorASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
@@ -37,11 +38,14 @@ public class RulesContainer {
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules() {
 		return Arrays.asList(new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
 				new TryWithResourceRule(TryWithResourceASTVisitor.class),
-				new StringUtilsRule(StringUtilsASTVisitor.class), new MultiCatchRule(MultiCatchASTVisitor.class),
+				new StringUtilsRule(StringUtilsASTVisitor.class),
+				new MultiCatchRule(MultiCatchASTVisitor.class),
 				new BracketsToControlRule(BracketsToControlASTVisitor.class),
 				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class),
-				new WhileToForRule(WhileToForASTVisitor.class), new ForToForEachRule(ForToForEachASTVisitor.class),
+				new WhileToForRule(WhileToForASTVisitor.class),
+				new ForToForEachRule(ForToForEachASTVisitor.class),
 				new CollectionRemoveAllRule(CollectionRemoveAllASTVisitor.class),
+				new SerialVersionUidRule(SerialVersionUidASTVisitor.class),
 				new StringFormatLineSeperatorRule(StringFormatLineSeperatorASTVisitor.class),
 				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
 				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class));

@@ -1,17 +1,17 @@
 package at.splendit.simonykees.core.rule;
 
 import at.splendit.simonykees.core.i18n.Messages;
-import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
+import at.splendit.simonykees.core.visitor.SerialVersionUidASTVisitor;
 
 /**
- * @see CollectionRemoveAllASTVisitor
+ * @see SerialVersionUidRule
  * 
  * @author Martin Huter
  * @since 0.9.2
  */
-public class CollectionRemoveAllRule extends RefactoringRule<CollectionRemoveAllASTVisitor> {
+public class SerialVersionUidRule extends RefactoringRule<SerialVersionUidASTVisitor> {
 
-	public CollectionRemoveAllRule(Class<CollectionRemoveAllASTVisitor> visitor) {
+	public SerialVersionUidRule(Class<SerialVersionUidASTVisitor> visitor) {
 		super(visitor);
 		this.name = Messages.CollectionRemoveAllRule_name;
 		this.description = Messages.CollectionRemoveAllRule_description;
