@@ -5,6 +5,12 @@ import java.util.List;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter
+ * @since 0.9.2
+ */
 public class ClassRelationUtil {
 	/**
 	 * 

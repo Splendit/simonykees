@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
  * have an field for {@link ASTRewrite} to commit the changes in the tree.
  * 
  * @author Martin Huter
- *
+ * @since 0.9
  */
 
 public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {

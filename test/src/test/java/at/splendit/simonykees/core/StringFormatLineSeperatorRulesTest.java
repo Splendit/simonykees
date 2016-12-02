@@ -15,11 +15,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import at.splendit.simonykees.core.rule.ForToForEachRule;
 import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.rule.StringFormatLineSeperatorRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
-import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.StringFormatLineSeperatorASTVisitor;
 
 /**
  * TODO SIM-103 add class description
@@ -29,15 +29,15 @@ import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
  */
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
-public class ForToForEachRulesTest extends AbstractRulesTest {
+public class StringFormatLineSeperatorRulesTest extends AbstractRulesTest {
 
-	public static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.forToForEach";
-	public static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/forToForEach";
+	public static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.stringFormat";
+	public static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/stringFormat";
 
 	private String fileName;
 	private Path preRule, postRule;
 
-	public ForToForEachRulesTest(String fileName, Path preRule, Path postRule) {
+	public StringFormatLineSeperatorRulesTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
@@ -55,7 +55,7 @@ public class ForToForEachRulesTest extends AbstractRulesTest {
 
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
 
-		rulesList.add(new ForToForEachRule(ForToForEachASTVisitor.class));
+		rulesList.add(new StringFormatLineSeperatorRule(StringFormatLineSeperatorASTVisitor.class));
 
 		String compilationUnitSource = processFile(fileName, content, rulesList);
 

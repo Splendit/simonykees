@@ -2,6 +2,12 @@ package at.splendit.simonykees.core.i18n;
 
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @since 0.9
+ */
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "at.splendit.simonykees.core.i18n.messages"; //$NON-NLS-1$
 	public static String aa_codename;
@@ -37,11 +43,11 @@ public class Messages extends NLS {
 	public static String RefactoringRule_default_description;
 	public static String RefactoringRule_default_name;
 	public static String RefactoringRule_warning_workingcopy_already_present;
-	public static String SelectRulesPage_description;
-	public static String SelectRulesPage_page_name;
-	public static String SelectRulesPage_rule_description_default_text;
-	public static String SelectRulesPage_select_unselect_all;
-	public static String SelectRulesPage_title;
+	public static String SelectRulesWizardPage_description;
+	public static String SelectRulesWizardPage_page_name;
+	public static String SelectRulesWizardPage_rule_description_default_text;
+	public static String SelectRulesWizardPage_select_unselect_all;
+	public static String SelectRulesWizardPage_title;
 	public static String SelectRulesWizard_title;
 	public static String SelectRulesWizard_warning_no_refactorings;
 	public static String SimonykeesMessageDialog_bugreport_email;
@@ -49,6 +55,8 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferenceManager_builtIn;
 	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_selectProfile;
+	public static String StringFormatLineSeperatorRule_description;
+	public static String StringFormatLineSeperatorRule_name;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
 	public static String TryWithResourceRule_description;

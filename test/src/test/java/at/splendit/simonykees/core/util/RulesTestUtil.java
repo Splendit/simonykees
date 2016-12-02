@@ -30,29 +30,34 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter, Hannes Schweighofer
+ * @since 0.9
+ */
 @SuppressWarnings("nls")
 public class RulesTestUtil {
 
 	private static final Path[] EMPTY_PATHS = new Path[0];
-	public static final String RULE_SUFFIX = "*Rule.java"; 
-	
+	public static final String RULE_SUFFIX = "*Rule.java";
+
 	public static final String BASE_PACKAGE = "package at.splendit.simonykees.sample";
 	public static final String PRERULE_PACKAGE = "package at.splendit.simonykees.sample.preRule";
 	public static final String BASE_DIRECTORY = "../sample/src/test/java/at/splendit/simonykees/sample";
 	public static final String PRERULE_DIRECTORY = "../sample/src/test/java/at/splendit/simonykees/sample/preRule";
-	
 
 	private RulesTestUtil() {
 		// hiding
 	}
 
 	public static IPackageFragment getPackageFragement() throws Exception {
-		IJavaProject javaProject = createJavaProject("allRulesTest", "bin"); 
-		IPackageFragmentRoot root = addSourceContainer(javaProject, "/allRulesTestRoot"); 
+		IJavaProject javaProject = createJavaProject("allRulesTest", "bin");
+		IPackageFragmentRoot root = addSourceContainer(javaProject, "/allRulesTestRoot");
 
 		addToClasspath(javaProject, getClassPathEntries(root));
 
-		return root.createPackageFragment("at.splendit.simonykees", true, null); 
+		return root.createPackageFragment("at.splendit.simonykees", true, null);
 	}
 
 	private static List<IClasspathEntry> getClassPathEntries(IPackageFragmentRoot root) throws Exception {
