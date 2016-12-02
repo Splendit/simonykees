@@ -97,6 +97,7 @@ public class TestForToForEachRule {
 	public String testForToForEachWithArray(String input) {
 
 		List<String> foo = generateList(input);
+		// FIXME: SIM-159: forEach on the arrays is to be implemented
 		String[] ms = (String[]) foo.toArray();
 		StringBuilder sb = new StringBuilder();
 
