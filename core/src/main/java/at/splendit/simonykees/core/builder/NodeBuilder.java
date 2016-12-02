@@ -3,12 +3,12 @@ package at.splendit.simonykees.core.builder;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -149,7 +149,7 @@ public class NodeBuilder {
 	
 	@SuppressWarnings("unchecked")
 	public static FieldDeclaration newFieldDeclaration(AST ast, Type type, VariableDeclarationFragment serialUidNode,
-			List<Modifier> newModifier) {
+			List<ASTNode> newModifier) {
 		FieldDeclaration fieldDeclaration = ast.newFieldDeclaration(serialUidNode);
 		fieldDeclaration.setType(type);
 		fieldDeclaration.modifiers().addAll(newModifier);
