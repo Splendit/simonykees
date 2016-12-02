@@ -18,7 +18,7 @@ import at.splendit.simonykees.core.ui.preference.profile.SimonykeesProfile;
  * @author Ludwig Werzowa, Hannes Schweighofer
  * @since 0.9.2
  */
-public class SimonykeesInitializer extends AbstractPreferenceInitializer {
+public class SimonykeesPreferenceInitializer extends AbstractPreferenceInitializer {
 
 	private static final List<SimonykeesProfile> DEFAULT_PROFILES = Arrays.asList(new DefaultProfile(),
 			new Java8Profile());

@@ -18,14 +18,19 @@ import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * TODO SIM-103 class description
+ * {@link Wizard} holding the {@link SelectRulesWizardPage}, which contains a
+ * list of all selectable rules.
+ * 
+ * Clicking the OK button either calls the {@link RefactoringPreviewWizard} (if
+ * there are changes within the code for the selected rules), or a
+ * {@link MessageDialog} informing the user that there are no changes.
  * 
  * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter
  * @since 0.9
  */
 public class SelectRulesWizard extends Wizard {
 
-	private final SelectRulesPage selectRulesPage = new SelectRulesPage();
+	private final SelectRulesWizardPage selectRulesPage = new SelectRulesWizardPage();
 	private final List<IJavaElement> javaElements;
 
 	public SelectRulesWizard(List<IJavaElement> javaElements) {
@@ -67,9 +72,9 @@ public class SelectRulesWizard extends Wizard {
 			final WizardDialog dialog = new WizardDialog(getShell(), new RefactoringPreviewWizard(refactorer));
 
 			Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
-			dialog.setPageSize(rectangle.width, rectangle.height); // maximizes
-																	// the
-																	// RefactoringPreviewWizard
+
+			// maximizes the RefactoringPreviewWizard
+			dialog.setPageSize(rectangle.width, rectangle.height);
 
 			dialog.open();
 		} else {

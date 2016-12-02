@@ -3,6 +3,7 @@ package at.splendit.simonykees.core.ui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -20,32 +21,47 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
-import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * TODO SIM-103 add class description
+ * Lists all rules as checkboxes and a description for the currently selected
+ * rule.
  * 
  * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter
  * @since 0.9
  */
-public class SelectRulesPage extends AbstractWizardPage {
+public class SelectRulesWizardPage extends AbstractWizardPage {
 
 	private CheckboxTableViewer rulesCheckboxTableViewer;
 	private StyledText descriptionStyledText;
 	private RefactoringRule<? extends ASTVisitor> selectedRefactoringRule;
 
-	protected SelectRulesPage() {
-		super(Messages.SelectRulesPage_page_name);
-		setTitle(Messages.SelectRulesPage_title);
-		setDescription(Messages.SelectRulesPage_description);
+	private Combo selectProfileCombo;
+
+	private Map<String, String> profileNamesAndIds;
+	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
+
+	private String currentProfileId;
+
+	protected SelectRulesWizardPage() {
+		super(Messages.SelectRulesWizardPage_page_name);
+		setTitle(Messages.SelectRulesWizardPage_title);
+		setDescription(Messages.SelectRulesWizardPage_description);
+
+		profileNamesAndIds = SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap();
+		rules = RulesContainer.getAllRules();
 	}
 
+	/**
+	 * Gets called when the page gets created.
+	 */
 	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
@@ -54,6 +70,11 @@ public class SelectRulesPage extends AbstractWizardPage {
 		GridLayout layout = new GridLayout();
 
 		parent.setLayout(layout);
+
+		selectProfileCombo = new Combo(parent, SWT.READ_ONLY);
+		populateSelectProfileCombo();
+
+		selectProfileCombo.addSelectionListener(createSelectProfileSelectionListener());
 
 		createSelectAllButton(parent);
 
@@ -65,9 +86,56 @@ public class SelectRulesPage extends AbstractWizardPage {
 
 	}
 
+	/**
+	 * Set all items for the dropdown ({@link Combo}) and select the current
+	 * profile according to
+	 * {@link SimonykeesPreferenceManager#getCurrentProfileId()}
+	 */
+	private void populateSelectProfileCombo() {
+		currentProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
+		profileNamesAndIds.entrySet().stream().forEach((entry) -> {
+			selectProfileCombo.add(entry.getKey());
+			if (entry.getValue().equals(currentProfileId)) {
+				selectProfileCombo.select(selectProfileCombo.indexOf(entry.getKey()));
+			}
+		});
+	}
+
+	/**
+	 * {@link SelectionListener} for the profile dropdown ({@link Combo}).
+	 * 
+	 * @return {@link SelectionListener} that reacts to changes of the selected
+	 *         element.
+	 */
+	private SelectionListener createSelectProfileSelectionListener() {
+		return new SelectionListener() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String selectedProfileId = profileNamesAndIds
+						.get(selectProfileCombo.getItem(selectProfileCombo.getSelectionIndex()));
+				if (selectedProfileId.equals(currentProfileId)) {
+					// nothing
+				} else {
+					currentProfileId = selectedProfileId;
+					doSelectCheckedRules();
+				}
+			}
+
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		};
+	}
+
+	/**
+	 * Adds a button to select / deselect all rules.
+	 * 
+	 * @param parent
+	 */
 	private void createSelectAllButton(Composite parent) {
 		Button selectAllButton = new Button(parent, SWT.CHECK);
-		selectAllButton.setText(Messages.SelectRulesPage_select_unselect_all);
+		selectAllButton.setText(Messages.SelectRulesWizardPage_select_unselect_all);
 		selectAllButton.addSelectionListener(new SelectionListener() {
 
 			@Override
@@ -82,8 +150,12 @@ public class SelectRulesPage extends AbstractWizardPage {
 		});
 	}
 
+	/**
+	 * Create all the rule checkboxes.
+	 * 
+	 * @param parent
+	 */
 	private void createRulesCheckboxTableViewer(Composite parent) {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
 
 		rulesCheckboxTableViewer = CheckboxTableViewer.newCheckList(parent, SWT.CHECK | SWT.BORDER);
 		rulesCheckboxTableViewer.setContentProvider(new ArrayContentProvider());
@@ -105,10 +177,24 @@ public class SelectRulesPage extends AbstractWizardPage {
 			}
 		});
 
-		rulesCheckboxTableViewer.setCheckedElements(
-				rules.stream().filter(r -> SimonykeesPreferenceManager.isRuleSelected(r.getId())).toArray());
+		doSelectCheckedRules();
+
 	}
 
+	/**
+	 * Selects the checked rules according to the current profile.
+	 */
+	private void doSelectCheckedRules() {
+		rulesCheckboxTableViewer.setCheckedElements(rules.stream()
+				.filter(r -> SimonykeesPreferenceManager.isRuleSelectedInProfile(currentProfileId, r.getId()))
+				.toArray());
+	}
+
+	/**
+	 * Creates the rule description viewer and sets the default text.
+	 * 
+	 * @param parent
+	 */
 	private void createRuleDescriptionViewer(Composite parent) {
 
 		/*
@@ -125,14 +211,24 @@ public class SelectRulesPage extends AbstractWizardPage {
 		populateDescriptionTextViewer();
 	}
 
+	/**
+	 * Sets the rule description text according to the currently selected rule
+	 * or to the default text if no rule is selected.
+	 */
 	private void populateDescriptionTextViewer() {
 		if (selectedRefactoringRule == null) {
-			descriptionStyledText.setText(Messages.SelectRulesPage_rule_description_default_text);
+			descriptionStyledText.setText(Messages.SelectRulesWizardPage_rule_description_default_text);
 		} else {
 			descriptionStyledText.setText(selectedRefactoringRule.getDescription());
 		}
 	}
 
+	/**
+	 * {@link ISelectionChangedListener} used to get the currently selected
+	 * rule, which is needed to populate the rule description.
+	 * 
+	 * @return
+	 */
 	private ISelectionChangedListener createSelectionChangedListener() {
 		return new ISelectionChangedListener() {
 			@Override
@@ -152,6 +248,12 @@ public class SelectRulesPage extends AbstractWizardPage {
 		};
 	}
 
+	/**
+	 * Returns a {@link List} of all selected {@link RefactoringRule}s, to be
+	 * used by the {@link SelectRulesWizard}.
+	 * 
+	 * @return {@link List} of all selected {@link RefactoringRule}s
+	 */
 	@SuppressWarnings("unchecked")
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRules() {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = new ArrayList<>();

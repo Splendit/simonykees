@@ -24,7 +24,7 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 		 * the dialog is made as small as possible horizontally (we want line
 		 * breaks for rule descriptions)
 		 */
-		dialog.setPageSize(1, 200);
+		dialog.setPageSize(1, 340);
 
 		dialog.open();
 		return null;
