@@ -5,17 +5,22 @@ import java.util.List;
 
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
+import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
+import at.splendit.simonykees.core.visitor.StringFormatLineSeperatorASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
-import at.splendit.simonykees.core.visitor.WhileToForASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.WhileToForASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.MultiCatchASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisitor;
 
-/** {@link RulesContainer} is a HelperClass that holds a static list of all implemented rules
+/**
+ * {@link RulesContainer} is a HelperClass that holds a static list of all
+ * implemented rules
  * 
- * @author Hannes Schweighofer
- *
+ * @author Ludwig Werzowa, Martin Huter, Hannes Schweighofer
+ * @since 0.9
  */
 public class RulesContainer {
 
@@ -23,23 +28,23 @@ public class RulesContainer {
 		// hiding the default constructor
 	}
 
-	
-	/** Is a static List of all implemented rules
+	/**
+	 * Is a static List of all implemented rules
 	 * 
-	 * @return a List of {@link RefactoringRule} with all used Rules is returned.
+	 * @return a List of {@link RefactoringRule} with all used Rules is
+	 *         returned.
 	 */
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules() {
-		return Arrays.asList(
-				new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
+		return Arrays.asList(new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
 				new TryWithResourceRule(TryWithResourceASTVisitor.class),
-				new StringUtilsRule(StringUtilsASTVisitor.class),
-				new MultiCatchRule(MultiCatchASTVisitor.class),
+				new StringUtilsRule(StringUtilsASTVisitor.class), new MultiCatchRule(MultiCatchASTVisitor.class),
 				new BracketsToControlRule(BracketsToControlASTVisitor.class),
 				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class),
-				new WhileToForRule(WhileToForASTVisitor.class),
+				new WhileToForRule(WhileToForASTVisitor.class), new ForToForEachRule(ForToForEachASTVisitor.class),
+				new CollectionRemoveAllRule(CollectionRemoveAllASTVisitor.class),
+				new StringFormatLineSeperatorRule(StringFormatLineSeperatorASTVisitor.class),
 				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
-				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class)
-				);
+				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class));
 	}
 
 }

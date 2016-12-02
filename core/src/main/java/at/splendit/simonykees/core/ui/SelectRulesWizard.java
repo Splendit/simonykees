@@ -25,7 +25,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * there are changes within the code for the selected rules), or a
  * {@link MessageDialog} informing the user that there are no changes.
  * 
- * @author Ludwig Werzowa, Hannes Schweighofer
+ * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter
  * @since 0.9
  */
 public class SelectRulesWizard extends Wizard {

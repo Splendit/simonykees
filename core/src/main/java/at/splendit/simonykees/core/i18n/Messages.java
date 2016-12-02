@@ -2,6 +2,12 @@ package at.splendit.simonykees.core.i18n;
 
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @since 0.9
+ */
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "at.splendit.simonykees.core.i18n.messages"; //$NON-NLS-1$
 	public static String aa_codename;
@@ -20,10 +26,14 @@ public class Messages extends NLS {
 	public static String ChangePreviewWizard_WizardPageTitle;
 	public static String CodeFormatterRule_description;
 	public static String CodeFormatterRule_name;
+	public static String CollectionRemoveAllRule_description;
+	public static String CollectionRemoveAllRule_name;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;
 	public static String MultiCatchRule_name;
+	public static String ForToForEachRule_description;
+	public static String ForToForEachRule_name;
 	public static String FunctionalInterfaceRule_description;
 	public static String FunctionalInterfaceRule_name;
 	public static String OrganiseImportsRule_description;
@@ -45,6 +55,8 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferenceManager_builtIn;
 	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_selectProfile;
+	public static String StringFormatLineSeperatorRule_description;
+	public static String StringFormatLineSeperatorRule_name;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
 	public static String TryWithResourceRule_description;

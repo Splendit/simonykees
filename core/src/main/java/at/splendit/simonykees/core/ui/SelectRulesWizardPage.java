@@ -34,7 +34,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * Lists all rules as checkboxes and a description for the currently selected
  * rule.
  * 
- * @author Ludwig Werzowa
+ * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter
  * @since 0.9
  */
 public class SelectRulesWizardPage extends AbstractWizardPage {

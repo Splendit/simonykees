@@ -1,9 +1,15 @@
-package at.splendit.simonykees.core.helper;
+package at.splendit.simonykees.core.util;
 
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.InfixExpression;
 
-public class ArithmeticHelper {
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter
+ * @since 0.9
+ */
+public class ArithmeticUtil {
 
 	/**
 	 *  Generates a corresponding arithmetic assignment operator to an arithmetic operator.

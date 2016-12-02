@@ -3,6 +3,7 @@ package at.splendit.simonykees.core.visitor.tryStatement;
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -13,7 +14,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
+import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
 
 /**
  * The {@link TryWithResourceASTVisitor} is used to find resources in an
@@ -22,30 +24,33 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitAstVisitor;
  * 
  * @author Martin Huter
  * @since 0.9
- *
  */
 
-public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor {
+public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor {
 
-	private static final String AUTO_CLOSEABLE = "java.lang.AutoCloseable"; //$NON-NLS-1$
-	private static final String CLOSEABLE = "java.io.Closeable"; //$NON-NLS-1$
+	private static final Integer AUTO_CLOSEABLE_KEY = 1;
+	private static final String AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME = "java.lang.AutoCloseable"; //$NON-NLS-1$
+	private static final String CLOSEABLE_FULLY_QUALLIFIED_NAME = "java.io.Closeable"; //$NON-NLS-1$
 
 	private TryStatement invokingTryStatement = null;
 	private List<VariableDeclarationExpression> listVDE = new ArrayList<>();
 
 	public TryWithResourceASTVisitor() {
 		super();
+		this.fullyQuallifiedNameMap.put(AUTO_CLOSEABLE_KEY,
+				generateFullyQuallifiedNameList(AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME, CLOSEABLE_FULLY_QUALLIFIED_NAME));
 	}
 
-	private TryWithResourceASTVisitor(List<IType> itypes, TryStatement invokingTryStatement) {
-		super(itypes);
+	private TryWithResourceASTVisitor(Map<Integer, List<IType>> iTypeMap, TryStatement invokingTryStatement) {
+		this();
+		this.iTypeMap = iTypeMap;
 		this.invokingTryStatement = invokingTryStatement;
 	}
 
 	@Override
 	public boolean visit(TryStatement node) {
 		if (!node.equals(invokingTryStatement)) {
-			TryWithResourceASTVisitor tryWithRes = new TryWithResourceASTVisitor(registeredITypes, node);
+			TryWithResourceASTVisitor tryWithRes = new TryWithResourceASTVisitor(iTypeMap, node);
 			tryWithRes.setAstRewrite(astRewrite);
 			node.accept(tryWithRes);
 			List<VariableDeclarationExpression> listVDE = tryWithRes.getListVDE();
@@ -61,8 +66,9 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor
 
 	@Override
 	public boolean visit(VariableDeclarationStatement node) {
-		ITypeBinding typeBind = node.getType().resolveBinding();
-		if (isInheritingContentOfRegistertITypes(typeBind)) {
+		ITypeBinding typeBind = null;
+		typeBind = node.getType().resolveBinding();
+		if (ClassRelationUtil.isInheritingContentOfRegistertITypes(typeBind, iTypeMap.get(AUTO_CLOSEABLE_KEY))) {
 			for (Object iterator : node.fragments()) {
 				if (iterator instanceof VariableDeclarationFragment) {
 					VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) iterator;
@@ -77,11 +83,6 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitAstVisitor
 			return false;
 		}
 		return true;
-	}
-
-	@Override
-	protected String[] relevantClasses() {
-		return new String[] { AUTO_CLOSEABLE, CLOSEABLE };
 	}
 
 	private List<VariableDeclarationExpression> getListVDE() {

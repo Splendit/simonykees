@@ -19,6 +19,12 @@ import org.junit.runners.Parameterized.Parameters;
 import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @since 0.9
+ */
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
 public class AllRulesTest extends AbstractRulesTest {
@@ -36,11 +42,14 @@ public class AllRulesTest extends AbstractRulesTest {
 	}
 
 	/**
-	 * All files in the preRule package are matched with its corresponding allRules match.
-	 * If an preRule File exists with no postRule complement there is an file not found exception raised.
-	 * This assures that a postRule file for each preRule File exists in case of the allRules test
+	 * All files in the preRule package are matched with its corresponding
+	 * allRules match. If an preRule File exists with no postRule complement
+	 * there is an file not found exception raised. This assures that a postRule
+	 * file for each preRule File exists in case of the allRules test
+	 * 
 	 * @return the object array list used for tests
-	 * @throws Exception junit test default 
+	 * @throws Exception
+	 *             junit test default
 	 */
 	@Parameters(name = "{index}: test file[{0}]")
 	public static Collection<Object[]> data() throws Exception {
@@ -57,12 +66,12 @@ public class AllRulesTest extends AbstractRulesTest {
 	public void testTransformation() throws Exception {
 		String expectedSource = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		String content = new String(Files.readAllBytes(preRule), StandardCharsets.UTF_8);
-		
+
 		String compilationUnitSource = processFile(fileName, content, RulesContainer.getAllRules());
-		
-		//Replace the package for comparison
+
+		// Replace the package for comparison
 		compilationUnitSource = StringUtils.replace(compilationUnitSource, RulesTestUtil.PRERULE_PACKAGE,
-					POSTRULE_PACKAGE);
+				POSTRULE_PACKAGE);
 
 		// TODO check if tabs and newlines make a difference
 		assertEquals(expectedSource, compilationUnitSource);

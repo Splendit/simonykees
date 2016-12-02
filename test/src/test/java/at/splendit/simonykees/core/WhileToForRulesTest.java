@@ -19,8 +19,14 @@ import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.WhileToForRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
-import at.splendit.simonykees.core.visitor.WhileToForASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.WhileToForASTVisitor;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter
+ * @since 0.9.2
+ */
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
 public class WhileToForRulesTest extends AbstractRulesTest {
