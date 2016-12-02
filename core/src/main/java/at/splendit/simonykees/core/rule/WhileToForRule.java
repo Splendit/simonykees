@@ -8,7 +8,6 @@ import at.splendit.simonykees.core.visitor.loop.WhileToForASTVisitor;
  * 
  * @author Martin Huter
  * @since 0.9.2
- *
  */
 public class WhileToForRule extends RefactoringRule<WhileToForASTVisitor> {
 

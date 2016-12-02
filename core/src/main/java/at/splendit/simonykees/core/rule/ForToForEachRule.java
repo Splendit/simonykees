@@ -8,7 +8,6 @@ import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
  * 
  * @author Martin Huter
  * @since 0.9.2
- *
  */
 public class ForToForEachRule extends RefactoringRule<ForToForEachASTVisitor> {
 

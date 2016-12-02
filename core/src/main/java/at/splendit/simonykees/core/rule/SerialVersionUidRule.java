@@ -8,7 +8,6 @@ import at.splendit.simonykees.core.visitor.SerialVersionUidASTVisitor;
  * 
  * @author Martin Huter
  * @since 0.9.2
- *
  */
 public class SerialVersionUidRule extends RefactoringRule<SerialVersionUidASTVisitor> {
 

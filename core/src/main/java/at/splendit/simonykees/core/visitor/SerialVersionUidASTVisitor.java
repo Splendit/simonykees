@@ -23,7 +23,6 @@ import at.splendit.simonykees.core.builder.NodeBuilder;
  * 
  * @author Martin Huter
  * @since 0.9.2
- *
  */
 public class SerialVersionUidASTVisitor extends AbstractCompilationUnitASTVisitor {
 

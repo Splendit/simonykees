@@ -8,7 +8,6 @@ import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
  * 
  * @author Martin Huter
  * @since 0.9.2
- *
  */
 public class CollectionRemoveAllRule extends RefactoringRule<CollectionRemoveAllASTVisitor> {
 
