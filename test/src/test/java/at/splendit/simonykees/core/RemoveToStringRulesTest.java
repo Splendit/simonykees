@@ -16,10 +16,10 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.rule.WhileToForRule;
+import at.splendit.simonykees.core.rule.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
-import at.splendit.simonykees.core.visitor.loop.WhileToForASTVisitor;
+import at.splendit.simonykees.core.visitor.RemoveToStringOnStringASTVisitor;
 
 /**
  * TODO SIM-103 add class description
@@ -55,7 +55,7 @@ public class RemoveToStringRulesTest extends AbstractRulesTest {
 
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
 
-		//rulesList.add(new WhileToForRule(WhileToForASTVisitor.class));
+		rulesList.add(new RemoveToStringOnStringRule(RemoveToStringOnStringASTVisitor.class));
 
 		String compilationUnitSource = processFile(fileName, content, rulesList);
 
