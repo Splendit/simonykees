@@ -28,7 +28,7 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractCompilationUni
 		super();
 		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
 	}
-
+	
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		if (ClassRelationUtil.isContentOfRegistertITypes(node.getType().resolveBinding(),
@@ -44,7 +44,11 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractCompilationUni
 			 */
 			if (0 == arguments.size()) {
 				astRewrite.replace(node, node.getAST().newStringLiteral(), null);
-			} else if (1 == arguments.size()) {
+			} 
+			/**
+			 * new String("string" || StringLiteral) resolves to "string" || StringLiteral 
+			 */
+			else if (1 == arguments.size()) {
 				Expression argument = arguments.get(0);
 				if (argument instanceof StringLiteral || ClassRelationUtil
 						.isContentOfRegistertITypes(argument.resolveTypeBinding(), iTypeMap.get(STRING_KEY))) {
