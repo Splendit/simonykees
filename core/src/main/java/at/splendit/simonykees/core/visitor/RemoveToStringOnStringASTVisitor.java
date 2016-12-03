@@ -27,6 +27,11 @@ public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitAST
 
 	@Override
 	public boolean visit(MethodInvocation node) {
+		/*
+		 * checks if method invocation is toString.
+		 * the invocation need to have zero arguments
+		 * the expressions type where the toString is used on needs to be a String or a StringLiteral
+		 */
 		if (StringUtils.equals("toString", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
 				&& node.typeArguments().size() == 0
 				&& (node.getExpression() != null && ClassRelationUtil

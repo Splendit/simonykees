@@ -22,7 +22,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveToStringOnStringASTVisitor;
 
 /**
- * TODO SIM-103 add class description
+ * TODO Tests the Simonykees-Rule {@link RemoveToStringOnStringRule}
  * 
  * @author Martin Huter
  * @since 0.9.2
