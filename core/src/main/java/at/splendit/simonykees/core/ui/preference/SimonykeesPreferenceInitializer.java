@@ -9,6 +9,8 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.ui.preference.profile.DefaultProfile;
+import at.splendit.simonykees.core.ui.preference.profile.Java5Profile;
+import at.splendit.simonykees.core.ui.preference.profile.Java7Profile;
 import at.splendit.simonykees.core.ui.preference.profile.Java8Profile;
 import at.splendit.simonykees.core.ui.preference.profile.SimonykeesProfile;
 
@@ -21,7 +23,7 @@ import at.splendit.simonykees.core.ui.preference.profile.SimonykeesProfile;
 public class SimonykeesPreferenceInitializer extends AbstractPreferenceInitializer {
 
 	private static final List<SimonykeesProfile> DEFAULT_PROFILES = Arrays.asList(new DefaultProfile(),
-			new Java8Profile());
+			new Java8Profile(), new Java7Profile(), new Java5Profile());
 
 	@Override
 	public void initializeDefaultPreferences() {
