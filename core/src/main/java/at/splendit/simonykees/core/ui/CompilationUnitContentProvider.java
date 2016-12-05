@@ -4,17 +4,8 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.Viewer;
 
 public class CompilationUnitContentProvider implements ITreeContentProvider {
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
-	 */
-	@Override
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		ITreeContentProvider.super.inputChanged(viewer, oldInput, newInput);
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override
