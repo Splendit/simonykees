@@ -16,7 +16,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.rule.StringFormatLineSeperatorRule;
+import at.splendit.simonykees.core.rule.impl.StringFormatLineSeperatorRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.StringFormatLineSeperatorASTVisitor;

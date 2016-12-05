@@ -15,8 +15,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import at.splendit.simonykees.core.rule.CollectionRemoveAllRule;
 import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.rule.impl.CollectionRemoveAllRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
