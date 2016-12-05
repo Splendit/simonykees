@@ -17,7 +17,6 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * 
  * @author Martin Huter
  * @since 0.9.2
- *
  */
 public class RemoveNewStringConstructorASTVisitor extends AbstractCompilationUnitASTVisitor {
 
@@ -28,25 +27,29 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractCompilationUni
 		super();
 		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
 	}
-	
+
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		if (ClassRelationUtil.isContentOfRegistertITypes(node.getType().resolveBinding(),
 				this.iTypeMap.get(STRING_KEY))) {
+			
 			/**
 			 * node.arguments() javadoc shows that it elements are at least
 			 * Expression
 			 */
 			@SuppressWarnings("unchecked")
 			List<Expression> arguments = (List<Expression>) node.arguments();
+			
 			/**
 			 * new String() resolves to ""
 			 */
 			if (0 == arguments.size()) {
 				astRewrite.replace(node, node.getAST().newStringLiteral(), null);
-			} 
+			}
+			
 			/**
-			 * new String("string" || StringLiteral) resolves to "string" || StringLiteral 
+			 * new String("string" || StringLiteral) resolves to "string" ||
+			 * StringLiteral
 			 */
 			else if (1 == arguments.size()) {
 				Expression argument = arguments.get(0);
