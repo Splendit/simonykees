@@ -13,7 +13,6 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * 
  * @author Martin Huter
  * @since 0.9.2
- *
  */
 public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitASTVisitor {
 
@@ -27,6 +26,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitAST
 
 	@Override
 	public boolean visit(MethodInvocation node) {
+		
 		/*
 		 * checks if method invocation is toString.
 		 * the invocation need to have zero arguments
@@ -39,6 +39,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitAST
 						|| node.getExpression() instanceof StringLiteral)) {
 			astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(node.getExpression()), null);
 		}
+		
 		return true;
 	}
 }
