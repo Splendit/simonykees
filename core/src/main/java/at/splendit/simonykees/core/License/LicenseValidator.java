@@ -1,5 +1,7 @@
 package at.splendit.simonykees.core.License;
 
+import java.time.Instant;
+
 import com.labs64.netlicensing.domain.vo.Composition;
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
@@ -17,12 +19,19 @@ public class LicenseValidator {
 			ValidationParameters validationParameters = licensee.getValidationParams();
 			String licenseeNumber = licensee.getLicenseeNumber();
 			Context context = APIRestConnection.getAPIRestConnection().getContext();
+			
+			Instant timestamp = Instant.now();
 
 			// sending validation request...
 			ValidationResult validationResult = LicenseeService.validate(context, licenseeNumber, validationParameters);
 
+			// caching the validation result...
+			ValidationResultCache cache = ValidationResultCache.getInstance();
+			cache.updateCachedResult(validationResult, timestamp);
+			
+			// logging validation result...
+			// TODO: use a logger instead of System.out
 			System.out.println(validationResult.getValidations().size());
-			// TODO: create a validation result object and cash it!
 
 			for (Composition value : validationResult.getValidations().values()) {
 				System.out.println("model = " + value);

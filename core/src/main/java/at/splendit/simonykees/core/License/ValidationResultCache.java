@@ -3,7 +3,7 @@ package at.splendit.simonykees.core.License;
 import java.time.Instant;
 import java.util.HashMap;
 
-import com.labs64.netlicensing.domain.Constants.ValidationResult;
+import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 /**
  * A cash implementation for storing the result of a single validation call.
