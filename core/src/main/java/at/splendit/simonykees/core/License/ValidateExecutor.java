@@ -7,10 +7,8 @@ import java.util.concurrent.TimeUnit;
 public class ValidateExecutor {
 
 	public static void main(String[] arg0) {
-		SchedulerEntity se = new SchedulerEntity();
+		SchedulerEntity se = new SchedulerEntity(5, true);
 		LicenseeEntity le = new LicenseeEntity("will be Implemented", "will be Implemented");
-		se.setDoValidate(true);
-		se.setValidateInterval(5);
 		startSchedule(se, le);
 
 	}

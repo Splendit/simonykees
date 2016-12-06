@@ -5,6 +5,10 @@ public class SchedulerEntity {
 	private long validateInterval;
 	private boolean doValidate;
 
+	public SchedulerEntity(long validateInternval, boolean doValidate) {
+		setValidateInterval(validateInternval);
+		setDoValidate(doValidate);
+	}
 	
 	public long getValidateInterval() {
 		return validateInterval;
