@@ -1,10 +1,30 @@
 package at.splendit.simonykees.core.License;
 
+import java.time.Instant;
+
+/**
+ * Provides information about the current status of the license.
+ */
 public interface LicenseChecker {
 	
-	public LicenseType getType();
-	public LicenseStatus getStatus();
-	public Long getExpireDate();
+	/**
+	 * Returns the type of the license as defined in {@link LicenseType}.
+	 */
+	LicenseType getType();
 	
-
+	/**
+	 * Returns if the status of the license is valid.
+	 */
+	boolean getStatus();
+	
+	/**
+	 * Returns a time-stamp of the last validation.
+	 */
+	Instant getValidationTimeStamp();
+	
+	/**
+	 * Returns the session id of the license. Relevant for cases
+	 * when the {@code LicenseType} is {@link LicenseType#FLOATING}.
+	 */
+	String getFloatingSessionId();
 }

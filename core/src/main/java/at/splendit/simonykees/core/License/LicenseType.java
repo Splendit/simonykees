@@ -2,7 +2,7 @@ package at.splendit.simonykees.core.License;
 
 public enum LicenseType {
 	
-	DEMO,
+	TRIAL,
 	FLOATING,
 	NODE_LOCKED
 	

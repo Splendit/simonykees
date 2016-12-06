@@ -1,7 +1,10 @@
 package at.splendit.simonykees.core.License;
 
-public class LicenseCheckerImpl implements LicenseChecker{
-	
+import java.time.Instant;
+
+public class LicenseCheckerImpl implements LicenseChecker {
+
+	// TODO: all the values are to be read from cash!
 
 	@Override
 	public LicenseType getType() {
@@ -10,16 +13,21 @@ public class LicenseCheckerImpl implements LicenseChecker{
 	}
 
 	@Override
-	public LicenseStatus getStatus() {
+	public boolean getStatus() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Instant getValidationTimeStamp() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public Long getExpireDate() {
+	public String getFloatingSessionId() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
 
 }
