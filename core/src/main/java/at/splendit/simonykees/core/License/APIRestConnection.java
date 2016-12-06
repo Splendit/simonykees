@@ -30,7 +30,10 @@ public class APIRestConnection {
 	}
 
 	public synchronized Context getContext() {
-		return context.setBaseUrl(BASE_URL).setSecurityMode(SecurityMode.APIKEY_IDENTIFICATION).setApiKey(PASS_APIKEY);
+		context.setBaseUrl(BASE_URL);
+		context.setSecurityMode(SecurityMode.APIKEY_IDENTIFICATION);
+		context.setApiKey(PASS_APIKEY);
+		return context;
 
 	}
 

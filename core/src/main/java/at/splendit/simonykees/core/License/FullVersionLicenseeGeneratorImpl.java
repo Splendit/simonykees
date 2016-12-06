@@ -1,6 +1,6 @@
 package at.splendit.simonykees.core.License;
 
-abstract public class  FullVersionLicenseeGeneratorImpl implements ValidateInterface {
+public abstract class FullVersionLicenseeGeneratorImpl implements ValidateInterface {
 
 	@Override
 	public String generateLicenseeName() {
@@ -13,7 +13,5 @@ abstract public class  FullVersionLicenseeGeneratorImpl implements ValidateInter
 
 		return null;
 	}
-
-	
 
 }
