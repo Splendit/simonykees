@@ -24,7 +24,7 @@ public class LicenseManager {
 //	private final String PRODUCT_MODULE_NUMBER = "toBeChecked"; // to be read from pre-validation
 
 	private final boolean DO_VALIDATE = true;
-	private final long VALIDATE_INTERVAL = 5; // validation interval in seconds.
+	private final long VALIDATE_INTERVAL_IN_SECONDS = 5; // validation interval in seconds.
 	
 	private static LicenseManager instance;
 	private LicenseChecker licenseChecker;
@@ -46,7 +46,7 @@ public class LicenseManager {
 	}
 	
 	private void initManager() {
-		schedulerEntity = new SchedulerEntity(VALIDATE_INTERVAL, DO_VALIDATE);
+		schedulerEntity = new SchedulerEntity(VALIDATE_INTERVAL_IN_SECONDS, DO_VALIDATE);
 		
 		// make a pre-validate call to get the license model relevant information...
 		Context context = APIRestConnection.getAPIRestConnection().getContext();
@@ -65,17 +65,18 @@ public class LicenseManager {
 			cache.updateCachedResult(validationResult, now);
 			
 			
-			// initiate the license model
+			// construct a license model
 			LicenseModel licenseModel = constructLicenseModel(licenseType, expireDate, productNumber, productModuleNumber);
 			
-			// initiate a licensee object...
+			// construct a licensee object...
 			licensee = new LicenseeEntity(LICENSEE_NAME, LICENSEE_NUMBER, licenseModel, productNumber, productModuleNumber);
 			
+			// start validate scheduler
 			ValidateExecutor.startSchedule(schedulerEntity, licensee);
 			
 			
 		} catch (NetLicensingException e) {
-			// TODO Auto-generated catch block
+			// TODO proper behavior should be triggered
 			e.printStackTrace();
 		}
 	}

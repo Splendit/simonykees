@@ -7,6 +7,7 @@ import com.labs64.netlicensing.domain.vo.Composition;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 public class LicenseCheckerImpl implements LicenseChecker {
+	//TODO: rename this class. find a proper name for it.
 
 	private LicenseType licenseType;
 	private boolean status;
