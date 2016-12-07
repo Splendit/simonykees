@@ -93,4 +93,19 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	public String getLicenseeName() {
 		return this.licenseeName;
 	}
+
+	public Instant getExprieDate() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getProductNumber() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String getProductModulNumber() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
