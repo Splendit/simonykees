@@ -1,12 +1,14 @@
 package at.splendit.simonykees.core.license;
 
+import java.time.Instant;
+
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
 public class NodeLockModel extends LicenseModel {
 
 	private String secretKey;
 	
-	public NodeLockModel(String productName, String productModuleNumber, Long expireDate, String secretKey) {
+	public NodeLockModel(String productName, String productModuleNumber, Instant expireDate, String secretKey) {
 		super(productName, productModuleNumber, LicenseType.NODE_LOCKED, expireDate);
 		setSecretKey(secretKey);
 	}
