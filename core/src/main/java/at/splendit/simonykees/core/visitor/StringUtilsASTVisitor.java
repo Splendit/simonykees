@@ -70,7 +70,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 				this.iTypeMap.get(STRING_KEY))) {
 			AST currentAST = node.getAST();
 			String replacementOperation = null;
-			String op = null;
+			String op;
 			switch (op = node.getName().getFullyQualifiedName()) {
 			case IS_EMPTY:
 			case TRIM:

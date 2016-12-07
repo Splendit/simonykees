@@ -33,7 +33,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitAST
 		 * the expressions type where the toString is used on needs to be a String or a StringLiteral
 		 */
 		if (StringUtils.equals("toString", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
-				&& node.typeArguments().size() == 0
+				&& node.typeArguments().isEmpty()
 				&& (node.getExpression() != null && ClassRelationUtil
 						.isContentOfRegistertITypes(node.getExpression().resolveTypeBinding(), iTypeMap.get(STRING_KEY))
 						|| node.getExpression() instanceof StringLiteral)) {

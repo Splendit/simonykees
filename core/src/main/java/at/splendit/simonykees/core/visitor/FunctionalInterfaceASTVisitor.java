@@ -6,7 +6,6 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -34,8 +33,8 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 				node.accept(methodBlockASTVisitor);
 				Block moveBlock = methodBlockASTVisitor.getMethodBlock();
 				if (moveBlock != null) {
-					if(methodBlockASTVisitor.getParameters() != null){
-						for(SingleVariableDeclaration s : methodBlockASTVisitor.getParameters()){
+					if (methodBlockASTVisitor.getParameters() != null) {
+						for (SingleVariableDeclaration s : methodBlockASTVisitor.getParameters()) {
 							newInitializer.parameters().add(astRewrite.createMoveTarget(s));
 						}
 					}
@@ -61,17 +60,14 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		@SuppressWarnings("unchecked")
 		@Override
 		public boolean visit(MethodDeclaration node) {
-			if (0 < node.parameters().size()) {
+			if (!node.parameters().isEmpty()) {
 				/**
 				 * node.parameters() ensures that the List contains only
 				 * SingleVariableDeclaration
 				 */
 				parameters = node.parameters();
 			}
-			if (node.getBody() instanceof Block) {
-				methodBlock = node.getBody();
-				// getAstRewrite().remove(node, null);
-			}
+			methodBlock = node.getBody();
 			return false;
 		}
 
