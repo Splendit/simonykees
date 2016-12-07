@@ -1,35 +1,53 @@
-package at.splendit.simonykees.core.License;
+package at.splendit.simonykees.core.license;
 
-public abstract class LicenseEntity {
-	
-	private LicenseStatus status;
+import com.labs64.netlicensing.domain.vo.ValidationParameters;
+
+public abstract class LicenseModel {
+
 	private LicenseType type;
 	private Long expireDate;
-	public LicenseEntity(LicenseStatus status, LicenseType type, Long expireDate) {
-		super();
-		this.status = status;
-		this.type = type;
-		this.expireDate = expireDate;
+	private String productName;
+	private String productModuleNumber;
+
+	public LicenseModel(String productName, String productModuleNumber, LicenseType type, Long expireDate) {
+		setType(type);
+		setExpireDate(expireDate);
+		setProductName(productName);
+		setProductModuleNumber(productModuleNumber);
 	}
-	public LicenseStatus getStatus() {
-		return status;
-	}
-	public void setStatus(LicenseStatus status) {
-		this.status = status;
-	}
+
+	protected abstract ValidationParameters getValidationParameters();
+
 	public LicenseType getType() {
 		return type;
 	}
-	public void setType(LicenseType type) {
+
+	private void setType(LicenseType type) {
 		this.type = type;
 	}
+
 	public Long getExpireDate() {
 		return expireDate;
 	}
-	public void setExpireDate(Long expireDate) {
+
+	private void setExpireDate(Long expireDate) {
 		this.expireDate = expireDate;
 	}
+
+	protected String getProudctName() {
+		return this.productName;
+	}
 	
+	private void setProductName(String productName){
+		this.productName = productName;
+	}
+
+	protected String getProductModuleNumber() {
+		return this.productModuleNumber;
+	}
 	
+	private void setProductModuleNumber(String productModuleNumber){
+		this.productModuleNumber = productModuleNumber;
+	}
 
 }
