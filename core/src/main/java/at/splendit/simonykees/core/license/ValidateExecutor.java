@@ -6,13 +6,6 @@ import java.util.concurrent.TimeUnit;
 
 public class ValidateExecutor {
 
-	public static void main(String[] arg0) {
-		SchedulerEntity se = new SchedulerEntity(5, true);
-		LicenseeEntity le = new LicenseeEntity("will be Implemented", "will be Implemented", null, null, null);
-		startSchedule(se, le);
-
-	}
-
 	protected synchronized static void startSchedule(SchedulerEntity se, LicenseeEntity le) {
 		final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
