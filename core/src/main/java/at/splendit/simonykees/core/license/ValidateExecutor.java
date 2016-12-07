@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.License;
+package at.splendit.simonykees.core.license;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -8,7 +8,7 @@ public class ValidateExecutor {
 
 	public static void main(String[] arg0) {
 		SchedulerEntity se = new SchedulerEntity(5, true);
-		LicenseeEntity le = new LicenseeEntity("will be Implemented", "will be Implemented");
+		LicenseeEntity le = new LicenseeEntity("will be Implemented", "will be Implemented", null, null, null);
 		startSchedule(se, le);
 
 	}

@@ -1,25 +1,39 @@
-package at.splendit.simonykees.core.License;
+package at.splendit.simonykees.core.license;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
 public class LicenseeEntity {
-	public static final String PRODUCT_NUMBER = "test-01";
 
 	private String licenseeName;
 	private String licenseeNumber;
 	private ValidationParameters validationParams;
+	private LicenseModel licenseModel;
+	private String productNumber;
+	private String productModuleNumber;
 
-	public LicenseeEntity(String licenseeName, String licenseeNumber) {
+	public LicenseeEntity(String licenseeName, String licenseeNumber, LicenseModel licenseModel, String productNumber, String productModuleNumber) {
 		setLicenseeName(licenseeName);
 		setLicenseeNumber(licenseeNumber);
-		initValidationParameters(licenseeName);
+		setLicenseModel(licenseModel);
+		setProductNumber(productNumber);
+		setProductModuleNumber(productModuleNumber);
 		
+		initValidationParameters(licenseeName);
 	}
 	
 	private void initValidationParameters(String licenseeName) {
-		this.validationParams = new ValidationParameters();
+		LicenseModel licenseModel = getLicenseModel();
+		String productNumber = getProductNumber();
+		
+		ValidationParameters validationParams = licenseModel.getValidationParameters();
 		validationParams.setLicenseeName(licenseeName);
-		validationParams.setProductNumber(PRODUCT_NUMBER);
+		validationParams.setProductNumber(productNumber);
+		
+		setValidationParameters(validationParams);
+	}
+
+	private void setValidationParameters(ValidationParameters validationParams) {
+		this.validationParams = validationParams;
 	}
 
 	public String getLicenseeName() {
@@ -40,6 +54,30 @@ public class LicenseeEntity {
 
 	public ValidationParameters getValidationParams() {
 		return validationParams;
+	}
+
+	public LicenseModel getLicenseModel() {
+		return licenseModel;
+	}
+
+	private void setLicenseModel(LicenseModel licenseModel) {
+		this.licenseModel = licenseModel;
+	}
+
+	private String getProductNumber() {
+		return productNumber;
+	}
+
+	private void setProductNumber(String productNumber) {
+		this.productNumber = productNumber;
+	}
+
+	private String getProductModuleNumber() {
+		return productModuleNumber;
+	}
+
+	private void setProductModuleNumber(String productModuleNumber) {
+		this.productModuleNumber = productModuleNumber;
 	}
 
 }
