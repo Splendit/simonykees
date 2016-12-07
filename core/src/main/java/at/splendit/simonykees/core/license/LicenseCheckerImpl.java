@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.License;
+package at.splendit.simonykees.core.license;
 
 import java.time.Instant;
 import java.util.Map;
@@ -12,6 +12,7 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private boolean status;
 	private Instant timestamp;
 	private String sessionId;
+	private String licenseeName;
 
 	// TODO: check if the following keys match with the keys of the validation
 	// properties
@@ -19,9 +20,10 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private final String SESSION_ID_KEY = "sessionId";
 	private final String VALID_KEY = "valid";
 
-	public LicenseCheckerImpl(ValidationResult validationResult, Instant timestamp) {
+	public LicenseCheckerImpl(ValidationResult validationResult, Instant timestamp, String licenseeName) {
 		setTimestamp(timestamp);
 		extractValidationData(validationResult);
+		setLicenseeName(licenseeName);
 	}
 
 	private void extractValidationData(ValidationResult validationResult) {
@@ -81,5 +83,14 @@ public class LicenseCheckerImpl implements LicenseChecker {
 
 	private void setTimestamp(Instant timestamp) {
 		this.timestamp = timestamp;
+	}
+	
+	private void setLicenseeName(String licenseeName) {
+		this.licenseeName = licenseeName;
+	}
+
+	@Override
+	public String getLicenseeName() {
+		return this.licenseeName;
 	}
 }

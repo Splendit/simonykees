@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.License;
+package at.splendit.simonykees.core.license;
 
 import java.time.Instant;
 
@@ -27,4 +27,11 @@ public interface LicenseChecker {
 	 * when the {@code LicenseType} is {@link LicenseType#FLOATING}.
 	 */
 	String getFloatingSessionId();
+	
+	/**
+	 * Returns the name of the licensee.
+	 */
+	String getLicenseeName();
+	
+	
 }
