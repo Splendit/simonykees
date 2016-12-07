@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.License;
+package at.splendit.simonykees.core.license;
 
 import java.time.Instant;
 
