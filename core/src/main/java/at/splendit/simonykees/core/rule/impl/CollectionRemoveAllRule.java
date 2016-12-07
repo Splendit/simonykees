@@ -1,6 +1,9 @@
-package at.splendit.simonykees.core.rule;
+package at.splendit.simonykees.core.rule.impl;
+
+import org.apache.commons.lang3.JavaVersion;
 
 import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 
 /**
@@ -15,6 +18,7 @@ public class CollectionRemoveAllRule extends RefactoringRule<CollectionRemoveAll
 		super(visitor);
 		this.name = Messages.CollectionRemoveAllRule_name;
 		this.description = Messages.CollectionRemoveAllRule_description;
+		this.requiredJavaVersion = JavaVersion.JAVA_1_2;
 	}
 
 }

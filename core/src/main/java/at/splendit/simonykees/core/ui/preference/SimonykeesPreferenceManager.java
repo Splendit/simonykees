@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.ui.preference;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -72,9 +73,17 @@ public class SimonykeesPreferenceManager {
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 * Returns a {@link LinkedHashMap} (ordered by insertion) with profile names
+	 * as keys and profile ids as value.
+	 * 
+	 * @return ordered map with profile names and ids.
+	 */
 	public static Map<String, String> getAllProfileNamesAndIdsMap() {
-		return Arrays.stream(getAllProfileIds()).collect(
-				Collectors.toMap(profileId -> getProfileNameWithBuiltInSuffix(profileId), profileId -> profileId));
+		return Arrays.stream(getAllProfileIds()).collect(Collectors
+				.toMap(profileId -> getProfileNameWithBuiltInSuffix(profileId), profileId -> profileId, (u, v) -> {
+					throw new IllegalStateException(String.format("Duplicate key %s", u)); //$NON-NLS-1$
+				}, LinkedHashMap::new));
 	}
 
 	/**
