@@ -4,11 +4,11 @@ import java.time.Instant;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
-public class NodeLockModel extends LicenseModel {
+public class NodeLockedModel extends LicenseModel {
 
 	private String secretKey;
 	
-	public NodeLockModel(String productName, String productModuleNumber, Instant expireDate, String secretKey) {
+	public NodeLockedModel(String productName, String productModuleNumber, Instant expireDate, String secretKey) {
 		super(productName, productModuleNumber, LicenseType.NODE_LOCKED, expireDate);
 		setSecretKey(secretKey);
 	}

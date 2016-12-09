@@ -94,7 +94,7 @@ public class LicenseManager {
 			break;
 		case NODE_LOCKED:
 			String secretKey = "";// TODO: get cpu id.
-			licenseModel = new NodeLockModel(productNumber, productModulNumber, expireDate, secretKey);
+			licenseModel = new NodeLockedModel(productNumber, productModulNumber, expireDate, secretKey);
 			break;
 		}
 		
