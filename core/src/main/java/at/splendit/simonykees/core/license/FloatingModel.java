@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.license;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
@@ -14,7 +15,7 @@ public class FloatingModel extends LicenseModel {
 
 	private String sessionId;
 
-	public FloatingModel(String productNumber, String productModuleNumber, Instant expireDate, String sessionId) {
+	public FloatingModel(String productNumber, String productModuleNumber, ZonedDateTime expireDate, String sessionId) {
 		super(productNumber, productModuleNumber, LicenseType.FLOATING, expireDate);
 		setSessionId(sessionId);
 
