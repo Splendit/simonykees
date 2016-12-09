@@ -18,20 +18,19 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
  */
 public class LicenseManager {
 
-	private final String LICENSEE_NAME = "test-licensee-name"; // to be provided as a parameter or to be read from a secure storage.
-	private final String LICENSEE_NUMBER = "test-licensee-number"; // to be provided as a parameter or to be read from a secure storage.
-//	private final String PRODUCT_NUMBER = "test-01"; // to be read from pre-validation
-//	private final String PRODUCT_MODULE_NUMBER = "toBeChecked"; // to be read from pre-validation
+	private final String LICENSEE_NAME = "test-licensee-name"; //$NON-NLS-1$ to be provided  as a parameter or to be read from a secure storage.
+	private final String LICENSEE_NUMBER = "test-licensee-number"; //$NON-NLS-1$ to be provided as a parameter or to be read from a secure storage.
+	private final String PRODUCT_NUMBER = "test-01"; //$NON-NLS-1$
+	private final String PRODUCT_MODULE_NUMBER = "toBeChecked"; //$NON-NLS-1$
 
 	private final boolean DO_VALIDATE = true;
 	private final long VALIDATE_INTERVAL_IN_SECONDS = 5; // validation interval in seconds.
-	
+
 	private static LicenseManager instance;
 	private LicenseChecker licenseChecker;
-	
+
 	private SchedulerEntity schedulerEntity;
 	private LicenseeEntity licensee;
-	
 
 	private LicenseManager() {
 		// TODO: throw an exception if the instance is not null...
@@ -44,77 +43,115 @@ public class LicenseManager {
 		}
 		return instance;
 	}
-	
+
 	private void initManager() {
 		schedulerEntity = new SchedulerEntity(VALIDATE_INTERVAL_IN_SECONDS, DO_VALIDATE);
-		
-		// make a pre-validate call to get the license model relevant information...
-		Context context = APIRestConnection.getAPIRestConnection().getContext();
+
+		Instant now = Instant.now();
+		ValidationResult validationResult;
 		try {
-			Instant now = Instant.now();
-			ValidationResult validationResult = LicenseeService.validate(context, LICENSEE_NUMBER, new ValidationParameters());
+			// make a pre-validate call to get the license model relevant information...
+			validationResult = preValidate(PRODUCT_NUMBER, PRODUCT_MODULE_NUMBER, LICENSEE_NUMBER, LICENSEE_NAME);
 			LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, now, LICENSEE_NAME);
-			
+
+			// extract pre-validation result
 			LicenseType licenseType = checker.getType();
 			Instant expireDate = checker.getExprieDate();
 			String productNumber = checker.getProductNumber();
 			String productModuleNumber = checker.getProductModulNumber();
-			
+
 			// cash pre-validation...
 			ValidationResultCache cache = ValidationResultCache.getInstance();
 			cache.updateCachedResult(validationResult, now);
-			
-			
+
 			// construct a license model
 			LicenseModel licenseModel = constructLicenseModel(licenseType, expireDate, productNumber, productModuleNumber);
-			
+
 			// construct a licensee object...
 			licensee = new LicenseeEntity(LICENSEE_NAME, LICENSEE_NUMBER, licenseModel, productNumber, productModuleNumber);
-			
+
 			// start validate scheduler
 			ValidateExecutor.startSchedule(schedulerEntity, licensee);
-			
-			
 		} catch (NetLicensingException e) {
 			// TODO proper behavior should be triggered
 			e.printStackTrace();
-		}
+		} 
+
 	}
-	
-	private LicenseModel constructLicenseModel(LicenseType licenseType, Instant expireDate, String productNumber, String productModulNumber) {
-		LicenseModel licenseModel = null;
+
+	private ValidationResult preValidate(String productNumber,
+										 String productModuleNumber,
+										 String licenseeNumber, 
+										 String licenseeName) throws NetLicensingException {
 		
-		switch(licenseType) {
-		case FLOATING: 
-			String sessionId = "";// TODO: get cpu id.
+		Context context = APIRestConnection.getAPIRestConnection().getContext();
+		ValidationResult preValidationResult = null;
+		Instant now = Instant.now();
+		// to be used only during pre-validation, as a expiration date.
+		Instant nowInOneYear = now.plusSeconds(365 * 24 * 3600);
+		FloatingModel floatingModel = new FloatingModel(productNumber, productModuleNumber, nowInOneYear, getUniqueNodeIdentifier());
+		NodeLockedModel nodeLockedModel = new NodeLockedModel(productNumber, productModuleNumber, nowInOneYear, getUniqueNodeIdentifier());
+
+
+		// pre-validation with floating license model...
+		LicenseeEntity licensee = new LicenseeEntity(licenseeName, licenseeNumber, floatingModel, productNumber, productModuleNumber);
+		ValidationParameters valParams = licensee.getValidationParams();
+		preValidationResult = LicenseeService.validate(context, LICENSEE_NUMBER, valParams);
+		LicenseCheckerImpl checker = new LicenseCheckerImpl(preValidationResult, now, licenseeName);
+
+		// if the pre-validation with floating license model fails, then try
+		// a node-locked pre-validation...
+		if (!checker.getStatus()) {
+			licensee = new LicenseeEntity(licenseeName, licenseeNumber, nodeLockedModel, productNumber, productModuleNumber);
+				valParams = licensee.getValidationParams();
+			preValidationResult = LicenseeService.validate(context, LICENSEE_NUMBER, valParams);
+
+		}
+
+
+		return preValidationResult;
+	}
+
+	private LicenseModel constructLicenseModel(LicenseType licenseType, Instant expireDate, String productNumber,
+			String productModulNumber) {
+		LicenseModel licenseModel = null;
+
+		switch (licenseType) {
+		case FLOATING:
+			String sessionId = getUniqueNodeIdentifier();
 			licenseModel = new FloatingModel(productNumber, productModulNumber, expireDate, sessionId);
 			break;
 		case TRIAL:
 			// TODO: to be implemented
 			break;
 		case NODE_LOCKED:
-			String secretKey = "";// TODO: get cpu id.
+			String secretKey = getUniqueNodeIdentifier();
 			licenseModel = new NodeLockedModel(productNumber, productModulNumber, expireDate, secretKey);
 			break;
 		}
-		
+
 		return licenseModel;
 	}
-	
+
+	private String getUniqueNodeIdentifier() {
+		// TODO get CPU ID
+		return "";
+	}
+
 	public LicenseChecker getValidationData() {
 		ValidationResultCache cache = ValidationResultCache.getInstance();
 		ValidationResult validationResult = cache.getCachedValidationResult();
 		Instant timestamp = cache.getValidationTimestamp();
-		
+
 		LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, timestamp, null);
-		
+
 		return checker;
 	}
-	
+
 	// TODO: override clone()
-//	@Override 
-//	public Object clone(){
-//		throw new RuntimeException();
-//	}
+	// @Override
+	// public Object clone(){
+	// throw new RuntimeException();
+	// }
 
 }
