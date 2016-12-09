@@ -89,8 +89,8 @@ public class LicenseManager {
 		ZonedDateTime now = ZonedDateTime.now();
 		// to be used only during pre-validation, as a expiration date.
 		ZonedDateTime nowInOneYear = now.plusYears(1);
-		FloatingModel floatingModel = new FloatingModel(productNumber, productModuleNumber, nowInOneYear, getUniqueNodeIdentifier());
-		NodeLockedModel nodeLockedModel = new NodeLockedModel(productNumber, productModuleNumber, nowInOneYear, getUniqueNodeIdentifier());
+		FloatingModel floatingModel = new FloatingModel(productModuleNumber, nowInOneYear, getUniqueNodeIdentifier());
+		NodeLockedModel nodeLockedModel = new NodeLockedModel(productModuleNumber, nowInOneYear, getUniqueNodeIdentifier());
 
 
 		// pre-validation with floating license model...
@@ -119,14 +119,14 @@ public class LicenseManager {
 		switch (licenseType) {
 		case FLOATING:
 			String sessionId = getUniqueNodeIdentifier();
-			licenseModel = new FloatingModel(productNumber, productModulNumber, expireDate, sessionId);
+			licenseModel = new FloatingModel(productModulNumber, expireDate, sessionId);
 			break;
 		case TRIAL:
 			// TODO: to be implemented
 			break;
 		case NODE_LOCKED:
 			String secretKey = getUniqueNodeIdentifier();
-			licenseModel = new NodeLockedModel(productNumber, productModulNumber, expireDate, secretKey);
+			licenseModel = new NodeLockedModel(productModulNumber, expireDate, secretKey);
 			break;
 		}
 

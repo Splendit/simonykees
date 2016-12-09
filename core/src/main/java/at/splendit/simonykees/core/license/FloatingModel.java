@@ -15,8 +15,8 @@ public class FloatingModel extends LicenseModel {
 
 	private String sessionId;
 
-	public FloatingModel(String productNumber, String productModuleNumber, ZonedDateTime expireDate, String sessionId) {
-		super(productNumber, productModuleNumber, LicenseType.FLOATING, expireDate);
+	public FloatingModel(String productModuleNumber, ZonedDateTime expireDate, String sessionId) {
+		super(productModuleNumber, LicenseType.FLOATING, expireDate);
 		setSessionId(sessionId);
 
 	}

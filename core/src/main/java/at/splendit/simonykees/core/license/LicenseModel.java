@@ -8,13 +8,11 @@ public abstract class LicenseModel {
 
 	private LicenseType type;
 	private ZonedDateTime expireDate;
-	private String productName;
 	private String productModuleNumber;
 
-	public LicenseModel(String productName, String productModuleNumber, LicenseType type, ZonedDateTime expireDate) {
+	public LicenseModel(String productModuleNumber, LicenseType type, ZonedDateTime expireDate) {
 		setType(type);
 		setExpireDate(expireDate);
-		setProductName(productName);
 		setProductModuleNumber(productModuleNumber);
 	}
 
@@ -34,14 +32,6 @@ public abstract class LicenseModel {
 
 	private void setExpireDate(ZonedDateTime expireDate) {
 		this.expireDate = expireDate;
-	}
-
-	protected String getProudctName() {
-		return this.productName;
-	}
-	
-	private void setProductName(String productName){
-		this.productName = productName;
 	}
 
 	protected String getProductModuleNumber() {
