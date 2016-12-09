@@ -1,6 +1,5 @@
 package at.splendit.simonykees.core.license;
 
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 

@@ -32,6 +32,7 @@ public class LicenseManager {
 
 	private SchedulerEntity schedulerEntity;
 	private LicenseeEntity licensee;
+	private LicenseModel licenseModel;
 
 	private LicenseManager() {
 		// TODO: throw an exception if the instance is not null...
@@ -66,9 +67,11 @@ public class LicenseManager {
 
 			// construct a license model
 			LicenseModel licenseModel = constructLicenseModel(licenseType, expireDate, PRODUCT_NUMBER, productModuleNumber);
+			setLicenseModel(licenseModel);
 
 			// construct a licensee object...
-			licensee = new LicenseeEntity(LICENSEE_NAME, LICENSEE_NUMBER, licenseModel, PRODUCT_NUMBER);
+			LicenseeEntity licensee = new LicenseeEntity(LICENSEE_NAME, LICENSEE_NUMBER, licenseModel, PRODUCT_NUMBER);
+			setLicensee(licensee);
 
 			// start validate scheduler
 			ValidateExecutor.startSchedule(schedulerEntity, licensee);
@@ -77,6 +80,10 @@ public class LicenseManager {
 			e.printStackTrace();
 		} 
 
+	}
+
+	private void setLicensee(LicenseeEntity licensee) {
+		this.licensee = licensee;
 	}
 
 	private ValidationResult preValidate(String productNumber,
@@ -108,8 +115,31 @@ public class LicenseManager {
 
 		}
 
-
 		return preValidationResult;
+	}
+
+	public void checkIn() {
+		LicenseModel licenseModel = getLicenseModel();
+		if(licenseModel instanceof FloatingModel){
+			Context context = RestApiConnection.getAPIRestConnection().getContext();
+			FloatingModel floatingModel = (FloatingModel)licenseModel;
+			ValidationParameters checkingValParameters = floatingModel.getCheckInValidationParameters();
+			try {
+				Instant now = Instant.now();
+				ValidationResult checkinResult = LicenseeService.validate(context, LICENSEE_NUMBER, checkingValParameters);
+				ValidationResultCache cache = ValidationResultCache.getInstance();
+				cache.updateCachedResult(checkinResult, now);
+				 
+			} catch (NetLicensingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
+	private LicenseeEntity getLicensee() {
+		return licensee;
 	}
 
 	private LicenseModel constructLicenseModel(LicenseType licenseType, ZonedDateTime expireDate, String productNumber,
@@ -146,6 +176,16 @@ public class LicenseManager {
 		LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, timestamp, null);
 
 		return checker;
+	}
+	
+
+	private LicenseModel getLicenseModel() {
+		return licenseModel;
+	}
+	
+
+	private void setLicenseModel(LicenseModel licenseModel) {
+		this.licenseModel = licenseModel;
 	}
 
 	// TODO: override clone()
