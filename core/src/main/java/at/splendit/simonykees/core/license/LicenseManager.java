@@ -68,7 +68,7 @@ public class LicenseManager {
 			LicenseModel licenseModel = constructLicenseModel(licenseType, expireDate, PRODUCT_NUMBER, productModuleNumber);
 
 			// construct a licensee object...
-			licensee = new LicenseeEntity(LICENSEE_NAME, LICENSEE_NUMBER, licenseModel, PRODUCT_NUMBER, productModuleNumber);
+			licensee = new LicenseeEntity(LICENSEE_NAME, LICENSEE_NUMBER, licenseModel, PRODUCT_NUMBER);
 
 			// start validate scheduler
 			ValidateExecutor.startSchedule(schedulerEntity, licensee);
@@ -94,7 +94,7 @@ public class LicenseManager {
 
 
 		// pre-validation with floating license model...
-		LicenseeEntity licensee = new LicenseeEntity(licenseeName, licenseeNumber, floatingModel, productNumber, productModuleNumber);
+		LicenseeEntity licensee = new LicenseeEntity(licenseeName, licenseeNumber, floatingModel, productNumber);
 		ValidationParameters valParams = licensee.getValidationParams();
 		preValidationResult = LicenseeService.validate(context, LICENSEE_NUMBER, valParams);
 		LicenseCheckerImpl checker = new LicenseCheckerImpl(preValidationResult, now.toInstant(), licenseeName);
@@ -102,7 +102,7 @@ public class LicenseManager {
 		// if the pre-validation with floating license model fails, then try
 		// a node-locked pre-validation...
 		if (!checker.getStatus()) {
-			licensee = new LicenseeEntity(licenseeName, licenseeNumber, nodeLockedModel, productNumber, productModuleNumber);
+			licensee = new LicenseeEntity(licenseeName, licenseeNumber, nodeLockedModel, productNumber);
 				valParams = licensee.getValidationParams();
 			preValidationResult = LicenseeService.validate(context, LICENSEE_NUMBER, valParams);
 

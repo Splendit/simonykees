@@ -9,14 +9,12 @@ public class LicenseeEntity {
 	private ValidationParameters validationParams;
 	private LicenseModel licenseModel;
 	private String productNumber;
-	private String productModuleNumber;
 
-	public LicenseeEntity(String licenseeName, String licenseeNumber, LicenseModel licenseModel, String productNumber, String productModuleNumber) {
+	public LicenseeEntity(String licenseeName, String licenseeNumber, LicenseModel licenseModel, String productNumber) {
 		setLicenseeName(licenseeName);
 		setLicenseeNumber(licenseeNumber);
 		setLicenseModel(licenseModel);
 		setProductNumber(productNumber);
-		setProductModuleNumber(productModuleNumber);
 		
 		initValidationParameters(licenseeName);
 	}
@@ -70,14 +68,6 @@ public class LicenseeEntity {
 
 	private void setProductNumber(String productNumber) {
 		this.productNumber = productNumber;
-	}
-
-	private String getProductModuleNumber() {
-		return productModuleNumber;
-	}
-
-	private void setProductModuleNumber(String productModuleNumber) {
-		this.productModuleNumber = productModuleNumber;
 	}
 
 }
