@@ -18,7 +18,6 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private String productModuleName;
 	private ZonedDateTime expires;
 
-	// TODO: check if the following keys match with the keys of the validation properties
 	private final String PRODUCT_MODULE_NUMBER_KEY = "productModuleNumber"; //$NON-NLS-1$
 	private final String PRODUCT_MODULE_NAME_KEY = "productModuleName";//$NON-NLS-1$
 	private final String LICENSING_MODEL_KEY = "licensingModel"; //$NON-NLS-1$

@@ -28,7 +28,6 @@ public class LicenseManager {
 	private final long VALIDATE_INTERVAL_IN_SECONDS = 5; // validation interval in seconds.
 
 	private static LicenseManager instance;
-	private LicenseChecker licenseChecker;
 
 	private SchedulerEntity schedulerEntity;
 	private LicenseeEntity licensee;
@@ -118,6 +117,11 @@ public class LicenseManager {
 		return preValidationResult;
 	}
 
+	/**
+	 * Sends a request to free one session from the session pool available
+	 * for Floating License Model. Relevant only for the case when the 
+	 * licensing model is Floating. 
+	 */
 	public void checkIn() {
 		LicenseModel licenseModel = getLicenseModel();
 		if(licenseModel instanceof FloatingModel){
@@ -131,10 +135,9 @@ public class LicenseManager {
 				cache.updateCachedResult(checkinResult, now);
 				 
 			} catch (NetLicensingException e) {
-				// TODO Auto-generated catch block
+				// TODO add a validation status indicating that the checkin was not successful.
 				e.printStackTrace();
-			}
-			
+			}		
 		}
 	}
 	
