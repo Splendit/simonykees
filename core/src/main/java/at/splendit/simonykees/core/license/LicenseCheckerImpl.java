@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.license;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 import com.labs64.netlicensing.domain.vo.Composition;
@@ -12,14 +13,17 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private LicenseType licenseType;
 	private boolean status;
 	private Instant timestamp;
-	private String sessionId;
 	private String licenseeName;
+	private String productModuleNumber;
+	private String productModuleName;
+	private ZonedDateTime expires;
 
-	// TODO: check if the following keys match with the keys of the validation
-	// properties
-	private final String LICENSING_MODEL_KEY = "productModuleNumber";
-	private final String SESSION_ID_KEY = "sessionId";
-	private final String VALID_KEY = "valid";
+	// TODO: check if the following keys match with the keys of the validation properties
+	private final String PRODUCT_MODULE_NUMBER_KEY = "productModuleNumber"; //$NON-NLS-1$
+	private final String PRODUCT_MODULE_NAME_KEY = "productModuleName";//$NON-NLS-1$
+	private final String LICENSING_MODEL_KEY = "licensingModel"; //$NON-NLS-1$
+	private final String EXPIRES_KEY = "expires"; //$NON-NLS-1$
+	private final String VALID_KEY = "valid"; //$NON-NLS-1$
 
 	public LicenseCheckerImpl(ValidationResult validationResult, Instant timestamp, String licenseeName) {
 		setTimestamp(timestamp);
@@ -37,17 +41,34 @@ public class LicenseCheckerImpl implements LicenseChecker {
 					LicenseType type = LicenseType.fromString(value.getValue());
 					setLicenseType(type);
 					break;
-				case SESSION_ID_KEY:
-					setSessionId(value.getValue());
-					break;
 				case VALID_KEY:
 					boolean valid = Boolean.valueOf(value.getValue());
 					setStatus(valid);
+					break;
+				case EXPIRES_KEY:
+					ZonedDateTime expireDate = ZonedDateTime.parse(value.getValue());
+					setExpireDate(expireDate);
+					break;
+				case PRODUCT_MODULE_NUMBER_KEY:
+					setProductModuleNumber(value.getValue());
+					break;
+				case PRODUCT_MODULE_NAME_KEY:
+					setProductModuleName(value.getValue());
 					break;
 				}
 				
 			});
 		});
+	}
+
+	private void setProductModuleName(String value) {
+		this.productModuleName = value;
+		
+	}
+
+	private void setProductModuleNumber(String value) {
+		this.productModuleNumber = value;
+		
 	}
 
 	@Override
@@ -65,17 +86,8 @@ public class LicenseCheckerImpl implements LicenseChecker {
 		return this.timestamp;
 	}
 
-	@Override
-	public String getFloatingSessionId() {
-		return this.sessionId;
-	}
-
 	private void setLicenseType(LicenseType licenseType) {
 		this.licenseType = licenseType;
-	}
-
-	private void setSessionId(String sessionId) {
-		this.sessionId = sessionId;
 	}
 
 	private void setStatus(boolean status) {
@@ -89,24 +101,25 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private void setLicenseeName(String licenseeName) {
 		this.licenseeName = licenseeName;
 	}
+	
+	private void setExpireDate(ZonedDateTime expireDate) {
+		this.expires = expireDate;
+	}
 
 	@Override
 	public String getLicenseeName() {
 		return this.licenseeName;
 	}
 
-	public Instant getExprieDate() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public String getProductNumber() {
-		// TODO Auto-generated method stub
-		return null;
+	public ZonedDateTime getExprieDate() {
+		return expires;
 	}
 
 	public String getProductModulNumber() {
-		// TODO Auto-generated method stub
-		return null;
+		return productModuleNumber;
+	}
+
+	public String getProductModulName() {
+		return productModuleName;
 	}
 }

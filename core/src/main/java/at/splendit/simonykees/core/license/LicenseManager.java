@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.license;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 import com.labs64.netlicensing.exception.NetLicensingException;
@@ -56,8 +57,7 @@ public class LicenseManager {
 
 			// extract pre-validation result
 			LicenseType licenseType = checker.getType();
-			Instant expireDate = checker.getExprieDate();
-			String productNumber = checker.getProductNumber();
+			ZonedDateTime expireDate = checker.getExprieDate();
 			String productModuleNumber = checker.getProductModulNumber();
 
 			// cash pre-validation...
@@ -65,10 +65,10 @@ public class LicenseManager {
 			cache.updateCachedResult(validationResult, now);
 
 			// construct a license model
-			LicenseModel licenseModel = constructLicenseModel(licenseType, expireDate, productNumber, productModuleNumber);
+			LicenseModel licenseModel = constructLicenseModel(licenseType, expireDate, PRODUCT_NUMBER, productModuleNumber);
 
 			// construct a licensee object...
-			licensee = new LicenseeEntity(LICENSEE_NAME, LICENSEE_NUMBER, licenseModel, productNumber, productModuleNumber);
+			licensee = new LicenseeEntity(LICENSEE_NAME, LICENSEE_NUMBER, licenseModel, PRODUCT_NUMBER, productModuleNumber);
 
 			// start validate scheduler
 			ValidateExecutor.startSchedule(schedulerEntity, licensee);
@@ -86,9 +86,9 @@ public class LicenseManager {
 		
 		Context context = APIRestConnection.getAPIRestConnection().getContext();
 		ValidationResult preValidationResult = null;
-		Instant now = Instant.now();
+		ZonedDateTime now = ZonedDateTime.now();
 		// to be used only during pre-validation, as a expiration date.
-		Instant nowInOneYear = now.plusSeconds(365 * 24 * 3600);
+		ZonedDateTime nowInOneYear = now.plusYears(1);
 		FloatingModel floatingModel = new FloatingModel(productNumber, productModuleNumber, nowInOneYear, getUniqueNodeIdentifier());
 		NodeLockedModel nodeLockedModel = new NodeLockedModel(productNumber, productModuleNumber, nowInOneYear, getUniqueNodeIdentifier());
 
@@ -97,7 +97,7 @@ public class LicenseManager {
 		LicenseeEntity licensee = new LicenseeEntity(licenseeName, licenseeNumber, floatingModel, productNumber, productModuleNumber);
 		ValidationParameters valParams = licensee.getValidationParams();
 		preValidationResult = LicenseeService.validate(context, LICENSEE_NUMBER, valParams);
-		LicenseCheckerImpl checker = new LicenseCheckerImpl(preValidationResult, now, licenseeName);
+		LicenseCheckerImpl checker = new LicenseCheckerImpl(preValidationResult, now.toInstant(), licenseeName);
 
 		// if the pre-validation with floating license model fails, then try
 		// a node-locked pre-validation...
@@ -112,7 +112,7 @@ public class LicenseManager {
 		return preValidationResult;
 	}
 
-	private LicenseModel constructLicenseModel(LicenseType licenseType, Instant expireDate, String productNumber,
+	private LicenseModel constructLicenseModel(LicenseType licenseType, ZonedDateTime expireDate, String productNumber,
 			String productModulNumber) {
 		LicenseModel licenseModel = null;
 

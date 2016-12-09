@@ -23,12 +23,6 @@ public interface LicenseChecker {
 	Instant getValidationTimeStamp();
 	
 	/**
-	 * Returns the session id of the license. Relevant for cases
-	 * when the {@code LicenseType} is {@link LicenseType#FLOATING}.
-	 */
-	String getFloatingSessionId();
-	
-	/**
 	 * Returns the name of the licensee.
 	 */
 	String getLicenseeName();
