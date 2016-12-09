@@ -18,7 +18,7 @@ public class LicenseValidator {
 			// preparing validation parameters...
 			ValidationParameters validationParameters = licensee.getValidationParams();
 			String licenseeNumber = licensee.getLicenseeNumber();
-			Context context = APIRestConnection.getAPIRestConnection().getContext();
+			Context context = RestApiConnection.getAPIRestConnection().getContext();
 			
 			Instant timestamp = Instant.now();
 

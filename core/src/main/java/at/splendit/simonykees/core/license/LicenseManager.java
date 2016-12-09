@@ -84,7 +84,7 @@ public class LicenseManager {
 										 String licenseeNumber, 
 										 String licenseeName) throws NetLicensingException {
 		
-		Context context = APIRestConnection.getAPIRestConnection().getContext();
+		Context context = RestApiConnection.getAPIRestConnection().getContext();
 		ValidationResult preValidationResult = null;
 		ZonedDateTime now = ZonedDateTime.now();
 		// to be used only during pre-validation, as a expiration date.

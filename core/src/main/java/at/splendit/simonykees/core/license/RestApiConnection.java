@@ -9,22 +9,22 @@ import com.labs64.netlicensing.domain.vo.SecurityMode;
  * @since 0.9.2
  */
 
-public class APIRestConnection {
+public class RestApiConnection {
 	private static final String REST_API_PATH = "/core/v2/rest";
 	private static final String BASE_URL_PROD = "https://go.netlicensing.io";
 	private static final String PASS_APIKEY = "5e6b99b7-4a6f-4a33-b94e-67f3552e0925";
 	private static final String BASE_URL = BASE_URL_PROD + REST_API_PATH;
 	private static final Context context = new Context();
-	private static APIRestConnection instance;
+	private static RestApiConnection instance;
 
-	private APIRestConnection() {
+	private RestApiConnection() {
 
 	}
 
-	public synchronized static APIRestConnection getAPIRestConnection() {
+	public synchronized static RestApiConnection getAPIRestConnection() {
 
 		if (instance == null) {
-			instance = new APIRestConnection();
+			instance = new RestApiConnection();
 		}
 		return instance;
 	}
