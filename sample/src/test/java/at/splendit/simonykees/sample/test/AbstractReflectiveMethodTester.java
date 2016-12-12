@@ -286,10 +286,9 @@ public abstract class AbstractReflectiveMethodTester {
 		 */
 		private static Table<ParameterType, String, Method> initMethodTable(Class<?> clazz) {
 			List<Method> methods = Arrays.stream(clazz.getMethods())
-					// only take methods with a return value
-					.filter(m -> !m.getReturnType().equals(Void.TYPE))
-					// only methods with exactly one parameter
-					.filter(m2 -> m2.getParameterCount() == 1).collect(Collectors.toList());
+					// only take methods with a return value and exactly one parameter
+					.filter(m -> !m.getReturnType().equals(Void.TYPE) && m.getParameterCount() == 1)
+					.collect(Collectors.toList());
 
 			Table<ParameterType, String, Method> retVal = HashBasedTable.create();
 			for (Method method : methods) {
