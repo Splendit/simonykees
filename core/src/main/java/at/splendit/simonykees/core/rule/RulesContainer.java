@@ -14,6 +14,7 @@ import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
 import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
+import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeperatorRule;
 import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
@@ -25,6 +26,7 @@ import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveNewStringConstructorASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveToStringOnStringASTVisitor;
 import at.splendit.simonykees.core.visitor.SerialVersionUidASTVisitor;
+import at.splendit.simonykees.core.visitor.StringConcatToPlusASTVisitor;
 import at.splendit.simonykees.core.visitor.StringFormatLineSeperatorASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
@@ -66,6 +68,7 @@ public class RulesContainer {
 				new StringFormatLineSeperatorRule(StringFormatLineSeperatorASTVisitor.class),
 				new RemoveToStringOnStringRule(RemoveToStringOnStringASTVisitor.class),
 				new RemoveNewStringConstructorRule(RemoveNewStringConstructorASTVisitor.class),
+				new StringConcatToPlusRule(StringConcatToPlusASTVisitor.class),
 				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
 				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class));
 	}
