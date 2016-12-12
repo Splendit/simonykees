@@ -5,24 +5,21 @@ import java.util.List;
 
 /**
  * The enum is used by {@link AbstractReflectiveMethodTester} to define datatype
- * "groups" that are equivalent. 
+ * "groups" that are equivalent.
  * 
- * For example: A method with an int parameter
- * could be called with either an int or an Integer.
+ * For example: A method with an int parameter could be called with either an
+ * int or an Integer.
  * 
  * @author Ludwig Werzowa
+ * @since 0.9.2
  */
 public enum ParameterType {
 
-	STRING(String.class), 
-	CHARSEQUENCE(CharSequence.class), // TODO which classes exactly?
-	INTEGER(Integer.class, Integer.TYPE), 
-	DOUBLE(Double.class, Double.TYPE), 
-	FLOAT(Float.class, Float.TYPE), 
-	LONG(Long.class, Long.TYPE), 
-	SHORT(Short.class, Short.TYPE), 
-	BYTE(Byte.class, Byte.TYPE), 
-	CHARACTER(Character.class, Character.TYPE);
+	STRING(String.class), CHARSEQUENCE(CharSequence.class), // TODO which
+															// classes exactly?
+	INTEGER(Integer.class, Integer.TYPE), DOUBLE(Double.class, Double.TYPE), FLOAT(Float.class, Float.TYPE), LONG(
+			Long.class, Long.TYPE), SHORT(Short.class,
+					Short.TYPE), BYTE(Byte.class, Byte.TYPE), CHARACTER(Character.class, Character.TYPE);
 
 	private List<Class<?>> possibleTypes;
 

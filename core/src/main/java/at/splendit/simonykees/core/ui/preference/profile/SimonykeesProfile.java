@@ -1,6 +1,3 @@
-/**
- * 
- */
 package at.splendit.simonykees.core.ui.preference.profile;
 
 import java.util.Collections;

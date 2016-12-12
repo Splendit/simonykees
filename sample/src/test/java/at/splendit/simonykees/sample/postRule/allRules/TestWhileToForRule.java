@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-@SuppressWarnings("nls")
+@SuppressWarnings({ "nls", "unused" })
 public class TestWhileToForRule {
 
 	private List<String> generateList(String input) {

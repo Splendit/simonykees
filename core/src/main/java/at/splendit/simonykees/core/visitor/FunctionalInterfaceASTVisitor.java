@@ -1,10 +1,16 @@
 package at.splendit.simonykees.core.visitor;
 
+import java.util.List;
+
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
 /**
  * Finds anonymous classes an converts it to lambdas, if they are functional
@@ -16,6 +22,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
  */
 public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor {
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
 		ClassInstanceCreation parentNode = (ClassInstanceCreation) node.getParent();
@@ -24,11 +31,15 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			if (parentNodeTypeBinding.getFunctionalInterfaceMethod() != null) {
 				LambdaExpression newInitializer = node.getAST().newLambdaExpression();
 				MethodBlockASTVisitor methodBlockASTVisitor = new MethodBlockASTVisitor();
-				methodBlockASTVisitor.setAstRewrite(astRewrite);
 				node.accept(methodBlockASTVisitor);
 				Block moveBlock = methodBlockASTVisitor.getMethodBlock();
 				if (moveBlock != null) {
-					newInitializer.setBody(moveBlock);
+					if(methodBlockASTVisitor.getParameters() != null){
+						for(SingleVariableDeclaration s : methodBlockASTVisitor.getParameters()){
+							newInitializer.parameters().add(astRewrite.createMoveTarget(s));
+						}
+					}
+					newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
 					getAstRewrite().replace(parentNode, newInitializer, null);
 				}
 			}
@@ -36,8 +47,9 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		return true;
 	}
 
-	private class MethodBlockASTVisitor extends AbstractASTRewriteASTVisitor {
+	private class MethodBlockASTVisitor extends ASTVisitor {
 		private Block methodBlock = null;
+		private List<SingleVariableDeclaration> parameters = null;
 
 		@Override
 		public boolean visit(Block node) {
@@ -46,8 +58,29 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			return false;
 		}
 
+		@SuppressWarnings("unchecked")
+		@Override
+		public boolean visit(MethodDeclaration node) {
+			if (0 < node.parameters().size()) {
+				/**
+				 * node.parameters() ensures that the List contains only
+				 * SingleVariableDeclaration
+				 */
+				parameters = node.parameters();
+			}
+			if (node.getBody() instanceof Block) {
+				methodBlock = node.getBody();
+				// getAstRewrite().remove(node, null);
+			}
+			return false;
+		}
+
 		public Block getMethodBlock() {
 			return methodBlock;
+		}
+
+		public List<SingleVariableDeclaration> getParameters() {
+			return parameters;
 		}
 	}
 }

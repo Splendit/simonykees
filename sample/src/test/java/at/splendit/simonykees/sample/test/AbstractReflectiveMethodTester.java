@@ -29,6 +29,9 @@ import com.google.common.collect.Table;
  * Only methods with return values are taken into account. Only methods where
  * the parameter types match the types of parameterizedValues, are taken into
  * account.
+ * 
+ * @author Ludwig Werzowa, Martin Huter
+ * @since 0.9
  */
 @SuppressWarnings("nls")
 public abstract class AbstractReflectiveMethodTester {
