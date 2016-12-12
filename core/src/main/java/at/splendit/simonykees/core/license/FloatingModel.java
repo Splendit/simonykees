@@ -7,8 +7,8 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
 public class FloatingModel extends LicenseModel {
 
-	private final String SESSION_ID_KEY = "sessionIdN"; //$NON-NLS-1$
-	private final String ACTION_KEY = "actionN"; //$NON-NLS-1$
+	private final String SESSION_ID_KEY = "sessionId"; //$NON-NLS-1$
+	private final String ACTION_KEY = "action"; //$NON-NLS-1$
 	private final String ACTION_CHECK_OUT_VAL = "checkOut"; //$NON-NLS-1$
 	private final String ACTION_CHECK_IN_VAL = "checkIn"; //$NON-NLS-1$
 
