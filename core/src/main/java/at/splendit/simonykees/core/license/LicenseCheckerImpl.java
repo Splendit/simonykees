@@ -16,58 +16,88 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private String licenseeName;
 	private String productModuleNumber;
 	private String productModuleName;
-	private ZonedDateTime expires;
+	private ZonedDateTime evaluationExpiresDate;
+	private ZonedDateTime expirationTimeStamp;
 
 	private final String PRODUCT_MODULE_NUMBER_KEY = "productModuleNumber"; //$NON-NLS-1$
 	private final String PRODUCT_MODULE_NAME_KEY = "productModuleName";//$NON-NLS-1$
 	private final String LICENSING_MODEL_KEY = "licensingModel"; //$NON-NLS-1$
-	private final String EXPIRES_KEY = "expires"; //$NON-NLS-1$
+	private final String EXPIRATION_TIME_STAMP_KEY = "expirationTimestamp"; //$NON-NLS-1$
+	private final String EVALUATION_EXPIRES_DATE_KEY = "evaluationExpires"; //$NON-NLS-1$
 	private final String VALID_KEY = "valid"; //$NON-NLS-1$
+
 
 	public LicenseCheckerImpl(ValidationResult validationResult, Instant timestamp, String licenseeName) {
 		setTimestamp(timestamp);
 		extractValidationData(validationResult);
 		setLicenseeName(licenseeName);
 	}
-
+	
 	private void extractValidationData(ValidationResult validationResult) {
-		Map<String, Composition> validations = validationResult.getValidations();
-		validations.values().forEach(composition -> {
-			composition.getProperties().forEach((key, value) -> {
+		extractValidationData(validationResult, LicenseType.FLOATING);
+		if(!getStatus()){
+			extractValidationData(validationResult, LicenseType.NODE_LOCKED);
+			if(!getStatus()){
+				extractValidationData(validationResult, LicenseType.TRY_AND_BUY);
+			}
+		}	
+	}
 
-				switch (key) {
-				case LICENSING_MODEL_KEY:
-					LicenseType type = LicenseType.fromString(value.getValue());
-					setLicenseType(type);
-					break;
-				case VALID_KEY:
-					boolean valid = Boolean.valueOf(value.getValue());
-					setStatus(valid);
-					break;
-				case EXPIRES_KEY:
-					ZonedDateTime expireDate = ZonedDateTime.parse(value.getValue());
-					setExpireDate(expireDate);
-					break;
-				case PRODUCT_MODULE_NUMBER_KEY:
-					setProductModuleNumber(value.getValue());
-					break;
-				case PRODUCT_MODULE_NAME_KEY:
-					setProductModuleName(value.getValue());
-					break;
-				}
-				
-			});
+	private void extractValidationData(ValidationResult validationResult, LicenseType licenseType) {
+		Map<String, Composition> validations = validationResult.getValidations();
+		
+		validations.forEach((compKey, composition)-> {
+			
+			Map<String, Composition> properties = composition.getProperties();
+			String receivedTypeStr = properties.get(LICENSING_MODEL_KEY).getValue();
+			LicenseType receivedType = LicenseType.fromString(receivedTypeStr);
+
+			if(licenseType.equals(receivedType)) {
+				String productModuleNumber = compKey;
+				setLicenseType(licenseType);
+				setProductModuleNumber(productModuleNumber);
+				properties.forEach((key, value) -> {
+
+					switch (key) {
+					case VALID_KEY:
+						boolean valid = Boolean.valueOf(value.getValue());
+						setStatus(valid);
+						break;
+					case PRODUCT_MODULE_NAME_KEY:
+						setProductModuleName(value.getValue());
+						break;
+					case PRODUCT_MODULE_NUMBER_KEY:
+						setProductModuleNumber(value.getValue());
+						break;
+					case EXPIRATION_TIME_STAMP_KEY:
+						ZonedDateTime expirationTimeStamp = ZonedDateTime.parse(value.getValue());
+						setExpirationTimeStamp(expirationTimeStamp);
+						break;
+					case EVALUATION_EXPIRES_DATE_KEY:
+						ZonedDateTime evaluationExpiresDate = ZonedDateTime.parse(value.getValue());
+						setEvaluationExpiresDate(evaluationExpiresDate);
+						break;
+					}
+					
+				});
+			}
 		});
+	}
+	
+	private void setProductModuleNumber(String value) {
+		this.productModuleNumber = value;
 	}
 
 	private void setProductModuleName(String value) {
-		this.productModuleName = value;
-		
+		this.productModuleName = value;		
 	}
 
-	private void setProductModuleNumber(String value) {
-		this.productModuleNumber = value;
-		
+	private void setEvaluationExpiresDate(ZonedDateTime evaluationExpiresDate) {
+		this.evaluationExpiresDate = evaluationExpiresDate;
+	}
+
+	private void setExpirationTimeStamp(ZonedDateTime expirationTimeStamp) {
+		this.expirationTimeStamp = expirationTimeStamp;
 	}
 
 	@Override
@@ -100,18 +130,10 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private void setLicenseeName(String licenseeName) {
 		this.licenseeName = licenseeName;
 	}
-	
-	private void setExpireDate(ZonedDateTime expireDate) {
-		this.expires = expireDate;
-	}
 
 	@Override
 	public String getLicenseeName() {
 		return this.licenseeName;
-	}
-
-	public ZonedDateTime getExprieDate() {
-		return expires;
 	}
 
 	public String getProductModulNumber() {
@@ -120,5 +142,13 @@ public class LicenseCheckerImpl implements LicenseChecker {
 
 	public String getProductModulName() {
 		return productModuleName;
+	}
+	
+	public ZonedDateTime getEvaluationExpiresDate() {
+		return evaluationExpiresDate;
+	}
+	
+	public ZonedDateTime getExpirationTimeStamp(){
+		return this.expirationTimeStamp;
 	}
 }

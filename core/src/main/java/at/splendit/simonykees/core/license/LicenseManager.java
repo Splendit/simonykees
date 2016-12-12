@@ -19,10 +19,10 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
  */
 public class LicenseManager {
 
-	private final String LICENSEE_NAME = "test-licensee-name"; //$NON-NLS-1$ to be provided  as a parameter or to be read from a secure storage.
-	private final String LICENSEE_NUMBER = "test-licensee-number"; //$NON-NLS-1$ to be provided as a parameter or to be read from a secure storage.
-	private final String PRODUCT_NUMBER = "test-01"; //$NON-NLS-1$
-	private final String PRODUCT_MODULE_NUMBER = "toBeChecked"; //$NON-NLS-1$
+	private final String LICENSEE_NAME = "License-Ali-Test"; //$NON-NLS-1$ to be provided  as a parameter or to be read from a secure storage.
+	private final String LICENSEE_NUMBER = "IITAK75GN"; //$NON-NLS-1$ to be provided as a parameter or to be read from a secure storage.
+	private final String PRODUCT_NUMBER = "PNZNF7Y7E"; //$NON-NLS-1$
+	private final String PRODUCT_MODULE_NUMBER = "M6IS9TIWG"; //$NON-NLS-1$ product module number for floating
 
 	private final boolean DO_VALIDATE = true;
 	private final long VALIDATE_INTERVAL_IN_SECONDS = 5; // validation interval in seconds.
@@ -57,7 +57,8 @@ public class LicenseManager {
 
 			// extract pre-validation result
 			LicenseType licenseType = checker.getType();
-			ZonedDateTime expireDate = checker.getExprieDate();
+			ZonedDateTime evaluationExpiresDate = checker.getEvaluationExpiresDate();
+			ZonedDateTime expirationTimeStamp = checker.getExpirationTimeStamp();
 			String productModuleNumber = checker.getProductModulNumber();
 
 			// cash pre-validation...
@@ -65,7 +66,7 @@ public class LicenseManager {
 			cache.updateCachedResult(validationResult, now);
 
 			// construct a license model
-			LicenseModel licenseModel = constructLicenseModel(licenseType, expireDate, PRODUCT_NUMBER, productModuleNumber);
+			LicenseModel licenseModel = constructLicenseModel(licenseType, evaluationExpiresDate, expirationTimeStamp, productModuleNumber);
 			setLicenseModel(licenseModel);
 
 			// construct a licensee object...
@@ -95,26 +96,41 @@ public class LicenseManager {
 		ZonedDateTime now = ZonedDateTime.now();
 		// to be used only during pre-validation, as a expiration date.
 		ZonedDateTime nowInOneYear = now.plusYears(1);
+		// pre-validation is done by using floating model 
+		// because it contains a superset of all other model's validation parameters 
 		FloatingModel floatingModel = new FloatingModel(productModuleNumber, nowInOneYear, getUniqueNodeIdentifier());
-		NodeLockedModel nodeLockedModel = new NodeLockedModel(productModuleNumber, nowInOneYear, getUniqueNodeIdentifier());
-
 
 		// pre-validation with floating license model...
 		LicenseeEntity licensee = new LicenseeEntity(licenseeName, licenseeNumber, floatingModel, productNumber);
 		ValidationParameters valParams = licensee.getValidationParams();
+		logPrevalidationRequest(LICENSEE_NUMBER, valParams);
 		preValidationResult = LicenseeService.validate(context, LICENSEE_NUMBER, valParams);
-		LicenseCheckerImpl checker = new LicenseCheckerImpl(preValidationResult, now.toInstant(), licenseeName);
-
-		// if the pre-validation with floating license model fails, then try
-		// a node-locked pre-validation...
-		if (!checker.getStatus()) {
-			licensee = new LicenseeEntity(licenseeName, licenseeNumber, nodeLockedModel, productNumber);
-				valParams = licensee.getValidationParams();
-			preValidationResult = LicenseeService.validate(context, LICENSEE_NUMBER, valParams);
-
-		}
+		logPrevalidationResponse(preValidationResult);
 
 		return preValidationResult;
+	}
+	
+	
+	private void logPrevalidationRequest(String licenseeNumber, ValidationParameters validationParams) {
+		System.out.println("------Prevalidation request-----");
+		System.out.println("Licensee number:" + licenseeNumber);
+		validationParams.getParameters().forEach((key, val) -> {
+			System.out.println("key: " + key);
+			val.forEach((mapKey, mapVal) -> {
+				System.out.println(mapKey + ":" + mapVal);
+			});
+		});
+		System.out.println("------------------------\n");
+		
+	}
+	
+	private void logPrevalidationResponse(ValidationResult validationResult) {
+		System.out.println("------Prevalidation response-----");
+		System.out.println("size: " +  validationResult.getValidations().size());
+		
+		System.out.print(validationResult.toString());
+		
+		System.out.println("------------------------\n");
 	}
 
 	/**
@@ -141,21 +157,20 @@ public class LicenseManager {
 		}
 	}
 	
-	private LicenseeEntity getLicensee() {
+	public LicenseeEntity getLicensee() {
 		return licensee;
 	}
 
-	private LicenseModel constructLicenseModel(LicenseType licenseType, ZonedDateTime expireDate, String productNumber,
-			String productModulNumber) {
+	private LicenseModel constructLicenseModel(LicenseType licenseType, ZonedDateTime expireDate, ZonedDateTime expireTimeStamp, String productModulNumber) {
 		LicenseModel licenseModel = null;
 
 		switch (licenseType) {
 		case FLOATING:
 			String sessionId = getUniqueNodeIdentifier();
-			licenseModel = new FloatingModel(productModulNumber, expireDate, sessionId);
+			licenseModel = new FloatingModel(productModulNumber, expireTimeStamp, sessionId);
 			break;
-		case TRIAL:
-			// TODO: to be implemented
+		case TRY_AND_BUY:
+			licenseModel = new TryAndBuyModel(productModulNumber, expireDate);
 			break;
 		case NODE_LOCKED:
 			String secretKey = getUniqueNodeIdentifier();
@@ -168,7 +183,7 @@ public class LicenseManager {
 
 	private String getUniqueNodeIdentifier() {
 		// TODO get CPU ID
-		return "";
+		return "test-unique-machine-id";
 	}
 
 	public LicenseChecker getValidationData() {
@@ -176,13 +191,13 @@ public class LicenseManager {
 		ValidationResult validationResult = cache.getCachedValidationResult();
 		Instant timestamp = cache.getValidationTimestamp();
 
-		LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, timestamp, null);
+		LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, timestamp, LICENSEE_NAME);
 
 		return checker;
 	}
 	
 
-	private LicenseModel getLicenseModel() {
+	public LicenseModel getLicenseModel() {
 		return licenseModel;
 	}
 	
