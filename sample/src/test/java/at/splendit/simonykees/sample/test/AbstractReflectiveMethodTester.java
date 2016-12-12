@@ -31,7 +31,7 @@ import com.google.common.collect.Table;
  * the parameter types match the types of parameterizedValues, are taken into
  * account.
  * 
- * @author Ludwig Werzowa, Martin Huter
+ * @author Ludwig Werzowa, Martin Huter, Hannes Schweighofer
  * @since 0.9
  */
 @SuppressWarnings("nls")
@@ -285,9 +285,7 @@ public abstract class AbstractReflectiveMethodTester {
 		 * @return
 		 */
 		private static Table<ParameterType, String, Method> initMethodTable(Class<?> clazz) {
-			List<Method> methods = Arrays.stream(clazz.getDeclaredMethods())
-					// only take methods which are public
-					.filter(m -> Modifier.isPublic(m.getModifiers()))
+			List<Method> methods = Arrays.stream(clazz.getMethods())
 					// only take methods with a return value
 					.filter(m -> !m.getReturnType().equals(Void.TYPE))
 					// only methods with exactly one parameter
