@@ -4,8 +4,10 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
+import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
@@ -55,6 +57,9 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractCompilationUni
 				Expression argument = arguments.get(0);
 				if (argument instanceof StringLiteral || ClassRelationUtil
 						.isContentOfRegistertITypes(argument.resolveTypeBinding(), iTypeMap.get(STRING_KEY))) {
+					if(argument instanceof ParenthesizedExpression){
+						argument = ASTNodeUtil.unwrapParenthesizedExpression(argument);
+					}
 					astRewrite.replace(node, astRewrite.createMoveTarget(argument), null);
 				}
 			}

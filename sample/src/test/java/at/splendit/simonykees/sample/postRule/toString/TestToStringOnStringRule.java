@@ -13,7 +13,7 @@ public class TestToStringOnStringRule {
 
 	public String testToStringOnStringVariable() {
 		String s = "theStringS";
-		
+
 		return s;
 
 	}
@@ -21,6 +21,18 @@ public class TestToStringOnStringRule {
 	public String testToStringOnStringFunctionThatReturnsString() {
 
 		return StringUtils.abbreviate("makeMeShorter", 4);
+
+	}
+
+	public String testToStringOnParenthesizeString(String s) {
+
+		return s;
+
+	}
+
+	public String testToStringOnParenthesizePlusString(String s) {
+
+		return s + "abc";
 
 	}
 }
