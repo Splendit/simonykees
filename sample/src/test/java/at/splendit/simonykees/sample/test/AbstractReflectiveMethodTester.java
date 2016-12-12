@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -285,6 +286,8 @@ public abstract class AbstractReflectiveMethodTester {
 		 */
 		private static Table<ParameterType, String, Method> initMethodTable(Class<?> clazz) {
 			List<Method> methods = Arrays.stream(clazz.getDeclaredMethods())
+					// only take methods which are public
+					.filter(m -> Modifier.isPublic(m.getModifiers()))
 					// only take methods with a return value
 					.filter(m -> !m.getReturnType().equals(Void.TYPE))
 					// only methods with exactly one parameter
