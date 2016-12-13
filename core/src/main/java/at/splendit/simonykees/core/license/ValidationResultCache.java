@@ -16,16 +16,18 @@ public class ValidationResultCache {
 	
 	private final String TIME_STAMP_KEY = "time-stamp";
 	private final String VALIDATION_RESULT_KEY = "validation-result";
+	private final String IS_EMPTY_KEY = "is-empty";
 	private HashMap<String, Object> cacheHashMap = new HashMap<>();
 
 
 	private ValidationResultCache() {
-
+		cacheHashMap.put(IS_EMPTY_KEY, true);
 	}
 	
 	public void updateCachedResult(ValidationResult validationResult, Instant timestamp) {
 		cacheHashMap.put(TIME_STAMP_KEY, timestamp);
 		cacheHashMap.put(VALIDATION_RESULT_KEY, validationResult);
+		cacheHashMap.put(IS_EMPTY_KEY, false);
 	}
 	
 	public ValidationResult getCachedValidationResult() {
@@ -36,6 +38,10 @@ public class ValidationResultCache {
 	public Instant getValidationTimestamp() {
 		// TODO: throw an exception if cache is empty
 		return (Instant) cacheHashMap.get(TIME_STAMP_KEY);
+	}
+	
+	public Boolean isEmpty() {
+		return (Boolean) cacheHashMap.get(IS_EMPTY_KEY);
 	}
 
 	public synchronized static ValidationResultCache getInstance() {
