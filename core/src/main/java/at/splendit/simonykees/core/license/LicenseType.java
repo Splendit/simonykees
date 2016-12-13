@@ -22,7 +22,7 @@ public enum LicenseType {
 		case "multifeature":
 			licenseType = NODE_LOCKED;
 			break;
-		case "timevolume":
+		case "subscription":
 			licenseType = SUBSCRIPTION;
 			break;
 		}

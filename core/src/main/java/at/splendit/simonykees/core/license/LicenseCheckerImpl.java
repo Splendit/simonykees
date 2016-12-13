@@ -11,7 +11,7 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	//TODO: rename this class. find a proper name for it.
 
 	private LicenseType licenseType;
-	private boolean status;
+	private boolean licenseModelStatus;
 	private Instant timestamp;
 	private String licenseeName;
 	private String productModuleNumber;
@@ -65,7 +65,7 @@ public class LicenseCheckerImpl implements LicenseChecker {
 					switch (key) {
 					case VALID_KEY:
 						boolean valid = Boolean.valueOf(value.getValue());
-						setStatus(valid);
+						seLicenseModelStatus(valid);
 						break;
 					case PRODUCT_MODULE_NAME_KEY:
 						setProductModuleName(value.getValue());
@@ -149,7 +149,15 @@ public class LicenseCheckerImpl implements LicenseChecker {
 
 	@Override
 	public boolean getStatus() {
-		return this.status;
+		boolean status = false;
+		
+		if(getType().equals(LicenseType.TRY_AND_BUY)) {
+			status = this.licenseModelStatus;
+		} else {
+			status = this.licenseModelStatus && this.subscriptionStatus;
+		}
+		
+		return status;
 	}
 
 	@Override
@@ -161,8 +169,8 @@ public class LicenseCheckerImpl implements LicenseChecker {
 		this.licenseType = licenseType;
 	}
 
-	private void setStatus(boolean status) {
-		this.status = status;
+	private void seLicenseModelStatus(boolean status) {
+		this.licenseModelStatus = status;
 	}
 
 	private void setTimestamp(Instant timestamp) {
