@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.visitor;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
@@ -24,22 +25,24 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
-		ClassInstanceCreation parentNode = (ClassInstanceCreation) node.getParent();
-		ITypeBinding parentNodeTypeBinding = parentNode.getType().resolveBinding();
-		if (parentNodeTypeBinding != null) {
-			if (parentNodeTypeBinding.getFunctionalInterfaceMethod() != null) {
-				LambdaExpression newInitializer = node.getAST().newLambdaExpression();
-				MethodBlockASTVisitor methodBlockASTVisitor = new MethodBlockASTVisitor();
-				node.accept(methodBlockASTVisitor);
-				Block moveBlock = methodBlockASTVisitor.getMethodBlock();
-				if (moveBlock != null) {
-					if (methodBlockASTVisitor.getParameters() != null) {
-						for (SingleVariableDeclaration s : methodBlockASTVisitor.getParameters()) {
-							newInitializer.parameters().add(astRewrite.createMoveTarget(s));
+		if (ASTNode.CLASS_INSTANCE_CREATION == node.getParent().getNodeType()) {
+			ClassInstanceCreation parentNode = (ClassInstanceCreation) node.getParent();
+			ITypeBinding parentNodeTypeBinding = parentNode.getType().resolveBinding();
+			if (parentNodeTypeBinding != null) {
+				if (parentNodeTypeBinding.getFunctionalInterfaceMethod() != null) {
+					LambdaExpression newInitializer = node.getAST().newLambdaExpression();
+					MethodBlockASTVisitor methodBlockASTVisitor = new MethodBlockASTVisitor();
+					node.accept(methodBlockASTVisitor);
+					Block moveBlock = methodBlockASTVisitor.getMethodBlock();
+					if (moveBlock != null) {
+						if (methodBlockASTVisitor.getParameters() != null) {
+							for (SingleVariableDeclaration s : methodBlockASTVisitor.getParameters()) {
+								newInitializer.parameters().add(astRewrite.createMoveTarget(s));
+							}
 						}
+						newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
+						getAstRewrite().replace(parentNode, newInitializer, null);
 					}
-					newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
-					getAstRewrite().replace(parentNode, newInitializer, null);
 				}
 			}
 		}
