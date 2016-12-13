@@ -19,8 +19,8 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
  */
 public class LicenseManager {
 
-	private final String LICENSEE_NAME = "License-Ali-Test"; //$NON-NLS-1$ to be provided  as a parameter or to be read from a secure storage.
-	private final String LICENSEE_NUMBER = "IITAK75GN"; //$NON-NLS-1$ to be provided as a parameter or to be read from a secure storage.
+	public static final String LICENSEE_NAME = "License-Ali-Test"; //$NON-NLS-1$ to be provided  as a parameter or to be read from a secure storage.
+	public static final String LICENSEE_NUMBER = "IITAK75GN"; //$NON-NLS-1$ to be provided as a parameter or to be read from a secure storage.
 	private final String PRODUCT_NUMBER = "PNZNF7Y7E"; //$NON-NLS-1$
 	private final String PRODUCT_MODULE_NUMBER = "M6IS9TIWG"; //$NON-NLS-1$ product module number for floating
 
