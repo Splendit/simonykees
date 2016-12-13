@@ -69,8 +69,13 @@ public class StringFormatLineSeperatorASTVisitor extends AbstractCompilationUnit
 				// replace complete unix strings
 				// FIXME are there possible side effects?
 				formatedString = StringUtils.replace(formatedString, "\\n", "%n"); //$NON-NLS-1$//$NON-NLS-2$
-				StringLiteral newFormatString = NodeBuilder.newStringLiteral(node.getAST(), formatedString);
-				astRewrite.replace(formatString, newFormatString, null);
+				/**
+				 * only make an astRewrite, if a change happened
+				 */
+				if(!formatedString.equals(formatString.getEscapedValue())){
+					StringLiteral newFormatString = NodeBuilder.newStringLiteral(node.getAST(), formatedString);
+					astRewrite.replace(formatString, newFormatString, null);	
+				}
 			}
 		}
 		return true;
