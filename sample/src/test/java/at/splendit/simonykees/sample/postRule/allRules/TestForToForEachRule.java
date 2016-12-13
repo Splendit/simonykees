@@ -31,7 +31,7 @@ public class TestForToForEachRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (java.lang.String fooIterator : foo) {
+		for (String fooIterator : foo) {
 			String s = fooIterator;
 			sb.append(s);
 			sb.append(fooIterator);
@@ -44,7 +44,7 @@ public class TestForToForEachRule {
 		StringBuilder sb = new StringBuilder();
 
 		int i;
-		for (java.lang.String fooIterator : foo) {
+		for (String fooIterator : foo) {
 			String s = fooIterator;
 			sb.append(s);
 		}

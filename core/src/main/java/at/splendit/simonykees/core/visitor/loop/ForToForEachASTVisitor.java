@@ -18,7 +18,9 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
@@ -150,6 +152,18 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 						ITypeBinding[] genericListTypes = listBinding.getTypeArguments();
 						if (genericListTypes != null && genericListTypes.length == 1) {
 							listGenericType = NodeBuilder.typeFromBinding(node.getAST(), genericListTypes[0]);
+							if (ASTNode.SIMPLE_TYPE == listGenericType.getNodeType()
+									&& ASTNode.QUALIFIED_NAME == ((SimpleType) listGenericType).getName()
+											.getNodeType()) {
+								QualifiedName qN = (QualifiedName) ((SimpleType) listGenericType).getName();
+								addImports.add(qN.getFullyQualifiedName());
+								listGenericType = node.getAST()
+										.newSimpleType(node.getAST().newName(qN.getName().getIdentifier()));
+
+							} else {
+								// TODO check all different possible Types
+								return false;
+							}
 						}
 					} else {
 
