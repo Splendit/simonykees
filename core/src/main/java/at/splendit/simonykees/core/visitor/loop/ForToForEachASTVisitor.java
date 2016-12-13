@@ -27,7 +27,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
@@ -110,9 +109,9 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 		if (node.getExpression() instanceof InfixExpression && node.updaters().size() == 1
 				&& node.initializers().size() == 1) {
 			// needed components for refactoring
-			SimpleName listName = null;
+			SimpleName listName;
 			Type listGenericType = null;
-			SimpleName iterationVariable = null;
+			SimpleName iterationVariable;
 
 			/*
 			 * first condition: node expression is an infixExpression of
@@ -172,7 +171,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 							}
 						}
 					} else {
-
+						return true;
 					}
 				} else {
 					return true;
@@ -227,7 +226,6 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 			/*
 			 * All Conditions met Do refactoring
 			 */
-			Activator.log("WE DID IT"); //$NON-NLS-1$
 			String listIteratorName = listName.getFullyQualifiedName() + "Iterator"; //$NON-NLS-1$
 			SingleVariableDeclaration svd = NodeBuilder.newSingleVariableDeclaration(node.getAST(),
 					NodeBuilder.newSimpleName(node.getAST(), listIteratorName), listGenericType);
@@ -339,7 +337,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 			if (astMatcher.match(iterationVariable, node.getLeftHandSide())) {
 				if (node.getRightHandSide() instanceof InfixExpression) {
 					InfixExpression infixExpression = (InfixExpression) node.getRightHandSide();
-					if ((infixExpression.extendedOperands() == null || infixExpression.extendedOperands().size() == 0)
+					if ((infixExpression.extendedOperands() == null || infixExpression.extendedOperands().isEmpty())
 							&& InfixExpression.Operator.PLUS.equals(infixExpression.getOperator())) {
 						Expression leftOperand = infixExpression.getLeftOperand();
 						Expression rightOperand = infixExpression.getRightOperand();

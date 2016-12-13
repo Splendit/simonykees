@@ -65,8 +65,8 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 				this.iTypeMap.get(STRING_KEY))) {
 			AST currentAST = node.getAST();
 			String replacementOperation = null;
-			String op = null;
-			switch (op = node.getName().getFullyQualifiedName()) {
+			String stringOperation = node.getName().getFullyQualifiedName();
+			switch (stringOperation) {
 			case IS_EMPTY:
 			case TRIM:
 				// case EQUALS: // see SIM-86
@@ -77,7 +77,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 			case SUBSTRING:
 				// case SPLIT: // see SIM-78
 				// case REPLACE: // see SIM-85
-				replacementOperation = op;
+				replacementOperation = stringOperation;
 				break;
 			case TO_UPPER_CASE:
 				replacementOperation = UPPER_CASE;
