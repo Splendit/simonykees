@@ -18,6 +18,8 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private String productModuleName;
 	private ZonedDateTime evaluationExpiresDate;
 	private ZonedDateTime expirationTimeStamp;
+	private ZonedDateTime subscriptionExpiresDate;
+	private boolean subscriptionStatus;
 
 	private final String PRODUCT_MODULE_NUMBER_KEY = "productModuleNumber"; //$NON-NLS-1$
 	private final String PRODUCT_MODULE_NAME_KEY = "productModuleName";//$NON-NLS-1$
@@ -25,6 +27,7 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private final String EXPIRATION_TIME_STAMP_KEY = "expirationTimestamp"; //$NON-NLS-1$
 	private final String EVALUATION_EXPIRES_DATE_KEY = "evaluationExpires"; //$NON-NLS-1$
 	private final String VALID_KEY = "valid"; //$NON-NLS-1$
+	private final String SUBSCRIPTION_EXPIRES_KEY = "expires"; //$NON-NLS-1$
 
 
 	public LicenseCheckerImpl(ValidationResult validationResult, Instant timestamp, String licenseeName) {
@@ -34,6 +37,7 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	}
 	
 	private void extractValidationData(ValidationResult validationResult) {
+		extractSubscription(validationResult);
 		extractValidationData(validationResult, LicenseType.FLOATING);
 		if(!getStatus()){
 			extractValidationData(validationResult, LicenseType.NODE_LOCKED);
@@ -84,6 +88,44 @@ public class LicenseCheckerImpl implements LicenseChecker {
 		});
 	}
 	
+	private void extractSubscription(ValidationResult validationResult){
+		Map<String, Composition> validations = validationResult.getValidations();
+		
+		validations.forEach((compKey, composition)-> {
+			
+			Map<String, Composition> properties = composition.getProperties();
+			String receivedTypeStr = properties.get(LICENSING_MODEL_KEY).getValue();
+			LicenseType receivedType = LicenseType.fromString(receivedTypeStr);
+
+			if(receivedType.equals(LicenseType.SUBSCRIPTION)) {
+
+				properties.forEach((key, value) -> {
+
+					switch (key) {
+					case VALID_KEY:
+						boolean valid = Boolean.valueOf(value.getValue());
+						setSubscriptionStatus(valid);
+						break;
+					case SUBSCRIPTION_EXPIRES_KEY:
+						ZonedDateTime subscriptionExpiresDate = ZonedDateTime.parse(value.getValue());
+						setSubscriptionExpiresDate(subscriptionExpiresDate);
+						break;
+					}
+					
+				});
+			}
+		});
+	}
+	
+	private void setSubscriptionExpiresDate(ZonedDateTime subscriptionExpiresDate) {
+		this.subscriptionExpiresDate = subscriptionExpiresDate;
+	}
+
+	private void setSubscriptionStatus(boolean status) {
+		this.subscriptionStatus = status; 
+		
+	}
+
 	private void setProductModuleNumber(String value) {
 		this.productModuleNumber = value;
 	}
@@ -148,7 +190,15 @@ public class LicenseCheckerImpl implements LicenseChecker {
 		return evaluationExpiresDate;
 	}
 	
-	public ZonedDateTime getExpirationTimeStamp(){
+	public ZonedDateTime getExpirationTimeStamp() {
 		return this.expirationTimeStamp;
+	}
+	
+	public boolean getSubscriptionStatus() {
+		return subscriptionStatus;
+	}
+	
+	public ZonedDateTime getSubscriptionExpiresDate() {
+		return subscriptionExpiresDate;
 	}
 }
