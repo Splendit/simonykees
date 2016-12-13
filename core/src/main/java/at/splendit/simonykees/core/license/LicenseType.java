@@ -4,7 +4,8 @@ public enum LicenseType {
 	
 	TRY_AND_BUY,
 	FLOATING,
-	NODE_LOCKED;
+	NODE_LOCKED, 
+	SUBSCRIPTION;
 	
 	public static LicenseType fromString(String value) {
 		LicenseType licenseType = TRY_AND_BUY;
@@ -20,6 +21,9 @@ public enum LicenseType {
 			break;
 		case "multifeature":
 			licenseType = NODE_LOCKED;
+			break;
+		case "timevolume":
+			licenseType = SUBSCRIPTION;
 			break;
 		}
 		
