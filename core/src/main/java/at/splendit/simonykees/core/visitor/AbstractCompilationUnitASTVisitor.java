@@ -83,18 +83,16 @@ public abstract class AbstractCompilationUnitASTVisitor extends AbstractASTRewri
 		/**
 		 * Manages the addition of new Imports
 		 */
-		if (!addImports.isEmpty()) {
-			for (String iterator : addImports) {
-				/**
-				 * java.lang doesn't need to be imported
-				 */
-				if (!StringUtils.startsWith(iterator, JAVA_LANG_PACKAGE)) {
-					ImportDeclaration newImport = node.getAST().newImportDeclaration();
-					newImport.setName(node.getAST().newName(iterator));
-					if (node.imports().stream().noneMatch(importDeclaration -> (new ASTMatcher())
-							.match((ImportDeclaration) importDeclaration, newImport))) {
-						astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY).insertLast(newImport, null);
-					}
+		for (String iterator : addImports) {
+			/**
+			 * java.lang doesn't need to be imported
+			 */
+			if (!StringUtils.startsWith(iterator, JAVA_LANG_PACKAGE)) {
+				ImportDeclaration newImport = node.getAST().newImportDeclaration();
+				newImport.setName(node.getAST().newName(iterator));
+				if (node.imports().stream().noneMatch(importDeclaration -> (new ASTMatcher())
+						.match((ImportDeclaration) importDeclaration, newImport))) {
+					astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY).insertLast(newImport, null);
 				}
 			}
 		}

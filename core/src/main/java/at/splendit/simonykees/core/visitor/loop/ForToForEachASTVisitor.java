@@ -150,15 +150,21 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 						}
 
 						ITypeBinding[] genericListTypes = listBinding.getTypeArguments();
+						/**
+						 * Transform ITypeBinding of generic Type from the list
+						 * to its corresponding Type. If the Type is qualified,
+						 * add the Type to the imports and use only the
+						 * Class-Identifier of the Type as type-name
+						 */
 						if (genericListTypes != null && genericListTypes.length == 1) {
 							listGenericType = NodeBuilder.typeFromBinding(node.getAST(), genericListTypes[0]);
 							if (ASTNode.SIMPLE_TYPE == listGenericType.getNodeType()
 									&& ASTNode.QUALIFIED_NAME == ((SimpleType) listGenericType).getName()
 											.getNodeType()) {
-								QualifiedName qN = (QualifiedName) ((SimpleType) listGenericType).getName();
-								addImports.add(qN.getFullyQualifiedName());
+								QualifiedName qualifiedName = (QualifiedName) ((SimpleType) listGenericType).getName();
+								addImports.add(qualifiedName.getFullyQualifiedName());
 								listGenericType = node.getAST()
-										.newSimpleType(node.getAST().newName(qN.getName().getIdentifier()));
+										.newSimpleType(node.getAST().newName(qualifiedName.getName().getIdentifier()));
 
 							} else {
 								// TODO check all different possible Types

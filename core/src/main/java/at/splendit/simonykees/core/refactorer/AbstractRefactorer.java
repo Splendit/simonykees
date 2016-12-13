@@ -118,6 +118,8 @@ public abstract class AbstractRefactorer {
 		}
 		List<String> notWorkingRules = new ArrayList<>();
 		for (RefactoringRule<? extends ASTVisitor> refactoringRule : rules) {
+			//TODO catch all exceptions from ASTVisitor execution?
+			// if any exception is thrown discard all changes from this rule
 			try {
 				refactoringRule.generateDocumentChanges(workingCopies);
 			} catch (JavaModelException | ReflectiveOperationException e) {
