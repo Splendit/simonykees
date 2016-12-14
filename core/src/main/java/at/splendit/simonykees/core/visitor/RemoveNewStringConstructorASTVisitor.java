@@ -11,11 +11,12 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
- * Finds all class instantiations of string over no input parameter or string
- * because its an useless construction. The wrapping of the string is resolved
- * by removing the constructor and replacing it with the parameter string The
- * wrapping of no parameter is resolved by replacing the constructor with an
- * empty string
+ * TODO: Martin please check if this description is correct.
+ * 
+ * Finds all instantiations of {@link String} with no input parameter (new
+ * String()) and all instantiations of {@link String} with a {@link String}
+ * parameter (new String("foo")) and replaces those occurrences empty String
+ * ("") or a String literal ("foo") respectively.
  * 
  * @author Martin Huter
  * @since 0.9.2
@@ -34,21 +35,21 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractCompilationUni
 	public boolean visit(ClassInstanceCreation node) {
 		if (ClassRelationUtil.isContentOfRegistertITypes(node.getType().resolveBinding(),
 				this.iTypeMap.get(STRING_KEY))) {
-			
+
 			/**
-			 * node.arguments() javadoc shows that it elements are at least
+			 * node.arguments() javadoc shows that its elements are at least
 			 * Expression
 			 */
 			@SuppressWarnings("unchecked")
 			List<Expression> arguments = (List<Expression>) node.arguments();
-			
+
 			/**
 			 * new String() resolves to ""
 			 */
 			if (0 == arguments.size()) {
 				astRewrite.replace(node, node.getAST().newStringLiteral(), null);
 			}
-			
+
 			/**
 			 * new String("string" || StringLiteral) resolves to "string" ||
 			 * StringLiteral
@@ -57,7 +58,7 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractCompilationUni
 				Expression argument = arguments.get(0);
 				if (argument instanceof StringLiteral || ClassRelationUtil
 						.isContentOfRegistertITypes(argument.resolveTypeBinding(), iTypeMap.get(STRING_KEY))) {
-					if(argument instanceof ParenthesizedExpression){
+					if (argument instanceof ParenthesizedExpression) {
 						argument = ASTNodeUtil.unwrapParenthesizedExpression(argument);
 					}
 					astRewrite.replace(node, astRewrite.createMoveTarget(argument), null);

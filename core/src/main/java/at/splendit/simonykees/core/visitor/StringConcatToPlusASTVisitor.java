@@ -14,8 +14,8 @@ import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
- * Removes all StringVariable.concat(Parameter) and transforms it into an
- * Infixoperation StringVariable + Parameter.
+ * Removes all occurrences of StringVariable.concat(Parameter) and transforms
+ * them into Infix operation StringVariable + Parameter.
  * 
  * ex.: a.concat(b) -> a + b a.concat(b.concat(c) -> a + b + c
  * 
@@ -53,14 +53,13 @@ public class StringConcatToPlusASTVisitor extends AbstractCompilationUnitASTVisi
 			Expression right = (null != recursionRightExpression) ? recursionRightExpression
 					: (Expression) astRewrite.createMoveTarget((Expression) node.arguments().get(0));
 
-			Expression replacementNode = NodeBuilder.newInfixExpression(node.getAST(),
-					InfixExpression.Operator.PLUS, left, right);
+			Expression replacementNode = NodeBuilder.newInfixExpression(node.getAST(), InfixExpression.Operator.PLUS,
+					left, right);
 
 			if (modifyMethodInvocation.contains(node.getParent())) {
 				recursionRightExpression = replacementNode;
-			}
-			else {
-				if(node.getParent() instanceof MethodInvocation){
+			} else {
+				if (node.getParent() instanceof MethodInvocation) {
 					replacementNode = NodeBuilder.newParenthesizedExpression(node.getAST(), replacementNode);
 				}
 				astRewrite.replace(node, replacementNode, null);
