@@ -11,6 +11,7 @@ import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
 import at.splendit.simonykees.core.rule.impl.MultiCatchRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
+import at.splendit.simonykees.core.rule.impl.PrimitiveBoxedForStringRule;
 import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
@@ -23,6 +24,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
+import at.splendit.simonykees.core.visitor.PrimitiveBoxedForStringASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveNewStringConstructorASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveToStringOnStringASTVisitor;
 import at.splendit.simonykees.core.visitor.SerialVersionUidASTVisitor;
@@ -59,16 +61,19 @@ public class RulesContainer {
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules() {
 		return Arrays.asList(new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
 				new TryWithResourceRule(TryWithResourceASTVisitor.class),
-				new StringUtilsRule(StringUtilsASTVisitor.class), new MultiCatchRule(MultiCatchASTVisitor.class),
+				new StringUtilsRule(StringUtilsASTVisitor.class),
+				new MultiCatchRule(MultiCatchASTVisitor.class),
 				new BracketsToControlRule(BracketsToControlASTVisitor.class),
 				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class),
-				new WhileToForRule(WhileToForASTVisitor.class), new ForToForEachRule(ForToForEachASTVisitor.class),
+				new WhileToForRule(WhileToForASTVisitor.class),
+				new ForToForEachRule(ForToForEachASTVisitor.class),
 				new CollectionRemoveAllRule(CollectionRemoveAllASTVisitor.class),
 				new SerialVersionUidRule(SerialVersionUidASTVisitor.class),
 				new StringFormatLineSeperatorRule(StringFormatLineSeperatorASTVisitor.class),
 				new RemoveToStringOnStringRule(RemoveToStringOnStringASTVisitor.class),
 				new RemoveNewStringConstructorRule(RemoveNewStringConstructorASTVisitor.class),
 				new StringConcatToPlusRule(StringConcatToPlusASTVisitor.class),
+				new PrimitiveBoxedForStringRule(PrimitiveBoxedForStringASTVisitor.class),
 
 				/*
 				 * Code formatting and organizing imports should always happen
