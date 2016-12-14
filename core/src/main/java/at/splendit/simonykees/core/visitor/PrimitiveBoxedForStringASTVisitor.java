@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.visitor;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -8,9 +9,12 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
+
+import at.splendit.simonykees.core.builder.NodeBuilder;
 
 /**
  * Primitives should not be boxed just for "String" conversion
@@ -58,7 +62,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 			else if (true) {
 
 			}
-			astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(node.getExpression()), null);
+			//astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(node.getExpression()), null);
 		}
 
 		return true;
@@ -66,8 +70,8 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 
 	@Override
 	public boolean visit(StringLiteral node) {
-		/**i
-		 * Third case: 4 + ""
+		/**
+		 * i Third case: 4 + ""
 		 */
 		if ("".equals(node.getLiteralValue()) && ASTNode.INFIX_EXPRESSION == node.getParent().getNodeType()) { //$NON-NLS-1$
 			InfixExpression infixExpression = (InfixExpression) node.getParent();
@@ -81,31 +85,33 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 				ITypeBinding otherSideTypeBinding = otherSide.resolveTypeBinding();
 				if (ASTNode.NUMBER_LITERAL == otherSide.getNodeType() && otherSideTypeBinding != null
 						&& otherSideTypeBinding.isPrimitive()) {
-					PrimitiveType.Code code;
+					String primitiveClassName;
 					switch (otherSideTypeBinding.getName()) {
-					case "Integer":
-						code = PrimitiveType.INT;
+					case "int":
+						primitiveClassName = "Integer";
 						break;
-					case "Double":
-						code = PrimitiveType.DOUBLE;
+					case "double":
+						primitiveClassName = "Double";
 						break;
-					case "Long":
-						code = PrimitiveType.LONG;
+					case "long":
+						primitiveClassName = "Long";
 						break;
-					case "Float":
-						code = PrimitiveType.FLOAT;
+					case "float":
+						primitiveClassName = "Float";
 						break;
 					default:
 						return true;
 					}
-					TypeLiteral typeLiteral = node.getAST().newTypeLiteral();
-					PrimitiveType newTargetClass = node.getAST().newPrimitiveType(code);
-					typeLiteral.setType(newTargetClass);
-					//TODO use method invocation instead of StringLiteral as node ....
-					astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, typeLiteral, null);
-					ASTNode valueParameter = astRewrite.createMoveTarget(otherSide);
-					astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY).insertLast(valueParameter,
-							null);
+					SimpleName typeName = NodeBuilder.newSimpleName(node.getAST(), primitiveClassName);
+					
+					SimpleName toStringSimpleName = NodeBuilder.newSimpleName(node.getAST(), "toString"); //$NON-NLS-1$
+					
+					Expression valueParameter = (Expression) astRewrite.createMoveTarget(otherSide);
+					
+					MethodInvocation methodInvocation = NodeBuilder.newMethodInvocation(node.getAST(), typeName,
+							toStringSimpleName, valueParameter);
+					
+					astRewrite.replace(node, methodInvocation, null);
 				}
 			}
 		}

@@ -4,8 +4,6 @@ package at.splendit.simonykees.sample.preRule;
 public class TestPrimitiveBoxedForStringRule {
 
 	public String testLiteralConcat() {
-
 		return "" + 4;
-
 	}
 }
