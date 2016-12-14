@@ -10,8 +10,6 @@ public enum LicenseType {
 	public static LicenseType fromString(String value) {
 		LicenseType licenseType = TRY_AND_BUY;
 		
-		// TODO: check if the cases really match with the returned values.
-		
 		switch(value.toLowerCase()) {
 		case "tryandbuy":
 			licenseType = TRY_AND_BUY;
@@ -28,6 +26,22 @@ public enum LicenseType {
 		}
 		
 		return licenseType;
+	}
+	
+	public String toString() {
+		switch (this) {
+		case TRY_AND_BUY:
+			return "TryAndBuy";
+		case FLOATING:
+			return "Floating";
+		case NODE_LOCKED:
+			return "MultiFeature";
+		case SUBSCRIPTION:
+			return "Subscription";
+
+		default:
+			return "";
+		}
 	}
 	
 }
