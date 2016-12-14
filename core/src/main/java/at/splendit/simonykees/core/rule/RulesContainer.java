@@ -15,6 +15,7 @@ import at.splendit.simonykees.core.rule.impl.PrimitiveBoxedForStringRule;
 import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
+import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeperatorRule;
 import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
@@ -27,6 +28,7 @@ import at.splendit.simonykees.core.visitor.PrimitiveBoxedForStringASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveNewStringConstructorASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveToStringOnStringASTVisitor;
 import at.splendit.simonykees.core.visitor.SerialVersionUidASTVisitor;
+import at.splendit.simonykees.core.visitor.StringConcatToPlusASTVisitor;
 import at.splendit.simonykees.core.visitor.StringFormatLineSeperatorASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
@@ -37,7 +39,7 @@ import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisito
 
 /**
  * {@link RulesContainer} is a HelperClass that holds a static list of all
- * implemented rules
+ * implemented rules.
  * 
  * @author Ludwig Werzowa, Martin Huter, Hannes Schweighofer
  * @since 0.9
@@ -49,7 +51,9 @@ public class RulesContainer {
 	}
 
 	/**
-	 * Is a static List of all implemented rules
+	 * This {@link List} holds all implemented rules and returns them in a
+	 * certain order. The execution order of each rule is determined by the
+	 * position of each rule in this {@link List}.
 	 * 
 	 * @return a List of {@link RefactoringRule} with all used Rules is
 	 *         returned.
@@ -68,7 +72,13 @@ public class RulesContainer {
 				new StringFormatLineSeperatorRule(StringFormatLineSeperatorASTVisitor.class),
 				new RemoveToStringOnStringRule(RemoveToStringOnStringASTVisitor.class),
 				new RemoveNewStringConstructorRule(RemoveNewStringConstructorASTVisitor.class),
+				new StringConcatToPlusRule(StringConcatToPlusASTVisitor.class),
 				new PrimitiveBoxedForStringRule(PrimitiveBoxedForStringASTVisitor.class),
+
+				/*
+				 * Code formatting and organizing imports should always happen
+				 * last.
+				 */
 				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
 				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class));
 	}
