@@ -36,7 +36,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitAST
 		 */
 		Expression variableExpression = node.getExpression();
 		if (StringUtils.equals("toString", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
-				&& node.typeArguments().size() == 0
+				&& node.typeArguments().isEmpty()
 				&& (node.getExpression() != null && ClassRelationUtil
 						.isContentOfRegistertITypes(variableExpression.resolveTypeBinding(), iTypeMap.get(STRING_KEY))
 						|| variableExpression instanceof StringLiteral)) {

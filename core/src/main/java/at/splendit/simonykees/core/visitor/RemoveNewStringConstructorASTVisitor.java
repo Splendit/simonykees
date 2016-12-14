@@ -43,18 +43,21 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractCompilationUni
 			@SuppressWarnings("unchecked")
 			List<Expression> arguments = (List<Expression>) node.arguments();
 
-			/**
-			 * new String() resolves to ""
-			 */
-			if (0 == arguments.size()) {
+			
+			switch (arguments.size()) {
+			
+			case 0:
+				/**
+				 * new String() resolves to ""
+				 */
 				astRewrite.replace(node, node.getAST().newStringLiteral(), null);
-			}
-
-			/**
-			 * new String("string" || StringLiteral) resolves to "string" ||
-			 * StringLiteral
-			 */
-			else if (1 == arguments.size()) {
+				break;
+				
+			case 1:
+				/**
+				 * new String("string" || StringLiteral) resolves to "string" ||
+				 * StringLiteral
+				 */
 				Expression argument = arguments.get(0);
 				if (argument instanceof StringLiteral || ClassRelationUtil
 						.isContentOfRegistertITypes(argument.resolveTypeBinding(), iTypeMap.get(STRING_KEY))) {
@@ -63,6 +66,10 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractCompilationUni
 					}
 					astRewrite.replace(node, astRewrite.createMoveTarget(argument), null);
 				}
+				break;
+
+			default:
+				break;
 			}
 		}
 		return true;

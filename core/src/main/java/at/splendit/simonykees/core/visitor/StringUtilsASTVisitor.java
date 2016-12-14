@@ -2,11 +2,8 @@ package at.splendit.simonykees.core.visitor;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import at.splendit.simonykees.core.util.ClassRelationUtil;
@@ -19,8 +16,6 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * @since 0.9
  */
 public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
-
-	private boolean stringUtilsRequired = false;
 
 	private static final Integer STRING_KEY = 1;
 	private static final String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
@@ -70,8 +65,8 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 				this.iTypeMap.get(STRING_KEY))) {
 			AST currentAST = node.getAST();
 			String replacementOperation = null;
-			String op = null;
-			switch (op = node.getName().getFullyQualifiedName()) {
+			String stringOperation = node.getName().getFullyQualifiedName();
+			switch (stringOperation) {
 			case IS_EMPTY:
 			case TRIM:
 				// case EQUALS: // see SIM-86
@@ -82,7 +77,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 			case SUBSTRING:
 				// case SPLIT: // see SIM-78
 				// case REPLACE: // see SIM-85
-				replacementOperation = op;
+				replacementOperation = stringOperation;
 				break;
 			case TO_UPPER_CASE:
 				replacementOperation = UPPER_CASE;
@@ -99,7 +94,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 				break;
 			}
 			if (replacementOperation != null) {
-				stringUtilsRequired = true;
+				addImports.add(STRING_UTILS_FULLY_QUALLIFIED_NAME);
 				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, currentAST.newSimpleName(STRING_UTILS),
 						null);
 				astRewrite.set(node, MethodInvocation.NAME_PROPERTY, node.getAST().newSimpleName(replacementOperation),
@@ -110,17 +105,5 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 			}
 		}
 		return true;
-	}
-
-	@SuppressWarnings("unchecked")
-	public void endVisit(CompilationUnit node) {
-		if (stringUtilsRequired) {
-			ImportDeclaration stringUtilsImport = node.getAST().newImportDeclaration();
-			stringUtilsImport.setName(node.getAST().newName(STRING_UTILS_FULLY_QUALLIFIED_NAME));
-			if (node.imports().stream().noneMatch(importDeclaration -> (new ASTMatcher())
-					.match((ImportDeclaration) importDeclaration, stringUtilsImport))) {
-				astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY).insertLast(stringUtilsImport, null);
-			}
-		}
 	}
 }

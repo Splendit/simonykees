@@ -42,11 +42,7 @@ class FindNextVariableASTVisitor extends AbstractCompilationUnitASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation node) {
 		if (new ASTMatcher().match(iteratorName, node.getExpression())) {
-			if ("remove".equals(node.getName().getFullyQualifiedName()) || //$NON-NLS-1$
-					"forEachRemaining".equals(node.getName().getFullyQualifiedName())) { //$NON-NLS-1$
-				transformable = false;
-				return false;
-			} else if ("next".equals(node.getName().getFullyQualifiedName())) { //$NON-NLS-1$
+			if ("next".equals(node.getName().getFullyQualifiedName())) { //$NON-NLS-1$
 				if (transformable || doubleNext) {
 					iteratorVariableType = null;
 					variableName = null;
@@ -54,10 +50,11 @@ class FindNextVariableASTVisitor extends AbstractCompilationUnitASTVisitor {
 					doubleNext = true;
 					return false;
 				}
-				// this.astRewrite.remove(node.getInitializer(), null);
-				//
 				transformable = true;
 				return true;
+			} else {
+				transformable = false;
+				return false;
 			}
 		}
 		return true;
