@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.primitiveBoxed;
+package at.splendit.simonykees.sample.postRule.allRules;
 
 @SuppressWarnings("nls")
 public class TestPrimitiveBoxedForStringWithObjectVariablesRule {

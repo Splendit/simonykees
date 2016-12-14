@@ -1,10 +1,7 @@
 package at.splendit.simonykees.core.constants;
 
 @SuppressWarnings("nls")
-public class ReservedNames {
-	private ReservedNames(){
-		
-	}
+abstract public class ReservedNames {
 	public static final String INTEGER = "Integer";
 	public static final String INTEGER_PRIMITIVE = "int";
 	

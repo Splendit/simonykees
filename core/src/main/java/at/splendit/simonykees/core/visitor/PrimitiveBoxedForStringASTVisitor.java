@@ -1,5 +1,7 @@
 package at.splendit.simonykees.core.visitor;
 
+import java.util.function.Predicate;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -7,7 +9,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -60,6 +61,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 
 			Expression refactorCandidateExpression = null;
 			SimpleName refactorPrimitiveType = null;
+			ITypeBinding refactorCandidateTypeBinding = null;
 
 			if (ASTNode.METHOD_INVOCATION == node.getExpression().getNodeType()) {
 				MethodInvocation expetedValueOf = (MethodInvocation) node.getExpression();
@@ -69,6 +71,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 						&& 1 == expetedValueOf.arguments().size()) {
 					refactorPrimitiveType = (SimpleName) expetedValueOf.getExpression();
 					refactorCandidateExpression = (Expression) expetedValueOf.arguments().get(0);
+					refactorCandidateTypeBinding = refactorCandidateExpression.resolveTypeBinding();
 				}
 			}
 			/**
@@ -83,30 +86,30 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 					refactorPrimitiveType = (SimpleName) ((SimpleType) expectedPrimitiveNumberClass.getType())
 							.getName();
 					refactorCandidateExpression = (Expression) expectedPrimitiveNumberClass.arguments().get(0);
-
+					refactorCandidateTypeBinding = refactorCandidateExpression.resolveTypeBinding();
 					/**
 					 * new Float(4D).toString() is not transformable to
 					 * Float.toString(4D) because toString only allows
 					 * primitives that are implicit cast-able to float. doubles
 					 * do not have this property
 					 */
+					Predicate<ITypeBinding> isDoubleVariable = (
+							binding) -> (binding != null && (binding.getName().contains(ReservedNames.DOUBLE_PRIMITIVE)
+									|| (binding.getName().contains(ReservedNames.DOUBLE))));
+
 					if (ReservedNames.FLOAT.equals(refactorPrimitiveType.getIdentifier())
-							&& ASTNode.NUMBER_LITERAL == refactorCandidateExpression.getNodeType()
-							&& ((NumberLiteral) refactorCandidateExpression).getToken()
-									.contains(ReservedNames.DOUBLE_LITERAL)) {
+							&& isDoubleVariable.test(refactorCandidateTypeBinding)) {
 						refactorPrimitiveType = null;
 						refactorCandidateExpression = null;
+						refactorCandidateTypeBinding = null;
 					}
 				}
 			}
-			if (null != refactorPrimitiveType && isPrimitiveNumberClass(refactorPrimitiveType)
-					&& null != refactorCandidateExpression) {
-				if (ASTNode.NUMBER_LITERAL == refactorCandidateExpression.getNodeType()) {
-					NumberLiteral moveTarget = (NumberLiteral) astRewrite.createMoveTarget(refactorCandidateExpression);
-					astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY).insertLast(moveTarget, null);
-					astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, refactorPrimitiveType, null);
-				}
-
+			if (refactorCandidateTypeBinding != null
+					&& isPrimitiveNumberClass(refactorCandidateTypeBinding.getName())) {
+				Expression moveTarget = (Expression) astRewrite.createMoveTarget(refactorCandidateExpression);
+				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY).insertLast(moveTarget, null);
+				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, refactorPrimitiveType, null);
 			}
 
 		}
@@ -114,12 +117,16 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 		return true;
 	}
 
-	private boolean isPrimitiveNumberClass(SimpleName simpleName) {
-		switch (simpleName.getIdentifier()) {
+	private boolean isPrimitiveNumberClass(String simpleName) {
+		switch (simpleName) {
 		case ReservedNames.INTEGER:
 		case ReservedNames.FLOAT:
 		case ReservedNames.DOUBLE:
 		case ReservedNames.LONG:
+		case ReservedNames.INTEGER_PRIMITIVE:
+		case ReservedNames.FLOAT_PRIMITIVE:
+		case ReservedNames.DOUBLE_PRIMITIVE:
+		case ReservedNames.LONG_PRIMITIVE:
 			return true;
 		default:
 			return false;
@@ -141,20 +148,23 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 					otherSide = infixExpression.getLeftOperand();
 				}
 				ITypeBinding otherSideTypeBinding = otherSide.resolveTypeBinding();
-				if (ASTNode.NUMBER_LITERAL == otherSide.getNodeType() && otherSideTypeBinding != null
-						&& otherSideTypeBinding.isPrimitive()) {
+				if (otherSideTypeBinding != null && isPrimitiveNumberClass(otherSideTypeBinding.getName())) {
 					String primitiveClassName;
 					switch (otherSideTypeBinding.getName()) {
 					case ReservedNames.INTEGER_PRIMITIVE:
+					case ReservedNames.INTEGER:
 						primitiveClassName = ReservedNames.INTEGER;
 						break;
 					case ReservedNames.DOUBLE_PRIMITIVE:
+					case ReservedNames.DOUBLE:
 						primitiveClassName = ReservedNames.DOUBLE;
 						break;
 					case ReservedNames.LONG_PRIMITIVE:
+					case ReservedNames.LONG:
 						primitiveClassName = ReservedNames.LONG;
 						break;
 					case ReservedNames.FLOAT_PRIMITIVE:
+					case ReservedNames.FLOAT:
 						primitiveClassName = ReservedNames.FLOAT;
 						break;
 					default:
