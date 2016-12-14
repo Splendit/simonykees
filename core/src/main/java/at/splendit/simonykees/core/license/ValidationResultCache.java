@@ -24,6 +24,12 @@ public class ValidationResultCache {
 		cacheHashMap.put(IS_EMPTY_KEY, true);
 	}
 	
+	public void reset() {
+		cacheHashMap.remove(TIME_STAMP_KEY);
+		cacheHashMap.remove(VALIDATION_RESULT_KEY);
+		cacheHashMap.put(IS_EMPTY_KEY, true);
+	}
+	
 	public void updateCachedResult(ValidationResult validationResult, Instant timestamp) {
 		cacheHashMap.put(TIME_STAMP_KEY, timestamp);
 		cacheHashMap.put(VALIDATION_RESULT_KEY, validationResult);
