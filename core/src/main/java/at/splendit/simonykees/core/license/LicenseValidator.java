@@ -25,9 +25,11 @@ public class LicenseValidator {
 			// sending validation request...
 			ValidationResult validationResult = LicenseeService.validate(context, licenseeNumber, validationParameters);
 
-			// caching the validation result...
+			// caching and persisting the validation result...
 			ValidationResultCache cache = ValidationResultCache.getInstance();
 			cache.updateCachedResult(validationResult, timestamp);
+			PersistenceManager persistenceManager = PersistenceManager.getInstance();
+			persistenceManager.persistCachedData();
 			
 			// logging validation result...
 			// TODO: use a logger instead of System.out
@@ -44,11 +46,12 @@ public class LicenseValidator {
 			}
 
 		} catch (final NetLicensingException e) {
+			ValidationResultCache cache = ValidationResultCache.getInstance();
+			cache.reset();
 			System.out.println("Got NetLicensing exception:" + e);
 			// TODO: in each exception case, a proper behavior should be
 			// triggered.
-		} catch (final Exception e) {
-			System.out.println("Got  exception:" + e);
+
 		}
 	}
 

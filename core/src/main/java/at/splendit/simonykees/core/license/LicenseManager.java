@@ -49,37 +49,46 @@ public class LicenseManager {
 		schedulerEntity = new SchedulerEntity(VALIDATE_INTERVAL_IN_SECONDS, DO_VALIDATE);
 
 		Instant now = Instant.now();
-		ValidationResult validationResult;
+
+		PersistenceManager persistenceManager = PersistenceManager.getInstance();
+		LicenseType licenseType;
+		ZonedDateTime evaluationExpiresDate;
+		ZonedDateTime expirationTimeStamp;
+		
 		try {
 			// make a pre-validate call to get the license model relevant information...
-			validationResult = preValidate(PRODUCT_NUMBER, PRODUCT_MODULE_NUMBER, LICENSEE_NUMBER, LICENSEE_NAME);
+			ValidationResult validationResult = preValidate(PRODUCT_NUMBER, PRODUCT_MODULE_NUMBER, LICENSEE_NUMBER, LICENSEE_NAME);
 			LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, now, LICENSEE_NAME);
-
-			// extract pre-validation result
-			LicenseType licenseType = checker.getType();
-			ZonedDateTime evaluationExpiresDate = checker.getEvaluationExpiresDate();
-			ZonedDateTime expirationTimeStamp = checker.getExpirationTimeStamp();
-			String productModuleNumber = checker.getProductModulNumber();
-
-			// cash pre-validation...
+			
+			// cash and persist pre-validation...
 			ValidationResultCache cache = ValidationResultCache.getInstance();
 			cache.updateCachedResult(validationResult, now);
-
-			// construct a license model
-			LicenseModel licenseModel = constructLicenseModel(licenseType, evaluationExpiresDate, expirationTimeStamp, productModuleNumber);
-			setLicenseModel(licenseModel);
-
-			// construct a licensee object...
-			LicenseeEntity licensee = new LicenseeEntity(LICENSEE_NAME, LICENSEE_NUMBER, licenseModel, PRODUCT_NUMBER);
-			setLicensee(licensee);
-
-			// start validate scheduler
-			ValidateExecutor.startSchedule(schedulerEntity, licensee);
+			persistenceManager.persistCachedData();
+			
+			// extract pre-validation result
+			licenseType = checker.getType();
+			evaluationExpiresDate = checker.getEvaluationExpiresDate();
+			expirationTimeStamp = checker.getExpirationTimeStamp();
+			
 		} catch (NetLicensingException e) {
-			// TODO proper behavior should be triggered
-			e.printStackTrace();
-		} 
+			PersistenceModel persistedData = persistenceManager.getPersistenceModel();
+			
+			licenseType = persistedData.getLicenseType().orElse(null);
+			evaluationExpiresDate = persistedData.getDemoExpirationDate().orElse(null);
+			expirationTimeStamp = persistedData.getExpirationTimeStamp().orElse(null);
+		}
 
+		// construct a license model
+		LicenseModel licenseModel = constructLicenseModel(licenseType, evaluationExpiresDate, expirationTimeStamp, PRODUCT_MODULE_NUMBER);
+		setLicenseModel(licenseModel);
+
+		// construct a licensee object...
+		LicenseeEntity licensee = new LicenseeEntity(LICENSEE_NAME, LICENSEE_NUMBER, licenseModel, PRODUCT_NUMBER);
+		setLicensee(licensee);
+
+		// start validate scheduler
+		ValidateExecutor.startSchedule(schedulerEntity, licensee);
+ 
 	}
 
 	private void setLicensee(LicenseeEntity licensee) {
@@ -188,10 +197,15 @@ public class LicenseManager {
 
 	public LicenseChecker getValidationData() {
 		ValidationResultCache cache = ValidationResultCache.getInstance();
-		ValidationResult validationResult = cache.getCachedValidationResult();
-		Instant timestamp = cache.getValidationTimestamp();
-
-		LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, timestamp, LICENSEE_NAME);
+		LicenseChecker checker;
+		if(!cache.isEmpty()) {
+			ValidationResult validationResult = cache.getCachedValidationResult();
+			Instant timestamp = cache.getValidationTimestamp();
+			checker = new LicenseCheckerImpl(validationResult, timestamp, LICENSEE_NAME);
+		} else {
+			PersistenceManager persistenceManager = PersistenceManager.getInstance();
+			checker = persistenceManager.vlidateUsingPersistedData();
+		}
 
 		return checker;
 	}

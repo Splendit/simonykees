@@ -55,6 +55,7 @@ public class PersistenceManager {
 		LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, timestamp, LicenseManager.LICENSEE_NAME);
 
 		ZonedDateTime demoExpirationDate = checker.getEvaluationExpiresDate();
+		ZonedDateTime expirationTimeStamp = checker.getExpirationTimeStamp();
 		ZonedDateTime subscriptionExpirationDate = checker.getSubscriptionExpiresDate();
 		LicenseType licenseType = checker.getType();
 		boolean subscriptionStatus = checker.getSubscriptionStatus();
@@ -65,8 +66,9 @@ public class PersistenceManager {
 				LicenseManager.LICENSEE_NAME, 
 				lastValidationStatus,
 				licenseType, 
-				timestamp, 
-				demoExpirationDate, 
+				timestamp,
+				demoExpirationDate,
+				expirationTimeStamp,
 				subscriptionExpirationDate, 
 				subscriptionStatus);
 		setPersistenceModel(persistenceModel);
@@ -142,6 +144,7 @@ public class PersistenceManager {
 	}
 
 	public PersistenceModel getPersistenceModel() {
+		persistenceModel = readPersistedData();
 		return persistenceModel;
 	}
 
