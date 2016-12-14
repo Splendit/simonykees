@@ -28,6 +28,7 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private final String EVALUATION_EXPIRES_DATE_KEY = "evaluationExpires"; //$NON-NLS-1$
 	private final String VALID_KEY = "valid"; //$NON-NLS-1$
 	private final String SUBSCRIPTION_EXPIRES_KEY = "expires"; //$NON-NLS-1$
+	private final String NODE_LOCKED_FEATURE_KEY = "ETP7TSTC3"; //$NON-NLS-1$
 
 
 	public LicenseCheckerImpl(ValidationResult validationResult, Instant timestamp, String licenseeName) {
@@ -39,9 +40,9 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private void extractValidationData(ValidationResult validationResult) {
 		extractSubscription(validationResult);
 		extractValidationData(validationResult, LicenseType.FLOATING);
-		if(!getStatus()){
+		if(!getStatus()) {
 			extractValidationData(validationResult, LicenseType.NODE_LOCKED);
-			if(!getStatus()){
+			if(!getStatus()) {
 				extractValidationData(validationResult, LicenseType.TRY_AND_BUY);
 			}
 		}	
@@ -67,6 +68,12 @@ public class LicenseCheckerImpl implements LicenseChecker {
 						boolean valid = Boolean.valueOf(value.getValue());
 						seLicenseModelStatus(valid);
 						break;
+					case NODE_LOCKED_FEATURE_KEY:
+						Map<String, Composition> featureKeyValues = value.getProperties();
+						Composition featureStatus = featureKeyValues.get(VALID_KEY);
+						valid = Boolean.valueOf(featureStatus.getValue());
+						seLicenseModelStatus(valid);
+						break;
 					case PRODUCT_MODULE_NAME_KEY:
 						setProductModuleName(value.getValue());
 						break;
@@ -88,7 +95,7 @@ public class LicenseCheckerImpl implements LicenseChecker {
 		});
 	}
 	
-	private void extractSubscription(ValidationResult validationResult){
+	private void extractSubscription(ValidationResult validationResult) {
 		Map<String, Composition> validations = validationResult.getValidations();
 		
 		validations.forEach((compKey, composition)-> {
