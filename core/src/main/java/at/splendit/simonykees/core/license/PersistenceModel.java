@@ -14,6 +14,7 @@ public class PersistenceModel implements Serializable {
 	private static final String LICENSE_TYPE_KEY = "license-type"; //$NON-NLS-1$
 	private static final String LAST_VALIDATION_TIMESTAMP_KEY = "last-validation-timestamp"; //$NON-NLS-1$
 	private static final String DEMO_EXPIRATION_KEY = "demo-expiration"; //$NON-NLS-1$
+	private static final String EXPIRATION_TIMESTAMP_KEY = "expiration-timestamp"; //$NON-NLS-1$
 	private static final String SUBSCRIPTION_EXPIRES_KEY = "subscription-expires"; //$NON-NLS-1$
 	private static final String SUBSCRIPTION_STATUS_KEY = "subscription-status"; //$NON-NLS-1$
 
@@ -23,14 +24,13 @@ public class PersistenceModel implements Serializable {
 	private LicenseType licenseType;
 	private Instant lastValidationTimestamp;
 	private ZonedDateTime demoExpirationDate;
+	private ZonedDateTime expirationTimeStamp;
 	private ZonedDateTime subscriptionExpirationDate;
 	private boolean subscriptionStatus;
-	
-	
 
 	public PersistenceModel(String licenseeNumber, String licenseeName, boolean lastValidationStatus,
 			LicenseType licenseType, Instant lastValidationTimestamp, ZonedDateTime demoExpirationDate,
-			ZonedDateTime subscriptionExpirationDate, boolean subscriptionStatus) {
+			ZonedDateTime expirationTimeStamp, ZonedDateTime subscriptionExpirationDate, boolean subscriptionStatus) {
 
 		setLicenseeName(licenseeName);
 		setLicenseeNumber(licenseeNumber);
@@ -40,6 +40,15 @@ public class PersistenceModel implements Serializable {
 		setDemoExpirationDate(demoExpirationDate);
 		setSubscriptionExpirationDate(subscriptionExpirationDate);
 		setSubscriptionStatus(subscriptionStatus);
+		setExpirationTimeStamp(expirationTimeStamp);
+	}
+
+	private void setExpirationTimeStamp(ZonedDateTime expirationTimeStamp) {
+		this.expirationTimeStamp = expirationTimeStamp;	
+	}
+	
+	public Optional<ZonedDateTime> getExpirationTimeStamp() {
+		return Optional.of(expirationTimeStamp);
 	}
 
 	public Optional<String> getLicenseeNumber() {
@@ -125,6 +134,7 @@ public class PersistenceModel implements Serializable {
 		String strLicenseType = data.get(LICENSE_TYPE_KEY);
 		String strLastValTimeStamp = data.get(LAST_VALIDATION_TIMESTAMP_KEY);
 		String strDemoExpiration = data.get(DEMO_EXPIRATION_KEY);
+		String strExpirationTimestamp = data.get(EXPIRATION_TIMESTAMP_KEY);
 		String strSubscriptionExpires = data.get(SUBSCRIPTION_EXPIRES_KEY);
 		String strSubscriptionStatus = data.get(SUBSCRIPTION_STATUS_KEY);
 		
@@ -148,6 +158,11 @@ public class PersistenceModel implements Serializable {
 			demoExpiration = ZonedDateTime.parse(strDemoExpiration);
 		}
 		
+		ZonedDateTime expirationTimestamp = null;
+		if(!strExpirationTimestamp.isEmpty()) {
+			expirationTimestamp = ZonedDateTime.parse(strExpirationTimestamp);
+		}
+		
 		ZonedDateTime subscriptionExpires = null;
 		if(!strSubscriptionExpires.isEmpty()) {
 			subscriptionExpires = ZonedDateTime.parse(strSubscriptionExpires);
@@ -165,6 +180,7 @@ public class PersistenceModel implements Serializable {
 				licenseType, 
 				lastValTimestamp, 
 				demoExpiration, 
+				expirationTimestamp,
 				subscriptionExpires, 
 				subscriptionStatus);
 		
@@ -195,6 +211,11 @@ public class PersistenceModel implements Serializable {
 		stringBuffer.append(DEMO_EXPIRATION_KEY + ":");
 		getDemoExpirationDate()
 		.ifPresent(demoExpireDate -> stringBuffer.append(demoExpireDate.toString()));
+		stringBuffer.append(",");
+		
+		stringBuffer.append(EXPIRATION_TIMESTAMP_KEY + ":");
+		getExpirationTimeStamp()
+		.ifPresent(expirationTimeStamp -> stringBuffer.append(expirationTimeStamp.toString()));
 		stringBuffer.append(",");
 		
 		stringBuffer.append(SUBSCRIPTION_EXPIRES_KEY + ":");
