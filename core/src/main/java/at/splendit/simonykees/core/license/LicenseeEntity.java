@@ -23,7 +23,11 @@ public class LicenseeEntity {
 		LicenseModel licenseModel = getLicenseModel();
 		String productNumber = getProductNumber();
 		
-		ValidationParameters validationParams = licenseModel.getValidationParameters();
+		ValidationParameters validationParams = new ValidationParameters();
+		if(licenseModel != null) {
+			validationParams = licenseModel.getValidationParameters();
+		}
+		
 		validationParams.setLicenseeName(licenseeName);
 		validationParams.setProductNumber(productNumber);
 		
