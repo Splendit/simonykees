@@ -52,7 +52,8 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 		 * needs to be a String or a StringLiteral
 		 */
 		if (StringUtils.equals(ReservedNames.MI_TO_STRING, node.getName().getFullyQualifiedName())) {
-			/**
+
+			/*
 			 * First case: Integer.valueOf(myInt).toString()
 			 */
 			if (node.getExpression() == null) {
@@ -74,7 +75,8 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 					refactorCandidateTypeBinding = refactorCandidateExpression.resolveTypeBinding();
 				}
 			}
-			/**
+
+			/*
 			 * Second case: new Integer(myInt).toString()
 			 */
 			else if (ASTNode.CLASS_INSTANCE_CREATION == node.getExpression().getNodeType()) {
@@ -87,7 +89,8 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 							.getName();
 					refactorCandidateExpression = (Expression) expectedPrimitiveNumberClass.arguments().get(0);
 					refactorCandidateTypeBinding = refactorCandidateExpression.resolveTypeBinding();
-					/**
+
+					/*
 					 * new Float(4D).toString() is not transformable to
 					 * Float.toString(4D) because toString only allows
 					 * primitives that are implicit cast-able to float. doubles
@@ -135,7 +138,8 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 
 	@Override
 	public boolean visit(StringLiteral node) {
-		/**
+
+		/*
 		 * i Third case: 4 + ""
 		 */
 		if ("".equals(node.getLiteralValue()) && ASTNode.INFIX_EXPRESSION == node.getParent().getNodeType()) { //$NON-NLS-1$
