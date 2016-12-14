@@ -23,4 +23,16 @@ public class TestToStringOnStringRule {
 		return StringUtils.abbreviate("makeMeShorter", 4);
 
 	}
+
+	public String testToStringOnParenthesizeString(String s) {
+
+		return s;
+
+	}
+
+	public String testToStringOnParenthesizePlusString(String s) {
+
+		return s + "abc";
+
+	}
 }
