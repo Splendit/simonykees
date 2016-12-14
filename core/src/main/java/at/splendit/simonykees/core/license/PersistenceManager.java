@@ -1,14 +1,26 @@
 package at.splendit.simonykees.core.license;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.security.Key;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Optional;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 public class PersistenceManager {
-
+	
 	private PersistenceModel persistenceModel;
 	private static PersistenceManager instance;
+	private static final String FILE_NAME = "info.txt"; //$NON-NLS-1$
+	private static final String ALGORITHM = "AES"; //$NON-NLS-1$
+	private static final String TRANSFORMATION = "AES"; //$NON-NLS-1$
+	private static final String KEY = "SOME_SECRET_KEY_"; //$NON-NLS-1$
 
 	private PersistenceManager() {
 		initPersistenceManager();
@@ -65,7 +77,26 @@ public class PersistenceManager {
 	 * Stores {@link PersistenceManager#persistenceModel} into secure storage.
 	 */
 	private void persist() {
-		// TODO Auto-generated method stub		
+		PersistenceModel persistenceModel = getPersistenceModel();
+		String licenseModelData = persistenceModel.toString();
+		
+		try {
+			Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
+			Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+			
+			byte[] outputBytes = cipher.doFinal(licenseModelData.getBytes());
+			File outputFile = new File(FILE_NAME);
+			FileOutputStream outputStream = new FileOutputStream(outputFile);
+			outputStream.write(outputBytes);
+			outputStream.close();
+			
+		} catch (Exception exception) {
+			// TODO: throw an exception or log the error??
+			exception.printStackTrace();
+		}
+		
+				
 	}
 	
 	/**
@@ -75,8 +106,30 @@ public class PersistenceManager {
 	 * @return An instance of {@link PersistenceModel}.
 	 */
 	private PersistenceModel readPersistedData() {
-		// TODO: implement
-		return null;
+		PersistenceModel persistenceModel = null;
+		
+		try {
+			Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
+			Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+			cipher.init(Cipher.DECRYPT_MODE, secretKey);
+			
+			File inputFile = new File(FILE_NAME);
+			FileInputStream inputStream = new FileInputStream(inputFile);
+			byte[] inputBytes = new byte[(int)inputFile.length()];
+			inputStream.read(inputBytes);
+			
+			byte[] outputBytes = cipher.doFinal(inputBytes);
+			String persistenceStr = new String(outputBytes);
+			persistenceModel = PersistenceModel.fromString(persistenceStr);
+			
+			inputStream.close();
+			
+		} catch (Exception exception) {
+			// TODO: throw an exception or log the error??
+			exception.printStackTrace();
+		}
+		
+		return persistenceModel;
 	}
 
 	/**
@@ -105,53 +158,64 @@ public class PersistenceManager {
 
 		@Override
 		public LicenseType getType() {
-			return persistence.getLicenseType();
+			return persistence.getLicenseType().orElse(null);
 		}
 
 		@Override
 		public boolean getStatus() {
-			boolean status = false;
-			Instant lastValidationTimestamp = persistence.getLastValidationTimestamp();
-			Instant now = Instant.now();
-			Instant oneHourAgo = now.minusSeconds(3600);
-			
-			if(lastValidationTimestamp.isAfter(oneHourAgo) 
-					&& persistence.getLastValidationStatus()) {
-				
-				LicenseType licenseType = persistence.getLicenseType();
-				if(licenseType.equals(LicenseType.TRY_AND_BUY)){
-					ZonedDateTime demoExpiration = persistence.getDemoExpirationDate();
-					if(demoExpiration.isAfter(ZonedDateTime.now())) {
-						status = true;
-					}
-					
-				} else if(licenseType.equals(LicenseType.FLOATING) 
-						|| licenseType.equals(LicenseType.NODE_LOCKED)) {
-					ZonedDateTime subscriptionExpires = persistence.getSubscriptionExpirationDate();
-					
-					if(subscriptionExpires.isAfter(ZonedDateTime.now())) {
-						status = true;
-					}
-				}
-			}
 			// check if last validation is earlier than 1h
 			// if type is TryAndBuy
 			//	- check if demo is not expired
 			// if type is node locked or floating
 			// 	- check subscription is not expired
 			//	- check if last validation was true.
+			boolean status = false;
+			Optional<Instant> lastValidationTimestamp = persistence.getLastValidationTimestamp();
+			Instant now = Instant.now();
+			Instant oneHourAgo = now.minusSeconds(3600);
+			boolean lastValidationStatus = 
+					persistence.getLastValidationStatus()
+					.orElse(false);
+			
+			if(lastValidationTimestamp.isPresent()
+					&& lastValidationTimestamp.get().isAfter(oneHourAgo) 
+					&& lastValidationStatus) {
+				
+				Optional<LicenseType> optLicenseType = persistence.getLicenseType();
+				if(optLicenseType.isPresent()) {
+					LicenseType licenseType = optLicenseType.get();
+					if(licenseType.equals(LicenseType.TRY_AND_BUY)) {
+						
+						Optional<ZonedDateTime> demoExpiration = persistence.getDemoExpirationDate();
+						if(demoExpiration.isPresent()
+								&& demoExpiration.get().isAfter(ZonedDateTime.now())) {
+							status = true;
+						}
+						
+					} else if(licenseType.equals(LicenseType.FLOATING) 
+								|| licenseType.equals(LicenseType.NODE_LOCKED)) {
+						
+						Optional<ZonedDateTime> subscriptionExpires = persistence.getSubscriptionExpirationDate();
+						
+						if(subscriptionExpires.isPresent()
+								&& subscriptionExpires.get().isAfter(ZonedDateTime.now())) {
+							status = true;
+						}
+					}
+				}
+			}
 			
 			return status;
 		}
 
 		@Override
 		public Instant getValidationTimeStamp() {
-			return persistence.getLastValidationTimestamp();
+			return persistence.getLastValidationTimestamp().orElse(null);
 		}
 
 		@Override
 		public String getLicenseeName() {
-			return persistence.getLicenseeName();
+			return persistence.getLicenseeName().orElse(null);
 		}
 		
 	}
