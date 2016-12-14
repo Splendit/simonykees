@@ -1,20 +1,19 @@
 package at.splendit.simonykees.core.visitor;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StringLiteral;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeLiteral;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
+import at.splendit.simonykees.core.constants.ReservedNames;
 
 /**
  * Primitives should not be boxed just for "String" conversion
@@ -27,6 +26,8 @@ import at.splendit.simonykees.core.builder.NodeBuilder;
  * Compliant Solution
  * 
  * int myInt = 4; String myIntString = Integer.toString(myInt);
+ * 
+ * TODO primitive Variables
  * 
  * @author Martin Huter
  * @since 0.9.2
@@ -49,23 +50,80 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 		 * zero arguments the expressions type where the toString is used on
 		 * needs to be a String or a StringLiteral
 		 */
-		if (StringUtils.equals("toString", node.getName().getFullyQualifiedName())) { //$NON-NLS-1$
+		if (StringUtils.equals(ReservedNames.MI_TO_STRING, node.getName().getFullyQualifiedName())) {
 			/**
 			 * First case: Integer.valueOf(myInt).toString()
 			 */
-			if (node.getExpression() != null && ASTNode.METHOD_INVOCATION == node.getExpression().getNodeType()) {
+			if (node.getExpression() == null) {
+				return true;
+			}
 
+			Expression refactorCandidateExpression = null;
+			SimpleName refactorPrimitiveType = null;
+
+			if (ASTNode.METHOD_INVOCATION == node.getExpression().getNodeType()) {
+				MethodInvocation expetedValueOf = (MethodInvocation) node.getExpression();
+				if (StringUtils.equals(ReservedNames.MI_VALUE_OF, expetedValueOf.getName().getFullyQualifiedName())
+						&& null != expetedValueOf.getExpression()
+						&& ASTNode.SIMPLE_NAME == expetedValueOf.getExpression().getNodeType()
+						&& 1 == expetedValueOf.arguments().size()) {
+					refactorPrimitiveType = (SimpleName) expetedValueOf.getExpression();
+					refactorCandidateExpression = (Expression) expetedValueOf.arguments().get(0);
+				}
 			}
 			/**
 			 * Second case: new Integer(myInt).toString()
 			 */
-			else if (true) {
+			else if (ASTNode.CLASS_INSTANCE_CREATION == node.getExpression().getNodeType()) {
+				ClassInstanceCreation expectedPrimitiveNumberClass = (ClassInstanceCreation) node.getExpression();
+				if (ASTNode.SIMPLE_TYPE == expectedPrimitiveNumberClass.getType().getNodeType()
+						&& ASTNode.SIMPLE_NAME == ((SimpleType) expectedPrimitiveNumberClass.getType()).getName()
+								.getNodeType()
+						&& 1 == expectedPrimitiveNumberClass.arguments().size()) {
+					refactorPrimitiveType = (SimpleName) ((SimpleType) expectedPrimitiveNumberClass.getType())
+							.getName();
+					refactorCandidateExpression = (Expression) expectedPrimitiveNumberClass.arguments().get(0);
+
+					/**
+					 * new Float(4D).toString() is not transformable to
+					 * Float.toString(4D) because toString only allows
+					 * primitives that are implicit cast-able to float. doubles
+					 * do not have this property
+					 */
+					if (ReservedNames.FLOAT.equals(refactorPrimitiveType.getIdentifier())
+							&& ASTNode.NUMBER_LITERAL == refactorCandidateExpression.getNodeType()
+							&& ((NumberLiteral) refactorCandidateExpression).getToken()
+									.contains(ReservedNames.DOUBLE_LITERAL)) {
+						refactorPrimitiveType = null;
+						refactorCandidateExpression = null;
+					}
+				}
+			}
+			if (null != refactorPrimitiveType && isPrimitiveNumberClass(refactorPrimitiveType)
+					&& null != refactorCandidateExpression) {
+				if (ASTNode.NUMBER_LITERAL == refactorCandidateExpression.getNodeType()) {
+					NumberLiteral moveTarget = (NumberLiteral) astRewrite.createMoveTarget(refactorCandidateExpression);
+					astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY).insertLast(moveTarget, null);
+					astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, refactorPrimitiveType, null);
+				}
 
 			}
-			//astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(node.getExpression()), null);
+
 		}
 
 		return true;
+	}
+
+	private boolean isPrimitiveNumberClass(SimpleName simpleName) {
+		switch (simpleName.getIdentifier()) {
+		case ReservedNames.INTEGER:
+		case ReservedNames.FLOAT:
+		case ReservedNames.DOUBLE:
+		case ReservedNames.LONG:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	@Override
@@ -87,30 +145,31 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 						&& otherSideTypeBinding.isPrimitive()) {
 					String primitiveClassName;
 					switch (otherSideTypeBinding.getName()) {
-					case "int":
-						primitiveClassName = "Integer";
+					case ReservedNames.INTEGER_PRIMITIVE:
+						primitiveClassName = ReservedNames.INTEGER;
 						break;
-					case "double":
-						primitiveClassName = "Double";
+					case ReservedNames.DOUBLE_PRIMITIVE:
+						primitiveClassName = ReservedNames.DOUBLE;
 						break;
-					case "long":
-						primitiveClassName = "Long";
+					case ReservedNames.LONG_PRIMITIVE:
+						primitiveClassName = ReservedNames.LONG;
 						break;
-					case "float":
-						primitiveClassName = "Float";
+					case ReservedNames.FLOAT_PRIMITIVE:
+						primitiveClassName = ReservedNames.FLOAT;
 						break;
 					default:
 						return true;
 					}
 					SimpleName typeName = NodeBuilder.newSimpleName(node.getAST(), primitiveClassName);
-					
-					SimpleName toStringSimpleName = NodeBuilder.newSimpleName(node.getAST(), "toString"); //$NON-NLS-1$
-					
+
+					SimpleName toStringSimpleName = NodeBuilder.newSimpleName(node.getAST(),
+							ReservedNames.MI_TO_STRING);
+
 					Expression valueParameter = (Expression) astRewrite.createMoveTarget(otherSide);
-					
+
 					MethodInvocation methodInvocation = NodeBuilder.newMethodInvocation(node.getAST(), typeName,
 							toStringSimpleName, valueParameter);
-					
+
 					astRewrite.replace(node, methodInvocation, null);
 				}
 			}
