@@ -171,7 +171,7 @@ public class LicenseManager {
 	}
 
 	private LicenseModel constructLicenseModel(LicenseType licenseType, ZonedDateTime expireDate, ZonedDateTime expireTimeStamp, String productModulNumber) {
-		LicenseModel licenseModel = null;
+		LicenseModel licenseModel;
 
 		switch (licenseType) {
 		case FLOATING:
@@ -179,11 +179,15 @@ public class LicenseManager {
 			licenseModel = new FloatingModel(productModulNumber, expireTimeStamp, sessionId);
 			break;
 		case TRY_AND_BUY:
-			licenseModel = new TryAndBuyModel(productModulNumber, expireDate);
+			String secret = getUniqueNodeIdentifier();
+			licenseModel = new TryAndBuyModel(productModulNumber, expireDate, secret);
 			break;
 		case NODE_LOCKED:
 			String secretKey = getUniqueNodeIdentifier();
 			licenseModel = new NodeLockedModel(productModulNumber, expireDate, secretKey);
+			break;
+		default:
+			licenseModel = null;
 			break;
 		}
 
