@@ -20,6 +20,7 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private ZonedDateTime expirationTimeStamp;
 	private ZonedDateTime subscriptionExpiresDate;
 	private boolean subscriptionStatus;
+	private LicenseStatus licenseStatus;
 
 	private final String PRODUCT_MODULE_NUMBER_KEY = "productModuleNumber"; //$NON-NLS-1$
 	private final String PRODUCT_MODULE_NAME_KEY = "productModuleName";//$NON-NLS-1$
@@ -35,8 +36,10 @@ public class LicenseCheckerImpl implements LicenseChecker {
 		setTimestamp(timestamp);
 		extractValidationData(validationResult);
 		setLicenseeName(licenseeName);
+		LicenseStatus licenseStatus = calLicenseStatus();
+		setLicenseStatus(licenseStatus);
 	}
-	
+
 	private void extractValidationData(ValidationResult validationResult) {
 		extractSubscription(validationResult);
 		extractValidationData(validationResult, LicenseType.FLOATING);
@@ -215,5 +218,54 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	
 	public ZonedDateTime getSubscriptionExpiresDate() {
 		return subscriptionExpiresDate;
+	}
+
+	@Override
+	public LicenseStatus getLicenseStatus() {
+		return licenseStatus;
+	}
+	
+	private void setLicenseStatus(LicenseStatus licenseStatus) {
+		this.licenseStatus = licenseStatus;
+		
+	}
+
+	private LicenseStatus calLicenseStatus() {
+		LicenseType type = getType();
+		LicenseStatus status;
+		
+		switch (type) {
+		case TRY_AND_BUY:
+			if(isValid()) {
+				status = LicenseStatus.TRIAL_REGISTERED;
+			} else {
+				status = LicenseStatus.TRIAL_EXPIRED;
+			}
+			break;
+			
+		case NODE_LOCKED:
+			if(isValid()) {
+				status = LicenseStatus.NODE_LOCKED_REGISTERED;
+			} else {
+				status = LicenseStatus.NODE_LOCKED_EXPIRED;
+			}
+			break;
+			
+		case FLOATING:
+			if(isValid()) {
+				status = LicenseStatus.FLOATING_CHECKED_OUT;
+			} else if(getSubscriptionStatus()) {
+				status = LicenseStatus.FLOATING_OUT_OF_SESSION;
+			} else {
+				status = LicenseStatus.FLOATING_EXPIRED;
+			}
+			break;
+
+		default:
+			status = LicenseStatus.NONE;
+			break;
+		}
+		
+		return status;
 	}
 }

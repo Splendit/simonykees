@@ -27,5 +27,10 @@ public interface LicenseChecker {
 	 */
 	String getLicenseeName();
 	
+	/**
+	 * Returns an {@link LicenseStatus} indicating the current
+	 * status of the license validation.
+	 */
+	LicenseStatus getLicenseStatus();
 	
 }

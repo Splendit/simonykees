@@ -212,7 +212,12 @@ public class PersistenceManager {
 
 		@Override
 		public String getLicenseeName() {
-			return persistence.getLicenseeName().orElse(null);
+			return persistence.getLicenseeName().orElse(""); //$NON-NLS-1$
+		}
+
+		@Override
+		public LicenseStatus getLicenseStatus() {
+			return LicenseStatus.CONNECTION_FAILURE;
 		}
 		
 	}
