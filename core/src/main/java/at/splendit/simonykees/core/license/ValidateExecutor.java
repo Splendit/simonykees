@@ -4,6 +4,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.core.runtime.Status;
+
+import at.splendit.simonykees.core.Activator;
+
 public class ValidateExecutor {
 
 	protected synchronized static void startSchedule(SchedulerEntity se, LicenseeEntity le) {
@@ -13,12 +17,11 @@ public class ValidateExecutor {
 			@Override
 			public void run() {
 				if (se.getDoValidate()) {
+					Activator.log(Status.INFO, "Validation scheduler started", null);
 					LicenseValidator.doValidate(le);
-					System.out.println("start Validate");
 				} else {
-					System.out.println("shutDownValidate");
+					Activator.log(Status.INFO, "Shutting down validation scheduler", null);
 					scheduledExecutor.shutdown();
-
 				}
 
 			}

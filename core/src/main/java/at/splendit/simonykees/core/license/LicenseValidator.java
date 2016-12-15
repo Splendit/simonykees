@@ -2,11 +2,15 @@ package at.splendit.simonykees.core.license;
 
 import java.time.Instant;
 
+import org.eclipse.core.runtime.Status;
+
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.service.LicenseeService;
+
+import at.splendit.simonykees.core.Activator;
 
 public class LicenseValidator {
 
@@ -36,10 +40,7 @@ public class LicenseValidator {
 		} catch (final NetLicensingException e) {
 			ValidationResultCache cache = ValidationResultCache.getInstance();
 			cache.reset();
-			System.out.println("Got NetLicensing exception:" + e);
-			// TODO: in each exception case, a proper behavior should be
-			// triggered.
-
+			Activator.log(Status.WARNING, "Couldn't reach licensing provider", e);
 		}
 	}
 

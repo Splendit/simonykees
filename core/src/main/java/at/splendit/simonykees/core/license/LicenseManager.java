@@ -3,9 +3,14 @@ package at.splendit.simonykees.core.license;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 
+import org.eclipse.core.runtime.Status;
+
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.service.LicenseeService;
+
+import at.splendit.simonykees.core.Activator;
+
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
@@ -76,6 +81,8 @@ public class LicenseManager {
 			licenseType = persistedData.getLicenseType().orElse(null);
 			evaluationExpiresDate = persistedData.getDemoExpirationDate().orElse(null);
 			expirationTimeStamp = persistedData.getExpirationTimeStamp().orElse(null);
+			
+			Activator.log(Status.WARNING, "Couldn't reach licensing provider during pre-validation", e);
 		}
 
 		// construct a license model
@@ -161,7 +168,7 @@ public class LicenseManager {
 				 
 			} catch (NetLicensingException e) {
 				// TODO add a validation status indicating that the checkin was not successful.
-				e.printStackTrace();
+				Activator.log(Status.WARNING, "Couldn't reach licensing provider during check-in request", e);
 			}		
 		}
 	}

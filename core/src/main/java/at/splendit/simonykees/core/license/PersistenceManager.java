@@ -122,8 +122,8 @@ public class PersistenceManager {
 			inputStream.close();
 			
 		} catch (Exception exception) {
-			// TODO: throw an exception or log the error??
-			exception.printStackTrace();
+			Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_decryption_error,
+					exception);
 		}
 		
 		return persistenceModel;
