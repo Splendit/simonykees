@@ -53,7 +53,7 @@ public class PersistenceManager {
 		ZonedDateTime subscriptionExpirationDate = checker.getSubscriptionExpiresDate();
 		LicenseType licenseType = checker.getType();
 		boolean subscriptionStatus = checker.getSubscriptionStatus();
-		boolean lastValidationStatus = checker.getStatus();
+		boolean lastValidationStatus = checker.isValid();
 
 		PersistenceModel persistenceModel = new PersistenceModel(
 				LicenseManager.LICENSEE_NUMBER, 
@@ -159,7 +159,7 @@ public class PersistenceManager {
 		}
 
 		@Override
-		public boolean getStatus() {
+		public boolean isValid() {
 			// check if last validation is earlier than 1h
 			// if type is TryAndBuy
 			//	- check if demo is not expired

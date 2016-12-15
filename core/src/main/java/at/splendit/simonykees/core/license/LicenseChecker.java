@@ -15,7 +15,7 @@ public interface LicenseChecker {
 	/**
 	 * Returns if the status of the license is valid.
 	 */
-	boolean getStatus();
+	boolean isValid();
 	
 	/**
 	 * Returns a time-stamp of the last validation.

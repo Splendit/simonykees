@@ -40,9 +40,9 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private void extractValidationData(ValidationResult validationResult) {
 		extractSubscription(validationResult);
 		extractValidationData(validationResult, LicenseType.FLOATING);
-		if(!getStatus()) {
+		if(!isValid()) {
 			extractValidationData(validationResult, LicenseType.NODE_LOCKED);
-			if(!getStatus()) {
+			if(!isValid()) {
 				extractValidationData(validationResult, LicenseType.TRY_AND_BUY);
 			}
 		}	
@@ -155,7 +155,7 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	}
 
 	@Override
-	public boolean getStatus() {
+	public boolean isValid() {
 		boolean status = false;
 		
 		if(getType().equals(LicenseType.TRY_AND_BUY)) {
