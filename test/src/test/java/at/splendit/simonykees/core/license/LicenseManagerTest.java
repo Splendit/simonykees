@@ -48,6 +48,7 @@ public class LicenseManagerTest {
 		assertTrue(checker.isValid());
 		assertEquals(licensee.getLicenseeName(), checker.getLicenseeName());
 		assertNotNull(checker.getValidationTimeStamp());
+		assertNotNull(checker.getLicenseStatus());
 		
 		// expecting the persisted validation status to comply with the pre-validation data...
 		LicenseChecker checkFromPersistence = persistenceMng.vlidateUsingPersistedData();
@@ -55,5 +56,6 @@ public class LicenseManagerTest {
 		assertTrue(checkFromPersistence.isValid());
 		assertEquals(licensee.getLicenseeName(), checkFromPersistence.getLicenseeName());
 		assertNotNull(checkFromPersistence.getValidationTimeStamp());
+		assertEquals(LicenseStatus.CONNECTION_FAILURE, checkFromPersistence.getLicenseStatus());
 	}
 }
