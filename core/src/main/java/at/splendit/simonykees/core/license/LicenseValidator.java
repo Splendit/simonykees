@@ -2,7 +2,6 @@ package at.splendit.simonykees.core.license;
 
 import java.time.Instant;
 
-import com.labs64.netlicensing.domain.vo.Composition;
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
@@ -32,18 +31,7 @@ public class LicenseValidator {
 			persistenceManager.persistCachedData();
 			
 			// logging validation result...
-			// TODO: use a logger instead of System.out
-			System.out.println(validationResult.getValidations().size());
-
-			for (Composition value : validationResult.getValidations().values()) {
-				System.out.println("model = " + value);
-
-				for (String key : value.getProperties().keySet()) {
-					System.out.print("Key = " + key);
-					System.out.println("  value:  " + value.getProperties().get(key).getValue());
-				}
-
-			}
+			// TODO: log a message that a validation response was received successfully...
 
 		} catch (final NetLicensingException e) {
 			ValidationResultCache cache = ValidationResultCache.getInstance();
