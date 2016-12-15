@@ -71,7 +71,7 @@ public class LicenseManager {
 			expirationTimeStamp = checker.getExpirationTimeStamp();
 			
 		} catch (NetLicensingException e) {
-			PersistenceModel persistedData = persistenceManager.getPersistenceModel();
+			PersistenceModel persistedData = persistenceManager.readPersistedData();
 			
 			licenseType = persistedData.getLicenseType().orElse(null);
 			evaluationExpiresDate = persistedData.getDemoExpirationDate().orElse(null);
