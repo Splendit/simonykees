@@ -8,6 +8,13 @@ import java.util.Optional;
 
 public class PersistenceModel implements Serializable {
 	
+	private static final long serialVersionUID = 1L;
+	
+	private static final String SEPARATOR_REGEX = ",";
+	private static final String KEY_VALUE_SEPARATOR_REGEX = "\\|";
+	private static final String SEPARATOR = ",";
+	private static final String KEY_VALUE_SEPARATOR = "|";
+	
 	private static final String LICENSEE_NUMBER_KEY = "licensee-number"; //$NON-NLS-1$
 	private static final String LICENSEE_NAME_KEY = "licensee-name"; //$NON-NLS-1$
 	private static final String LAST_VALIDATION_STATUS_KEY = "last-validation-status"; //$NON-NLS-1$
@@ -48,11 +55,11 @@ public class PersistenceModel implements Serializable {
 	}
 	
 	public Optional<ZonedDateTime> getExpirationTimeStamp() {
-		return Optional.of(expirationTimeStamp);
+		return Optional.ofNullable(expirationTimeStamp);
 	}
 
 	public Optional<String> getLicenseeNumber() {
-		return Optional.of(licenseeNumber);
+		return Optional.ofNullable(licenseeNumber).filter(s -> !s.isEmpty());
 	}
 
 	private void setLicenseeNumber(String licenseeNumber) {
@@ -60,7 +67,7 @@ public class PersistenceModel implements Serializable {
 	}
 
 	public Optional<String> getLicenseeName() {
-		return Optional.of(licenseeName);
+		return Optional.ofNullable(licenseeName).filter(s -> !s.isEmpty());
 	}
 
 	private void setLicenseeName(String licenseeName) {
@@ -68,7 +75,7 @@ public class PersistenceModel implements Serializable {
 	}
 
 	public Optional<Boolean> getLastValidationStatus() {
-		return Optional.of(lastValidationStatus);
+		return Optional.ofNullable(lastValidationStatus);
 	}
 
 	private void setLastValidationStatus(boolean lastValidationStatus) {
@@ -76,7 +83,7 @@ public class PersistenceModel implements Serializable {
 	}
 
 	public Optional<LicenseType> getLicenseType() {
-		return Optional.of(licenseType);
+		return Optional.ofNullable(licenseType);
 	}
 
 	private void setLicenseType(LicenseType licenseType) {
@@ -84,7 +91,7 @@ public class PersistenceModel implements Serializable {
 	}
 
 	public Optional<Instant> getLastValidationTimestamp() {
-		return Optional.of(lastValidationTimestamp);
+		return Optional.ofNullable(lastValidationTimestamp);
 	}
 
 	private void setLastValidationTimestamp(Instant lastValidationTimestamp) {
@@ -92,7 +99,7 @@ public class PersistenceModel implements Serializable {
 	}
 
 	public Optional<ZonedDateTime> getDemoExpirationDate() {
-		return Optional.of(demoExpirationDate);
+		return Optional.ofNullable(demoExpirationDate);
 	}
 
 	private void setDemoExpirationDate(ZonedDateTime demoExpirationDate) {
@@ -100,7 +107,7 @@ public class PersistenceModel implements Serializable {
 	}
 
 	public Optional<ZonedDateTime> getSubscriptionExpirationDate() {
-		return Optional.of(subscriptionExpirationDate);
+		return Optional.ofNullable(subscriptionExpirationDate);
 	}
 
 	private void setSubscriptionExpirationDate(ZonedDateTime subscriptionExpirationDate) {
@@ -108,7 +115,7 @@ public class PersistenceModel implements Serializable {
 	}
 
 	public Optional<Boolean> getSubscriptionStatus() {
-		return Optional.of(subscriptionStatus);
+		return Optional.ofNullable(subscriptionStatus);
 	}
 
 	private void setSubscriptionStatus(boolean subscriptionStatus) {
@@ -117,12 +124,12 @@ public class PersistenceModel implements Serializable {
 	
 	public static PersistenceModel fromString(String strPersistenceModel) {
 		HashMap<String, String> data = new HashMap<>();
-		String[] splitedByComma = strPersistenceModel.split(",");
+		String[] splitedByComma = strPersistenceModel.split(SEPARATOR_REGEX);
 		for(String row : splitedByComma) {
-			String [] splitedRow = row.split(":");
+			String [] splitedRow = row.split(KEY_VALUE_SEPARATOR_REGEX);
 			String key = splitedRow[0];
 			String val = "";
-			if(splitedRow.length > 0) {
+			if(splitedRow.length > 1) {
 				val = splitedRow[1];
 			}
 			data.put(key, val);
@@ -189,44 +196,44 @@ public class PersistenceModel implements Serializable {
 	
 	@Override
 	public String toString() {
+
 		StringBuffer stringBuffer = new StringBuffer();
-		stringBuffer.append(LICENSEE_NUMBER_KEY + ":" + getLicenseeNumber().orElse("") + ",");
-		stringBuffer.append(LICENSEE_NAME_KEY + ":" + getLicenseeName().orElse("") + ",");
+		stringBuffer.append(LICENSEE_NUMBER_KEY + KEY_VALUE_SEPARATOR + getLicenseeNumber().orElse("") + SEPARATOR);
+		stringBuffer.append(LICENSEE_NAME_KEY + KEY_VALUE_SEPARATOR + getLicenseeName().orElse("") + SEPARATOR);
 		
-		stringBuffer.append(LAST_VALIDATION_STATUS_KEY + ":");
+		stringBuffer.append(LAST_VALIDATION_STATUS_KEY + KEY_VALUE_SEPARATOR);
 		getLastValidationStatus()
 		.ifPresent(status -> stringBuffer.append(status.toString()));
-		stringBuffer.append(",");
+		stringBuffer.append(SEPARATOR);
 		
-		stringBuffer.append(LICENSE_TYPE_KEY + ":");
+		stringBuffer.append(LICENSE_TYPE_KEY + KEY_VALUE_SEPARATOR);
 		getLicenseType()
 		.ifPresent(licenseType -> stringBuffer.append(licenseType.toString()));
-		stringBuffer.append(",");
+		stringBuffer.append(SEPARATOR);
 		
-		stringBuffer.append(LAST_VALIDATION_TIMESTAMP_KEY + ":");
-		getLastValidationStatus()
-		.ifPresent(lastValStatus -> stringBuffer.append(lastValStatus.toString()));
-		stringBuffer.append(",");
+		stringBuffer.append(LAST_VALIDATION_TIMESTAMP_KEY + KEY_VALUE_SEPARATOR);
+		getLastValidationTimestamp()
+		.ifPresent(timeStamp -> stringBuffer.append(timeStamp.toString()));
+		stringBuffer.append(SEPARATOR);
 		
-		stringBuffer.append(DEMO_EXPIRATION_KEY + ":");
+		stringBuffer.append(DEMO_EXPIRATION_KEY + KEY_VALUE_SEPARATOR);
 		getDemoExpirationDate()
-		.ifPresent(demoExpireDate -> stringBuffer.append(demoExpireDate.toString()));
-		stringBuffer.append(",");
+		.ifPresent(demoExpireDate -> stringBuffer.append(demoExpireDate));
+		stringBuffer.append(SEPARATOR);
 		
-		stringBuffer.append(EXPIRATION_TIMESTAMP_KEY + ":");
+		stringBuffer.append(EXPIRATION_TIMESTAMP_KEY + KEY_VALUE_SEPARATOR);
 		getExpirationTimeStamp()
-		.ifPresent(expirationTimeStamp -> stringBuffer.append(expirationTimeStamp.toString()));
-		stringBuffer.append(",");
+		.ifPresent(expirationTimeStamp -> stringBuffer.append(expirationTimeStamp));
+		stringBuffer.append(SEPARATOR);
 		
-		stringBuffer.append(SUBSCRIPTION_EXPIRES_KEY + ":");
+		stringBuffer.append(SUBSCRIPTION_EXPIRES_KEY + KEY_VALUE_SEPARATOR);
 		getSubscriptionExpirationDate()
-		.ifPresent(subscriptionExpires -> stringBuffer.append(subscriptionExpires.toString()));
-		stringBuffer.append(",");
+		.ifPresent(subscriptionExpires -> stringBuffer.append(subscriptionExpires));
+		stringBuffer.append(SEPARATOR);
 		
-		stringBuffer.append(SUBSCRIPTION_STATUS_KEY + ":");
+		stringBuffer.append(SUBSCRIPTION_STATUS_KEY + KEY_VALUE_SEPARATOR);
 		getSubscriptionStatus()
 		.ifPresent(subscriptionStatus -> stringBuffer.append(subscriptionStatus.toString()));
-		stringBuffer.append(",");
 		
 		return stringBuffer.toString();
 	}

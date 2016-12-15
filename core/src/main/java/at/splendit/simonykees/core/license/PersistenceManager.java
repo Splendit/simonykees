@@ -11,7 +11,12 @@ import java.util.Optional;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.eclipse.core.runtime.Status;
+
 import com.labs64.netlicensing.domain.vo.ValidationResult;
+
+import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.i18n.ExceptionMessages;
 
 public class PersistenceManager {
 	
@@ -23,18 +28,7 @@ public class PersistenceManager {
 	private static final String KEY = "SOME_SECRET_KEY_"; //$NON-NLS-1$
 
 	private PersistenceManager() {
-		initPersistenceManager();
-	}
 
-	private void initPersistenceManager() {
-		ValidationResultCache cache = ValidationResultCache.getInstance();
-		if (!cache.isEmpty()) {
-			persistCachedData();	
-		} else {
-			PersistenceModel pesistenceModel = readPersistedData();
-			setPersistenceModel(pesistenceModel);
-			persist();
-		}
 	}
 
 	public synchronized static PersistenceManager getInstance() {
@@ -78,7 +72,7 @@ public class PersistenceManager {
 	/**
 	 * Stores {@link PersistenceManager#persistenceModel} into secure storage.
 	 */
-	private void persist() {
+	void persist() {
 		PersistenceModel persistenceModel = getPersistenceModel();
 		String licenseModelData = persistenceModel.toString();
 		
@@ -95,7 +89,8 @@ public class PersistenceManager {
 			
 		} catch (Exception exception) {
 			// TODO: throw an exception or log the error??
-			exception.printStackTrace();
+				Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_encryption_error,
+						exception);
 		}
 		
 				
@@ -107,7 +102,7 @@ public class PersistenceManager {
 	 * 
 	 * @return An instance of {@link PersistenceModel}.
 	 */
-	private PersistenceModel readPersistedData() {
+	public PersistenceModel readPersistedData() {
 		PersistenceModel persistenceModel = null;
 		
 		try {
@@ -142,13 +137,12 @@ public class PersistenceManager {
 		PersistenceModel persistenceModel = readPersistedData();
 		return new OfflineLicenseChecker(persistenceModel);
 	}
-
+	
 	public PersistenceModel getPersistenceModel() {
-		persistenceModel = readPersistedData();
 		return persistenceModel;
 	}
 
-	private void setPersistenceModel(PersistenceModel persistenceModel) {
+	void setPersistenceModel(PersistenceModel persistenceModel) {
 		this.persistenceModel = persistenceModel;
 	}
 	
