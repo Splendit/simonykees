@@ -14,9 +14,11 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
 public class ValidationResultCache {
 	private static ValidationResultCache instance;
 	
-	private final String TIME_STAMP_KEY = "time-stamp";
-	private final String VALIDATION_RESULT_KEY = "validation-result";
-	private final String IS_EMPTY_KEY = "is-empty";
+	private final String TIME_STAMP_KEY = "time-stamp"; //$NON-NLS-1$
+	private final String VALIDATION_RESULT_KEY = "validation-result"; //$NON-NLS-1$
+	private final String IS_EMPTY_KEY = "is-empty"; //$NON-NLS-1$
+	private final String LICENSEE_NAME = "licensee-name"; //$NON-NLS-1$
+	private final String LICENSEE_NUMBER = "licensee-number"; //$NON-NLS-1$
 	private HashMap<String, Object> cacheHashMap = new HashMap<>();
 
 
@@ -30,10 +32,12 @@ public class ValidationResultCache {
 		cacheHashMap.put(IS_EMPTY_KEY, true);
 	}
 	
-	public void updateCachedResult(ValidationResult validationResult, Instant timestamp) {
+	public void updateCachedResult(ValidationResult validationResult, String licenseeName, String licenseeNumber, Instant timestamp) {
 		cacheHashMap.put(TIME_STAMP_KEY, timestamp);
 		cacheHashMap.put(VALIDATION_RESULT_KEY, validationResult);
 		cacheHashMap.put(IS_EMPTY_KEY, false);
+		cacheHashMap.put(LICENSEE_NAME, licenseeName);
+		cacheHashMap.put(LICENSEE_NUMBER, licenseeNumber);
 	}
 	
 	public ValidationResult getCachedValidationResult() {
@@ -48,6 +52,14 @@ public class ValidationResultCache {
 	
 	public Boolean isEmpty() {
 		return (Boolean) cacheHashMap.get(IS_EMPTY_KEY);
+	}
+	
+	public String getLicenseName() {
+		return (String) cacheHashMap.get(LICENSEE_NAME);
+	}
+	
+	public String getLicenseeNumber() {
+		return (String) cacheHashMap.get(LICENSEE_NUMBER);
 	}
 
 	public synchronized static ValidationResultCache getInstance() {

@@ -13,10 +13,12 @@ public class FloatingModel extends LicenseModel {
 	private final String ACTION_CHECK_IN_VAL = "checkIn"; //$NON-NLS-1$
 
 	private String sessionId;
+	private String productModuleNumber;
 
 	public FloatingModel(String productModuleNumber, ZonedDateTime expireDate, String sessionId) {
-		super(productModuleNumber, LicenseType.FLOATING, expireDate);
+		super(LicenseType.FLOATING, expireDate);
 		setSessionId(sessionId);
+		setProductModuleNumber(productModuleNumber);
 
 	}
 
@@ -55,5 +57,14 @@ public class FloatingModel extends LicenseModel {
 
 		return validationParams;
 	}
+	
+	public String getProductModuleNumber() {
+		return this.productModuleNumber;
+	}
+	
+	private void setProductModuleNumber(String productModuleNumber){
+		this.productModuleNumber = productModuleNumber;
+	}
+
 
 }

@@ -8,8 +8,8 @@ public class NodeLockedModel extends LicenseModel {
 
 	private String secretKey;
 	
-	public NodeLockedModel(String productModuleNumber, ZonedDateTime expireDate, String secretKey) {
-		super(productModuleNumber, LicenseType.NODE_LOCKED, expireDate);
+	public NodeLockedModel(ZonedDateTime expireDate, String secretKey) {
+		super(LicenseType.NODE_LOCKED, expireDate);
 		setSecretKey(secretKey);
 	}
 

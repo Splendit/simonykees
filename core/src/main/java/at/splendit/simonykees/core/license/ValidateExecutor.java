@@ -9,6 +9,8 @@ import org.eclipse.core.runtime.Status;
 import at.splendit.simonykees.core.Activator;
 
 public class ValidateExecutor {
+	
+	private static ScheduledExecutorService scheduler;
 
 	protected synchronized static void startSchedule(SchedulerEntity se, LicenseeEntity le) {
 		final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
@@ -23,9 +25,32 @@ public class ValidateExecutor {
 					Activator.log(Status.INFO, "Shutting down validation scheduler", null);
 					scheduledExecutor.shutdown();
 				}
-
 			}
 		}, 0, se.getValidateInterval(), TimeUnit.SECONDS);
-
+		
+		scheduler = scheduledExecutor;
+	}
+	
+	public synchronized static void shutDownScheduler() {
+		if(scheduler != null) {
+			Activator.log(Status.INFO, "Shutting down validation scheduler", null);
+			scheduler.shutdown();
+		}
+	}
+	
+	public static boolean isTerminated() {
+		boolean isTerminated = true;
+		if(scheduler != null) {
+			isTerminated = scheduler.isTerminated();
+		}
+		return isTerminated;
+	}
+	
+	public static boolean isShutDown() {
+		boolean isShutDown = true;
+		if(scheduler != null) {
+			isShutDown = scheduler.isShutdown();
+		}
+		return isShutDown;
 	}
 }

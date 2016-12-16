@@ -21,6 +21,7 @@ public class LicenseValidator {
 			// preparing validation parameters...
 			ValidationParameters validationParameters = licensee.getValidationParams();
 			String licenseeNumber = licensee.getLicenseeNumber();
+			String licenseeName = licensee.getLicenseeName();
 			Context context = RestApiConnection.getAPIRestConnection().getContext();
 			
 			Instant timestamp = Instant.now();
@@ -30,12 +31,12 @@ public class LicenseValidator {
 
 			// caching and persisting the validation result...
 			ValidationResultCache cache = ValidationResultCache.getInstance();
-			cache.updateCachedResult(validationResult, timestamp);
+			cache.updateCachedResult(validationResult, licenseeName, licenseeNumber, timestamp);
 			PersistenceManager persistenceManager = PersistenceManager.getInstance();
 			persistenceManager.persistCachedData();
 			
 			// logging validation result...
-			// TODO: log a message that a validation response was received successfully...
+			//Activator.log("License validation response received successfully ");
 
 		} catch (final NetLicensingException e) {
 			ValidationResultCache cache = ValidationResultCache.getInstance();

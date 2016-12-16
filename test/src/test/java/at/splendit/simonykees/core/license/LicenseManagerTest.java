@@ -2,12 +2,25 @@ package at.splendit.simonykees.core.license;
 
 import static org.junit.Assert.*;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class LicenseManagerTest {
 	
+	private static final String LICENSEE_NUMBER = "IITAK75GN";
+	private static final String LICENSEE_NAME = "License-Ali-Test";
+	
+	@BeforeClass
+	public static void setUpLicensee() {
+		prepareLicensee();
+	}
+	
 	@Test
 	public void testInitLicenseManager() {
+
 		LicenseManager instance = LicenseManager.getInstance();
 		LicenseModel licenseModel = instance.getLicenseModel();
 		LicenseeEntity licensee = instance.getLicensee();
@@ -57,5 +70,21 @@ public class LicenseManagerTest {
 		assertEquals(licensee.getLicenseeName(), checkFromPersistence.getLicenseeName());
 		assertNotNull(checkFromPersistence.getValidationTimeStamp());
 		assertEquals(LicenseStatus.CONNECTION_FAILURE, checkFromPersistence.getLicenseStatus());
+	}
+	
+	private static void prepareLicensee() {
+		PersistenceManager persistenceMng = PersistenceManager.getInstance();
+		PersistenceModel persistenceModel = new PersistenceModel(
+				LICENSEE_NUMBER, 
+				LICENSEE_NAME, 
+				true, 
+				LicenseType.FLOATING, 
+				Instant.now(), 
+				ZonedDateTime.now().plusDays(1),
+				ZonedDateTime.now().plusHours(1), 
+				ZonedDateTime.now().plusYears(1), 
+				true);
+		persistenceMng.setPersistenceModel(persistenceModel);
+		persistenceMng.persist();
 	}
 }

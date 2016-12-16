@@ -46,7 +46,9 @@ public class PersistenceManager {
 		ValidationResultCache cache = ValidationResultCache.getInstance();
 		Instant timestamp = cache.getValidationTimestamp();
 		ValidationResult validationResult = cache.getCachedValidationResult();
-		LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, timestamp, LicenseManager.LICENSEE_NAME);
+		String licenseeName = cache.getLicenseName();
+		String licenseeNumber = cache.getLicenseeNumber();
+		LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, timestamp, licenseeName);
 
 		ZonedDateTime demoExpirationDate = checker.getEvaluationExpiresDate();
 		ZonedDateTime expirationTimeStamp = checker.getExpirationTimeStamp();
@@ -54,10 +56,10 @@ public class PersistenceManager {
 		LicenseType licenseType = checker.getType();
 		boolean subscriptionStatus = checker.getSubscriptionStatus();
 		boolean lastValidationStatus = checker.isValid();
-
+		
 		PersistenceModel persistenceModel = new PersistenceModel(
-				LicenseManager.LICENSEE_NUMBER, 
-				LicenseManager.LICENSEE_NAME, 
+				licenseeNumber,
+				licenseeName, 
 				lastValidationStatus,
 				licenseType, 
 				timestamp,
@@ -91,9 +93,7 @@ public class PersistenceManager {
 			// TODO: throw an exception or log the error??
 				Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_encryption_error,
 						exception);
-		}
-		
-				
+		}		
 	}
 	
 	/**
@@ -102,7 +102,7 @@ public class PersistenceManager {
 	 * 
 	 * @return An instance of {@link PersistenceModel}.
 	 */
-	public PersistenceModel readPersistedData() {
+	public Optional<PersistenceModel> readPersistedData() {
 		PersistenceModel persistenceModel = null;
 		
 		try {
@@ -126,7 +126,7 @@ public class PersistenceManager {
 					exception);
 		}
 		
-		return persistenceModel;
+		return Optional.ofNullable(persistenceModel);
 	}
 
 	/**
@@ -134,7 +134,8 @@ public class PersistenceManager {
 	 * object.
 	 */
 	public LicenseChecker vlidateUsingPersistedData() {
-		PersistenceModel persistenceModel = readPersistedData();
+		PersistenceModel persistenceModel = readPersistedData()
+				.orElse(new PersistenceModel("", "", false, null, null, null, null, null, false));
 		return new OfflineLicenseChecker(persistenceModel);
 	}
 	
@@ -220,5 +221,38 @@ public class PersistenceManager {
 			return LicenseStatus.CONNECTION_FAILURE;
 		}
 		
+	}
+
+	public Optional<String> getPersistedLicenseeName() {
+		String licenseeName =
+				readPersistedData()
+					.flatMap(PersistenceModel::getLicenseeName)
+					.orElse("");
+		
+		return Optional.of(licenseeName).filter(s -> !s.isEmpty());
+	}
+
+	public Optional<String> getPersistedLicenseeNumber() {
+		String licenseeNumber =
+				readPersistedData()
+					.flatMap(PersistenceModel::getLicenseeNumber)
+					.orElse("");
+		
+		return Optional.of(licenseeNumber).filter(s -> !s.isEmpty());
+	}
+
+	public void updateLicenseeData(String licenseeName, String licenseeNumber) {
+		PersistenceModel persistenceModel = 
+				readPersistedData()
+				.orElse(new PersistenceModel(
+							licenseeNumber,
+							licenseeName,
+							false,
+							null, null, null, null, null, 
+							false
+						));
+		persistenceModel.updateLicenseeCredential(licenseeName, licenseeNumber);
+		setPersistenceModel(persistenceModel);
+		persist();
 	}
 }

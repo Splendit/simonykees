@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.license;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 import org.eclipse.core.runtime.Status;
 
@@ -24,10 +25,9 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
  */
 public class LicenseManager {
 
-	public static final String LICENSEE_NAME = "License-Ali-Test"; //$NON-NLS-1$ to be provided  as a parameter or to be read from a secure storage.
-	public static final String LICENSEE_NUMBER = "IITAK75GN"; //$NON-NLS-1$ to be provided as a parameter or to be read from a secure storage.
-	private final String PRODUCT_NUMBER = "PNZNF7Y7E"; //$NON-NLS-1$
-	private final String PRODUCT_MODULE_NUMBER = "M6IS9TIWG"; //$NON-NLS-1$ product module number for floating
+	private static final String DEFAULT_LICENSEE_NUMBER = "trial-licensee-number"; //$NON-NLS-1$
+	private static final String PRODUCT_NUMBER = "PNZNF7Y7E"; //$NON-NLS-1$
+	private static final String PRODUCT_MODULE_NUMBER = "M6IS9TIWG"; //$NON-NLS-1$ product module number for floating model
 
 	private final boolean DO_VALIDATE = true;
 	private final long VALIDATE_INTERVAL_IN_SECONDS = 5; // validation interval in seconds.
@@ -37,6 +37,9 @@ public class LicenseManager {
 	private SchedulerEntity schedulerEntity;
 	private LicenseeEntity licensee;
 	private LicenseModel licenseModel;
+	
+	private String licenseeName;
+	private String licenseeNumber;
 
 	private LicenseManager() {
 		// TODO: throw an exception if the instance is not null...
@@ -59,15 +62,19 @@ public class LicenseManager {
 		LicenseType licenseType;
 		ZonedDateTime evaluationExpiresDate;
 		ZonedDateTime expirationTimeStamp;
+		String licenseeName = persistenceManager.getPersistedLicenseeName().orElse("");
+		setLicenseeName(licenseeName);
+		String licenseeNumber = persistenceManager.getPersistedLicenseeNumber().orElse(DEFAULT_LICENSEE_NUMBER);
+		setLicenseeNumber(licenseeNumber);
 		
 		try {
 			// make a pre-validate call to get the license model relevant information...
-			ValidationResult validationResult = preValidate(PRODUCT_NUMBER, PRODUCT_MODULE_NUMBER, LICENSEE_NUMBER, LICENSEE_NAME);
-			LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, now, LICENSEE_NAME);
+			ValidationResult validationResult = preValidate(PRODUCT_NUMBER, PRODUCT_MODULE_NUMBER, licenseeNumber, licenseeName);
+			LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, now, licenseeName);
 			
 			// cash and persist pre-validation...
 			ValidationResultCache cache = ValidationResultCache.getInstance();
-			cache.updateCachedResult(validationResult, now);
+			cache.updateCachedResult(validationResult, licenseeName, licenseeNumber, now);
 			persistenceManager.persistCachedData();
 			
 			// extract pre-validation result
@@ -76,13 +83,23 @@ public class LicenseManager {
 			expirationTimeStamp = checker.getExpirationTimeStamp();
 			
 		} catch (NetLicensingException e) {
-			PersistenceModel persistedData = persistenceManager.readPersistedData();
-			
-			licenseType = persistedData.getLicenseType().orElse(null);
-			evaluationExpiresDate = persistedData.getDemoExpirationDate().orElse(null);
-			expirationTimeStamp = persistedData.getExpirationTimeStamp().orElse(null);
+			Optional<PersistenceModel> persistedData = persistenceManager.readPersistedData();
 			
 			Activator.log(Status.WARNING, "Couldn't reach licensing provider during pre-validation", e);
+			
+			licenseType = 
+					persistedData
+						.flatMap(PersistenceModel::getLicenseType)
+						.orElse(LicenseType.TRY_AND_BUY);
+			evaluationExpiresDate = 
+					persistedData
+						.flatMap(PersistenceModel::getDemoExpirationDate)
+						.orElse(null);
+			expirationTimeStamp = 
+					persistedData
+						.flatMap(PersistenceModel::getExpirationTimeStamp)
+						.orElse(null);
+			
 		}
 
 		// construct a license model
@@ -90,7 +107,7 @@ public class LicenseManager {
 		setLicenseModel(licenseModel);
 
 		// construct a licensee object...
-		LicenseeEntity licensee = new LicenseeEntity(LICENSEE_NAME, LICENSEE_NUMBER, licenseModel, PRODUCT_NUMBER);
+		LicenseeEntity licensee = new LicenseeEntity(licenseeName, licenseeNumber, licenseModel, PRODUCT_NUMBER);
 		setLicensee(licensee);
 
 		// start validate scheduler
@@ -108,7 +125,7 @@ public class LicenseManager {
 										 String licenseeName) throws NetLicensingException {
 		
 		Context context = RestApiConnection.getAPIRestConnection().getContext();
-		ValidationResult preValidationResult = null;
+		ValidationResult preValidationResult;
 		ZonedDateTime now = ZonedDateTime.now();
 		// to be used only during pre-validation, as a expiration date.
 		ZonedDateTime nowInOneYear = now.plusYears(1);
@@ -119,8 +136,8 @@ public class LicenseManager {
 		// pre-validation with floating license model...
 		LicenseeEntity licensee = new LicenseeEntity(licenseeName, licenseeNumber, floatingModel, productNumber);
 		ValidationParameters valParams = licensee.getValidationParams();
-		logPrevalidationRequest(LICENSEE_NUMBER, valParams);
-		preValidationResult = LicenseeService.validate(context, LICENSEE_NUMBER, valParams);
+		logPrevalidationRequest(licenseeNumber, valParams);
+		preValidationResult = LicenseeService.validate(context, licenseeNumber, valParams);
 		logPrevalidationResponse(preValidationResult);
 
 		return preValidationResult;
@@ -156,15 +173,17 @@ public class LicenseManager {
 	 */
 	public void checkIn() {
 		LicenseModel licenseModel = getLicenseModel();
+		PersistenceManager persistMng = PersistenceManager.getInstance();
 		if(licenseModel instanceof FloatingModel){
 			Context context = RestApiConnection.getAPIRestConnection().getContext();
 			FloatingModel floatingModel = (FloatingModel)licenseModel;
 			ValidationParameters checkingValParameters = floatingModel.getCheckInValidationParameters();
 			try {
 				Instant now = Instant.now();
-				ValidationResult checkinResult = LicenseeService.validate(context, LICENSEE_NUMBER, checkingValParameters);
+				ValidationResult checkinResult = LicenseeService.validate(context, getLicenseeNumber(), checkingValParameters);
 				ValidationResultCache cache = ValidationResultCache.getInstance();
-				cache.updateCachedResult(checkinResult, now);
+				cache.updateCachedResult(checkinResult, getLicenseeName(), getLicenseeNumber(), now);
+				persistMng.persistCachedData();
 				 
 			} catch (NetLicensingException e) {
 				// TODO add a validation status indicating that the checkin was not successful.
@@ -187,14 +206,14 @@ public class LicenseManager {
 			break;
 		case TRY_AND_BUY:
 			String secret = getUniqueNodeIdentifier();
-			licenseModel = new TryAndBuyModel(productModulNumber, expireDate, secret);
+			licenseModel = new TryAndBuyModel(expireDate, secret);
 			break;
 		case NODE_LOCKED:
 			String secretKey = getUniqueNodeIdentifier();
-			licenseModel = new NodeLockedModel(productModulNumber, expireDate, secretKey);
+			licenseModel = new NodeLockedModel(expireDate, secretKey);
 			break;
 		default:
-			licenseModel = null;
+			licenseModel = new TryAndBuyModel(expireDate, getUniqueNodeIdentifier());
 			break;
 		}
 
@@ -212,7 +231,7 @@ public class LicenseManager {
 		if(!cache.isEmpty()) {
 			ValidationResult validationResult = cache.getCachedValidationResult();
 			Instant timestamp = cache.getValidationTimestamp();
-			checker = new LicenseCheckerImpl(validationResult, timestamp, LICENSEE_NAME);
+			checker = new LicenseCheckerImpl(validationResult, timestamp, getLicenseeName());
 		} else {
 			PersistenceManager persistenceManager = PersistenceManager.getInstance();
 			checker = persistenceManager.vlidateUsingPersistedData();
@@ -231,6 +250,32 @@ public class LicenseManager {
 		this.licenseModel = licenseModel;
 	}
 
+	public void updateLicenseeNumber(String licenseeNumber, String licenseeName) {
+		Activator.log(Status.INFO, "Updating licensee credentials", null);
+		setLicenseeName(licenseeName);
+		setLicenseeNumber(licenseeNumber);
+		PersistenceManager persistence = PersistenceManager.getInstance();
+		persistence.updateLicenseeData(licenseeName, licenseeNumber);
+		// re-initiate manager as a new licenseeNumber is received...
+		ValidateExecutor.shutDownScheduler();
+		initManager();
+	}
+	
+	public String getLicenseeNumber() {
+		return this.licenseeNumber;
+	}
+	
+	private void setLicenseeNumber(String licenseeNumber) {
+		this.licenseeNumber = licenseeNumber;
+	}
+	
+	private String getLicenseeName() {
+		return this.licenseeName;
+	}
+	
+	private void setLicenseeName(String licenseeName) {
+		this.licenseeName = licenseeName;
+	}
 	// TODO: override clone()
 	// @Override
 	// public Object clone(){

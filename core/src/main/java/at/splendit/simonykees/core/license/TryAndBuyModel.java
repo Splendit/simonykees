@@ -8,8 +8,8 @@ public class TryAndBuyModel extends LicenseModel {
 
 	private String secretKey;
 	
-	public TryAndBuyModel(String productModuleNumber, ZonedDateTime expireDate, String secretKey) {
-		super(productModuleNumber, LicenseType.TRY_AND_BUY, expireDate);
+	public TryAndBuyModel(ZonedDateTime expireDate, String secretKey) {
+		super(LicenseType.TRY_AND_BUY, expireDate);
 		setSecretKey(secretKey);
 	}
 

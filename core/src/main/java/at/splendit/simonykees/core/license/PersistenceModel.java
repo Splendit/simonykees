@@ -237,5 +237,10 @@ public class PersistenceModel implements Serializable {
 		
 		return stringBuffer.toString();
 	}
+	
+	public void updateLicenseeCredential(String licenseeName, String licenseeNumber) {
+		setLicenseeName(licenseeName);
+		setLicenseeNumber(licenseeNumber);
+	}
 
 }
