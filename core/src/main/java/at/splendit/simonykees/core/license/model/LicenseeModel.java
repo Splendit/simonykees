@@ -1,8 +1,8 @@
-package at.splendit.simonykees.core.license;
+package at.splendit.simonykees.core.license.model;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
-public class LicenseeEntity {
+public class LicenseeModel {
 
 	private String licenseeName;
 	private String licenseeNumber;
@@ -10,7 +10,7 @@ public class LicenseeEntity {
 	private LicenseModel licenseModel;
 	private String productNumber;
 
-	public LicenseeEntity(String licenseeName, String licenseeNumber, LicenseModel licenseModel, String productNumber) {
+	public LicenseeModel(String licenseeName, String licenseeNumber, LicenseModel licenseModel, String productNumber) {
 		setLicenseeName(licenseeName);
 		setLicenseeNumber(licenseeNumber);
 		setLicenseModel(licenseModel);

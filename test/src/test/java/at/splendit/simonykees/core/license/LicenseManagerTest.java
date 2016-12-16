@@ -4,18 +4,30 @@ import static org.junit.Assert.*;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
+import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import at.splendit.simonykees.core.license.model.LicenseModel;
+import at.splendit.simonykees.core.license.model.LicenseeModel;
+import at.splendit.simonykees.core.license.model.PersistenceModel;
+
 public class LicenseManagerTest {
 	
-	private static final String LICENSEE_NUMBER = "IITAK75GN";
-	private static final String LICENSEE_NAME = "License-Ali-Test";
+	private static final String LICENSEE_NUMBER = "IPWAY9YZI"; //$NON-NLS-1$
+	private static final String LICENSEE_NAME = ""; //$NON-NLS-1$
 	
 	@BeforeClass
 	public static void setUpLicensee() {
 		prepareLicensee();
+	}
+	
+	@After
+	public void checkId() {
+		LicenseManager instance = LicenseManager.getInstance();
+		instance.checkIn();
 	}
 	
 	@Test
@@ -23,7 +35,7 @@ public class LicenseManagerTest {
 
 		LicenseManager instance = LicenseManager.getInstance();
 		LicenseModel licenseModel = instance.getLicenseModel();
-		LicenseeEntity licensee = instance.getLicensee();
+		LicenseeModel licensee = instance.getLicensee();
 		
 		assertNotNull(licensee);
 		assertNotNull(licenseModel);
@@ -34,23 +46,25 @@ public class LicenseManagerTest {
 	}
 	
 	@Test
-	public void testValidator() {
+	public void testValidator() throws InterruptedException {
 		// having a licensee with license model from the prevalidation... 
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		ValidationResultCache cache = ValidationResultCache.getInstance();
 		LicenseManager licenseMng = LicenseManager.getInstance();
 		LicenseModel licenseModel = licenseMng.getLicenseModel();
-		LicenseeEntity licensee = licenseMng.getLicensee();
+		LicenseeModel licensee = licenseMng.getLicensee();
 		
 		assertFalse(
 				"Expecting cache to not be empty after prevalidation...", 
 				cache.isEmpty());
-		
-		cache.reset();
-		assertTrue("Expecting cache to be empty after reseting it...", cache.isEmpty());
+
 		
 		// when sending a routine validate call...
-		LicenseValidator.doValidate(licensee);
+		Thread.sleep(13000);
+		Optional<PersistenceModel> optPm = persistenceMng.readPersistedData();
+		assertTrue(optPm.isPresent());
+		PersistenceModel pm = optPm.get();
+		assertEquals(LICENSEE_NUMBER, pm.getLicenseeNumber().orElse(""));
 		
 		// expecting the validation result to comply with the pre-validation data...
 		assertFalse(
@@ -72,13 +86,72 @@ public class LicenseManagerTest {
 		assertEquals(LicenseStatus.CONNECTION_FAILURE, checkFromPersistence.getLicenseStatus());
 	}
 	
+	@Test
+	public void testFloatingSession() {
+		// having 3 sessions occupied (the floating model used for testing has only 3 available sessions)
+		LicenseManager licenseMng = LicenseManager.getInstance();
+		LicenseModel licenseModel  = licenseMng.getLicenseModel();
+		
+		LicenseChecker checker;
+		LicenseeModel licensee;
+		
+		licenseMng.setUniqueHwId("unique-02");
+		licenseMng.initManager();
+
+		
+		licenseMng.setUniqueHwId("unique-03");
+		licenseMng.initManager();
+		
+		licenseMng.setUniqueHwId("unique-04");
+		licenseMng.initManager();
+		
+		checker = licenseMng.getValidationData();
+		licensee = licenseMng.getLicensee();
+		
+		LicenseValidator.doValidate(licensee);
+		
+		LicenseValidator.doValidate(licensee);
+		
+		assertEquals(licenseModel.getType(), checker.getType());	
+		assertTrue(checker.isValid());
+		assertEquals(licensee.getLicenseeName(), checker.getLicenseeName());
+		assertNotNull(checker.getValidationTimeStamp());
+		assertNotNull(checker.getLicenseStatus());
+		assertEquals(LicenseStatus.FLOATING_CHECKED_OUT, checker.getLicenseStatus());
+		
+		// when sending validation with a fourth session id...
+		licenseMng.setUniqueHwId("unique-05");
+		licenseMng.initManager();
+		licensee = licenseMng.getLicensee();
+		checker = licenseMng.getValidationData();
+		
+		//expecting the validation result to be false	
+		assertFalse(checker.isValid());
+		assertEquals(licensee.getLicenseeName(), checker.getLicenseeName());
+		assertNotNull(checker.getValidationTimeStamp());
+		assertNotNull(checker.getLicenseStatus());
+		assertEquals(LicenseStatus.FLOATING_OUT_OF_SESSION, checker.getLicenseStatus());
+		
+		licenseMng.setUniqueHwId("unique-02");
+		licenseMng.initManager();
+		licenseMng.checkIn();
+		
+		licenseMng.setUniqueHwId("unique-03");
+		licenseMng.initManager();
+		licenseMng.checkIn();
+		
+		licenseMng.setUniqueHwId("unique-04");
+		licenseMng.initManager();
+		licenseMng.checkIn();
+	}
+	
 	private static void prepareLicensee() {
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		PersistenceModel persistenceModel = new PersistenceModel(
 				LICENSEE_NUMBER, 
 				LICENSEE_NAME, 
 				true, 
-				LicenseType.FLOATING, 
+				LicenseType.NODE_LOCKED, 
 				Instant.now(), 
 				ZonedDateTime.now().plusDays(1),
 				ZonedDateTime.now().plusHours(1), 

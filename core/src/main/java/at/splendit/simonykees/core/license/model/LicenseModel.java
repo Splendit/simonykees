@@ -1,8 +1,10 @@
-package at.splendit.simonykees.core.license;
+package at.splendit.simonykees.core.license.model;
 
 import java.time.ZonedDateTime;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
+
+import at.splendit.simonykees.core.license.LicenseType;
 
 public abstract class LicenseModel {
 
@@ -14,7 +16,7 @@ public abstract class LicenseModel {
 		setExpireDate(expireDate);
 	}
 
-	protected abstract ValidationParameters getValidationParameters();
+	public abstract ValidationParameters getValidationParameters();
 
 	public LicenseType getType() {
 		return type;

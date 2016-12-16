@@ -47,6 +47,9 @@ public class LicenseCheckerImpl implements LicenseChecker {
 			extractValidationData(validationResult, LicenseType.NODE_LOCKED);
 			if(!isValid()) {
 				extractValidationData(validationResult, LicenseType.TRY_AND_BUY);
+				if(!isValid() && getSubscriptionStatus()) {
+					extractValidationData(validationResult, LicenseType.FLOATING);
+				}
 			}
 		}	
 	}
@@ -161,10 +164,12 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	public boolean isValid() {
 		boolean status = false;
 		
-		if(getType().equals(LicenseType.TRY_AND_BUY)) {
-			status = this.licenseModelStatus;
-		} else {
-			status = this.licenseModelStatus && this.subscriptionStatus;
+		if(getType()!= null) {
+			if(getType().equals(LicenseType.TRY_AND_BUY)) {
+				status = this.licenseModelStatus;
+			} else {
+				status = this.licenseModelStatus && this.subscriptionStatus;
+			}
 		}
 		
 		return status;

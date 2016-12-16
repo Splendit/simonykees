@@ -1,11 +1,11 @@
-package at.splendit.simonykees.core.license;
+package at.splendit.simonykees.core.license.model;
 
-public class SchedulerEntity {
+public class SchedulerModel {
 
 	private long validateInterval;
 	private boolean doValidate;
 
-	public SchedulerEntity(long validateInternval, boolean doValidate) {
+	public SchedulerModel(long validateInternval, boolean doValidate) {
 		setValidateInterval(validateInternval);
 		setDoValidate(doValidate);
 	}

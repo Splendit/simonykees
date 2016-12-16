@@ -7,12 +7,14 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.Status;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.license.model.LicenseeModel;
+import at.splendit.simonykees.core.license.model.SchedulerModel;
 
 public class ValidateExecutor {
 	
 	private static ScheduledExecutorService scheduler;
 
-	protected synchronized static void startSchedule(SchedulerEntity se, LicenseeEntity le) {
+	protected synchronized static void startSchedule(SchedulerModel se, LicenseeModel le) {
 		final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
 		scheduledExecutor.scheduleWithFixedDelay(new Runnable() {

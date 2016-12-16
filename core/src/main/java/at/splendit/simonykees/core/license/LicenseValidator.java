@@ -11,10 +11,11 @@ import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.service.LicenseeService;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.license.model.LicenseeModel;
 
 public class LicenseValidator {
 
-	public static void doValidate(LicenseeEntity licensee) {
+	public static void doValidate(LicenseeModel licensee) {
 
 		try {
 
@@ -36,7 +37,7 @@ public class LicenseValidator {
 			persistenceManager.persistCachedData();
 			
 			// logging validation result...
-			//Activator.log("License validation response received successfully ");
+			Activator.log("License validation response received successfully ");
 
 		} catch (final NetLicensingException e) {
 			ValidationResultCache cache = ValidationResultCache.getInstance();

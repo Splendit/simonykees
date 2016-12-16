@@ -7,6 +7,8 @@ import java.time.ZonedDateTime;
 
 import org.junit.Test;
 
+import at.splendit.simonykees.core.license.model.PersistenceModel;
+
 public class PersistenceManagerTest {
 	
 	@Test

@@ -1,9 +1,11 @@
-package at.splendit.simonykees.core.license;
+package at.splendit.simonykees.core.license.model;
 
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
+
+import at.splendit.simonykees.core.license.LicenseType;
 
 public class FloatingModel extends LicenseModel {
 

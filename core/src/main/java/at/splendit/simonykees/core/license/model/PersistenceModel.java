@@ -1,10 +1,12 @@
-package at.splendit.simonykees.core.license;
+package at.splendit.simonykees.core.license.model;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Optional;
+
+import at.splendit.simonykees.core.license.LicenseType;
 
 public class PersistenceModel implements Serializable {
 	

@@ -11,6 +11,17 @@ import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.service.LicenseeService;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.license.model.FloatingModel;
+import at.splendit.simonykees.core.license.model.LicenseModel;
+import at.splendit.simonykees.core.license.model.LicenseeModel;
+import at.splendit.simonykees.core.license.model.NodeLockedModel;
+import at.splendit.simonykees.core.license.model.PersistenceModel;
+import at.splendit.simonykees.core.license.model.SchedulerModel;
+import at.splendit.simonykees.core.license.model.TryAndBuyModel;
+import oshi.SystemInfo;
+import oshi.hardware.HWDiskStore;
+import oshi.hardware.HardwareAbstractionLayer;
+import oshi.hardware.NetworkIF;
 
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
@@ -34,12 +45,14 @@ public class LicenseManager {
 
 	private static LicenseManager instance;
 
-	private SchedulerEntity schedulerEntity;
-	private LicenseeEntity licensee;
+	private SchedulerModel schedulerEntity;
+	private LicenseeModel licensee;
 	private LicenseModel licenseModel;
 	
 	private String licenseeName;
 	private String licenseeNumber;
+	
+	private String uniqueHwId = "";
 
 	private LicenseManager() {
 		// TODO: throw an exception if the instance is not null...
@@ -53,8 +66,8 @@ public class LicenseManager {
 		return instance;
 	}
 
-	private void initManager() {
-		schedulerEntity = new SchedulerEntity(VALIDATE_INTERVAL_IN_SECONDS, DO_VALIDATE);
+	void initManager() {
+		schedulerEntity = new SchedulerModel(VALIDATE_INTERVAL_IN_SECONDS, DO_VALIDATE);
 
 		Instant now = Instant.now();
 
@@ -107,7 +120,7 @@ public class LicenseManager {
 		setLicenseModel(licenseModel);
 
 		// construct a licensee object...
-		LicenseeEntity licensee = new LicenseeEntity(licenseeName, licenseeNumber, licenseModel, PRODUCT_NUMBER);
+		LicenseeModel licensee = new LicenseeModel(licenseeName, licenseeNumber, licenseModel, PRODUCT_NUMBER);
 		setLicensee(licensee);
 
 		// start validate scheduler
@@ -115,7 +128,7 @@ public class LicenseManager {
  
 	}
 
-	private void setLicensee(LicenseeEntity licensee) {
+	private void setLicensee(LicenseeModel licensee) {
 		this.licensee = licensee;
 	}
 
@@ -131,39 +144,40 @@ public class LicenseManager {
 		ZonedDateTime nowInOneYear = now.plusYears(1);
 		// pre-validation is done by using floating model 
 		// because it contains a superset of all other model's validation parameters 
-		FloatingModel floatingModel = new FloatingModel(productModuleNumber, nowInOneYear, getUniqueNodeIdentifier());
+		String uniqueHwId = getUniqueNodeIdentifier();
+		
+		FloatingModel floatingModel = new FloatingModel(productModuleNumber, nowInOneYear, uniqueHwId);
 
 		// pre-validation with floating license model...
-		LicenseeEntity licensee = new LicenseeEntity(licenseeName, licenseeNumber, floatingModel, productNumber);
+		LicenseeModel licensee = new LicenseeModel(licenseeName, licenseeNumber, floatingModel, productNumber);
 		ValidationParameters valParams = licensee.getValidationParams();
-		logPrevalidationRequest(licenseeNumber, valParams);
+//		logPrevalidationRequest(licenseeNumber, valParams);
 		preValidationResult = LicenseeService.validate(context, licenseeNumber, valParams);
-		logPrevalidationResponse(preValidationResult);
+//		logPrevalidationResponse(preValidationResult);
 
 		return preValidationResult;
 	}
 	
 	
 	private void logPrevalidationRequest(String licenseeNumber, ValidationParameters validationParams) {
-		System.out.println("------Prevalidation request-----");
-		System.out.println("Licensee number:" + licenseeNumber);
+		System.out.println("------Prevalidation request-----"); //$NON-NLS-1$
+		System.out.println("Licensee number:" + licenseeNumber); //$NON-NLS-1$
 		validationParams.getParameters().forEach((key, val) -> {
-			System.out.println("key: " + key);
+			System.out.println("key: " + key); //$NON-NLS-1$
 			val.forEach((mapKey, mapVal) -> {
-				System.out.println(mapKey + ":" + mapVal);
+				System.out.println(mapKey + ":" + mapVal); //$NON-NLS-1$
 			});
 		});
-		System.out.println("------------------------\n");
 		
 	}
 	
 	private void logPrevalidationResponse(ValidationResult validationResult) {
-		System.out.println("------Prevalidation response-----");
+		System.out.println("------Prevalidation response-----"); //$NON-NLS-1$
 		System.out.println("size: " +  validationResult.getValidations().size());
 		
 		System.out.print(validationResult.toString());
 		
-		System.out.println("------------------------\n");
+		System.out.println("------------------------\n"); //$NON-NLS-1$
 	}
 
 	/**
@@ -192,7 +206,7 @@ public class LicenseManager {
 		}
 	}
 	
-	public LicenseeEntity getLicensee() {
+	public LicenseeModel getLicensee() {
 		return licensee;
 	}
 
@@ -219,10 +233,32 @@ public class LicenseManager {
 
 		return licenseModel;
 	}
+	
+	void setUniqueHwId(String uniqueHwId) {
+		this.uniqueHwId = uniqueHwId;
+	}
 
 	private String getUniqueNodeIdentifier() {
-		// TODO get CPU ID
-		return "test-unique-machine-id";
+		if(this.uniqueHwId.isEmpty()) {
+			SystemInfo systemInfo = new SystemInfo();
+
+	        HardwareAbstractionLayer hal = systemInfo.getHardware();
+	        HWDiskStore[] diskStores = hal.getDiskStores();
+	        String diskSerial = "";
+	        if(diskStores.length > 0) {
+	        	diskSerial = diskStores[0].getSerial();
+	        }
+	        
+	        String mac = ""; 
+	        NetworkIF[] netWorkIfs = hal.getNetworkIFs();
+	        if(netWorkIfs.length > 0) {
+	        	mac = netWorkIfs[0].getMacaddr();
+	        }
+	        
+	        setUniqueHwId(diskSerial + mac);
+		}
+
+		return uniqueHwId;
 	}
 
 	public LicenseChecker getValidationData() {
