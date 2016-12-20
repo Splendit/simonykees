@@ -46,6 +46,10 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 			return true;
 		}
 
+		if (ASTNode.METHOD_INVOCATION == node.getParent().getNodeType()) {
+			return true;
+		}
+
 		if (StringUtils.equals(ReservedNames.MI_VALUE_OF, node.getName().getFullyQualifiedName())
 				&& null != node.getExpression() && ASTNode.SIMPLE_NAME == node.getExpression().getNodeType()
 				&& 1 == node.arguments().size()) {
@@ -75,60 +79,72 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
-		/*
-		 * Second case: new Integer(myInt).toString()
-		 */
-		Expression refactorCandidateParameter = null;
-		SimpleName refactorPrimitiveType = null;
-		ITypeBinding refactorCandidateTypeBinding = null;
-		ITypeBinding refactorPrimitiveTypeBinding = null;
-
 		if (ASTNode.SIMPLE_TYPE == node.getType().getNodeType()
 				&& ASTNode.SIMPLE_NAME == ((SimpleType) node.getType()).getName().getNodeType()
 				&& 1 == node.arguments().size()) {
-			refactorPrimitiveType = (SimpleName) ((SimpleType) node.getType()).getName();
-			refactorPrimitiveTypeBinding = refactorPrimitiveType.resolveTypeBinding();
-			refactorCandidateParameter = (Expression) node.arguments().get(0);
-			refactorCandidateTypeBinding = refactorCandidateParameter.resolveTypeBinding();
+			SimpleName refactorPrimitiveType = (SimpleName) ((SimpleType) node.getType()).getName();
+			ITypeBinding refactorPrimitiveTypeBinding = refactorPrimitiveType.resolveTypeBinding();
+			Expression refactorCandidateParameter = (Expression) node.arguments().get(0);
+			ITypeBinding refactorCandidateTypeBinding = refactorCandidateParameter.resolveTypeBinding();
 
 			/*
-			 * new Float(4D).toString() is not transformable to
-			 * Float.toString(4D) because toString only allows primitives that
-			 * are implicit cast-able to float. doubles do not have this
-			 * property
+			 * boolean case
 			 */
-			Predicate<ITypeBinding> isDoubleVariable = (
-					binding) -> (binding != null && (binding.getName().contains(ReservedNames.DOUBLE_PRIMITIVE)
-							|| (binding.getName().contains(ReservedNames.DOUBLE))));
-
-			if (ReservedNames.FLOAT.equals(refactorPrimitiveType.getIdentifier())
-					&& isDoubleVariable.test(refactorCandidateTypeBinding)) {
-				return true;
-			}
-
 			if (null != refactorPrimitiveTypeBinding && isBooleanClass(refactorPrimitiveTypeBinding.getName())) {
+				Expression replacement;
+				boolean wrapIfParentMethodInvocation = false;
 				if (ASTNode.STRING_LITERAL == refactorCandidateParameter.getNodeType()) {
 					StringLiteral stringParameter = (StringLiteral) refactorCandidateParameter;
+					wrapIfParentMethodInvocation = true;
 					if (ReservedNames.BOOLEAN_TRUE.equals(stringParameter.getLiteralValue())) {
-						refactorCandidateParameter = node.getAST().newBooleanLiteral(true);
+						replacement = node.getAST().newBooleanLiteral(true);
 					} else {
-						refactorCandidateParameter = node.getAST().newBooleanLiteral(false);
+						replacement = node.getAST().newBooleanLiteral(false);
 					}
 				} else if (ClassRelationUtil.isContentOfRegistertITypes(refactorCandidateTypeBinding,
 						iTypeMap.get(STRING_KEY))) {
-					refactorPrimitiveType = (SimpleName) astRewrite.createMoveTarget(refactorPrimitiveType);
-					refactorCandidateParameter = (SimpleName) astRewrite.createMoveTarget(refactorCandidateParameter);
 					SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(), ReservedNames.MI_VALUE_OF);
-					refactorCandidateParameter = NodeBuilder.newMethodInvocation(node.getAST(), refactorPrimitiveType,
-							valueOfInvocation, refactorCandidateParameter);
+					replacement = NodeBuilder.newMethodInvocation(node.getAST(),
+							(SimpleName) astRewrite.createMoveTarget(refactorPrimitiveType), valueOfInvocation,
+							(SimpleName) astRewrite.createMoveTarget(refactorCandidateParameter));
 				} else {
-					refactorCandidateParameter = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
+					replacement = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
+					wrapIfParentMethodInvocation = refactorCandidateTypeBinding.isPrimitive();
 				}
-				astRewrite.replace(node, refactorCandidateParameter, null);
+				if (ASTNode.METHOD_INVOCATION == node.getParent().getNodeType() && wrapIfParentMethodInvocation) {
+					SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(), ReservedNames.MI_VALUE_OF);
+					replacement = NodeBuilder.newMethodInvocation(node.getAST(),
+							(SimpleName) astRewrite.createMoveTarget(refactorPrimitiveType), valueOfInvocation,
+							replacement);
+				}
+				astRewrite.replace(node, replacement, null);
 			}
-			else if (refactorCandidateTypeBinding != null && isPrimitiveNumberClass(refactorCandidateTypeBinding.getName())) {
+			/*
+			 * primitive numbers
+			 */
+			else if (null != refactorPrimitiveTypeBinding && isPrimitiveNumberClass(refactorPrimitiveTypeBinding.getName())) {
+				/*
+				 * new Float(4D) is not transformable to Float.valueOf(4D)
+				 * because valueOf only allows primitives that are implicit
+				 * cast-able to float. doubles do not have this property
+				 */
+				Predicate<ITypeBinding> isDoubleVariable = (
+						binding) -> (binding != null && (binding.getName().contains(ReservedNames.DOUBLE_PRIMITIVE)
+								|| (binding.getName().contains(ReservedNames.DOUBLE))));
+
+				if (ReservedNames.FLOAT.equals(refactorPrimitiveType.getIdentifier())
+						&& isDoubleVariable.test(refactorCandidateTypeBinding)) {
+					return true;
+				}
+
+				if(ASTNode.NUMBER_LITERAL == refactorCandidateParameter.getNodeType()){
+					if(ASTNode.METHOD_INVOCATION == node.getParent().getNodeType()){
+
+					}
+				}
 				refactorCandidateParameter = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
-				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY).insertLast(refactorCandidateParameter, null);
+				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY)
+						.insertLast(refactorCandidateParameter, null);
 				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, refactorPrimitiveType, null);
 			}
 		}

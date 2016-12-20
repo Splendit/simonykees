@@ -62,4 +62,12 @@ public class TestInefficientConstructorBooleanRule {
 	public Boolean booleanVariableStringValueOfTest(String input) {
 		return Boolean.valueOf(input);
 	}
+
+	public Boolean booleanWithMethodInvocationTest() {
+		return Boolean.valueOf(true).booleanValue();
+	}
+
+	public Boolean booleanTrueValueOfMethodInvocationTest() {
+		return Boolean.valueOf(true).booleanValue();
+	}
 }

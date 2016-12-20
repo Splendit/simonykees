@@ -10,7 +10,7 @@ public class TestInefficientConstructorBooleanRule {
 	public Boolean booleanTrueLiteralTest() {
 		return true;
 	}
-	
+
 	public Boolean booleanFalseTest() {
 		return false;
 	}
@@ -30,7 +30,7 @@ public class TestInefficientConstructorBooleanRule {
 	public Boolean booleanVariableStringTest(String input) {
 		return Boolean.valueOf(input);
 	}
-	
+
 	public Boolean booleanTrueValueOfTest() {
 		return true;
 	}
@@ -38,7 +38,7 @@ public class TestInefficientConstructorBooleanRule {
 	public Boolean booleanTrueLiteralValueOfTest() {
 		return true;
 	}
-	
+
 	public Boolean booleanFalseValueOfTest() {
 		return false;
 	}
@@ -54,12 +54,20 @@ public class TestInefficientConstructorBooleanRule {
 	public Boolean booleanVariableBooleanTest(Boolean input) {
 		return input;
 	}
-	
+
 	public Boolean booleanVariableBooleanPrimTest(boolean input) {
 		return input;
 	}
-	
+
 	public Boolean booleanVariableStringValueOfTest(String input) {
 		return Boolean.valueOf(input);
+	}
+
+	public Boolean booleanWithMethodInvocationTest() {
+		return Boolean.valueOf(true).booleanValue();
+	}
+
+	public Boolean booleanTrueValueOfMethodInvocationTest() {
+		return Boolean.valueOf(true).booleanValue();
 	}
 }
