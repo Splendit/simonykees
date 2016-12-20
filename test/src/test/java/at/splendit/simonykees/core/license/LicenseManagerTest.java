@@ -16,8 +16,8 @@ import at.splendit.simonykees.core.license.model.PersistenceModel;
 
 public class LicenseManagerTest {
 	
-	private static final String LICENSEE_NUMBER = "IPWAY9YZI"; //$NON-NLS-1$
-	private static final String LICENSEE_NAME = ""; //$NON-NLS-1$
+	private static final String LICENSEE_NUMBER = "IITAK75GN"; //$NON-NLS-1$
+	private static final String LICENSEE_NAME = "License-Ali-Test"; //$NON-NLS-1$
 	
 	@BeforeClass
 	public static void setUpLicensee() {

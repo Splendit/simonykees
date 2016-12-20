@@ -23,7 +23,7 @@ public class PersistenceManager {
 	
 	private PersistenceModel persistenceModel;
 	private static PersistenceManager instance;
-	private static final String FILE_NAME = "info.txt"; //$NON-NLS-1$
+	private static final String FILE_NAME = "target/info.txt"; //$NON-NLS-1$
 	private static final String ALGORITHM = "AES"; //$NON-NLS-1$
 	private static final String TRANSFORMATION = "AES"; //$NON-NLS-1$
 	private static final String KEY = "SOME_SECRET_KEY_"; //$NON-NLS-1$
