@@ -16,11 +16,16 @@ public final class ReservedNames {
 	
 	public static final String BOOLEAN = "Boolean";
 	public static final String BOOLEAN_PRIMITIVE = "boolean";
-
+	public static final String BOOLEAN_TRUE = "true";
+	public static final String BOOLEAN_FALSE = "false";
+	
+	
 	/** MI = Method Invocation */
 	public static final String MI_TO_STRING = "toString";
 	/** MI = Method Invocation */
 	public static final String MI_VALUE_OF = "valueOf";
+	
+	
 
 	private ReservedNames() {
 		// this class should not be instantiated

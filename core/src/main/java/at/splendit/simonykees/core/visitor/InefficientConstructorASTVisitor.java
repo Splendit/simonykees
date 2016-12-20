@@ -7,7 +7,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -15,6 +14,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.constants.ReservedNames;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
  * Primitives should not use the constructor for construction of new Variables.
@@ -25,8 +25,8 @@ import at.splendit.simonykees.core.constants.ReservedNames;
  */
 public class InefficientConstructorASTVisitor extends AbstractCompilationUnitASTVisitor {
 
-	private static Integer STRING_KEY = 1;
-	private static String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
+	private static final Integer STRING_KEY = 1;
+	private static final String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
 
 	public InefficientConstructorASTVisitor() {
 		super();
@@ -35,78 +35,103 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-
 		/*
-		 * checks if method invocation is toString. the invocation need to have
-		 * zero arguments the expressions type where the toString is used on
-		 * needs to be a String or a StringLiteral
+		 * Boolean.valueOf(true); -> true, Boolean.valueOf("true"); -> true
+		 * Boolean.valueOf(false); -> false, Boolean.valueOf("false"); -> false
+		 * Boolean.valueOf("anyOtherString"); -> false Boolean/boolean b = ...;
+		 * Boolean.valueOf(b); -> b String s = ...; Boolean.valueOf(s); ->
+		 * ignore
 		 */
-		if (StringUtils.equals(ReservedNames.MI_TO_STRING, node.getName().getFullyQualifiedName())) {
+		if (node.getExpression() == null) {
+			return true;
+		}
+
+		if (StringUtils.equals(ReservedNames.MI_VALUE_OF, node.getName().getFullyQualifiedName())
+				&& null != node.getExpression() && ASTNode.SIMPLE_NAME == node.getExpression().getNodeType()
+				&& 1 == node.arguments().size()) {
+			SimpleName refactorPrimitiveType = (SimpleName) node.getExpression();
+			ITypeBinding refactorPrimitiveTypeBinding = refactorPrimitiveType.resolveTypeBinding();
+			Expression refactorCandidateParameter = (Expression) node.arguments().get(0);
+			ITypeBinding refactorCandidateTypeBinding = refactorCandidateParameter.resolveTypeBinding();
+			if (null != refactorPrimitiveTypeBinding && isBooleanClass(refactorPrimitiveTypeBinding.getName())) {
+				if (ASTNode.STRING_LITERAL == refactorCandidateParameter.getNodeType()) {
+					StringLiteral stringParameter = (StringLiteral) refactorCandidateParameter;
+					if (ReservedNames.BOOLEAN_TRUE.equals(stringParameter.getLiteralValue())) {
+						refactorCandidateParameter = node.getAST().newBooleanLiteral(true);
+					} else {
+						refactorCandidateParameter = node.getAST().newBooleanLiteral(false);
+					}
+				} else if (ClassRelationUtil.isContentOfRegistertITypes(refactorCandidateTypeBinding,
+						iTypeMap.get(STRING_KEY))) {
+					return true;
+				} else {
+					refactorCandidateParameter = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
+				}
+				astRewrite.replace(node, refactorCandidateParameter, null);
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean visit(ClassInstanceCreation node) {
+		/*
+		 * Second case: new Integer(myInt).toString()
+		 */
+		Expression refactorCandidateParameter = null;
+		SimpleName refactorPrimitiveType = null;
+		ITypeBinding refactorCandidateTypeBinding = null;
+		ITypeBinding refactorPrimitiveTypeBinding = null;
+
+		if (ASTNode.SIMPLE_TYPE == node.getType().getNodeType()
+				&& ASTNode.SIMPLE_NAME == ((SimpleType) node.getType()).getName().getNodeType()
+				&& 1 == node.arguments().size()) {
+			refactorPrimitiveType = (SimpleName) ((SimpleType) node.getType()).getName();
+			refactorPrimitiveTypeBinding = refactorPrimitiveType.resolveTypeBinding();
+			refactorCandidateParameter = (Expression) node.arguments().get(0);
+			refactorCandidateTypeBinding = refactorCandidateParameter.resolveTypeBinding();
 
 			/*
-			 * First case: Integer.valueOf(myInt).toString()
+			 * new Float(4D).toString() is not transformable to
+			 * Float.toString(4D) because toString only allows primitives that
+			 * are implicit cast-able to float. doubles do not have this
+			 * property
 			 */
-			if (node.getExpression() == null) {
+			Predicate<ITypeBinding> isDoubleVariable = (
+					binding) -> (binding != null && (binding.getName().contains(ReservedNames.DOUBLE_PRIMITIVE)
+							|| (binding.getName().contains(ReservedNames.DOUBLE))));
+
+			if (ReservedNames.FLOAT.equals(refactorPrimitiveType.getIdentifier())
+					&& isDoubleVariable.test(refactorCandidateTypeBinding)) {
 				return true;
 			}
 
-			Expression refactorCandidateExpression = null;
-			SimpleName refactorPrimitiveType = null;
-			ITypeBinding refactorCandidateTypeBinding = null;
-
-			if (ASTNode.METHOD_INVOCATION == node.getExpression().getNodeType()) {
-				MethodInvocation expetedValueOf = (MethodInvocation) node.getExpression();
-				if (StringUtils.equals(ReservedNames.MI_VALUE_OF, expetedValueOf.getName().getFullyQualifiedName())
-						&& null != expetedValueOf.getExpression()
-						&& ASTNode.SIMPLE_NAME == expetedValueOf.getExpression().getNodeType()
-						&& 1 == expetedValueOf.arguments().size()) {
-					refactorPrimitiveType = (SimpleName) expetedValueOf.getExpression();
-					refactorCandidateExpression = (Expression) expetedValueOf.arguments().get(0);
-					refactorCandidateTypeBinding = refactorCandidateExpression.resolveTypeBinding();
-				}
-			}
-
-			/*
-			 * Second case: new Integer(myInt).toString()
-			 */
-			else if (ASTNode.CLASS_INSTANCE_CREATION == node.getExpression().getNodeType()) {
-				ClassInstanceCreation expectedPrimitiveNumberClass = (ClassInstanceCreation) node.getExpression();
-				if (ASTNode.SIMPLE_TYPE == expectedPrimitiveNumberClass.getType().getNodeType()
-						&& ASTNode.SIMPLE_NAME == ((SimpleType) expectedPrimitiveNumberClass.getType()).getName()
-								.getNodeType()
-						&& 1 == expectedPrimitiveNumberClass.arguments().size()) {
-					refactorPrimitiveType = (SimpleName) ((SimpleType) expectedPrimitiveNumberClass.getType())
-							.getName();
-					refactorCandidateExpression = (Expression) expectedPrimitiveNumberClass.arguments().get(0);
-					refactorCandidateTypeBinding = refactorCandidateExpression.resolveTypeBinding();
-
-					/*
-					 * new Float(4D).toString() is not transformable to
-					 * Float.toString(4D) because toString only allows
-					 * primitives that are implicit cast-able to float. doubles
-					 * do not have this property
-					 */
-					Predicate<ITypeBinding> isDoubleVariable = (
-							binding) -> (binding != null && (binding.getName().contains(ReservedNames.DOUBLE_PRIMITIVE)
-									|| (binding.getName().contains(ReservedNames.DOUBLE))));
-
-					if (ReservedNames.FLOAT.equals(refactorPrimitiveType.getIdentifier())
-							&& isDoubleVariable.test(refactorCandidateTypeBinding)) {
-						refactorPrimitiveType = null;
-						refactorCandidateExpression = null;
-						refactorCandidateTypeBinding = null;
+			if (null != refactorPrimitiveTypeBinding && isBooleanClass(refactorPrimitiveTypeBinding.getName())) {
+				if (ASTNode.STRING_LITERAL == refactorCandidateParameter.getNodeType()) {
+					StringLiteral stringParameter = (StringLiteral) refactorCandidateParameter;
+					if (ReservedNames.BOOLEAN_TRUE.equals(stringParameter.getLiteralValue())) {
+						refactorCandidateParameter = node.getAST().newBooleanLiteral(true);
+					} else {
+						refactorCandidateParameter = node.getAST().newBooleanLiteral(false);
 					}
+				} else if (ClassRelationUtil.isContentOfRegistertITypes(refactorCandidateTypeBinding,
+						iTypeMap.get(STRING_KEY))) {
+					refactorPrimitiveType = (SimpleName) astRewrite.createMoveTarget(refactorPrimitiveType);
+					refactorCandidateParameter = (SimpleName) astRewrite.createMoveTarget(refactorCandidateParameter);
+					SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(), ReservedNames.MI_VALUE_OF);
+					refactorCandidateParameter = NodeBuilder.newMethodInvocation(node.getAST(), refactorPrimitiveType,
+							valueOfInvocation, refactorCandidateParameter);
+				} else {
+					refactorCandidateParameter = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
 				}
+				astRewrite.replace(node, refactorCandidateParameter, null);
 			}
-			if (refactorCandidateTypeBinding != null
-					&& isPrimitiveNumberClass(refactorCandidateTypeBinding.getName())) {
-				Expression moveTarget = (Expression) astRewrite.createMoveTarget(refactorCandidateExpression);
-				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY).insertLast(moveTarget, null);
+			else if (refactorCandidateTypeBinding != null && isPrimitiveNumberClass(refactorCandidateTypeBinding.getName())) {
+				refactorCandidateParameter = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
+				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY).insertLast(refactorCandidateParameter, null);
 				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, refactorPrimitiveType, null);
 			}
-
 		}
-
 		return true;
 	}
 
@@ -125,7 +150,7 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 			return false;
 		}
 	}
-	
+
 	private boolean isBooleanClass(String simpleName) {
 		switch (simpleName) {
 		case ReservedNames.BOOLEAN:

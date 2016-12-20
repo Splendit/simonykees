@@ -4,55 +4,59 @@ package at.splendit.simonykees.sample.postRule.allRules;
 public class TestInefficientConstructorBooleanRule {
 
 	public Boolean booleanTrueTest() {
-		return new Boolean(true);
+		return true;
 	}
 
 	public Boolean booleanTrueLiteralTest() {
-		return new Boolean("true");
-	}
-
-	public Boolean booleanTrueValueOfTest() {
-		return Boolean.valueOf(true);
-	}
-
-	public Boolean booleanTrueLiteralValueOfTest() {
-		return Boolean.valueOf("true");
+		return true;
 	}
 
 	public Boolean booleanFalseTest() {
-		return new Boolean(false);
+		return false;
 	}
 
 	public Boolean booleanFalseLiteralTest() {
-		return new Boolean("false");
+		return false;
 	}
 
 	public Boolean booleanFalseAnyLiteralTest() {
-		return new Boolean("anyOtherStringThanTrue");
-	}
-
-	public Boolean booleanFalseValueOfTest() {
-		return Boolean.valueOf(false);
-	}
-
-	public Boolean booleanFalseLiteralValueOfTest() {
-		return Boolean.valueOf("false");
-	}
-
-	public Boolean booleanAnyValueOfTest() {
-		return Boolean.valueOf("anyOtherStringThanTrue");
-	}
-
-	public Boolean booleanVariableBooleanTest(Boolean input) {
-		return Boolean.valueOf(input);
+		return false;
 	}
 
 	public Boolean booleanVariableBooleanTest(boolean input) {
-		return new Boolean(input);
+		return input;
 	}
 
 	public Boolean booleanVariableStringTest(String input) {
-		return new Boolean(input);
+		return Boolean.valueOf(input);
+	}
+
+	public Boolean booleanTrueValueOfTest() {
+		return true;
+	}
+
+	public Boolean booleanTrueLiteralValueOfTest() {
+		return true;
+	}
+
+	public Boolean booleanFalseValueOfTest() {
+		return false;
+	}
+
+	public Boolean booleanFalseLiteralValueOfTest() {
+		return false;
+	}
+
+	public Boolean booleanAnyValueOfTest() {
+		return false;
+	}
+
+	public Boolean booleanVariableBooleanTest(Boolean input) {
+		return input;
+	}
+
+	public Boolean booleanVariableBooleanPrimTest(boolean input) {
+		return input;
 	}
 
 	public Boolean booleanVariableStringValueOfTest(String input) {

@@ -10,15 +10,7 @@ public class TestInefficientConstructorBooleanRule {
 	public Boolean booleanTrueLiteralTest() {
 		return new Boolean("true");
 	}
-
-	public Boolean booleanTrueValueOfTest() {
-		return Boolean.valueOf(true);
-	}
-
-	public Boolean booleanTrueLiteralValueOfTest() {
-		return Boolean.valueOf("true");
-	}
-
+	
 	public Boolean booleanFalseTest() {
 		return new Boolean(false);
 	}
@@ -31,6 +23,22 @@ public class TestInefficientConstructorBooleanRule {
 		return new Boolean("anyOtherStringThanTrue");
 	}
 
+	public Boolean booleanVariableBooleanTest(boolean input) {
+		return new Boolean(input);
+	}
+
+	public Boolean booleanVariableStringTest(String input) {
+		return new Boolean(input);
+	}
+	
+	public Boolean booleanTrueValueOfTest() {
+		return Boolean.valueOf(true);
+	}
+
+	public Boolean booleanTrueLiteralValueOfTest() {
+		return Boolean.valueOf("true");
+	}
+	
 	public Boolean booleanFalseValueOfTest() {
 		return Boolean.valueOf(false);
 	}
@@ -46,15 +54,11 @@ public class TestInefficientConstructorBooleanRule {
 	public Boolean booleanVariableBooleanTest(Boolean input) {
 		return Boolean.valueOf(input);
 	}
-
-	public Boolean booleanVariableBooleanTest(boolean input) {
-		return new Boolean(input);
+	
+	public Boolean booleanVariableBooleanPrimTest(boolean input) {
+		return Boolean.valueOf(input);
 	}
-
-	public Boolean booleanVariableStringTest(String input) {
-		return new Boolean(input);
-	}
-
+	
 	public Boolean booleanVariableStringValueOfTest(String input) {
 		return Boolean.valueOf(input);
 	}

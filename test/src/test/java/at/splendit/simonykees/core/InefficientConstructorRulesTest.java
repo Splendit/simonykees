@@ -3,7 +3,6 @@ package at.splendit.simonykees.core;
 import java.nio.file.Path;
 import java.util.Collection;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -37,7 +36,6 @@ public class InefficientConstructorRulesTest extends AbstractRulesTest {
 	}
 
 	@Test
-	@Ignore
 	public void testTransformation() throws Exception {
 		super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
 	}
