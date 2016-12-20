@@ -124,12 +124,12 @@
 		<repository>
 			<id>eclipse-neon</id>
 			<layout>p2</layout>
-			<url>http://download.eclipse.org/releases/neon</url>
+			<url>http://nexus-vm-02.splendit.loc/content/repositories/p2-eclipse-neon/</url>
 		</repository>
 		<repository>
-			<id>p2-custom-site</id>
+			<id>netlicensing</id>
 			<layout>p2</layout>
-			<url>http://nexus.splendit.loc/repository/p2-custom-site/repository/</url>
+			<url>http://packagedrone-vm-01.splendit.loc:8080/p2/p2-simonykees-dependencies/</url>
 		</repository>
 	</repositories>
 
