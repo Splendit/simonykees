@@ -14,6 +14,7 @@ import at.splendit.simonykees.core.license.model.LicenseModel;
 import at.splendit.simonykees.core.license.model.LicenseeModel;
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 
+@SuppressWarnings("nls")
 public class LicenseManagerTest {
 	
 	private static final String LICENSEE_NUMBER = "IITAK75GN"; //$NON-NLS-1$

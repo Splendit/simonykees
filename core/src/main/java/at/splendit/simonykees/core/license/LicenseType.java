@@ -7,6 +7,7 @@ public enum LicenseType {
 	NODE_LOCKED, 
 	SUBSCRIPTION;
 	
+	@SuppressWarnings("nls")
 	public static LicenseType fromString(String value) {
 		LicenseType licenseType = TRY_AND_BUY;
 		
@@ -28,6 +29,7 @@ public enum LicenseType {
 		return licenseType;
 	}
 	
+	@SuppressWarnings("nls")
 	public String toString() {
 		switch (this) {
 		case TRY_AND_BUY:

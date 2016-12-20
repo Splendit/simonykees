@@ -8,7 +8,7 @@ import com.labs64.netlicensing.domain.vo.SecurityMode;
  * @author elham.cheriki
  * @since 0.9.2
  */
-
+@SuppressWarnings("nls")
 public class RestApiConnection {
 	private static final String REST_API_PATH = "/core/v2/rest";
 	private static final String BASE_URL_PROD = "https://go.netlicensing.io";

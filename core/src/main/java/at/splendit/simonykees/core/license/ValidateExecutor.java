@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.core.runtime.Status;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.license.model.LicenseeModel;
 import at.splendit.simonykees.core.license.model.SchedulerModel;
 
@@ -21,10 +22,10 @@ public class ValidateExecutor {
 			@Override
 			public void run() {
 				if (se.getDoValidate()) {
-					Activator.log(Status.INFO, "Validation scheduler started", null);
+					Activator.log(Status.INFO, Messages.ValidateExecutor_validation_scheduler_started, null);
 					LicenseValidator.doValidate(le);
 				} else {
-					Activator.log(Status.INFO, "Shutting down validation scheduler", null);
+					Activator.log(Status.INFO, Messages.ValidateExecutor_shutting_down_validation_scheduler, null);
 					scheduledExecutor.shutdown();
 				}
 			}
@@ -35,7 +36,7 @@ public class ValidateExecutor {
 	
 	public synchronized static void shutDownScheduler() {
 		if(scheduler != null) {
-			Activator.log(Status.INFO, "Shutting down validation scheduler", null);
+			Activator.log(Status.INFO, Messages.ValidateExecutor_shutting_down_validation_scheduler, null);
 			scheduler.shutdown();
 		}
 	}

@@ -12,6 +12,7 @@ public enum LicenseStatus {
 
 	CONNECTION_FAILURE;
 
+	@SuppressWarnings("nls")
 	public static LicenseStatus fromString(String value) {
 		LicenseStatus status = NONE;
 

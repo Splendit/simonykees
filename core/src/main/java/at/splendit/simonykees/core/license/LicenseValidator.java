@@ -11,6 +11,7 @@ import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.service.LicenseeService;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.license.model.LicenseeModel;
 
 public class LicenseValidator {
@@ -37,12 +38,12 @@ public class LicenseValidator {
 			persistenceManager.persistCachedData();
 			
 			// logging validation result...
-			Activator.log("License validation response received successfully ");
+			Activator.log(Messages.LicenseValidator_received_validation_response);
 
 		} catch (final NetLicensingException e) {
 			ValidationResultCache cache = ValidationResultCache.getInstance();
 			cache.reset();
-			Activator.log(Status.WARNING, "Couldn't reach licensing provider", e);
+			Activator.log(Status.WARNING, Messages.LicenseValidator_cannot_reach_license_provider_on_validation_call, e);
 		}
 	}
 

@@ -11,6 +11,7 @@ import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.service.LicenseeService;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.license.model.FloatingModel;
 import at.splendit.simonykees.core.license.model.LicenseModel;
 import at.splendit.simonykees.core.license.model.LicenseeModel;
@@ -52,7 +53,7 @@ public class LicenseManager {
 	private String licenseeName;
 	private String licenseeNumber;
 	
-	private String uniqueHwId = "";
+	private String uniqueHwId = ""; //$NON-NLS-1$
 
 	private LicenseManager() {
 		// TODO: throw an exception if the instance is not null...
@@ -75,7 +76,7 @@ public class LicenseManager {
 		LicenseType licenseType;
 		ZonedDateTime evaluationExpiresDate;
 		ZonedDateTime expirationTimeStamp;
-		String licenseeName = persistenceManager.getPersistedLicenseeName().orElse("");
+		String licenseeName = persistenceManager.getPersistedLicenseeName().orElse(""); //$NON-NLS-1$
 		setLicenseeName(licenseeName);
 		String licenseeNumber = persistenceManager.getPersistedLicenseeNumber().orElse(DEFAULT_LICENSEE_NUMBER);
 		setLicenseeNumber(licenseeNumber);
@@ -98,7 +99,7 @@ public class LicenseManager {
 		} catch (NetLicensingException e) {
 			Optional<PersistenceModel> persistedData = persistenceManager.readPersistedData();
 			
-			Activator.log(Status.WARNING, "Couldn't reach licensing provider during pre-validation", e);
+			Activator.log(Status.WARNING, Messages.LicenseManager_cannot_reach_licensing_provider_on_prevalidation, e);
 			
 			licenseType = 
 					persistedData
@@ -173,7 +174,7 @@ public class LicenseManager {
 	
 	private void logPrevalidationResponse(ValidationResult validationResult) {
 		System.out.println("------Prevalidation response-----"); //$NON-NLS-1$
-		System.out.println("size: " +  validationResult.getValidations().size());
+		System.out.println("size: " +  validationResult.getValidations().size()); //$NON-NLS-1$
 		
 		System.out.print(validationResult.toString());
 		
@@ -194,14 +195,15 @@ public class LicenseManager {
 			ValidationParameters checkingValParameters = floatingModel.getCheckInValidationParameters();
 			try {
 				Instant now = Instant.now();
+				Activator.log(Messages.LicenseManager_session_check_in);
 				ValidationResult checkinResult = LicenseeService.validate(context, getLicenseeNumber(), checkingValParameters);
 				ValidationResultCache cache = ValidationResultCache.getInstance();
 				cache.updateCachedResult(checkinResult, getLicenseeName(), getLicenseeNumber(), now);
 				persistMng.persistCachedData();
 				 
 			} catch (NetLicensingException e) {
-				// TODO add a validation status indicating that the checkin was not successful.
-				Activator.log(Status.WARNING, "Couldn't reach licensing provider during check-in request", e);
+				// TODO add a validation status indicating that the check-in was not successful.
+				Activator.log(Status.WARNING, Messages.LicenseManager_cannot_reach_licensing_provider_on_checkin, e);
 			}		
 		}
 	}
@@ -239,17 +241,17 @@ public class LicenseManager {
 	}
 
 	private String getUniqueNodeIdentifier() {
-		if(this.uniqueHwId.isEmpty()) {
+		if(this.uniqueHwId != null && this.uniqueHwId.isEmpty()) {
 			SystemInfo systemInfo = new SystemInfo();
 
 	        HardwareAbstractionLayer hal = systemInfo.getHardware();
 	        HWDiskStore[] diskStores = hal.getDiskStores();
-	        String diskSerial = "";
+	        String diskSerial = ""; //$NON-NLS-1$
 	        if(diskStores.length > 0) {
 	        	diskSerial = diskStores[0].getSerial();
 	        }
 	        
-	        String mac = ""; 
+	        String mac = "";  //$NON-NLS-1$
 	        NetworkIF[] netWorkIfs = hal.getNetworkIFs();
 	        if(netWorkIfs.length > 0) {
 	        	mac = netWorkIfs[0].getMacaddr();
@@ -287,7 +289,7 @@ public class LicenseManager {
 	}
 
 	public void updateLicenseeNumber(String licenseeNumber, String licenseeName) {
-		Activator.log(Status.INFO, "Updating licensee credentials", null);
+		Activator.log(Status.INFO, Messages.LicenseManager_updating_licensee_credentials, null);
 		setLicenseeName(licenseeName);
 		setLicenseeNumber(licenseeNumber);
 		PersistenceManager persistence = PersistenceManager.getInstance();

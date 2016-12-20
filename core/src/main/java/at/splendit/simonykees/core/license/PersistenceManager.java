@@ -27,6 +27,7 @@ public class PersistenceManager {
 	private static final String ALGORITHM = "AES"; //$NON-NLS-1$
 	private static final String TRANSFORMATION = "AES"; //$NON-NLS-1$
 	private static final String KEY = "SOME_SECRET_KEY_"; //$NON-NLS-1$
+	private static final String EMPTY_STRING = "";  //$NON-NLS-1$
 
 	private PersistenceManager() {
 
@@ -136,7 +137,7 @@ public class PersistenceManager {
 	 */
 	public LicenseChecker vlidateUsingPersistedData() {
 		PersistenceModel persistenceModel = readPersistedData()
-				.orElse(new PersistenceModel("", "", false, null, null, null, null, null, false));
+				.orElse(new PersistenceModel(EMPTY_STRING, EMPTY_STRING, false, null, null, null, null, null, false));
 		return new OfflineLicenseChecker(persistenceModel);
 	}
 	
@@ -214,7 +215,7 @@ public class PersistenceManager {
 
 		@Override
 		public String getLicenseeName() {
-			return persistence.getLicenseeName().orElse(""); //$NON-NLS-1$
+			return persistence.getLicenseeName().orElse(EMPTY_STRING);
 		}
 
 		@Override
@@ -228,7 +229,7 @@ public class PersistenceManager {
 		String licenseeName =
 				readPersistedData()
 					.flatMap(PersistenceModel::getLicenseeName)
-					.orElse("");
+					.orElse(EMPTY_STRING);
 		
 		return Optional.of(licenseeName).filter(s -> !s.isEmpty());
 	}
@@ -237,7 +238,7 @@ public class PersistenceManager {
 		String licenseeNumber =
 				readPersistedData()
 					.flatMap(PersistenceModel::getLicenseeNumber)
-					.orElse("");
+					.orElse(EMPTY_STRING);
 		
 		return Optional.of(licenseeNumber).filter(s -> !s.isEmpty());
 	}

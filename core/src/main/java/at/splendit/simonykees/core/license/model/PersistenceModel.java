@@ -12,10 +12,11 @@ public class PersistenceModel implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final String SEPARATOR_REGEX = ",";
-	private static final String KEY_VALUE_SEPARATOR_REGEX = "\\|";
-	private static final String SEPARATOR = ",";
-	private static final String KEY_VALUE_SEPARATOR = "|";
+	private static final String SEPARATOR_REGEX = ","; //$NON-NLS-1$
+	private static final String KEY_VALUE_SEPARATOR_REGEX = "\\|"; //$NON-NLS-1$
+	private static final String SEPARATOR = ","; //$NON-NLS-1$
+	private static final String KEY_VALUE_SEPARATOR = "|"; //$NON-NLS-1$
+	private static final String EMPTY_STRING = "";  //$NON-NLS-1$
 	
 	private static final String LICENSEE_NUMBER_KEY = "licensee-number"; //$NON-NLS-1$
 	private static final String LICENSEE_NAME_KEY = "licensee-name"; //$NON-NLS-1$
@@ -130,7 +131,7 @@ public class PersistenceModel implements Serializable {
 		for(String row : splitedByComma) {
 			String [] splitedRow = row.split(KEY_VALUE_SEPARATOR_REGEX);
 			String key = splitedRow[0];
-			String val = "";
+			String val = EMPTY_STRING;
 			if(splitedRow.length > 1) {
 				val = splitedRow[1];
 			}
@@ -200,8 +201,8 @@ public class PersistenceModel implements Serializable {
 	public String toString() {
 
 		StringBuffer stringBuffer = new StringBuffer();
-		stringBuffer.append(LICENSEE_NUMBER_KEY + KEY_VALUE_SEPARATOR + getLicenseeNumber().orElse("") + SEPARATOR);
-		stringBuffer.append(LICENSEE_NAME_KEY + KEY_VALUE_SEPARATOR + getLicenseeName().orElse("") + SEPARATOR);
+		stringBuffer.append(LICENSEE_NUMBER_KEY + KEY_VALUE_SEPARATOR + getLicenseeNumber().orElse(EMPTY_STRING) + SEPARATOR);
+		stringBuffer.append(LICENSEE_NAME_KEY + KEY_VALUE_SEPARATOR + getLicenseeName().orElse(EMPTY_STRING) + SEPARATOR);
 		
 		stringBuffer.append(LAST_VALIDATION_STATUS_KEY + KEY_VALUE_SEPARATOR);
 		getLastValidationStatus()
