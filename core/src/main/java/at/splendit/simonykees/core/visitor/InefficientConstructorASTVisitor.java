@@ -17,27 +17,18 @@ import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.constants.ReservedNames;
 
 /**
- * Primitives should not be boxed just for "String" conversion
- * 
- * Noncompliant Code Example
- * 
- * int myInt = 4; String myIntString = new Integer(myInt).toString();
- * myIntString = Integer.valueOf(myInt).toString(); myIntString = 4 + "";
- * 
- * Compliant Solution
- * 
- * int myInt = 4; String myIntString = Integer.toString(myInt);
- * 
+ * Primitives should not use the constructor for construction of new Variables.
+ * Instead the .valueOf(..) should be used
  * 
  * @author Martin Huter
  * @since 0.9.2
  */
-public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitASTVisitor {
+public class InefficientConstructorASTVisitor extends AbstractCompilationUnitASTVisitor {
 
 	private static Integer STRING_KEY = 1;
 	private static String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
 
-	public PrimitiveBoxedForStringASTVisitor() {
+	public InefficientConstructorASTVisitor() {
 		super();
 		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
 	}
@@ -134,59 +125,14 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 			return false;
 		}
 	}
-
-	@Override
-	public boolean visit(StringLiteral node) {
-
-		/*
-		 * i Third case: 4 + ""
-		 */
-		if ("".equals(node.getLiteralValue()) && ASTNode.INFIX_EXPRESSION == node.getParent().getNodeType()) { //$NON-NLS-1$
-			InfixExpression infixExpression = (InfixExpression) node.getParent();
-			if (InfixExpression.Operator.PLUS == infixExpression.getOperator()) {
-				Expression otherSide;
-				if (infixExpression.getLeftOperand().equals(node)) {
-					otherSide = infixExpression.getRightOperand();
-				} else {
-					otherSide = infixExpression.getLeftOperand();
-				}
-				ITypeBinding otherSideTypeBinding = otherSide.resolveTypeBinding();
-				if (otherSideTypeBinding != null && isPrimitiveNumberClass(otherSideTypeBinding.getName())) {
-					String primitiveClassName;
-					switch (otherSideTypeBinding.getName()) {
-					case ReservedNames.INTEGER_PRIMITIVE:
-					case ReservedNames.INTEGER:
-						primitiveClassName = ReservedNames.INTEGER;
-						break;
-					case ReservedNames.DOUBLE_PRIMITIVE:
-					case ReservedNames.DOUBLE:
-						primitiveClassName = ReservedNames.DOUBLE;
-						break;
-					case ReservedNames.LONG_PRIMITIVE:
-					case ReservedNames.LONG:
-						primitiveClassName = ReservedNames.LONG;
-						break;
-					case ReservedNames.FLOAT_PRIMITIVE:
-					case ReservedNames.FLOAT:
-						primitiveClassName = ReservedNames.FLOAT;
-						break;
-					default:
-						return true;
-					}
-					SimpleName typeName = NodeBuilder.newSimpleName(node.getAST(), primitiveClassName);
-
-					SimpleName toStringSimpleName = NodeBuilder.newSimpleName(node.getAST(),
-							ReservedNames.MI_TO_STRING);
-
-					Expression valueParameter = (Expression) astRewrite.createMoveTarget(otherSide);
-
-					MethodInvocation methodInvocation = NodeBuilder.newMethodInvocation(node.getAST(), typeName,
-							toStringSimpleName, valueParameter);
-
-					astRewrite.replace(node, methodInvocation, null);
-				}
-			}
+	
+	private boolean isBooleanClass(String simpleName) {
+		switch (simpleName) {
+		case ReservedNames.BOOLEAN:
+		case ReservedNames.BOOLEAN_PRIMITIVE:
+			return true;
+		default:
+			return false;
 		}
-		return true;
 	}
 }
