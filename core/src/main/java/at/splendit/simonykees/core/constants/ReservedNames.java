@@ -14,6 +14,15 @@ public final class ReservedNames {
 	public static final String DOUBLE = "Double";
 	public static final String DOUBLE_PRIMITIVE = "double";
 	
+	public static final String SHORT = "Short";
+	public static final String SHORT_PRIMITIVE = "short";
+	
+	public static final String CHARACTER = "Character";
+	public static final String CHARACTER_PRIMITIVE = "character";
+	
+	public static final String BYTE = "Byte";
+	public static final String BYTE_PRIMITIVE = "byte";
+	
 	public static final String BOOLEAN = "Boolean";
 	public static final String BOOLEAN_PRIMITIVE = "boolean";
 	public static final String BOOLEAN_TRUE = "true";
