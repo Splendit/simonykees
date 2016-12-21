@@ -1,7 +1,10 @@
 package at.splendit.simonykees.core.license;
 
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Enumeration;
 import java.util.Optional;
 
 import org.eclipse.core.runtime.Status;
@@ -19,10 +22,6 @@ import at.splendit.simonykees.core.license.model.NodeLockedModel;
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 import at.splendit.simonykees.core.license.model.SchedulerModel;
 import at.splendit.simonykees.core.license.model.TryAndBuyModel;
-import oshi.SystemInfo;
-import oshi.hardware.HWDiskStore;
-import oshi.hardware.HardwareAbstractionLayer;
-import oshi.hardware.NetworkIF;
 
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
@@ -152,7 +151,7 @@ public class LicenseManager {
 		// pre-validation with floating license model...
 		LicenseeModel licensee = new LicenseeModel(licenseeName, licenseeNumber, floatingModel, productNumber);
 		ValidationParameters valParams = licensee.getValidationParams();
-//		logPrevalidationRequest(licenseeNumber, valParams);
+		logPrevalidationRequest(licenseeNumber, valParams);
 		preValidationResult = LicenseeService.validate(context, licenseeNumber, valParams);
 //		logPrevalidationResponse(preValidationResult);
 
@@ -242,20 +241,37 @@ public class LicenseManager {
 
 	private String getUniqueNodeIdentifier() {
 		if(this.uniqueHwId != null && this.uniqueHwId.isEmpty()) {
-			SystemInfo systemInfo = new SystemInfo();
-
-	        HardwareAbstractionLayer hal = systemInfo.getHardware();
-	        HWDiskStore[] diskStores = hal.getDiskStores();
 	        String diskSerial = ""; //$NON-NLS-1$
-	        if(diskStores.length > 0) {
-	        	diskSerial = diskStores[0].getSerial();
-	        }
-	        
+//			SystemInfo systemInfo = new SystemInfo();
+//
+//	        HardwareAbstractionLayer hal = systemInfo.getHardware();
+//	        HWDiskStore[] diskStores = hal.getDiskStores();
+
+//	        if(diskStores.length > 0) {
+//	        	diskSerial = diskStores[0].getSerial();
+//	        }
+//	        
 	        String mac = "";  //$NON-NLS-1$
-	        NetworkIF[] netWorkIfs = hal.getNetworkIFs();
-	        if(netWorkIfs.length > 0) {
-	        	mac = netWorkIfs[0].getMacaddr();
-	        }
+//	        NetworkIF[] netWorkIfs = hal.getNetworkIFs();
+//	        if(netWorkIfs.length > 0) {
+//	        	mac = netWorkIfs[0].getMacaddr();
+//	        }
+	        
+	        try {
+				Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+				if(networkInterfaces.hasMoreElements()) {
+					NetworkInterface networkInterface = networkInterfaces.nextElement();
+					byte[] hwAddress = networkInterface.getHardwareAddress();
+					
+					StringBuilder sb = new StringBuilder();
+			        for (int i = 0; i < hwAddress.length; i++) {
+			            sb.append(String.format("%02X%s", hwAddress[i], (i < hwAddress.length - 1) ? "-" : ""));         //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			        }
+			        mac = sb.toString();
+				}
+			} catch (SocketException e) {
+				Activator.log(Status.ERROR, Messages.LicenseManager_cannot_read_hardware_information, e);
+			}
 	        
 	        setUniqueHwId(diskSerial + mac);
 		}

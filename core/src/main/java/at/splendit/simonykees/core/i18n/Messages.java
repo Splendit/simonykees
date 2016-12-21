@@ -28,6 +28,7 @@ public class Messages extends NLS {
 	public static String FunctionalInterfaceRule_name;
 	public static String LicenseManager_cannot_reach_licensing_provider_on_checkin;
 	public static String LicenseManager_cannot_reach_licensing_provider_on_prevalidation;
+	public static String LicenseManager_cannot_read_hardware_information;
 	public static String LicenseManager_session_check_in;
 	public static String LicenseManager_updating_licensee_credentials;
 	public static String LicenseValidator_cannot_reach_license_provider_on_validation_call;
