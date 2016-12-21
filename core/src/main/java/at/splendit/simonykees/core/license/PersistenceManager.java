@@ -50,7 +50,7 @@ public class PersistenceManager {
 		ValidationResult validationResult = cache.getCachedValidationResult();
 		String licenseeName = cache.getLicenseName();
 		String licenseeNumber = cache.getLicenseeNumber();
-		LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, timestamp, licenseeName);
+		LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, timestamp, licenseeName, cache.getValidatioAction());
 
 		ZonedDateTime demoExpirationDate = checker.getEvaluationExpiresDate();
 		ZonedDateTime expirationTimeStamp = checker.getExpirationTimeStamp();

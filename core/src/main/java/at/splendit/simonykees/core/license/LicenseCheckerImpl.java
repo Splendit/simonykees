@@ -21,6 +21,7 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private ZonedDateTime subscriptionExpiresDate;
 	private boolean subscriptionStatus;
 	private LicenseStatus licenseStatus;
+	private ValidationAction validationAction;
 
 	private final String PRODUCT_MODULE_NUMBER_KEY = "productModuleNumber"; //$NON-NLS-1$
 	private final String PRODUCT_MODULE_NAME_KEY = "productModuleName";//$NON-NLS-1$
@@ -32,8 +33,9 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private final String NODE_LOCKED_FEATURE_KEY = "ETP7TSTC3"; //$NON-NLS-1$
 
 
-	public LicenseCheckerImpl(ValidationResult validationResult, Instant timestamp, String licenseeName) {
+	public LicenseCheckerImpl(ValidationResult validationResult, Instant timestamp, String licenseeName, ValidationAction validationAction) {
 		setTimestamp(timestamp);
+		setValidationAction(validationAction);
 		extractValidationData(validationResult);
 		setLicenseeName(licenseeName);
 		LicenseStatus licenseStatus = calLicenseStatus();
@@ -225,6 +227,10 @@ public class LicenseCheckerImpl implements LicenseChecker {
 		return subscriptionExpiresDate;
 	}
 
+	private void setValidationAction(ValidationAction validationAction) {
+		this.validationAction = validationAction;
+	}
+	
 	@Override
 	public LicenseStatus getLicenseStatus() {
 		return licenseStatus;
@@ -257,10 +263,13 @@ public class LicenseCheckerImpl implements LicenseChecker {
 			break;
 			
 		case FLOATING:
+			ValidationAction action = getValidationAction();
 			if(isValid()) {
 				status = LicenseStatus.FLOATING_CHECKED_OUT;
-			} else if(getSubscriptionStatus()) {
+			} else if(action.equals(ValidationAction.CHECK_OUT) && getSubscriptionStatus()) {
 				status = LicenseStatus.FLOATING_OUT_OF_SESSION;
+			} else if(action.equals(ValidationAction.CHECK_IN) && getSubscriptionStatus()) {
+				status = LicenseStatus.FLOATING_CHECKED_IN;
 			} else {
 				status = LicenseStatus.FLOATING_EXPIRED;
 			}
@@ -272,5 +281,9 @@ public class LicenseCheckerImpl implements LicenseChecker {
 		}
 		
 		return status;
+	}
+
+	private ValidationAction getValidationAction() {
+		return this.validationAction;
 	}
 }

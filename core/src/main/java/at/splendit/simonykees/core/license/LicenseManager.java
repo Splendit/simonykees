@@ -22,6 +22,10 @@ import at.splendit.simonykees.core.license.model.NodeLockedModel;
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 import at.splendit.simonykees.core.license.model.SchedulerModel;
 import at.splendit.simonykees.core.license.model.TryAndBuyModel;
+import oshi.SystemInfo;
+import oshi.hardware.HWDiskStore;
+import oshi.hardware.HardwareAbstractionLayer;
+import oshi.hardware.NetworkIF;
 
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
@@ -41,7 +45,7 @@ public class LicenseManager {
 	private static final String PRODUCT_MODULE_NUMBER = "M6IS9TIWG"; //$NON-NLS-1$ product module number for floating model
 
 	private final boolean DO_VALIDATE = true;
-	private final long VALIDATE_INTERVAL_IN_SECONDS = 5; // validation interval in seconds.
+	private final long VALIDATE_INTERVAL_IN_SECONDS = 600; // validation interval in seconds. 10 * 60s = 6 minutes
 
 	private static LicenseManager instance;
 
@@ -83,11 +87,11 @@ public class LicenseManager {
 		try {
 			// make a pre-validate call to get the license model relevant information...
 			ValidationResult validationResult = preValidate(PRODUCT_NUMBER, PRODUCT_MODULE_NUMBER, licenseeNumber, licenseeName);
-			LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, now, licenseeName);
+			LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, now, licenseeName, ValidationAction.CHECK_OUT);
 			
 			// cash and persist pre-validation...
 			ValidationResultCache cache = ValidationResultCache.getInstance();
-			cache.updateCachedResult(validationResult, licenseeName, licenseeNumber, now);
+			cache.updateCachedResult(validationResult, licenseeName, licenseeNumber, now, ValidationAction.CHECK_OUT);
 			persistenceManager.persistCachedData();
 			
 			// extract pre-validation result
@@ -128,7 +132,7 @@ public class LicenseManager {
  
 	}
 
-	private void setLicensee(LicenseeModel licensee) {
+	void setLicensee(LicenseeModel licensee) {
 		this.licensee = licensee;
 	}
 
@@ -197,8 +201,9 @@ public class LicenseManager {
 				Activator.log(Messages.LicenseManager_session_check_in);
 				ValidationResult checkinResult = LicenseeService.validate(context, getLicenseeNumber(), checkingValParameters);
 				ValidationResultCache cache = ValidationResultCache.getInstance();
-				cache.updateCachedResult(checkinResult, getLicenseeName(), getLicenseeNumber(), now);
+				cache.updateCachedResult(checkinResult, getLicenseeName(), getLicenseeNumber(), now, ValidationAction.CHECK_IN);
 				persistMng.persistCachedData();
+				ValidateExecutor.shutDownScheduler();
 				 
 			} catch (NetLicensingException e) {
 				// TODO add a validation status indicating that the check-in was not successful.
@@ -242,36 +247,20 @@ public class LicenseManager {
 	private String getUniqueNodeIdentifier() {
 		if(this.uniqueHwId != null && this.uniqueHwId.isEmpty()) {
 	        String diskSerial = ""; //$NON-NLS-1$
-//			SystemInfo systemInfo = new SystemInfo();
-//
-//	        HardwareAbstractionLayer hal = systemInfo.getHardware();
-//	        HWDiskStore[] diskStores = hal.getDiskStores();
+			SystemInfo systemInfo = new SystemInfo();
 
-//	        if(diskStores.length > 0) {
-//	        	diskSerial = diskStores[0].getSerial();
-//	        }
-//	        
-	        String mac = "";  //$NON-NLS-1$
-//	        NetworkIF[] netWorkIfs = hal.getNetworkIFs();
-//	        if(netWorkIfs.length > 0) {
-//	        	mac = netWorkIfs[0].getMacaddr();
-//	        }
+	        HardwareAbstractionLayer hal = systemInfo.getHardware();
+	        HWDiskStore[] diskStores = hal.getDiskStores();
+
+	        if(diskStores.length > 0) {
+	        	diskSerial = diskStores[0].getSerial();
+	        }
 	        
-	        try {
-				Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-				if(networkInterfaces.hasMoreElements()) {
-					NetworkInterface networkInterface = networkInterfaces.nextElement();
-					byte[] hwAddress = networkInterface.getHardwareAddress();
-					
-					StringBuilder sb = new StringBuilder();
-			        for (int i = 0; i < hwAddress.length; i++) {
-			            sb.append(String.format("%02X%s", hwAddress[i], (i < hwAddress.length - 1) ? "-" : ""));         //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			        }
-			        mac = sb.toString();
-				}
-			} catch (SocketException e) {
-				Activator.log(Status.ERROR, Messages.LicenseManager_cannot_read_hardware_information, e);
-			}
+	        String mac = "";  //$NON-NLS-1$
+	        NetworkIF[] netWorkIfs = hal.getNetworkIFs();
+	        if(netWorkIfs.length > 0) {
+	        	mac = netWorkIfs[0].getMacaddr();
+	        }
 	        
 	        setUniqueHwId(diskSerial + mac);
 		}
@@ -285,7 +274,7 @@ public class LicenseManager {
 		if(!cache.isEmpty()) {
 			ValidationResult validationResult = cache.getCachedValidationResult();
 			Instant timestamp = cache.getValidationTimestamp();
-			checker = new LicenseCheckerImpl(validationResult, timestamp, getLicenseeName());
+			checker = new LicenseCheckerImpl(validationResult, timestamp, getLicenseeName(), cache.getValidatioAction());
 		} else {
 			PersistenceManager persistenceManager = PersistenceManager.getInstance();
 			checker = persistenceManager.vlidateUsingPersistedData();
@@ -300,7 +289,7 @@ public class LicenseManager {
 	}
 	
 
-	private void setLicenseModel(LicenseModel licenseModel) {
+	void setLicenseModel(LicenseModel licenseModel) {
 		this.licenseModel = licenseModel;
 	}
 
@@ -335,5 +324,13 @@ public class LicenseManager {
 	// public Object clone(){
 	// throw new RuntimeException();
 	// }
+
+	String getFloatingProductModuleNumber() {
+		return PRODUCT_MODULE_NUMBER;
+	}
+	
+	String getProductNumber() {
+		return PRODUCT_NUMBER;
+	}
 
 }

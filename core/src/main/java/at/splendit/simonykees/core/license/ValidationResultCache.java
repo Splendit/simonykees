@@ -18,6 +18,7 @@ public class ValidationResultCache {
 	private final String VALIDATION_RESULT_KEY = "validation-result"; //$NON-NLS-1$
 	private final String IS_EMPTY_KEY = "is-empty"; //$NON-NLS-1$
 	private final String LICENSEE_NAME = "licensee-name"; //$NON-NLS-1$
+	private final String ACTION_KEY = "action"; //$NON-NLS-1$
 	private final String LICENSEE_NUMBER = "licensee-number"; //$NON-NLS-1$
 	private HashMap<String, Object> cacheHashMap = new HashMap<>();
 
@@ -32,12 +33,13 @@ public class ValidationResultCache {
 		cacheHashMap.put(IS_EMPTY_KEY, true);
 	}
 	
-	public void updateCachedResult(ValidationResult validationResult, String licenseeName, String licenseeNumber, Instant timestamp) {
+	public void updateCachedResult(ValidationResult validationResult, String licenseeName, String licenseeNumber, Instant timestamp, ValidationAction action) {
 		cacheHashMap.put(TIME_STAMP_KEY, timestamp);
 		cacheHashMap.put(VALIDATION_RESULT_KEY, validationResult);
 		cacheHashMap.put(IS_EMPTY_KEY, false);
 		cacheHashMap.put(LICENSEE_NAME, licenseeName);
 		cacheHashMap.put(LICENSEE_NUMBER, licenseeNumber);
+		cacheHashMap.put(ACTION_KEY, action);
 	}
 	
 	public ValidationResult getCachedValidationResult() {
@@ -60,6 +62,10 @@ public class ValidationResultCache {
 	
 	public String getLicenseeNumber() {
 		return (String) cacheHashMap.get(LICENSEE_NUMBER);
+	}
+	
+	public ValidationAction getValidatioAction() {
+		return (ValidationAction)cacheHashMap.get(ACTION_KEY);
 	}
 
 	public synchronized static ValidationResultCache getInstance() {
