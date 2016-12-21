@@ -124,6 +124,11 @@
 		<repository>
 			<id>eclipse-neon</id>
 			<layout>p2</layout>
+			<url>http://download.eclipse.org/releases/neon</url>
+		</repository>
+		<repository>
+			<id>splendit-nexus-2</id>
+			<layout>p2</layout>
 			<url>http://nexus-vm-02.splendit.loc/content/repositories/p2-eclipse-neon/</url>
 		</repository>
 		<repository>
