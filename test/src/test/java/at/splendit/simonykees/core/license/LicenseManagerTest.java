@@ -118,6 +118,7 @@ public class LicenseManagerTest {
 		checker = licenseMng.getValidationData();
 		assertEquals(LicenseStatus.FLOATING_CHECKED_OUT, checker.getLicenseStatus());
 		assertTrue(checker.isValid());
+		Thread.sleep(300);
 		licenseMng.checkIn();
 		checker = licenseMng.getValidationData();
 		assertEquals(false, checker.isValid());
@@ -130,6 +131,7 @@ public class LicenseManagerTest {
 		assertTrue(checker.isValid());
 		storeUsedSessionId();
 		assertEquals(LicenseStatus.FLOATING_CHECKED_OUT, checker.getLicenseStatus());
+		Thread.sleep(300);
 
 		
 		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_03);
@@ -138,14 +140,13 @@ public class LicenseManagerTest {
 		assertTrue(checker.isValid());
 		storeUsedSessionId();
 		assertEquals(LicenseStatus.FLOATING_CHECKED_OUT, checker.getLicenseStatus());
+		Thread.sleep(300);
 		
 		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_04);
 		licenseMng.initManager();
 		
 		checker = licenseMng.getValidationData();
 		licensee = licenseMng.getLicensee();
-		
-		LicenseValidator.doValidate(licensee);
 		
 		assertEquals(licenseModel.getType(), checker.getType());	
 		assertTrue(checker.isValid());
