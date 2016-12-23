@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,6 +25,11 @@ public class LicenseValidatorTest {
 	@Before
 	public void clearCache() {
 		ValidationResultCache.getInstance().reset();
+	}
+	
+	@After
+	public void waitToCompleteProcessing() throws InterruptedException {
+		Thread.sleep(300);
 	}
 	
 	@Test

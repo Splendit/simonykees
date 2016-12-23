@@ -49,6 +49,11 @@ public class LicenseManagerTest {
 		});
 	}
 	
+	@After
+	public void waitToCompleteProcessing() throws InterruptedException {
+		Thread.sleep(300);
+	}
+	
 	@Test
 	public void testInitLicenseManager() {
 
