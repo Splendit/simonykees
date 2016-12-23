@@ -7,7 +7,7 @@ import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import org.junit.After;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import at.splendit.simonykees.core.license.model.FloatingModel;
@@ -29,8 +29,8 @@ public class LicenseManagerTest {
 	private final HashSet<String> usedSessions = new HashSet<>();
 	
 	
-	@BeforeClass
-	public static void setUpLicensee() {
+	@Before
+	public void setUpLicensee() {
 		prepareLicensee();
 	}
 	
