@@ -1,14 +1,13 @@
 package at.splendit.simonykees.core.license;
 
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.Enumeration;
 import java.util.Optional;
 
 import org.eclipse.core.runtime.Status;
 
+import com.labs64.netlicensing.domain.vo.Context;
+import com.labs64.netlicensing.domain.vo.ValidationParameters;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.service.LicenseeService;
@@ -26,9 +25,6 @@ import oshi.SystemInfo;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.NetworkIF;
-
-import com.labs64.netlicensing.domain.vo.Context;
-import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
 /**
  * Manager of the validation process. Starts the validation process, caches the
@@ -155,33 +151,9 @@ public class LicenseManager {
 		// pre-validation with floating license model...
 		LicenseeModel licensee = new LicenseeModel(licenseeName, licenseeNumber, floatingModel, productNumber);
 		ValidationParameters valParams = licensee.getValidationParams();
-		logPrevalidationRequest(licenseeNumber, valParams);
 		preValidationResult = LicenseeService.validate(context, licenseeNumber, valParams);
-//		logPrevalidationResponse(preValidationResult);
 
 		return preValidationResult;
-	}
-	
-	
-	private void logPrevalidationRequest(String licenseeNumber, ValidationParameters validationParams) {
-		System.out.println("------Prevalidation request-----"); //$NON-NLS-1$
-		System.out.println("Licensee number:" + licenseeNumber); //$NON-NLS-1$
-		validationParams.getParameters().forEach((key, val) -> {
-			System.out.println("key: " + key); //$NON-NLS-1$
-			val.forEach((mapKey, mapVal) -> {
-				System.out.println(mapKey + ":" + mapVal); //$NON-NLS-1$
-			});
-		});
-		
-	}
-	
-	private void logPrevalidationResponse(ValidationResult validationResult) {
-		System.out.println("------Prevalidation response-----"); //$NON-NLS-1$
-		System.out.println("size: " +  validationResult.getValidations().size()); //$NON-NLS-1$
-		
-		System.out.print(validationResult.toString());
-		
-		System.out.println("------------------------\n"); //$NON-NLS-1$
 	}
 
 	/**
@@ -325,11 +297,11 @@ public class LicenseManager {
 	// throw new RuntimeException();
 	// }
 
-	String getFloatingProductModuleNumber() {
+	static String getFloatingProductModuleNumber() {
 		return PRODUCT_MODULE_NUMBER;
 	}
 	
-	String getProductNumber() {
+	static String getProductNumber() {
 		return PRODUCT_NUMBER;
 	}
 
