@@ -1,5 +1,8 @@
 package at.splendit.simonykees.core.license;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.security.Key;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -25,6 +28,7 @@ public class PersistenceManager {
 	
 	private static final String LICENSEE_CREDENTIALS_NODE_KEY = "licensee-credentials"; //$NON-NLS-1$
 	private static final String SIMONYKEES_KEY = "simonykees"; //$NON-NLS-1$
+	private static final String FILE_NAME = "target/info.txt"; //$NON-NLS-1$
 
 	private PersistenceManager() {
 		
@@ -74,26 +78,25 @@ public class PersistenceManager {
 	 * Stores {@link PersistenceManager#persistenceModel} into secure storage.
 	 */
 	void persist() {
+		
 		PersistenceModel persistenceModel = getPersistenceModel();
 		String licenseModelData = persistenceModel.toString();
 		
 		try {
-			ISecurePreferences iSecurePreferences = SecurePreferencesFactory.getDefault();
-			ISecurePreferences simonykeesNode = iSecurePreferences.node(SIMONYKEES_KEY);
-			
-			
 			Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
 			Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 			
 			byte[] outputBytes = cipher.doFinal(licenseModelData.getBytes());
-			simonykeesNode.putByteArray(LICENSEE_CREDENTIALS_NODE_KEY, outputBytes, true);
-			simonykeesNode.flush();
+			File outputFile = new File(FILE_NAME);
+			FileOutputStream outputStream = new FileOutputStream(outputFile);
+			outputStream.write(outputBytes);
+			outputStream.close();
 			
 		} catch (Exception exception) {
 				Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_encryption_error,
 						exception);
-		}	
+		}		
 	}
 	
 	/**
@@ -110,13 +113,16 @@ public class PersistenceManager {
 			Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 			cipher.init(Cipher.DECRYPT_MODE, secretKey);
 			
-			ISecurePreferences iSecurePreferences = SecurePreferencesFactory.getDefault();
-			ISecurePreferences simonykeesNode = iSecurePreferences.node(SIMONYKEES_KEY);
-			byte[] inputBytes = simonykeesNode.getByteArray(LICENSEE_CREDENTIALS_NODE_KEY, new byte[0]);
+			File inputFile = new File(FILE_NAME);
+			FileInputStream inputStream = new FileInputStream(inputFile);
+			byte[] inputBytes = new byte[(int)inputFile.length()];
+			inputStream.read(inputBytes);
 			
 			byte[] outputBytes = cipher.doFinal(inputBytes);
 			String persistenceStr = new String(outputBytes);
 			persistenceModel = PersistenceModel.fromString(persistenceStr);
+			
+			inputStream.close();
 			
 		} catch (Exception exception) {
 			Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_decryption_error,
