@@ -27,6 +27,8 @@ public class PersistenceModel implements Serializable {
 	private static final String EXPIRATION_TIMESTAMP_KEY = "expiration-timestamp"; //$NON-NLS-1$
 	private static final String SUBSCRIPTION_EXPIRES_KEY = "subscription-expires"; //$NON-NLS-1$
 	private static final String SUBSCRIPTION_STATUS_KEY = "subscription-status"; //$NON-NLS-1$
+	private static final String LAST_SUCCESS_TIMESTAMP = "last-successful-timestamp"; //$NON-NLS-1$
+	private static final String LAST_SUCCESS_LICENSE_TYPE = "last-successful-model"; //$NON-NLS-1$
 
 	private String licenseeNumber;
 	private String licenseeName;
@@ -37,10 +39,13 @@ public class PersistenceModel implements Serializable {
 	private ZonedDateTime expirationTimeStamp;
 	private ZonedDateTime subscriptionExpirationDate;
 	private boolean subscriptionStatus;
+	private Instant lastSuccessTimestamp;
+	private LicenseType lastSuccessLicenseType;
 
 	public PersistenceModel(String licenseeNumber, String licenseeName, boolean lastValidationStatus,
 			LicenseType licenseType, Instant lastValidationTimestamp, ZonedDateTime demoExpirationDate,
-			ZonedDateTime expirationTimeStamp, ZonedDateTime subscriptionExpirationDate, boolean subscriptionStatus) {
+			ZonedDateTime expirationTimeStamp, ZonedDateTime subscriptionExpirationDate, 
+			boolean subscriptionStatus, Instant lastSuccessTimestamp, LicenseType lastSuccessType) {
 
 		setLicenseeName(licenseeName);
 		setLicenseeNumber(licenseeNumber);
@@ -51,6 +56,24 @@ public class PersistenceModel implements Serializable {
 		setSubscriptionExpirationDate(subscriptionExpirationDate);
 		setSubscriptionStatus(subscriptionStatus);
 		setExpirationTimeStamp(expirationTimeStamp);
+		setLastSuccessTimestamp(lastSuccessTimestamp);
+		setLastSuccessLicenseType(lastSuccessType);
+	}
+
+	public Optional<LicenseType> getLastSuccessLicenseType() {
+		return Optional.ofNullable(lastSuccessLicenseType);
+	}
+	
+	private void setLastSuccessLicenseType(LicenseType lastSuccessType) {
+		this.lastSuccessLicenseType = lastSuccessType;
+	}
+	
+	public Optional<Instant> getLastSuccessTimestamp() {
+		return Optional.ofNullable(lastSuccessTimestamp);
+	}
+
+	private void setLastSuccessTimestamp(Instant lastSuccessTimestamp) {
+		this.lastSuccessTimestamp = lastSuccessTimestamp;
 	}
 
 	private void setExpirationTimeStamp(ZonedDateTime expirationTimeStamp) {
@@ -147,6 +170,8 @@ public class PersistenceModel implements Serializable {
 		String strExpirationTimestamp = data.get(EXPIRATION_TIMESTAMP_KEY);
 		String strSubscriptionExpires = data.get(SUBSCRIPTION_EXPIRES_KEY);
 		String strSubscriptionStatus = data.get(SUBSCRIPTION_STATUS_KEY);
+		String strLastSuccessTimestamp = data.get(LAST_SUCCESS_TIMESTAMP);
+		String strLastSuccessLicenseType = data.get(LAST_SUCCESS_LICENSE_TYPE);
 		
 		boolean lastVal = false;
 		if(!lastValStr.isEmpty()) {
@@ -183,6 +208,16 @@ public class PersistenceModel implements Serializable {
 			subscriptionStatus = Boolean.valueOf(strSubscriptionStatus);
 		}
 		
+		Instant lastSuccessTimestamp = null;
+		if(!strLastSuccessTimestamp.isEmpty()) {
+			lastSuccessTimestamp = Instant.parse(strLastSuccessTimestamp);
+		}
+		
+		LicenseType lastSuccessType = null;
+		if(!strLastSuccessLicenseType.isEmpty()) {
+			lastSuccessType = LicenseType.fromString(strLastSuccessLicenseType);
+		}
+		
 		PersistenceModel persistenceModel = new PersistenceModel(
 				licenseeNumber,
 				licenseeName, 
@@ -192,7 +227,9 @@ public class PersistenceModel implements Serializable {
 				demoExpiration, 
 				expirationTimestamp,
 				subscriptionExpires, 
-				subscriptionStatus);
+				subscriptionStatus, 
+				lastSuccessTimestamp, 
+				lastSuccessType);
 		
 		return persistenceModel;
 	}
@@ -237,6 +274,16 @@ public class PersistenceModel implements Serializable {
 		stringBuffer.append(SUBSCRIPTION_STATUS_KEY + KEY_VALUE_SEPARATOR);
 		getSubscriptionStatus()
 		.ifPresent(subscriptionStatus -> stringBuffer.append(subscriptionStatus.toString()));
+		stringBuffer.append(SEPARATOR);
+		
+		stringBuffer.append(LAST_SUCCESS_TIMESTAMP + KEY_VALUE_SEPARATOR);
+		getLastSuccessTimestamp()
+		.ifPresent(lastSuccessfulTimestamp -> stringBuffer.append(lastSuccessfulTimestamp.toString()));
+		stringBuffer.append(SEPARATOR);
+		
+		stringBuffer.append(LAST_SUCCESS_LICENSE_TYPE + KEY_VALUE_SEPARATOR);
+		getLastSuccessLicenseType()
+		.ifPresent(lastSuccessfulModel -> stringBuffer.append(lastSuccessfulModel.toString()));
 		
 		return stringBuffer.toString();
 	}

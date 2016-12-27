@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 
+@SuppressWarnings("nls")
 public class PersistenceManagerTest {
 	
 	@After
@@ -22,6 +23,7 @@ public class PersistenceManagerTest {
 		// having an instance of a PersistenceManager together with a PersistenceModel...
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		Instant nowMin30sec = Instant.now().minusSeconds(30);
+		Instant nowMin35sec = Instant.now().minusSeconds(35);
 		ZonedDateTime demoExpireDate  = ZonedDateTime.now().plusDays(4);
 		ZonedDateTime expireTimeStamp = ZonedDateTime.now().plusHours(4);
 		ZonedDateTime subscriptionExpires = ZonedDateTime.now().plusDays(350);
@@ -34,7 +36,9 @@ public class PersistenceManagerTest {
 				demoExpireDate, 
 				expireTimeStamp, 
 				subscriptionExpires, 
-				true);
+				true,
+				nowMin35sec, 
+				LicenseType.NODE_LOCKED);
 		persistenceMng.setPersistenceModel(orgModel);
 		
 		// when persisting the data and reading it back...
@@ -52,6 +56,8 @@ public class PersistenceManagerTest {
 		assertEquals(LicenseType.TRY_AND_BUY, decModel.getLicenseType().orElse(null));
 		assertEquals(subscriptionExpires, decModel.getSubscriptionExpirationDate().orElse(null));
 		assertEquals(true, decModel.getSubscriptionStatus().orElse(false));
+		assertEquals(nowMin35sec, decModel.getLastSuccessTimestamp().orElse(null));
+		assertEquals(LicenseType.NODE_LOCKED, decModel.getLastSuccessLicenseType().orElse(null));
 	}
 	
 	@Test
@@ -67,7 +73,9 @@ public class PersistenceManagerTest {
 				null, 
 				ZonedDateTime.now().plusHours(4), 
 				null, 
-				true);
+				true, 
+				null, 
+				null);
 		persistenceMng.setPersistenceModel(orgModel);
 		
 		// when persisting the data and reading it back...

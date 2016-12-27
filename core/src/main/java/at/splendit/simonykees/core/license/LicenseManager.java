@@ -242,13 +242,32 @@ public class LicenseManager {
 
 	public LicenseChecker getValidationData() {
 		ValidationResultCache cache = ValidationResultCache.getInstance();
+		PersistenceManager persistenceManager = PersistenceManager.getInstance();
 		LicenseChecker checker;
+		
 		if(!cache.isEmpty()) {
 			ValidationResult validationResult = cache.getCachedValidationResult();
 			Instant timestamp = cache.getValidationTimestamp();
-			checker = new LicenseCheckerImpl(validationResult, timestamp, getLicenseeName(), cache.getValidatioAction());
+			LicenseCheckerImpl checkerImpl = 
+					new LicenseCheckerImpl(
+							validationResult, 
+							timestamp, 
+							getLicenseeName(), 
+							cache.getValidatioAction());
+			Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
+			
+			Instant lastSussessTimestamp = 
+					optPersistedData
+					.flatMap(PersistenceModel::getLastSuccessTimestamp)
+					.orElse(null);
+			LicenseType lastSuccessType = 
+					optPersistedData
+					.flatMap(PersistenceModel::getLastSuccessLicenseType)
+					.orElse(null);
+			
+			checker = new CheckerImpl(checkerImpl, lastSussessTimestamp, lastSuccessType);
 		} else {
-			PersistenceManager persistenceManager = PersistenceManager.getInstance();
+
 			checker = persistenceManager.vlidateUsingPersistedData();
 		}
 
@@ -303,6 +322,81 @@ public class LicenseManager {
 	
 	static String getProductNumber() {
 		return PRODUCT_NUMBER;
+	}
+	
+	private class CheckerImpl implements LicenseChecker {
+
+		Instant lastSuccessTimestamp;
+		LicenseType lastSuccessLicenseType;
+		LicenseCheckerImpl checker;
+		LicenseType licenseType;
+		LicenseStatus licenseStatus;
+		
+		
+		
+		public CheckerImpl(LicenseCheckerImpl checker, Instant lastSussessTimestamp, 
+				LicenseType lastSuccessType) {
+			this.checker = checker;
+			this.lastSuccessLicenseType = lastSuccessType;
+			this.lastSuccessTimestamp = lastSussessTimestamp;
+			calcLicenseStatus();
+			
+		}
+
+		private void calcLicenseStatus() {
+			if(isValid() || isSubscriptionValid()) {
+				this.licenseType = checker.getType();
+				this.licenseStatus = checker.getLicenseStatus();
+			} else {
+				if(lastSuccessLicenseType != null 
+						&& lastSuccessTimestamp != null 
+						&& Instant.now().isBefore(checker.getExpirationDate().toInstant())
+						&& lastSuccessLicenseType.equals(LicenseType.NODE_LOCKED)) {
+					
+					this.licenseStatus = LicenseStatus.NODE_LOCKED_HW_ID_FAILURE;
+					this.licenseType = LicenseType.NODE_LOCKED;
+					
+				} else {
+					this.licenseType = checker.getType();
+					this.licenseStatus = checker.getLicenseStatus();
+				}
+			}	
+		}
+
+		private boolean isSubscriptionValid() {
+			return checker.getSubscriptionStatus();
+		}
+
+		@Override
+		public LicenseType getType() {
+			return licenseType;
+		}
+
+		@Override
+		public boolean isValid() {
+			return checker.isValid();
+		}
+
+		@Override
+		public Instant getValidationTimeStamp() {
+			return checker.getValidationTimeStamp();
+		}
+
+		@Override
+		public String getLicenseeName() {
+			return checker.getLicenseeName();
+		}
+
+		@Override
+		public LicenseStatus getLicenseStatus() {
+			return licenseStatus;
+		}
+
+		@Override
+		public ZonedDateTime getExpirationDate() {
+			return checker.getExpirationDate();
+		}
+		
 	}
 
 }

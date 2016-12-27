@@ -38,7 +38,7 @@ public class LicenseCheckerImpl implements LicenseChecker {
 		setValidationAction(validationAction);
 		extractValidationData(validationResult);
 		setLicenseeName(licenseeName);
-		LicenseStatus licenseStatus = calLicenseStatus();
+		LicenseStatus licenseStatus = calcLicenseStatus();
 		setLicenseStatus(licenseStatus);
 	}
 
@@ -223,7 +223,8 @@ public class LicenseCheckerImpl implements LicenseChecker {
 		return subscriptionStatus;
 	}
 	
-	public ZonedDateTime getSubscriptionExpiresDate() {
+	@Override
+	public ZonedDateTime getExpirationDate() {
 		return subscriptionExpiresDate;
 	}
 
@@ -241,7 +242,7 @@ public class LicenseCheckerImpl implements LicenseChecker {
 		
 	}
 
-	private LicenseStatus calLicenseStatus() {
+	private LicenseStatus calcLicenseStatus() {
 		LicenseType type = getType();
 		LicenseStatus status;
 		

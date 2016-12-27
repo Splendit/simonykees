@@ -18,7 +18,7 @@ public class LicenseValidatorTest {
 
 	private static final String NODE_LOCKED_LICENSEE_NUMBER = "IDVU36ETR";
 	private static final String NODE_LOCKED_LICENSEE_NAME = "TestAndRemoveIt-licensee3";
-	private static final String UNIQUE_WH_ID_01 = "unique-01";
+	private static final String UNIQUE_HW_ID_01 = "unique-01";
 	private static final ZonedDateTime NOW_IN_AYEAR = ZonedDateTime.now().plusDays(365);
 	
 
@@ -36,7 +36,7 @@ public class LicenseValidatorTest {
 	public void validateNodeLockedLicense() {
 		// having a licensee with a node locked license...
 		String productNumber = LicenseManager.getProductNumber();
-		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_AYEAR, UNIQUE_WH_ID_01);
+		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_AYEAR, UNIQUE_HW_ID_01);
 		LicenseeModel licensee = new LicenseeModel(NODE_LOCKED_LICENSEE_NAME, NODE_LOCKED_LICENSEE_NUMBER, nodeLocked, productNumber);
 		ValidationResultCache cache = ValidationResultCache.getInstance();
 		PersistenceManager persistenceManager = PersistenceManager.getInstance();
@@ -105,5 +105,50 @@ public class LicenseValidatorTest {
 		assertEquals(NODE_LOCKED_LICENSEE_NAME, persistenceModel.getLicenseeName().orElse(null));
 		assertEquals(NODE_LOCKED_LICENSEE_NUMBER, persistenceModel.getLicenseeNumber().orElse(null));
 		assertFalse(persistenceModel.getSubscriptionStatus().orElse(false));
+	}
+	
+	@Test
+	public void validateNodeLockedHwIdFailureStatus() throws InterruptedException {
+		// having a licensee with a node locked license...
+		LicenseManager licenseMenager = LicenseManager.getInstance();
+		licenseMenager.setUniqueHwId(UNIQUE_HW_ID_01);
+		licenseMenager.updateLicenseeNumber(NODE_LOCKED_LICENSEE_NUMBER, NODE_LOCKED_LICENSEE_NAME);
+		
+		LicenseChecker preVlaidateChecker = licenseMenager.getValidationData();
+		assertTrue(preVlaidateChecker.isValid());
+		assertEquals(LicenseType.NODE_LOCKED, preVlaidateChecker.getType());
+		assertEquals(LicenseStatus.NODE_LOCKED_REGISTERED, preVlaidateChecker.getLicenseStatus());
+		assertEquals(NODE_LOCKED_LICENSEE_NAME, preVlaidateChecker.getLicenseeName());
+		
+		// when calling a validate request with an incorrect hardware id...
+		String productNumber = LicenseManager.getProductNumber();
+		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_AYEAR, "some-incorrect-hw-id");
+		LicenseeModel licensee = new LicenseeModel(NODE_LOCKED_LICENSEE_NAME, NODE_LOCKED_LICENSEE_NUMBER, nodeLocked, productNumber);
+		ValidationResultCache cache = ValidationResultCache.getInstance();
+		PersistenceManager persistenceManager = PersistenceManager.getInstance();
+		
+		Thread.sleep(300);
+
+		LicenseValidator.doValidate(licensee);
+		
+		// expecting the validation result to be cached and validation status to be false
+		assertFalse("Expecting cache to contain received validation data", cache.isEmpty());
+		LicenseChecker checker = licenseMenager.getValidationData();
+		
+		assertFalse(checker.isValid()); // validation should be false
+		assertEquals(LicenseType.NODE_LOCKED, checker.getType());
+		assertEquals(LicenseStatus.NODE_LOCKED_HW_ID_FAILURE, checker.getLicenseStatus()); // hw id failure shall be detected
+		assertEquals(NODE_LOCKED_LICENSEE_NAME, checker.getLicenseeName());
+		
+		Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
+		assertTrue(optPersistedData.isPresent());
+		PersistenceModel persistenceModel = optPersistedData.get();
+		assertEquals(LicenseType.TRY_AND_BUY, persistenceModel.getLicenseType().orElse(null));
+		assertFalse(persistenceModel.getLastValidationStatus().orElse(false));
+		assertEquals(NODE_LOCKED_LICENSEE_NAME, persistenceModel.getLicenseeName().orElse(null));
+		assertEquals(NODE_LOCKED_LICENSEE_NUMBER, persistenceModel.getLicenseeNumber().orElse(null));
+		assertFalse(persistenceModel.getSubscriptionStatus().orElse(false));
+		assertEquals(LicenseType.NODE_LOCKED, persistenceModel.getLastSuccessLicenseType().orElse(null));
+		assertNotNull(persistenceModel.getLastSuccessTimestamp().orElse(null));
 	}
 }
