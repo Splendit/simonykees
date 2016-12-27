@@ -186,7 +186,9 @@ public class LicenseManagerTest {
 				ZonedDateTime.now().plusDays(1),
 				ZonedDateTime.now().plusHours(1), 
 				ZonedDateTime.now().plusYears(1), 
-				true);
+				true, 
+				Instant.now().minusSeconds(1), 
+				LicenseType.FLOATING);
 		persistenceMng.setPersistenceModel(persistenceModel);
 		persistenceMng.persist();
 	}

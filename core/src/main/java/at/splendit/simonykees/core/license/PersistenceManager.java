@@ -55,10 +55,25 @@ public class PersistenceManager {
 
 		ZonedDateTime demoExpirationDate = checker.getEvaluationExpiresDate();
 		ZonedDateTime expirationTimeStamp = checker.getExpirationTimeStamp();
-		ZonedDateTime subscriptionExpirationDate = checker.getSubscriptionExpiresDate();
+		ZonedDateTime subscriptionExpirationDate = checker.getExpirationDate();
 		LicenseType licenseType = checker.getType();
 		boolean subscriptionStatus = checker.getSubscriptionStatus();
 		boolean lastValidationStatus = checker.isValid();
+		
+		Instant lastSuccessTimestamp;
+		LicenseType lastSuccessType;
+		if(lastValidationStatus == true) {
+			lastSuccessTimestamp = timestamp;
+			lastSuccessType = licenseType;
+		} else {
+			Optional<PersistenceModel> optPersistedData = readPersistedData();
+			lastSuccessTimestamp = optPersistedData
+					.flatMap(PersistenceModel::getLastSuccessTimestamp)
+					.orElse(null);
+			lastSuccessType = optPersistedData
+					.flatMap(PersistenceModel::getLastSuccessLicenseType)
+					.orElse(null);
+		}
 		
 		PersistenceModel persistenceModel = new PersistenceModel(
 				licenseeNumber,
@@ -69,7 +84,9 @@ public class PersistenceManager {
 				demoExpirationDate,
 				expirationTimeStamp,
 				subscriptionExpirationDate, 
-				subscriptionStatus);
+				subscriptionStatus, 
+				lastSuccessTimestamp,
+				lastSuccessType);
 		setPersistenceModel(persistenceModel);
 		persist();
 	}
@@ -149,7 +166,9 @@ public class PersistenceManager {
 								null, // demo expiration date
 								null, // expiration time stamp
 								null, // subscription expiration date
-								false // last subscription status
+								false, // last subscription status
+								null, // last successful timestamp
+								null // last successful type
 								));
 		return new OfflineLicenseChecker(persistenceModel);
 	}
@@ -235,6 +254,11 @@ public class PersistenceManager {
 		public LicenseStatus getLicenseStatus() {
 			return LicenseStatus.CONNECTION_FAILURE;
 		}
+
+		@Override
+		public ZonedDateTime getExpirationDate() {
+			return persistence.getSubscriptionExpirationDate().orElse(null);
+		}
 		
 	}
 
@@ -267,7 +291,7 @@ public class PersistenceManager {
 							licenseeName,
 							false,
 							null, null, null, null, null, 
-							false
+							false, null, null
 						));
 		persistenceModel.updateLicenseeCredential(licenseeName, licenseeNumber);
 		setPersistenceModel(persistenceModel);

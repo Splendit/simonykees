@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.license;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 
 /**
  * Provides information about the current status of the license.
@@ -32,5 +33,10 @@ public interface LicenseChecker {
 	 * status of the license validation.
 	 */
 	LicenseStatus getLicenseStatus();
+	
+	/**
+	 * Returns license expiration date.
+	 */
+	ZonedDateTime getExpirationDate();
 	
 }
