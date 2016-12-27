@@ -7,18 +7,20 @@ import java.security.Key;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+
 import org.eclipse.core.runtime.Status;
-import org.eclipse.equinox.security.storage.ISecurePreferences;
-import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
+
 import com.labs64.netlicensing.domain.vo.ValidationResult;
+
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.i18n.ExceptionMessages;
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 
 public class PersistenceManager {
-	
+		
 	private PersistenceModel persistenceModel;
 	private static PersistenceManager instance;
 	private static final String ALGORITHM = "AES"; //$NON-NLS-1$
@@ -26,8 +28,6 @@ public class PersistenceManager {
 	private static final String KEY = "SOME_SECRET_KEY_"; //$NON-NLS-1$
 	private static final String EMPTY_STRING = "";  //$NON-NLS-1$
 	
-	private static final String LICENSEE_CREDENTIALS_NODE_KEY = "licensee-credentials"; //$NON-NLS-1$
-	private static final String SIMONYKEES_KEY = "simonykees"; //$NON-NLS-1$
 	private static final String FILE_NAME = "target/info.txt"; //$NON-NLS-1$
 
 	private PersistenceManager() {

@@ -38,10 +38,10 @@ public class LicenseManagerTest {
 	public void checkIn() {
 		LicenseManager instance = LicenseManager.getInstance();
 		usedSessions.forEach(sessionId -> {
-			FloatingModel floatingModel = new FloatingModel(instance.getFloatingProductModuleNumber(), ZonedDateTime.now().plusDays(356), sessionId);
+			FloatingModel floatingModel = new FloatingModel(LicenseManager.getFloatingProductModuleNumber(), ZonedDateTime.now().plusDays(356), sessionId);
 			instance.setUniqueHwId(sessionId);
 			
-			LicenseeModel licensee = new LicenseeModel("", instance.getLicenseeNumber(), floatingModel, instance.getProductNumber());
+			LicenseeModel licensee = new LicenseeModel("", instance.getLicenseeNumber(), floatingModel, LicenseManager.getProductNumber());
 			instance.setLicensee(licensee);
 			instance.setLicenseModel(floatingModel);
 			
