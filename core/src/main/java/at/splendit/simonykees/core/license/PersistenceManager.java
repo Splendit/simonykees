@@ -113,7 +113,29 @@ public class PersistenceManager {
 		} catch (Exception exception) {
 				Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_encryption_error,
 						exception);
-		}		
+		}
+		
+//		PersistenceModel persistenceModel = getPersistenceModel();
+//		String licenseModelData = persistenceModel.toString();
+//		
+//		try {
+//			ISecurePreferences iSecurePreferences = SecurePreferencesFactory.getDefault();
+//			ISecurePreferences simonykeesNode = iSecurePreferences.node(SIMONYKEES_KEY);
+//			simonykeesNode.clear();
+//			simonykeesNode.flush();
+//			
+//			Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
+//			Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+//			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+//			
+//			byte[] outputBytes = cipher.doFinal(licenseModelData.getBytes());
+//			simonykeesNode.putByteArray(LICENSEE_CREDENTIALS_NODE_KEY, outputBytes, true);
+//			simonykeesNode.flush();
+//			
+//		} catch (Exception exception) {
+//				Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_encryption_error,
+//						exception);
+//		}
 	}
 	
 	/**
@@ -145,6 +167,24 @@ public class PersistenceManager {
 			Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_decryption_error,
 					exception);
 		}
+		
+//		try {
+//		Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
+//		Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+//		cipher.init(Cipher.DECRYPT_MODE, secretKey);
+//		
+//		ISecurePreferences iSecurePreferences = SecurePreferencesFactory.getDefault();
+//		ISecurePreferences simonykeesNode = iSecurePreferences.node(SIMONYKEES_KEY);
+//		byte[] inputBytes = simonykeesNode.getByteArray(LICENSEE_CREDENTIALS_NODE_KEY, new byte[0]);
+//		
+//		byte[] outputBytes = cipher.doFinal(inputBytes);
+//		String persistenceStr = new String(outputBytes);
+//		persistenceModel = PersistenceModel.fromString(persistenceStr);
+//		
+//	} catch (Exception exception) {
+//		Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_decryption_error,
+//				exception);
+//	}
 		
 		return Optional.ofNullable(persistenceModel);
 	}
