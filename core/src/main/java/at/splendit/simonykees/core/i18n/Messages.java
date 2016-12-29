@@ -31,6 +31,7 @@ public class Messages extends NLS {
 	public static String LicenseManager_cannot_read_hardware_information;
 	public static String LicenseManager_session_check_in;
 	public static String LicenseManager_updating_licensee_credentials;
+	public static String LicenseManager_wait_for_validation_was_interrupted;
 	public static String LicenseValidator_cannot_reach_license_provider_on_validation_call;
 	public static String LicenseValidator_received_validation_response;
 	public static String OrganiseImportsRule_description;

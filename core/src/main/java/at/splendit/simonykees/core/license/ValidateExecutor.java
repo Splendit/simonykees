@@ -12,46 +12,49 @@ import at.splendit.simonykees.core.license.model.LicenseeModel;
 import at.splendit.simonykees.core.license.model.SchedulerModel;
 
 public class ValidateExecutor {
-	
+
 	private static ScheduledExecutorService scheduler;
 
-	protected synchronized static void startSchedule(SchedulerModel se, LicenseeModel le) {
+	protected synchronized static void startSchedule(SchedulerModel schedulingInfo, LicenseeModel licensee) {
 		final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
 		scheduledExecutor.scheduleWithFixedDelay(new Runnable() {
 			@Override
 			public void run() {
-				if (se.getDoValidate()) {
+				if (schedulingInfo.getDoValidate()) {
 					Activator.log(Status.INFO, Messages.ValidateExecutor_validation_scheduler_started, null);
-					LicenseValidator.doValidate(le);
+					LicenseValidator.doValidate(licensee);
 				} else {
 					Activator.log(Status.INFO, Messages.ValidateExecutor_shutting_down_validation_scheduler, null);
 					scheduledExecutor.shutdown();
 				}
 			}
-		}, 0, se.getValidateInterval(), TimeUnit.SECONDS);
-		
+		}, 
+				schedulingInfo.getInitialDelay(), 
+				schedulingInfo.getValidateInterval(), 
+				TimeUnit.SECONDS);
+
 		scheduler = scheduledExecutor;
 	}
-	
+
 	public synchronized static void shutDownScheduler() {
-		if(scheduler != null) {
-			Activator.log(Status.INFO, Messages.ValidateExecutor_shutting_down_validation_scheduler, null);
+		if (scheduler != null) {
+			Activator.log(Messages.ValidateExecutor_shutting_down_validation_scheduler);
 			scheduler.shutdown();
 		}
 	}
-	
+
 	public static boolean isTerminated() {
 		boolean isTerminated = true;
-		if(scheduler != null) {
+		if (scheduler != null) {
 			isTerminated = scheduler.isTerminated();
 		}
 		return isTerminated;
 	}
-	
+
 	public static boolean isShutDown() {
 		boolean isShutDown = true;
-		if(scheduler != null) {
+		if (scheduler != null) {
 			isShutDown = scheduler.isShutdown();
 		}
 		return isShutDown;

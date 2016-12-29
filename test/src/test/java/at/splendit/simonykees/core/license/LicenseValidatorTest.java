@@ -49,7 +49,7 @@ public class LicenseValidatorTest {
 		
 		// expecting the validation result to be cached and validation status to be true
 		assertFalse("Expecting cache to contain received validation data", cache.isEmpty());
-		LicenseCheckerImpl checker = new LicenseCheckerImpl(
+		ResponseParser checker = new ResponseParser(
 				cache.getCachedValidationResult(), 
 				cache.getValidationTimestamp(),
 				cache.getLicenseName(), 
@@ -87,7 +87,7 @@ public class LicenseValidatorTest {
 		
 		// expecting the validation result to be cached and validation status to be false
 		assertFalse("Expecting cache to contain received validation data", cache.isEmpty());
-		LicenseCheckerImpl checker = new LicenseCheckerImpl(
+		ResponseParser checker = new ResponseParser(
 				cache.getCachedValidationResult(), 
 				cache.getValidationTimestamp(),
 				cache.getLicenseName(), 

@@ -36,12 +36,14 @@ import oshi.hardware.NetworkIF;
  */
 public class LicenseManager {
 
-	private static final String DEFAULT_LICENSEE_NUMBER = "trial-licensee-number"; //$NON-NLS-1$
+	private static final String DEFAULT_LICENSEE_NUMBER_PREFIX = "demo"; //$NON-NLS-1$
 	private static final String PRODUCT_NUMBER = "PNZNF7Y7E"; //$NON-NLS-1$
 	private static final String PRODUCT_MODULE_NUMBER = "M6IS9TIWG"; //$NON-NLS-1$ product module number for floating model
+	private static final long WAIT_FOR_VALIDATION_RESPONSE = 1000; // in milliseconds
 
 	private final boolean DO_VALIDATE = true;
 	private final long VALIDATE_INTERVAL_IN_SECONDS = 600; // validation interval in seconds. 10 * 60s = 6 minutes
+	private final long INITIAL_VALIDATION_DELAY = 0;  // delay of the first validation of the scheduler
 
 	private static LicenseManager instance;
 
@@ -53,7 +55,7 @@ public class LicenseManager {
 	private String licenseeNumber;
 	
 	private String uniqueHwId = ""; //$NON-NLS-1$
-
+	
 	private LicenseManager() {
 		// TODO: throw an exception if the instance is not null...
 		initManager();
@@ -67,7 +69,10 @@ public class LicenseManager {
 	}
 
 	void initManager() {
-		schedulerEntity = new SchedulerModel(VALIDATE_INTERVAL_IN_SECONDS, DO_VALIDATE);
+		schedulerEntity = new SchedulerModel(
+				VALIDATE_INTERVAL_IN_SECONDS, 
+				INITIAL_VALIDATION_DELAY, 
+				DO_VALIDATE);
 
 		Instant now = Instant.now();
 
@@ -77,13 +82,13 @@ public class LicenseManager {
 		ZonedDateTime expirationTimeStamp;
 		String licenseeName = persistenceManager.getPersistedLicenseeName().orElse(""); //$NON-NLS-1$
 		setLicenseeName(licenseeName);
-		String licenseeNumber = persistenceManager.getPersistedLicenseeNumber().orElse(DEFAULT_LICENSEE_NUMBER);
+		String licenseeNumber = persistenceManager.getPersistedLicenseeNumber().orElse(calcDemoLicenseeNumber());
 		setLicenseeNumber(licenseeNumber);
 		
 		try {
 			// make a pre-validate call to get the license model relevant information...
 			ValidationResult validationResult = preValidate(PRODUCT_NUMBER, PRODUCT_MODULE_NUMBER, licenseeNumber, licenseeName);
-			LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, now, licenseeName, ValidationAction.CHECK_OUT);
+			ResponseParser parser = new ResponseParser(validationResult, now, licenseeName, ValidationAction.CHECK_OUT);
 			
 			// cash and persist pre-validation...
 			ValidationResultCache cache = ValidationResultCache.getInstance();
@@ -91,9 +96,9 @@ public class LicenseManager {
 			persistenceManager.persistCachedData();
 			
 			// extract pre-validation result
-			licenseType = checker.getType();
-			evaluationExpiresDate = checker.getEvaluationExpiresDate();
-			expirationTimeStamp = checker.getExpirationTimeStamp();
+			licenseType = parser.getType();
+			evaluationExpiresDate = parser.getEvaluationExpiresDate();
+			expirationTimeStamp = parser.getExpirationTimeStamp();
 			
 		} catch (NetLicensingException e) {
 			Optional<PersistenceModel> persistedData = persistenceManager.readPersistedData();
@@ -157,7 +162,7 @@ public class LicenseManager {
 	}
 
 	/**
-	 * Sends a request to free one session from the session pool available
+	 * Sends a request to release one session from the session pool available
 	 * for Floating License Model. Relevant only for the case when the 
 	 * licensing model is Floating. 
 	 */
@@ -216,9 +221,10 @@ public class LicenseManager {
 		this.uniqueHwId = uniqueHwId;
 	}
 
+	@SuppressWarnings("nls")
 	private String getUniqueNodeIdentifier() {
 		if(this.uniqueHwId != null && this.uniqueHwId.isEmpty()) {
-	        String diskSerial = ""; //$NON-NLS-1$
+	        String diskSerial = "";
 			SystemInfo systemInfo = new SystemInfo();
 
 	        HardwareAbstractionLayer hal = systemInfo.getHardware();
@@ -228,7 +234,7 @@ public class LicenseManager {
 	        	diskSerial = diskStores[0].getSerial();
 	        }
 	        
-	        String mac = "";  //$NON-NLS-1$
+	        String mac = "";
 	        NetworkIF[] netWorkIfs = hal.getNetworkIFs();
 	        if(netWorkIfs.length > 0) {
 	        	mac = netWorkIfs[0].getMacaddr();
@@ -239,24 +245,59 @@ public class LicenseManager {
 
 		return uniqueHwId;
 	}
+	
+	
+	@SuppressWarnings("nls")
+	private String calcDemoLicenseeNumber() {
+		String demoLicenseeName = "";
+		
+		SystemInfo systemInfo = new SystemInfo();
 
+        HardwareAbstractionLayer hal = systemInfo.getHardware();
+        HWDiskStore[] diskStores = hal.getDiskStores();
+
+        String diskSerial = "";
+        if(diskStores.length > 0) {
+        	diskSerial = diskStores[0].getSerial();
+        	if(diskSerial.length() > 26) {
+        		diskSerial = diskSerial.substring(0, 25);
+        	}
+        }
+        
+        String mac = "";
+        NetworkIF[] netWorkIfs = hal.getNetworkIFs();
+        if(netWorkIfs.length > 0) {
+        	mac = netWorkIfs[0].getMacaddr();
+        }
+        
+        demoLicenseeName = DEFAULT_LICENSEE_NUMBER_PREFIX + mac + diskSerial;
+		
+		return demoLicenseeName;
+	}
+
+	/**
+	 * Constructs an instance of type {@link LicenseChecker} which contains
+	 * information about the validity of the license. 
+	 */
 	public LicenseChecker getValidationData() {
+
 		ValidationResultCache cache = ValidationResultCache.getInstance();
 		PersistenceManager persistenceManager = PersistenceManager.getInstance();
 		LicenseChecker checker;
 		
+		// if there is a cached validation result...
 		if(!cache.isEmpty()) {
-			ValidationResult validationResult = cache.getCachedValidationResult();
-			Instant timestamp = cache.getValidationTimestamp();
-			LicenseCheckerImpl checkerImpl = 
-					new LicenseCheckerImpl(
-							validationResult, 
-							timestamp, 
+			// construct a validation result parser...
+			ResponseParser parser = 
+					new ResponseParser(
+							cache.getCachedValidationResult(), 
+							cache.getValidationTimestamp(), 
 							getLicenseeName(), 
 							cache.getValidatioAction());
-			Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
 			
-			Instant lastSussessTimestamp = 
+			// and get the last successful validation information from persistence...
+			Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
+			Instant lastSuccessTimestamp = 
 					optPersistedData
 					.flatMap(PersistenceModel::getLastSuccessTimestamp)
 					.orElse(null);
@@ -265,9 +306,41 @@ public class LicenseManager {
 					.flatMap(PersistenceModel::getLastSuccessLicenseType)
 					.orElse(null);
 			
-			checker = new CheckerImpl(checkerImpl, lastSussessTimestamp, lastSuccessType);
+			// create an instance of LicenseChecker from the parser and last successful info...
+			checker = new CheckerImpl(parser, lastSuccessTimestamp, lastSuccessType);
+			
+			if(checker.isValid() && ValidateExecutor.isShutDown()) {
+				// cache cannot be trusted if the validate executor is shut down.
+				
+				// restart the scheduler
+				ValidateExecutor.startSchedule(schedulerEntity, licensee);
+				
+				// wait for the validation call...
+				try {
+					Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE);
+				} catch (InterruptedException e) {
+					Activator.log(Status.ERROR, Messages.LicenseManager_wait_for_validation_was_interrupted, e);
+					cache.reset();
+				}
+				
+				// and reconstruct an instance of type LicenseChecker
+				if(!cache.isEmpty()) {
+					parser = 
+							new ResponseParser(
+									cache.getCachedValidationResult(), 
+									cache.getValidationTimestamp(), 
+									getLicenseeName(), 
+									cache.getValidatioAction());
+					
+					checker = new CheckerImpl(parser, lastSuccessTimestamp, lastSuccessType);
+				} else {
+					checker = persistenceManager.vlidateUsingPersistedData();
+				}
+			}
+			
 		} else {
 
+			// otherwise use the persisted data to create an instance of type LicenseChecker...
 			checker = persistenceManager.vlidateUsingPersistedData();
 		}
 
@@ -275,15 +348,23 @@ public class LicenseManager {
 	}
 	
 
-	public LicenseModel getLicenseModel() {
+	LicenseModel getLicenseModel() {
 		return licenseModel;
 	}
-	
 
 	void setLicenseModel(LicenseModel licenseModel) {
 		this.licenseModel = licenseModel;
 	}
 
+	/**
+	 * Overwrites the existing license name and number with 
+	 * the given ones. From the moment of calling this method,
+	 * the new licensee name and number will be used on the
+	 * validation calls.
+	 * 
+	 * @param licenseeNumber new licensee number.
+	 * @param licenseeName 	new licensee name.
+	 */
 	public void updateLicenseeNumber(String licenseeNumber, String licenseeName) {
 		Activator.log(Status.INFO, Messages.LicenseManager_updating_licensee_credentials, null);
 		setLicenseeName(licenseeName);
@@ -295,7 +376,7 @@ public class LicenseManager {
 		initManager();
 	}
 	
-	public String getLicenseeNumber() {
+	String getLicenseeNumber() {
 		return this.licenseeNumber;
 	}
 	
@@ -310,11 +391,10 @@ public class LicenseManager {
 	private void setLicenseeName(String licenseeName) {
 		this.licenseeName = licenseeName;
 	}
-	// TODO: override clone()
-	// @Override
-	// public Object clone(){
-	// throw new RuntimeException();
-	// }
+
+	public Object clone() throws CloneNotSupportedException {
+	    throw new CloneNotSupportedException(); 
+	}
 
 	static String getFloatingProductModuleNumber() {
 		return PRODUCT_MODULE_NUMBER;
@@ -328,15 +408,15 @@ public class LicenseManager {
 
 		Instant lastSuccessTimestamp;
 		LicenseType lastSuccessLicenseType;
-		LicenseCheckerImpl checker;
+		ResponseParser parser;
 		LicenseType licenseType;
 		LicenseStatus licenseStatus;
 		
 		
 		
-		public CheckerImpl(LicenseCheckerImpl checker, Instant lastSussessTimestamp, 
+		public CheckerImpl(ResponseParser parser, Instant lastSussessTimestamp, 
 				LicenseType lastSuccessType) {
-			this.checker = checker;
+			this.parser = parser;
 			this.lastSuccessLicenseType = lastSuccessType;
 			this.lastSuccessTimestamp = lastSussessTimestamp;
 			calcLicenseStatus();
@@ -345,26 +425,26 @@ public class LicenseManager {
 
 		private void calcLicenseStatus() {
 			if(isValid() || isSubscriptionValid()) {
-				this.licenseType = checker.getType();
-				this.licenseStatus = checker.getLicenseStatus();
+				this.licenseType = parser.getType();
+				this.licenseStatus = parser.getLicenseStatus();
 			} else {
 				if(lastSuccessLicenseType != null 
 						&& lastSuccessTimestamp != null 
-						&& Instant.now().isBefore(checker.getExpirationDate().toInstant())
+						&& Instant.now().isBefore(parser.getExpirationDate().toInstant())
 						&& lastSuccessLicenseType.equals(LicenseType.NODE_LOCKED)) {
 					
 					this.licenseStatus = LicenseStatus.NODE_LOCKED_HW_ID_FAILURE;
 					this.licenseType = LicenseType.NODE_LOCKED;
 					
 				} else {
-					this.licenseType = checker.getType();
-					this.licenseStatus = checker.getLicenseStatus();
+					this.licenseType = parser.getType();
+					this.licenseStatus = parser.getLicenseStatus();
 				}
 			}	
 		}
 
 		private boolean isSubscriptionValid() {
-			return checker.getSubscriptionStatus();
+			return parser.getSubscriptionStatus();
 		}
 
 		@Override
@@ -374,17 +454,17 @@ public class LicenseManager {
 
 		@Override
 		public boolean isValid() {
-			return checker.isValid();
+			return parser.isValid();
 		}
 
 		@Override
 		public Instant getValidationTimeStamp() {
-			return checker.getValidationTimeStamp();
+			return parser.getValidationTimeStamp();
 		}
 
 		@Override
 		public String getLicenseeName() {
-			return checker.getLicenseeName();
+			return parser.getLicenseeName();
 		}
 
 		@Override
@@ -394,7 +474,7 @@ public class LicenseManager {
 
 		@Override
 		public ZonedDateTime getExpirationDate() {
-			return checker.getExpirationDate();
+			return parser.getExpirationDate();
 		}
 		
 	}

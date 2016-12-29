@@ -14,7 +14,8 @@ public interface LicenseChecker {
 	LicenseType getType();
 	
 	/**
-	 * Returns if the status of the license is valid.
+	 * Returns true if the license is valid and the licensee is 
+	 * allowed to use the product.
 	 */
 	boolean isValid();
 	
