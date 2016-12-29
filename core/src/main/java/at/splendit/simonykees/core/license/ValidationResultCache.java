@@ -30,6 +30,9 @@ public class ValidationResultCache {
 	public void reset() {
 		cacheHashMap.remove(TIME_STAMP_KEY);
 		cacheHashMap.remove(VALIDATION_RESULT_KEY);
+		cacheHashMap.remove(LICENSEE_NAME);
+		cacheHashMap.remove(LICENSEE_NUMBER);
+		cacheHashMap.remove(ACTION_KEY);
 		cacheHashMap.put(IS_EMPTY_KEY, true);
 	}
 	

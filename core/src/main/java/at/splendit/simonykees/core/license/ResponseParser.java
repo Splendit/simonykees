@@ -7,8 +7,7 @@ import java.util.Map;
 import com.labs64.netlicensing.domain.vo.Composition;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
-public class LicenseCheckerImpl implements LicenseChecker {
-	//TODO: rename this class. find a proper name for it.
+public class ResponseParser implements LicenseChecker {
 
 	private LicenseType licenseType;
 	private boolean licenseModelStatus;
@@ -33,7 +32,7 @@ public class LicenseCheckerImpl implements LicenseChecker {
 	private final String NODE_LOCKED_FEATURE_KEY = "ETP7TSTC3"; //$NON-NLS-1$
 
 
-	public LicenseCheckerImpl(ValidationResult validationResult, Instant timestamp, String licenseeName, ValidationAction validationAction) {
+	public ResponseParser(ValidationResult validationResult, Instant timestamp, String licenseeName, ValidationAction validationAction) {
 		setTimestamp(timestamp);
 		setValidationAction(validationAction);
 		extractValidationData(validationResult);

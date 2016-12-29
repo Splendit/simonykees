@@ -51,14 +51,14 @@ public class PersistenceManager {
 		ValidationResult validationResult = cache.getCachedValidationResult();
 		String licenseeName = cache.getLicenseName();
 		String licenseeNumber = cache.getLicenseeNumber();
-		LicenseCheckerImpl checker = new LicenseCheckerImpl(validationResult, timestamp, licenseeName, cache.getValidatioAction());
+		ResponseParser parser = new ResponseParser(validationResult, timestamp, licenseeName, cache.getValidatioAction());
 
-		ZonedDateTime demoExpirationDate = checker.getEvaluationExpiresDate();
-		ZonedDateTime expirationTimeStamp = checker.getExpirationTimeStamp();
-		ZonedDateTime subscriptionExpirationDate = checker.getExpirationDate();
-		LicenseType licenseType = checker.getType();
-		boolean subscriptionStatus = checker.getSubscriptionStatus();
-		boolean lastValidationStatus = checker.isValid();
+		ZonedDateTime demoExpirationDate = parser.getEvaluationExpiresDate();
+		ZonedDateTime expirationTimeStamp = parser.getExpirationTimeStamp();
+		ZonedDateTime subscriptionExpirationDate = parser.getExpirationDate();
+		LicenseType licenseType = parser.getType();
+		boolean subscriptionStatus = parser.getSubscriptionStatus();
+		boolean lastValidationStatus = parser.isValid();
 		
 		Instant lastSuccessTimestamp;
 		LicenseType lastSuccessType;

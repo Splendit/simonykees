@@ -4,10 +4,12 @@ public class SchedulerModel {
 
 	private long validateInterval;
 	private boolean doValidate;
+	private long initialDelay;
 
-	public SchedulerModel(long validateInternval, boolean doValidate) {
+	public SchedulerModel(long validateInternval, long initialDelay, boolean doValidate) {
 		setValidateInterval(validateInternval);
 		setDoValidate(doValidate);
+		setInitialDelay(initialDelay);
 	}
 
 	public long getValidateInterval() {
@@ -24,6 +26,14 @@ public class SchedulerModel {
 
 	public void setDoValidate(boolean doValidate) {
 		this.doValidate = doValidate;
+	}
+
+	public long getInitialDelay() {
+		return initialDelay;
+	}
+
+	private void setInitialDelay(long initialDelay) {
+		this.initialDelay = initialDelay;
 	}
 
 }

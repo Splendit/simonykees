@@ -29,6 +29,9 @@ public enum LicenseStatus {
 		case "nodelocked-expired":
 			status = LicenseStatus.NODE_LOCKED_EXPIRED;
 			break;
+		case "node-locked-hw-id-failure":
+			status = NODE_LOCKED_HW_ID_FAILURE;
+			break;
 		case "floating-checked-out":
 			status = LicenseStatus.FLOATING_CHECKED_OUT;
 			break;
