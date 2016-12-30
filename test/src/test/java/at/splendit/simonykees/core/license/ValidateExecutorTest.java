@@ -19,6 +19,7 @@ public class ValidateExecutorTest {
 
 	private static final String NODE_LOCKED_LICENSEE_NUMBER = "IDVU36ETR";
 	private static final String NODE_LOCKED_LICENSEE_NAME = "TestAndRemoveIt-licensee3";
+	private static final String UNIQUE_HW_ID_01 = "unique-01";
 	
 	@Before
 	public void clearCache() {
@@ -32,9 +33,12 @@ public class ValidateExecutorTest {
 	}
 	
 	@Test
-	public void shutDownAndRestartScheduler() {
+	public void shutDownAndRestartScheduler() throws InterruptedException {
 		// having an instance of license manager and a running scheduler...
 		LicenseManager licenseManager = LicenseManager.getInstance();
+		Thread.sleep(500);
+		licenseManager.setUniqueHwId(UNIQUE_HW_ID_01);
+		licenseManager.initManager();
 		LicenseeModel licensee = licenseManager.getLicensee();
 		assertEquals(NODE_LOCKED_LICENSEE_NUMBER, licensee.getLicenseeNumber());
 		assertEquals(NODE_LOCKED_LICENSEE_NAME, licensee.getLicenseeName());
@@ -56,6 +60,9 @@ public class ValidateExecutorTest {
 	public void shutDownAndCheckLicense() throws InterruptedException {
 		// having an instance of license manager where the scheduler is shut down...
 		LicenseManager licenseManager = LicenseManager.getInstance();
+		Thread.sleep(500);
+		licenseManager.setUniqueHwId(UNIQUE_HW_ID_01);
+		licenseManager.initManager();
 		LicenseChecker validationData = licenseManager.getValidationData();
 		Instant firstValidationTimestamp = validationData.getValidationTimeStamp();
 		assertTrue(validationData.isValid());
@@ -69,6 +76,7 @@ public class ValidateExecutorTest {
 		
 		// when getting the validation data from the manager...
 		validationData = licenseManager.getValidationData();
+		assertTrue(validationData.isValid());
 		Instant secondValidationTimestamp = validationData.getValidationTimeStamp();
 		
 		// expecting the scheduler to be restarted... 
