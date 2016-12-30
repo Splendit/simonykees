@@ -37,7 +37,7 @@ public class ValidateExecutor {
 		scheduler = scheduledExecutor;
 	}
 
-	public synchronized static void shutDownScheduler() {
+	synchronized static void shutDownScheduler() {
 		if (scheduler != null) {
 			Activator.log(Messages.ValidateExecutor_shutting_down_validation_scheduler);
 			scheduler.shutdown();
