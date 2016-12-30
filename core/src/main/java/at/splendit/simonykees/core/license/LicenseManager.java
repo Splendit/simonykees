@@ -406,11 +406,16 @@ public class LicenseManager {
 	
 	private class CheckerImpl implements LicenseChecker {
 
-		Instant lastSuccessTimestamp;
-		LicenseType lastSuccessLicenseType;
-		ResponseParser parser;
-		LicenseType licenseType;
-		LicenseStatus licenseStatus;
+		private Instant lastSuccessTimestamp;
+		private LicenseType lastSuccessLicenseType;
+		private ResponseParser parser;
+		private LicenseType licenseType;
+		private LicenseStatus licenseStatus;
+		private boolean valid;
+		private boolean subscriptionValid;
+		private Instant timestamp;
+		private ZonedDateTime expirationDate;
+		private String licenseeName;
 		
 		
 		
@@ -419,6 +424,11 @@ public class LicenseManager {
 			this.parser = parser;
 			this.lastSuccessLicenseType = lastSuccessType;
 			this.lastSuccessTimestamp = lastSussessTimestamp;
+			this.valid = parser.isValid();
+			this.subscriptionValid = parser.getSubscriptionStatus();
+			this.timestamp = parser.getValidationTimeStamp();
+			this.expirationDate =  parser.getExpirationDate();
+			this.licenseeName = parser.getLicenseeName();
 			calcLicenseStatus();
 			
 		}
@@ -444,7 +454,7 @@ public class LicenseManager {
 		}
 
 		private boolean isSubscriptionValid() {
-			return parser.getSubscriptionStatus();
+			return subscriptionValid;
 		}
 
 		@Override
@@ -454,17 +464,17 @@ public class LicenseManager {
 
 		@Override
 		public boolean isValid() {
-			return parser.isValid();
+			return this.valid;
 		}
 
 		@Override
 		public Instant getValidationTimeStamp() {
-			return parser.getValidationTimeStamp();
+			return timestamp;
 		}
 
 		@Override
 		public String getLicenseeName() {
-			return parser.getLicenseeName();
+			return licenseeName;
 		}
 
 		@Override
@@ -474,7 +484,7 @@ public class LicenseManager {
 
 		@Override
 		public ZonedDateTime getExpirationDate() {
-			return parser.getExpirationDate();
+			return expirationDate;
 		}
 		
 	}
