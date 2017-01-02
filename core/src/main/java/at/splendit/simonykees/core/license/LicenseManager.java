@@ -406,9 +406,7 @@ public class LicenseManager {
 	
 	private class CheckerImpl implements LicenseChecker {
 
-		private Instant lastSuccessTimestamp;
-		private LicenseType lastSuccessLicenseType;
-		private ResponseParser parser;
+		private LicenseType parsedLicenseType;
 		private LicenseType licenseType;
 		private LicenseStatus licenseStatus;
 		private boolean valid;
@@ -416,37 +414,55 @@ public class LicenseManager {
 		private Instant timestamp;
 		private ZonedDateTime expirationDate;
 		private String licenseeName;
+		private LicenseStatus parsedLicenseStatus;
+		private ZonedDateTime parsedExpirationDate;
 		
 		public CheckerImpl(ResponseParser parser, Instant lastSussessTimestamp, 
 				LicenseType lastSuccessType) {
-			this.parser = parser;
-			this.lastSuccessLicenseType = lastSuccessType;
-			this.lastSuccessTimestamp = lastSussessTimestamp;
+			this.parsedLicenseType = parser.getType();
+			this.parsedLicenseStatus = parser.getLicenseStatus();
 			this.valid = parser.isValid();
 			this.subscriptionValid = parser.getSubscriptionStatus();
 			this.timestamp = parser.getValidationTimeStamp();
 			this.expirationDate =  parser.getExpirationDate();
 			this.licenseeName = parser.getLicenseeName();
-			calcLicenseStatus();
+			this.parsedExpirationDate = parser.getExpirationDate();
+			calcLicenseStatus(lastSuccessType, lastSussessTimestamp);
 			
 		}
 
-		private void calcLicenseStatus() {
+		/**
+		 * Calculates the {@link LicenseStatus} based on the parsed 
+		 * validity of the license and the last successful validation 
+		 * time-stamp.
+		 * 
+		 * It covers the case where the NodeLocked license is still 
+		 * valid but the hardware id does not match with the one 
+		 * of the first validation. Note that this method does not 
+		 * calculate anything about the validity of the license.
+		 */
+		private void calcLicenseStatus(LicenseType lastSuccessLicenseType, Instant lastSuccessTimestamp) {
 			if(isValid() || isSubscriptionValid()) {
-				this.licenseType = parser.getType();
-				this.licenseStatus = parser.getLicenseStatus();
+				// if the license or the subscription is valid, then the license type/status
+				// is the same as the parsed license type/status.
+				this.licenseType = parsedLicenseType;
+				this.licenseStatus = parsedLicenseStatus;
 			} else {
+				// otherwise, if the last successful validation is stored, the last successful 
+				// license type is NodeLocked and the license is not expired yet, 
+				// then it must be the case that the hardware id does not match
 				if(lastSuccessLicenseType != null 
 						&& lastSuccessTimestamp != null 
-						&& Instant.now().isBefore(parser.getExpirationDate().toInstant())
+						&& Instant.now().isBefore(parsedExpirationDate.toInstant())
 						&& lastSuccessLicenseType.equals(LicenseType.NODE_LOCKED)) {
 					
 					this.licenseStatus = LicenseStatus.NODE_LOCKED_HW_ID_FAILURE;
 					this.licenseType = LicenseType.NODE_LOCKED;
 					
 				} else {
-					this.licenseType = parser.getType();
-					this.licenseStatus = parser.getLicenseStatus();
+					// otherwise, just keep the parsed license type/status.
+					this.licenseType = parsedLicenseType;
+					this.licenseStatus = parsedLicenseStatus;
 				}
 			}	
 		}

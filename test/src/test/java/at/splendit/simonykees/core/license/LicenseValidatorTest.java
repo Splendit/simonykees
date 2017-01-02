@@ -21,6 +21,7 @@ public class LicenseValidatorTest {
 	private static final String NODE_LOCKED_LICENSEE_NAME = "TestAndRemoveIt-licensee3";
 	private static final String UNIQUE_HW_ID_01 = "unique-01";
 	private static final ZonedDateTime NOW_IN_AYEAR = ZonedDateTime.now().plusDays(365);
+	private static final long WAIT_FOR_VALIDATION_RESPONSE_TIME = 700; // in millis
 	
 
 	@Before
@@ -30,7 +31,7 @@ public class LicenseValidatorTest {
 	
 	@After
 	public void waitToCompleteProcessing() throws InterruptedException {
-		Thread.sleep(300);
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 	}
 	
 	@Test
@@ -116,6 +117,8 @@ public class LicenseValidatorTest {
 		licenseMenager.setUniqueHwId(UNIQUE_HW_ID_01);
 		licenseMenager.updateLicenseeNumber(NODE_LOCKED_LICENSEE_NUMBER, NODE_LOCKED_LICENSEE_NAME);
 		
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+		
 		LicenseChecker preVlaidateChecker = licenseMenager.getValidationData();
 		assertTrue(preVlaidateChecker.isValid());
 		assertEquals(LicenseType.NODE_LOCKED, preVlaidateChecker.getType());
@@ -129,11 +132,11 @@ public class LicenseValidatorTest {
 		ValidationResultCache cache = ValidationResultCache.getInstance();
 		PersistenceManager persistenceManager = PersistenceManager.getInstance();
 		
-		Thread.sleep(300);
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 
 		LicenseValidator.doValidate(licensee);
 		
-		Thread.sleep(300);
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 
 		LicenseValidator.doValidate(licensee);// sending a second validate request with incorrect HW ID
 		
