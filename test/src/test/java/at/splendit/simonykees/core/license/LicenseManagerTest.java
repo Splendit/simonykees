@@ -20,6 +20,9 @@ public class LicenseManagerTest {
 	
 	private static final String LICENSEE_NUMBER = "IAQ45SNQR"; //$NON-NLS-1$
 	private static final String LICENSEE_NAME = "Ardit Test"; //$NON-NLS-1$
+	private static final String NODE_LOCKED_LICENSEE_NUMBER = "IDVU36ETR"; //$NON-NLS-1$
+	private static final String NODE_LOCKED_LICENSEE_NAME = "TestAndRemoveIt-licensee3"; //$NON-NLS-1$
+	private static final String NODE_LOCKED_SECRET = "unique-01";
 	
 	private static final String TEST_UNIQUE_ID_02 = "unique-02";
 	private static final String TEST_UNIQUE_ID_03 = "unique-03";
@@ -173,6 +176,36 @@ public class LicenseManagerTest {
 		assertNotNull(checker.getValidationTimeStamp());
 		assertNotNull(checker.getLicenseStatus());
 		assertEquals(LicenseStatus.FLOATING_OUT_OF_SESSION, checker.getLicenseStatus());
+	}
+	
+	@Test
+	public void updateLicenseeNumber() throws InterruptedException {
+		// having an instance of license manager...
+		LicenseManager licenseMng = LicenseManager.getInstance();
+		licenseMng.initManager();
+		LicenseChecker checker = licenseMng.getValidationData();
+		String oldLicenseeName = checker.getLicenseeName();
+		String oldLicenseeNumber = licenseMng.getLicenseeNumber();
+		assertEquals(LICENSEE_NAME, oldLicenseeName);
+		assertEquals(LICENSEE_NUMBER, oldLicenseeNumber);
+		
+		licenseMng.checkIn();
+		Thread.sleep(300);
+		
+		//when updating the licensee name and number
+		licenseMng.setUniqueHwId(NODE_LOCKED_SECRET);
+		licenseMng.updateLicenseeNumber(NODE_LOCKED_LICENSEE_NUMBER, NODE_LOCKED_LICENSEE_NAME);
+		Thread.sleep(1000);
+		
+		// expecting the licensee credentials to be replaced in the following validate calls
+		checker = licenseMng.getValidationData();
+		
+		assertEquals(NODE_LOCKED_LICENSEE_NAME, checker.getLicenseeName());
+		assertEquals(LicenseType.NODE_LOCKED, checker.getType());
+		assertEquals(NODE_LOCKED_LICENSEE_NUMBER, licenseMng.getLicenseeNumber());		
+		LicenseModel newLicenseModel = licenseMng.getLicenseModel();
+		assertEquals(LicenseType.NODE_LOCKED, newLicenseModel.getType());
+		assertTrue(checker.isValid());
 	}
 	
 	private static void prepareLicensee() {

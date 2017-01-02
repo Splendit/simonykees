@@ -417,8 +417,6 @@ public class LicenseManager {
 		private ZonedDateTime expirationDate;
 		private String licenseeName;
 		
-		
-		
 		public CheckerImpl(ResponseParser parser, Instant lastSussessTimestamp, 
 				LicenseType lastSuccessType) {
 			this.parser = parser;
