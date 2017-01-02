@@ -181,13 +181,14 @@ public class LicenseManagerTest {
 	@Test
 	public void updateLicenseeNumber() throws InterruptedException {
 		// having an instance of license manager...
+		clearPersistedData();
 		LicenseManager licenseMng = LicenseManager.getInstance();
 		licenseMng.initManager();
 		LicenseChecker checker = licenseMng.getValidationData();
-		String oldLicenseeName = checker.getLicenseeName();
 		String oldLicenseeNumber = licenseMng.getLicenseeNumber();
-		assertEquals(LICENSEE_NAME, oldLicenseeName);
-		assertEquals(LICENSEE_NUMBER, oldLicenseeNumber);
+		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
+		assertTrue(checker.getLicenseeName().isEmpty());
+		assertTrue(oldLicenseeNumber.startsWith("demo", 0));
 		
 		licenseMng.checkIn();
 		Thread.sleep(300);
@@ -208,6 +209,40 @@ public class LicenseManagerTest {
 		assertTrue(checker.isValid());
 	}
 	
+	@Test
+	public void createTryAndBuyLicensee() {
+		// having cleared the persisted data...
+		clearPersistedData();
+		LicenseManager licenseMng = LicenseManager.getInstance();
+		
+		// when sending a validation request
+		LicenseChecker checker = licenseMng.getValidationData();
+		
+		// expecting to create (if it doesn't exist) a new licensee with demo license
+		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
+		assertEquals(LicenseStatus.TRIAL_REGISTERED, checker.getLicenseStatus());
+		// validation status is deliberately  not checked because it depends on execution time
+		
+		// ... and expecting the stored data to comply with created licensee
+		PersistenceManager persistenceMng = PersistenceManager.getInstance();
+		PersistenceModel persistedData = persistenceMng.readPersistedData().orElse(null);
+		assertNotNull(persistedData);
+		assertEquals(licenseMng.getLicenseeNumber(), persistedData.getLicenseeNumber().orElse(""));
+		assertEquals(LicenseType.TRY_AND_BUY, persistedData.getLicenseType().orElse(null));
+	}
+	
+	private void clearPersistedData() {
+		PersistenceManager persistenceMng = PersistenceManager.getInstance();
+		PersistenceModel persistenceModel = new PersistenceModel(
+				"", "", 
+				true, 
+				null, null, null, null, null, 
+				true,
+				null, null);
+		persistenceMng.setPersistenceModel(persistenceModel);
+		persistenceMng.persist();
+	}
+
 	private static void prepareLicensee() {
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		PersistenceModel persistenceModel = new PersistenceModel(
