@@ -27,6 +27,7 @@ public class PersistenceManager {
 	private static final String TRANSFORMATION = "AES"; //$NON-NLS-1$
 	private static final String KEY = "SOME_SECRET_KEY_"; //$NON-NLS-1$
 	private static final String EMPTY_STRING = "";  //$NON-NLS-1$
+	private static final long SECONDS_IN_ONE_HOUR = 3600;
 	
 	private static final String FILE_NAME = "target/info.txt"; //$NON-NLS-1$
 
@@ -244,7 +245,7 @@ public class PersistenceManager {
 			boolean status = false;
 			Optional<Instant> lastValidationTimestamp = persistence.getLastValidationTimestamp();
 			Instant now = Instant.now();
-			Instant oneHourAgo = now.minusSeconds(3600);
+			Instant oneHourAgo = now.minusSeconds(SECONDS_IN_ONE_HOUR);
 			boolean lastValidationStatus = 
 					persistence.getLastValidationStatus()
 					.orElse(false);
@@ -252,25 +253,31 @@ public class PersistenceManager {
 			if(lastValidationTimestamp.isPresent()
 					&& lastValidationTimestamp.get().isAfter(oneHourAgo) 
 					&& lastValidationStatus) {
+				// last validation time stamp was stored and is earlier than one hour.
+				// further more the last validation status was true...
 				
 				Optional<LicenseType> optLicenseType = persistence.getLicenseType();
 				if(optLicenseType.isPresent()) {
+					// license type was stored...
 					LicenseType licenseType = optLicenseType.get();
 					if(licenseType.equals(LicenseType.TRY_AND_BUY)) {
-						
+						// the stored license type was TryAndBuy. A further check is needed for the expiration date.
 						Optional<ZonedDateTime> demoExpiration = persistence.getDemoExpirationDate();
 						if(demoExpiration.isPresent()
 								&& demoExpiration.get().isAfter(ZonedDateTime.now())) {
+							// demo time period was stored and it is not expired yet
 							status = true;
 						}
 						
 					} else if(licenseType.equals(LicenseType.FLOATING) 
 								|| licenseType.equals(LicenseType.NODE_LOCKED)) {
-						
+						// the stored license type was either Floating or NodeLocked
+						// A further check is needed for the subscription expiration
 						Optional<ZonedDateTime> subscriptionExpires = persistence.getSubscriptionExpirationDate();
 						
 						if(subscriptionExpires.isPresent()
 								&& subscriptionExpires.get().isAfter(ZonedDateTime.now())) {
+							// the subscription date was stored and is not expired yet.
 							status = true;
 						}
 					}

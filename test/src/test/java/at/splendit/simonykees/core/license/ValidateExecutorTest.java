@@ -46,7 +46,7 @@ public class ValidateExecutorTest {
 		assertFalse(ValidateExecutor.isShutDown());
 		assertFalse(ValidateExecutor.isTerminated());
 		
-		// when shutting down the scheduler and re-initiating he manager...
+		// when shutting down the scheduler and re-initiating the manager...
 		ValidateExecutor.shutDownScheduler();
 		assertTrue(ValidateExecutor.isShutDown());
 		licenseManager.initManager();
