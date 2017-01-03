@@ -7,16 +7,18 @@ public enum ValidationAction {
 	public static ValidationAction fromString(String action) {
 		ValidationAction validationAction = NONE;
 		
-		switch (action) {
-		case "check-in":
-			validationAction = CHECK_IN;
-			break;
-		case "check-out":
-			validationAction = CHECK_OUT;
-			break;
-		default:
-			validationAction = NONE;
-			break;
+		if(action != null) {
+			switch (action) {
+			case "check-in":
+				validationAction = CHECK_IN;
+				break;
+			case "check-out":
+				validationAction = CHECK_OUT;
+				break;
+			default:
+				validationAction = NONE;
+				break;
+			}
 		}
 		
 		return validationAction;
