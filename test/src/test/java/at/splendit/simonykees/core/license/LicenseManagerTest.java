@@ -1,11 +1,14 @@
 package at.splendit.simonykees.core.license;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Optional;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,26 +19,14 @@ import at.splendit.simonykees.core.license.model.LicenseeModel;
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 
 @SuppressWarnings("nls")
-public class LicenseManagerTest {
-	
-	private static final String LICENSEE_NUMBER = "IAQ45SNQR"; //$NON-NLS-1$
-	private static final String LICENSEE_NAME = "Ardit Test"; //$NON-NLS-1$
-	private static final String NODE_LOCKED_LICENSEE_NUMBER = "IDVU36ETR"; //$NON-NLS-1$
-	private static final String NODE_LOCKED_LICENSEE_NAME = "TestAndRemoveIt-licensee3"; //$NON-NLS-1$
-	private static final String NODE_LOCKED_SECRET = "unique-01";
-	
-	private static final String TEST_UNIQUE_ID_02 = "unique-02";
-	private static final String TEST_UNIQUE_ID_03 = "unique-03";
-	private static final String TEST_UNIQUE_ID_04 = "unique-04";
-	private static final String TEST_UNIQUE_ID_05 = "unique-05";
-	
+public class LicenseManagerTest extends LicenseCommonTest {
+		
 	private final HashSet<String> usedSessions = new HashSet<>();
-	private static final long WAIT_FOR_VALIDATION_RESPONSE_TIME = 1000;
 	
 	
 	@Before
 	public void setUpLicensee() {
-		prepareLicensee();
+		persistFloatingLicensee();
 	}
 	
 	@After
@@ -93,7 +84,7 @@ public class LicenseManagerTest {
 		Optional<PersistenceModel> optPm = persistenceMng.readPersistedData();
 		assertTrue(optPm.isPresent());
 		PersistenceModel pm = optPm.get();
-		assertEquals(LICENSEE_NUMBER, pm.getLicenseeNumber().orElse(""));
+		assertEquals(FLOATING_LICENSEE_NUMBER, pm.getLicenseeNumber().orElse(""));
 		
 		// expecting the validation result to comply with the pre-validation data...
 		assertFalse(
@@ -195,7 +186,7 @@ public class LicenseManagerTest {
 		Thread.sleep(300);
 		
 		//when updating the licensee name and number
-		licenseMng.setUniqueHwId(NODE_LOCKED_SECRET);
+		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_01);
 		licenseMng.updateLicenseeNumber(NODE_LOCKED_LICENSEE_NUMBER, NODE_LOCKED_LICENSEE_NAME);
 		Thread.sleep(1000);
 		
@@ -295,36 +286,6 @@ public class LicenseManagerTest {
 		assertEquals(LicenseType.TRY_AND_BUY, licenseChecker.getType());
 		assertEquals(LicenseStatus.TRIAL_HW_ID_FAILURE, licenseChecker.getLicenseStatus());
 		assertFalse(licenseChecker.isValid());
-	}
-	
-	private void clearPersistedData() {
-		PersistenceManager persistenceMng = PersistenceManager.getInstance();
-		PersistenceModel persistenceModel = new PersistenceModel(
-				"", "", 
-				true, 
-				null, null, null, null, null, 
-				true,
-				null, null);
-		persistenceMng.setPersistenceModel(persistenceModel);
-		persistenceMng.persist();
-	}
-
-	private static void prepareLicensee() {
-		PersistenceManager persistenceMng = PersistenceManager.getInstance();
-		PersistenceModel persistenceModel = new PersistenceModel(
-				LICENSEE_NUMBER, 
-				LICENSEE_NAME, 
-				true, 
-				LicenseType.FLOATING, 
-				Instant.now(), 
-				ZonedDateTime.now().plusDays(1),
-				ZonedDateTime.now().plusHours(1), 
-				ZonedDateTime.now().plusYears(1), 
-				true, 
-				Instant.now().minusSeconds(1), 
-				LicenseType.FLOATING);
-		persistenceMng.setPersistenceModel(persistenceModel);
-		persistenceMng.persist();
 	}
 	
 	private void storeUsedSessionId() {

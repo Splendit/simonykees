@@ -1,9 +1,10 @@
 package at.splendit.simonykees.core.license;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import org.junit.After;
@@ -15,14 +16,7 @@ import at.splendit.simonykees.core.license.model.NodeLockedModel;
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 
 @SuppressWarnings("nls")
-public class LicenseValidatorTest {
-
-	private static final String NODE_LOCKED_LICENSEE_NUMBER = "IDVU36ETR";
-	private static final String NODE_LOCKED_LICENSEE_NAME = "TestAndRemoveIt-licensee3";
-	private static final String UNIQUE_HW_ID_01 = "unique-01";
-	private static final ZonedDateTime NOW_IN_AYEAR = ZonedDateTime.now().plusDays(365);
-	private static final long WAIT_FOR_VALIDATION_RESPONSE_TIME = 700; // in millis
-	
+public class LicenseValidatorTest extends LicenseCommonTest {
 
 	@Before
 	public void clearCache() {
@@ -38,7 +32,7 @@ public class LicenseValidatorTest {
 	public void validateNodeLockedLicense() {
 		// having a licensee with a node locked license...
 		String productNumber = LicenseManager.getProductNumber();
-		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_AYEAR, UNIQUE_HW_ID_01);
+		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_AYEAR, TEST_UNIQUE_ID_01);
 		LicenseeModel licensee = new LicenseeModel(NODE_LOCKED_LICENSEE_NAME, NODE_LOCKED_LICENSEE_NUMBER, nodeLocked, productNumber);
 		ValidationResultCache cache = ValidationResultCache.getInstance();
 		PersistenceManager persistenceManager = PersistenceManager.getInstance();
@@ -69,7 +63,6 @@ public class LicenseValidatorTest {
 		assertEquals(NODE_LOCKED_LICENSEE_NAME, persistenceModel.getLicenseeName().orElse(null));
 		assertEquals(NODE_LOCKED_LICENSEE_NUMBER, persistenceModel.getLicenseeNumber().orElse(null));
 		assertEquals(true, persistenceModel.getSubscriptionStatus().orElse(false));
-		
 	}
 	
 	@Test
@@ -112,9 +105,9 @@ public class LicenseValidatorTest {
 	@Test
 	public void validateNodeLockedHwIdFailureStatus() throws InterruptedException {
 		// having a licensee with a node locked license...
-		prepareNodeLockedLicensee();
+		persistNodeLockedLicensee();
 		LicenseManager licenseMenager = LicenseManager.getInstance();
-		licenseMenager.setUniqueHwId(UNIQUE_HW_ID_01);
+		licenseMenager.setUniqueHwId(TEST_UNIQUE_ID_01);
 		licenseMenager.updateLicenseeNumber(NODE_LOCKED_LICENSEE_NUMBER, NODE_LOCKED_LICENSEE_NAME);
 		
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
@@ -159,23 +152,5 @@ public class LicenseValidatorTest {
 		assertFalse(persistenceModel.getSubscriptionStatus().orElse(false));
 		assertEquals(LicenseType.NODE_LOCKED, persistenceModel.getLastSuccessLicenseType().orElse(null));
 		assertNotNull(persistenceModel.getLastSuccessTimestamp().orElse(null));
-	}
-	
-	private static void prepareNodeLockedLicensee() {
-		PersistenceManager persistenceMng = PersistenceManager.getInstance();
-		PersistenceModel persistenceModel = new PersistenceModel(
-				NODE_LOCKED_LICENSEE_NUMBER, 
-				NODE_LOCKED_LICENSEE_NAME, 
-				true, 
-				LicenseType.NODE_LOCKED, 
-				Instant.now(), 
-				ZonedDateTime.now().plusDays(1),
-				ZonedDateTime.now().plusHours(1), 
-				ZonedDateTime.now().plusYears(1), 
-				true, 
-				Instant.now().minusSeconds(1), 
-				LicenseType.NODE_LOCKED);
-		persistenceMng.setPersistenceModel(persistenceModel);
-		persistenceMng.persist();
 	}
 }

@@ -11,7 +11,7 @@ import org.junit.Test;
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 
 @SuppressWarnings("nls")
-public class PersistenceManagerTest {
+public class PersistenceManagerTest extends LicenseCommonTest {
 	
 	@After
 	public void waitToCompleteProcessing() throws InterruptedException {
