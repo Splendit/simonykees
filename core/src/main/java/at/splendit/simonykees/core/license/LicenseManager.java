@@ -421,9 +421,11 @@ public class LicenseManager {
 		private String licenseeName;
 		private LicenseStatus parsedLicenseStatus;
 		private ZonedDateTime parsedExpirationDate;
+		private ZonedDateTime demoExpireation;
 		
 		public CheckerImpl(ResponseParser parser, Instant lastSussessTimestamp, 
 				LicenseType lastSuccessType) {
+			this.demoExpireation = parser.getEvaluationExpiresDate();
 			this.parsedLicenseType = parser.getType();
 			this.parsedLicenseStatus = parser.getLicenseStatus();
 			this.valid = parser.isValid();
@@ -441,7 +443,7 @@ public class LicenseManager {
 		 * validity of the license and the last successful validation 
 		 * time-stamp.
 		 * 
-		 * It covers the case where the NodeLocked license is still 
+		 * It covers the case where the NodeLocked/Trial license is still 
 		 * valid but the hardware id does not match with the one 
 		 * of the first validation. Note that this method does not 
 		 * calculate anything about the validity of the license.
@@ -458,12 +460,21 @@ public class LicenseManager {
 				// then it must be the case that the hardware id does not match
 				if(lastSuccessLicenseType != null 
 						&& lastSuccessTimestamp != null 
+						&& lastSuccessLicenseType.equals(LicenseType.NODE_LOCKED)
+						&& parsedExpirationDate != null
 						&& Instant.now().isBefore(parsedExpirationDate.toInstant())
-						&& lastSuccessLicenseType.equals(LicenseType.NODE_LOCKED)) {
+						) {
 					
 					this.licenseStatus = LicenseStatus.NODE_LOCKED_HW_ID_FAILURE;
 					this.licenseType = LicenseType.NODE_LOCKED;
 					
+				} else if(this.parsedLicenseType != null 
+							&& this.demoExpireation != null
+							&& parsedLicenseType.equals(LicenseType.TRY_AND_BUY)
+							&& Instant.now().isBefore(demoExpireation.toInstant())) {
+					
+					this.licenseStatus = LicenseStatus.TRIAL_HW_ID_FAILURE;
+					this.licenseType = LicenseType.TRY_AND_BUY;
 				} else {
 					// otherwise, just keep the parsed license type/status.
 					this.licenseType = parsedLicenseType;
