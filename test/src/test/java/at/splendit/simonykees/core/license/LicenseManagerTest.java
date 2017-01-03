@@ -30,6 +30,7 @@ public class LicenseManagerTest {
 	private static final String TEST_UNIQUE_ID_05 = "unique-05";
 	
 	private final HashSet<String> usedSessions = new HashSet<>();
+	private static final long WAIT_FOR_VALIDATION_RESPONSE_TIME = 1000;
 	
 	
 	@Before
@@ -210,13 +211,18 @@ public class LicenseManagerTest {
 	}
 	
 	@Test
-	public void createTryAndBuyLicensee() {
+	public void createTryAndBuyLicensee() throws InterruptedException {
 		// having cleared the persisted data...
-		clearPersistedData();
 		LicenseManager licenseMng = LicenseManager.getInstance();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+		clearPersistedData();
+		licenseMng.setUniqueHwId("");
 		
 		// when sending a validation request
+		licenseMng.initManager();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseChecker checker = licenseMng.getValidationData();
+
 		
 		// expecting to create (if it doesn't exist) a new licensee with demo license
 		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
@@ -229,6 +235,66 @@ public class LicenseManagerTest {
 		assertNotNull(persistedData);
 		assertEquals(licenseMng.getLicenseeNumber(), persistedData.getLicenseeNumber().orElse(""));
 		assertEquals(LicenseType.TRY_AND_BUY, persistedData.getLicenseType().orElse(null));
+	}
+	
+	@Test
+	public void validateDemoLicense() throws InterruptedException {
+		// having no licensee information stored
+		LicenseManager licenseManager = LicenseManager.getInstance();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+		clearPersistedData();
+		licenseManager.setUniqueHwId("");
+		
+		// when initiating the license manager
+		licenseManager.initManager();
+		
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+		
+		// expecting a try and buy licensee to be created
+		LicenseeModel licensee = licenseManager.getLicensee();
+		LicenseChecker licenseChecker = licenseManager.getValidationData();
+		
+		assertEquals(LicenseType.TRY_AND_BUY, licenseChecker.getType());
+		assertTrue(licenseChecker.isValid());
+		
+		LicenseValidator.doValidate(licensee);
+		
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+		licenseChecker = licenseManager.getValidationData();
+		
+		assertEquals(LicenseType.TRY_AND_BUY, licenseChecker.getType());
+		assertEquals(LicenseStatus.TRIAL_REGISTERED, licenseChecker.getLicenseStatus());
+		assertTrue(licenseChecker.isValid());
+	}
+	
+	@Test
+	public void validateHwIdFailureDemoLicense() throws InterruptedException {
+		// having a demo licensee...
+		LicenseManager licenseManager = LicenseManager.getInstance();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME );
+		clearPersistedData();
+		licenseManager.setUniqueHwId("");
+
+		licenseManager.initManager();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME );
+		LicenseChecker licenseChecker = licenseManager.getValidationData();
+		
+		assertEquals(LicenseType.TRY_AND_BUY, licenseChecker.getType());
+		assertTrue(licenseChecker.isValid());
+		
+		// when initiating the license manager with a wrong hardware id...
+		licenseManager.setUniqueHwId("wrong-hw-id");
+		licenseManager.initManager();
+		LicenseeModel licensee = licenseManager.getLicensee();
+		LicenseValidator.doValidate(licensee);
+		
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+		licenseChecker = licenseManager.getValidationData();
+
+		// expecting the validation data to be false
+		assertEquals(LicenseType.TRY_AND_BUY, licenseChecker.getType());
+		assertEquals(LicenseStatus.TRIAL_HW_ID_FAILURE, licenseChecker.getLicenseStatus());
+		assertFalse(licenseChecker.isValid());
 	}
 	
 	private void clearPersistedData() {

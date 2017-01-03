@@ -161,7 +161,6 @@ public class LicenseValidatorTest {
 		assertNotNull(persistenceModel.getLastSuccessTimestamp().orElse(null));
 	}
 	
-	
 	private static void prepareNodeLockedLicensee() {
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		PersistenceModel persistenceModel = new PersistenceModel(
