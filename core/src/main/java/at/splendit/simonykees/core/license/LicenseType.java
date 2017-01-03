@@ -11,19 +11,21 @@ public enum LicenseType {
 	public static LicenseType fromString(String value) {
 		LicenseType licenseType = TRY_AND_BUY;
 		
-		switch(value.toLowerCase()) {
-		case "tryandbuy":
-			licenseType = TRY_AND_BUY;
-			break;
-		case "floating":
-			licenseType = FLOATING;
-			break;
-		case "multifeature":
-			licenseType = NODE_LOCKED;
-			break;
-		case "subscription":
-			licenseType = SUBSCRIPTION;
-			break;
+		if(value != null) {
+			switch(value.toLowerCase()) {
+			case "tryandbuy":
+				licenseType = TRY_AND_BUY;
+				break;
+			case "floating":
+				licenseType = FLOATING;
+				break;
+			case "multifeature":
+				licenseType = NODE_LOCKED;
+				break;
+			case "subscription":
+				licenseType = SUBSCRIPTION;
+				break;
+			}
 		}
 		
 		return licenseType;

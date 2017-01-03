@@ -15,36 +15,43 @@ public enum LicenseStatus {
 	@SuppressWarnings("nls")
 	public static LicenseStatus fromString(String value) {
 		LicenseStatus status = NONE;
-
-		switch (value.toLowerCase()) {
-		case "trial-registered":
-			status = LicenseStatus.TRIAL_REGISTERED;
-			break;
-		case "trial-expired":
-			status = LicenseStatus.TRIAL_EXPIRED;
-			break;
-		case "nodelocked-registered":
-			status = LicenseStatus.NODE_LOCKED_REGISTERED;
-			break;
-		case "nodelocked-expired":
-			status = LicenseStatus.NODE_LOCKED_EXPIRED;
-			break;
-		case "node-locked-hw-id-failure":
-			status = NODE_LOCKED_HW_ID_FAILURE;
-			break;
-		case "floating-checked-out":
-			status = LicenseStatus.FLOATING_CHECKED_OUT;
-			break;
-		case "floating-expired":
-			status = LicenseStatus.FLOATING_EXPIRED;
-			break;
-		case "floating-out-of-session":
-			status = LicenseStatus.FLOATING_OUT_OF_SESSION;
-			break;
-		case "floating-checked-in":
-			status = LicenseStatus.FLOATING_CHECKED_IN;
-			break;
-
+		
+		if(value != null) {
+			switch (value.toLowerCase()) {
+			case "conncection-failure":
+				status = LicenseStatus.CONNECTION_FAILURE;
+				break;
+			case "trial-registered":
+				status = LicenseStatus.TRIAL_REGISTERED;
+				break;
+			case "trial-expired":
+				status = LicenseStatus.TRIAL_EXPIRED;
+				break;
+			case "trial-hw-id-failure":
+				status = LicenseStatus.TRIAL_HW_ID_FAILURE;
+				break;
+			case "node-locked-registered":
+				status = LicenseStatus.NODE_LOCKED_REGISTERED;
+				break;
+			case "node-locked-expired":
+				status = LicenseStatus.NODE_LOCKED_EXPIRED;
+				break;
+			case "node-locked-hw-id-failure":
+				status = NODE_LOCKED_HW_ID_FAILURE;
+				break;
+			case "floating-checked-out":
+				status = LicenseStatus.FLOATING_CHECKED_OUT;
+				break;
+			case "floating-expired":
+				status = LicenseStatus.FLOATING_EXPIRED;
+				break;
+			case "floating-out-of-session":
+				status = LicenseStatus.FLOATING_OUT_OF_SESSION;
+				break;
+			case "floating-checked-in":
+				status = LicenseStatus.FLOATING_CHECKED_IN;
+				break;
+			}
 		}
 
 		return status;
