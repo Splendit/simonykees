@@ -42,12 +42,19 @@ public class ResponseParser implements LicenseChecker {
 	}
 
 	private void extractValidationData(ValidationResult validationResult) {
+		// first extract the subscription license
 		extractSubscription(validationResult);
+		// then check for a valid floating license...
 		extractValidationData(validationResult, LicenseType.FLOATING);
 		if(!isValid()) {
+			//if no floating license is found, check for a node locked license... 
 			extractValidationData(validationResult, LicenseType.NODE_LOCKED);
 			if(!isValid()) {
+				// if no node locked license, check for try and buy license...
 				extractValidationData(validationResult, LicenseType.TRY_AND_BUY);
+				// finally, if no valid license is found, but there is a valid subscription,
+				// it must be the case that there is a floating license which is running 
+				// out of sessions
 				if(!isValid() && getSubscriptionStatus()) {
 					extractValidationData(validationResult, LicenseType.FLOATING);
 				}
@@ -55,6 +62,14 @@ public class ResponseParser implements LicenseChecker {
 		}	
 	}
 
+	/**
+	 * Checks if the given validation result contains information about
+	 * the given license type. If it does, a state is created out of 
+	 * that information. 
+	 * 
+	 * @param validationResult received from NetLicensing
+	 * @param licenseType	type of the license to check for
+	 */
 	private void extractValidationData(ValidationResult validationResult, LicenseType licenseType) {
 		Map<String, Composition> validations = validationResult.getValidations();
 		
@@ -102,6 +117,11 @@ public class ResponseParser implements LicenseChecker {
 		});
 	}
 	
+	/**
+	 * Similar to {@link extractValidationData(ValidationResult, LicenseType)} except 
+	 * that it checks only of the subscription license type.
+	 * @param validationResult
+	 */
 	private void extractSubscription(ValidationResult validationResult) {
 		Map<String, Composition> validations = validationResult.getValidations();
 		
@@ -241,6 +261,13 @@ public class ResponseParser implements LicenseChecker {
 		
 	}
 
+	/**
+	 * Calculates the license status based on the extracted type and 
+	 * validity of license. Note that {@link LicenseStatus} is to be used
+	 * only as a descriptor. The validity of the license is NOT calculated.
+	 * 
+	 * @return computed license status.
+	 */
 	private LicenseStatus calcLicenseStatus() {
 		LicenseType type = getType();
 		LicenseStatus status;

@@ -137,6 +137,11 @@ public class LicenseManager {
 		this.licensee = licensee;
 	}
 
+	/**
+	 * Sends a pre-validate call for the given product and licensee. Floating 
+	 * license model is used for pre-validation, because it needs extra parameters.
+	 * The validation response is returned without being modified.
+	 */
 	private ValidationResult preValidate(String productNumber,
 										 String productModuleNumber,
 										 String licenseeNumber, 
@@ -162,9 +167,9 @@ public class LicenseManager {
 	}
 
 	/**
-	 * Sends a request to release one session from the session pool available
-	 * for Floating License Model. Relevant only for the case when the 
-	 * licensing model is Floating. 
+	 * Sends a request to release one Floating session which is occupied 
+	 * by the current user. Relevant only for the case when the licensing 
+	 * model is {@link FloatingModel}. 
 	 */
 	public void checkIn() {
 		LicenseModel licenseModel = getLicenseModel();
