@@ -173,6 +173,27 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	}
 	
 	@Test
+	public void runningSchedulerAftercheckIn() throws InterruptedException {
+		// having initiated an instance of license manager for a floatingl licensee
+		LicenseManager licenseMng = LicenseManager.getInstance();
+		licenseMng.initManager();
+		
+		LicenseChecker checker = licenseMng.getValidationData();
+		assertTrue(checker.isValid());
+		assertEquals(LicenseType.FLOATING, checker.getType());
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+		
+		// when sending a check-in request
+		licenseMng.checkIn();
+		checker = licenseMng.getValidationData();
+		
+		// expecting the validity to be false and the scheduler to be shut down
+		assertFalse(checker.isValid());
+		assertTrue(ValidateExecutor.isShutDown());
+		assertEquals(LicenseStatus.FLOATING_CHECKED_IN, checker.getLicenseStatus());
+	}
+	
+	@Test
 	public void updateLicenseeNumber() throws InterruptedException {
 		// having an instance of license manager...
 		clearPersistedData();
@@ -201,6 +222,8 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		LicenseModel newLicenseModel = licenseMng.getLicenseModel();
 		assertEquals(LicenseType.NODE_LOCKED, newLicenseModel.getType());
 		assertTrue(checker.isValid());
+		// ... and expecting the scheduler to be running...
+		assertFalse(ValidateExecutor.isShutDown());
 	}
 	
 	@Test
