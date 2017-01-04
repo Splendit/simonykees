@@ -223,19 +223,36 @@ public class PersistenceManager {
 	}
 	
 	private class OfflineLicenseChecker implements LicenseChecker {
-		private PersistenceModel persistence;
+		
+		private LicenseType licenseType;
+		private boolean valid;
+		private Instant validationTimestamp;
+		private String licenseeName;
+		private LicenseStatus licenseStatus;
+		private ZonedDateTime expirationDate;
 		
 		public OfflineLicenseChecker(PersistenceModel persistence) {
-			this.persistence = persistence;
+			
+			this.licenseType = persistence.getLicenseType().orElse(null);
+			this.valid = calcValidity(persistence);
+			this.validationTimestamp = persistence.getLastValidationTimestamp().orElse(null);
+			this.licenseeName = persistence.getLicenseeName().orElse(EMPTY_STRING);
+			this.licenseStatus = LicenseStatus.CONNECTION_FAILURE;
+			this.expirationDate = persistence.getSubscriptionExpirationDate().orElse(null);
+			
 		}
 
 		@Override
 		public LicenseType getType() {
-			return persistence.getLicenseType().orElse(null);
+			return licenseType;
 		}
 
 		@Override
 		public boolean isValid() {
+			return valid;
+		}
+		
+		private boolean calcValidity(PersistenceModel persistence) {
 			// check if last validation is earlier than 1h
 			// if type is TryAndBuy
 			//	- check if demo is not expired
@@ -289,22 +306,22 @@ public class PersistenceManager {
 
 		@Override
 		public Instant getValidationTimeStamp() {
-			return persistence.getLastValidationTimestamp().orElse(null);
+			return validationTimestamp;
 		}
 
 		@Override
 		public String getLicenseeName() {
-			return persistence.getLicenseeName().orElse(EMPTY_STRING);
+			return licenseeName;
 		}
 
 		@Override
 		public LicenseStatus getLicenseStatus() {
-			return LicenseStatus.CONNECTION_FAILURE;
+			return licenseStatus;
 		}
 
 		@Override
 		public ZonedDateTime getExpirationDate() {
-			return persistence.getSubscriptionExpirationDate().orElse(null);
+			return expirationDate;
 		}
 		
 	}
