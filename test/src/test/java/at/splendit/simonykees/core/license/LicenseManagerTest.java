@@ -42,11 +42,13 @@ public class LicenseManagerTest extends LicenseCommonTest {
 			
 			instance.checkIn();
 		});
+
 	}
 	
 	@After
 	public void waitToCompleteProcessing() throws InterruptedException {
 		Thread.sleep(300);
+		clearPersistedData();
 	}
 	
 	@Test
@@ -204,9 +206,9 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	@Test
 	public void createTryAndBuyLicensee() throws InterruptedException {
 		// having cleared the persisted data...
+		clearPersistedData();
 		LicenseManager licenseMng = LicenseManager.getInstance();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
-		clearPersistedData();
 		licenseMng.setUniqueHwId("");
 		
 		// when sending a validation request
@@ -231,9 +233,9 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	@Test
 	public void validateDemoLicense() throws InterruptedException {
 		// having no licensee information stored
+		clearPersistedData();
 		LicenseManager licenseManager = LicenseManager.getInstance();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
-		clearPersistedData();
 		licenseManager.setUniqueHwId("");
 		
 		// when initiating the license manager
@@ -261,9 +263,9 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	@Test
 	public void validateHwIdFailureDemoLicense() throws InterruptedException {
 		// having a demo licensee...
+		clearPersistedData();
 		LicenseManager licenseManager = LicenseManager.getInstance();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME );
-		clearPersistedData();
 		licenseManager.setUniqueHwId("");
 
 		licenseManager.initManager();
