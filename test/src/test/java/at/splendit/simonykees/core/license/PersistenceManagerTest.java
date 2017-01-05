@@ -1,22 +1,19 @@
 package at.splendit.simonykees.core.license;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
 
-import org.junit.After;
 import org.junit.Test;
 
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 
 @SuppressWarnings("nls")
 public class PersistenceManagerTest extends LicenseCommonTest {
-	
-	@After
-	public void waitToCompleteProcessing() throws InterruptedException {
-		Thread.sleep(300);
-	}
 	
 	@Test
 	public void encryptDecryptPersistenceModel() {

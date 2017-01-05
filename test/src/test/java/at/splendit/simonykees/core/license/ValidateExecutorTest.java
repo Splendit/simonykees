@@ -22,7 +22,7 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 	
 	@After
 	public void waitToCompleteProcessing() throws InterruptedException {
-		Thread.sleep(300);
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 	}
 	
 	@Test
@@ -62,7 +62,7 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 		assertFalse(ValidateExecutor.isShutDown());
 		assertFalse(ValidateExecutor.isTerminated());
 		
-		Thread.sleep(300);
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		ValidateExecutor.shutDownScheduler();
 		assertTrue(ValidateExecutor.isShutDown());
