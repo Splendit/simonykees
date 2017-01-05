@@ -40,6 +40,11 @@ public class LicenseManagerTest extends LicenseCommonTest {
 			instance.setLicenseModel(floatingModel);
 			
 			instance.checkIn();
+			try {
+				Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+			} catch (InterruptedException e) {
+				
+			}
 		});
 
 	}
@@ -162,6 +167,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		licenseMng.initManager();
 		licensee = licenseMng.getLicensee();
 		checker = licenseMng.getValidationData();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		//expecting the validation result to be false	
 		assertFalse(checker.isValid());
@@ -198,6 +204,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		clearPersistedData();
 		LicenseManager licenseMng = LicenseManager.getInstance();
 		licenseMng.initManager();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseChecker checker = licenseMng.getValidationData();
 		String oldLicenseeNumber = licenseMng.getLicenseeNumber();
 		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());

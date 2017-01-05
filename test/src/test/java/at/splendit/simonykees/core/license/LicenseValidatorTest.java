@@ -31,7 +31,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	}
 	
 	@Test
-	public void validateNodeLockedLicense() {
+	public void validateNodeLockedLicense() throws InterruptedException {
 		// having a licensee with a node locked license...
 		String productNumber = LicenseManager.getProductNumber();
 		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_AYEAR, TEST_UNIQUE_ID_01);
@@ -43,6 +43,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		
 		// when calling a validate request...
 		LicenseValidator.doValidate(licensee);
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		// expecting the validation result to be cached and validation status to be true
 		assertFalse("Expecting cache to contain received validation data", cache.isEmpty());
@@ -68,7 +69,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	}
 	
 	@Test
-	public void validateNodeLockedLicenseWrongSecret() {
+	public void validateNodeLockedLicenseWrongSecret() throws InterruptedException {
 		// having a licensee with a node locked license and with incorrect secret id...
 		String productNumber = LicenseManager.getProductNumber();
 		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_AYEAR, "someWrongSecret");
@@ -80,6 +81,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		
 		// when calling a validate request...
 		LicenseValidator.doValidate(licensee);
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		// expecting the validation result to be cached and validation status to be false
 		assertFalse("Expecting cache to contain received validation data", cache.isEmpty());
@@ -109,6 +111,8 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		// having a licensee with a node locked license...
 		persistNodeLockedLicensee();
 		LicenseManager licenseMenager = LicenseManager.getInstance();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+		
 		licenseMenager.setUniqueHwId(TEST_UNIQUE_ID_01);
 		licenseMenager.updateLicenseeNumber(NODE_LOCKED_LICENSEE_NUMBER, NODE_LOCKED_LICENSEE_NAME);
 		
@@ -127,13 +131,8 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		ValidationResultCache cache = ValidationResultCache.getInstance();
 		PersistenceManager persistenceManager = PersistenceManager.getInstance();
 		
+		LicenseValidator.doValidate(licensee);// sending a validate request with incorrect HW ID
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
-
-		LicenseValidator.doValidate(licensee);
-		
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
-
-		LicenseValidator.doValidate(licensee);// sending a second validate request with incorrect HW ID
 		
 		// expecting the validation result to be cached and validation status to be false
 		assertFalse("Expecting cache to contain received validation data", cache.isEmpty());
