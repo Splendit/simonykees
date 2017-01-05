@@ -431,7 +431,7 @@ public class LicenseManager {
 			this.valid = parser.isValid();
 			this.subscriptionValid = parser.getSubscriptionStatus();
 			this.timestamp = parser.getValidationTimeStamp();
-			this.expirationDate =  parser.getExpirationDate();
+			this.expirationDate =  calcExpireDate(parser);
 			this.licenseeName = parser.getLicenseeName();
 			this.parsedExpirationDate = parser.getExpirationDate();
 			calcLicenseStatus(lastSuccessType, lastSussessTimestamp);
@@ -481,6 +481,17 @@ public class LicenseManager {
 					this.licenseStatus = parsedLicenseStatus;
 				}
 			}	
+		}
+		
+		public ZonedDateTime calcExpireDate(ResponseParser parser) {
+			LicenseType type = parser.getType();
+			ZonedDateTime expireDate = null;
+			if(type.equals(LicenseType.TRY_AND_BUY)) {
+				expireDate = parser.getEvaluationExpiresDate();
+			} else {
+				expireDate = parser.getExpirationDate();
+			}
+			return expireDate;
 		}
 
 		private boolean isSubscriptionValid() {

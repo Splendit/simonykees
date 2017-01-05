@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import org.junit.After;
@@ -14,6 +15,7 @@ import org.junit.Test;
 import at.splendit.simonykees.core.license.model.LicenseeModel;
 import at.splendit.simonykees.core.license.model.NodeLockedModel;
 import at.splendit.simonykees.core.license.model.PersistenceModel;
+import at.splendit.simonykees.core.license.model.TryAndBuyModel;
 
 @SuppressWarnings("nls")
 public class LicenseValidatorTest extends LicenseCommonTest {
@@ -152,5 +154,31 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		assertFalse(persistenceModel.getSubscriptionStatus().orElse(false));
 		assertEquals(LicenseType.NODE_LOCKED, persistenceModel.getLastSuccessLicenseType().orElse(null));
 		assertNotNull(persistenceModel.getLastSuccessTimestamp().orElse(null));
+	}
+	
+	@Test
+	public void validateExpiredDemoLicensee() throws InterruptedException {
+		// having a licensee with expired demo...
+		ValidationResultCache cache = ValidationResultCache.getInstance();
+		String productNumber = LicenseManager.getProductNumber();
+		TryAndBuyModel tryAndBuy = new TryAndBuyModel(ZonedDateTime.now().minusDays(1), DEMO_EXPIRED_LICENSEE_SECRET);
+		LicenseeModel licensee = new LicenseeModel(DEMO_EXPIRED_LICENSEE_NAME, DEMO_EXPIRED_LICENSEE_NUMBER, tryAndBuy, productNumber);
+		
+		// when sending a validate call...
+		LicenseValidator.doValidate(licensee);
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+		
+		// expecting the validation state to be parsed properly...
+		assertFalse("Expecting cache to contain received validation data", cache.isEmpty());
+		ResponseParser checker = new ResponseParser(
+				cache.getCachedValidationResult(), 
+				cache.getValidationTimestamp(),
+				cache.getLicenseName(), 
+				ValidationAction.NONE);
+		
+		assertEquals(LicenseStatus.TRIAL_EXPIRED, checker.getLicenseStatus());
+		assertFalse(checker.isValid());
+		assertNotNull(checker.getEvaluationExpiresDate());
+		assertTrue(checker.getEvaluationExpiresDate().isBefore(ZonedDateTime.now()));
 	}
 }

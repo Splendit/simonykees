@@ -22,8 +22,7 @@ import at.splendit.simonykees.core.license.model.PersistenceModel;
 public class LicenseManagerTest extends LicenseCommonTest {
 		
 	private final HashSet<String> usedSessions = new HashSet<>();
-	
-	
+
 	@Before
 	public void setUpLicensee() {
 		persistFloatingLicensee();
@@ -120,12 +119,12 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		checker = licenseMng.getValidationData();
 		assertEquals(LicenseStatus.FLOATING_CHECKED_OUT, checker.getLicenseStatus());
 		assertTrue(checker.isValid());
-		Thread.sleep(300);
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		licenseMng.checkIn();
 		checker = licenseMng.getValidationData();
 		assertEquals(false, checker.isValid());
 		assertEquals(LicenseStatus.FLOATING_CHECKED_IN, checker.getLicenseStatus());
-		Thread.sleep(300);
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_02);
 		licenseMng.initManager();
@@ -133,7 +132,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		assertTrue(checker.isValid());
 		storeUsedSessionId();
 		assertEquals(LicenseStatus.FLOATING_CHECKED_OUT, checker.getLicenseStatus());
-		Thread.sleep(300);
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 
 		
 		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_03);
@@ -142,7 +141,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		assertTrue(checker.isValid());
 		storeUsedSessionId();
 		assertEquals(LicenseStatus.FLOATING_CHECKED_OUT, checker.getLicenseStatus());
-		Thread.sleep(300);
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_04);
 		licenseMng.initManager();
@@ -206,12 +205,12 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		assertTrue(oldLicenseeNumber.startsWith("demo", 0));
 		
 		licenseMng.checkIn();
-		Thread.sleep(300);
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		//when updating the licensee name and number
 		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_01);
 		licenseMng.updateLicenseeNumber(NODE_LOCKED_LICENSEE_NUMBER, NODE_LOCKED_LICENSEE_NAME);
-		Thread.sleep(1000);
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		// expecting the licensee credentials to be replaced in the following validate calls
 		checker = licenseMng.getValidationData();
@@ -311,6 +310,26 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		assertEquals(LicenseType.TRY_AND_BUY, licenseChecker.getType());
 		assertEquals(LicenseStatus.TRIAL_HW_ID_FAILURE, licenseChecker.getLicenseStatus());
 		assertFalse(licenseChecker.isValid());
+	}
+	
+	@Test
+	public void initiateExpiredDemoLicense() throws InterruptedException {
+		// having an expired demo licensee...
+		persistExpiredDemoLicensee();
+		LicenseManager licenseManager = LicenseManager.getInstance();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME );
+		licenseManager.setUniqueHwId(DEMO_EXPIRED_LICENSEE_SECRET);
+
+		// when initiating the license manager with a wrong hardware id...
+		licenseManager.initManager();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME );
+		
+		// expecting the validation state to be detected properly
+		LicenseChecker licenseChecker = licenseManager.getValidationData();
+		assertEquals(LicenseType.TRY_AND_BUY, licenseChecker.getType());
+		assertFalse(licenseChecker.isValid());
+		assertEquals(LicenseStatus.TRIAL_EXPIRED, licenseChecker.getLicenseStatus());
+		assertNotNull(licenseChecker.getExpirationDate());
 	}
 	
 	private void storeUsedSessionId() {

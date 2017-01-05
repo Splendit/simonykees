@@ -187,8 +187,12 @@ public class ResponseParser implements LicenseChecker {
 		
 		if(getType()!= null) {
 			if(getType().equals(LicenseType.TRY_AND_BUY)) {
+				// in case of TRY_AND_BUY type, the license is valid if the 
+				// corresponding valid field is true
 				status = this.licenseModelStatus;
 			} else {
+				// for other license models, the validity is a conjunction of 
+				// the license model validity and the subscription validity.
 				status = this.licenseModelStatus && this.subscriptionStatus;
 			}
 		}

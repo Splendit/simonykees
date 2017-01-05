@@ -12,6 +12,9 @@ public abstract class LicenseCommonTest {
 	protected static final String FLOATING_LICENSEE_NAME = "Ardit Test"; 
 	protected static final String NODE_LOCKED_LICENSEE_NUMBER = "IDVU36ETR";
 	protected static final String NODE_LOCKED_LICENSEE_NAME = "TestAndRemoveIt-licensee3";
+	protected static final String DEMO_EXPIRED_LICENSEE_NUMBER = "for-expired-demo"; 
+	protected static final String DEMO_EXPIRED_LICENSEE_NAME = "For expired demo";
+	protected static final String DEMO_EXPIRED_LICENSEE_SECRET = "demo-expired-secret";
 	
 	protected static final String TEST_UNIQUE_ID_01 = "unique-01";	
 	protected static final String TEST_UNIQUE_ID_02 = "unique-02";
@@ -54,6 +57,24 @@ public abstract class LicenseCommonTest {
 				true, 
 				Instant.now().minusSeconds(1), 
 				LicenseType.NODE_LOCKED);
+		persistenceMng.setPersistenceModel(persistenceModel);
+		persistenceMng.persist();
+	}
+	
+	protected static void persistExpiredDemoLicensee() {
+		PersistenceManager persistenceMng = PersistenceManager.getInstance();
+		PersistenceModel persistenceModel = new PersistenceModel(
+				DEMO_EXPIRED_LICENSEE_NUMBER, 
+				DEMO_EXPIRED_LICENSEE_NAME, 
+				false, 
+				LicenseType.TRY_AND_BUY, 
+				Instant.now(), 
+				ZonedDateTime.now().minusDays(1),
+				null, 
+				null, 
+				false, 
+				Instant.now().minusSeconds(1), 
+				LicenseType.TRY_AND_BUY);
 		persistenceMng.setPersistenceModel(persistenceModel);
 		persistenceMng.persist();
 	}
