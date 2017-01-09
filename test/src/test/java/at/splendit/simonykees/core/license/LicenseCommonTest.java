@@ -8,6 +8,7 @@ import at.splendit.simonykees.core.license.model.PersistenceModel;
 @SuppressWarnings("nls")
 public abstract class LicenseCommonTest {
 	
+	// the following values are hard copied from existing licensees on the net licensing server
 	protected static final String FLOATING_LICENSEE_NUMBER = "IAQ45SNQR";
 	protected static final String FLOATING_LICENSEE_NAME = "Ardit Test"; 
 	protected static final String NODE_LOCKED_LICENSEE_NUMBER = "IDVU36ETR";
@@ -16,15 +17,20 @@ public abstract class LicenseCommonTest {
 	protected static final String DEMO_EXPIRED_LICENSEE_NAME = "For expired demo";
 	protected static final String DEMO_EXPIRED_LICENSEE_SECRET = "demo-expired-secret";
 	
+	// the following are used as test values for hw id and floating session id
 	protected static final String TEST_UNIQUE_ID_01 = "unique-01";	
 	protected static final String TEST_UNIQUE_ID_02 = "unique-02";
 	protected static final String TEST_UNIQUE_ID_03 = "unique-03";
 	protected static final String TEST_UNIQUE_ID_04 = "unique-04";
 	protected static final String TEST_UNIQUE_ID_05 = "unique-05";
 	
-	protected static final long WAIT_FOR_VALIDATION_RESPONSE_TIME = 1000;
-	protected static final ZonedDateTime NOW_IN_AYEAR = ZonedDateTime.now().plusDays(365);
+	// other constants for testing purposes
+	protected static final long WAIT_FOR_VALIDATION_RESPONSE_TIME = 1000; // in milliseconds
+	protected static final ZonedDateTime NOW_IN_ONE_YEAR = ZonedDateTime.now().plusDays(365);
 	
+	/**
+	 * Stores/overwrites a licensee with a valid floating license. 
+	 */
 	protected static void persistFloatingLicensee() {
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		PersistenceModel persistenceModel = new PersistenceModel(
@@ -43,6 +49,9 @@ public abstract class LicenseCommonTest {
 		persistenceMng.persist();
 	}
 	
+	/**
+	 * Stores/overwrites a licensee with a valid node locked license. 
+	 */
 	protected static void persistNodeLockedLicensee() {
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		PersistenceModel persistenceModel = new PersistenceModel(
@@ -61,6 +70,9 @@ public abstract class LicenseCommonTest {
 		persistenceMng.persist();
 	}
 	
+	/**
+	 * Stores/overwrites a licensee with expired demo license.
+	 */
 	protected static void persistExpiredDemoLicensee() {
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		PersistenceModel persistenceModel = new PersistenceModel(
@@ -79,6 +91,9 @@ public abstract class LicenseCommonTest {
 		persistenceMng.persist();
 	}
 	
+	/**
+	 * Overwrites the persisted data with empty and null values.
+	 */
 	protected void clearPersistedData() {
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		PersistenceModel persistenceModel = new PersistenceModel(

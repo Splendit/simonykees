@@ -40,6 +40,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 			instance.setLicenseModel(floatingModel);
 			
 			instance.checkIn();
+			// setting a pause between checkIn requests.
 			try {
 				Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 			} catch (InterruptedException e) {
@@ -57,13 +58,14 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	
 	@Test
 	public void testInitLicenseManager() {
-
+		// when initiating the license manager...
 		LicenseManager instance = LicenseManager.getInstance();
 		instance.initManager();
 		storeUsedSessionId();
 		LicenseModel licenseModel = instance.getLicenseModel();
 		LicenseeModel licensee = instance.getLicensee();
 		
+		// expecting the licensee and the license model to be initiated, too...
 		assertNotNull(licensee);
 		assertNotNull(licenseModel);
 		assertNotNull(licenseModel.getType());
@@ -119,20 +121,20 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		
 		// having 3 sessions occupied (the floating model used for testing has only 3 available sessions)
 		LicenseManager licenseMng = LicenseManager.getInstance();
-		licenseMng.initManager();
+		licenseMng.initManager();// 1 occupied session
 		LicenseModel licenseModel  = licenseMng.getLicenseModel();
 		checker = licenseMng.getValidationData();
 		assertEquals(LicenseStatus.FLOATING_CHECKED_OUT, checker.getLicenseStatus());
 		assertTrue(checker.isValid());
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
-		licenseMng.checkIn();
+		licenseMng.checkIn();// occupied sessions is released. 0 occupied sessions
 		checker = licenseMng.getValidationData();
 		assertEquals(false, checker.isValid());
 		assertEquals(LicenseStatus.FLOATING_CHECKED_IN, checker.getLicenseStatus());
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_02);
-		licenseMng.initManager();
+		licenseMng.initManager(); // 1 occupied session
 		checker = licenseMng.getValidationData();
 		assertTrue(checker.isValid());
 		storeUsedSessionId();
@@ -141,7 +143,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 
 		
 		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_03);
-		licenseMng.initManager();
+		licenseMng.initManager(); // 2 occupied sessions
 		checker = licenseMng.getValidationData();
 		assertTrue(checker.isValid());
 		storeUsedSessionId();
@@ -149,7 +151,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_04);
-		licenseMng.initManager();
+		licenseMng.initManager(); // 3 occupied sessions
 		
 		checker = licenseMng.getValidationData();
 		licensee = licenseMng.getLicensee();
@@ -179,7 +181,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	
 	@Test
 	public void runningSchedulerAftercheckIn() throws InterruptedException {
-		// having initiated an instance of license manager for a floatingl licensee
+		// having initiated an instance of license manager for a floating licensee
 		LicenseManager licenseMng = LicenseManager.getInstance();
 		licenseMng.initManager();
 		
@@ -249,7 +251,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		// expecting to create (if it doesn't exist) a new licensee with demo license
 		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
 		assertEquals(LicenseStatus.TRIAL_REGISTERED, checker.getLicenseStatus());
-		// validation status is deliberately  not checked because it depends on execution time
+		assertTrue(checker.isValid());
 		
 		// ... and expecting the stored data to comply with created licensee
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
@@ -294,11 +296,11 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		// having a demo licensee...
 		clearPersistedData();
 		LicenseManager licenseManager = LicenseManager.getInstance();
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME );
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		licenseManager.setUniqueHwId("");
 
 		licenseManager.initManager();
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME );
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseChecker licenseChecker = licenseManager.getValidationData();
 		
 		assertEquals(LicenseType.TRY_AND_BUY, licenseChecker.getType());

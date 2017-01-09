@@ -34,7 +34,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	public void validateNodeLockedLicense() throws InterruptedException {
 		// having a licensee with a node locked license...
 		String productNumber = LicenseManager.getProductNumber();
-		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_AYEAR, TEST_UNIQUE_ID_01);
+		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_ONE_YEAR, TEST_UNIQUE_ID_01);
 		LicenseeModel licensee = new LicenseeModel(NODE_LOCKED_LICENSEE_NAME, NODE_LOCKED_LICENSEE_NUMBER, nodeLocked, productNumber);
 		ValidationResultCache cache = ValidationResultCache.getInstance();
 		PersistenceManager persistenceManager = PersistenceManager.getInstance();
@@ -57,7 +57,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		assertEquals(LicenseStatus.NODE_LOCKED_REGISTERED, checker.getLicenseStatus());
 		assertTrue(checker.getSubscriptionStatus());
 		assertEquals(NODE_LOCKED_LICENSEE_NAME, checker.getLicenseeName());
-		
+		// ... and expecting the validation result to be persisted...
 		Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
 		assertTrue(optPersistedData.isPresent());
 		PersistenceModel persistenceModel = optPersistedData.get();
@@ -72,7 +72,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	public void validateNodeLockedLicenseWrongSecret() throws InterruptedException {
 		// having a licensee with a node locked license and with incorrect secret id...
 		String productNumber = LicenseManager.getProductNumber();
-		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_AYEAR, "someWrongSecret");
+		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_ONE_YEAR, "someWrongSecret");
 		LicenseeModel licensee = new LicenseeModel(NODE_LOCKED_LICENSEE_NAME, NODE_LOCKED_LICENSEE_NUMBER, nodeLocked, productNumber);
 		ValidationResultCache cache = ValidationResultCache.getInstance();
 		PersistenceManager persistenceManager = PersistenceManager.getInstance();
@@ -95,7 +95,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		assertEquals(LicenseStatus.TRIAL_EXPIRED, checker.getLicenseStatus());
 		assertFalse(checker.getSubscriptionStatus());
 		assertEquals(NODE_LOCKED_LICENSEE_NAME, checker.getLicenseeName());
-		
+		// ... and expecting the validation result to be persisted...
 		Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
 		assertTrue(optPersistedData.isPresent());
 		PersistenceModel persistenceModel = optPersistedData.get();
@@ -126,7 +126,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		
 		// when calling a validate request with an incorrect hardware id...
 		String productNumber = LicenseManager.getProductNumber();
-		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_AYEAR, "some-incorrect-hw-id");
+		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_ONE_YEAR, "some-incorrect-hw-id");
 		LicenseeModel licensee = new LicenseeModel(NODE_LOCKED_LICENSEE_NAME, NODE_LOCKED_LICENSEE_NUMBER, nodeLocked, productNumber);
 		ValidationResultCache cache = ValidationResultCache.getInstance();
 		PersistenceManager persistenceManager = PersistenceManager.getInstance();
@@ -142,7 +142,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		assertEquals(LicenseType.NODE_LOCKED, checker.getType());
 		assertEquals(LicenseStatus.NODE_LOCKED_HW_ID_FAILURE, checker.getLicenseStatus()); // hw id failure shall be detected
 		assertEquals(NODE_LOCKED_LICENSEE_NAME, checker.getLicenseeName());
-		
+		// ... and expecting the validation result to be persisted...
 		Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
 		assertTrue(optPersistedData.isPresent());
 		PersistenceModel persistenceModel = optPersistedData.get();
