@@ -36,6 +36,8 @@ public class Messages extends NLS {
 	public static String ForToForEachRule_name;
 	public static String FunctionalInterfaceRule_description;
 	public static String FunctionalInterfaceRule_name;
+	public static String InefficientConstructorRule_description;
+	public static String InefficientConstructorRule_name;
 	public static String Java5Profile_profileName;
 	public static String Java7Profile_profileName;
 	public static String OrganiseImportsRule_description;

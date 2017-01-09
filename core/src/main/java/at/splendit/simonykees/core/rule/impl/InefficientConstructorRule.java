@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.rule.impl;
 
 import org.apache.commons.lang3.JavaVersion;
 
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.InefficientConstructorASTVisitor;
 
@@ -15,8 +16,8 @@ public class InefficientConstructorRule extends RefactoringRule<InefficientConst
 
 	public InefficientConstructorRule(Class<InefficientConstructorASTVisitor> visitor) {
 		super(visitor);
-		this.name = "TODO insert name";
-		this.description = "TODO insert description";
+		this.name = Messages.InefficientConstructorRule_name;
+		this.description = Messages.InefficientConstructorRule_description;
 		this.requiredJavaVersion = JavaVersion.JAVA_1_5;
 	}
 

@@ -157,7 +157,7 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 					SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(), ReservedNames.MI_VALUE_OF);
 					replacement = NodeBuilder.newMethodInvocation(node.getAST(),
 							(SimpleName) astRewrite.createMoveTarget(refactorPrimitiveType), valueOfInvocation,
-							(SimpleName) astRewrite.createMoveTarget(refactorCandidateParameter));
+							(Expression) astRewrite.createMoveTarget(refactorCandidateParameter));
 				}
 
 				/* primitive input parameters */
