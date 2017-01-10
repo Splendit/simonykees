@@ -192,6 +192,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		
 		// when sending a check-in request
 		licenseMng.checkIn();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		checker = licenseMng.getValidationData();
 		
 		// expecting the validity to be false and the scheduler to be shut down
