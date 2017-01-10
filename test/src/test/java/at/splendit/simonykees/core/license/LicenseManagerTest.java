@@ -115,7 +115,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	}
 	
 	@Test
-	public void testFloatingSession() throws InterruptedException {
+	public void floatingSession() throws InterruptedException {
 		LicenseChecker checker;
 		LicenseeModel licensee;
 		
