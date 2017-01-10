@@ -174,47 +174,47 @@ public class PersistenceModel implements Serializable {
 		String strLastSuccessLicenseType = data.get(LAST_SUCCESS_LICENSE_TYPE);
 		
 		boolean lastVal = false;
-		if(!lastValStr.isEmpty()) {
+		if(lastValStr!=null && !lastValStr.isEmpty()) {
 			lastVal = Boolean.valueOf(lastValStr);
 		}
 		
 		LicenseType licenseType = null;
-		if(!strLicenseType.isEmpty()) {
+		if(strLicenseType!= null && !strLicenseType.isEmpty()) {
 			licenseType = LicenseType.fromString(strLicenseType);
 		}
 		
 		Instant lastValTimestamp = null;
-		if(!strLastValTimeStamp.isEmpty()) {
+		if(strLastValTimeStamp!= null && !strLastValTimeStamp.isEmpty()) {
 			lastValTimestamp = Instant.parse(strLastValTimeStamp);
 		}
 		
 		ZonedDateTime demoExpiration = null;
-		if(!strDemoExpiration.isEmpty()) {
+		if(strDemoExpiration!= null && !strDemoExpiration.isEmpty()) {
 			demoExpiration = ZonedDateTime.parse(strDemoExpiration);
 		}
 		
 		ZonedDateTime expirationTimestamp = null;
-		if(!strExpirationTimestamp.isEmpty()) {
+		if(strExpirationTimestamp!=null && !strExpirationTimestamp.isEmpty()) {
 			expirationTimestamp = ZonedDateTime.parse(strExpirationTimestamp);
 		}
 		
 		ZonedDateTime subscriptionExpires = null;
-		if(!strSubscriptionExpires.isEmpty()) {
+		if(strSubscriptionExpires!=null && !strSubscriptionExpires.isEmpty()) {
 			subscriptionExpires = ZonedDateTime.parse(strSubscriptionExpires);
 		}
 		
 		boolean subscriptionStatus = false;
-		if(!strSubscriptionStatus.isEmpty()) {
+		if(strSubscriptionStatus!= null && !strSubscriptionStatus.isEmpty()) {
 			subscriptionStatus = Boolean.valueOf(strSubscriptionStatus);
 		}
 		
 		Instant lastSuccessTimestamp = null;
-		if(!strLastSuccessTimestamp.isEmpty()) {
+		if(strLastSuccessTimestamp!=null && !strLastSuccessTimestamp.isEmpty()) {
 			lastSuccessTimestamp = Instant.parse(strLastSuccessTimestamp);
 		}
 		
 		LicenseType lastSuccessType = null;
-		if(!strLastSuccessLicenseType.isEmpty()) {
+		if(strLastSuccessLicenseType!=null && !strLastSuccessLicenseType.isEmpty()) {
 			lastSuccessType = LicenseType.fromString(strLastSuccessLicenseType);
 		}
 		
