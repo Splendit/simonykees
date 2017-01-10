@@ -29,8 +29,6 @@ public class PersistenceManager {
 	private static final String KEY = "SOME_SECRET_KEY_"; //$NON-NLS-1$
 	private static final String EMPTY_STRING = "";  //$NON-NLS-1$
 	private static final long SECONDS_IN_ONE_HOUR = 3600;
-	
-//	private static final String FILE_NAME = "target/info.txt"; //$NON-NLS-1$
 
 	private PersistenceManager() {
 		
@@ -98,25 +96,6 @@ public class PersistenceManager {
 	 */
 	void persist() {
 		
-//		PersistenceModel persistenceModel = getPersistenceModel();
-//		String licenseModelData = persistenceModel.toString();
-//		
-//		try {
-//			Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
-//			Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-//			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-//			
-//			byte[] outputBytes = cipher.doFinal(licenseModelData.getBytes());
-//			File outputFile = new File(FILE_NAME);
-//			FileOutputStream outputStream = new FileOutputStream(outputFile);
-//			outputStream.write(outputBytes);
-//			outputStream.close();
-//			
-//		} catch (Exception exception) {
-//				Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_encryption_error,
-//						exception);
-//		}
-		
 		PersistenceModel persistenceModel = getPersistenceModel();
 		String licenseModelData = persistenceModel.toString();
 		
@@ -131,7 +110,7 @@ public class PersistenceManager {
 			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 			
 			byte[] outputBytes = cipher.doFinal(licenseModelData.getBytes());
-			simonykeesNode.putByteArray(LICENSEE_CREDENTIALS_NODE_KEY, outputBytes, true);
+			simonykeesNode.putByteArray(LICENSEE_CREDENTIALS_NODE_KEY, outputBytes, false);
 			simonykeesNode.flush();
 			
 		} catch (Exception exception) {
@@ -148,27 +127,6 @@ public class PersistenceManager {
 	 */
 	public Optional<PersistenceModel> readPersistedData() {
 		PersistenceModel persistenceModel = null;
-		
-//		try {
-//			Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
-//			Cipher cipher = Cipher.getInstance(TRANSFORMATION);
-//			cipher.init(Cipher.DECRYPT_MODE, secretKey);
-//			
-//			File inputFile = new File(FILE_NAME);
-//			FileInputStream inputStream = new FileInputStream(inputFile);
-//			byte[] inputBytes = new byte[(int)inputFile.length()];
-//			inputStream.read(inputBytes);
-//			
-//			byte[] outputBytes = cipher.doFinal(inputBytes);
-//			String persistenceStr = new String(outputBytes);
-//			persistenceModel = PersistenceModel.fromString(persistenceStr);
-//			
-//			inputStream.close();
-//			
-//		} catch (Exception exception) {
-//			Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_decryption_error,
-//					exception);
-//		}
 		
 		try {
 		Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
