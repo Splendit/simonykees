@@ -81,6 +81,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		ValidationResultCache cache = ValidationResultCache.getInstance();
 		LicenseManager licenseMng = LicenseManager.getInstance();
 		licenseMng.initManager();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseModel licenseModel = licenseMng.getLicenseModel();
 		LicenseeModel licensee = licenseMng.getLicensee();
 		storeUsedSessionId();
@@ -185,11 +186,11 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		// having initiated an instance of license manager for a floating licensee
 		LicenseManager licenseMng = LicenseManager.getInstance();
 		licenseMng.initManager();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		LicenseChecker checker = licenseMng.getValidationData();
 		assertTrue(checker.isValid());
 		assertEquals(LicenseType.FLOATING, checker.getType());
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		// when sending a check-in request
 		licenseMng.checkIn();
@@ -311,10 +312,11 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		// when initiating the license manager with a wrong hardware id...
 		licenseManager.setUniqueHwId("wrong-hw-id");
 		licenseManager.initManager();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseeModel licensee = licenseManager.getLicensee();
 		LicenseValidator.doValidate(licensee);
-		
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+		
 		licenseChecker = licenseManager.getValidationData();
 
 		// expecting the validation data to be false
