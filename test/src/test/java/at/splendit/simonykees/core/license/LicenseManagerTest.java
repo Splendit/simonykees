@@ -122,36 +122,37 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		// having 3 sessions occupied (the floating model used for testing has only 3 available sessions)
 		LicenseManager licenseMng = LicenseManager.getInstance();
 		licenseMng.initManager();// 1 occupied session
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseModel licenseModel  = licenseMng.getLicenseModel();
 		checker = licenseMng.getValidationData();
 		assertEquals(LicenseStatus.FLOATING_CHECKED_OUT, checker.getLicenseStatus());
 		assertTrue(checker.isValid());
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		licenseMng.checkIn();// occupied sessions is released. 0 occupied sessions
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		checker = licenseMng.getValidationData();
 		assertEquals(false, checker.isValid());
 		assertEquals(LicenseStatus.FLOATING_CHECKED_IN, checker.getLicenseStatus());
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_02);
 		licenseMng.initManager(); // 1 occupied session
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		checker = licenseMng.getValidationData();
 		assertTrue(checker.isValid());
 		storeUsedSessionId();
 		assertEquals(LicenseStatus.FLOATING_CHECKED_OUT, checker.getLicenseStatus());
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 
 		
 		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_03);
 		licenseMng.initManager(); // 2 occupied sessions
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		checker = licenseMng.getValidationData();
 		assertTrue(checker.isValid());
 		storeUsedSessionId();
 		assertEquals(LicenseStatus.FLOATING_CHECKED_OUT, checker.getLicenseStatus());
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_04);
 		licenseMng.initManager(); // 3 occupied sessions
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		checker = licenseMng.getValidationData();
 		licensee = licenseMng.getLicensee();
@@ -167,9 +168,9 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		// when sending validation with a fourth session id...
 		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_05);
 		licenseMng.initManager();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		licensee = licenseMng.getLicensee();
 		checker = licenseMng.getValidationData();
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		//expecting the validation result to be false	
 		assertFalse(checker.isValid());
