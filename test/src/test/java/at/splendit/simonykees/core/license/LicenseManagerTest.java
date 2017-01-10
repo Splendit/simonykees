@@ -222,7 +222,6 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		//when updating the licensee name and number
 		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_01);
 		licenseMng.updateLicenseeNumber(NODE_LOCKED_LICENSEE_NUMBER, NODE_LOCKED_LICENSEE_NAME);
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		// expecting the licensee credentials to be replaced in the following validate calls
 		checker = licenseMng.getValidationData();
@@ -269,7 +268,6 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		// having no licensee information stored
 		clearPersistedData();
 		LicenseManager licenseManager = LicenseManager.getInstance();
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		licenseManager.setUniqueHwId("");
 		
 		// when initiating the license manager
@@ -299,7 +297,6 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		// having a demo licensee...
 		clearPersistedData();
 		LicenseManager licenseManager = LicenseManager.getInstance();
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		licenseManager.setUniqueHwId("");
 
 		licenseManager.initManager();
@@ -312,7 +309,6 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		// when initiating the license manager with a wrong hardware id...
 		licenseManager.setUniqueHwId("wrong-hw-id");
 		licenseManager.initManager();
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseeModel licensee = licenseManager.getLicensee();
 		LicenseValidator.doValidate(licensee);
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
@@ -330,12 +326,10 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		// having an expired demo licensee...
 		persistExpiredDemoLicensee();
 		LicenseManager licenseManager = LicenseManager.getInstance();
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME );
 		licenseManager.setUniqueHwId(DEMO_EXPIRED_LICENSEE_SECRET);
 
 		// when initiating the license manager with a wrong hardware id...
 		licenseManager.initManager();
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME );
 		
 		// expecting the validation state to be detected properly
 		LicenseChecker licenseChecker = licenseManager.getValidationData();
