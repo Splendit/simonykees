@@ -110,8 +110,9 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 				null,  // expiration time stamp
 				subscriptionExpires, 
 				true, // last subscription status
-				nowMin35sec, 
-				LicenseType.NODE_LOCKED);
+				nowMin35sec, // last success timestamp
+				LicenseType.NODE_LOCKED // last success type 
+				); 
 		persistenceMng.setPersistenceModel(orgModel);
 		persistenceMng.persist();
 		
@@ -245,7 +246,7 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 				"test-name", 
 				true,  // last validation status
 				LicenseType.NODE_LOCKED, // license type
-				nowMin3601sec, // validation time-stamp
+				nowMin3601sec, // validation time-stamp, expired 1 second ago
 				demoExpireDate, 
 				null,  // expiration time stamp
 				subscriptionExpires, 

@@ -25,7 +25,7 @@ public abstract class LicenseCommonTest {
 	protected static final String TEST_UNIQUE_ID_05 = "unique-05";
 	
 	// other constants for testing purposes
-	protected static final long WAIT_FOR_VALIDATION_RESPONSE_TIME = 800; // in milliseconds
+	protected static final long WAIT_FOR_VALIDATION_RESPONSE_TIME = 1000; // in milliseconds
 	protected static final ZonedDateTime NOW_IN_ONE_YEAR = ZonedDateTime.now().plusDays(365);
 	
 	/**

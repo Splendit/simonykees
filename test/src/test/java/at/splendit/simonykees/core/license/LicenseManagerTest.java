@@ -52,7 +52,6 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	
 	@After
 	public void waitToCompleteProcessing() throws InterruptedException {
-		Thread.sleep(300);
 		clearPersistedData();
 	}
 	
@@ -116,7 +115,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	}
 	
 	@Test
-	public void floatingSession() throws InterruptedException {
+	public void floatingOutOfSessionsSession() throws InterruptedException {
 		LicenseChecker checker;
 		LicenseeModel licensee;
 		
@@ -241,8 +240,8 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		// having cleared the persisted data...
 		clearPersistedData();
 		LicenseManager licenseMng = LicenseManager.getInstance();
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		licenseMng.setUniqueHwId("");
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		// when sending a validation request
 		licenseMng.initManager();
