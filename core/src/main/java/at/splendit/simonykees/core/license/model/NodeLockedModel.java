@@ -6,6 +6,14 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
 import at.splendit.simonykees.core.license.LicenseType;
 
+/**
+ * A representation of the Node Locked license. Responsible for constructing 
+ * validation parameters related to the Node Locked license.
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public class NodeLockedModel extends LicenseModel {
 
 	private String secretKey;

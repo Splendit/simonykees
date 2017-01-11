@@ -12,6 +12,13 @@ import org.junit.Test;
 
 import at.splendit.simonykees.core.license.model.LicenseeModel;
 
+/**
+ * Testing scheduler. 
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public class ValidateExecutorTest extends LicenseCommonTest {
 	
 	@Before

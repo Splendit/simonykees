@@ -6,6 +6,14 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
 import at.splendit.simonykees.core.license.LicenseType;
 
+/**
+ * A representation of the Try and Buy license. Responsible for 
+ * generating validation parameters relevant to Try and Buy license model.
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public class TryAndBuyModel extends LicenseModel {
 
 	private String secretKey;

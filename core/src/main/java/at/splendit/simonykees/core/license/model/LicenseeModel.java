@@ -2,6 +2,15 @@ package at.splendit.simonykees.core.license.model;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
+/**
+ * Representation of the licensee entity. Responsible for constructing the 
+ * validation parameters related to the licensee. It makes use of the license 
+ * model for getting parameters related to the license. 
+ *  
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public class LicenseeModel {
 
 	private String licenseeName;

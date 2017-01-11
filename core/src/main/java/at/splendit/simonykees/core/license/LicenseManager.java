@@ -31,7 +31,8 @@ import oshi.hardware.NetworkIF;
  * result of the validation, and provides relevant information of the validation
  * results.
  * 
- * @author ardit.ymeri
+ * @author Ardit Ymeri
+ * @since 1.0
  *
  */
 public class LicenseManager {

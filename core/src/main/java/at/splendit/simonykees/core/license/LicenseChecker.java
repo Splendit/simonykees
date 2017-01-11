@@ -5,6 +5,10 @@ import java.time.ZonedDateTime;
 
 /**
  * Provides information about the current status of the license.
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
  */
 public interface LicenseChecker {
 	

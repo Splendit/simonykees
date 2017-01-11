@@ -1,5 +1,11 @@
 package at.splendit.simonykees.core.license;
-
+/**
+ * Enumeration for indicating the reason why the license is or is not valid.
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public enum LicenseStatus {
 
 	NONE,

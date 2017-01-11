@@ -12,6 +12,13 @@ import org.junit.Test;
 
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 
+/**
+ * Testing persistence manager. 
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 @SuppressWarnings("nls")
 public class PersistenceManagerTest extends LicenseCommonTest {
 	

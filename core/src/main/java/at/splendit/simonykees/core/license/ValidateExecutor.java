@@ -11,6 +11,13 @@ import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.license.model.LicenseeModel;
 import at.splendit.simonykees.core.license.model.SchedulerModel;
 
+/**
+ * Responsible for starting and shutting down the validate scheduler.
+ *  
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public class ValidateExecutor {
 
 	private static ScheduledExecutorService scheduler;

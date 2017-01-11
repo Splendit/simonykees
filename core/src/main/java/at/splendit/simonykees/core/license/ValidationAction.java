@@ -1,5 +1,12 @@
 package at.splendit.simonykees.core.license;
 
+/**
+ * Enumeration of the validation actions.
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public enum ValidationAction {
 	CHECK_IN, CHECK_OUT, NONE;
 	

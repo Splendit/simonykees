@@ -7,6 +7,14 @@ import java.util.Map;
 import com.labs64.netlicensing.domain.vo.Composition;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
+/**
+ * Responsible for parsing the result of a validation call. Detects the 
+ * proper license type and status. 
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public class ResponseParser implements LicenseChecker {
 
 	private LicenseType licenseType;

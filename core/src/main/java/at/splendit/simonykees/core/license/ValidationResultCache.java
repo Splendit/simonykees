@@ -8,7 +8,8 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
 /**
  * A cash implementation for storing the result of a single validation call.
  * 
- * @author ardit.ymeri
+ * @author Ardit Ymeri
+ * @since 1.0
  *
  */
 public class ValidationResultCache {

@@ -8,6 +8,14 @@ import java.util.Optional;
 
 import at.splendit.simonykees.core.license.LicenseType;
 
+/**
+ * A representation of the license data to be persisted. Responsible 
+ * for serializing the data to and from string. 
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public class PersistenceModel implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

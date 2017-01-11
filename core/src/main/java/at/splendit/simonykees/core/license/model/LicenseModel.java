@@ -6,6 +6,14 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
 import at.splendit.simonykees.core.license.LicenseType;
 
+/**
+ * A super class for all license models. Enforces construction of 
+ * validation parameters. 
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public abstract class LicenseModel {
 
 	private LicenseType type;

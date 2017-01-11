@@ -14,12 +14,18 @@ import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.license.model.LicenseeModel;
 
+/**
+ * Sends a routine validate call. The result is cashed and persisted.
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public class LicenseValidator {
 
 	public static void doValidate(LicenseeModel licensee) {
 
 		try {
-
 			// preparing validation parameters...
 			ValidationParameters validationParameters = licensee.getValidationParams();
 			String licenseeNumber = licensee.getLicenseeNumber();

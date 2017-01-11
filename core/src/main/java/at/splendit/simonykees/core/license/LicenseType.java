@@ -1,5 +1,12 @@
 package at.splendit.simonykees.core.license;
 
+/**
+ * Enumeration of the license models that a client can have.
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public enum LicenseType {
 	
 	TRY_AND_BUY,

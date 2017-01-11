@@ -6,7 +6,14 @@ import java.util.HashMap;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
 import at.splendit.simonykees.core.license.LicenseType;
-
+/**
+ * A representation of a floating license. Responsible for constructing 
+ * the validation parameters for checking and checkout calls. 
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public class FloatingModel extends LicenseModel {
 
 	private final String SESSION_ID_KEY = "sessionId"; //$NON-NLS-1$

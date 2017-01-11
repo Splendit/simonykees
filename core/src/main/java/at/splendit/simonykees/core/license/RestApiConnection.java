@@ -4,9 +4,12 @@ import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.SecurityMode;
 
 /**
- * a singleton pattern to connect to NetLicensing API (RESTful).
- * @author elham.cheriki
- * @since 0.9.2
+ * Responsible for constructing the context REST api connection 
+ * with NetLicensing.
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
  */
 @SuppressWarnings("nls")
 public class RestApiConnection {

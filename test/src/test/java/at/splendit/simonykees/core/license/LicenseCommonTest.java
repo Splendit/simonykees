@@ -5,6 +5,13 @@ import java.time.ZonedDateTime;
 
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 
+/**
+ * A super class containing relevant constants and methods for testing. 
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 @SuppressWarnings("nls")
 public abstract class LicenseCommonTest {
 	

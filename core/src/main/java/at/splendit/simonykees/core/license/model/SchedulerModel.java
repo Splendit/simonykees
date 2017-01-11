@@ -1,5 +1,12 @@
 package at.splendit.simonykees.core.license.model;
 
+/**
+ * A representation of the scheduling parameters. 
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public class SchedulerModel {
 
 	private long validateInterval;

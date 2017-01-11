@@ -4,6 +4,13 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+/**
+ * Test cases for converting enumerations from/to string.
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 @SuppressWarnings("nls")
 public class EnumsTests {
 	

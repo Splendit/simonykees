@@ -17,7 +17,15 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.i18n.ExceptionMessages;
 import at.splendit.simonykees.core.license.model.PersistenceModel;
-
+/**
+ * Responsible for encrypting, storing and retrieving data in secure storage.
+ * Furthermore, this class is also responsible for constructing a validation
+ * object of type {@link LicenseChecker} with the existing data being stored.
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 public class PersistenceManager {
 		
 	private PersistenceModel persistenceModel;
@@ -26,9 +34,9 @@ public class PersistenceManager {
 	private static PersistenceManager instance;
 	private static final String ALGORITHM = "AES"; //$NON-NLS-1$
 	private static final String TRANSFORMATION = "AES"; //$NON-NLS-1$
-	private static final String KEY = "SOME_SECRET_KEY_"; //$NON-NLS-1$
+	private static final String KEY = "SOME_SECRET_KEY_"; //$NON-NLS-1$ //FIXME
 	private static final String EMPTY_STRING = "";  //$NON-NLS-1$
-	private static final long SECONDS_IN_ONE_HOUR = 3600;
+	private static final long OFFLINE_EXPIRATION_TIME_PERIOD = 3600; // in seconds
 
 	private PersistenceManager() {
 		
@@ -212,26 +220,28 @@ public class PersistenceManager {
 		}
 		
 		private boolean calcValidity(PersistenceModel persistence) {
-			// check if last validation is earlier than 1h
-			// if type is TryAndBuy
-			//	- check if demo is not expired
-			// if type is node locked or floating
-			// 	- check subscription is not expired
-			//	- check if last validation was true.
+			/* 
+			 * check if last validation is not expired
+			 * if type is TryAndBuy
+			 *	- check if demo is not expired
+			 * if type is node locked or floating
+			 * 	- check subscription is not expired
+			 *	- check if last validation was true.
+			 */
 			boolean status = false;
 			Optional<Instant> lastValidationTimestamp = persistence.getLastValidationTimestamp();
 			Instant now = Instant.now();
-			Instant oneHourAgo = now.minusSeconds(SECONDS_IN_ONE_HOUR);
 			boolean lastValidationStatus = 
 					persistence.getLastValidationStatus()
 					.orElse(false);
 			
 			if(lastValidationTimestamp.isPresent()
-					&& lastValidationTimestamp.get().isAfter(oneHourAgo) 
+					&& lastValidationTimestamp.get().isAfter(now.minusSeconds(OFFLINE_EXPIRATION_TIME_PERIOD)) 
 					&& lastValidationStatus) {
-				// last validation time stamp was stored and is earlier than one hour.
-				// further more the last validation status was true...
-				
+				/* 
+				 * last validation time stamp was stored and is earlier than one hour.
+				 * further more the last validation status was true...
+				 */
 				Optional<LicenseType> optLicenseType = persistence.getLicenseType();
 				if(optLicenseType.isPresent()) {
 					// license type was stored...
@@ -247,8 +257,10 @@ public class PersistenceManager {
 						
 					} else if(licenseType.equals(LicenseType.FLOATING) 
 								|| licenseType.equals(LicenseType.NODE_LOCKED)) {
-						// the stored license type was either Floating or NodeLocked
-						// A further check is needed for the subscription expiration
+						/*  
+						 * the stored license type was either Floating or NodeLocked
+						 * a further check is needed for the subscription expiration
+						 */
 						Optional<ZonedDateTime> subscriptionExpires = persistence.getSubscriptionExpirationDate();
 						
 						if(subscriptionExpires.isPresent()

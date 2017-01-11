@@ -15,7 +15,13 @@ import at.splendit.simonykees.core.license.model.LicenseeModel;
 import at.splendit.simonykees.core.license.model.NodeLockedModel;
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 import at.splendit.simonykees.core.license.model.TryAndBuyModel;
-
+/**
+ * Testing License Validator. 
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 @SuppressWarnings("nls")
 public class LicenseValidatorTest extends LicenseCommonTest {
 

@@ -18,6 +18,13 @@ import at.splendit.simonykees.core.license.model.LicenseModel;
 import at.splendit.simonykees.core.license.model.LicenseeModel;
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 
+/**
+ * Testing license manager. 
+ * 
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
+ */
 @SuppressWarnings("nls")
 public class LicenseManagerTest extends LicenseCommonTest {
 		
@@ -133,7 +140,9 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		assertEquals(false, checker.isValid());
 		assertEquals(LicenseStatus.FLOATING_CHECKED_IN, checker.getLicenseStatus());
 		
-		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_02);
+		// setting a new hw-id will occupy a new session, because the next validate 
+		// call will use the new hw-id as a session id.
+		licenseMng.setUniqueHwId(TEST_UNIQUE_ID_02); 
 		licenseMng.initManager(); // 1 occupied session
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		checker = licenseMng.getValidationData();
