@@ -35,6 +35,7 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 
 	@Override
 	public boolean visit(MethodInvocation node) {
+
 		/*
 		 * Boolean.valueOf(true); -> true, Boolean.valueOf("true"); -> true
 		 * Boolean.valueOf(false); -> false, Boolean.valueOf("false"); -> false
@@ -110,6 +111,7 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 						replacement = node.getAST().newBooleanLiteral(false);
 					}
 				}
+
 				/* wrapping string variables into Boolean.valueOf(...) */
 				else if (ClassRelationUtil.isContentOfRegistertITypes(refactorCandidateTypeBinding,
 						iTypeMap.get(STRING_KEY))) {
@@ -118,6 +120,7 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 							(SimpleName) astRewrite.createMoveTarget(refactorPrimitiveType), valueOfInvocation,
 							(SimpleName) astRewrite.createMoveTarget(refactorCandidateParameter));
 				}
+
 				/* primitive booleans */
 				else if (isBooleanClass(refactorCandidateTypeBinding.getName())) {
 					replacement = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
@@ -137,6 +140,7 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 			 * primitive types
 			 */
 			else if (isPrimitiveTypeClass(refactorPrimitiveTypeBinding.getName())) {
+
 				/*
 				 * new Float(4D) is not transformable to Float.valueOf(4D)
 				 * because valueOf only allows primitives that are implicit
@@ -150,7 +154,7 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 						&& isDoubleVariable.test(refactorCandidateTypeBinding)) {
 					return true;
 				}
-				
+
 				/* wrapping string variables into PrimitiveType.valueOf(...) */
 				if (ClassRelationUtil.isContentOfRegistertITypes(refactorCandidateTypeBinding,
 						iTypeMap.get(STRING_KEY))) {
@@ -163,13 +167,15 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 				/* primitive input parameters */
 				else if (isPrimitiveTypeClass(refactorCandidateTypeBinding.getName())) {
 					replacement = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
+
 					/*
-					 * if the new object is part of a method invocation it needs to
-					 * be wrapped into a object
+					 * if the new object is part of a method invocation it needs
+					 * to be wrapped into a object
 					 */
 					if (ASTNode.METHOD_INVOCATION == node.getParent().getNodeType()
 							&& refactorCandidateTypeBinding.isPrimitive()) {
-						SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(), ReservedNames.MI_VALUE_OF);
+						SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(),
+								ReservedNames.MI_VALUE_OF);
 						replacement = NodeBuilder.newMethodInvocation(node.getAST(),
 								(SimpleName) astRewrite.createMoveTarget(refactorPrimitiveType), valueOfInvocation,
 								replacement);
