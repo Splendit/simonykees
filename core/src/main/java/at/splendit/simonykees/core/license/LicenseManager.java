@@ -451,14 +451,18 @@ public class LicenseManager {
 		 */
 		private void calcLicenseStatus(LicenseType lastSuccessLicenseType, Instant lastSuccessTimestamp) {
 			if(isValid() || isSubscriptionValid()) {
-				// if the license or the subscription is valid, then the license type/status
-				// is the same as the parsed license type/status.
+				/*
+				 * If the license or the subscription is valid, then the license type/status
+				 * is the same as the parsed license type/status.
+				 */
 				this.licenseType = parsedLicenseType;
 				this.licenseStatus = parsedLicenseStatus;
 			} else {
-				// otherwise, if the last successful validation is stored, the last successful 
-				// license type is NodeLocked and the license is not expired yet, 
-				// then it must be the case that the hardware id does not match
+				/*
+				 * Otherwise, if the last successful validation is stored, the last successful 
+				 * license type is NodeLocked and the license is not expired yet, 
+				 * then it must be the case that the hardware id does not match                          
+				 */
 				if(lastSuccessLicenseType != null 
 						&& lastSuccessTimestamp != null 
 						&& lastSuccessLicenseType.equals(LicenseType.NODE_LOCKED)

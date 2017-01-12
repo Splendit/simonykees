@@ -60,9 +60,11 @@ public class ResponseParser implements LicenseChecker {
 			if(!isValid()) {
 				// if no node locked license, check for try and buy license...
 				extractValidationData(validationResult, LicenseType.TRY_AND_BUY);
-				// finally, if no valid license is found, but there is a valid subscription,
-				// it must be the case that there is a floating license which is running 
-				// out of sessions
+				/*
+				 * finally, if no valid license is found, but there is a valid subscription,
+				 * it must be the case that there is a floating license which is running
+				 * out of sessions
+				 */
 				if(!isValid() && getSubscriptionStatus()) {
 					extractValidationData(validationResult, LicenseType.FLOATING);
 				}
@@ -195,12 +197,16 @@ public class ResponseParser implements LicenseChecker {
 		
 		if(getType()!= null) {
 			if(getType().equals(LicenseType.TRY_AND_BUY)) {
-				// in case of TRY_AND_BUY type, the license is valid if the 
-				// corresponding valid field is true
+				/*
+				 * In case of TRY_AND_BUY type, the license is valid if the
+				 * corresponding valid field is true
+				 */
 				status = this.licenseModelStatus;
 			} else {
-				// for other license models, the validity is a conjunction of 
-				// the license model validity and the subscription validity.
+				/*
+				 * For other license models, the validity is a conjunction of 
+				 * the license model validity and the subscription validity.
+				 */
 				status = this.licenseModelStatus && this.subscriptionStatus;
 			}
 		}
