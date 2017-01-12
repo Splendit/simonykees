@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
    <feature url="features/simonykees.feature_0.0.0.jar" id="simonykees.feature" version="0.0.0">
-    <category name="simonykees"/>
+      <category name="simonykees.category"/>
    </feature>
-   <feature url="features/simonykees.feature.source_0.0.0.jar" id="simonykees.feature.source" version="0.0.0">
-    <category name="simonykees Developer Resources"/>
-   </feature>
+   <category-def name="simonykees.category" label="jSparrow"/>
 </site>

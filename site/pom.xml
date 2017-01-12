@@ -9,8 +9,8 @@
 	</parent>
 	<artifactId>simonykees.site</artifactId>
 	<packaging>eclipse-repository</packaging>
-	<name>simonykees :: update site</name>
-	<description>simonykees Update Site</description>
+	<name>jSparrow :: update site</name>
+	<description>jSparrow Update Site</description>
 
 	<scm>
 		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/site</url>
