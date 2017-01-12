@@ -1,12 +1,16 @@
 package at.splendit.simonykees.core;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -22,7 +26,9 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
  * @since 0.9.2
  */
-public class AbstractRulesTest {
+public abstract class AbstractRulesTest {
+	
+	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
 
 	public AbstractRulesTest() {
 		super();
@@ -67,4 +73,17 @@ public class AbstractRulesTest {
 		return compilationUnit.getSource();
 	}
 
+	protected void testTransformation(Path postRule, Path preRule, String fileName, String postRulePackage) throws Exception {
+		String expectedSource = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		String content = new String(Files.readAllBytes(preRule), StandardCharsets.UTF_8);
+
+		String compilationUnitSource = processFile(fileName, content, rulesList);
+
+		// Replace the package for comparison
+		compilationUnitSource = StringUtils.replace(compilationUnitSource, RulesTestUtil.PRERULE_PACKAGE,
+				postRulePackage);
+
+		// TODO check if tabs and newlines make a difference
+		assertEquals(expectedSource, compilationUnitSource);
+	}
 }

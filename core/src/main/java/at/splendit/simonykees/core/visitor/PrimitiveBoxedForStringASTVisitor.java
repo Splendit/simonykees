@@ -28,7 +28,6 @@ import at.splendit.simonykees.core.constants.ReservedNames;
  * 
  * int myInt = 4; String myIntString = Integer.toString(myInt);
  * 
- * TODO primitive Variables
  * 
  * @author Martin Huter
  * @since 0.9.2
