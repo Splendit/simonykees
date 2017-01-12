@@ -9,8 +9,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>simonykees.core</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<name>simonykees :: core</name>
-	<description>simonykees Core Plugin</description>
+	<name>jSparrow :: core</name>
+	<description>jSparrow Core Plugin</description>
 
 	<dependencies>
 		<!-- eclipse -->

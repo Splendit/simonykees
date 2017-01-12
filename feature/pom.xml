@@ -9,8 +9,8 @@
 	</parent>
 	<artifactId>simonykees.feature</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<name>simonykees :: feature</name>
-	<description>simonykees Feature</description>
+	<name>jSparrow :: feature</name>
+	<description>jSparrow Feature</description>
 
 	<scm>
 		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/feature</url>
