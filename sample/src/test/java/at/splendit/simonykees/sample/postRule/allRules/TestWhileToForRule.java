@@ -129,4 +129,126 @@ public class TestWhileToForRule {
 		}
 		return sb.toString();
 	}
+
+	public String testNestedWhileLoops(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		for (String s : l) {
+			sb.append(s);
+			
+			for (String innerStr:l){
+				sb.append(innerStr);
+			}
+		}
+		
+		return sb.toString();
+	}
+
+	public String testCascadedWhilesToFor(String input) {
+		List<String> l = generateList(input);
+		List<String> k = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		for (String s : l) {
+			sb.append(s);
+		}
+
+		for (String s : k) {
+			sb.append(s);
+		}
+
+		return sb.toString();
+	}
+
+	public String testTripleNestedWhilesToFor(String input) {
+		List<String> l = generateList(input);
+		List<String> k = generateList(input);
+		List<String> m = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		for (String outerVal : l){
+			sb.append(outerVal);
+			
+			for (String kVal:k){
+				sb.append(kVal);
+				
+//				FIXME SIM-173: RuleException is thrown
+//				Iterator<String> mIterator = m.iterator(); 
+//				while (mIterator.hasNext()) {
+//					String mVal = mIterator.next();
+//					sb.append(mVal);
+//				}
+			}
+		}
+
+		return sb.toString();
+	}
+
+	public String testNestedIfWhilesToFor(String input) {
+		List<String> l = generateList(input);
+		List<String> k = generateList(input);
+		List<String> m = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		for (String outerVal : l) {
+			sb.append(outerVal);
+			
+			Iterator<String> kIterator = k.iterator();
+			String kVal;
+			if ((kVal = kIterator.next()) != null) {
+				sb.append(kVal);
+				
+				for (String mVal : m) {
+					sb.append(mVal);
+				}
+			}
+		}
+
+		return sb.toString();
+	}
+
+	public String testWhileLoopsMultipleDeclaration(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		for (String m : l) {
+			String n = "nothing";
+			Integer i = 1;
+			String o = "-";
+			String p = "something";
+			sb.append(n);
+			sb.append(m);
+			sb.append(o);
+			sb.append(p);
+			sb.append(i.toString());
+		}
+
+		return sb.toString();
+	}
+
+	public String testWhileLoopsIgnoreIterator(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		for (String string : l) {
+			String p = "foo";
+			sb.append(p);
+		}
+
+		return sb.toString();
+	}
+
+	public String testWhileLoopsDiscardIterator(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		Iterator<String> iterator = l.iterator();
+		while (iterator.hasNext()) {
+			iterator.next();
+			sb.append("nothing");
+		}
+
+		return sb.toString();
+	}
 }
