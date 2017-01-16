@@ -251,4 +251,29 @@ public class TestWhileToForRule {
 
 		return sb.toString();
 	}
+
+	public String testWhileLoopsWithSwitchCase(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		String fooCase = "foo";
+
+		for (String s : l) {
+			switch (fooCase) {
+			case "foo":
+				sb.append(s);
+				break;
+			case "b":
+				sb.append("b");
+				break;
+			case "c":
+				sb.append("c");
+				break;
+			default:
+				sb.append("nothing");
+				break;
+			}
+		}
+
+		return sb.toString();
+	}
 }
