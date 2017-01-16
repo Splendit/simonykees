@@ -418,4 +418,16 @@ public class TestForToForEachRule {
 
 		return sb.toString();
 	}
+
+	private List<String> a;
+
+	public String testIteratingIndexMoreLevels(String input) {
+		a = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < a.size(); i++) {
+			sb.append(this.a.get(i));
+
+		}
+		return sb.toString();
+	}
 }
