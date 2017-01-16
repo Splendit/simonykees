@@ -4,7 +4,7 @@ package at.splendit.simonykees.sample.postRule.inefficientConstructor;
 public class TestInefficientConstructorPrimitiveRule {
 
 	public Integer primIntegerToIntegerTest() {
-		return 1;
+		return Integer.valueOf(1);
 	}
 
 	public Integer stringToIntegerTest() {
@@ -12,7 +12,7 @@ public class TestInefficientConstructorPrimitiveRule {
 	}
 
 	public Double primDoubleToDoubleTest() {
-		return 1.0;
+		return Double.valueOf(1.0);
 	}
 
 	public Double stringToDoubleTest() {
@@ -20,7 +20,7 @@ public class TestInefficientConstructorPrimitiveRule {
 	}
 
 	public Float primFloatToFloatTest() {
-		return 1.0f;
+		return Float.valueOf(1.0f);
 	}
 
 	public Float primDoubleToFloatTest() {
@@ -32,7 +32,7 @@ public class TestInefficientConstructorPrimitiveRule {
 	}
 
 	public Long primLongToLongTest() {
-		return 1L;
+		return Long.valueOf(1L);
 	}
 
 	public Long stringToLongTest() {
@@ -40,7 +40,7 @@ public class TestInefficientConstructorPrimitiveRule {
 	}
 
 	public Short primShortToShortTest() {
-		return (short) 1;
+		return Short.valueOf((short) 1);
 	}
 
 	public Short stringToShortTest() {
@@ -48,18 +48,18 @@ public class TestInefficientConstructorPrimitiveRule {
 	}
 
 	public Character characterToCharacterTest() {
-		return new Character('c');
+		return Character.valueOf('c');
 	}
 
 	public Byte primByteToByteTest() {
-		return (byte) 1;
+		return Byte.valueOf((byte) 1);
 	}
 
 	public Byte stringToByteTest() {
 		return Byte.valueOf("1");
 	}
 
-	Byte b1 = (byte) 1;
+	Byte b1 = Byte.valueOf((byte) 1);
 	Byte b3 = Byte.valueOf("1");
 
 	public Number doubleToNumberTest() {

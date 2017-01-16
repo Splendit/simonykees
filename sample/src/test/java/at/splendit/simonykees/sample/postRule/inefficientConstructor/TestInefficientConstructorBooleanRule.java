@@ -4,27 +4,27 @@ package at.splendit.simonykees.sample.postRule.inefficientConstructor;
 public class TestInefficientConstructorBooleanRule {
 
 	public Boolean booleanTrueTest() {
-		return true;
+		return Boolean.valueOf(true);
 	}
 
 	public Boolean booleanTrueLiteralTest() {
-		return true;
+		return Boolean.valueOf(true);
 	}
 
 	public Boolean booleanFalseTest() {
-		return false;
+		return Boolean.valueOf(false);
 	}
 
 	public Boolean booleanFalseLiteralTest() {
-		return false;
+		return Boolean.valueOf(false);
 	}
 
 	public Boolean booleanFalseAnyLiteralTest() {
-		return false;
+		return Boolean.valueOf(false);
 	}
 
 	public Boolean booleanVariableBooleanTest(boolean input) {
-		return input;
+		return Boolean.valueOf(input);
 	}
 
 	public Boolean booleanVariableStringTest(String input) {
@@ -32,31 +32,31 @@ public class TestInefficientConstructorBooleanRule {
 	}
 
 	public Boolean booleanTrueValueOfTest() {
-		return true;
+		return Boolean.valueOf(true);
 	}
 
 	public Boolean booleanTrueLiteralValueOfTest() {
-		return true;
+		return Boolean.valueOf(true);
 	}
 
 	public Boolean booleanFalseValueOfTest() {
-		return false;
+		return Boolean.valueOf(false);
 	}
 
 	public Boolean booleanFalseLiteralValueOfTest() {
-		return false;
+		return Boolean.valueOf(false);
 	}
 
 	public Boolean booleanAnyValueOfTest() {
-		return false;
+		return Boolean.valueOf(false);
 	}
 
 	public Boolean booleanVariableBooleanTest(Boolean input) {
-		return input;
+		return Boolean.valueOf(input);
 	}
 
 	public Boolean booleanVariableBooleanPrimTest(boolean input) {
-		return input;
+		return Boolean.valueOf(input);
 	}
 
 	public Boolean booleanVariableStringValueOfTest(String input) {
