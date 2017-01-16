@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 @SuppressWarnings({ "nls", "unused" })
 public class TestWhileToForRule {
 
@@ -390,6 +392,28 @@ public class TestWhileToForRule {
 			String foo = "foo";
 			Number s = iterator.next();
 			sb.append(s);
+		}
+		return sb.toString();
+	}
+
+	public String testIteratorReuse(String input) {
+		List<String> l1 = generateList(input);
+		List<String> l2 = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		Iterator iterator = l1.iterator();
+		while (iterator.hasNext()) {
+			String s = (String) iterator.next();
+			int i = StringUtils.length(s);
+			sb.append(s).append(i);
+		}
+		
+		iterator = l2.iterator();
+		
+		while (iterator.hasNext()) {
+			String s = (String) iterator.next();
+			int i = StringUtils.length(s);
+			sb.append(s).append(i);
 		}
 		
 		return sb.toString();
