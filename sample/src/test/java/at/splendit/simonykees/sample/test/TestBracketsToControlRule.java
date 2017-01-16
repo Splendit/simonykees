@@ -12,6 +12,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter, Ludwig Werzowa
+ * @since 0.9.2
+ */
 @RunWith(Parameterized.class)
 public class TestBracketsToControlRule extends AbstractReflectiveMethodTester {
 	
@@ -51,7 +57,7 @@ public class TestBracketsToControlRule extends AbstractReflectiveMethodTester {
 	@BeforeClass
 	public static void setUptHolderInstance() throws Exception {
 		holder = new PreAndPostClassHolder(at.splendit.simonykees.sample.preRule.TestBracketsToControlRule.class,
-				at.splendit.simonykees.sample.postRule.TestBracketsToControlRule.class);
+				at.splendit.simonykees.sample.postRule.allRules.TestBracketsToControlRule.class);
 	}
 	
 	@AfterClass

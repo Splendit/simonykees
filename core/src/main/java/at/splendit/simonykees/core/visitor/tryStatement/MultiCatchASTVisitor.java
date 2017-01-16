@@ -123,7 +123,7 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 			return false;
 		}
 
-		return false || isSubType(supertypeBinding, subtypeBinding.getSuperclass());
+		return isSubType(supertypeBinding, subtypeBinding.getSuperclass());
 	}
 
 	private boolean isSubType(ITypeBinding supertypeBinding, ITypeBinding subtypeBinding) {
@@ -136,7 +136,7 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 			return true;
 		}
 
-		return false || isSubType(supertypeBinding, subtypeBinding.getSuperclass());
+		return isSubType(supertypeBinding, subtypeBinding.getSuperclass());
 	}
 
 }

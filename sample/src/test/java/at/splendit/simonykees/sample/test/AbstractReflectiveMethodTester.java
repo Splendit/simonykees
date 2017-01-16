@@ -29,6 +29,9 @@ import com.google.common.collect.Table;
  * Only methods with return values are taken into account. Only methods where
  * the parameter types match the types of parameterizedValues, are taken into
  * account.
+ * 
+ * @author Ludwig Werzowa, Martin Huter
+ * @since 0.9
  */
 @SuppressWarnings("nls")
 public abstract class AbstractReflectiveMethodTester {
@@ -108,16 +111,35 @@ public abstract class AbstractReflectiveMethodTester {
 	 */
 	private void testArrayReturnValue(Method m1, Method m2)
 			throws IllegalAccessException, InvocationTargetException, ArrayComparisonFailure {
-		Object[] preRetVal = (Object[]) m1.invoke(getHolder().getPreObject(), this.parameterizedValue);
+		
+		Object[] preRetVal = null;
+		Exception preRetValException = null;
+		try {
+			preRetVal = (Object[]) m1.invoke(getHolder().getPreObject(), this.parameterizedValue);
+		} catch (Exception e) {
+			preRetValException = e;
+		}
 
-		Object[] postRetVal = (Object[]) m2.invoke(getHolder().getPostObject(), parameterizedValue);
+		Object[] postRetVal = null;
+		Exception postRetValException = null;
+		try {
+			postRetVal = (Object[]) m2.invoke(getHolder().getPostObject(), this.parameterizedValue);
+		} catch (Exception e) {
+			postRetValException = e;
+		}
 
-		log.debug(String.format("Type: [%s], Method: [%s], isArrayRetVal: [%b], preRetVal: [%s], postRetVal: [%s]",
-				this.parameterType, m1.getName(), true, Arrays.toString(preRetVal), Arrays.toString(postRetVal)));
+		if (preRetVal != null) {
+			log.debug(String.format("Type: [%s], Method: [%s], isArrayRetVal: [%b], preRetVal: [%s], postRetVal: [%s]",
+					this.parameterType, m1.getName(), true, Arrays.toString(preRetVal), Arrays.toString(postRetVal)));
 
-		assertArrayEquals(String.format("Return value mismatch for parameter [%s]. [%s.%s] expected [%s] but was [%s]",
-				parameterizedValue, getHolder().preObject.getClass().getSimpleName(), m1.getName(),
-				Arrays.toString(preRetVal), Arrays.toString(postRetVal)), preRetVal, postRetVal);
+			assertArrayEquals(
+					String.format("Return value mismatch for parameter [%s]. [%s.%s] expected [%s] but was [%s]",
+							this.parameterizedValue, getHolder().preObject.getClass().getSimpleName(), m1.getName(),
+							Arrays.toString(preRetVal), Arrays.toString(postRetVal)),
+					preRetVal, postRetVal);
+		} else {
+			compareRuntimeExceptions(m1, preRetValException, postRetValException);
+		}
 	}
 
 	/**
@@ -134,15 +156,42 @@ public abstract class AbstractReflectiveMethodTester {
 	 */
 	private void testSingleReturnValue(Method m1, Method m2)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Object preRetVal = m1.invoke(getHolder().getPreObject(), this.parameterizedValue);
+		
+		Object preRetVal = null;
+		Exception preRetValException = null;
+		try {
+			preRetVal = m1.invoke(getHolder().getPreObject(), this.parameterizedValue);
+		} catch (Exception e) {
+			preRetValException = e;
+		}
 
-		Object postRetVal = m2.invoke(getHolder().getPostObject(), parameterizedValue);
+		Object postRetVal = null;
+		Exception postRetValException = null;
+		try {
+			postRetVal = m2.invoke(getHolder().getPostObject(), this.parameterizedValue);
+		} catch (Exception e) {
+			postRetValException = e;
+		}
 
-		log.debug(String.format("Type: [%s], Method: [%s], isArrayRetVal: [%b], preRetVal: [%s], postRetVal: [%s]",
-				this.parameterType, m1.getName(), false, preRetVal, postRetVal));
+		if (preRetVal != null) {
+			log.debug(String.format("Type: [%s], Method: [%s], isArrayRetVal: [%b], preRetVal: [%s], postRetVal: [%s]",
+					this.parameterType, m1.getName(), false, preRetVal, postRetVal));
 
-		assertEquals(String.format("Return value mismatch for parameter [%s]. [%s.%s]", parameterizedValue,
-				getHolder().preObject.getClass().getSimpleName(), m1.getName()), preRetVal, postRetVal);
+			assertEquals(String.format("Return value mismatch for parameter [%s]. [%s.%s]", this.parameterizedValue,
+					getHolder().preObject.getClass().getSimpleName(), m1.getName()), preRetVal, postRetVal);
+		} else {
+			compareRuntimeExceptions(m1, preRetValException, postRetValException);
+		}
+	}
+
+	private void compareRuntimeExceptions(Method m1, Exception preRetValException, Exception postRetValException) {
+		
+		assertTrue(String.format("Only one exception occured for parameter [%s]. [%s.%s]", this.parameterizedValue,
+				getHolder().preObject.getClass().getSimpleName(), m1.getName()), postRetValException != null);
+		assertEquals(
+				String.format("Return exception mismatch for parameter [%s]. [%s.%s]", this.parameterizedValue,
+						getHolder().preObject.getClass().getSimpleName(), m1.getName()),
+				preRetValException.getClass(), postRetValException.getClass());
 	}
 
 	/**
@@ -235,12 +284,11 @@ public abstract class AbstractReflectiveMethodTester {
 		 * @return
 		 */
 		private static Table<ParameterType, String, Method> initMethodTable(Class<?> clazz) {
-			List<Method> methods = Arrays.stream(clazz.getDeclaredMethods())
+			List<Method> methods = Arrays.stream(clazz.getMethods())
 					// only take methods with a return value
 					.filter(m -> !m.getReturnType().equals(Void.TYPE))
 					// only methods with exactly one parameter
-					.filter(m2 -> m2.getParameterCount() == 1)
-					.collect(Collectors.toList());
+					.filter(m2 -> m2.getParameterCount() == 1).collect(Collectors.toList());
 
 			Table<ParameterType, String, Method> retVal = HashBasedTable.create();
 			for (Method method : methods) {

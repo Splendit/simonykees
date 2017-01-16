@@ -3,7 +3,6 @@ package at.splendit.simonykees.core.ui;
 import java.util.List;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -16,16 +15,28 @@ import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * {@link Wizard} holding the {@link SelectRulesWizardPage}, which contains a
+ * list of all selectable rules.
+ * 
+ * Clicking the OK button either calls the {@link RefactoringPreviewWizard} (if
+ * there are changes within the code for the selected rules), or a
+ * {@link MessageDialog} informing the user that there are no changes.
+ * 
+ * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter
+ * @since 0.9
+ */
 public class SelectRulesWizard extends Wizard {
 
-	private final SelectRulesPage selectRulesPage = new SelectRulesPage();
+	private final SelectRulesWizardPage selectRulesPage = new SelectRulesWizardPage();
 	private final List<IJavaElement> javaElements;
-	
+
 	public SelectRulesWizard(List<IJavaElement> javaElements) {
 		this.javaElements = javaElements;
 	}
-	
+
 	@Override
 	public void addPages() {
 		addPage(selectRulesPage);
@@ -35,12 +46,13 @@ public class SelectRulesWizard extends Wizard {
 	public String getWindowTitle() {
 		return Messages.SelectRulesWizard_title;
 	}
-	
+
 	@Override
 	public boolean performFinish() {
-		final List<RefactoringRule<? extends ASTVisitor>> rules = selectRulesPage.getSelectedRules();
-		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {};
-		
+		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = selectRulesPage.getSelectedRules();
+		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
+		};
+
 		try {
 			refactorer.prepareRefactoring();
 		} catch (RefactoringException e) {
@@ -55,19 +67,22 @@ public class SelectRulesWizard extends Wizard {
 		} catch (RuleException e) {
 			SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
 		}
-		
+
 		if (refactorer.hasChanges()) {
 			final WizardDialog dialog = new WizardDialog(getShell(), new RefactoringPreviewWizard(refactorer));
-			
+
 			Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
-			dialog.setPageSize(rectangle.width, rectangle.height); // maximizes the RefactoringPreviewWizard 
-			
+
+			// maximizes the RefactoringPreviewWizard
+			dialog.setPageSize(rectangle.width, rectangle.height);
+
 			dialog.open();
 		} else {
-			MessageDialog dialog = new MessageDialog(getShell(), Messages.aa_codename, null, Messages.SelectRulesWizard_warning_no_refactorings, MessageDialog.INFORMATION, 1, Messages.ui_ok);
+			MessageDialog dialog = new MessageDialog(getShell(), Messages.aa_codename, null,
+					Messages.SelectRulesWizard_warning_no_refactorings, MessageDialog.INFORMATION, 1, Messages.ui_ok);
 			dialog.open();
 		}
-		
+
 		return true;
 	}
 

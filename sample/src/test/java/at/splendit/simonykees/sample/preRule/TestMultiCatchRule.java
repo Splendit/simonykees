@@ -77,7 +77,7 @@ public class TestMultiCatchRule {
 		return i;
 	}
 
-	/**
+	/*
 	 * Same as cornerCaseInheritance but with different Exception names
 	 */
 	public int cornerCaseDifferentExceptionNames(int i) {
@@ -102,7 +102,7 @@ public class TestMultiCatchRule {
 		return i;
 	}
 	
-	/**
+	/*
 	 * Same as cornerCaseDifferentExceptionNames but without reference to the
 	 * Exception variable in the Exception body
 	 */

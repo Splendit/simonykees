@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
  * because an ArithmeticExpressionASTVisitor may not be unique
  * 
  * @author Martin Huter
- *
+ * @since 0.9
  */
 class ArithmeticExpressionASTVisitor extends ASTVisitor {
 

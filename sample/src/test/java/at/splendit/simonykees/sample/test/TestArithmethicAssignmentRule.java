@@ -12,6 +12,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter, Ludwig Werzowa
+ * @since 0.9
+ */
 @RunWith(Parameterized.class)
 public class TestArithmethicAssignmentRule extends AbstractReflectiveMethodTester {
 	
@@ -93,7 +99,7 @@ public class TestArithmethicAssignmentRule extends AbstractReflectiveMethodTeste
 	@BeforeClass
 	public static void setUptHolderInstance() throws Exception {
 		holder = new PreAndPostClassHolder(at.splendit.simonykees.sample.preRule.ArithmethicAssignmentRule.class,
-				at.splendit.simonykees.sample.postRule.ArithmethicAssignmentRule.class);
+				at.splendit.simonykees.sample.postRule.allRules.ArithmethicAssignmentRule.class);
 	}
 	
 	@AfterClass

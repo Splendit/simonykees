@@ -1,0 +1,118 @@
+package at.splendit.simonykees.core.visitor.loop;
+
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.WhileStatement;
+
+import at.splendit.simonykees.core.builder.NodeBuilder;
+import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
+import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
+
+/**
+ * While-loops over Iterators that could be expressed with a for-loop are
+ * transformed to a equivalent for-loop.
+ * 
+ * @author Martin Huter
+ * @since 0.9.2
+ *
+ */
+public class WhileToForASTVisitor extends AbstractCompilationUnitASTVisitor {
+	
+	private static Integer ITERATOR_KEY = 1;
+	private static String ITERATOR_FULLY_QUALLIFIED_NAME = "java.util.Iterator"; //$NON-NLS-1$
+
+	private SimpleName iterationVariable = null;
+	
+	public WhileToForASTVisitor() {
+		super();
+		this.fullyQuallifiedNameMap.put(ITERATOR_KEY, generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME));
+	}
+
+	@Override
+	public boolean visit(WhileStatement node) {
+		iterationVariable = null;
+		SimpleName iteratorExpression = replaceAbleWhileCondition(node.getExpression());
+		if (iteratorExpression != null) {
+			if (ClassRelationUtil
+					.isContentOfRegistertITypes(iteratorExpression.resolveTypeBinding(), iTypeMap.get(ITERATOR_KEY))) {
+				Block parentNode = ASTNodeUtil.getSurroundingBlock(node);
+				if (parentNode == null) {
+					// No surrounding parent block found
+					// should not happen, because the Iterator has to be
+					// defined in an parent block.
+					return false;
+				}
+				IteratorDefinitionASTVisior iteratorDefinitionAstVisior = new IteratorDefinitionASTVisior(
+						(SimpleName) iteratorExpression);
+				iteratorDefinitionAstVisior.setAstRewrite(this.astRewrite);
+				parentNode.accept(iteratorDefinitionAstVisior);
+				Type svdType = null;
+				FindNextVariableASTVisitor findNextVariableAstVisitor = null;
+				if (iterationVariable == null) {
+					findNextVariableAstVisitor = new FindNextVariableASTVisitor((SimpleName) iteratorExpression);
+					findNextVariableAstVisitor.setAstRewrite(this.astRewrite);
+					node.getBody().accept(findNextVariableAstVisitor);
+					if (findNextVariableAstVisitor.getVariableName() != null
+							&& findNextVariableAstVisitor.isTransformable()) {
+						iterationVariable = findNextVariableAstVisitor.getVariableName();
+						svdType = findNextVariableAstVisitor.getIteratorVariableType();
+					}
+				}
+
+				if (iteratorDefinitionAstVisior.getList() != null && iterationVariable != null) {
+
+					if (svdType == null) {
+						// variable is not in while defined check if
+						// unused in other context and extract type
+						VariableDefinitionASTVisitor variableDefinitionAstVisitor = new VariableDefinitionASTVisitor(
+								iterationVariable, node);
+						parentNode.accept(variableDefinitionAstVisitor);
+						if (variableDefinitionAstVisitor.getVariableDeclarationStatement() != null) {
+							svdType = variableDefinitionAstVisitor.getVariableDeclarationStatement().getType();
+							astRewrite.remove(variableDefinitionAstVisitor.getVariableDeclarationStatement(), null);
+						} else {
+							// exclusion ground found
+							return false;
+						}
+					} else {
+
+					}
+					SingleVariableDeclaration svd = NodeBuilder.newSingleVariableDeclaration(node.getAST(),
+							(SimpleName) astRewrite.createMoveTarget(iterationVariable),
+							(Type) astRewrite.createMoveTarget(svdType));
+					EnhancedForStatement newFor = NodeBuilder.newEnhancedForStatement(node.getAST(),
+							(Statement) astRewrite.createMoveTarget(node.getBody()),
+							(Expression) astRewrite.createMoveTarget(iteratorDefinitionAstVisior.getList()), svd);
+					astRewrite.replace(node, newFor, null);
+					// executed here, because a breaking statement can
+					// be found after the setting of the type
+					if (findNextVariableAstVisitor != null) {
+						astRewrite.remove(findNextVariableAstVisitor.getRemoveWithTransformation(), null);
+					}
+					astRewrite.remove(iteratorDefinitionAstVisior.getIteratorDeclarationStatement(), null);
+				}
+			}
+		}
+		return true;
+	}
+
+	private SimpleName replaceAbleWhileCondition(Expression node) {
+		if (node instanceof MethodInvocation) {
+			MethodInvocation methodInvocation = (MethodInvocation) node;
+			// check for hasNext operation on Iterator
+			if (StringUtils.equals("hasNext", methodInvocation.getName().getFullyQualifiedName()) //$NON-NLS-1$
+					&& methodInvocation.getExpression() instanceof SimpleName) {
+				return (SimpleName) methodInvocation.getExpression();
+			}
+		}
+		return null;
+	}
+}
