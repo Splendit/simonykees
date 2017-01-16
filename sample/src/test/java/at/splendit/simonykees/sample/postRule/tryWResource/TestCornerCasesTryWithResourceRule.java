@@ -21,7 +21,7 @@ public class TestCornerCasesTryWithResourceRule {
 		Object result;
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		ObjectOutput out;
-		try(ObjectInput in = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()));){
+		try(ObjectInput in = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()))){
 			out = new ObjectOutputStream(buffer);
 			out.writeObject(input);
 			result = in.readObject();

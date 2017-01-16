@@ -16,7 +16,7 @@ public class TestCornerCasesTryWithResourceRule {
 		StringReader a = new StringReader("lalelu");
 		return a;
 	}
-	
+
 	public Object lostStreamsWithTry(String input) {
 		Object result;
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();

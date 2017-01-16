@@ -41,31 +41,27 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 				generateFullyQuallifiedNameList(AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME, CLOSEABLE_FULLY_QUALLIFIED_NAME));
 	}
 
-	private TryWithResourceASTVisitor(Map<Integer, List<IType>> iTypeMap, TryStatement invokingTryStatement) {
-		this();
-		this.iTypeMap = iTypeMap;
-		this.invokingTryStatement = invokingTryStatement;
-	}
-
 	@Override
 	public boolean visit(TryStatement node) {
-		if (!node.equals(invokingTryStatement)) {
-			TryWithResourceASTVisitor tryWithRes = new TryWithResourceASTVisitor(iTypeMap, node);
-			tryWithRes.setAstRewrite(astRewrite);
-			node.accept(tryWithRes);
-			List<VariableDeclarationExpression> listVDE = tryWithRes.getListVDE();
+		if (invokingTryStatement != null) {
+			return true;
+		} else {
+			invokingTryStatement = node;
+			node.getBody().accept(this);
+			List<VariableDeclarationExpression> listVDE = this.getListVDE();
 			if (!listVDE.isEmpty()) {
 				listVDE.forEach(iteratorNode -> astRewrite.getListRewrite(node, TryStatement.RESOURCES_PROPERTY)
 						.insertLast(iteratorNode, null));
 			}
 			return false;
-		} else {
-			return true;
 		}
 	}
 
 	@Override
 	public boolean visit(VariableDeclarationStatement node) {
+		if (invokingTryStatement == null) {
+			return true;
+		}
 		ITypeBinding typeBind = node.getType().resolveBinding();
 		if (ClassRelationUtil.isInheritingContentOfRegistertITypes(typeBind, iTypeMap.get(AUTO_CLOSEABLE_KEY))) {
 			for (Object iterator : node.fragments()) {
