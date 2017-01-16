@@ -39,12 +39,24 @@ public class LicenseManager {
 
 	private static final String DEFAULT_LICENSEE_NUMBER_PREFIX = "demo"; //$NON-NLS-1$
 	private static final String PRODUCT_NUMBER = "PNZNF7Y7E"; //$NON-NLS-1$
-	private static final String PRODUCT_MODULE_NUMBER = "M6IS9TIWG"; //$NON-NLS-1$ product module number for floating model
-	private static final long WAIT_FOR_VALIDATION_RESPONSE = 1000; // in milliseconds
+	/**
+	 * Product module number related to Floating licenses.
+	 */
+	private static final String PRODUCT_MODULE_NUMBER = "M6IS9TIWG"; //$NON-NLS-1$
+	/**
+	 * Waiting time in milliseconds for receiving and processing a validation call.
+	 */
+	private static final long WAIT_FOR_VALIDATION_RESPONSE = 1000;
 
 	private final boolean DO_VALIDATE = true;
-	private final long VALIDATE_INTERVAL_IN_SECONDS = 600; // validation interval in seconds. 10 * 60s = 6 minutes
-	private final long INITIAL_VALIDATION_DELAY = 0;  // delay of the first validation of the scheduler
+	/**
+	 * Validation interval in seconds. 10 * 60s = 6 minutes
+	 */
+	private final long VALIDATE_INTERVAL_IN_SECONDS = 600;
+	/**
+	 * Delay of the first validation of the scheduler
+	 */
+	private final long INITIAL_VALIDATION_DELAY = 0; 
 
 	private static LicenseManager instance;
 

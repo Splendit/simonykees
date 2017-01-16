@@ -36,7 +36,10 @@ public class PersistenceManager {
 	private static final String TRANSFORMATION = "AES"; //$NON-NLS-1$
 	private static final String KEY = "SOME_SECRET_KEY_"; //$NON-NLS-1$ //FIXME
 	private static final String EMPTY_STRING = "";  //$NON-NLS-1$
-	private static final long OFFLINE_EXPIRATION_TIME_PERIOD = 3600; // in seconds
+	/**
+	 * Time period (in seconds) of valid license without internet connection. 
+	 */
+	private static final long OFFLINE_EXPIRATION_TIME_PERIOD = 3600;
 
 	private PersistenceManager() {
 		
