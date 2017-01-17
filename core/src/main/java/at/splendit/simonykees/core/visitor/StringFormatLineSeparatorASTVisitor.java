@@ -22,7 +22,7 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * @since 0.9.2
  *
  */
-public class StringFormatLineSeperatorASTVisitor extends AbstractCompilationUnitASTVisitor {
+public class StringFormatLineSeparatorASTVisitor extends AbstractCompilationUnitASTVisitor {
 
 	private static Integer STRING_KEY = 1;
 	private static String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
@@ -30,7 +30,7 @@ public class StringFormatLineSeperatorASTVisitor extends AbstractCompilationUnit
 	private static Integer LOCALE_KEY = 2;
 	private static String LOCALE_FULLY_QUALLIFIED_NAME = "java.util.Locale"; //$NON-NLS-1$
 
-	public StringFormatLineSeperatorASTVisitor() {
+	public StringFormatLineSeparatorASTVisitor() {
 		super();
 		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
 		this.fullyQuallifiedNameMap.put(LOCALE_KEY, generateFullyQuallifiedNameList(LOCALE_FULLY_QUALLIFIED_NAME));

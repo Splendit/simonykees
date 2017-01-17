@@ -16,10 +16,10 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.rule.impl.StringFormatLineSeperatorRule;
+import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
-import at.splendit.simonykees.core.visitor.StringFormatLineSeperatorASTVisitor;
+import at.splendit.simonykees.core.visitor.StringFormatLineSeparatorASTVisitor;
 
 /**
  * TODO SIM-103 add class description
@@ -29,7 +29,7 @@ import at.splendit.simonykees.core.visitor.StringFormatLineSeperatorASTVisitor;
  */
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
-public class StringFormatLineSeperatorRulesTest extends AbstractRulesTest {
+public class StringFormatLineSeparatorRulesTest extends AbstractRulesTest {
 
 	public static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.stringFormat";
 	public static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/stringFormat";
@@ -37,7 +37,7 @@ public class StringFormatLineSeperatorRulesTest extends AbstractRulesTest {
 	private String fileName;
 	private Path preRule, postRule;
 
-	public StringFormatLineSeperatorRulesTest(String fileName, Path preRule, Path postRule) {
+	public StringFormatLineSeparatorRulesTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
@@ -55,7 +55,7 @@ public class StringFormatLineSeperatorRulesTest extends AbstractRulesTest {
 
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
 
-		rulesList.add(new StringFormatLineSeperatorRule(StringFormatLineSeperatorASTVisitor.class));
+		rulesList.add(new StringFormatLineSeparatorRule(StringFormatLineSeparatorASTVisitor.class));
 
 		String compilationUnitSource = processFile(fileName, content, rulesList);
 
