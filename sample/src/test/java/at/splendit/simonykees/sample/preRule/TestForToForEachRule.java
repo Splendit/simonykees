@@ -1,34 +1,33 @@
 package at.splendit.simonykees.sample.preRule;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("nls")
 public class TestForToForEachRule {
-	
+
 	private List<String> generateList(String input) {
 		return Arrays.asList(input.split(";"));
 	}
-	
+
 	private List<Integer> generateHashCodeList(String input) {
 		List<String> foo = generateList(input);
-		List<Integer>fooHashCodes = 
-				foo
-				.stream()
-				.map(s -> s.hashCode())
-				.collect(Collectors.toList());
+		List<Integer> fooHashCodes = foo.stream().map(s -> s.hashCode()).collect(Collectors.toList());
 		return fooHashCodes;
 	}
-	
+
 	public String testConvertIteratorToForEach(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext(); ) {
-		    String s = iterator.next();
-		    sb.append(s);
+		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext();) {
+			String s = iterator.next();
+			sb.append(s);
 		}
 		return sb.toString();
 	}
@@ -126,22 +125,22 @@ public class TestForToForEachRule {
 
 		for (int i = 0; i < foo.size(); i++) {
 			String s = foo.get(i);
-		    sb.append(s);
-		    sb.append(foo.get(i));
+			sb.append(s);
+			sb.append(foo.get(i));
 		}
 	}
-	
+
 	public String testIteratingIndex(String input) {
 		List<String> foo = generateList(input);
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+
 		int i;
 		for (i = 0; i < foo.size(); i++) {
 			String s = foo.get(i);
 			sb.append(s);
 		}
-		
+
 		return sb.toString();
 	}
 	
@@ -345,23 +344,24 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 	
+
 	public String testBiggerThanOneIterationStep(String input) {
 		List<String> foo = generateList(input);
 
 		StringBuilder sb = new StringBuilder();
-		
+
 		int i;
 		for (i = 0; i < foo.size(); i = i + 2) {
 			String s = foo.get(i);
 			sb.append(s);
 		}
-		
+
 		return sb.toString();
 	}
 
 	public String testMultipleInitStatements(String input) {
 		List<String> foo = generateList(input);
-		
+
 		StringBuilder sb = new StringBuilder();
 
 		int i, a;
@@ -369,13 +369,13 @@ public class TestForToForEachRule {
 			String s = foo.get(i);
 			sb.append(s);
 		}
-		
+
 		return sb.toString();
 	}
 
 	public String testMultipleIncStatements(String input) {
 		List<String> foo = generateList(input);
-		
+
 		StringBuilder sb = new StringBuilder();
 
 		int i, a;
@@ -383,13 +383,13 @@ public class TestForToForEachRule {
 			String s = foo.get(i);
 			sb.append(s);
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	public String testForToForEachWithArray(String input) {
-		
-		List<String> foo = generateList(input); 
+
+		List<String> foo = generateList(input);
 		// FIXME: SIM-159: forEach on the arrays is to be implemented
 		String[] ms = (String[]) foo.toArray();
 		StringBuilder sb = new StringBuilder();
@@ -398,7 +398,7 @@ public class TestForToForEachRule {
 			String s = ms[i];
 			sb.append(s);
 		}
-		
+
 		return sb.toString();
 	}
 	
@@ -419,20 +419,37 @@ public class TestForToForEachRule {
 	 * }
 	 */
 	
+
+	// public String testIterateNumberCollection(String input) {
+	// List<? extends Number> foo = generateHashCodeList(input);
+	//
+	// StringBuilder sb = new StringBuilder();
+	//
+	// int i;
+	// for (i = 0; i < foo.size(); i = i + 1) {
+	// FIXME SIM-163 : if the collection type restricted to certain sub-types,
+	// the forEach iterator type shall be 'parent type'
+	// Number s = foo.get(i);
+	// sb.append(s.toString());
+	// }
+	//
+	// return sb.toString();
+	// }
+
 	public String testCollectionBiggerIterationStep(String input) {
 		List<? extends Number> foo = generateHashCodeList(input);
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+
 		int i;
 		for (i = 0; i < foo.size(); i = i + 2) {
 			Number s = foo.get(i);
 			sb.append(s.toString());
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	private List<String> a;
 
 	public String testIteratingIndexMoreLevels(String input) {
@@ -444,4 +461,39 @@ public class TestForToForEachRule {
 		}
 		return sb.toString();
 	}
+
+	public Object encode(final Object value) {
+		if (value != null) {
+			Map<String, Object> map = new LinkedHashMap<String, Object>();
+			List<Object> list = (List<Object>) value;
+			for (int i = 0; i < list.size(); i++) {
+				map.put(i + "", list.get(i));
+			}
+			return map;
+		}
+
+		return null;
+	}
+
+	public boolean testDoubleLoop() {
+		List<Double> coordinates = new ArrayList<>();
+		Point point = new Point();
+
+		for (int i = 0; i < coordinates.size(); i++) {
+			final Double coordinate = coordinates.get(i);
+			if (Double.compare(coordinate, point.getCoordinates().get(i)) != 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private class Point {
+		private final List<Double> coordinates = new ArrayList<Double>();
+
+		public List<Double> getCoordinates() {
+			return coordinates;
+		}
+	}
+
 }
