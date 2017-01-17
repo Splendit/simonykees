@@ -9,11 +9,14 @@ import at.splendit.simonykees.core.rule.impl.CodeFormatterRule;
 import at.splendit.simonykees.core.rule.impl.CollectionRemoveAllRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
+import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
 import at.splendit.simonykees.core.rule.impl.MultiCatchRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
+import at.splendit.simonykees.core.rule.impl.PrimitiveBoxedForStringRule;
 import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
+import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
 import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
@@ -22,9 +25,12 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
+import at.splendit.simonykees.core.visitor.InefficientConstructorASTVisitor;
+import at.splendit.simonykees.core.visitor.PrimitiveBoxedForStringASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveNewStringConstructorASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveToStringOnStringASTVisitor;
 import at.splendit.simonykees.core.visitor.SerialVersionUidASTVisitor;
+import at.splendit.simonykees.core.visitor.StringConcatToPlusASTVisitor;
 import at.splendit.simonykees.core.visitor.StringFormatLineSeparatorASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
@@ -35,7 +41,7 @@ import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisito
 
 /**
  * {@link RulesContainer} is a HelperClass that holds a static list of all
- * implemented rules
+ * implemented rules.
  * 
  * @author Ludwig Werzowa, Martin Huter, Hannes Schweighofer
  * @since 0.9
@@ -47,7 +53,9 @@ public class RulesContainer {
 	}
 
 	/**
-	 * Is a static List of all implemented rules
+	 * This {@link List} holds all implemented rules and returns them in a
+	 * certain order. The execution order of each rule is determined by the
+	 * position of each rule in this {@link List}.
 	 * 
 	 * @return a List of {@link RefactoringRule} with all used Rules is
 	 *         returned.
@@ -66,6 +74,14 @@ public class RulesContainer {
 				new StringFormatLineSeparatorRule(StringFormatLineSeparatorASTVisitor.class),
 				new RemoveToStringOnStringRule(RemoveToStringOnStringASTVisitor.class),
 				new RemoveNewStringConstructorRule(RemoveNewStringConstructorASTVisitor.class),
+				new StringConcatToPlusRule(StringConcatToPlusASTVisitor.class),
+				new PrimitiveBoxedForStringRule(PrimitiveBoxedForStringASTVisitor.class),
+				new InefficientConstructorRule(InefficientConstructorASTVisitor.class),
+
+				/*
+				 * Code formatting and organizing imports should always happen
+				 * last.
+				 */
 				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
 				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class));
 	}

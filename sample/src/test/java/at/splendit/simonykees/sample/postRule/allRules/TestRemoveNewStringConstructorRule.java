@@ -11,6 +11,10 @@ public class TestRemoveNewStringConstructorRule {
 		return "StringLiteral";
 	}
 
+	public String testNewStringOfLiteralWithParentheses() {
+		return "StringLiteral";
+	}
+
 	public String testNewStringOfOtherString(String s) {
 		return s;
 	}

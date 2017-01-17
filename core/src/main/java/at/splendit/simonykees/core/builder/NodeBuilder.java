@@ -8,8 +8,10 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -223,5 +225,35 @@ public class NodeBuilder {
 			throw new IllegalArgumentException("No name for type binding."); //$NON-NLS-1$
 		}
 		return ast.newSimpleType(ast.newName(qualName));
+	}
+
+	/**
+	 * 
+	 * @param ast
+	 *            the AbastractSyntaxTree thats the target of the node
+	 * @param operator {@link InfixExpression.Operator} of the {@link InfixExpression}
+	 * @param left {@link Expression} for the left-operand
+	 * @param right {@link Expression} for the right-operand 
+	 * @return {@link InfixExpression} with the given operator and operands
+	 */
+	public static InfixExpression newInfixExpression(AST ast, InfixExpression.Operator operator, Expression left, Expression right) {
+		InfixExpression result = ast.newInfixExpression();
+		result.setOperator(operator);
+		result.setLeftOperand(left);
+		result.setRightOperand(right);
+		return result;
+	}
+	
+	/**
+	 * 
+	 * @param ast
+	 *            the AbastractSyntaxTree thats the target of the node
+	 * @param expression {@link Expression} that is wrapped by the new {@link ParenthesizedExpression}
+	 * @return {@link ParenthesizedExpression} that wraps the expression
+	 */	
+	public static ParenthesizedExpression newParenthesizedExpression(AST ast, Expression expression) {
+		ParenthesizedExpression result = ast.newParenthesizedExpression();
+		result.setExpression(expression);
+		return result;
 	}
 }

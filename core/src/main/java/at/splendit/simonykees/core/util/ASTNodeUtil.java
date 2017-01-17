@@ -2,6 +2,8 @@ package at.splendit.simonykees.core.util;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 
 /**
  * TODO SIM-103 add class description
@@ -27,5 +29,18 @@ public class ASTNodeUtil {
 		} else {
 			return getSurroundingBlock(node.getParent());
 		}
+	}
+
+	/**
+	 * Removes all surrounding parenthesizes
+	 * 
+	 * @param expression is unwrapped, if it is a {@link ParenthesizedExpression}
+	 * @return unwrapped expression
+	 */
+	public static Expression unwrapParenthesizedExpression(Expression expression) {
+		if (expression instanceof ParenthesizedExpression) {
+			return unwrapParenthesizedExpression(((ParenthesizedExpression) expression).getExpression());
+		}
+		return expression;
 	}
 }

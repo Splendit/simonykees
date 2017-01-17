@@ -36,6 +36,7 @@ public class AllRulesTest extends AbstractRulesTest {
 	private Path preRule, postRule;
 
 	public AllRulesTest(String fileName, Path preRule, Path postRule) {
+		super();
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
