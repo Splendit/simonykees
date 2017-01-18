@@ -295,4 +295,28 @@ public class TestWhileToForRule {
 		
 		return sb.toString();
 	}
+	
+	public String testWhileLoopsWithNestedTryCatch(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		String foo = "foo";
+		String suffix = "";
+		String prefix = "";
+		for (String s:l){
+			try {
+				if(l.size() > 0) {
+					prefix = s;
+				}
+			} catch (Exception e) {
+				s = e.getLocalizedMessage();
+			} finally {
+				suffix = "|" + foo;
+			}
+			
+			sb.append(prefix + suffix);
+		}
+		
+		return sb.toString();
+	}
 }
