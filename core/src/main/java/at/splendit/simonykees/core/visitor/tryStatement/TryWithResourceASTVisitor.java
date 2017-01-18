@@ -3,6 +3,8 @@ package at.splendit.simonykees.core.visitor.tryStatement;
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -47,7 +49,8 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 		List<VariableDeclarationExpression> resourceList = new ArrayList<>();
 		List<SimpleName> resourceNameList = new ArrayList<>();
 		for (Object statementIterator : node.getBody().statements()) {
-			// Move all AutoCloseable Object to resource header, stop collection after first non resource object
+			// Move all AutoCloseable Object to resource header, stop collection
+			// after first non resource object
 			if (statementIterator instanceof VariableDeclarationStatement) {
 				VariableDeclarationStatement varDeclStatmentNode = (VariableDeclarationStatement) statementIterator;
 				ITypeBinding typeBind = varDeclStatmentNode.getType().resolveBinding();
@@ -79,30 +82,30 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 			resourceList.forEach(iteratorNode -> astRewrite.getListRewrite(node, TryStatement.RESOURCES_PROPERTY)
 					.insertLast(iteratorNode, null));
 			// remove all close operations on the found resources
-			resourceNameList.forEach(simpleName -> { 
-				SimpleName close = NodeBuilder.newSimpleName(node.getAST(), "close"); //$NON-NLS-1$
-				simpleName = (SimpleName) ASTNode.copySubtree(simpleName.getAST(), simpleName);
-				MethodInvocation closeInvocation = NodeBuilder.newMethodInvocation(node.getAST(), simpleName , close);
-				node.accept(new RemoveCloseASTVisitor(closeInvocation));
-			});
-			
+			Function<SimpleName, MethodInvocation> mapper = simpleName -> NodeBuilder.newMethodInvocation(node.getAST(),
+					(SimpleName) ASTNode.copySubtree(simpleName.getAST(), simpleName),
+					NodeBuilder.newSimpleName(node.getAST(), "close")); //$NON-NLS-1$
+
+			node.accept(new RemoveCloseASTVisitor(resourceNameList.parallelStream().map(mapper).collect(Collectors.toList())));
+
 		}
 		return true;
 	}
 
 	private class RemoveCloseASTVisitor extends ASTVisitor {
 
-		MethodInvocation methodInvocation;
+		List<MethodInvocation> methodInvocationList;
 		ASTMatcher astMatcher;
 
-		public RemoveCloseASTVisitor(MethodInvocation methodInvocation) {
-			this.methodInvocation = methodInvocation;
+		public RemoveCloseASTVisitor(List<MethodInvocation> methodInvocationList) {
+			this.methodInvocationList = methodInvocationList;
 			this.astMatcher = new ASTMatcher();
 		}
 
 		@Override
 		public boolean visit(MethodInvocation node) {
-			if (astMatcher.match(node, methodInvocation) && node.getParent() instanceof Statement) {
+			if (methodInvocationList.stream().anyMatch(methodInvocation -> astMatcher.match(node, methodInvocation)
+					&& node.getParent() instanceof Statement)) {
 				getAstRewrite().remove(node.getParent(), null);
 			}
 			return false;
