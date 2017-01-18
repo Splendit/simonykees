@@ -269,9 +269,28 @@ public class TestWhileToForRule {
 		StringBuilder sb = new StringBuilder();
 		
 		Iterator<String> iterator = l.iterator();
+		String s;
+		String foo = "foo";
 		while(iterator.hasNext()) {
 			iterator.next();
-			sb.append("nothing");
+			sb.append(foo);
+		}
+		
+		return sb.toString();
+	}
+	
+	public String testWhileLoopsCompoundCondition(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		Iterator<String> iterator = l.iterator();
+		String s;
+		String foo = "foo";
+		while(iterator.hasNext() && !foo.isEmpty()) {
+			if(l.size() > 0) {
+				s = iterator.next();
+				sb.append(s + "|" + foo);
+			}
 		}
 		
 		return sb.toString();
