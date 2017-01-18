@@ -36,6 +36,14 @@ public class Messages extends NLS {
 	public static String ForToForEachRule_name;
 	public static String FunctionalInterfaceRule_description;
 	public static String FunctionalInterfaceRule_name;
+	public static String LicenseManager_cannot_reach_licensing_provider_on_checkin;
+	public static String LicenseManager_cannot_reach_licensing_provider_on_prevalidation;
+	public static String LicenseManager_cannot_read_hardware_information;
+	public static String LicenseManager_session_check_in;
+	public static String LicenseManager_updating_licensee_credentials;
+	public static String LicenseManager_wait_for_validation_was_interrupted;
+	public static String LicenseValidator_cannot_reach_license_provider_on_validation_call;
+	public static String LicenseValidator_received_validation_response;
 	public static String InefficientConstructorRule_description;
 	public static String InefficientConstructorRule_name;
 	public static String Java5Profile_profileName;
@@ -75,6 +83,8 @@ public class Messages extends NLS {
 	public static String StringUtilsRule_name;
 	public static String TryWithResourceRule_description;
 	public static String TryWithResourceRule_name;
+	public static String ValidateExecutor_shutting_down_validation_scheduler;
+	public static String ValidateExecutor_validation_scheduler_started;
 	public static String WhileToForRule_description;
 	public static String WhileToForRule_name;
 	static {
