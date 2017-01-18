@@ -344,4 +344,20 @@ public class TestWhileToForRule {
 		
 		return sb.toString();
 	}
+	
+	public String testWhileLoopsNumericIterator(String input) {
+		List<String> l = generateList(input);
+		List<Number> numbers = l.stream()
+				.map(val -> val.hashCode())
+				.collect(Collectors.toList());
+		
+		StringBuilder sb = new StringBuilder();
+		
+		for (Number s:numbers){
+			String foo = "foo";
+			sb.append(s);
+		}
+		
+		return sb.toString();
+	}
 }

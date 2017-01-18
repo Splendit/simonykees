@@ -377,4 +377,22 @@ public class TestWhileToForRule {
 		
 		return sb.toString();
 	}
+	
+	public String testWhileLoopsNumericIterator(String input) {
+		List<String> l = generateList(input);
+		List<Number> numbers = l.stream()
+				.map(val -> val.hashCode())
+				.collect(Collectors.toList());
+		
+		StringBuilder sb = new StringBuilder();
+		
+		Iterator<Number> iterator = numbers.iterator();
+		while(iterator.hasNext()) {
+			String foo = "foo";
+			Number s = iterator.next();
+			sb.append(s);
+		}
+		
+		return sb.toString();
+	}
 }
