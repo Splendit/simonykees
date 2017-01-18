@@ -33,6 +33,31 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 	
+	public String testMultipleIteratorToForEach(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		for (Iterator<String> iterator = foo.iterator(), it2 = foo.iterator(); iterator.hasNext();) {
+			String anotherString = "foo";
+		    String s = iterator.next();
+		    String t = it2.next();
+		    sb.append(s + t);
+		}
+		return sb.toString();
+	}
+	
+	public String testIteratorDiscardValue(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext(); ) {
+			String anotherString = "foo";
+//		    iterator.next(); // FIXME causing runtime exception
+		    sb.append(anotherString);
+		}
+		return sb.toString();
+	}
+	
 	public void testForToForEach2(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
@@ -55,6 +80,158 @@ public class TestForToForEachRule {
 			sb.append(s);
 		}
 		
+		return sb.toString();
+	}
+	
+	public String testModifiedIteratingIndex(String input) {
+		List<String> foo = generateList(input);
+		
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = 0; i < foo.size(); i++) {
+			String it = foo.get(i);
+			String s = foo.get(i%2);
+			String firstString = foo.get(0);
+			String someConstant = "const";
+			sb.append(i + it + s + firstString + someConstant);
+		}
+		
+		return sb.toString();
+	}
+	
+	public String testCompoundCondition(String input) {
+		List<String> foo = generateList(input);
+		
+		StringBuilder sb = new StringBuilder();
+	
+		for (int i = 0; i +1  < foo.size(); i++) {
+			String it = foo.get(i);
+			String s = foo.get(i%2);
+			String firstString = foo.get(0);
+			String someConstant = "const";
+			sb.append(i + it + s + firstString + someConstant);
+		}
+		
+		return sb.toString();
+	}
+	
+	public String testStartingIndex(String input) {
+		List<String> foo = generateList(input);
+		
+		StringBuilder sb = new StringBuilder();
+	
+		for (int i = 1; i  < foo.size(); i++) {
+			String it = foo.get(i);
+			String someConstant = "const";
+			sb.append(i + it + someConstant);
+		}
+		
+		return sb.toString();
+	}
+	
+	public String testNestedForLoopsIteratingIndex(String input) {
+		List<String> foo = generateList(input);
+		List<String> secondFoo = generateList(input);
+		
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = 0; i < foo.size(); i++) {
+			String s = foo.get(i);
+			s += ";";
+			sb.append(s);
+			for(int j = 0; j < secondFoo.size(); j++) {
+				String r = secondFoo.get(j);
+				sb.append(r);
+			}
+		}
+		
+		return sb.toString();
+	}
+	
+	public String testTripleNestedForLoops(String input) {
+		List<String> stFoo = generateList(input);
+		List<String> ndFoo = generateList(input);
+		List<String> rdFoo = generateList(input);
+		
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = 0; i < stFoo.size(); i++) {
+			String s = stFoo.get(i);
+			s += ";";
+			sb.append(s);
+			for(int j = 0; j < ndFoo.size(); j++) {
+				String n = ndFoo.get(j);
+				sb.append(n + ",");
+				for(int k = 0; k < rdFoo.size(); k++) {
+					String t = stFoo.get(i);
+					String r = rdFoo.get(k);
+					sb.append(r + t);
+				}
+			}
+		}
+		
+		return sb.toString();
+	}
+	
+	public String testCascadeForLoops(String input) {
+		List<String> foo = generateList(input);
+
+		StringBuilder sb = new StringBuilder();
+
+		int i;
+		for (i = 0; i < foo.size(); i++) {
+			String it = foo.get(i);
+			String someConstant = "const";
+			sb.append(it + someConstant);
+		}
+		
+		int j;
+		for (j = 0; j < foo.size(); j++) {
+			String it = foo.get(j);
+			String someConstant = "const";
+			sb.append(it + someConstant);
+		}
+
+		return sb.toString();
+	}
+	
+	public String testIfNestedForLoops(String input) {
+		List<String> foo = generateList(input);
+
+		StringBuilder sb = new StringBuilder();
+		if(foo != null ) {
+			for (int i = 0; i < foo.size(); i++) {
+				String it = foo.get(i);
+				String someConstant = "const";
+				sb.append(it + someConstant);
+			}
+		}
+
+		return sb.toString();
+	}
+	
+	public String testTryCatchNestedForLoops(String input) {
+		List<String> foo = generateList(input);
+
+		StringBuilder sb = new StringBuilder();
+		try {
+			if(foo != null ) {
+				for (int i = 0; i < foo.size(); i++) {
+					String someConstant = "const";
+					try {						
+						sb.append(foo.get(i) + someConstant);
+					} finally {
+						String s = foo.get(i);
+						sb.append(",");
+					}
+				}
+			}
+		} catch (Exception e) {
+			sb.append(e.getMessage());
+		} finally {
+			sb.append(";");
+		}
+
 		return sb.toString();
 	}
 	
