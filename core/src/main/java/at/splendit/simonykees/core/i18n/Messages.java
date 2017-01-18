@@ -75,10 +75,10 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferenceManager_builtIn;
 	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_selectProfile;
+	public static String StringFormatLineSeparatorRule_description;
+	public static String StringFormatLineSeparatorRule_name;
 	public static String StringConcatToPlusRule_description;
 	public static String StringConcatToPlusRule_name;
-	public static String StringFormatLineSeperatorRule_description;
-	public static String StringFormatLineSeperatorRule_name;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
 	public static String TryWithResourceRule_description;
