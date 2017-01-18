@@ -1,7 +1,10 @@
 package at.splendit.simonykees.sample.preRule;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
@@ -35,4 +38,15 @@ public class TestCornerCasesTryWithResourceRule {
 		return result;
 	}
 
+	static void readFirstLineFromFile(String path) {
+
+		try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+			BufferedReader br2 = new BufferedReader(new FileReader(path));
+			Closeable cl = new BufferedReader(new FileReader(path));
+			br2.close();
+			cl.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

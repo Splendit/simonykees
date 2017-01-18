@@ -39,7 +39,13 @@ public abstract class AbstractCompilationUnitASTVisitor extends AbstractASTRewri
 		super();
 		this.iTypeMap = new HashMap<>();
 		this.fullyQuallifiedNameMap = new HashMap<>();
-		addImports = new HashSet<>();
+		this.addImports = new HashSet<>();
+	}
+	
+	protected AbstractCompilationUnitASTVisitor(AbstractCompilationUnitASTVisitor contextReference) {
+		super(contextReference);
+		this.iTypeMap = contextReference.iTypeMap;
+		this.fullyQuallifiedNameMap = contextReference.fullyQuallifiedNameMap;
 	}
 
 	/**

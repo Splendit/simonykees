@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.tryWResource;
+package at.splendit.simonykees.sample.postRule.allRules;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -15,7 +15,7 @@ import java.io.StringReader;
 @SuppressWarnings("nls")
 public class TestCornerCasesTryWithResourceRule {
 
-	public StringReader lostStreamsWithoutTry(){
+	public StringReader lostStreamsWithoutTry() {
 		StringReader a = new StringReader("lalelu");
 		return a;
 	}
@@ -30,9 +30,7 @@ public class TestCornerCasesTryWithResourceRule {
 			ObjectInput in = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()));
 			result = in.readObject();
 			in.close();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} catch (ClassNotFoundException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
 		return result;
@@ -40,7 +38,9 @@ public class TestCornerCasesTryWithResourceRule {
 
 	static void readFirstLineFromFile(String path) {
 
-		try (BufferedReader br = new BufferedReader(new FileReader(path)); BufferedReader br2 = new BufferedReader(new FileReader(path)); Closeable cl = new BufferedReader(new FileReader(path))) {
+		try (BufferedReader br = new BufferedReader(new FileReader(path));
+				BufferedReader br2 = new BufferedReader(new FileReader(path));
+				Closeable cl = new BufferedReader(new FileReader(path))) {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
