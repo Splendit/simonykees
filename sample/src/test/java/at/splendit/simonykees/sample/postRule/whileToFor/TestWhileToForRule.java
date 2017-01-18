@@ -1,8 +1,10 @@
 package at.splendit.simonykees.sample.postRule.whileToFor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({ "nls", "unused" })
 public class TestWhileToForRule {
@@ -315,6 +317,29 @@ public class TestWhileToForRule {
 			}
 			
 			sb.append(prefix + suffix);
+		}
+		
+		return sb.toString();
+	}
+	
+	public String testWhileLoopsWithNestedLambda(String input) {
+		List<String> l = generateList(input);
+		List<String> k = generateList(input);
+		List<String> result = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		
+		String foo = "foo";
+		String suffix = "";
+		String prefix = "";
+		for (String s:l){
+		
+			result = k
+					.stream()
+					.map(key -> {
+						return s + "|" + key + ";" ;
+					}).collect(Collectors.toList());
+			
+			result.forEach(sb::append);
 		}
 		
 		return sb.toString();

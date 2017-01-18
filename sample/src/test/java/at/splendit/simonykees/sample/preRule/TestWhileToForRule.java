@@ -1,8 +1,10 @@
 package at.splendit.simonykees.sample.preRule;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({ "nls", "unused" })
 public class TestWhileToForRule {
@@ -345,6 +347,32 @@ public class TestWhileToForRule {
 			}
 			
 			sb.append(prefix + suffix);
+		}
+		
+		return sb.toString();
+	}
+	
+	public String testWhileLoopsWithNestedLambda(String input) {
+		List<String> l = generateList(input);
+		List<String> k = generateList(input);
+		List<String> result = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		
+		Iterator<String> iterator = l.iterator();
+		
+		String foo = "foo";
+		String suffix = "";
+		String prefix = "";
+		while(iterator.hasNext()) {
+		
+			result = k
+					.stream()
+					.map(key -> {
+						String s = iterator.next();
+						return s + "|" + key + ";" ;
+					}).collect(Collectors.toList());
+			
+			result.forEach(sb::append);
 		}
 		
 		return sb.toString();
