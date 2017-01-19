@@ -33,6 +33,18 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 	
+	public String testReferencingIterator(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext(); ) {
+			iterator.forEachRemaining(remaining -> remaining = "foo");
+		    String s = iterator.next();
+		    sb.append(s);
+		}
+		return sb.toString();
+	}
+	
 	public String testIteratorToForEachIncrementStatement(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
