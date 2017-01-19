@@ -98,6 +98,22 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 	
+	public String testIgnoreIteratingIndex(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		for(int j = 0; j < foo.size(); j++) {
+			int i = 0;
+			int k = 0;
+			String it = foo.get(i);
+			String it2 = foo.get(k);
+			
+			sb.append(it + "," + it2 + ";");
+		}
+		
+		return sb.toString();
+	}
+	
 	public String testCompoundCondition(String input) {
 		List<String> foo = generateList(input);
 		
@@ -140,6 +156,24 @@ public class TestForToForEachRule {
 			sb.append(s);
 			for (String secondFooIterator:secondFoo){
 				String r = secondFooIterator;
+				sb.append(r);
+			}
+		}
+		
+		return sb.toString();
+	}
+	
+	public String testDoubleIteration(String input) {
+		List<String> foo = generateList(input);
+		
+		StringBuilder sb = new StringBuilder();
+		
+		for (String fooIterator:foo){
+			String s = fooIterator;
+			s += ";";
+			sb.append(s);
+			for (String fooIterator2:foo){
+				String r = fooIterator2;
 				sb.append(r);
 			}
 		}
@@ -291,20 +325,22 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 	
-//	public String testIterateNumberCollection(String input) {
-//		List<? extends Number> foo = generateHashCodeList(input);
-//		
-//		StringBuilder sb = new StringBuilder();
-//		
-//		int i;
-//		for (i = 0; i < foo.size(); i = i + 1) { 
-// 			FIXME SIM-163 : if the collection type restricted to certain sub-types, the forEach iterator type shall be 'parent type'
-//			Number s = foo.get(i);
-//			sb.append(s.toString());
-//		}
-//		
-//		return sb.toString();
-//	}
+	/*
+	 * public String testIterateNumberCollection(String input) {
+	 *	List<? extends Number> foo = generateHashCodeList(input);
+	 *	
+	 *	StringBuilder sb = new StringBuilder();
+	 *	
+	 *	int i;
+	 *	for (i = 0; i < foo.size(); i = i + 1) { 
+ 	 *		// FIXME SIM-163 : if the collection type restricted to certain sub-types, the forEach iterator type shall be 'parent type'
+	 *		Number s = foo.get(i);
+	 *		sb.append(s.toString());
+	 *	}
+	 *	
+	 *	return sb.toString();
+	 * }
+	 */
 	
 	public String testCollectionBiggerIterationStep(String input) {
 		List<? extends Number> foo = generateHashCodeList(input);
