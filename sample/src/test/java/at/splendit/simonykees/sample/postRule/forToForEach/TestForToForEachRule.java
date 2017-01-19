@@ -32,6 +32,50 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 	
+	public String testIteratorToForEachIncrementStatement(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		int i = 0;
+		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext(); i++) {
+		    String s = iterator.next();
+		    sb.append(s + "," + i);
+		}
+		sb.append(i);
+		
+		return sb.toString();
+	}
+	
+	public String testIteratorToForEachNestedIf(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext();) {
+		    String s = iterator.next();
+		    if(iterator.hasNext()) {
+		    	String t = iterator.next();
+		    	sb.append(t);
+		    }
+		    sb.append(s + ",");
+		}
+		
+		return sb.toString();
+	}
+	
+	public String testNestedIteratorToForEach(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		for (String s:foo){
+		    for (String t:foo){
+			    sb.append(t + ",");
+			}
+		    sb.append(s + ";");
+		}
+
+		return sb.toString();
+	}
+	
 	public String testMultipleIteratorToForEach(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
@@ -76,6 +120,20 @@ public class TestForToForEachRule {
 		int i;
 		for (String fooIterator:foo){
 			String s = fooIterator;
+			sb.append(s);
+		}
+		
+		return sb.toString();
+	}
+	
+	public String testDecIteratingIndex(String input) {
+		List<String> foo = generateList(input);
+		
+		StringBuilder sb = new StringBuilder();
+		
+		int i;
+		for (i = foo.size() -1 ; i >=0; i--) {
+			String s = foo.get(i);
 			sb.append(s);
 		}
 		
