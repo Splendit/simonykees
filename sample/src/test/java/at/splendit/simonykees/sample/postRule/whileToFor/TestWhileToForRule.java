@@ -241,16 +241,14 @@ public class TestWhileToForRule {
 		return sb.toString();
 	}
 	
-	public String testWhileLoopsDiscardIterator(String input) {
+	public String testWhileLoopsNoIteratingVariable(String input) {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 		
-		Iterator<String> iterator = l.iterator();
 		String s;
 		String foo = "foo";
-		while(iterator.hasNext()) {
-			iterator.next();
-			sb.append(foo);
+		for (String lIterator : l) {
+			sb.append(lIterator);
 		}
 		
 		return sb.toString();
