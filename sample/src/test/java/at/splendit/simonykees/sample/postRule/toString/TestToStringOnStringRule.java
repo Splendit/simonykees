@@ -136,4 +136,9 @@ public class TestToStringOnStringRule {
 		}
 		return result;
 	}
+	
+	public String testChainMethodInvocatioonToString(String input) {
+		String className = this.getClass().getName();
+		return input + className;
+	}
 }

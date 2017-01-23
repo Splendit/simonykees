@@ -92,7 +92,7 @@ public class TestToStringOnStringRule {
 
 	public String testRemoveToStringInCodeBlock(String input) {
 		String result = "";
-		if(!input.isEmpty()) {
+		if (!StringUtils.isEmpty(input)) {
 			try {
 				result = input + "-";
 			} finally {
@@ -104,7 +104,7 @@ public class TestToStringOnStringRule {
 
 	public String testRemoveToStringOnIfCondition(String input) {
 		String result = "";
-		if(!input.isEmpty()) {
+		if (!StringUtils.isEmpty(input)) {
 			result = "nonEmpty:" + input;
 		}
 		return result;
@@ -112,10 +112,10 @@ public class TestToStringOnStringRule {
 
 	public String testRemoveToStringOnForCondition(String input) {
 		String result = "";
-		if(!input.isEmpty()) {
+		if (!StringUtils.isEmpty(input)) {
 			result = "nonEmpty:" + input;
-			for(;input.length() == 0; ) {
-				result = "empty:" + input;				
+			for (; input.length() == 0;) {
+				result = "empty:" + input;
 			}
 		}
 		return result;
@@ -123,12 +123,17 @@ public class TestToStringOnStringRule {
 
 	public String testRemoveToStringOnWhileCondition(String input) {
 		String result = "";
-		if(!input.isEmpty()) {
+		if (!StringUtils.isEmpty(input)) {
 			result = "nonEmpty:" + input;
 			while (input.length() == 0) {
-				result = "empty:" + input;				
+				result = "empty:" + input;
 			}
 		}
 		return result;
+	}
+
+	public String testChainMethodInvocatioonToString(String input) {
+		String className = this.getClass().getName();
+		return input + className;
 	}
 }
