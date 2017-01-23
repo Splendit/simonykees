@@ -105,4 +105,35 @@ public class TestToStringOnStringRule {
 		}
 		return result;
 	}
+	
+	public String testRemoveToStringOnIfCondition(String input) {
+		String result = "";
+		if(!input.isEmpty()) {
+			result = "nonEmpty:" + input;
+		}
+		return result;
+	}
+	
+	public String testRemoveToStringOnForCondition(String input) {
+		String result = "";
+		if(!input.isEmpty()) {
+			result = "nonEmpty:" + input;
+			for(;input.length() == 0; ) {
+				result = "empty:" + input;				
+			}
+		}
+		return result;
+	}
+	
+	
+	public String testRemoveToStringOnWhileCondition(String input) {
+		String result = "";
+		if(!input.isEmpty()) {
+			result = "nonEmpty:" + input;
+			while (input.length() == 0) {
+				result = "empty:" + input;				
+			}
+		}
+		return result;
+	}
 }
