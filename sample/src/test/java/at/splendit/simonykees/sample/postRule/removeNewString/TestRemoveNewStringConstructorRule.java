@@ -1,5 +1,9 @@
 package at.splendit.simonykees.sample.postRule.removeNewString;
 
+import java.math.BigDecimal;
+
+import org.apache.commons.lang3.StringUtils;
+
 @SuppressWarnings("nls")
 public class TestRemoveNewStringConstructorRule {
 
@@ -44,7 +48,53 @@ public class TestRemoveNewStringConstructorRule {
 		return new String(bytes);
 	}
 
+	public String testNestedNewStringsAndConcat(String input) {
+		return input + "-" + input + "-" + "val" + "val";
+	}
+
 	public String testNestedNewStrings(String input) {
 		return input;
+	}
+
+	public String testDeepNestedNewStringCtor(String input) {
+		return new String(sampleMethod(input));
+	}
+
+	public String testCharArrayInput(String input) {
+		char[] charArray = input.toCharArray();
+		String result = new String(charArray);
+		return result;
+	}
+
+	public String testCharArrayInputOffest(String input) {
+		char[] charArray = input.toCharArray();
+		String result = new String(charArray, 0, 1);
+		return result;
+	}
+
+	public String testStringBuffer(String input) {
+		StringBuffer buffer = new StringBuffer(input);
+		return new String(buffer);
+	}
+
+	public String testDiscardCtorResult(String input) {
+		new String(input);
+		return input;
+	}
+
+	public String testConvertInsideBlock(String input) {
+		String result = "";
+		if (!StringUtils.isEmpty(input)) {
+			if (StringUtils.isEmpty(result)) {
+				result = input;
+			}
+		}
+		return result;
+	}
+
+	public String testConcertInputParameter(String input) {
+		BigDecimal number = new BigDecimal("10.05");
+		Integer.valueOf("123");
+		return input + number;
 	}
 }
