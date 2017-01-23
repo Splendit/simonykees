@@ -1,9 +1,25 @@
 package at.splendit.simonykees.sample.preRule;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings("nls")
 public class TestToStringOnStringRule {
+	
+	private String sampleMethod() {
+		return "sample-method";
+	}
+	
+	private Number numberSampleMethod() {
+		return new Integer("100");
+	}
+	
+	private String sampleMethod(String param) {
+		return param + "sample-method";
+	}
 
 	public String testToStringOnStringLiteral() {
 
@@ -34,5 +50,59 @@ public class TestToStringOnStringRule {
 
 		return (s + "abc").toString();
 
+	}
+	
+	public String testToStringOnMethodInvocation(String s) {
+		return sampleMethod().toString();
+	}
+	
+	public String testToStringChain(String input) {
+		return input.toString().toString();
+	}
+	
+	public String testToStringToLowerCaseChain(String input) {
+		return input.toString().toLowerCase();
+	}
+	
+	public String testToStringOnOtherTypes(String input) {
+		String sampleString = numberSampleMethod().toString();
+		return sampleString.toString() + numberSampleMethod().toString();
+	}
+	
+	public String testDiscardToStringOnString(String input) {
+		input.toString();
+		return input;
+	}
+	
+	public String testToStringInNestedConcatOperations(String input) {
+		String val = (input.toString() + ("some-other-nasty-string".toString()) + "abc".toString() + 'c').toString();
+		return val;
+	}
+	
+	public String testToStringInLambdaExpressionBody(String input) {
+		List<String> stringList = Arrays.asList(input, "foo");
+		String result = 
+				stringList
+				.stream()
+				.map(s -> s.toString() + ";".toString())
+				.collect(Collectors.joining(",".toString()));
+		return result;
+	}
+	
+	public String testToStringOnMethodInvocationParameters(String input) {
+		String result = sampleMethod(input.toString());
+		return result;
+	}
+	
+	public String testRemoveToStringInCodeBlock(String input) {
+		String result = "";
+		if(!input.isEmpty()) {
+			try {
+				result = input.toString() + "-".toString();
+			} finally {
+				result = result + ";".toString();
+			}
+		}
+		return result;
 	}
 }
