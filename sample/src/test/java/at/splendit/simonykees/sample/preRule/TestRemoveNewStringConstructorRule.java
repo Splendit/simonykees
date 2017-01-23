@@ -1,6 +1,9 @@
 package at.splendit.simonykees.sample.preRule;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("nls")
 public class TestRemoveNewStringConstructorRule {
@@ -90,9 +93,18 @@ public class TestRemoveNewStringConstructorRule {
 		return result;
 	}
 	
-	public String testConcertInputParameter(String input) {
+	public String testConvertInputParameter(String input) {
 		BigDecimal number = new BigDecimal(new String("10.05"));
 		Integer.valueOf(new String("123"));
 		return input + number;
-	}	
+	}
+	
+	public String testConvertInLambdaExpressionBody(String input) {
+		List<String> list = Arrays.asList(input);
+		String result = new String(
+				list.stream()
+				.map(t -> new String(t))
+				.collect(Collectors.joining()));
+		return result;
+	}
 }
