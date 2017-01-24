@@ -118,7 +118,7 @@ public class TestToStringOnStringRule {
 		String result = "";
 		if(!input.toString().isEmpty()) {
 			result = "nonEmpty:" + input;
-			for(;input.toString().length() == 0; ) {
+			for(int i = 0; sampleMethod(input).toString().length() == 0 || i < sampleMethod(input).toString().length(); i++) {
 				result = "empty:" + input;				
 			}
 		}
