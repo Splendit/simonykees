@@ -42,12 +42,6 @@ public abstract class AbstractCompilationUnitASTVisitor extends AbstractASTRewri
 		this.addImports = new HashSet<>();
 	}
 	
-	protected AbstractCompilationUnitASTVisitor(AbstractCompilationUnitASTVisitor contextReference) {
-		super(contextReference);
-		this.iTypeMap = contextReference.iTypeMap;
-		this.fullyQuallifiedNameMap = contextReference.fullyQuallifiedNameMap;
-	}
-
 	/**
 	 * Find the corresponding types of the {@link #relevantClasses()} in the
 	 * java project of the {@link CompilationUnit} that accepts the ASTVisitor

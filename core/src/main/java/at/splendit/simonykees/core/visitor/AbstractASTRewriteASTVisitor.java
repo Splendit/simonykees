@@ -18,11 +18,6 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	public AbstractASTRewriteASTVisitor() {
 		super();
 	}
-	
-	public AbstractASTRewriteASTVisitor(AbstractASTRewriteASTVisitor contextReference) {
-		this();
-		this.astRewrite=contextReference.astRewrite;
-	}
 
 	public AbstractASTRewriteASTVisitor(boolean visitDocTags) {
 		super(visitDocTags);
