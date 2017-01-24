@@ -86,7 +86,7 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 					(SimpleName) ASTNode.copySubtree(simpleName.getAST(), simpleName),
 					NodeBuilder.newSimpleName(node.getAST(), "close")); //$NON-NLS-1$
 
-			node.accept(new RemoveCloseASTVisitor(resourceNameList.parallelStream().map(mapper).collect(Collectors.toList())));
+			node.accept(new RemoveCloseASTVisitor(resourceNameList.stream().map(mapper).collect(Collectors.toList())));
 
 		}
 		return true;
