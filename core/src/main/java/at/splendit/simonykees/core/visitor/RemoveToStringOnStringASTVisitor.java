@@ -1,11 +1,15 @@
 package at.splendit.simonykees.core.visitor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.StringLiteral;
 
+import at.splendit.simonykees.core.constants.ReservedNames;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
@@ -20,32 +24,66 @@ public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitAST
 
 	private static Integer STRING_KEY = 1;
 	private static String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
-
+	
+	private List<MethodInvocation> methodInvocationSkipList;
+	
 	public RemoveToStringOnStringASTVisitor() {
 		super();
 		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
+		this.methodInvocationSkipList = new ArrayList<MethodInvocation>();
 	}
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-
+		
+		/*
+		 * MethodInvocation already handled
+		 */
+		if(methodInvocationSkipList.contains(node)){
+			return true;
+		}
+		
 		/*
 		 * Checks if method invocation is toString. The invocation needs to have
 		 * zero arguments. The expressions type where the toString is used on
 		 * needs to be a String or a StringLiteral
 		 */
-		Expression variableExpression = node.getExpression();
-		if (StringUtils.equals("toString", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
-				&& node.typeArguments().isEmpty()
-				&& (node.getExpression() != null && ClassRelationUtil
-						.isContentOfRegistertITypes(variableExpression.resolveTypeBinding(), iTypeMap.get(STRING_KEY))
-						|| variableExpression instanceof StringLiteral)) {
-			if (variableExpression instanceof ParenthesizedExpression) {
-				variableExpression = ASTNodeUtil.unwrapParenthesizedExpression(variableExpression);
-			}
+		if (StringUtils.equals(ReservedNames.MI_TO_STRING, node.getName().getFullyQualifiedName())
+				&& !(node.getParent() instanceof ExpressionStatement) && node.typeArguments().isEmpty()
+				&& (node.getExpression() != null && ClassRelationUtil.isContentOfRegistertITypes(
+						node.getExpression().resolveTypeBinding(), iTypeMap.get(STRING_KEY)))) {
+			Expression variableExpression = node.getExpression();
+			
+			boolean unwrapped = false;
+			do{
+				unwrapped = false;
+				if (variableExpression instanceof ParenthesizedExpression) {
+					variableExpression = ASTNodeUtil.unwrapParenthesizedExpression(variableExpression);
+					unwrapped = true;
+				}
+				
+				if (variableExpression instanceof MethodInvocation){
+					MethodInvocation mI = (MethodInvocation) variableExpression;
+					if (StringUtils.equals(ReservedNames.MI_TO_STRING, mI.getName().getFullyQualifiedName())
+							&& mI.typeArguments().isEmpty()
+							&& (mI.getExpression() != null && ClassRelationUtil.isContentOfRegistertITypes(
+									mI.getExpression().resolveTypeBinding(), iTypeMap.get(STRING_KEY)))) {
+						variableExpression = mI.getExpression();
+						methodInvocationSkipList.add(mI);
+						unwrapped = true;
+					}
+				}
+			}while(unwrapped);
+			
 			astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(variableExpression), null);
+			
 		}
-
 		return true;
 	}
+	
+	@Override
+	public void endVisit(MethodInvocation node) {
+		methodInvocationSkipList.remove(node);
+	}
+	
 }

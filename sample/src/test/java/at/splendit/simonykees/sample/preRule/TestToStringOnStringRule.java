@@ -124,7 +124,7 @@ public class TestToStringOnStringRule {
 		}
 		return result;
 	}
-	
+
 	public String testRemoveToStringOnWhileCondition(String input) {
 		String result = "";
 		if(!input.toString().isEmpty()) {
