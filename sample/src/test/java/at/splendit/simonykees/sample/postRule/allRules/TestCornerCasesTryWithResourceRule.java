@@ -10,7 +10,10 @@ import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.logging.LogRecord;
 
 @SuppressWarnings("nls")
 public class TestCornerCasesTryWithResourceRule {
@@ -43,6 +46,23 @@ public class TestCornerCasesTryWithResourceRule {
 				Closeable cl = new BufferedReader(new FileReader(path))) {
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public void morphiaCornerCase() {
+		
+		final LogRecord record = null;
+		final StringBuilder sb = new StringBuilder();
+		
+		if (record.getThrown() != null) {
+			try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
+	            //CHECKSTYLE:OFF
+	            record.getThrown().printStackTrace(pw);
+	            //CHECKSTYLE:ON
+	            sb.append(sw.toString());
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
 		}
 	}
 }
