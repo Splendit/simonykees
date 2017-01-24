@@ -102,4 +102,8 @@ public class TestPrimitiveBoxedForStringWithVariablesRule {
 	public String testDoubleIntegerValueOfToString(int input) {
 		return Double.toString(input);
 	}
+	
+	public String testIntegertoStringWithParameters(int input) {
+		return Integer.toString(4);
+	}
 }
