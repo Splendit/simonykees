@@ -24,9 +24,9 @@ public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitAST
 
 	private static Integer STRING_KEY = 1;
 	private static String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
-	
+
 	private List<MethodInvocation> methodInvocationSkipList;
-	
+
 	public RemoveToStringOnStringASTVisitor() {
 		super();
 		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
@@ -35,14 +35,14 @@ public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitAST
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-		
+
 		/*
 		 * MethodInvocation already handled
 		 */
-		if(methodInvocationSkipList.contains(node)){
+		if (methodInvocationSkipList.contains(node)) {
 			return true;
 		}
-		
+
 		/*
 		 * Checks if method invocation is toString. The invocation needs to have
 		 * zero arguments. The expressions type where the toString is used on
@@ -53,16 +53,16 @@ public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitAST
 				&& (node.getExpression() != null && ClassRelationUtil.isContentOfRegistertITypes(
 						node.getExpression().resolveTypeBinding(), iTypeMap.get(STRING_KEY)))) {
 			Expression variableExpression = node.getExpression();
-			
+
 			boolean unwrapped = false;
-			do{
+			do {
 				unwrapped = false;
 				if (variableExpression instanceof ParenthesizedExpression) {
 					variableExpression = ASTNodeUtil.unwrapParenthesizedExpression(variableExpression);
 					unwrapped = true;
 				}
-				
-				if (variableExpression instanceof MethodInvocation){
+
+				if (variableExpression instanceof MethodInvocation) {
 					MethodInvocation mI = (MethodInvocation) variableExpression;
 					if (StringUtils.equals(ReservedNames.MI_TO_STRING, mI.getName().getFullyQualifiedName())
 							&& mI.typeArguments().isEmpty()
@@ -73,17 +73,17 @@ public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitAST
 						unwrapped = true;
 					}
 				}
-			}while(unwrapped);
-			
+			} while (unwrapped);
+
 			astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(variableExpression), null);
-			
+
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void endVisit(MethodInvocation node) {
 		methodInvocationSkipList.remove(node);
 	}
-	
+
 }
