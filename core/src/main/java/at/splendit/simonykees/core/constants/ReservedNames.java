@@ -18,7 +18,7 @@ public final class ReservedNames {
 	public static final String SHORT_PRIMITIVE = "short";
 	
 	public static final String CHARACTER = "Character";
-	public static final String CHARACTER_PRIMITIVE = "character";
+	public static final String CHARACTER_PRIMITIVE = "char";
 	
 	public static final String BYTE = "Byte";
 	public static final String BYTE_PRIMITIVE = "byte";
