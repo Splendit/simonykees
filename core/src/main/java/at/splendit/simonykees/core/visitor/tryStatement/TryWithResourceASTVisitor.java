@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -18,6 +20,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
@@ -44,6 +47,7 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 				generateFullyQuallifiedNameList(AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME, CLOSEABLE_FULLY_QUALLIFIED_NAME));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(TryStatement node) {
 		List<VariableDeclarationExpression> resourceList = new ArrayList<>();
@@ -64,6 +68,13 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 											variableDeclarationFragment.getAST(), variableDeclarationFragment));
 							variableDeclarationExpression.setType((Type) ASTNode
 									.copySubtree(varDeclStatmentNode.getAST(), varDeclStatmentNode.getType()));
+
+							List<Modifier> modifierList = varDeclStatmentNode.modifiers();
+							Function<Modifier, Modifier> cloneModifier = modifier -> (Modifier) ASTNode
+									.copySubtree(modifier.getAST(), modifier);
+							variableDeclarationExpression.modifiers()
+									.addAll(modifierList.stream().map(cloneModifier).collect(Collectors.toList()));
+
 							resourceList.add(variableDeclarationExpression);
 							resourceNameList.add(variableDeclarationFragment.getName());
 						}
@@ -75,12 +86,18 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 			} else {
 				break;
 			}
+
+			// FIXME dirty hack!
+			if (node.resources().isEmpty()) {
+				break;
+			}
 		}
 
 		if (!resourceList.isEmpty()) {
 			// Add Resources to try head
 			resourceList.forEach(iteratorNode -> astRewrite.getListRewrite(node, TryStatement.RESOURCES_PROPERTY)
 					.insertLast(iteratorNode, null));
+
 			// remove all close operations on the found resources
 			Function<SimpleName, MethodInvocation> mapper = simpleName -> NodeBuilder.newMethodInvocation(node.getAST(),
 					(SimpleName) ASTNode.copySubtree(simpleName.getAST(), simpleName),

@@ -13,6 +13,7 @@ import org.eclipse.osgi.util.NLS;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
@@ -105,12 +106,23 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	private void applyRule(ICompilationUnit workingCopy) throws JavaModelException, ReflectiveOperationException {
-		if (changes.containsKey(workingCopy)) {
+		//FIXME SIM-206 TryWithResource multipe new resource on empty list 
+		boolean dirtyHack = !(this instanceof TryWithResourceRule);
+		
+		if ( dirtyHack && changes.containsKey(workingCopy)) {
 			// already have changes
 			Activator.log(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
 		} else {
 			DocumentChange documentChange = SimonykeesUtil.applyRule(workingCopy, visitor);
 			if (documentChange != null) {
+				//FIXME SIM-206 TryWithResource multipe new resource on empty list
+				if ( dirtyHack) {
+					DocumentChange temp = changes.get(workingCopy);
+					if(temp != null){
+						documentChange.addEdit(temp.getEdit());
+					}
+				}
+				
 				changes.put(workingCopy, documentChange);
 			} else {
 				// no changes

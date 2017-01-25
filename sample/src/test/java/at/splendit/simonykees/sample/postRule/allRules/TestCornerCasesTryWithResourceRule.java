@@ -50,19 +50,18 @@ public class TestCornerCasesTryWithResourceRule {
 	}
 
 	public void morphiaCornerCase() {
-		
+
 		final LogRecord record = null;
 		final StringBuilder sb = new StringBuilder();
-		
+
 		if (record.getThrown() != null) {
-			try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
-	            //CHECKSTYLE:OFF
-	            record.getThrown().printStackTrace(pw);
-	            //CHECKSTYLE:ON
-	            sb.append(sw.toString());
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	        }
+			try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
+				// CHECKSTYLE:OFF
+				record.getThrown().printStackTrace(pw);
+				sb.append(sw.toString());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }
