@@ -376,14 +376,21 @@ public class LicenseManager {
 
 	/**
 	 * Overwrites the existing license name and number with 
-	 * the given ones. From the moment of calling this method,
-	 * the new licensee name and number will be used on the
+	 * the given ones, unless the new licensee number does 
+	 * not belong to an existing licensee (in which case, 
+	 * a fall-back to existing licensee is performed). 
+	 * 
+	 * If the update process is successful (i.e the given
+	 * licensee number belongs to an existing licensee), 
+	 * the new credentials will be used for future 
 	 * validation calls.
 	 * 
 	 * @param licenseeNumber new licensee number.
 	 * @param licenseeName 	new licensee name.
 	 */
 	public void updateLicenseeNumber(String licenseeNumber, String licenseeName) {
+		String existingLicenseeNumber = getLicenseeNumber();
+		String existingLicenseeName = getLicenseeName();
 		Activator.log(Status.INFO, Messages.LicenseManager_updating_licensee_credentials, null);
 		setLicenseeName(licenseeName);
 		setLicenseeNumber(licenseeNumber);
@@ -392,6 +399,22 @@ public class LicenseManager {
 		// re-initiate manager as a new licenseeNumber is received...
 		ValidateExecutor.shutDownScheduler();
 		initManager();
+		
+		try {
+			Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE);
+		} catch (InterruptedException e) {
+			// do nothing. no hurt...
+		}
+		
+		
+		LicenseChecker checker = getValidationData();
+		if(LicenseType.TRY_AND_BUY.equals(checker.getType())) {
+			Activator.log(Status.WARNING, Messages.LicenseManager_invalid_new_license_key, null);
+			setLicenseeNumber(existingLicenseeNumber);
+			setLicenseeName(existingLicenseeName);
+			overwritePersistedData(existingLicenseeNumber, existingLicenseeName);
+			initManager();
+		}
 	}
 	
 	String getLicenseeNumber() {
@@ -545,6 +568,19 @@ public class LicenseManager {
 			return expirationDate;
 		}
 		
+	}
+	
+	private void overwritePersistedData(String licenseeNumber, String licenseeName) {
+		PersistenceModel persistenceModel = new PersistenceModel(
+				licenseeNumber, 
+				licenseeName, 
+				false,
+				null, null, null, null, null, 
+				false, 
+				null, null);
+		PersistenceManager persistence = PersistenceManager.getInstance();
+		persistence.setPersistenceModel(persistenceModel);
+		persistence.persist();
 	}
 
 }
