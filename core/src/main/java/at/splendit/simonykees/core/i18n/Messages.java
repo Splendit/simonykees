@@ -75,6 +75,13 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferenceManager_builtIn;
 	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_selectProfile;
+	public static String SimonykeesPreferencePageLicense_jsparrow_licensed_as;
+	public static String SimonykeesPreferencePageLicense_jsparrow_valid_untill;
+	public static String SimonykeesPreferencePageLicense_update_license_key_button;
+	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_label;
+	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_message;
+	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_title;
+	public static String SimonykeesUpdateLicenseDialog_update_llicense_dialog_button;
 	public static String StringFormatLineSeparatorRule_description;
 	public static String StringFormatLineSeparatorRule_name;
 	public static String StringConcatToPlusRule_description;
