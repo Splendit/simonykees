@@ -21,7 +21,7 @@ public class TestPrimitiveBoxedForStringWithExpressionsRule {
 	}
 
 	public String testIntegerValueOfMixedTypeExpression(int input) {
-		return Integer.valueOf(input + 1 + intSampleMethod()).toString();
+		return Integer.valueOf(input + Integer.valueOf(1) + intSampleMethod()).toString();
 	}
 
 	public String testIntegerValueOfCascadeExpressions(int input) {
