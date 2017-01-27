@@ -57,11 +57,6 @@ public class LicenseManagerTest extends LicenseCommonTest {
 
 	}
 	
-	@After
-	public void waitToCompleteProcessing() throws InterruptedException {
-		clearPersistedData();
-	}
-	
 	@Test
 	public void testInitLicenseManager() {
 		// when initiating the license manager...
