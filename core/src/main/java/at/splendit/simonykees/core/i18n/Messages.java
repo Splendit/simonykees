@@ -47,6 +47,7 @@ public class Messages extends NLS {
 	public static String LicenseManager_updating_licensee_credentials;
 	public static String LicenseManager_wait_for_validation_was_interrupted;
 	public static String LicenseStatus_userMessage_CONNECTION_FAILURE;
+	public static String LicenseStatus_userMessage_CONNECTION_FAILURE_UNREGISTERED;
 	public static String LicenseStatus_userMessage_FLOATING_CHECKED_IN;
 	public static String LicenseStatus_userMessage_FLOATING_CHECKED_OUT;
 	public static String LicenseStatus_userMessage_FLOATING_EXPIRED;

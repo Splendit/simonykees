@@ -22,6 +22,7 @@ public enum LicenseStatus {
 	FLOATING_EXPIRED(Messages.LicenseStatus_userMessage_FLOATING_EXPIRED), 
 	FLOATING_OUT_OF_SESSION(Messages.LicenseStatus_userMessage_FLOATING_OUT_OF_SESSION), 
 	FLOATING_CHECKED_IN(Messages.LicenseStatus_userMessage_FLOATING_CHECKED_IN),
+	CONNECTION_FAILURE_UNREGISTERED(Messages.LicenseStatus_userMessage_CONNECTION_FAILURE_UNREGISTERED),
 	CONNECTION_FAILURE(Messages.LicenseStatus_userMessage_CONNECTION_FAILURE);
 
 	public static LicenseStatus fromString(String value) {
