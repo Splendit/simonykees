@@ -13,8 +13,6 @@ public class TestTryWithResourceRule {
 				BufferedReader br2 = new BufferedReader(new FileReader(path));
 				Closeable cl = new BufferedReader(new FileReader(path))) {
 			br.close();
-			br2.close();
-			cl.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

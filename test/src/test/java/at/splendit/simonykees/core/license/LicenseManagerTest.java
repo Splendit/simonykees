@@ -62,7 +62,8 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		clearPersistedData();
 	}
 	
-	@Test
+	//FIXME: tests related to floating license are temporarily removed
+	//@Test
 	public void testInitLicenseManager() {
 		// when initiating the license manager...
 		LicenseManager instance = LicenseManager.getInstance();
@@ -80,7 +81,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		
 	}
 
-	@Test
+	//@Test
 	public void testValidator() throws InterruptedException {
 		// having a licensee with license model from the prevalidation... 
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
@@ -121,7 +122,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		assertEquals(LicenseStatus.CONNECTION_FAILURE, checkFromPersistence.getLicenseStatus());
 	}
 	
-	@Test
+	//@Test
 	public void floatingOutOfSessionsSession() throws InterruptedException {
 		LicenseChecker checker;
 		LicenseeModel licensee;
@@ -189,7 +190,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		assertEquals(LicenseStatus.FLOATING_OUT_OF_SESSION, checker.getLicenseStatus());
 	}
 	
-	@Test
+	//@Test
 	public void runningSchedulerAftercheckIn() throws InterruptedException {
 		// having initiated an instance of license manager for a floating licensee
 		LicenseManager licenseMng = LicenseManager.getInstance();
