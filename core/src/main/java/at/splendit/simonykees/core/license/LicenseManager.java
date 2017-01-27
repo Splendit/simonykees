@@ -408,13 +408,32 @@ public class LicenseManager {
 		
 		
 		LicenseChecker checker = getValidationData();
-		if(LicenseType.TRY_AND_BUY.equals(checker.getType())) {
+		if(!isValidUpdate(checker)) {
 			Activator.log(Status.WARNING, Messages.LicenseManager_invalid_new_license_key, null);
 			setLicenseeNumber(existingLicenseeNumber);
 			setLicenseeName(existingLicenseeName);
+			if(checker != null && 
+					checker.getLicenseStatus().equals(LicenseStatus.CONNECTION_FAILURE_UNREGISTERED)) {
+				existingLicenseeNumber = ""; //$NON-NLS-1$
+				existingLicenseeName = ""; //$NON-NLS-1$
+			}
 			overwritePersistedData(existingLicenseeNumber, existingLicenseeName);
 			initManager();
 		}
+	}
+	
+	private boolean isValidUpdate(LicenseChecker checker) {
+		boolean valid = false;
+		
+		if(checker != null && 
+				!checker.getLicenseStatus().equals(LicenseStatus.CONNECTION_FAILURE) &&
+				!checker.getLicenseStatus().equals(LicenseStatus.CONNECTION_FAILURE_UNREGISTERED) &&
+				checker.getType() != null &&
+				!checker.getType().equals(LicenseType.TRY_AND_BUY)) {
+			valid = true;
+		}
+		
+		return valid;
 	}
 	
 	String getLicenseeNumber() {
