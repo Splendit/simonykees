@@ -1,5 +1,7 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
+import org.apache.commons.lang3.StringUtils;
+
 @SuppressWarnings("nls")
 public class TestPrimitiveBoxedForStringWithVariablesRule {
 
@@ -105,5 +107,22 @@ public class TestPrimitiveBoxedForStringWithVariablesRule {
 
 	public String testIntegertoStringWithParameters(int input) {
 		return Integer.toString(4);
+	}
+
+	// TODO SIM-205
+	public String test(Integer input) {
+		String result = "";
+
+		if (!StringUtils.isEmpty((Integer.toString(input)))) {
+			result = new Integer(intSampleMethod("5") + Integer.valueOf(3) + input).toString();
+			Integer res = input + 1;
+			result = result + res.toString();
+		}
+
+		return result;
+	}
+
+	private Integer intSampleMethod(String returnME) {
+		return Integer.valueOf(returnME);
 	}
 }

@@ -106,4 +106,21 @@ public class TestPrimitiveBoxedForStringWithVariablesRule {
 	public String testIntegertoStringWithParameters(int input) {
 		return Integer.valueOf(input).toString(4);
 	}
+
+	//TODO SIM-205
+	public String test(Integer input) {
+		String result = "";
+
+		if(!("" + input).isEmpty()) {
+			result = new Integer(intSampleMethod("5") + Integer.valueOf(3) + input).toString();
+			Integer res = input + new Integer(1);
+			result = result + res.toString();
+		}
+
+		return result;
+	}
+	
+	private Integer intSampleMethod(String returnME){
+		return Integer.valueOf(returnME);
+	}
 }
