@@ -47,8 +47,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	public RefactoringRule(Class<T> visitor) {
 		this.visitor = visitor;
-		this.id = this.getClass().getSimpleName(); // FIXME maybe add a better
-													// id
+		// TODO maybe add a better id
+		this.id = this.getClass().getSimpleName();
 	}
 
 	public String getName() {
@@ -106,23 +106,35 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	private void applyRule(ICompilationUnit workingCopy) throws JavaModelException, ReflectiveOperationException {
-		//FIXME SIM-206 TryWithResource multipe new resource on empty list 
-		boolean dirtyHack = !(this instanceof TryWithResourceRule);
-		
-		if ( dirtyHack && changes.containsKey(workingCopy)) {
+
+		// FIXME SIM-206: TryWithResource multiple new resource on empty list
+		boolean dirtyHack = this instanceof TryWithResourceRule;
+
+		if (!dirtyHack && changes.containsKey(workingCopy)) {
 			// already have changes
 			Activator.log(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
 		} else {
 			DocumentChange documentChange = SimonykeesUtil.applyRule(workingCopy, visitor);
 			if (documentChange != null) {
-				//FIXME SIM-206 TryWithResource multipe new resource on empty list
-				if ( dirtyHack) {
-					DocumentChange temp = changes.get(workingCopy);
-					if(temp != null){
-						documentChange.addEdit(temp.getEdit());
-					}
-				}
-				
+
+				/*
+				 * FIXME SIM-206: TryWithResource multiple new resource on empty
+				 * list
+				 */
+				/*
+				 * FIXME SIM-206: this particular part of the fix does not work.
+				 * This will create the correct results. However, the
+				 * RefactoringPreviewWizard will show the diff between the first
+				 * and the second run, rather than the diff between the original
+				 * source and the second run. See comment in SIM-206.
+				 */
+				// if (dirtyHack) {
+				// DocumentChange temp = changes.get(workingCopy);
+				// if (temp != null) {
+				// documentChange.addEdit(temp.getEdit());
+				// }
+				// }
+
 				changes.put(workingCopy, documentChange);
 			} else {
 				// no changes

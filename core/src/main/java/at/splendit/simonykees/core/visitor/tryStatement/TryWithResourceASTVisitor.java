@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -20,7 +19,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
@@ -52,9 +50,12 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 	public boolean visit(TryStatement node) {
 		List<VariableDeclarationExpression> resourceList = new ArrayList<>();
 		List<SimpleName> resourceNameList = new ArrayList<>();
+		
 		for (Object statementIterator : node.getBody().statements()) {
-			// Move all AutoCloseable Object to resource header, stop collection
-			// after first non resource object
+			/*
+			 * Move all AutoCloseable Object to resource header, stop collection
+			 * after first non resource object
+			 */
 			if (statementIterator instanceof VariableDeclarationStatement) {
 				VariableDeclarationStatement varDeclStatmentNode = (VariableDeclarationStatement) statementIterator;
 				ITypeBinding typeBind = varDeclStatmentNode.getType().resolveBinding();
