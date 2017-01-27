@@ -58,6 +58,10 @@ public class Messages extends NLS {
 	public static String LicenseStatus_userMessage_TRIAL_EXPIRED;
 	public static String LicenseStatus_userMessage_TRIAL_HW_ID_FAILURE;
 	public static String LicenseStatus_userMessage_TRIAL_REGISTERED;
+	public static String LicenseType_floating;
+	public static String LicenseType_node_locked;
+	public static String LicenseType_subscription;
+	public static String LicenseType_try_and_buy;
 	public static String LicenseValidator_cannot_reach_license_provider_on_validation_call;
 	public static String LicenseValidator_received_validation_response;
 	public static String InefficientConstructorRule_description;

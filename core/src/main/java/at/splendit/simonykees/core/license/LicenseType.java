@@ -1,5 +1,7 @@
 package at.splendit.simonykees.core.license;
 
+import at.splendit.simonykees.core.i18n.Messages;
+
 /**
  * Enumeration of the license models that a client can have.
  * 
@@ -9,10 +11,10 @@ package at.splendit.simonykees.core.license;
  */
 public enum LicenseType {
 	
-	TRY_AND_BUY,
-	FLOATING,
-	NODE_LOCKED, 
-	SUBSCRIPTION;
+	TRY_AND_BUY(Messages.LicenseType_try_and_buy),
+	FLOATING(Messages.LicenseType_floating),
+	NODE_LOCKED(Messages.LicenseType_node_locked), 
+	SUBSCRIPTION(Messages.LicenseType_subscription);
 	
 	@SuppressWarnings("nls")
 	public static LicenseType fromString(String value) {
@@ -55,4 +57,13 @@ public enum LicenseType {
 		}
 	}
 	
+	private LicenseType(String licenseName) {
+		this.licenseName = licenseName;
+	}
+	
+	private String licenseName;
+	
+	public String getLicenseName() {
+		return licenseName;
+	}
 }

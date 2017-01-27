@@ -95,7 +95,7 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
-				// TODO Auto-generated method stub
+				// nothing
 			}
 		});
 
@@ -118,7 +118,7 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 		LicenseType licenseType = licenseData.getType();
 		ZonedDateTime expireationDate = licenseData.getExpirationDate();
 
-		licenseLabel.setText(Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as + licenseType.toString());
+		licenseLabel.setText(Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as + licenseType.getLicenseName());
 		expiresLabel.setText(
 				Messages.SimonykeesPreferencePageLicense_jsparrow_valid_untill + extractDateFormat(expireationDate));
 	}
