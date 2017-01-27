@@ -388,7 +388,7 @@ public class LicenseManager {
 	 * @param licenseeNumber new licensee number.
 	 * @param licenseeName 	new licensee name.
 	 */
-	public void updateLicenseeNumber(String licenseeNumber, String licenseeName) {
+	public boolean updateLicenseeNumber(String licenseeNumber, String licenseeName) {
 		String existingLicenseeNumber = getLicenseeNumber();
 		String existingLicenseeName = getLicenseeName();
 		Activator.log(Status.INFO, Messages.LicenseManager_updating_licensee_credentials, null);
@@ -399,13 +399,13 @@ public class LicenseManager {
 		// re-initiate manager as a new licenseeNumber is received...
 		ValidateExecutor.shutDownScheduler();
 		initManager();
+		boolean updated = true;
 		
 		try {
 			Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE);
 		} catch (InterruptedException e) {
 			// do nothing. no hurt...
 		}
-		
 		
 		LicenseChecker checker = getValidationData();
 		if(!isValidUpdate(checker)) {
@@ -419,7 +419,10 @@ public class LicenseManager {
 			}
 			overwritePersistedData(existingLicenseeNumber, existingLicenseeName);
 			initManager();
+			updated = false;
 		}
+		
+		return updated;
 	}
 	
 	private boolean isValidUpdate(LicenseChecker checker) {
