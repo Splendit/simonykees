@@ -39,9 +39,9 @@ public abstract class AbstractCompilationUnitASTVisitor extends AbstractASTRewri
 		super();
 		this.iTypeMap = new HashMap<>();
 		this.fullyQuallifiedNameMap = new HashMap<>();
-		addImports = new HashSet<>();
+		this.addImports = new HashSet<>();
 	}
-
+	
 	/**
 	 * Find the corresponding types of the {@link #relevantClasses()} in the
 	 * java project of the {@link CompilationUnit} that accepts the ASTVisitor
