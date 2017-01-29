@@ -2,6 +2,8 @@ package at.splendit.simonykees.core.visitor;
 
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
@@ -31,45 +33,60 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractCompilationUni
 		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
-		if (ClassRelationUtil.isContentOfRegistertITypes(node.getType().resolveBinding(),
-				this.iTypeMap.get(STRING_KEY))) {
+		if (ClassRelationUtil.isContentOfRegistertITypes(node.getType().resolveBinding(), this.iTypeMap.get(STRING_KEY))
+				&& !(ASTNode.EXPRESSION_STATEMENT == node.getParent().getNodeType())) {
 
 			/**
 			 * node.arguments() javadoc shows that its elements are at least
 			 * Expression
 			 */
-			@SuppressWarnings("unchecked")
 			List<Expression> arguments = (List<Expression>) node.arguments();
+			Expression replacement = null;
 
-			
-			switch (arguments.size()) {
-			
-			case 0:
-				/**
-				 * new String() resolves to ""
-				 */
-				astRewrite.replace(node, node.getAST().newStringLiteral(), null);
-				break;
-				
-			case 1:
-				/**
-				 * new String("string" || StringLiteral) resolves to "string" ||
-				 * StringLiteral
-				 */
-				Expression argument = arguments.get(0);
-				if (argument instanceof StringLiteral || ClassRelationUtil
-						.isContentOfRegistertITypes(argument.resolveTypeBinding(), iTypeMap.get(STRING_KEY))) {
-					if (argument instanceof ParenthesizedExpression) {
-						argument = ASTNodeUtil.unwrapParenthesizedExpression(argument);
+			do {
+
+				switch (arguments.size()) {
+
+				case 0:
+					/**
+					 * new String() resolves to ""
+					 */
+					replacement = node.getAST().newStringLiteral();
+					arguments = null;
+					break;
+
+				case 1:
+					/**
+					 * new String("string" || StringLiteral) resolves to
+					 * "string" || StringLiteral
+					 */
+					Expression argument = arguments.get(0);
+					arguments = null;
+					if (argument instanceof StringLiteral || ClassRelationUtil
+							.isContentOfRegistertITypes(argument.resolveTypeBinding(), iTypeMap.get(STRING_KEY))) {
+						if (argument instanceof ParenthesizedExpression) {
+							argument = ASTNodeUtil.unwrapParenthesizedExpression(argument);
+						}
+						if (ASTNode.CLASS_INSTANCE_CREATION == argument.getNodeType()
+								&& ClassRelationUtil.isContentOfRegistertITypes(
+										((ClassInstanceCreation) argument).getType().resolveBinding(),
+										this.iTypeMap.get(STRING_KEY))) {
+							arguments = (List<Expression>) ((ClassInstanceCreation) argument).arguments();
+						}
+						replacement = argument;
 					}
-					astRewrite.replace(node, astRewrite.createMoveTarget(argument), null);
-				}
-				break;
+					break;
 
-			default:
-				break;
+				default:
+					arguments = null;
+					break;
+				}
+			} while (arguments != null);
+			if (replacement != null) {
+				astRewrite.replace(node, replacement, null);
 			}
 		}
 		return true;

@@ -50,7 +50,7 @@ public class TestRemoveNewStringConstructorRule {
 	}
 	
 	public String testNestedNewStringsAndConcat(String input) {
-		return input+ "-" + input + "-" + "val" + "val";
+		return input + "-" + input + "-" + "val" + "val";
 	}
 	
 	public String testNestedNewStrings(String input) {
@@ -58,7 +58,7 @@ public class TestRemoveNewStringConstructorRule {
 	}
 	
 	public String testDeepNestedNewStringCtor(String input) {
-		return new String(sampleMethod(input));
+		return sampleMethod(input);
 	}
 	
 	public String testCharArrayInput(String input) {

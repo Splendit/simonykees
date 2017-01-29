@@ -60,7 +60,7 @@ public class TestRemoveNewStringConstructorRule {
 	}
 
 	public String testDeepNestedNewStringCtor(String input) {
-		return new String(sampleMethod(input));
+		return sampleMethod(input);
 	}
 
 	public String testCharArrayInput(String input) {
