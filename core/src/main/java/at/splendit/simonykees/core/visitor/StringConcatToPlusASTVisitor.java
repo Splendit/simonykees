@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -40,7 +41,8 @@ public class StringConcatToPlusASTVisitor extends AbstractCompilationUnitASTVisi
 		if (StringUtils.equals("concat", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
 				&& (node.getExpression() instanceof SimpleName && ClassRelationUtil
 						.isContentOfRegistertITypes(node.getExpression().resolveTypeBinding(), iTypeMap.get(STRING_KEY))
-						|| node.getExpression() instanceof StringLiteral)) {
+						|| node.getExpression() instanceof StringLiteral)
+				&& ASTNode.EXPRESSION_STATEMENT != node.getParent().getNodeType()) {
 			modifyMethodInvocation.add(node);
 		}
 		return true;
