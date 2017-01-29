@@ -17,7 +17,7 @@ public class TestStringConcatToPlusRule {
 	private String sampleMethod(String param) {
 		return "method-invocation-result" + param;
 	}
-
+/*
 	public String testConcatWithLiteral(String input) {
 		return input.concat("abc");
 	}
@@ -49,7 +49,7 @@ public class TestStringConcatToPlusRule {
 	public String testConcatWithToString(String input, String param) {
 		return input.concat(param).toString();
 	}
-	
+*/	
 	public String testConcatChain(String input) {
 		return input
 				.concat("abc")

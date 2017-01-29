@@ -61,9 +61,6 @@ public class StringConcatToPlusASTVisitor extends AbstractCompilationUnitASTVisi
 			if (modifyMethodInvocation.contains(node.getParent())) {
 				recursionRightExpression = replacementNode;
 			} else {
-				if (node.getParent() instanceof MethodInvocation) {
-					replacementNode = NodeBuilder.newParenthesizedExpression(node.getAST(), replacementNode);
-				}
 				astRewrite.replace(node, replacementNode, null);
 				recursionRightExpression = null;
 			}
