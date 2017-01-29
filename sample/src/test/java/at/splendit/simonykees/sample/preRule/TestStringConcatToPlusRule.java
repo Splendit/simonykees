@@ -7,17 +7,17 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("nls")
 public class TestStringConcatToPlusRule {
-	
+
 	private static final String STATIC_VALUE = "static-value";
 
 	private String sampleMethod() {
 		return "method-invocation-result";
 	}
-	
+
 	private String sampleMethod(String param) {
 		return "method-invocation-result" + param;
 	}
-/*
+
 	public String testConcatWithLiteral(String input) {
 		return input.concat("abc");
 	}
@@ -49,56 +49,53 @@ public class TestStringConcatToPlusRule {
 	public String testConcatWithToString(String input, String param) {
 		return input.concat(param).toString();
 	}
-*/	
+
 	public String testConcatChain(String input) {
-		return input
-				.concat("abc")
-				.concat("cde")
-				.concat("fgh".concat("hij"));
+		return input.concat("abc").concat("cde").concat("fgh".concat("hij"));
 	}
-	
+
 	public String testConcatWithResultOfMethodCall(String input) {
 		return input.concat(sampleMethod());
 	}
-	
+
 	public String testConcatWithResultOfMethodCallWithParams(String input, String param) {
 		return input.concat(sampleMethod(param) + sampleMethod());
 	}
-	
+
 	public String testConcatWithNumber(String input) {
 		Number number = new BigDecimal("10.00");
 		return input.concat(number.toString());
 	}
-	
+
+	//SIM-209
 	public String testConcatWithStreamResult(String input) {
 		List<String> values = Arrays.asList("val1", "val2", input);
-		return input
-				.concat(
-						values.stream().filter(s -> s.equals(input)).collect(Collectors.joining(","))
-						.concat(values.stream().collect(Collectors.joining(";"))));
+		return input.concat(values.stream().filter(s -> s.equals(input)).collect(Collectors.joining(","))
+				.concat(values.stream().collect(Collectors.joining(";"))));
 	}
-	
+
 	public String testConcatEmptyString(String input) {
 		return input.concat("");
 	}
-	
+
 	public String testConcatEmptyCharacter(String input) {
 		return input.concat('c' + "");
 	}
-	
+
 	public String testConcatDeepNestedConcats(String input, String param) {
-		return input.concat(param.concat("a.concat()".concat("b".concat("\"c".concat("i")))) + param.concat("e".concat("d") + "h".concat("f".concat("g"))));
+		return input.concat(param.concat("a.concat()".concat("b".concat("\"c".concat("i"))))
+				+ param.concat("e".concat("d") + "h".concat("f".concat("g"))));
 	}
-	
+
 	public String testConcatInsideCodeBlock(String input, String parameter) {
 		String result = "";
 		List<String> values = Arrays.asList("val1", "val2", input);
-		
-		if("".equals(result)) {
+
+		if ("".equals(result)) {
 			result = result.concat(input);
 		}
-		
-		switch(result) {
+
+		switch (result) {
 		case "some-val":
 			result = result.concat(parameter);
 			break;
@@ -106,25 +103,25 @@ public class TestStringConcatToPlusRule {
 			result = result.concat(parameter);
 		}
 		result = result.concat(";");
-		
-		for(String key : values) {
+
+		for (String key : values) {
 			result = result.concat(key.concat(","));
 		}
-		
+
 		result = result.concat(";");
-		
+
 		return result;
 	}
-	
+
 	public String testConcatWithStaticField(String input) {
 		return input.concat(STATIC_VALUE);
 	}
-	
+
 	public String testDiscardConcatResult(String input, String parameter) {
 		input.concat(parameter);
 		return input.concat(parameter);
 	}
-	
+
 	public String testConcatInMethodInvocationParam(String input, String param) {
 		boolean startsWitParam = input.startsWith(param.concat("a"), 0);
 		return input.concat(Boolean.toString(startsWitParam));

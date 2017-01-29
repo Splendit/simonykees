@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("nls")
 public class TestStringConcatToPlusRule {
-	
+
 	private static final String STATIC_VALUE = "static-value";
 
 	private String sampleMethod() {
@@ -49,6 +49,7 @@ public class TestStringConcatToPlusRule {
 	public String testConcatWithToString(String input, String param) {
 		return (input + param).toString();
 	}
+
 	public String testConcatChain(String input) {
 		return input + "abc" + "cde" + "fgh" + "hij";
 	}
@@ -66,10 +67,11 @@ public class TestStringConcatToPlusRule {
 		return input + number.toString();
 	}
 
+	//SIM-209
 	public String testConcatWithStreamResult(String input) {
 		List<String> values = Arrays.asList("val1", "val2", input);
-		return input + values.stream().filter(s -> s.equals(input)).collect(Collectors.joining(","))
-				.concat(values.stream().collect(Collectors.joining(";")));
+		return input.concat(values.stream().filter(s -> s.equals(input)).collect(Collectors.joining(","))
+				.concat(values.stream().collect(Collectors.joining(";"))));
 	}
 
 	public String testConcatEmptyString(String input) {
@@ -81,7 +83,8 @@ public class TestStringConcatToPlusRule {
 	}
 
 	public String testConcatDeepNestedConcats(String input, String param) {
-		return input + param + "a.concat()" + "b" + "\"c" + "i" + param + "e" + "d" + "h" + "f" + "g";
+		return input + param + "a.concat()" + "b" + "\"c" + "i"
+				+ param + "e" + "d" + "h" + "f" + "g";
 	}
 
 	public String testConcatInsideCodeBlock(String input, String parameter) {
