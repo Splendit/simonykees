@@ -119,7 +119,7 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 			licenseLabel.setText(licenseLabelText);
 			
 			expiresLabel.setText(
-					Messages.SimonykeesPreferencePageLicense_jsparrow_valid_untill + extractDateFormat(expireationDate));
+					Messages.SimonykeesPreferencePageLicense_jsparrow_valid_until + extractDateFormat(expireationDate));
 		}
 
 		licenseStatusLabel.setText(status.getUserMessage());

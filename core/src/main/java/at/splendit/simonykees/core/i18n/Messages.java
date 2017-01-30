@@ -22,10 +22,6 @@ public class Messages extends NLS {
 	public static String ArithmethicAssignmentRule_name;
 	public static String BracketsToControlRule_description;
 	public static String BracketsToControlRule_name;
-	public static String ChangePreviewWizard_ChangePreview;
-	public static String ChangePreviewWizard_Wizard_Page_Description;
-	public static String ChangePreviewWizard_WizardPage;
-	public static String ChangePreviewWizard_WizardPageTitle;
 	public static String CodeFormatterRule_description;
 	public static String CodeFormatterRule_name;
 	public static String CollectionRemoveAllRule_description;
@@ -98,7 +94,7 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_selectProfile;
 	public static String SimonykeesPreferencePageLicense_jsparrow_licensed_as;
-	public static String SimonykeesPreferencePageLicense_jsparrow_valid_untill;
+	public static String SimonykeesPreferencePageLicense_jsparrow_valid_until;
 	public static String SimonykeesPreferencePageLicense_under_key_label;
 	public static String SimonykeesPreferencePageLicense_update_license_key_button;
 	public static String SimonykeesUpdateLicenseDialog_invalid_license_key;
