@@ -145,8 +145,8 @@ public class TestWhileToForRule {
 		
 		Iterator<String> iterator = l.iterator();
 		while(iterator.hasNext()) {
-			String s = iterator.next();
-			sb.append(s);
+			String outerVal = iterator.next();
+			sb.append(outerVal);
 			
 			Iterator<String> innerIt = l.iterator();
 			while(innerIt.hasNext()) {
@@ -365,17 +365,15 @@ public class TestWhileToForRule {
 		String suffix = "";
 		String prefix = "";
 		while(iterator.hasNext()) {
-		
+			String s = iterator.next();
 			result = k
 					.stream()
 					.map(key -> {
-						String s = iterator.next();
 						return s + "|" + key + ";" ;
 					}).collect(Collectors.toList());
 			
 			result.forEach(sb::append);
 		}
-		
 		return sb.toString();
 	}
 	
@@ -396,6 +394,7 @@ public class TestWhileToForRule {
 		return sb.toString();
 	}
 
+	//SIM-211
 	public String testIteratorReuse(String input) {
 		List<String> l1 = generateList(input);
 		List<String> l2 = generateList(input);

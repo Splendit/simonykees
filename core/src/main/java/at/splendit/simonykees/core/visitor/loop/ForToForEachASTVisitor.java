@@ -67,7 +67,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 					// Type is not an Iterator
 					return false;
 				}
-				IteratorDefinitionASTVisior iteratorDefinitionAstVisior = new IteratorDefinitionASTVisior(iteratorName);
+				IteratorDefinitionASTVisior iteratorDefinitionAstVisior = new IteratorDefinitionASTVisior(iteratorName, null);
 				if (1 == node.initializers().size()) {
 					((ASTNode) node.initializers().get(0)).accept(iteratorDefinitionAstVisior);
 				}
@@ -76,7 +76,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 						(SimpleName) iteratorName);
 				findNextVariableAstVisitor.setAstRewrite(this.astRewrite);
 				node.getBody().accept(findNextVariableAstVisitor);
-				if (findNextVariableAstVisitor.isTransformable() && iteratorDefinitionAstVisior.getList() != null) {
+				if (findNextVariableAstVisitor.isTransformable() && iteratorDefinitionAstVisior.getListName() != null) {
 
 					SimpleName iterationVariable = findNextVariableAstVisitor.getVariableName();
 					Type iterationType = findNextVariableAstVisitor.getIteratorVariableType();
@@ -90,7 +90,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 							(Type) astRewrite.createMoveTarget(iterationType));
 
 					Expression iterationList = (Expression) astRewrite
-							.createMoveTarget(iteratorDefinitionAstVisior.getList());
+							.createMoveTarget(iteratorDefinitionAstVisior.getListName());
 
 					EnhancedForStatement newFor = NodeBuilder.newEnhancedForStatement(node.getAST(),
 							(Statement) astRewrite.createMoveTarget(node.getBody()), iterationList,

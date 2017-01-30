@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-import org.apache.commons.lang3.StringUtils;
-
 @SuppressWarnings({ "nls", "unused" })
 public class TestWhileToForRule {
 
@@ -72,8 +70,10 @@ public class TestWhileToForRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (String s : l) {
+		String s;
+		for (String lIterator : l) {
 			Object k;
+			s = lIterator;
 			sb.append(s);
 		}
 		return sb.toString();
@@ -83,12 +83,11 @@ public class TestWhileToForRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		Iterator<String> iterator = l.iterator();
 		String s;
 		s = "lalelu";
-		while (iterator.hasNext()) {
+		for (String lIterator : l) {
 			Object k;
-			s = iterator.next();
+			s = lIterator;
 			sb.append(s);
 		}
 		return sb.toString();
@@ -98,11 +97,10 @@ public class TestWhileToForRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		Iterator<String> iterator = l.iterator();
 		String s;
-		while (iterator.hasNext()) {
+		for (String lIterator : l) {
 			Object k;
-			s = iterator.next();
+			s = lIterator;
 			sb.append(s);
 		}
 		s = "lalelu";
@@ -113,11 +111,10 @@ public class TestWhileToForRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		Iterator<String> iterator = l.iterator();
 		String s = "";
-		while (iterator.hasNext()) {
+		for (String lIterator : l) {
 			Object k;
-			s = iterator.next();
+			s = lIterator;
 			sb.append(s);
 		}
 		sb.append(s);
@@ -139,15 +136,15 @@ public class TestWhileToForRule {
 	public String testNestedWhileLoops(String input) {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
-		
-		for (String s : l) {
-			sb.append(s);
-			
-			for (String innerStr:l){
+
+		for (String outerVal : l) {
+			sb.append(outerVal);
+
+			for (String innerStr : l) {
 				sb.append(innerStr);
 			}
 		}
-		
+
 		return sb.toString();
 	}
 
@@ -172,19 +169,19 @@ public class TestWhileToForRule {
 		List<String> k = generateList(input);
 		List<String> m = generateList(input);
 		StringBuilder sb = new StringBuilder();
-		
-		for (String outerVal : l){
+
+		for (String outerVal : l) {
 			sb.append(outerVal);
-			
-			for (String kVal:k){
+
+			for (String kVal : k) {
 				sb.append(kVal);
-				
-//				FIXME SIM-173: RuleException is thrown
-//				Iterator<String> mIterator = m.iterator(); 
-//				while (mIterator.hasNext()) {
-//					String mVal = mIterator.next();
-//					sb.append(mVal);
-//				}
+
+				// FIXME SIM-173: RuleException is thrown
+				// Iterator<String> mIterator = m.iterator();
+				// while (mIterator.hasNext()) {
+				// String mVal = mIterator.next();
+				// sb.append(mVal);
+				// }
 			}
 		}
 
@@ -196,15 +193,15 @@ public class TestWhileToForRule {
 		List<String> k = generateList(input);
 		List<String> m = generateList(input);
 		StringBuilder sb = new StringBuilder();
-		
+
 		for (String outerVal : l) {
 			sb.append(outerVal);
-			
+
 			Iterator<String> kIterator = k.iterator();
 			String kVal;
 			if ((kVal = kIterator.next()) != null) {
 				sb.append(kVal);
-				
+
 				for (String mVal : m) {
 					sb.append(mVal);
 				}
@@ -237,7 +234,7 @@ public class TestWhileToForRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (String string : l) {
+		for (String lIterator : l) {
 			String p = "foo";
 			sb.append(p);
 		}
@@ -304,12 +301,14 @@ public class TestWhileToForRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
+		String s;
 		String foo = "foo";
 		String suffix = "";
 		String prefix = "";
-		for (String s : l) {
+		for (String lIterator : l) {
 			try {
 				if (l.size() > 0) {
+					s = lIterator;
 					prefix = s;
 				}
 			} catch (Exception e) {
@@ -334,14 +333,12 @@ public class TestWhileToForRule {
 		String suffix = "";
 		String prefix = "";
 		for (String s : l) {
-
 			result = k.stream().map(key -> {
 				return s + "|" + key + ";";
 			}).collect(Collectors.toList());
 
 			result.forEach(sb::append);
 		}
-
 		return sb.toString();
 	}
 
@@ -358,21 +355,27 @@ public class TestWhileToForRule {
 		return sb.toString();
 	}
 
+	// SIM-211
 	public String testIteratorReuse(String input) {
 		List<String> l1 = generateList(input);
 		List<String> l2 = generateList(input);
 		StringBuilder sb = new StringBuilder();
-		
-		for (String s:l1) {
+
+		Iterator iterator = l1.iterator();
+		while (iterator.hasNext()) {
+			String s = (String) iterator.next();
 			int i = StringUtils.length(s);
 			sb.append(s).append(i);
 		}
-		
-		for (String s:l2) {
+
+		iterator = l2.iterator();
+
+		while (iterator.hasNext()) {
+			String s = (String) iterator.next();
 			int i = StringUtils.length(s);
 			sb.append(s).append(i);
 		}
-		
+
 		return sb.toString();
 	}
 }
