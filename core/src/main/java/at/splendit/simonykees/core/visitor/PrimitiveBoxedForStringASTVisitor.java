@@ -50,7 +50,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 		 * zero arguments the expressions type where the toString is used on
 		 * needs to be a String or a StringLiteral
 		 */
-		if (StringUtils.equals(ReservedNames.MI_TO_STRING, node.getName().getFullyQualifiedName())) {
+		if (StringUtils.equals(ReservedNames.MI_TO_STRING, node.getName().getFullyQualifiedName()) && 1 >= node.arguments().size()) {
 
 			/*
 			 * First case: Integer.valueOf(myInt).toString()
@@ -110,7 +110,9 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitAS
 			if (refactorCandidateTypeBinding != null
 					&& isPrimitiveNumberClass(refactorCandidateTypeBinding.getName())) {
 				Expression moveTarget = (Expression) astRewrite.createMoveTarget(refactorCandidateExpression);
-				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY).insertLast(moveTarget, null);
+				if(node.arguments().isEmpty()){
+					astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY).insertLast(moveTarget, null);
+				}
 				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, refactorPrimitiveType, null);
 			}
 
