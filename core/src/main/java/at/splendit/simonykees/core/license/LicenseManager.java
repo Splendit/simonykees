@@ -389,38 +389,43 @@ public class LicenseManager {
 	 * @param licenseeName 	new licensee name.
 	 */
 	public boolean updateLicenseeNumber(String licenseeNumber, String licenseeName) {
-		String existingLicenseeNumber = getLicenseeNumber();
-		String existingLicenseeName = getLicenseeName();
-		Activator.log(Status.INFO, Messages.LicenseManager_updating_licensee_credentials, null);
-		setLicenseeName(licenseeName);
-		setLicenseeNumber(licenseeNumber);
-		PersistenceManager persistence = PersistenceManager.getInstance();
-		persistence.updateLicenseeData(licenseeName, licenseeNumber);
-		// re-initiate manager as a new licenseeNumber is received...
-		ValidateExecutor.shutDownScheduler();
-		initManager();
-		boolean updated = true;
-		
-		try {
-			Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE);
-		} catch (InterruptedException e) {
-			// do nothing. no hurt...
-		}
-		
-		LicenseChecker checker = getValidationData();
-		if(!isValidUpdate(checker)) {
-			Activator.log(Status.WARNING, Messages.LicenseManager_invalid_new_license_key, null);
-			setLicenseeNumber(existingLicenseeNumber);
-			setLicenseeName(existingLicenseeName);
-			if(checker != null && 
-					checker.getLicenseStatus().equals(LicenseStatus.CONNECTION_FAILURE_UNREGISTERED)) {
-				existingLicenseeNumber = ""; //$NON-NLS-1$
-				existingLicenseeName = ""; //$NON-NLS-1$
-			}
-			overwritePersistedData(existingLicenseeNumber, existingLicenseeName);
+		boolean updated = false;
+		boolean validLicensee = LicenseValidator.isValidLicensee(licenseeNumber);
+		if(validLicensee) {
+			String existingLicenseeNumber = getLicenseeNumber();
+			String existingLicenseeName = getLicenseeName();
+			Activator.log(Status.INFO, Messages.LicenseManager_updating_licensee_credentials, null);
+			setLicenseeName(licenseeName);
+			setLicenseeNumber(licenseeNumber);
+			PersistenceManager persistence = PersistenceManager.getInstance();
+			persistence.updateLicenseeData(licenseeName, licenseeNumber);
+			// re-initiate manager as a new licenseeNumber is received...
+			ValidateExecutor.shutDownScheduler();
 			initManager();
-			updated = false;
+			updated = true;
+			
+			try {
+				Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE);
+			} catch (InterruptedException e) {
+				// do nothing. no hurt...
+			}
+			
+			LicenseChecker checker = getValidationData();
+			if(!isValidUpdate(checker)) {
+				Activator.log(Status.WARNING, Messages.LicenseManager_invalid_new_license_key, null);
+				setLicenseeNumber(existingLicenseeNumber);
+				setLicenseeName(existingLicenseeName);
+				if(checker != null && 
+						checker.getLicenseStatus().equals(LicenseStatus.CONNECTION_FAILURE_UNREGISTERED)) {
+					existingLicenseeNumber = ""; //$NON-NLS-1$
+					existingLicenseeName = ""; //$NON-NLS-1$
+				}
+				overwritePersistedData(existingLicenseeNumber, existingLicenseeName);
+				initManager();
+				updated = false;
+			}
 		}
+
 		
 		return updated;
 	}
