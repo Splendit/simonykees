@@ -99,7 +99,10 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_selectProfile;
 	public static String SimonykeesPreferencePageLicense_jsparrow_licensed_as;
 	public static String SimonykeesPreferencePageLicense_jsparrow_valid_untill;
+	public static String SimonykeesPreferencePageLicense_under_key_label;
 	public static String SimonykeesPreferencePageLicense_update_license_key_button;
+	public static String SimonykeesUpdateLicenseDialog_invalid_license_key;
+	public static String SimonykeesUpdateLicenseDialog_license_updated_successfully;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_label;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_message;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_title;
