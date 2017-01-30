@@ -144,7 +144,7 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 		if(licenseType != null && expireationDate != null) {
 			licenseLabel.setText(Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as + licenseType.getLicenseName());
 			expiresLabel.setText(
-					Messages.SimonykeesPreferencePageLicense_jsparrow_valid_untill + extractDateFormat(expireationDate));
+					Messages.SimonykeesPreferencePageLicense_jsparrow_valid_until + extractDateFormat(expireationDate));
 			licenseKey = " under key " + LicenseManager.getInstance().getLicensee().getLicenseeNumber() + ".";
 		}
 		String not = !valid?"not ":"";
