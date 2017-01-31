@@ -1,14 +1,15 @@
 package at.splendit.simonykees.core.visitor;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.StringLiteral;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
@@ -28,7 +29,7 @@ public class StringConcatToPlusASTVisitor extends AbstractCompilationUnitASTVisi
 	private static final String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
 
 	private Set<MethodInvocation> modifyMethodInvocation = new HashSet<>();
-	private Expression recursionRightExpression = null;
+	private Map<MethodInvocation, Expression> alreadyReplacedExpression = new HashMap<>();
 
 	public StringConcatToPlusASTVisitor() {
 		super();
@@ -38,9 +39,11 @@ public class StringConcatToPlusASTVisitor extends AbstractCompilationUnitASTVisi
 	@Override
 	public boolean visit(MethodInvocation node) {
 		if (StringUtils.equals("concat", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
-				&& (node.getExpression() instanceof SimpleName && ClassRelationUtil
-						.isContentOfRegistertITypes(node.getExpression().resolveTypeBinding(), iTypeMap.get(STRING_KEY))
-						|| node.getExpression() instanceof StringLiteral)) {
+				&& ClassRelationUtil.isContentOfRegistertITypes(node.getExpression().resolveTypeBinding(),
+						iTypeMap.get(STRING_KEY))
+				&& ASTNode.EXPRESSION_STATEMENT != node.getParent().getNodeType() && node.arguments().size() == 1
+				&& ClassRelationUtil.isContentOfRegistertITypes(
+						((Expression) node.arguments().get(0)).resolveTypeBinding(), iTypeMap.get(STRING_KEY))) {
 			modifyMethodInvocation.add(node);
 		}
 		return true;
@@ -49,21 +52,34 @@ public class StringConcatToPlusASTVisitor extends AbstractCompilationUnitASTVisi
 	@Override
 	public void endVisit(MethodInvocation node) {
 		if (modifyMethodInvocation.contains(node)) {
-			Expression left = (Expression) astRewrite.createMoveTarget(node.getExpression());
-			Expression right = (null != recursionRightExpression) ? recursionRightExpression
-					: (Expression) astRewrite.createMoveTarget((Expression) node.arguments().get(0));
+			Expression optionalExpression = node.getExpression();
+			Expression argument = (Expression) node.arguments().get(0);
+
+			Expression left = alreadyReplacedExpression.remove(optionalExpression);
+			if (null == left) {
+				left = (Expression) astRewrite.createMoveTarget(optionalExpression);
+			}
+
+			Expression right = alreadyReplacedExpression.remove(argument);
+			if (null == right) {
+				right = (Expression) astRewrite.createMoveTarget(argument);
+			}
 
 			Expression replacementNode = NodeBuilder.newInfixExpression(node.getAST(), InfixExpression.Operator.PLUS,
 					left, right);
 
 			if (modifyMethodInvocation.contains(node.getParent())) {
-				recursionRightExpression = replacementNode;
+				alreadyReplacedExpression.put(node, replacementNode);
 			} else {
 				if (node.getParent() instanceof MethodInvocation) {
 					replacementNode = NodeBuilder.newParenthesizedExpression(node.getAST(), replacementNode);
 				}
 				astRewrite.replace(node, replacementNode, null);
-				recursionRightExpression = null;
+			}
+			modifyMethodInvocation.remove(node);
+			
+			if(modifyMethodInvocation.isEmpty()){
+				alreadyReplacedExpression.keySet().forEach(key -> astRewrite.replace(key, alreadyReplacedExpression.remove((key)), null));
 			}
 		}
 	}
