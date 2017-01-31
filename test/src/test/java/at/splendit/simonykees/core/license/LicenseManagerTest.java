@@ -37,7 +37,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	
 	@After
 	public void checkIn() {
-		LicenseManager instance = LicenseManager.getInstance();
+		LicenseManager instance = LicenseManager.getTestInstance();
 		usedSessions.forEach(sessionId -> {
 			FloatingModel floatingModel = new FloatingModel(LicenseManager.getFloatingProductModuleNumber(), ZonedDateTime.now().plusDays(356), sessionId);
 			instance.setUniqueHwId(sessionId);
@@ -66,7 +66,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	//@Test
 	public void testInitLicenseManager() {
 		// when initiating the license manager...
-		LicenseManager instance = LicenseManager.getInstance();
+		LicenseManager instance = LicenseManager.getTestInstance();
 		instance.initManager();
 		storeUsedSessionId();
 		LicenseModel licenseModel = instance.getLicenseModel();
@@ -86,7 +86,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		// having a licensee with license model from the prevalidation... 
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		ValidationResultCache cache = ValidationResultCache.getInstance();
-		LicenseManager licenseMng = LicenseManager.getInstance();
+		LicenseManager licenseMng = LicenseManager.getTestInstance();
 		licenseMng.initManager();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseModel licenseModel = licenseMng.getLicenseModel();
@@ -128,7 +128,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		LicenseeModel licensee;
 		
 		// having 3 sessions occupied (the floating model used for testing has only 3 available sessions)
-		LicenseManager licenseMng = LicenseManager.getInstance();
+		LicenseManager licenseMng = LicenseManager.getTestInstance();
 		licenseMng.initManager();// 1 occupied session
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseModel licenseModel  = licenseMng.getLicenseModel();
@@ -193,7 +193,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	//@Test
 	public void runningSchedulerAftercheckIn() throws InterruptedException {
 		// having initiated an instance of license manager for a floating licensee
-		LicenseManager licenseMng = LicenseManager.getInstance();
+		LicenseManager licenseMng = LicenseManager.getTestInstance();
 		licenseMng.initManager();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
@@ -216,13 +216,13 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	public void updateLicenseeNumber() throws InterruptedException {
 		// having an instance of license manager...
 		clearPersistedData();
-		LicenseManager licenseMng = LicenseManager.getInstance();
+		LicenseManager licenseMng = LicenseManager.getTestInstance();
 		licenseMng.initManager();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseChecker checker = licenseMng.getValidationData();
 		String oldLicenseeNumber = licenseMng.getLicenseeNumber();
 		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
-		assertTrue(checker.getLicenseeName().isEmpty());
+		assertNotNull(checker.getLicenseeName());
 		assertTrue(oldLicenseeNumber.startsWith("demo", 0));
 		
 		licenseMng.checkIn();
@@ -249,7 +249,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	public void createTryAndBuyLicensee() throws InterruptedException {
 		// having cleared the persisted data...
 		clearPersistedData();
-		LicenseManager licenseMng = LicenseManager.getInstance();
+		LicenseManager licenseMng = LicenseManager.getTestInstance();
 		licenseMng.setUniqueHwId("");
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
@@ -276,7 +276,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	public void validateDemoLicense() throws InterruptedException {
 		// having no licensee information stored
 		clearPersistedData();
-		LicenseManager licenseManager = LicenseManager.getInstance();
+		LicenseManager licenseManager = LicenseManager.getTestInstance();
 		licenseManager.setUniqueHwId("");
 		
 		// when initiating the license manager
@@ -305,7 +305,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	public void validateHwIdFailureDemoLicense() throws InterruptedException {
 		// having a demo licensee...
 		clearPersistedData();
-		LicenseManager licenseManager = LicenseManager.getInstance();
+		LicenseManager licenseManager = LicenseManager.getTestInstance();
 		licenseManager.setUniqueHwId("");
 
 		licenseManager.initManager();
@@ -334,7 +334,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	public void initiateExpiredDemoLicense() throws InterruptedException {
 		// having an expired demo licensee...
 		persistExpiredDemoLicensee();
-		LicenseManager licenseManager = LicenseManager.getInstance();
+		LicenseManager licenseManager = LicenseManager.getTestInstance();
 		licenseManager.setUniqueHwId(DEMO_EXPIRED_LICENSEE_SECRET);
 
 		// when initiating the license manager with a wrong hardware id...
@@ -349,7 +349,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	}
 	
 	private void storeUsedSessionId() {
-		LicenseManager licenseManager = LicenseManager.getInstance();
+		LicenseManager licenseManager = LicenseManager.getTestInstance();
 		LicenseModel licenseModel = licenseManager.getLicenseModel();
 		if(licenseModel instanceof FloatingModel) {
 			String sessionId = ((FloatingModel) licenseModel).getSessionId();

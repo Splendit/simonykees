@@ -110,7 +110,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	public void validateNodeLockedHwIdFailureStatus() throws InterruptedException {
 		// having a licensee with a node locked license...
 		persistNodeLockedLicensee();
-		LicenseManager licenseMenager = LicenseManager.getInstance();
+		LicenseManager licenseMenager = LicenseManager.getTestInstance();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		licenseMenager.setUniqueHwId(TEST_UNIQUE_ID_01);
