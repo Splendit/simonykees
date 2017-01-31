@@ -4,8 +4,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Optional;
 
 import org.eclipse.core.runtime.Status;
@@ -277,14 +275,7 @@ public class LicenseManager {
 	        HWDiskStore[] diskStores = hal.getDiskStores();
 
 	        if(diskStores.length > 0) {
-	        	ArrayList<HWDiskStore> diskStoresArray = new ArrayList<>(Arrays.asList(diskStores));
-	        	diskSerial = 
-	        			diskStoresArray
-	        			.stream()
-	        			.map(HWDiskStore::getSerial)
-	        			.sorted()
-	        			.findFirst()
-	        			.orElse("");
+	        	diskSerial = diskStores[0].getSerial();
 	        }
 	        
 	        setUniqueHwId(diskSerial);
@@ -306,16 +297,6 @@ public class LicenseManager {
         String diskSerial = "";
         if(diskStores.length > 0) {
         	diskSerial = diskStores[0].getSerial();
-        	if(diskSerial.length() > 26) {
-	        	ArrayList<HWDiskStore> diskStoresArray = new ArrayList<>(Arrays.asList(diskStores));
-	        	diskSerial = 
-	        			diskStoresArray
-	        			.stream()
-	        			.map(HWDiskStore::getSerial)
-	        			.sorted()
-	        			.findFirst()
-	        			.orElse("");
-        	}
         }
         
         demoLicenseeName = DEFAULT_LICENSEE_NUMBER_PREFIX + diskSerial;
