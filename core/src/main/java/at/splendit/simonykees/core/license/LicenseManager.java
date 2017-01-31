@@ -4,6 +4,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.eclipse.core.runtime.Status;
@@ -26,7 +28,6 @@ import at.splendit.simonykees.core.license.model.TryAndBuyModel;
 import oshi.SystemInfo;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HardwareAbstractionLayer;
-import oshi.hardware.NetworkIF;
 
 /**
  * Manager of the validation process. Starts the validation process, caches the
@@ -246,23 +247,22 @@ public class LicenseManager {
 		if(this.uniqueHwId != null && this.uniqueHwId.isEmpty()) {
 	        String diskSerial = "";
 			SystemInfo systemInfo = new SystemInfo();
-			
-			
 
 	        HardwareAbstractionLayer hal = systemInfo.getHardware();
 	        HWDiskStore[] diskStores = hal.getDiskStores();
 
 	        if(diskStores.length > 0) {
-	        	diskSerial = diskStores[0].getSerial();
+//	        	diskSerial = diskStores[0].getSerial();
+	        	ArrayList<HWDiskStore> diskStoresArray = new ArrayList<>(Arrays.asList(diskStores));
+	        	diskSerial = diskStoresArray
+	        	.stream()
+	        	.map(HWDiskStore::getSerial)
+	        	.sorted()
+	        	.findFirst()
+	        	.orElse("");
 	        }
 	        
-	        String mac = "";
-	        NetworkIF[] netWorkIfs = hal.getNetworkIFs();
-	        if(netWorkIfs.length > 0) {
-	        	mac = netWorkIfs[0].getMacaddr();
-	        }
-	        
-	        setUniqueHwId(diskSerial + mac);
+	        setUniqueHwId(diskSerial);
 		}
 
 		return uniqueHwId;
@@ -282,17 +282,17 @@ public class LicenseManager {
         if(diskStores.length > 0) {
         	diskSerial = diskStores[0].getSerial();
         	if(diskSerial.length() > 26) {
-        		diskSerial = diskSerial.substring(0, 25);
+	        	ArrayList<HWDiskStore> diskStoresArray = new ArrayList<>(Arrays.asList(diskStores));
+	        	diskSerial = diskStoresArray
+	        	.stream()
+	        	.map(HWDiskStore::getSerial)
+	        	.sorted()
+	        	.findFirst()
+	        	.orElse("");
         	}
         }
         
-        String mac = "";
-        NetworkIF[] netWorkIfs = hal.getNetworkIFs();
-        if(netWorkIfs.length > 0) {
-        	mac = netWorkIfs[0].getMacaddr();
-        }
-        
-        demoLicenseeName = DEFAULT_LICENSEE_NUMBER_PREFIX + mac + diskSerial;
+        demoLicenseeName = DEFAULT_LICENSEE_NUMBER_PREFIX + diskSerial;
 		
 		return demoLicenseeName;
 	}
