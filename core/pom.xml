@@ -2,15 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
-		<artifactId>simonykees</artifactId>
-		<groupId>at.splendit.simonykees</groupId>
+		<artifactId>jSparrow</artifactId>
+		<groupId>at.splendit.jSparrow</groupId>
 		<version>0.9.2-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>simonykees.core</artifactId>
+	<artifactId>jSparrow.core</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<name>simonykees :: core</name>
-	<description>simonykees Core Plugin</description>
+	<name>jSparrow :: core</name>
+	<description>jSparrow Core Plugin</description>
 
 	<dependencies>
 		<!-- eclipse -->
