@@ -1,5 +1,7 @@
 package at.splendit.simonykees.core.license;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -93,7 +95,7 @@ public class LicenseManager {
 		LicenseType licenseType;
 		ZonedDateTime evaluationExpiresDate;
 		ZonedDateTime expirationTimeStamp;
-		String licenseeName = persistenceManager.getPersistedLicenseeName().orElse(""); //$NON-NLS-1$
+		String licenseeName = persistenceManager.getPersistedLicenseeName().orElse(calcDemoLicenseeName());
 		setLicenseeName(licenseeName);
 		String licenseeNumber = persistenceManager.getPersistedLicenseeNumber().orElse(calcDemoLicenseeNumber());
 		setLicenseeNumber(licenseeNumber);
@@ -244,6 +246,8 @@ public class LicenseManager {
 		if(this.uniqueHwId != null && this.uniqueHwId.isEmpty()) {
 	        String diskSerial = "";
 			SystemInfo systemInfo = new SystemInfo();
+			
+			
 
 	        HardwareAbstractionLayer hal = systemInfo.getHardware();
 	        HWDiskStore[] diskStores = hal.getDiskStores();
@@ -289,6 +293,20 @@ public class LicenseManager {
         }
         
         demoLicenseeName = DEFAULT_LICENSEE_NUMBER_PREFIX + mac + diskSerial;
+		
+		return demoLicenseeName;
+	}
+	
+	@SuppressWarnings("nls")
+	private String calcDemoLicenseeName() {
+		String demoLicenseeName = "";
+		
+		try {
+			InetAddress address = InetAddress.getLocalHost();
+			demoLicenseeName = address.getHostName();
+		} catch (UnknownHostException e) {
+			// nothing
+		}
 		
 		return demoLicenseeName;
 	}
