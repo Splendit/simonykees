@@ -3,14 +3,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>simonykees</artifactId>
-		<groupId>at.splendit.simonykees</groupId>
-		<version>0.9.2-SNAPSHOT</version>
+		<artifactId>jSparrow</artifactId>
+		<groupId>at.splendit.jSparrow</groupId>
+		<version>0.9.2</version>
 	</parent>
-	<artifactId>simonykees.site</artifactId>
+	<artifactId>jSparrow.site</artifactId>
 	<packaging>eclipse-repository</packaging>
-	<name>simonykees :: update site</name>
-	<description>simonykees Update Site</description>
+	<name>jSparrow :: update site</name>
+	<description>jSparrow Update Site</description>
 
 	<scm>
 		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/site</url>

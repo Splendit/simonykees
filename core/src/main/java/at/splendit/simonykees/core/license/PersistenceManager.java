@@ -17,6 +17,7 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.i18n.ExceptionMessages;
 import at.splendit.simonykees.core.license.model.PersistenceModel;
+
 /**
  * Responsible for encrypting, storing and retrieving data in secure storage.
  * Furthermore, this class is also responsible for constructing a validation

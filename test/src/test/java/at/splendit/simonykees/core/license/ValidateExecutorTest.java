@@ -35,7 +35,7 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 	@Test
 	public void shutDownAndRestartScheduler() throws InterruptedException {
 		// having an instance of license manager and a running scheduler...
-		LicenseManager licenseManager = LicenseManager.getInstance();
+		LicenseManager licenseManager = LicenseManager.getTestInstance();
 		Thread.sleep(500);
 		licenseManager.setUniqueHwId(TEST_UNIQUE_ID_01);
 		licenseManager.initManager();
@@ -59,7 +59,7 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 	@Test
 	public void shutDownAndCheckLicense() throws InterruptedException {
 		// having an instance of license manager where the scheduler is shut down...
-		LicenseManager licenseManager = LicenseManager.getInstance();
+		LicenseManager licenseManager = LicenseManager.getTestInstance();
 		licenseManager.setUniqueHwId(TEST_UNIQUE_ID_01);
 		licenseManager.initManager();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);

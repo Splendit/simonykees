@@ -15,7 +15,7 @@ import com.labs64.netlicensing.domain.vo.SecurityMode;
 public class RestApiConnection {
 	private static final String REST_API_PATH = "/core/v2/rest";
 	private static final String BASE_URL_PROD = "https://go.netlicensing.io";
-	private static final String PASS_APIKEY = "bf7f1092-3c88-492f-8a52-d00823d225a8";
+	static String PASS_APIKEY = "bf7f1092-3c88-492f-8a52-d00823d225a8";
 	private static final String BASE_URL = BASE_URL_PROD + REST_API_PATH;
 	private static final Context context = new Context();
 	private static RestApiConnection instance;

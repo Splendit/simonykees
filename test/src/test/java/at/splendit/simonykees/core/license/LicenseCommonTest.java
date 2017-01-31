@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 
 import org.junit.After;
+import org.junit.BeforeClass;
 
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 
@@ -113,6 +114,11 @@ public abstract class LicenseCommonTest {
 				null, null);
 		persistenceMng.setPersistenceModel(persistenceModel);
 		persistenceMng.persist();
+	}
+	
+	@BeforeClass
+	public static void initTestLicenseManager() {
+		LicenseManager.getTestInstance();
 	}
 
 	@After
