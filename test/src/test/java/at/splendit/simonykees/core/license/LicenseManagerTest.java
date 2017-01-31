@@ -217,7 +217,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		LicenseChecker checker = licenseMng.getValidationData();
 		String oldLicenseeNumber = licenseMng.getLicenseeNumber();
 		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
-		assertTrue(checker.getLicenseeName().isEmpty());
+		assertNotNull(checker.getLicenseeName());
 		assertTrue(oldLicenseeNumber.startsWith("demo", 0));
 		
 		licenseMng.checkIn();
