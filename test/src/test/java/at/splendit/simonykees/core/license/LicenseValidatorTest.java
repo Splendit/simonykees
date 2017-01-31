@@ -180,4 +180,14 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		assertNotNull(checker.getEvaluationExpiresDate());
 		assertTrue(checker.getEvaluationExpiresDate().isBefore(ZonedDateTime.now()));
 	}
+	
+	@Test
+	public void checkExistingLicensee() {
+		boolean existingLicensee =
+				LicenseValidator.isValidLicensee(NODE_LOCKED_LICENSEE_NUMBER);
+		assertTrue(existingLicensee);
+		boolean nonExistingLicensee =
+				LicenseValidator.isValidLicensee("non-existing-licensee-number");
+		assertFalse(nonExistingLicensee);
+	}
 }

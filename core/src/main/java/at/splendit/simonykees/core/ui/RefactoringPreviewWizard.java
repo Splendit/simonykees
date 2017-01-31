@@ -44,13 +44,17 @@ public class RefactoringPreviewWizard extends Wizard {
 	 */
 	@Override
 	public boolean performFinish() {
-		try {
-			abstractRefactorer.commitRefactoring();
-		} catch (RefactoringException e) {
-			SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
-			return true;
-		} catch (ReconcileException e) {
-			SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+		if (LicenseUtil.isValid()) {
+			try {
+				abstractRefactorer.commitRefactoring();
+			} catch (RefactoringException e) {
+				SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+				return true;
+			} catch (ReconcileException e) {
+				SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+			}
+		} else {
+			LicenseUtil.displayLicenseErrorDialog(getShell());
 		}
 		return true;
 	}

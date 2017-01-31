@@ -30,14 +30,14 @@ public class ResponseParser implements LicenseChecker {
 	private LicenseStatus licenseStatus;
 	private ValidationAction validationAction;
 
-	private final String PRODUCT_MODULE_NUMBER_KEY = "productModuleNumber"; //$NON-NLS-1$
-	private final String PRODUCT_MODULE_NAME_KEY = "productModuleName";//$NON-NLS-1$
-	private final String LICENSING_MODEL_KEY = "licensingModel"; //$NON-NLS-1$
-	private final String EXPIRATION_TIME_STAMP_KEY = "expirationTimestamp"; //$NON-NLS-1$
-	private final String EVALUATION_EXPIRES_DATE_KEY = "evaluationExpires"; //$NON-NLS-1$
-	private final String VALID_KEY = "valid"; //$NON-NLS-1$
-	private final String SUBSCRIPTION_EXPIRES_KEY = "expires"; //$NON-NLS-1$
-	private final String NODE_LOCKED_FEATURE_KEY = "ETP7TSTC3"; //$NON-NLS-1$
+	private static final String PRODUCT_MODULE_NUMBER_KEY = "productModuleNumber"; //$NON-NLS-1$
+	private static final String PRODUCT_MODULE_NAME_KEY = "productModuleName";//$NON-NLS-1$
+	private static final String LICENSING_MODEL_KEY = "licensingModel"; //$NON-NLS-1$
+	private static final String EXPIRATION_TIME_STAMP_KEY = "expirationTimestamp"; //$NON-NLS-1$
+	private static final String EVALUATION_EXPIRES_DATE_KEY = "evaluationExpires"; //$NON-NLS-1$
+	private static final String VALID_KEY = "valid"; //$NON-NLS-1$
+	private static final String SUBSCRIPTION_EXPIRES_KEY = "expires"; //$NON-NLS-1$
+	private static final String NODE_LOCKED_FEATURE_KEY = "ETP7TSTC3"; //$NON-NLS-1$
 
 
 	public ResponseParser(ValidationResult validationResult, Instant timestamp, String licenseeName, ValidationAction validationAction) {
@@ -159,6 +159,24 @@ public class ResponseParser implements LicenseChecker {
 				});
 			}
 		});
+	}
+	
+	public static boolean parseLicenseeValidation(ValidationResult validationResult) {
+		boolean isValid = false;
+		Map<String, Composition> validations = validationResult.getValidations();
+		for(Map.Entry<String, Composition>entry : validations.entrySet()) {
+			Composition composition = entry.getValue();
+			Map<String, Composition> properties = composition.getProperties();
+			if(properties.containsKey(VALID_KEY)) {
+				Composition value = properties.get(VALID_KEY);
+				isValid = Boolean.valueOf(value.getValue());
+				if(isValid) {
+					break;
+				}
+			}
+		}
+		
+		return isValid;
 	}
 	
 	private void setSubscriptionExpiresDate(ZonedDateTime subscriptionExpiresDate) {

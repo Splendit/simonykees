@@ -57,11 +57,6 @@ public class LicenseManagerTest extends LicenseCommonTest {
 
 	}
 	
-	@After
-	public void waitToCompleteProcessing() throws InterruptedException {
-		clearPersistedData();
-	}
-	
 	//FIXME: tests related to floating license are temporarily removed
 	//@Test
 	public void testInitLicenseManager() {

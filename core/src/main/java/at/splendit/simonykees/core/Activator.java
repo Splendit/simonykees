@@ -12,6 +12,9 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.core.license.LicenseManager;
+
 /**
  * The activator class controls the plug-in life cycle
  * 
@@ -43,6 +46,10 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+
+		// starting the license heartbeat
+		LicenseManager.getInstance();
+		Activator.log(Messages.Activator_start);
 	}
 
 	/*
@@ -52,6 +59,13 @@ public class Activator extends AbstractUIPlugin {
 	 * BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+
+		/*
+		 * release the current license session (in case of a floating license)
+		 */
+		LicenseManager.getInstance().checkIn();
+		Activator.log(Messages.Activator_stop);
+
 		plugin = null;
 
 		synchronized (jobs) {
