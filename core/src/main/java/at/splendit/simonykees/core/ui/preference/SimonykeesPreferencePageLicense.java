@@ -122,7 +122,9 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 					Messages.SimonykeesPreferencePageLicense_jsparrow_valid_until + extractDateFormat(expireationDate));
 		}
 
-		licenseStatusLabel.setText(status.getUserMessage());
+		if(!licenseData.isValid()) {			
+			licenseStatusLabel.setText(status.getUserMessage());
+		}
 		licenseLabel.getParent().pack();
 		licenseLabel.getParent().layout(true);
 	}

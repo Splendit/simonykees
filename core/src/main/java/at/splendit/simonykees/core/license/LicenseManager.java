@@ -421,9 +421,12 @@ public class LicenseManager {
 					existingLicenseeName = ""; //$NON-NLS-1$
 				}
 				overwritePersistedData(existingLicenseeNumber, existingLicenseeName);
+				ValidateExecutor.shutDownScheduler();
 				initManager();
 				updated = false;
 			}
+		} else {
+			Activator.log(Status.WARNING, Messages.LicenseManager_invalid_new_license_key, null);
 		}
 
 		
