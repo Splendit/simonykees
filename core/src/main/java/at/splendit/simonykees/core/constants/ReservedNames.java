@@ -29,10 +29,15 @@ public final class ReservedNames {
 	public static final String BOOLEAN_FALSE = "false";
 	
 	
+	public static final String CLASS_OBJECT = "Object";
+	public static final String CLASS_ITERATOR = "Iterator";
+	
 	/** MI = Method Invocation */
 	public static final String MI_TO_STRING = "toString";
-	/** MI = Method Invocation */
 	public static final String MI_VALUE_OF = "valueOf";
+	public static final String MI_Iterator = "iterator";
+	public static final String MI_NEXT = "next";
+	public static final String MI_HAS_NEXT = "hasNext";
 	
 	
 

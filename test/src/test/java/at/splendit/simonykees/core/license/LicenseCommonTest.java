@@ -3,6 +3,8 @@ package at.splendit.simonykees.core.license;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 
+import org.junit.After;
+
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 
 /**
@@ -113,4 +115,8 @@ public abstract class LicenseCommonTest {
 		persistenceMng.persist();
 	}
 
+	@After
+	public void waitToCompleteProcessing() throws InterruptedException {
+		clearPersistedData();
+	}
 }

@@ -84,6 +84,7 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 		createRulesCheckboxTableViewer(sashForm);
 		createRuleDescriptionViewer(sashForm);
 
+		sashForm.setWeights(new int[] { 4, 3 });
 	}
 
 	/**

@@ -52,5 +52,18 @@ public class LicenseValidator {
 			Activator.log(Status.WARNING, Messages.LicenseValidator_cannot_reach_license_provider_on_validation_call, e);
 		}
 	}
+	
+	public static boolean isValidLicensee(String licenseeNumber) {
+		boolean validLicensee = false;
+		Context context = RestApiConnection.getAPIRestConnection().getContext();
+		try {
+			ValidationResult validationResult = LicenseeService.validate(context, licenseeNumber, new ValidationParameters());
+			validLicensee = ResponseParser.parseLicenseeValidation(validationResult);
+		} catch (NetLicensingException e) {
+			Activator.log(Status.WARNING, Messages.LicenseValidator_invalid_licensee_number, e);
+		}
+		
+		return validLicensee;
+	}
 
 }

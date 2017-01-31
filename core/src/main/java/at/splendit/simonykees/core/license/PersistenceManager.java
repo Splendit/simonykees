@@ -208,8 +208,8 @@ public class PersistenceManager {
 			this.valid = calcValidity(persistence);
 			this.validationTimestamp = persistence.getLastValidationTimestamp().orElse(null);
 			this.licenseeName = persistence.getLicenseeName().orElse(EMPTY_STRING);
-			this.licenseStatus = LicenseStatus.CONNECTION_FAILURE;
-			this.expirationDate = persistence.getSubscriptionExpirationDate().orElse(null);
+			this.licenseStatus = calcLicenseStatus();
+			this.expirationDate = calcExpirationDate(persistence);
 			
 		}
 
@@ -221,6 +221,26 @@ public class PersistenceManager {
 		@Override
 		public boolean isValid() {
 			return valid;
+		}
+		
+		private LicenseStatus calcLicenseStatus() {
+			LicenseStatus status = LicenseStatus.CONNECTION_FAILURE;
+			if(getType() == null) {
+				status = LicenseStatus.CONNECTION_FAILURE_UNREGISTERED;
+			}
+			return status;
+		}
+		
+		private ZonedDateTime calcExpirationDate(PersistenceModel persistenceModel) {
+			ZonedDateTime expirationDate;
+			
+			if(getType() != null && getType().equals(LicenseType.TRY_AND_BUY)) {
+				expirationDate = persistenceModel.getDemoExpirationDate().orElse(null);
+			} else {
+				expirationDate = persistenceModel.getSubscriptionExpirationDate().orElse(null);
+			}
+			
+			return expirationDate;
 		}
 		
 		private boolean calcValidity(PersistenceModel persistence) {
