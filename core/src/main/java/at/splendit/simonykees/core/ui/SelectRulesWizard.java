@@ -68,7 +68,7 @@ public class SelectRulesWizard extends Wizard {
 			SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
 		}
 
-		if (LicenseHelper.isValid()) {
+		if (LicenseUtil.isValid()) {
 			if (refactorer.hasChanges()) {
 				final WizardDialog dialog = new WizardDialog(getShell(), new RefactoringPreviewWizard(refactorer));
 
@@ -85,7 +85,7 @@ public class SelectRulesWizard extends Wizard {
 				dialog.open();
 			}
 		} else {
-			LicenseHelper.displayLicenseErrorDialog(getShell());
+			LicenseUtil.displayLicenseErrorDialog(getShell());
 		}
 
 		return true;

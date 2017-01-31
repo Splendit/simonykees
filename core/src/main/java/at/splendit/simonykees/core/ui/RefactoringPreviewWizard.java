@@ -44,7 +44,7 @@ public class RefactoringPreviewWizard extends Wizard {
 	 */
 	@Override
 	public boolean performFinish() {
-		if (LicenseHelper.isValid()) {
+		if (LicenseUtil.isValid()) {
 			try {
 				abstractRefactorer.commitRefactoring();
 			} catch (RefactoringException e) {
@@ -54,7 +54,7 @@ public class RefactoringPreviewWizard extends Wizard {
 				SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
 			}
 		} else {
-			LicenseHelper.displayLicenseErrorDialog(getShell());
+			LicenseUtil.displayLicenseErrorDialog(getShell());
 		}
 		return true;
 	}

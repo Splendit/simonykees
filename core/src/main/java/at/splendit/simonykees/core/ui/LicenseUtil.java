@@ -15,7 +15,7 @@ import at.splendit.simonykees.core.license.LicenseManager;
  * @author Ludwig Werzowa
  * @since 1.0
  */
-public class LicenseHelper {
+public class LicenseUtil {
 
 	public static boolean isValid() {
 		return LicenseManager.getInstance().getValidationData().isValid();
