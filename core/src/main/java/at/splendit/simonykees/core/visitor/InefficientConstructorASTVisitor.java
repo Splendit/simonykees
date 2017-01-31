@@ -57,22 +57,19 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 			SimpleName refactorPrimitiveType = (SimpleName) node.getExpression();
 			ITypeBinding refactorPrimitiveTypeBinding = refactorPrimitiveType.resolveTypeBinding();
 			Expression refactorCandidateParameter = (Expression) node.arguments().get(0);
-			ITypeBinding refactorCandidateTypeBinding = refactorCandidateParameter.resolveTypeBinding();
+
+			Expression replaceParameter;
+
 			if (null != refactorPrimitiveTypeBinding && isBooleanClass(refactorPrimitiveTypeBinding.getName())) {
 				if (ASTNode.STRING_LITERAL == refactorCandidateParameter.getNodeType()) {
 					StringLiteral stringParameter = (StringLiteral) refactorCandidateParameter;
 					if (ReservedNames.BOOLEAN_TRUE.equals(stringParameter.getLiteralValue())) {
-						refactorCandidateParameter = node.getAST().newBooleanLiteral(true);
+						replaceParameter = node.getAST().newBooleanLiteral(true);
 					} else {
-						refactorCandidateParameter = node.getAST().newBooleanLiteral(false);
+						replaceParameter = node.getAST().newBooleanLiteral(false);
 					}
-				} else if (ClassRelationUtil.isContentOfRegistertITypes(refactorCandidateTypeBinding,
-						iTypeMap.get(STRING_KEY))) {
-					return true;
-				} else {
-					refactorCandidateParameter = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
+					astRewrite.replace(refactorCandidateParameter, replaceParameter, null);
 				}
-				astRewrite.replace(node, refactorCandidateParameter, null);
 			}
 		}
 		return true;
@@ -97,14 +94,14 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 			 * boolean case
 			 */
 			if (isBooleanClass(refactorPrimitiveTypeBinding.getName())) {
-				boolean wrapIfParentMethodInvocation = false;
+				// boolean wrapIfParentMethodInvocation = false;
 
 				/*
 				 * all string-literals transformed to its boolean counterpart
 				 */
 				if (ASTNode.STRING_LITERAL == refactorCandidateParameter.getNodeType()) {
 					StringLiteral stringParameter = (StringLiteral) refactorCandidateParameter;
-					wrapIfParentMethodInvocation = true;
+					// wrapIfParentMethodInvocation = true;
 					if (ReservedNames.BOOLEAN_TRUE.equals(stringParameter.getLiteralValue())) {
 						replacement = node.getAST().newBooleanLiteral(true);
 					} else {
@@ -115,25 +112,19 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 				/* wrapping string variables into Boolean.valueOf(...) */
 				else if (ClassRelationUtil.isContentOfRegistertITypes(refactorCandidateTypeBinding,
 						iTypeMap.get(STRING_KEY))) {
-					SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(), ReservedNames.MI_VALUE_OF);
-					replacement = NodeBuilder.newMethodInvocation(node.getAST(),
-							(SimpleName) astRewrite.createMoveTarget(refactorPrimitiveType), valueOfInvocation,
-							(SimpleName) astRewrite.createMoveTarget(refactorCandidateParameter));
+					replacement = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
 				}
 
 				/* primitive booleans */
 				else if (isBooleanClass(refactorCandidateTypeBinding.getName())) {
 					replacement = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
-					wrapIfParentMethodInvocation = refactorCandidateTypeBinding.isPrimitive();
 				}
 
-				/* wrap if object is needed */
-				if (ASTNode.METHOD_INVOCATION == node.getParent().getNodeType() && wrapIfParentMethodInvocation) {
-					SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(), ReservedNames.MI_VALUE_OF);
-					replacement = NodeBuilder.newMethodInvocation(node.getAST(),
-							(SimpleName) astRewrite.createMoveTarget(refactorPrimitiveType), valueOfInvocation,
-							replacement);
-				}
+				/* wrap object */
+				SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(), ReservedNames.MI_VALUE_OF);
+				replacement = NodeBuilder.newMethodInvocation(node.getAST(),
+						(SimpleName) astRewrite.createMoveTarget(refactorPrimitiveType), valueOfInvocation,
+						replacement);
 			}
 
 			/*
@@ -155,31 +146,16 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 					return true;
 				}
 
-				/* wrapping string variables into PrimitiveType.valueOf(...) */
-				if (ClassRelationUtil.isContentOfRegistertITypes(refactorCandidateTypeBinding,
-						iTypeMap.get(STRING_KEY))) {
+				/*
+				 * wrapping string and primitive input parameter into
+				 * PrimitiveType.valueOf(...)
+				 */
+				if (ClassRelationUtil.isContentOfRegistertITypes(refactorCandidateTypeBinding, iTypeMap.get(STRING_KEY))
+						|| isPrimitiveTypeClass(refactorCandidateTypeBinding.getName())) {
 					SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(), ReservedNames.MI_VALUE_OF);
 					replacement = NodeBuilder.newMethodInvocation(node.getAST(),
 							(SimpleName) astRewrite.createMoveTarget(refactorPrimitiveType), valueOfInvocation,
 							(Expression) astRewrite.createMoveTarget(refactorCandidateParameter));
-				}
-
-				/* primitive input parameters */
-				else if (isPrimitiveTypeClass(refactorCandidateTypeBinding.getName())) {
-					replacement = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
-
-					/*
-					 * if the new object is part of a method invocation it needs
-					 * to be wrapped into a object
-					 */
-					if (ASTNode.METHOD_INVOCATION == node.getParent().getNodeType()
-							&& refactorCandidateTypeBinding.isPrimitive()) {
-						SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(),
-								ReservedNames.MI_VALUE_OF);
-						replacement = NodeBuilder.newMethodInvocation(node.getAST(),
-								(SimpleName) astRewrite.createMoveTarget(refactorPrimitiveType), valueOfInvocation,
-								replacement);
-					}
 				}
 			}
 			if (replacement != null) {

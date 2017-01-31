@@ -19,6 +19,7 @@ import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.i18n.ExceptionMessages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
@@ -122,6 +123,10 @@ public abstract class AbstractRefactorer {
 			// if any exception is thrown discard all changes from this rule
 			try {
 				refactoringRule.generateDocumentChanges(workingCopies);
+				
+				if(refactoringRule instanceof TryWithResourceRule){
+					refactoringRule.generateDocumentChanges(workingCopies);
+				}
 			} catch (JavaModelException | ReflectiveOperationException e) {
 				Activator.log(Status.ERROR, e.getMessage(), e);
 				notWorkingRules.add(refactoringRule.getName());
