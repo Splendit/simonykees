@@ -20,6 +20,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 	private static final Integer STRING_KEY = 1;
 	private static final String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
 
+	private static final Integer STRING_UTILS_KEY = 2;
 	private static final String STRING_UTILS_FULLY_QUALLIFIED_NAME = "org.apache.commons.lang3.StringUtils"; //$NON-NLS-1$
 
 	private static final String STRING_UTILS = "StringUtils"; //$NON-NLS-1$
@@ -52,8 +53,9 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 	public StringUtilsASTVisitor() {
 		super();
 		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
+		this.fullyQuallifiedNameMap.put(STRING_UTILS_KEY, generateFullyQuallifiedNameList(STRING_UTILS_FULLY_QUALLIFIED_NAME));
 	}
-
+	
 	@Override
 	public boolean visit(MethodInvocation node) {
 		Expression optionalExpression = node.getExpression();

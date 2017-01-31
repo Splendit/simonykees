@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -17,6 +18,7 @@ import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 
+import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeException;
 import at.splendit.simonykees.core.i18n.ExceptionMessages;
 
@@ -67,12 +69,14 @@ public abstract class AbstractCompilationUnitASTVisitor extends AbstractASTRewri
 							categoryTypeList.add(classtype);
 						}
 					} else {
-						throw new ITypeNotFoundRuntimeException();
+						Activator.log(Status.ERROR, "Class not in classpath" ,new ITypeNotFoundRuntimeException()); //$NON-NLS-1$
+						return false;
 					}
 				}
 			}
 		} catch (JavaModelException e) {
-			throw new ITypeNotFoundRuntimeException(e);
+			Activator.log(Status.ERROR, e.getMessage() ,new ITypeNotFoundRuntimeException());
+			return false;
 		}
 		return true;
 	}
