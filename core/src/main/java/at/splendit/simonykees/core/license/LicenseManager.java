@@ -252,14 +252,14 @@ public class LicenseManager {
 	        HWDiskStore[] diskStores = hal.getDiskStores();
 
 	        if(diskStores.length > 0) {
-//	        	diskSerial = diskStores[0].getSerial();
 	        	ArrayList<HWDiskStore> diskStoresArray = new ArrayList<>(Arrays.asList(diskStores));
-	        	diskSerial = diskStoresArray
-	        	.stream()
-	        	.map(HWDiskStore::getSerial)
-	        	.sorted()
-	        	.findFirst()
-	        	.orElse("");
+	        	diskSerial = 
+	        			diskStoresArray
+	        			.stream()
+	        			.map(HWDiskStore::getSerial)
+	        			.sorted()
+	        			.findFirst()
+	        			.orElse("");
 	        }
 	        
 	        setUniqueHwId(diskSerial);
@@ -283,12 +283,13 @@ public class LicenseManager {
         	diskSerial = diskStores[0].getSerial();
         	if(diskSerial.length() > 26) {
 	        	ArrayList<HWDiskStore> diskStoresArray = new ArrayList<>(Arrays.asList(diskStores));
-	        	diskSerial = diskStoresArray
-	        	.stream()
-	        	.map(HWDiskStore::getSerial)
-	        	.sorted()
-	        	.findFirst()
-	        	.orElse("");
+	        	diskSerial = 
+	        			diskStoresArray
+	        			.stream()
+	        			.map(HWDiskStore::getSerial)
+	        			.sorted()
+	        			.findFirst()
+	        			.orElse("");
         	}
         }
         
