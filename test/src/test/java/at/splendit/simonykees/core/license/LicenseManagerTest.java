@@ -57,11 +57,6 @@ public class LicenseManagerTest extends LicenseCommonTest {
 
 	}
 	
-	@After
-	public void waitToCompleteProcessing() throws InterruptedException {
-		clearPersistedData();
-	}
-	
 	//FIXME: tests related to floating license are temporarily removed
 	//@Test
 	public void testInitLicenseManager() {
@@ -222,7 +217,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		LicenseChecker checker = licenseMng.getValidationData();
 		String oldLicenseeNumber = licenseMng.getLicenseeNumber();
 		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
-		assertTrue(checker.getLicenseeName().isEmpty());
+		assertNotNull(checker.getLicenseeName());
 		assertTrue(oldLicenseeNumber.startsWith("demo", 0));
 		
 		licenseMng.checkIn();

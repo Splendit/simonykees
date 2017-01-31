@@ -200,7 +200,7 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 		assertTrue(checker.isValid());
 		assertEquals(LicenseStatus.CONNECTION_FAILURE, checker.getLicenseStatus());
 		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
-		assertEquals(subscriptionExpires, checker.getExpirationDate());
+		assertEquals(demoExpireDate, checker.getExpirationDate());
 		assertEquals("floating test-name", checker.getLicenseeName());
 		assertEquals(nowMin30sec, checker.getValidationTimeStamp());
 	}
@@ -235,7 +235,7 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 		assertFalse(checker.isValid());
 		assertEquals(LicenseStatus.CONNECTION_FAILURE, checker.getLicenseStatus());
 		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
-		assertEquals(subscriptionExpires, checker.getExpirationDate());
+		assertEquals(demoExpireDate, checker.getExpirationDate());
 		assertEquals("floating test-name", checker.getLicenseeName());
 		assertEquals(nowMin1300sec, checker.getValidationTimeStamp());
 	}

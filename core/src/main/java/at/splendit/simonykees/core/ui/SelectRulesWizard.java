@@ -68,19 +68,24 @@ public class SelectRulesWizard extends Wizard {
 			SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
 		}
 
-		if (refactorer.hasChanges()) {
-			final WizardDialog dialog = new WizardDialog(getShell(), new RefactoringPreviewWizard(refactorer));
+		if (LicenseUtil.isValid()) {
+			if (refactorer.hasChanges()) {
+				final WizardDialog dialog = new WizardDialog(getShell(), new RefactoringPreviewWizard(refactorer));
 
-			Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
+				Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
 
-			// maximizes the RefactoringPreviewWizard
-			dialog.setPageSize(rectangle.width, rectangle.height);
+				// maximizes the RefactoringPreviewWizard
+				dialog.setPageSize(rectangle.width, rectangle.height);
 
-			dialog.open();
+				dialog.open();
+			} else {
+				MessageDialog dialog = new MessageDialog(getShell(), Messages.aa_codename, null,
+						Messages.SelectRulesWizard_warning_no_refactorings, MessageDialog.INFORMATION, 1,
+						Messages.ui_ok);
+				dialog.open();
+			}
 		} else {
-			MessageDialog dialog = new MessageDialog(getShell(), Messages.aa_codename, null,
-					Messages.SelectRulesWizard_warning_no_refactorings, MessageDialog.INFORMATION, 1, Messages.ui_ok);
-			dialog.open();
+			LicenseUtil.displayLicenseErrorDialog(getShell());
 		}
 
 		return true;

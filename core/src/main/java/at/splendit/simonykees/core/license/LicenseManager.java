@@ -1,7 +1,11 @@
 package at.splendit.simonykees.core.license;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.eclipse.core.runtime.Status;
@@ -24,7 +28,6 @@ import at.splendit.simonykees.core.license.model.TryAndBuyModel;
 import oshi.SystemInfo;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HardwareAbstractionLayer;
-import oshi.hardware.NetworkIF;
 
 /**
  * Manager of the validation process. Starts the validation process, caches the
@@ -93,7 +96,7 @@ public class LicenseManager {
 		LicenseType licenseType;
 		ZonedDateTime evaluationExpiresDate;
 		ZonedDateTime expirationTimeStamp;
-		String licenseeName = persistenceManager.getPersistedLicenseeName().orElse(""); //$NON-NLS-1$
+		String licenseeName = persistenceManager.getPersistedLicenseeName().orElse(calcDemoLicenseeName());
 		setLicenseeName(licenseeName);
 		String licenseeNumber = persistenceManager.getPersistedLicenseeNumber().orElse(calcDemoLicenseeNumber());
 		setLicenseeNumber(licenseeNumber);
@@ -249,16 +252,17 @@ public class LicenseManager {
 	        HWDiskStore[] diskStores = hal.getDiskStores();
 
 	        if(diskStores.length > 0) {
-	        	diskSerial = diskStores[0].getSerial();
+	        	ArrayList<HWDiskStore> diskStoresArray = new ArrayList<>(Arrays.asList(diskStores));
+	        	diskSerial = 
+	        			diskStoresArray
+	        			.stream()
+	        			.map(HWDiskStore::getSerial)
+	        			.sorted()
+	        			.findFirst()
+	        			.orElse("");
 	        }
 	        
-	        String mac = "";
-	        NetworkIF[] netWorkIfs = hal.getNetworkIFs();
-	        if(netWorkIfs.length > 0) {
-	        	mac = netWorkIfs[0].getMacaddr();
-	        }
-	        
-	        setUniqueHwId(diskSerial + mac);
+	        setUniqueHwId(diskSerial);
 		}
 
 		return uniqueHwId;
@@ -278,17 +282,32 @@ public class LicenseManager {
         if(diskStores.length > 0) {
         	diskSerial = diskStores[0].getSerial();
         	if(diskSerial.length() > 26) {
-        		diskSerial = diskSerial.substring(0, 25);
+	        	ArrayList<HWDiskStore> diskStoresArray = new ArrayList<>(Arrays.asList(diskStores));
+	        	diskSerial = 
+	        			diskStoresArray
+	        			.stream()
+	        			.map(HWDiskStore::getSerial)
+	        			.sorted()
+	        			.findFirst()
+	        			.orElse("");
         	}
         }
         
-        String mac = "";
-        NetworkIF[] netWorkIfs = hal.getNetworkIFs();
-        if(netWorkIfs.length > 0) {
-        	mac = netWorkIfs[0].getMacaddr();
-        }
-        
-        demoLicenseeName = DEFAULT_LICENSEE_NUMBER_PREFIX + mac + diskSerial;
+        demoLicenseeName = DEFAULT_LICENSEE_NUMBER_PREFIX + diskSerial;
+		
+		return demoLicenseeName;
+	}
+	
+	@SuppressWarnings("nls")
+	private String calcDemoLicenseeName() {
+		String demoLicenseeName = "";
+		
+		try {
+			InetAddress address = InetAddress.getLocalHost();
+			demoLicenseeName = address.getHostName();
+		} catch (UnknownHostException e) {
+			// nothing
+		}
 		
 		return demoLicenseeName;
 	}
@@ -376,22 +395,76 @@ public class LicenseManager {
 
 	/**
 	 * Overwrites the existing license name and number with 
-	 * the given ones. From the moment of calling this method,
-	 * the new licensee name and number will be used on the
+	 * the given ones, unless the new licensee number does 
+	 * not belong to an existing licensee (in which case, 
+	 * a fall-back to existing licensee is performed). 
+	 * 
+	 * If the update process is successful (i.e the given
+	 * licensee number belongs to an existing licensee), 
+	 * the new credentials will be used for future 
 	 * validation calls.
 	 * 
 	 * @param licenseeNumber new licensee number.
 	 * @param licenseeName 	new licensee name.
 	 */
-	public void updateLicenseeNumber(String licenseeNumber, String licenseeName) {
-		Activator.log(Status.INFO, Messages.LicenseManager_updating_licensee_credentials, null);
-		setLicenseeName(licenseeName);
-		setLicenseeNumber(licenseeNumber);
-		PersistenceManager persistence = PersistenceManager.getInstance();
-		persistence.updateLicenseeData(licenseeName, licenseeNumber);
-		// re-initiate manager as a new licenseeNumber is received...
-		ValidateExecutor.shutDownScheduler();
-		initManager();
+	public boolean updateLicenseeNumber(String licenseeNumber, String licenseeName) {
+		boolean updated = false;
+		boolean validLicensee = LicenseValidator.isValidLicensee(licenseeNumber);
+		if(validLicensee) {
+			String existingLicenseeNumber = getLicenseeNumber();
+			String existingLicenseeName = getLicenseeName();
+			Activator.log(Status.INFO, Messages.LicenseManager_updating_licensee_credentials, null);
+			setLicenseeName(licenseeName);
+			setLicenseeNumber(licenseeNumber);
+			PersistenceManager persistence = PersistenceManager.getInstance();
+			persistence.updateLicenseeData(licenseeName, licenseeNumber);
+			// re-initiate manager as a new licenseeNumber is received...
+			ValidateExecutor.shutDownScheduler();
+			initManager();
+			updated = true;
+			
+			try {
+				Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE);
+			} catch (InterruptedException e) {
+				// do nothing. no hurt...
+			}
+			
+			LicenseChecker checker = getValidationData();
+			if(!isValidUpdate(checker)) {
+				Activator.log(Status.WARNING, Messages.LicenseManager_invalid_new_license_key, null);
+				setLicenseeNumber(existingLicenseeNumber);
+				setLicenseeName(existingLicenseeName);
+				if(checker != null && 
+						checker.getLicenseStatus().equals(LicenseStatus.CONNECTION_FAILURE_UNREGISTERED)) {
+					existingLicenseeNumber = ""; //$NON-NLS-1$
+					existingLicenseeName = ""; //$NON-NLS-1$
+				}
+				overwritePersistedData(existingLicenseeNumber, existingLicenseeName);
+				ValidateExecutor.shutDownScheduler();
+				initManager();
+				updated = false;
+			}
+		} else {
+			Activator.log(Status.WARNING, Messages.LicenseManager_invalid_new_license_key, null);
+		}
+
+		
+		return updated;
+	}
+	
+	private boolean isValidUpdate(LicenseChecker checker) {
+		boolean valid = false;
+		
+		if(checker != null && 
+				!checker.getLicenseStatus().equals(LicenseStatus.CONNECTION_FAILURE) &&
+				!checker.getLicenseStatus().equals(LicenseStatus.CONNECTION_FAILURE_UNREGISTERED) &&
+				checker.getType() != null &&
+				!checker.getType().equals(LicenseType.TRY_AND_BUY) &&
+				checker.isValid()) {
+			valid = true;
+		}
+		
+		return valid;
 	}
 	
 	String getLicenseeNumber() {
@@ -444,10 +517,10 @@ public class LicenseManager {
 			this.valid = parser.isValid();
 			this.subscriptionValid = parser.getSubscriptionStatus();
 			this.timestamp = parser.getValidationTimeStamp();
-			this.expirationDate =  calcExpireDate(parser);
 			this.licenseeName = parser.getLicenseeName();
 			this.parsedExpirationDate = parser.getExpirationDate();
 			calcLicenseStatus(lastSuccessType, lastSussessTimestamp);
+			this.expirationDate =  calcExpireDate(parser);
 			
 		}
 
@@ -503,7 +576,7 @@ public class LicenseManager {
 		public ZonedDateTime calcExpireDate(ResponseParser parser) {
 			LicenseType type = parser.getType();
 			ZonedDateTime expireDate = null;
-			if(type.equals(LicenseType.TRY_AND_BUY)) {
+			if(LicenseType.TRY_AND_BUY.equals(type)) {
 				expireDate = parser.getEvaluationExpiresDate();
 			} else {
 				expireDate = parser.getExpirationDate();
@@ -545,6 +618,19 @@ public class LicenseManager {
 			return expirationDate;
 		}
 		
+	}
+	
+	private void overwritePersistedData(String licenseeNumber, String licenseeName) {
+		PersistenceModel persistenceModel = new PersistenceModel(
+				licenseeNumber, 
+				licenseeName, 
+				false,
+				null, null, null, null, null, 
+				false, 
+				null, null);
+		PersistenceManager persistence = PersistenceManager.getInstance();
+		persistence.setPersistenceModel(persistenceModel);
+		persistence.persist();
 	}
 
 }
