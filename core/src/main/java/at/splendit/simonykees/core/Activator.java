@@ -24,7 +24,7 @@ import at.splendit.simonykees.core.license.LicenseManager;
 public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "simonykees.core"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "jSparrow.core"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Activator plugin;
