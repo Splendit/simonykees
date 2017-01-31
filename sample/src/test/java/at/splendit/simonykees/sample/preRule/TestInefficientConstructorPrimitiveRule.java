@@ -62,4 +62,26 @@ public class TestInefficientConstructorPrimitiveRule {
 	Byte b1 = new Byte((byte) 1);
 	Byte b3 = new Byte("1");
 
+	public Number doubleToNumberTest() {
+		return new TestNumberConstructor(2d).getValue();
+	}
+
+	private static class TestNumberConstructor {
+
+		private Number value;
+
+		protected TestNumberConstructor(double value) {
+			this(new Double(value));
+		}
+
+		protected TestNumberConstructor(Number value) {
+			this.value = value;
+		}
+
+		protected Number getValue() {
+			return this.value;
+		}
+
+	}
+
 }
