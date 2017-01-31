@@ -39,10 +39,10 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	public void checkIn() {
 		LicenseManager instance = LicenseManager.getTestInstance();
 		usedSessions.forEach(sessionId -> {
-			FloatingModel floatingModel = new FloatingModel(LicenseManager.getFloatingProductModuleNumber(), ZonedDateTime.now().plusDays(356), sessionId);
+			FloatingModel floatingModel = new FloatingModel(LicenseManager.getTestFloatingProductModuleNumber(), ZonedDateTime.now().plusDays(356), sessionId);
 			instance.setUniqueHwId(sessionId);
 			
-			LicenseeModel licensee = new LicenseeModel("", instance.getLicenseeNumber(), floatingModel, LicenseManager.getProductNumber());
+			LicenseeModel licensee = new LicenseeModel("", instance.getLicenseeNumber(), floatingModel, LicenseManager.getTestProductNumber());
 			instance.setLicensee(licensee);
 			instance.setLicenseModel(floatingModel);
 			

@@ -100,10 +100,10 @@ public class LicenseManager {
 	}
 	
 	synchronized static LicenseManager getTestInstance() {
-		if (instance == null) {
+		RestApiConnection.PASS_APIKEY = PASS_APIKEY_TEST;
+		if (instance == null || PRODUCT_NUMBER == PRODUCT_NUMBER_PRODUCTION) {
 			PRODUCT_NUMBER = PRODUCT_NUMBER_TEST;
 			PRODUCT_MODULE_NUMBER = PRODUCT_MODULE_NUMBER_TEST;
-			RestApiConnection.PASS_APIKEY = PASS_APIKEY_TEST;
 			instance = new LicenseManager();
 		}
 		return instance;
@@ -512,12 +512,12 @@ public class LicenseManager {
 	    throw new CloneNotSupportedException(); 
 	}
 
-	static String getFloatingProductModuleNumber() {
-		return PRODUCT_MODULE_NUMBER;
+	static String getTestFloatingProductModuleNumber() {
+		return PRODUCT_MODULE_NUMBER_TEST;
 	}
 	
-	static String getProductNumber() {
-		return PRODUCT_NUMBER;
+	static String getTestProductNumber() {
+		return PRODUCT_NUMBER_TEST;
 	}
 	
 	private class CheckerImpl implements LicenseChecker {
