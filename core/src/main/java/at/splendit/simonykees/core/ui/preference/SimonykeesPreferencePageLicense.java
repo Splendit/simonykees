@@ -124,6 +124,8 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 
 		if(!licenseData.isValid()) {			
 			licenseStatusLabel.setText(status.getUserMessage());
+		} else {
+			licenseStatusLabel.setText("");; //$NON-NLS-1$
 		}
 		licenseLabel.getParent().pack();
 		licenseLabel.getParent().layout(true);
