@@ -2,6 +2,12 @@ package at.splendit.simonykees.core.exception;
 
 import at.splendit.simonykees.core.i18n.ExceptionMessages;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter
+ * @since 0.9
+ */
 public class SimonykeesException extends Exception {
 	private static final long serialVersionUID = 4654641184128521329L;
 

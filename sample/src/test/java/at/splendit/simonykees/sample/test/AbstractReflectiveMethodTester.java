@@ -3,12 +3,15 @@ package at.splendit.simonykees.sample.test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -16,10 +19,10 @@ import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
+
 /**
- * TODO: discuss logging: use logger / leave as is / toggle logging / remove
- * logging
- * 
  * This class makes it easy to take two classes with the same methods and assert
  * that every corresponding return value (of methods with the same name),
  * returns the same value.
@@ -27,16 +30,31 @@ import org.junit.internal.ArrayComparisonFailure;
  * Only methods with return values are taken into account. Only methods where
  * the parameter types match the types of parameterizedValues, are taken into
  * account.
+ * 
+ * @author Ludwig Werzowa, Martin Huter, Hannes Schweighofer
+ * @since 0.9
  */
+@SuppressWarnings("nls")
 public abstract class AbstractReflectiveMethodTester {
 
 	private static Logger log = LogManager.getLogger(AbstractReflectiveMethodTester.class);
 
-	// parameterized values
-	private Object[] parameterizedValues;
+	private ParameterType parameterType;
 
-	public AbstractReflectiveMethodTester(Object... parameterizedValues) {
-		this.parameterizedValues = parameterizedValues;
+	// parameterized value
+	private Object parameterizedValue;
+
+	public AbstractReflectiveMethodTester(ParameterType parameterType, Object parameterizedValue) {
+
+		assertTrue(
+				String.format("ParameterType [%s] does not allow parameter values of type [%s]", parameterType.name(),
+						parameterizedValue.getClass().getSimpleName()),
+				parameterType.allowsType(parameterizedValue.getClass()));
+
+		getHolder().incrementValueCounter(parameterType);
+
+		this.parameterType = parameterType;
+		this.parameterizedValue = parameterizedValue;
 	}
 
 	/**
@@ -53,17 +71,16 @@ public abstract class AbstractReflectiveMethodTester {
 	 */
 	protected abstract PreAndPostClassHolder getHolder();
 
-	@SuppressWarnings("nls")
 	@Test
 	public void test() throws Exception {
-		log.debug(String.format("Class: [%s], Values: [%s]", getHolder().getPreObject().getClass().getSimpleName(),
-				Arrays.toString(this.parameterizedValues)));
+		log.debug(String.format("Class: [%s], Type: [%s], Value: [%s]",
+				getHolder().getPreObject().getClass().getSimpleName(), this.parameterType, this.parameterizedValue));
 
-		for (Method m : getHolder().getPreMethods().values()) {
+		for (Method m : getHolder().getPreMethods(this.parameterType).values()) {
 
 			boolean isArrayRetVal = m.getReturnType().isArray();
 
-			Method postMethod = getHolder().getPostMethod(m.getName());
+			Method postMethod = getHolder().getPostMethod(this.parameterType, m.getName());
 
 			assertNotNull(String.format("Expected method [%s] not present in class [%s]", m.getName(),
 					getHolder().getPostObject().getClass().getName()), postMethod);
@@ -93,19 +110,37 @@ public abstract class AbstractReflectiveMethodTester {
 	 * @throws InvocationTargetException
 	 * @throws ArrayComparisonFailure
 	 */
-	@SuppressWarnings("nls")
 	private void testArrayReturnValue(Method m1, Method m2)
 			throws IllegalAccessException, InvocationTargetException, ArrayComparisonFailure {
-		Object[] preRetVal = (Object[]) m1.invoke(getHolder().getPreObject(), this.parameterizedValues);
+		
+		Object[] preRetVal = null;
+		Exception preRetValException = null;
+		try {
+			preRetVal = (Object[]) m1.invoke(getHolder().getPreObject(), this.parameterizedValue);
+		} catch (Exception e) {
+			preRetValException = e;
+		}
 
-		Object[] postRetVal = (Object[]) m2.invoke(getHolder().getPostObject(), parameterizedValues);
+		Object[] postRetVal = null;
+		Exception postRetValException = null;
+		try {
+			postRetVal = (Object[]) m2.invoke(getHolder().getPostObject(), this.parameterizedValue);
+		} catch (Exception e) {
+			postRetValException = e;
+		}
 
-		log.debug(String.format("Method: [%s], isArrayRetVal: [%b], preRetVal: [%s], postRetVal: [%s]", m1.getName(),
-				true, Arrays.toString(preRetVal), Arrays.toString(postRetVal)));
+		if (preRetVal != null) {
+			log.debug(String.format("Type: [%s], Method: [%s], isArrayRetVal: [%b], preRetVal: [%s], postRetVal: [%s]",
+					this.parameterType, m1.getName(), true, Arrays.toString(preRetVal), Arrays.toString(postRetVal)));
 
-		assertArrayEquals(String.format("Return value mismatch for parameter [%s]. [%s.%s] expected [%s] but was [%s]",
-				Arrays.toString(parameterizedValues), getHolder().preObject.getClass().getSimpleName(), m1.getName(),
-				Arrays.toString(preRetVal), Arrays.toString(postRetVal)), preRetVal, postRetVal);
+			assertArrayEquals(
+					String.format("Return value mismatch for parameter [%s]. [%s.%s] expected [%s] but was [%s]",
+							this.parameterizedValue, getHolder().preObject.getClass().getSimpleName(), m1.getName(),
+							Arrays.toString(preRetVal), Arrays.toString(postRetVal)),
+					preRetVal, postRetVal);
+		} else {
+			compareRuntimeExceptions(m1, preRetValException, postRetValException);
+		}
 	}
 
 	/**
@@ -120,19 +155,44 @@ public abstract class AbstractReflectiveMethodTester {
 	 * @throws IllegalArgumentException
 	 * @throws InvocationTargetException
 	 */
-	@SuppressWarnings("nls")
 	private void testSingleReturnValue(Method m1, Method m2)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Object preRetVal = m1.invoke(getHolder().getPreObject(), this.parameterizedValues);
+		
+		Object preRetVal = null;
+		Exception preRetValException = null;
+		try {
+			preRetVal = m1.invoke(getHolder().getPreObject(), this.parameterizedValue);
+		} catch (Exception e) {
+			preRetValException = e;
+		}
 
-		Object postRetVal = m2.invoke(getHolder().getPostObject(), parameterizedValues);
+		Object postRetVal = null;
+		Exception postRetValException = null;
+		try {
+			postRetVal = m2.invoke(getHolder().getPostObject(), this.parameterizedValue);
+		} catch (Exception e) {
+			postRetValException = e;
+		}
 
-		log.debug(String.format("Method: [%s], isArrayRetVal: [%b], preRetVal: [%s], postRetVal: [%s]", m1.getName(),
-				false, preRetVal, postRetVal));
+		if (preRetVal != null) {
+			log.debug(String.format("Type: [%s], Method: [%s], isArrayRetVal: [%b], preRetVal: [%s], postRetVal: [%s]",
+					this.parameterType, m1.getName(), false, preRetVal, postRetVal));
 
-		assertEquals(String.format("Return value mismatch for parameter [%s]. [%s.%s]",
-				Arrays.toString(parameterizedValues), getHolder().preObject.getClass().getSimpleName(), m1.getName()),
-				preRetVal, postRetVal);
+			assertEquals(String.format("Return value mismatch for parameter [%s]. [%s.%s]", this.parameterizedValue,
+					getHolder().preObject.getClass().getSimpleName(), m1.getName()), preRetVal, postRetVal);
+		} else {
+			compareRuntimeExceptions(m1, preRetValException, postRetValException);
+		}
+	}
+
+	private void compareRuntimeExceptions(Method m1, Exception preRetValException, Exception postRetValException) {
+		
+		assertTrue(String.format("Only one exception occured for parameter [%s]. [%s.%s]", this.parameterizedValue,
+				getHolder().preObject.getClass().getSimpleName(), m1.getName()), postRetValException != null);
+		assertEquals(
+				String.format("Return exception mismatch for parameter [%s]. [%s.%s]", this.parameterizedValue,
+						getHolder().preObject.getClass().getSimpleName(), m1.getName()),
+				preRetValException.getClass(), postRetValException.getClass());
 	}
 
 	/**
@@ -144,8 +204,19 @@ public abstract class AbstractReflectiveMethodTester {
 		private Object preObject;
 		private Object postObject;
 
-		private Map<String, Method> preMethods;
-		private Map<String, Method> postMethods;
+		private Table<ParameterType, String, Method> preMethods;
+		private Table<ParameterType, String, Method> postMethods;
+
+		private Map<ParameterType, MethodAndValueCounter> counter = new LinkedHashMap<>();
+
+		public void incrementValueCounter(ParameterType parameterType) {
+			counter.putIfAbsent(parameterType, new MethodAndValueCounter(0));
+			counter.get(parameterType).incrementValueCounter();
+		}
+
+		public String getCounterToString() {
+			return counter.toString();
+		}
 
 		public Object getPreObject() {
 			return preObject;
@@ -155,16 +226,15 @@ public abstract class AbstractReflectiveMethodTester {
 			return postObject;
 		}
 
-		public Map<String, Method> getPreMethods() {
-			return preMethods;
+		public Map<String, Method> getPreMethods(ParameterType parameterType) {
+			return preMethods.row(parameterType);
 		}
 
-		public Method getPostMethod(String name) {
-			return postMethods.get(name);
+		public Method getPostMethod(ParameterType parameterType, String methodName) {
+			return postMethods.get(parameterType, methodName);
 		}
 
-		@SuppressWarnings("nls")
-		public PreAndPostClassHolder(Class<?> preClass, Class<?> postClass, Class<?>... parameterizedValues) {
+		public PreAndPostClassHolder(Class<?> preClass, Class<?> postClass) {
 			try {
 				this.preObject = preClass.newInstance();
 				this.postObject = postClass.newInstance();
@@ -173,8 +243,8 @@ public abstract class AbstractReflectiveMethodTester {
 				e.printStackTrace();
 			}
 
-			this.preMethods = initMethodMap(preClass, parameterizedValues);
-			this.postMethods = initMethodMap(postClass, parameterizedValues);
+			this.preMethods = initMethodTable(preClass);
+			this.postMethods = initMethodTable(postClass);
 
 			/**
 			 * We only need to check this case here, because the other case
@@ -186,14 +256,22 @@ public abstract class AbstractReflectiveMethodTester {
 			 * method exactly is missing.
 			 */
 			if (this.postMethods.size() > this.preMethods.size()) {
-				for (Method m : this.postMethods.values()) {
+				for (ParameterType parameterType : this.postMethods.rowKeySet()) {
+					for (Method m : this.postMethods.row(parameterType).values()) {
 
-					Method preMethod = this.preMethods.get(m.getName());
+						Method preMethod = this.preMethods.get(parameterType, m.getName());
 
-					assertNotNull(String.format("Expected method [%s] not present in class [%s]", m.getName(),
-							this.preObject.getClass().getName()), preMethod);
+						assertNotNull(
+								String.format("Expected method [%s] for parameter type [%s] not present in class [%s]",
+										m.getName(), parameterType.name(), this.preObject.getClass().getName()),
+								preMethod);
+					}
 				}
 			}
+
+			this.preMethods.rowKeySet().stream()
+					.forEach(p -> counter.putIfAbsent(p, new MethodAndValueCounter(this.preMethods.row(p).size())));
+
 		}
 
 		/**
@@ -202,61 +280,57 @@ public abstract class AbstractReflectiveMethodTester {
 		 * parameterizedValues arrays.
 		 * 
 		 * @param clazz
-		 * @param parameterizedValues
+		 * @param parameterizedValue
+		 *            // TODO
 		 * @return
 		 */
-		private static Map<String, Method> initMethodMap(Class<?> clazz, Class<?>... parameterizedValues) {
-			Map<String, Method> retVal = Arrays.stream(clazz.getDeclaredMethods())
-					// only take methods with a return value
-					.filter(m -> !m.getReturnType().equals(Void.TYPE))
-					// only take methods where the parameters fit
-					.filter(m2 -> hasDesiredParameters(m2.getParameterTypes(), parameterizedValues))
-					.collect(Collectors.toMap(Method::getName, Function.identity()));
+		private static Table<ParameterType, String, Method> initMethodTable(Class<?> clazz) {
+			List<Method> methods = Arrays.stream(clazz.getMethods())
+					// only take methods with a return value and exactly one parameter
+					.filter(m -> !m.getReturnType().equals(Void.TYPE) && m.getParameterCount() == 1)
+					.collect(Collectors.toList());
+
+			Table<ParameterType, String, Method> retVal = HashBasedTable.create();
+			for (Method method : methods) {
+				addMethodToTable(method, retVal);
+			}
+
 			return retVal;
 		}
 
-		/*
-		 * Too bad, Class.getDeclaredMethod(String name, Class<?>...
-		 * parameterTypes) needs a method name and thus only returns one
-		 * method..
-		 */
-		private static boolean hasDesiredParameters(Class<?>[] methodParameterClasses,
-				Class<?>... parameterizedValues) {
+		private static void addMethodToTable(Method method, Table<ParameterType, String, Method> tableToInsert) {
 
-			if (methodParameterClasses == null) {
-				return parameterizedValues == null || parameterizedValues.length == 0;
-			}
+			assertEquals(String.format(
+					"At this point, only methods with one parameter should be present. Method [%s], parameters: [%s]", //$NON-NLS-1$
+					method.getName(), Arrays.toString(method.getParameters())), method.getParameterCount(), 1);
 
-			if (methodParameterClasses.length != parameterizedValues.length) {
-				return false;
-			}
+			Class<?> parameterClass = method.getParameterTypes()[0];
 
-			for (int i = 0; i < methodParameterClasses.length; i++) {
-				if (!isEquivalentClass(methodParameterClasses[i], parameterizedValues[i])) {
-					return false;
+			for (ParameterType parameterType : ParameterType.values()) {
+				// we already know that there is only one parameter
+				if (parameterType.allowsType(parameterClass)) {
+					tableToInsert.put(parameterType, method.getName(), method);
 				}
 			}
-
-			return true;
-
 		}
 
-		/**
-		 * To ignore mismatches if one is a primitive type and the other isn't
-		 * 
-		 * @param c1
-		 * @param c2
-		 * @return
-		 */
-		private static boolean isEquivalentClass(Class<?> c1, Class<?> c2) {
-			if (c1.equals(c2))
-				return true;
-			if (c1.equals(Integer.TYPE) && c2.equals(Integer.class))
-				return true;
-			if (c1.equals(Integer.class) && c2.equals(Integer.TYPE))
-				return true;
+	}
 
-			return false;
+	private static class MethodAndValueCounter {
+		private int methodCounter = 0;
+		private int valueCounter = 0;
+
+		public MethodAndValueCounter(int methodCounter) {
+			this.methodCounter = methodCounter;
+		}
+
+		public void incrementValueCounter() {
+			valueCounter++;
+		}
+
+		@Override
+		public String toString() {
+			return "[methods: [" + methodCounter + "], values: [" + valueCounter + "]]";
 		}
 
 	}

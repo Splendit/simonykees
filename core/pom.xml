@@ -2,15 +2,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
-		<artifactId>simonykees</artifactId>
-		<groupId>at.splendit.simonykees</groupId>
-		<version>0.9.1</version>
+		<artifactId>jSparrow</artifactId>
+		<groupId>at.splendit.jSparrow</groupId>
+		<version>0.9.2</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>simonykees.core</artifactId>
+	<artifactId>jSparrow.core</artifactId>
 	<packaging>eclipse-plugin</packaging>
-	<name>simonykees :: core</name>
-	<description>simonykees Core Plugin</description>
+	<name>jSparrow :: core</name>
+	<description>jSparrow Core Plugin</description>
 
 	<dependencies>
 		<!-- eclipse -->
@@ -23,4 +23,60 @@
 	<scm>
 		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/core</url>
 	</scm>
+
+	<profiles>
+		<profile>
+			<id>proguard</id>
+			<activation>
+				<property>
+					<!-- With this profile active, obfuscation will happen -->
+					<name>proguard</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.wvengen</groupId>
+						<artifactId>proguard-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>proguard</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<obfuscate>true</obfuscate>
+							<!-- <injar>${project.build.finalName}.jar</injar> <outjar>${project.build.finalName}-small.jar</outjar> -->
+							<libs>
+								<lib>${java.home}/lib/rt.jar</lib>
+								<lib>${java.home}/lib/jsse.jar</lib>
+							</libs>
+							<options>
+								<option>-keep public class * extends
+									org.eclipse.ui.plugin.AbstractUIPlugin</option>
+								<option>-keep public class * extends
+									at.splendit.simonykees.core.handler.AbstractSimonykeesHandler</option>
+								<option>-keepclassmembers public class * extends
+									org.eclipse.osgi.util.NLS { public static &lt;fields&gt;; }</option>
+								<option>-keep public class * implements
+									org.eclipse.ui.IWorkbenchPreferencePage</option>
+								<option>-keep public class * extends
+									org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer</option>
+								<option>-dontnote org.eclipse.**</option>
+								<option>-dontnote org.osgi.**</option>
+								<option>-dontnote javax.xml.**</option>
+								<option>-dontnote javax.annotation.**</option>
+								<option>-dontnote org.xml.sax.**</option>
+								<option>-dontnote org.w3c.dom.**</option>
+								<option>-dontwarn javax.crypto.**</option>
+							</options>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>

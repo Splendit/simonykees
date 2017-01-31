@@ -1,5 +1,11 @@
 package at.splendit.simonykees.core.exception;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter
+ * @since 0.9
+ */
 public class ReconcileException extends SimonykeesException {
 	private static final long serialVersionUID = 226771914518618608L;
 
@@ -7,8 +13,7 @@ public class ReconcileException extends SimonykeesException {
 		super();
 	}
 
-	public ReconcileException(String message, Throwable cause, boolean enableSuppression,
-			boolean writableStackTrace) {
+	public ReconcileException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 	}
 

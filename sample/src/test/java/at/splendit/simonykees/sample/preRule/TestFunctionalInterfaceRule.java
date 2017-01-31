@@ -6,7 +6,7 @@ import org.junit.Test;
 public class TestFunctionalInterfaceRule {
 
 	@Test
-	public void Test1() {
+	public void test1() {
 
 		Runnable runnable = new Runnable() {
 
@@ -42,6 +42,21 @@ public class TestFunctionalInterfaceRule {
 		};
 
 		nonFunctionalInterface.method();
+
+		AFunctionalInterface aFunctionalInterface = new AFunctionalInterface() {
+			@Override
+			public void method(int a) {
+			}
+		};
+
+		AFunctionalInterface aFunctionalInterface2 = (int a) -> {
+		};
+
+		aFunctionalInterface.method(0);
+	}
+
+	private interface AFunctionalInterface {
+		public void method(int a);
 	}
 
 	private interface NonFunctionalInterface {

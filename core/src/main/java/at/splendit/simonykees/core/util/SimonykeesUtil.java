@@ -21,8 +21,27 @@ import org.eclipse.text.edits.TextEdit;
 
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Utility class for simonykees
+ * 
+ * @author Hannes Schweighofer
+ * @since 0.9
+ */
 public final class SimonykeesUtil {
 
+	private static final String BACKSLASH_N = "\n"; //$NON-NLS-1$
+	private static final String LINE_SEPARATOR_PROPERTY = "line.separator"; //$NON-NLS-1$
+	/**
+	 * Get the line separator for the current system, if none is found
+	 * <code>&#92;n</code> is used
+	 * 
+	 * @since 0.9.2
+	 */
+	public static final String LINE_SEPARATOR = System.getProperty(LINE_SEPARATOR_PROPERTY, BACKSLASH_N);
+
+	/**
+	 * Constructor should never be called
+	 */
 	private SimonykeesUtil() {
 		// no constructor for a utility class
 	}
@@ -37,8 +56,9 @@ public final class SimonykeesUtil {
 	 *            contains java elements which should be split up into
 	 *            compilation units
 	 * @throws JavaModelException
-	 *             * if this element does not exist or if an exception occurs
+	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
+	 * @since 0.9
 	 */
 	public static void collectICompilationUnits(List<ICompilationUnit> result, List<IJavaElement> javaElements)
 			throws JavaModelException {
@@ -72,6 +92,7 @@ public final class SimonykeesUtil {
 	 * @throws JavaModelException
 	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
+	 * @since 0.9
 	 */
 
 	private static void addCompilationUnit(List<ICompilationUnit> result, ICompilationUnit compilationUnit)
@@ -94,6 +115,7 @@ public final class SimonykeesUtil {
 	 * @throws JavaModelException
 	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
+	 * @since 0.9
 	 */
 	private static void addCompilationUnit(List<ICompilationUnit> result, ICompilationUnit[] compilationUnits)
 			throws JavaModelException {
@@ -115,6 +137,7 @@ public final class SimonykeesUtil {
 	 * @param options
 	 *            the table of options (key type: String; value type: String),
 	 *            or null to set it back to the default
+	 * @since 0.9
 	 */
 	public static void resetParser(ICompilationUnit compilationUnit, ASTParser astParser, Map<String, String> options) {
 		astParser.setSource(compilationUnit);
@@ -134,6 +157,7 @@ public final class SimonykeesUtil {
 	 *            is the actual change that will be made
 	 * @return returns the {@link TextEdit} that is wrapped in a
 	 *         {@link DocumentChange}
+	 * @since 0.9
 	 */
 	public static DocumentChange generateDocumentChange(String name, Document document, TextEdit edit) {
 		DocumentChange documentChange = new DocumentChange(name, document);
@@ -154,6 +178,7 @@ public final class SimonykeesUtil {
 	 *             copy (INVALID_ELEMENT_TYPES) A update conflict (described
 	 *             above) (UPDATE_CONFLICT) if this working copy could not
 	 *             return in its original mode.
+	 * @since 0.9
 	 */
 	public static void commitAndDiscardWorkingCopy(ICompilationUnit workingCopy) throws JavaModelException {
 		workingCopy.commitWorkingCopy(false, null);
@@ -189,6 +214,7 @@ public final class SimonykeesUtil {
 	 *             if the contents of the original element cannot be accessed.
 	 *             Reasons include: The original Java element does not exist
 	 *             (ELEMENT_DOES_NOT_EXIST)
+	 * @since 0.9
 	 * 
 	 */
 	public static DocumentChange applyRule(ICompilationUnit workingCopy,

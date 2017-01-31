@@ -35,12 +35,30 @@
          </menu>
       </menuContribution>
    </extension>
-   <extension
-         point="org.eclipse.ui.commands">
+   <extension point="org.eclipse.ui.commands">
       <command
             defaultHandler="at.splendit.simonykees.core.handler.SelectRulesWizardHandler"
             id="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
             name="%command.name.select_rules_wizard_handler">
       </command>
+   </extension>
+   <extension point = "org.eclipse.ui.preferencePages">
+       <page id="at.splendit.simonykees.core.ui.preference.ProfilePreferencePage"
+	    class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferencePage"
+            name="%preferencePage.name">
+       </page>
+	</extension>
+   <extension point = "org.eclipse.ui.preferencePages">
+       <page id="at.splendit.simonykees.core.ui.preference.ProfilePreferencePageLicense"
+				class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferencePageLicense"
+				name="%preferencePageLicense.name"
+				category = "at.splendit.simonykees.core.ui.preference.ProfilePreferencePage">
+       </page>
+	</extension>
+	<extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceInitializer">
+      </initializer>
    </extension>
 </plugin>

@@ -2,6 +2,12 @@ package at.splendit.simonykees.core.i18n;
 
 import org.eclipse.osgi.util.NLS;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Martin Huter
+ * @since 0.9
+ */
 public class ExceptionMessages extends NLS {
 	private static final String BUNDLE_NAME = "at.splendit.simonykees.core.i18n.exceptionMessages"; //$NON-NLS-1$
 	public static String AbstractCompilationUnitAstVisitor_compilation_unit_no_context;
@@ -16,6 +22,8 @@ public class ExceptionMessages extends NLS {
 	public static String AbstractRefactorer_warn_no_compilation_units_found;
 	public static String AbstractRefactorer_warn_no_working_copies_foung;
 	public static String AbstractRefactorer_warn_working_copies_already_generated;
+	public static String PersistenceManager_decryption_error;
+	public static String PersistenceManager_encryption_error;
 	public static String SimonykeesException_default_ui_message;
 	static {
 		// initialize resource bundle
