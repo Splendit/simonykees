@@ -35,8 +35,10 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
-	// is initialized in constructor and set to null again if condition is
-	// broken
+	/*
+	 * is initialized in constructor and set to null again if condition is
+	 * broken
+	 */
 	private SimpleName iteratorName;
 	private Statement loopStatement;
 	private Name listName = null;
@@ -95,7 +97,9 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		return true;
 	}
 
-	// While Definition
+	/**
+	 *  While Definition
+	 */
 	@Override
 	public void endVisit(VariableDeclarationStatement node) {
 		if (preconditionForVariableDeclaration(node.fragments())) {
@@ -104,7 +108,9 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		}
 	}
 
-	// For Definition
+	/**
+	 *  For Definition
+	 */
 	@Override
 	public void endVisit(VariableDeclarationExpression node) {
 		if (preconditionForVariableDeclaration(node.fragments())) {
@@ -158,15 +164,17 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 	public void replaceLoop(Statement loopStatement, Statement loopBody, Map<String, Integer> multipleIteratorUse) {
 		Type iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 
-		// iterator has no type-parameter therefore a optimization is could
-		// not be applied
+		/*
+		 * iterator has no type-parameter therefore a optimization is could not
+		 * be applied
+		 */
 		if (null == iteratorType) {
 			return;
 		} else {
 			iteratorType = (Type) astRewrite.createMoveTarget(iteratorType);
 		}
-		// find LoopvariableName
 
+		// find LoopvariableName
 		MethodInvocation nextCall = getIteratorNextCall();
 		SingleVariableDeclaration singleVariableDeclaration = null;
 		if (nextCall.getParent() instanceof SingleVariableDeclaration) {
@@ -198,8 +206,10 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 			singleVariableDeclaration = NodeBuilder.newSingleVariableDeclaration(loopBody.getAST(),
 					NodeBuilder.newSimpleName(loopBody.getAST(), iteratorName), iteratorType);
-			// if the next call is used only as an ExpressionStatement just
-			// remove it.
+			/*
+			 * if the next call is used only as an ExpressionStatement just
+			 * remove it.
+			 */
 			if (nextCall.getParent() instanceof ExpressionStatement) {
 				astRewrite.remove(nextCall.getParent(), null);
 			} else {
