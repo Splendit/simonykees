@@ -1,7 +1,9 @@
 package at.splendit.simonykees.core.visitor.loop;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTMatcher;
@@ -11,6 +13,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -26,8 +29,10 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
+import at.splendit.simonykees.core.constants.ReservedNames;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
@@ -45,15 +50,141 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 
 	private static final Integer LIST_KEY = 2;
 	private static final String LIST_FULLY_QUALLIFIED_NAME = "java.util.List"; //$NON-NLS-1$
+	
+	private Map<ForStatement, LoopOptimizationASTVisior> replaceInformationASTVisitorList;
+	private Map<String, Integer> multipleIteratorUse;
 
 	public ForToForEachASTVisitor() {
 		super();
 		this.fullyQuallifiedNameMap.put(ITERATOR_KEY, generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME));
 		this.fullyQuallifiedNameMap.put(LIST_KEY, generateFullyQuallifiedNameList(LIST_FULLY_QUALLIFIED_NAME));
+		this.replaceInformationASTVisitorList = new HashMap<>();
+		this.multipleIteratorUse = new HashMap<>();
 	}
 
-	@Override
 	public boolean visit(ForStatement node) {
+		//Defined updaters are note allowed 
+		if(!node.updaters().isEmpty()){
+			return true;
+		}
+		SimpleName iteratorName = replaceAbleWhileCondition(node.getExpression());
+		if (iteratorName != null) {
+			if (ClassRelationUtil.isContentOfRegistertITypes(iteratorName.resolveTypeBinding(),
+					iTypeMap.get(ITERATOR_KEY))) {
+				Block parentNode = ASTNodeUtil.getSurroundingBlock(node);
+				if (parentNode == null) {
+					// No surrounding parent block found
+					// should not happen, because the Iterator has to be
+					// defined in an parent block.
+					return false;
+				}
+				LoopOptimizationASTVisior iteratorDefinitionAstVisior = new LoopOptimizationASTVisior(
+						(SimpleName) iteratorName, node);
+				iteratorDefinitionAstVisior.setAstRewrite(this.astRewrite);
+				parentNode.accept(iteratorDefinitionAstVisior);
+
+				if (iteratorDefinitionAstVisior.allParametersFound()) {
+					replaceInformationASTVisitorList.put(node, iteratorDefinitionAstVisior);
+				}
+			}
+		}
+		return true;
+	}
+	
+	@Override
+	public void endVisit(ForStatement node) {
+		// Do the replacement
+		if (replaceInformationASTVisitorList.containsKey(node)) {
+			LoopOptimizationASTVisior iteratorDefinitionAstVisior = replaceInformationASTVisitorList.remove(node);
+			Type iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(iteratorDefinitionAstVisior.getIteratorDeclaration());
+
+			// iterator has no type-parameter therefore a optimization is could
+			// not be applied
+			if (null == iteratorType) {
+				return;
+			}
+			else {
+				iteratorType = (Type) astRewrite.createMoveTarget(iteratorType);
+			}
+			// find LoopvariableName
+
+			MethodInvocation nextCall = iteratorDefinitionAstVisior.getIteratorNextCall();
+			SingleVariableDeclaration singleVariableDeclaration = null;
+			if (nextCall.getParent() instanceof SingleVariableDeclaration) {
+				singleVariableDeclaration = (SingleVariableDeclaration) astRewrite
+						.createMoveTarget(nextCall.getParent());
+				astRewrite.remove(nextCall.getParent(), null);
+			} else if (nextCall.getParent() instanceof VariableDeclarationFragment
+					&& nextCall.getParent().getParent() instanceof VariableDeclarationStatement) {
+				VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) nextCall
+						.getParent();
+				VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) variableDeclarationFragment
+						.getParent();
+				if (1 == variableDeclarationStatement.fragments().size()) {
+					singleVariableDeclaration = NodeBuilder.newSingleVariableDeclaration(node.getAST(),
+							(SimpleName) astRewrite.createMoveTarget(variableDeclarationFragment.getName()),
+							iteratorType);
+					astRewrite.remove(variableDeclarationStatement, null);
+				}
+			}
+
+			if (null == singleVariableDeclaration) {
+				// Solution for Iteration over the same List without variables
+				String iteratorName = iteratorDefinitionAstVisior.getListName().getFullyQualifiedName()
+						+ ReservedNames.CLASS_ITERATOR;
+				if(null == multipleIteratorUse.get(iteratorName)){
+					multipleIteratorUse.put(iteratorName, 2);
+				}
+				else{
+					Integer i = multipleIteratorUse.get(iteratorName);
+					multipleIteratorUse.put(iteratorName, i + 1);
+					iteratorName = iteratorName + i;
+				}
+				
+				
+				singleVariableDeclaration = NodeBuilder.newSingleVariableDeclaration(node.getAST(),
+						NodeBuilder.newSimpleName(node.getAST(),iteratorName),
+						iteratorType);
+				//if the next call is used only as an ExpressionStatement just remove it.
+				if(nextCall.getParent() instanceof ExpressionStatement){
+					astRewrite.remove(nextCall.getParent(), null);
+				}
+				else{
+					astRewrite.replace(nextCall,
+							NodeBuilder.newSimpleName(node.getAST(),iteratorName),null);
+				}
+			}
+
+			EnhancedForStatement newFor = NodeBuilder.newEnhancedForStatement(node.getAST(),
+					(Statement) astRewrite.createMoveTarget(node.getBody()),
+					(Expression) astRewrite.createMoveTarget(iteratorDefinitionAstVisior.getListName()),
+					singleVariableDeclaration);
+			astRewrite.replace(node, newFor, null);
+
+			astRewrite.remove(iteratorDefinitionAstVisior.getIteratorDeclaration(), null);
+			
+			//clear the variableIterator if no other loop is present
+			if(replaceInformationASTVisitorList.isEmpty()){
+				multipleIteratorUse.clear();
+			}
+		}
+	}
+	
+	private SimpleName replaceAbleWhileCondition(Expression node) {
+		if (node instanceof MethodInvocation) {
+			MethodInvocation methodInvocation = (MethodInvocation) node;
+			// check for hasNext operation on Iterator
+			if (StringUtils.equals("hasNext", methodInvocation.getName().getFullyQualifiedName()) //$NON-NLS-1$
+					&& methodInvocation.getExpression() instanceof SimpleName) {
+				return (SimpleName) methodInvocation.getExpression();
+			}
+		}
+		return null;
+	}
+	
+	
+	
+	public boolean oldImplementationVisit(ForStatement node) {
 		if (node.getExpression() instanceof MethodInvocation) {
 			MethodInvocation methodInvocation = (MethodInvocation) node.getExpression();
 
@@ -67,7 +198,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 					// Type is not an Iterator
 					return false;
 				}
-				IteratorDefinitionASTVisior iteratorDefinitionAstVisior = new IteratorDefinitionASTVisior(iteratorName, null);
+				LoopOptimizationASTVisior iteratorDefinitionAstVisior = new LoopOptimizationASTVisior(iteratorName, null);
 				if (1 == node.initializers().size()) {
 					((ASTNode) node.initializers().get(0)).accept(iteratorDefinitionAstVisior);
 				}

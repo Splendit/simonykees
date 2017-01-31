@@ -31,94 +31,90 @@ public class TestForToForEachRule {
 		}
 		return sb.toString();
 	}
-	
+
 	public String testReferencingIterator(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
-		
-		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext(); ) {
+
+		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext();) {
 			iterator.forEachRemaining(remaining -> remaining = "foo");
-		    String s = iterator.next();
-		    sb.append(s);
+			String s = iterator.next();
+			sb.append(s);
 		}
 		return sb.toString();
 	}
-	
+
 	public String testIteratorToForEachIncrementStatement(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
 		int i = 0;
 		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext(); i++) {
-		    String s = iterator.next();
-		    if(iterator.hasNext()) {
-		    	String t = iterator.next();
-		    	sb.append(t);
-		    }
-		    sb.append(s + "," + i);
+			String s = iterator.next();
+			sb.append(s + "," + i);
 		}
 		sb.append(i);
-		
+
 		return sb.toString();
 	}
-	
+
 	public String testIteratorToForEachNestedIf(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
 		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext();) {
-		    String s = iterator.next();
-		    if(iterator.hasNext()) {
-		    	String t = iterator.next();
-		    	sb.append(t);
-		    }
-		    sb.append(s + ",");
+			String s = iterator.next();
+			if (iterator.hasNext()) {
+				String t = iterator.next();
+				sb.append(t);
+			}
+			sb.append(s + ",");
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	public String testNestedIteratorToForEach(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
 		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext();) {
-		    String s = iterator.next();
+			String s = iterator.next();
 			for (Iterator<String> innerIterator = foo.iterator(); innerIterator.hasNext();) {
-			    String t = innerIterator.next();
-			    sb.append(t + ",");
+				String t = innerIterator.next();
+				sb.append(t + ",");
 			}
-		    sb.append(s + ";");
+			sb.append(s + ";");
 		}
 
 		return sb.toString();
 	}
-	
+
 	public String testMultipleIteratorToForEach(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
 		for (Iterator<String> iterator = foo.iterator(), it2 = foo.iterator(); iterator.hasNext();) {
 			String anotherString = "foo";
-		    String s = iterator.next();
-		    String t = it2.next();
-		    sb.append(s + t);
+			String s = iterator.next();
+			String t = it2.next();
+			sb.append(s + t);
 		}
 		return sb.toString();
 	}
-	
+
 	public String testIteratorDiscardValue(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext(); ) {
+		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext();) {
 			String anotherString = "foo";
-//		    iterator.next(); // FIXME causing runtime exception
-		    sb.append(anotherString);
+			iterator.next();
+			sb.append(anotherString);
 		}
 		return sb.toString();
 	}
-	
+
 	public void testForToForEach2(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
@@ -143,145 +139,164 @@ public class TestForToForEachRule {
 
 		return sb.toString();
 	}
-	
+
 	public String testDecIteratingIndex(String input) {
 		List<String> foo = generateList(input);
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+
 		int i;
-		for (i = foo.size() -1 ; i >=0; i--) {
+		for (i = foo.size() - 1; i >= 0; i--) {
 			String s = foo.get(i);
 			sb.append(s);
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	public String testModifiedIteratingIndex(String input) {
 		List<String> foo = generateList(input);
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+
 		for (int i = 0; i < foo.size(); i++) {
 			String it = foo.get(i);
-			String s = foo.get(i%2);
+			String s = foo.get(i % 2);
 			String firstString = foo.get(0);
 			String someConstant = "const";
 			sb.append(i + it + s + firstString + someConstant);
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	public String testIgnoreIteratingIndex(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
-		
-		for(int j = 0; j < foo.size(); j++) {
+
+		for (int j = 0; j < foo.size(); j++) {
 			int i = 0;
 			int k = 0;
 			String it = foo.get(i);
 			String it2 = foo.get(k);
-			
+
 			sb.append(it + "," + it2 + ";");
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	public String testCompoundCondition(String input) {
 		List<String> foo = generateList(input);
-		
+
 		StringBuilder sb = new StringBuilder();
-	
-		for (int i = 0; i +1  < foo.size(); i++) {
+
+		for (int i = 0; i + 1 < foo.size(); i++) {
 			String it = foo.get(i);
-			String s = foo.get(i%2);
+			String s = foo.get(i % 2);
 			String firstString = foo.get(0);
 			String someConstant = "const";
 			sb.append(i + it + s + firstString + someConstant);
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	public String testStartingIndex(String input) {
 		List<String> foo = generateList(input);
-		
+
 		StringBuilder sb = new StringBuilder();
-	
-		for (int i = 1; i  < foo.size(); i++) {
+
+		for (int i = 1; i < foo.size(); i++) {
 			String it = foo.get(i);
 			String someConstant = "const";
 			sb.append(i + it + someConstant);
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	public String testNestedForLoopsIteratingIndex(String input) {
 		List<String> foo = generateList(input);
 		List<String> secondFoo = generateList(input);
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+
 		for (int i = 0; i < foo.size(); i++) {
 			String s = foo.get(i);
 			s += ";";
 			sb.append(s);
-			for(int j = 0; j < secondFoo.size(); j++) {
+			for (int j = 0; j < secondFoo.size(); j++) {
 				String r = secondFoo.get(j);
 				sb.append(r);
 			}
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	public String testDoubleIteration(String input) {
 		List<String> foo = generateList(input);
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+		String s, t;
+		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext();) {
+			s = iterator.next();
+			s += ";";
+			sb.append(s);
+			for (Iterator<String> iterator2 = foo.iterator(); iterator2.hasNext();) {
+				t = iterator2.next();
+				sb.append(t);
+			}
+		}
+
+		return sb.toString();
+	}
+
+	//SIM-212
+	public String testDoubleIterationWithSize(String input) {
+		List<String> foo = generateList(input);
+
+		StringBuilder sb = new StringBuilder();
+
 		for (int i = 0; i < foo.size(); i++) {
 			String s = foo.get(i);
 			s += ";";
 			sb.append(s);
-			for(int j = 0; j < foo.size(); j++) {
+			for (int j = 0; j < foo.size(); j++) {
 				String r = foo.get(j);
 				sb.append(r);
 			}
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	public String testTripleNestedForLoops(String input) {
 		List<String> stFoo = generateList(input);
 		List<String> ndFoo = generateList(input);
 		List<String> rdFoo = generateList(input);
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+
 		for (int i = 0; i < stFoo.size(); i++) {
 			String s = stFoo.get(i);
 			s += ";";
 			sb.append(s);
-			for(int j = 0; j < ndFoo.size(); j++) {
+			for (int j = 0; j < ndFoo.size(); j++) {
 				String n = ndFoo.get(j);
 				sb.append(n + ",");
-				for(int k = 0; k < rdFoo.size(); k++) {
+				for (int k = 0; k < rdFoo.size(); k++) {
 					String t = stFoo.get(i);
 					String r = rdFoo.get(k);
 					sb.append(r + t);
 				}
 			}
 		}
-		
+
 		return sb.toString();
 	}
-	
+
 	public String testCascadeForLoops(String input) {
 		List<String> foo = generateList(input);
 
@@ -293,7 +308,7 @@ public class TestForToForEachRule {
 			String someConstant = "const";
 			sb.append(it + someConstant);
 		}
-		
+
 		int j;
 		for (j = 0; j < foo.size(); j++) {
 			String it = foo.get(j);
@@ -303,12 +318,12 @@ public class TestForToForEachRule {
 
 		return sb.toString();
 	}
-	
+
 	public String testIfNestedForLoops(String input) {
 		List<String> foo = generateList(input);
 
 		StringBuilder sb = new StringBuilder();
-		if(foo != null ) {
+		if (foo != null) {
 			for (int i = 0; i < foo.size(); i++) {
 				String it = foo.get(i);
 				String someConstant = "const";
@@ -318,16 +333,16 @@ public class TestForToForEachRule {
 
 		return sb.toString();
 	}
-	
+
 	public String testTryCatchNestedForLoops(String input) {
 		List<String> foo = generateList(input);
 
 		StringBuilder sb = new StringBuilder();
 		try {
-			if(foo != null ) {
+			if (foo != null) {
 				for (int i = 0; i < foo.size(); i++) {
 					String someConstant = "const";
-					try {						
+					try {
 						sb.append(foo.get(i) + someConstant);
 					} finally {
 						String s = foo.get(i);
@@ -343,7 +358,6 @@ public class TestForToForEachRule {
 
 		return sb.toString();
 	}
-	
 
 	public String testBiggerThanOneIterationStep(String input) {
 		List<String> foo = generateList(input);
@@ -401,40 +415,34 @@ public class TestForToForEachRule {
 
 		return sb.toString();
 	}
-	
-	/*
-	 * public String testIterateNumberCollection(String input) {
-	 *	List<? extends Number> foo = generateHashCodeList(input);
-	 *	
-	 *	StringBuilder sb = new StringBuilder();
-	 *	
-	 *	int i;
-	 *	for (i = 0; i < foo.size(); i = i + 1) { 
- 	 *		// FIXME SIM-163 : if the collection type restricted to certain sub-types, the forEach iterator type shall be 'parent type'
-	 *		Number s = foo.get(i);
-	 *		sb.append(s.toString());
-	 *	}
-	 *	
-	 *	return sb.toString();
-	 * }
-	 */
-	
 
-	// public String testIterateNumberCollection(String input) {
-	// List<? extends Number> foo = generateHashCodeList(input);
-	//
-	// StringBuilder sb = new StringBuilder();
-	//
-	// int i;
-	// for (i = 0; i < foo.size(); i = i + 1) {
-	// FIXME SIM-163 : if the collection type restricted to certain sub-types,
-	// the forEach iterator type shall be 'parent type'
-	// Number s = foo.get(i);
-	// sb.append(s.toString());
-	// }
-	//
-	// return sb.toString();
-	// }
+	public String testIterateWithSizeNumberCollection(String input) {
+		List<? extends Number> foo = generateHashCodeList(input);
+
+		StringBuilder sb = new StringBuilder();
+
+		int i;
+		for (i = 0; i < foo.size(); i = i + 1) {
+			// FIXME SIM-212
+			Number s = foo.get(i);
+			sb.append(s.toString());
+		}
+
+		return sb.toString();
+	}
+
+	public String testIterateNumberCollection(String input) {
+		List<? extends Number> foo = generateHashCodeList(input);
+
+		StringBuilder sb = new StringBuilder();
+
+		for (Iterator<? extends Number> iterator = foo.iterator(); iterator.hasNext();) {
+			Number s = iterator.next();
+			sb.append(s.toString());
+		}
+
+		return sb.toString();
+	}
 
 	public String testCollectionBiggerIterationStep(String input) {
 		List<? extends Number> foo = generateHashCodeList(input);

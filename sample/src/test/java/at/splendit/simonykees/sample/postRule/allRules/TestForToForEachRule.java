@@ -1,8 +1,11 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("nls")
@@ -46,8 +49,8 @@ public class TestForToForEachRule {
 
 		int i = 0;
 		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext(); i++) {
-		    String s = iterator.next();
-		    sb.append(s + "," + i);
+			String s = iterator.next();
+			sb.append(s + "," + i);
 		}
 		sb.append(i);
 
@@ -59,12 +62,12 @@ public class TestForToForEachRule {
 		StringBuilder sb = new StringBuilder();
 
 		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext();) {
-		    String s = iterator.next();
-		    if(iterator.hasNext()) {
-		    	String t = iterator.next();
-		    	sb.append(t);
-		    }
-		    sb.append(s + ",");
+			String s = iterator.next();
+			if (iterator.hasNext()) {
+				String t = iterator.next();
+				sb.append(t);
+			}
+			sb.append(s + ",");
 		}
 
 		return sb.toString();
@@ -75,10 +78,10 @@ public class TestForToForEachRule {
 		StringBuilder sb = new StringBuilder();
 
 		for (String s : foo) {
-		    for (String t : foo) {
-			    sb.append(t + ",");
+			for (String t : foo) {
+				sb.append(t + ",");
 			}
-		    sb.append(s + ";");
+			sb.append(s + ";");
 		}
 
 		return sb.toString();
@@ -90,9 +93,9 @@ public class TestForToForEachRule {
 
 		for (Iterator<String> iterator = foo.iterator(), it2 = foo.iterator(); iterator.hasNext();) {
 			String anotherString = "foo";
-		    String s = iterator.next();
-		    String t = it2.next();
-		    sb.append(s + t);
+			String s = iterator.next();
+			String t = it2.next();
+			sb.append(s + t);
 		}
 		return sb.toString();
 	}
@@ -101,9 +104,8 @@ public class TestForToForEachRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext();) {
+		for (String fooIterator : foo) {
 			String anotherString = "foo";
-			// iterator.next(); // FIXME causing runtime exception
 			sb.append(anotherString);
 		}
 		return sb.toString();
@@ -113,10 +115,10 @@ public class TestForToForEachRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (String fooIterator : foo) {
-			String s = fooIterator;
+		for (int i = 0; i < foo.size(); i++) {
+			String s = foo.get(i);
 			sb.append(s);
-			sb.append(fooIterator);
+			sb.append(foo.get(i));
 		}
 	}
 
@@ -126,8 +128,8 @@ public class TestForToForEachRule {
 		StringBuilder sb = new StringBuilder();
 
 		int i;
-		for (String fooIterator : foo) {
-			String s = fooIterator;
+		for (i = 0; i < foo.size(); i++) {
+			String s = foo.get(i);
 			sb.append(s);
 		}
 
@@ -155,7 +157,7 @@ public class TestForToForEachRule {
 
 		for (int i = 0; i < foo.size(); i++) {
 			String it = foo.get(i);
-			String s = foo.get(i%2);
+			String s = foo.get(i % 2);
 			String firstString = foo.get(0);
 			String someConstant = "const";
 			sb.append(i + it + s + firstString + someConstant);
@@ -168,7 +170,7 @@ public class TestForToForEachRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for(int j = 0; j < foo.size(); j++) {
+		for (int j = 0; j < foo.size(); j++) {
 			int i = 0;
 			int k = 0;
 			String it = foo.get(i);
@@ -216,12 +218,12 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		for (String fooIterator : foo) {
-			String s = fooIterator;
+		for (int i = 0; i < foo.size(); i++) {
+			String s = foo.get(i);
 			s += ";";
 			sb.append(s);
-			for (String secondFooIterator : secondFoo) {
-				String r = secondFooIterator;
+			for (int j = 0; j < secondFoo.size(); j++) {
+				String r = secondFoo.get(j);
 				sb.append(r);
 			}
 		}
@@ -233,13 +235,32 @@ public class TestForToForEachRule {
 		List<String> foo = generateList(input);
 
 		StringBuilder sb = new StringBuilder();
-
-		for (String fooIterator : foo) {
-			String s = fooIterator;
+		String s, t;
+		for (String fooIterator2 : foo) {
+			s = fooIterator2;
 			s += ";";
 			sb.append(s);
-			for (String fooIterator2 : foo) {
-				String r = fooIterator2;
+			for (String fooIterator : foo) {
+				t = fooIterator;
+				sb.append(t);
+			}
+		}
+
+		return sb.toString();
+	}
+
+	// SIM-212
+	public String testDoubleIterationWithSize(String input) {
+		List<String> foo = generateList(input);
+
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < foo.size(); i++) {
+			String s = foo.get(i);
+			s += ";";
+			sb.append(s);
+			for (int j = 0; j < foo.size(); j++) {
+				String r = foo.get(j);
 				sb.append(r);
 			}
 		}
@@ -254,16 +275,16 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		for (String stFooIterator : stFoo) {
-			String s = stFooIterator;
+		for (int i = 0; i < stFoo.size(); i++) {
+			String s = stFoo.get(i);
 			s += ";";
 			sb.append(s);
-			for (String ndFooIterator : ndFoo) {
-				String n = ndFooIterator;
+			for (int j = 0; j < ndFoo.size(); j++) {
+				String n = ndFoo.get(j);
 				sb.append(n + ",");
-				for (String rdFooIterator : rdFoo) {
-					String t = stFooIterator;
-					String r = rdFooIterator;
+				for (int k = 0; k < rdFoo.size(); k++) {
+					String t = stFoo.get(i);
+					String r = rdFoo.get(k);
 					sb.append(r + t);
 				}
 			}
@@ -278,15 +299,15 @@ public class TestForToForEachRule {
 		StringBuilder sb = new StringBuilder();
 
 		int i;
-		for (String fooIterator : foo) {
-			String it = fooIterator;
+		for (i = 0; i < foo.size(); i++) {
+			String it = foo.get(i);
 			String someConstant = "const";
 			sb.append(it + someConstant);
 		}
 
 		int j;
-		for (String fooIterator : foo) {
-			String it = fooIterator;
+		for (j = 0; j < foo.size(); j++) {
+			String it = foo.get(j);
 			String someConstant = "const";
 			sb.append(it + someConstant);
 		}
@@ -299,8 +320,8 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 		if (foo != null) {
-			for (String fooIterator : foo) {
-				String it = fooIterator;
+			for (int i = 0; i < foo.size(); i++) {
+				String it = foo.get(i);
 				String someConstant = "const";
 				sb.append(it + someConstant);
 			}
@@ -315,12 +336,12 @@ public class TestForToForEachRule {
 		StringBuilder sb = new StringBuilder();
 		try {
 			if (foo != null) {
-				for (String fooIterator : foo) {
+				for (int i = 0; i < foo.size(); i++) {
 					String someConstant = "const";
 					try {
-						sb.append(fooIterator + someConstant);
+						sb.append(foo.get(i) + someConstant);
 					} finally {
-						String s = fooIterator;
+						String s = foo.get(i);
 						sb.append(",");
 					}
 				}
@@ -391,19 +412,32 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 
-	/*
-	 * public String testIterateNumberCollection(String input) { List<? extends
-	 * Number> foo = generateHashCodeList(input);
-	 * 
-	 * StringBuilder sb = new StringBuilder();
-	 * 
-	 * int i; for (i = 0; i < foo.size(); i = i + 1) { // FIXME SIM-163 : if the
-	 * collection type restricted to certain sub-types, the forEach iterator
-	 * type shall be 'parent type' Number s = foo.get(i);
-	 * sb.append(s.toString()); }
-	 * 
-	 * return sb.toString(); }
-	 */
+	public String testIterateWithSizeNumberCollection(String input) {
+		List<? extends Number> foo = generateHashCodeList(input);
+
+		StringBuilder sb = new StringBuilder();
+
+		int i;
+		for (i = 0; i < foo.size(); i += 1) {
+			// FIXME SIM-212
+			Number s = foo.get(i);
+			sb.append(s.toString());
+		}
+
+		return sb.toString();
+	}
+
+	public String testIterateNumberCollection(String input) {
+		List<? extends Number> foo = generateHashCodeList(input);
+
+		StringBuilder sb = new StringBuilder();
+
+		for (Number s : foo) {
+			sb.append(s.toString());
+		}
+
+		return sb.toString();
+	}
 
 	public String testCollectionBiggerIterationStep(String input) {
 		List<? extends Number> foo = generateHashCodeList(input);
@@ -430,4 +464,39 @@ public class TestForToForEachRule {
 		}
 		return sb.toString();
 	}
+
+	public Object encode(final Object value) {
+		if (value != null) {
+			Map<String, Object> map = new LinkedHashMap<String, Object>();
+			List<Object> list = (List<Object>) value;
+			for (int i = 0; i < list.size(); i++) {
+				map.put(Integer.toString(i), list.get(i));
+			}
+			return map;
+		}
+
+		return null;
+	}
+
+	public boolean testDoubleLoop() {
+		List<Double> coordinates = new ArrayList<>();
+		Point point = new Point();
+
+		for (int i = 0; i < coordinates.size(); i++) {
+			final Double coordinate = coordinates.get(i);
+			if (Double.compare(coordinate, point.getCoordinates().get(i)) != 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private class Point {
+		private final List<Double> coordinates = new ArrayList<Double>();
+
+		public List<Double> getCoordinates() {
+			return coordinates;
+		}
+	}
+
 }

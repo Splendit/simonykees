@@ -4,13 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -18,7 +16,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-import org.eclipse.jdt.core.dom.WildcardType;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.constants.ReservedNames;
@@ -41,12 +38,14 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitASTVisitor {
 
 	// private SimpleName iterationVariable = null;
 
-	private Map<WhileStatement, IteratorDefinitionASTVisior> replaceInformationASTVisitorList;
+	private Map<WhileStatement, LoopOptimizationASTVisior> replaceInformationASTVisitorList;
+	private Map<String, Integer> multipleIteratorUse;
 
 	public WhileToForASTVisitor() {
 		super();
 		this.fullyQuallifiedNameMap.put(ITERATOR_KEY, generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME));
 		this.replaceInformationASTVisitorList = new HashMap<>();
+		this.multipleIteratorUse = new HashMap<>();
 	}
 
 	@Override
@@ -62,12 +61,12 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitASTVisitor {
 					// defined in an parent block.
 					return false;
 				}
-				IteratorDefinitionASTVisior iteratorDefinitionAstVisior = new IteratorDefinitionASTVisior(
+				LoopOptimizationASTVisior iteratorDefinitionAstVisior = new LoopOptimizationASTVisior(
 						(SimpleName) iteratorName, node);
 				iteratorDefinitionAstVisior.setAstRewrite(this.astRewrite);
 				parentNode.accept(iteratorDefinitionAstVisior);
 
-				if (null != iteratorDefinitionAstVisior.getIteratorName()) {
+				if (iteratorDefinitionAstVisior.allParametersFound()) {
 					replaceInformationASTVisitorList.put(node, iteratorDefinitionAstVisior);
 				}
 			}
@@ -91,13 +90,16 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitASTVisitor {
 	public void endVisit(WhileStatement node) {
 		// Do the replacement
 		if (replaceInformationASTVisitorList.containsKey(node)) {
-			IteratorDefinitionASTVisior iteratorDefinitionAstVisior = replaceInformationASTVisitorList.remove(node);
-			Type iteratorType = getTypeOfIterator(iteratorDefinitionAstVisior.getIteratorDeclarationStatement());
+			LoopOptimizationASTVisior iteratorDefinitionAstVisior = replaceInformationASTVisitorList.remove(node);
+			Type iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(iteratorDefinitionAstVisior.getIteratorDeclaration());
 
 			// iterator has no type-parameter therefore a optimization is could
 			// not be applied
 			if (null == iteratorType) {
 				return;
+			}
+			else {
+				iteratorType = (Type) astRewrite.createMoveTarget(iteratorType);
 			}
 
 			// find LoopvariableName
@@ -123,6 +125,19 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitASTVisitor {
 			}
 
 			if (null == singleVariableDeclaration) {
+				// Solution for Iteration over the same List without variables
+				String iteratorName = iteratorDefinitionAstVisior.getListName().getFullyQualifiedName()
+						+ ReservedNames.CLASS_ITERATOR;
+				if(null == multipleIteratorUse.get(iteratorName)){
+					multipleIteratorUse.put(iteratorName, 2);
+				}
+				else{
+					Integer i = multipleIteratorUse.get(iteratorName);
+					multipleIteratorUse.put(iteratorName, i + 1);
+					iteratorName = iteratorName + i;
+				}
+				
+				
 				singleVariableDeclaration = NodeBuilder.newSingleVariableDeclaration(node.getAST(),
 						NodeBuilder.newSimpleName(node.getAST(),
 								iteratorDefinitionAstVisior.getListName().getFullyQualifiedName()
@@ -147,80 +162,12 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitASTVisitor {
 					singleVariableDeclaration);
 			astRewrite.replace(node, newFor, null);
 
-			astRewrite.remove(iteratorDefinitionAstVisior.getIteratorDeclarationStatement(), null);
-		}
-	}
-
-	private Type getTypeOfIterator(VariableDeclarationStatement variableDeclarationStatement) {
-		if (ASTNode.PARAMETERIZED_TYPE == variableDeclarationStatement.getType().getNodeType()) {
-			ParameterizedType parameterizedType = (ParameterizedType) variableDeclarationStatement.getType();
-			if (1 == parameterizedType.typeArguments().size()) {
-				Type parameterType = (Type) parameterizedType.typeArguments().get(0);
-				if (parameterType.isWildcardType()) {
-					WildcardType wildcardType = (WildcardType) parameterType;
-					if (wildcardType.isUpperBound()) {
-						return (Type) astRewrite.createMoveTarget(wildcardType.getBound());
-					}
-				} else if (parameterType.isSimpleType()) {
-					return (Type) astRewrite.createMoveTarget(parameterType);
-				}
+			astRewrite.remove(iteratorDefinitionAstVisior.getIteratorDeclaration(), null);
+			
+			//clear the variableIterator if no other loop is present
+			if(replaceInformationASTVisitorList.isEmpty()){
+				multipleIteratorUse.clear();
 			}
-		}
-
-		return null;
-	}
-
-	private void oldReplacement() {
-		/* vars it needs */
-		IteratorDefinitionASTVisior iteratorDefinitionAstVisior = null;
-		WhileStatement node = null;
-		Block parentNode = null;
-		SimpleName iteratorName = null;
-
-		SimpleName iterationVariable = null;
-		Type svdType = null;
-		FindNextVariableASTVisitor findNextVariableAstVisitor = null;
-		if (iterationVariable == null) {
-			findNextVariableAstVisitor = new FindNextVariableASTVisitor((SimpleName) iteratorName);
-			findNextVariableAstVisitor.setAstRewrite(this.astRewrite);
-			node.getBody().accept(findNextVariableAstVisitor);
-			if (findNextVariableAstVisitor.getVariableName() != null && findNextVariableAstVisitor.isTransformable()) {
-				iterationVariable = findNextVariableAstVisitor.getVariableName();
-				svdType = findNextVariableAstVisitor.getIteratorVariableType();
-			}
-		}
-
-		if (iteratorDefinitionAstVisior.getListName() != null && iterationVariable != null) {
-
-			if (svdType == null) {
-				// variable is not in while defined check if
-				// unused in other context and extract type
-				VariableDefinitionASTVisitor variableDefinitionAstVisitor = new VariableDefinitionASTVisitor(
-						iterationVariable, node);
-				parentNode.accept(variableDefinitionAstVisitor);
-				if (variableDefinitionAstVisitor.getVariableDeclarationStatement() != null) {
-					svdType = variableDefinitionAstVisitor.getVariableDeclarationStatement().getType();
-					astRewrite.remove(variableDefinitionAstVisitor.getVariableDeclarationStatement(), null);
-				} else {
-					// exclusion ground found
-					// return false;
-				}
-			} else {
-
-			}
-			SingleVariableDeclaration svd = NodeBuilder.newSingleVariableDeclaration(node.getAST(),
-					(SimpleName) astRewrite.createMoveTarget(iterationVariable),
-					(Type) astRewrite.createMoveTarget(svdType));
-			EnhancedForStatement newFor = NodeBuilder.newEnhancedForStatement(node.getAST(),
-					(Statement) astRewrite.createMoveTarget(node.getBody()),
-					(Expression) astRewrite.createMoveTarget(iteratorDefinitionAstVisior.getListName()), svd);
-			astRewrite.replace(node, newFor, null);
-			// executed here, because a breaking statement can
-			// be found after the setting of the type
-			if (findNextVariableAstVisitor != null) {
-				astRewrite.remove(findNextVariableAstVisitor.getRemoveWithTransformation(), null);
-			}
-			astRewrite.remove(iteratorDefinitionAstVisior.getIteratorDeclarationStatement(), null);
 		}
 	}
 }
