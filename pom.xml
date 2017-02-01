@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>at.splendit.jSparrow</groupId>
 	<artifactId>jSparrow</artifactId>
-	<version>0.9.2</version>
+	<version>0.9.2.4</version>
 	<packaging>pom</packaging>
 	<name>jSparrow :: parent</name>
 	<description>jSparrow Parent</description>
@@ -61,7 +61,7 @@
 		<system>JIRA</system>
 		<url>https://jira.splendit.loc/browse/SIM/</url>
 	</issueManagement>
-	
+
 	<ciManagement>
 		<system>Jenkins</system>
 		<url>https://jenkins.splendit.loc/view/simonykees/</url>
@@ -297,6 +297,11 @@
 					<configuration>
 						<format>yyyyMMdd-HHmm</format>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-p2-repository-plugin</artifactId>
+					<version>${tycho.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.eclipse.tycho</groupId>

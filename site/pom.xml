@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>jSparrow</artifactId>
 		<groupId>at.splendit.jSparrow</groupId>
-		<version>0.9.2</version>
+		<version>0.9.2.4</version>
 	</parent>
 	<artifactId>jSparrow.site</artifactId>
 	<packaging>eclipse-repository</packaging>
@@ -15,4 +15,16 @@
 	<scm>
 		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/site</url>
 	</scm>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-p2-repository-plugin</artifactId>
+				<configuration>
+					<includeAllDependencies>true</includeAllDependencies>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
