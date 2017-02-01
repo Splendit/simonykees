@@ -37,7 +37,6 @@ public class ResponseParser implements LicenseChecker {
 	private static final String EVALUATION_EXPIRES_DATE_KEY = "evaluationExpires"; //$NON-NLS-1$
 	private static final String VALID_KEY = "valid"; //$NON-NLS-1$
 	private static final String SUBSCRIPTION_EXPIRES_KEY = "expires"; //$NON-NLS-1$
-	private static final String NODE_LOCKED_FEATURE_KEY = "ETP7TSTC3"; //$NON-NLS-1$
 
 
 	public ResponseParser(ValidationResult validationResult, Instant timestamp, String licenseeName, ValidationAction validationAction) {
@@ -94,32 +93,26 @@ public class ResponseParser implements LicenseChecker {
 				setLicenseType(licenseType);
 				setProductModuleNumber(productModuleNumber);
 				properties.forEach((key, value) -> {
-
-					switch (key) {
-					case VALID_KEY:
-						boolean valid = Boolean.valueOf(value.getValue());
+					
+					boolean valid;
+					if(key.equals(VALID_KEY)) {
+						valid = Boolean.valueOf(value.getValue());
 						seLicenseModelStatus(valid);
-						break;
-					case NODE_LOCKED_FEATURE_KEY:
+					} else if (key.equals(LicenseManager.NODE_LOCKED_FEATURE_KEY)) {
 						Map<String, Composition> featureKeyValues = value.getProperties();
 						Composition featureStatus = featureKeyValues.get(VALID_KEY);
 						valid = Boolean.valueOf(featureStatus.getValue());
 						seLicenseModelStatus(valid);
-						break;
-					case PRODUCT_MODULE_NAME_KEY:
+					} else if (key.equals(PRODUCT_MODULE_NAME_KEY)) {
 						setProductModuleName(value.getValue());
-						break;
-					case PRODUCT_MODULE_NUMBER_KEY:
+					} else if (key.equals(PRODUCT_MODULE_NUMBER_KEY)) {
 						setProductModuleNumber(value.getValue());
-						break;
-					case EXPIRATION_TIME_STAMP_KEY:
+					} else if (key.equals(EXPIRATION_TIME_STAMP_KEY)) {
 						ZonedDateTime expirationTimeStamp = ZonedDateTime.parse(value.getValue());
 						setExpirationTimeStamp(expirationTimeStamp);
-						break;
-					case EVALUATION_EXPIRES_DATE_KEY:
+					} else if (key.equals(EVALUATION_EXPIRES_DATE_KEY)) {
 						ZonedDateTime evaluationExpiresDate = ZonedDateTime.parse(value.getValue());
 						setEvaluationExpiresDate(evaluationExpiresDate);
-						break;
 					}
 					
 				});
