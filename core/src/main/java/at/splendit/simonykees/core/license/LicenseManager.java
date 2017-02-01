@@ -4,8 +4,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Optional;
 
 import org.eclipse.core.runtime.Status;
@@ -59,6 +57,13 @@ public class LicenseManager {
 	private static final String PRODUCT_MODULE_NUMBER_TEST = "M6IS9TIWG"; //$NON-NLS-1$
 	
 	/**
+	 * Node Locked license template number.
+	 */
+	static String NODE_LOCKED_FEATURE_KEY = "ETP7TSTC3"; //$NON-NLS-1$
+	private static final String NODE_LOCKED_FEATURE_KEY_PRODUCTION = "EHTPIKGMR"; //$NON-NLS-1$
+	private static final String NODE_LOCKED_FEATURE_KEY_TEST = "ETP7TSTC3"; //$NON-NLS-1$
+	
+	/**
 	 * Waiting time in milliseconds for receiving and processing a validation call.
 	 */
 	private static final long WAIT_FOR_VALIDATION_RESPONSE = 1000;
@@ -93,6 +98,7 @@ public class LicenseManager {
 		if (instance == null) {
 			PRODUCT_NUMBER = PRODUCT_NUMBER_PRODUCTION;
 			PRODUCT_MODULE_NUMBER = PRODUCT_MODULE_NUMBER_PRODUCTION;
+			NODE_LOCKED_FEATURE_KEY = NODE_LOCKED_FEATURE_KEY_PRODUCTION;
 			RestApiConnection.PASS_APIKEY = PASS_APIKEY_PRODUCTION;
 			instance = new LicenseManager();
 		}
@@ -104,6 +110,7 @@ public class LicenseManager {
 		if (instance == null || PRODUCT_NUMBER == PRODUCT_NUMBER_PRODUCTION) {
 			PRODUCT_NUMBER = PRODUCT_NUMBER_TEST;
 			PRODUCT_MODULE_NUMBER = PRODUCT_MODULE_NUMBER_TEST;
+			NODE_LOCKED_FEATURE_KEY = NODE_LOCKED_FEATURE_KEY_TEST;
 			instance = new LicenseManager();
 		}
 		return instance;
@@ -277,14 +284,7 @@ public class LicenseManager {
 	        HWDiskStore[] diskStores = hal.getDiskStores();
 
 	        if(diskStores.length > 0) {
-	        	ArrayList<HWDiskStore> diskStoresArray = new ArrayList<>(Arrays.asList(diskStores));
-	        	diskSerial = 
-	        			diskStoresArray
-	        			.stream()
-	        			.map(HWDiskStore::getSerial)
-	        			.sorted()
-	        			.findFirst()
-	        			.orElse("");
+	        	diskSerial = diskStores[0].getSerial();
 	        }
 	        
 	        setUniqueHwId(diskSerial);
@@ -306,16 +306,6 @@ public class LicenseManager {
         String diskSerial = "";
         if(diskStores.length > 0) {
         	diskSerial = diskStores[0].getSerial();
-        	if(diskSerial.length() > 26) {
-	        	ArrayList<HWDiskStore> diskStoresArray = new ArrayList<>(Arrays.asList(diskStores));
-	        	diskSerial = 
-	        			diskStoresArray
-	        			.stream()
-	        			.map(HWDiskStore::getSerial)
-	        			.sorted()
-	        			.findFirst()
-	        			.orElse("");
-        	}
         }
         
         demoLicenseeName = DEFAULT_LICENSEE_NUMBER_PREFIX + diskSerial;

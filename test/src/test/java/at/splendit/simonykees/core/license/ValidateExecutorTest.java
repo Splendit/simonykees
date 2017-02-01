@@ -28,7 +28,7 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 	}
 	
 	@After
-	public void waitToCompleteProcessing() throws InterruptedException {
+	public void waitForProcessingResponse() throws InterruptedException {
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 	}
 	
