@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: jSparrow.core;singleton:=true
-Bundle-Version: 0.9.2.2
+Bundle-Version: 0.9.2.3
 Bundle-Activator: at.splendit.simonykees.core.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.compare,
