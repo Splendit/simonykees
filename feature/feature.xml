@@ -2,7 +2,7 @@
 <feature
       id="jSparrow.feature"
       label="jSparrow"
-      version="0.9.2.4"
+      version="1.0.0"
       provider-name="Splendit IT-Consulting GmbH">
 
    <description url="https://jsparrow.eu/description">

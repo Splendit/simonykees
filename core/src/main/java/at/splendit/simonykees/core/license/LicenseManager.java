@@ -60,7 +60,7 @@ public class LicenseManager {
 	 * Node Locked license template number.
 	 */
 	static String NODE_LOCKED_FEATURE_KEY = "ETP7TSTC3"; //$NON-NLS-1$
-	private static final String NODE_LOCKED_FEATURE_KEY_PRODUCTION = "EHTPIKGMR"; //$NON-NLS-1$
+	private static final String NODE_LOCKED_FEATURE_KEY_PRODUCTION = "EXXTJ43D3"; //$NON-NLS-1$
 	private static final String NODE_LOCKED_FEATURE_KEY_TEST = "ETP7TSTC3"; //$NON-NLS-1$
 	
 	/**
