@@ -339,27 +339,9 @@ public class LicenseManager {
 		
 		// if there is a cached validation result...
 		if(!cache.isEmpty()) {
-			// construct a validation result parser...
-			ResponseParser parser = 
-					new ResponseParser(
-							cache.getCachedValidationResult(), 
-							cache.getValidationTimestamp(), 
-							getLicenseeName(), 
-							cache.getValidatioAction());
-			
-			// and get the last successful validation information from persistence...
-			Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
-			Instant lastSuccessTimestamp = 
-					optPersistedData
-					.flatMap(PersistenceModel::getLastSuccessTimestamp)
-					.orElse(null);
-			LicenseType lastSuccessType = 
-					optPersistedData
-					.flatMap(PersistenceModel::getLastSuccessLicenseType)
-					.orElse(null);
 			
 			// create an instance of LicenseChecker from the parser and last successful info...
-			checker = new CheckerImpl(parser, lastSuccessTimestamp, lastSuccessType);
+			checker = validateUsingCache();
 			
 			if(checker.isValid() && ValidateExecutor.isShutDown()) {
 				// cache cannot be trusted if the validate executor is shut down.
@@ -377,25 +359,58 @@ public class LicenseManager {
 				
 				// and reconstruct an instance of type LicenseChecker
 				if(!cache.isEmpty()) {
-					parser = 
-							new ResponseParser(
-									cache.getCachedValidationResult(), 
-									cache.getValidationTimestamp(), 
-									getLicenseeName(), 
-									cache.getValidatioAction());
-					
-					checker = new CheckerImpl(parser, lastSuccessTimestamp, lastSuccessType);
+					checker = validateUsingCache();
 				} else {
 					checker = persistenceManager.vlidateUsingPersistedData();
 				}
 			}
 			
 		} else {
+			
+			/*
+			 * Try to make a validation call. Here is the case that the previous 
+			 * validation call failed due to internet connection. 
+			 */
+			LicenseValidator.doValidate(getLicensee());
 
-			// otherwise use the persisted data to create an instance of type LicenseChecker...
-			checker = persistenceManager.vlidateUsingPersistedData();
+			if(!cache.isEmpty()) {
+				checker = validateUsingCache();
+				
+			} else {
+				// otherwise use the persisted data to create an instance of type LicenseChecker...
+				checker = persistenceManager.vlidateUsingPersistedData();
+			}
 		}
 
+		return checker;
+	}
+	
+	private LicenseChecker validateUsingCache() {
+		ValidationResultCache cache = ValidationResultCache.getInstance();
+		PersistenceManager persistenceManager = PersistenceManager.getInstance();
+		
+		// construct a validation result parser...
+		ResponseParser parser = 
+				new ResponseParser(
+						cache.getCachedValidationResult(), 
+						cache.getValidationTimestamp(), 
+						getLicenseeName(), 
+						cache.getValidatioAction());
+		
+		// and get the last successful validation information from persistence...
+		Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
+		Instant lastSuccessTimestamp = 
+				optPersistedData
+				.flatMap(PersistenceModel::getLastSuccessTimestamp)
+				.orElse(null);
+		LicenseType lastSuccessType = 
+				optPersistedData
+				.flatMap(PersistenceModel::getLastSuccessLicenseType)
+				.orElse(null);
+		
+		// create an instance of LicenseChecker from the parser and last successful info...
+		LicenseChecker checker = new CheckerImpl(parser, lastSuccessTimestamp, lastSuccessType);
+		
 		return checker;
 	}
 	

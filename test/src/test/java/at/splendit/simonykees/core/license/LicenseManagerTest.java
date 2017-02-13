@@ -274,6 +274,8 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		LicenseManager licenseManager = LicenseManager.getTestInstance();
 		licenseManager.setUniqueHwId("");
 		
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+		
 		// when initiating the license manager
 		licenseManager.initManager();
 		
