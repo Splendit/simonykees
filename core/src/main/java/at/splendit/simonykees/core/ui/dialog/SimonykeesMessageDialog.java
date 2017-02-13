@@ -53,15 +53,15 @@ public class SimonykeesMessageDialog extends MessageDialog {
 
 	private SimonykeesMessageDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage,
 			int dialogImageType, int defaultIndex, String... dialogButtonLabels) {
-		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, defaultIndex,
-				dialogButtonLabels);
+		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels,
+				defaultIndex);
 	}
 
 	private SimonykeesMessageDialog(Function<Composite, Control> customAreaFunction, Shell parentShell,
 			String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType, int defaultIndex,
 			String... dialogButtonLabels) {
-		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, defaultIndex,
-				dialogButtonLabels);
+		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels,
+				defaultIndex);
 		// This function injection works because this.open() is used to create
 		// the dialog, where createCustomArea is invoked
 		this.customAreaFunction = customAreaFunction;

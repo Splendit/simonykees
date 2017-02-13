@@ -79,10 +79,7 @@ public class SelectRulesWizard extends Wizard {
 
 				dialog.open();
 			} else {
-				MessageDialog dialog = new MessageDialog(getShell(), Messages.aa_codename, null,
-						Messages.SelectRulesWizard_warning_no_refactorings, MessageDialog.INFORMATION, 1,
-						Messages.ui_ok);
-				dialog.open();
+				MessageDialog.openError(getShell(), Messages.aa_codename, Messages.SelectRulesWizard_warning_no_refactorings);
 			}
 		} else {
 			LicenseUtil.displayLicenseErrorDialog(getShell());

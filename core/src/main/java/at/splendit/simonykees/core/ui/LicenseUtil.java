@@ -25,9 +25,7 @@ public class LicenseUtil {
 		LicenseChecker licenseChecker = LicenseManager.getInstance().getValidationData();
 		String userMessage = licenseChecker.getLicenseStatus().getUserMessage();
 
-		MessageDialog dialog = new MessageDialog(shell, Messages.aa_codename, null,
-				NLS.bind(Messages.LicenseHelper_licenseProblem, userMessage), MessageDialog.ERROR, 1, Messages.ui_ok);
-		dialog.open();
+		MessageDialog.openError(shell, Messages.aa_codename, NLS.bind(Messages.LicenseHelper_licenseProblem, userMessage));
 	}
 
 }
