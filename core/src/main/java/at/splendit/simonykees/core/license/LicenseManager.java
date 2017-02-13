@@ -589,7 +589,7 @@ public class LicenseManager {
 		}
 		
 		public ZonedDateTime calcExpireDate(ResponseParser parser) {
-			LicenseType type = parser.getType();
+			LicenseType type = getType();
 			ZonedDateTime expireDate = null;
 			if(LicenseType.TRY_AND_BUY.equals(type)) {
 				expireDate = parser.getEvaluationExpiresDate();
