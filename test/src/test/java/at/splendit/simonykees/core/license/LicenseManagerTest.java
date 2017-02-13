@@ -243,7 +243,9 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	@Test
 	public void createTryAndBuyLicensee() throws InterruptedException {
 		// having cleared the persisted data...
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		clearPersistedData();
+		
 		LicenseManager licenseMng = LicenseManager.getTestInstance();
 		licenseMng.setUniqueHwId("");
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
@@ -270,11 +272,11 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	@Test
 	public void validateDemoLicense() throws InterruptedException {
 		// having no licensee information stored
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		clearPersistedData();
 		LicenseManager licenseManager = LicenseManager.getTestInstance();
 		licenseManager.setUniqueHwId("");
 		
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		// when initiating the license manager
 		licenseManager.initManager();
