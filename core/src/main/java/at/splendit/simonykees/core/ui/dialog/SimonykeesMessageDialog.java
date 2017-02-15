@@ -1,14 +1,20 @@
 package at.splendit.simonykees.core.ui.dialog;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.function.Function;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 import at.splendit.simonykees.core.exception.SimonykeesException;
 import at.splendit.simonykees.core.i18n.Messages;
@@ -32,6 +38,22 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	private Function<Composite, Control> customAreaFunction = parent -> {
 		Link link = new Link(parent, SWT.NONE | SWT.RIGHT);
 		link.setText(splenditUrl);
+		link.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				try {
+					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(arg0.text));
+				} catch (PartInitException | MalformedURLException e) {
+					// nothing... 
+				}
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				// nothing
+			}
+		});
 		return link;
 	};
 
