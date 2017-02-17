@@ -114,8 +114,8 @@ public class Messages extends NLS {
 	public static String TryWithResourceRule_name;
 	public static String ValidateExecutor_shutting_down_validation_scheduler;
 	public static String ValidateExecutor_validation_scheduler_started;
-	public static String WhileToForRule_description;
-	public static String WhileToForRule_name;
+	public static String WhileToForEachRule_description;
+	public static String WhileToForEachRule_name;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

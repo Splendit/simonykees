@@ -16,8 +16,8 @@ public class WhileToForEachRule extends RefactoringRule<WhileToForEachASTVisitor
 
 	public WhileToForEachRule(Class<WhileToForEachASTVisitor> visitor) {
 		super(visitor);
-		this.name = Messages.WhileToForRule_name;
-		this.description = Messages.WhileToForRule_description;
+		this.name = Messages.WhileToForEachRule_name;
+		this.description = Messages.WhileToForEachRule_description;
 		this.requiredJavaVersion = JavaVersion.JAVA_1_5;
 	}
 
