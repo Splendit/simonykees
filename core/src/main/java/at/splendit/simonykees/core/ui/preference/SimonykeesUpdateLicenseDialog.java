@@ -114,7 +114,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	
 	private void updateWarningInformation(boolean updated) {
 		Display display = getShell().getDisplay();
-		Device device = Display.getCurrent ();
+		Device device = Display.getCurrent();
 		FontDescriptor boldDescriptor = FontDescriptor.createFrom(updatedLabel.getFont()).setStyle(SWT.BOLD);
 		Font boldFont = boldDescriptor.createFont(display);
 		updatedLabel.setFont(boldFont);

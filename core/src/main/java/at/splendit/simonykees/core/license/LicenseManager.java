@@ -57,20 +57,13 @@ public class LicenseManager {
 	private static final String PRODUCT_MODULE_NUMBER_TEST = "M6IS9TIWG"; //$NON-NLS-1$
 	
 	/**
-	 * Node Locked license template number.
-	 */
-	static String NODE_LOCKED_FEATURE_KEY = "ETP7TSTC3"; //$NON-NLS-1$
-	private static final String NODE_LOCKED_FEATURE_KEY_PRODUCTION = "ETP7TSTC3"; //$NON-NLS-1$
-	private static final String NODE_LOCKED_FEATURE_KEY_TEST = "ETP7TSTC3"; //$NON-NLS-1$
-	
-	/**
 	 * Waiting time in milliseconds for receiving and processing a validation call.
 	 */
 	private static final long WAIT_FOR_VALIDATION_RESPONSE = 1000;
 
 	private final boolean DO_VALIDATE = true;
 	/**
-	 * Validation interval in seconds. 10 * 60s = 6 minutes
+	 * Validation interval in seconds. 10 * 60s = 10 minutes
 	 */
 	private final long VALIDATE_INTERVAL_IN_SECONDS = 600;
 	/**
@@ -90,7 +83,6 @@ public class LicenseManager {
 	private String uniqueHwId = ""; //$NON-NLS-1$
 	
 	private LicenseManager() {
-		// TODO: throw an exception if the instance is not null...
 		initManager();
 	}
 
@@ -98,7 +90,6 @@ public class LicenseManager {
 		if (instance == null) {
 			PRODUCT_NUMBER = PRODUCT_NUMBER_PRODUCTION;
 			PRODUCT_MODULE_NUMBER = PRODUCT_MODULE_NUMBER_PRODUCTION;
-			NODE_LOCKED_FEATURE_KEY = NODE_LOCKED_FEATURE_KEY_PRODUCTION;
 			RestApiConnection.PASS_APIKEY = PASS_APIKEY_PRODUCTION;
 			instance = new LicenseManager();
 		}
@@ -110,7 +101,6 @@ public class LicenseManager {
 		if (instance == null || PRODUCT_NUMBER == PRODUCT_NUMBER_PRODUCTION) {
 			PRODUCT_NUMBER = PRODUCT_NUMBER_TEST;
 			PRODUCT_MODULE_NUMBER = PRODUCT_MODULE_NUMBER_TEST;
-			NODE_LOCKED_FEATURE_KEY = NODE_LOCKED_FEATURE_KEY_TEST;
 			instance = new LicenseManager();
 		}
 		return instance;
@@ -236,7 +226,6 @@ public class LicenseManager {
 				ValidateExecutor.shutDownScheduler();
 				 
 			} catch (NetLicensingException e) {
-				// TODO add a validation status indicating that the check-in was not successful.
 				Activator.log(Status.WARNING, Messages.LicenseManager_cannot_reach_licensing_provider_on_checkin, e);
 			}		
 		}
@@ -339,27 +328,9 @@ public class LicenseManager {
 		
 		// if there is a cached validation result...
 		if(!cache.isEmpty()) {
-			// construct a validation result parser...
-			ResponseParser parser = 
-					new ResponseParser(
-							cache.getCachedValidationResult(), 
-							cache.getValidationTimestamp(), 
-							getLicenseeName(), 
-							cache.getValidatioAction());
-			
-			// and get the last successful validation information from persistence...
-			Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
-			Instant lastSuccessTimestamp = 
-					optPersistedData
-					.flatMap(PersistenceModel::getLastSuccessTimestamp)
-					.orElse(null);
-			LicenseType lastSuccessType = 
-					optPersistedData
-					.flatMap(PersistenceModel::getLastSuccessLicenseType)
-					.orElse(null);
 			
 			// create an instance of LicenseChecker from the parser and last successful info...
-			checker = new CheckerImpl(parser, lastSuccessTimestamp, lastSuccessType);
+			checker = validateUsingCache();
 			
 			if(checker.isValid() && ValidateExecutor.isShutDown()) {
 				// cache cannot be trusted if the validate executor is shut down.
@@ -377,25 +348,58 @@ public class LicenseManager {
 				
 				// and reconstruct an instance of type LicenseChecker
 				if(!cache.isEmpty()) {
-					parser = 
-							new ResponseParser(
-									cache.getCachedValidationResult(), 
-									cache.getValidationTimestamp(), 
-									getLicenseeName(), 
-									cache.getValidatioAction());
-					
-					checker = new CheckerImpl(parser, lastSuccessTimestamp, lastSuccessType);
+					checker = validateUsingCache();
 				} else {
 					checker = persistenceManager.vlidateUsingPersistedData();
 				}
 			}
 			
 		} else {
+			
+			/*
+			 * Try to make a validation call. Here is the case that the previous 
+			 * validation call failed due to internet connection. 
+			 */
+			LicenseValidator.doValidate(getLicensee());
 
-			// otherwise use the persisted data to create an instance of type LicenseChecker...
-			checker = persistenceManager.vlidateUsingPersistedData();
+			if(!cache.isEmpty()) {
+				checker = validateUsingCache();
+				
+			} else {
+				// otherwise use the persisted data to create an instance of type LicenseChecker...
+				checker = persistenceManager.vlidateUsingPersistedData();
+			}
 		}
 
+		return checker;
+	}
+	
+	private LicenseChecker validateUsingCache() {
+		ValidationResultCache cache = ValidationResultCache.getInstance();
+		PersistenceManager persistenceManager = PersistenceManager.getInstance();
+		
+		// construct a validation result parser...
+		ResponseParser parser = 
+				new ResponseParser(
+						cache.getCachedValidationResult(), 
+						cache.getValidationTimestamp(), 
+						getLicenseeName(), 
+						cache.getValidatioAction());
+		
+		// and get the last successful validation information from persistence...
+		Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
+		Instant lastSuccessTimestamp = 
+				optPersistedData
+				.flatMap(PersistenceModel::getLastSuccessTimestamp)
+				.orElse(null);
+		LicenseType lastSuccessType = 
+				optPersistedData
+				.flatMap(PersistenceModel::getLastSuccessLicenseType)
+				.orElse(null);
+		
+		// create an instance of LicenseChecker from the parser and last successful info...
+		LicenseChecker checker = new CheckerImpl(parser, lastSuccessTimestamp, lastSuccessType);
+		
 		return checker;
 	}
 	
@@ -589,7 +593,7 @@ public class LicenseManager {
 		}
 		
 		public ZonedDateTime calcExpireDate(ResponseParser parser) {
-			LicenseType type = parser.getType();
+			LicenseType type = getType();
 			ZonedDateTime expireDate = null;
 			if(LicenseType.TRY_AND_BUY.equals(type)) {
 				expireDate = parser.getEvaluationExpiresDate();
