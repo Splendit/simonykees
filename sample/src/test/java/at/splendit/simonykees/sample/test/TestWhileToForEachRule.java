@@ -19,13 +19,13 @@ import org.junit.runners.Parameterized.Parameters;
  * @since 0.9.2
  */
 @RunWith(Parameterized.class)
-public class TestWhileToForRule extends AbstractReflectiveMethodTester {
+public class TestWhileToForEachRule extends AbstractReflectiveMethodTester {
 
-	private static Logger log = LogManager.getLogger(TestWhileToForRule.class);
+	private static Logger log = LogManager.getLogger(TestWhileToForEachRule.class);
 
 	private static PreAndPostClassHolder holder;
 
-	public TestWhileToForRule(ParameterType parameterType, String value) {
+	public TestWhileToForEachRule(ParameterType parameterType, String value) {
 		super(parameterType, value);
 	}
 
@@ -47,8 +47,8 @@ public class TestWhileToForRule extends AbstractReflectiveMethodTester {
 
 	@BeforeClass
 	public static void setUptHolderInstance() throws Exception {
-		holder = new PreAndPostClassHolder(at.splendit.simonykees.sample.preRule.TestWhileToForRule.class,
-				at.splendit.simonykees.sample.postRule.allRules.TestWhileToForRule.class);
+		holder = new PreAndPostClassHolder(at.splendit.simonykees.sample.preRule.TestWhileToForEachRule.class,
+				at.splendit.simonykees.sample.postRule.allRules.TestWhileToForEachRule.class);
 	}
 
 	@AfterClass

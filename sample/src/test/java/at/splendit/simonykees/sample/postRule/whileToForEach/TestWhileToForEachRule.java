@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.whileToFor;
+package at.splendit.simonykees.sample.postRule.whileToForEach;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings({ "nls", "unused" })
-public class TestWhileToForRule {
+public class TestWhileToForEachRule {
 
 	private List<String> generateList(String input) {
 		return Arrays.asList(input.split(";")); //$NON-NLS-1$
