@@ -19,7 +19,7 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
  * @since 0.9.2
  *
  */
-public class WhileToForASTVisitor extends AbstractCompilationUnitASTVisitor {
+public class WhileToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 
 	private static Integer ITERATOR_KEY = 1;
 	private static String ITERATOR_FULLY_QUALLIFIED_NAME = "java.util.Iterator"; //$NON-NLS-1$
@@ -29,7 +29,7 @@ public class WhileToForASTVisitor extends AbstractCompilationUnitASTVisitor {
 	private Map<WhileStatement, LoopOptimizationASTVisior> replaceInformationASTVisitorList;
 	private Map<String, Integer> multipleIteratorUse;
 
-	public WhileToForASTVisitor() {
+	public WhileToForEachASTVisitor() {
 		super();
 		this.fullyQuallifiedNameMap.put(ITERATOR_KEY, generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME));
 		this.replaceInformationASTVisitorList = new HashMap<>();

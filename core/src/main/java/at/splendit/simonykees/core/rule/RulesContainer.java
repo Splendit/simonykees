@@ -20,7 +20,7 @@ import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
 import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
-import at.splendit.simonykees.core.rule.impl.WhileToForRule;
+import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
@@ -35,7 +35,7 @@ import at.splendit.simonykees.core.visitor.StringFormatLineSeparatorASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
-import at.splendit.simonykees.core.visitor.loop.WhileToForASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.WhileToForEachASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.MultiCatchASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisitor;
 
@@ -67,7 +67,7 @@ public class RulesContainer {
 				new MultiCatchRule(MultiCatchASTVisitor.class),
 				new BracketsToControlRule(BracketsToControlASTVisitor.class),
 				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class),
-				new WhileToForRule(WhileToForASTVisitor.class),
+				new WhileToForEachRule(WhileToForEachASTVisitor.class),
 				new ForToForEachRule(ForToForEachASTVisitor.class),
 				new CollectionRemoveAllRule(CollectionRemoveAllASTVisitor.class),
 				new SerialVersionUidRule(SerialVersionUidASTVisitor.class),

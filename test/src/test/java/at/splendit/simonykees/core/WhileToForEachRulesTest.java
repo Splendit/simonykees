@@ -8,9 +8,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import at.splendit.simonykees.core.rule.impl.WhileToForRule;
+import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
-import at.splendit.simonykees.core.visitor.loop.WhileToForASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.WhileToForEachASTVisitor;
 
 /**
  * TODO SIM-103 add class description
@@ -20,20 +20,20 @@ import at.splendit.simonykees.core.visitor.loop.WhileToForASTVisitor;
  */
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
-public class WhileToForRulesTest extends AbstractRulesTest {
+public class WhileToForEachRulesTest extends AbstractRulesTest {
 
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.whileToFor";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/whileToFor";
+	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.whileToForEach";
+	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/whileToForEach";
 
 	private String fileName;
 	private Path preRule, postRule;
 
-	public WhileToForRulesTest(String fileName, Path preRule, Path postRule) {
+	public WhileToForEachRulesTest(String fileName, Path preRule, Path postRule) {
 		super();
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
-		rulesList.add(new WhileToForRule(WhileToForASTVisitor.class));
+		rulesList.add(new WhileToForEachRule(WhileToForEachASTVisitor.class));
 	}
 
 	@Parameters(name = "{index}: test file[{0}]")
