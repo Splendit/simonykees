@@ -57,6 +57,12 @@ public class LicenseManagerTest extends LicenseCommonTest {
 
 	}
 	
+	@After
+	public void clearSecureStorage() throws InterruptedException {
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+		clearPersistedData();
+	}
+	
 	//FIXME: tests related to floating license are temporarily removed
 	//@Test
 	public void testInitLicenseManager() {

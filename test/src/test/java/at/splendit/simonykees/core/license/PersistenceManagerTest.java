@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 
+import org.junit.After;
 import org.junit.Test;
 
 import at.splendit.simonykees.core.license.model.PersistenceModel;
@@ -21,6 +22,11 @@ import at.splendit.simonykees.core.license.model.PersistenceModel;
  */
 @SuppressWarnings("nls")
 public class PersistenceManagerTest extends LicenseCommonTest {
+	
+	@After
+	public void clearSecureStorage() throws InterruptedException {
+		clearPersistedData();
+	}
 	
 	@Test
 	public void encryptDecryptPersistenceModel() {

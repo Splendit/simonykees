@@ -3,7 +3,6 @@ package at.splendit.simonykees.core.license;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 
-import org.junit.After;
 import org.junit.BeforeClass;
 
 import at.splendit.simonykees.core.license.model.PersistenceModel;
@@ -119,10 +118,5 @@ public abstract class LicenseCommonTest {
 	@BeforeClass
 	public static void initTestLicenseManager() {
 		LicenseManager.getTestInstance();
-	}
-
-	@After
-	public void waitToCompleteProcessing() throws InterruptedException {
-		clearPersistedData();
 	}
 }
