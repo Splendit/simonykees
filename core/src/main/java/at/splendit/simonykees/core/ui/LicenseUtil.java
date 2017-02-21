@@ -7,6 +7,7 @@ import org.eclipse.swt.widgets.Shell;
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.license.LicenseChecker;
 import at.splendit.simonykees.core.license.LicenseManager;
+import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 
 /**
  * GUI related convenience class to check the validity of the license and
@@ -25,9 +26,9 @@ public class LicenseUtil {
 		LicenseChecker licenseChecker = LicenseManager.getInstance().getValidationData();
 		String userMessage = licenseChecker.getLicenseStatus().getUserMessage();
 
-		MessageDialog dialog = new MessageDialog(shell, Messages.aa_codename, null,
-				NLS.bind(Messages.LicenseHelper_licenseProblem, userMessage), MessageDialog.ERROR, 1, Messages.ui_ok);
-		dialog.open();
+		SimonykeesMessageDialog.openMessageDialog(shell, 
+				NLS.bind(Messages.LicenseHelper_licenseProblem, userMessage), 
+				MessageDialog.ERROR);
 	}
 
 }
