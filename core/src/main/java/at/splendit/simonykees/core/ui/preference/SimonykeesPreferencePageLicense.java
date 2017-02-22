@@ -14,12 +14,11 @@ import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
@@ -44,7 +43,7 @@ import at.splendit.simonykees.core.license.LicenseType;
 /**
  * Preference page for displaying license information and updating license key.
  * 
- * @author Ardit Ymeri
+ * @author Ardit Ymeri, Andreja Sambolec
  * @since 1.0
  *
  */
@@ -54,11 +53,16 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 	private Label licenseStatusLabel;
 	private Button updateButton;
 	
-	private static final double JSPARROW_LOGO_SCALE = 0.333333;
+	private Image jSparrowImageActive;
+	private Image jSparrowImageInactive;
+	private Label logoLabel;
+	
+	
 	private static final int LICENSE_LABEL_MAX_WIDTH = 370;
 
 	private static final String DATE_FORMAT_PATTERN = "MMMM dd, yyyy"; //$NON-NLS-1$
-	private static final String LOGO_PATH = "icons/jSparrow_FIN_2.png"; //$NON-NLS-1$
+	private static final String LOGO_PATH_ACTIVE = "icons/jSparrow_FIN_2_scaled.png"; //$NON-NLS-1$
+	private static final String LOGO_PATH_INACTIVE = "icons/jSparrow_FIN_3_scaled.png"; //$NON-NLS-1$
 
 	public SimonykeesPreferencePageLicense() {
 		super(GRID);
@@ -81,16 +85,19 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 		composite.setLayout(new RowLayout(SWT.VERTICAL));
 		
 		Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
-		IPath iPath = new Path(LOGO_PATH);
-		URL url = FileLocator.find(bundle, iPath, new HashMap<>());
-		ImageDescriptor imageDesc = ImageDescriptor.createFromURL(url);
-		Image jSparrowImage = imageDesc.createImage();
-		ImageData imageData = jSparrowImage.getImageData();
-		int scaledWidth = (int) (JSPARROW_LOGO_SCALE * imageData.width);
-		int scaledHeight = (int) (JSPARROW_LOGO_SCALE * imageData.height);
-		Image scaledJSparrowImage = new Image(composite.getDisplay(), imageData.scaledTo(scaledWidth, scaledHeight));
-		Label logoLabel = new Label(composite, SWT.NONE);
-		logoLabel.setImage(scaledJSparrowImage);
+		IPath iPathActive = new Path(LOGO_PATH_ACTIVE);
+		URL urlActive = FileLocator.find(bundle, iPathActive, new HashMap<>());
+		ImageDescriptor imageDescActive = ImageDescriptor.createFromURL(urlActive);
+		jSparrowImageActive = imageDescActive.createImage();
+		
+		IPath iPathInactive = new Path(LOGO_PATH_INACTIVE);
+		URL urlInactive = FileLocator.find(bundle, iPathInactive, new HashMap<>());
+		ImageDescriptor imageDescInactive = ImageDescriptor.createFromURL(urlInactive);
+		jSparrowImageInactive = imageDescInactive.createImage();
+		
+		
+		logoLabel = new Label(composite, SWT.NONE);
+		logoLabel.setImage(jSparrowImageActive);
 
 		licenseLabel = new Label(composite, SWT.LEFT | SWT.WRAP);
 		licenseLabel.setVisible(true);
@@ -111,7 +118,7 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 
 		updateButton = new Button(composite, SWT.PUSH);
 		updateButton.setText(Messages.SimonykeesPreferencePageLicense_update_license_key_button);
-		updateButton.addSelectionListener(new SelectionListener() {
+		updateButton.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -122,13 +129,9 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 				updateDisplayedInformation();
 			}
 
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				// nothing
-			}
 		});
 		
-		jSparrowLink.addSelectionListener(new SelectionListener() {
+		jSparrowLink.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -139,10 +142,6 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 				}
 			}
 			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				// no need to override this one
-			}
 		});
 
 		updateDisplayedInformation();
@@ -187,8 +186,10 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 
 		if(!licenseData.isValid()) {			
 			licenseStatusLabel.setText(status.getUserMessage());
+			logoLabel.setImage(jSparrowImageInactive);
 		} else {
 			licenseStatusLabel.setText("");; //$NON-NLS-1$
+			logoLabel.setImage(jSparrowImageActive);
 		}
 		licenseLabel.getParent().pack();
 		licenseLabel.getParent().layout(true);

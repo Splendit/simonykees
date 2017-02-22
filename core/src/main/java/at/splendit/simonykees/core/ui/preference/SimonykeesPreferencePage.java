@@ -9,7 +9,10 @@ import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IWorkbench;
@@ -25,7 +28,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * Main preference page for the plug-in. {@link FieldEditor}s are used for
  * convenient preference handling.
  * 
- * @author Ludwig Werzowa, Hannes Schweighofer
+ * @author Ludwig Werzowa, Hannes Schweighofer, Andreja Sambolec
  * @since 0.9.2
  */
 public class SimonykeesPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
@@ -35,6 +38,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	private String currentProfileId;
 	private Group ruleCheckboxGroup;
+	
+	private Button selectAllButton;
 
 	public SimonykeesPreferencePage() {
 		super(GRID);
@@ -53,6 +58,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 				composite);
 		addField(profileSelectionComboField);
 
+		createSelectAllButton(composite);
+		
 		generateRuleCheckboxList(composite);
 
 	}
@@ -81,7 +88,39 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			ruleCheckboxList.add(ruleCheckbox);
 			addField(ruleCheckbox);
 		}
+		
+	}
+	
+	/**
+	 * Adds a button to select / deselect all rules.
+	 * On select, for every field new value is first set in preferences and 
+	 * then field is reloaded.
+	 * 
+	 * @param parent
+	 */
+	private void createSelectAllButton(Composite parent) {
+		selectAllButton = new Button(parent, SWT.CHECK);
+		selectAllButton.setText(Messages.SelectRulesWizardPage_select_unselect_all);
+		boolean builtInProfile = SimonykeesPreferenceManager.isProfileBuiltIn(this.currentProfileId);
+		selectAllButton.setEnabled(!builtInProfile);
+		selectAllButton.addSelectionListener(new SelectionAdapter() {
 
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				for (BooleanFieldEditor ruleCheckbox : ruleCheckboxList) {
+					/*
+					 * Current value of property is first saved to temp variable and later reused.
+					 * BooleanFieldEditor does not have public method to set value so that
+					 * workaround is used.
+					 */
+					boolean currentValue = getPreferenceStore().getBoolean(ruleCheckbox.getPreferenceName());
+					getPreferenceStore().setValue(ruleCheckbox.getPreferenceName(), selectAllButton.getSelection());
+					ruleCheckbox.load();
+					getPreferenceStore().setValue(ruleCheckbox.getPreferenceName(), currentValue);
+				}
+			}
+
+		});
 	}
 	
 	/**
@@ -113,6 +152,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			ruleCheckbox.setEnabled(!builtInProfile, ruleCheckboxGroup);
 		}
 		currentProfileId = profileId;
+		selectAllButton.setEnabled(!builtInProfile);
 	}
 
 	@Override
