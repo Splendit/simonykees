@@ -72,6 +72,10 @@ public class Messages extends NLS {
 	public static String PrimitiveBoxedForStringRule_name;
 	public static String Profile_DefaultProfile_profileName;
 	public static String Profile_Java8Profile_profileName;
+	public static String ProgressMonitor_SelectRulesWizard_performFinish_jobName;
+	public static String ProgressMonitor_AbstractRefactorer_prepareRefactoring_taskName;
+	public static String ProgressMonitor_AbstractRefactorer_doRefactoring_taskName;
+	public static String ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName;
 	public static String RefactoringRule_default_description;
 	public static String RefactoringRule_default_name;
 	public static String RefactoringRule_warning_workingcopy_already_present;

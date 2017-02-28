@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -19,12 +20,13 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
 
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Utility class for simonykees
  * 
- * @author Hannes Schweighofer
+ * @author Hannes Schweighofer, Andreja Sambolec
  * @since 0.9
  */
 public final class SimonykeesUtil {
@@ -60,9 +62,12 @@ public final class SimonykeesUtil {
 	 *             while accessing its corresponding resource.
 	 * @since 0.9
 	 */
-	public static void collectICompilationUnits(List<ICompilationUnit> result, List<IJavaElement> javaElements)
+	public static void collectICompilationUnits(List<ICompilationUnit> result, List<IJavaElement> javaElements, IProgressMonitor monitor)
 			throws JavaModelException {
+		monitor.beginTask(Messages.ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName, javaElements.size()*100);
+		monitor.subTask("");
 		for (IJavaElement javaElement : javaElements) {
+			monitor.subTask(javaElement.getElementName());
 			if (javaElement instanceof ICompilationUnit) {
 				ICompilationUnit compilationUnit = (ICompilationUnit) javaElement;
 				addCompilationUnit(result, compilationUnit);
@@ -71,13 +76,14 @@ public final class SimonykeesUtil {
 				addCompilationUnit(result, packageFragment.getCompilationUnits());
 			} else if (javaElement instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot) javaElement;
-				collectICompilationUnits(result, Arrays.asList(packageFragmentRoot.getChildren()));
+				collectICompilationUnits(result, Arrays.asList(packageFragmentRoot.getChildren()), monitor);
 			} else if (javaElement instanceof IJavaProject) {
 				IJavaProject javaProject = (IJavaProject) javaElement;
 				for (IPackageFragment packageFragment : javaProject.getPackageFragments()) {
 					addCompilationUnit(result, packageFragment.getCompilationUnits());
 				}
 			}
+			monitor.worked(100);
 		}
 	}
 

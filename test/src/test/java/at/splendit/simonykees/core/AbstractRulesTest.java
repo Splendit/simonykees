@@ -66,8 +66,8 @@ public abstract class AbstractRulesTest {
 		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
 		};
 
-		refactorer.prepareRefactoring();
-		refactorer.doRefactoring();
+		refactorer.prepareRefactoring(null);
+		refactorer.doRefactoring(null);
 		refactorer.commitRefactoring();
 
 		return compilationUnit.getSource();

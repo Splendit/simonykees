@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -18,6 +19,7 @@ import at.splendit.simonykees.core.exception.ReconcileException;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.i18n.ExceptionMessages;
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
@@ -32,7 +34,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * <li>{@link #commitRefactoring()}</li>
  * </ol>
  * 
- * @author Hannes Schweighofer
+ * @author Hannes Schweighofer, Andreja Sambolec
  * @since 0.9
  *
  */
@@ -63,6 +65,8 @@ public abstract class AbstractRefactorer {
 	 * Find {@link ICompilationUnit}s and create working copies for the
 	 * {@link IJavaElement}s
 	 * 
+	 * @param IProgressMonitor monitor used to show progress in UI
+	 * 
 	 * @throws RefactoringException
 	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
@@ -71,10 +75,11 @@ public abstract class AbstractRefactorer {
 	 * 
 	 * @see SimonykeesUtil#collectICompilationUnits(List, List)
 	 */
-	public void prepareRefactoring() throws RefactoringException {
+	public void prepareRefactoring(IProgressMonitor monitor) throws RefactoringException {
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
+		
 		try {
-			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements);
+			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements, monitor);
 			if (compilationUnits.isEmpty()) {
 				Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found,
 						null);
@@ -86,8 +91,17 @@ public abstract class AbstractRefactorer {
 				throw new RefactoringException(
 						ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated);
 			} else {
+				/*
+				 * Monitor sets name of task on progress monitor dialog 
+				 * Size is set to number of compilationUnits in list * 100
+				 * Each compilation unit increases worked amount for same size 
+				 */
+				monitor.beginTask(Messages.ProgressMonitor_AbstractRefactorer_prepareRefactoring_taskName, compilationUnits.size()*100);
+				monitor.subTask("");
 				for (ICompilationUnit compilationUnit : compilationUnits) {
+					monitor.subTask(compilationUnit.getElementName());
 					workingCopies.add(compilationUnit.getWorkingCopy(null));
+					monitor.worked(100);
 				}
 			}
 		} catch (JavaModelException e) {
@@ -99,6 +113,8 @@ public abstract class AbstractRefactorer {
 
 	/**
 	 * Apply {@link RefactoringRule}s to the working copies
+	 * 
+	 * @param IProgressMonitor monitor used to show progress in UI
 	 * 
 	 * @throws RefactoringException
 	 *             if no working copies were found to apply
@@ -112,15 +128,18 @@ public abstract class AbstractRefactorer {
 	 * @see RefactoringRule#generateDocumentChanges(List)
 	 * 
 	 */
-	public void doRefactoring() throws RefactoringException, RuleException {
+	public void doRefactoring(IProgressMonitor monitor) throws RefactoringException, RuleException {
 		if (workingCopies.isEmpty()) {
 			Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung, null);
 			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
 		}
+		monitor.beginTask(Messages.ProgressMonitor_AbstractRefactorer_doRefactoring_taskName, rules.size()*100);
+		monitor.subTask("");
 		List<String> notWorkingRules = new ArrayList<>();
 		for (RefactoringRule<? extends ASTVisitor> refactoringRule : rules) {
 			//TODO catch all exceptions from ASTVisitor execution?
 			// if any exception is thrown discard all changes from this rule
+			monitor.subTask(refactoringRule.getName());
 			try {
 				refactoringRule.generateDocumentChanges(workingCopies);
 				
@@ -131,6 +150,7 @@ public abstract class AbstractRefactorer {
 				Activator.log(Status.ERROR, e.getMessage(), e);
 				notWorkingRules.add(refactoringRule.getName());
 			}
+			monitor.worked(100);
 		}
 		if (!notWorkingRules.isEmpty()) {
 			String notWorkingRulesCollected = notWorkingRules.stream().collect(Collectors.joining(", ")); //$NON-NLS-1$
