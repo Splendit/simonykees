@@ -5,7 +5,7 @@ import org.eclipse.osgi.util.NLS;
 /**
  * TODO SIM-103 add class description
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec
  * @since 0.9
  */
 public class Messages extends NLS {
@@ -90,6 +90,7 @@ public class Messages extends NLS {
 	public static String SerialVersionUidRule_name;
 	public static String SimonykeesMessageDialog_bugreport_email;
 	public static String SimonykeesMessageDialog_default_error_message;
+	public static String SimonykeesMessageDialog_open_browser_error_message;
 	public static String SimonykeesPreferenceManager_builtIn;
 	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_selectProfile;
@@ -104,6 +105,7 @@ public class Messages extends NLS {
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_message;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_title;
 	public static String SimonykeesUpdateLicenseDialog_update_llicense_dialog_button;
+	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_group_title;
 	public static String StringFormatLineSeparatorRule_description;
 	public static String StringFormatLineSeparatorRule_name;
 	public static String StringConcatToPlusRule_description;
