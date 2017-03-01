@@ -41,7 +41,7 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	private static String messageText;
 
 	public static boolean openDefaultHelpMessageDialog(Shell parentShell) {
-		messageText = dialogInformationMessage + "\n" + splenditUrl;
+		messageText = dialogInformationMessage + System.lineSeparator() + splenditUrl;
 		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText,
 				MessageDialog.INFORMATION, defaultIndex, dialogButtonLabels).open() == 0;
 	}
@@ -53,8 +53,8 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	}
 
 	public static boolean openErrorMessageDialog(Shell parentShell, SimonykeesException simonykeesException) {
-		messageText = ((simonykeesException != null) ? simonykeesException.getUiMessage() : dialogErrorMessage) + "\n"
-				+ "<a>" + MAIL_BUGREPORT + "</a>";
+		messageText = ((simonykeesException != null) ? simonykeesException.getUiMessage() : dialogErrorMessage)
+				+ System.lineSeparator() + "<a>" + MAIL_BUGREPORT + "</a>";
 		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, MessageDialog.ERROR,
 				defaultIndex, dialogButtonLabels).open() == 0;
 	}
