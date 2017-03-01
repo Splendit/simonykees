@@ -1,9 +1,13 @@
 package at.splendit.simonykees.sample.preRule;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 @SuppressWarnings("nls")
 public class TestFunctionalInterfaceRule {
+	
+	private static Logger log = LogManager.getLogger(TestFunctionalInterfaceRule.class);
 
 	@Test
 	public void test1() {
@@ -12,7 +16,7 @@ public class TestFunctionalInterfaceRule {
 
 			@Override
 			public void run() {
-				System.out.println("xx");
+				log.debug("xx");
 			}
 		};
 
@@ -22,7 +26,7 @@ public class TestFunctionalInterfaceRule {
 
 			@Override
 			public void run() {
-				System.out.println("xy");
+				log.debug("xy");
 			}
 		});
 
@@ -32,12 +36,12 @@ public class TestFunctionalInterfaceRule {
 
 			@Override
 			public void method(int a) {
-				System.out.println("zy");
+				log.debug("zy");
 			}
 
 			@Override
 			public void method() {
-				System.out.println("xy");
+				log.debug("xy");
 			}
 		};
 

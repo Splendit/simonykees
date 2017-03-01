@@ -2,27 +2,31 @@ package at.splendit.simonykees.core.ui.dialog;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.function.Function;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
+import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.SimonykeesException;
 import at.splendit.simonykees.core.i18n.Messages;
 
 /**
  * Simple help dialog that gets populated with default values
  * 
- * @author Ludwig Werzowa, Martin Huter
+ * @author Ludwig Werzowa, Martin Huter, Andreja Sambolec
  * @since 0.9
  */
 public class SimonykeesMessageDialog extends MessageDialog {
@@ -35,63 +39,63 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	private static final int defaultIndex = 1;
 	private static final String[] dialogButtonLabels = { Messages.ui_ok };
 	private static final String splenditUrl = Messages.HelpMessageDialog_homepage_url;
-	private Function<Composite, Control> customAreaFunction = parent -> {
-		Link link = new Link(parent, SWT.NONE | SWT.RIGHT);
-		link.setText(splenditUrl);
-		link.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				try {
-					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(arg0.text));
-				} catch (PartInitException | MalformedURLException e) {
-					// nothing... 
-				}
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				// nothing
-			}
-		});
-		return link;
-	};
+
+	private static String messageText;
 
 	public static boolean openDefaultHelpMessageDialog(Shell parentShell) {
-		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, dialogInformationMessage,
+		messageText = dialogInformationMessage + System.lineSeparator() + splenditUrl;
+		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText,
 				MessageDialog.INFORMATION, defaultIndex, dialogButtonLabels).open() == 0;
 	}
 
+	public static boolean openMessageDialog(Shell parentShell, String message, int dialogImage) {
+		messageText = message;
+		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, dialogImage,
+				defaultIndex, dialogButtonLabels).open() == 0;
+	}
+
 	public static boolean openErrorMessageDialog(Shell parentShell, SimonykeesException simonykeesException) {
-		Function<Composite, Control> customAreaFunction = parent -> {
-			Link link = new Link(parent, SWT.NONE | SWT.RIGHT);
-			link.setText(MAIL_BUGREPORT);
-			return link;
-		};
-		return new SimonykeesMessageDialog(customAreaFunction, parentShell, dialogTitle, dialogTitleImage,
-				(simonykeesException != null) ? simonykeesException.getUiMessage() : dialogErrorMessage,
-				MessageDialog.ERROR, defaultIndex, dialogButtonLabels).open() == 0;
+		messageText = ((simonykeesException != null) ? simonykeesException.getUiMessage() : dialogErrorMessage)
+				+ System.lineSeparator() + "<a>" + MAIL_BUGREPORT + "</a>";
+		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, MessageDialog.ERROR,
+				defaultIndex, dialogButtonLabels).open() == 0;
 	}
 
 	private SimonykeesMessageDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage,
 			int dialogImageType, int defaultIndex, String... dialogButtonLabels) {
 		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, defaultIndex,
 				dialogButtonLabels);
-	}
-
-	private SimonykeesMessageDialog(Function<Composite, Control> customAreaFunction, Shell parentShell,
-			String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType, int defaultIndex,
-			String... dialogButtonLabels) {
-		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, defaultIndex,
-				dialogButtonLabels);
-		// This function injection works because this.open() is used to create
-		// the dialog, where createCustomArea is invoked
-		this.customAreaFunction = customAreaFunction;
+		messageText = dialogMessage;
 	}
 
 	@Override
-	protected Control createCustomArea(Composite parent) {
-		return customAreaFunction.apply(parent);
+	protected Control createMessageArea(Composite composite) {
+		Image image = getImage();
+		if (image != null) {
+			imageLabel = new Label(composite, SWT.NULL);
+			image.setBackground(imageLabel.getBackground());
+			imageLabel.setImage(image);
+			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.BEGINNING).applyTo(imageLabel);
+		}
+		if (message != null) {
+			Link link = new Link(composite, getMessageLabelStyle());
+			link.setText(messageText);
+			link.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					try {
+						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(arg0.text));
+					} catch (PartInitException | MalformedURLException e) {
+						Activator.log(IStatus.ERROR, Messages.SimonykeesMessageDialog_open_browser_error_message, e);
+					}
+				}
+			});
+			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false)
+					.hint(convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT)
+					.applyTo(link);
+		}
+		return composite;
 	}
 
 }
