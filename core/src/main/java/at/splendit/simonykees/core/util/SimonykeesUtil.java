@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -64,10 +65,16 @@ public final class SimonykeesUtil {
 	 */
 	public static void collectICompilationUnits(List<ICompilationUnit> result, List<IJavaElement> javaElements, IProgressMonitor monitor)
 			throws JavaModelException {
-		monitor.beginTask(Messages.ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName, javaElements.size()*100);
-		monitor.subTask("");
+
+		/*
+		 * Converts the monitor to a SubMonitor and sets name of task on progress monitor dialog 
+		 * Size is set to number 100 and then scaled to size of the javaElements list
+		 * Each java element increases worked amount for same size 
+		 */
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(javaElements.size());
+		subMonitor.setTaskName(Messages.ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName);
 		for (IJavaElement javaElement : javaElements) {
-			monitor.subTask(javaElement.getElementName());
+			subMonitor.subTask(javaElement.getElementName());
 			if (javaElement instanceof ICompilationUnit) {
 				ICompilationUnit compilationUnit = (ICompilationUnit) javaElement;
 				addCompilationUnit(result, compilationUnit);
@@ -83,7 +90,12 @@ public final class SimonykeesUtil {
 					addCompilationUnit(result, packageFragment.getCompilationUnits());
 				}
 			}
-			monitor.worked(100);
+			// If cancel is pressed on progress monitor, abort all and return, else continue
+			if(subMonitor.isCanceled()) {
+				return;
+			} else {
+				monitor.worked(1);
+			}
 		}
 	}
 

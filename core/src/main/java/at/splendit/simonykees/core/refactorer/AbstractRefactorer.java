@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -92,16 +93,22 @@ public abstract class AbstractRefactorer {
 						ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated);
 			} else {
 				/*
-				 * Monitor sets name of task on progress monitor dialog 
-				 * Size is set to number of compilationUnits in list * 100
+				 * Converts the monitor to a SubMonitor and sets name of task on progress monitor dialog 
+				 * Size is set to number 100 and then scaled to size of the compilationUnits list
 				 * Each compilation unit increases worked amount for same size 
 				 */
-				monitor.beginTask(Messages.ProgressMonitor_AbstractRefactorer_prepareRefactoring_taskName, compilationUnits.size()*100);
-				monitor.subTask("");
+				SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(compilationUnits.size());
+				subMonitor.setTaskName(Messages.ProgressMonitor_AbstractRefactorer_prepareRefactoring_taskName);
+
 				for (ICompilationUnit compilationUnit : compilationUnits) {
-					monitor.subTask(compilationUnit.getElementName());
+					subMonitor.subTask(compilationUnit.getElementName());;
 					workingCopies.add(compilationUnit.getWorkingCopy(null));
-					monitor.worked(100);
+					// If cancel is pressed on progress monitor, abort all and return, else continue
+					if(subMonitor.isCanceled()) {
+						return;
+					} else {
+						subMonitor.worked(1);
+					}
 				}
 			}
 		} catch (JavaModelException e) {
@@ -133,13 +140,20 @@ public abstract class AbstractRefactorer {
 			Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung, null);
 			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
 		}
-		monitor.beginTask(Messages.ProgressMonitor_AbstractRefactorer_doRefactoring_taskName, rules.size()*100);
-		monitor.subTask("");
+		
+		/*
+		 * Converts the monitor to a SubMonitor and sets name of task on progress monitor dialog 
+		 * Size is set to number 100 and then scaled to size of the rules list
+		 * Each refactoring rule increases worked amount for same size 
+		 */
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(rules.size());
+		subMonitor.setTaskName(Messages.ProgressMonitor_AbstractRefactorer_doRefactoring_taskName);
+
 		List<String> notWorkingRules = new ArrayList<>();
 		for (RefactoringRule<? extends ASTVisitor> refactoringRule : rules) {
 			//TODO catch all exceptions from ASTVisitor execution?
 			// if any exception is thrown discard all changes from this rule
-			monitor.subTask(refactoringRule.getName());
+			subMonitor.subTask(refactoringRule.getName());;
 			try {
 				refactoringRule.generateDocumentChanges(workingCopies);
 				
@@ -150,7 +164,12 @@ public abstract class AbstractRefactorer {
 				Activator.log(Status.ERROR, e.getMessage(), e);
 				notWorkingRules.add(refactoringRule.getName());
 			}
-			monitor.worked(100);
+			// If cancel is pressed on progress monitor, abort all and return, else continue
+			if(subMonitor.isCanceled()) {
+				return;
+			} else {
+				subMonitor.worked(1);
+			}
 		}
 		if (!notWorkingRules.isEmpty()) {
 			String notWorkingRulesCollected = notWorkingRules.stream().collect(Collectors.joining(", ")); //$NON-NLS-1$

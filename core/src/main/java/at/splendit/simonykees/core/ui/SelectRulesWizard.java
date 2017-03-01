@@ -65,20 +65,21 @@ public class SelectRulesWizard extends Wizard {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				/*
-				 * Initializing progress monitor
-				 * Resized when used for lists
-				 */
-				monitor.beginTask(null, 2000);
 
 				try {
 					refactorer.prepareRefactoring(monitor);
+					if (monitor.isCanceled()) {
+						return Status.CANCEL_STATUS;
+					}
 				} catch (RefactoringException e) {
 					SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
 					return null;
 				}
 				try {
 					refactorer.doRefactoring(monitor);
+					if (monitor.isCanceled()) {
+						return Status.CANCEL_STATUS;
+					}
 				} catch (RefactoringException e) {
 					SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
 					return null;
