@@ -24,7 +24,7 @@ import at.splendit.simonykees.core.i18n.Messages;
 /**
  * Simple help dialog that gets populated with default values
  * 
- * @author Ludwig Werzowa, Martin Huter
+ * @author Ludwig Werzowa, Martin Huter, Andreja Sambolec
  * @since 0.9
  */
 public class SimonykeesMessageDialog extends MessageDialog {

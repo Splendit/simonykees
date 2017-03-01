@@ -13,7 +13,7 @@ import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
  * GUI related convenience class to check the validity of the license and
  * display appropriate popups if not.
  * 
- * @author Ludwig Werzowa
+ * @author Ludwig Werzowa, Andreja Sambolec
  * @since 1.0
  */
 public class LicenseUtil {
