@@ -12,6 +12,9 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.events.HelpEvent;
+import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -36,6 +39,7 @@ import org.osgi.framework.Bundle;
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.license.LicenseManager;
+import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 
 /**
  * Dialog for updating license key.
@@ -75,6 +79,17 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite area = (Composite) super.createDialogArea(parent);
 
+		/*
+		 * Setting help listener to question mark help button Open default help
+		 * dialog
+		 */
+		area.addHelpListener(new HelpListener() {
+			@Override
+			public void helpRequested(HelpEvent e) {
+				SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
+			}
+		});
+
 		Composite container = new Composite(area, SWT.NONE);
 		container.setLayoutData(new GridData(SWT.FILL, SWT.WRAP, true, true));
 
@@ -108,6 +123,8 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
 			@Override
 			public void modifyText(ModifyEvent event) {
+				updatedIconLabel.setVisible(false);
+				updatedLabel.setVisible(false);
 				Text textWidget = (Text) event.getSource();
 				licenseKey = textWidget.getText();
 			}
@@ -122,12 +139,15 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				String licenseKey = getLicenseKey();
-				LicenseManager licenseManager = LicenseManager.getInstance();
-				boolean updated = licenseManager.updateLicenseeNumber(licenseKey.trim(), DEFAULT_LICENSEE_NAME);
-				updateWarningInformation(updated);
+				BusyIndicator.showWhile(Display.getDefault(), new Runnable() {
+					public void run() {
+						String licenseKey = getLicenseKey();
+						LicenseManager licenseManager = LicenseManager.getInstance();
+						boolean updated = licenseManager.updateLicenseeNumber(licenseKey.trim(), DEFAULT_LICENSEE_NAME);
+						updateWarningInformation(updated);
+					}
+				});
 			}
-
 		});
 
 		updatedIconLabel = new Label(container, SWT.NONE);
@@ -208,4 +228,5 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	public String getLicenseKey() {
 		return licenseKey;
 	}
+
 }
