@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration status="error" strict="true" name="jSparrow">
-    <appenders>
-        <appender type="Console" name="Console">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
-        </appender>
-    </appenders>
-    <loggers>
-        <root level="debug">
-            <appender-ref ref="Console" />
-        </root>
-    </loggers>
-</configuration>
+<Configuration status="error" strict="true" name="jSparrow">
+
+	<Appenders>
+        <Console name="Console"> 
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" /> 
+        </Console>
+
+		<File name="File" fileName="target/debug.log">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" /> 
+		</File>
+	</Appenders>
+
+	<Loggers>
+		<Root level="debug">
+			<AppenderRef ref="File" />
+			<AppenderRef ref="Console" level="info" />
+		</Root>
+	</Loggers>
+</Configuration>

@@ -1,21 +1,25 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 @SuppressWarnings("nls")
 public class TestFunctionalInterfaceRule {
 
+	private static Logger log = LogManager.getLogger(TestFunctionalInterfaceRule.class);
+
 	@Test
 	public void test1() {
 
 		Runnable runnable = () -> {
-			System.out.println("xx");
+			log.debug("xx");
 		};
 
 		runnable.run();
 
 		MyClass mYClass = new MyClass(() -> {
-			System.out.println("xy");
+			log.debug("xy");
 		});
 
 		mYClass.test();
@@ -24,12 +28,12 @@ public class TestFunctionalInterfaceRule {
 
 			@Override
 			public void method(int a) {
-				System.out.println("zy");
+				log.debug("zy");
 			}
 
 			@Override
 			public void method() {
-				System.out.println("xy");
+				log.debug("xy");
 			}
 		};
 
