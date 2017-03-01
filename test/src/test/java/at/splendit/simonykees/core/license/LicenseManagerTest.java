@@ -5,15 +5,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.time.ZonedDateTime;
-import java.util.HashSet;
-import java.util.Optional;
-
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-import at.splendit.simonykees.core.license.model.FloatingModel;
 import at.splendit.simonykees.core.license.model.LicenseModel;
 import at.splendit.simonykees.core.license.model.LicenseeModel;
 import at.splendit.simonykees.core.license.model.PersistenceModel;
@@ -166,14 +159,5 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		assertFalse(licenseChecker.isValid());
 		assertEquals(LicenseStatus.TRIAL_EXPIRED, licenseChecker.getLicenseStatus());
 		assertNotNull(licenseChecker.getExpirationDate());
-	}
-	
-	private void storeUsedSessionId() {
-		LicenseManager licenseManager = LicenseManager.getTestInstance();
-		LicenseModel licenseModel = licenseManager.getLicenseModel();
-		if(licenseModel instanceof FloatingModel) {
-			String sessionId = ((FloatingModel) licenseModel).getSessionId();
-			usedSessions.add(sessionId);
-		}
 	}
 }
