@@ -52,12 +52,11 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 	private Label licenseLabel;
 	private Label licenseStatusLabel;
 	private Button updateButton;
-	
+
 	private Image jSparrowImageActive;
 	private Image jSparrowImageInactive;
 	private Label logoLabel;
-	
-	
+
 	private static final int LICENSE_LABEL_MAX_WIDTH = 370;
 
 	private static final String DATE_FORMAT_PATTERN = "MMMM dd, yyyy"; //$NON-NLS-1$
@@ -83,19 +82,18 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 		gd.verticalSpan = 5;
 		composite.setLayoutData(gd);
 		composite.setLayout(new RowLayout(SWT.VERTICAL));
-		
+
 		Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
 		IPath iPathActive = new Path(LOGO_PATH_ACTIVE);
 		URL urlActive = FileLocator.find(bundle, iPathActive, new HashMap<>());
 		ImageDescriptor imageDescActive = ImageDescriptor.createFromURL(urlActive);
 		jSparrowImageActive = imageDescActive.createImage();
-		
+
 		IPath iPathInactive = new Path(LOGO_PATH_INACTIVE);
 		URL urlInactive = FileLocator.find(bundle, iPathInactive, new HashMap<>());
 		ImageDescriptor imageDescInactive = ImageDescriptor.createFromURL(urlInactive);
 		jSparrowImageInactive = imageDescInactive.createImage();
-		
-		
+
 		logoLabel = new Label(composite, SWT.NONE);
 		logoLabel.setImage(jSparrowImageActive);
 
@@ -104,14 +102,14 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 		RowData licenseRowData = new RowData();
 		licenseRowData.width = LICENSE_LABEL_MAX_WIDTH;
 		licenseLabel.setLayoutData(licenseRowData);
-		
+
 		Link jSparrowLink = new Link(composite, SWT.NONE);
 		jSparrowLink.setText(Messages.SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow);
-		
+
 		licenseStatusLabel = new Label(composite, SWT.NONE);
 		FontDescriptor boldDescriptor = FontDescriptor.createFrom(licenseStatusLabel.getFont()).setStyle(SWT.BOLD);
 		Font boldFont = boldDescriptor.createFont(composite.getDisplay());
-		Color red = new Color (display, 255, 0, 0);
+		Color red = new Color(display, 255, 0, 0);
 		licenseStatusLabel.setFont(boldFont);
 		licenseStatusLabel.setForeground(red);
 		licenseStatusLabel.setVisible(true);
@@ -130,18 +128,18 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 			}
 
 		});
-		
+
 		jSparrowLink.addSelectionListener(new SelectionAdapter() {
-			
+
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				try {
 					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(arg0.text));
 				} catch (PartInitException | MalformedURLException e) {
-					// nothing... 
+					// nothing...
 				}
 			}
-			
+
 		});
 
 		updateDisplayedInformation();
@@ -165,32 +163,33 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 		ZonedDateTime expireationDate = licenseData.getExpirationDate();
 		LicenseStatus status = licenseData.getLicenseStatus();
 
-		if(licenseType != null && expireationDate != null) {
-			String licenseLabelText = Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as + licenseType.getLicenseName();
+		if (licenseType != null && expireationDate != null) {
+			String licenseLabelText = Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as
+					+ licenseType.getLicenseName();
 
-			if(!LicenseType.TRY_AND_BUY.equals(licenseType)) {
+			if (!LicenseType.TRY_AND_BUY.equals(licenseType)) {
 				String licenseKey = licenseManger.getLicensee().getLicenseeNumber();
-				licenseLabelText += 
-						" " + Messages.SimonykeesPreferencePageLicense_under_key_label //$NON-NLS-1$
+				licenseLabelText += " " + Messages.SimonykeesPreferencePageLicense_under_key_label //$NON-NLS-1$
 						+ " " + licenseKey //$NON-NLS-1$
-						+ ".";  //$NON-NLS-1$
+						+ "."; //$NON-NLS-1$
 			} else {
 				licenseLabelText += "."; //$NON-NLS-1$
 			}
 			licenseLabelText += " " //$NON-NLS-1$
-			+ Messages.SimonykeesPreferencePageLicense_jsparrow_valid_until 
-			+ extractDateFormat(expireationDate)
-			+ "."; //$NON-NLS-1$
+					+ Messages.SimonykeesPreferencePageLicense_jsparrow_valid_until + extractDateFormat(expireationDate)
+					+ "."; //$NON-NLS-1$
 			licenseLabel.setText(licenseLabelText);
 		}
 
-		if(!licenseData.isValid()) {			
+		if (!licenseData.isValid()) {
 			licenseStatusLabel.setText(status.getUserMessage());
 			logoLabel.setImage(jSparrowImageInactive);
 		} else {
-			licenseStatusLabel.setText("");; //$NON-NLS-1$
+			licenseStatusLabel.setText(""); //$NON-NLS-1$
+			;
 			logoLabel.setImage(jSparrowImageActive);
 		}
+
 		licenseLabel.getParent().pack();
 		licenseLabel.getParent().layout(true);
 	}

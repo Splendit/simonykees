@@ -38,7 +38,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	private String currentProfileId;
 	private Group ruleCheckboxGroup;
-	
+
 	private Button selectAllButton;
 
 	public SimonykeesPreferencePage() {
@@ -54,12 +54,12 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		loadCurrentProfileId();
 
 		profileSelectionComboField = new ComboFieldEditor(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT,
-				Messages.SimonykeesPreferencePage_selectProfile, SimonykeesPreferenceManager.getAllProfileNamesAndIdsArray(),
-				composite);
+				Messages.SimonykeesPreferencePage_selectProfile,
+				SimonykeesPreferenceManager.getAllProfileNamesAndIdsArray(), composite);
 		addField(profileSelectionComboField);
 
 		createSelectAllButton(composite);
-		
+
 		generateRuleCheckboxList(composite);
 
 	}
@@ -77,7 +77,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		ruleCheckboxGroup.setText(Messages.SimonykeesPreferencePage_rules);
 
 		boolean builtInProfile = SimonykeesPreferenceManager.isProfileBuiltIn(this.currentProfileId);
-		
+
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
 
@@ -88,30 +88,32 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			ruleCheckboxList.add(ruleCheckbox);
 			addField(ruleCheckbox);
 		}
-		
+
 	}
-	
+
 	/**
-	 * Adds a button to select / deselect all rules.
-	 * On select, for every field new value is first set in preferences and 
-	 * then field is reloaded.
+	 * Adds a button to select / deselect all rules. On select, for every field
+	 * new value is first set in preferences and then field is reloaded.
 	 * 
 	 * @param parent
 	 */
 	private void createSelectAllButton(Composite parent) {
+		
 		selectAllButton = new Button(parent, SWT.CHECK);
 		selectAllButton.setText(Messages.SelectRulesWizardPage_select_unselect_all);
+		
 		boolean builtInProfile = SimonykeesPreferenceManager.isProfileBuiltIn(this.currentProfileId);
 		selectAllButton.setEnabled(!builtInProfile);
+		
 		selectAllButton.addSelectionListener(new SelectionAdapter() {
 
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent event) {
 				for (BooleanFieldEditor ruleCheckbox : ruleCheckboxList) {
 					/*
-					 * Current value of property is first saved to temp variable and later reused.
-					 * BooleanFieldEditor does not have public method to set value so that
-					 * workaround is used.
+					 * Current value of property is first saved to temp variable
+					 * and later reused. BooleanFieldEditor does not have public
+					 * method to set value so that workaround is used.
 					 */
 					boolean currentValue = getPreferenceStore().getBoolean(ruleCheckbox.getPreferenceName());
 					getPreferenceStore().setValue(ruleCheckbox.getPreferenceName(), selectAllButton.getSelection());
@@ -122,7 +124,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 		});
 	}
-	
+
 	/**
 	 * Eclipse doesn't like normal property change listeners for some reason.
 	 * Adding a change listener directly to the combo field never fires an

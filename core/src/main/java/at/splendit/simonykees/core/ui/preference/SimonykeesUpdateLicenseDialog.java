@@ -39,7 +39,7 @@ import at.splendit.simonykees.core.license.LicenseManager;
 
 /**
  * Dialog for updating license key.
- *  
+ * 
  * @author Ardit Ymeri, Andreja Sambolec
  * @since 1.0
  *
@@ -47,56 +47,55 @@ import at.splendit.simonykees.core.license.LicenseManager;
 public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
 	private static final String DEFAULT_LICENSEE_NAME = ""; //$NON-NLS-1$
-	
+
 	private Text licenseKeyText;
 	private String licenseKey = ""; //$NON-NLS-1$
 	private Button updateButton;
 	private Label updatedLabel;
 	private Label updatedIconLabel;
-	
+
 	private Image scaledJSparrowImageActive;
 	private Image scaledJSparrowImageInactive;
-	
+
 	private static final String LOGO_ACTIVE_LICENSE_PATH = "icons/jSparrow_active_icon_100.png"; //$NON-NLS-1$
 	private static final String LOGO_INACTIVE_LICENSE_PATH = "icons/jSparrow_inactive_icon_100.png"; //$NON-NLS-1$
-
 
 	protected SimonykeesUpdateLicenseDialog(Shell parentShell) {
 		super(parentShell);
 	}
-	
+
 	@Override
 	public void create() {
 		super.create();
-        setTitle(Messages.SimonykeesUpdateLicenseDialog_update_license_dialog_title);
-        setMessage(Messages.SimonykeesUpdateLicenseDialog_update_license_dialog_message, IMessageProvider.INFORMATION);
+		setTitle(Messages.SimonykeesUpdateLicenseDialog_update_license_dialog_title);
+		setMessage(Messages.SimonykeesUpdateLicenseDialog_update_license_dialog_message, IMessageProvider.INFORMATION);
 	}
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite area = (Composite) super.createDialogArea(parent);
-		
+
 		Composite container = new Composite(area, SWT.NONE);
-        container.setLayoutData(new GridData(SWT.FILL, SWT.WRAP, true, true));
-        
-        GridLayout licenceMainLayout = new GridLayout(2, false);
-        container.setLayout(licenceMainLayout);
-        
-        // enter new key group
-        Group newKeyGroup = new Group(container, SWT.NONE);
-        newKeyGroup.setText(Messages.SimonykeesUpdateLicenseDialog_update_license_dialog_group_title);
-        
-        GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
-        gridData.horizontalSpan = 2;
-        newKeyGroup.setLayoutData(gridData);
-        
-        GridLayout groupGridLayout = new GridLayout(3, false); 
-        newKeyGroup.setLayout(groupGridLayout);
-        
-        GridData groupGridData = new GridData(SWT.CENTER, SWT.FILL, false, false);
-        groupGridData.horizontalIndent = 10;
-        groupGridData.verticalIndent = 5;
-        
+		container.setLayoutData(new GridData(SWT.FILL, SWT.WRAP, true, true));
+
+		GridLayout licenceMainLayout = new GridLayout(2, false);
+		container.setLayout(licenceMainLayout);
+
+		// enter new key group
+		Group newKeyGroup = new Group(container, SWT.NONE);
+		newKeyGroup.setText(Messages.SimonykeesUpdateLicenseDialog_update_license_dialog_group_title);
+
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gridData.horizontalSpan = 2;
+		newKeyGroup.setLayoutData(gridData);
+
+		GridLayout groupGridLayout = new GridLayout(3, false);
+		newKeyGroup.setLayout(groupGridLayout);
+
+		GridData groupGridData = new GridData(SWT.CENTER, SWT.FILL, false, false);
+		groupGridData.horizontalIndent = 10;
+		groupGridData.verticalIndent = 5;
+
 		Label licenseKeyLabel = new Label(newKeyGroup, SWT.NONE);
 		licenseKeyLabel.setText(Messages.SimonykeesUpdateLicenseDialog_update_license_dialog_label);
 		licenseKeyLabel.setLayoutData(groupGridData);
@@ -113,14 +112,14 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 				licenseKey = textWidget.getText();
 			}
 		});
-	
+
 		groupGridData = new GridData(SWT.CENTER, SWT.FILL, false, false);
 		groupGridData.horizontalIndent = 20;
 		updateButton = new Button(newKeyGroup, SWT.PUSH);
 		updateButton.setLayoutData(groupGridData);
 		updateButton.setText(Messages.SimonykeesUpdateLicenseDialog_update_llicense_dialog_button);
 		updateButton.addSelectionListener(new SelectionAdapter() {
-			
+
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				String licenseKey = getLicenseKey();
@@ -128,15 +127,14 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 				boolean updated = licenseManager.updateLicenseeNumber(licenseKey.trim(), DEFAULT_LICENSEE_NAME);
 				updateWarningInformation(updated);
 			}
-			
+
 		});
-		
-		
+
 		updatedIconLabel = new Label(container, SWT.NONE);
 		gridData = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
 		gridData.verticalIndent = 5;
 		updatedIconLabel.setLayoutData(gridData);
-		
+
 		Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
 		IPath iPathActive = new Path(LOGO_ACTIVE_LICENSE_PATH);
 		URL urlActive = FileLocator.find(bundle, iPathActive, new HashMap<>());
@@ -144,17 +142,17 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		Image jSparrowImageActive = imageDescActive.createImage();
 		ImageData imageDataActive = jSparrowImageActive.getImageData();
 		scaledJSparrowImageActive = new Image(container.getDisplay(), imageDataActive);
-		
+
 		IPath iPathInactive = new Path(LOGO_INACTIVE_LICENSE_PATH);
 		URL urlInactive = FileLocator.find(bundle, iPathInactive, new HashMap<>());
 		ImageDescriptor imageDescInactive = ImageDescriptor.createFromURL(urlInactive);
 		Image jSparrowImageInactive = imageDescInactive.createImage();
 		ImageData imageDataInactive = jSparrowImageInactive.getImageData();
 		scaledJSparrowImageInactive = new Image(container.getDisplay(), imageDataInactive);
-		
+
 		updatedIconLabel.setImage(scaledJSparrowImageActive);
 		updatedIconLabel.setVisible(false);
-		
+
 		updatedLabel = new Label(container, SWT.NONE);
 		gridData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
 		gridData.verticalIndent = 5;
@@ -162,32 +160,32 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		updatedLabel.setLayoutData(gridData);
 		updatedLabel.setText(Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
 		updatedLabel.setVisible(false);
-		
+
 		return container;
 	}
-	
+
 	private void updateWarningInformation(boolean updated) {
 		Device device = Display.getCurrent();
-		
-		if(!updated) {
-			Color red = new Color (device, 255, 0, 0);
+
+		if (!updated) {
+			Color red = new Color(device, 255, 0, 0);
 			updatedLabel.setText(Messages.SimonykeesUpdateLicenseDialog_invalid_license_key);
 			updatedLabel.setForeground(red);
 			updatedLabel.setVisible(true);
-			
+
 			updatedIconLabel.setImage(scaledJSparrowImageInactive);
 			updatedIconLabel.setVisible(true);
-			
+
 		} else {
-			Color green = new Color (device, 1, 66, 37);
+			Color green = new Color(device, 1, 66, 37);
 			updatedLabel.setText(Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
 			updatedLabel.setForeground(green);
 			updatedLabel.setVisible(true);
-			
+
 			updatedIconLabel.setImage(scaledJSparrowImageActive);
-			updatedIconLabel.setVisible(true);			
+			updatedIconLabel.setVisible(true);
 		}
-		
+
 		updatedIconLabel.getParent().layout();
 	}
 
@@ -203,7 +201,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
 	@Override
 	protected void okPressed() {
-		this. licenseKey = licenseKeyText.getText();
+		this.licenseKey = licenseKeyText.getText();
 		super.okPressed();
 	}
 
