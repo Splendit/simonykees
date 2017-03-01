@@ -90,6 +90,7 @@ public class Messages extends NLS {
 	public static String SerialVersionUidRule_name;
 	public static String SimonykeesMessageDialog_bugreport_email;
 	public static String SimonykeesMessageDialog_default_error_message;
+	public static String SimonykeesMessageDialog_open_browser_error_message;
 	public static String SimonykeesPreferenceManager_builtIn;
 	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_selectProfile;

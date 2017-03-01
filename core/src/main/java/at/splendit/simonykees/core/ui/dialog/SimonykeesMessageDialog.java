@@ -3,12 +3,13 @@ package at.splendit.simonykees.core.ui.dialog;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -18,6 +19,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
+import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.SimonykeesException;
 import at.splendit.simonykees.core.i18n.Messages;
 
@@ -78,20 +80,15 @@ public class SimonykeesMessageDialog extends MessageDialog {
 		if (message != null) {
 			Link link = new Link(composite, getMessageLabelStyle());
 			link.setText(messageText);
-			link.addSelectionListener(new SelectionListener() {
+			link.addSelectionListener(new SelectionAdapter() {
 
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
 					try {
 						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(arg0.text));
 					} catch (PartInitException | MalformedURLException e) {
-						// nothing...
+						Activator.log(IStatus.ERROR, Messages.SimonykeesMessageDialog_open_browser_error_message, e);
 					}
-				}
-
-				@Override
-				public void widgetDefaultSelected(SelectionEvent arg0) {
-					// nothing
 				}
 			});
 			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false)
