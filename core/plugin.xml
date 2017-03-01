@@ -44,17 +44,17 @@
    </extension>
    <extension point = "org.eclipse.ui.preferencePages">
        <page id="at.splendit.simonykees.core.ui.preference.ProfilePreferencePage"
-	    class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferencePage"
+	    	class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferencePage"
             name="%preferencePage.name">
        </page>
-	</extension>
-   <extension point = "org.eclipse.ui.preferencePages">
+	
        <page id="at.splendit.simonykees.core.ui.preference.ProfilePreferencePageLicense"
-				class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferencePageLicense"
-				name="%preferencePageLicense.name"
-				category = "at.splendit.simonykees.core.ui.preference.ProfilePreferencePage">
+			class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferencePageLicense"
+			name="%preferencePageLicense.name"
+			category = "at.splendit.simonykees.core.ui.preference.ProfilePreferencePage">
        </page>
 	</extension>
+	
 	<extension
          point="org.eclipse.core.runtime.preferences">
       <initializer
