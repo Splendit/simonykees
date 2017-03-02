@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,12 +28,6 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	@Before
 	public void clearCache() {
 		ValidationResultCache.getInstance().reset();
-	}
-	
-	@After
-	public void clearSecureStorage() throws InterruptedException {
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
-		clearPersistedData();
 	}
 	
 	@Test

@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import java.time.Instant;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import at.splendit.simonykees.core.license.model.LicenseeModel;
@@ -22,17 +23,17 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 	
 	@After
 	public void cleareSecureStorage() throws InterruptedException {
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
-		clearPersistedData();
+		ValidateExecutor.shutDownScheduler();
 	}
 	
 	@Test
+	//@Ignore
 	public void shutDownAndRestartScheduler() throws InterruptedException {
 		// having an instance of license manager and a running scheduler...
 		
 		ValidationResultCache.getInstance().reset();
 		persistNodeLockedLicensee();
-		
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseManager licenseManager = LicenseManager.getTestInstance();
 		licenseManager.setUniqueHwId(TEST_UNIQUE_ID_01);
 		licenseManager.initManager();
@@ -54,6 +55,7 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 	}
 	
 	@Test
+	//@Ignore
 	public void shutDownAndCheckLicense() throws InterruptedException {
 		// having an instance of license manager where the scheduler is shut down...
 		
