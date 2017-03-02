@@ -1,7 +1,6 @@
 package at.splendit.simonykees.core.license;
 
 import java.time.Instant;
-import java.util.HashMap;
 
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
@@ -15,61 +14,60 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
 public class ValidationResultCache {
 	private static ValidationResultCache instance;
 	
-	private final String TIME_STAMP_KEY = "time-stamp"; //$NON-NLS-1$
-	private final String VALIDATION_RESULT_KEY = "validation-result"; //$NON-NLS-1$
-	private final String IS_EMPTY_KEY = "is-empty"; //$NON-NLS-1$
-	private final String LICENSEE_NAME = "licensee-name"; //$NON-NLS-1$
-	private final String ACTION_KEY = "action"; //$NON-NLS-1$
-	private final String LICENSEE_NUMBER = "licensee-number"; //$NON-NLS-1$
-	private HashMap<String, Object> cacheHashMap = new HashMap<>();
+	private ValidationResult validationResult;
+	private String licenseeName;
+	private String licenseeNumber;
+	private Instant timestamp;
+	private ValidationAction action;
+	private boolean isEmpty;
 
 
 	private ValidationResultCache() {
-		cacheHashMap.put(IS_EMPTY_KEY, true);
+		isEmpty = true;
 	}
 	
 	public void reset() {
-		cacheHashMap.remove(TIME_STAMP_KEY);
-		cacheHashMap.remove(VALIDATION_RESULT_KEY);
-		cacheHashMap.remove(LICENSEE_NAME);
-		cacheHashMap.remove(LICENSEE_NUMBER);
-		cacheHashMap.remove(ACTION_KEY);
-		cacheHashMap.put(IS_EMPTY_KEY, true);
+		validationResult = null;
+		licenseeName = null;
+		licenseeNumber = null;
+		timestamp = null;
+		action = null;
+		isEmpty = true;
 	}
 	
 	public void updateCachedResult(ValidationResult validationResult, String licenseeName, String licenseeNumber, Instant timestamp, ValidationAction action) {
-		cacheHashMap.put(TIME_STAMP_KEY, timestamp);
-		cacheHashMap.put(VALIDATION_RESULT_KEY, validationResult);
-		cacheHashMap.put(IS_EMPTY_KEY, false);
-		cacheHashMap.put(LICENSEE_NAME, licenseeName);
-		cacheHashMap.put(LICENSEE_NUMBER, licenseeNumber);
-		cacheHashMap.put(ACTION_KEY, action);
+		this.validationResult = validationResult;
+		this.licenseeName = licenseeName;
+		this.licenseeNumber = licenseeNumber;
+		this.timestamp = timestamp;
+		this.action = action;
+		this.isEmpty = false;
 	}
 	
 	public ValidationResult getCachedValidationResult() {
 		// TODO: throw an exception if cache is empty
-		return (ValidationResult) cacheHashMap.get(VALIDATION_RESULT_KEY);
+		return validationResult;
 	}
 	
 	public Instant getValidationTimestamp() {
 		// TODO: throw an exception if cache is empty
-		return (Instant) cacheHashMap.get(TIME_STAMP_KEY);
+		return timestamp;
 	}
 	
 	public Boolean isEmpty() {
-		return (Boolean) cacheHashMap.get(IS_EMPTY_KEY);
+		return isEmpty;
 	}
 	
 	public String getLicenseName() {
-		return (String) cacheHashMap.get(LICENSEE_NAME);
+		return licenseeName;
 	}
 	
 	public String getLicenseeNumber() {
-		return (String) cacheHashMap.get(LICENSEE_NUMBER);
+		return licenseeNumber;
 	}
 	
 	public ValidationAction getValidatioAction() {
-		return (ValidationAction)cacheHashMap.get(ACTION_KEY);
+		return action;
 	}
 
 	public synchronized static ValidationResultCache getInstance() {
