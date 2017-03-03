@@ -23,10 +23,14 @@ public class DiamondOperatorRule {
 		}
 	}
 	
-	private String concatList(List objects) {
+	private String concatRawTypeList(List objects) {
 		objects.add(new Object());
 		Object val = objects.stream().map(o -> o.toString()).collect(Collectors.joining(", "));
 		return val.toString();
+	}
+	
+	private String concatTypedList(List<String>foo, int i, Map<String, List<String>>map) {
+		return foo.stream().collect(Collectors.joining(","));
 	}
 	
 	public void inferListType() {
@@ -59,7 +63,7 @@ public class DiamondOperatorRule {
 			list = new ArrayList<>();
 			map = new HashMap<>();
 			list.add(ten.toString());
-			map.put(input, new GenericSample<String>(ten.toString()));
+			map.put(input, new GenericSample<>(ten.toString()));
 		}
 	}
 	
@@ -101,6 +105,7 @@ public class DiamondOperatorRule {
 	}
 	
 	public void diamondRuleOnMethodInvocation(String input) {
-		concatList(new ArrayList<String>());
+		concatRawTypeList(new ArrayList<String>());
+		concatTypedList(new ArrayList<>(), 1, new HashMap<>());
 	}
 }
