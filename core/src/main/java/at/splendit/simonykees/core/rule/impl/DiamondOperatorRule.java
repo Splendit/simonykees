@@ -9,6 +9,8 @@ import at.splendit.simonykees.core.visitor.DiamondOperatorASTVisitor;
 /**
  * @see DiamondOperatorASTVisitor
  * 
+ * Minimum java version that supports diamond operator is {@value JavaVersion.JAVA_1_7}
+ * 
  * @author Ardit Ymeri
  * @since 1.0
  *
