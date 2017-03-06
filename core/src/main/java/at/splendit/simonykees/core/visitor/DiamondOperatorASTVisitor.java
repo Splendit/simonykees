@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.visitor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -15,9 +16,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.i18n.Messages;
 
@@ -25,10 +23,9 @@ import at.splendit.simonykees.core.i18n.Messages;
  * Diamond operator should be used instead of explicit type arguments.
  * <p>
  * For example:<br/>
- * 		{@code List<Integer> numbers = new ArrayList<Integer>();}
- * <br/>
+ * {@code List<Integer> numbers = new ArrayList<Integer>();} <br/>
  * should be replaced with:<br/>
- * 		{@code List<Integer> numbers = new ArrayList<>();}
+ * {@code List<Integer> numbers = new ArrayList<>();}
  * 
  * @author Ardit Ymeri
  * @since 1.0
@@ -45,37 +42,40 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		Type nodeType = node.getType();
 		if (ASTNode.PARAMETERIZED_TYPE == nodeType.getNodeType()) {
 			ParameterizedType parameterizedType = (ParameterizedType) nodeType;
-			List<Type> rhsTypeArguments = 
-					// safe casting to typed list
-					Lists.newArrayList(Iterables.filter(parameterizedType.typeArguments(), Type.class));
-			
+			// safe casting to typed list
+			@SuppressWarnings("unchecked")
+			List<Type> rhsTypeArguments = ((List<Object>) parameterizedType.typeArguments()).stream()
+					.filter(Type.class::isInstance).map(Type.class::cast).collect(Collectors.toList());
+
 			if (rhsTypeArguments != null && !rhsTypeArguments.isEmpty()) {
 				ASTNode parent = node.getParent();
-				
+
 				/*
-				 * It is important that the type arguments in the initialization matches 
-				 * with the type arguments in initialization/assignment. If the declaration
-				 * is a raw type, we cannot replace the type arguments with a diamond operator. 
+				 * It is important that the type arguments in the initialization
+				 * matches with the type arguments in initialization/assignment.
+				 * If the declaration is a raw type, we cannot replace the type
+				 * arguments with a diamond operator.
 				 */
-				
+
 				if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()) {
 					/*
-					 * Declaration and initialization occur in the same statement. 
-					 * For example:
-					 * 		List<String> names = new ArrayList<String>();
-					 * should be replaced with:
-					 * 		List<String> names = new ArrayList<>();
+					 * Declaration and initialization occur in the same
+					 * statement. For example: List<String> names = new
+					 * ArrayList<String>(); should be replaced with:
+					 * List<String> names = new ArrayList<>();
 					 */
 					ASTNode varDeclarationStatement = parent.getParent();
 					if (ASTNode.VARIABLE_DECLARATION_STATEMENT == varDeclarationStatement.getNodeType()) {
 						Type lhsType = ((VariableDeclarationStatement) varDeclarationStatement).getType();
 						if (ASTNode.PARAMETERIZED_TYPE == lhsType.getNodeType()) {
-							
-							List<Type> lhsTypeArguments = 
-									// safe casting to typed list
-									Lists.newArrayList(Iterables.filter(((ParameterizedType) lhsType).typeArguments(), Type.class));
+							// safe casting to typed list
+							@SuppressWarnings("unchecked")
+							List<Object> typeArguments = ((ParameterizedType) lhsType).typeArguments();
+							List<Type> lhsTypeArguments = ((List<Object>)typeArguments).stream()
+									.filter(Type.class::isInstance).map(Type.class::cast).collect(Collectors.toList());
 
-							// checking if type arguments in declaration match with the ones in initialization
+							// checking if type arguments in declaration match
+							// with the ones in initialization
 							ASTMatcher astMatcher = new ASTMatcher();
 							if (astMatcher.safeSubtreeListMatch(lhsTypeArguments, rhsTypeArguments)) {
 								replaceWithDiamond(parameterizedType, rhsTypeArguments);
@@ -85,14 +85,12 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 				} else if (ASTNode.ASSIGNMENT == parent.getNodeType()) {
 					/*
-					 * Declaration and assignment occur on different statements:  
-					 * For example:
-					 * 		List<String> names;
-					 * 		names = new ArrayList<String>();
+					 * Declaration and assignment occur on different statements:
+					 * For example: List<String> names; names = new
+					 * ArrayList<String>();
 					 * 
-					 * should be replaced with:
-					 * 		List<String> names;
-					 * 		names = new ArrayList<>();
+					 * should be replaced with: List<String> names; names = new
+					 * ArrayList<>();
 					 */
 					Assignment assignmentNode = ((Assignment) parent);
 					Expression lhsNode = assignmentNode.getLeftHandSide();
@@ -101,7 +99,8 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 						ITypeBinding[] lhsTypeArguments = lhsTypeBinding.getTypeArguments();
 						ITypeBinding rhsTypeBinding = node.resolveTypeBinding();
 						ITypeBinding[] rhsTypeBindingArguments = rhsTypeBinding.getTypeArguments();
-						// compare type arguments in new instance creation with the ones in declaration
+						// compare type arguments in new instance creation with
+						// the ones in declaration
 						boolean sameTypes = compareTypeBindingArguments(lhsTypeArguments, rhsTypeBindingArguments);
 						if (sameTypes) {
 							replaceWithDiamond(parameterizedType, rhsTypeArguments);
@@ -113,10 +112,10 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		return false;
 	}
-	
+
 	/**
-	 * Covers the case when diamond operator can be used on 
-	 * the arguments of a method invocation. e.g:
+	 * Covers the case when diamond operator can be used on the arguments of a
+	 * method invocation. e.g:
 	 * <p>
 	 * {@code map.put("key", new ArrayList<String>());} <br/>
 	 * can be replaced with: <br/>
@@ -125,27 +124,33 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding methodBinding = node.resolveMethodBinding();
-		if(methodBinding != null) {
+		if (methodBinding != null) {
 			ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
-			List<ASTNode> arguments = Lists.newArrayList(Iterables.filter(node.arguments(), ASTNode.class));
-			if(arguments.size() == parameterTypes.length) {
-				for(int i = 0; i < arguments.size(); i++) {
+			// safe casting to typed list
+			@SuppressWarnings("unchecked")
+			List<ASTNode> arguments = ((List<Object>)node.arguments()).stream()
+					.filter(Type.class::isInstance).map(ASTNode.class::cast).collect(Collectors.toList());
+			if (arguments.size() == parameterTypes.length) {
+				for (int i = 0; i < arguments.size(); i++) {
 					ASTNode argument = arguments.get(i);
-					if(ASTNode.CLASS_INSTANCE_CREATION == argument.getNodeType()) {
-						ClassInstanceCreation clsInstatnceCreateion = (ClassInstanceCreation)argument;
+					if (ASTNode.CLASS_INSTANCE_CREATION == argument.getNodeType()) {
+						ClassInstanceCreation clsInstatnceCreateion = (ClassInstanceCreation) argument;
 						Type argType = clsInstatnceCreateion.getType();
-						
-						if(ASTNode.PARAMETERIZED_TYPE == argType.getNodeType()) {
-							ParameterizedType parArgType = (ParameterizedType)argType;
-							List<Type> parTypeArguments = Lists.newArrayList(Iterables.filter(parArgType.typeArguments(), Type.class));
+
+						if (ASTNode.PARAMETERIZED_TYPE == argType.getNodeType()) {
+							ParameterizedType parArgType = (ParameterizedType) argType;
+							// safe casting to typed list
+							@SuppressWarnings("unchecked")
+							List<Type> parTypeArguments = ((List<Object>)parArgType.typeArguments()).stream()
+									.filter(Type.class::isInstance).map(Type.class::cast).collect(Collectors.toList());
 							ITypeBinding parameterType = parameterTypes[i];
 							ITypeBinding[] parameterTypeArgs = parameterType.getTypeArguments();
-							
-							if(!parTypeArguments.isEmpty() && parTypeArguments.size() == parameterTypeArgs.length) {
+
+							if (!parTypeArguments.isEmpty() && parTypeArguments.size() == parameterTypeArgs.length) {
 								ITypeBinding argBinding = parArgType.resolveBinding();
 								ITypeBinding[] argTypeBindings = argBinding.getTypeArguments();
-		
-								if(compareTypeBindingArguments(parameterTypeArgs, argTypeBindings)) {
+
+								if (compareTypeBindingArguments(parameterTypeArgs, argTypeBindings)) {
 									replaceWithDiamond(parArgType, parTypeArguments);
 								}
 							}
@@ -159,11 +164,13 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 * Replaces the type arguments of the given parameterized node with the 
-	 * diamond operator. 
+	 * Replaces the type arguments of the given parameterized node with the
+	 * diamond operator.
 	 * 
-	 * @param parameterizedType ast node with type arguments.
-	 * @param rhsTypeArguments list of type arguments to be removed.
+	 * @param parameterizedType
+	 *            ast node with type arguments.
+	 * @param rhsTypeArguments
+	 *            list of type arguments to be removed.
 	 */
 	private void replaceWithDiamond(ParameterizedType parameterizedType, List<Type> rhsTypeArguments) {
 		// removing type arguments in new class instance creation
@@ -174,11 +181,11 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 * Compares the given lists by getting the qualified name of 
-	 * corresponding elements on same positions. 
+	 * Compares the given lists by getting the qualified name of corresponding
+	 * elements on same positions.
 	 * 
-	 * @return if both lists have the same size and all corresponding 
-	 * elements have the same qualified name.
+	 * @return if both lists have the same size and all corresponding elements
+	 *         have the same qualified name.
 	 */
 	private boolean compareTypeBindingArguments(ITypeBinding[] lhsTypeArguments,
 			ITypeBinding[] rhsTypeBindingArguments) {
@@ -196,7 +203,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					break;
 				}
 			}
-			
+
 		} else {
 			equals = false;
 		}
