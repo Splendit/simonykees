@@ -40,7 +40,9 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		Type nodeType = node.getType();
-		if (ASTNode.PARAMETERIZED_TYPE == nodeType.getNodeType()) {
+		if (ASTNode.PARAMETERIZED_TYPE == nodeType.getNodeType() 
+				&&
+				node.getAnonymousClassDeclaration() == null) {
 			boolean sameTypes = false;
 			ParameterizedType parameterizedType = (ParameterizedType) nodeType;
 			// safe casting to typed list

@@ -23,6 +23,21 @@ public class DiamondOperatorRule {
 		}
 	}
 	
+	private abstract class Foo<T> {
+		private T t;
+		public Foo (T t) {
+			setValue(t);
+		}
+		
+		private void setValue(T t) {
+			this.t = t;
+		}
+		
+		public T getValue() {
+			return t;
+		}
+	}
+	
 	private String concatRawTypeList(List objects) {
 		objects.add(new Object());
 		Object val = objects.stream().map(o -> o.toString()).collect(Collectors.joining(", "));
@@ -107,5 +122,10 @@ public class DiamondOperatorRule {
 	public void diamondRuleOnMethodInvocation(String input) {
 		concatRawTypeList(new ArrayList<String>());
 		concatTypedList(new ArrayList<>(), 1, new HashMap<>());
+	}
+	
+	public String anonymousGenericInstatiation(String input) {
+		Foo<String> foo = new Foo<String>(input){};
+		return foo.getValue();
 	}
 }
