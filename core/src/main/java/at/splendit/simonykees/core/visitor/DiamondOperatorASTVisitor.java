@@ -111,10 +111,11 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					 * replaced with: <br/> {@code map.put("key", new
 					 * ArrayList<>());} <br/>
 					 */
+					
 					@SuppressWarnings("unchecked")
-					List<ASTNode> argumentList = (List<ASTNode>) parent
-							.getStructuralProperty(MethodInvocation.ARGUMENTS_PROPERTY);
-
+					List<Expression> argumentList = ((List<Object>)((MethodInvocation)parent).arguments()).stream()
+					.filter(Expression.class::isInstance).map(Expression.class::cast).collect(Collectors.toList());
+					
 					ITypeBinding[] parameterTypeArgs = null;
 
 					// index of the ClassInstanceCreation
