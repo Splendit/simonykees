@@ -17,6 +17,7 @@ import org.eclipse.ui.PlatformUI;
 
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
+import at.splendit.simonykees.core.exception.SimonykeesException;
 import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
 import at.splendit.simonykees.core.rule.RefactoringRule;
@@ -72,7 +73,7 @@ public class SelectRulesWizard extends Wizard {
 						return Status.CANCEL_STATUS;
 					}
 				} catch (RefactoringException e) {
-					SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+					synchronizeWithUIShowError(e);
 					return null;
 				}
 				try {
@@ -81,10 +82,10 @@ public class SelectRulesWizard extends Wizard {
 						return Status.CANCEL_STATUS;
 					}
 				} catch (RefactoringException e) {
-					SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+					synchronizeWithUIShowError(e);
 					return null;
 				} catch (RuleException e) {
-					SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+					synchronizeWithUIShowError(e);
 				}
 
 				monitor.done();
@@ -151,7 +152,7 @@ public class SelectRulesWizard extends Wizard {
 	}
 
 	/**
-	 * Method used to open ErrorDialog from non UI thread
+	 * Method used to open License ErrorDialog from non UI thread
 	 */
 	private void synchronizeWithUIShowLicenseError() {
 		Display.getDefault().asyncExec(new Runnable() {
@@ -160,6 +161,20 @@ public class SelectRulesWizard extends Wizard {
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				LicenseUtil.displayLicenseErrorDialog(shell);
+			}
+		});
+	}
+	
+	/**
+	 * Method used to open ErrorDialog from non UI thread
+	 */
+	private void synchronizeWithUIShowError(SimonykeesException exception) {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				SimonykeesMessageDialog.openErrorMessageDialog(shell, exception);
 			}
 		});
 	}
