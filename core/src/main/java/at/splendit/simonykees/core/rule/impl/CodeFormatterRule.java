@@ -52,7 +52,9 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 	@Override
 	public void generateDocumentChanges(List<ICompilationUnit> workingCopies, SubMonitor subMonitor)
 			throws JavaModelException, ReflectiveOperationException {
+		
 		subMonitor.setWorkRemaining(workingCopies.size());
+		
 		for (ICompilationUnit wc : workingCopies) {
 			subMonitor.subTask(getName() + ": " + wc.getElementName()); //$NON-NLS-1$
 			applyFormating(wc);

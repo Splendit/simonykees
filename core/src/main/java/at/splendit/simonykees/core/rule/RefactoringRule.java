@@ -101,7 +101,9 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	 */
 	public void generateDocumentChanges(List<ICompilationUnit> workingCopies, SubMonitor subMonitor)
 			throws JavaModelException, ReflectiveOperationException {
+
 		subMonitor.setWorkRemaining(workingCopies.size());
+
 		for (ICompilationUnit wc : workingCopies) {
 			subMonitor.subTask(getName() + ": " + wc.getElementName()); //$NON-NLS-1$
 			applyRule(wc);
