@@ -145,48 +145,6 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		return true;
 	}
-	/*
-	 * moved to ClassInstanceCreation
-	 * 
-	 * /** Covers the case when diamond operator can be used on the arguments of
-	 * a method invocation. e.g: <p> {@code map.put("key", new
-	 * ArrayList<String>());} <br/> can be replaced with: <br/> {@code
-	 * map.put("key", new ArrayList<>());} <br/> /
-	 * 
-	 * @Override public boolean visit(MethodInvocation node) { IMethodBinding
-	 * methodBinding = node.resolveMethodBinding(); if (methodBinding != null) {
-	 * ITypeBinding[] parameterTypes = methodBinding.getParameterTypes(); //
-	 * safe casting to typed list
-	 * 
-	 * @SuppressWarnings("unchecked") List<Expression> arguments =
-	 * ((List<Object>) node.arguments()).stream().filter(Type.class::isInstance)
-	 * .map(Expression.class::cast).collect(Collectors.toList()); if
-	 * (arguments.size() == parameterTypes.length) { for (int i = 0; i <
-	 * arguments.size(); i++) { ASTNode argument = arguments.get(i); if
-	 * (ASTNode.CLASS_INSTANCE_CREATION == argument.getNodeType()) {
-	 * ClassInstanceCreation clsInstatnceCreateion = (ClassInstanceCreation)
-	 * argument; Type argType = clsInstatnceCreateion.getType();
-	 * 
-	 * if (ASTNode.PARAMETERIZED_TYPE == argType.getNodeType()) {
-	 * ParameterizedType parArgType = (ParameterizedType) argType; // safe
-	 * casting to typed list
-	 * 
-	 * @SuppressWarnings("unchecked") List<Type> parTypeArguments =
-	 * ((List<Object>) parArgType.typeArguments()).stream()
-	 * .filter(Type.class::isInstance).map(Type.class::cast).collect(Collectors.
-	 * toList()); ITypeBinding parameterType = parameterTypes[i]; ITypeBinding[]
-	 * parameterTypeArgs = parameterType.getTypeArguments();
-	 * 
-	 * if (!parTypeArguments.isEmpty() && parTypeArguments.size() ==
-	 * parameterTypeArgs.length) { ITypeBinding argBinding =
-	 * parArgType.resolveBinding(); ITypeBinding[] argTypeBindings =
-	 * argBinding.getTypeArguments();
-	 * 
-	 * if (compareTypeBindingArguments(parameterTypeArgs, argTypeBindings)) {
-	 * replaceWithDiamond(parArgType, parTypeArguments); } } } } } } }
-	 * 
-	 * return false; }
-	 */
 
 	/**
 	 * Replaces the type arguments of the given parameterized node with the
