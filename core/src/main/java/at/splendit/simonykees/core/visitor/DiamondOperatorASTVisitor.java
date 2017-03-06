@@ -41,6 +41,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	public boolean visit(ClassInstanceCreation node) {
 		Type nodeType = node.getType();
 		if (ASTNode.PARAMETERIZED_TYPE == nodeType.getNodeType()) {
+			boolean sameTypes = false;
 			ParameterizedType parameterizedType = (ParameterizedType) nodeType;
 			// safe casting to typed list
 			@SuppressWarnings("unchecked")
@@ -71,15 +72,13 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 							// safe casting to typed list
 							@SuppressWarnings("unchecked")
 							List<Object> typeArguments = ((ParameterizedType) lhsType).typeArguments();
-							List<Type> lhsTypeArguments = ((List<Object>)typeArguments).stream()
+							List<Type> lhsTypeArguments = ((List<Object>) typeArguments).stream()
 									.filter(Type.class::isInstance).map(Type.class::cast).collect(Collectors.toList());
 
 							// checking if type arguments in declaration match
 							// with the ones in initialization
 							ASTMatcher astMatcher = new ASTMatcher();
-							if (astMatcher.safeSubtreeListMatch(lhsTypeArguments, rhsTypeArguments)) {
-								replaceWithDiamond(parameterizedType, rhsTypeArguments);
-							}
+							sameTypes = astMatcher.safeSubtreeListMatch(lhsTypeArguments, rhsTypeArguments);
 						}
 					}
 
@@ -101,67 +100,93 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 						ITypeBinding[] rhsTypeBindingArguments = rhsTypeBinding.getTypeArguments();
 						// compare type arguments in new instance creation with
 						// the ones in declaration
-						boolean sameTypes = compareTypeBindingArguments(lhsTypeArguments, rhsTypeBindingArguments);
-						if (sameTypes) {
-							replaceWithDiamond(parameterizedType, rhsTypeArguments);
-						}
+						sameTypes = compareTypeBindingArguments(lhsTypeArguments, rhsTypeBindingArguments);
 					}
-				}
-			}
-		}
+				} else if (ASTNode.METHOD_INVOCATION == parent.getNodeType()
+						&& MethodInvocation.ARGUMENTS_PROPERTY == node.getLocationInParent()) {
+					/*
+					 * Covers the case when diamond operator can be used on the
+					 * arguments of a method invocation. e.g: <p> {@code
+					 * map.put("key", new ArrayList<String>());} <br/> can be
+					 * replaced with: <br/> {@code map.put("key", new
+					 * ArrayList<>());} <br/>
+					 */
+					@SuppressWarnings("unchecked")
+					List<ASTNode> argumentList = (List<ASTNode>) parent
+							.getStructuralProperty(MethodInvocation.ARGUMENTS_PROPERTY);
 
-		return false;
-	}
+					ITypeBinding[] parameterTypeArgs = null;
 
-	/**
-	 * Covers the case when diamond operator can be used on the arguments of a
-	 * method invocation. e.g:
-	 * <p>
-	 * {@code map.put("key", new ArrayList<String>());} <br/>
-	 * can be replaced with: <br/>
-	 * {@code map.put("key", new ArrayList<>());} <br/>
-	 */
-	@Override
-	public boolean visit(MethodInvocation node) {
-		IMethodBinding methodBinding = node.resolveMethodBinding();
-		if (methodBinding != null) {
-			ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
-			// safe casting to typed list
-			@SuppressWarnings("unchecked")
-			List<ASTNode> arguments = ((List<Object>)node.arguments()).stream()
-					.filter(Type.class::isInstance).map(ASTNode.class::cast).collect(Collectors.toList());
-			if (arguments.size() == parameterTypes.length) {
-				for (int i = 0; i < arguments.size(); i++) {
-					ASTNode argument = arguments.get(i);
-					if (ASTNode.CLASS_INSTANCE_CREATION == argument.getNodeType()) {
-						ClassInstanceCreation clsInstatnceCreateion = (ClassInstanceCreation) argument;
-						Type argType = clsInstatnceCreateion.getType();
-
-						if (ASTNode.PARAMETERIZED_TYPE == argType.getNodeType()) {
-							ParameterizedType parArgType = (ParameterizedType) argType;
-							// safe casting to typed list
-							@SuppressWarnings("unchecked")
-							List<Type> parTypeArguments = ((List<Object>)parArgType.typeArguments()).stream()
-									.filter(Type.class::isInstance).map(Type.class::cast).collect(Collectors.toList());
+					// index of the ClassInstanceCreation
+					int i = argumentList.indexOf(node);
+					// resolve the typeBinding of the ClassInstanceCreation
+					// position in MethodHead
+					IMethodBinding methodBinding = ((MethodInvocation) parent).resolveMethodBinding();
+					if (-1 != i && methodBinding != null) {
+						ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
+						if (parameterTypes != null && parameterTypes.length > i) {
 							ITypeBinding parameterType = parameterTypes[i];
-							ITypeBinding[] parameterTypeArgs = parameterType.getTypeArguments();
-
-							if (!parTypeArguments.isEmpty() && parTypeArguments.size() == parameterTypeArgs.length) {
-								ITypeBinding argBinding = parArgType.resolveBinding();
-								ITypeBinding[] argTypeBindings = argBinding.getTypeArguments();
-
-								if (compareTypeBindingArguments(parameterTypeArgs, argTypeBindings)) {
-									replaceWithDiamond(parArgType, parTypeArguments);
-								}
-							}
+							parameterTypeArgs = parameterType.getTypeArguments();
 						}
+					}
+
+					if (!rhsTypeArguments.isEmpty() && rhsTypeArguments.size() == parameterTypeArgs.length) {
+						ITypeBinding argBinding = parameterizedType.resolveBinding();
+						ITypeBinding[] argTypeBindings = argBinding.getTypeArguments();
+
+						sameTypes = compareTypeBindingArguments(parameterTypeArgs, argTypeBindings);
 					}
 				}
 			}
+			if (sameTypes) {
+				replaceWithDiamond(parameterizedType, rhsTypeArguments);
+			}
 		}
 
-		return false;
+		return true;
 	}
+	/*
+	 * moved to ClassInstanceCreation
+	 * 
+	 * /** Covers the case when diamond operator can be used on the arguments of
+	 * a method invocation. e.g: <p> {@code map.put("key", new
+	 * ArrayList<String>());} <br/> can be replaced with: <br/> {@code
+	 * map.put("key", new ArrayList<>());} <br/> /
+	 * 
+	 * @Override public boolean visit(MethodInvocation node) { IMethodBinding
+	 * methodBinding = node.resolveMethodBinding(); if (methodBinding != null) {
+	 * ITypeBinding[] parameterTypes = methodBinding.getParameterTypes(); //
+	 * safe casting to typed list
+	 * 
+	 * @SuppressWarnings("unchecked") List<Expression> arguments =
+	 * ((List<Object>) node.arguments()).stream().filter(Type.class::isInstance)
+	 * .map(Expression.class::cast).collect(Collectors.toList()); if
+	 * (arguments.size() == parameterTypes.length) { for (int i = 0; i <
+	 * arguments.size(); i++) { ASTNode argument = arguments.get(i); if
+	 * (ASTNode.CLASS_INSTANCE_CREATION == argument.getNodeType()) {
+	 * ClassInstanceCreation clsInstatnceCreateion = (ClassInstanceCreation)
+	 * argument; Type argType = clsInstatnceCreateion.getType();
+	 * 
+	 * if (ASTNode.PARAMETERIZED_TYPE == argType.getNodeType()) {
+	 * ParameterizedType parArgType = (ParameterizedType) argType; // safe
+	 * casting to typed list
+	 * 
+	 * @SuppressWarnings("unchecked") List<Type> parTypeArguments =
+	 * ((List<Object>) parArgType.typeArguments()).stream()
+	 * .filter(Type.class::isInstance).map(Type.class::cast).collect(Collectors.
+	 * toList()); ITypeBinding parameterType = parameterTypes[i]; ITypeBinding[]
+	 * parameterTypeArgs = parameterType.getTypeArguments();
+	 * 
+	 * if (!parTypeArguments.isEmpty() && parTypeArguments.size() ==
+	 * parameterTypeArgs.length) { ITypeBinding argBinding =
+	 * parArgType.resolveBinding(); ITypeBinding[] argTypeBindings =
+	 * argBinding.getTypeArguments();
+	 * 
+	 * if (compareTypeBindingArguments(parameterTypeArgs, argTypeBindings)) {
+	 * replaceWithDiamond(parArgType, parTypeArguments); } } } } } } }
+	 * 
+	 * return false; }
+	 */
 
 	/**
 	 * Replaces the type arguments of the given parameterized node with the
