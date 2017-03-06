@@ -26,6 +26,9 @@ public class Messages extends NLS {
 	public static String CodeFormatterRule_name;
 	public static String CollectionRemoveAllRule_description;
 	public static String CollectionRemoveAllRule_name;
+	public static String DiamondOperatorASTVisitor_using_diamond_operator;
+	public static String DiamondOperatorRule_description;
+	public static String DiamondOperatorRule_name;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;
