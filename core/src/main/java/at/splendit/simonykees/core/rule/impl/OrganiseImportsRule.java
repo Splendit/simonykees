@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -54,13 +55,22 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 	}
 
 	@Override
-	public void generateDocumentChanges(List<ICompilationUnit> workingCopies)
+	public void generateDocumentChanges(List<ICompilationUnit> workingCopies, SubMonitor subMonitor)
 			throws JavaModelException, ReflectiveOperationException {
+		
+		subMonitor.setWorkRemaining(workingCopies.size());
+		
 		for (ICompilationUnit wc : workingCopies) {
+			subMonitor.subTask(getName() + ": " + wc.getElementName()); //$NON-NLS-1$
 			try {
 				applyOrganising(wc);
 			} catch (CoreException e) {
 				throw new JavaModelException(e);
+			}
+			if (subMonitor.isCanceled()) {
+				return;
+			} else {
+				subMonitor.worked(1);
 			}
 		}
 	}
