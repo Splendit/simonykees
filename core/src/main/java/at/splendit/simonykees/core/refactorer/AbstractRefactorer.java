@@ -167,12 +167,15 @@ public abstract class AbstractRefactorer {
 			 */
 			subMonitor.subTask(refactoringRule.getName());
 			try {
-				
-				// TODO add progress monitor
-				refactoringRule.generateDocumentChanges(workingCopies);
+
+				/*
+				 * Sends new child of subMonitor which takes in progress bar size of 1 of rules size
+				 * In method that part of progress bar is split to number of compilation units 
+				 */
+				refactoringRule.generateDocumentChanges(workingCopies, subMonitor.newChild(1));
 
 				if (refactoringRule instanceof TryWithResourceRule) {
-					refactoringRule.generateDocumentChanges(workingCopies);
+					refactoringRule.generateDocumentChanges(workingCopies, subMonitor.newChild(0));
 				}
 			} catch (JavaModelException | ReflectiveOperationException e) {
 				Activator.log(Status.ERROR, e.getMessage(), e);
@@ -182,8 +185,6 @@ public abstract class AbstractRefactorer {
 			// else continue
 			if (subMonitor.isCanceled()) {
 				return;
-			} else {
-				subMonitor.worked(1);
 			}
 		}
 		if (!notWorkingRules.isEmpty()) {
