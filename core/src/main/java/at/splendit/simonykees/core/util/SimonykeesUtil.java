@@ -85,7 +85,7 @@ public final class SimonykeesUtil {
 				addCompilationUnit(result, packageFragment.getCompilationUnits());
 			} else if (javaElement instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot) javaElement;
-				collectICompilationUnits(result, Arrays.asList(packageFragmentRoot.getChildren()), monitor);
+				collectICompilationUnits(result, Arrays.asList(packageFragmentRoot.getChildren()), subMonitor);
 			} else if (javaElement instanceof IJavaProject) {
 				IJavaProject javaProject = (IJavaProject) javaElement;
 				for (IPackageFragment packageFragment : javaProject.getPackageFragments()) {
@@ -100,7 +100,7 @@ public final class SimonykeesUtil {
 			if (subMonitor.isCanceled()) {
 				return;
 			} else {
-				monitor.worked(1);
+				subMonitor.worked(1);
 			}
 		}
 	}
