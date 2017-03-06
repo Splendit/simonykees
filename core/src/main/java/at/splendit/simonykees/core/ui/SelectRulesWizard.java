@@ -86,30 +86,32 @@ public class SelectRulesWizard extends Wizard {
 				} catch (RuleException e) {
 					SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
 				}
+
 				monitor.done();
-				
+
 				if (LicenseUtil.isValid()) {
 					if (refactorer.hasChanges()) {
-						
+
 						synchronizeWithUIShowRefactoringPreviewWizard(refactorer, rectangle);
 					} else {
-						
+
 						synchronizeWithUIShowWarningNoRefactoringDialog();
 					}
 				} else {
 					synchronizeWithUIShowLicenseError();
 				}
-				
+
 				return Status.OK_STATUS;
 			}
 		};
+		
 		job.setUser(true);
 		job.schedule();
 
 		return true;
 	}
 
-	/*
+	/**
 	 * Method used to open RefactoringPreviewWizard from non UI thread
 	 */
 	private void synchronizeWithUIShowRefactoringPreviewWizard(AbstractRefactorer refactorer, Rectangle rectangle) {
@@ -124,12 +126,13 @@ public class SelectRulesWizard extends Wizard {
 				dialog.setPageSize(rectangle.width, rectangle.height);
 				dialog.open();
 			}
-			
+
 		});
 	}
-	
-	/*
-	 * Method used to open MessageDialog from non UI thread
+
+	/**
+	 * Method used to open MessageDialog informing the user that no refactorings
+	 * are required from non UI thread
 	 */
 	private void synchronizeWithUIShowWarningNoRefactoringDialog() {
 		Display.getDefault().asyncExec(new Runnable() {
@@ -140,14 +143,14 @@ public class SelectRulesWizard extends Wizard {
 				MessageDialog dialog = new MessageDialog(shell, Messages.aa_codename, null,
 						Messages.SelectRulesWizard_warning_no_refactorings, MessageDialog.INFORMATION, 1,
 						Messages.ui_ok);
-				
+
 				dialog.open();
 			}
-			
+
 		});
 	}
-	
-	/*
+
+	/**
 	 * Method used to open ErrorDialog from non UI thread
 	 */
 	private void synchronizeWithUIShowLicenseError() {

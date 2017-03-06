@@ -34,6 +34,7 @@ public final class SimonykeesUtil {
 
 	private static final String BACKSLASH_N = "\n"; //$NON-NLS-1$
 	private static final String LINE_SEPARATOR_PROPERTY = "line.separator"; //$NON-NLS-1$
+
 	/**
 	 * Get the line separator for the current system, if none is found
 	 * <code>&#92;n</code> is used
@@ -63,13 +64,14 @@ public final class SimonykeesUtil {
 	 *             while accessing its corresponding resource.
 	 * @since 0.9
 	 */
-	public static void collectICompilationUnits(List<ICompilationUnit> result, List<IJavaElement> javaElements, IProgressMonitor monitor)
-			throws JavaModelException {
+	public static void collectICompilationUnits(List<ICompilationUnit> result, List<IJavaElement> javaElements,
+			IProgressMonitor monitor) throws JavaModelException {
 
 		/*
-		 * Converts the monitor to a SubMonitor and sets name of task on progress monitor dialog 
-		 * Size is set to number 100 and then scaled to size of the javaElements list
-		 * Each java element increases worked amount for same size 
+		 * Converts the monitor to a SubMonitor and sets name of task on
+		 * progress monitor dialog. Size is set to number 100 and then scaled to
+		 * size of the javaElements list. Each java element increases worked
+		 * amount for same size.
 		 */
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(javaElements.size());
 		subMonitor.setTaskName(Messages.ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName);
@@ -90,8 +92,12 @@ public final class SimonykeesUtil {
 					addCompilationUnit(result, packageFragment.getCompilationUnits());
 				}
 			}
-			// If cancel is pressed on progress monitor, abort all and return, else continue
-			if(subMonitor.isCanceled()) {
+			
+			/*
+			 * If cancel is pressed on progress monitor, abort all and return,
+			 * else continue
+			 */
+			if (subMonitor.isCanceled()) {
 				return;
 			} else {
 				monitor.worked(1);

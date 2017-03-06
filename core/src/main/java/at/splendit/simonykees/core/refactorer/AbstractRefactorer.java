@@ -53,10 +53,11 @@ public abstract class AbstractRefactorer {
 	 * @param rules
 	 *            {@link List} of {@link RefactoringRule}s to apply to the
 	 *            {@link IJavaElement}s
-	 *            
+	 * 
 	 * @since 0.9
 	 */
-	public AbstractRefactorer(List<IJavaElement> javaElements, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+	public AbstractRefactorer(List<IJavaElement> javaElements,
+			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		this.javaElements = javaElements;
 		this.rules = rules;
 	}
@@ -66,7 +67,8 @@ public abstract class AbstractRefactorer {
 	 * Find {@link ICompilationUnit}s and create working copies for the
 	 * {@link IJavaElement}s
 	 * 
-	 * @param IProgressMonitor monitor used to show progress in UI
+	 * @param IProgressMonitor
+	 *            monitor used to show progress in UI
 	 * 
 	 * @throws RefactoringException
 	 *             if this element does not exist or if an exception occurs
@@ -78,7 +80,7 @@ public abstract class AbstractRefactorer {
 	 */
 	public void prepareRefactoring(IProgressMonitor monitor) throws RefactoringException {
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
-		
+
 		try {
 			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements, monitor);
 			if (compilationUnits.isEmpty()) {
@@ -92,19 +94,25 @@ public abstract class AbstractRefactorer {
 				throw new RefactoringException(
 						ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated);
 			} else {
+
 				/*
-				 * Converts the monitor to a SubMonitor and sets name of task on progress monitor dialog 
-				 * Size is set to number 100 and then scaled to size of the compilationUnits list
-				 * Each compilation unit increases worked amount for same size 
+				 * Converts the monitor to a SubMonitor and sets name of task on
+				 * progress monitor dialog. Size is set to number 100 and then
+				 * scaled to size of the compilationUnits list. Each compilation
+				 * unit increases worked amount for same size.
 				 */
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(compilationUnits.size());
 				subMonitor.setTaskName(Messages.ProgressMonitor_AbstractRefactorer_prepareRefactoring_taskName);
 
 				for (ICompilationUnit compilationUnit : compilationUnits) {
-					subMonitor.subTask(compilationUnit.getElementName());;
+					subMonitor.subTask(compilationUnit.getElementName());
 					workingCopies.add(compilationUnit.getWorkingCopy(null));
-					// If cancel is pressed on progress monitor, abort all and return, else continue
-					if(subMonitor.isCanceled()) {
+
+					/*
+					 * If cancel is pressed on progress monitor, abort all and
+					 * return, else continue
+					 */
+					if (subMonitor.isCanceled()) {
 						return;
 					} else {
 						subMonitor.worked(1);
@@ -121,7 +129,8 @@ public abstract class AbstractRefactorer {
 	/**
 	 * Apply {@link RefactoringRule}s to the working copies
 	 * 
-	 * @param IProgressMonitor monitor used to show progress in UI
+	 * @param IProgressMonitor
+	 *            monitor used to show progress in UI
 	 * 
 	 * @throws RefactoringException
 	 *             if no working copies were found to apply
@@ -140,32 +149,38 @@ public abstract class AbstractRefactorer {
 			Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung, null);
 			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
 		}
-		
+
 		/*
-		 * Converts the monitor to a SubMonitor and sets name of task on progress monitor dialog 
-		 * Size is set to number 100 and then scaled to size of the rules list
-		 * Each refactoring rule increases worked amount for same size 
+		 * Converts the monitor to a SubMonitor and sets name of task on
+		 * progress monitor dialog Size is set to number 100 and then scaled to
+		 * size of the rules list Each refactoring rule increases worked amount
+		 * for same size
 		 */
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(rules.size());
 		subMonitor.setTaskName(Messages.ProgressMonitor_AbstractRefactorer_doRefactoring_taskName);
 
 		List<String> notWorkingRules = new ArrayList<>();
 		for (RefactoringRule<? extends ASTVisitor> refactoringRule : rules) {
-			//TODO catch all exceptions from ASTVisitor execution?
-			// if any exception is thrown discard all changes from this rule
-			subMonitor.subTask(refactoringRule.getName());;
+			/*
+			 * TODO catch all exceptions from ASTVisitor execution? if any
+			 * exception is thrown discard all changes from this rule
+			 */
+			subMonitor.subTask(refactoringRule.getName());
 			try {
-				refactoringRule.generateDocumentChanges(workingCopies);
 				
-				if(refactoringRule instanceof TryWithResourceRule){
+				// TODO add progress monitor
+				refactoringRule.generateDocumentChanges(workingCopies);
+
+				if (refactoringRule instanceof TryWithResourceRule) {
 					refactoringRule.generateDocumentChanges(workingCopies);
 				}
 			} catch (JavaModelException | ReflectiveOperationException e) {
 				Activator.log(Status.ERROR, e.getMessage(), e);
 				notWorkingRules.add(refactoringRule.getName());
 			}
-			// If cancel is pressed on progress monitor, abort all and return, else continue
-			if(subMonitor.isCanceled()) {
+			// If cancel is pressed on progress monitor, abort all and return,
+			// else continue
+			if (subMonitor.isCanceled()) {
 				return;
 			} else {
 				subMonitor.worked(1);

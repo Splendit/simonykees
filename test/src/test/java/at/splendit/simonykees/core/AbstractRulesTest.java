@@ -29,7 +29,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * @since 0.9.2
  */
 public abstract class AbstractRulesTest {
-	
+
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
 
 	public AbstractRulesTest() {
@@ -55,7 +55,7 @@ public abstract class AbstractRulesTest {
 		}
 		return data;
 	}
-	
+
 	protected String processFile(String fileName, String content,
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) throws Exception {
 
@@ -68,9 +68,12 @@ public abstract class AbstractRulesTest {
 		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
 		};
 
-		// A default progress monitor implementation, used just for testing purposes
+		/*
+		 * A default progress monitor implementation, used just for testing
+		 * purposes
+		 */
 		IProgressMonitor monitor = new NullProgressMonitor();
-		
+
 		refactorer.prepareRefactoring(monitor);
 		refactorer.doRefactoring(monitor);
 		refactorer.commitRefactoring();
@@ -78,7 +81,8 @@ public abstract class AbstractRulesTest {
 		return compilationUnit.getSource();
 	}
 
-	protected void testTransformation(Path postRule, Path preRule, String fileName, String postRulePackage) throws Exception {
+	protected void testTransformation(Path postRule, Path preRule, String fileName, String postRulePackage)
+			throws Exception {
 		String expectedSource = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		String content = new String(Files.readAllBytes(preRule), StandardCharsets.UTF_8);
 
