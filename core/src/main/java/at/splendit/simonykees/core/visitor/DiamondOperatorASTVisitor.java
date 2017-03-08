@@ -8,10 +8,13 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -67,9 +70,24 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					 * ArrayList<String>(); should be replaced with:
 					 * List<String> names = new ArrayList<>();
 					 */
-					ASTNode varDeclarationStatement = parent.getParent();
-					if (ASTNode.VARIABLE_DECLARATION_STATEMENT == varDeclarationStatement.getNodeType()) {
-						Type lhsType = ((VariableDeclarationStatement) varDeclarationStatement).getType();
+					ASTNode declarationStatement = parent.getParent();
+					if (ASTNode.VARIABLE_DECLARATION_STATEMENT == declarationStatement.getNodeType()) {
+						Type lhsType = ((VariableDeclarationStatement) declarationStatement).getType();
+						if (ASTNode.PARAMETERIZED_TYPE == lhsType.getNodeType()) {
+							// safe casting to typed list
+							@SuppressWarnings("unchecked")
+							List<Object> typeArguments = ((ParameterizedType) lhsType).typeArguments();
+							List<Type> lhsTypeArguments = ((List<Object>) typeArguments).stream()
+									.filter(Type.class::isInstance).map(Type.class::cast).collect(Collectors.toList());
+
+							// checking if type arguments in declaration match
+							// with the ones in initialization
+							ASTMatcher astMatcher = new ASTMatcher();
+							sameTypes = astMatcher.safeSubtreeListMatch(lhsTypeArguments, rhsTypeArguments);
+						}
+						
+					} else if (ASTNode.FIELD_DECLARATION == declarationStatement.getNodeType()) {
+						Type lhsType = ((FieldDeclaration) declarationStatement).getType();
 						if (ASTNode.PARAMETERIZED_TYPE == lhsType.getNodeType()) {
 							// safe casting to typed list
 							@SuppressWarnings("unchecked")
@@ -139,6 +157,21 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 						sameTypes = compareTypeBindingArguments(parameterTypeArgs, argTypeBindings);
 					}
+				} else if (ASTNode.RETURN_STATEMENT == parent.getNodeType()) {
+					ReturnStatement returnStatement = (ReturnStatement)parent;
+					MethodDeclaration methodDeclaration = findMethodSignature(returnStatement);
+					if(methodDeclaration != null) {						
+						Type returnType = methodDeclaration.getReturnType2();
+						if(returnType != null && ASTNode.PARAMETERIZED_TYPE == returnType.getNodeType()) {
+							
+							@SuppressWarnings("unchecked")
+							List<Type> returnTypeArgumetns =((List<Object>) ((ParameterizedType)returnType).typeArguments()).stream()
+							.filter(Type.class::isInstance).map(Type.class::cast).collect(Collectors.toList());
+							
+							ASTMatcher matcher = new ASTMatcher();
+							sameTypes = matcher.safeSubtreeListMatch(returnTypeArgumetns, rhsTypeArguments);
+						}
+					}
 				}
 			}
 			if (sameTypes) {
@@ -147,6 +180,22 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return true;
+	}
+	
+	private MethodDeclaration findMethodSignature(ASTNode node) {
+		MethodDeclaration methodDeclaration = null;
+		if(node != null) {
+			ASTNode parent = node;
+			do {
+				parent = parent.getParent();
+			} while (parent != null && parent.getNodeType() != ASTNode.METHOD_DECLARATION);
+			
+			if(parent != null) {
+				methodDeclaration = (MethodDeclaration)parent;
+			}
+		}
+		
+		return methodDeclaration;
 	}
 
 	/**
