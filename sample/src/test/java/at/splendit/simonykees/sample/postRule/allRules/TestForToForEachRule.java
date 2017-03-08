@@ -492,7 +492,7 @@ public class TestForToForEachRule {
 	}
 
 	private class Point {
-		private final List<Double> coordinates = new ArrayList<Double>();
+		private final List<Double> coordinates = new ArrayList<>();
 
 		public List<Double> getCoordinates() {
 			return coordinates;

@@ -25,6 +25,8 @@ public class DiamondOperatorRule {
 	
 	private abstract class Foo<T> {
 		private T t;
+		private List<T> field = new ArrayList<>();
+		
 		public Foo (T t) {
 			setValue(t);
 		}
@@ -42,6 +44,10 @@ public class DiamondOperatorRule {
 		objects.add(new Object());
 		Object val = objects.stream().map(o -> o.toString()).collect(Collectors.joining(", "));
 		return val.toString();
+	}
+	
+	public List<String> sampleGenericReturnTypeMethod(String input) {
+		return new ArrayList<>();
 	}
 	
 	private String concatTypedList(List<String>foo, int i, Map<String, List<String>>map) {
