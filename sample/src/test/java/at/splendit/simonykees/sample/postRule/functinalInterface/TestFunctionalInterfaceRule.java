@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.preRule;
+package at.splendit.simonykees.sample.postRule.functinalInterface;
 
 import java.util.List;
 
@@ -14,22 +14,14 @@ public class TestFunctionalInterfaceRule {
 	@Test
 	public void test1() {
 
-		Runnable runnable = new Runnable() {
-
-			@Override
-			public void run() {
-				log.debug("xx");
-			}
+		Runnable runnable = ()->{
+			log.debug("xx");
 		};
 
 		runnable.run();
 
-		MyClass mYClass = new MyClass(new Runnable() {
-
-			@Override
-			public void run() {
-				log.debug("xy");
-			}
+		MyClass mYClass = new MyClass(()->{
+			log.debug("xy");
 		});
 
 		mYClass.test();
@@ -49,10 +41,7 @@ public class TestFunctionalInterfaceRule {
 
 		nonFunctionalInterface.method();
 
-		AFunctionalInterface aFunctionalInterface = new AFunctionalInterface() {
-			@Override
-			public void method(int a) {
-			}
+		AFunctionalInterface aFunctionalInterface = (int a)->{
 		};
 
 		AFunctionalInterface aFunctionalInterface2 = (int a) -> {

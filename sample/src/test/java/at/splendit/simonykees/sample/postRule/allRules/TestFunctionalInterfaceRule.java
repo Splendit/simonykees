@@ -1,5 +1,7 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
@@ -48,6 +50,17 @@ public class TestFunctionalInterfaceRule {
 		aFunctionalInterface.method(0);
 	}
 
+	public void genericAnonymousClassCreation(String input) {
+
+		sampleMethodAcceptingFunction(new GenericFoo<String>() {
+			@Override
+			public String foo(String s, List<String> fooList) {
+				fooList.add(s);
+				return s;
+			}
+		});
+	}
+
 	private interface AFunctionalInterface {
 		public void method(int a);
 	}
@@ -68,5 +81,13 @@ public class TestFunctionalInterfaceRule {
 		public void test() {
 			runnable.run();
 		}
+	}
+
+	private interface GenericFoo<T> {
+		T foo(String t, List<T> fooList);
+	}
+
+	private void sampleMethodAcceptingFunction(GenericFoo foo) {
+		// do nothing
 	}
 }
