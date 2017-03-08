@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
 
 /**
  * Finds anonymous classes an converts it to lambdas, if they are functional
@@ -27,21 +28,24 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	public boolean visit(AnonymousClassDeclaration node) {
 		if (ASTNode.CLASS_INSTANCE_CREATION == node.getParent().getNodeType()) {
 			ClassInstanceCreation parentNode = (ClassInstanceCreation) node.getParent();
-			ITypeBinding parentNodeTypeBinding = parentNode.getType().resolveBinding();
-			if (parentNodeTypeBinding != null) {
-				if (parentNodeTypeBinding.getFunctionalInterfaceMethod() != null) {
-					LambdaExpression newInitializer = node.getAST().newLambdaExpression();
-					MethodBlockASTVisitor methodBlockASTVisitor = new MethodBlockASTVisitor();
-					node.accept(methodBlockASTVisitor);
-					Block moveBlock = methodBlockASTVisitor.getMethodBlock();
-					if (moveBlock != null) {
-						if (methodBlockASTVisitor.getParameters() != null) {
-							for (SingleVariableDeclaration s : methodBlockASTVisitor.getParameters()) {
-								newInitializer.parameters().add(astRewrite.createMoveTarget(s));
+			Type parentType = parentNode.getType();
+			if(ASTNode.PARAMETERIZED_TYPE != parentType.getNodeType()) {
+				ITypeBinding parentNodeTypeBinding = parentNode.getType().resolveBinding();
+				if (parentNodeTypeBinding != null) {
+					if (parentNodeTypeBinding.getFunctionalInterfaceMethod() != null) {
+						LambdaExpression newInitializer = node.getAST().newLambdaExpression();
+						MethodBlockASTVisitor methodBlockASTVisitor = new MethodBlockASTVisitor();
+						node.accept(methodBlockASTVisitor);
+						Block moveBlock = methodBlockASTVisitor.getMethodBlock();
+						if (moveBlock != null) {
+							if (methodBlockASTVisitor.getParameters() != null) {
+								for (SingleVariableDeclaration s : methodBlockASTVisitor.getParameters()) {
+									newInitializer.parameters().add(astRewrite.createMoveTarget(s));
+								}
 							}
+							newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
+							getAstRewrite().replace(parentNode, newInitializer, null);
 						}
-						newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
-						getAstRewrite().replace(parentNode, newInitializer, null);
 					}
 				}
 			}
