@@ -50,6 +50,54 @@ public class TestFunctionalInterfaceRule {
 		aFunctionalInterface.method(0);
 	}
 	
+	int a;
+	AFunctionalInterface aFunctionalInterface = (int a)->{
+	};
+	
+	public void clashingLocalVarialbeNames() {
+		
+		int a = 5;
+		int a1 = 6;
+		int a4 = 8;
+
+		if(a4 > 0) {
+			int k = 0;
+			for(int a2 = 0; a2 < 10; a2++) {
+				int c;
+				
+				if(a1 == 6) {
+					boolean b = true;
+					boolean d = false;
+					int m = 1;
+				}
+				
+				AFunctionalInterface foo = (int a3)->{
+					int b = a3; 
+				};
+				
+				AFunctionalInterface foo2 = (int m)->{
+					int b = m; 
+				};
+				
+				AFunctionalInterface foo3 = (int k1)->{
+					int b = k1; 
+				};
+				
+				AFunctionalInterface foo4 = (int c1)->{
+					int b = c1; 
+				};
+			}
+			
+			int b;
+		}
+
+		int a3 = 7;
+		
+		AFunctionalInterface aFunctionalInterface2 = (int b) -> {
+		}; 
+
+	} 
+	
 	public void genericAnonymousClassCreation(String input) {
 		
 		sampleMethodAcceptingFunction(			
