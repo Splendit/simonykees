@@ -54,10 +54,11 @@ public class TestFunctionalInterfaceRule {
 	AFunctionalInterface aFunctionalInterface = (int a)->{
 	};
 	
-	public void clashingLocalVarialbeNames() {
+	public void clashingLocalVariableNames(int l) {
 		
-		int a = 5;
-		int a1 = 6;
+		int a, a1; 
+		a = 5;
+		a1 = 6;
 		int a4 = 8;
 
 		if(a4 > 0) {
@@ -85,6 +86,10 @@ public class TestFunctionalInterfaceRule {
 				
 				AFunctionalInterface foo4 = (int c1)->{
 					int b = c1; 
+				};
+				
+				AFunctionalInterface foo5 = (int l1)->{
+					int b = l1; 
 				};
 			}
 			

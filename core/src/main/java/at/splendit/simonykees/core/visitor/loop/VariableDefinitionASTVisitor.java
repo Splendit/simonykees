@@ -6,7 +6,10 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
@@ -49,6 +52,7 @@ public class VariableDefinitionASTVisitor extends AbstractCompilationUnitASTVisi
 		for(ASTNode block : relevantBlocks) {
 			if(block == node) {
 				inScope = true;
+				break;
 			}
 		}
 		
@@ -61,6 +65,20 @@ public class VariableDefinitionASTVisitor extends AbstractCompilationUnitASTVisi
 		for(ASTNode block : relevantBlocks) {
 			if(block == node) {
 				inScope = true;
+				break;
+			}
+		}
+		
+		return inScope;
+	}
+	
+	@Override
+	public boolean visit(MethodDeclaration node) {
+		boolean inScope = false;
+		for(ASTNode block : relevantBlocks) {
+			if(block == node) {
+				inScope = true;
+				break;
 			}
 		}
 		
@@ -69,6 +87,15 @@ public class VariableDefinitionASTVisitor extends AbstractCompilationUnitASTVisi
 
 	@Override
 	public boolean visit(VariableDeclarationFragment node) {
+		if(endThis) {
+			variableNames.add(node.getName());
+		}
+		
+		return endThis;
+	}
+	
+	@Override
+	public boolean visit(SingleVariableDeclaration node) {
 		if(endThis) {
 			variableNames.add(node.getName());
 		}

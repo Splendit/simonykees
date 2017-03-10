@@ -68,10 +68,11 @@ public class TestFunctionalInterfaceRule {
 		}
 	};
 	
-	public void clashingLocalVarialbeNames() {
+	public void clashingLocalVariableNames(int l) {
 		
-		int a = 5;
-		int a1 = 6;
+		int a, a1; 
+		a = 5;
+		a1 = 6;
 		int a4 = 8;
 
 		if(a4 > 0) {
@@ -110,6 +111,13 @@ public class TestFunctionalInterfaceRule {
 					@Override 
 					public void method(int c) {
 						int b = c; 
+					} 
+				};
+				
+				AFunctionalInterface foo5 = new AFunctionalInterface() {
+					@Override 
+					public void method(int l) {
+						int b = l; 
 					} 
 				};
 			}

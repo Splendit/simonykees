@@ -143,7 +143,8 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 				scope = scope.getParent();
 				int scopeNodeType = scope.getNodeType();
 				if(ASTNode.BLOCK == scopeNodeType
-						|| ASTNode.FOR_STATEMENT == scopeNodeType) {
+						|| ASTNode.FOR_STATEMENT == scopeNodeType
+						|| ASTNode.METHOD_DECLARATION == scopeNodeType) {
 					relevantBlocks.add(scope);
 				}
 			}
