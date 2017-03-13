@@ -1,9 +1,15 @@
 package at.splendit.simonykees.sample.preRule;
 
+import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
-@SuppressWarnings("nls")
+@SuppressWarnings({ "nls", "unused", "rawtypes" })
 public class TestFunctionalInterfaceRule {
+	
+	private static Logger log = LogManager.getLogger(TestFunctionalInterfaceRule.class);
 
 	@Test
 	public void test1() {
@@ -12,7 +18,7 @@ public class TestFunctionalInterfaceRule {
 
 			@Override
 			public void run() {
-				System.out.println("xx");
+				log.debug("xx");
 			}
 		};
 
@@ -22,7 +28,7 @@ public class TestFunctionalInterfaceRule {
 
 			@Override
 			public void run() {
-				System.out.println("xy");
+				log.debug("xy");
 			}
 		});
 
@@ -32,12 +38,12 @@ public class TestFunctionalInterfaceRule {
 
 			@Override
 			public void method(int a) {
-				System.out.println("zy");
+				log.debug("zy");
 			}
 
 			@Override
 			public void method() {
-				System.out.println("xy");
+				log.debug("xy");
 			}
 		};
 
@@ -53,6 +59,89 @@ public class TestFunctionalInterfaceRule {
 		};
 
 		aFunctionalInterface.method(0);
+	}
+	
+	int a;
+	AFunctionalInterface aFunctionalInterface = new AFunctionalInterface() {
+		@Override
+		public void method(int a) {
+		}
+	};
+	
+	public void clashingLocalVariableNames(int l) {
+		
+		int a, a1; 
+		a = 5;
+		a1 = 6;
+		int a4 = 8;
+
+		if(a4 > 0) {
+			int k = 0;
+			for(int a2 = 0; a2 < 10; a2++) {
+				int c;
+				
+				if(a1 == 6) {
+					boolean b = true;
+					boolean d = false;
+					int m = 1;
+				}
+				
+				AFunctionalInterface foo = new AFunctionalInterface() {
+					@Override 
+					public void method(int a) {
+						int b = a; 
+					} 
+				};
+				
+				AFunctionalInterface foo2 = new AFunctionalInterface() {
+					@Override 
+					public void method(int m) {
+						int b = m; 
+					} 
+				};
+				
+				AFunctionalInterface foo3 = new AFunctionalInterface() {
+					@Override 
+					public void method(int k) {
+						int b = k; 
+					} 
+				};
+				
+				AFunctionalInterface foo4 = new AFunctionalInterface() {
+					@Override 
+					public void method(int c) {
+						int b = c; 
+					} 
+				};
+				
+				AFunctionalInterface foo5 = new AFunctionalInterface() {
+					@Override 
+					public void method(int l) {
+						int b = l; 
+					} 
+				};
+			}
+			
+			int b;
+		}
+
+		int a3 = 7;
+		
+		AFunctionalInterface aFunctionalInterface2 = (int b) -> {
+		}; 
+
+	} 
+	
+	public void genericAnonymousClassCreation(String input) {
+		
+		sampleMethodAcceptingFunction(			
+				new GenericFoo<String>() {
+				@Override
+				public String foo(String s, List<String>fooList) {
+					fooList.add(s);
+					return s;
+				}
+			});
 	}
 
 	private interface AFunctionalInterface {
@@ -75,5 +164,13 @@ public class TestFunctionalInterfaceRule {
 		public void test() {
 			runnable.run();
 		}
+	}
+	
+	private interface GenericFoo<T> {
+		T foo(String t, List<T>fooList);
+	}
+	
+	private void sampleMethodAcceptingFunction(GenericFoo foo) {
+		// do nothing
 	}
 }

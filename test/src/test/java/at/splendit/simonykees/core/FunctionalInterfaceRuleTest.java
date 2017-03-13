@@ -8,32 +8,31 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import at.splendit.simonykees.core.rule.impl.WhileToForRule;
+import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
-import at.splendit.simonykees.core.visitor.loop.WhileToForASTVisitor;
+import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
 
 /**
- * TODO SIM-103 add class description
+ * Testing functional interface rule.
  * 
- * @author Martin Huter
- * @since 0.9.2
+ * @author Ardit Ymeri
+ * @since 1.0
+ *
  */
-@SuppressWarnings("nls")
 @RunWith(Parameterized.class)
-public class WhileToForRulesTest extends AbstractRulesTest {
-
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.whileToFor";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/whileToFor";
+@SuppressWarnings("nls")
+public class FunctionalInterfaceRuleTest extends AbstractRulesTest {
+	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.functinalInterface";
+	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/functinalInterface";
 
 	private String fileName;
 	private Path preRule, postRule;
 
-	public WhileToForRulesTest(String fileName, Path preRule, Path postRule) {
-		super();
+	public FunctionalInterfaceRuleTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
-		rulesList.add(new WhileToForRule(WhileToForASTVisitor.class));
+		rulesList.add(new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class));
 	}
 
 	@Parameters(name = "{index}: test file[{0}]")

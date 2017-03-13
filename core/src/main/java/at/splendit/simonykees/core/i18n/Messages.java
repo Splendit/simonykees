@@ -5,7 +5,7 @@ import org.eclipse.osgi.util.NLS;
 /**
  * TODO SIM-103 add class description
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec
  * @since 0.9
  */
 public class Messages extends NLS {
@@ -26,6 +26,9 @@ public class Messages extends NLS {
 	public static String CodeFormatterRule_name;
 	public static String CollectionRemoveAllRule_description;
 	public static String CollectionRemoveAllRule_name;
+	public static String DiamondOperatorASTVisitor_using_diamond_operator;
+	public static String DiamondOperatorRule_description;
+	public static String DiamondOperatorRule_name;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;
@@ -72,6 +75,10 @@ public class Messages extends NLS {
 	public static String PrimitiveBoxedForStringRule_name;
 	public static String Profile_DefaultProfile_profileName;
 	public static String Profile_Java8Profile_profileName;
+	public static String ProgressMonitor_SelectRulesWizard_performFinish_jobName;
+	public static String ProgressMonitor_AbstractRefactorer_prepareRefactoring_taskName;
+	public static String ProgressMonitor_AbstractRefactorer_doRefactoring_taskName;
+	public static String ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName;
 	public static String RefactoringRule_default_description;
 	public static String RefactoringRule_default_name;
 	public static String RefactoringRule_warning_workingcopy_already_present;
@@ -90,11 +97,13 @@ public class Messages extends NLS {
 	public static String SerialVersionUidRule_name;
 	public static String SimonykeesMessageDialog_bugreport_email;
 	public static String SimonykeesMessageDialog_default_error_message;
+	public static String SimonykeesMessageDialog_open_browser_error_message;
 	public static String SimonykeesPreferenceManager_builtIn;
 	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_selectProfile;
 	public static String SimonykeesPreferencePageLicense_jsparrow_licensed_as;
 	public static String SimonykeesPreferencePageLicense_jsparrow_valid_until;
+	public static String SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow;
 	public static String SimonykeesPreferencePageLicense_under_key_label;
 	public static String SimonykeesPreferencePageLicense_update_license_key_button;
 	public static String SimonykeesUpdateLicenseDialog_invalid_license_key;
@@ -103,6 +112,7 @@ public class Messages extends NLS {
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_message;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_title;
 	public static String SimonykeesUpdateLicenseDialog_update_llicense_dialog_button;
+	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_group_title;
 	public static String StringFormatLineSeparatorRule_description;
 	public static String StringFormatLineSeparatorRule_name;
 	public static String StringConcatToPlusRule_description;
@@ -113,8 +123,8 @@ public class Messages extends NLS {
 	public static String TryWithResourceRule_name;
 	public static String ValidateExecutor_shutting_down_validation_scheduler;
 	public static String ValidateExecutor_validation_scheduler_started;
-	public static String WhileToForRule_description;
-	public static String WhileToForRule_name;
+	public static String WhileToForEachRule_description;
+	public static String WhileToForEachRule_name;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

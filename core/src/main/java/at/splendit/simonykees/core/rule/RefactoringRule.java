@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
@@ -98,10 +99,19 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	 *             is thrown if the default constructor of {@link #visitor} is
 	 *             not present and the reflective construction fails.
 	 */
-	public void generateDocumentChanges(List<ICompilationUnit> workingCopies)
+	public void generateDocumentChanges(List<ICompilationUnit> workingCopies, SubMonitor subMonitor)
 			throws JavaModelException, ReflectiveOperationException {
+
+		subMonitor.setWorkRemaining(workingCopies.size());
+
 		for (ICompilationUnit wc : workingCopies) {
+			subMonitor.subTask(getName() + ": " + wc.getElementName()); //$NON-NLS-1$
 			applyRule(wc);
+			if (subMonitor.isCanceled()) {
+				return;
+			} else {
+				subMonitor.worked(1);
+			}
 		}
 	}
 

@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -23,11 +25,11 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 /**
  * TODO SIM-103 add class description
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec
  * @since 0.9.2
  */
 public abstract class AbstractRulesTest {
-	
+
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
 
 	public AbstractRulesTest() {
@@ -66,14 +68,21 @@ public abstract class AbstractRulesTest {
 		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
 		};
 
-		refactorer.prepareRefactoring();
-		refactorer.doRefactoring();
+		/*
+		 * A default progress monitor implementation, used just for testing
+		 * purposes
+		 */
+		IProgressMonitor monitor = new NullProgressMonitor();
+
+		refactorer.prepareRefactoring(monitor);
+		refactorer.doRefactoring(monitor);
 		refactorer.commitRefactoring();
 
 		return compilationUnit.getSource();
 	}
 
-	protected void testTransformation(Path postRule, Path preRule, String fileName, String postRulePackage) throws Exception {
+	protected void testTransformation(Path postRule, Path preRule, String fileName, String postRulePackage)
+			throws Exception {
 		String expectedSource = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		String content = new String(Files.readAllBytes(preRule), StandardCharsets.UTF_8);
 

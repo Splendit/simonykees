@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.allRules;
+package at.splendit.simonykees.sample.postRule.functinalInterface;
 
 import java.util.List;
 
@@ -8,19 +8,19 @@ import org.junit.Test;
 
 @SuppressWarnings({ "nls", "unused", "rawtypes" })
 public class TestFunctionalInterfaceRule {
-
+	
 	private static Logger log = LogManager.getLogger(TestFunctionalInterfaceRule.class);
 
 	@Test
 	public void test1() {
 
-		Runnable runnable = () -> {
+		Runnable runnable = ()->{
 			log.debug("xx");
 		};
 
 		runnable.run();
 
-		MyClass mYClass = new MyClass(() -> {
+		MyClass mYClass = new MyClass(()->{
 			log.debug("xy");
 		});
 
@@ -41,7 +41,7 @@ public class TestFunctionalInterfaceRule {
 
 		nonFunctionalInterface.method();
 
-		AFunctionalInterface aFunctionalInterface = (int a) -> {
+		AFunctionalInterface aFunctionalInterface = (int a)->{
 		};
 
 		AFunctionalInterface aFunctionalInterface2 = (int a) -> {
@@ -49,69 +49,70 @@ public class TestFunctionalInterfaceRule {
 
 		aFunctionalInterface.method(0);
 	}
-
+	
 	int a;
-	AFunctionalInterface aFunctionalInterface = (int a) -> {
+	AFunctionalInterface aFunctionalInterface = (int a)->{
 	};
-
+	
 	public void clashingLocalVariableNames(int l) {
-
-		int a, a1;
+		
+		int a, a1; 
 		a = 5;
 		a1 = 6;
 		int a4 = 8;
 
-		if (a4 > 0) {
+		if(a4 > 0) {
 			int k = 0;
-			for (int a2 = 0; a2 < 10; a2++) {
+			for(int a2 = 0; a2 < 10; a2++) {
 				int c;
-
-				if (a1 == 6) {
+				
+				if(a1 == 6) {
 					boolean b = true;
 					boolean d = false;
 					int m = 1;
 				}
-
-				AFunctionalInterface foo = (int a3) -> {
-					int b = a3;
+				
+				AFunctionalInterface foo = (int a3)->{
+					int b = a3; 
 				};
-
-				AFunctionalInterface foo2 = (int m) -> {
-					int b = m;
+				
+				AFunctionalInterface foo2 = (int m)->{
+					int b = m; 
 				};
-
-				AFunctionalInterface foo3 = (int k1) -> {
-					int b = k1;
+				
+				AFunctionalInterface foo3 = (int k1)->{
+					int b = k1; 
 				};
-
-				AFunctionalInterface foo4 = (int c1) -> {
-					int b = c1;
+				
+				AFunctionalInterface foo4 = (int c1)->{
+					int b = c1; 
 				};
-
-				AFunctionalInterface foo5 = (int l1) -> {
-					int b = l1;
+				
+				AFunctionalInterface foo5 = (int l1)->{
+					int b = l1; 
 				};
 			}
-
+			
 			int b;
 		}
 
 		int a3 = 7;
-
+		
 		AFunctionalInterface aFunctionalInterface2 = (int b) -> {
-		};
+		}; 
 
-	}
-
+	} 
+	
 	public void genericAnonymousClassCreation(String input) {
-
-		sampleMethodAcceptingFunction(new GenericFoo<String>() {
-			@Override
-			public String foo(String s, List<String> fooList) {
-				fooList.add(s);
-				return s;
-			}
-		});
+		
+		sampleMethodAcceptingFunction(			
+				new GenericFoo<String>() {
+				@Override
+				public String foo(String s, List<String>fooList) {
+					fooList.add(s);
+					return s;
+				}
+			});
 	}
 
 	private interface AFunctionalInterface {
@@ -135,11 +136,11 @@ public class TestFunctionalInterfaceRule {
 			runnable.run();
 		}
 	}
-
+	
 	private interface GenericFoo<T> {
-		T foo(String t, List<T> fooList);
+		T foo(String t, List<T>fooList);
 	}
-
+	
 	private void sampleMethodAcceptingFunction(GenericFoo foo) {
 		// do nothing
 	}

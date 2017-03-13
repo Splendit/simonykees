@@ -1,0 +1,37 @@
+package at.splendit.simonykees.sample.postRule.functinalInterface;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.List;
+
+public abstract class TestFunctionalInterface2Rule {
+	Object fields;
+
+	@SuppressWarnings("unchecked")
+	public void setFields(Object fields) {
+		Object proxyFields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
+				(Object proxy,Method method,Object[] args)->{
+					return method.invoke(fields, args);
+				});
+		this.fields = proxyFields;
+	}
+
+	@SuppressWarnings("unchecked")
+	public void setFields2(Object fields) {
+		Object proxyFields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
+				new InvocationHandler() {
+
+					@Override
+					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+						doSomething();
+						return method.invoke(fields, args);
+					}
+
+					private void doSomething() {
+
+					}
+				});
+		this.fields = proxyFields;
+	}
+}
