@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
-@SuppressWarnings("nls")
+@SuppressWarnings({ "nls", "unused", "rawtypes" })
 public class TestFunctionalInterfaceRule {
 
 	private static Logger log = LogManager.getLogger(TestFunctionalInterfaceRule.class);
