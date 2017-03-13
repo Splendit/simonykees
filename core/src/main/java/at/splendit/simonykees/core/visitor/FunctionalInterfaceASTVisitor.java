@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 
-import at.splendit.simonykees.core.visitor.loop.VariableDefinitionASTVisitor;
+import at.splendit.simonykees.core.visitor.sub.VariableDefinitionASTVisitor;
 
 /**
  * Finds anonymous classes an converts it to lambdas, if they are functional
@@ -120,12 +120,12 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 				.map(SimpleName::getIdentifier)
 				.collect(Collectors.toList());
 		
-		String newName = simpleName.getIdentifier() + Integer.toString(suffix);
+		String newName;
 		
-		while(identifiers.contains(newName)) {
-			suffix++;
+		do {
 			newName = simpleName.getIdentifier() + Integer.toString(suffix);
-		}
+			suffix++;
+		}while(identifiers.contains(newName));
 		
 		return newName;
 	}
