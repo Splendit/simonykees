@@ -61,6 +61,77 @@ public class TestFunctionalInterfaceRule {
 		aFunctionalInterface.method(0);
 	}
 	
+	int a;
+	AFunctionalInterface aFunctionalInterface = new AFunctionalInterface() {
+		@Override
+		public void method(int a) {
+		}
+	};
+	
+	public void clashingLocalVariableNames(int l) {
+		
+		int a, a1; 
+		a = 5;
+		a1 = 6;
+		int a4 = 8;
+
+		if(a4 > 0) {
+			int k = 0;
+			for(int a2 = 0; a2 < 10; a2++) {
+				int c;
+				
+				if(a1 == 6) {
+					boolean b = true;
+					boolean d = false;
+					int m = 1;
+				}
+				
+				AFunctionalInterface foo = new AFunctionalInterface() {
+					@Override 
+					public void method(int a) {
+						int b = a; 
+					} 
+				};
+				
+				AFunctionalInterface foo2 = new AFunctionalInterface() {
+					@Override 
+					public void method(int m) {
+						int b = m; 
+					} 
+				};
+				
+				AFunctionalInterface foo3 = new AFunctionalInterface() {
+					@Override 
+					public void method(int k) {
+						int b = k; 
+					} 
+				};
+				
+				AFunctionalInterface foo4 = new AFunctionalInterface() {
+					@Override 
+					public void method(int c) {
+						int b = c; 
+					} 
+				};
+				
+				AFunctionalInterface foo5 = new AFunctionalInterface() {
+					@Override 
+					public void method(int l) {
+						int b = l; 
+					} 
+				};
+			}
+			
+			int b;
+		}
+
+		int a3 = 7;
+		
+		AFunctionalInterface aFunctionalInterface2 = (int b) -> {
+		}; 
+
+	} 
+	
 	public void genericAnonymousClassCreation(String input) {
 		
 		sampleMethodAcceptingFunction(			
