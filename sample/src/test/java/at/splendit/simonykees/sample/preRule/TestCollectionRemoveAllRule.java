@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("nls")
+@SuppressWarnings({"nls", "unused"})
 public class TestCollectionRemoveAllRule {
 	private List<String> generateList(String input) {
 		return Arrays.asList(input.split(";"));

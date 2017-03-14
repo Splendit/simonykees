@@ -15,7 +15,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.logging.LogRecord;
 
-@SuppressWarnings("nls")
+@SuppressWarnings({"nls", "null"})
 public class TestCornerCasesTryWithResourceRule {
 
 	public StringReader lostStreamsWithoutTry(){

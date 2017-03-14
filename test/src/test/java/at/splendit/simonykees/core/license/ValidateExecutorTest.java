@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import java.time.Instant;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import at.splendit.simonykees.core.license.model.LicenseeModel;
@@ -27,7 +26,6 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 	}
 	
 	@Test
-	//@Ignore
 	public void shutDownAndRestartScheduler() throws InterruptedException {
 		// having an instance of license manager and a running scheduler...
 		
@@ -55,7 +53,6 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 	}
 	
 	@Test
-	//@Ignore
 	public void shutDownAndCheckLicense() throws InterruptedException {
 		// having an instance of license manager where the scheduler is shut down...
 		

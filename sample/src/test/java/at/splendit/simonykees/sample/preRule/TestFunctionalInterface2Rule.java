@@ -8,7 +8,6 @@ import java.util.List;
 public abstract class TestFunctionalInterface2Rule {
 	Object fields;
 
-	@SuppressWarnings("unchecked")
 	public void setFields(Object fields) {
 		Object proxyFields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
 				new InvocationHandler() {
@@ -21,7 +20,6 @@ public abstract class TestFunctionalInterface2Rule {
 		this.fields = proxyFields;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void setFields2(Object fields) {
 		Object proxyFields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
 				new InvocationHandler() {
