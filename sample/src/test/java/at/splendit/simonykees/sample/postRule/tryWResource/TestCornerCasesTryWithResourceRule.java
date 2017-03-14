@@ -27,12 +27,10 @@ public class TestCornerCasesTryWithResourceRule {
 		Object result;
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 		ObjectOutput out;
-		try {
+		try (ObjectInput in = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()))) {
 			out = new ObjectOutputStream(buffer);
 			out.writeObject(input);
-			ObjectInput in = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()));
 			result = in.readObject();
-			in.close();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} catch (ClassNotFoundException e) {
