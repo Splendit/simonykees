@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.util;
+package at.splendit.simonykees.sample.utilities;
 
 /**
  * Intended to be used for clashing imports added by StringUtils rule.

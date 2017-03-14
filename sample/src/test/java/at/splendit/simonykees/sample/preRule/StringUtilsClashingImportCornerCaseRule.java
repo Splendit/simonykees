@@ -4,8 +4,8 @@ import java.util.List;
 
 import at.splendit.simonykees.sample.test.AbstractReflectiveMethodTester;
 import at.splendit.simonykees.sample.test.ParameterType;
-import at.splendit.simonykees.sample.util.NumberUtils;
-import at.splendit.simonykees.sample.util.StringUtils;
+import at.splendit.simonykees.sample.utilities.NumberUtils;
+import at.splendit.simonykees.sample.utilities.StringUtils;
 
 /**
  * Having imported a StringUtils class from any package,

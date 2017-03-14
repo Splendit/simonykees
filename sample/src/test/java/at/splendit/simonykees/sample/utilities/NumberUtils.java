@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.util;
+package at.splendit.simonykees.sample.utilities;
 
 public class NumberUtils {
 	
