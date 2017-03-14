@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -50,52 +53,77 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 	public boolean visit(TryStatement node) {
 		List<VariableDeclarationExpression> resourceList = new ArrayList<>();
 		List<SimpleName> resourceNameList = new ArrayList<>();
+		boolean exit = false;
+
+		List<VariableDeclarationStatement> varDeclarationStatements = 
+				((List<Object>)node.getBody().statements())
+				.stream()
+				.filter(VariableDeclarationStatement.class::isInstance)
+				.map(VariableDeclarationStatement.class::cast)
+				.collect(Collectors.toList());
 		
-		for (Object statementIterator : node.getBody().statements()) {
+		for (VariableDeclarationStatement varDeclStatmentNode : varDeclarationStatements) {
 			/*
 			 * Move all AutoCloseable Object to resource header, stop collection
 			 * after first non resource object
 			 */
-			if (statementIterator instanceof VariableDeclarationStatement) {
-				VariableDeclarationStatement varDeclStatmentNode = (VariableDeclarationStatement) statementIterator;
-				ITypeBinding typeBind = varDeclStatmentNode.getType().resolveBinding();
-				if (ClassRelationUtil.isInheritingContentOfRegistertITypes(typeBind,
-						iTypeMap.get(AUTO_CLOSEABLE_KEY))) {
-					for (Object iterator : varDeclStatmentNode.fragments()) {
-						if (iterator instanceof VariableDeclarationFragment) {
-							VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) iterator;
-							VariableDeclarationExpression variableDeclarationExpression = varDeclStatmentNode.getAST()
-									.newVariableDeclarationExpression((VariableDeclarationFragment) ASTNode.copySubtree(
-											variableDeclarationFragment.getAST(), variableDeclarationFragment));
-							variableDeclarationExpression.setType((Type) ASTNode
-									.copySubtree(varDeclStatmentNode.getAST(), varDeclStatmentNode.getType()));
+			ITypeBinding typeBind = varDeclStatmentNode.getType().resolveBinding();
+			if (ClassRelationUtil.isInheritingContentOfRegistertITypes(typeBind,
+					iTypeMap.get(AUTO_CLOSEABLE_KEY))) {
+	
+				List<VariableDeclarationFragment>fragments = 
+						((List<Object>)varDeclStatmentNode.fragments())
+						.stream()
+						.filter(VariableDeclarationFragment.class::isInstance)
+						.map(VariableDeclarationFragment.class::cast)
+						.collect(Collectors.toList());
+				int numFragments = fragments.size();
+				
+				for (VariableDeclarationFragment variableDeclarationFragment : fragments) {
 
-							List<Modifier> modifierList = varDeclStatmentNode.modifiers();
-							Function<Modifier, Modifier> cloneModifier = modifier -> (Modifier) ASTNode
-									.copySubtree(modifier.getAST(), modifier);
-							variableDeclarationExpression.modifiers()
-									.addAll(modifierList.stream().map(cloneModifier).collect(Collectors.toList()));
+					SimpleName varName = variableDeclarationFragment.getName();
+					CheckAssignmentsVisitor visitor = new CheckAssignmentsVisitor(varName);
+					node.accept(visitor);
+					if(!visitor.foundAssignmetns()) {
+						VariableDeclarationExpression variableDeclarationExpression = varDeclStatmentNode.getAST()
+								.newVariableDeclarationExpression((VariableDeclarationFragment) ASTNode.copySubtree(
+										variableDeclarationFragment.getAST(), variableDeclarationFragment));
+						variableDeclarationExpression.setType((Type) ASTNode
+								.copySubtree(varDeclStatmentNode.getAST(), varDeclStatmentNode.getType()));
 
-							resourceList.add(variableDeclarationExpression);
-							resourceNameList.add(variableDeclarationFragment.getName());
+						List<Modifier> modifierList = varDeclStatmentNode.modifiers();
+						Function<Modifier, Modifier> cloneModifier = modifier -> (Modifier) ASTNode
+								.copySubtree(modifier.getAST(), modifier);
+						variableDeclarationExpression.modifiers()
+								.addAll(modifierList.stream().map(cloneModifier).collect(Collectors.toList()));
+
+						resourceList.add(variableDeclarationExpression);
+						resourceNameList.add(variableDeclarationFragment.getName());
+						if(numFragments > 1) {
+							astRewrite.remove(variableDeclarationFragment, null);
+							numFragments--;
+						} else {
+							astRewrite.remove(varDeclStatmentNode, null);
 						}
 					}
-					astRewrite.remove(varDeclStatmentNode, null);
-				} else {
-					break;
+					
+					// FIXME dirty hack!
+					if (!resourceList.isEmpty() && node.resources().isEmpty()) {
+						exit = true;
+						break;
+					}
 				}
 			} else {
 				break;
 			}
 
 			// FIXME dirty hack!
-			if (node.resources().isEmpty()) {
+			if (node.resources().isEmpty() || exit) {
 				break;
 			}
 		}
 
 		if (!resourceList.isEmpty()) {
-			// Add Resources to try head
 			resourceList.forEach(iteratorNode -> astRewrite.getListRewrite(node, TryStatement.RESOURCES_PROPERTY)
 					.insertLast(iteratorNode, null));
 
@@ -131,4 +159,39 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 
 	}
 
+	/**
+	 * Looks for assignments of given {@code SimpleName}.
+	 * 
+	 * @author Ardit Ymeri
+	 * @since 1.0
+	 */
+	private class CheckAssignmentsVisitor extends ASTVisitor {
+		private SimpleName targetName;
+		private boolean assigned = false;
+		
+		public CheckAssignmentsVisitor(SimpleName targetName) {
+			this.targetName = targetName;
+		}
+		
+		@Override
+		public boolean visit(Assignment assignment) {
+			Expression expression = assignment.getLeftHandSide();
+			if(ASTNode.SIMPLE_NAME == expression.getNodeType()) {
+				 SimpleName simpleName = (SimpleName)expression;
+				 if(StringUtils.equals(targetName.getIdentifier(), simpleName.getIdentifier())) {
+					 assigned = true;
+				 }
+			}
+			return !assigned;
+		}
+		
+		@Override
+		public boolean preVisit2(ASTNode node) {
+			return !assigned;
+		}
+		
+		public boolean foundAssignmetns() {
+			return assigned;
+		}
+	}
 }
