@@ -12,14 +12,6 @@
 	<name>jSparrow :: core</name>
 	<description>jSparrow Core Plugin</description>
 
-	<dependencies>
-		<!-- eclipse -->
-		<dependency>
-			<groupId>org.eclipse.jdt</groupId>
-			<artifactId>org.eclipse.jdt.core</artifactId>
-		</dependency>
-	</dependencies>
-
 	<scm>
 		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/core</url>
 	</scm>
