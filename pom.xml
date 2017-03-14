@@ -135,7 +135,7 @@
 		<repository>
 			<id>netlicensing</id>
 			<layout>p2</layout>
-			<url>http://packagedrone-vm-01.splendit.loc:8080/p2/p2-site/</url>
+			<url>http://packagedrone-vm-01.splendit.loc:8080/p2/jsparrow-external-osgi-dependencies/</url>
 		</repository>
 	</repositories>
 
@@ -167,12 +167,6 @@
 				<groupId>at.splendit.jSparrow</groupId>
 				<artifactId>jSparrow.sample</artifactId>
 				<version>${project.version}</version>
-			</dependency>
-			<!-- eclipse -->
-			<dependency>
-				<groupId>org.eclipse.jdt</groupId>
-				<artifactId>org.eclipse.jdt.core</artifactId>
-				<version>${eclipse.jdt.core.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
