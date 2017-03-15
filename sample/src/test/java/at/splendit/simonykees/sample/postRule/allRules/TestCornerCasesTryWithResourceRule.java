@@ -62,4 +62,11 @@ public class TestCornerCasesTryWithResourceRule {
 			}
 		}
 	}
+
+	public void wekaNotInitialized() {
+		try (ByteArrayInputStream istream = new ByteArrayInputStream(null)) {
+			ObjectInputStream p;
+		} catch (Exception e) {
+		}
+	}
 }
