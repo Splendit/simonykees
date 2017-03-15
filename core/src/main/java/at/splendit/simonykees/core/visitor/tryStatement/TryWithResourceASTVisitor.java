@@ -84,7 +84,7 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 					SimpleName varName = variableDeclarationFragment.getName();
 					CheckAssignmentsVisitor visitor = new CheckAssignmentsVisitor(varName);
 					node.accept(visitor);
-					if(!visitor.foundAssignmetns()) {
+					if(!visitor.foundAssignmetns() && variableDeclarationFragment.getInitializer() != null) {
 						VariableDeclarationExpression variableDeclarationExpression = varDeclStatmentNode.getAST()
 								.newVariableDeclarationExpression((VariableDeclarationFragment) ASTNode.copySubtree(
 										variableDeclarationFragment.getAST(), variableDeclarationFragment));

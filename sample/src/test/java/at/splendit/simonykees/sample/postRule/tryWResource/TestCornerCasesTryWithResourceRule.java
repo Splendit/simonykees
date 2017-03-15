@@ -18,7 +18,7 @@ import java.util.logging.LogRecord;
 @SuppressWarnings("nls")
 public class TestCornerCasesTryWithResourceRule {
 
-	public StringReader lostStreamsWithoutTry(){
+	public StringReader lostStreamsWithoutTry() {
 		StringReader a = new StringReader("lalelu");
 		return a;
 	}
@@ -60,6 +60,13 @@ public class TestCornerCasesTryWithResourceRule {
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }
+		}
+	}
+	
+	public void wekaNotInitialized() {
+		try (ByteArrayInputStream istream = new ByteArrayInputStream(null)) {
+			ObjectInputStream p;
+		} catch (Exception e) {
 		}
 	}
 }
