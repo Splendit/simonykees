@@ -1,15 +1,22 @@
 package at.splendit.simonykees.core.visitor.loop;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -21,9 +28,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.constants.ReservedNames;
+import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeException;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -89,8 +99,32 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 				if (ReservedNames.MI_Iterator.equals(nodeInitializer.getName().getFullyQualifiedName())
 						&& nodeInitializer.arguments().isEmpty() && null != nodeInitializer.getExpression()
 						&& nodeInitializer.getExpression() instanceof Name) {
-					listName = (Name) nodeInitializer.getExpression();
-					return false;
+					
+					Expression iterableExpression =  nodeInitializer.getExpression();
+					ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
+					ASTNode rootNode = node.getRoot();
+					if(ASTNode.COMPILATION_UNIT == rootNode.getNodeType()) {
+						CompilationUnit compilationUnit = (CompilationUnit)rootNode;
+						IJavaElement javaElement = compilationUnit.getJavaElement();
+						if(javaElement != null) {
+							IJavaProject iJavaProject = javaElement.getJavaProject();
+							try {
+								String iterableFullyQualifiedName = Iterable.class.getName();
+								IType classtype = iJavaProject.findType(iterableFullyQualifiedName);
+								// check if iterable object is compatible with java Iterable
+								boolean isIterable = ClassRelationUtil.isInheritingContentOfRegistertITypes(iterableTypeBinding,
+										Collections.singletonList(classtype));
+								
+								if(isIterable) {
+									listName = (Name) iterableExpression;
+									return false;
+								}
+
+							} catch (Exception e) {
+								Activator.log(Status.ERROR, e.getMessage() ,new ITypeNotFoundRuntimeException());
+							}
+						}
+					}
 				}
 			}
 		}

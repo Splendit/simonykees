@@ -34,7 +34,8 @@ public class ClassRelationUtil {
 			if (registeredITypes.contains(interfaceBind.getJavaElement())) {
 				return true;
 			}
-			result = result || isInheritingContentOfRegistertITypes(interfaceBind.getSuperclass(), registeredITypes);
+			result = result || isInheritingContentOfRegistertITypes(interfaceBind.getSuperclass(), registeredITypes)
+					|| isInheritingContentOfRegistertITypes(interfaceBind, registeredITypes);
 		}
 		return result || isInheritingContentOfRegistertITypes(iTypeBinding.getSuperclass(), registeredITypes);
 	}
