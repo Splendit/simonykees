@@ -1,5 +1,7 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -34,4 +36,21 @@ public abstract class TestFunctionalInterface2Rule {
 				});
 		this.fields = proxyFields;
 	}
+
+	MouseAdapter a = new MouseAdapter() {
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			e.getX();
+			e.getY();
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			mouseMoved(e);
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+		}
+	};
 }
