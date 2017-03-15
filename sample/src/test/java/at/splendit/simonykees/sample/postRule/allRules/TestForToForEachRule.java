@@ -491,11 +491,48 @@ public class TestForToForEachRule {
 		return true;
 	}
 
+	public boolean testIteratingNonJavaIterators() {
+		MyCollection<Number> myCollection = new MyCollection<>();
+
+		for (Iterator<Number> iterator = myCollection.iterator(); iterator.hasNext();) {
+			Number c = iterator.next();
+			// do nothing
+		}
+		return false;
+	}
+
 	private class Point {
 		private final List<Double> coordinates = new ArrayList<>();
 
 		public List<Double> getCoordinates() {
 			return coordinates;
+		}
+	}
+
+	/**
+	 * This collection is not subtype of {@code Iterable}.
+	 */
+	private class MyCollection<T> {
+		private final int size = 5;
+		private int index = 0;
+
+		public boolean hasNext() {
+			return index < size;
+		}
+
+		public Iterator<T> iterator() {
+			return new Iterator<T>() {
+
+				@Override
+				public boolean hasNext() {
+					return false;
+				}
+
+				@Override
+				public T next() {
+					return null;
+				}
+			};
 		}
 	}
 
