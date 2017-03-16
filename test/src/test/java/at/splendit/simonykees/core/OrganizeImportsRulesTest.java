@@ -8,11 +8,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
-import at.splendit.simonykees.core.visitor.DiamondOperatorASTVisitor;
 
 @RunWith(Parameterized.class)
 @SuppressWarnings("nls")
