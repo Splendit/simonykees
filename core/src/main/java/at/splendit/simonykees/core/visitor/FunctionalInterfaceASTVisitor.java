@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -88,6 +89,11 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						VariableDeclarationExpression vds = (VariableDeclarationExpression) classInstanceExecuter.getParent();
 						variableTypeBinding = vds.getType().resolveBinding();
 					}
+					if(ASTNode.FIELD_DECLARATION == classInstanceExecuter.getParent().getNodeType()){
+						FieldDeclaration vds = (FieldDeclaration) classInstanceExecuter.getParent();
+						variableTypeBinding = vds.getType().resolveBinding();
+					}
+					
 					
 				}
 				
@@ -237,7 +243,8 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					relevantBlocks.add(scope);
 				}
 			} while (scope != null && scope.getNodeType() != ASTNode.METHOD_DECLARATION
-					&& scope.getNodeType() != ASTNode.TYPE_DECLARATION);
+					&& scope.getNodeType() != ASTNode.TYPE_DECLARATION
+					&& scope.getNodeType() != ASTNode.INITIALIZER);
 		}
 
 		return scope;

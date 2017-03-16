@@ -54,6 +54,12 @@ public class TestFunctionalInterfaceRule {
 	AFunctionalInterface aFunctionalInterface = (int a) -> {
 	};
 
+	{
+		int a;
+		AFunctionalInterface aFunctionalInterface = (int a1) -> {
+		};
+	}
+
 	public void clashingLocalVariableNames(int l) {
 
 		int a, a1;
