@@ -8,15 +8,21 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.sub.VariableDefinitionASTVisitor;
 
 /**
@@ -34,8 +40,68 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	public boolean visit(AnonymousClassDeclaration node) {
 		if (ASTNode.CLASS_INSTANCE_CREATION == node.getParent().getNodeType()) {
 			ClassInstanceCreation parentNode = (ClassInstanceCreation) node.getParent();
-			Type parentType = parentNode.getType();
-			if (ASTNode.PARAMETERIZED_TYPE != parentType.getNodeType()) {
+			Type classType = parentNode.getType();
+			// Check if the consuming part is the same type (assignment to the
+			// same type, method parameter is the same type)
+			boolean allowedType = false;
+			if (null != parentNode.getParent()){
+				ASTNode classInstanceExecuter = parentNode.getParent();
+				int classInstanceExecuterType = classInstanceExecuter.getNodeType();
+				
+				// Find the type of the executing environment
+				ITypeBinding variableTypeBinding = null;
+				
+				//Possible Scenarios for the ClassInstanceCreation
+				if(ASTNode.METHOD_INVOCATION == classInstanceExecuterType) {
+					MethodInvocation mI = ((MethodInvocation) classInstanceExecuter);
+					int indexOfClassInstance = mI.arguments().indexOf(parentNode);
+					IMethodBinding methodBinding = mI.resolveMethodBinding();
+					if(null != methodBinding){
+						ITypeBinding[] parameters = methodBinding.getParameterTypes();
+						if(-1 != indexOfClassInstance && parameters.length>indexOfClassInstance){
+							variableTypeBinding = parameters[indexOfClassInstance];
+						}
+					}
+				}
+				
+				if(ASTNode.CLASS_INSTANCE_CREATION == classInstanceExecuterType) {
+					ClassInstanceCreation ciI = ((ClassInstanceCreation) classInstanceExecuter);
+					int indexOfClassInstance = ciI.arguments().indexOf(parentNode);
+					IMethodBinding methodBinding = ciI.resolveConstructorBinding();
+					if(null != methodBinding){
+						ITypeBinding[] parameters = methodBinding.getParameterTypes();
+						if(-1 != indexOfClassInstance && parameters.length>indexOfClassInstance){
+							variableTypeBinding = parameters[indexOfClassInstance];
+						}
+					}
+				}
+				
+				if(ASTNode.ASSIGNMENT == classInstanceExecuterType){
+					variableTypeBinding = ((Assignment) classInstanceExecuter).getLeftHandSide().resolveTypeBinding();
+				}
+				if(ASTNode.VARIABLE_DECLARATION_FRAGMENT == classInstanceExecuterType && null != classInstanceExecuter.getParent()){
+					if(ASTNode.VARIABLE_DECLARATION_STATEMENT == classInstanceExecuter.getParent().getNodeType()){
+						VariableDeclarationStatement vds = (VariableDeclarationStatement) classInstanceExecuter.getParent();
+						variableTypeBinding = vds.getType().resolveBinding();
+					}
+					if(ASTNode.VARIABLE_DECLARATION_EXPRESSION == classInstanceExecuter.getParent().getNodeType()){
+						VariableDeclarationExpression vds = (VariableDeclarationExpression) classInstanceExecuter.getParent();
+						variableTypeBinding = vds.getType().resolveBinding();
+					}
+					
+				}
+				
+				if(ASTNode.SINGLE_VARIABLE_DECLARATION == classInstanceExecuterType){
+					SingleVariableDeclaration svd = (SingleVariableDeclaration) classInstanceExecuter;
+					variableTypeBinding = svd.getType().resolveBinding();
+				}
+				
+				if(variableTypeBinding != null) {
+					allowedType = ClassRelationUtil.compareITypeBinding(variableTypeBinding, classType.resolveBinding());
+				}
+			}
+			
+			if (allowedType && ASTNode.PARAMETERIZED_TYPE != classType.getNodeType()) {
 				ITypeBinding parentNodeTypeBinding = parentNode.getType().resolveBinding();
 				if (parentNodeTypeBinding != null) {
 					// check that only one Method is implemented, which is the
@@ -84,17 +150,18 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	private boolean checkOnlyFunctionalInterfaceMethodIsImplemented(AnonymousClassDeclaration node,
 			ITypeBinding parentNodeTypeBinding) {
-		if(node == null){
+		if (node == null) {
 			return false;
 		}
-		
-		if(parentNodeTypeBinding == null || node.bodyDeclarations() == null || parentNodeTypeBinding.getFunctionalInterfaceMethod() == null) {
+
+		if (parentNodeTypeBinding == null || node.bodyDeclarations() == null
+				|| parentNodeTypeBinding.getFunctionalInterfaceMethod() == null) {
 			return false;
 		}
-		
+
 		if (node.bodyDeclarations().size() == 1 && node.bodyDeclarations().get(0) instanceof MethodDeclaration) {
 			return StringUtils.equals(parentNodeTypeBinding.getFunctionalInterfaceMethod().getName(),
-			((MethodDeclaration) node.bodyDeclarations().get(0)).getName().getIdentifier());
+					((MethodDeclaration) node.bodyDeclarations().get(0)).getName().getIdentifier());
 		}
 
 		return false;

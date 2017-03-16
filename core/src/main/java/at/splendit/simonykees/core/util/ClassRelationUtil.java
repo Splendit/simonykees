@@ -20,7 +20,8 @@ public class ClassRelationUtil {
 	 * @return if the {@link ITypeBinding} is part of the registered types the
 	 *         return value is true
 	 */
-	public static boolean isInheritingContentOfRegistertITypes(ITypeBinding iTypeBinding, List<IType> registeredITypes) {
+	public static boolean isInheritingContentOfRegistertITypes(ITypeBinding iTypeBinding,
+			List<IType> registeredITypes) {
 		boolean result = false;
 		if (iTypeBinding == null) {
 			return false;
@@ -50,4 +51,49 @@ public class ClassRelationUtil {
 		}
 		return false;
 	}
+
+	/**
+	 * Compares the given lists by getting the qualified name of corresponding
+	 * elements on same positions.
+	 * 
+	 * @return if both lists have the same size and all corresponding elements
+	 *         have the same qualified name.
+	 */
+	public static boolean compareITypeBinding(ITypeBinding[] lhsTypeArguments, ITypeBinding[] rhsTypeBindingArguments) {
+		if (lhsTypeArguments == null || rhsTypeBindingArguments == null) {
+			return false;
+		}
+
+		int lhsSize = lhsTypeArguments.length;
+		int rhsSize = rhsTypeBindingArguments.length;
+
+		if (lhsSize != rhsSize) {
+			return false;
+		}
+		
+		
+		
+		for (int i = 0; i < lhsSize; i++) {
+			if(!compareITypeBinding(lhsTypeArguments[i], rhsTypeBindingArguments[i])){
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public static boolean compareITypeBinding(ITypeBinding firstTypeBinding, ITypeBinding secondTypeBinging) {
+		if (null == firstTypeBinding || null == secondTypeBinging) {
+			return false;
+		}
+
+		String lhsTypeName = firstTypeBinding.getQualifiedName();
+		String rhsTypeName = secondTypeBinging.getQualifiedName();
+		if (lhsTypeName.equals(rhsTypeName)) {
+			return true;
+		}
+
+		return false;
+	}
+
 }
