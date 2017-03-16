@@ -74,7 +74,7 @@ public class SelectRulesWizard extends Wizard {
 					}
 				} catch (RefactoringException e) {
 					synchronizeWithUIShowError(e);
-					return null;
+					return Status.CANCEL_STATUS;
 				}
 				try {
 					refactorer.doRefactoring(monitor);
@@ -83,9 +83,10 @@ public class SelectRulesWizard extends Wizard {
 					}
 				} catch (RefactoringException e) {
 					synchronizeWithUIShowError(e);
-					return null;
+					return Status.CANCEL_STATUS;
 				} catch (RuleException e) {
 					synchronizeWithUIShowError(e);
+					return Status.CANCEL_STATUS;
 				}
 
 				monitor.done();
