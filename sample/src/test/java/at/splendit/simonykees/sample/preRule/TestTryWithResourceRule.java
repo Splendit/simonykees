@@ -23,10 +23,12 @@ public class TestTryWithResourceRule {
 	
 	public void assignedResource(String path) {
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(path)), br2 = new BufferedReader(new FileReader(path));
+			BufferedReader br2 = new BufferedReader(new FileReader(path)), br = new BufferedReader(new FileReader(path));
 			br.readLine();
 			br = new BufferedReader(new FileReader(path));
 			br2.readLine();
+			br.close();
+			br2.close();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -35,11 +37,40 @@ public class TestTryWithResourceRule {
 	
 	public void assignedMultipleResources(String path) {
 		try (BufferedReader br4 = new BufferedReader(new FileReader(path))) {
-			BufferedReader br = new BufferedReader(new FileReader(path)), br2 = new BufferedReader(new FileReader(path)), br3 = new BufferedReader(new FileReader(path));
+			BufferedReader br = new BufferedReader(new FileReader(path)), br2 = new BufferedReader(new FileReader(path)),
+					br003 = new BufferedReader(new FileReader(path)), br004 = new BufferedReader(new FileReader(path));
 			br.readLine();
 			br2.readLine();
-			br3.readLine();
+			br003.readLine();
+			br004.readLine();
 			br4.read();
+			br.close();
+			br2.close();
+			br003.close();
+			br004.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void assignedMultipleResources1(String path) {
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(path));
+			BufferedReader br2 = new BufferedReader(new FileReader(path));
+			BufferedReader br003 = new BufferedReader(new FileReader(path));
+			BufferedReader br004 = new BufferedReader(new FileReader(path));
+			BufferedReader br4 = new BufferedReader(new FileReader(path));
+			br.readLine();
+			br2.readLine();
+			br003.readLine();
+			br004.readLine();
+			br4.read();
+			br.close();
+			br2.close();
+			br003.close();
+			br004.close();
+			br4.close();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -54,13 +85,15 @@ public class TestTryWithResourceRule {
 			br2.readLine();
 			br3.readLine();
 			br4.read();
+			br.close();
+			br2.close();
+			br3.close();
+			br4.close();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
-
 	
 	public void assignedMultipleResources3(String path) {
 		try {
@@ -68,6 +101,9 @@ public class TestTryWithResourceRule {
 			br.readLine();
 			br2.readLine();
 			br4.read();
+			br.close();
+			br4.close();
+			br2.close();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -80,6 +116,7 @@ public class TestTryWithResourceRule {
 			br.readLine();
 			br2 = new BufferedReader(new FileReader(path));
 			br.readLine();
+			br.close();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -94,6 +131,8 @@ public class TestTryWithResourceRule {
 			br.readLine();
 			br2 = new BufferedReader(new FileReader(path));
 			br.readLine();
+			br.close();
+			br2.close();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -108,6 +147,8 @@ public class TestTryWithResourceRule {
 			br2 = new BufferedReader(new FileReader(path));
 			br2.readLine();
 			br.readLine();
+			br.close();
+			br2.close();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -122,6 +163,8 @@ public class TestTryWithResourceRule {
 			br2 = new BufferedReader(new FileReader(path));
 			br2.readLine();
 			br.readLine();
+			br.close();
+			br2.close();
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -143,7 +186,6 @@ public class TestTryWithResourceRule {
 			br2.readLine();
 			br.readLine();
 			br.close();
-			br2.close();
 			br2.close();
 
 		} catch (IOException e) {

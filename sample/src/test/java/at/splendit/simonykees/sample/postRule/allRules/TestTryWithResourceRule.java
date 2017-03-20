@@ -25,6 +25,7 @@ public class TestTryWithResourceRule {
 			br.readLine();
 			br = new BufferedReader(new FileReader(path));
 			br2.readLine();
+			br.close();
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -35,10 +36,29 @@ public class TestTryWithResourceRule {
 		try (BufferedReader br4 = new BufferedReader(new FileReader(path));
 				BufferedReader br = new BufferedReader(new FileReader(path));
 				BufferedReader br2 = new BufferedReader(new FileReader(path));
-				BufferedReader br3 = new BufferedReader(new FileReader(path))) {
+				BufferedReader br003 = new BufferedReader(new FileReader(path));
+				BufferedReader br004 = new BufferedReader(new FileReader(path))) {
 			br.readLine();
 			br2.readLine();
-			br3.readLine();
+			br003.readLine();
+			br004.readLine();
+			br4.read();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void assignedMultipleResources1(String path) {
+		try (BufferedReader br = new BufferedReader(new FileReader(path));
+				BufferedReader br2 = new BufferedReader(new FileReader(path));
+				BufferedReader br003 = new BufferedReader(new FileReader(path));
+				BufferedReader br004 = new BufferedReader(new FileReader(path));
+				BufferedReader br4 = new BufferedReader(new FileReader(path))) {
+			br.readLine();
+			br2.readLine();
+			br003.readLine();
+			br004.readLine();
 			br4.read();
 
 		} catch (IOException e) {
@@ -94,6 +114,8 @@ public class TestTryWithResourceRule {
 			br.readLine();
 			br2 = new BufferedReader(new FileReader(path));
 			br.readLine();
+			br.close();
+			br2.close();
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -108,6 +130,8 @@ public class TestTryWithResourceRule {
 			br2 = new BufferedReader(new FileReader(path));
 			br2.readLine();
 			br.readLine();
+			br.close();
+			br2.close();
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -121,6 +145,7 @@ public class TestTryWithResourceRule {
 			br2 = new BufferedReader(new FileReader(path));
 			br2.readLine();
 			br.readLine();
+			br2.close();
 
 		} catch (IOException e) {
 			e.printStackTrace();
