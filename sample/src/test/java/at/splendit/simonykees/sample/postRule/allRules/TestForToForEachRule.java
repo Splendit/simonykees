@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("nls")
+@SuppressWarnings({ "nls", "unused", "unchecked" })
 public class TestForToForEachRule {
 
 	private List<String> generateList(String input) {

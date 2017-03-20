@@ -5,6 +5,7 @@ import java.io.Closeable;
 import java.io.FileReader;
 import java.io.IOException;
 
+@SuppressWarnings({"resource", "unused"})
 public class TestTryWithResourceRule {
 
 	static void readFirstLineFromFile(String path) {

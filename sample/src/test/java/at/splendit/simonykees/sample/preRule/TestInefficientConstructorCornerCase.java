@@ -1,5 +1,6 @@
 package at.splendit.simonykees.sample.preRule;
 
+@SuppressWarnings("unused")
 public class TestInefficientConstructorCornerCase {
 
 	public void doubleInNumber(double d) {
