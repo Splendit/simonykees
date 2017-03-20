@@ -14,9 +14,10 @@ import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -109,11 +110,10 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 		licenseStatusLabel = new Label(composite, SWT.NONE);
 		FontDescriptor boldDescriptor = FontDescriptor.createFrom(licenseStatusLabel.getFont()).setStyle(SWT.BOLD);
 		Font boldFont = boldDescriptor.createFont(composite.getDisplay());
-		Color red = new Color(display, 255, 0, 0);
 		licenseStatusLabel.setFont(boldFont);
-		licenseStatusLabel.setForeground(red);
+		licenseStatusLabel.setForeground(display.getSystemColor(SWT.COLOR_RED));
 		licenseStatusLabel.setVisible(true);
-
+		
 		updateButton = new Button(composite, SWT.PUSH);
 		updateButton.setText(Messages.SimonykeesPreferencePageLicense_update_license_key_button);
 		updateButton.addSelectionListener(new SelectionAdapter() {
@@ -145,6 +145,17 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 		updateDisplayedInformation();
 
 		updateButton.setVisible(true);
+		
+		composite.addDisposeListener(new DisposeListener() {
+			
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				jSparrowImageActive.dispose();
+				jSparrowImageInactive.dispose();
+				boldFont.dispose();
+			}
+		});		
+		
 		composite.pack();
 	}
 
