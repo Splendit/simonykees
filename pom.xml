@@ -81,14 +81,13 @@
 		<site>
 			<id>nexus</id>
 			<name>Nexus Simonykees Site</name>
-			<url>dav:https://javadoc.splendit.loc/simonykees</url>
+			<url>https://jenkins.splendit.loc/view/simonykees/job/simonykees%20master/site/</url>
 		</site>
 	</distributionManagement>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<eclipse.jdt.core.version>3.10.0</eclipse.jdt.core.version>
 		<tycho.version>0.26.0</tycho.version>
 		<tycho.extras.version>0.26.0</tycho.extras.version>
 		<tycho.test.platformArgs />

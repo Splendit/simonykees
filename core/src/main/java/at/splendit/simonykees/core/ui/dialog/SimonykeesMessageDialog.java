@@ -56,15 +56,15 @@ public class SimonykeesMessageDialog extends MessageDialog {
 
 	public static boolean openErrorMessageDialog(Shell parentShell, SimonykeesException simonykeesException) {
 		messageText = ((simonykeesException != null) ? simonykeesException.getUiMessage() : dialogErrorMessage)
-				+ System.lineSeparator() + "<a>" + MAIL_BUGREPORT + "</a>";
+				+ System.lineSeparator() + "<a>" + MAIL_BUGREPORT + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$
 		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, MessageDialog.ERROR,
 				defaultIndex, dialogButtonLabels).open() == 0;
 	}
 
 	private SimonykeesMessageDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage,
 			int dialogImageType, int defaultIndex, String... dialogButtonLabels) {
-		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, defaultIndex,
-				dialogButtonLabels);
+		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels,
+				defaultIndex);
 		messageText = dialogMessage;
 	}
 

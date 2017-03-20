@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
 
 /**
  * 
@@ -31,6 +32,14 @@ public class CompilationUnitContentProvider implements ITreeContentProvider {
 	@Override
 	public boolean hasChildren(Object element) {
 		return false;
+	}
+
+	public void dispose() {
+		//Only needed for 4.5.x (Mars)
+	}
+
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		//Only needed for 4.5.x (Mars)
 	}
 
 }
