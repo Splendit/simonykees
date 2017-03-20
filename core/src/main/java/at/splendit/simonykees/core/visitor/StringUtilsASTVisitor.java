@@ -104,9 +104,9 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 			}
 		}
 		
-		boolean safeToGo = !clashingImports;
-		if(safeToGo) {
-			super.visit(compilationUnit);
+		boolean safeToGo = false;
+		if(!clashingImports) {
+			safeToGo = super.visit(compilationUnit);
 		}
 		
 		return safeToGo;
