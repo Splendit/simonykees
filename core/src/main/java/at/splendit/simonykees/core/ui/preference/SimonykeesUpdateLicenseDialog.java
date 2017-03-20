@@ -13,13 +13,14 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.HelpEvent;
 import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -181,6 +182,18 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		updatedLabel.setText(Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
 		updatedLabel.setVisible(false);
 
+		/*
+		 * Automatic release does not work for Image, so we do it manually when container is disposed 
+		 */
+		container.addDisposeListener(new DisposeListener() {
+			
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				scaledJSparrowImageActive.dispose();
+				scaledJSparrowImageInactive.dispose();
+			}
+		});
+		
 		return container;
 	}
 
@@ -188,18 +201,16 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		Device device = Display.getCurrent();
 
 		if (!updated) {
-			Color red = new Color(device, 255, 0, 0);
 			updatedLabel.setText(Messages.SimonykeesUpdateLicenseDialog_invalid_license_key);
-			updatedLabel.setForeground(red);
+			updatedLabel.setForeground(device.getSystemColor(SWT.COLOR_DARK_RED));
 			updatedLabel.setVisible(true);
 
 			updatedIconLabel.setImage(scaledJSparrowImageInactive);
 			updatedIconLabel.setVisible(true);
 
 		} else {
-			Color green = new Color(device, 1, 66, 37);
 			updatedLabel.setText(Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
-			updatedLabel.setForeground(green);
+			updatedLabel.setForeground(device.getSystemColor(SWT.COLOR_GREEN));
 			updatedLabel.setVisible(true);
 
 			updatedIconLabel.setImage(scaledJSparrowImageActive);
