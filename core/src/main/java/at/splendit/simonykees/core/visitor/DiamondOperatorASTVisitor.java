@@ -96,12 +96,13 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					Expression lhsNode = assignmentNode.getLeftHandSide();
 					if (ASTNode.SIMPLE_NAME == lhsNode.getNodeType()) {
 						ITypeBinding lhsTypeBinding = lhsNode.resolveTypeBinding();
-						ITypeBinding[] lhsTypeArguments = lhsTypeBinding.getTypeArguments();
+						ITypeBinding[] lhsTypeBindingArguments = lhsTypeBinding.getTypeArguments();
 						ITypeBinding rhsTypeBinding = node.resolveTypeBinding();
 						ITypeBinding[] rhsTypeBindingArguments = rhsTypeBinding.getTypeArguments();
 						// compare type arguments in new instance creation with
 						// the ones in declaration
-						sameTypes = ClassRelationUtil.compareITypeBinding(lhsTypeArguments, rhsTypeBindingArguments);
+						sameTypes = ClassRelationUtil.compareITypeBinding(lhsTypeBindingArguments,
+								rhsTypeBindingArguments);
 					}
 				} else if (ASTNode.METHOD_INVOCATION == parent.getNodeType()
 						&& MethodInvocation.ARGUMENTS_PROPERTY == node.getLocationInParent()) {

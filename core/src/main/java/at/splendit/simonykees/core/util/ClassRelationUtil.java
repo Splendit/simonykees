@@ -56,25 +56,27 @@ public class ClassRelationUtil {
 	 * Compares the given lists by getting the qualified name of corresponding
 	 * elements on same positions.
 	 * 
+	 * @param firstTypeBindings
+	 *            the first {@link ITypeBinding} array to be compared
+	 * @param secondTypeBindings
+	 *            the second {@link ITypeBinding} array to be compared
 	 * @return if both lists have the same size and all corresponding elements
 	 *         have the same qualified name.
 	 */
-	public static boolean compareITypeBinding(ITypeBinding[] lhsTypeArguments, ITypeBinding[] rhsTypeBindingArguments) {
-		if (lhsTypeArguments == null || rhsTypeBindingArguments == null) {
+	public static boolean compareITypeBinding(ITypeBinding[] firstTypeBindings, ITypeBinding[] secondTypeBindings) {
+		if (firstTypeBindings == null || secondTypeBindings == null) {
 			return false;
 		}
 
-		int lhsSize = lhsTypeArguments.length;
-		int rhsSize = rhsTypeBindingArguments.length;
+		int lhsSize = firstTypeBindings.length;
+		int rhsSize = secondTypeBindings.length;
 
 		if (lhsSize != rhsSize) {
 			return false;
 		}
-		
-		
-		
+
 		for (int i = 0; i < lhsSize; i++) {
-			if(!compareITypeBinding(lhsTypeArguments[i], rhsTypeBindingArguments[i])){
+			if (!compareITypeBinding(firstTypeBindings[i], secondTypeBindings[i])) {
 				return false;
 			}
 		}
@@ -82,6 +84,17 @@ public class ClassRelationUtil {
 		return true;
 	}
 
+	/**
+	 * @see ClassRelationUtil#compareITypeBinding(ITypeBinding[],
+	 *      ITypeBinding[])
+	 * 
+	 * @param firstTypeBinding
+	 *            the first {@link ITypeBinding} to be compared
+	 * @param secondTypeBinging
+	 *            the second {@link ITypeBinding} to be compared
+	 * @return whether or not the {@link ITypeBinding}s have the same qualified
+	 *         name
+	 */
 	public static boolean compareITypeBinding(ITypeBinding firstTypeBinding, ITypeBinding secondTypeBinging) {
 		if (null == firstTypeBinding || null == secondTypeBinging) {
 			return false;

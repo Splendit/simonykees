@@ -42,76 +42,85 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		if (ASTNode.CLASS_INSTANCE_CREATION == node.getParent().getNodeType()) {
 			ClassInstanceCreation parentNode = (ClassInstanceCreation) node.getParent();
 			Type classType = parentNode.getType();
-			// Check if the consuming part is the same type (assignment to the
-			// same type, method parameter is the same type)
+
+			/*
+			 * Check if the consuming part is the same type (assignment to the
+			 * same type, method parameter is the same type)
+			 */
 			boolean allowedType = false;
-			if (null != parentNode.getParent()){
+			if (null != parentNode.getParent()) {
 				ASTNode classInstanceExecuter = parentNode.getParent();
 				int classInstanceExecuterType = classInstanceExecuter.getNodeType();
-				
+
 				// Find the type of the executing environment
 				ITypeBinding variableTypeBinding = null;
-				
-				//Possible Scenarios for the ClassInstanceCreation
-				if(ASTNode.METHOD_INVOCATION == classInstanceExecuterType) {
+
+				// Possible scenarios for the ClassInstanceCreation
+				if (ASTNode.METHOD_INVOCATION == classInstanceExecuterType) {
 					MethodInvocation mI = ((MethodInvocation) classInstanceExecuter);
 					int indexOfClassInstance = mI.arguments().indexOf(parentNode);
 					IMethodBinding methodBinding = mI.resolveMethodBinding();
-					if(null != methodBinding){
+					if (null != methodBinding) {
 						ITypeBinding[] parameters = methodBinding.getParameterTypes();
-						if(-1 != indexOfClassInstance && parameters.length>indexOfClassInstance){
+						if (-1 != indexOfClassInstance && parameters.length > indexOfClassInstance) {
 							variableTypeBinding = parameters[indexOfClassInstance];
 						}
 					}
 				}
-				
-				if(ASTNode.CLASS_INSTANCE_CREATION == classInstanceExecuterType) {
+
+				if (ASTNode.CLASS_INSTANCE_CREATION == classInstanceExecuterType) {
 					ClassInstanceCreation ciI = ((ClassInstanceCreation) classInstanceExecuter);
 					int indexOfClassInstance = ciI.arguments().indexOf(parentNode);
 					IMethodBinding methodBinding = ciI.resolveConstructorBinding();
-					if(null != methodBinding){
+					if (null != methodBinding) {
 						ITypeBinding[] parameters = methodBinding.getParameterTypes();
-						if(-1 != indexOfClassInstance && parameters.length>indexOfClassInstance){
+						if (-1 != indexOfClassInstance && parameters.length > indexOfClassInstance) {
 							variableTypeBinding = parameters[indexOfClassInstance];
 						}
 					}
 				}
-				
-				if(ASTNode.ASSIGNMENT == classInstanceExecuterType){
+
+				if (ASTNode.ASSIGNMENT == classInstanceExecuterType) {
 					variableTypeBinding = ((Assignment) classInstanceExecuter).getLeftHandSide().resolveTypeBinding();
 				}
-				if(ASTNode.VARIABLE_DECLARATION_FRAGMENT == classInstanceExecuterType && null != classInstanceExecuter.getParent()){
-					if(ASTNode.VARIABLE_DECLARATION_STATEMENT == classInstanceExecuter.getParent().getNodeType()){
-						VariableDeclarationStatement vds = (VariableDeclarationStatement) classInstanceExecuter.getParent();
+				
+				if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == classInstanceExecuterType
+						&& null != classInstanceExecuter.getParent()) {
+					if (ASTNode.VARIABLE_DECLARATION_STATEMENT == classInstanceExecuter.getParent().getNodeType()) {
+						VariableDeclarationStatement vds = (VariableDeclarationStatement) classInstanceExecuter
+								.getParent();
 						variableTypeBinding = vds.getType().resolveBinding();
 					}
-					if(ASTNode.VARIABLE_DECLARATION_EXPRESSION == classInstanceExecuter.getParent().getNodeType()){
-						VariableDeclarationExpression vds = (VariableDeclarationExpression) classInstanceExecuter.getParent();
+					if (ASTNode.VARIABLE_DECLARATION_EXPRESSION == classInstanceExecuter.getParent().getNodeType()) {
+						VariableDeclarationExpression vds = (VariableDeclarationExpression) classInstanceExecuter
+								.getParent();
 						variableTypeBinding = vds.getType().resolveBinding();
 					}
-					if(ASTNode.FIELD_DECLARATION == classInstanceExecuter.getParent().getNodeType()){
+					if (ASTNode.FIELD_DECLARATION == classInstanceExecuter.getParent().getNodeType()) {
 						FieldDeclaration vds = (FieldDeclaration) classInstanceExecuter.getParent();
 						variableTypeBinding = vds.getType().resolveBinding();
 					}
-					
-					
+
 				}
-				
-				if(ASTNode.SINGLE_VARIABLE_DECLARATION == classInstanceExecuterType){
+
+				if (ASTNode.SINGLE_VARIABLE_DECLARATION == classInstanceExecuterType) {
 					SingleVariableDeclaration svd = (SingleVariableDeclaration) classInstanceExecuter;
 					variableTypeBinding = svd.getType().resolveBinding();
 				}
-				
-				if(variableTypeBinding != null) {
-					allowedType = ClassRelationUtil.compareITypeBinding(variableTypeBinding, classType.resolveBinding());
+
+				if (variableTypeBinding != null) {
+					allowedType = ClassRelationUtil.compareITypeBinding(variableTypeBinding,
+							classType.resolveBinding());
 				}
 			}
-			
+
 			if (allowedType && ASTNode.PARAMETERIZED_TYPE != classType.getNodeType()) {
 				ITypeBinding parentNodeTypeBinding = parentNode.getType().resolveBinding();
 				if (parentNodeTypeBinding != null) {
-					// check that only one Method is implemented, which is the
-					// FunctionalInterfaceMethod
+					/*
+					 * check that only one Method is implemented, which is the
+					 * FunctionalInterfaceMethod
+					 */
 					if (!checkOnlyFunctionalInterfaceMethodIsImplemented(node, parentNodeTypeBinding)) {
 						return false;
 					}
@@ -127,9 +136,10 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 							// renaming the clashing variable names
 							ASTNode scope = findScope(node, relevantBlocks);
 							if (ASTNode.TYPE_DECLARATION != scope.getNodeType()) {
-								// if the scope is the whole class, no need
-								// to do any renaming...
-
+								/*
+								 * if the scope is the whole class, no need to
+								 * do any renaming...
+								 */
 								VariableDefinitionASTVisitor varVisistor = new VariableDefinitionASTVisitor(node,
 										relevantBlocks);
 								scope.accept(varVisistor);
@@ -243,8 +253,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					relevantBlocks.add(scope);
 				}
 			} while (scope != null && scope.getNodeType() != ASTNode.METHOD_DECLARATION
-					&& scope.getNodeType() != ASTNode.TYPE_DECLARATION
-					&& scope.getNodeType() != ASTNode.INITIALIZER);
+					&& scope.getNodeType() != ASTNode.TYPE_DECLARATION && scope.getNodeType() != ASTNode.INITIALIZER);
 		}
 
 		return scope;
