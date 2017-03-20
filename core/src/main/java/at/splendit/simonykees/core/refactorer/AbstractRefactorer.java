@@ -265,4 +265,8 @@ public abstract class AbstractRefactorer {
 		}
 		return false;
 	}
+
+	public void clearWorkingCopies() {
+		workingCopies.clear();
+	}
 }

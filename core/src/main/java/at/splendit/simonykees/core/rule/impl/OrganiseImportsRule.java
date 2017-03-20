@@ -85,10 +85,7 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 			Activator.log(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
 		} else {
 
-			final ASTParser astParser = ASTParser.newParser(AST.JLS8);
-			SimonykeesUtil.resetParser(workingCopy, astParser, workingCopy.getJavaProject().getOptions(true));
-			final CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
-			
+			final CompilationUnit astRoot = SimonykeesUtil.parse(workingCopy);
 			final boolean hasAmbiguity[]= new boolean[] { false };
 			IChooseImportQuery query= new IChooseImportQuery() {
 				@Override

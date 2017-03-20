@@ -2,7 +2,6 @@ package at.splendit.simonykees.core.util;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -149,24 +148,22 @@ public final class SimonykeesUtil {
 	}
 
 	/**
-	 * Reset parser to parse next {@link ICompilationUnit} with the given
-	 * {@code options}
+	 * Creates the new parser to parse {@link ICompilationUnit} 
 	 * 
 	 * @param compilationUnit
 	 *            the Java model compilation unit whose source code is to be
 	 *            parsed, or null if none
-	 * @param astParser
-	 *            A Java language parser for creating abstract syntax trees
-	 *            (ASTs).
-	 * @param options
-	 *            the table of options (key type: String; value type: String),
-	 *            or null to set it back to the default
+	 *            
+	 * @return newly created parsed compilation unit
+	 * 
 	 * @since 0.9
 	 */
-	public static void resetParser(ICompilationUnit compilationUnit, ASTParser astParser, Map<String, String> options) {
+	public static CompilationUnit parse(ICompilationUnit compilationUnit) {
+		ASTParser astParser = ASTParser.newParser(AST.JLS8);
+		astParser.setKind(ASTParser.K_COMPILATION_UNIT);
 		astParser.setSource(compilationUnit);
 		astParser.setResolveBindings(true);
-		astParser.setCompilerOptions(options);
+		return (CompilationUnit) astParser.createAST(null);
 	}
 
 	/**
@@ -207,6 +204,7 @@ public final class SimonykeesUtil {
 	public static void commitAndDiscardWorkingCopy(ICompilationUnit workingCopy) throws JavaModelException {
 		workingCopy.commitWorkingCopy(false, null);
 		workingCopy.discardWorkingCopy();
+		workingCopy.close();
 	}
 
 	/**
@@ -244,9 +242,7 @@ public final class SimonykeesUtil {
 	public static DocumentChange applyRule(ICompilationUnit workingCopy,
 			Class<? extends AbstractASTRewriteASTVisitor> ruleClazz)
 			throws ReflectiveOperationException, JavaModelException {
-		final ASTParser astParser = ASTParser.newParser(AST.JLS8);
-		resetParser(workingCopy, astParser, workingCopy.getJavaProject().getOptions(true));
-		final CompilationUnit astRoot = (CompilationUnit) astParser.createAST(null);
+		final CompilationUnit astRoot = parse(workingCopy);
 		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 		// FIXME resolves that comments are manipulated during astrewrite
 		//

@@ -70,6 +70,7 @@ public class SelectRulesWizard extends Wizard {
 				try {
 					refactorer.prepareRefactoring(monitor);
 					if (monitor.isCanceled()) {
+						refactorer.clearWorkingCopies();
 						return Status.CANCEL_STATUS;
 					}
 				} catch (RefactoringException e) {
@@ -79,6 +80,7 @@ public class SelectRulesWizard extends Wizard {
 				try {
 					refactorer.doRefactoring(monitor);
 					if (monitor.isCanceled()) {
+						refactorer.clearWorkingCopies();
 						return Status.CANCEL_STATUS;
 					}
 				} catch (RefactoringException e) {
