@@ -20,7 +20,8 @@ public class ClassRelationUtil {
 	 * @return if the {@link ITypeBinding} is part of the registered types the
 	 *         return value is true
 	 */
-	public static boolean isInheritingContentOfRegistertITypes(ITypeBinding iTypeBinding, List<IType> registeredITypes) {
+	public static boolean isInheritingContentOfRegistertITypes(ITypeBinding iTypeBinding,
+			List<IType> registeredITypes) {
 		boolean result = false;
 		if (iTypeBinding == null) {
 			return false;
@@ -50,4 +51,62 @@ public class ClassRelationUtil {
 		}
 		return false;
 	}
+
+	/**
+	 * Compares the given lists by getting the qualified name of corresponding
+	 * elements on same positions.
+	 * 
+	 * @param firstTypeBindings
+	 *            the first {@link ITypeBinding} array to be compared
+	 * @param secondTypeBindings
+	 *            the second {@link ITypeBinding} array to be compared
+	 * @return if both lists have the same size and all corresponding elements
+	 *         have the same qualified name.
+	 */
+	public static boolean compareITypeBinding(ITypeBinding[] firstTypeBindings, ITypeBinding[] secondTypeBindings) {
+		if (firstTypeBindings == null || secondTypeBindings == null) {
+			return false;
+		}
+
+		int lhsSize = firstTypeBindings.length;
+		int rhsSize = secondTypeBindings.length;
+
+		if (lhsSize != rhsSize) {
+			return false;
+		}
+
+		for (int i = 0; i < lhsSize; i++) {
+			if (!compareITypeBinding(firstTypeBindings[i], secondTypeBindings[i])) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * @see ClassRelationUtil#compareITypeBinding(ITypeBinding[],
+	 *      ITypeBinding[])
+	 * 
+	 * @param firstTypeBinding
+	 *            the first {@link ITypeBinding} to be compared
+	 * @param secondTypeBinging
+	 *            the second {@link ITypeBinding} to be compared
+	 * @return whether or not the {@link ITypeBinding}s have the same qualified
+	 *         name
+	 */
+	public static boolean compareITypeBinding(ITypeBinding firstTypeBinding, ITypeBinding secondTypeBinging) {
+		if (null == firstTypeBinding || null == secondTypeBinging) {
+			return false;
+		}
+
+		String lhsTypeName = firstTypeBinding.getQualifiedName();
+		String rhsTypeName = secondTypeBinging.getQualifiedName();
+		if (lhsTypeName.equals(rhsTypeName)) {
+			return true;
+		}
+
+		return false;
+	}
+
 }

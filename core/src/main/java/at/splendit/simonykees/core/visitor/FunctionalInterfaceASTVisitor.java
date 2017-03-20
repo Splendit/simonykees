@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 
+import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.sub.VariableDefinitionASTVisitor;
 
 /**
@@ -34,12 +36,22 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	public boolean visit(AnonymousClassDeclaration node) {
 		if (ASTNode.CLASS_INSTANCE_CREATION == node.getParent().getNodeType()) {
 			ClassInstanceCreation parentNode = (ClassInstanceCreation) node.getParent();
-			Type parentType = parentNode.getType();
-			if (ASTNode.PARAMETERIZED_TYPE != parentType.getNodeType()) {
+			Type classType = parentNode.getType();
+
+			/*
+			 * Check if the consuming part is the same type (assignment to the
+			 * same type, method parameter is the same type)
+			 */
+			boolean allowedType = ClassRelationUtil.compareITypeBinding(ASTNodeUtil.getTypeBindingOfNodeUsage(parentNode),
+					classType.resolveBinding());
+
+			if (allowedType && ASTNode.PARAMETERIZED_TYPE != classType.getNodeType()) {
 				ITypeBinding parentNodeTypeBinding = parentNode.getType().resolveBinding();
 				if (parentNodeTypeBinding != null) {
-					// check that only one Method is implemented, which is the
-					// FunctionalInterfaceMethod
+					/*
+					 * check that only one Method is implemented, which is the
+					 * FunctionalInterfaceMethod
+					 */
 					if (!checkOnlyFunctionalInterfaceMethodIsImplemented(node, parentNodeTypeBinding)) {
 						return false;
 					}
@@ -55,9 +67,10 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 							// renaming the clashing variable names
 							ASTNode scope = findScope(node, relevantBlocks);
 							if (ASTNode.TYPE_DECLARATION != scope.getNodeType()) {
-								// if the scope is the whole class, no need
-								// to do any renaming...
-
+								/*
+								 * if the scope is the whole class, no need to
+								 * do any renaming...
+								 */
 								VariableDefinitionASTVisitor varVisistor = new VariableDefinitionASTVisitor(node,
 										relevantBlocks);
 								scope.accept(varVisistor);
@@ -82,19 +95,26 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		return true;
 	}
 
+	/**
+	 * 
+	 * @param node
+	 * @param parentNodeTypeBinding
+	 * @return
+	 */
 	private boolean checkOnlyFunctionalInterfaceMethodIsImplemented(AnonymousClassDeclaration node,
 			ITypeBinding parentNodeTypeBinding) {
-		if(node == null){
+		if (node == null) {
 			return false;
 		}
-		
-		if(parentNodeTypeBinding == null || node.bodyDeclarations() == null || parentNodeTypeBinding.getFunctionalInterfaceMethod() == null) {
+
+		if (parentNodeTypeBinding == null || node.bodyDeclarations() == null
+				|| parentNodeTypeBinding.getFunctionalInterfaceMethod() == null) {
 			return false;
 		}
-		
+
 		if (node.bodyDeclarations().size() == 1 && node.bodyDeclarations().get(0) instanceof MethodDeclaration) {
 			return StringUtils.equals(parentNodeTypeBinding.getFunctionalInterfaceMethod().getName(),
-			((MethodDeclaration) node.bodyDeclarations().get(0)).getName().getIdentifier());
+					((MethodDeclaration) node.bodyDeclarations().get(0)).getName().getIdentifier());
 		}
 
 		return false;
@@ -170,7 +190,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					relevantBlocks.add(scope);
 				}
 			} while (scope != null && scope.getNodeType() != ASTNode.METHOD_DECLARATION
-					&& scope.getNodeType() != ASTNode.TYPE_DECLARATION);
+					&& scope.getNodeType() != ASTNode.TYPE_DECLARATION && scope.getNodeType() != ASTNode.INITIALIZER);
 		}
 
 		return scope;

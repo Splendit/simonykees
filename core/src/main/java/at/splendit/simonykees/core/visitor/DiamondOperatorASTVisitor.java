@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
  * Diamond operator should be used instead of explicit type arguments.
@@ -95,12 +96,13 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					Expression lhsNode = assignmentNode.getLeftHandSide();
 					if (ASTNode.SIMPLE_NAME == lhsNode.getNodeType()) {
 						ITypeBinding lhsTypeBinding = lhsNode.resolveTypeBinding();
-						ITypeBinding[] lhsTypeArguments = lhsTypeBinding.getTypeArguments();
+						ITypeBinding[] lhsTypeBindingArguments = lhsTypeBinding.getTypeArguments();
 						ITypeBinding rhsTypeBinding = node.resolveTypeBinding();
 						ITypeBinding[] rhsTypeBindingArguments = rhsTypeBinding.getTypeArguments();
 						// compare type arguments in new instance creation with
 						// the ones in declaration
-						sameTypes = compareTypeBindingArguments(lhsTypeArguments, rhsTypeBindingArguments);
+						sameTypes = ClassRelationUtil.compareITypeBinding(lhsTypeBindingArguments,
+								rhsTypeBindingArguments);
 					}
 				} else if (ASTNode.METHOD_INVOCATION == parent.getNodeType()
 						&& MethodInvocation.ARGUMENTS_PROPERTY == node.getLocationInParent()) {
@@ -138,7 +140,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 						ITypeBinding argBinding = parameterizedType.resolveBinding();
 						ITypeBinding[] argTypeBindings = argBinding.getTypeArguments();
 
-						sameTypes = compareTypeBindingArguments(parameterTypeArgs, argTypeBindings);
+						sameTypes = ClassRelationUtil.compareITypeBinding(parameterTypeArgs, argTypeBindings);
 					}
 				} else if (ASTNode.RETURN_STATEMENT == parent.getNodeType()) {
 					ReturnStatement returnStatement = (ReturnStatement) parent;
@@ -199,36 +201,5 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		ListRewrite typeArgumentsListRewrite = astRewrite.getListRewrite(parameterizedType,
 				ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
 		rhsTypeArguments.stream().forEach(type -> typeArgumentsListRewrite.remove(type, null));
-	}
-
-	/**
-	 * Compares the given lists by getting the qualified name of corresponding
-	 * elements on same positions.
-	 * 
-	 * @return if both lists have the same size and all corresponding elements
-	 *         have the same qualified name.
-	 */
-	private boolean compareTypeBindingArguments(ITypeBinding[] lhsTypeArguments,
-			ITypeBinding[] rhsTypeBindingArguments) {
-		boolean equals = true;
-		int lhsSize = lhsTypeArguments.length;
-		int rhsSize = rhsTypeBindingArguments.length;
-		if (lhsSize == rhsSize) {
-			for (int i = 0; i < lhsSize; i++) {
-				ITypeBinding lhsType = lhsTypeArguments[i];
-				ITypeBinding rhsType = rhsTypeBindingArguments[i];
-				String lhsTypeName = lhsType.getQualifiedName();
-				String rhsTypeName = rhsType.getQualifiedName();
-				if (!lhsTypeName.equals(rhsTypeName)) {
-					equals = false;
-					break;
-				}
-			}
-
-		} else {
-			equals = false;
-		}
-
-		return equals;
 	}
 }

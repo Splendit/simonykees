@@ -68,6 +68,15 @@ public class TestFunctionalInterfaceRule {
 		}
 	};
 	
+	{
+		int a;
+		AFunctionalInterface aFunctionalInterface = new AFunctionalInterface() {
+			@Override
+			public void method(int a) {
+			}
+		};
+	}
+	
 	public void clashingLocalVariableNames(int l) {
 		
 		int a, a1; 
