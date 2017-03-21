@@ -68,24 +68,34 @@
 	</ciManagement>
 
 	<distributionManagement>
-		<repository>
+<!--		<repository>
 			<id>nexus</id>
 			<name>Nexus Simonykees Releases</name>
 			<url>http://nexus.splendit.loc/repository/maven-simonykees-releases/</url>
-		</repository>
-		<snapshotRepository>
+		</repository> -->
+	<!--	<snapshotRepository>
 			<id>nexus</id>
 			<name>Nexus Simonykees Snapshots</name>
 			<url>http://nexus.splendit.loc/repository/maven-simonykees-snapshots/</url>
-		</snapshotRepository>
+		</snapshotRepository> -->
 		<site>
 			<id>nexus</id>
 			<name>Nexus Simonykees Site</name>
 			<url>https://jenkins.splendit.loc/view/simonykees/job/simonykees%20master/site/</url>
 		</site>
+		<repository>
+			<name>package-drone</name>
+			<id>pdrone.b8eed447-5f46-42c2-bfc1-1b9b174069e5</id>
+			<url>http://packagedrone-vm-01.splendit.loc:8080/maven/0c59cce1-cb2c-4942-8e44-465609fe2fdb</url>
+		</repository>
 	</distributionManagement>
 
 	<properties>
+
+		<!-- skipping install and deployment of non-site modules -->
+		<maven.deploy.skip>true</maven.deploy.skip>
+		<maven.install.skip>true</maven.install.skip>
+
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<tycho.version>0.26.0</tycho.version>
@@ -457,3 +467,4 @@
 	</reporting>
 
 </project>
+
