@@ -23,7 +23,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * description, if its enabled and the document changes for
  * {@link ICompilationUnit} that are processed
  * 
- * @author Martin Huter, Hannes Schweithofer, Ludwig Werzowa
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
  * @since 0.9
  *
  * @param <T>
@@ -120,35 +120,60 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		// FIXME SIM-206: TryWithResource multiple new resource on empty list
 		boolean dirtyHack = this instanceof TryWithResourceRule;
 
-		if (!dirtyHack && changes.containsKey(workingCopy)) {
-			// already have changes
-			Activator.log(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
-		} else {
-			DocumentChange documentChange = SimonykeesUtil.applyRule(workingCopy, visitor);
-			if (documentChange != null) {
+		boolean changesAlreadyPresent = changes.containsKey(workingCopy);
 
-				/*
-				 * FIXME SIM-206: TryWithResource multiple new resource on empty
-				 * list
-				 */
-				/*
-				 * FIXME SIM-206: this particular part of the fix does not work.
-				 * This will create the correct results. However, the
-				 * RefactoringPreviewWizard will show the diff between the first
-				 * and the second run, rather than the diff between the original
-				 * source and the second run. See comment in SIM-206.
-				 */
-				// if (dirtyHack) {
-				// DocumentChange temp = changes.get(workingCopy);
-				// if (temp != null) {
-				// documentChange.addEdit(temp.getEdit());
-				// }
-				// }
-
-				changes.put(workingCopy, documentChange);
+		if (changesAlreadyPresent) {
+			if (dirtyHack) {
+				// we have to collect changes a second time (see SIM-206)
+				collectChanges(workingCopy);
 			} else {
-				// no changes
+				// already have changes
+				Activator.log(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
 			}
+		} else {
+			collectChanges(workingCopy);
+		}
+
+	}
+
+	/**
+	 * Apply the current rule and collect all resulting changes.
+	 * 
+	 * @param workingCopies
+	 *            List of {@link ICompilationUnit} for which a
+	 *            {@link DocumentChange} for each selected rule is created
+	 * @throws JavaModelException
+	 *             if this element does not exist or if an exception occurs
+	 *             while accessing its corresponding resource.
+	 * @throws ReflectiveOperationException
+	 *             is thrown if the default constructor of {@link #visitor} is
+	 *             not present and the reflective construction fails.
+	 */
+	private void collectChanges(ICompilationUnit workingCopy) throws JavaModelException, ReflectiveOperationException {
+		DocumentChange documentChange = SimonykeesUtil.applyRule(workingCopy, visitor);
+		if (documentChange != null) {
+
+			/*
+			 * FIXME SIM-206: TryWithResource multiple new resource on empty
+			 * list
+			 */
+			/*
+			 * FIXME SIM-206: this particular part of the fix does not work.
+			 * This will create the correct results. However, the
+			 * RefactoringPreviewWizard will show the diff between the first and
+			 * the second run, rather than the diff between the original source
+			 * and the second run. See comment in SIM-206.
+			 */
+			// if (dirtyHack) {
+			// DocumentChange temp = changes.get(workingCopy);
+			// if (temp != null) {
+			// documentChange.addEdit(temp.getEdit());
+			// }
+			// }
+
+			changes.put(workingCopy, documentChange);
+		} else {
+			// no changes
 		}
 	}
 }
