@@ -20,7 +20,6 @@ import at.splendit.simonykees.core.exception.ReconcileException;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.i18n.ExceptionMessages;
-import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
@@ -102,7 +101,7 @@ public abstract class AbstractRefactorer {
 				 * unit increases worked amount for same size.
 				 */
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(compilationUnits.size());
-				subMonitor.setTaskName(Messages.ProgressMonitor_AbstractRefactorer_prepareRefactoring_taskName);
+				subMonitor.setTaskName(""); //$NON-NLS-1$
 
 				for (ICompilationUnit compilationUnit : compilationUnits) {
 					subMonitor.subTask(compilationUnit.getElementName());
@@ -157,7 +156,7 @@ public abstract class AbstractRefactorer {
 		 * for same size
 		 */
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(rules.size());
-		subMonitor.setTaskName(Messages.ProgressMonitor_AbstractRefactorer_doRefactoring_taskName);
+		subMonitor.setTaskName(""); //$NON-NLS-1$
 
 		List<String> notWorkingRules = new ArrayList<>();
 		for (RefactoringRule<? extends ASTVisitor> refactoringRule : rules) {
@@ -169,8 +168,9 @@ public abstract class AbstractRefactorer {
 			try {
 
 				/*
-				 * Sends new child of subMonitor which takes in progress bar size of 1 of rules size
-				 * In method that part of progress bar is split to number of compilation units 
+				 * Sends new child of subMonitor which takes in progress bar
+				 * size of 1 of rules size In method that part of progress bar
+				 * is split to number of compilation units
 				 */
 				refactoringRule.generateDocumentChanges(workingCopies, subMonitor.newChild(1));
 
@@ -267,6 +267,16 @@ public abstract class AbstractRefactorer {
 	}
 
 	public void clearWorkingCopies() {
+		for (ICompilationUnit workingCopy : workingCopies) {
+			try {
+				SimonykeesUtil.discardWorkingCopy(workingCopy);
+			} catch (JavaModelException e) {
+				Activator.log(Status.ERROR,
+						NLS.bind(ExceptionMessages.AbstractRefactorer_unable_to_discard_working_copy,
+								workingCopy.getPath().toString(), e.getMessage()),
+						e);
+			}
+		}
 		workingCopies.clear();
 	}
 }
