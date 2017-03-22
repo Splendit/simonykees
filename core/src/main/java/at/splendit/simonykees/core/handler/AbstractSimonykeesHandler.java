@@ -111,12 +111,6 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 		return StructuredSelection.EMPTY;
 	}
 
-	static void resetParser(ICompilationUnit compilationUnit, ASTParser astParser) {
-		astParser.setSource(compilationUnit);
-		astParser.setResolveBindings(true);
-		// astParser.setCompilerOptions(null);
-	}
-
 	static boolean hasNature(IProject project, String natureId) {
 		try {
 			return project.hasNature(natureId);
