@@ -1,7 +1,6 @@
 package at.splendit.simonykees.core.handler;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -17,7 +16,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.viewers.ISelection;
@@ -125,44 +123,6 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 		} catch (CoreException e) {
 			// FIXME find a useful exception
 			throw new RuntimeException(e.getCause());
-		}
-	}
-
-	static void getCompilationUnits(List<ICompilationUnit> result, List<IJavaElement> javaElements)
-			throws JavaModelException {
-		for (IJavaElement javaElement : javaElements) {
-			if (javaElement instanceof ICompilationUnit) {
-				ICompilationUnit compilationUnit = (ICompilationUnit) javaElement;
-				addCompilationUnit(result, compilationUnit);
-			} else if (javaElement instanceof IPackageFragment) {
-				IPackageFragment packageFragment = (IPackageFragment) javaElement;
-				addCompilationUnit(result, packageFragment.getCompilationUnits());
-			} else if (javaElement instanceof IPackageFragmentRoot) {
-				IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot) javaElement;
-				getCompilationUnits(result, Arrays.asList(packageFragmentRoot.getChildren()));
-			} else if (javaElement instanceof IJavaProject) {
-				IJavaProject javaProject = (IJavaProject) javaElement;
-				for (IPackageFragment packageFragment : javaProject.getPackageFragments()) {
-					addCompilationUnit(result, packageFragment.getCompilationUnits());
-				}
-			}
-		}
-	}
-
-	private static void addCompilationUnit(List<ICompilationUnit> result, ICompilationUnit compilationUnit)
-			throws JavaModelException {
-		if (!compilationUnit.isConsistent()) {
-			compilationUnit.makeConsistent(null);
-		}
-		if (!compilationUnit.isReadOnly()) {
-			result.add(compilationUnit);
-		}
-	}
-
-	private static void addCompilationUnit(List<ICompilationUnit> result, ICompilationUnit[] compilationUnits)
-			throws JavaModelException {
-		for (ICompilationUnit compilationUnit : compilationUnits) {
-			addCompilationUnit(result, compilationUnit);
 		}
 	}
 
