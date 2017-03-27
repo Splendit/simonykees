@@ -5,7 +5,9 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
@@ -74,7 +76,7 @@ public class SelectRulesWizard extends Wizard {
 						return Status.CANCEL_STATUS;
 					}
 				} catch (RefactoringException e) {
-					synchronizeWithUIShowError(e);
+					synchronizeWithUIShowInfo(e);
 					return Status.CANCEL_STATUS;
 				}
 				try {
@@ -84,31 +86,43 @@ public class SelectRulesWizard extends Wizard {
 						return Status.CANCEL_STATUS;
 					}
 				} catch (RefactoringException e) {
-					synchronizeWithUIShowError(e);
+					synchronizeWithUIShowInfo(e);
 					return Status.CANCEL_STATUS;
 				} catch (RuleException e) {
 					synchronizeWithUIShowError(e);
 					return Status.CANCEL_STATUS;
-				}
-
-				monitor.done();
-
-				if (LicenseUtil.isValid()) {
-					if (refactorer.hasChanges()) {
-
-						synchronizeWithUIShowRefactoringPreviewWizard(refactorer, rectangle);
-					} else {
-
-						synchronizeWithUIShowWarningNoRefactoringDialog();
-					}
-				} else {
-					synchronizeWithUIShowLicenseError();
+					
+				} finally {
+					monitor.done();					
 				}
 
 				return Status.OK_STATUS;
 			}
 		};
 		
+		job.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				
+				if (event.getResult().isOK()) {
+					if (LicenseUtil.isValid()) {
+						if (refactorer.hasChanges()) {
+							
+							synchronizeWithUIShowRefactoringPreviewWizard(refactorer, rectangle);
+						} else {
+							
+							synchronizeWithUIShowWarningNoRefactoringDialog();
+						}
+					} else {
+						
+						synchronizeWithUIShowLicenseError();
+					}
+				} else {
+					// do nothing if status is canceled, close
+				}
+			}
+		});
+
 		job.setUser(true);
 		job.schedule();
 
@@ -144,11 +158,7 @@ public class SelectRulesWizard extends Wizard {
 			@Override
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				MessageDialog dialog = new MessageDialog(shell, Messages.aa_codename, null,
-						Messages.SelectRulesWizard_warning_no_refactorings, MessageDialog.INFORMATION, 1,
-						Messages.ui_ok);
-
-				dialog.open();
+				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizard_warning_no_refactorings, MessageDialog.INFORMATION);
 			}
 
 		});
@@ -167,7 +177,7 @@ public class SelectRulesWizard extends Wizard {
 			}
 		});
 	}
-	
+
 	/**
 	 * Method used to open ErrorDialog from non UI thread
 	 */
@@ -178,6 +188,23 @@ public class SelectRulesWizard extends Wizard {
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				SimonykeesMessageDialog.openErrorMessageDialog(shell, exception);
+			}
+		});
+	}
+
+	/**
+	 * Method used to open InformationDialog from non UI thread
+	 * RefactoringException is thrown if java element does not exist or if an
+	 * exception occurs while accessing its corresponding resource, or if no
+	 * working copies were found to apply
+	 */
+	private void synchronizeWithUIShowInfo(SimonykeesException exception) {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
 			}
 		});
 	}
