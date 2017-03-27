@@ -91,30 +91,30 @@ public class SelectRulesWizard extends Wizard {
 				} catch (RuleException e) {
 					synchronizeWithUIShowError(e);
 					return Status.CANCEL_STATUS;
-					
+
 				} finally {
-					monitor.done();					
+					monitor.done();
 				}
 
 				return Status.OK_STATUS;
 			}
 		};
-		
+
 		job.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
-				
+
 				if (event.getResult().isOK()) {
 					if (LicenseUtil.isValid()) {
 						if (refactorer.hasChanges()) {
-							
+
 							synchronizeWithUIShowRefactoringPreviewWizard(refactorer, rectangle);
 						} else {
-							
+
 							synchronizeWithUIShowWarningNoRefactoringDialog();
 						}
 					} else {
-						
+
 						synchronizeWithUIShowLicenseError();
 					}
 				} else {
@@ -158,7 +158,8 @@ public class SelectRulesWizard extends Wizard {
 			@Override
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizard_warning_no_refactorings, MessageDialog.INFORMATION);
+				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizard_warning_no_refactorings,
+						MessageDialog.INFORMATION);
 			}
 
 		});
