@@ -33,7 +33,7 @@ import at.splendit.simonykees.core.visitor.sub.VariableDefinitionASTVisitor;
  */
 public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor {
 	
-	private static Map<String, Integer>renamings = new HashMap<>();
+	private Map<String, Integer>renamings = new HashMap<>();
 
 	@SuppressWarnings("unchecked")
 	@Override
