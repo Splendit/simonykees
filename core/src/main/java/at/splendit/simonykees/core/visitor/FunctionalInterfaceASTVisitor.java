@@ -1,7 +1,9 @@
 package at.splendit.simonykees.core.visitor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +32,8 @@ import at.splendit.simonykees.core.visitor.sub.VariableDefinitionASTVisitor;
  *
  */
 public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor {
+	
+	private static Map<String, Integer>renamings = new HashMap<>();
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -165,11 +169,21 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 				.collect(Collectors.toList());
 
 		String newName;
+		String currentName = simpleName.getIdentifier();
+		if(renamings.containsKey(currentName)) {
+			suffix = renamings.get(currentName) + 1;
+		}
 
+		boolean inalidNewName = true;
 		do {
-			newName = simpleName.getIdentifier() + Integer.toString(suffix);
+			newName = currentName + Integer.toString(suffix);
+			if(!identifiers.contains(newName)) {
+				inalidNewName = false;
+				// keep track of the introduced new names
+				renamings.put(currentName, suffix);
+			}
 			suffix++;
-		} while (identifiers.contains(newName));
+		} while (inalidNewName);
 
 		return newName;
 	}
@@ -181,16 +195,19 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	private ASTNode findScope(AnonymousClassDeclaration node, List<ASTNode> relevantBlocks) {
 		ASTNode scope = null;
 		if (node != null && relevantBlocks != null) {
+			relevantBlocks.add(node);
 			scope = node;
 			do {
 				scope = scope.getParent();
 				int scopeNodeType = scope.getNodeType();
 				if (ASTNode.BLOCK == scopeNodeType || ASTNode.FOR_STATEMENT == scopeNodeType
-						|| ASTNode.METHOD_DECLARATION == scopeNodeType) {
+						|| ASTNode.METHOD_DECLARATION == scopeNodeType || ASTNode.LAMBDA_EXPRESSION == scopeNodeType) {
 					relevantBlocks.add(scope);
 				}
-			} while (scope != null && scope.getNodeType() != ASTNode.METHOD_DECLARATION
-					&& scope.getNodeType() != ASTNode.TYPE_DECLARATION && scope.getNodeType() != ASTNode.INITIALIZER);
+			} while (scope != null 
+					&& (scope.getNodeType() != ASTNode.METHOD_DECLARATION || ASTNode.ANONYMOUS_CLASS_DECLARATION == scope.getParent().getNodeType())
+					&& scope.getNodeType() != ASTNode.TYPE_DECLARATION 
+					&& scope.getNodeType() != ASTNode.INITIALIZER);
 		}
 
 		return scope;
