@@ -152,6 +152,52 @@ public class TestFunctionalInterfaceRule {
 				}
 			});
 	}
+	
+	public void nestedLambdaExpressions(String input) {
+		int repeatedName = 0;
+		AFunctionalInterface foo = new AFunctionalInterface() {
+
+			@Override
+			public void method(int repeatedName) {
+				if(repeatedName > 0) {
+
+					AFunctionalInterface innerFoo = new AFunctionalInterface() {
+						
+						@Override
+						public void method(int repeatedName) {
+							int c = repeatedName;
+							c++;
+						}
+					};
+				}
+				
+			}
+			
+		};
+	}
+	
+	public void cascadedLambdaExpressions(String input) {
+		AFunctionalInterface foo = new AFunctionalInterface() {
+
+			@Override
+			public void method(int a) {
+				if(a > 0) {
+					int b = a;
+				}
+				
+			}
+			
+		};
+
+		AFunctionalInterface innerFoo = new AFunctionalInterface() {
+			
+			@Override
+			public void method(int a) {
+				int b = a;
+				b++;
+			}
+		};
+	}
 
 	private interface AFunctionalInterface {
 		public void method(int a);
