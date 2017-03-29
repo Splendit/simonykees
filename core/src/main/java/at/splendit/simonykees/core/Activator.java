@@ -105,6 +105,10 @@ public class Activator extends AbstractUIPlugin {
 		log(new SimonykeesStatus(IStatus.INFO, PLUGIN_ID, message, e));
 	}
 
+	public static void log(int severity, String message) {
+		log(new SimonykeesStatus(severity, PLUGIN_ID, message));
+	}
+
 	public static void log(String message) {
 		log(new SimonykeesStatus(IStatus.INFO, PLUGIN_ID, message));
 	}
