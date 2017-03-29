@@ -61,7 +61,6 @@ public class TestFunctionalInterfaceRule {
 	}
 
 	public void clashingLocalVariableNames(int l) {
-
 		int a, a1;
 		a = 5;
 		a1 = 6;
@@ -118,6 +117,34 @@ public class TestFunctionalInterfaceRule {
 				return s;
 			}
 		});
+	}
+
+	public void nestedLambdaExpressions(String input) {
+		int repeatedName = 0;
+		AFunctionalInterface foo = (int repeatedName1) -> {
+			if (repeatedName1 > 0) {
+
+				AFunctionalInterface innerFoo = (int repeatedName2) -> {
+					int c = repeatedName2;
+					c++;
+				};
+			}
+
+		};
+	}
+
+	public void cascadedLambdaExpressions(String input) {
+		AFunctionalInterface foo = (int a) -> {
+			if (a > 0) {
+				int b = a;
+			}
+
+		};
+
+		AFunctionalInterface innerFoo = (int a) -> {
+			int b = a;
+			b++;
+		};
 	}
 
 	private interface AFunctionalInterface {
