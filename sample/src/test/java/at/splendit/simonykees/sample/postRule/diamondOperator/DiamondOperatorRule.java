@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"unused", "unchecked", "rawtypes"})
+@SuppressWarnings({"unused", "unchecked", "rawtypes", "nls"})
 public class DiamondOperatorRule {
 	
 	private class GenericSample<T> {
@@ -27,9 +27,12 @@ public class DiamondOperatorRule {
 	private abstract class Foo<T> {
 		private T t;
 		private List<T> field = new ArrayList<>();
+		private List<String>[] arrayList;
+		
 		
 		public Foo (T t) {
 			setValue(t);
+			arrayList = new ArrayList[2];
 		}
 		
 		private void setValue(T t) {
@@ -38,6 +41,14 @@ public class DiamondOperatorRule {
 		
 		public T getValue() {
 			return t;
+		}
+		
+		public void resetValue() {
+			this.field = new ArrayList<>();
+			arrayList[0] = new ArrayList<>();
+			for(List<String>list = new ArrayList<>(); !list.isEmpty(); ) {
+				list.add("");
+			}
 		}
 	}
 	
