@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -77,6 +78,8 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 						lhsType = ((VariableDeclarationStatement) declarationStatement).getType();
 					} else if (ASTNode.FIELD_DECLARATION == declarationStatement.getNodeType()) {
 						lhsType = ((FieldDeclaration) declarationStatement).getType();
+					} else if (ASTNode.VARIABLE_DECLARATION_EXPRESSION == declarationStatement.getNodeType()) {
+						lhsType = ((VariableDeclarationExpression) declarationStatement).getType();
 					}
 					if (lhsType != null && ASTNode.PARAMETERIZED_TYPE == lhsType.getNodeType()) {
 						sameTypes = areParameterizedTypeEqual((ParameterizedType) lhsType, rhsTypeArguments);
@@ -94,16 +97,19 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					 */
 					Assignment assignmentNode = ((Assignment) parent);
 					Expression lhsNode = assignmentNode.getLeftHandSide();
-					if (ASTNode.SIMPLE_NAME == lhsNode.getNodeType()) {
-						ITypeBinding lhsTypeBinding = lhsNode.resolveTypeBinding();
+					ITypeBinding lhsTypeBinding = lhsNode.resolveTypeBinding();
+					if(lhsTypeBinding != null) {
 						ITypeBinding[] lhsTypeBindingArguments = lhsTypeBinding.getTypeArguments();
 						ITypeBinding rhsTypeBinding = node.resolveTypeBinding();
-						ITypeBinding[] rhsTypeBindingArguments = rhsTypeBinding.getTypeArguments();
-						// compare type arguments in new instance creation with
-						// the ones in declaration
-						sameTypes = ClassRelationUtil.compareITypeBinding(lhsTypeBindingArguments,
-								rhsTypeBindingArguments);
+						if(rhsTypeBinding != null) {
+							ITypeBinding[] rhsTypeBindingArguments = rhsTypeBinding.getTypeArguments();
+							// compare type arguments in new instance creation with
+							// the ones in declaration
+							sameTypes = ClassRelationUtil.compareITypeBinding(lhsTypeBindingArguments,
+									rhsTypeBindingArguments);
+						}
 					}
+
 				} else if (ASTNode.METHOD_INVOCATION == parent.getNodeType()
 						&& MethodInvocation.ARGUMENTS_PROPERTY == node.getLocationInParent()) {
 
