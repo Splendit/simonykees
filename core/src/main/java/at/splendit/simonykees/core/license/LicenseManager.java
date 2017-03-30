@@ -32,7 +32,7 @@ import oshi.hardware.HardwareAbstractionLayer;
  * result of the validation, and provides relevant information of the validation
  * results.
  * 
- * @author Ardit Ymeri
+ * @author Ardit Ymeri, Andreja Sambolec
  * @since 1.0
  *
  */
@@ -218,7 +218,8 @@ public class LicenseManager {
 			ValidationParameters checkingValParameters = floatingModel.getCheckInValidationParameters();
 			try {
 				Instant now = Instant.now();
-				Activator.log(Messages.LicenseManager_session_check_in);
+				//FIXME figure logging configuration
+//				Activator.log(Messages.LicenseManager_session_check_in);
 				ValidationResult checkinResult = LicenseeService.validate(context, getLicenseeNumber(), checkingValParameters);
 				ValidationResultCache cache = ValidationResultCache.getInstance();
 				cache.updateCachedResult(checkinResult, getLicenseeName(), getLicenseeNumber(), now, ValidationAction.CHECK_IN);
