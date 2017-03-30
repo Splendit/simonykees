@@ -209,9 +209,8 @@ public class LicenseManager {
 			ValidationParameters checkingValParameters = floatingModel.getCheckInValidationParameters();
 			try {
 				Instant now = Instant.now();
-				//FIXME figure logging configuration
-//				Activator.log(Messages.LicenseManager_session_check_in);
-				ValidationResult checkinResult = LicenseeService.validate(context, getLicenseeNumber(), checkingValParameters);
+				// FIXME (see SIM-331) figure out better logging configuration
+				// Activator.log(Messages.LicenseManager_session_check_in);
 				ValidationResult checkinResult = LicenseeService.validate(context, getLicenseeNumber(),
 						checkingValParameters);
 				ValidationResultCache cache = ValidationResultCache.getInstance();

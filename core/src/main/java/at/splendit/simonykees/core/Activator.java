@@ -64,7 +64,7 @@ public class Activator extends AbstractUIPlugin {
 		 * release the current license session (in case of a floating license)
 		 */
 		LicenseManager.getInstance().checkIn();
-		// FIXME figure logging configuration
+		// FIXME (see SIM-331) figure out better logging configuration
 		// Activator.log(Messages.Activator_stop);
 
 		plugin = null;
