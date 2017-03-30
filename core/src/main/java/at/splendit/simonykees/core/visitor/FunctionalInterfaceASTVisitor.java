@@ -12,9 +12,12 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -32,8 +35,8 @@ import at.splendit.simonykees.core.visitor.sub.VariableDefinitionASTVisitor;
  *
  */
 public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor {
-	
-	private Map<String, Integer>renamings = new HashMap<>();
+
+	private Map<String, Integer> renamings = new HashMap<>();
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -46,8 +49,8 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			 * Check if the consuming part is the same type (assignment to the
 			 * same type, method parameter is the same type)
 			 */
-			boolean allowedType = ClassRelationUtil.compareITypeBinding(ASTNodeUtil.getTypeBindingOfNodeUsage(parentNode),
-					classType.resolveBinding());
+			boolean allowedType = ClassRelationUtil
+					.compareITypeBinding(ASTNodeUtil.getTypeBindingOfNodeUsage(parentNode), classType.resolveBinding());
 
 			if (allowedType && ASTNode.PARAMETERIZED_TYPE != classType.getNodeType()) {
 				ITypeBinding parentNodeTypeBinding = parentNode.getType().resolveBinding();
@@ -64,12 +67,33 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					node.accept(methodBlockASTVisitor);
 					Block moveBlock = methodBlockASTVisitor.getMethodBlock();
 					if (moveBlock != null) {
+						// find the scope for renaming relevant variables and
+						// static scope check
+						List<ASTNode> relevantBlocks = new ArrayList<>();
+						ASTNode scope = findScope(node, relevantBlocks);
+
+						List<IExtendedModifier> modifiers = null;
+						if (ASTNode.INITIALIZER == scope.getNodeType()) {
+							modifiers = ASTNodeUtil.returnTypedList(((Initializer) scope).modifiers(),
+									IExtendedModifier.class);
+						} else if (ASTNode.METHOD_DECLARATION == scope.getNodeType()) {
+							modifiers = ASTNodeUtil.returnTypedList(((MethodDeclaration) scope).modifiers(),
+									IExtendedModifier.class);
+						}
+						if (modifiers != null && modifiers.stream().filter(Modifier.class::isInstance)
+								.map(Modifier.class::cast).anyMatch(modifier -> Modifier.ModifierKeyword.STATIC_KEYWORD
+										.equals(modifier.getKeyword()))) {
+							/*
+							 * TODO skipping static methods for the moment Need
+							 * to implement handling of non static method calls
+							 * (scopechange with functionalinterface) SIM-321 ->
+							 * SIM-324
+							 */
+							return true;
+						}
+
 						List<SingleVariableDeclaration> parameteres = methodBlockASTVisitor.getParameters();
 						if (parameteres != null) {
-							List<ASTNode> relevantBlocks = new ArrayList<>();
-
-							// renaming the clashing variable names
-							ASTNode scope = findScope(node, relevantBlocks);
 							if (ASTNode.TYPE_DECLARATION != scope.getNodeType()) {
 								/*
 								 * if the scope is the whole class, no need to
@@ -97,6 +121,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			}
 		}
 		return true;
+
 	}
 
 	/**
@@ -170,14 +195,14 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		String newName;
 		String currentName = simpleName.getIdentifier();
-		if(renamings.containsKey(currentName)) {
+		if (renamings.containsKey(currentName)) {
 			suffix = renamings.get(currentName) + 1;
 		}
 
 		boolean inalidNewName = true;
 		do {
 			newName = currentName + Integer.toString(suffix);
-			if(!identifiers.contains(newName)) {
+			if (!identifiers.contains(newName)) {
 				inalidNewName = false;
 				// keep track of the introduced new names
 				renamings.put(currentName, suffix);
@@ -197,6 +222,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		if (node != null && relevantBlocks != null) {
 			relevantBlocks.add(node);
 			scope = node;
+			boolean stopCondition = true;
 			do {
 				scope = scope.getParent();
 				int scopeNodeType = scope.getNodeType();
@@ -204,12 +230,14 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						|| ASTNode.METHOD_DECLARATION == scopeNodeType || ASTNode.LAMBDA_EXPRESSION == scopeNodeType) {
 					relevantBlocks.add(scope);
 				}
-			} while (scope != null 
-					&& (scope.getNodeType() != ASTNode.METHOD_DECLARATION || ASTNode.ANONYMOUS_CLASS_DECLARATION == scope.getParent().getNodeType())
-					&& scope.getNodeType() != ASTNode.TYPE_DECLARATION 
-					&& scope.getNodeType() != ASTNode.INITIALIZER);
-		}
 
+				stopCondition = scope == null
+						|| (scope.getNodeType() == ASTNode.METHOD_DECLARATION && scope.getParent() != null
+								&& ASTNode.ANONYMOUS_CLASS_DECLARATION != scope.getParent().getNodeType())
+						|| scope.getNodeType() == ASTNode.TYPE_DECLARATION
+						|| scope.getNodeType() == ASTNode.INITIALIZER;
+			} while (!stopCondition);
+		}
 		return scope;
 	}
 

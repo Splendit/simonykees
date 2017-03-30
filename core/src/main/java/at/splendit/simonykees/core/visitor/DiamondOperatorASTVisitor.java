@@ -1,7 +1,6 @@
 package at.splendit.simonykees.core.visitor;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -22,6 +21,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
@@ -49,9 +49,8 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 			boolean sameTypes = false;
 			ParameterizedType parameterizedType = (ParameterizedType) nodeType;
 			// safe casting to typed list
-			@SuppressWarnings("unchecked")
-			List<Type> rhsTypeArguments = ((List<Object>) parameterizedType.typeArguments()).stream()
-					.filter(Type.class::isInstance).map(Type.class::cast).collect(Collectors.toList());
+			
+			List<Type> rhsTypeArguments = ASTNodeUtil.returnTypedList(parameterizedType.typeArguments(), Type.class);
 
 			if (rhsTypeArguments != null && !rhsTypeArguments.isEmpty()) {
 				ASTNode parent = node.getParent();
@@ -120,10 +119,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					 * replaced with: <br/> {@code map.put("key", new
 					 * ArrayList<>());} <br/>
 					 */
-					@SuppressWarnings("unchecked")
-					List<Expression> argumentList = ((List<Object>) ((MethodInvocation) parent).arguments()).stream()
-							.filter(Expression.class::isInstance).map(Expression.class::cast)
-							.collect(Collectors.toList());
+					List<Expression> argumentList = ASTNodeUtil.returnTypedList(((MethodInvocation) parent).arguments(), Expression.class);
 
 					ITypeBinding[] parameterTypeArgs = null;
 
@@ -184,9 +180,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private boolean areParameterizedTypeEqual(ParameterizedType parameterizedType, List<Type> referenceGenerics) {
-		@SuppressWarnings("unchecked")
-		List<Type> returnTypeArgumetns = ((List<Object>) ((ParameterizedType) parameterizedType).typeArguments())
-				.stream().filter(Type.class::isInstance).map(Type.class::cast).collect(Collectors.toList());
+		List<Type> returnTypeArgumetns = ASTNodeUtil.returnTypedList(((ParameterizedType) parameterizedType).typeArguments(), Type.class);
 
 		ASTMatcher matcher = new ASTMatcher();
 		return matcher.safeSubtreeListMatch(returnTypeArgumetns, referenceGenerics);
