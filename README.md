@@ -15,7 +15,6 @@
 		updated osgi bundle will be visible on:
 		http://packagedrone-vm-01.splendit.loc:8080/p2/jSparrow-test-channel/
 
-
 ## build ##
 
     mvn clean verify -fae
