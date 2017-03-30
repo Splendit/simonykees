@@ -197,6 +197,35 @@ public class TestFunctionalInterfaceRule {
 			}
 		};
 	}
+	
+	public String maliciousComments(String input) { 
+		  
+		String local = input; 
+		AFunctionalInterface fooComments = new AFunctionalInterface() { 
+	 
+		@Override 
+		public void method(int fooComments) { 
+	        String toString = "toString"; 
+	        
+		  }
+		/* } */ 
+		}; 
+		     
+		AFunctionalInterface fooComments2 = new AFunctionalInterface() {
+		 
+			/** 
+			* what happens with javadoc? 
+			*/ 
+			@Override 
+			public void method(int fooComments) {
+			    String toString = "toString"; 
+			} 
+			   
+			//TODO: some important comment. shall not be removed! 
+		}; 
+	
+	return input; 
+	}
 
 	private interface AFunctionalInterface {
 		public void method(int a);

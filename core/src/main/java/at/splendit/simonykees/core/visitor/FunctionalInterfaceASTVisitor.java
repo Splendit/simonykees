@@ -17,7 +17,9 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
@@ -63,7 +65,14 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					MethodBlockASTVisitor methodBlockASTVisitor = new MethodBlockASTVisitor();
 					node.accept(methodBlockASTVisitor);
 					Block moveBlock = methodBlockASTVisitor.getMethodBlock();
+					
 					if (moveBlock != null) {
+						
+						ListRewrite listRewrite = getAstRewrite().getListRewrite(node, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+						Statement placeHolder = (Statement) getAstRewrite().createStringPlaceholder("", ASTNode.EMPTY_STATEMENT); //$NON-NLS-1$
+						listRewrite.insertAfter(placeHolder, moveBlock.getParent(),  null);
+//						listRewrite.insertLast(placeHolder, null);
+
 						List<SingleVariableDeclaration> parameteres = methodBlockASTVisitor.getParameters();
 						if (parameteres != null) {
 							List<ASTNode> relevantBlocks = new ArrayList<>();
@@ -241,14 +250,17 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		@SuppressWarnings("unchecked")
 		@Override
 		public boolean visit(MethodDeclaration node) {
-			if (!node.parameters().isEmpty()) {
-				/**
-				 * node.parameters() ensures that the List contains only
-				 * SingleVariableDeclaration
-				 */
-				parameters = node.parameters();
-			}
-			methodBlock = node.getBody();
+	      if(node.getJavadoc() == null) { 
+	          if (!node.parameters().isEmpty()) { 
+	            /** 
+	             * node.parameters() ensures that the List contains only 
+	             * SingleVariableDeclaration 
+	             */ 
+	            parameters = node.parameters(); 
+	          } 
+	           
+	          methodBlock = node.getBody(); 
+	        } 
 			return false;
 		}
 
