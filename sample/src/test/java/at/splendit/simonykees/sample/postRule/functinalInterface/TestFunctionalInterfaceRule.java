@@ -147,6 +147,20 @@ public class TestFunctionalInterfaceRule {
 			b++;
 		};
 	}
+	
+	public String redeclaringLocalVariableInAnEnclosingScope(String input) {
+		String local = input;
+		int a = 0;
+		int toString = a;
+		
+		AFunctionalInterface foo = (int a1)->{
+			String toString1 = "toString";
+			String local1 = Integer.toString(a1);
+			String input1 = local1;
+		};
+		
+		return local;
+	}
 
 	private interface AFunctionalInterface {
 		public void method(int a);
