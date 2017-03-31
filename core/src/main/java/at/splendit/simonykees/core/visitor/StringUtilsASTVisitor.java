@@ -1,7 +1,6 @@
 package at.splendit.simonykees.core.visitor;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
@@ -16,6 +15,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
@@ -86,9 +86,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 		 * conflicting with org.apache.commons.lang3.StringUtils
 		 */
 		if(!clashingImports) {
-			@SuppressWarnings("unchecked")
-			List<ImportDeclaration> imports = ((List<Object>) compilationUnit.imports()).stream()
-					.filter(ImportDeclaration.class::isInstance).map(ImportDeclaration.class::cast).collect(Collectors.toList());
+			List<ImportDeclaration> imports = ASTNodeUtil.returnTypedList(compilationUnit.imports(), ImportDeclaration.class);
 			
 			for(ImportDeclaration importDeclaration : imports) {
 				Name qualifiedName = importDeclaration.getName();

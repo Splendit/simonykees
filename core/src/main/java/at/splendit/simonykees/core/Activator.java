@@ -18,7 +18,7 @@ import at.splendit.simonykees.core.license.LicenseManager;
 /**
  * The activator class controls the plug-in life cycle
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec
  * @since 0.9
  */
 public class Activator extends AbstractUIPlugin {
@@ -64,7 +64,8 @@ public class Activator extends AbstractUIPlugin {
 		 * release the current license session (in case of a floating license)
 		 */
 		LicenseManager.getInstance().checkIn();
-		Activator.log(Messages.Activator_stop);
+		// FIXME (see SIM-331) figure out better logging configuration
+		// Activator.log(Messages.Activator_stop);
 
 		plugin = null;
 

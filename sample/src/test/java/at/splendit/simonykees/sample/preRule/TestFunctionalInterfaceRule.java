@@ -198,6 +198,52 @@ public class TestFunctionalInterfaceRule {
 		};
 	}
 	
+	public String redeclaringLocalVariableInAnEnclosingScope(String input) {
+		String local = input;
+		int a = 0;
+		int toString = a;
+		
+		AFunctionalInterface foo = new AFunctionalInterface() {
+			
+			@Override
+			public void method(int a) {
+				String toString = "toString";
+				String local = Integer.toString(a);
+				String input = local;
+			}
+		};
+		
+		return local;
+	}
+	
+	public String nestedRedeclaringLocalVariableInAnEnclosingScope(String input) {
+		String local = input;
+		int a = 0;
+		int toString = a;
+		
+		AFunctionalInterface foo = new AFunctionalInterface() {
+			
+			@Override
+			public void method(int a) {
+				String toString = "toString";
+				String local = Integer.toString(a);
+				String input = local;
+				
+				AFunctionalInterface foo = new AFunctionalInterface() {
+					
+					@Override
+					public void method(int a) {
+						String toString = "toString";
+						String local = Integer.toString(a);
+						String input = local;
+					}
+				};
+			}
+		};
+		
+		return local;
+	}
+	
 	public String commentFreeAnonymousClass(String input) { 
 		  
 		String local = input; 
