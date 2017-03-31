@@ -163,7 +163,10 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		if (node.getParent() != null && ASTNode.TYPE_DECLARATION == node.getParent().getNodeType()) {
 			renamings.clear();
 		}
-		return true;
+		//FIXME SIM-335: it is better to detected the uninitialized fields that are referenced in the body. 
+		boolean isConstructor = node.isConstructor();
+		
+		return !isConstructor;
 	}
 
 	private List<SimpleName> checkForClashingLocalVariables(List<SimpleName> scopeNames,
@@ -409,6 +412,17 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		@Override
 		public boolean visit(VariableDeclarationFragment node) {
+			blockVariableNames.add(node.getName());
+			return true;
+		}
+		
+		@Override
+		public boolean visit(ClassInstanceCreation node) {
+			return false;
+		}
+		
+		@Override
+		public boolean visit(SingleVariableDeclaration node) {
 			blockVariableNames.add(node.getName());
 			return true;
 		}
