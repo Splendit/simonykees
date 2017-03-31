@@ -410,6 +410,15 @@
 				<!-- skipping test for proguard because they dont work -->
 				<maven.test.skip>true</maven.test.skip>
 			</properties>
+
+			<distributionManagement>
+				<repository>
+					<id>pdrone.b8eed447-5f46-42c2-bfc1-1b9b174069e5</id>
+					<!-- should be this id for correct channel id reference in id, but then this id also needed to be added to settings.xml, will be improved with automated deployment -->
+					<!-- <id>pdrone.45eec635-9bd5-4b75-8b69-69e9e126d733</id>-->
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/45eec635-9bd5-4b75-8b69-69e9e126d733</url>
+				</repository>
+			</distributionManagement>
 		</profile>
 	</profiles>
 
