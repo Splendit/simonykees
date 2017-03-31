@@ -1,5 +1,9 @@
 package at.splendit.simonykees.core.util;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -9,6 +13,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
@@ -34,14 +39,16 @@ public class ASTNodeUtil {
 	 *            ASTNode where the backward search is started
 	 * @return surrounding {@link Block}, null if non exists
 	 */
-	public static Block getSurroundingBlock(ASTNode node) {
+	@SuppressWarnings("unchecked")
+	public static <T> T getSpecificAncestor(ASTNode node, Class<T> nodeType) {
 		if (node == null) {
 			return null;
 		}
-		if (node.getParent() instanceof Block) {
-			return (Block) node.getParent();
+		;
+		if (nodeType.isInstance(node.getParent())) {
+			return (T) node.getParent();
 		} else {
-			return getSurroundingBlock(node.getParent());
+			return getSpecificAncestor(node.getParent(), nodeType);
 		}
 	}
 
@@ -192,7 +199,37 @@ public class ASTNodeUtil {
 				variableTypeBinding = svd.getType().resolveBinding();
 			}
 
+			if (ASTNode.RETURN_STATEMENT == classInstanceExecuterType) {
+				MethodDeclaration mD = ASTNodeUtil.getSpecificAncestor(classInstanceExecuter, MethodDeclaration.class);
+				variableTypeBinding = mD.getReturnType2().resolveBinding();
+			}
+
 		}
 		return variableTypeBinding;
+	}
+
+	/**
+	 * Returns list with generic type if all elements are instance of listType
+	 * 
+	 * @param rawList
+	 *            the raw list
+	 * @param listType
+	 *            the generic type of the list
+	 * @return emptyList if not all objects are from the listType, otherwise the
+	 *         list with generic parameter.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> List<T> returnTypedList(@SuppressWarnings("rawtypes") List rawList, Class<T> listType) {
+		if (rawList == null || listType == null) {
+			return Collections.emptyList();
+		}
+
+		List<T> returnList = ((List<Object>) rawList).stream().filter(listType::isInstance).map(listType::cast)
+				.collect(Collectors.toList());
+
+		if (returnList.size() != rawList.size()) {
+			return Collections.emptyList();
+		}
+		return returnList;
 	}
 }
