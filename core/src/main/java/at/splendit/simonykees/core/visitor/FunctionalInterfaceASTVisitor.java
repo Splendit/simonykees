@@ -12,14 +12,14 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Comment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
@@ -36,6 +36,13 @@ import at.splendit.simonykees.core.visitor.sub.VariableDefinitionASTVisitor;
 public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor {
 	
 	private Map<String, Integer>renamings = new HashMap<>();
+	private CompilationUnit compilationUnit;
+	
+	@Override
+	public boolean visit(CompilationUnit compilationUnit) {
+		this.compilationUnit = compilationUnit;
+		return true;
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -66,12 +73,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					node.accept(methodBlockASTVisitor);
 					Block moveBlock = methodBlockASTVisitor.getMethodBlock();
 					
-					if (moveBlock != null) {
-						
-						ListRewrite listRewrite = getAstRewrite().getListRewrite(node, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
-						Statement placeHolder = (Statement) getAstRewrite().createStringPlaceholder("", ASTNode.EMPTY_STATEMENT); //$NON-NLS-1$
-						listRewrite.insertAfter(placeHolder, moveBlock.getParent(),  null);
-//						listRewrite.insertLast(placeHolder, null);
+					if (moveBlock != null && isCommentFree(node, moveBlock)) {
 
 						List<SingleVariableDeclaration> parameteres = methodBlockASTVisitor.getParameters();
 						if (parameteres != null) {
@@ -234,6 +236,42 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		return parameters.stream().map(parameter -> parameter.getName())
 				.filter(parameter -> varNames.contains(parameter.getIdentifier())).collect(Collectors.toList());
+	}
+	
+	private boolean isCommentFree(AnonymousClassDeclaration node, Block moveBlock) {
+		boolean commentFree = false;
+		if(compilationUnit != null) {
+			int nodeStartPos = node.getStartPosition();
+			int nodeLength = node.getLength();
+			int nodeLastPos = nodeStartPos + nodeLength;
+			int blockStartPos = moveBlock.getStartPosition();
+			int blockEndPos = moveBlock.getStartPosition() + moveBlock.getLength();
+			
+			@SuppressWarnings("unchecked")
+			List<Comment> allComments = 
+					((List<Object>) compilationUnit.getCommentList())
+					.stream()
+					.filter(Comment.class::isInstance)
+					.map(Comment.class::cast)
+					.collect(Collectors.toList());
+			
+			boolean hasComments =  
+					allComments
+					.stream()
+					.filter(comment -> {
+						int commentStartPos = comment.getStartPosition();
+						int commentLastPOs = commentStartPos + comment.getLength();
+						return 
+								(commentStartPos > nodeStartPos && commentLastPOs < blockStartPos) 
+								|| (commentStartPos > blockEndPos && commentLastPOs < nodeLastPos);
+					})
+					.findAny()
+					.isPresent();
+			
+			commentFree = !hasComments;
+		}
+		
+		return commentFree;
 	}
 
 	private class MethodBlockASTVisitor extends ASTVisitor {
