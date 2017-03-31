@@ -49,8 +49,6 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		return true;
 	}
 
-	private Map<String, Integer> renamings = new HashMap<>();
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
@@ -358,17 +356,14 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		@SuppressWarnings("unchecked")
 		@Override
 		public boolean visit(MethodDeclaration node) {
-	      if(node.getJavadoc() == null) { 
-	          if (!node.parameters().isEmpty()) { 
-	            /** 
+			if (!node.parameters().isEmpty()) { 
+				/** 
 	             * node.parameters() ensures that the List contains only 
 	             * SingleVariableDeclaration 
 	             */ 
 	            parameters = node.parameters(); 
-	          } 
-	           
-	          methodBlock = node.getBody(); 
-	        } 
+			} 
+			methodBlock = node.getBody();
 			return false;
 		}
 
