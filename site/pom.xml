@@ -16,6 +16,11 @@
 		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/site</url>
 	</scm>
 
+	<properties>
+		<!-- skipping install and deployment of non-site modules -->
+		<maven.deploy.skip>false</maven.deploy.skip>
+	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
