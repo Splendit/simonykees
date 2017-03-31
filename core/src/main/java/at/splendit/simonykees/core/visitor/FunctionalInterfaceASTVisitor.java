@@ -348,7 +348,6 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			return false;
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public boolean visit(MethodDeclaration node) {
 			if (!node.parameters().isEmpty()) { 
@@ -356,7 +355,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	             * node.parameters() ensures that the List contains only 
 	             * SingleVariableDeclaration 
 	             */ 
-	            parameters = node.parameters(); 
+	            parameters = ASTNodeUtil.returnTypedList(node.parameters(),SingleVariableDeclaration.class); 
 			} 
 			methodBlock = node.getBody();
 			return false;
