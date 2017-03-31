@@ -6,7 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -32,7 +34,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * <li>{@link #commitRefactoring()}</li>
  * </ol>
  * 
- * @author Hannes Schweighofer
+ * @author Hannes Schweighofer, Andreja Sambolec
  * @since 0.9
  *
  */
@@ -50,10 +52,11 @@ public abstract class AbstractRefactorer {
 	 * @param rules
 	 *            {@link List} of {@link RefactoringRule}s to apply to the
 	 *            {@link IJavaElement}s
-	 *            
+	 * 
 	 * @since 0.9
 	 */
-	public AbstractRefactorer(List<IJavaElement> javaElements, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+	public AbstractRefactorer(List<IJavaElement> javaElements,
+			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		this.javaElements = javaElements;
 		this.rules = rules;
 	}
@@ -63,6 +66,9 @@ public abstract class AbstractRefactorer {
 	 * Find {@link ICompilationUnit}s and create working copies for the
 	 * {@link IJavaElement}s
 	 * 
+	 * @param IProgressMonitor
+	 *            monitor used to show progress in UI
+	 * 
 	 * @throws RefactoringException
 	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
@@ -71,10 +77,11 @@ public abstract class AbstractRefactorer {
 	 * 
 	 * @see SimonykeesUtil#collectICompilationUnits(List, List)
 	 */
-	public void prepareRefactoring() throws RefactoringException {
+	public void prepareRefactoring(IProgressMonitor monitor) throws RefactoringException {
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
+
 		try {
-			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements);
+			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements, monitor);
 			if (compilationUnits.isEmpty()) {
 				Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found,
 						null);
@@ -86,8 +93,29 @@ public abstract class AbstractRefactorer {
 				throw new RefactoringException(
 						ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated);
 			} else {
+
+				/*
+				 * Converts the monitor to a SubMonitor and sets name of task on
+				 * progress monitor dialog. Size is set to number 100 and then
+				 * scaled to size of the compilationUnits list. Each compilation
+				 * unit increases worked amount for same size.
+				 */
+				SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(compilationUnits.size());
+				subMonitor.setTaskName(""); //$NON-NLS-1$
+
 				for (ICompilationUnit compilationUnit : compilationUnits) {
+					subMonitor.subTask(compilationUnit.getElementName());
 					workingCopies.add(compilationUnit.getWorkingCopy(null));
+
+					/*
+					 * If cancel is pressed on progress monitor, abort all and
+					 * return, else continue
+					 */
+					if (subMonitor.isCanceled()) {
+						return;
+					} else {
+						subMonitor.worked(1);
+					}
 				}
 			}
 		} catch (JavaModelException e) {
@@ -99,6 +127,9 @@ public abstract class AbstractRefactorer {
 
 	/**
 	 * Apply {@link RefactoringRule}s to the working copies
+	 * 
+	 * @param IProgressMonitor
+	 *            monitor used to show progress in UI
 	 * 
 	 * @throws RefactoringException
 	 *             if no working copies were found to apply
@@ -112,24 +143,48 @@ public abstract class AbstractRefactorer {
 	 * @see RefactoringRule#generateDocumentChanges(List)
 	 * 
 	 */
-	public void doRefactoring() throws RefactoringException, RuleException {
+	public void doRefactoring(IProgressMonitor monitor) throws RefactoringException, RuleException {
 		if (workingCopies.isEmpty()) {
 			Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung, null);
 			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
 		}
+
+		/*
+		 * Converts the monitor to a SubMonitor and sets name of task on
+		 * progress monitor dialog Size is set to number 100 and then scaled to
+		 * size of the rules list Each refactoring rule increases worked amount
+		 * for same size
+		 */
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(rules.size());
+		subMonitor.setTaskName(""); //$NON-NLS-1$
+
 		List<String> notWorkingRules = new ArrayList<>();
 		for (RefactoringRule<? extends ASTVisitor> refactoringRule : rules) {
-			//TODO catch all exceptions from ASTVisitor execution?
-			// if any exception is thrown discard all changes from this rule
+			/*
+			 * TODO catch all exceptions from ASTVisitor execution? if any
+			 * exception is thrown discard all changes from this rule
+			 */
+			subMonitor.subTask(refactoringRule.getName());
 			try {
-				refactoringRule.generateDocumentChanges(workingCopies);
-				
-				if(refactoringRule instanceof TryWithResourceRule){
-					refactoringRule.generateDocumentChanges(workingCopies);
+
+				/*
+				 * Sends new child of subMonitor which takes in progress bar
+				 * size of 1 of rules size In method that part of progress bar
+				 * is split to number of compilation units
+				 */
+				refactoringRule.generateDocumentChanges(workingCopies, subMonitor.newChild(1));
+
+				if (refactoringRule instanceof TryWithResourceRule) {
+					refactoringRule.generateDocumentChanges(workingCopies, subMonitor.newChild(0));
 				}
 			} catch (JavaModelException | ReflectiveOperationException e) {
 				Activator.log(Status.ERROR, e.getMessage(), e);
 				notWorkingRules.add(refactoringRule.getName());
+			}
+			// If cancel is pressed on progress monitor, abort all and return,
+			// else continue
+			if (subMonitor.isCanceled()) {
+				return;
 			}
 		}
 		if (!notWorkingRules.isEmpty()) {
@@ -209,5 +264,19 @@ public abstract class AbstractRefactorer {
 			}
 		}
 		return false;
+	}
+
+	public void clearWorkingCopies() {
+		for (ICompilationUnit workingCopy : workingCopies) {
+			try {
+				SimonykeesUtil.discardWorkingCopy(workingCopy);
+			} catch (JavaModelException e) {
+				Activator.log(Status.ERROR,
+						NLS.bind(ExceptionMessages.AbstractRefactorer_unable_to_discard_working_copy,
+								workingCopy.getPath().toString(), e.getMessage()),
+						e);
+			}
+		}
+		workingCopies.clear();
 	}
 }

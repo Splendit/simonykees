@@ -43,7 +43,7 @@ public abstract class AbstractCompilationUnitASTVisitor extends AbstractASTRewri
 		this.fullyQuallifiedNameMap = new HashMap<>();
 		this.addImports = new HashSet<>();
 	}
-	
+
 	/**
 	 * Find the corresponding types of the {@link #relevantClasses()} in the
 	 * java project of the {@link CompilationUnit} that accepts the ASTVisitor
@@ -69,13 +69,14 @@ public abstract class AbstractCompilationUnitASTVisitor extends AbstractASTRewri
 							categoryTypeList.add(classtype);
 						}
 					} else {
-						Activator.log(Status.ERROR, "Class not in classpath" ,new ITypeNotFoundRuntimeException()); //$NON-NLS-1$
+						Activator.log(Status.INFO,
+								String.format("Class not in classpath [%s]", fullyQuallifiedClassName)); //$NON-NLS-1$
 						return false;
 					}
 				}
 			}
 		} catch (JavaModelException e) {
-			Activator.log(Status.ERROR, e.getMessage() ,new ITypeNotFoundRuntimeException());
+			Activator.log(Status.ERROR, e.getMessage(), new ITypeNotFoundRuntimeException());
 			return false;
 		}
 		return true;

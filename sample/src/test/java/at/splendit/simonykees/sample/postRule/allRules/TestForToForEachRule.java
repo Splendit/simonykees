@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("nls")
+@SuppressWarnings({ "nls", "unused", "unchecked" })
 public class TestForToForEachRule {
 
 	private List<String> generateList(String input) {
@@ -467,7 +467,7 @@ public class TestForToForEachRule {
 
 	public Object encode(final Object value) {
 		if (value != null) {
-			Map<String, Object> map = new LinkedHashMap<String, Object>();
+			Map<String, Object> map = new LinkedHashMap<>();
 			List<Object> list = (List<Object>) value;
 			for (int i = 0; i < list.size(); i++) {
 				map.put(Integer.toString(i), list.get(i));
@@ -491,11 +491,48 @@ public class TestForToForEachRule {
 		return true;
 	}
 
+	public boolean testIteratingNonJavaIterators() {
+		MyCollection<Number> myCollection = new MyCollection<>();
+
+		for (Iterator<Number> iterator = myCollection.iterator(); iterator.hasNext();) {
+			Number c = iterator.next();
+			// do nothing
+		}
+		return false;
+	}
+
 	private class Point {
-		private final List<Double> coordinates = new ArrayList<Double>();
+		private final List<Double> coordinates = new ArrayList<>();
 
 		public List<Double> getCoordinates() {
 			return coordinates;
+		}
+	}
+
+	/**
+	 * This collection is not subtype of {@code Iterable}.
+	 */
+	private class MyCollection<T> {
+		private final int size = 5;
+		private int index = 0;
+
+		public boolean hasNext() {
+			return index < size;
+		}
+
+		public Iterator<T> iterator() {
+			return new Iterator<T>() {
+
+				@Override
+				public boolean hasNext() {
+					return false;
+				}
+
+				@Override
+				public T next() {
+					return null;
+				}
+			};
 		}
 	}
 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
@@ -49,10 +50,19 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 	}
 
 	@Override
-	public void generateDocumentChanges(List<ICompilationUnit> workingCopies)
+	public void generateDocumentChanges(List<ICompilationUnit> workingCopies, SubMonitor subMonitor)
 			throws JavaModelException, ReflectiveOperationException {
+		
+		subMonitor.setWorkRemaining(workingCopies.size());
+		
 		for (ICompilationUnit wc : workingCopies) {
+			subMonitor.subTask(getName() + ": " + wc.getElementName()); //$NON-NLS-1$
 			applyFormating(wc);
+			if (subMonitor.isCanceled()) {
+				return;
+			} else {
+				subMonitor.worked(1);
+			}
 		}
 	}
 

@@ -1,11 +1,21 @@
 package at.splendit.simonykees.core.visitor;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
+import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
@@ -57,7 +67,52 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 	}
 	
 	@Override
+	public boolean visit(CompilationUnit compilationUnit) {
+		boolean clashingImports = false;
+		
+		/*
+		 * Check if there is any type inside the compilation unit 
+		 * with the same name as StringUtils
+		 */
+		ConflictingTypeDeclarationAstVisitor visitor = new ConflictingTypeDeclarationAstVisitor();
+		compilationUnit.accept(visitor);
+		boolean isConflictingTypeName = visitor.isSafe();
+		if(!isConflictingTypeName) {
+			clashingImports = true;
+		}
+		
+		/*
+		 * Check if there is another import declaration 
+		 * conflicting with org.apache.commons.lang3.StringUtils
+		 */
+		if(!clashingImports) {
+			List<ImportDeclaration> imports = ASTNodeUtil.returnTypedList(compilationUnit.imports(), ImportDeclaration.class);
+			
+			for(ImportDeclaration importDeclaration : imports) {
+				Name qualifiedName = importDeclaration.getName();
+				String fullyQualifiedName = qualifiedName.getFullyQualifiedName();
+				if(ASTNode.QUALIFIED_NAME == qualifiedName.getNodeType()) {
+					 SimpleName name = ((QualifiedName)qualifiedName).getName();
+					 if(StringUtils.equals(name.getIdentifier(), STRING_UTILS)
+							 && !StringUtils.equals(fullyQualifiedName, STRING_UTILS_FULLY_QUALLIFIED_NAME)) {
+						 clashingImports = true;
+						 break;
+					 }
+				}
+			}
+		}
+		
+		boolean safeToGo = false;
+		if(!clashingImports) {
+			safeToGo = super.visit(compilationUnit);
+		}
+		
+		return safeToGo;
+	}
+	
+	@Override
 	public boolean visit(MethodInvocation node) {
+		
 		Expression optionalExpression = node.getExpression();
 		if (optionalExpression == null) {
 			return true;
@@ -107,5 +162,32 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * Checks for a type declaration with name {@value StringUtilsASTVisitor#STRING_UTILS}.
+	 * 
+	 * @author Ardit Ymeri
+	 *
+	 */
+	private class ConflictingTypeDeclarationAstVisitor extends ASTVisitor {
+		private boolean safe = true;
+		
+		@Override
+		public boolean visit(TypeDeclaration node) {
+			if(STRING_UTILS.equals(node.getName().getIdentifier())) {
+				safe = false;
+			}
+			return safe;
+		}
+		
+		public boolean isSafe() {
+			return safe;
+		}
+		
+		@Override
+		public boolean preVisit2(ASTNode node) {
+			return safe;
+		}
 	}
 }

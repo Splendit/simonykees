@@ -45,7 +45,7 @@ public class ForToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
 		if (iteratorName != null) {
 			if (ClassRelationUtil.isContentOfRegistertITypes(iteratorName.resolveTypeBinding(),
 					iTypeMap.get(ITERATOR_KEY))) {
-				Block parentNode = ASTNodeUtil.getSurroundingBlock(node);
+				Block parentNode = ASTNodeUtil.getSpecificAncestor(node, Block.class);
 				if (parentNode == null) {
 					// No surrounding parent block found
 					// should not happen, because the Iterator has to be

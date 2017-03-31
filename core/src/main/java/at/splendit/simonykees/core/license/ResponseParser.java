@@ -31,6 +31,7 @@ public class ResponseParser implements LicenseChecker {
 	private ValidationAction validationAction;
 
 	private static final String PRODUCT_MODULE_NUMBER_KEY = "productModuleNumber"; //$NON-NLS-1$
+	private static final String FEATURE_NAME_KEY = "featureName"; //$NON-NLS-1$
 	private static final String PRODUCT_MODULE_NAME_KEY = "productModuleName";//$NON-NLS-1$
 	private static final String LICENSING_MODEL_KEY = "licensingModel"; //$NON-NLS-1$
 	private static final String EXPIRATION_TIME_STAMP_KEY = "expirationTimestamp"; //$NON-NLS-1$
@@ -82,6 +83,8 @@ public class ResponseParser implements LicenseChecker {
 	private void extractValidationData(ValidationResult validationResult, LicenseType licenseType) {
 		Map<String, Composition> validations = validationResult.getValidations();
 		
+		String NODE_LOCKED_FEATURE_KEY = extractNodeLockedFeatureKey(validationResult);
+		
 		validations.forEach((compKey, composition)-> {
 			
 			Map<String, Composition> properties = composition.getProperties();
@@ -98,7 +101,7 @@ public class ResponseParser implements LicenseChecker {
 					if(key.equals(VALID_KEY)) {
 						valid = Boolean.valueOf(value.getValue());
 						seLicenseModelStatus(valid);
-					} else if (key.equals(LicenseManager.NODE_LOCKED_FEATURE_KEY)) {
+					} else if (key.equals(NODE_LOCKED_FEATURE_KEY)) {
 						Map<String, Composition> featureKeyValues = value.getProperties();
 						Composition featureStatus = featureKeyValues.get(VALID_KEY);
 						valid = Boolean.valueOf(featureStatus.getValue());
@@ -118,6 +121,36 @@ public class ResponseParser implements LicenseChecker {
 				});
 			}
 		});
+	}
+	
+	private String extractNodeLockedFeatureKey(ValidationResult validationResult) {
+		String nodeLockedFeatureKey = ""; //$NON-NLS-1$
+		Map<String, Composition> validations = validationResult.getValidations();
+		
+		for(Map.Entry<String, Composition> compEntry : validations.entrySet()) {	
+			Composition composition = compEntry.getValue();
+			Map<String, Composition> properties = composition.getProperties();
+			
+			String receivedTypeStr = properties.get(LICENSING_MODEL_KEY).getValue();
+			LicenseType receivedType = LicenseType.fromString(receivedTypeStr);
+			
+			if(LicenseType.NODE_LOCKED.equals(receivedType)) {
+				
+				for(Map.Entry<String, Composition> entry : properties.entrySet()) {
+					String key = entry.getKey();
+					Composition value = entry.getValue();
+					if(!value.getProperties().isEmpty()) {
+						Map<String, Composition> featureProperties = value.getProperties();
+						if(featureProperties.containsKey(VALID_KEY) 
+								&& featureProperties.containsKey(FEATURE_NAME_KEY)) {
+							nodeLockedFeatureKey = key;
+						}
+					}
+				}
+			}
+		}
+		
+		return nodeLockedFeatureKey;
 	}
 	
 	/**

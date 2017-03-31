@@ -1,11 +1,18 @@
 package at.splendit.simonykees.core.license;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 
+import org.eclipse.core.runtime.Status;
+import org.eclipse.equinox.security.storage.ISecurePreferences;
+import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 
+import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.i18n.ExceptionMessages;
 import at.splendit.simonykees.core.license.model.PersistenceModel;
 
 /**
@@ -101,6 +108,22 @@ public abstract class LicenseCommonTest {
 		persistenceMng.persist();
 	}
 	
+	@After
+	public void tearDown() throws InterruptedException {
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+		try {
+			ISecurePreferences iSecurePreferences = SecurePreferencesFactory.getDefault();
+			do {
+				iSecurePreferences.node("simonykees").removeNode();
+				iSecurePreferences.flush();
+			} while (iSecurePreferences.nodeExists("simonykees"));
+		} catch (IOException exception) {
+			Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_encryption_error, exception);
+			Assert.fail();
+		}
+	}
+
+	
 	/**
 	 * Overwrites the persisted data with empty and null values.
 	 */
@@ -119,10 +142,5 @@ public abstract class LicenseCommonTest {
 	@BeforeClass
 	public static void initTestLicenseManager() {
 		LicenseManager.getTestInstance();
-	}
-
-	@After
-	public void waitToCompleteProcessing() throws InterruptedException {
-		clearPersistedData();
 	}
 }

@@ -66,7 +66,13 @@ public class RefactoringPreviewWizard extends Wizard {
 	 */
 	@Override
 	public boolean performCancel() {
+		abstractRefactorer.clearWorkingCopies();
 		return super.performCancel();
 	}
 
+	@Override
+	public void dispose() {
+		abstractRefactorer.clearWorkingCopies();
+		super.dispose();
+	}
 }

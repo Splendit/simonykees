@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import java.time.Instant;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import at.splendit.simonykees.core.license.model.LicenseeModel;
@@ -21,22 +20,19 @@ import at.splendit.simonykees.core.license.model.LicenseeModel;
  */
 public class ValidateExecutorTest extends LicenseCommonTest {
 	
-	@Before
-	public void clearCache() {
-		ValidationResultCache.getInstance().reset();
-		persistNodeLockedLicensee();
-	}
-	
 	@After
-	public void waitForProcessingResponse() throws InterruptedException {
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
+	public void cleareSecureStorage() throws InterruptedException {
+		ValidateExecutor.shutDownScheduler();
 	}
 	
 	@Test
 	public void shutDownAndRestartScheduler() throws InterruptedException {
 		// having an instance of license manager and a running scheduler...
+		
+		ValidationResultCache.getInstance().reset();
+		persistNodeLockedLicensee();
+		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseManager licenseManager = LicenseManager.getTestInstance();
-		Thread.sleep(500);
 		licenseManager.setUniqueHwId(TEST_UNIQUE_ID_01);
 		licenseManager.initManager();
 		LicenseeModel licensee = licenseManager.getLicensee();
@@ -59,6 +55,10 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 	@Test
 	public void shutDownAndCheckLicense() throws InterruptedException {
 		// having an instance of license manager where the scheduler is shut down...
+		
+		ValidationResultCache.getInstance().reset();
+		persistNodeLockedLicensee();
+		
 		LicenseManager licenseManager = LicenseManager.getTestInstance();
 		licenseManager.setUniqueHwId(TEST_UNIQUE_ID_01);
 		licenseManager.initManager();

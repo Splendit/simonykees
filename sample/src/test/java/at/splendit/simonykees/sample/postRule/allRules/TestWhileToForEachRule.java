@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-@SuppressWarnings({ "nls", "unused" })
-public class TestWhileToForRule {
+@SuppressWarnings({ "nls", "unused", "rawtypes" })
+public class TestWhileToForEachRule {
 
 	private List<String> generateList(String input) {
 		return Arrays.asList(input.split(";")); //$NON-NLS-1$
@@ -377,5 +377,45 @@ public class TestWhileToForRule {
 		}
 
 		return sb.toString();
+	}
+
+	public String testNonIterableCollection(String input) {
+		StringBuilder sb = new StringBuilder();
+		FooCollection<Number> numbers = new FooCollection<>();
+		Iterator<Number> iterator = numbers.iterator();
+
+		while (iterator.hasNext()) {
+			String foo = "foo";
+			Number s = iterator.next();
+			sb.append(s);
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * This collection is not subtype of {@code Iterable}.
+	 */
+	private class FooCollection<T> {
+		private final int size = 5;
+		private int index = 0;
+
+		public boolean hasNext() {
+			return index < size;
+		}
+
+		public Iterator<T> iterator() {
+			return new Iterator<T>() {
+
+				@Override
+				public boolean hasNext() {
+					return false;
+				}
+
+				@Override
+				public T next() {
+					return null;
+				}
+			};
+		}
 	}
 }
