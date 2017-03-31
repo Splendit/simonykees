@@ -181,6 +181,60 @@ public class TestFunctionalInterfaceRule {
 		return local;
 	}
 
+	public String commentFreeAnonymousClass(String input) {
+
+		String local = input;
+		AFunctionalInterface fooComments = new AFunctionalInterface() {
+
+			@Override
+			public void method(int fooComments) {
+				String toString = "toString";
+
+			}
+			/* } */
+		};
+
+		AFunctionalInterface fooComments2 = new AFunctionalInterface() {
+
+			/**
+			 * what happens with javadoc?
+			 */
+			@Override
+			public void method(int fooComments) {
+				String toString = "toString";
+			}
+
+			// TODO: some important comment. shall not be removed!
+		};
+
+		AFunctionalInterface fooComments3 = (int fooComments1) -> {
+			String toString = "toString";
+
+		};
+
+		AFunctionalInterface fooComments4 = new AFunctionalInterface() {
+			/* block comment */
+			@Override
+			public void method(int fooComments) {
+				String toString = "toString";
+
+			}
+
+		};
+
+		AFunctionalInterface fooComments5 = new AFunctionalInterface() {
+			// line comment
+			@Override
+			public void method(int fooComments) {
+				String toString = "toString";
+
+			}
+
+		};
+
+		return input;
+	}
+
 	private interface AFunctionalInterface {
 		public void method(int a);
 	}
