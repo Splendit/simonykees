@@ -4,16 +4,17 @@
 
     add to maven settings.xml the deployment credentials (/usr/share/maven/settings.xml)
 
-		<server>
-			<id>pdrone.b8eed447-5f46-42c2-bfc1-1b9b174069e5</id>
-			<username>deploy</username>
-			<password>c8afacb01b3ce8171db24192e31b13eb60110a59b9b3f989cf9a6b3815aac496</password>
-		</server>
+	<server>
+		<id>pdrone.b8eed447-5f46-42c2-bfc1-1b9b174069e5</id>
+		<username>deploy</username>
+		<password>c8afacb01b3ce8171db24192e31b13eb60110a59b9b3f989cf9a6b3815aac496</password>
+	</server>
 
-		deploy with: mvn clean deploy
+	deploy with: mvn clean deploy
+	deploy with proguard: mvn clean deploy -Pproguard
 
-		updated osgi bundle will be visible on:
-		http://packagedrone-vm-01.splendit.loc:8080/p2/jSparrow-test-channel/
+	updated osgi bundle will be visible on:
+	http://packagedrone-vm-01.splendit.loc:8080/p2/jSparrow-test-channel/
 
 ## build ##
 
@@ -25,7 +26,7 @@
 
 ## proguard build ##
 
-		mvn -Pproguard clean verify
+	mvn -Pproguard clean verify
 
-		This command produces a *.zip artifact in ./site/target that contains obfuscated eclipse-site artifact
-		The profile is executed without tests by default, because they are not working with obfuscation.
+	This command produces a *.zip artifact in ./site/target that contains obfuscated eclipse-site artifact
+	The profile is executed without tests by default, because they are not working with obfuscation.
