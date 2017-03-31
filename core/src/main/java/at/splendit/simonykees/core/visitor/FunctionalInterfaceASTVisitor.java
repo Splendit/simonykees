@@ -412,6 +412,17 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			blockVariableNames.add(node.getName());
 			return true;
 		}
+		
+		@Override
+		public boolean visit(ClassInstanceCreation node) {
+			return false;
+		}
+		
+		@Override
+		public boolean visit(SingleVariableDeclaration node) {
+			blockVariableNames.add(node.getName());
+			return true;
+		}
 
 		public List<SimpleName> getBlockVariableDelcarations() {
 			return blockVariableNames;
