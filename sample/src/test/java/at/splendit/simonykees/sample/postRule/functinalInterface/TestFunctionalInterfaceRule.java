@@ -168,14 +168,14 @@ public class TestFunctionalInterfaceRule {
 		int toString = a;
 		
 		AFunctionalInterface foo = (int a1)->{
-			String toString2 = "toString";
-			String local2 = Integer.toString(a1);
-			String input2 = local2;
+			String toString1 = "toString";
+			String local1 = Integer.toString(a1);
+			String input1 = local1;
 			
 			AFunctionalInterface foo1 = (int a2)->{
-				String toString3 = "toString";
-				String local3 = Integer.toString(a2);
-				String input3 = local3;
+				String toString2 = "toString";
+				String local2 = Integer.toString(a2);
+				String input2 = local2;
 			};
 		};
 		
@@ -234,6 +234,18 @@ public class TestFunctionalInterfaceRule {
 		}; 
 	
 	return input; 
+	}
+	
+	public void renamingVarInCatchClause(String e) {
+		AFunctionalInterface foo = (int param)->{ 
+	        String toString = "toString"; 
+	        try {
+	        	
+	        } catch(Exception e1) {
+	        	String sthToLog = e1.getMessage() + toString() + param;
+	        }
+	        
+		  }; 
 	}
 
 	private interface AFunctionalInterface {

@@ -302,6 +302,22 @@ public class TestFunctionalInterfaceRule {
 	
 	return input; 
 	}
+	
+	public void renamingVarInCatchClause(String e) {
+		AFunctionalInterface foo = new AFunctionalInterface() {
+		@Override 
+		public void method(int param) { 
+	        String toString = "toString"; 
+	        try {
+	        	
+	        } catch(Exception e) {
+	        	String sthToLog = e.getMessage() + toString() + param;
+	        }
+	        
+		  }
+		
+		}; 
+	}
 
 	private interface AFunctionalInterface {
 		public void method(int a);
