@@ -198,7 +198,7 @@ public class TestFunctionalInterfaceRule {
 		};
 	}
 	
-	public String maliciousComments(String input) { 
+	public String commentFreeAnonymousClass(String input) { 
 		  
 		String local = input; 
 		AFunctionalInterface fooComments = new AFunctionalInterface() { 
@@ -222,6 +222,36 @@ public class TestFunctionalInterfaceRule {
 			} 
 			   
 			//TODO: some important comment. shall not be removed! 
+		}; 
+		
+		AFunctionalInterface fooComments3 = new AFunctionalInterface() { 
+			 
+		@Override 
+		public void method(int fooComments) { 
+	        String toString = "toString"; 
+	        
+		  }
+		
+		};
+		
+		AFunctionalInterface fooComments4 = new AFunctionalInterface() {
+		/* block comment */ 
+		@Override 
+		public void method(int fooComments) { 
+	        String toString = "toString"; 
+	        
+		  }
+		
+		}; 
+		
+		AFunctionalInterface fooComments5 = new AFunctionalInterface() {
+		// line comment
+		@Override 
+		public void method(int fooComments) { 
+	        String toString = "toString"; 
+	        
+		  }
+		
 		}; 
 	
 	return input; 
