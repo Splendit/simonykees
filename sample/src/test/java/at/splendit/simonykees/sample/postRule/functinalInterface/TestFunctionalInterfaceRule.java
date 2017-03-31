@@ -13,7 +13,7 @@ public class TestFunctionalInterfaceRule {
 	
 	private final String FINAL_STRING_FIELD;
 	
-	TestFunctionalInterfaceRule() {
+	public TestFunctionalInterfaceRule() {
 		
 		AFunctionalInterface foo = new AFunctionalInterface() {
 			
