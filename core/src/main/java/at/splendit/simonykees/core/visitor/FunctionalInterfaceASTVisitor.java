@@ -315,13 +315,8 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			int blockStartPos = moveBlock.getStartPosition();
 			int blockEndPos = moveBlock.getStartPosition() + moveBlock.getLength();
 			
-			@SuppressWarnings("unchecked")
 			List<Comment> allComments = 
-					((List<Object>) compilationUnit.getCommentList())
-					.stream()
-					.filter(Comment.class::isInstance)
-					.map(Comment.class::cast)
-					.collect(Collectors.toList());
+					ASTNodeUtil.returnTypedList(compilationUnit.getCommentList(), Comment.class); 
 			
 			boolean hasComments =  
 					allComments
