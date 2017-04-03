@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.ui;
 
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.swt.custom.BusyIndicator;
 
 import at.splendit.simonykees.core.exception.ReconcileException;
 import at.splendit.simonykees.core.exception.RefactoringException;
@@ -14,7 +15,7 @@ import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
  * 
  * The OK Button commits the refactorings.
  * 
- * @author Ludwig Werzowa
+ * @author Ludwig Werzowa, Andreja Sambolec
  * @since 0.9
  */
 public class RefactoringPreviewWizard extends Wizard {
@@ -44,18 +45,26 @@ public class RefactoringPreviewWizard extends Wizard {
 	 */
 	@Override
 	public boolean performFinish() {
-		if (LicenseUtil.isValid()) {
-			try {
-				abstractRefactorer.commitRefactoring();
-			} catch (RefactoringException e) {
-				SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
-				return true;
-			} catch (ReconcileException e) {
-				SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
+
+			@Override
+			public void run() {
+				if (LicenseUtil.isValid()) {
+					try {
+						abstractRefactorer.commitRefactoring();
+					} catch (RefactoringException e) {
+						SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+						return;
+					} catch (ReconcileException e) {
+						SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+					}
+				} else {
+					LicenseUtil.displayLicenseErrorDialog(getShell());
+				}
+				return;
 			}
-		} else {
-			LicenseUtil.displayLicenseErrorDialog(getShell());
-		}
+		});
+
 		return true;
 	}
 
