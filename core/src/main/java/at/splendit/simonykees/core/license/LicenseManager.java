@@ -40,20 +40,20 @@ public class LicenseManager {
 
 	private static final String DEFAULT_LICENSEE_NUMBER_PREFIX = "demo"; //$NON-NLS-1$
 	private static String PRODUCT_NUMBER = "PNZNF7Y7E"; //$NON-NLS-1$
-	private static final String PRODUCT_NUMBER_PRODUCTION = "P27GH3XNG"; //$NON-NLS-1$
+	private static final String PRODUCT_NUMBER_PRODUCTION = "PNZNF7Y7E"; //$NON-NLS-1$
 	private static final String PRODUCT_NUMBER_TEST = "PNZNF7Y7E"; //$NON-NLS-1$
 
 	/**
 	 * Rest API authentication token.
 	 */
-	private static final String PASS_APIKEY_PRODUCTION = "b61db5be-c350-4cab-8497-6c07d0f39409"; //$NON-NLS-1$
+	private static final String PASS_APIKEY_PRODUCTION = "bf7f1092-3c88-492f-8a52-d00823d225a8"; //$NON-NLS-1$
 	private static final String PASS_APIKEY_TEST = "bf7f1092-3c88-492f-8a52-d00823d225a8"; //$NON-NLS-1$
 
 	/**
 	 * Product module number related to Floating licenses.
 	 */
 	private static String PRODUCT_MODULE_NUMBER = "M6IS9TIWG"; //$NON-NLS-1$
-	private static final String PRODUCT_MODULE_NUMBER_PRODUCTION = "MVIG9MWGS"; //$NON-NLS-1$
+	private static final String PRODUCT_MODULE_NUMBER_PRODUCTION = "M6IS9TIWG"; //$NON-NLS-1$
 	private static final String PRODUCT_MODULE_NUMBER_TEST = "M6IS9TIWG"; //$NON-NLS-1$
 
 	/**
