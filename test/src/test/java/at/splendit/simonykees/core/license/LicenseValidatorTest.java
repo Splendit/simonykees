@@ -29,11 +29,12 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	public void clearCache() {
 		ValidationResultCache.getInstance().reset();
 	}
+		
 	
 	@Test
 	public void validateNodeLockedLicense() throws InterruptedException {
 		// having a licensee with a node locked license...
-		String productNumber = LicenseManager.getTestProductNumber();
+		String productNumber = LicenseManager.getProductNumber();
 		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_ONE_YEAR, TEST_UNIQUE_ID_01);
 		LicenseeModel licensee = new LicenseeModel(NODE_LOCKED_LICENSEE_NAME, NODE_LOCKED_LICENSEE_NUMBER, nodeLocked, productNumber);
 		ValidationResultCache cache = ValidationResultCache.getInstance();
@@ -71,7 +72,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	@Test
 	public void validateNodeLockedLicenseWrongSecret() throws InterruptedException {
 		// having a licensee with a node locked license and with incorrect secret id...
-		String productNumber = LicenseManager.getTestProductNumber();
+		String productNumber = LicenseManager.getProductNumber();
 		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_ONE_YEAR, "someWrongSecret");
 		LicenseeModel licensee = new LicenseeModel(NODE_LOCKED_LICENSEE_NAME, NODE_LOCKED_LICENSEE_NUMBER, nodeLocked, productNumber);
 		ValidationResultCache cache = ValidationResultCache.getInstance();
@@ -110,7 +111,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	public void validateNodeLockedHwIdFailureStatus() throws InterruptedException {
 		// having a licensee with a node locked license...
 		persistNodeLockedLicensee();
-		LicenseManager licenseMenager = LicenseManager.getTestInstance();
+		LicenseManager licenseMenager = LicenseManager.getInstance();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
 		licenseMenager.setUniqueHwId(TEST_UNIQUE_ID_01);
@@ -125,7 +126,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		assertEquals(NODE_LOCKED_LICENSEE_NAME, preVlaidateChecker.getLicenseeName());
 		
 		// when calling a validate request with an incorrect hardware id...
-		String productNumber = LicenseManager.getTestProductNumber();
+		String productNumber = LicenseManager.getProductNumber();
 		NodeLockedModel nodeLocked = new NodeLockedModel(NOW_IN_ONE_YEAR, "some-incorrect-hw-id");
 		LicenseeModel licensee = new LicenseeModel(NODE_LOCKED_LICENSEE_NAME, NODE_LOCKED_LICENSEE_NUMBER, nodeLocked, productNumber);
 		ValidationResultCache cache = ValidationResultCache.getInstance();
@@ -159,7 +160,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	public void validateExpiredDemoLicensee() throws InterruptedException {
 		// having a licensee with expired demo...
 		ValidationResultCache cache = ValidationResultCache.getInstance();
-		String productNumber = LicenseManager.getTestProductNumber();
+		String productNumber = LicenseManager.getProductNumber();
 		TryAndBuyModel tryAndBuy = new TryAndBuyModel(ZonedDateTime.now().minusDays(1), DEMO_EXPIRED_LICENSEE_SECRET);
 		LicenseeModel licensee = new LicenseeModel(DEMO_EXPIRED_LICENSEE_NAME, DEMO_EXPIRED_LICENSEE_NUMBER, tryAndBuy, productNumber);
 		
@@ -183,7 +184,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	
 	@Test
 	public void checkExistingLicensee() {
-		LicenseManager.getTestInstance();
+		LicenseManager.getInstance();
 		boolean existingLicensee =
 				LicenseValidator.isValidLicensee(NODE_LOCKED_LICENSEE_NUMBER);
 		assertTrue(existingLicensee);

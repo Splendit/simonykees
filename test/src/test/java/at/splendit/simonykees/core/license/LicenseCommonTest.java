@@ -141,6 +141,6 @@ public abstract class LicenseCommonTest {
 	
 	@BeforeClass
 	public static void initTestLicenseManager() {
-		LicenseManager.getTestInstance();
+		LicenseManager.getInstance();
 	}
 }
