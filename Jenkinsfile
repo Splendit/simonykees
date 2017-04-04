@@ -52,7 +52,9 @@ node {
 				def mvnCommand = 'clean deploy -DskipTests'
 			  sh "'${mvnHome}/bin/mvn' ${mvnCommand}"	
 				// tag build in reppsitory
-				sh("./tag_deployment.sh $env.BRANCH_NAME")
+				sshagent(["jenkins-testjsparrow"]) { //key id of ssh-rsa key in remote repository within jenkins
+					sh("./tag_deployment.sh $env.BRANCH_NAME")
+				}
 			}
 		}
 	}
