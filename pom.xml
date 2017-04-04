@@ -84,10 +84,15 @@
 			<url>https://jenkins.splendit.loc/view/simonykees/job/simonykees%20master/site/</url>
 		</site>
 		<repository>
-			<name>package-drone</name>
-			<id>pdrone.b8eed447-5f46-42c2-bfc1-1b9b174069e5</id>
-			<url>http://packagedrone-vm-01.splendit.loc:8080/maven/0c59cce1-cb2c-4942-8e44-465609fe2fdb</url>
-		</repository>
+    	<id>pdrone.85838837-477a-445f-aee1-757e4a362481</id>
+    	<url>http://packagedrone-vm-01.splendit.loc:8080/maven/85838837-477a-445f-aee1-757e4a362481</url>
+    </repository>	
+		<!--
+  	<repository> 
+			<id>pdrone.85838837-477a-445f-aee1-757e4a362481</id>
+			<url>http://localhost:8080/maven/85838837-477a-445f-aee1-757e4a362481</url>
+	 	</repository>	
+		-->
 	</distributionManagement>
 
 	<properties>

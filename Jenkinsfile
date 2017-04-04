@@ -21,7 +21,7 @@ node {
 		stage('Integration-Tests') {
 			// Run the maven build
 			def mvnCommand = 'clean verify -fae -Dsurefire.rerunFailingTestsCount=2'
-			//def mvnCommand = 'surefire:test -fae -Dsurefire.rerunFailingTestsCount=2'
+			// def mvnCommand = 'surefire:test -fae -Dsurefire.rerunFailingTestsCount=2'
 			if (isUnix()) {
 				setTestStatus(sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${mvnCommand}"))
 			} else {
@@ -45,6 +45,14 @@ node {
 				sh("git rev-parse HEAD | xargs git checkout")
 				sh("git branch -d $env.BRANCH_NAME")
 			}
+		}
+		if ( currentBuild.result == 'SUCCESS' ) {
+			stage('Deploy and Tag') {
+				// skipping tests, because integration tests have passed already
+				def $mvnCommand = 'clean deploy -DskipTests'
+			  sh "'${mvnHome}/bin/mvn' ${mvnCommand}"	
+				// tag build in reppsitory
+				sh("./tag_deployment.sh $env.BRANCH_NAME")
 		}
 	}
 }
