@@ -49,6 +49,7 @@
 		<module>feature</module>
 		<module>site</module>
 		<module>sample</module>
+		<module>license</module>
 	</modules>
 
 	<scm>
