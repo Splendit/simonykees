@@ -4,8 +4,9 @@ node {
   // variable for maven home
 	def mvnHome = tool 'mvn system'
 	// defines the backup repository to push to
-	def backupOrigin = 'ssh://git@bitbucket.splendit.loc:7999/tes/testsparrow2.git'
-	def sshCredentials = 'jenkins-testjsparrow'
+	def backupOrigin = 'git@github.com:Splendit/simonykees.git'
+	// jenkins git ssh credentials
+	def sshCredentials = '7f15bb8a-a1db-4cdf-978f-3ae5983400b6'
 	stage('Preparation') { // for display purposes
 		checkout scm
 	}
