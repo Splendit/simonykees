@@ -16,12 +16,10 @@ if [ -z ${dir+x} ]; then echo "Exectued with wrong argument '$1' or argument is 
 # second parameter is the sub dircetory
 if [ -n ${2+x} ]; then subdir="$2"/; fi
 
+# building the tag
 tag=`pcregrep -o1 "name='jSparrow\.feature\.feature\.group' range='\[(\d.\d.\d.\d{8}-\d{4})," site/target/p2content.xml`
 suffix=`pcregrep -o1 "name='(\w+\.\w+)\.feature\.group' range='\[(\d.\d.\d.\d{8}-\d{4})," site/target/p2content.xml`
-
-
 completeTag=$dir$subdir$tag-$suffix
-
 
 # tag the build
 git tag $completeTag
