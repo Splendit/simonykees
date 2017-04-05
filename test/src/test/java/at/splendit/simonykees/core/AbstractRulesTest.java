@@ -51,7 +51,7 @@ public abstract class AbstractRulesTest {
 		List<Object[]> data = new ArrayList<>();
 		for (Path postRulePath : Files.newDirectoryStream(Paths.get(postRuleDirectory), RulesTestUtil.RULE_SUFFIX)) {
 			Path preRulePath = Paths.get(RulesTestUtil.PRERULE_DIRECTORY, postRulePath.getFileName().toString());
-			data.add(new Object[] { preRulePath.getFileName().toString(), preRulePath, postRulePath });
+			data.add(new Object[] { prRulePath.getFileName().toString(), preRulePath, postRulePath });
 		}
 		return data;
 	}
