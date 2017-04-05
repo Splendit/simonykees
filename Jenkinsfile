@@ -34,13 +34,16 @@ node {
 	}
 	
 	if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
+
+		// defines the backup repository to push to
+		def backupOrigin = 'ssh://git@bitbucket.splendit.loc:7999/tes/testsparrow2.git'
+
 		stage('Push to Github') {
-			println "Is Develop or Master"
 			println "Pushing to github..."
 			sshagent(["jenkins-testjsparrow"]) { //key id of ssh-rsa key in remote repository within jenkins
 				// pushing the repository to github
 				//sh("git checkout $env.BRANCH_NAME")
-      	sh("git push ssh://git@bitbucket.splendit.loc:7999/tes/testsparrow2.git HEAD:$env.BRANCH_NAME")
+      	sh("git push $backupOrigin HEAD:$env.BRANCH_NAME")
 				//sh("git rev-parse HEAD | xargs git checkout")
 				//sh("git branch -d $env.BRANCH_NAME")
 			}
@@ -55,6 +58,7 @@ node {
 				sshagent(["jenkins-testjsparrow"]) { //key id of ssh-rsa key in remote repository within jenkins
 					// first parameter is the dir, second parameter is the subdirectory and optional
 					sh("./tag_deployment.sh $env.BRANCH_NAME main")
+      	  sh("git push $backupOrigin --tags")
 				}
 			}
 		}
