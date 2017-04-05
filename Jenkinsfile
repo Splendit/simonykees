@@ -53,7 +53,7 @@ node {
 			  sh "'${mvnHome}/bin/mvn' ${mvnCommand}"	
 				// tag build in reppsitory
 				sshagent(["jenkins-testjsparrow"]) { //key id of ssh-rsa key in remote repository within jenkins
-					# first parameter is the dir, second parameter is the subdirectory and optional
+					// first parameter is the dir, second parameter is the subdirectory and optional
 					sh("./tag_deployment.sh $env.BRANCH_NAME main")
 				}
 			}
