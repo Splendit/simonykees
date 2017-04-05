@@ -49,7 +49,8 @@ node {
 		if ( currentBuild.result == 'SUCCESS' ) {
 			stage('Deploy and Tag') {
 				// skipping tests, because integration tests have passed already
-				def mvnCommand = 'clean deploy -DskipTests'
+				// -B batch mode for clean output
+				def mvnCommand = 'clean deploy -DskipTests -B'
 			  sh "'${mvnHome}/bin/mvn' ${mvnCommand}"	
 				// tag build in reppsitory
 				sshagent(["jenkins-testjsparrow"]) { //key id of ssh-rsa key in remote repository within jenkins
