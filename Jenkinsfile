@@ -27,8 +27,7 @@ node {
 			} else {
 				setTestStatus(bat(/"${mvnHome}\bin\mvn ${mvnCommand}"/))
 			}
-		}
-		stage('Results') {
+				// collects unit test results
 				junit '**/target/surefire-reports/TEST-*.xml'
 				archive 'target/*.jar'
 		}
