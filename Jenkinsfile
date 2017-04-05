@@ -40,10 +40,10 @@ node {
 			println "Pushing to github..."
 			sshagent(["jenkins-testjsparrow"]) { //key id of ssh-rsa key in remote repository within jenkins
 				// pushing the repository to github
-				sh("git checkout $env.BRANCH_NAME")
+				//sh("git checkout $env.BRANCH_NAME")
       	sh("git push ssh://git@bitbucket.splendit.loc:7999/tes/testsparrow2.git HEAD:$env.BRANCH_NAME")
-				sh("git rev-parse HEAD | xargs git checkout")
-				sh("git branch -d $env.BRANCH_NAME")
+				//sh("git rev-parse HEAD | xargs git checkout")
+				//sh("git branch -d $env.BRANCH_NAME")
 			}
 		}
 		if ( currentBuild.result == 'SUCCESS' ) {
