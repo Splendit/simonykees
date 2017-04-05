@@ -13,7 +13,7 @@ node {
 	if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
 		stage('Push to Github') {
 			println "Pushing to github..."
-			sshagent([$sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
+			sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
 				// pushing the repository to github
       	sh("git push $backupOrigin HEAD:$env.BRANCH_NAME")
 			}
@@ -46,7 +46,7 @@ node {
 				def mvnCommand = 'clean deploy -DskipTests -B'
 			  sh "'${mvnHome}/bin/mvn' ${mvnCommand}"	
 				// tag build in reppsitory
-				sshagent([$sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
+				sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
 					// first parameter is the dir, second parameter is the subdirectory and optional
 					sh("./tag_deployment.sh $env.BRANCH_NAME main")
       	  sh("git push $backupOrigin --tags")
