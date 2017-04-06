@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.fieldsOrder;
+package at.splendit.simonykees.sample.postRule.rearrangeClassMembers;
 
 //TODO: be careful when you write comments! 
 
@@ -7,13 +7,13 @@ package at.splendit.simonykees.sample.postRule.fieldsOrder;
  */
 
 /**
- * Corner cases for {@linkplain FieldsOrderRule}.
+ * Corner cases for {@linkplain RearrangeClassMembersRule}.
  * 
  * @author Ardit Ymeri
  *
  */
 @SuppressWarnings({"unused", "nls"})
-public class FieldsOrderRule {
+public class RearrangeClassMembersRule {
 	
     public static final String A_PUBLIC_FINAL_FIELD = "protectedFinalString";
 	public static final String ND_PUBLIC_FINAL_FIELD = "protectedFinalString";
@@ -44,7 +44,7 @@ public class FieldsOrderRule {
         }
     }}
 
-	public FieldsOrderRule() {
+	public RearrangeClassMembersRule() {
         this.foo = "foo-value";
         this.anotherFoo = "another-foo";
     }

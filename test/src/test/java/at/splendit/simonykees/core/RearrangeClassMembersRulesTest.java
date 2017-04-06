@@ -8,32 +8,32 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import at.splendit.simonykees.core.rule.impl.FieldsOrderRule;
+import at.splendit.simonykees.core.rule.impl.RearrangeClassMembersRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
-import at.splendit.simonykees.core.visitor.FieldsOrderASTVisitor;
+import at.splendit.simonykees.core.visitor.RearrangeClassMembersASTVisitor;
 
 /**
- * Testing {@link FieldsOrderRule}.
+ * Testing {@link RearrangeClassMembersRule}.
  * 
  * @author Ardit Ymeri
  * @since 1.1
  */
 @RunWith(Parameterized.class)
 @SuppressWarnings("nls")
-public class FieldsOrderRulesTest extends AbstractRulesTest {
+public class RearrangeClassMembersRulesTest extends AbstractRulesTest {
 	
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.fieldsOrder";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/fieldsOrder";
+	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.rearrangeClassMembers";
+	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/rearrangeClassMembers";
 
 	private String fileName;
 	private Path preRule;
 	private Path postRule;
 	
-	public FieldsOrderRulesTest(String fileName, Path preRule, Path postRule) {
+	public RearrangeClassMembersRulesTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
-		rulesList.add(new FieldsOrderRule(FieldsOrderASTVisitor.class));
+		rulesList.add(new RearrangeClassMembersRule(RearrangeClassMembersASTVisitor.class));
 	}
 	
 	@Parameters(name = "{index}: test file[{0}]")

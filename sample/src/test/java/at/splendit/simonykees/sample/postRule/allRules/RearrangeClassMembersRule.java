@@ -9,13 +9,13 @@ import org.apache.commons.lang3.StringUtils;
  */
 
 /**
- * Corner cases for {@linkplain FieldsOrderRule}.
+ * Corner cases for {@linkplain RearrangeClassMembersRule}.
  * 
  * @author Ardit Ymeri
  *
  */
 @SuppressWarnings({ "unused", "nls" })
-public class FieldsOrderRule {
+public class RearrangeClassMembersRule {
 
 	public static final String A_PUBLIC_FINAL_FIELD = "protectedFinalString";
 	public static final String ND_PUBLIC_FINAL_FIELD = "protectedFinalString";
@@ -48,7 +48,7 @@ public class FieldsOrderRule {
 		}
 	}
 
-	public FieldsOrderRule() {
+	public RearrangeClassMembersRule() {
 		this.foo = "foo-value";
 		this.anotherFoo = "another-foo";
 	}

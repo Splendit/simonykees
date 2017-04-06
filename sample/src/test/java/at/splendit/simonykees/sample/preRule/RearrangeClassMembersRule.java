@@ -7,13 +7,13 @@ package at.splendit.simonykees.sample.preRule;
  */
 
 /**
- * Corner cases for {@linkplain FieldsOrderRule}.
+ * Corner cases for {@linkplain RearrangeClassMembersRule}.
  * 
  * @author Ardit Ymeri
  *
  */
 @SuppressWarnings({"unused", "nls"})
-public class FieldsOrderRule {
+public class RearrangeClassMembersRule {
 	
     @Deprecated
     abstract class AbstractInnerType {
@@ -119,7 +119,7 @@ public class FieldsOrderRule {
     	description += "and is static";
     }
     
-    public FieldsOrderRule() {
+    public RearrangeClassMembersRule() {
         this.foo = "foo-value";
         this.anotherFoo = "another-foo";
     }

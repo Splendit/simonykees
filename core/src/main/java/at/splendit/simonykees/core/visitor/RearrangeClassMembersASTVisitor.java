@@ -50,7 +50,7 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
  * @since 1.1
  *
  */
-public class FieldsOrderASTVisitor extends AbstractASTRewriteASTVisitor {
+public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisitor {
 	
 	private CompilationUnit compilationUnit;
 
