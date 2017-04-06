@@ -35,14 +35,10 @@ node {
 			def statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${mvnCommand}")
 
 			int i = 0		
-			println "i: $i"
-			println "statusCode: $statusCode"
 			while (statusCode != 0 && i < 1) {
 				def rerunTests = 'verify -fae'
 				statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${rerunTests}")
-				println "statusCode: $statusCode"
 				i = i +1
-				println "i: $i"
 			}
 
 			setTestStatus(statusCode)
