@@ -36,8 +36,9 @@ node {
 
 			int i = 0		
 			println "i: $i"
-			while (statusCode != 0 || i < 2) {
-				def rerunTests = '-f test/ verify'
+			println "statusCode: $statusCode"
+			while (statusCode != 0 && i < 1) {
+				def rerunTests = 'verify'
 				statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${rerunTests}")
 				println "statusCode: $statusCode"
 				i = i +1
