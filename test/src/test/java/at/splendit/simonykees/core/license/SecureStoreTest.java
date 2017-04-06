@@ -8,6 +8,7 @@ import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -39,6 +40,7 @@ public class SecureStoreTest {
 
 	@Test
 	public void testPrivateSecureStore() throws IOException, StorageException{
+		Assert.fail();
 		Activator.log(file.toString());
 		ISecurePreferences iSecurePreferences = SecurePreferencesFactory.open(file.toURI().toURL(), null);
 		iSecurePreferences.node("simonykees").put("key", "value", false);
