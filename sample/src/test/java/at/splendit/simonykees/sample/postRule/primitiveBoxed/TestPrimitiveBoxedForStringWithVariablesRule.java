@@ -107,12 +107,11 @@ public class TestPrimitiveBoxedForStringWithVariablesRule {
 		return Integer.valueOf(input).toString(4);
 	}
 
-	//TODO SIM-205
 	public String test(Integer input) {
 		String result = "";
 
 		if(!(Integer.toString(input)).isEmpty()) {
-			result = new Integer(intSampleMethod("5") + Integer.valueOf(3) + input).toString();
+			result = Integer.toString(intSampleMethod("5") + Integer.valueOf(3) + input);
 			Integer res = input + new Integer(1);
 			result = result + res.toString();
 		}
