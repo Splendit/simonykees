@@ -49,6 +49,8 @@
 		<module>feature</module>
 		<module>site</module>
 		<module>sample</module>
+		<module>license</module>
+		<module>license.test</module>
 	</modules>
 
 	<scm>

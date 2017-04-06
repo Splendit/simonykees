@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: jSparrow.license
+Bundle-SymbolicName: jSparrow.license
+Bundle-Version: 1.1.1.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: com.labs64.netlicensing.client;bundle-version="2.3.4",
+ org.eclipse.equinox.security;bundle-version="1.2.200",
+ org.eclipse.core.runtime;bundle-version="3.12.0",
+ com.github.oshi.core;bundle-version="3.4.2"
+Import-Package: org.osgi.framework;version="1.8.0",
+ oshi;version="3.4.2"
+Export-Package: at.splendit.simonykees.license,
+ at.splendit.simonykees.license.i18n,
+ at.splendit.simonykees.license.model
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: at.splendit.simonykees.license.Activator

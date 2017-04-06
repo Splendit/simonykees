@@ -5,8 +5,8 @@ import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 
 import at.splendit.simonykees.core.i18n.Messages;
-import at.splendit.simonykees.core.license.LicenseChecker;
-import at.splendit.simonykees.core.license.LicenseManager;
+import at.splendit.simonykees.license.LicenseChecker;
+import at.splendit.simonykees.license.LicenseManager;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 
 /**
