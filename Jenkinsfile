@@ -28,6 +28,8 @@ node {
 
 	wrap([$class: 'Xvfb']) {
 		stage('Integration-Tests') {
+			//xvfb sometimes needs more time
+			sleep(500)
 			// Run the maven build
 			def mvnCommand = 'clean install -fae -Dsurefire.rerunFailingTestsCount=2'
 
