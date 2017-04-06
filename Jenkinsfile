@@ -34,7 +34,7 @@ node {
 			// def mvnCommand = 'surefire:test -fae -Dsurefire.rerunFailingTestsCount=2'
 			def statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${mvnCommand}")
 
-			def i = 0		
+			int i = 0		
 			println "i:"i
 			while (statusCode != 0 || i < 2) {
 				def rerunTests = '-f test/ verify'
