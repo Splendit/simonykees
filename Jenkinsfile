@@ -29,18 +29,19 @@ node {
 	wrap([$class: 'Xvfb']) {
 		stage('Integration-Tests') {
 			// Run the maven build
-			def mvnCommand = 'clean verify -fae -Dsurefire.rerunFailingTestsCount=2'
+			def mvnCommand = 'clean install -fae -Dsurefire.rerunFailingTestsCount=2'
 
 			// def mvnCommand = 'surefire:test -fae -Dsurefire.rerunFailingTestsCount=2'
 			def statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${mvnCommand}")
 
 			int i = 0		
-			println "i:"+i
+			println "i: $i"
 			while (statusCode != 0 || i < 2) {
 				def rerunTests = '-f test/ verify'
 				statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${rerunTests}")
-				println "statusCode:"+statusCode
+				println "statusCode: $statusCode"
 				i = i +1
+				println "i: $i"
 			}
 
 			setTestStatus(statusCode)
