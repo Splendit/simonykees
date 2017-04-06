@@ -11,15 +11,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings({ "nls", "unused", "unchecked" })
 public class TestForToForEachRule {
 
-	private List<String> generateList(String input) {
-		return Arrays.asList(input.split(";"));
-	}
-
-	private List<Integer> generateHashCodeList(String input) {
-		List<String> foo = generateList(input);
-		List<Integer> fooHashCodes = foo.stream().map(s -> s.hashCode()).collect(Collectors.toList());
-		return fooHashCodes;
-	}
+	private List<String> a;
 
 	public String testConvertIteratorToForEach(String input) {
 		List<String> foo = generateList(input);
@@ -453,8 +445,6 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 
-	private List<String> a;
-
 	public String testIteratingIndexMoreLevels(String input) {
 		a = generateList(input);
 		StringBuilder sb = new StringBuilder();
@@ -499,6 +489,16 @@ public class TestForToForEachRule {
 			// do nothing
 		}
 		return false;
+	}
+
+	private List<String> generateList(String input) {
+		return Arrays.asList(input.split(";"));
+	}
+
+	private List<Integer> generateHashCodeList(String input) {
+		List<String> foo = generateList(input);
+		List<Integer> fooHashCodes = foo.stream().map(s -> s.hashCode()).collect(Collectors.toList());
+		return fooHashCodes;
 	}
 
 	private class Point {

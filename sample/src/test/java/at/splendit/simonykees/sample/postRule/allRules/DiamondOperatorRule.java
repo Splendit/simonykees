@@ -12,57 +12,8 @@ import java.util.stream.Collectors;
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "nls" })
 public class DiamondOperatorRule {
 
-	private class GenericSample<T> {
-		private T t;
-
-		public GenericSample(T t) {
-			this.t = t;
-		}
-
-		public T getValue() {
-			return t;
-		}
-	}
-
-	private abstract class Foo<T> {
-		private T t;
-		private List<T> field = new ArrayList<>();
-		private List<String>[] arrayList;
-
-		public Foo(T t) {
-			setValue(t);
-			arrayList = new ArrayList[2];
-		}
-
-		private void setValue(T t) {
-			this.t = t;
-		}
-
-		public T getValue() {
-			return t;
-		}
-
-		public void resetValue() {
-			this.field = new ArrayList<>();
-			arrayList[0] = new ArrayList<>();
-			for (List<String> list = new ArrayList<>(); !list.isEmpty();) {
-				list.add("");
-			}
-		}
-	}
-
-	private String concatRawTypeList(List objects) {
-		objects.add(new Object());
-		Object val = objects.stream().map(o -> o.toString()).collect(Collectors.joining(", "));
-		return val.toString();
-	}
-
 	public List<String> sampleGenericReturnTypeMethod(String input) {
 		return new ArrayList<>();
-	}
-
-	private String concatTypedList(List<String> foo, int i, Map<String, List<String>> map) {
-		return foo.stream().collect(Collectors.joining(","));
 	}
 
 	public void inferListType() {
@@ -145,5 +96,54 @@ public class DiamondOperatorRule {
 		Foo<String> foo = new Foo<String>(input) {
 		};
 		return foo.getValue();
+	}
+
+	private String concatRawTypeList(List objects) {
+		objects.add(new Object());
+		Object val = objects.stream().map(o -> o.toString()).collect(Collectors.joining(", "));
+		return val.toString();
+	}
+
+	private String concatTypedList(List<String> foo, int i, Map<String, List<String>> map) {
+		return foo.stream().collect(Collectors.joining(","));
+	}
+
+	private class GenericSample<T> {
+		private T t;
+
+		public GenericSample(T t) {
+			this.t = t;
+		}
+
+		public T getValue() {
+			return t;
+		}
+	}
+
+	private abstract class Foo<T> {
+		private T t;
+		private List<T> field = new ArrayList<>();
+		private List<String>[] arrayList;
+
+		public Foo(T t) {
+			setValue(t);
+			arrayList = new ArrayList[2];
+		}
+
+		public T getValue() {
+			return t;
+		}
+
+		public void resetValue() {
+			this.field = new ArrayList<>();
+			arrayList[0] = new ArrayList<>();
+			for (List<String> list = new ArrayList<>(); !list.isEmpty();) {
+				list.add("");
+			}
+		}
+
+		private void setValue(T t) {
+			this.t = t;
+		}
 	}
 }

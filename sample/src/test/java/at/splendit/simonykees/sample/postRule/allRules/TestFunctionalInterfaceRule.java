@@ -11,7 +11,18 @@ public class TestFunctionalInterfaceRule {
 
 	private static Logger log = LogManager.getLogger(TestFunctionalInterfaceRule.class);
 
+	int a;
+
+	AFunctionalInterface aFunctionalInterface = (int a) -> {
+	};
+
 	private final String FINAL_STRING_FIELD;
+
+	{
+		int a;
+		AFunctionalInterface aFunctionalInterface = (int a1) -> {
+		};
+	}
 
 	public TestFunctionalInterfaceRule() {
 
@@ -64,16 +75,6 @@ public class TestFunctionalInterfaceRule {
 		};
 
 		aFunctionalInterface.method(0);
-	}
-
-	int a;
-	AFunctionalInterface aFunctionalInterface = (int a) -> {
-	};
-
-	{
-		int a;
-		AFunctionalInterface aFunctionalInterface = (int a1) -> {
-		};
 	}
 
 	public void clashingLocalVariableNames(int l) {
@@ -263,6 +264,10 @@ public class TestFunctionalInterfaceRule {
 		};
 	}
 
+	private void sampleMethodAcceptingFunction(GenericFoo foo) {
+		// do nothing
+	}
+
 	private interface AFunctionalInterface {
 		public void method(int a);
 	}
@@ -287,9 +292,5 @@ public class TestFunctionalInterfaceRule {
 
 	private interface GenericFoo<T> {
 		T foo(String t, List<T> fooList);
-	}
-
-	private void sampleMethodAcceptingFunction(GenericFoo foo) {
-		// do nothing
 	}
 }

@@ -91,30 +91,6 @@ public class StringUtilsRefactorRule {
 		return testString;
 	}
 
-	private String complexSplit(String input, String splitSign, int limit) {
-		if (StringUtils.contains(input, splitSign)) {
-			if ("?".equals(splitSign)) {
-				/*
-				 * We need to escape the "?" because otherwise there is the
-				 * following exception: java.util.regex.PatternSyntaxException:
-				 * Dangling meta character '?' near index 0
-				 */
-				splitSign = splitSign.replace("?", "\\?");
-			}
-			if ("|".equals(splitSign)) {
-				/*
-				 * We need to escape the "|" because otherwise an empty String
-				 * is taken as split sign.
-				 */
-				splitSign = splitSign.replace("|", "\\|");
-			}
-			return limit == 0 ? Arrays.toString(input.split(splitSign))
-					: Arrays.toString(input.split(splitSign, limit));
-		} else {
-			return input;
-		}
-	}
-
 	public String testReplaceCornerCaseCharSequence(String testString) {
 		CharSequence c1 = new StringBuilder("a");
 		CharSequence c2 = new StringBuilder("b");
@@ -154,6 +130,30 @@ public class StringUtilsRefactorRule {
 		Locale l = Locale.GERMAN;
 
 		return StringUtils.lowerCase(testString, l);
+	}
+
+	private String complexSplit(String input, String splitSign, int limit) {
+		if (StringUtils.contains(input, splitSign)) {
+			if ("?".equals(splitSign)) {
+				/*
+				 * We need to escape the "?" because otherwise there is the
+				 * following exception: java.util.regex.PatternSyntaxException:
+				 * Dangling meta character '?' near index 0
+				 */
+				splitSign = splitSign.replace("?", "\\?");
+			}
+			if ("|".equals(splitSign)) {
+				/*
+				 * We need to escape the "|" because otherwise an empty String
+				 * is taken as split sign.
+				 */
+				splitSign = splitSign.replace("|", "\\|");
+			}
+			return limit == 0 ? Arrays.toString(input.split(splitSign))
+					: Arrays.toString(input.split(splitSign, limit));
+		} else {
+			return input;
+		}
 	}
 
 }
