@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.rule.impl;
 
 import org.apache.commons.lang3.JavaVersion;
 
+import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.RearrangeClassMembersASTVisitor;
 
@@ -15,8 +16,8 @@ public class RearrangeClassMembersRule extends RefactoringRule<RearrangeClassMem
 
 	public RearrangeClassMembersRule(Class<RearrangeClassMembersASTVisitor> visitor) {
 		super(visitor);
-		this.name = "Rearrange class members";
-		this.description = "Members of classes and interfaces should appear in a predefiend order.";
+		this.name = Messages.RearrangeClassMembersRule_name;
+		this.description = Messages.RearrangeClassMembersRule_description;
 		this.requiredJavaVersion = JavaVersion.JAVA_0_9;
 	}
 
