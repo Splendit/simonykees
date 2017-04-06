@@ -72,7 +72,6 @@ node {
 }
 
 def setTestStatus(testStatus) {
-	println testStatus
   if (testStatus == 0) {
     currentBuild.result = 'SUCCESS'
   } else if ( testStatus == 1 ) {

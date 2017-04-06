@@ -40,7 +40,6 @@ public class SecureStoreTest {
 
 	@Test
 	public void testPrivateSecureStore() throws IOException, StorageException{
-		Assert.fail();
 		Activator.log(file.toString());
 		ISecurePreferences iSecurePreferences = SecurePreferencesFactory.open(file.toURI().toURL(), null);
 		iSecurePreferences.node("simonykees").put("key", "value", false);
