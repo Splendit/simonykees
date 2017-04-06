@@ -10,4 +10,8 @@ Require-Bundle: com.labs64.netlicensing.client;bundle-version="2.3.4",
  com.github.oshi.core;bundle-version="3.4.2"
 Import-Package: org.osgi.framework;version="1.8.0",
  oshi;version="3.4.2"
-Export-Package: at.splendit.simonykees.license
+Export-Package: at.splendit.simonykees.license,
+ at.splendit.simonykees.license.i18n,
+ at.splendit.simonykees.license.model
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: at.splendit.simonykees.license.Activator
