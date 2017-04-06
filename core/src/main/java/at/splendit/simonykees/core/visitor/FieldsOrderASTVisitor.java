@@ -24,8 +24,30 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 
 /**
+ * Sorts the members of the class in the following order:
+ * 		<ul>
+ * 		 <li> fields </li>
+ * 		 <li> initializers </li>
+ * 		 <li> constructors </li>
+ * 		 <li> methods </li>
+ * 		 <li> enumeration declarations </li>
+ * 		 <li> annotation declarations </li>
+ * 		 <li> inner classes </li>
+ * 		</ul>
+ * <p>
+ * Furthermore, the members of the same type, are also sorted
+ * according to their modifier. The priority of the modifiers is 
+ * as follows:
+ * 		<ul>
+ * 		<li> static </li>
+ * 		<li> public </li>
+ * 		<li> protected </li>
+ * 		<li> package protected (no modifier) </li>
+ * 		<li> private. </li>
+ * 		</ul>
  * 
  * @author Ardit Ymeri
+ * @since 1.1
  *
  */
 public class FieldsOrderASTVisitor extends AbstractASTRewriteASTVisitor {
@@ -52,6 +74,7 @@ public class FieldsOrderASTVisitor extends AbstractASTRewriteASTVisitor {
 			Map<BodyDeclaration, List<Comment>>boundedComments = 
 					extractBoundedComments(node, comments, bodyDeclarations);
 			
+			// classify the body declarations according to their type
 			List<FieldDeclaration> fields = 
 					fileterByDeclarationType(bodyDeclarations, FieldDeclaration.class);
 			
@@ -82,22 +105,26 @@ public class FieldsOrderASTVisitor extends AbstractASTRewriteASTVisitor {
 			List<AnnotationTypeMemberDeclaration> annotationMembers = 
 					fileterByDeclarationType(bodyDeclarations, AnnotationTypeMemberDeclaration.class);
 			
+			// sort all body declarations
 			List<BodyDeclaration> sortedDeclarations = new ArrayList<>();
 			
-			sortedDeclarations.addAll(sortByModifier(fields));
+			sortedDeclarations.addAll(sortMembers(fields));
 			sortedDeclarations.addAll(initializers);
-			sortedDeclarations.addAll(sortByModifier(constructors));
-			sortedDeclarations.addAll(sortByModifier(methods));
-			sortedDeclarations.addAll(sortByModifier(enums));
-			sortedDeclarations.addAll(sortByModifier(annotations));
+			sortedDeclarations.addAll(sortMembers(constructors));
+			sortedDeclarations.addAll(sortMembers(methods));
+			sortedDeclarations.addAll(sortMembers(enums));
+			sortedDeclarations.addAll(sortMembers(annotations));
 			sortedDeclarations.addAll(annotationMembers);
 			
+			// swap the position according to the new order.
 			if(!sortedDeclarations.isEmpty()) {
 				ASTRewrite astRewrite = getAstRewrite();
 				ListRewrite listRewrite = 
 						astRewrite.getListRewrite(node, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+				
 				BodyDeclaration firstDeclaration = sortedDeclarations.get(0);
 				ASTNode firstTarget = astRewrite.createMoveTarget(firstDeclaration);
+				
 				List<Comment>firstDeclComments = boundedComments.get(firstDeclaration);
 				firstDeclComments.forEach(comment -> comment.getAlternateRoot().delete());
 				listRewrite.insertFirst((BodyDeclaration)firstTarget, null);
@@ -115,53 +142,38 @@ public class FieldsOrderASTVisitor extends AbstractASTRewriteASTVisitor {
 					firstTarget = target;
 				}
 			}
-			
-//			Collections.reverse(sortedDeclarations);
-//			
-//			ASTRewrite astRewrite = getAstRewrite();
-//			ListRewrite listRewrite = 
-//					astRewrite.getListRewrite(node, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
-//			sortedDeclarations.forEach(declaration -> {
-//				
-//				ASTNode target = astRewrite.createMoveTarget(declaration);
-//				List<Comment>declComments = boundedComments.get(declaration);
-//				declComments.forEach(comment -> comment.getAlternateRoot().delete());
-//				listRewrite.insertFirst((BodyDeclaration)target, null);
-//				
-//				listRewrite.remove(declaration, null);
-//				
-//			});
-			
 		}
 		
 		return true;
 	}
 	
-	private Map<BodyDeclaration, List<Comment>> extractBoundedComments(TypeDeclaration node, 
-			List<Comment> comments, List<BodyDeclaration> bodyDeclarations) {
+	private <T extends BodyDeclaration> List<T> sortMembers(List<T> members) {
+		List<T> staticMembers = 
+				members
+				.stream()
+				.filter(this::isStaticMember)
+				.collect(Collectors.toList());
+		List<T> instanceMembers =
+				members
+				.stream()
+				.filter(member -> !isStaticMember(member))
+				.collect(Collectors.toList());
 		
-		Map<BodyDeclaration, List<Comment>> boundComments = new HashMap<>();
-		if(!bodyDeclarations.isEmpty()) {
-			List<Comment> firstDeclComments = extractFirstDeclCommetns(node, bodyDeclarations, comments);
-			boundComments.put(bodyDeclarations.get(0), firstDeclComments);
-			
-			int j = 0;
-			for(int i = 1; i<bodyDeclarations.size(); i++) {
-				BodyDeclaration previousDecl = bodyDeclarations.get(i-1);
-				BodyDeclaration decl = bodyDeclarations.get(i);
-				List<Comment> declComments = new ArrayList<>();
-				while(j<comments.size() && comments.get(j).getStartPosition() < decl.getStartPosition()) {
-					if(fallsBetween(comments.get(j), previousDecl, decl)) {						
-						declComments.add(comments.get(j));
-					}
-					j++;
-				}
-				
-				boundComments.put(decl, declComments);
-			}
-
-		}
-		return boundComments;
+		List<T> sortedMembers = new ArrayList<>();
+		
+		sortedMembers.addAll(sortByModifier(staticMembers));
+		sortedMembers.addAll(sortByModifier(instanceMembers));
+		
+		return sortedMembers;
+	}
+	
+	private <T extends BodyDeclaration> boolean isStaticMember(T member) {
+		return 
+				convertToTypedList(member.modifiers(), Modifier.class)
+				.stream()
+				.filter(Modifier::isStatic)
+				.findAny()
+				.isPresent();
 	}
 
 	private <T extends BodyDeclaration> List<T> sortByModifier(List<T> member) {
@@ -184,7 +196,6 @@ public class FieldsOrderASTVisitor extends AbstractASTRewriteASTVisitor {
 				.collect(Collectors.toList());
 	}
 	
-	@SuppressWarnings("unchecked")
 	private <T extends BodyDeclaration> List<T> filterByModifier(List<T>members, int modifierFlag) {
 		
 		return 
@@ -193,11 +204,9 @@ public class FieldsOrderASTVisitor extends AbstractASTRewriteASTVisitor {
 				.filter(member -> {
 					 
 					 return 
-							 member
-							 .modifiers()
+							 convertToTypedList(member.modifiers(), Modifier.class)
 							 .stream()
-							 .filter(Modifier.class::isInstance)
-							 .filter(modifier -> ((Modifier)modifier).getKeyword().toFlagValue() == modifierFlag)
+							 .filter(modifier -> modifier.getKeyword().toFlagValue() == modifierFlag)
 							 .findAny()
 							 .isPresent();
 				})
@@ -219,19 +228,66 @@ public class FieldsOrderASTVisitor extends AbstractASTRewriteASTVisitor {
 				.collect(Collectors.toList());
 	}
 	
-	private boolean fallsBetween(Comment comment, BodyDeclaration previousDeclaration, BodyDeclaration declaration) {
-		
-		int previousEndPos = previousDeclaration.getStartPosition() + previousDeclaration.getLength();
-		int startPos = declaration.getStartPosition();
-		int commentStartPos = comment.getStartPosition();
-		int commentEndPos = commentStartPos + comment.getLength();
-		
-		return 
-				commentStartPos > previousEndPos 
-				&& commentEndPos < startPos; 
+	@SuppressWarnings("unchecked")
+	private <T> List<T> convertToTypedList(@SuppressWarnings("rawtypes") List rawlist, Class<T>type) {
+		return
+			((List<Object>)rawlist)
+			.stream()
+			.filter(type::isInstance)
+			.map(type::cast)
+			.collect(Collectors.toList());
 	}
 	
-	private List<Comment> extractFirstDeclCommetns(TypeDeclaration node, List<BodyDeclaration> bodyDeclarations, 
+	/**
+	 * Finds the comments that belong to a member of the class.
+	 * A comment is considered to belong to a member of the class
+	 * if it is placed above it, with possible empty lines in 
+	 * between.
+	 * 
+	 * @param node represents the body of the whole class.
+	 * @param comments list of all comments in the compilation unit.
+	 * @param bodyDeclarations list of body declarations in the class.
+	 * 
+	 * @return a map representing the comments belonging to a member of the class.
+	 */
+	private Map<BodyDeclaration, List<Comment>> extractBoundedComments(TypeDeclaration node, 
+			List<Comment> comments, List<BodyDeclaration> bodyDeclarations) {
+		
+		Map<BodyDeclaration, List<Comment>> boundComments = new HashMap<>();
+		if(!bodyDeclarations.isEmpty()) {
+			List<Comment> firstDeclComments = extractFirstDeclComments(node, bodyDeclarations, comments);
+			boundComments.put(bodyDeclarations.get(0), firstDeclComments);
+			
+			int j = 0;
+			for(int i = 1; i<bodyDeclarations.size(); i++) {
+				BodyDeclaration previousDecl = bodyDeclarations.get(i-1);
+				BodyDeclaration decl = bodyDeclarations.get(i);
+				List<Comment> declComments = new ArrayList<>();
+				while(j<comments.size() && comments.get(j).getStartPosition() < decl.getStartPosition()) {
+					if(fallsBetween(comments.get(j), previousDecl, decl)) {						
+						declComments.add(comments.get(j));
+					}
+					j++;
+				}
+				
+				boundComments.put(decl, declComments);
+			}
+
+		}
+		return boundComments;
+	}
+	
+	/**
+	 * Finds the comments belonging to the very first declaration in the 
+	 * body of the class. 
+	 * 
+	 * @param node represents the body of the whole class.
+	 * @param comments list of all comments in the compilation unit.
+	 * @param bodyDeclarations list of body declarations in the class.
+	 * 
+	 * @return list of comments belonging to the very first declaration.
+	 */
+	private List<Comment> extractFirstDeclComments(TypeDeclaration node, List<BodyDeclaration> bodyDeclarations, 
 			List<Comment>comments) {
 		List<Comment>firstDeclComments = new ArrayList<>();
 		if(!bodyDeclarations.isEmpty()) {
@@ -253,5 +309,28 @@ public class FieldsOrderASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return firstDeclComments;
+	}
+	
+	/**
+	 * Checks whether a given comment is placed between the given 
+	 * two consecutive body declarations. 
+	 * 
+	 * @param comment comment to be checked
+	 * @param previousDeclaration 
+	 * @param declaration
+	 * 
+	 * @return if the comment is placed after the previousDeclartion and before
+	 * the declaration.
+	 */
+	private boolean fallsBetween(Comment comment, BodyDeclaration previousDeclaration, BodyDeclaration declaration) {
+		
+		int previousEndPos = previousDeclaration.getStartPosition() + previousDeclaration.getLength();
+		int startPos = declaration.getStartPosition();
+		int commentStartPos = comment.getStartPosition();
+		int commentEndPos = commentStartPos + comment.getLength();
+		
+		return 
+				commentStartPos > previousEndPos 
+				&& commentEndPos < startPos; 
 	}
 }

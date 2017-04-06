@@ -12,6 +12,12 @@ import at.splendit.simonykees.core.rule.impl.FieldsOrderRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.FieldsOrderASTVisitor;
 
+/**
+ * Testing {@link FieldsOrderRule}.
+ * 
+ * @author Ardit Ymeri
+ * @since 1.1
+ */
 @RunWith(Parameterized.class)
 @SuppressWarnings("nls")
 public class FieldsOrderRulesTest extends AbstractRulesTest {
