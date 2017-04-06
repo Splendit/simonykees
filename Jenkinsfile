@@ -35,7 +35,7 @@ node {
 			def statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${mvnCommand}")
 
 			def i = 0			
-			while (statuscode != 0 || i < 2) {
+			while (statusCode != 0 || i < 2) {
 				rerunTests = '-f test/ verify'
 				statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${rerunTests}")
 				i = i +1
