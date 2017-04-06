@@ -32,7 +32,17 @@ node {
 			def mvnCommand = 'clean verify -fae -Dsurefire.rerunFailingTestsCount=2'
 
 			// def mvnCommand = 'surefire:test -fae -Dsurefire.rerunFailingTestsCount=2'
-			setTestStatus(sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${mvnCommand}"))
+			def statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${mvnCommand}")
+
+			def i = 0			
+			while (statuscode != 0 || i < 2) {
+				rerunTests = '-f test/ verify'
+				statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${rerunTests}")
+				i = i +1
+			}
+
+			setTestStatus(statusCode)
+			
 			// collects unit test results
 			junit '**/target/surefire-reports/TEST-*.xml'
 			archive 'target/*.jar'
