@@ -51,6 +51,7 @@
 		<module>sample</module>
 		<module>license</module>
 		<module>license.test</module>
+		<module>i18n</module>
 	</modules>
 
 	<scm>
