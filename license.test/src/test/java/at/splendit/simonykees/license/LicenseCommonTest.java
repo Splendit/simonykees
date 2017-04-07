@@ -12,7 +12,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 
 import at.splendit.simonykees.license.Activator;
-import at.splendit.simonykees.license.i18n.ExceptionMessages;
+import at.splendit.simonykees.i18n.ExceptionMessages;
 import at.splendit.simonykees.license.model.PersistenceModel;
 
 /**
