@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.Status;
 
-import at.splendit.simonykees.license.i18n.Messages;
+import at.splendit.simonykees.i18n.Messages;
 
 import at.splendit.simonykees.license.model.LicenseeModel;
 import at.splendit.simonykees.license.model.SchedulerModel;

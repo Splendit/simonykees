@@ -1,6 +1,6 @@
 package at.splendit.simonykees.license;
 
-import at.splendit.simonykees.license.i18n.Messages;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * Enumeration of the license models that a client can have.

@@ -10,7 +10,7 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
 import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.service.LicenseeService;
 
-import at.splendit.simonykees.license.i18n.Messages;
+import at.splendit.simonykees.i18n.Messages;
 
 import at.splendit.simonykees.license.model.LicenseeModel;
 

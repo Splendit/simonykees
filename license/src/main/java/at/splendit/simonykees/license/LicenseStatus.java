@@ -1,6 +1,6 @@
 package at.splendit.simonykees.license;
 
-import at.splendit.simonykees.license.i18n.Messages; //TODO: add i18n support
+import at.splendit.simonykees.i18n.Messages; //TODO: add i18n support
 
 /**
  * Enumeration for indicating the reason why the license is or is not valid.

@@ -14,7 +14,7 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
-import at.splendit.simonykees.license.i18n.ExceptionMessages;
+import at.splendit.simonykees.i18n.ExceptionMessages;
 import at.splendit.simonykees.license.model.PersistenceModel;
 
 
