@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.i18n;
+package at.splendit.simonykees.i18n;
 
 import org.eclipse.osgi.util.NLS;
 
@@ -9,7 +9,7 @@ import org.eclipse.osgi.util.NLS;
  * @since 0.9
  */
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "at.splendit.simonykees.core.i18n.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "at.splendit.simonykees.i18n.messages"; //$NON-NLS-1$
 	public static String aa_codename;
 	public static String ui_ok;
 	public static String ui_cancel;

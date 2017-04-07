@@ -1,4 +1,4 @@
-package at.splendit.simonykees.license.i18n;
+package at.splendit.simonykees.i18n;
 
 import org.eclipse.osgi.util.NLS;
 
@@ -9,7 +9,7 @@ import org.eclipse.osgi.util.NLS;
  * @since 0.9
  */
 public class ExceptionMessages extends NLS {
-	private static final String BUNDLE_NAME = "at.splendit.simonykees.core.i18n.exceptionMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "at.splendit.simonykees.i18n.exceptionMessages"; //$NON-NLS-1$
 	public static String AbstractCompilationUnitAstVisitor_compilation_unit_no_context;
 	public static String AbstractRefactorer_error_cannot_init_rule;
 	public static String AbstractRefactorer_java_element_resoltuion_failed;
