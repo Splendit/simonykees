@@ -23,7 +23,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;

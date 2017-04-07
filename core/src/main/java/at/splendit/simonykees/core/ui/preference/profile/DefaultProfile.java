@@ -3,7 +3,7 @@ package at.splendit.simonykees.core.ui.preference.profile;
 import java.util.Arrays;
 import java.util.List;
 
-import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.core.rule.impl.CodeFormatterRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
 import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceConstants;

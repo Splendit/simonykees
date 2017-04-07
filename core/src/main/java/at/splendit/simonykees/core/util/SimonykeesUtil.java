@@ -20,7 +20,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
 
-import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**

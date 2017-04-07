@@ -11,7 +11,7 @@ import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.ui.preference.profile.SimonykeesProfile;
 

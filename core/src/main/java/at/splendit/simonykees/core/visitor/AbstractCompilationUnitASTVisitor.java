@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeException;
-import at.splendit.simonykees.core.i18n.ExceptionMessages;
+import at.splendit.simonykees.i18n.ExceptionMessages;
 
 /**
  * Extended {@link AbstractASTRewriteASTVisitor} where a list of java classes
