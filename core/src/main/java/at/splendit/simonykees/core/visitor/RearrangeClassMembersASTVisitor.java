@@ -77,10 +77,10 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 			
 			// classify the body declarations according to their type
 			List<FieldDeclaration> fields = 
-					fileterByDeclarationType(bodyDeclarations, FieldDeclaration.class);
+					filterByDeclarationType(bodyDeclarations, FieldDeclaration.class);
 			
 			List<MethodDeclaration> methodsDeclarations = 
-					fileterByDeclarationType(bodyDeclarations, MethodDeclaration.class);
+					filterByDeclarationType(bodyDeclarations, MethodDeclaration.class);
 			
 			List<MethodDeclaration> constructors = 
 					methodsDeclarations
@@ -95,16 +95,16 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 					.collect(Collectors.toList());
 			
 			List<Initializer> initializers = 
-					fileterByDeclarationType(bodyDeclarations, Initializer.class);
+					filterByDeclarationType(bodyDeclarations, Initializer.class);
 			
 			List<EnumDeclaration> enums = 
-					fileterByDeclarationType(bodyDeclarations, EnumDeclaration.class);
+					filterByDeclarationType(bodyDeclarations, EnumDeclaration.class);
 			
 			List<AnnotationTypeDeclaration> annotations = 
-					fileterByDeclarationType(bodyDeclarations, AnnotationTypeDeclaration.class);
+					filterByDeclarationType(bodyDeclarations, AnnotationTypeDeclaration.class);
 			
 			List<AnnotationTypeMemberDeclaration> annotationMembers = 
-					fileterByDeclarationType(bodyDeclarations, AnnotationTypeMemberDeclaration.class);
+					filterByDeclarationType(bodyDeclarations, AnnotationTypeMemberDeclaration.class);
 			
 			// sort all body declarations
 			List<BodyDeclaration> sortedDeclarations = new ArrayList<>();
@@ -148,12 +148,22 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 		return true;
 	}
 	
+	/**
+	 * Sorts the given list of body declarations of the same type, 
+	 * by the modifier. Static members have higher priority. Then, comes
+	 * public, protected, package protected and private.
+	 * 
+	 * @param members body declarations to be sorted
+	 * @return sorted list of body declarations
+	 */
 	private <T extends BodyDeclaration> List<T> sortMembers(List<T> members) {
+		// extract static members
 		List<T> staticMembers = 
 				members
 				.stream()
 				.filter(this::isStaticMember)
 				.collect(Collectors.toList());
+		// extract instance members
 		List<T> instanceMembers =
 				members
 				.stream()
@@ -162,12 +172,21 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 		
 		List<T> sortedMembers = new ArrayList<>();
 		
-		sortedMembers.addAll(sortByModifier(staticMembers));
-		sortedMembers.addAll(sortByModifier(instanceMembers));
+		// sort static members by modifier
+		sortedMembers.addAll(sortByAccessModifier(staticMembers));
+		// sort instance members by modifier
+		sortedMembers.addAll(sortByAccessModifier(instanceMembers));
 		
 		return sortedMembers;
 	}
 	
+	/**
+	 * Checks whether the given body declaration is a static or 
+	 * an instance declaration. 
+	 *  
+	 * @param member a body declaration
+	 * @return if it is a static body declaration.
+	 */
 	private <T extends BodyDeclaration> boolean isStaticMember(T member) {
 		return 
 				convertToTypedList(member.modifiers(), Modifier.class)
@@ -177,7 +196,22 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 				.isPresent();
 	}
 
-	private <T extends BodyDeclaration> List<T> sortByModifier(List<T> member) {
+	/**
+	 * Sorts the given list of body declarations according to their 
+	 * access modifiers. The priority of the modifiers is as follows:
+	 * <ul>
+	 * 	<li>public</li>
+	 *  <li>protected</li>
+	 *  <li>(none)</li>
+	 *  <li>private</li>
+	 * </ul>
+	 * 
+	 * <b>Note</b>: The static modifier and the annotations are not considered! 
+	 * 
+	 * @param member body declarations of the same type, to be sorted.
+	 * @return sorted list of body declarations
+	 */
+	private <T extends BodyDeclaration> List<T> sortByAccessModifier(List<T> member) {
 		List<T> sortedDeclarations = new ArrayList<>();
 		
 		sortedDeclarations.addAll(filterByModifier(member, Modifier.PUBLIC));
@@ -188,7 +222,15 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 		return sortedDeclarations;
 	}
 
-	private <T extends BodyDeclaration> List<T> fileterByDeclarationType(List<BodyDeclaration> bodyDeclarations, Class<T>type) {
+	/**
+	 * Extracts the body declarations of the given from the given list of 
+	 * the body declarations.  
+	 * 
+	 * @param bodyDeclarations list of original body declarations
+	 * @param type type of the declarations to be filtered. 
+	 * @return 
+	 */
+	private <T extends BodyDeclaration> List<T> filterByDeclarationType(List<BodyDeclaration> bodyDeclarations, Class<T>type) {
 		return
 				bodyDeclarations
 				.stream()
@@ -197,6 +239,16 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 				.collect(Collectors.toList());
 	}
 	
+	/**
+	 * Extracts the body declarations having the given modifier flag
+	 * from the given list of body declarations. 
+	 * 
+	 * @see Modifier for the available modifier flags. 
+	 *  
+	 * @param members list of  body declarations
+	 * @param modifierFlag modifier flag.
+	 * @return list of body declarations having the given modifier.
+	 */
 	private <T extends BodyDeclaration> List<T> filterByModifier(List<T>members, int modifierFlag) {
 		Predicate<T> filter = member -> {
 			 
@@ -210,6 +262,14 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 		return filterByModifier(members, filter);
 	}
 	
+	/**
+	 * Extracts the body declarations with <b>NO</b> access modifier.
+	 * The difference from {@link #filterByModifier(List, int)} is that
+	 * it checks for the absence of an access modifier.
+	 *  
+	 * @param members list of body declarations.
+	 * @return list of body declarations with no access modifier.
+	 */
 	private <T extends BodyDeclaration> List<T> filterByPackageProtectedModifier(List<T>members) {
 		Predicate<T> packageProtectedFilter = member -> {
 			int flag = member.getModifiers();
@@ -225,7 +285,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 	 * 
 	 * @param members list to filter
 	 * @param modifierFilter defines the filter for the collection.
-	 * @return
+	 * @return list of members satisfying the modifierFilter
 	 */
 	private <T extends BodyDeclaration> List<T> filterByModifier(List<T> members, Predicate<T> modifierFilter) {
 		return 
@@ -235,6 +295,14 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 				.collect(Collectors.toList());
 	}
 	
+	/**
+	 * Converts the raw list to a typed list.
+	 * Filters out the elements that are not instances of the given type.
+	 * 
+	 * @param rawlist
+	 * @param type
+	 * @return list of the given type. 
+	 */
 	@SuppressWarnings("unchecked")
 	private <T> List<T> convertToTypedList(@SuppressWarnings("rawtypes") List rawlist, Class<T>type) {
 		return
