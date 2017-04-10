@@ -38,24 +38,22 @@ import oshi.hardware.HardwareAbstractionLayer;
  */
 public class LicenseManager {
 
-	private static final String DEFAULT_LICENSEE_NUMBER_PREFIX = "demo"; //$NON-NLS-1$
-	private static String PRODUCT_NUMBER = "PNZNF7Y7E"; //$NON-NLS-1$
-	private static final String PRODUCT_NUMBER_PRODUCTION = "PNZNF7Y7E"; //$NON-NLS-1$
-	private static final String PRODUCT_NUMBER_TEST = "PNZNF7Y7E"; //$NON-NLS-1$
-
+	private static final String DEFAULT_LICENSEE_NUMBER_PREFIX = LicenseProperties.DEFAULT_LICENSEE_NUMBER_PREFIX;
+	private static String PRODUCT_NUMBER = LicenseProperties.LICENSE_PRODUCT_NUMBER;
+		
 	/**
 	 * Rest API authentication token.
 	 */
-	private static final String PASS_APIKEY_PRODUCTION = "bf7f1092-3c88-492f-8a52-d00823d225a8"; //$NON-NLS-1$
-	private static final String PASS_APIKEY_TEST = "bf7f1092-3c88-492f-8a52-d00823d225a8"; //$NON-NLS-1$
-
+	private static final String PASS_APIKEY = LicenseProperties.LICENSE_PASS_API_KEY;
+	
+	
 	/**
 	 * Product module number related to Floating licenses.
-	 */
-	private static String PRODUCT_MODULE_NUMBER = "M6IS9TIWG"; //$NON-NLS-1$
-	private static final String PRODUCT_MODULE_NUMBER_PRODUCTION = "M6IS9TIWG"; //$NON-NLS-1$
-	private static final String PRODUCT_MODULE_NUMBER_TEST = "M6IS9TIWG"; //$NON-NLS-1$
-
+	 */	
+	private static  String PRODUCT_MODULE_NUMBER = LicenseProperties.LICENSE_PRODUCT_MODULE_NUMBER;
+	
+	
+	
 	/**
 	 * Waiting time in milliseconds for receiving and processing a validation
 	 * call.
@@ -89,23 +87,11 @@ public class LicenseManager {
 
 	public synchronized static LicenseManager getInstance() {
 		if (instance == null) {
-			PRODUCT_NUMBER = PRODUCT_NUMBER_PRODUCTION;
-			PRODUCT_MODULE_NUMBER = PRODUCT_MODULE_NUMBER_PRODUCTION;
-			RestApiConnection.PASS_APIKEY = PASS_APIKEY_PRODUCTION;
 			instance = new LicenseManager();
 		}
 		return instance;
 	}
 
-	synchronized static LicenseManager getTestInstance() {
-		RestApiConnection.PASS_APIKEY = PASS_APIKEY_TEST;
-		if (instance == null || PRODUCT_NUMBER == PRODUCT_NUMBER_PRODUCTION) {
-			PRODUCT_NUMBER = PRODUCT_NUMBER_TEST;
-			PRODUCT_MODULE_NUMBER = PRODUCT_MODULE_NUMBER_TEST;
-			instance = new LicenseManager();
-		}
-		return instance;
-	}
 
 	void initManager() {
 		schedulerEntity = new SchedulerModel(VALIDATE_INTERVAL_IN_SECONDS, INITIAL_VALIDATION_DELAY, DO_VALIDATE);
@@ -502,12 +488,12 @@ public class LicenseManager {
 		throw new CloneNotSupportedException();
 	}
 
-	static String getTestFloatingProductModuleNumber() {
-		return PRODUCT_MODULE_NUMBER_TEST;
+	static String getFloatingProductModuleNumber() {
+		return PRODUCT_MODULE_NUMBER;
 	}
-
-	static String getTestProductNumber() {
-		return PRODUCT_NUMBER_TEST;
+	
+	static String getProductNumber() {
+		return PRODUCT_NUMBER;
 	}
 
 	private class CheckerImpl implements LicenseChecker {

@@ -39,12 +39,12 @@ public class FloatingLicenseManagerTest extends LicenseCommonTest {
 	//Connected to floating licenses
 	@After
 	public void checkIn() {
-		LicenseManager instance = LicenseManager.getTestInstance();
+		LicenseManager instance = LicenseManager.getInstance();
 		usedSessions.forEach(sessionId -> {
-			FloatingModel floatingModel = new FloatingModel(LicenseManager.getTestFloatingProductModuleNumber(), ZonedDateTime.now().plusDays(356), sessionId);
+			FloatingModel floatingModel = new FloatingModel(LicenseManager.getFloatingProductModuleNumber(), ZonedDateTime.now().plusDays(356), sessionId);
 			instance.setUniqueHwId(sessionId);
 			
-			LicenseeModel licensee = new LicenseeModel("", instance.getLicenseeNumber(), floatingModel, LicenseManager.getTestProductNumber());
+			LicenseeModel licensee = new LicenseeModel("", instance.getLicenseeNumber(), floatingModel, LicenseManager.getProductNumber());
 			instance.setLicensee(licensee);
 			instance.setLicenseModel(floatingModel);
 			
@@ -58,13 +58,14 @@ public class FloatingLicenseManagerTest extends LicenseCommonTest {
 		});
 
 	}
+		
 	
 	//FIXME: tests related to floating license are temporarily removed
 	@Ignore
 	@Test
 	public void testInitLicenseManager() {
 		// when initiating the license manager...
-		LicenseManager instance = LicenseManager.getTestInstance();
+		LicenseManager instance = LicenseManager.getInstance();
 		instance.initManager();
 		storeUsedSessionId();
 		LicenseModel licenseModel = instance.getLicenseModel();
@@ -85,7 +86,7 @@ public class FloatingLicenseManagerTest extends LicenseCommonTest {
 		// having a licensee with license model from the prevalidation... 
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		ValidationResultCache cache = ValidationResultCache.getInstance();
-		LicenseManager licenseMng = LicenseManager.getTestInstance();
+		LicenseManager licenseMng = LicenseManager.getInstance();
 		licenseMng.initManager();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseModel licenseModel = licenseMng.getLicenseModel();
@@ -128,7 +129,7 @@ public class FloatingLicenseManagerTest extends LicenseCommonTest {
 		LicenseeModel licensee;
 		
 		// having 3 sessions occupied (the floating model used for testing has only 3 available sessions)
-		LicenseManager licenseMng = LicenseManager.getTestInstance();
+		LicenseManager licenseMng = LicenseManager.getInstance();
 		licenseMng.initManager();// 1 occupied session
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseModel licenseModel  = licenseMng.getLicenseModel();
@@ -194,7 +195,7 @@ public class FloatingLicenseManagerTest extends LicenseCommonTest {
 	@Test
 	public void runningSchedulerAftercheckIn() throws InterruptedException {
 		// having initiated an instance of license manager for a floating licensee
-		LicenseManager licenseMng = LicenseManager.getTestInstance();
+		LicenseManager licenseMng = LicenseManager.getInstance();
 		licenseMng.initManager();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
@@ -214,7 +215,7 @@ public class FloatingLicenseManagerTest extends LicenseCommonTest {
 	}
 	
 	private void storeUsedSessionId() {
-		LicenseManager licenseManager = LicenseManager.getTestInstance();
+		LicenseManager licenseManager = LicenseManager.getInstance();
 		LicenseModel licenseModel = licenseManager.getLicenseModel();
 		if(licenseModel instanceof FloatingModel) {
 			String sessionId = ((FloatingModel) licenseModel).getSessionId();
