@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -197,34 +198,40 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 	}
 	
 	private <T extends BodyDeclaration> List<T> filterByModifier(List<T>members, int modifierFlag) {
-		
-		return 
-				members
-				.stream()
-				.filter(member -> {
-					 
-					 return 
-							 convertToTypedList(member.modifiers(), Modifier.class)
-							 .stream()
-							 .filter(modifier -> modifier.getKeyword().toFlagValue() == modifierFlag)
-							 .findAny()
-							 .isPresent();
-				})
-				.collect(Collectors.toList());
+		Predicate<T> filter = member -> {
+			 
+			 return 
+					 convertToTypedList(member.modifiers(), Modifier.class)
+					 .stream()
+					 .filter(modifier -> modifier.getKeyword().toFlagValue() == modifierFlag)
+					 .findAny()
+					 .isPresent();
+		};
+		return filterByModifier(members, filter);
 	}
 	
 	private <T extends BodyDeclaration> List<T> filterByPackageProtectedModifier(List<T>members) {
-		
+		Predicate<T> packageProtectedFilter = member -> {
+			int flag = member.getModifiers();
+			return 
+					!Modifier.isProtected(flag)
+					&& !Modifier.isPublic(flag)
+					&& !Modifier.isPrivate(flag);
+		};
+		return filterByModifier(members, packageProtectedFilter);
+	}
+	
+	/** Filters the members by the modifierFilter
+	 * 
+	 * @param members list to filter
+	 * @param modifierFilter defines the filter for the collection.
+	 * @return
+	 */
+	private <T extends BodyDeclaration> List<T> filterByModifier(List<T> members, Predicate<T> modifierFilter) {
 		return 
 				members
 				.stream()
-				.filter(member -> {
-					int flag = member.getModifiers();
-					return 
-							!Modifier.isProtected(flag)
-							&& !Modifier.isPublic(flag)
-							&& !Modifier.isPrivate(flag);
-				})
+				.filter(modifierFilter)
 				.collect(Collectors.toList());
 	}
 	
