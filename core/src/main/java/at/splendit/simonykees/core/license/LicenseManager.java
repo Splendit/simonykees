@@ -44,7 +44,7 @@ public class LicenseManager {
 	/**
 	 * Rest API authentication token.
 	 */
-	private static final String PASS_APIKEY = LicenseProperties.LICENSE_PASS_API_KEY;
+	static final String PASS_APIKEY = LicenseProperties.LICENSE_PASS_API_KEY;
 	
 	
 	/**
