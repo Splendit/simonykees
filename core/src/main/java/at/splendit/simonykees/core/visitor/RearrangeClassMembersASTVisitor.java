@@ -122,7 +122,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 			
 			/**
 			 * Fields are not sorted by modifier because they 
-			 * me reference each-other during initialization.
+			 * may reference each-other during initialization.
 			 */
 			sortedDeclarations.addAll(fields);  
 			sortedDeclarations.addAll(nonStaticInitializers);
@@ -187,7 +187,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 		
 		List<T> sortedMembers = new ArrayList<>();
 
-		// sort static members
+		// sort static members by modifier
 		sortedMembers.addAll(sortByAccessModifier(staticMembers));
 		// sort instance members by modifier
 		sortedMembers.addAll(sortByAccessModifier(instanceMembers));
