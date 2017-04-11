@@ -17,7 +17,7 @@ public class LicensePropertiesTest {
 	@Test
 	public void testLicenseProperties() {
 				
-	    assertEquals( "Test", LicenseProperties.LICENSE_ENVIRONMENT);
+	    assertEquals( "Test", LicenseProperties.LICENSE_ENVIRONMENT); //$NON-NLS-1$
 	}
 
 }

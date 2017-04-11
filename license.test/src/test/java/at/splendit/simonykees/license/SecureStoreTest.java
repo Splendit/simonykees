@@ -16,34 +16,37 @@ import org.junit.rules.TestName;
 import at.splendit.simonykees.license.Activator;
 
 public class SecureStoreTest {
-	
+
 	private File file;
-	
-	@Rule public TestName name = new TestName();
-	
+
+	@Rule
+	public TestName name = new TestName();
+
 	@Before
-	public void setup() throws MalformedURLException, IOException{
-		file = new File(System.getProperty("user.home"), ".eclipse/org.eclipse.equinox.security/jsparrow_store_"+name.getMethodName());
-		if(file.exists()){
+	public void setup() throws MalformedURLException, IOException {
+		file = new File(System.getProperty("user.home"), //$NON-NLS-1$
+				".eclipse/org.eclipse.equinox.security/jsparrow_store_" + name.getMethodName()); //$NON-NLS-1$
+		if (file.exists()) {
 			file.delete();
 		}
 	}
-	
+
 	@After
-	public void tearDown() throws MalformedURLException, IOException{
-		if(file.exists()){
+	public void tearDown() throws MalformedURLException, IOException {
+		if (file.exists()) {
 			file.delete();
 		}
 		file = null;
 	}
 
+	@SuppressWarnings("nls")
 	@Test
-	public void testPrivateSecureStore() throws IOException, StorageException{
+	public void testPrivateSecureStore() throws IOException, StorageException {
 		Activator.log(file.toString());
 		ISecurePreferences iSecurePreferences = SecurePreferencesFactory.open(file.toURI().toURL(), null);
 		iSecurePreferences.node("simonykees").put("key", "value", false);
 		Activator.log(iSecurePreferences.node("simonykees").get("key", ""));
 		iSecurePreferences.flush();
 	}
-	
+
 }
