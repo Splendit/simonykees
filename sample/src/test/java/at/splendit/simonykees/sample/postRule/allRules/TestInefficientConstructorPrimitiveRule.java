@@ -3,6 +3,9 @@ package at.splendit.simonykees.sample.postRule.allRules;
 @SuppressWarnings("nls")
 public class TestInefficientConstructorPrimitiveRule {
 
+	Byte b1 = Byte.valueOf((byte) 1);
+	Byte b3 = Byte.valueOf("1");
+
 	public Integer primIntegerToIntegerTest() {
 		return Integer.valueOf(1);
 	}
@@ -58,9 +61,6 @@ public class TestInefficientConstructorPrimitiveRule {
 	public Byte stringToByteTest() {
 		return Byte.valueOf("1");
 	}
-
-	Byte b1 = Byte.valueOf((byte) 1);
-	Byte b3 = Byte.valueOf("1");
 
 	public Number doubleToNumberTest() {
 		return new TestNumberConstructor(2d).getValue();
