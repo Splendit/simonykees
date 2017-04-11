@@ -77,13 +77,21 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 			
 			// classify the body declarations according to their type
 			
-			// fields and initializers are handled together
+			// fields and static initializers are handled together
 			List<BodyDeclaration> fields = 
-					applyFileter(
+					applyFilter(
 							bodyDeclarations, 
 							member -> 
 							FieldDeclaration.class.isInstance(member) 
-							|| Initializer.class.isInstance(member));
+							|| ( Initializer.class.isInstance(member) 
+									&& isStaticMember(member)));
+			
+			List<BodyDeclaration> nonStaticInitializers = 
+					applyFilter(
+							bodyDeclarations, 
+							member -> 
+							Initializer.class.isInstance(member) 
+									&& !isStaticMember(member));
 			
 			List<MethodDeclaration> methodsDeclarations = 
 					filterByDeclarationType(bodyDeclarations, MethodDeclaration.class);
@@ -112,7 +120,12 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 			// sort all body declarations
 			List<BodyDeclaration> sortedDeclarations = new ArrayList<>();
 			
-			sortedDeclarations.addAll(sortMembers(fields));
+			/**
+			 * Fields are not sorted by modifier because they 
+			 * me reference each-other during initialization.
+			 */
+			sortedDeclarations.addAll(fields);  
+			sortedDeclarations.addAll(nonStaticInitializers);
 			sortedDeclarations.addAll(sortMembers(constructors));
 			sortedDeclarations.addAll(sortMembers(methods));
 			sortedDeclarations.addAll(sortMembers(enums));
@@ -173,23 +186,9 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 				.collect(Collectors.toList());
 		
 		List<T> sortedMembers = new ArrayList<>();
-		
-		// don't sort static fields and initializers.
-		boolean sortStatic = 
-				staticMembers
-				.stream()
-				.filter(member -> 
-				!FieldDeclaration.class.isInstance(member) 
-				&& !Initializer.class.isInstance(member))
-				.findAny()
-				.isPresent();
-		
-		if(sortStatic) {
-			sortedMembers.addAll(sortByAccessModifier(staticMembers));
-		} else {
-			sortedMembers.addAll(staticMembers);
-		}
-		
+
+		// sort static members
+		sortedMembers.addAll(sortByAccessModifier(staticMembers));
 		// sort instance members by modifier
 		sortedMembers.addAll(sortByAccessModifier(instanceMembers));
 		
@@ -275,7 +274,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 					 .findAny()
 					 .isPresent();
 		};
-		return applyFileter(members, filter);
+		return applyFilter(members, filter);
 	}
 	
 	/**
@@ -294,7 +293,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 					&& !Modifier.isPublic(flag)
 					&& !Modifier.isPrivate(flag);
 		};
-		return applyFileter(members, packageProtectedFilter);
+		return applyFilter(members, packageProtectedFilter);
 	}
 	
 	/** Applies the given filter to the given collection.
@@ -303,7 +302,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 	 * @param filter defines the filter for the collection.
 	 * @return list of members satisfying the filter
 	 */
-	private <T extends BodyDeclaration> List<T> applyFileter(List<T> members, Predicate<T> filter) {
+	private <T extends BodyDeclaration> List<T> applyFilter(List<T> members, Predicate<T> filter) {
 		return 
 				members
 				.stream()

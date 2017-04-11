@@ -15,24 +15,30 @@ package at.splendit.simonykees.sample.postRule.rearrangeClassMembers;
 @SuppressWarnings({"unused", "nls"})
 public class RearrangeClassMembersRule {
 	
-    private static final String A_STATIC_FINAL_FIELD;
+    @SuppressWarnings({})
+    String annotatedField = "";
+	//this comment lies above anotherFoo filed
+    private String anotherFoo;
+	public int noEmptyLineAbove;
+	String defaultModifierFoo;
+	public String publicFoo;
+	@Deprecated
+    public String publicAnnotatedFoo;
+	private static final String A_STATIC_FINAL_FIELD;
 	static {
     	A_STATIC_FINAL_FIELD = "staticFinalString";
     }
 	protected static final String A_PROTECTED_FINAL_FIELD = "protectedFinalString";
 	public static final String A_PUBLIC_FINAL_FIELD = A_STATIC_FINAL_FIELD;
+	private final String myString = "to-be-used-as-initializer";
+	public String initializedField = myString;
+	// comment above foo
+    private String foo = "foo-value";
+	protected String protectedFoo;
 	private static final String ND_STATIC_FINAL_FIELD = "staticFinalString";
 	public static final String ND_PUBLIC_FINAL_FIELD = "protectedFinalString";
-	public int noEmptyLineAbove;
-	public String publicFoo;
-	@Deprecated
-    public String publicAnnotatedFoo;
-	protected String protectedFoo;
 	@SuppressWarnings({})
     protected String protectedAnnotatedFoo;
-	@SuppressWarnings({})
-    String annotatedField = "";
-	String defaultModifierFoo;
 	{{
         Days a = Days.Mon;
         // some useless block
@@ -41,10 +47,6 @@ public class RearrangeClassMembersRule {
             foo = "foo-value";
         }
     }}
-	//this comment lies above anotherFoo filed
-    private String anotherFoo;
-	// comment above foo
-    private String foo = "foo-value";
 
 	public RearrangeClassMembersRule() {
         this.foo = "foo-value";
