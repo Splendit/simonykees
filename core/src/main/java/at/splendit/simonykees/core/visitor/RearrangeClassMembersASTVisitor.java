@@ -79,7 +79,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 			
 			// fields and initializers are handled together
 			List<BodyDeclaration> fields = 
-					applyFileter(
+					applyFilter(
 							bodyDeclarations, 
 							member -> 
 							FieldDeclaration.class.isInstance(member) 
@@ -275,7 +275,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 					 .findAny()
 					 .isPresent();
 		};
-		return applyFileter(members, filter);
+		return applyFilter(members, filter);
 	}
 	
 	/**
@@ -294,7 +294,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 					&& !Modifier.isPublic(flag)
 					&& !Modifier.isPrivate(flag);
 		};
-		return applyFileter(members, packageProtectedFilter);
+		return applyFilter(members, packageProtectedFilter);
 	}
 	
 	/** Applies the given filter to the given collection.
@@ -303,7 +303,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 	 * @param filter defines the filter for the collection.
 	 * @return list of members satisfying the filter
 	 */
-	private <T extends BodyDeclaration> List<T> applyFileter(List<T> members, Predicate<T> filter) {
+	private <T extends BodyDeclaration> List<T> applyFilter(List<T> members, Predicate<T> filter) {
 		return 
 				members
 				.stream()
