@@ -15,7 +15,15 @@ package at.splendit.simonykees.sample.postRule.rearrangeClassMembers;
 @SuppressWarnings({"unused", "nls"})
 public class RearrangeClassMembersRule {
 	
-    @SuppressWarnings({})
+    private static final String A_STATIC_FINAL_FIELD;
+	static {
+    	A_STATIC_FINAL_FIELD = "staticFinalString";
+    }
+	protected static final String A_PROTECTED_FINAL_FIELD = "protectedFinalString";
+	public static final String A_PUBLIC_FINAL_FIELD = A_STATIC_FINAL_FIELD;
+	private static final String ND_STATIC_FINAL_FIELD = "staticFinalString";
+	public static final String ND_PUBLIC_FINAL_FIELD = "protectedFinalString";
+	@SuppressWarnings({})
     String annotatedField = "";
 	//this comment lies above anotherFoo filed
     private String anotherFoo;
@@ -24,19 +32,11 @@ public class RearrangeClassMembersRule {
 	public String publicFoo;
 	@Deprecated
     public String publicAnnotatedFoo;
-	private static final String A_STATIC_FINAL_FIELD;
-	static {
-    	A_STATIC_FINAL_FIELD = "staticFinalString";
-    }
-	protected static final String A_PROTECTED_FINAL_FIELD = "protectedFinalString";
-	public static final String A_PUBLIC_FINAL_FIELD = A_STATIC_FINAL_FIELD;
 	private final String myString = "to-be-used-as-initializer";
 	public String initializedField = myString;
 	// comment above foo
     private String foo = "foo-value";
 	protected String protectedFoo;
-	private static final String ND_STATIC_FINAL_FIELD = "staticFinalString";
-	public static final String ND_PUBLIC_FINAL_FIELD = "protectedFinalString";
 	@SuppressWarnings({})
     protected String protectedAnnotatedFoo;
 	{{

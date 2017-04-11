@@ -77,16 +77,23 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 			
 			// classify the body declarations according to their type
 			
-			// fields and static initializers are handled together
-			List<BodyDeclaration> fields = 
+			// static fields and static initializers are handled together
+			List<BodyDeclaration> staticFieldsAndInitializers = 
+					applyFilter(
+							bodyDeclarations, 
+							member -> 
+							isStaticMember(member)
+							&& (FieldDeclaration.class.isInstance(member)
+									|| Initializer.class.isInstance(member)));
+			
+			List<BodyDeclaration> instanceFields = 
 					applyFilter(
 							bodyDeclarations, 
 							member -> 
 							FieldDeclaration.class.isInstance(member) 
-							|| ( Initializer.class.isInstance(member) 
-									&& isStaticMember(member)));
+							&& !isStaticMember(member));
 			
-			List<BodyDeclaration> nonStaticInitializers = 
+			List<BodyDeclaration> instanceInitializers = 
 					applyFilter(
 							bodyDeclarations, 
 							member -> 
@@ -124,8 +131,9 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 			 * Fields are not sorted by modifier because they 
 			 * may reference each-other during initialization.
 			 */
-			sortedDeclarations.addAll(fields);  
-			sortedDeclarations.addAll(nonStaticInitializers);
+			sortedDeclarations.addAll(staticFieldsAndInitializers);  
+			sortedDeclarations.addAll(instanceFields); 
+			sortedDeclarations.addAll(instanceInitializers);
 			sortedDeclarations.addAll(sortMembers(constructors));
 			sortedDeclarations.addAll(sortMembers(methods));
 			sortedDeclarations.addAll(sortMembers(enums));
