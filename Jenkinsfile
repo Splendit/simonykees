@@ -26,8 +26,9 @@ node {
 		sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
 	}
 
+	wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', autoDisplayName: true, debug: true, installationName: 'xvfb', screen: '1366x768x24', shutdownWithBuild: true, timeout: 60]) {
 	// X virtual framebuffer (virtual X window display) is needed for plugin tests
-	wrap([$class: 'Xvfb']) {
+	// wrap([$class: 'Xvfb']) {
 		stage('Integration-Tests') {
 			//xvfb sometimes needs more time
 			sleep(5)
