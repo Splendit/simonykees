@@ -11,23 +11,6 @@
 	<packaging>eclipse-plugin</packaging>
 	<name>jSparrow :: core</name>
 	<description>jSparrow Core Plugin</description>
-	
-	<properties>
-		<!-- source of property file for production license -->
-		<configFileProduction>src/main/config-files/prod-license.properties</configFileProduction>
-		<!-- source of property file for test license -->
-		<configFileTest>src/main/config-files/test-license.properties</configFileTest>
-		<!-- actual property file for productive license -->
-		<activeConfigFileProduction>target/classes/active-prod-license.properties</activeConfigFileProduction>
-		<!-- actual property file for test license -->
-		<activeConfigFileTest>target/classes/active-test-license.properties</activeConfigFileTest>
-		<!-- Java Class for test licenses -->
-		<javaLicenseTestPropertiesClass>src/main/config-files/java-license-properties-test.txt</javaLicenseTestPropertiesClass>
-		<!-- Java Class for production licenses -->
-		<javaLicenseProductionPropertiesClass>src/main/config-files/java-license-properties-production.txt</javaLicenseProductionPropertiesClass>
-		<!-- Target Java class -->
-		<targetJavaLicenseProperties>src/main/java/at/splendit/simonykees/core/license/LicenseProperties.java</targetJavaLicenseProperties>				
-	</properties>	
 
 	<scm>
 		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/core</url>

@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.license;
+package at.splendit.simonykees.license;
 
 /**
  * This class is added at compile time by Maven and contains parameters relevant for Test licenses. These parameters will be
