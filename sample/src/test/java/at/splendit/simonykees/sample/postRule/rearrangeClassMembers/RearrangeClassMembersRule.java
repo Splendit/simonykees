@@ -15,11 +15,14 @@ package at.splendit.simonykees.sample.postRule.rearrangeClassMembers;
 @SuppressWarnings({"unused", "nls"})
 public class RearrangeClassMembersRule {
 	
-    public static final String A_PUBLIC_FINAL_FIELD = "protectedFinalString";
-	public static final String ND_PUBLIC_FINAL_FIELD = "protectedFinalString";
+    private static final String A_STATIC_FINAL_FIELD;
+	static {
+    	A_STATIC_FINAL_FIELD = "staticFinalString";
+    }
 	protected static final String A_PROTECTED_FINAL_FIELD = "protectedFinalString";
-	private static final String A_STATIC_FINAL_FIELD = "staticFinalString";
+	public static final String A_PUBLIC_FINAL_FIELD = A_STATIC_FINAL_FIELD;
 	private static final String ND_STATIC_FINAL_FIELD = "staticFinalString";
+	public static final String ND_PUBLIC_FINAL_FIELD = "protectedFinalString";
 	public int noEmptyLineAbove;
 	public String publicFoo;
 	@Deprecated
@@ -30,11 +33,6 @@ public class RearrangeClassMembersRule {
 	@SuppressWarnings({})
     String annotatedField = "";
 	String defaultModifierFoo;
-	//this comment lies above anotherFoo filed
-    private String anotherFoo;
-	// comment above foo
-    private String foo = "foo-value";
-
 	{{
         Days a = Days.Mon;
         // some useless block
@@ -43,6 +41,10 @@ public class RearrangeClassMembersRule {
             foo = "foo-value";
         }
     }}
+	//this comment lies above anotherFoo filed
+    private String anotherFoo;
+	// comment above foo
+    private String foo = "foo-value";
 
 	public RearrangeClassMembersRule() {
         this.foo = "foo-value";

@@ -45,9 +45,12 @@ public class RearrangeClassMembersRule {
     public String publicFoo;
     @Deprecated
     public String publicAnnotatedFoo;
-    private static final String A_STATIC_FINAL_FIELD = "staticFinalString";
+    private static final String A_STATIC_FINAL_FIELD;
+    static {
+    	A_STATIC_FINAL_FIELD = "staticFinalString";
+    }
     protected static final String A_PROTECTED_FINAL_FIELD = "protectedFinalString";
-    public static final String A_PUBLIC_FINAL_FIELD = "protectedFinalString";
+    public static final String A_PUBLIC_FINAL_FIELD = A_STATIC_FINAL_FIELD;
     class SomethingCouldBeInnerType {
 
         private String foo = "it-shadows-the-outer-class";
