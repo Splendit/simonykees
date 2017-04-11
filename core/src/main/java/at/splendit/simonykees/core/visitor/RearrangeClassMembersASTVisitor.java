@@ -48,7 +48,7 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
  * 		</ul>
  * 
  * @author Ardit Ymeri
- * @since 1.1
+ * @since 1.2
  *
  */
 public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisitor {

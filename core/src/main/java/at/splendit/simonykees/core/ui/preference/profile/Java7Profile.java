@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.JavaVersion;
 
-import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceConstants;

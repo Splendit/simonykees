@@ -21,7 +21,7 @@ import org.eclipse.ui.PlatformUI;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.SimonykeesException;
-import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * Simple help dialog that gets populated with default values

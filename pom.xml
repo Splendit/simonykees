@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>at.splendit.jSparrow</groupId>
 	<artifactId>jSparrow</artifactId>
-	<version>1.1.1-SNAPSHOT</version>
+	<version>1.2.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>jSparrow :: parent</name>
 	<description>jSparrow Parent</description>
@@ -49,6 +49,9 @@
 		<module>feature</module>
 		<module>site</module>
 		<module>sample</module>
+		<module>license</module>
+		<module>license.test</module>
+		<module>i18n</module>
 	</modules>
 
 	<scm>

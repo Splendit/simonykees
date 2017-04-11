@@ -20,7 +20,7 @@ import org.eclipse.ui.PlatformUI;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.exception.SimonykeesException;
-import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;

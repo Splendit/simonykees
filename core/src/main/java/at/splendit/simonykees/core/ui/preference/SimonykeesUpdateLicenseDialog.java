@@ -38,8 +38,8 @@ import org.eclipse.swt.widgets.Text;
 import org.osgi.framework.Bundle;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.i18n.Messages;
-import at.splendit.simonykees.core.license.LicenseManager;
+import at.splendit.simonykees.i18n.Messages;
+import at.splendit.simonykees.license.LicenseManager;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 
 /**
