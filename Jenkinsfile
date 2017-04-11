@@ -30,8 +30,6 @@ node {
 	// X virtual framebuffer (virtual X window display) is needed for plugin tests
 	// wrap([$class: 'Xvfb']) {
 		stage('Integration-Tests') {
-			//xvfb sometimes needs more time
-			sleep(5)
 			// Run the maven build
 			def mvnCommand = 'clean install -fae -Dsurefire.rerunFailingTestsCount=2'
 
