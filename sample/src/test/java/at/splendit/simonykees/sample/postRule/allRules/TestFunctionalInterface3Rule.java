@@ -1,24 +1,8 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
 public abstract class TestFunctionalInterface3Rule {
-	private static Runnable staticGetRunnable() {
-		return new Runnable() {
-			@Override
-			public void run() {
-				getClass();
-
-			}
-		};
-	}
-
 	static {
 		staticGetRunnable();
-	}
-
-	public Runnable getRunnable() {
-		return () -> {
-			getClass();
-		};
 	}
 
 	static {
@@ -36,6 +20,22 @@ public abstract class TestFunctionalInterface3Rule {
 			getClass();
 		};
 		r.run();
+	}
+
+	private static Runnable staticGetRunnable() {
+		return new Runnable() {
+			@Override
+			public void run() {
+				getClass();
+
+			}
+		};
+	}
+
+	public Runnable getRunnable() {
+		return () -> {
+			getClass();
+		};
 	}
 
 }

@@ -11,10 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 @SuppressWarnings({ "nls", "unused", "rawtypes" })
 public class TestWhileToForEachRule {
 
-	private List<String> generateList(String input) {
-		return Arrays.asList(input.split(";")); //$NON-NLS-1$
-	}
-
 	public String testWhileToFor(String input) {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
@@ -390,6 +386,10 @@ public class TestWhileToForEachRule {
 			sb.append(s);
 		}
 		return sb.toString();
+	}
+
+	private List<String> generateList(String input) {
+		return Arrays.asList(input.split(";")); //$NON-NLS-1$
 	}
 
 	/**

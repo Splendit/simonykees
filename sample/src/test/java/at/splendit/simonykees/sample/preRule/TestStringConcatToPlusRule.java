@@ -67,7 +67,6 @@ public class TestStringConcatToPlusRule {
 		return input.concat(number.toString());
 	}
 
-	//SIM-209
 	public String testConcatWithStreamResult(String input) {
 		List<String> values = Arrays.asList("val1", "val2", input);
 		return input.concat(values.stream().filter(s -> s.equals(input)).collect(Collectors.joining(","))

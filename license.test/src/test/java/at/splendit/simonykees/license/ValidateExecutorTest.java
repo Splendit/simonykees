@@ -32,7 +32,7 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 		ValidationResultCache.getInstance().reset();
 		persistNodeLockedLicensee();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
-		LicenseManager licenseManager = LicenseManager.getTestInstance();
+		LicenseManager licenseManager = LicenseManager.getInstance();
 		licenseManager.setUniqueHwId(TEST_UNIQUE_ID_01);
 		licenseManager.initManager();
 		LicenseeModel licensee = licenseManager.getLicensee();
@@ -59,7 +59,7 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 		ValidationResultCache.getInstance().reset();
 		persistNodeLockedLicensee();
 		
-		LicenseManager licenseManager = LicenseManager.getTestInstance();
+		LicenseManager licenseManager = LicenseManager.getInstance();
 		licenseManager.setUniqueHwId(TEST_UNIQUE_ID_01);
 		licenseManager.initManager();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);

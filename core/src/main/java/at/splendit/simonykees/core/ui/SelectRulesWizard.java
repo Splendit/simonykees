@@ -69,6 +69,8 @@ public class SelectRulesWizard extends Wizard {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
+				disableUIThread();
+
 				try {
 					refactorer.prepareRefactoring(monitor);
 					if (monitor.isCanceled()) {
@@ -104,6 +106,8 @@ public class SelectRulesWizard extends Wizard {
 			@Override
 			public void done(IJobChangeEvent event) {
 
+				enableUIThread();
+
 				if (event.getResult().isOK()) {
 					if (LicenseUtil.isValid()) {
 						if (refactorer.hasChanges()) {
@@ -127,6 +131,26 @@ public class SelectRulesWizard extends Wizard {
 		job.schedule();
 
 		return true;
+	}
+
+	private void disableUIThread() {
+		Display.getDefault().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setEnabled(false);
+			}
+		});
+	}
+
+	private void enableUIThread() {
+		Display.getDefault().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setEnabled(true);
+			}
+		});
 	}
 
 	/**

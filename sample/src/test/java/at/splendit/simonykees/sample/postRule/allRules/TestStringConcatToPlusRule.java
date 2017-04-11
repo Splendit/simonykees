@@ -10,14 +10,6 @@ public class TestStringConcatToPlusRule {
 
 	private static final String STATIC_VALUE = "static-value";
 
-	private String sampleMethod() {
-		return "method-invocation-result";
-	}
-
-	private String sampleMethod(String param) {
-		return "method-invocation-result" + param;
-	}
-
 	public String testConcatWithLiteral(String input) {
 		return input + "abc";
 	}
@@ -67,11 +59,10 @@ public class TestStringConcatToPlusRule {
 		return input + number.toString();
 	}
 
-	// SIM-209
 	public String testConcatWithStreamResult(String input) {
 		List<String> values = Arrays.asList("val1", "val2", input);
-		return input.concat(values.stream().filter(s -> s.equals(input)).collect(Collectors.joining(","))
-				.concat(values.stream().collect(Collectors.joining(";"))));
+		return input + values.stream().filter(s -> s.equals(input)).collect(Collectors.joining(","))
+				+ values.stream().collect(Collectors.joining(";"));
 	}
 
 	public String testConcatEmptyString(String input) {
@@ -124,5 +115,13 @@ public class TestStringConcatToPlusRule {
 	public String testConcatInMethodInvocationParam(String input, String param) {
 		boolean startsWitParam = input.startsWith((param + "a"), 0);
 		return input + Boolean.toString(startsWitParam);
+	}
+
+	private String sampleMethod() {
+		return "method-invocation-result";
+	}
+
+	private String sampleMethod(String param) {
+		return "method-invocation-result" + param;
 	}
 }

@@ -11,6 +11,23 @@
 	<packaging>eclipse-plugin</packaging>
 	<name>jSparrow :: core</name>
 	<description>jSparrow Core Plugin</description>
+	
+	<properties>
+		<!-- source of property file for production license -->
+		<configFileProduction>src/main/config-files/prod-license.properties</configFileProduction>
+		<!-- source of property file for test license -->
+		<configFileTest>src/main/config-files/test-license.properties</configFileTest>
+		<!-- actual property file for productive license -->
+		<activeConfigFileProduction>target/classes/active-prod-license.properties</activeConfigFileProduction>
+		<!-- actual property file for test license -->
+		<activeConfigFileTest>target/classes/active-test-license.properties</activeConfigFileTest>
+		<!-- Java Class for test licenses -->
+		<javaLicenseTestPropertiesClass>src/main/config-files/java-license-properties-test.txt</javaLicenseTestPropertiesClass>
+		<!-- Java Class for production licenses -->
+		<javaLicenseProductionPropertiesClass>src/main/config-files/java-license-properties-production.txt</javaLicenseProductionPropertiesClass>
+		<!-- Target Java class -->
+		<targetJavaLicenseProperties>src/main/java/at/splendit/simonykees/core/license/LicenseProperties.java</targetJavaLicenseProperties>				
+	</properties>	
 
 	<scm>
 		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/core</url>
@@ -69,6 +86,94 @@
 				</plugins>
 			</build>
 		</profile>
+		<profile>
+			<id>test</id>
+			  <activation>
+				<activeByDefault>true</activeByDefault>
+			</activation> 
+			<build>
+ 				<resources> 
+             		<resource>
+                 		<directory>src/main/resources</directory>
+             		</resource>
+         		</resources> 
+				<plugins>
+					<plugin>
+					    <groupId>com.coderplus.maven.plugins</groupId>
+					    <artifactId>copy-rename-maven-plugin</artifactId>
+					    <version>1.0.1</version>
+					    <executions>
+					     <execution>
+						      <id>copy-java-file</id>
+						      <phase>validate</phase>
+						      <goals>
+						      	<goal>copy</goal>
+						      </goals>
+						      <configuration>
+						          <sourceFile>${javaLicenseTestPropertiesClass}</sourceFile>
+						          <destinationFile>${targetJavaLicenseProperties}</destinationFile>
+						          <overWrite>true</overWrite>
+						        </configuration>
+				      </execution>
+					      <execution>
+					        <id>copy-file-flag</id>
+					        <phase>compile</phase>
+					        <goals>
+					          <goal>copy</goal>
+					        </goals>
+					        <configuration>
+					          <sourceFile>${configFileTest}</sourceFile>
+					          <destinationFile>${activeConfigFileTest}</destinationFile>
+					        </configuration>
+					      </execution>
+					    </executions>
+				  </plugin>
+			  </plugins>
+		  </build>
+		</profile>
+		<profile>
+			<id>production</id>			
+			<build>
+				 <resources> 
+             		<resource>
+                 		<directory>src/main/resources</directory>
+             		</resource>
+         		</resources>
+         	<plugins>
+				<plugin>
+				    <groupId>com.coderplus.maven.plugins</groupId>
+				    <artifactId>copy-rename-maven-plugin</artifactId>
+				    <version>1.0.1</version>
+				    <executions>
+				      <execution>
+				      <id>copy-java-file</id>
+				      <phase>validate</phase>
+				      <goals>
+				      	<goal>copy</goal>
+				      </goals>
+				      <configuration>
+				          <sourceFile>${javaLicenseProductionPropertiesClass}</sourceFile>
+				          <destinationFile>${targetJavaLicenseProperties}</destinationFile>
+				          <overWrite>true</overWrite>
+				        </configuration>
+				      </execution>
+				      <execution>
+				        <id>copy-file-flag</id>
+				        <phase>compile</phase>
+				        <goals>
+				          <goal>copy</goal>
+				        </goals>
+				        <configuration>
+				          <sourceFile>${configFileProduction}</sourceFile>
+				          <destinationFile>${activeConfigFileProduction}</destinationFile>
+				        </configuration>
+				      </execution>
+				    </executions>
+					</plugin>
+			  </plugins>
+		  </build>			
+		</profile>
+		
 	</profiles>
 
 </project>

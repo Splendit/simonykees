@@ -21,11 +21,12 @@ import at.splendit.simonykees.license.model.PersistenceModel;
 @SuppressWarnings("nls")
 public class LicenseManagerTest extends LicenseCommonTest {
 	
+		
 	@Test
 	public void updateLicenseeNumber() throws InterruptedException {
 		// having an instance of license manager...
 		//clearPersistedData();
-		LicenseManager licenseMng = LicenseManager.getTestInstance();
+		LicenseManager licenseMng = LicenseManager.getInstance();
 		licenseMng.initManager();
 		//Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseChecker checker = licenseMng.getValidationData();
@@ -58,7 +59,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	public void createTryAndBuyLicensee() throws InterruptedException {
 		// having cleared the persisted data...
 		
-		LicenseManager licenseMng = LicenseManager.getTestInstance();
+		LicenseManager licenseMng = LicenseManager.getInstance();
 		licenseMng.setUniqueHwId("");
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		
@@ -84,7 +85,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	@Test
 	public void validateDemoLicense() throws InterruptedException {
 		// having no licensee information stored
-		LicenseManager licenseManager = LicenseManager.getTestInstance();
+		LicenseManager licenseManager = LicenseManager.getInstance();
 		licenseManager.setUniqueHwId("");
 		
 		
@@ -113,7 +114,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	@Test
 	public void validateHwIdFailureDemoLicense() throws InterruptedException {
 		// having a demo licensee...
-		LicenseManager licenseManager = LicenseManager.getTestInstance();
+		LicenseManager licenseManager = LicenseManager.getInstance();
 		licenseManager.setUniqueHwId("");
 
 		licenseManager.initManager();
@@ -142,7 +143,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 	public void initiateExpiredDemoLicense() throws InterruptedException {
 		// having an expired demo licensee...
 		persistExpiredDemoLicensee();
-		LicenseManager licenseManager = LicenseManager.getTestInstance();
+		LicenseManager licenseManager = LicenseManager.getInstance();
 		licenseManager.setUniqueHwId(DEMO_EXPIRED_LICENSEE_SECRET);
 
 		// when initiating the license manager with a wrong hardware id...

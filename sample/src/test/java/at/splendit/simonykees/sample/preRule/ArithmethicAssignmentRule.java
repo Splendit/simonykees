@@ -20,7 +20,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * INTEGER
 	 */
-
 	public int testA(int i) {
 		i = (int) i + 1;
 		return i;
@@ -260,7 +259,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * Corner cases
 	 */
-
 	// SIM-94
 	public Integer cornerCaseInteger(Integer i) {
 		i = i + 1;
@@ -325,7 +323,6 @@ public class ArithmethicAssignmentRule {
     /*
      * DOUBLE
      */
-    
 	public double testA(double d) {
 		d = (double) d + 1;
 		return d;
@@ -485,7 +482,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * FLOAT
 	 */
-	
 	public float testA(float f) {
 		f = (float) f + 1;
 		return f;
@@ -645,7 +641,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * LONG
 	 */
-	
 	public long testA(long l) {
 		l = (long) l + 1;
 		return l;
@@ -805,7 +800,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * SHORT
 	 */
-	
 	public short testA(short s) {
 		s = (short) ((short) s + 1);
 		return s;
@@ -965,7 +959,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * BYTE
 	 */
-
 	public byte testA(byte b) {
 		b = (byte) ((byte) b + 1);
 		return b;
@@ -1126,7 +1119,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * CHAR
 	 */
-	
 	public char testA(char c) {
 		c = (char) ((char) c + 1);
 		return c;

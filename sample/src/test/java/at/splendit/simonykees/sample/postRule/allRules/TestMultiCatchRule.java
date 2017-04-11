@@ -36,7 +36,6 @@ public class TestMultiCatchRule {
 	/*
 	 * UnionType cornercase
 	 */
-
 	public int unionTypeCornerCaseInheritance(int i) {
 		try {
 			throwSomethingWithInheritance(i);

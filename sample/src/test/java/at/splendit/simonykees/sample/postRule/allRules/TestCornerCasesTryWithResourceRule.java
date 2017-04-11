@@ -20,6 +20,16 @@ import java.util.logging.LogRecord;
 @SuppressWarnings({ "nls", "null" })
 public class TestCornerCasesTryWithResourceRule {
 
+	static void readFirstLineFromFile(String path) {
+
+		try (BufferedReader br = new BufferedReader(new FileReader(path));
+				BufferedReader br2 = new BufferedReader(new FileReader(path));
+				Closeable cl = new BufferedReader(new FileReader(path))) {
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public StringReader lostStreamsWithoutTry() {
 		StringReader a = new StringReader("lalelu");
 		return a;
@@ -39,16 +49,6 @@ public class TestCornerCasesTryWithResourceRule {
 			throw new RuntimeException(e);
 		}
 		return result;
-	}
-
-	static void readFirstLineFromFile(String path) {
-
-		try (BufferedReader br = new BufferedReader(new FileReader(path));
-				BufferedReader br2 = new BufferedReader(new FileReader(path));
-				Closeable cl = new BufferedReader(new FileReader(path))) {
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public void morphiaCornerCase() {
