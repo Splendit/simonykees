@@ -36,7 +36,7 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
  * 		 <li> inner classes </li>
  * 		</ul>
  * <p>
- * Furthermore, the members of the same type, are also sorted
+ * Furthermore, the members of the same type (except for fields), are also sorted
  * according to their modifier. The priority of the modifiers is 
  * as follows:
  * 		<ul>
@@ -44,7 +44,7 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
  * 		<li> public </li>
  * 		<li> protected </li>
  * 		<li> package protected (no modifier) </li>
- * 		<li> private. </li>
+ * 		<li> private </li>
  * 		</ul>
  * 
  * @author Ardit Ymeri
@@ -76,8 +76,29 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 					extractBoundedComments(node, comments, bodyDeclarations);
 			
 			// classify the body declarations according to their type
-			List<FieldDeclaration> fields = 
-					filterByDeclarationType(bodyDeclarations, FieldDeclaration.class);
+			
+			// static fields and static initializers are handled together
+			List<BodyDeclaration> staticFieldsAndInitializers = 
+					applyFilter(
+							bodyDeclarations, 
+							member -> 
+							isStaticMember(member)
+							&& (FieldDeclaration.class.isInstance(member)
+									|| Initializer.class.isInstance(member)));
+			
+			List<BodyDeclaration> instanceFields = 
+					applyFilter(
+							bodyDeclarations, 
+							member -> 
+							FieldDeclaration.class.isInstance(member) 
+							&& !isStaticMember(member));
+			
+			List<BodyDeclaration> instanceInitializers = 
+					applyFilter(
+							bodyDeclarations, 
+							member -> 
+							Initializer.class.isInstance(member) 
+									&& !isStaticMember(member));
 			
 			List<MethodDeclaration> methodsDeclarations = 
 					filterByDeclarationType(bodyDeclarations, MethodDeclaration.class);
@@ -94,9 +115,6 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 					.filter(method -> !method.isConstructor())
 					.collect(Collectors.toList());
 			
-			List<Initializer> initializers = 
-					filterByDeclarationType(bodyDeclarations, Initializer.class);
-			
 			List<EnumDeclaration> enums = 
 					filterByDeclarationType(bodyDeclarations, EnumDeclaration.class);
 			
@@ -109,8 +127,13 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 			// sort all body declarations
 			List<BodyDeclaration> sortedDeclarations = new ArrayList<>();
 			
-			sortedDeclarations.addAll(sortMembers(fields));
-			sortedDeclarations.addAll(initializers);
+			/**
+			 * Fields are not sorted by the access modifier because they 
+			 * may reference each-other during initialization.
+			 */
+			sortedDeclarations.addAll(staticFieldsAndInitializers);  
+			sortedDeclarations.addAll(instanceFields); 
+			sortedDeclarations.addAll(instanceInitializers);
 			sortedDeclarations.addAll(sortMembers(constructors));
 			sortedDeclarations.addAll(sortMembers(methods));
 			sortedDeclarations.addAll(sortMembers(enums));
@@ -171,7 +194,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 				.collect(Collectors.toList());
 		
 		List<T> sortedMembers = new ArrayList<>();
-		
+
 		// sort static members by modifier
 		sortedMembers.addAll(sortByAccessModifier(staticMembers));
 		// sort instance members by modifier
@@ -259,7 +282,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 					 .findAny()
 					 .isPresent();
 		};
-		return filterByModifier(members, filter);
+		return applyFilter(members, filter);
 	}
 	
 	/**
@@ -278,20 +301,20 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 					&& !Modifier.isPublic(flag)
 					&& !Modifier.isPrivate(flag);
 		};
-		return filterByModifier(members, packageProtectedFilter);
+		return applyFilter(members, packageProtectedFilter);
 	}
 	
-	/** Filters the members by the modifierFilter
+	/** Applies the given filter to the given collection.
 	 * 
 	 * @param members list to filter
-	 * @param modifierFilter defines the filter for the collection.
-	 * @return list of members satisfying the modifierFilter
+	 * @param filter defines the filter for the collection.
+	 * @return list of members satisfying the filter
 	 */
-	private <T extends BodyDeclaration> List<T> filterByModifier(List<T> members, Predicate<T> modifierFilter) {
+	private <T extends BodyDeclaration> List<T> applyFilter(List<T> members, Predicate<T> filter) {
 		return 
 				members
 				.stream()
-				.filter(modifierFilter)
+				.filter(filter)
 				.collect(Collectors.toList());
 	}
 	
