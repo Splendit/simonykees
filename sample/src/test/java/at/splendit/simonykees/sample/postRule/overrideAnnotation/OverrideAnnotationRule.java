@@ -1,0 +1,122 @@
+package at.splendit.simonykees.sample.postRule.overrideAnnotation;
+
+import java.util.List;
+
+@SuppressWarnings({"nls", "unused"})  
+public class OverrideAnnotationRule<T> {
+	
+	T val;
+	
+	protected OverrideAnnotationRule(T val) {
+		this.val = val;
+	}
+	
+	public void toBeOveridden(String input) {
+		
+	}
+	
+	public String dontOverride(Object object, String string) {
+		String s = "I am not expecting anybody to override me";
+		return s + string + object;
+	}
+	
+	protected T genericMethod(T value) {
+		T myVal = null;
+		
+		if(value != null) {
+			myVal = value;
+		}
+		
+		return myVal;
+	}
+	
+	protected <Type extends List<String>> Type methodUsingTypeVariablesInSignature(Type someCollection) {
+		return null;
+	}
+	
+	protected String myChildCanMakeMePublic() {
+		return "Please make me public";
+	}
+	
+	protected String alreadyAnnotated() {
+		return "Already annotated";
+	}
+	
+	private String iAmPrivate() {
+		return "I am a very private method";
+	}
+
+}
+
+@SuppressWarnings({"nls", "unused"})  
+class Foo extends OverrideAnnotationRule<String> implements IFoo {
+	
+	protected Foo(String val) {
+		super(val);
+	}
+	
+	protected Foo(List<String> val) {
+		super("");
+	}
+
+	@Override
+	public void toBeOveridden(String input) {
+		
+	}
+	
+	public void toNotBeOverriden(String iput) {
+		
+	}
+	
+	public String dontOverride(String object, String string) {
+		return string;
+	}
+	
+	@Override
+	protected String genericMethod(String value) {
+		String myString = "";
+		if(value != null && !value.isEmpty()) {
+			myString = value;
+		}
+		return myString;
+	}
+	
+	@Override
+	protected <Type extends List<String>> Type methodUsingTypeVariablesInSignature(Type someCollection) {
+		return null;
+	}
+
+	@Override
+	public void methodFromYouFoo(String foo) {
+		
+		
+	}
+
+	@Override
+	public void methodFromIfoo() {
+		
+		
+	}
+	
+	@Override
+	public String myChildCanMakeMePublic() {
+		return "You are now public";
+	}
+	
+	@Override
+	protected String alreadyAnnotated() {
+		return "Already annotated";
+	}
+	
+	private String iAmPrivate() {
+		return "I am a very private method";
+	}
+}
+
+interface IFoo extends YouFoo {
+	void methodFromIfoo();
+}
+
+interface YouFoo {
+	void methodFromYouFoo(String foo);
+}
