@@ -36,7 +36,7 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
  * 		 <li> inner classes </li>
  * 		</ul>
  * <p>
- * Furthermore, the members of the same type, are also sorted
+ * Furthermore, the members of the same type (except for fields), are also sorted
  * according to their modifier. The priority of the modifiers is 
  * as follows:
  * 		<ul>
@@ -44,7 +44,7 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
  * 		<li> public </li>
  * 		<li> protected </li>
  * 		<li> package protected (no modifier) </li>
- * 		<li> private. </li>
+ * 		<li> private </li>
  * 		</ul>
  * 
  * @author Ardit Ymeri
@@ -128,7 +128,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 			List<BodyDeclaration> sortedDeclarations = new ArrayList<>();
 			
 			/**
-			 * Fields are not sorted by modifier because they 
+			 * Fields are not sorted by the access modifier because they 
 			 * may reference each-other during initialization.
 			 */
 			sortedDeclarations.addAll(staticFieldsAndInitializers);  
