@@ -14,6 +14,7 @@ import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
 import at.splendit.simonykees.core.rule.impl.MultiCatchRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
+import at.splendit.simonykees.core.rule.impl.OverrideAnnotationRule;
 import at.splendit.simonykees.core.rule.impl.PrimitiveBoxedForStringRule;
 import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
@@ -30,6 +31,7 @@ import at.splendit.simonykees.core.visitor.DiamondOperatorASTVisitor;
 import at.splendit.simonykees.core.visitor.RearrangeClassMembersASTVisitor;
 import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
 import at.splendit.simonykees.core.visitor.InefficientConstructorASTVisitor;
+import at.splendit.simonykees.core.visitor.OverrideAnnotationRuleASTVisitor;
 import at.splendit.simonykees.core.visitor.PrimitiveBoxedForStringASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveNewStringConstructorASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveToStringOnStringASTVisitor;
@@ -83,6 +85,7 @@ public class RulesContainer {
 				new InefficientConstructorRule(InefficientConstructorASTVisitor.class),
 				new DiamondOperatorRule(DiamondOperatorASTVisitor.class),
 				new RearrangeClassMembersRule(RearrangeClassMembersASTVisitor.class),
+				new OverrideAnnotationRule(OverrideAnnotationRuleASTVisitor.class),
 
 				/*
 				 * Code formatting and organizing imports should always happen
