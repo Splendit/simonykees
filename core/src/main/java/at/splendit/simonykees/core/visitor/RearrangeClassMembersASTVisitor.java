@@ -212,7 +212,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 	 */
 	private <T extends BodyDeclaration> boolean isStaticMember(T member) {
 		return 
-				convertToTypedList(member.modifiers(), Modifier.class)
+				ASTNodeUtil.convertToTypedList(member.modifiers(), Modifier.class)
 				.stream()
 				.filter(Modifier::isStatic)
 				.findAny()
@@ -276,7 +276,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 		Predicate<T> filter = member -> {
 			 
 			 return 
-					 convertToTypedList(member.modifiers(), Modifier.class)
+					 ASTNodeUtil.convertToTypedList(member.modifiers(), Modifier.class)
 					 .stream()
 					 .filter(modifier -> modifier.getKeyword().toFlagValue() == modifierFlag)
 					 .findAny()
@@ -316,24 +316,6 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 				.stream()
 				.filter(filter)
 				.collect(Collectors.toList());
-	}
-	
-	/**
-	 * Converts the raw list to a typed list.
-	 * Filters out the elements that are not instances of the given type.
-	 * 
-	 * @param rawlist
-	 * @param type
-	 * @return list of the given type. 
-	 */
-	@SuppressWarnings("unchecked")
-	private <T> List<T> convertToTypedList(@SuppressWarnings("rawtypes") List rawlist, Class<T>type) {
-		return
-			((List<Object>)rawlist)
-			.stream()
-			.filter(type::isInstance)
-			.map(type::cast)
-			.collect(Collectors.toList());
 	}
 	
 	/**

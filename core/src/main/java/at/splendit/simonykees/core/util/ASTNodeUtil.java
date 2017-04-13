@@ -218,18 +218,34 @@ public class ASTNodeUtil {
 	 * @return emptyList if not all objects are from the listType, otherwise the
 	 *         list with generic parameter.
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T> List<T> returnTypedList(@SuppressWarnings("rawtypes") List rawList, Class<T> listType) {
 		if (rawList == null || listType == null) {
 			return Collections.emptyList();
 		}
 
-		List<T> returnList = ((List<Object>) rawList).stream().filter(listType::isInstance).map(listType::cast)
-				.collect(Collectors.toList());
+		List<T> returnList = convertToTypedList(rawList, listType);
 
 		if (returnList.size() != rawList.size()) {
 			return Collections.emptyList();
 		}
 		return returnList;
+	}
+
+	/**
+	 * Converts the raw list to a typed list.
+	 * Filters out the elements that are not instances of the given type.
+	 * 
+	 * @param rawlist
+	 * @param type
+	 * @return list of the given type. 
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> List<T> convertToTypedList(@SuppressWarnings("rawtypes") List rawlist, Class<T>type) {
+		return
+			((List<Object>)rawlist)
+			.stream()
+			.filter(type::isInstance)
+			.map(type::cast)
+			.collect(Collectors.toList());
 	}
 }

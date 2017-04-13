@@ -15,6 +15,8 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import at.splendit.simonykees.core.util.ASTNodeUtil;
+
 /**
  * Adds the missing @{@link Override} annotation when overriding
  * a method from a parent class or interface. 
@@ -79,18 +81,19 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	 * @return true if the given method is annotated with {@code @Override}
 	 */
 	private boolean isOverrideAnnotated(MethodDeclaration method) {
-		//FIXME: use ASTNodeUtils
-		List<MarkerAnnotation> annotations = 
-				((List<Object>) method.modifiers())
-				.stream()
-				.filter(MarkerAnnotation.class::isInstance)
-				.map(MarkerAnnotation.class::cast)
-				.collect(Collectors.toList());
 		
 		return 
-				annotations
+				ASTNodeUtil
+				.convertToTypedList(method.modifiers(), MarkerAnnotation.class)
 				.stream()
-				.filter(annotation -> annotation.getTypeName().getFullyQualifiedName().equals(OVERRIDE))
+				.filter(annotation -> {
+					boolean isAnnotated = false;
+					Name typeName = annotation.getTypeName();
+					if(typeName != null) {
+						isAnnotated = OVERRIDE.equals(typeName.getFullyQualifiedName());
+					}
+					return isAnnotated;
+				})
 				.findAny()
 				.isPresent();
 	}
@@ -102,16 +105,10 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	 * @return true if the given method is {@code private}
 	 */
 	private boolean isPrivate(MethodDeclaration method) {
-		//FIXME: use ASTNodeUtils
-		List<Modifier> modifiers = 
-				((List<Object>) method.modifiers())
-				.stream()
-				.filter(Modifier.class::isInstance)
-				.map(Modifier.class::cast)
-				.collect(Collectors.toList());
 		
 		return 
-				modifiers
+				ASTNodeUtil
+				.convertToTypedList(method.modifiers(), Modifier.class)
 				.stream()
 				.filter(Modifier::isPrivate)
 				.findAny()
