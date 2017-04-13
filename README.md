@@ -2,6 +2,7 @@
 
 # --tmp-test-deployment-- #
 
+## momentary not working profiles with credentials need be added to pom! ##
     add to maven settings.xml the deployment credentials (/usr/share/maven/settings.xml)
 
 	<server>
