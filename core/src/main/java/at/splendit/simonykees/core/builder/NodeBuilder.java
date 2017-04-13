@@ -9,7 +9,9 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -28,6 +30,10 @@ import org.eclipse.jdt.core.dom.WildcardType;
  * @since 0.9.0
  */
 public class NodeBuilder {
+
+	private NodeBuilder() {
+		// util class
+	}
 
 	/**
 	 * Creates an method invocation on an expression with
@@ -148,7 +154,7 @@ public class NodeBuilder {
 		svd.setType(variableType);
 		return svd;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public static FieldDeclaration newFieldDeclaration(AST ast, Type type, VariableDeclarationFragment serialUidNode,
 			List<ASTNode> newModifier) {
@@ -231,29 +237,49 @@ public class NodeBuilder {
 	 * 
 	 * @param ast
 	 *            the AbastractSyntaxTree thats the target of the node
-	 * @param operator {@link InfixExpression.Operator} of the {@link InfixExpression}
-	 * @param left {@link Expression} for the left-operand
-	 * @param right {@link Expression} for the right-operand 
+	 * @param operator
+	 *            {@link InfixExpression.Operator} of the
+	 *            {@link InfixExpression}
+	 * @param left
+	 *            {@link Expression} for the left-operand
+	 * @param right
+	 *            {@link Expression} for the right-operand
 	 * @return {@link InfixExpression} with the given operator and operands
 	 */
-	public static InfixExpression newInfixExpression(AST ast, InfixExpression.Operator operator, Expression left, Expression right) {
+	public static InfixExpression newInfixExpression(AST ast, InfixExpression.Operator operator, Expression left,
+			Expression right) {
 		InfixExpression result = ast.newInfixExpression();
 		result.setOperator(operator);
 		result.setLeftOperand(left);
 		result.setRightOperand(right);
 		return result;
 	}
-	
+
 	/**
 	 * 
 	 * @param ast
 	 *            the AbastractSyntaxTree thats the target of the node
-	 * @param expression {@link Expression} that is wrapped by the new {@link ParenthesizedExpression}
+	 * @param expression
+	 *            {@link Expression} that is wrapped by the new
+	 *            {@link ParenthesizedExpression}
 	 * @return {@link ParenthesizedExpression} that wraps the expression
-	 */	
+	 */
 	public static ParenthesizedExpression newParenthesizedExpression(AST ast, Expression expression) {
 		ParenthesizedExpression result = ast.newParenthesizedExpression();
 		result.setExpression(expression);
 		return result;
+	}
+
+	/** Creates a {@link MarkerAnnotation} for the given {@link Name}
+	 * 
+	 * @param ast
+	 *            the AbastractSyntaxTree thats the target of the node
+	 * @param name name of the annotation
+	 * @return an {@link MarkerAnnotation}
+	 */
+	public static MarkerAnnotation newMarkerAnnotation(AST ast, Name name) {
+		MarkerAnnotation markerAnnotation = ast.newMarkerAnnotation();
+		markerAnnotation.setTypeName(name);
+		return markerAnnotation;
 	}
 }
