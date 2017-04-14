@@ -13,6 +13,8 @@ import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.SelectRulesWizard;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 
+import at.splendit.simonykees.i18n.Messages;
+
 /**
  * TODO SIM-103 add class description
  * 
@@ -21,13 +23,12 @@ import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
  */
 public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 
-
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
 		if (Activator.isRunning()) {
-			SimonykeesMessageDialog.openMessageDialog(Display.getDefault().getActiveShell(), "Allready running",
-					MessageDialog.INFORMATION);
+			SimonykeesMessageDialog.openMessageDialog(Display.getDefault().getActiveShell(),
+					Messages.SelectRulesWizardHandler_allready_running, MessageDialog.INFORMATION);
 		} else {
 			Activator.setRunning(true);
 			if (LicenseUtil.isValid()) {

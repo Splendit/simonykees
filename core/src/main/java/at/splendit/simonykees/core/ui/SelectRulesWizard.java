@@ -126,8 +126,8 @@ public class SelectRulesWizard extends Wizard {
 					}
 				} else {
 					// do nothing if status is canceled, close
+					Activator.setRunning(false);
 				}
-				Activator.setRunning(false);
 			}
 		});
 
