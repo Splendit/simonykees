@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
+import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.exception.SimonykeesException;
@@ -58,6 +59,12 @@ public class SelectRulesWizard extends Wizard {
 	}
 
 	@Override
+	public boolean performCancel() {
+		Activator.setRunning(false);
+		return super.performCancel();
+	}
+
+	@Override
 	public boolean performFinish() {
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = selectRulesPage.getSelectedRules();
 		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
@@ -68,8 +75,6 @@ public class SelectRulesWizard extends Wizard {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-
-				disableUIThread();
 
 				try {
 					refactorer.prepareRefactoring(monitor);
@@ -106,8 +111,6 @@ public class SelectRulesWizard extends Wizard {
 			@Override
 			public void done(IJobChangeEvent event) {
 
-				enableUIThread();
-
 				if (event.getResult().isOK()) {
 					if (LicenseUtil.isValid()) {
 						if (refactorer.hasChanges()) {
@@ -124,6 +127,7 @@ public class SelectRulesWizard extends Wizard {
 				} else {
 					// do nothing if status is canceled, close
 				}
+				Activator.setRunning(false);
 			}
 		});
 
@@ -131,26 +135,6 @@ public class SelectRulesWizard extends Wizard {
 		job.schedule();
 
 		return true;
-	}
-
-	private void disableUIThread() {
-		Display.getDefault().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setEnabled(false);
-			}
-		});
-	}
-
-	private void enableUIThread() {
-		Display.getDefault().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setEnabled(true);
-			}
-		});
 	}
 
 	/**
@@ -184,6 +168,8 @@ public class SelectRulesWizard extends Wizard {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizard_warning_no_refactorings,
 						MessageDialog.INFORMATION);
+
+				Activator.setRunning(false);
 			}
 
 		});
@@ -199,6 +185,8 @@ public class SelectRulesWizard extends Wizard {
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				LicenseUtil.displayLicenseErrorDialog(shell);
+
+				Activator.setRunning(false);
 			}
 		});
 	}
@@ -213,6 +201,8 @@ public class SelectRulesWizard extends Wizard {
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				SimonykeesMessageDialog.openErrorMessageDialog(shell, exception);
+
+				Activator.setRunning(false);
 			}
 		});
 	}
@@ -230,6 +220,8 @@ public class SelectRulesWizard extends Wizard {
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
+
+				Activator.setRunning(false);
 			}
 		});
 	}

@@ -4,6 +4,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.swt.custom.BusyIndicator;
 
+import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.ReconcileException;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
@@ -52,14 +53,18 @@ public class RefactoringPreviewWizard extends Wizard {
 				if (LicenseUtil.isValid()) {
 					try {
 						abstractRefactorer.commitRefactoring();
+						Activator.setRunning(false);
 					} catch (RefactoringException e) {
 						SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+						Activator.setRunning(false);
 						return;
 					} catch (ReconcileException e) {
 						SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+						Activator.setRunning(false);
 					}
 				} else {
 					LicenseUtil.displayLicenseErrorDialog(getShell());
+					Activator.setRunning(false);
 				}
 				return;
 			}
@@ -76,6 +81,7 @@ public class RefactoringPreviewWizard extends Wizard {
 	@Override
 	public boolean performCancel() {
 		abstractRefactorer.clearWorkingCopies();
+		Activator.setRunning(false);
 		return super.performCancel();
 	}
 
