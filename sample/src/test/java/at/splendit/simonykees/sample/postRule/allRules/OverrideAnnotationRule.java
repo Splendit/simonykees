@@ -5,7 +5,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings({ "nls", "unused" })
-public class OverrideAnnotationRule<T> {
+public abstract class OverrideAnnotationRule<T> {
 
 	T val;
 
@@ -21,6 +21,9 @@ public class OverrideAnnotationRule<T> {
 		String s = "I am not expecting anybody to override me";
 		return s + string + object;
 	}
+
+	@Override
+	public abstract int hashCode();
 
 	protected T genericMethod(T value) {
 		T myVal = null;
@@ -52,6 +55,19 @@ public class OverrideAnnotationRule<T> {
 
 @SuppressWarnings({ "nls", "unused" })
 class Foo extends OverrideAnnotationRule<String> implements IFoo {
+
+	public IFoo iFoo = new IFoo() {
+
+		@Override
+		public void methodFromYouFoo(String foo) {
+
+		}
+
+		@Override
+		public void methodFromIfoo() {
+
+		}
+	};
 
 	protected Foo(String val) {
 		super(val);
@@ -90,6 +106,11 @@ class Foo extends OverrideAnnotationRule<String> implements IFoo {
 	}
 
 	@Override
+	public int hashCode() {
+		return 0;
+	}
+
+	@Override
 	protected String genericMethod(String value) {
 		String myString = "";
 		if (value != null && !StringUtils.isEmpty(value)) {
@@ -111,6 +132,15 @@ class Foo extends OverrideAnnotationRule<String> implements IFoo {
 	private String iAmPrivate() {
 		return "I am a very private method";
 	}
+
+	enum FooEnum {
+		use, override;
+
+		@Override
+		public String toString() {
+			return "Don't forget to put the @Override annotation!";
+		}
+	};
 }
 
 interface IFoo extends YouFoo {

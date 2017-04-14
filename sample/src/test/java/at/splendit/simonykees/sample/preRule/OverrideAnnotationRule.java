@@ -3,7 +3,7 @@ package at.splendit.simonykees.sample.preRule;
 import java.util.List;
 
 @SuppressWarnings({"nls", "unused"})  
-public class OverrideAnnotationRule<T> {
+public abstract class OverrideAnnotationRule<T> {
 	
 	T val;
 	
@@ -45,6 +45,8 @@ public class OverrideAnnotationRule<T> {
 	private String iAmPrivate() {
 		return "I am a very private method";
 	}
+	
+	public abstract int hashCode();
 
 }
 
@@ -53,6 +55,26 @@ class Foo extends OverrideAnnotationRule<String> implements IFoo {
 	
 	protected Foo(String val) {
 		super(val);
+	}
+	
+	public IFoo iFoo = new IFoo() {
+		
+		public void methodFromYouFoo(String foo) {
+			
+		}
+		
+		public void methodFromIfoo() {
+			
+		}
+	};
+	
+	enum FooEnum {
+		use,
+		override;
+		
+		public String toString() {
+			return "Don't forget to put the @Override annotation!";
+		}
 	}
 	
 	protected Foo(List<String> val) {
@@ -105,6 +127,10 @@ class Foo extends OverrideAnnotationRule<String> implements IFoo {
 	private String iAmPrivate() {
 		return "I am a very private method";
 	}
+	
+	public int hashCode() {
+		return 0;
+	};
 }
 
 interface IFoo extends YouFoo {

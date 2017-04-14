@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
@@ -33,6 +36,41 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 
 		List<MethodDeclaration> methods = Arrays.asList(node.getMethods());
 		ITypeBinding typeBinding = node.resolveBinding();
+		addOverrideAnnotation(node, methods, typeBinding);
+		return true;
+	}
+
+	@Override
+	public boolean visit(AnonymousClassDeclaration node) {
+		List<MethodDeclaration> methods = ASTNodeUtil.convertToTypedList(node.bodyDeclarations(),
+				MethodDeclaration.class);
+		ITypeBinding typeBinding = node.resolveBinding();
+		addOverrideAnnotation(node, methods, typeBinding);
+		return true;
+	}
+
+	@Override
+	public boolean visit(EnumDeclaration node) {
+		List<MethodDeclaration> methods = ASTNodeUtil.convertToTypedList(node.bodyDeclarations(),
+				MethodDeclaration.class);
+		ITypeBinding typeBinding = node.resolveBinding();
+		addOverrideAnnotation(node, methods, typeBinding);
+		return true;
+	}
+
+	/**
+	 * Implements the functionality of inserting the @{@link Override}
+	 * annotation above the methods that are overriding a parent method.
+	 * 
+	 * @param node
+	 *            parent node having method declarations.
+	 * @param methods
+	 *            list of method declarations to be checked if the annotation is
+	 *            needed.
+	 * @param typeBinding
+	 *            type binding of the parent node.
+	 */
+	private void addOverrideAnnotation(ASTNode node, List<MethodDeclaration> methods, ITypeBinding typeBinding) {
 		List<ITypeBinding> ancestors = ClassRelationUtil.findAncestors(typeBinding);
 		List<IMethodBinding> ancestorMethods = findOverridableAncestorMethods(ancestors);
 		List<MethodDeclaration> toBeAnnotated = new ArrayList<>();
@@ -60,7 +98,6 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 		toBeAnnotated.stream()
 				.forEach(method -> astRewrite.getListRewrite(method, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(
 						NodeBuilder.newMarkerAnnotation(node.getAST(), node.getAST().newName(OVERRIDE)), null));
-		return true;
 	}
 
 	/**
@@ -74,8 +111,7 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 
 		return ASTNodeUtil.convertToTypedList(method.modifiers(), MarkerAnnotation.class).stream()
 				.map(MarkerAnnotation::getTypeName)
-				.filter(typeName -> OVERRIDE.equals(typeName.getFullyQualifiedName()))
-				.findAny().isPresent();
+				.filter(typeName -> OVERRIDE.equals(typeName.getFullyQualifiedName())).findAny().isPresent();
 	}
 
 	/**
