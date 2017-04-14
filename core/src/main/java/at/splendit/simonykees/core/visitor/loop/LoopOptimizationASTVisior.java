@@ -27,6 +27,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.builder.NodeBuilder;
@@ -45,6 +47,8 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
+	private static final Logger logger = LoggerFactory.getLogger(LoopOptimizationASTVisior.class);
+	
 	/*
 	 * is initialized in constructor and set to null again if condition is
 	 * broken
@@ -121,7 +125,8 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 								}
 
 							} catch (Exception e) {
-								Activator.log(Status.ERROR, e.getMessage() ,new ITypeNotFoundRuntimeException());
+								//Activator.log(Status.ERROR, e.getMessage() ,new ITypeNotFoundRuntimeException());
+								logger.error(e.getMessage(), new ITypeNotFoundRuntimeException());
 							}
 						}
 					}

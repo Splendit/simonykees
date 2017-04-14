@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeException;
@@ -31,6 +33,8 @@ import at.splendit.simonykees.i18n.ExceptionMessages;
  */
 public abstract class AbstractCompilationUnitASTVisitor extends AbstractASTRewriteASTVisitor {
 
+	private static final Logger logger = LoggerFactory.getLogger(AbstractCompilationUnitASTVisitor.class);
+	
 	private static final String JAVA_LANG_PACKAGE = "java.lang"; //$NON-NLS-1$
 
 	protected Map<Integer, List<IType>> iTypeMap;
@@ -69,14 +73,16 @@ public abstract class AbstractCompilationUnitASTVisitor extends AbstractASTRewri
 							categoryTypeList.add(classtype);
 						}
 					} else {
-						Activator.log(Status.INFO,
-								String.format("Class not in classpath [%s]", fullyQuallifiedClassName)); //$NON-NLS-1$
+//						Activator.log(Status.INFO,
+//								String.format("Class not in classpath [%s]", fullyQuallifiedClassName)); //$NON-NLS-1$
+						logger.info(String.format("Class not in classpath [%s]", fullyQuallifiedClassName)); //$NON-NLS-1$
 						return false;
 					}
 				}
 			}
 		} catch (JavaModelException e) {
-			Activator.log(Status.ERROR, e.getMessage(), new ITypeNotFoundRuntimeException());
+			//Activator.log(Status.ERROR, e.getMessage(), new ITypeNotFoundRuntimeException());
+			logger.error(e.getMessage(), new ITypeNotFoundRuntimeException());
 			return false;
 		}
 		return true;

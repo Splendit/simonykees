@@ -14,16 +14,18 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.osgi.util.NLS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.ReconcileException;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
-import at.splendit.simonykees.i18n.ExceptionMessages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.i18n.ExceptionMessages;
 
 /**
  * Applies {@link RefactoringRule}s to {@link IJavaElement}s.<br>
@@ -40,6 +42,8 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public abstract class AbstractRefactorer {
 
+	private static final Logger logger = LoggerFactory.getLogger(AbstractRefactorer.class);
+	
 	protected List<IJavaElement> javaElements;
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 	protected List<ICompilationUnit> workingCopies = new ArrayList<>();
@@ -83,13 +87,15 @@ public abstract class AbstractRefactorer {
 		try {
 			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements, monitor);
 			if (compilationUnits.isEmpty()) {
-				Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found,
-						null);
+//				Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found,
+//						null);
+				logger.warn(ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found);
 				throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found,
 						ExceptionMessages.AbstractRefactorer_user_warn_no_compilation_units_found);
 			} else if (!workingCopies.isEmpty()) {
-				Activator.log(Status.WARNING,
-						ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated, null);
+//				Activator.log(Status.WARNING,
+//						ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated, null);
+				logger.warn(ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated);
 				throw new RefactoringException(
 						ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated);
 			} else {
@@ -119,7 +125,8 @@ public abstract class AbstractRefactorer {
 				}
 			}
 		} catch (JavaModelException e) {
-			Activator.log(Status.ERROR, e.getMessage(), e);
+			//Activator.log(Status.ERROR, e.getMessage(), e);
+			logger.error(e.getMessage(), e);
 			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_java_element_resoltuion_failed,
 					ExceptionMessages.AbstractRefactorer_user_java_element_resoltuion_failed, e);
 		}
@@ -145,7 +152,8 @@ public abstract class AbstractRefactorer {
 	 */
 	public void doRefactoring(IProgressMonitor monitor) throws RefactoringException, RuleException {
 		if (workingCopies.isEmpty()) {
-			Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung, null);
+			//Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung, null);
+			logger.warn(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
 			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
 		}
 
@@ -178,7 +186,8 @@ public abstract class AbstractRefactorer {
 					refactoringRule.generateDocumentChanges(workingCopies, subMonitor.newChild(0));
 				}
 			} catch (JavaModelException | ReflectiveOperationException e) {
-				Activator.log(Status.ERROR, e.getMessage(), e);
+				//Activator.log(Status.ERROR, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 				notWorkingRules.add(refactoringRule.getName());
 			}
 			// If cancel is pressed on progress monitor, abort all and return,
@@ -211,7 +220,8 @@ public abstract class AbstractRefactorer {
 	 */
 	public void commitRefactoring() throws RefactoringException, ReconcileException {
 		if (workingCopies.isEmpty()) {
-			Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung, null);
+			//Activator.log(Status.WARNING, ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung, null);
+			logger.warn(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
 			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
 		}
 		List<String> workingCopiesNotCommited = new ArrayList<>();
@@ -221,7 +231,8 @@ public abstract class AbstractRefactorer {
 				SimonykeesUtil.commitAndDiscardWorkingCopy(workingCopy);
 				iterator.remove();
 			} catch (JavaModelException e) {
-				Activator.log(Status.ERROR, e.getMessage(), e);
+				//Activator.log(Status.ERROR, e.getMessage(), e);
+				logger.error(e.getMessage(), e);
 				workingCopiesNotCommited.add(workingCopy.getPath().toString());
 			}
 		}
@@ -271,10 +282,12 @@ public abstract class AbstractRefactorer {
 			try {
 				SimonykeesUtil.discardWorkingCopy(workingCopy);
 			} catch (JavaModelException e) {
-				Activator.log(Status.ERROR,
-						NLS.bind(ExceptionMessages.AbstractRefactorer_unable_to_discard_working_copy,
-								workingCopy.getPath().toString(), e.getMessage()),
-						e);
+//				Activator.log(Status.ERROR,
+//						NLS.bind(ExceptionMessages.AbstractRefactorer_unable_to_discard_working_copy,
+//								workingCopy.getPath().toString(), e.getMessage()),
+//						e);
+				logger.error(NLS.bind(ExceptionMessages.AbstractRefactorer_unable_to_discard_working_copy,
+								workingCopy.getPath().toString(), e.getMessage()), e);
 			}
 		}
 		workingCopies.clear();

@@ -25,6 +25,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.i18n.Messages;
@@ -37,6 +39,8 @@ import at.splendit.simonykees.i18n.Messages;
  */
 public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 
+	private static final Logger logger = LoggerFactory.getLogger(AbstractSimonykeesHandler.class);
+	
 	private static final String EDITOR = "org.eclipse.jdt.ui.CompilationUnitEditor"; //$NON-NLS-1$
 	private static final String PACKAGE_EXPLORER = "org.eclipse.jdt.ui.PackageExplorer"; //$NON-NLS-1$
 	private static final String PROJECT_EXPLORER = "org.eclipse.ui.navigator.ProjectExplorer"; //$NON-NLS-1$
@@ -52,8 +56,9 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 		case PROJECT_EXPLORER:
 			return getFromExplorer(shell, getCurrentStructuredSelection(event));
 		default:
-			Activator.log(Status.ERROR,
-					NLS.bind(Messages.AbstractSimonykeesHandler_error_activePartId_unknown, activePartId), null);
+			//Activator.log(Status.ERROR,
+			//		NLS.bind(Messages.AbstractSimonykeesHandler_error_activePartId_unknown, activePartId), null);
+			logger.error(NLS.bind(Messages.AbstractSimonykeesHandler_error_activePartId_unknown, activePartId));
 			return Collections.emptyList();
 		}
 	}
@@ -64,8 +69,10 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 		if (javaElement instanceof ICompilationUnit) {
 			return Collections.singletonList(javaElement);
 		} else {
-			Activator.log(Status.ERROR, NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_editor,
-					javaElement.getClass().getName()), null);
+			//Activator.log(Status.ERROR, NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_editor,
+			//		javaElement.getClass().getName()), null);
+			logger.error(NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_editor,
+					javaElement.getClass().getName()));
 		}
 		return Collections.emptyList();
 	}
@@ -83,10 +90,12 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 					javaElements.add(JavaCore.create(project));
 				}
 			} else {
-				Activator.log(Status.ERROR,
-						NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_explorer,
-								object.getClass().getName()),
-						null);
+//				Activator.log(Status.ERROR,
+//						NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_explorer,
+//								object.getClass().getName()),
+//						null);
+				logger.error(NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_explorer,
+								object.getClass().getName()));
 			}
 		}
 		return javaElements;
