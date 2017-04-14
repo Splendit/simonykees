@@ -5,7 +5,10 @@ import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
@@ -99,6 +102,11 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	private void configureFileAppender(LoggerContext loggerContext) {
 		
+		// get path to logfile in <eclipse-workspace>/.metadata/jSparrow.log
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		IPath logFilePath = workspace.getRoot().getLocation().append(".metadata").append("jSparrow.log");
+		String logFilePathStr = logFilePath.toString();
+		
 		// set pattern according to logback documentation (https://logback.qos.ch/manual/layouts.html)
 		PatternLayoutEncoder ple = new PatternLayoutEncoder();
 		ple.setContext(loggerContext);
@@ -109,7 +117,7 @@ public class Activator extends AbstractUIPlugin {
 		FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
 		fileAppender.setContext(loggerContext);
 		fileAppender.setName("FILE");
-		fileAppender.setFile("/home/matthias/Desktop/codeFileAppenderTest.log");
+		fileAppender.setFile(logFilePathStr);
 		fileAppender.setEncoder(ple);
 		fileAppender.start();
 		
