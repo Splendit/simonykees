@@ -10,11 +10,11 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
  * Adds the missing @{@link Override} annotation when overriding a method from a
@@ -33,7 +33,7 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 
 		List<MethodDeclaration> methods = Arrays.asList(node.getMethods());
 		ITypeBinding typeBinding = node.resolveBinding();
-		List<ITypeBinding> ancestors = findAncestors(typeBinding);
+		List<ITypeBinding> ancestors = ClassRelationUtil.findAncestors(typeBinding);
 		List<IMethodBinding> ancestorMethods = findOverridableAncestorMethods(ancestors);
 		List<MethodDeclaration> toBeAnnotated = new ArrayList<>();
 
@@ -73,14 +73,9 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	private boolean isOverrideAnnotated(MethodDeclaration method) {
 
 		return ASTNodeUtil.convertToTypedList(method.modifiers(), MarkerAnnotation.class).stream()
-				.filter(annotation -> {
-					boolean isAnnotated = false;
-					Name typeName = annotation.getTypeName();
-					if (typeName != null) {
-						isAnnotated = OVERRIDE.equals(typeName.getFullyQualifiedName());
-					}
-					return isAnnotated;
-				}).findAny().isPresent();
+				.map(MarkerAnnotation::getTypeName)
+				.filter(typeName -> OVERRIDE.equals(typeName.getFullyQualifiedName()))
+				.findAny().isPresent();
 	}
 
 	/**
@@ -107,43 +102,13 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 		List<IMethodBinding> allMethods = new ArrayList<>();
 		ancestors.forEach(ancestor -> {
 			List<IMethodBinding> overridableMethods = Arrays.asList(ancestor.getDeclaredMethods()).stream()
-					.filter(method -> method != null).filter(method -> !Modifier.isPrivate(method.getModifiers()))
-					.filter(method -> !method.isConstructor()).collect(Collectors.toList());
+					.filter(method -> !Modifier.isPrivate(method.getModifiers()) && !method.isConstructor())
+					.collect(Collectors.toList());
 
 			allMethods.addAll(overridableMethods);
 		});
 
 		return allMethods;
-	}
-
-	/**
-	 * Finds the list of type bindings of the supper classes and interfaces
-	 * inherited by the given type binding.
-	 * 
-	 * @param typeBinding
-	 * @return list of type bindings of all ancestors
-	 */
-	private List<ITypeBinding> findAncestors(ITypeBinding typeBinding) {
-		List<ITypeBinding> ancesotrs = new ArrayList<>();
-
-		if (typeBinding != null) {
-			// get the type binding of super class
-			ITypeBinding parentClass = typeBinding.getSuperclass();
-			if (parentClass != null) {
-				ancesotrs.add(parentClass);
-				ancesotrs.addAll(findAncestors(parentClass));
-			}
-
-			// get type bindings of the implemented interfaces
-			for (ITypeBinding iTypeBinding : typeBinding.getInterfaces()) {
-				if (iTypeBinding != null) {
-					ancesotrs.add(iTypeBinding);
-					ancesotrs.addAll(findAncestors(iTypeBinding));
-				}
-			}
-		}
-
-		return ancesotrs;
 	}
 
 }
