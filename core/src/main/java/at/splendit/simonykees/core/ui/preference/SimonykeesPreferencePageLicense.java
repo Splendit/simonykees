@@ -35,11 +35,11 @@ import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Bundle;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.i18n.Messages;
-import at.splendit.simonykees.core.license.LicenseChecker;
-import at.splendit.simonykees.core.license.LicenseManager;
-import at.splendit.simonykees.core.license.LicenseStatus;
-import at.splendit.simonykees.core.license.LicenseType;
+import at.splendit.simonykees.i18n.Messages;
+import at.splendit.simonykees.license.LicenseChecker;
+import at.splendit.simonykees.license.LicenseManager;
+import at.splendit.simonykees.license.LicenseStatus;
+import at.splendit.simonykees.license.LicenseType;
 
 /**
  * Preference page for displaying license information and updating license key.

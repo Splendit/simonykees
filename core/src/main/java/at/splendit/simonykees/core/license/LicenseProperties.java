@@ -7,6 +7,7 @@ package at.splendit.simonykees.core.license;
  * @author ali
  *
  */
+@SuppressWarnings("nls")
 public class LicenseProperties {	
 	public static final String  LICENSE_ENVIRONMENT ="Test";
 	public static final String	DEFAULT_LICENSEE_NUMBER_PREFIX = "demo";
