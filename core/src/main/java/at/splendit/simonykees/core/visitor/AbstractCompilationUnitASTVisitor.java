@@ -75,7 +75,7 @@ public abstract class AbstractCompilationUnitASTVisitor extends AbstractASTRewri
 					} else {
 //						Activator.log(Status.INFO,
 //								String.format("Class not in classpath [%s]", fullyQuallifiedClassName)); //$NON-NLS-1$
-						logger.info(String.format("Class not in classpath [%s]", fullyQuallifiedClassName)); //$NON-NLS-1$
+						logger.debug(String.format("Class not in classpath [%s]", fullyQuallifiedClassName)); //$NON-NLS-1$
 						return false;
 					}
 				}
