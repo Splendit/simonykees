@@ -52,6 +52,7 @@
 		<module>license</module>
 		<module>license.test</module>
 		<module>i18n</module>
+		<module>logging</module>
 	</modules>
 
 	<scm>
