@@ -10,8 +10,9 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.license.Activator;
 import at.splendit.simonykees.i18n.ExceptionMessages;
 import at.splendit.simonykees.license.model.PersistenceModel;
 
@@ -24,6 +25,8 @@ import at.splendit.simonykees.license.model.PersistenceModel;
  */
 @SuppressWarnings("nls")
 public abstract class LicenseCommonTest {
+	
+	private static final Logger logger = LoggerFactory.getLogger(LicenseCommonTest.class);
 	
 	// the following values are hard copied from existing licensees on the net licensing server
 	protected static final String FLOATING_LICENSEE_NUMBER = "IAQ45SNQR";
@@ -118,7 +121,8 @@ public abstract class LicenseCommonTest {
 				iSecurePreferences.flush();
 			} while (iSecurePreferences.nodeExists("simonykees"));
 		} catch (IOException exception) {
-			Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_encryption_error, exception);
+			//Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_encryption_error, exception);
+			logger.warn(ExceptionMessages.PersistenceManager_encryption_error, exception);
 			Assert.fail();
 		}
 	}
