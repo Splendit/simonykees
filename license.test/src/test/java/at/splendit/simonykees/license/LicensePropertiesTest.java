@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.license;
+package at.splendit.simonykees.license;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
