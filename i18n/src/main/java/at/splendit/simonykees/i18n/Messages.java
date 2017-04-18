@@ -71,6 +71,8 @@ public class Messages extends NLS {
 	public static String Java7Profile_profileName;
 	public static String OrganiseImportsRule_description;
 	public static String OrganiseImportsRule_name;
+	public static String OverrideAnnotationRule_description;
+	public static String OverrideAnnotationRule_name;
 	public static String PrimitiveBoxedForStringRule_description;
 	public static String PrimitiveBoxedForStringRule_name;
 	public static String Profile_DefaultProfile_profileName;

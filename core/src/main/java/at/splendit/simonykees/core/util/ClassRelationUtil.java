@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.IType;
@@ -107,6 +108,37 @@ public class ClassRelationUtil {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Finds the list of type bindings of the supper classes and interfaces
+	 * inherited by the given type binding.
+	 * 
+	 * @param typeBinding
+	 * 			the resolved type binding of the class to find the ancestors for.	
+	 * @return  the list of type bindings of all ancestors
+	 */
+	public static List<ITypeBinding> findAncestors(ITypeBinding typeBinding) {
+		List<ITypeBinding> ancesotrs = new ArrayList<>();
+	
+		if (typeBinding != null) {
+			// get the type binding of super class
+			ITypeBinding parentClass = typeBinding.getSuperclass();
+			if (parentClass != null) {
+				ancesotrs.add(parentClass);
+				ancesotrs.addAll(findAncestors(parentClass));
+			}
+	
+			// get type bindings of the implemented interfaces
+			for (ITypeBinding iTypeBinding : typeBinding.getInterfaces()) {
+				if (iTypeBinding != null) {
+					ancesotrs.add(iTypeBinding);
+					ancesotrs.addAll(findAncestors(iTypeBinding));
+				}
+			}
+		}
+	
+		return ancesotrs;
 	}
 
 }
