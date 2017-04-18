@@ -1,5 +1,9 @@
 #!/usr/bin/groovy
 
+// if this script is changed expand the documentation on confluence!
+// url: https://confluence.splendit.loc/display/SIM/Jenkins+Pipeline+Description
+
+
 node {
 	// variable for maven home
 	def mvnHome = tool 'mvn system'
