@@ -6,12 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -102,32 +98,25 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 					
 					Expression iterableExpression =  nodeInitializer.getExpression();
 					ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
-					ASTNode rootNode = node.getRoot();
-					if(ASTNode.COMPILATION_UNIT == rootNode.getNodeType()) {
-						CompilationUnit compilationUnit = (CompilationUnit)rootNode;
-						IJavaElement javaElement = compilationUnit.getJavaElement();
-						if(javaElement != null) {
-							IJavaProject iJavaProject = javaElement.getJavaProject();
-							try {
-								String iterableFullyQualifiedName = Iterable.class.getName();
-								IType classtype = iJavaProject.findType(iterableFullyQualifiedName);
-								// check if iterable object is compatible with java Iterable
-								boolean isIterable = ClassRelationUtil.isInheritingContentOfRegistertITypes(iterableTypeBinding,
-										Collections.singletonList(classtype));
-								
-								if(isIterable) {
-									listName = (Name) iterableExpression;
-									return false;
-								}
 
-							} catch (Exception e) {
-								Activator.log(Status.ERROR, e.getMessage() ,new ITypeNotFoundRuntimeException());
-							}
+					try {
+						String iterableFullyQualifiedName = Iterable.class.getName();
+						// check if iterable object is compatible with java Iterable
+						boolean isIterable = ClassRelationUtil.isInheritingContentOfRegistertITypes(iterableTypeBinding,
+								Collections.singletonList(iterableFullyQualifiedName));
+						
+						if(isIterable) {
+							listName = (Name) iterableExpression;
+							return false;
 						}
+
+					} catch (Exception e) {
+						Activator.log(Status.ERROR, e.getMessage() ,new ITypeNotFoundRuntimeException());
 					}
 				}
 			}
 		}
+		
 		return true;
 	}
 

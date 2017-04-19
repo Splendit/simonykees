@@ -1,5 +1,8 @@
 package at.splendit.simonykees.core.visitor;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
@@ -29,6 +32,10 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	public void setAstRewrite(ASTRewrite astRewrite) {
 		this.astRewrite = astRewrite;
+	}
+
+	protected List<String> generateFullyQuallifiedNameList(String... fullyQuallifiedName) {
+		return Arrays.asList(fullyQuallifiedName);
 	}
 
 }

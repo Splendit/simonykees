@@ -119,7 +119,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 		}
 
 		if (ClassRelationUtil.isContentOfRegistertITypes(optionalExpression.resolveTypeBinding(),
-				this.iTypeMap.get(STRING_KEY))) {
+				generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 			AST currentAST = node.getAST();
 			String replacementOperation = null;
 			String stringOperation = node.getName().getFullyQualifiedName();

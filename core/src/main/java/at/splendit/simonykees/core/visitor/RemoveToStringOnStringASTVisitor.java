@@ -20,16 +20,13 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitASTVisitor {
+public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static Integer STRING_KEY = 1;
 	private static String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
 
 	private List<MethodInvocation> methodInvocationSkipList;
 
 	public RemoveToStringOnStringASTVisitor() {
-		super();
-		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
 		this.methodInvocationSkipList = new ArrayList<MethodInvocation>();
 	}
 
@@ -42,6 +39,8 @@ public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitAST
 		if (methodInvocationSkipList.contains(node)) {
 			return true;
 		}
+		
+		List<String> stringFullyQualifiedName = generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME);
 
 		/*
 		 * Checks if method invocation is toString. The invocation needs to have
@@ -51,7 +50,8 @@ public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitAST
 		if (StringUtils.equals(ReservedNames.MI_TO_STRING, node.getName().getFullyQualifiedName())
 				&& !(node.getParent() instanceof ExpressionStatement) && node.typeArguments().isEmpty()
 				&& (node.getExpression() != null && ClassRelationUtil.isContentOfRegistertITypes(
-						node.getExpression().resolveTypeBinding(), iTypeMap.get(STRING_KEY)))) {
+						node.getExpression().resolveTypeBinding(), stringFullyQualifiedName))) {
+			
 			Expression variableExpression = node.getExpression();
 
 			boolean unwrapped = false;
@@ -67,7 +67,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractCompilationUnitAST
 					if (StringUtils.equals(ReservedNames.MI_TO_STRING, mI.getName().getFullyQualifiedName())
 							&& mI.typeArguments().isEmpty()
 							&& (mI.getExpression() != null && ClassRelationUtil.isContentOfRegistertITypes(
-									mI.getExpression().resolveTypeBinding(), iTypeMap.get(STRING_KEY)))) {
+									mI.getExpression().resolveTypeBinding(), stringFullyQualifiedName))) {
 						variableExpression = mI.getExpression();
 						methodInvocationSkipList.add(mI);
 						unwrapped = true;

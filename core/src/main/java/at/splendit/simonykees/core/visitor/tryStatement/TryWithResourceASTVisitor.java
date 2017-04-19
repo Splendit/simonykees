@@ -72,7 +72,7 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 			 */
 			ITypeBinding typeBind = varDeclStatmentNode.getType().resolveBinding();
 			if (ClassRelationUtil.isInheritingContentOfRegistertITypes(typeBind,
-					iTypeMap.get(AUTO_CLOSEABLE_KEY))) {
+					generateFullyQuallifiedNameList(AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME, CLOSEABLE_FULLY_QUALLIFIED_NAME))) {
 	
 				List<VariableDeclarationFragment>fragments = 
 						((List<Object>)varDeclStatmentNode.fragments())

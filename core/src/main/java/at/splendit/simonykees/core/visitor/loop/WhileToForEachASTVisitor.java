@@ -9,7 +9,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
-import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * While-loops over Iterators that could be expressed with a for-loop are
@@ -19,9 +19,8 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
  * @since 0.9.2
  *
  */
-public class WhileToForEachASTVisitor extends AbstractCompilationUnitASTVisitor {
+public class WhileToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static Integer ITERATOR_KEY = 1;
 	private static String ITERATOR_FULLY_QUALLIFIED_NAME = "java.util.Iterator"; //$NON-NLS-1$
 
 	// private SimpleName iterationVariable = null;
@@ -31,7 +30,6 @@ public class WhileToForEachASTVisitor extends AbstractCompilationUnitASTVisitor 
 
 	public WhileToForEachASTVisitor() {
 		super();
-		this.fullyQuallifiedNameMap.put(ITERATOR_KEY, generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME));
 		this.replaceInformationASTVisitorList = new HashMap<>();
 		this.multipleIteratorUse = new HashMap<>();
 	}
@@ -41,7 +39,7 @@ public class WhileToForEachASTVisitor extends AbstractCompilationUnitASTVisitor 
 		SimpleName iteratorName = ASTNodeUtil.replaceableIteratorCondition(node.getExpression());
 		if (iteratorName != null) {
 			if (ClassRelationUtil.isContentOfRegistertITypes(iteratorName.resolveTypeBinding(),
-					iTypeMap.get(ITERATOR_KEY))) {
+					generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
 				Block parentNode = ASTNodeUtil.getSpecificAncestor(node, Block.class);
 				if (parentNode == null) {
 					// No surrounding parent block found
