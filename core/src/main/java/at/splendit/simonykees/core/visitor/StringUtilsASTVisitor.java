@@ -118,7 +118,7 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 			return true;
 		}
 
-		if (ClassRelationUtil.isContentOfRegistertITypes(optionalExpression.resolveTypeBinding(),
+		if (ClassRelationUtil.isContentOfTypes(optionalExpression.resolveTypeBinding(),
 				generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 			AST currentAST = node.getAST();
 			String replacementOperation = null;

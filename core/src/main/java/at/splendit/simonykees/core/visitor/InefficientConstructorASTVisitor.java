@@ -104,7 +104,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 				}
 
 				/* wrapping string variables into Boolean.valueOf(...) */
-				else if (ClassRelationUtil.isContentOfRegistertITypes(refactorCandidateTypeBinding,
+				else if (ClassRelationUtil.isContentOfTypes(refactorCandidateTypeBinding,
 						generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 					replacement = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
 				}
@@ -144,7 +144,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 				 * wrapping string and primitive input parameter into
 				 * PrimitiveType.valueOf(...)
 				 */
-				if (ClassRelationUtil.isContentOfRegistertITypes(refactorCandidateTypeBinding, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
+				if (ClassRelationUtil.isContentOfTypes(refactorCandidateTypeBinding, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
 						|| isPrimitiveTypeClass(refactorCandidateTypeBinding.getName())) {
 					SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(), ReservedNames.MI_VALUE_OF);
 					replacement = NodeBuilder.newMethodInvocation(node.getAST(),

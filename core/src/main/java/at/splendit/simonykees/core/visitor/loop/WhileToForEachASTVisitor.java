@@ -38,7 +38,7 @@ public class WhileToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 	public boolean visit(WhileStatement node) {
 		SimpleName iteratorName = ASTNodeUtil.replaceableIteratorCondition(node.getExpression());
 		if (iteratorName != null) {
-			if (ClassRelationUtil.isContentOfRegistertITypes(iteratorName.resolveTypeBinding(),
+			if (ClassRelationUtil.isContentOfTypes(iteratorName.resolveTypeBinding(),
 					generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
 				Block parentNode = ASTNodeUtil.getSpecificAncestor(node, Block.class);
 				if (parentNode == null) {

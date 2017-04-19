@@ -49,7 +49,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 		 */
 		if (StringUtils.equals(ReservedNames.MI_TO_STRING, node.getName().getFullyQualifiedName())
 				&& !(node.getParent() instanceof ExpressionStatement) && node.typeArguments().isEmpty()
-				&& (node.getExpression() != null && ClassRelationUtil.isContentOfRegistertITypes(
+				&& (node.getExpression() != null && ClassRelationUtil.isContentOfTypes(
 						node.getExpression().resolveTypeBinding(), stringFullyQualifiedName))) {
 			
 			Expression variableExpression = node.getExpression();
@@ -66,7 +66,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 					MethodInvocation mI = (MethodInvocation) variableExpression;
 					if (StringUtils.equals(ReservedNames.MI_TO_STRING, mI.getName().getFullyQualifiedName())
 							&& mI.typeArguments().isEmpty()
-							&& (mI.getExpression() != null && ClassRelationUtil.isContentOfRegistertITypes(
+							&& (mI.getExpression() != null && ClassRelationUtil.isContentOfTypes(
 									mI.getExpression().resolveTypeBinding(), stringFullyQualifiedName))) {
 						variableExpression = mI.getExpression();
 						methodInvocationSkipList.add(mI);

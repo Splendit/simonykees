@@ -35,9 +35,9 @@ public class StringConcatToPlusASTVisitor extends AbstractCompilationUnitASTVisi
 	public boolean visit(MethodInvocation node) {
 		List<String> fullyQualifiedStringName = generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME);
 		if (StringUtils.equals("concat", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
-				&& ClassRelationUtil.isContentOfRegistertITypes(node.getExpression().resolveTypeBinding(), fullyQualifiedStringName)
+				&& ClassRelationUtil.isContentOfTypes(node.getExpression().resolveTypeBinding(), fullyQualifiedStringName)
 				&& ASTNode.EXPRESSION_STATEMENT != node.getParent().getNodeType() && node.arguments().size() == 1
-				&& ClassRelationUtil.isContentOfRegistertITypes(
+				&& ClassRelationUtil.isContentOfTypes(
 						((Expression) node.arguments().get(0)).resolveTypeBinding(), fullyQualifiedStringName)) {
 			modifyMethodInvocation.add(node);
 		}

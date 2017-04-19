@@ -24,7 +24,7 @@ public class ClassRelationUtil {
 	 * @return if the {@link ITypeBinding} is part of the registered types the
 	 *         return value is true
 	 */
-	public static boolean isInheritingContentOfRegistertITypes(ITypeBinding iTypeBinding,
+	public static boolean isInheritingContentOfTypes(ITypeBinding iTypeBinding,
 			List<String> fullyQuallifiedTargetnames) {
 
 		if (iTypeBinding == null) {
@@ -47,7 +47,7 @@ public class ClassRelationUtil {
 	 * 
 	 * @return if the erasure the type binding occurs in the list of types
 	 */
-	public static boolean isContentOfRegistertITypes(ITypeBinding iTypeBinding, List<String> registeredITypes) {
+	public static boolean isContentOfTypes(ITypeBinding iTypeBinding, List<String> registeredITypes) {
 
 		if (iTypeBinding == null) {
 			return false;

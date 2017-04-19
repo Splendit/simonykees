@@ -30,7 +30,7 @@ public class CollectionRemoveAllASTVisitor extends AbstractASTRewriteASTVisitor 
 	@Override
 	public boolean visit(MethodInvocation node) {
 		if (StringUtils.equals("removeAll", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
-				&& node.getExpression() instanceof SimpleName && ClassRelationUtil.isInheritingContentOfRegistertITypes(
+				&& node.getExpression() instanceof SimpleName && ClassRelationUtil.isInheritingContentOfTypes(
 						node.getExpression().resolveTypeBinding(), Collections.singletonList(COLLECTION_FULLY_QUALLIFIED_NAME))) {
 
 			@SuppressWarnings("unchecked")

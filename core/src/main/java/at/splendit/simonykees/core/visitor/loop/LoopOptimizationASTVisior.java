@@ -102,7 +102,7 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 					try {
 						String iterableFullyQualifiedName = Iterable.class.getName();
 						// check if iterable object is compatible with java Iterable
-						boolean isIterable = ClassRelationUtil.isInheritingContentOfRegistertITypes(iterableTypeBinding,
+						boolean isIterable = ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
 								Collections.singletonList(iterableFullyQualifiedName));
 						
 						if(isIterable) {

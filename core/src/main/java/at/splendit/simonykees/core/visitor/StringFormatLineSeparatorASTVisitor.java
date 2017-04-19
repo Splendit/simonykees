@@ -34,7 +34,7 @@ public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVi
 	@Override
 	public boolean visit(MethodInvocation node) {
 		if (StringUtils.equals("format", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
-				&& node.getExpression() instanceof SimpleName && ClassRelationUtil.isContentOfRegistertITypes(
+				&& node.getExpression() instanceof SimpleName && ClassRelationUtil.isContentOfTypes(
 						node.getExpression().resolveTypeBinding(), generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 
 			@SuppressWarnings("rawtypes")
@@ -48,7 +48,7 @@ public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVi
 			 * be an LOCALE & the second an StringLiteral
 			 */
 			else if (arguments.size() >= 2 && arguments.get(0) instanceof QualifiedName
-					&& ClassRelationUtil.isContentOfRegistertITypes(
+					&& ClassRelationUtil.isContentOfTypes(
 							((QualifiedName) arguments.get(0)).resolveTypeBinding(), generateFullyQuallifiedNameList(LOCALE_FULLY_QUALLIFIED_NAME))
 					&& arguments.get(1) instanceof StringLiteral) {
 				formatString = (StringLiteral) arguments.get(1);
