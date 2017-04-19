@@ -5,7 +5,7 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
-
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +35,15 @@ public class Activator extends Plugin {
 		 */
 		public void start(BundleContext context) throws Exception {
 			plugin = this;
+			
+			// start jSparrow logging bundle
+			for(Bundle bundle : context.getBundles()) {
+				if(bundle.getSymbolicName().equals("jSparrow.logging") 
+						&& bundle.getState() != Bundle.ACTIVE) {
+					bundle.start();
+					break;
+				}
+			}
 		}
 
 		/*
