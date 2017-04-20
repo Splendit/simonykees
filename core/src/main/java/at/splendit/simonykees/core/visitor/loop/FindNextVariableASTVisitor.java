@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
-import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * also checks if remove or forEachRemaining is used on the iterator.
@@ -19,7 +19,7 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
  * @author Martin Huter
  * @since 0.9.2
  */
-class FindNextVariableASTVisitor extends AbstractCompilationUnitASTVisitor {
+class FindNextVariableASTVisitor extends AbstractASTRewriteASTVisitor {
 	private SimpleName iteratorName;
 
 	private Type iteratorVariableType = null;

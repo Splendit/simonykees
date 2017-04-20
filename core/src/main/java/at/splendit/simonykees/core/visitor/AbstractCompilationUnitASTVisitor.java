@@ -1,7 +1,6 @@
 package at.splendit.simonykees.core.visitor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -101,9 +100,5 @@ public abstract class AbstractCompilationUnitASTVisitor extends AbstractASTRewri
 				}
 			}
 		}
-	}
-
-	protected List<String> generateFullyQuallifiedNameList(String... fullyQuallifiedName) {
-		return Arrays.asList(fullyQuallifiedName);
 	}
 }
