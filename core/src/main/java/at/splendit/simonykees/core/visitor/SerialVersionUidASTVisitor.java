@@ -73,7 +73,7 @@ public class SerialVersionUidASTVisitor extends AbstractASTRewriteASTVisitor {
 						newModifier);
 				/*
 				 * a declarationfield must always be in a list of statements of
-				 * the sourrounding class block
+				 * the surrounding class block
 				 */
 				if (node.getLocationInParent() instanceof ChildListPropertyDescriptor) {
 					astRewrite
