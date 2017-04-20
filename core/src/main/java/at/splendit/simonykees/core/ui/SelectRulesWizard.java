@@ -40,11 +40,18 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public class SelectRulesWizard extends Wizard {
 
-	private final SelectRulesWizardPage selectRulesPage = new SelectRulesWizardPage();
+	private final SelectRulesWizardPage selectRulesPage;
 	private final List<IJavaElement> javaElements;
 
 	public SelectRulesWizard(List<IJavaElement> javaElements) {
 		this.javaElements = javaElements;
+		selectRulesPage = new SelectRulesWizardPage();
+		setNeedsProgressMonitor(true);
+	}
+	
+	public SelectRulesWizard(List<IJavaElement> javaElements, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+		this.javaElements = javaElements;
+		selectRulesPage = new SelectRulesWizardPage(rules);
 		setNeedsProgressMonitor(true);
 	}
 

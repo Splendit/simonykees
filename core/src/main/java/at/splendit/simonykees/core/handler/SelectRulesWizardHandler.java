@@ -1,7 +1,11 @@
 package at.splendit.simonykees.core.handler;
 
+import java.util.List;
+
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
@@ -9,10 +13,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.SelectRulesWizard;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
-
 import at.splendit.simonykees.i18n.Messages;
 
 /**
@@ -32,16 +36,23 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 		} else {
 			Activator.setRunning(true);
 			if (LicenseUtil.isValid()) {
-				final WizardDialog dialog = new WizardDialog(HandlerUtil.getActiveShell(event),
-						new SelectRulesWizard(getSelectedJavaElements(event)));
+				List<IJavaElement> selectedJavaElements = getSelectedJavaElements(event);
+				if (!selectedJavaElements.isEmpty()) {
+					IJavaProject selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
+					if(null != selectedJavaProjekt){
+						
+						final WizardDialog dialog = new WizardDialog(HandlerUtil.getActiveShell(event),
+								new SelectRulesWizard(selectedJavaElements, RulesContainer.getRulesForProject(selectedJavaProjekt)));
+						/*
+						 * the dialog is made as smaller than necessary horizontally
+						 * (we want line breaks for rule descriptions)
+						 */
+						dialog.setPageSize(750, 500);
 
-				/*
-				 * the dialog is made as smaller than necessary horizontally (we
-				 * want line breaks for rule descriptions)
-				 */
-				dialog.setPageSize(750, 500);
+						dialog.open();
 
-				dialog.open();
+					}
+									}
 			} else {
 				// do not display the SelectRulesWizard if the license is
 				// invalid

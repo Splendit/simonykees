@@ -58,6 +58,11 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 		profileNamesAndIds = SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap();
 		rules = RulesContainer.getAllRules();
 	}
+	
+	protected SelectRulesWizardPage(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+		this();
+		this.rules = rules;
+	}
 
 	/**
 	 * Gets called when the page gets created.
