@@ -37,7 +37,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter
  * @since 0.9
  */
-public class SelectRulesWizardPage extends AbstractWizardPage {
+public class SelectRulesWizardPageOld extends AbstractWizardPage {
 
 	private CheckboxTableViewer rulesCheckboxTableViewer;
 	private StyledText descriptionStyledText;
@@ -50,7 +50,7 @@ public class SelectRulesWizardPage extends AbstractWizardPage {
 
 	private String currentProfileId;
 
-	protected SelectRulesWizardPage() {
+	protected SelectRulesWizardPageOld() {
 		super(Messages.SelectRulesWizardPage_page_name);
 		setTitle(Messages.SelectRulesWizardPage_title);
 		setDescription(Messages.SelectRulesWizardPage_description);
