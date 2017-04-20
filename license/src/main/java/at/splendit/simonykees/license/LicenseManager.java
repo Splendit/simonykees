@@ -6,7 +6,6 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
-import org.eclipse.core.runtime.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,7 +129,6 @@ public class LicenseManager {
 		} catch (NetLicensingException e) {
 			Optional<PersistenceModel> persistedData = persistenceManager.readPersistedData();
 
-			//Activator.log(Status.WARNING, Messages.LicenseManager_cannot_reach_licensing_provider_on_prevalidation, e);
 			logger.warn(Messages.LicenseManager_cannot_reach_licensing_provider_on_checkin);
 
 			licenseType = persistedData.flatMap(PersistenceModel::getLicenseType).orElse(LicenseType.TRY_AND_BUY);
@@ -210,7 +208,6 @@ public class LicenseManager {
 				ValidateExecutor.shutDownScheduler();
 
 			} catch (NetLicensingException e) {
-				//Activator.log(Status.WARNING, Messages.LicenseManager_cannot_reach_licensing_provider_on_checkin, e);
 				logger.warn(Messages.LicenseManager_cannot_reach_licensing_provider_on_checkin, e);
 			}
 		}
@@ -333,7 +330,6 @@ public class LicenseManager {
 				try {
 					Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE);
 				} catch (InterruptedException e) {
-					//Activator.log(Status.ERROR, Messages.LicenseManager_wait_for_validation_was_interrupted, e);
 					logger.error(Messages.LicenseManager_wait_for_validation_was_interrupted, e);
 					cache.reset();
 				}
@@ -423,7 +419,6 @@ public class LicenseManager {
 		if (validLicensee) {
 			String existingLicenseeNumber = getLicenseeNumber();
 			String existingLicenseeName = getLicenseeName();
-			//Activator.log(Status.INFO, Messages.LicenseManager_updating_licensee_credentials, null);
 			logger.info(Messages.LicenseManager_updating_licensee_credentials);
 			setLicenseeName(licenseeName);
 			setLicenseeNumber(licenseeNumber);
@@ -442,7 +437,6 @@ public class LicenseManager {
 
 			LicenseChecker checker = getValidationData();
 			if (!isValidUpdate(checker)) {
-				//Activator.log(Status.WARNING, Messages.LicenseManager_invalid_new_license_key, null);
 				logger.warn(Messages.LicenseManager_invalid_new_license_key);
 				setLicenseeNumber(existingLicenseeNumber);
 				setLicenseeName(existingLicenseeName);
@@ -457,7 +451,6 @@ public class LicenseManager {
 				updated = false;
 			}
 		} else {
-			//Activator.log(Status.WARNING, Messages.LicenseManager_invalid_new_license_key, null);
 			logger.warn(Messages.LicenseManager_invalid_new_license_key);
 		}
 

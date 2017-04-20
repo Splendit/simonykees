@@ -8,7 +8,6 @@ import java.util.Optional;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.slf4j.Logger;
@@ -131,8 +130,6 @@ public class PersistenceManager {
 			simonykeesNode.flush();
 			
 		} catch (Exception exception) {
-				//Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_encryption_error,
-				//		exception);
 				logger.warn(ExceptionMessages.PersistenceManager_encryption_error, exception);
 		}
 	}
@@ -160,8 +157,6 @@ public class PersistenceManager {
 		persistenceModel = PersistenceModel.fromString(persistenceStr);
 		
 	} catch (Exception exception) {
-		// Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_decryption_error,
-		//		exception);
 		logger.warn(ExceptionMessages.PersistenceManager_decryption_error, exception);
 	}
 		

@@ -2,7 +2,6 @@ package at.splendit.simonykees.license;
 
 import java.time.Instant;
 
-import org.eclipse.core.runtime.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,13 +46,11 @@ public class LicenseValidator {
 			persistenceManager.persistCachedData();
 			
 			// logging validation result...
-			//Activator.log(Messages.LicenseValidator_received_validation_response);
 			logger.info(Messages.LicenseValidator_received_validation_response);
 
 		} catch (final NetLicensingException e) {
 			ValidationResultCache cache = ValidationResultCache.getInstance();
 			cache.reset();
-			//Activator.log(Status.WARNING, Messages.LicenseValidator_cannot_reach_license_provider_on_validation_call, e);
 			logger.warn(Messages.LicenseValidator_cannot_reach_license_provider_on_validation_call, e);
 		}
 	}
@@ -65,7 +62,6 @@ public class LicenseValidator {
 			ValidationResult validationResult = LicenseeService.validate(context, licenseeNumber, new ValidationParameters());
 			validLicensee = ResponseParser.parseLicenseeValidation(validationResult);
 		} catch (NetLicensingException e) {
-			//Activator.log(Status.WARNING, Messages.LicenseValidator_invalid_licensee_number, e);
 			logger.warn(Messages.LicenseValidator_invalid_licensee_number, e);
 		}
 		

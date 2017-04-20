@@ -23,7 +23,7 @@ import at.splendit.simonykees.license.LicenseManager;
  */
 public class Activator extends AbstractUIPlugin {
 
-	//private static final Logger logger = LoggerFactory.getLogger(Activator.class);
+	private static final Logger logger = LoggerFactory.getLogger(Activator.class);
 	
 	// The plug-in ID
 	public static final String PLUGIN_ID = "jSparrow.core"; //$NON-NLS-1$
@@ -66,7 +66,7 @@ public class Activator extends AbstractUIPlugin {
 
 		// start jSparrow logging bundle
 		for(Bundle bundle : context.getBundles()) {
-			if(bundle.getSymbolicName().equals("jSparrow.logging") 
+			if(bundle.getSymbolicName().equals("jSparrow.logging")  //$NON-NLS-1$ //name of the logging api bundle
 					&& bundle.getState() != Bundle.ACTIVE) {
 				bundle.start();
 				loggingBundleID = bundle.getBundleId();
@@ -76,8 +76,7 @@ public class Activator extends AbstractUIPlugin {
 		
 		// starting the license heartbeat
 		LicenseManager.getInstance();
-		//Activator.log(Messages.Activator_start);
-		//logger.info(Messages.Activator_start);
+		logger.info(Messages.Activator_start);
 	}
 
 	/*
@@ -93,8 +92,8 @@ public class Activator extends AbstractUIPlugin {
 		 */
 		LicenseManager.getInstance().checkIn();
 		// FIXME (see SIM-331) figure out better logging configuration
-		// Activator.log(Messages.Activator_stop);
-
+		logger.info(Messages.Activator_stop);
+		
 		plugin = null;
 
 		synchronized (jobs) {
@@ -131,27 +130,6 @@ public class Activator extends AbstractUIPlugin {
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
-
-//	public static void log(int severity, String message, Exception e) {
-//		log(new SimonykeesStatus(severity, PLUGIN_ID, message, e));
-//	}
-//
-//	public static void log(String message, Exception e) {
-//		log(new SimonykeesStatus(IStatus.INFO, PLUGIN_ID, message, e));
-//	}
-//
-//	public static void log(int severity, String message) {
-//		log(new SimonykeesStatus(severity, PLUGIN_ID, message));
-//	}
-//
-//	public static void log(String message) {
-//		log(new SimonykeesStatus(IStatus.INFO, PLUGIN_ID, message));
-//	}
-//
-//	private static void log(Status status) {
-//		final ILog log = getDefault().getLog();
-//		log.log(status);
-//	}
 
 	public static void registerJob(Job job) {
 		synchronized (jobs) {

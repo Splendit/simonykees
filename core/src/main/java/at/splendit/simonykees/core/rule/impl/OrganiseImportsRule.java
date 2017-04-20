@@ -24,7 +24,6 @@ import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -84,7 +83,6 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 	private void applyOrganising(ICompilationUnit workingCopy) throws OperationCanceledException, CoreException {
 		if (changes.containsKey(workingCopy)) {
 			// already have changes
-			//Activator.log(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
 			logger.info(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
 		} else {
 

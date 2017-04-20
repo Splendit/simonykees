@@ -9,7 +9,6 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -28,7 +27,6 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
@@ -56,8 +54,6 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 		case PROJECT_EXPLORER:
 			return getFromExplorer(shell, getCurrentStructuredSelection(event));
 		default:
-			//Activator.log(Status.ERROR,
-			//		NLS.bind(Messages.AbstractSimonykeesHandler_error_activePartId_unknown, activePartId), null);
 			logger.error(NLS.bind(Messages.AbstractSimonykeesHandler_error_activePartId_unknown, activePartId));
 			return Collections.emptyList();
 		}
@@ -69,8 +65,6 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 		if (javaElement instanceof ICompilationUnit) {
 			return Collections.singletonList(javaElement);
 		} else {
-			//Activator.log(Status.ERROR, NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_editor,
-			//		javaElement.getClass().getName()), null);
 			logger.error(NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_editor,
 					javaElement.getClass().getName()));
 		}
@@ -90,10 +84,6 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 					javaElements.add(JavaCore.create(project));
 				}
 			} else {
-//				Activator.log(Status.ERROR,
-//						NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_explorer,
-//								object.getClass().getName()),
-//						null);
 				logger.error(NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_explorer,
 								object.getClass().getName()));
 			}

@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.i18n.Messages;
@@ -201,7 +200,6 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	private void replaceWithDiamond(ParameterizedType parameterizedType, List<Type> rhsTypeArguments) {
 		// removing type arguments in new class instance creation
-		//Activator.log(Messages.DiamondOperatorASTVisitor_using_diamond_operator);
 		logger.debug(Messages.DiamondOperatorASTVisitor_using_diamond_operator);
 		ListRewrite typeArgumentsListRewrite = astRewrite.getListRewrite(parameterizedType,
 				ParameterizedType.TYPE_ARGUMENTS_PROPERTY);

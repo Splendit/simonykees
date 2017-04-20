@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 
-import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.junit.After;
@@ -121,7 +120,6 @@ public abstract class LicenseCommonTest {
 				iSecurePreferences.flush();
 			} while (iSecurePreferences.nodeExists("simonykees"));
 		} catch (IOException exception) {
-			//Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_encryption_error, exception);
 			logger.warn(ExceptionMessages.PersistenceManager_encryption_error, exception);
 			Assert.fail();
 		}

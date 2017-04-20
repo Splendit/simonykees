@@ -44,11 +44,9 @@ public class SecureStoreTest {
 	@SuppressWarnings("nls")
 	@Test
 	public void testPrivateSecureStore() throws IOException, StorageException {
-		//Activator.log(file.toString());
 		logger.info(file.toString());
 		ISecurePreferences iSecurePreferences = SecurePreferencesFactory.open(file.toURI().toURL(), null);
 		iSecurePreferences.node("simonykees").put("key", "value", false);
-		//Activator.log(iSecurePreferences.node("simonykees").get("key", ""));
 		logger.info(iSecurePreferences.node("simonykees").get("key", ""));
 		iSecurePreferences.flush();
 	}
