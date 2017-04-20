@@ -8,9 +8,10 @@ import java.util.Optional;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
@@ -30,6 +31,8 @@ import at.splendit.simonykees.license.model.PersistenceModel;
  */
 public class PersistenceManager {
 		
+	private static final Logger logger = LoggerFactory.getLogger(PersistenceManager.class);
+	
 	private PersistenceModel persistenceModel;
 	private String LICENSEE_CREDENTIALS_NODE_KEY = "credentials"; //$NON-NLS-1$
 	private static final String SIMONYKEES_KEY = "simonykees"; //$NON-NLS-1$
@@ -127,8 +130,7 @@ public class PersistenceManager {
 			simonykeesNode.flush();
 			
 		} catch (Exception exception) {
-				Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_encryption_error,
-						exception);
+				logger.warn(ExceptionMessages.PersistenceManager_encryption_error, exception);
 		}
 	}
 	
@@ -155,8 +157,7 @@ public class PersistenceManager {
 		persistenceModel = PersistenceModel.fromString(persistenceStr);
 		
 	} catch (Exception exception) {
-		Activator.log(Status.WARNING, ExceptionMessages.PersistenceManager_decryption_error,
-				exception);
+		logger.warn(ExceptionMessages.PersistenceManager_decryption_error, exception);
 	}
 		
 		return Optional.ofNullable(persistenceModel);

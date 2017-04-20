@@ -4,10 +4,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.core.runtime.Status;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.i18n.Messages;
-
 import at.splendit.simonykees.license.model.LicenseeModel;
 import at.splendit.simonykees.license.model.SchedulerModel;
 
@@ -20,6 +20,8 @@ import at.splendit.simonykees.license.model.SchedulerModel;
  */
 public class ValidateExecutor {
 
+	private static final Logger logger = LoggerFactory.getLogger(ValidateExecutor.class);
+	
 	private static ScheduledExecutorService scheduler;
 
 	protected synchronized static void startSchedule(SchedulerModel schedulingInfo, LicenseeModel licensee) {
@@ -29,10 +31,10 @@ public class ValidateExecutor {
 			@Override
 			public void run() {
 				if (schedulingInfo.getDoValidate()) {
-					Activator.log(Status.INFO, Messages.ValidateExecutor_validation_scheduler_started, null);
+					logger.info(Messages.ValidateExecutor_validation_scheduler_started);
 					LicenseValidator.doValidate(licensee);
 				} else {
-					Activator.log(Status.INFO, Messages.ValidateExecutor_shutting_down_validation_scheduler, null);
+					logger.info(Messages.ValidateExecutor_shutting_down_validation_scheduler);
 					scheduledExecutor.shutdown();
 				}
 			}
@@ -46,7 +48,7 @@ public class ValidateExecutor {
 
 	synchronized static void shutDownScheduler() {
 		if (scheduler != null) {
-			Activator.log(Messages.ValidateExecutor_shutting_down_validation_scheduler);
+			logger.info(Messages.ValidateExecutor_shutting_down_validation_scheduler);
 			scheduler.shutdown();
 		}
 	}

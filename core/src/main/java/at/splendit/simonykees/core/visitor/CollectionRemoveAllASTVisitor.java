@@ -8,8 +8,9 @@ import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
@@ -22,6 +23,8 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  *
  */
 public class CollectionRemoveAllASTVisitor extends AbstractASTRewriteASTVisitor {
+
+	private static final Logger logger = LoggerFactory.getLogger(CollectionRemoveAllASTVisitor.class);
 
 	private static String COLLECTION_FULLY_QUALLIFIED_NAME = "java.util.Collection"; //$NON-NLS-1$
 
@@ -37,8 +40,8 @@ public class CollectionRemoveAllASTVisitor extends AbstractASTRewriteASTVisitor 
 			List<Expression> arguments = (List<Expression>) node.arguments();
 			if (arguments.size() == 1 && arguments.get(0) instanceof SimpleName) {
 				if (astMatcher.match((SimpleName) arguments.get(0), node.getExpression())) {
-					Activator.log("replace statment"); //$NON-NLS-1$
-
+					logger.debug("replace statement"); //$NON-NLS-1$
+					
 					SimpleName clear = node.getAST().newSimpleName("clear"); //$NON-NLS-1$
 					MethodInvocation newMI = NodeBuilder.newMethodInvocation(node.getAST(),
 							(Expression) astRewrite.createMoveTarget(node.getExpression()), clear);

@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Logging
+Bundle-SymbolicName: jSparrow.logging
+Bundle-Version: 1.2.0.qualifier
+Bundle-Activator: at.splendit.simonykees.logging.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Export-Package: at.splendit.simonykees.logging
+Bundle-ClassPath: lib/slf4j-api-1.7.25.jar,
+ lib/logback-core-1.2.3.jar,
+ lib/logback-classic-1.2.3.jar,
+ lib/jul-to-slf4j-1.7.25.jar,
+ .

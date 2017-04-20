@@ -6,7 +6,8 @@ import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
-import org.eclipse.core.runtime.Status;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
@@ -37,6 +38,8 @@ import oshi.hardware.HardwareAbstractionLayer;
  */
 public class LicenseManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(LicenseManager.class);
+	
 	private static final String DEFAULT_LICENSEE_NUMBER_PREFIX = LicenseProperties.DEFAULT_LICENSEE_NUMBER_PREFIX;
 	private static String PRODUCT_NUMBER = LicenseProperties.LICENSE_PRODUCT_NUMBER;
 		
@@ -126,7 +129,7 @@ public class LicenseManager {
 		} catch (NetLicensingException e) {
 			Optional<PersistenceModel> persistedData = persistenceManager.readPersistedData();
 
-			Activator.log(Status.WARNING, Messages.LicenseManager_cannot_reach_licensing_provider_on_prevalidation, e);
+			logger.warn(Messages.LicenseManager_cannot_reach_licensing_provider_on_checkin);
 
 			licenseType = persistedData.flatMap(PersistenceModel::getLicenseType).orElse(LicenseType.TRY_AND_BUY);
 			evaluationExpiresDate = persistedData.flatMap(PersistenceModel::getDemoExpirationDate).orElse(null);
@@ -205,7 +208,7 @@ public class LicenseManager {
 				ValidateExecutor.shutDownScheduler();
 
 			} catch (NetLicensingException e) {
-				Activator.log(Status.WARNING, Messages.LicenseManager_cannot_reach_licensing_provider_on_checkin, e);
+				logger.warn(Messages.LicenseManager_cannot_reach_licensing_provider_on_checkin, e);
 			}
 		}
 	}
@@ -327,7 +330,7 @@ public class LicenseManager {
 				try {
 					Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE);
 				} catch (InterruptedException e) {
-					Activator.log(Status.ERROR, Messages.LicenseManager_wait_for_validation_was_interrupted, e);
+					logger.error(Messages.LicenseManager_wait_for_validation_was_interrupted, e);
 					cache.reset();
 				}
 
@@ -416,7 +419,7 @@ public class LicenseManager {
 		if (validLicensee) {
 			String existingLicenseeNumber = getLicenseeNumber();
 			String existingLicenseeName = getLicenseeName();
-			Activator.log(Status.INFO, Messages.LicenseManager_updating_licensee_credentials, null);
+			logger.info(Messages.LicenseManager_updating_licensee_credentials);
 			setLicenseeName(licenseeName);
 			setLicenseeNumber(licenseeNumber);
 			PersistenceManager persistence = PersistenceManager.getInstance();
@@ -434,7 +437,7 @@ public class LicenseManager {
 
 			LicenseChecker checker = getValidationData();
 			if (!isValidUpdate(checker)) {
-				Activator.log(Status.WARNING, Messages.LicenseManager_invalid_new_license_key, null);
+				logger.warn(Messages.LicenseManager_invalid_new_license_key);
 				setLicenseeNumber(existingLicenseeNumber);
 				setLicenseeName(existingLicenseeName);
 				if (checker != null
@@ -448,7 +451,7 @@ public class LicenseManager {
 				updated = false;
 			}
 		} else {
-			Activator.log(Status.WARNING, Messages.LicenseManager_invalid_new_license_key, null);
+			logger.warn(Messages.LicenseManager_invalid_new_license_key);
 		}
 
 		return updated;

@@ -12,11 +12,13 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
-
-import at.splendit.simonykees.license.Activator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SecureStoreTest {
 
+	private static final Logger logger = LoggerFactory.getLogger(SecureStoreTest.class);
+	
 	private File file;
 
 	@Rule
@@ -42,10 +44,10 @@ public class SecureStoreTest {
 	@SuppressWarnings("nls")
 	@Test
 	public void testPrivateSecureStore() throws IOException, StorageException {
-		Activator.log(file.toString());
+		logger.info(file.toString());
 		ISecurePreferences iSecurePreferences = SecurePreferencesFactory.open(file.toURI().toURL(), null);
 		iSecurePreferences.node("simonykees").put("key", "value", false);
-		Activator.log(iSecurePreferences.node("simonykees").get("key", ""));
+		logger.info(iSecurePreferences.node("simonykees").get("key", ""));
 		iSecurePreferences.flush();
 	}
 
