@@ -32,15 +32,7 @@ import at.splendit.simonykees.core.constants.ReservedNames;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class PrimitiveBoxedForStringASTVisitor extends AbstractCompilationUnitASTVisitor {
-
-	private static Integer STRING_KEY = 1;
-	private static String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
-
-	public PrimitiveBoxedForStringASTVisitor() {
-		super();
-		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
-	}
+public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(MethodInvocation node) {

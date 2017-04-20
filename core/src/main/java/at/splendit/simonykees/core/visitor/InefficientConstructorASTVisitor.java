@@ -23,15 +23,9 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class InefficientConstructorASTVisitor extends AbstractCompilationUnitASTVisitor {
+public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final Integer STRING_KEY = 1;
 	private static final String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
-
-	public InefficientConstructorASTVisitor() {
-		super();
-		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
-	}
 
 	@Override
 	public boolean visit(MethodInvocation node) {
@@ -110,8 +104,8 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 				}
 
 				/* wrapping string variables into Boolean.valueOf(...) */
-				else if (ClassRelationUtil.isContentOfRegistertITypes(refactorCandidateTypeBinding,
-						iTypeMap.get(STRING_KEY))) {
+				else if (ClassRelationUtil.isContentOfTypes(refactorCandidateTypeBinding,
+						generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 					replacement = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
 				}
 
@@ -150,7 +144,7 @@ public class InefficientConstructorASTVisitor extends AbstractCompilationUnitAST
 				 * wrapping string and primitive input parameter into
 				 * PrimitiveType.valueOf(...)
 				 */
-				if (ClassRelationUtil.isContentOfRegistertITypes(refactorCandidateTypeBinding, iTypeMap.get(STRING_KEY))
+				if (ClassRelationUtil.isContentOfTypes(refactorCandidateTypeBinding, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
 						|| isPrimitiveTypeClass(refactorCandidateTypeBinding.getName())) {
 					SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(), ReservedNames.MI_VALUE_OF);
 					replacement = NodeBuilder.newMethodInvocation(node.getAST(),

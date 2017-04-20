@@ -10,14 +10,14 @@
             </layout>
         </appender>
         
-        <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+<!--         <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         	<file>/home/matthias/Desktop/test.log</file>
         	<encoder>
         		<Pattern>
                     %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
                 </Pattern>
         	</encoder>
-        </appender>
+        </appender> -->
 
         <root level="debug">
                 <appender-ref ref="STDOUT" />

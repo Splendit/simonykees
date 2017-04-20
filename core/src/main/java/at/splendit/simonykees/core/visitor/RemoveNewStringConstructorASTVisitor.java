@@ -22,20 +22,15 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class RemoveNewStringConstructorASTVisitor extends AbstractCompilationUnitASTVisitor {
+public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final Integer STRING_KEY = 1;
 	private static final String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
-
-	public RemoveNewStringConstructorASTVisitor() {
-		super();
-		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
-		if (ClassRelationUtil.isContentOfRegistertITypes(node.getType().resolveBinding(), this.iTypeMap.get(STRING_KEY))
+		if (ClassRelationUtil.isContentOfTypes(node.getType().resolveBinding(), 
+				generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
 				&& !(ASTNode.EXPRESSION_STATEMENT == node.getParent().getNodeType())) {
 
 			/**
@@ -65,14 +60,14 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractCompilationUni
 					Expression argument = arguments.get(0);
 					arguments = null;
 					if (argument instanceof StringLiteral || ClassRelationUtil
-							.isContentOfRegistertITypes(argument.resolveTypeBinding(), iTypeMap.get(STRING_KEY))) {
+							.isContentOfTypes(argument.resolveTypeBinding(), generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 						if (argument instanceof ParenthesizedExpression) {
 							argument = ASTNodeUtil.unwrapParenthesizedExpression(argument);
 						}
 						if (ASTNode.CLASS_INSTANCE_CREATION == argument.getNodeType()
-								&& ClassRelationUtil.isContentOfRegistertITypes(
+								&& ClassRelationUtil.isContentOfTypes(
 										((ClassInstanceCreation) argument).getType().resolveBinding(),
-										this.iTypeMap.get(STRING_KEY))) {
+										generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 							arguments = (List<Expression>) ((ClassInstanceCreation) argument).arguments();
 						}
 						replacement = argument;

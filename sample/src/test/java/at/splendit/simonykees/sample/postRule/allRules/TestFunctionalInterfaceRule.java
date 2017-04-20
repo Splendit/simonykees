@@ -11,12 +11,12 @@ public class TestFunctionalInterfaceRule {
 
 	private static Logger log = LogManager.getLogger(TestFunctionalInterfaceRule.class);
 
+	private final String FINAL_STRING_FIELD;
+
 	int a;
 
 	AFunctionalInterface aFunctionalInterface = (int a) -> {
 	};
-
-	private final String FINAL_STRING_FIELD;
 
 	{
 		int a;

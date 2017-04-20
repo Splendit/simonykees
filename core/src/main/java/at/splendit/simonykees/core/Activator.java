@@ -35,6 +35,9 @@ public class Activator extends AbstractUIPlugin {
 
 	private long loggingBundleID = 0;
 	
+	// Flag is jSparrow is already running
+	private static boolean running = false;
+
 	/**
 	 * The constructor
 	 */
@@ -59,7 +62,7 @@ public class Activator extends AbstractUIPlugin {
 		 * jna.library.path. To avoid that jna.nosys is set to true. This should
 		 * force libraries to be unpacked from the jar.
 		 * 
-		 * See SIM-323 and the explanatory comment. 
+		 * See SIM-323 and the explanatory comment.
 		 */
 		System.setProperty("jna.boot.library.path", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		System.setProperty("jna.nosys", "true"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -86,6 +89,8 @@ public class Activator extends AbstractUIPlugin {
 	 * BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+
+		running = false;
 
 		/*
 		 * release the current license session (in case of a floating license)
@@ -141,5 +146,13 @@ public class Activator extends AbstractUIPlugin {
 		synchronized (jobs) {
 			jobs.remove(job);
 		}
+	}
+
+	public static boolean isRunning() {
+		return running;
+	}
+
+	public static void setRunning(boolean isRunning) {
+		running = isRunning;
 	}
 }
