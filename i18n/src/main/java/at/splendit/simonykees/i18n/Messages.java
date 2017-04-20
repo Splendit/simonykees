@@ -37,6 +37,15 @@ public class Messages extends NLS {
 	public static String ForToForEachRule_name;
 	public static String FunctionalInterfaceRule_description;
 	public static String FunctionalInterfaceRule_name;
+	public static String GroupEnum_JAVA_1;
+	public static String GroupEnum_JAVA_2;
+	public static String GroupEnum_JAVA_3;
+	public static String GroupEnum_JAVA_4;
+	public static String GroupEnum_JAVA_5;
+	public static String GroupEnum_JAVA_6;
+	public static String GroupEnum_JAVA_7;
+	public static String GroupEnum_JAVA_8;
+	public static String GroupEnum_JAVA_9;
 	public static String LicenseHelper_licenseProblem;
 	public static String LicenseManager_cannot_reach_licensing_provider_on_checkin;
 	public static String LicenseManager_cannot_reach_licensing_provider_on_prevalidation;
