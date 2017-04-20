@@ -18,11 +18,12 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * Diamond operator should be used instead of explicit type arguments.
@@ -38,6 +39,8 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  */
 public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
+	private static final Logger logger = LoggerFactory.getLogger(DiamondOperatorASTVisitor.class);
+	
 	/**
 	 * Covers the case when a diamond operator can be used in the initialization
 	 * or in an assignment expression.
@@ -197,7 +200,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	private void replaceWithDiamond(ParameterizedType parameterizedType, List<Type> rhsTypeArguments) {
 		// removing type arguments in new class instance creation
-		Activator.log(Messages.DiamondOperatorASTVisitor_using_diamond_operator);
+		logger.debug(Messages.DiamondOperatorASTVisitor_using_diamond_operator);
 		ListRewrite typeArgumentsListRewrite = astRewrite.getListRewrite(parameterizedType,
 				ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
 		rhsTypeArguments.stream().forEach(type -> typeArgumentsListRewrite.remove(type, null));

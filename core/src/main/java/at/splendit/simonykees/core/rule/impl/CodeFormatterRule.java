@@ -17,12 +17,13 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.text.edits.TextEdit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * Format a Java class, the rule does not use an
@@ -35,6 +36,8 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
 
+	private static final Logger logger = LoggerFactory.getLogger(CodeFormatterRule.class);
+	
 	private Map<ICompilationUnit, DocumentChange> changes = new HashMap<ICompilationUnit, DocumentChange>();
 
 	public CodeFormatterRule(Class<AbstractASTRewriteASTVisitor> visitor) {
@@ -69,7 +72,7 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 	private void applyFormating(ICompilationUnit workingCopy) throws JavaModelException {
 		if (changes.containsKey(workingCopy)) {
 			// already have changes
-			Activator.log(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
+			logger.info(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
 		} else {
 			ISourceRange sourceRange = workingCopy.getSourceRange();
 			// TODO check formating style
