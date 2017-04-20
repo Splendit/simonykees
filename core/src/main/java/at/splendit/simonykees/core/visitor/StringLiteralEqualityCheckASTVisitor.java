@@ -15,9 +15,9 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 
 /**
- * To avoid NullPointerExceptions , it is recommended to use string 
+ * To avoid NullPointerExceptions, it is recommended to use string 
  * literals in the left-hand-side of equals() or equalsIgnoreCase() when
- *  checking for equality.
+ * checking for equality.
  *  
  * @author Ardit Ymeri
  * @since 1.2
@@ -53,7 +53,7 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 
 							/**
 							 * Comments may break the code!!! If the expression
-							 * is followed by a line comment, when putting in in
+							 * is followed by a line comment, when putting it in
 							 * the arguments of equals, it may comment out the
 							 * closing bracket.
 							 */
