@@ -287,7 +287,7 @@ public class SelectRulesWizardPage extends WizardPage {
 
 		leftTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				updateData();
+				controler.selectionChanged();
 			}
 		});
 

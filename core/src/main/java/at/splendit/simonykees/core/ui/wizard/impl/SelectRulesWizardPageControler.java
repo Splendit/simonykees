@@ -41,4 +41,7 @@ public class SelectRulesWizardPageControler {
 		model.filterByGroup(selectedProfileId);
 	}
 
+	public void selectionChanged() {
+		model.notifyListeners();
+	}
 }
