@@ -15,10 +15,26 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 
 /**
- * To avoid NullPointerExceptions, it is recommended to use string 
- * literals in the left-hand-side of equals() or equalsIgnoreCase() when
- * checking for equality.
- *  
+ * This visitor looks for the cases where a string literal is used as a parameter in
+ * {@link String#equals(Object)} or {@link String#equalsIgnoreCase(String)}} and
+ * swaps the literal with the string expression where the method is called.
+ * For example, the following code:
+ * <pre>
+ * {@code
+ * 		getSomeStringVal().equals("my-val");
+ * }
+ * </pre> 
+ * 
+ * will be replaced with:
+ * <pre>
+ * {@code
+ * 		"my-val".equals(getSomeStringVal());
+ * }
+ * </pre> 
+ * 
+ * Skips the cases where the type of the expression is 
+ * not {@link String} or if the expression is already a string literal. 
+ * 
  * @author Ardit Ymeri
  * @since 1.2
  */
@@ -39,11 +55,11 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 		ASTNode parent = stringLiteral.getParent();
 		if (parent != null && parent.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			MethodInvocation methodInvocation = (MethodInvocation) parent;
-			// if method invocation name is 'equals' or 'equalsIgnoreCase'
+			// if the method invocation's name is 'equals' or 'equalsIgnoreCase'
 			String methodIdentifier = methodInvocation.getName().getIdentifier();
 			if (EQUALS.equals(methodIdentifier) || EQUALS_IGNORE_CASE.equals(methodIdentifier)) {
 				Expression expression = methodInvocation.getExpression();
-				// if LHS is not already a literal
+				// if the LHS is not already a literal
 				if (expression != null && expression.getNodeType() != ASTNode.STRING_LITERAL) {
 					// if the data-type of the expression is String
 					ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
@@ -51,11 +67,11 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 						boolean isString = expressionTypeBinding.getQualifiedName().equals(String.class.getName());
 						if (isString) {
 
-							/**
+							/*
 							 * Comments may break the code!!! If the expression
 							 * is followed by a line comment, when putting it in
-							 * the arguments of equals, it may comment out the
-							 * closing bracket.
+							 * the arguments of the equals(), it may comment out
+							 * the closing bracket.
 							 */
 							boolean isCommentFree = isCommentFree(methodInvocation);
 							if (isCommentFree) {
@@ -75,8 +91,11 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 	}
 
 	/**
-	 * Returns if there is no comment nested with the method invocation.
-	 * For example:
+	 * Returns if there is no comment nested with the code represented by the 
+	 * given {@link ASTNode}. For example, if a {@link MethodInvocation} node 
+	 * representing the following code is given as a parameter, then this 
+	 * method returns {@code false}.
+	 * 
 	 * <pre>
 	 * {@code
 	 * "val" // line comment
@@ -84,14 +103,13 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 	 * }
 	 * </pre>
 	 * 
-	 * @param methodInvocation
-	 * 			{@link ASTNode} representing a method invocation
-	 * @return
-	 * 		true if there is no comment nested in the method invocation
+	 * @param node
+	 *            {@link ASTNode} representing a method invocation
+	 * @return true if there is no comment nested in the method invocation
 	 */
-	private boolean isCommentFree(MethodInvocation methodInvocation) {
-		int startPos = methodInvocation.getStartPosition();
-		int endPos = startPos + methodInvocation.getLength();
+	private boolean isCommentFree(ASTNode node) {
+		int startPos = node.getStartPosition();
+		int endPos = startPos + node.getLength();
 		boolean hasComment = comments.stream().filter(comment -> (comment.getStartPosition() > startPos)
 				&& ((comment.getStartPosition() + comment.getLength()) < endPos)).findAny().isPresent();
 		return !hasComment;
