@@ -1,6 +1,9 @@
 package at.splendit.simonykees.core.rule.impl;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
@@ -15,6 +18,8 @@ import at.splendit.simonykees.i18n.Messages;
  * @since 0.9.2
  */
 public class WhileToForEachRule extends RefactoringRule<WhileToForEachASTVisitor> {
+	
+	Logger logger = LoggerFactory.getLogger(WhileToForEachASTVisitor.class);
 
 	public WhileToForEachRule(Class<WhileToForEachASTVisitor> visitor) {
 		super(visitor);
@@ -25,8 +30,9 @@ public class WhileToForEachRule extends RefactoringRule<WhileToForEachASTVisitor
 
 	@Override
 	public void calculateEnabledForProject(IJavaProject project) {
-		// TODO Auto-generated method stub
-		
+		project.getOptions(true).forEach((s,s1)-> logger.debug("[left:"+s+"];[right:"+s1+"]"));
+		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		logger.debug(project.toString());
 	}
 
 }

@@ -73,6 +73,8 @@ public abstract class AbstractRulesTest {
 		 * purposes
 		 */
 		IProgressMonitor monitor = new NullProgressMonitor();
+		
+		rules.stream().forEach(rule -> rule.calculateEnabledForProject(packageFragment.getJavaProject()));
 
 		refactorer.prepareRefactoring(monitor);
 		refactorer.doRefactoring(monitor);
