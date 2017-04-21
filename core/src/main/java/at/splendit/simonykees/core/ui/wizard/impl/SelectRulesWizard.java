@@ -49,7 +49,7 @@ public class SelectRulesWizard extends Wizard {
 	private final List<IJavaElement> javaElements;
 
 
-	public SelectRulesWizard(List<IJavaElement> javaElements) {
+	public SelectRulesWizard(List<IJavaElement> javaElements, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		super();
 		this.javaElements = javaElements;
 		setNeedsProgressMonitor(true);

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -20,6 +21,7 @@ import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
+import at.splendit.simonykees.core.ui.wizard.impl.SelectRulesWizard;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
@@ -45,7 +47,24 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 						
 					if(null != selectedJavaProjekt){
 						final WizardDialog dialog = new WizardDialog(HandlerUtil.getActiveShell(event),
-								new SelectRulesWizard(selectedJavaElements, RulesContainer.getRulesForProject(selectedJavaProjekt)));
+								new SelectRulesWizard(selectedJavaElements, RulesContainer.getRulesForProject(selectedJavaProjekt))){
+							@Override
+				            protected Control createDialogArea(Composite parent) {
+				                Control ctrl = super.createDialogArea(parent);
+				                getProgressMonitor();
+				                return ctrl;
+				            }
+				            
+				            @Override
+				            protected IProgressMonitor getProgressMonitor() {
+				                ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
+				                GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+				                gridData.heightHint = 0;
+				                monitor.setLayoutData(gridData);
+				                monitor.setVisible(false);
+				                return monitor;
+				            }
+						};
 						/*
 						 * the dialog is made as smaller than necessary horizontally
 						 * (we want line breaks for rule descriptions)

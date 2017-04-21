@@ -1,17 +1,15 @@
 package at.splendit.simonykees.core.ui.wizard.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
@@ -29,35 +27,23 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	private Set<Object> posibilities = new HashSet<>();
 	private Set<Object> selection = new HashSet<>();
 
-	private String categoryAllKey = "All";
-	private String currentGroupId = categoryAllKey; // default group should
-													// contain all elements
+	private String currentGroupId; 
+
 	private String nameFilter = "";
 
-	private final Map<String, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>>> categories = new HashMap<>();
+	List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules = new ArrayList<>();
+	private List<GroupEnum> groups;
 
 	Set<IValueChangeListener> listeners = new HashSet<>();
 
 	public SelectRulesWizardPageModel() {
 
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> categoryAll = new ArrayList<>();
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> categoryJava7 = new ArrayList<>();
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> categoryJava8 = new ArrayList<>();
+		groups = Arrays.asList(GroupEnum.values());
 
-		categoryAll = RulesContainer.getAllRules();
-		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : categoryAll) {
-			posibilities.add(rule);
-			if (rule.getRequiredJavaVersion().equals(JavaVersion.JAVA_1_7)) {
-				categoryJava7.add(rule);
-			} else if (rule.getRequiredJavaVersion().equals(JavaVersion.JAVA_1_8)) {
-				categoryJava8.add(rule);
-			}
-		}
-
-		categories.put("Java 1.7", categoryJava7);
-		categories.put("Java 1.8", categoryJava8);
-		// addAllItems(categoryAll);
-		categories.put(categoryAllKey, categoryAll);
+		// TODO get all rules from wizard passed all trough around
+		allRules = RulesContainer.getAllRules();
+		addAllItems(posibilities);
+		currentGroupId = GroupEnum.EMPTY.toString();
 	}
 
 	/**
@@ -136,13 +122,13 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	 * are enabled from right to left and removes them from right view. Ignores
 	 * disabled elements.
 	 */
+	@SuppressWarnings("unchecked")
 	public void moveToLeft(IStructuredSelection selectedElements) {
 		selection.removeAll(selectedElements.toList());
 
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> currentGroupEntries = categories
-				.get(currentGroupId);
 		for (Object posibility : selectedElements.toList()) {
-			if (currentGroupEntries.contains(posibility)) {
+			if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getGroups()
+					.contains(currentGroupId)) {
 				posibilities.add(posibility);
 			}
 		}
@@ -154,11 +140,11 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	 * are enabled from right to left and removes them from right view. Ignores
 	 * disabled elements.
 	 */
+	@SuppressWarnings("unchecked")
 	public void moveAllToLeft() {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> currentGroupEntries = categories
-				.get(currentGroupId);
 		for (Object posibility : selection) {
-			if (currentGroupEntries.contains(posibility)) {
+			if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getGroups()
+					.contains(currentGroupId)) {
 				posibilities.add(posibility);
 			}
 		}
@@ -187,10 +173,11 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 		final Set<Object> applicable = new HashSet<>();
 		currentGroupId = filter;
 
-		if (filter == null || filter.isEmpty() || filter.equals(categoryAllKey)) {
+		if (currentGroupId == null || currentGroupId.isEmpty() || currentGroupId.equals(GroupEnum.EMPTY.toString())) {
 			addAllItems(applicable);
-		} else if (categories.containsKey(filter)) {
-			applicable.addAll(categories.get(filter));
+		} else if (groups.contains(currentGroupId)) {
+			applicable.addAll(allRules.stream().filter(rule -> rule.getGroups().contains(currentGroupId))
+					.collect(Collectors.toList()));
 		}
 		posibilities.clear();
 		posibilities.addAll(applicable);
@@ -208,10 +195,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	 *            Set to fill with all possible elements from all groups
 	 */
 	private void addAllItems(final Set<Object> applicable) {
-		for (final Entry<String, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>>> category : categories
-				.entrySet()) {
-			applicable.addAll(category.getValue());
-		}
+		applicable.addAll(allRules);
 	}
 
 	/**
@@ -229,12 +213,12 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	}
 
 	/**
-	 * Getter for map containing all groups for filtering by group.
+	 * Getter for List containing all groups for filtering by group.
 	 * 
-	 * @return Map containing all groups and elements for each group.
+	 * @return List containing all group names.
 	 */
-	public Map<String, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>>> getGroups() {
-		return categories;
+	public List<GroupEnum> getGroups() {
+		return groups;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -249,7 +233,8 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 			}
 		} else {
 			posibilities.clear();
-			posibilities.addAll(categories.get(currentGroupId));
+			posibilities.addAll(allRules.stream().filter(rule -> rule.getGroups().contains(currentGroupId))
+					.collect(Collectors.toList()));
 		}
 		notifyListeners();
 	}

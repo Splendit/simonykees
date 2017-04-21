@@ -159,10 +159,11 @@ public class SelectRulesWizardPage extends WizardPage {
 	 * group
 	 */
 	private void populateGroupFilterCombo() {
-		model.getGroups().entrySet().stream().forEach((entry) -> {
-			groupFilterCombo.add(entry.getKey());
-			if (entry.getKey().equals(model.getCurrentGroupId())) {
-				groupFilterCombo.select(groupFilterCombo.indexOf(entry.getKey()));
+		// model.getGroups().entrySet().stream().forEach((entry) -> {
+		model.getGroups().stream().forEach((entry) -> {
+			groupFilterCombo.add(entry.toString());
+			if (entry.equals(model.getCurrentGroupId())) {
+				groupFilterCombo.select(groupFilterCombo.indexOf(entry.toString()));
 			}
 		});
 	}
@@ -182,7 +183,7 @@ public class SelectRulesWizardPage extends WizardPage {
 				if (selectedProfileId.equals(model.getCurrentGroupId())) {
 					// nothing
 				} else {
-					model.filterByGroup(selectedProfileId);
+					controler.groupFilterComboChanged(selectedProfileId);
 				}
 			}
 		};
