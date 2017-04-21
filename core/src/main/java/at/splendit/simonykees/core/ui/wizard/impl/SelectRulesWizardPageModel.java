@@ -27,7 +27,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	private Set<Object> posibilities = new HashSet<>();
 	private Set<Object> selection = new HashSet<>();
 
-	private String currentGroupId; 
+	private static GroupEnum currentGroupId = GroupEnum.EMPTY;
 
 	private String nameFilter = "";
 
@@ -43,7 +43,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 		// TODO get all rules from wizard passed all trough around
 		allRules = RulesContainer.getAllRules();
 		addAllItems(posibilities);
-		currentGroupId = GroupEnum.EMPTY.toString();
+//		currentGroupId = GroupEnum.EMPTY;
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	 * 
 	 * @return String value of current group id in combo
 	 */
-	public String getCurrentGroupId() {
+	public GroupEnum getCurrentGroupId() {
 		return currentGroupId;
 	}
 
@@ -126,10 +126,14 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	public void moveToLeft(IStructuredSelection selectedElements) {
 		selection.removeAll(selectedElements.toList());
 
-		for (Object posibility : selectedElements.toList()) {
-			if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getGroups()
-					.contains(currentGroupId)) {
-				posibilities.add(posibility);
+		if (currentGroupId.equals(GroupEnum.EMPTY)) {
+			posibilities.addAll(selectedElements.toList());
+		} else {
+			for (Object posibility : selectedElements.toList()) {
+				if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getGroups()
+						.contains(currentGroupId)) {
+					posibilities.add(posibility);
+				}
 			}
 		}
 		notifyListeners();
@@ -142,10 +146,14 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	 */
 	@SuppressWarnings("unchecked")
 	public void moveAllToLeft() {
-		for (Object posibility : selection) {
-			if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getGroups()
-					.contains(currentGroupId)) {
-				posibilities.add(posibility);
+		if (currentGroupId.equals(GroupEnum.EMPTY)) {
+			posibilities.addAll(selection);
+		} else {
+			for (Object posibility : selection) {
+				if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getGroups()
+						.contains(currentGroupId)) {
+					posibilities.add(posibility);
+				}
 			}
 		}
 		selection.clear();
@@ -171,9 +179,9 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	 */
 	public void filterByGroup(final String filter) {
 		final Set<Object> applicable = new HashSet<>();
-		currentGroupId = filter;
+		currentGroupId = GroupEnum.findByGroupName(filter);
 
-		if (currentGroupId == null || currentGroupId.isEmpty() || currentGroupId.equals(GroupEnum.EMPTY.toString())) {
+		if (currentGroupId == null || currentGroupId.equals(GroupEnum.EMPTY)) {
 			addAllItems(applicable);
 		} else if (groups.contains(currentGroupId)) {
 			applicable.addAll(allRules.stream().filter(rule -> rule.getGroups().contains(currentGroupId))
@@ -233,8 +241,12 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 			}
 		} else {
 			posibilities.clear();
-			posibilities.addAll(allRules.stream().filter(rule -> rule.getGroups().contains(currentGroupId))
-					.collect(Collectors.toList()));
+			if (currentGroupId.equals(GroupEnum.EMPTY)) {
+				posibilities.addAll(allRules);
+			} else {
+				posibilities.addAll(allRules.stream().filter(rule -> rule.getGroups().contains(currentGroupId))
+						.collect(Collectors.toList()));
+			}
 		}
 		notifyListeners();
 	}

@@ -25,8 +25,18 @@ public enum GroupEnum {
 	public String getJavaVersion() {
 		return javaVersion;
 	}
-	
+
 	public String getGroupName() {
 		return groupName;
 	}
+
+	public static GroupEnum findByGroupName(String groupName) {
+		for (GroupEnum group : values()) {
+			if (group.getGroupName().equals(groupName)) {
+				return group;
+			}
+		}
+		return null;
+	}
+
 }
