@@ -1,6 +1,5 @@
 package at.splendit.simonykees.core.ui.wizard.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -11,7 +10,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.core.ui.wizard.IWizardPageModel;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -29,21 +27,20 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 
 	private static GroupEnum currentGroupId = GroupEnum.EMPTY;
 
-	private String nameFilter = "";
+	private String nameFilter = ""; //$NON-NLS-1$
 
-	List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules = new ArrayList<>();
 	private List<GroupEnum> groups;
+	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
+
 
 	Set<IValueChangeListener> listeners = new HashSet<>();
 
-	public SelectRulesWizardPageModel() {
+	public SelectRulesWizardPageModel(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 
 		groups = Arrays.asList(GroupEnum.values());
+		this.rules = rules;
 
-		// TODO get all rules from wizard passed all trough around
-		allRules = RulesContainer.getAllRules();
 		addAllItems(posibilities);
-//		currentGroupId = GroupEnum.EMPTY;
 	}
 
 	/**
@@ -184,7 +181,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 		if (currentGroupId == null || currentGroupId.equals(GroupEnum.EMPTY)) {
 			addAllItems(applicable);
 		} else if (groups.contains(currentGroupId)) {
-			applicable.addAll(allRules.stream().filter(rule -> rule.getGroups().contains(currentGroupId))
+			applicable.addAll(rules.stream().filter(rule -> rule.getGroups().contains(currentGroupId))
 					.collect(Collectors.toList()));
 		}
 		posibilities.clear();
@@ -203,7 +200,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	 *            Set to fill with all possible elements from all groups
 	 */
 	private void addAllItems(final Set<Object> applicable) {
-		applicable.addAll(allRules);
+		applicable.addAll(rules);
 	}
 
 	/**
@@ -242,9 +239,9 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 		} else {
 			posibilities.clear();
 			if (currentGroupId.equals(GroupEnum.EMPTY)) {
-				posibilities.addAll(allRules);
+				posibilities.addAll(rules);
 			} else {
-				posibilities.addAll(allRules.stream().filter(rule -> rule.getGroups().contains(currentGroupId))
+				posibilities.addAll(rules.stream().filter(rule -> rule.getGroups().contains(currentGroupId))
 						.collect(Collectors.toList()));
 			}
 		}

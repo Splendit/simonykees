@@ -47,11 +47,12 @@ public class SelectRulesWizard extends Wizard {
 	private SelectRulesWizardPageModel model;
 	
 	private final List<IJavaElement> javaElements;
-
+	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
 	public SelectRulesWizard(List<IJavaElement> javaElements, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		super();
 		this.javaElements = javaElements;
+		this.rules = rules;
 		setNeedsProgressMonitor(true);
 	}
 
@@ -62,7 +63,7 @@ public class SelectRulesWizard extends Wizard {
 
 	@Override
 	public void addPages() {
-		model = new SelectRulesWizardPageModel();
+		model = new SelectRulesWizardPageModel(rules);
 		controler = new SelectRulesWizardPageControler(model);
 		page = new SelectRulesWizardPage(model, controler);
 		addPage(page);
@@ -73,17 +74,6 @@ public class SelectRulesWizard extends Wizard {
 		Activator.setRunning(false);
 		return super.performCancel();
 	}
-	
-//	@Override
-//	public boolean performFinish() {
-//		for(Object element : model.getSelection()) {
-//			System.out.println(element);			
-//		}
-//		
-//		Activator.setRunning(false);
-//
-//		return true;
-//	}
 
 	@Override
 	public boolean performFinish() {
