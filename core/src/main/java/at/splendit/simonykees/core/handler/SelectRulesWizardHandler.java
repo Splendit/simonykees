@@ -27,7 +27,7 @@ import at.splendit.simonykees.i18n.Messages;
 /**
  * TODO SIM-103 add class description
  * 
- * @author Hannes Schweighofer, Ludwig Werzowa
+ * @author Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec
  * @since 0.9
  */
 public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
@@ -44,37 +44,42 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 				List<IJavaElement> selectedJavaElements = getSelectedJavaElements(event);
 				if (!selectedJavaElements.isEmpty()) {
 					IJavaProject selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
-						
-					if(null != selectedJavaProjekt){
+
+					if (null != selectedJavaProjekt) {
 						final WizardDialog dialog = new WizardDialog(HandlerUtil.getActiveShell(event),
-								new SelectRulesWizard(selectedJavaElements, RulesContainer.getRulesForProject(selectedJavaProjekt))){
+								new SelectRulesWizard(selectedJavaElements,
+										RulesContainer.getRulesForProject(selectedJavaProjekt))) {
+							// Removed unnecessary empty space on the bottom of
+							// the wizard intended for ProgressMonitor that is
+							// not used
 							@Override
-				            protected Control createDialogArea(Composite parent) {
-				                Control ctrl = super.createDialogArea(parent);
-				                getProgressMonitor();
-				                return ctrl;
-				            }
-				            
-				            @Override
-				            protected IProgressMonitor getProgressMonitor() {
-				                ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
-				                GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-				                gridData.heightHint = 0;
-				                monitor.setLayoutData(gridData);
-				                monitor.setVisible(false);
-				                return monitor;
-				            }
+							protected Control createDialogArea(Composite parent) {
+								Control ctrl = super.createDialogArea(parent);
+								getProgressMonitor();
+								return ctrl;
+							}
+
+							@Override
+							protected IProgressMonitor getProgressMonitor() {
+								ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
+								GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+								gridData.heightHint = 0;
+								monitor.setLayoutData(gridData);
+								monitor.setVisible(false);
+								return monitor;
+							}
 						};
 						/*
-						 * the dialog is made as smaller than necessary horizontally
-						 * (we want line breaks for rule descriptions)
+						 * the dialog is made as smaller than necessary
+						 * horizontally (we want line breaks for rule
+						 * descriptions)
 						 */
 						dialog.setPageSize(750, 500);
 
 						dialog.open();
 
 					}
-									}
+				}
 			} else {
 				// do not display the SelectRulesWizard if the license is
 				// invalid

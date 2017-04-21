@@ -104,6 +104,13 @@ public class SelectRulesWizardPage extends WizardPage {
 		updateData();
 	}
 
+	/**
+	 * Creates filtering part of the wizard view which contains label and combo
+	 * for filtering by group, label and text field for filtering by group and
+	 * check box button to show or hide disabled rules
+	 * 
+	 * @param parent
+	 */
 	private void createFilteringPart(Composite parent) {
 		Composite filterComposite = new Composite(parent, SWT.NONE);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -208,6 +215,15 @@ public class SelectRulesWizardPage extends WizardPage {
 		});
 	}
 
+	/**
+	 * Creates part of wizard for selecting the rules, built from tree parts.
+	 * First part, left, is tree view in which all filtered rules are shown and
+	 * can be chosen to add on right side. Middle part contains buttons to add
+	 * chosen rules to selection or remove rules already selected. Third, right,
+	 * part is table view containing rules that are selected to be applied.
+	 * 
+	 * @param parent
+	 */
 	private void createSelectionViewer(Composite parent) {
 		Composite leftCenterRightComposite = new Composite(parent, SWT.NONE);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -335,22 +351,6 @@ public class SelectRulesWizardPage extends WizardPage {
 
 	}
 
-	private void createDescriptionViewer(Composite parent) {
-		/*
-		 * There is a known issue with automatically showing and hiding
-		 * scrollbars and SWT.WRAP. Using StyledText and
-		 * setAlwaysShowScrollBars(false) makes the vertical scroll work
-		 * correctly at least.
-		 */
-		descriptionStyledText = new StyledText(parent, SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
-		descriptionStyledText.setAlwaysShowScrollBars(false);
-		descriptionStyledText.setEditable(false);
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.minimumHeight = 60;
-		descriptionStyledText.setLayoutData(gridData);
-		descriptionStyledText.setMargins(2, 2, 2, 2);
-	}
-
 	private void createTree(Composite parent) {
 		leftTreeViewer = new TreeViewer(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
 		leftTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -417,6 +417,29 @@ public class SelectRulesWizardPage extends WizardPage {
 			}
 
 		});
+	}
+
+	/**
+	 * Creates bottom part of select wizard containing Text field with
+	 * description of selected rule if only one rule is selected, default
+	 * description otherwise.
+	 * 
+	 * @param parent
+	 */
+	private void createDescriptionViewer(Composite parent) {
+		/*
+		 * There is a known issue with automatically showing and hiding
+		 * scrollbars and SWT.WRAP. Using StyledText and
+		 * setAlwaysShowScrollBars(false) makes the vertical scroll work
+		 * correctly at least.
+		 */
+		descriptionStyledText = new StyledText(parent, SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
+		descriptionStyledText.setAlwaysShowScrollBars(false);
+		descriptionStyledText.setEditable(false);
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gridData.minimumHeight = 60;
+		descriptionStyledText.setLayoutData(gridData);
+		descriptionStyledText.setMargins(2, 2, 2, 2);
 	}
 
 	/**
