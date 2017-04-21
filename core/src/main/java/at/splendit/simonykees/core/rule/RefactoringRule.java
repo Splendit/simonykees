@@ -1,13 +1,14 @@
 package at.splendit.simonykees.core.rule;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
@@ -34,14 +35,14 @@ import at.splendit.simonykees.i18n.Messages;
 public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringRule.class);
-	
+
 	protected String id;
 
 	protected String name = Messages.RefactoringRule_default_name;
 
 	protected String description = Messages.RefactoringRule_default_description;
 
-	protected JavaVersion requiredJavaVersion = JavaVersion.JAVA_1_4;
+	protected List<GroupEnum> groups = new ArrayList<>();
 
 	protected boolean enabled = true;
 
@@ -63,6 +64,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		return description;
 	}
 
+	public List<GroupEnum> getGroups() {
+		return groups;
+	}
+
 	public boolean isEnabled() {
 		return enabled;
 	}
@@ -73,10 +78,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	public String getId() {
 		return id;
-	}
-
-	public JavaVersion getRequiredJavaVersion() {
-		return requiredJavaVersion;
 	}
 
 	/**
@@ -179,4 +180,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 			// no changes
 		}
 	}
+
+	abstract public void calculateEnabledForProject(IJavaProject project);
 }

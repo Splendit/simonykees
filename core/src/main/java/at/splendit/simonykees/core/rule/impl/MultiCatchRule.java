@@ -1,10 +1,12 @@
 package at.splendit.simonykees.core.rule.impl;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.IJavaProject;
 
-import at.splendit.simonykees.i18n.Messages;
+import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.util.GroupUtil;
 import at.splendit.simonykees.core.visitor.tryStatement.MultiCatchASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 /** 
  * @see MultiCatchASTVisitor
  * 
@@ -18,7 +20,12 @@ public class MultiCatchRule extends RefactoringRule<MultiCatchASTVisitor> {
 		super(visitor);
 		this.name = Messages.MultiCatchRule_name;
 		this.description = Messages.MultiCatchRule_description;
-		this.requiredJavaVersion = JavaVersion.JAVA_1_7;
+		this.groups.addAll(GroupUtil.allJavaVersionTo(GroupEnum.JAVA_7));
+	}
+	
+	@Override
+	public void calculateEnabledForProject(IJavaProject project) {
+		this.enabled = true;
 	}
 
 }

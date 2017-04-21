@@ -1,10 +1,12 @@
 package at.splendit.simonykees.core.rule.impl;
 
-import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.IJavaProject;
 
-import at.splendit.simonykees.i18n.Messages;
+import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.util.GroupUtil;
 import at.splendit.simonykees.core.visitor.RearrangeClassMembersASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * @see RearrangeClassMembersASTVisitor
@@ -18,7 +20,12 @@ public class RearrangeClassMembersRule extends RefactoringRule<RearrangeClassMem
 		super(visitor);
 		this.name = Messages.RearrangeClassMembersRule_name;
 		this.description = Messages.RearrangeClassMembersRule_description;
-		this.requiredJavaVersion = JavaVersion.JAVA_0_9;
+		this.groups.addAll(GroupUtil.allJavaVersionTo(GroupEnum.JAVA_1));
+	}
+	
+	@Override
+	public void calculateEnabledForProject(IJavaProject project) {
+		this.enabled = true;
 	}
 
 }

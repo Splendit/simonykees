@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -24,7 +24,9 @@ import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.util.GroupUtil;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
@@ -51,7 +53,12 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 		super(visitor);
 		this.name = Messages.OrganiseImportsRule_name;
 		this.description = Messages.OrganiseImportsRule_description;
-		this.requiredJavaVersion = JavaVersion.JAVA_0_9;
+		this.groups.addAll(GroupUtil.allJavaVersionTo(GroupEnum.JAVA_1));
+	}
+	
+	@Override
+	public void calculateEnabledForProject(IJavaProject project) {
+		this.enabled = true;
 	}
 
 	@Override

@@ -1,8 +1,11 @@
 package at.splendit.simonykees.core.rule.impl;
 
 import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.IJavaProject;
 
+import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.util.GroupUtil;
 import at.splendit.simonykees.core.visitor.OverrideAnnotationRuleASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -23,7 +26,12 @@ public class OverrideAnnotationRule extends RefactoringRule<OverrideAnnotationRu
 		super(visitor);
 		this.name = Messages.OverrideAnnotationRule_name;
 		this.description = Messages.OverrideAnnotationRule_description;
-		this.requiredJavaVersion = JavaVersion.JAVA_1_6;
+		this.groups.addAll(GroupUtil.allJavaVersionTo(GroupEnum.JAVA_6));
+	}
+	
+	@Override
+	public void calculateEnabledForProject(IJavaProject project) {
+		this.enabled = true;
 	}
 
 }

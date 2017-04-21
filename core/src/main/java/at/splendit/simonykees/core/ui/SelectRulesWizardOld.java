@@ -45,6 +45,13 @@ public class SelectRulesWizardOld extends Wizard {
 
 	public SelectRulesWizardOld(List<IJavaElement> javaElements) {
 		this.javaElements = javaElements;
+		selectRulesPage = new SelectRulesWizardPage();
+		setNeedsProgressMonitor(true);
+	}
+	
+	public SelectRulesWizard(List<IJavaElement> javaElements, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+		this.javaElements = javaElements;
+		selectRulesPage = new SelectRulesWizardPage(rules);
 		setNeedsProgressMonitor(true);
 	}
 
