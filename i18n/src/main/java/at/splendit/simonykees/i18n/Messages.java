@@ -37,6 +37,7 @@ public class Messages extends NLS {
 	public static String ForToForEachRule_name;
 	public static String FunctionalInterfaceRule_description;
 	public static String FunctionalInterfaceRule_name;
+	public static String GroupEnum_EMPTY;
 	public static String GroupEnum_JAVA_1;
 	public static String GroupEnum_JAVA_2;
 	public static String GroupEnum_JAVA_3;

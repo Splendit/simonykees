@@ -3,6 +3,7 @@ package at.splendit.simonykees.core.rule;
 import at.splendit.simonykees.i18n.Messages;
 
 public enum GroupEnum {
+	EMPTY("", Messages.GroupEnum_EMPTY), //$NON-NLS-1$
 	JAVA_1("1.0", Messages.GroupEnum_JAVA_1), //$NON-NLS-1$
 	JAVA_2("1.2", Messages.GroupEnum_JAVA_2), //$NON-NLS-1$
 	JAVA_3("1.3", Messages.GroupEnum_JAVA_3), //$NON-NLS-1$
