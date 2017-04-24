@@ -15,7 +15,7 @@ import at.splendit.simonykees.core.ui.wizard.IWizardPageModel;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * Model that is storing all the data required for {@link SelectRulesWizardPage}
+ * Model that is storing all the data required for {@link AbstractSelectRulesWizardPage}
  * 
  * @author Andreja Sambolec
  * @since 1.3

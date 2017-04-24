@@ -1,22 +1,6 @@
 package at.splendit.simonykees.core.ui.wizard.impl;
 
-import java.util.List;
-import java.util.Set;
-
-import org.eclipse.jdt.ui.JavaElementComparator;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -30,20 +14,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
-import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
-/**
- * Lists all rules as checkboxes and a description for the currently selected
- * rule. From version 1.3 checkboxes are replaced with windows for filtering and
- * adding selection
- * 
- * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter, Andreja Sambolec
- * @since 0.9 refactored in 1.3
- */
-public class SelectRulesWizardPage extends WizardPage {
+public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private SelectRulesWizardPageModel model;
 	private SelectRulesWizardPageControler controler;
@@ -56,52 +29,13 @@ public class SelectRulesWizardPage extends WizardPage {
 
 	private Button removeDisabledRulesButton;
 
-	private TreeViewer leftTreeViewer;
-	private TableViewer rightTableViewer;
-
-	private Button addButton;
-	private Button addAllButton;
-	private Button removeButton;
-	private Button removeAllButton;
-
-	private StyledText descriptionStyledText;
-
 	public SelectRulesWizardPage(SelectRulesWizardPageModel model, SelectRulesWizardPageControler controler) {
-		super(Messages.SelectRulesWizardPage_page_name);
+		super(model, controler);
 		setTitle(Messages.SelectRulesWizardPage_title);
 		setDescription(Messages.SelectRulesWizardPage_description);
 
 		this.model = model;
 		this.controler = controler;
-	}
-
-	/**
-	 * Gets called when the page gets created.
-	 */
-	@Override
-	public void createControl(Composite parent) {
-		initializeDialogUnits(parent);
-
-		Composite composite = new Composite(parent, SWT.NONE);
-		composite.setLayout(new GridLayout());
-
-		setControl(composite);
-
-		createFilteringPart(composite);
-
-		createSelectionViewer(composite);
-
-		createDescriptionViewer(composite);
-
-		model.addListener(new IValueChangeListener() {
-
-			@Override
-			public void valueChanged() {
-				updateData();
-			}
-		});
-
-		updateData();
 	}
 
 	/**
@@ -111,7 +45,7 @@ public class SelectRulesWizardPage extends WizardPage {
 	 * 
 	 * @param parent
 	 */
-	private void createFilteringPart(Composite parent) {
+	protected void createFilteringPart(Composite parent) {
 		Composite filterComposite = new Composite(parent, SWT.NONE);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		filterComposite.setLayoutData(gridData);
@@ -213,278 +147,5 @@ public class SelectRulesWizardPage extends WizardPage {
 				model.removeDisabledPosibilities(btn.getSelection());
 			}
 		});
-	}
-
-	/**
-	 * Creates part of wizard for selecting the rules, built from tree parts.
-	 * First part, left, is tree view in which all filtered rules are shown and
-	 * can be chosen to add on right side. Middle part contains buttons to add
-	 * chosen rules to selection or remove rules already selected. Third, right,
-	 * part is table view containing rules that are selected to be applied.
-	 * 
-	 * @param parent
-	 */
-	private void createSelectionViewer(Composite parent) {
-		Composite leftCenterRightComposite = new Composite(parent, SWT.NONE);
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.heightHint = convertHeightInCharsToPixels(20);
-		leftCenterRightComposite.setLayoutData(gridData);
-		GridLayout gridLayout = new GridLayout(3, false);
-		gridLayout.marginHeight = 0;
-		gridLayout.marginWidth = 0;
-		leftCenterRightComposite.setLayout(gridLayout);
-
-		Composite leftComposite = new Composite(leftCenterRightComposite, SWT.NONE);
-		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.widthHint = convertWidthInCharsToPixels(40);
-		leftComposite.setLayoutData(gridData);
-		gridLayout = new GridLayout(1, false);
-		gridLayout.marginHeight = 0;
-		gridLayout.marginWidth = 0;
-		leftComposite.setLayout(gridLayout);
-
-		Composite centerComposite = new Composite(leftCenterRightComposite, SWT.NONE);
-		gridLayout = new GridLayout(1, false);
-		gridLayout.marginHeight = 0;
-		gridLayout.marginWidth = 0;
-		centerComposite.setLayout(gridLayout);
-		centerComposite.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
-
-		Composite rightComposite = new Composite(leftCenterRightComposite, SWT.NONE);
-		gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.widthHint = convertWidthInCharsToPixels(40);
-		rightComposite.setLayoutData(gridData);
-		gridLayout = new GridLayout(1, false);
-		gridLayout.marginHeight = 0;
-		gridLayout.marginWidth = 0;
-		rightComposite.setLayout(gridLayout);
-
-		createTree(leftComposite);
-		createTable(rightComposite);
-
-		createButtonBar(centerComposite);
-	}
-
-	private void createButtonBar(Composite parent) {
-		Label spacer = new Label(parent, SWT.NONE);
-		spacer.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-
-		addButton = new Button(parent, SWT.PUSH);
-		addButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		addButton.setText(Messages.SelectRulesWizardPage_addButtonLabel);
-
-		addAllButton = new Button(parent, SWT.PUSH);
-		addAllButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		addAllButton.setText(Messages.SelectRulesWizardPage_addAllButtonLabel);
-
-		removeButton = new Button(parent, SWT.PUSH);
-		removeButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		removeButton.setText(Messages.SelectRulesWizardPage_removeButtonLabel);
-
-		removeAllButton = new Button(parent, SWT.PUSH);
-		removeAllButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		removeAllButton.setText(Messages.SelectRulesWizardPage_removeAllButtonLabel);
-
-		leftTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				controler.selectionChanged();
-			}
-		});
-
-		addButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				controler.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection());
-			}
-		});
-
-		leftTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
-			public void doubleClick(DoubleClickEvent event) {
-				controler.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection());
-			}
-		});
-
-		rightTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				removeButton.setEnabled(!event.getSelection().isEmpty());
-			}
-		});
-
-		removeButton.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				controler.removeButtonClicked((IStructuredSelection) rightTableViewer.getSelection());
-			}
-		});
-
-		rightTableViewer.addDoubleClickListener(new IDoubleClickListener() {
-			public void doubleClick(DoubleClickEvent event) {
-				controler.removeButtonClicked((IStructuredSelection) rightTableViewer.getSelection());
-			}
-		});
-
-		addAllButton.addSelectionListener(new SelectionAdapter() {
-			/*
-			 * (non-Javadoc)
-			 *
-			 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.
-			 * eclipse.swt.events.SelectionEvent)
-			 */
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				controler.addAllButtonClicked();
-			}
-		});
-
-		removeAllButton.addSelectionListener(new SelectionAdapter() {
-			/*
-			 * (non-Javadoc)
-			 *
-			 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.
-			 * eclipse.swt.events.SelectionEvent)
-			 */
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				controler.removeAllButtonClicked();
-			}
-		});
-
-	}
-
-	private void createTree(Composite parent) {
-		leftTreeViewer = new TreeViewer(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
-		leftTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		leftTreeViewer.setUseHashlookup(true);
-
-		configureTree(leftTreeViewer);
-	}
-
-	private void createTable(Composite parent) {
-		rightTableViewer = new TableViewer(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
-
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		rightTableViewer.getControl().setLayoutData(gd);
-
-		rightTableViewer.setUseHashlookup(true);
-
-		configureTable(rightTableViewer);
-	}
-
-	protected void configureTree(TreeViewer tree) {
-		tree.setContentProvider(new ITreeContentProvider() {
-
-			@Override
-			public boolean hasChildren(Object element) {
-				return false;
-			}
-
-			@Override
-			public Object[] getChildren(Object parentElement) {
-				return null;
-			}
-
-			@Override
-			public Object getParent(Object element) {
-				return null;
-			}
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public Object[] getElements(Object inputElement) {
-				Set<String> list = (Set<String>) inputElement;
-				return list.toArray();
-			}
-		});
-		tree.setLabelProvider(new TreeLabelProvider());
-		tree.setComparator(new JavaElementComparator());
-	}
-
-	protected void configureTable(TableViewer table) {
-		table.setLabelProvider(new TableLabelProvider());
-		table.setComparator(new JavaElementComparator());
-		rightTableViewer.setContentProvider(new IStructuredContentProvider() {
-
-			@SuppressWarnings("unchecked")
-			public Object[] getElements(Object inputElement) {
-				Set<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> list = (Set<RefactoringRule<? extends AbstractASTRewriteASTVisitor>>) inputElement;
-				return list.toArray();
-			}
-
-			public void dispose() {
-			}
-
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			}
-
-		});
-	}
-
-	/**
-	 * Creates bottom part of select wizard containing Text field with
-	 * description of selected rule if only one rule is selected, default
-	 * description otherwise.
-	 * 
-	 * @param parent
-	 */
-	private void createDescriptionViewer(Composite parent) {
-		/*
-		 * There is a known issue with automatically showing and hiding
-		 * scrollbars and SWT.WRAP. Using StyledText and
-		 * setAlwaysShowScrollBars(false) makes the vertical scroll work
-		 * correctly at least.
-		 */
-		descriptionStyledText = new StyledText(parent, SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
-		descriptionStyledText.setAlwaysShowScrollBars(false);
-		descriptionStyledText.setEditable(false);
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.minimumHeight = 60;
-		descriptionStyledText.setLayoutData(gridData);
-		descriptionStyledText.setMargins(2, 2, 2, 2);
-	}
-
-	/**
-	 * Updates entire view with data every time something is changed in model.
-	 */
-	@SuppressWarnings("unchecked")
-	private void updateData() {
-		if (model.getNameFilter().isEmpty()) {
-			leftTreeViewer.setInput(model.getPosibilities());
-		} else {
-			leftTreeViewer.setInput(model.filterPosibilitiesByName());
-		}
-		rightTableViewer.setInput(model.getSelection());
-
-		populateDescriptionTextViewer();
-
-		addButton.setEnabled(!leftTreeViewer.getSelection().isEmpty()
-				&& selectionContainsEnabledEntry(((IStructuredSelection) leftTreeViewer.getSelection()).toList()));
-		addAllButton.setEnabled(((Set<Object>) leftTreeViewer.getInput()).size() > 0);
-		removeButton.setEnabled(!rightTableViewer.getSelection().isEmpty());
-		removeAllButton.setEnabled(((Set<Object>) rightTableViewer.getInput()).size() > 0);
-	}
-
-	/**
-	 * Sets the rule description text according to the currently selected rule
-	 * or to the default text if no rule is selected.
-	 */
-	@SuppressWarnings("unchecked")
-	private void populateDescriptionTextViewer() {
-		List<Object> selection = ((IStructuredSelection) leftTreeViewer.getSelection()).toList();
-		if (selection.size() == 1) {
-			descriptionStyledText.setText(
-					((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) selection.get(0)).getDescription());
-		} else {
-			descriptionStyledText.setText(Messages.SelectRulesWizardPage_defaultDescriptionText);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private boolean selectionContainsEnabledEntry(List<Object> selection) {
-		for (Object object : selection) {
-			if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).isEnabled()) {
-				return true;
-			}
-		}
-		return false;
 	}
 }

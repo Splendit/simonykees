@@ -30,7 +30,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
- * {@link Wizard} holding the {@link SelectRulesWizardPage}, which contains a
+ * {@link Wizard} holding the {@link AbstractSelectRulesWizardPage}, which contains a
  * list of all selectable rules.
  * 
  * Clicking the OK button either calls the {@link RefactoringPreviewWizard} (if
@@ -42,7 +42,7 @@ import at.splendit.simonykees.i18n.Messages;
  */
 public class SelectRulesWizard extends Wizard {
 
-	private SelectRulesWizardPage page;
+	private AbstractSelectRulesWizardPage page;
 	private SelectRulesWizardPageControler controler;
 	private SelectRulesWizardPageModel model;
 	
