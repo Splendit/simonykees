@@ -43,14 +43,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	private SelectRulesWizardPageModel model;
 	private SelectRulesWizardPageControler controler;
-	//
-	// private Label groupFilterLabel;
-	// private Combo groupFilterCombo;
-	//
-	// private Label nameFilterLabel;
-	// private Text nameFilterText;
-	//
-	// private Button removeDisabledRulesButton;
 
 	private TreeViewer leftTreeViewer;
 	private TableViewer rightTableViewer;
@@ -308,8 +300,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule1 = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) e1;
 				RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule2 = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) e2;
-                return rule1.getName().compareTo(rule2.getName());
-        };
+				return rule1.getName().compareTo(rule2.getName());
+			};
 
 		});
 	}
@@ -342,13 +334,17 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	 */
 	@SuppressWarnings("unchecked")
 	private void updateData() {
-		if (model.getNameFilter().isEmpty()) {
-			leftTreeViewer.setInput(model.getPosibilities());
-		} else {
-			leftTreeViewer.setInput(model.filterPosibilitiesByName());
+		// check if model has changed to update table and tree view or is just
+		// selection changed to update description field and buttons
+		if (model.hasChanged()) {
+			if (model.getNameFilter().isEmpty()) {
+				leftTreeViewer.setInput(model.getPosibilities());
+			} else {
+				leftTreeViewer.setInput(model.filterPosibilitiesByName());
+			}
+			rightTableViewer.setInput(model.getSelection());
+			model.resetChanged();
 		}
-		rightTableViewer.setInput(model.getSelection());
-
 		populateDescriptionTextViewer();
 
 		addButton.setEnabled(!leftTreeViewer.getSelection().isEmpty()

@@ -38,12 +38,16 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 
 	Set<IValueChangeListener> listeners = new HashSet<>();
 
+	// flag if model is changed or is just selection change
+	private boolean changed = false;
+
 	public SelectRulesWizardPageModel(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 
 		groups = Arrays.asList(GroupEnum.values());
 		this.rules = rules;
 
 		addAllItems(posibilities);
+		changed = true;
 	}
 
 	/**
@@ -93,6 +97,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 			if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
 				selection.add(posibility);
 				posibilities.remove(posibility);
+				changed = true;
 			}
 		}
 		notifyListeners();
@@ -111,6 +116,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 			if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
 				selection.add(posibility);
 				posibilities.remove(posibility);
+				changed = true;
 			}
 		}
 		notifyListeners();
@@ -136,6 +142,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 				}
 			}
 		}
+		changed = true;
 		notifyListeners();
 	}
 
@@ -158,6 +165,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 		}
 		selection.clear();
 
+		changed = true;
 		notifyListeners();
 	}
 
@@ -192,6 +200,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 
 		removeAlreadyAdded(applicable);
 
+		changed = true;
 		notifyListeners();
 	}
 
@@ -248,6 +257,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 						.collect(Collectors.toList()));
 			}
 		}
+		changed = true;
 		notifyListeners();
 	}
 
@@ -279,6 +289,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	public void setNameFilter(String nameFilter) {
 		this.nameFilter = nameFilter;
 
+		changed = true;
 		notifyListeners();
 	}
 
@@ -293,25 +304,35 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 
 	@SuppressWarnings("unchecked")
 	public List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectionAsList() {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = selection.stream().map(object -> (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object)
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = selection.stream()
+				.map(object -> (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object)
 				.collect(Collectors.toList());
 		Collections.sort(rules, new Comparator<RefactoringRule<? extends AbstractASTRewriteASTVisitor>>() {
 			@Override
-			public int compare(RefactoringRule<? extends AbstractASTRewriteASTVisitor> o1, RefactoringRule<? extends AbstractASTRewriteASTVisitor> o2) {
+			public int compare(RefactoringRule<? extends AbstractASTRewriteASTVisitor> o1,
+					RefactoringRule<? extends AbstractASTRewriteASTVisitor> o2) {
 				return Integer.compare(indexOfRuleInSortedList(o1), indexOfRuleInSortedList(o2));
 			}
 		});
 		return rules;
 
 	}
-	
+
 	private int indexOfRuleInSortedList(RefactoringRule<? extends AbstractASTRewriteASTVisitor> searchedRule) {
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> sortedRules = RulesContainer.getAllRules();
-		for(int i = 0; i < sortedRules.size(); i++) {
-			if(sortedRules.get(i).getName().equals(searchedRule.getName())) {
+		for (int i = 0; i < sortedRules.size(); i++) {
+			if (sortedRules.get(i).getName().equals(searchedRule.getName())) {
 				return i;
 			}
 		}
 		return -1;
+	}
+
+	public boolean hasChanged() {
+		return changed;
+	}
+
+	public void resetChanged() {
+		this.changed = false;
 	}
 }
