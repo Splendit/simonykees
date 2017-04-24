@@ -1,7 +1,5 @@
 package at.splendit.simonykees.core.rule.impl;
 
-import org.eclipse.jdt.core.IJavaProject;
-
 import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.GroupUtil;
@@ -20,13 +18,6 @@ public class TryWithResourceRule extends RefactoringRule<TryWithResourceASTVisit
 		super(visitor);
 		this.name = Messages.TryWithResourceRule_name;
 		this.description = Messages.TryWithResourceRule_description;
-		this.groups.addAll(GroupUtil.allJavaVersionTo(GroupEnum.JAVA_7));
+		this.groups.addAll(GroupUtil.allJavaVersionSince(GroupEnum.JAVA_1_7));
 	}
-	
-	@Override
-	public void calculateEnabledForProject(IJavaProject project) {
-		// TODO Auto-generated method stub
-		
-	}
-
 }

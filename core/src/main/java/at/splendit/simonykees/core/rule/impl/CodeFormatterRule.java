@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
@@ -46,12 +45,7 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 		super(visitor);
 		this.name = Messages.CodeFormatterRule_name;
 		this.description = Messages.CodeFormatterRule_description;
-		this.groups.addAll(GroupUtil.allJavaVersionTo(GroupEnum.JAVA_1));
-	}
-	
-	@Override
-	public void calculateEnabledForProject(IJavaProject project) {
-		this.enabled = true;
+		this.groups.addAll(GroupUtil.allJavaVersionSince(GroupEnum.JAVA_1_1));
 	}
 
 	@Override

@@ -39,7 +39,7 @@ public class Java8Profile implements SimonykeesProfile {
 
 	@Override
 	public List<String> getEnabledRuleIds() {
-		return RulesContainer.getAllRules().stream().filter(r -> r.getGroups().contains(GroupEnum.JAVA_8))
+		return RulesContainer.getAllRules().stream().filter(r -> r.getGroups().contains(GroupEnum.JAVA_1_8))
 				.map(RefactoringRule::getId).collect(Collectors.toList());
 	}
 

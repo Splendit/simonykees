@@ -1,7 +1,5 @@
 package at.splendit.simonykees.core.rule.impl;
 
-import org.eclipse.jdt.core.IJavaProject;
-
 import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.GroupUtil;
@@ -20,12 +18,6 @@ public class ForToForEachRule extends RefactoringRule<ForToForEachASTVisitor> {
 		super(visitor);
 		this.name = Messages.ForToForEachRule_name;
 		this.description = Messages.ForToForEachRule_description;
-		this.groups.addAll(GroupUtil.allJavaVersionTo(GroupEnum.JAVA_5));
+		this.groups.addAll(GroupUtil.allJavaVersionSince(GroupEnum.JAVA_1_5));
 	}
-	
-	@Override
-	public void calculateEnabledForProject(IJavaProject project) {
-		this.enabled = true;
-	}
-
 }

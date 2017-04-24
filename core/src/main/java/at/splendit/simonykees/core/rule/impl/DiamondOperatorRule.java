@@ -1,7 +1,5 @@
 package at.splendit.simonykees.core.rule.impl;
 
-import org.eclipse.jdt.core.IJavaProject;
-
 import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.GroupUtil;
@@ -23,12 +21,6 @@ public class DiamondOperatorRule extends RefactoringRule<DiamondOperatorASTVisit
 		super(visitor);
 		this.name = Messages.DiamondOperatorRule_name;
 		this.description = Messages.DiamondOperatorRule_description;
-		this.groups.addAll(GroupUtil.allJavaVersionTo(GroupEnum.JAVA_7));
+		this.groups.addAll(GroupUtil.allJavaVersionSince(GroupEnum.JAVA_1_7));
 	}
-	
-	@Override
-	public void calculateEnabledForProject(IJavaProject project) {
-		this.enabled = true;
-	}
-
 }

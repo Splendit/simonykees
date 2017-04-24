@@ -9,7 +9,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -53,12 +52,7 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 		super(visitor);
 		this.name = Messages.OrganiseImportsRule_name;
 		this.description = Messages.OrganiseImportsRule_description;
-		this.groups.addAll(GroupUtil.allJavaVersionTo(GroupEnum.JAVA_1));
-	}
-	
-	@Override
-	public void calculateEnabledForProject(IJavaProject project) {
-		this.enabled = true;
+		this.groups.addAll(GroupUtil.allJavaVersionSince(GroupEnum.JAVA_1_1));
 	}
 
 	@Override

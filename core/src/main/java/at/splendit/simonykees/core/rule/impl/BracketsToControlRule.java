@@ -1,7 +1,5 @@
 package at.splendit.simonykees.core.rule.impl;
 
-import org.eclipse.jdt.core.IJavaProject;
-
 import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.GroupUtil;
@@ -21,11 +19,6 @@ public class BracketsToControlRule extends RefactoringRule<BracketsToControlASTV
 		super(visitor);
 		this.name = Messages.BracketsToControlRule_name;
 		this.description = Messages.BracketsToControlRule_description;
-		this.groups.addAll(GroupUtil.allJavaVersionTo(GroupEnum.JAVA_1));
-	}
-	
-	@Override
-	public void calculateEnabledForProject(IJavaProject project) {
-		this.enabled = true;
+		this.groups.addAll(GroupUtil.allJavaVersionSince(GroupEnum.JAVA_1_1));
 	}
 }

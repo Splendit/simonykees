@@ -22,6 +22,8 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * This ASTVisitor finds the usage of specified string operation and wraps it in
  * {@link StringUtils} commands.
  * 
+ * TODO check if extending AbstractCompilationUnitASTVisitor is still needed after the redesign of the SelectRulesWizard
+ * 
  * @author Martin Huter
  * @since 0.9
  */

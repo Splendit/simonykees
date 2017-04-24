@@ -9,6 +9,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
+import at.splendit.simonykees.core.util.GroupUtil;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
@@ -181,5 +183,25 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		}
 	}
 
-	abstract public void calculateEnabledForProject(IJavaProject project);
+	/** Responsible to calculate of the rule is executable in the current project. 
+	 * 
+	 * @param project
+	 */
+	public void calculateEnabledForProject(IJavaProject project){
+		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		enabled = GroupUtil.compilerOptionMatchesGroup(compilerCompliance, groups);
+		if(enabled){
+			enabled = ruleSpecificImplementation(project);
+		}
+	}
+	
+	/** JavaVersion independent requirements for rules that need to be defined for each rule.
+	 * 	Returns true as default implementation
+	 * 
+	 * @param project
+	 * @return
+	 */
+	public boolean ruleSpecificImplementation(IJavaProject project){
+		return true;
+	}
 }

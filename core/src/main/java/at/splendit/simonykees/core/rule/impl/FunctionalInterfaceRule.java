@@ -1,7 +1,5 @@
 package at.splendit.simonykees.core.rule.impl;
 
-import org.eclipse.jdt.core.IJavaProject;
-
 import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.GroupUtil;
@@ -21,12 +19,6 @@ public class FunctionalInterfaceRule extends RefactoringRule<FunctionalInterface
 		super(visitor);
 		this.name = Messages.FunctionalInterfaceRule_name;
 		this.description = Messages.FunctionalInterfaceRule_description;
-		this.groups.addAll(GroupUtil.allJavaVersionTo(GroupEnum.JAVA_8));
+		this.groups.addAll(GroupUtil.allJavaVersionSince(GroupEnum.JAVA_1_8));
 	}
-	
-	@Override
-	public void calculateEnabledForProject(IJavaProject project) {
-		this.enabled = true;
-	}
-
 }
