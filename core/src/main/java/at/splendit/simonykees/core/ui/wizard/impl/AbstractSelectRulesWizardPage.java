@@ -14,6 +14,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -286,8 +287,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	}
 
 	protected void configureTable(TableViewer table) {
-		table.setLabelProvider(new TableLabelProvider());
-		table.setComparator(new JavaElementComparator());
 		rightTableViewer.setContentProvider(new IStructuredContentProvider() {
 
 			@SuppressWarnings("unchecked")
@@ -301,6 +300,16 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			}
+
+		});
+		table.setLabelProvider(new TableLabelProvider());
+		table.setComparator(new ViewerComparator() {
+			@SuppressWarnings("unchecked")
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule1 = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) e1;
+				RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule2 = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) e2;
+                return rule1.getName().compareTo(rule2.getName());
+        };
 
 		});
 	}

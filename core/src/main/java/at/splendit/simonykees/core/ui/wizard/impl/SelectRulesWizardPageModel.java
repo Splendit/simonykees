@@ -1,6 +1,8 @@
 package at.splendit.simonykees.core.ui.wizard.impl;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,12 +12,14 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.core.ui.wizard.IWizardPageModel;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * Model that is storing all the data required for {@link AbstractSelectRulesWizardPage}
+ * Model that is storing all the data required for
+ * {@link AbstractSelectRulesWizardPage}
  * 
  * @author Andreja Sambolec
  * @since 1.3
@@ -31,7 +35,6 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 
 	private List<GroupEnum> groups;
 	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
-
 
 	Set<IValueChangeListener> listeners = new HashSet<>();
 
@@ -290,7 +293,25 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 
 	@SuppressWarnings("unchecked")
 	public List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectionAsList() {
-		return selection.stream().map(object -> (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object)
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = selection.stream().map(object -> (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object)
 				.collect(Collectors.toList());
+		Collections.sort(rules, new Comparator<RefactoringRule<? extends AbstractASTRewriteASTVisitor>>() {
+			@Override
+			public int compare(RefactoringRule<? extends AbstractASTRewriteASTVisitor> o1, RefactoringRule<? extends AbstractASTRewriteASTVisitor> o2) {
+				return Integer.compare(indexOfRuleInSortedList(o1), indexOfRuleInSortedList(o2));
+			}
+		});
+		return rules;
+
+	}
+	
+	private int indexOfRuleInSortedList(RefactoringRule<? extends AbstractASTRewriteASTVisitor> searchedRule) {
+		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> sortedRules = RulesContainer.getAllRules();
+		for(int i = 0; i < sortedRules.size(); i++) {
+			if(sortedRules.get(i).getName().equals(searchedRule.getName())) {
+				return i;
+			}
+		}
+		return -1;
 	}
 }
