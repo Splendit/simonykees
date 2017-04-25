@@ -71,7 +71,7 @@ public class RulesTestUtil {
 		return entries;
 	}
 
-	private static void extractClasspathEntries(List<IClasspathEntry> entries, String classpathFile) throws Exception {
+	public static void extractClasspathEntries(List<IClasspathEntry> entries, String classpathFile) throws Exception {
 		final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		final DocumentBuilder builder = factory.newDocumentBuilder();
 		final Document document = builder.parse(new File(classpathFile));
@@ -163,7 +163,7 @@ public class RulesTestUtil {
 		return root;
 	}
 
-	private static void addToClasspath(IJavaProject javaProject, List<IClasspathEntry> classpathEntries)
+	public static void addToClasspath(IJavaProject javaProject, List<IClasspathEntry> classpathEntries)
 			throws Exception {
 		if (!classpathEntries.isEmpty()) {
 			IClasspathEntry[] oldEntries = javaProject.getRawClasspath();
