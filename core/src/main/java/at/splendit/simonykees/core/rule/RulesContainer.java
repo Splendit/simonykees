@@ -8,6 +8,7 @@ import at.splendit.simonykees.core.rule.impl.BracketsToControlRule;
 import at.splendit.simonykees.core.rule.impl.CodeFormatterRule;
 import at.splendit.simonykees.core.rule.impl.CollectionRemoveAllRule;
 import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
+import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.RearrangeClassMembersRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
@@ -28,6 +29,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 import at.splendit.simonykees.core.visitor.DiamondOperatorASTVisitor;
+import at.splendit.simonykees.core.visitor.FieldNameConventionASTVisitor;
 import at.splendit.simonykees.core.visitor.RearrangeClassMembersASTVisitor;
 import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
 import at.splendit.simonykees.core.visitor.InefficientConstructorASTVisitor;
@@ -86,6 +88,7 @@ public class RulesContainer {
 				new DiamondOperatorRule(DiamondOperatorASTVisitor.class),
 				new RearrangeClassMembersRule(RearrangeClassMembersASTVisitor.class),
 				new OverrideAnnotationRule(OverrideAnnotationRuleASTVisitor.class),
+				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
 
 				/*
 				 * Code formatting and organizing imports should always happen
