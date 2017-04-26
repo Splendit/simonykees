@@ -3,6 +3,8 @@ package at.splendit.simonykees.core.ui.wizard.impl;
 
 import java.util.Map;
 
+import org.eclipse.jface.fieldassist.AutoCompleteField;
+import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -60,6 +62,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		nameFilterLabel.setText(Messages.SelectRulesWizardPage_filterByName);
 
 		nameFilterText = new Text(filterComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
+		new AutoCompleteField(nameFilterText, new TextContentAdapter(), model.getTags());
 		nameFilterText.setMessage(Messages.SelectRulesWizardPage_searchString);
 		gridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
 		gridData.widthHint = 180;

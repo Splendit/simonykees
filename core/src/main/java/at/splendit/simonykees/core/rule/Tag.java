@@ -30,7 +30,7 @@ import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
 @SuppressWarnings("nls")
 public enum Tag {
 
-	LOOP("LOOP"), JAVA_1_1("1.1", "1"), JAVA_1_2("1.2", "2"), JAVA_1_3("1.3", "3"), JAVA_1_4("1.4",
+	LOOP("loop"), JAVA_1_1("1.1", "1"), JAVA_1_2("1.2", "2"), JAVA_1_3("1.3", "3"), JAVA_1_4("1.4",
 			"4"), JAVA_1_5("1.5", "5"), JAVA_1_6("1.6", "6"), JAVA_1_7("1.7", "7"), JAVA_1_8("1.8", "8"), EMPTY();
 	// not yet arrived! JAVA_1_9("1.5","5");
 
@@ -100,7 +100,7 @@ public enum Tag {
 		return Arrays.stream(Tag.class.getEnumConstants()).filter(tag -> tag.name().equals(name)).findFirst().orElse(null);
 	}
 
-	public String[] getAllTags() {
+	public static String[] getAllTags() {
 		List<String> allTagsList = Arrays.stream(Tag.class.getEnumConstants()).map(t -> t.getTagNames())
 				.flatMap(List::stream).collect(Collectors.toList());
 		return allTagsList.stream().toArray(String[]::new);

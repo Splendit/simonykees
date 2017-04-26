@@ -11,8 +11,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
-import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
 import at.splendit.simonykees.core.rule.Tag;
+import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.core.ui.wizard.IWizardPageModel;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -33,7 +33,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 
 	private String nameFilter = ""; //$NON-NLS-1$
 
-	private List<Tag> groups;
+	private String[] tags;
 	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
 	Set<IValueChangeListener> listeners = new HashSet<>();
@@ -43,7 +43,7 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 
 	public SelectRulesWizardPageModel(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 
-		groups = Arrays.asList(Tag.values());
+		tags = Tag.getAllTags();
 		this.rules = rules;
 
 		addAllItems(posibilities);
@@ -197,8 +197,8 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	 * @return List containing all group names.
 	 * 
 	 */
-	public List<Tag> getGroups() {
-		return groups;
+	public String[] getTags() {
+		return tags;
 	}
 
 	@SuppressWarnings("unchecked")
