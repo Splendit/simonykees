@@ -2,9 +2,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>jSparrow.license.api</groupId>
   <artifactId>jSparrow.license.api</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
-  <name>jSparrow :: License API</name>
+  <name>jSparrow :: license API</name>
   <description>jSparrow License API Plugin</description>
   <parent>
   	<groupId>at.splendit.jSparrow</groupId>
