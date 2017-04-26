@@ -4,7 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
@@ -13,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.i18n.Messages;
-import at.splendit.simonykees.license.LicenseManager;
+import at.splendit.simonykees.license.api.LicenseValidationService;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -38,6 +45,12 @@ public class Activator extends AbstractUIPlugin {
 	// Flag is jSparrow is already running
 	private static boolean running = false;
 
+	private static BundleContext bundleContext;
+	private static IEclipseContext eclipseContext;
+	
+	@Inject
+	private LicenseValidationService licenseValidationService;
+	
 	/**
 	 * The constructor
 	 */
@@ -53,6 +66,10 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		bundleContext = context;
+		
+		eclipseContext = EclipseContextFactory.getServiceContext(context);
+		ContextInjectionFactory.inject(this, eclipseContext);
 
 		/*
 		 * JNA first tries to read from jna.boot.library.path. If system
@@ -77,11 +94,10 @@ public class Activator extends AbstractUIPlugin {
 			}
 		}
 		
-		// starting the license heartbeat
-		LicenseManager.getInstance();
 		logger.info(Messages.Activator_start);
 	}
-
+	
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -92,14 +108,11 @@ public class Activator extends AbstractUIPlugin {
 
 		running = false;
 
-		/*
-		 * release the current license session (in case of a floating license)
-		 */
-		LicenseManager.getInstance().checkIn();
 		// FIXME (see SIM-331) figure out better logging configuration
 		logger.info(Messages.Activator_stop);
 		
 		plugin = null;
+		bundleContext = null;
 
 		synchronized (jobs) {
 			jobs.forEach(job -> job.cancel());
@@ -113,6 +126,22 @@ public class Activator extends AbstractUIPlugin {
 		}
 
 		super.stop(context);
+	}
+	
+	/**
+	 * starts the license validation service after it has been injected
+	 */
+	@PostConstruct
+	private void startValidation() {
+		licenseValidationService.startValidation();
+	}
+
+	/**
+	 * stops the license validation service before it gets uninjected
+	 */
+	@PreDestroy
+	private void stopValidation() {
+		licenseValidationService.stopValidation();
 	}
 
 	/**
@@ -154,5 +183,13 @@ public class Activator extends AbstractUIPlugin {
 
 	public static void setRunning(boolean isRunning) {
 		running = isRunning;
+	}
+	
+	public static BundleContext getBundleContext() {
+		return bundleContext;
+	}
+	
+	public static IEclipseContext getEclipseContext() {
+		return eclipseContext;
 	}
 }

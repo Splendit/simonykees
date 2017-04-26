@@ -3,10 +3,15 @@ package at.splendit.simonykees.core.ui.preference;
 import java.net.URL;
 import java.util.HashMap;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -36,10 +41,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.osgi.framework.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.i18n.Messages;
-import at.splendit.simonykees.license.LicenseManager;
+import at.splendit.simonykees.license.api.LicenseValidationService;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 
 /**
@@ -52,6 +59,7 @@ import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
 	private static final String DEFAULT_LICENSEE_NAME = ""; //$NON-NLS-1$
+	private static final Logger logger = LoggerFactory.getLogger(SimonykeesUpdateLicenseDialog.class);
 
 	private Text licenseKeyText;
 	private String licenseKey = ""; //$NON-NLS-1$
@@ -65,10 +73,26 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	private static final String LOGO_ACTIVE_LICENSE_PATH = "icons/jSparrow_active_icon_100.png"; //$NON-NLS-1$
 	private static final String LOGO_INACTIVE_LICENSE_PATH = "icons/jSparrow_inactive_icon_100.png"; //$NON-NLS-1$
 
+	@Inject
+	private LicenseValidationService licenseValidationService;
+	private boolean isLicenseValidationServiceAvailable = false;
+	
 	protected SimonykeesUpdateLicenseDialog(Shell parentShell) {
 		super(parentShell);
+		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 	}
 
+	@PostConstruct
+	private void postConstruct() {
+		if(licenseValidationService != null)
+			isLicenseValidationServiceAvailable = true;
+	}
+	
+	@PreDestroy
+	private void preDestroy() {
+		isLicenseValidationServiceAvailable = false;
+	}
+	
 	@Override
 	public void create() {
 		super.create();
@@ -142,10 +166,15 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 			public void widgetSelected(SelectionEvent arg0) {
 				BusyIndicator.showWhile(Display.getDefault(), new Runnable() {
 					public void run() {
-						String licenseKey = getLicenseKey();
-						LicenseManager licenseManager = LicenseManager.getInstance();
-						boolean updated = licenseManager.updateLicenseeNumber(licenseKey.trim(), DEFAULT_LICENSEE_NAME);
-						updateWarningInformation(updated);
+						if(isLicenseValidationServiceAvailable) {
+							String licenseKey = getLicenseKey();
+							boolean updated = licenseValidationService.updateLicenseeNumber(licenseKey, DEFAULT_LICENSEE_NAME);
+							updateWarningInformation(updated);
+						}
+						else {
+							// TODO: propper error handling
+							logger.error("license validation service unavailable!");
+						}
 					}
 				});
 			}
