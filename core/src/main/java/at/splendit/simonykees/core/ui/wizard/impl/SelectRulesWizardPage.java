@@ -1,5 +1,7 @@
 package at.splendit.simonykees.core.ui.wizard.impl;
 
+import java.util.Map;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -14,6 +16,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
 import at.splendit.simonykees.i18n.Messages;
 
 public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
@@ -22,7 +25,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	private SelectRulesWizardPageControler controler;
 
 	private Label groupFilterLabel;
-	private Combo groupFilterCombo;
+	private Combo selectProfileCombo;
 
 	private Label nameFilterLabel;
 	private Text nameFilterText;
@@ -49,18 +52,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		Composite filterComposite = new Composite(parent, SWT.NONE);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		filterComposite.setLayoutData(gridData);
-		GridLayout gridLayout = new GridLayout(2, false);
+		GridLayout gridLayout = new GridLayout(4, false);
 		filterComposite.setLayout(gridLayout);
-
-		groupFilterLabel = new Label(filterComposite, SWT.NONE);
-		groupFilterLabel.setText(Messages.SelectRulesWizardPage_filterByGroup);
-
-		groupFilterCombo = new Combo(filterComposite, SWT.READ_ONLY);
-		populateGroupFilterCombo();
-		groupFilterCombo.addSelectionListener(createGroupFilterSelectionListener());
-		gridData = new GridData(GridData.BEGINNING, GridData.CENTER, false, false);
-		gridData.widthHint = 200;
-		groupFilterCombo.setLayoutData(gridData);
 
 		nameFilterLabel = new Label(filterComposite, SWT.NONE);
 		nameFilterLabel.setText(Messages.SelectRulesWizardPage_filterByName);
@@ -68,7 +61,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		nameFilterText = new Text(filterComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
 		nameFilterText.setMessage(Messages.SelectRulesWizardPage_searchString);
 		gridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
-		gridData.widthHint = 200;
+		gridData.widthHint = 180;
 		nameFilterText.setLayoutData(gridData);
 		nameFilterText.addModifyListener(new ModifyListener() {
 
@@ -89,6 +82,19 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			}
 		});
 
+
+		groupFilterLabel = new Label(filterComposite, SWT.NONE);
+		groupFilterLabel.setText(Messages.SelectRulesWizardPage_selectProfile);
+		gridData = new GridData(GridData.END, GridData.CENTER, true, false);
+		groupFilterLabel.setLayoutData(gridData);
+
+		selectProfileCombo = new Combo(filterComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
+		populateGroupFilterCombo();
+		selectProfileCombo.addSelectionListener(createSelectProfileSelectionListener());
+		gridData = new GridData(GridData.END, GridData.FILL, false, false);
+		gridData.widthHint = 200;
+		selectProfileCombo.setLayoutData(gridData);
+
 		createRemoveDisabledRulesButton(filterComposite);
 		gridData = new GridData();
 		gridData.horizontalSpan = 2;
@@ -100,12 +106,10 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 * group
 	 */
 	private void populateGroupFilterCombo() {
-		model.getGroups().stream().forEach((entry) -> {
-			groupFilterCombo.add(entry.getGroupName());
-			if (entry.equals(model.getCurrentGroupId())) {
-				groupFilterCombo.select(groupFilterCombo.indexOf(entry.getGroupName()));
-			}
-		});
+		Map<String, String> profiles = SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap();
+		for(String key : profiles.keySet()) {
+			selectProfileCombo.add(key);
+		}
 	}
 
 	/**
@@ -114,16 +118,17 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 * @return {@link SelectionListener} that reacts to changes of the selected
 	 *         element.
 	 */
-	private SelectionListener createGroupFilterSelectionListener() {
+	private SelectionListener createSelectProfileSelectionListener() {
 		return new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String selectedProfileId = groupFilterCombo.getItem(groupFilterCombo.getSelectionIndex());
-				if (selectedProfileId.equals(model.getCurrentGroupId())) {
+				String selectedProfileId = selectProfileCombo.getItem(selectProfileCombo.getSelectionIndex());
+				if (selectedProfileId.equals(model.getCurrentProfileId())) {
 					// nothing
 				} else {
-					controler.groupFilterComboChanged(selectedProfileId);
+					nameFilterText.setText(""); //$NON-NLS-1$
+					controler.profileChanged(selectedProfileId);
 				}
 			}
 		};

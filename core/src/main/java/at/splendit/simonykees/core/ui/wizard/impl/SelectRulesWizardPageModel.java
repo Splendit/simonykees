@@ -1,6 +1,5 @@
 package at.splendit.simonykees.core.ui.wizard.impl;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -10,9 +9,9 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
+import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.core.ui.wizard.IWizardPageModel;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -29,11 +28,11 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	private Set<Object> posibilities = new HashSet<>();
 	private Set<Object> selection = new HashSet<>();
 
-	private static GroupEnum currentGroupId = GroupEnum.EMPTY;
+	private String currentProfileId = ""; //$NON-NLS-1$
 
 	private String nameFilter = ""; //$NON-NLS-1$
 
-	private List<GroupEnum> groups;
+	// private List<GroupEnum> groups;
 	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
 	Set<IValueChangeListener> listeners = new HashSet<>();
@@ -43,7 +42,6 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 
 	public SelectRulesWizardPageModel(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 
-		groups = Arrays.asList(GroupEnum.values());
 		this.rules = rules;
 
 		addAllItems(posibilities);
@@ -56,15 +54,6 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	 */
 	public void addListener(IValueChangeListener listener) {
 		listeners.add(listener);
-	}
-
-	/**
-	 * Getter for current group id set in the filter by group combo
-	 * 
-	 * @return String value of current group id in combo
-	 */
-	public GroupEnum getCurrentGroupId() {
-		return currentGroupId;
 	}
 
 	/**
@@ -83,6 +72,15 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	 */
 	public Set<Object> getSelection() {
 		return selection;
+	}
+
+	/**
+	 * Getter for currently selected profile in combo view
+	 * 
+	 * @return String id of currently selected profile in combo
+	 */
+	public String getCurrentProfileId() {
+		return currentProfileId;
 	}
 
 	/**
@@ -132,16 +130,8 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	public void moveToLeft(IStructuredSelection selectedElements) {
 		selection.removeAll(selectedElements.toList());
 
-		if (currentGroupId.equals(GroupEnum.EMPTY)) {
-			posibilities.addAll(selectedElements.toList());
-		} else {
-			for (Object posibility : selectedElements.toList()) {
-				if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getGroups()
-						.contains(currentGroupId)) {
-					posibilities.add(posibility);
-				}
-			}
-		}
+		posibilities.addAll(selectedElements.toList());
+
 		changed = true;
 		notifyListeners();
 	}
@@ -151,18 +141,9 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 	 * are enabled from right to left and removes them from right view. Ignores
 	 * disabled elements.
 	 */
-	@SuppressWarnings("unchecked")
 	public void moveAllToLeft() {
-		if (currentGroupId.equals(GroupEnum.EMPTY)) {
-			posibilities.addAll(selection);
-		} else {
-			for (Object posibility : selection) {
-				if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getGroups()
-						.contains(currentGroupId)) {
-					posibilities.add(posibility);
-				}
-			}
-		}
+		posibilities.addAll(selection);
+
 		selection.clear();
 
 		changed = true;
@@ -179,26 +160,20 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 		}
 	}
 
-	/**
-	 * Used to filter all objects in left view to show only objects that are in
-	 * group selected in filtering combo. By default shows group All containing
-	 * all possible elements. Removes elements that are already added in right
-	 * view.
-	 */
-	public void filterByGroup(final String filter) {
-		final Set<Object> applicable = new HashSet<>();
-		currentGroupId = GroupEnum.findByGroupName(filter);
-
-		if (currentGroupId == null || currentGroupId.equals(GroupEnum.EMPTY)) {
-			addAllItems(applicable);
-		} else if (groups.contains(currentGroupId)) {
-			applicable.addAll(rules.stream().filter(rule -> rule.getGroups().contains(currentGroupId))
-					.collect(Collectors.toList()));
+	@SuppressWarnings("unchecked")
+	public void selectFromProfile(final String profileId) {
+		currentProfileId = profileId;
+		moveAllToLeft();
+		Set<Object> currentPosibilities = new HashSet<>();
+		currentPosibilities.addAll(posibilities);
+		for (Object posibility : currentPosibilities) {
+			if (SimonykeesPreferenceManager.isRuleSelectedInProfile(
+					SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
+					((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getId())) {
+				selection.add(posibility);
+				posibilities.remove(posibility);
+			}
 		}
-		posibilities.clear();
-		posibilities.addAll(applicable);
-
-		removeAlreadyAdded(applicable);
 
 		changed = true;
 		notifyListeners();
@@ -215,29 +190,6 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 		applicable.addAll(rules);
 	}
 
-	/**
-	 * Used by filter to remove elements from left view that are already added
-	 * in right view.
-	 * 
-	 * @param applicable
-	 */
-	private void removeAlreadyAdded(final Set<Object> applicable) {
-		for (final Object object : applicable) {
-			if (selection.contains(object)) {
-				posibilities.remove(object);
-			}
-		}
-	}
-
-	/**
-	 * Getter for List containing all groups for filtering by group.
-	 * 
-	 * @return List containing all group names.
-	 */
-	public List<GroupEnum> getGroups() {
-		return groups;
-	}
-
 	@SuppressWarnings("unchecked")
 	public void removeDisabledPosibilities(boolean doit) {
 		if (doit) {
@@ -250,12 +202,8 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 			}
 		} else {
 			posibilities.clear();
-			if (currentGroupId.equals(GroupEnum.EMPTY)) {
-				posibilities.addAll(rules);
-			} else {
-				posibilities.addAll(rules.stream().filter(rule -> rule.getGroups().contains(currentGroupId))
-						.collect(Collectors.toList()));
-			}
+			posibilities.addAll(rules);
+
 		}
 		changed = true;
 		notifyListeners();

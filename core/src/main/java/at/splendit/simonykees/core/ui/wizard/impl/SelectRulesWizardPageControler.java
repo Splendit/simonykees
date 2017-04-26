@@ -37,8 +37,8 @@ public class SelectRulesWizardPageControler {
 		model.setNameFilter(text);
 	}
 
-	public void groupFilterComboChanged(String selectedProfileId) {
-		model.filterByGroup(selectedProfileId);
+	public void profileChanged(String selectedProfileId) {
+		model.selectFromProfile(selectedProfileId);
 	}
 
 	public void selectionChanged() {

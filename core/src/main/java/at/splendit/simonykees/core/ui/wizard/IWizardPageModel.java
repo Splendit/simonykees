@@ -14,6 +14,4 @@ public interface IWizardPageModel {
 
 	public void moveAllToLeft();
 	
-	public void filterByGroup(final String filter);
-
 }
