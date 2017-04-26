@@ -31,7 +31,7 @@ import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
 public enum Tag {
 
 	LOOP("LOOP"), JAVA_1_1("1.1", "1"), JAVA_1_2("1.2", "2"), JAVA_1_3("1.3", "3"), JAVA_1_4("1.4",
-			"4"), JAVA_1_5("1.5", "5"), JAVA_1_6("1.6", "6"), JAVA_1_7("1.7", "7"), JAVA_1_8("1.8", "8");
+			"4"), JAVA_1_5("1.5", "5"), JAVA_1_6("1.6", "6"), JAVA_1_7("1.7", "7"), JAVA_1_8("1.8", "8"), EMPTY();
 	// not yet arrived! JAVA_1_9("1.5","5");
 
 	private List<String> tagName;
@@ -43,6 +43,7 @@ public enum Tag {
 	public List<String> getTagNames() {
 		return tagName;
 	}
+	
 
 	@SuppressWarnings("rawtypes")
 	public static List<Tag> getTagsForRule(Class<? extends RefactoringRule> clazz) {
@@ -93,6 +94,10 @@ public enum Tag {
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["
 				+ Tag.class.getCanonicalName() + "]");
+	}
+	
+	public static Tag getTageForName(String name) {
+		return Arrays.stream(Tag.class.getEnumConstants()).filter(tag -> tag.name().equals(name)).findFirst().orElse(null);
 	}
 
 	public String[] getAllTags() {

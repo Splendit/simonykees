@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.ui;
+package at.splendit.simonykees.core.ui.wizard.impl;
 
 import java.util.List;
 
@@ -21,14 +21,16 @@ import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.exception.SimonykeesException;
-import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
 import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.ui.LicenseUtil;
+import at.splendit.simonykees.core.ui.RefactoringPreviewWizard;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
- * {@link Wizard} holding the {@link SelectRulesWizardPage}, which contains a
+ * {@link Wizard} holding the {@link AbstractSelectRulesWizardPage}, which contains a
  * list of all selectable rules.
  * 
  * Clicking the OK button either calls the {@link RefactoringPreviewWizard} (if
@@ -40,29 +42,31 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public class SelectRulesWizard extends Wizard {
 
-	private final SelectRulesWizardPage selectRulesPage;
-	private final List<IJavaElement> javaElements;
-
-	public SelectRulesWizard(List<IJavaElement> javaElements) {
-		this.javaElements = javaElements;
-		selectRulesPage = new SelectRulesWizardPage();
-		setNeedsProgressMonitor(true);
-	}
+	private AbstractSelectRulesWizardPage page;
+	private SelectRulesWizardPageControler controler;
+	private SelectRulesWizardPageModel model;
 	
-	public SelectRulesWizard(List<IJavaElement> javaElements, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
-		this.javaElements = javaElements;
-		selectRulesPage = new SelectRulesWizardPage(rules);
-		setNeedsProgressMonitor(true);
-	}
+	private final List<IJavaElement> javaElements;
+	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
-	@Override
-	public void addPages() {
-		addPage(selectRulesPage);
+	public SelectRulesWizard(List<IJavaElement> javaElements, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+		super();
+		this.javaElements = javaElements;
+		this.rules = rules;
+		setNeedsProgressMonitor(true);
 	}
 
 	@Override
 	public String getWindowTitle() {
 		return Messages.SelectRulesWizard_title;
+	}
+
+	@Override
+	public void addPages() {
+		model = new SelectRulesWizardPageModel(rules);
+		controler = new SelectRulesWizardPageControler(model);
+		page = new SelectRulesWizardPage(model, controler);
+		addPage(page);
 	}
 
 	@Override
@@ -73,7 +77,7 @@ public class SelectRulesWizard extends Wizard {
 
 	@Override
 	public boolean performFinish() {
-		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = selectRulesPage.getSelectedRules();
+		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = model.getSelectionAsList();
 		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
 		};
 		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
@@ -232,5 +236,4 @@ public class SelectRulesWizard extends Wizard {
 			}
 		});
 	}
-
 }
