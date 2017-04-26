@@ -57,7 +57,8 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 			MethodInvocation methodInvocation = (MethodInvocation) stringLiteral.getParent();
 			// if the method invocation's name is 'equals' or 'equalsIgnoreCase'
 			String methodIdentifier = methodInvocation.getName().getIdentifier();
-			if (EQUALS.equals(methodIdentifier) || EQUALS_IGNORE_CASE.equals(methodIdentifier)) {
+			if ((EQUALS.equals(methodIdentifier) || EQUALS_IGNORE_CASE.equals(methodIdentifier))
+					&& methodInvocation.arguments().size() == 1) {
 				Expression expression = methodInvocation.getExpression();
 				// if the LHS is not already a literal
 				if (expression != null && expression.getNodeType() != ASTNode.STRING_LITERAL) {
