@@ -29,103 +29,76 @@ import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
 
 @SuppressWarnings("nls")
 public enum Tag {
-	
-	LOOP("LOOP"),
-	JAVA_1_1("1.1","1"),
-	JAVA_1_2("1.2","2"),
-	JAVA_1_3("1.3","3"),
-	JAVA_1_4("1.4","4"),
-	JAVA_1_5("1.5","5"),
-	JAVA_1_6("1.6","6"),
-	JAVA_1_7("1.7","7"),
-	JAVA_1_8("1.8","8");
-	//not yet arrived! JAVA_1_9("1.5","5");
-	
+
+	LOOP("LOOP"), JAVA_1_1("1.1", "1"), JAVA_1_2("1.2", "2"), JAVA_1_3("1.3", "3"), JAVA_1_4("1.4",
+			"4"), JAVA_1_5("1.5", "5"), JAVA_1_6("1.6", "6"), JAVA_1_7("1.7", "7"), JAVA_1_8("1.8", "8");
+	// not yet arrived! JAVA_1_9("1.5","5");
+
 	private List<String> tagName;
-	
-	private Tag(String... tagName){
-		this.tagName=Arrays.asList(tagName);
+
+	private Tag(String... tagName) {
+		this.tagName = Arrays.asList(tagName);
 	}
-	
-	public String getTagName(){
-		return tagName.stream().collect(Collectors.joining(","));
+
+	public List<String> getTagNames() {
+		return tagName;
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	public static List<Tag> getTagsForRule(Class<? extends RefactoringRule> clazz) {
-		
-		if(ArithmethicAssignmentRule.class == clazz){
-			return Arrays.asList(LOOP);
+
+		if (ArithmethicAssignmentRule.class == clazz) {
+			return Arrays.asList(JAVA_1_4);
+		} else if (BracketsToControlRule.class == clazz) {
+			return Arrays.asList(JAVA_1_1);
+		} else if (CodeFormatterRule.class == clazz) {
+			return Arrays.asList(JAVA_1_1);
+		} else if (CollectionRemoveAllRule.class == clazz) {
+			return Arrays.asList(JAVA_1_2);
+		} else if (DiamondOperatorRule.class == clazz) {
+			return Arrays.asList(JAVA_1_7);
+		} else if (ForToForEachRule.class == clazz) {
+			return Arrays.asList(JAVA_1_5,LOOP);
+		} else if (FunctionalInterfaceRule.class == clazz) {
+			return Arrays.asList(JAVA_1_8);
+		} else if (InefficientConstructorRule.class == clazz) {
+			return Arrays.asList(JAVA_1_5);
+		} else if (MultiCatchRule.class == clazz) {
+			return Arrays.asList(JAVA_1_7);
+		} else if (OrganiseImportsRule.class == clazz) {
+			return Arrays.asList(JAVA_1_1);
+		} else if (OverrideAnnotationRule.class == clazz) {
+			return Arrays.asList(JAVA_1_6);
+		} else if (PrimitiveBoxedForStringRule.class == clazz) {
+			return Arrays.asList(JAVA_1_1);
+		} else if (RearrangeClassMembersRule.class == clazz) {
+			return Arrays.asList(JAVA_1_1);
+		} else if (RemoveNewStringConstructorRule.class == clazz) {
+			return Arrays.asList(JAVA_1_1);
+		} else if (RemoveToStringOnStringRule.class == clazz) {
+			return Arrays.asList(JAVA_1_1);
+		} else if (SerialVersionUidRule.class == clazz) {
+			return Arrays.asList(JAVA_1_1);
+		} else if (StringConcatToPlusRule.class == clazz) {
+			return Arrays.asList(JAVA_1_1);
+		} else if (StringFormatLineSeparatorRule.class == clazz) {
+			return Arrays.asList(JAVA_1_5);
+		} else if (StringUtilsRule.class == clazz) {
+			return Arrays.asList(JAVA_1_1);
+		} else if (TryWithResourceRule.class == clazz) {
+			return Arrays.asList(JAVA_1_7);
+		} else if (WhileToForEachRule.class == clazz) {
+			return Arrays.asList(JAVA_1_5,LOOP);
 		}
-		else if(BracketsToControlRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(CodeFormatterRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(CollectionRemoveAllRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(DiamondOperatorRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(ForToForEachRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(FunctionalInterfaceRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(InefficientConstructorRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(MultiCatchRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(OrganiseImportsRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(OverrideAnnotationRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(PrimitiveBoxedForStringRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(RearrangeClassMembersRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(RemoveNewStringConstructorRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(RemoveToStringOnStringRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(SerialVersionUidRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(StringConcatToPlusRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(StringFormatLineSeparatorRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(StringUtilsRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(TryWithResourceRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		else if(WhileToForEachRule.class == clazz){
-			return Arrays.asList(LOOP);
-		}
-		
-		throw new NoSuchElementException("Class:["+clazz.getName()+"] has no tags defined. Fix this in:["+Tag.class.getCanonicalName()+"]");
+
+		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["
+				+ Tag.class.getCanonicalName() + "]");
 	}
-	
-	
-	
-	
-	public String getAllTags(){
-		return Arrays.stream(Tag.class.getEnumConstants()).map(Tag::getTagName).collect(Collectors.joining(";"));
+
+	public String[] getAllTags() {
+		List<String> allTagsList = Arrays.stream(Tag.class.getEnumConstants()).map(t -> t.getTagNames())
+				.flatMap(List::stream).collect(Collectors.toList());
+		return allTagsList.stream().toArray(String[]::new);
 	}
 
 }
