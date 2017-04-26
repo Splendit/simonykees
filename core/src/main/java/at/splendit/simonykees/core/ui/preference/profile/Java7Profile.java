@@ -3,7 +3,8 @@ package at.splendit.simonykees.core.ui.preference.profile;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import at.splendit.simonykees.core.rule.GroupEnum;
+import org.apache.commons.lang3.JavaVersion;
+
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceConstants;
@@ -39,7 +40,7 @@ public class Java7Profile implements SimonykeesProfile {
 
 	@Override
 	public List<String> getEnabledRuleIds() {
-		return RulesContainer.getAllRules().stream().filter(r -> r.getGroups().contains(GroupEnum.JAVA_7))
+		return RulesContainer.getAllRules().stream().filter(r -> r.getRequiredJavaVersion() == JavaVersion.JAVA_1_7)
 				.map(RefactoringRule::getId).collect(Collectors.toList());
 	}
 

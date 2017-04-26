@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
@@ -20,9 +20,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.util.GroupUtil;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
@@ -46,12 +44,11 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 		super(visitor);
 		this.name = Messages.CodeFormatterRule_name;
 		this.description = Messages.CodeFormatterRule_description;
-		this.groups.addAll(GroupUtil.allJavaVersionTo(GroupEnum.JAVA_1));
 	}
 	
 	@Override
-	public void calculateEnabledForProject(IJavaProject project) {
-		this.enabled = true;
+	protected JavaVersion provideRequiredJavaVersion() {
+		return JavaVersion.JAVA_1_1;
 	}
 
 	@Override

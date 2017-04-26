@@ -1,10 +1,8 @@
 package at.splendit.simonykees.core.rule.impl;
 
-import org.eclipse.jdt.core.IJavaProject;
+import org.apache.commons.lang3.JavaVersion;
 
-import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.util.GroupUtil;
 import at.splendit.simonykees.core.visitor.PrimitiveBoxedForStringASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -20,12 +18,10 @@ public class PrimitiveBoxedForStringRule extends RefactoringRule<PrimitiveBoxedF
 		super(visitor);
 		this.name = Messages.PrimitiveBoxedForStringRule_name;
 		this.description = Messages.PrimitiveBoxedForStringRule_description;
-		this.groups.addAll(GroupUtil.allJavaVersionTo(GroupEnum.JAVA_1));
 	}
 	
 	@Override
-	public void calculateEnabledForProject(IJavaProject project) {
-		this.enabled = true;
+	protected JavaVersion provideRequiredJavaVersion() {
+		return JavaVersion.JAVA_1_1;
 	}
-
 }
