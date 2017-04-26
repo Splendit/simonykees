@@ -52,9 +52,9 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 
 	@Override
 	public boolean visit(StringLiteral stringLiteral) {
-		ASTNode parent = stringLiteral.getParent();
-		if (parent != null && parent.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			MethodInvocation methodInvocation = (MethodInvocation) parent;
+		//checks if the parenth is a MethodInvoation and the StringLiteral is part of the arguments
+		if(stringLiteral.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+			MethodInvocation methodInvocation = (MethodInvocation) stringLiteral.getParent();
 			// if the method invocation's name is 'equals' or 'equalsIgnoreCase'
 			String methodIdentifier = methodInvocation.getName().getIdentifier();
 			if (EQUALS.equals(methodIdentifier) || EQUALS_IGNORE_CASE.equals(methodIdentifier)) {
