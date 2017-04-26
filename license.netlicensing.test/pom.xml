@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>jSparrow.license.test</groupId>
-  <artifactId>jSparrow.license.test</artifactId>
+  <artifactId>jSparrow.license.netlicensing.test</artifactId>
   <packaging>eclipse-test-plugin</packaging>
-  <name>jSparrow :: license test</name>
+  <name>jSparrow :: license netlicesing test</name>
   <description>jSparrow License Test</description>
   <parent>
   	<groupId>at.splendit.jSparrow</groupId>
