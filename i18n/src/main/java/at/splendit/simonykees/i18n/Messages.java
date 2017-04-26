@@ -122,6 +122,8 @@ public class Messages extends NLS {
 	public static String StringFormatLineSeparatorRule_name;
 	public static String StringConcatToPlusRule_description;
 	public static String StringConcatToPlusRule_name;
+	public static String StringLiteralEqualityCheckRule_description;
+	public static String StringLiteralEqualityCheckRule_name;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
 	public static String TryWithResourceRule_description;
