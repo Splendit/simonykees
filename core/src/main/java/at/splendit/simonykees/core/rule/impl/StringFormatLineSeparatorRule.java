@@ -1,8 +1,8 @@
 package at.splendit.simonykees.core.rule.impl;
 
-import at.splendit.simonykees.core.rule.GroupEnum;
+import org.apache.commons.lang3.JavaVersion;
+
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.util.GroupUtil;
 import at.splendit.simonykees.core.visitor.StringFormatLineSeparatorASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -18,6 +18,10 @@ public class StringFormatLineSeparatorRule extends RefactoringRule<StringFormatL
 		super(visitor);
 		this.name = Messages.StringFormatLineSeparatorRule_name;
 		this.description = Messages.StringFormatLineSeparatorRule_description;
-		this.groups.addAll(GroupUtil.allJavaVersionSince(GroupEnum.JAVA_1_5));
+	}
+	
+	@Override
+	protected JavaVersion provideRequiredJavaVersion() {
+		return JavaVersion.JAVA_1_5;
 	}
 }

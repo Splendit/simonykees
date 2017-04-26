@@ -1,11 +1,11 @@
 package at.splendit.simonykees.core.rule;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
-import at.splendit.simonykees.core.util.GroupUtil;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
@@ -43,8 +42,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	protected String name = Messages.RefactoringRule_default_name;
 
 	protected String description = Messages.RefactoringRule_default_description;
+	
+	protected final JavaVersion requiredJavaVersion;
 
-	protected List<GroupEnum> groups = new ArrayList<>();
+	protected final List<Tag> tags;
 
 	protected boolean enabled = true;
 
@@ -56,7 +57,15 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		this.visitor = visitor;
 		// TODO maybe add a better id
 		this.id = this.getClass().getSimpleName();
+		this.tags = Tag.getTagsForRule(this.getClass());
+		this.requiredJavaVersion = provideRequiredJavaVersion();
 	}
+	
+	/**
+	 * the required java version of the implemented rule
+	 * @return
+	 */
+	protected abstract JavaVersion provideRequiredJavaVersion();
 
 	public String getName() {
 		return name;
@@ -65,9 +74,9 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	public String getDescription() {
 		return description;
 	}
-
-	public List<GroupEnum> getGroups() {
-		return groups;
+	
+	public JavaVersion getRequiredJavaVersion() {
+		return requiredJavaVersion;
 	}
 
 	public boolean isEnabled() {
@@ -189,9 +198,12 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	 */
 	public void calculateEnabledForProject(IJavaProject project){
 		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-		enabled = GroupUtil.compilerOptionMatchesGroup(compilerCompliance, groups);
-		if(enabled){
-			enabled = ruleSpecificImplementation(project);
+		if(null != compilerCompliance){
+			String enumRepresentation = "JAVA_"+compilerCompliance.replace(".", "_");
+			enabled = JavaVersion.valueOf(enumRepresentation).atLeast(requiredJavaVersion);
+			if(enabled){
+				enabled = ruleSpecificImplementation(project);
+			}	
 		}
 	}
 	

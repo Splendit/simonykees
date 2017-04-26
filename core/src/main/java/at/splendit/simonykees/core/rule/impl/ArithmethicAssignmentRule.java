@@ -1,8 +1,8 @@
 package at.splendit.simonykees.core.rule.impl;
 
-import at.splendit.simonykees.core.rule.GroupEnum;
+import org.apache.commons.lang3.JavaVersion;
+
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.util.GroupUtil;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -19,6 +19,10 @@ public class ArithmethicAssignmentRule extends RefactoringRule<ArithmethicAssign
 		super(visitor);
 		this.name = Messages.ArithmethicAssignmentRule_name;
 		this.description = Messages.ArithmethicAssignmentRule_description;
-		this.groups.addAll(GroupUtil.allJavaVersionSince(GroupEnum.JAVA_1_4));
+	}
+	
+	@Override
+	protected JavaVersion provideRequiredJavaVersion() {
+		return JavaVersion.JAVA_1_4;
 	}
 }

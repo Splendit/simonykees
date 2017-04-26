@@ -2,9 +2,7 @@ package at.splendit.simonykees.core.rule.impl;
 
 import org.apache.commons.lang3.JavaVersion;
 
-import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.util.GroupUtil;
 import at.splendit.simonykees.core.visitor.OverrideAnnotationRuleASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -25,6 +23,10 @@ public class OverrideAnnotationRule extends RefactoringRule<OverrideAnnotationRu
 		super(visitor);
 		this.name = Messages.OverrideAnnotationRule_name;
 		this.description = Messages.OverrideAnnotationRule_description;
-		this.groups.addAll(GroupUtil.allJavaVersionSince(GroupEnum.JAVA_1_6));
+	}
+	
+	@Override
+	protected JavaVersion provideRequiredJavaVersion() {
+		return JavaVersion.JAVA_1_6;
 	}
 }

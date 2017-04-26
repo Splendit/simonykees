@@ -9,6 +9,7 @@ import java.util.jar.Attributes.Name;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -18,9 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeException;
-import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.util.GroupUtil;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -46,8 +45,12 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 		super(visitor);
 		this.name = Messages.StringUtilsRule_name;
 		this.description = Messages.StringUtilsRule_description;
-		this.groups.addAll(GroupUtil.allJavaVersionSince(GroupEnum.JAVA_1_1));
 		this.supportetVersion.add(VERSION_3_1);
+	}
+	
+	@Override
+	protected JavaVersion provideRequiredJavaVersion() {
+		return JavaVersion.JAVA_1_1;
 	}
 
 	@Override

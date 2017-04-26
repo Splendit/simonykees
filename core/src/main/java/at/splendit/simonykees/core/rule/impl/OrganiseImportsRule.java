@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
@@ -23,9 +24,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.core.rule.GroupEnum;
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.util.GroupUtil;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
@@ -52,7 +51,11 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 		super(visitor);
 		this.name = Messages.OrganiseImportsRule_name;
 		this.description = Messages.OrganiseImportsRule_description;
-		this.groups.addAll(GroupUtil.allJavaVersionSince(GroupEnum.JAVA_1_1));
+	}
+	
+	@Override
+	protected JavaVersion provideRequiredJavaVersion() {
+		return JavaVersion.JAVA_1_1;
 	}
 
 	@Override
