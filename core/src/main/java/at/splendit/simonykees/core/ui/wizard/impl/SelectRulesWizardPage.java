@@ -1,7 +1,7 @@
 
 package at.splendit.simonykees.core.ui.wizard.impl;
 
-import java.util.Map;
+import java.util.List;
 
 import org.eclipse.jface.fieldassist.AutoCompleteField;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
@@ -110,9 +110,13 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 * group
 	 */
 	private void populateGroupFilterCombo() {
-		Map<String, String> profiles = SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap();
-		for(String key : profiles.keySet()) {
-			selectProfileCombo.add(key);
+//		Map<String, String> profiles = SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap();
+//		for(String key : profiles.keySet()) {
+//			selectProfileCombo.add(key);
+//		}
+		List<String> profiles = SimonykeesPreferenceManager.getAllProfileIds();
+		for(String profile : profiles) {
+			selectProfileCombo.add(profile);
 		}
 	}
 

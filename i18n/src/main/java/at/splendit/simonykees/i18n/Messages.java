@@ -114,8 +114,14 @@ public class Messages extends NLS {
 	public static String SimonykeesMessageDialog_default_error_message;
 	public static String SimonykeesMessageDialog_open_browser_error_message;
 	public static String SimonykeesPreferenceManager_builtIn;
+	public static String SimonykeesPreferencePage_editProfileButtonLabel;
+	public static String SimonykeesPreferencePage_newProfileButtonLabel;
+	public static String SimonykeesPreferencePage_removeProfileButtonLabel;
 	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_selectProfile;
+	public static String SimonykeesPreferencePage_useProfileOptionNoProfile;
+	public static String SimonykeesPreferencePage_useProfileOptionRadioGroupTitle;
+	public static String SimonykeesPreferencePage_useProfileOptionSelectedProfile;
 	public static String SimonykeesPreferencePageLicense_jsparrow_licensed_as;
 	public static String SimonykeesPreferencePageLicense_jsparrow_valid_until;
 	public static String SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow;

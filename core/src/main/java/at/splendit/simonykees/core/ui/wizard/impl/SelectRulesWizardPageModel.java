@@ -169,8 +169,8 @@ public class SelectRulesWizardPageModel implements IWizardPageModel {
 		Set<Object> currentPosibilities = new HashSet<>();
 		currentPosibilities.addAll(posibilities);
 		for (Object posibility : currentPosibilities) {
-			if (SimonykeesPreferenceManager.isRuleSelectedInProfile(
-					SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
+			if (SimonykeesPreferenceManager.getProfileFromName(currentProfileId).containsRule(//SimonykeesPreferenceManager.isRuleSelectedInProfile(
+					//SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
 					((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getId())) {
 				selection.add(posibility);
 				posibilities.remove(posibility);
