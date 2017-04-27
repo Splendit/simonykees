@@ -12,13 +12,15 @@ node {
 	// jenkins git ssh credentials
 	def sshCredentials = '7f15bb8a-a1db-4cdf-978f-3ae5983400b6'
 
-	def to = emailextrecipients([[$class: 'DevelopersRecipientProvider'],[$class: 'CulpritsRecipientProvider'],[$class: 'UpstreamComitterRecipientProvider'],[$class: 'FirstFailingBuildSuspectsRecipientProvider'],[$class: 'FailingTestSuspectsRecipientProvider']])
-	println "Whats going on with this emailsi [$to]"
-	
-	notifyStarted()
 
 	stage('Preparation') { // for display purposes
 		checkout scm
+
+		def to = emailextrecipients([[$class: 'DevelopersRecipientProvider'],[$class: 'CulpritsRecipientProvider'],[$class: 'UpstreamComitterRecipientProvider'],[$class: 'FirstFailingBuildSuspectsRecipientProvider'],[$class: 'FailingTestSuspectsRecipientProvider']])
+	  println "Whats going on with this emailsi [$to]"
+	
+		notifyStarted()
+
 	}
 /*
 	if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
