@@ -13,8 +13,8 @@ node {
 	def sshCredentials = '7f15bb8a-a1db-4cdf-978f-3ae5983400b6'
 
 	def to = emailextrecipients([
-        [$class: 'CulpritsRecipientProvider'],
-        [$class: 'DevelopersRecipientProvider'],
+   //     [$class: 'CulpritsRecipientProvider'],
+   //     [$class: 'DevelopersRecipientProvider'],
         [$class: 'RequesterRecipientProvider']
 	])
 
