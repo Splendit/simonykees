@@ -12,14 +12,20 @@ node {
 	// jenkins git ssh credentials
 	def sshCredentials = '7f15bb8a-a1db-4cdf-978f-3ae5983400b6'
 
+	def to = emailextrecipients([
+        [$class: 'CulpritsRecipientProvider'],
+        [$class: 'DevelopersRecipientProvider'],
+        [$class: 'RequesterRecipientProvider']
+	])
 
+	println to	
 	
 	notifyStarted()
 
 	stage('Preparation') { // for display purposes
 		checkout scm
 	}
-
+/*
 	if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
 		stage('Push to Github') {
 			println "Pushing to GitHub..."
@@ -56,9 +62,9 @@ node {
 
 			setTestStatus(statusCode)
 			
-			// collects unit test results
-			junit '**/target/surefire-reports/TEST-*.xml'
-			archive 'target/*.jar'
+			// collects unit test results*/
+//			junit '**/target/surefire-reports/TEST-*.xml'
+/*			archive 'target/*.jar'
 		}
 	}
 	
@@ -88,7 +94,7 @@ def setTestStatus(testStatus) {
 		currentBuild.result = 'UNSTABLE'
 	}
 }
-
+*/
 
 def notifyStarted() {
   // send to Slack
