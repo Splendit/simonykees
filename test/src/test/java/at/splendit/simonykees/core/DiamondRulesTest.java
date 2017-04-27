@@ -3,6 +3,7 @@ package at.splendit.simonykees.core;
 import java.nio.file.Path;
 import java.util.Collection;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -44,7 +45,7 @@ public class DiamondRulesTest extends AbstractRulesTest {
 
 	@Test
 	public void testTransformation() throws Exception {
-		Assert.fail()
+		Assert.fail();
 		//super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
 	}
 }
