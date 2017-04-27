@@ -26,6 +26,8 @@ public class Messages extends NLS {
 	public static String CodeFormatterRule_name;
 	public static String CollectionRemoveAllRule_description;
 	public static String CollectionRemoveAllRule_name;
+	public static String ConfigureProfileSelectRulesWizardPage_nameInputLabel;
+	public static String ConfigureProfileSelectRulesWizardPage_nameInputText;
 	public static String DiamondOperatorASTVisitor_using_diamond_operator;
 	public static String DiamondOperatorRule_description;
 	public static String DiamondOperatorRule_name;

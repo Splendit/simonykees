@@ -74,6 +74,15 @@ public class SelectRulesWizard extends Wizard {
 		Activator.setRunning(false);
 		return super.performCancel();
 	}
+	
+	@Override
+	public boolean canFinish() {
+		if(model.getSelectionAsList().isEmpty()) {
+			return false;
+		} else {
+			return true;
+		}
+	}
 
 	@Override
 	public boolean performFinish() {

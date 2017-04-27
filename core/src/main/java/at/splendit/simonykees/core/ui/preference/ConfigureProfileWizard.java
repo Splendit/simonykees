@@ -8,16 +8,14 @@ import org.eclipse.jface.wizard.Wizard;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.ui.wizard.impl.AbstractSelectRulesWizardPage;
-import at.splendit.simonykees.core.ui.wizard.impl.SelectRulesWizardPageControler;
-import at.splendit.simonykees.core.ui.wizard.impl.SelectRulesWizardPageModel;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
 public class ConfigureProfileWizard extends Wizard {
 
 	private AbstractSelectRulesWizardPage page;
-	private SelectRulesWizardPageControler controler;
-	private SelectRulesWizardPageModel model;
+	private ConfigureProfileSelectRulesWizardPageControler controler;
+	private ConfigureProfileSelectRulesWIzardPageModel model;
 
 	private String profileId;
 
@@ -36,8 +34,8 @@ public class ConfigureProfileWizard extends Wizard {
 
 	@Override
 	public void addPages() {
-		model = new SelectRulesWizardPageModel(rules);
-		controler = new SelectRulesWizardPageControler(model);
+		model = new ConfigureProfileSelectRulesWIzardPageModel(rules);
+		controler = new ConfigureProfileSelectRulesWizardPageControler(model);
 		page = new ConfigureProfileSelectRulesWizardPage(model, controler, profileId);
 		addPage(page);
 	}
@@ -45,7 +43,7 @@ public class ConfigureProfileWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		int index = SimonykeesPreferenceManager.getProfiles().indexOf(SimonykeesPreferenceManager.getProfileFromName(profileId));
-		String name = "Profile 1";//model.getNameText();
+		String name = ((ConfigureProfileSelectRulesWIzardPageModel)model).getName();
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ruleIds = model.getSelectionAsList();
 		if(index >= 0) {
 			SimonykeesPreferenceManager.updateProfile(index, name, ruleIds.stream().map(rule -> rule.getId()).collect(Collectors.toList()));
@@ -55,4 +53,15 @@ public class ConfigureProfileWizard extends Wizard {
 		return true;
 	}
 
+	@Override
+	public boolean canFinish() {
+		if(model.getSelectionAsList().isEmpty()) {
+			return false;
+		} else if (model.getName().isEmpty()){
+			//TODO if name already exists for another profile, return false
+			return false;
+		} else {
+			return true;
+		}
+	}
 }

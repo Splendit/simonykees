@@ -41,8 +41,8 @@ import at.splendit.simonykees.i18n.Messages;
  */
 public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
-	private SelectRulesWizardPageModel model;
-	private SelectRulesWizardPageControler controler;
+	private AbstractSelectRulesWizardModel model;
+	private AbstractSelectRulesWizardControler controler;
 
 	private TreeViewer leftTreeViewer;
 	private TableViewer rightTableViewer;
@@ -54,7 +54,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	private StyledText descriptionStyledText;
 
-	public AbstractSelectRulesWizardPage(SelectRulesWizardPageModel model, SelectRulesWizardPageControler controler) {
+	public AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
+			AbstractSelectRulesWizardControler controler) {
 		super(Messages.SelectRulesWizardPage_page_name);
 		setTitle(Messages.SelectRulesWizardPage_title);
 		setDescription(Messages.SelectRulesWizardPage_description);
@@ -343,6 +344,9 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				leftTreeViewer.setInput(model.filterPosibilitiesByName());
 			}
 			rightTableViewer.setInput(model.getSelection());
+			// updates enabling Finish button according to right side table view
+			// if selection is empty Finish button is disabled
+			getContainer().updateButtons();
 			model.resetChanged();
 		}
 		populateDescriptionTextViewer();

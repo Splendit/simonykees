@@ -24,8 +24,8 @@ import at.splendit.simonykees.i18n.Messages;
 
 public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
-	private SelectRulesWizardPageModel model;
-	private SelectRulesWizardPageControler controler;
+	private AbstractSelectRulesWizardModel model;
+	private AbstractSelectRulesWizardControler controler;
 
 	private Label groupFilterLabel;
 	private Combo selectProfileCombo;
@@ -62,7 +62,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		nameFilterLabel.setText(Messages.SelectRulesWizardPage_filterByName);
 
 		nameFilterText = new Text(filterComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
-		new AutoCompleteField(nameFilterText, new TextContentAdapter(), model.getTags());
+		new AutoCompleteField(nameFilterText, new TextContentAdapter(), ((SelectRulesWizardPageModel)model).getTags());
 		nameFilterText.setMessage(Messages.SelectRulesWizardPage_searchString);
 		gridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
 		gridData.widthHint = 180;
@@ -72,7 +72,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				Text source = (Text) e.getSource();
-				controler.nameFilterTextChanged(source.getText());
+				((SelectRulesWizardPageControler)controler).nameFilterTextChanged(source.getText());
 			}
 		});
 		// following doesn't work under Windows7
@@ -132,11 +132,11 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String selectedProfileId = selectProfileCombo.getItem(selectProfileCombo.getSelectionIndex());
-				if (selectedProfileId.equals(model.getCurrentProfileId())) {
+				if (selectedProfileId.equals(((SelectRulesWizardPageModel)model).getCurrentProfileId())) {
 					// nothing
 				} else {
 					nameFilterText.setText(""); //$NON-NLS-1$
-					controler.profileChanged(selectedProfileId);
+					((SelectRulesWizardPageControler)controler).profileChanged(selectedProfileId);
 				}
 			}
 		};
