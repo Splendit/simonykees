@@ -100,8 +100,10 @@ def setTestStatus(testStatus) {
 def notifyBuild(String buildStatus) {
   // send to email
 
-	def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
-  def details = "<p>${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>\n<p>Check console output at \"<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>\"</p>"
+	jobName = env.JOB_NAME.replace("%2F", "/")
+
+	def subject = "${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]'"
+  def details = "<p>${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]':</p>\n<p>Check console output at \"<a href='${env.BUILD_URL}'>${jobName} [${env.BUILD_NUMBER}]</a>\"</p>"
 
 	  emailext (
       subject: subject,
