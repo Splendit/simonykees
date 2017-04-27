@@ -25,10 +25,12 @@ public class FieldNameConventionRule {
 	private String my$val = new String(_myval);
 	private String Mon = myval$;
 	private static String CanBeRenamed = "expecting renaming";
-	private static String CAMMEL_CASE_ME = "this can be converted to cammel case";
+	private static String CAMEL_CASE_ME = "this can be converted to camel case";
 	
 	private String shadowed_var;
 	private String österreich, Österreich;
+	
+	private String[]MyArray = {"my", "array"};
 	
 	public Integer MyInt;
 	
@@ -44,8 +46,28 @@ public class FieldNameConventionRule {
 	
 	public String referenceWithQualifiedName() {
 		FieldNameConventionRule conentionRule = new FieldNameConventionRule();
+		int length = conentionRule.MyArray.length;
 		return conentionRule.my$val;
 	}
+	
+	public void invokingObjectMethod() {
+		int length = MyArray.length;
+	}
+	
+	public void accessingEnumConstants() {
+		WeekDays day = WeekDays.SATURDAAAY;
+		switch (day) {
+		case Mon:
+			break;
+		case Fri:
+			break;
+
+		default:
+			break;
+		}
+	}
+	
+
 	
 	public String methodImplementigAnAnonymousClass() {
 		String _myval = Optional.ofNullable(this._myval).orElse("");
@@ -68,14 +90,22 @@ public class FieldNameConventionRule {
 		return _myval; 
 	}
 	
-	class Foo {
+	public void referencingRenamesInInnerClass() {
+		Foo foo = new Foo();
+		
+		String t = foo.Can_be_renamed;
+	}
+	
+	public class Foo {
 		
 //		private Integer Int;
 		private String i_nt;
 		private String _myval;
+		private String Can_be_renamed = "";
 		
 		public Foo () {
 			FieldNameConventionRule conventionRule = new FieldNameConventionRule();
+			Can_be_renamed = "_";
 			conventionRule._myval = "";
 			if(my$val != null) {
 				Int = 0;
@@ -83,12 +113,30 @@ public class FieldNameConventionRule {
 		}
 		
 		public String getMyVal() {
-			
+			Can_be_renamed = "in_getMyVal";
 			return _myval;
 		}
 		
 		public Integer getIntValue() {
 			return Int;
+		}
+		
+		public String getCanBeRenamed() {
+			InnerFoo innerInnerFoo = new InnerFoo();
+			String s = innerInnerFoo.innerInnerFooString;
+			return Can_be_renamed;
+		}
+		
+		public class InnerFoo {
+			private String innerInnerFooString;
+			public InnerFoo() {
+				String s = Can_be_renamed;
+				s = my$val;
+			}
+			
+			class EndlessInnerFoo {
+				
+			}
 		}
 	}
 	
@@ -112,7 +160,6 @@ public class FieldNameConventionRule {
 	@interface FooAnnotation {
 		String myvalue = _int;
 		String Mon = CanBeRenamed;
-		String cammelCaseMe = CAMMEL_CASE_ME;
-		
+		String camelCaseMe = CAMEL_CASE_ME;
 	}
 }

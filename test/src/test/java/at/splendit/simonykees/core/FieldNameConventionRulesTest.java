@@ -3,7 +3,6 @@ package at.splendit.simonykees.core;
 import java.nio.file.Path;
 import java.util.Collection;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
