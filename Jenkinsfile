@@ -98,7 +98,7 @@ def notifyStarted() {
 //  hipchatSend (color: 'YELLOW', notify: true,
 //      message: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
 //    )
-emailext body: 'A Test EMail', recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: 'Test', to: 'martin.huter@splendit.at'
+emailext body: 'A Test EMail', recipientProviders: [[$class: 'DevelopersRecipientProvider'], [$class: 'RequesterRecipientProvider']], subject: 'Test', to: 'ludwig.werzowa@splendit.at'
   // send to email
 //  emailext (
 //      subject: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
