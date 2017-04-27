@@ -104,12 +104,12 @@ def notifyBuild(String buildStatus) {
 		jobName = env.JOB_NAME.replace("%2F", "/")
 	
 		def subject = "${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]'"
-	  def details = "<p>${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]':</p>\n<p>Check console output at \"<a href='${env.BUILD_URL}'>${jobName} [${env.BUILD_NUMBER}]</a>\"</p>"
+		def details = "<p>${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]':</p>\n<p>Check console output at \"<a href='${env.BUILD_URL}'>${jobName} [${env.BUILD_NUMBER}]</a>\"</p>"
 	
-		  emailext (
-	      subject: subject,
-	      body: details,
-	      recipientProviders: [[$class: 'CulpritsRecipientProvider']]
-	    )
+		emailext (
+			subject: subject,
+			body: details,
+			recipientProviders: [[$class: 'CulpritsRecipientProvider']]
+	  )
 	}
 }
