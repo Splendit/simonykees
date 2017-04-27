@@ -44,6 +44,7 @@ public class DiamondRulesTest extends AbstractRulesTest {
 
 	@Test
 	public void testTransformation() throws Exception {
-		super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
+		Assert.fail()
+		//super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
 	}
 }
