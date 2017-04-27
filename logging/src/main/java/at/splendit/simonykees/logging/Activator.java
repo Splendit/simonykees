@@ -27,6 +27,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
 /**
  * The activator class controls the plug-in life cycle
  */
+@SuppressWarnings("nls")
 public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
