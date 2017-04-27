@@ -80,7 +80,7 @@ node {
 		}
 	} catch (e) {
 	  // If there was an exception thrown, the build failed
-	  currentBuild.result = "FAILED"
+		currentBuild.result = "FAILURE"
 		println currentBuild.result
 		println "failed"
 	  throw e
@@ -104,7 +104,7 @@ def setTestStatus(testStatus) {
 def notifyBuild(String buildStatus) {
   // send to email only if buildStatus is UNSTABLE or FAILED
 	println buildStatus
-	if (buildStatus == 'FAILED' || buildStatus == 'UNSTABLE') {
+	if (buildStatus == 'FAILURE' || buildStatus == 'UNSTABLE') {
 		jobName = env.JOB_NAME.replace("%2F", "/")
 	
 		def subject = "${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]'"
