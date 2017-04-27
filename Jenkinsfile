@@ -14,7 +14,7 @@ node {
 
 	def to = emailextrecipients([[$class: 'CulpritsRecipientProvider'],[$class: 'DevelopersRecipientProvider'],[$class: 'RequesterRecipientProvider']])
 
-	println to	
+	println "Whats going on with this emailsi [$to]"
 	
 	notifyStarted()
 
