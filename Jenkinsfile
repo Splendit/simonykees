@@ -93,7 +93,7 @@ def setTestStatus(testStatus) {
 		currentBuild.result = 'SUCCESS'
 	} else if ( testStatus == 1 ) {
 		currentBuild.result = 'UNSTABLE'
-	}*/
+	}
 }
 
 
