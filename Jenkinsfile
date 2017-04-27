@@ -81,9 +81,13 @@ node {
 	} catch (e) {
 	  // If there was an exception thrown, the build failed
 	  currentBuild.result = "FAILED"
+		println currentBuild.result
+		println "failed"
 	  throw e
 	} finally {
 	  // Success or failure, always send notifications
+		println "finally"
+		println currentBuild.result
 	  notifyBuild(currentBuild.result)
 	}
 }
@@ -99,7 +103,7 @@ def setTestStatus(testStatus) {
 
 def notifyBuild(String buildStatus) {
   // send to email only if buildStatus is UNSTABLE or FAILED
-
+	println buildStatus
 	if (buildStatus == 'FAILED' || buildStatus == 'UNSTABLE') {
 		jobName = env.JOB_NAME.replace("%2F", "/")
 	
