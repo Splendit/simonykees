@@ -11,6 +11,11 @@ node {
 	def backupOrigin = 'git@github.com:Splendit/simonykees.git'
 	// jenkins git ssh credentials
 	def sshCredentials = '7f15bb8a-a1db-4cdf-978f-3ae5983400b6'
+
+
+	
+	notifyStarted()
+
 	stage('Preparation') { // for display purposes
 		checkout scm
 	}
@@ -82,4 +87,23 @@ def setTestStatus(testStatus) {
 	} else if ( testStatus == 1 ) {
 		currentBuild.result = 'UNSTABLE'
 	}
+}
+
+
+def notifyStarted() {
+  // send to Slack
+//  slackSend (color: '#FFFF00', message: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+
+  // send to HipChat
+//  hipchatSend (color: 'YELLOW', notify: true,
+//      message: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
+//    )
+
+  // send to email
+  emailext (
+      subject: "STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+      body: """<p>STARTED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+        <p>Check console output at &QUOT;<a href='${env.BUILD_URL}'>${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>&QUOT;</p>""",
+      recipientProviders: [[$class: 'DevelopersRecipientProvider']]
+    )
 }
