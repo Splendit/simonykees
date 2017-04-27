@@ -97,7 +97,7 @@ def setTestStatus(testStatus) {
 }
 
 
-def notifyStarted(String buildStatus) {
+def notifyBuild(String buildStatus) {
   // send to email
 
 	def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
