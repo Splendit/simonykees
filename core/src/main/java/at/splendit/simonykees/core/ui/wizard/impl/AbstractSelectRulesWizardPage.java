@@ -44,6 +44,8 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 	private AbstractSelectRulesWizardModel model;
 	private AbstractSelectRulesWizardControler controler;
 
+	private Composite composite;
+	
 	private TreeViewer leftTreeViewer;
 	private TableViewer rightTableViewer;
 
@@ -71,7 +73,7 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		Composite composite = new Composite(parent, SWT.NONE);
+		composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 
 		setControl(composite);
@@ -338,6 +340,7 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 		// check if model has changed to update table and tree view or is just
 		// selection changed to update description field and buttons
 		if (model.hasChanged()) {
+			model.filterPosibilitiesByTags();
 			if (model.getNameFilter().isEmpty()) {
 				leftTreeViewer.setInput(model.getPosibilities());
 			} else {
@@ -381,5 +384,9 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 			}
 		}
 		return false;
+	}
+	
+	public void recalculateLayout() {
+		composite.layout(true, true);
 	}
 }

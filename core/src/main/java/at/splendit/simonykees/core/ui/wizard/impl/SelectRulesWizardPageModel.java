@@ -1,5 +1,7 @@
 package at.splendit.simonykees.core.ui.wizard.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -10,24 +12,30 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 
-
 	private String nameFilter = ""; //$NON-NLS-1$
 
 	private String[] tags;
 
+	private final List<String> appliedTags = new ArrayList<>();
+
 	public SelectRulesWizardPageModel(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		super(rules);
-		
+
 		tags = Tag.getAllTags();
 	}
 
 	/**
 	 * Getter for List containing all groups for filtering by group.
+	 * 
 	 * @return List containing all group names.
 	 * 
 	 */
 	public String[] getTags() {
 		return tags;
+	}
+
+	public List<String> getAppliedTags() {
+		return appliedTags;
 	}
 
 	/**
@@ -44,6 +52,23 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 						|| ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).getDescription()
 								.contains(nameFilter))
 				.collect(Collectors.toSet());
+	}
+
+	@SuppressWarnings("unchecked")
+	public void filterPosibilitiesByTags() {
+		if (!appliedTags.isEmpty()) {
+			Set<Object> currentPossibilities = getPosibilities();
+			setPosibilitiesFilteredByTag(currentPossibilities.stream()
+					.filter(object -> !Collections.disjoint(
+							((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).getTags(), appliedTags))
+					.collect(Collectors.toSet()));
+		} else {
+			setPosibilitiesFilteredByTag(getAllPosibilities());
+		}
+		// ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>)
+		// object).getTags().stream()
+		// .anyMatch(tag ->
+		// appliedTags.contains(tag))).collect(Collectors.toSet());
 	}
 
 	/**
@@ -71,5 +96,18 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 		return nameFilter;
 	}
 
-	
+	public void addTag(String text) {
+		appliedTags.add(text);
+
+		setChanged();
+		notifyListeners();
+	}
+
+	public void removeTag(String text) {
+		appliedTags.remove(text);
+
+		setChanged();
+		notifyListeners();
+	}
+
 }

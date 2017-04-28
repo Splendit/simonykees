@@ -13,6 +13,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
@@ -27,11 +28,15 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	private AbstractSelectRulesWizardModel model;
 	private AbstractSelectRulesWizardControler controler;
 
+	private Composite filterComposite;
+
 	private Label groupFilterLabel;
 	private Combo selectProfileCombo;
 
 	private Label nameFilterLabel;
 	private Text nameFilterText;
+
+	private Composite tagsComposite;
 
 	private Button removeDisabledRulesButton;
 
@@ -52,17 +57,18 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 * @param parent
 	 */
 	protected void createFilteringPart(Composite parent) {
-		Composite filterComposite = new Composite(parent, SWT.NONE);
+		filterComposite = new Composite(parent, SWT.NONE);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		filterComposite.setLayoutData(gridData);
 		GridLayout gridLayout = new GridLayout(4, false);
+		gridLayout.horizontalSpacing = 3;
 		filterComposite.setLayout(gridLayout);
 
 		nameFilterLabel = new Label(filterComposite, SWT.NONE);
 		nameFilterLabel.setText(Messages.SelectRulesWizardPage_filterByName);
 
 		nameFilterText = new Text(filterComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
-		new AutoCompleteField(nameFilterText, new TextContentAdapter(), ((SelectRulesWizardPageModel)model).getTags());
+		new AutoCompleteField(nameFilterText, new TextContentAdapter(), ((SelectRulesWizardPageModel) model).getTags());
 		nameFilterText.setMessage(Messages.SelectRulesWizardPage_searchString);
 		gridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
 		gridData.widthHint = 180;
@@ -72,7 +78,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				Text source = (Text) e.getSource();
-				((SelectRulesWizardPageControler)controler).nameFilterTextChanged(source.getText());
+				((SelectRulesWizardPageControler) controler).nameFilterTextChanged(source.getText());
 			}
 		});
 		// following doesn't work under Windows7
@@ -83,9 +89,14 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 					Text text = (Text) e.getSource();
 					text.setText(Messages.SelectRulesWizardPage_emptyString);
 				}
+				if (e.detail == SWT.ICON_SEARCH) {
+					Text text = (Text) e.getSource();
+					((SelectRulesWizardPageControler) controler).searchPressed(text.getText());
+					addTagInComposite(text.getText());
+					nameFilterText.setText(""); //$NON-NLS-1$
+				}
 			}
 		});
-
 
 		groupFilterLabel = new Label(filterComposite, SWT.NONE);
 		groupFilterLabel.setText(Messages.SelectRulesWizardPage_selectProfile);
@@ -99,6 +110,15 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		gridData.widthHint = 200;
 		selectProfileCombo.setLayoutData(gridData);
 
+		tagsComposite = new Composite(filterComposite, SWT.NONE);
+		RowLayout tagsLayout = new RowLayout();
+		tagsLayout.marginBottom = 0;
+		tagsLayout.marginTop = 0;
+		tagsComposite.setLayout(tagsLayout);
+		gridData = new GridData(GridData.FILL, GridData.BEGINNING, false, false);
+		gridData.horizontalSpan = 4;
+		tagsComposite.setLayoutData(gridData);
+
 		createRemoveDisabledRulesButton(filterComposite);
 		gridData = new GridData();
 		gridData.horizontalSpan = 2;
@@ -110,12 +130,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 * group
 	 */
 	private void populateGroupFilterCombo() {
-//		Map<String, String> profiles = SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap();
-//		for(String key : profiles.keySet()) {
-//			selectProfileCombo.add(key);
-//		}
 		List<String> profiles = SimonykeesPreferenceManager.getAllProfileIds();
-		for(String profile : profiles) {
+		for (String profile : profiles) {
 			selectProfileCombo.add(profile);
 		}
 	}
@@ -132,11 +148,11 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String selectedProfileId = selectProfileCombo.getItem(selectProfileCombo.getSelectionIndex());
-				if (selectedProfileId.equals(((SelectRulesWizardPageModel)model).getCurrentProfileId())) {
+				if (selectedProfileId.equals(((SelectRulesWizardPageModel) model).getCurrentProfileId())) {
 					// nothing
 				} else {
 					nameFilterText.setText(""); //$NON-NLS-1$
-					((SelectRulesWizardPageControler)controler).profileChanged(selectedProfileId);
+					((SelectRulesWizardPageControler) controler).profileChanged(selectedProfileId);
 				}
 			}
 		};
@@ -160,5 +176,23 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 				model.removeDisabledPosibilities(btn.getSelection());
 			}
 		});
+	}
+
+	private void addTagInComposite(String tag) {
+		Button tagButton = new Button(tagsComposite, SWT.PUSH | SWT.ICON_CANCEL);
+		tagButton.setText(tag);
+		tagButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				((SelectRulesWizardPageControler) controler).tagButtonPressed(((Button) e.getSource()).getText());
+				tagButton.dispose();
+				tagsComposite.layout(true, true);
+				filterComposite.layout(true, true);
+				recalculateLayout();
+			}
+		});
+		tagsComposite.layout(true, true);
+		filterComposite.layout(true, true);
+		recalculateLayout();
 	}
 }

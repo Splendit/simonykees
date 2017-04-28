@@ -257,4 +257,11 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	public abstract String getNameFilter();
 	
 	public abstract Set<Object> filterPosibilitiesByName();
+
+	public abstract void filterPosibilitiesByTags();
+
+	public void setPosibilitiesFilteredByTag(Set<Object> filteredPosibilities) {
+		posibilities.clear();
+		posibilities.addAll(filteredPosibilities);
+	}
 }

@@ -12,4 +12,12 @@ public class SelectRulesWizardPageControler extends AbstractSelectRulesWizardCon
 		model.setNameFilter(text);
 	}
 
+	public void searchPressed(String text) {
+		model.addTag(text);
+	}
+
+	public void tagButtonPressed(String text) {
+		model.removeTag(text);
+	}
+
 }

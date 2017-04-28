@@ -28,6 +28,11 @@ public class ConfigureProfileSelectRulesWIzardPageModel extends AbstractSelectRu
 		return super.getAllPosibilities();
 	}
 
+	@Override
+	public void filterPosibilitiesByTags() {
+		// do nothing
+	}
+
 	public String getName() {
 		return newName;
 	}
@@ -50,5 +55,4 @@ public class ConfigureProfileSelectRulesWIzardPageModel extends AbstractSelectRu
 	public String getNameFilter() {
 		return ""; //$NON-NLS-1$
 	}
-
 }
