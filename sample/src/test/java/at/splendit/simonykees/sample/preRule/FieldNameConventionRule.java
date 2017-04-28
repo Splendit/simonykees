@@ -35,6 +35,10 @@ public class FieldNameConventionRule {
 	
 	public Integer MyInt;
 	
+	{
+		String insideInitializer = FINAL_INSTANCE_VARIABLES_CAN_BE_RENAMED;
+	}
+	
 	protected int getInt() {
 		String aFinalIncanceVariable = FINAL_INSTANCE_VARIABLES_CAN_BE_RENAMED;
 		return Int;

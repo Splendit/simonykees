@@ -28,6 +28,10 @@ public class FieldNameConventionRule {
 	private String[] myArray = { "my", "array" };
 	public Integer MyInt;
 
+	{
+		String insideInitializer = finalInstanceVariablesCanBeRenamed;
+	}
+
 	public String someFieldsAreShadowed() {
 		String shadowed_var = "myLocalVal";
 		String Österreich = "Österreich";
