@@ -28,9 +28,9 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
- * Renames the private non-final fields to comply with the naming convention:
- * "^[a-z][a-zA-Z0-9]*$" i.e. a lower case prefix followed by any sequence of
- * alpha-numeric characters.
+ * Renames the private fields (except for static final ones) to comply with 
+ * the naming convention: "^[a-z][a-zA-Z0-9]*$" i.e. a lower case prefix followed
+ * by any sequence of alpha-numeric characters.
  * For example, the fields of the the following class:
  * <pre>
  * 
@@ -83,10 +83,13 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
-		// check if it is a private and non-final field
+		/**
+		 * Only private fields can be renamed, unless they are static final. 
+		 */
 		if (hasModifier(fieldDeclaration, modifier -> modifier.isPrivate())
-				&& !hasModifier(fieldDeclaration, modifier -> modifier.isFinal())) {
-			
+				&& !(hasModifier(fieldDeclaration, modifier -> modifier.isStatic())
+						&& hasModifier(fieldDeclaration, modifier -> modifier.isFinal()))) {
+
 			ASTNode parent = fieldDeclaration.getParent();
 			if (parent != null && parent.getNodeType() == ASTNode.TYPE_DECLARATION) {
 				// find the type binding of the parent
@@ -98,37 +101,39 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 				for (VariableDeclarationFragment fragment : fragments) {
 					SimpleName fragmentName = fragment.getName();
 					String fragmentIdentifier = fragmentName.getIdentifier();
-					// check whether the current field name complies with convention
+					// check if the field name complies with the convention
 					if (!isComplyingWithConventions(fragmentIdentifier)) {
 						ITypeBinding fieldTypeBinding = fragmentName.resolveTypeBinding();
 						if (fieldTypeBinding != null) {
 							generateNewIdetifier(fragmentIdentifier)
 									// should not clash with existing names
-									.filter(newName -> !declaredFieldNames.contains(newName))
-									.ifPresent(newName -> {
+									.filter(newName -> !declaredFieldNames.contains(newName)).ifPresent(newName -> {
 
 										FieldReferencesASTVisitor referencesVisitor = new FieldReferencesASTVisitor(
 												fragmentName, parentTypeBidning, fieldTypeBinding);
-										/* 
-										 * Find the references in the outer class. A private field of an inner 
-										 * class can be directly accessed from the outer class!
-										 * */
+										/*
+										 * Find the references in the outer
+										 * class. A private field of an inner
+										 * class can be directly accessed from
+										 * the outer class!
+										 */
 										if (type.getParent().getNodeType() == ASTNode.TYPE_DECLARATION) {
 											type.getParent().accept(referencesVisitor);
 										}
-										// Find the references in the current class.
+										// Find the references in the current
+										// class.
 										type.accept(referencesVisitor);
 										List<String> allLocalVarNames = referencesVisitor.getLocalVarNames();
-										
+
 										/*
-										 * It is risky to introduce a field name coinciding with a 
-										 * local variable name. 
+										 * It is risky to introduce a field name
+										 * coinciding with a local variable name
 										 */
 										if (!allLocalVarNames.contains(newName)) {
-											// get the references from the visitor
 											List<SimpleName> references = referencesVisitor.getReferences();
 											declaredFieldNames.add(newName);
-											// rename the declaration and all the references...
+											// rename the declaration and all
+											// the references...
 											astRewrite.set(fragmentName, SimpleName.IDENTIFIER_PROPERTY, newName, null);
 											references.forEach(referene -> astRewrite.set(referene,
 													SimpleName.IDENTIFIER_PROPERTY, newName, null));

@@ -4,6 +4,7 @@ import java.util.Optional;
 
 @SuppressWarnings({ "nls", "unused" })
 public class FieldNameConventionRule {
+	private static final String DONT_RENAME_ME = "";
 	private static String iNt, i$nt, sWitch, $int, _int;
 	private static String canBeRenamed = "expecting renaming";
 	private static String CAMEL_CASE_ME = "this can be converted to camel case";
@@ -15,7 +16,7 @@ public class FieldNameConventionRule {
 	int $_;
 	private String $$$;
 	private int Int;
-	private final String DONT_RENAME_ME = "";
+	private final String finalInstanceVariablesCanBeRenamed = "toBeRenamed";
 	private String myval;
 	private String $myval;
 	private String myval_;
@@ -84,6 +85,7 @@ public class FieldNameConventionRule {
 	}
 
 	protected int getInt() {
+		String aFinalIncanceVariable = finalInstanceVariablesCanBeRenamed;
 		return Int;
 	}
 
@@ -114,7 +116,7 @@ public class FieldNameConventionRule {
 
 		public Foo() {
 			FieldNameConventionRule conventionRule = new FieldNameConventionRule();
-			canBeRenamed = "_";
+			canBeRenamed = "_" + finalInstanceVariablesCanBeRenamed;
 			conventionRule.myval = "";
 			if (myVal != null) {
 				Int = 0;
@@ -140,6 +142,7 @@ public class FieldNameConventionRule {
 			private String innerInnerFooString;
 
 			public InnerFoo() {
+				String aFinalIncanceVariable = finalInstanceVariablesCanBeRenamed;
 				String s = canBeRenamed;
 				s = myVal;
 			}

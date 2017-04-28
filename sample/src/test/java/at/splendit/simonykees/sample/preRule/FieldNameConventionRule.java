@@ -15,7 +15,8 @@ public class FieldNameConventionRule {
 	private String $$$;
 	private int Int;
 
-	private final String DONT_RENAME_ME = "";
+	private static final String DONT_RENAME_ME = "";
+	private final String FINAL_INSTANCE_VARIABLES_CAN_BE_RENAMED = "toBeRenamed";
 	
 	private static String i_nt, i$nt, s$Witch, $int, _int;
 	private String _myval;
@@ -35,6 +36,7 @@ public class FieldNameConventionRule {
 	public Integer MyInt;
 	
 	protected int getInt() {
+		String aFinalIncanceVariable = FINAL_INSTANCE_VARIABLES_CAN_BE_RENAMED;
 		return Int;
 	}
 	
@@ -105,7 +107,7 @@ public class FieldNameConventionRule {
 		
 		public Foo () {
 			FieldNameConventionRule conventionRule = new FieldNameConventionRule();
-			Can_be_renamed = "_";
+			Can_be_renamed = "_" + FINAL_INSTANCE_VARIABLES_CAN_BE_RENAMED;
 			conventionRule._myval = "";
 			if(my$val != null) {
 				Int = 0;
@@ -130,6 +132,7 @@ public class FieldNameConventionRule {
 		public class InnerFoo {
 			private String innerInnerFooString;
 			public InnerFoo() {
+				String aFinalIncanceVariable = FINAL_INSTANCE_VARIABLES_CAN_BE_RENAMED;
 				String s = Can_be_renamed;
 				s = my$val;
 			}
