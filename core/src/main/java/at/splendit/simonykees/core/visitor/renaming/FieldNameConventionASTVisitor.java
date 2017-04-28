@@ -8,26 +8,15 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Initializer;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
-import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
-import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
  * Renames the private fields (except for static final ones) to comply with 
@@ -111,7 +100,7 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 									// should not clash with existing names
 									.filter(newName -> !declaredFieldNames.contains(newName)).ifPresent(newName -> {
 
-										FieldReferencesASTVisitor referencesVisitor = new FieldReferencesASTVisitor(
+										BodyDeclarationsVisitor referencesVisitor = new BodyDeclarationsVisitor(
 												fragmentName, parentTypeBidning, fieldTypeBinding);
 										/*
 										 * Find the references in the outer
@@ -197,7 +186,7 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 			String camelCasedIdenitfier = lowerCasePrefix + suffix;
 
 			// check if it is eligible variable name
-			if (!ReservedKeyWords.isKeyWord(camelCasedIdenitfier)
+			if (!JavaReservedKeyWords.isKeyWord(camelCasedIdenitfier)
 					&& !Character.isDigit(camelCasedIdenitfier.charAt(0))) {
 				newName = camelCasedIdenitfier;
 			}
@@ -209,211 +198,5 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 	private boolean hasModifier(FieldDeclaration field, Predicate<? super Modifier> predicate) {
 		return ASTNodeUtil.convertToTypedList(field.modifiers(), Modifier.class).stream().filter(predicate).findAny()
 				.isPresent();
-	}
-}
-
-/**
- * List of java key words sorted by name. Taken from
- * {@linkplain https://docs.oracle.com/javase/tutorial/java/nutsandbolts/_keywords.html}
- * 
- * @author Ardit Ymeri
- * @since 1.2
- *
- */
-class ReservedKeyWords {
-	@SuppressWarnings("nls")
-	static final String[] javaKeyWords = { "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char",
-			"class", "const",
-
-			"continue", "default", "do", "double", "else", "enum", "extends", "final", "finally", "float",
-
-			"for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long", "native",
-
-			"new", "package", "private", "protected", "public", "return", "short", "static", "strictfp", "super",
-
-			"switch", "synchronized", "this", "throw", "throws", "transient", "try", "void", "volatile", "while" };
-
-	public static boolean isKeyWord(String keyword) {
-		return (Arrays.binarySearch(javaKeyWords, keyword) >= 0);
-	}
-}
-
-/**
- * A visitor for finding the references of a given field in the body of a class.
- * Does NOT go inside the inner the classes.
- * 
- * @author Ardit Ymeri
- * @since 1.2
- *
- */
-class FieldReferencesASTVisitor extends ASTVisitor {
-	private SimpleName fieldName;
-	private List<SimpleName> fieldReferences;
-	private ITypeBinding parentTypeBinding;
-	private int nestedTypeDeclarationLevel = 0;
-	private List<String> declaredLocalVarNames;
-	private ITypeBinding fieldTypeBinding;
-
-	public FieldReferencesASTVisitor(SimpleName fieldName, ITypeBinding parentTypeBinding,
-			ITypeBinding fieldTypeBinding) {
-
-		this.fieldName = fieldName;
-		this.fieldReferences = new ArrayList<>();
-		this.parentTypeBinding = parentTypeBinding;
-		this.declaredLocalVarNames = new ArrayList<>();
-		this.fieldTypeBinding = fieldTypeBinding;
-	}
-
-	@Override
-	public boolean visit(FieldDeclaration fieldDeclaration) {
-		visitReferences(fieldDeclaration);
-		return false;
-	}
-
-	@Override
-	public boolean visit(MethodDeclaration methodDeclaration) {
-		visitReferences(methodDeclaration);
-		return false;
-	}
-
-	@Override
-	public boolean visit(Initializer initializer) {
-		visitReferences(initializer);
-		return false;
-	}
-
-	@Override
-	public boolean visit(TypeDeclaration typeDeclaration) {
-		nestedTypeDeclarationLevel++;
-		visitReferences(typeDeclaration);
-
-		return nestedTypeDeclarationLevel == 1;
-	}
-
-	public void endVisit(TypeDeclaration typeDeclaration) {
-		nestedTypeDeclarationLevel--;
-	}
-
-	@Override
-	public boolean visit(EnumDeclaration typeDeclaration) {
-		visitReferences(typeDeclaration);
-		return false;
-	}
-
-	@Override
-	public boolean visit(AnnotationTypeDeclaration typeDeclaration) {
-		visitReferences(typeDeclaration);
-		return false;
-	}
-
-	/**
-	 * Gathers the local variable names in the given bodyDeclaration. Then,
-	 * finds the references of the {@link FieldReferencesASTVisitor#fieldName}.
-	 * 
-	 * @param bodyDeclaration
-	 *            an node representing a {@link BodyDeclaration}.
-	 */
-	private void visitReferences(BodyDeclaration bodyDeclaration) {
-
-		VariableDeclarationsVisitor declarationsVisitor = new VariableDeclarationsVisitor();
-		bodyDeclaration.accept(declarationsVisitor);
-		List<SimpleName> localDeclarations = declarationsVisitor.getVariableDeclarationNames();
-		List<String> localDeclarationNames = localDeclarations.stream().map(SimpleName::getIdentifier)
-				.collect(Collectors.toList());
-		ReferencesVisitor visitor = new ReferencesVisitor(fieldName, parentTypeBinding, fieldTypeBinding,
-				localDeclarationNames);
-		bodyDeclaration.accept(visitor);
-		fieldReferences.addAll(visitor.getReferences());
-		declaredLocalVarNames.addAll(localDeclarationNames);
-	}
-
-	public List<SimpleName> getReferences() {
-		return fieldReferences;
-	}
-
-	public List<String> getLocalVarNames() {
-		return declaredLocalVarNames;
-	}
-}
-
-/**
- * Finds the references of the given field in a block. Requires the names of the
- * local variables to be provided. Distinguishes between the local variables and
- * the fields with the same name.
- * 
- * @author Ardit Ymeri
- * @since 1.2
- *
- */
-class ReferencesVisitor extends ASTVisitor {
-	private String targetNameIdentifier;
-	private ITypeBinding targetTypeBinding;
-	private List<String> declaredLocalVarName;
-	private List<SimpleName> references;
-	private ITypeBinding parentTypeBinding;
-
-	public ReferencesVisitor(SimpleName targetNode, ITypeBinding parentTypeBinding,
-			ITypeBinding targetTypeBinding, List<String> declaredLocalVarNames) {
-		this.targetNameIdentifier = targetNode.getIdentifier();
-		this.declaredLocalVarName = declaredLocalVarNames;
-		this.references = new ArrayList<>();
-		this.parentTypeBinding = parentTypeBinding;
-		this.targetTypeBinding = targetTypeBinding;
-	}
-
-	@Override
-	public boolean visit(SimpleName simpleName) {
-		String identifier = simpleName.getIdentifier();
-		IBinding resolvedBinding = simpleName.resolveBinding();
-		if (resolvedBinding != null && resolvedBinding.getKind() == IBinding.VARIABLE) {
-
-			if (!simpleName.isDeclaration() && identifier.equals(targetNameIdentifier)
-					&& ClassRelationUtil.compareITypeBinding(simpleName.resolveTypeBinding().getErasure(),
-							targetTypeBinding.getErasure())) {
-				ASTNode parent = simpleName.getParent();
-				boolean isReference = false;
-
-				if (parent.getNodeType() == ASTNode.QUALIFIED_NAME) {
-					// the simpleName is part of a qualified name
-					QualifiedName qualifiedName = ((QualifiedName) parent);
-					if (simpleName == qualifiedName.getName()) {
-						// if the simpleName stands at the tail of the
-						// qualifedName
-						ITypeBinding qualifierTypeBinding = ((QualifiedName) parent).getQualifier()
-								.resolveTypeBinding();
-						if (ClassRelationUtil.compareITypeBinding(parentTypeBinding, qualifierTypeBinding)) {
-							isReference = true;
-						}
-					} else if (!declaredLocalVarName.contains(identifier)) {
-						// the simpleName is the qualifier itself
-						isReference = true;
-					}
-
-				} else if (parent.getNodeType() == ASTNode.FIELD_ACCESS) {
-					// a 'field access' is an expression of the form:
-					// this.[field_name]
-					ITypeBinding expressionTypeBidnign = ((FieldAccess) parent).getExpression().resolveTypeBinding();
-					if (ClassRelationUtil.compareITypeBinding(parentTypeBinding, expressionTypeBidnign)) {
-						isReference = true;
-					}
-				} else if (!declaredLocalVarName.contains(identifier)) {
-					/*
-					 * If not a field access and not a qualified name, then the
-					 * simpleName which is not a local variable, is field
-					 * access.
-					 */
-					isReference = true;
-				}
-
-				if (isReference) {
-					references.add(simpleName);
-				}
-			}
-		}
-		return true;
-	}
-
-	public List<SimpleName> getReferences() {
-		return references;
 	}
 }
