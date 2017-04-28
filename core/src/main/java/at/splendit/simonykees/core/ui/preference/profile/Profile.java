@@ -9,6 +9,8 @@ public class Profile implements SimonykeesProfile {
 	
 	String profileName;
 	
+	boolean isBuiltInProfile = false;
+	
 	public Profile(String name, List<String> enabledRulesIds) {
 		this.profileName = name;
 		this.enabledRulesIds = enabledRulesIds;
@@ -34,5 +36,10 @@ public class Profile implements SimonykeesProfile {
 	
 	public boolean containsRule(String ruleId) {
 		return enabledRulesIds.contains(ruleId);
+	}
+
+	@Override
+	public boolean isBuiltInProfile() {
+		return isBuiltInProfile;
 	}
 }

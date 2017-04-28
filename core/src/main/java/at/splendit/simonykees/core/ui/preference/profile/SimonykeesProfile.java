@@ -13,8 +13,6 @@ public interface SimonykeesProfile {
 	List<String> getEnabledRuleIds();
 	boolean containsRule(String id);
 	
-	default boolean isBuiltInProfile() {
-		return false;
-	}
+	boolean isBuiltInProfile();
 	
 }

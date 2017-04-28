@@ -16,6 +16,8 @@ import at.splendit.simonykees.i18n.Messages;
  */
 public class DefaultProfile implements SimonykeesProfile {
 
+	boolean isBuiltInProfile = true;
+
 	public DefaultProfile() {
 	}
 
@@ -26,7 +28,7 @@ public class DefaultProfile implements SimonykeesProfile {
 
 	@Override
 	public boolean isBuiltInProfile() {
-		return true;
+		return isBuiltInProfile;
 	}
 
 	@Override

@@ -34,7 +34,7 @@ public class ConfigureProfileWizard extends Wizard {
 
 	@Override
 	public void addPages() {
-		model = new ConfigureProfileSelectRulesWIzardPageModel(rules);
+		model = new ConfigureProfileSelectRulesWIzardPageModel(rules, profileId);
 		controler = new ConfigureProfileSelectRulesWizardPageControler(model);
 		page = new ConfigureProfileSelectRulesWizardPage(model, controler, profileId);
 		addPage(page);
@@ -42,26 +42,30 @@ public class ConfigureProfileWizard extends Wizard {
 
 	@Override
 	public boolean performFinish() {
-		int index = SimonykeesPreferenceManager.getProfiles().indexOf(SimonykeesPreferenceManager.getProfileFromName(profileId));
-		String name = ((ConfigureProfileSelectRulesWIzardPageModel)model).getName();
+		int index = SimonykeesPreferenceManager.getProfiles()
+				.indexOf(SimonykeesPreferenceManager.getProfileFromName(profileId));
+		String name = ((ConfigureProfileSelectRulesWIzardPageModel) model).getName();
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ruleIds = model.getSelectionAsList();
-		if(index >= 0) {
-			SimonykeesPreferenceManager.updateProfile(index, name, ruleIds.stream().map(rule -> rule.getId()).collect(Collectors.toList()));
+		if (index >= 0) {
+			SimonykeesPreferenceManager.updateProfile(index, name,
+					ruleIds.stream().map(rule -> rule.getId()).collect(Collectors.toList()));
 		} else {
-			SimonykeesPreferenceManager.addProfile(name, ruleIds.stream().map(rule -> rule.getId()).collect(Collectors.toList()));
+			SimonykeesPreferenceManager.addProfile(name,
+					ruleIds.stream().map(rule -> rule.getId()).collect(Collectors.toList()));
 		}
 		return true;
 	}
 
 	@Override
 	public boolean canFinish() {
-		if(model.getSelectionAsList().isEmpty()) {
+		if (model.getSelectionAsList().isEmpty()) {
 			return false;
-		} else if (model.getName().isEmpty()){
-			//TODO if name already exists for another profile, return false
+		} else if (model.getName().isEmpty()) {
+			// if name already exists check is handled in page with status on
+			// field change
 			return false;
 		} else {
-			return true;
+			return super.canFinish();
 		}
 	}
 }

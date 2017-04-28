@@ -9,8 +9,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.ui.preference.profile.DefaultProfile;
 import at.splendit.simonykees.core.ui.preference.profile.Profile;
 import at.splendit.simonykees.core.ui.preference.profile.SimonykeesProfile;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * Central point to access property values.
@@ -85,7 +87,11 @@ public class SimonykeesPreferenceManager {
 			List<String> rules = Arrays.asList(
 					profileInfo.substring(profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
 							.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
-			profiles.add(new Profile(name, rules));
+			if (name.equals(Messages.Profile_DefaultProfile_profileName)) {
+				profiles.add(new DefaultProfile());
+			} else {
+				profiles.add(new Profile(name, rules));
+			}
 		}
 		return profiles;
 	}

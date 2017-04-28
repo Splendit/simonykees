@@ -1,5 +1,7 @@
 package at.splendit.simonykees.core.ui.preference;
 
+import org.eclipse.core.runtime.IStatus;
+
 import at.splendit.simonykees.core.ui.wizard.impl.AbstractSelectRulesWizardControler;
 
 public class ConfigureProfileSelectRulesWizardPageControler extends AbstractSelectRulesWizardControler {
@@ -11,8 +13,8 @@ public class ConfigureProfileSelectRulesWizardPageControler extends AbstractSele
 		this.model = model;
 	}
 
-	public void nameTextChanged(String text) {
-		model.setName(text);
+	public IStatus nameTextChanged(String text) {
+		return model.setName(text);
 	}
 	
 }

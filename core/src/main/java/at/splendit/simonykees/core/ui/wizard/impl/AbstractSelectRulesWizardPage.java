@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
+import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -15,7 +16,6 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -39,7 +39,7 @@ import at.splendit.simonykees.i18n.Messages;
  * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter, Andreja Sambolec
  * @since 0.9 refactored in 1.3
  */
-public abstract class AbstractSelectRulesWizardPage extends WizardPage {
+public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage {
 
 	private AbstractSelectRulesWizardModel model;
 	private AbstractSelectRulesWizardControler controler;

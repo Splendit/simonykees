@@ -28,6 +28,7 @@ public class Messages extends NLS {
 	public static String CollectionRemoveAllRule_name;
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputLabel;
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputText;
+	public static String ConfigureProfileSelectRulesWIzardPageModel_error_NameExists;
 	public static String DiamondOperatorASTVisitor_using_diamond_operator;
 	public static String DiamondOperatorRule_description;
 	public static String DiamondOperatorRule_name;
