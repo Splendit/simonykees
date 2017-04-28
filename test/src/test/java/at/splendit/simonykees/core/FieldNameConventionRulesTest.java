@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
-import at.splendit.simonykees.core.visitor.FieldNameConventionASTVisitor;
+import at.splendit.simonykees.core.visitor.renaming.FieldNameConventionASTVisitor;
 
 @RunWith(Parameterized.class)
 @SuppressWarnings("nls")

@@ -29,7 +29,6 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 import at.splendit.simonykees.core.visitor.DiamondOperatorASTVisitor;
-import at.splendit.simonykees.core.visitor.FieldNameConventionASTVisitor;
 import at.splendit.simonykees.core.visitor.RearrangeClassMembersASTVisitor;
 import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
 import at.splendit.simonykees.core.visitor.InefficientConstructorASTVisitor;
@@ -44,6 +43,7 @@ import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
 import at.splendit.simonykees.core.visitor.loop.WhileToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.renaming.FieldNameConventionASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.MultiCatchASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisitor;
 

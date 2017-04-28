@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.visitor;
+package at.splendit.simonykees.core.visitor.renaming;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
  * Renames the private fields (except for static final ones) to comply with 
@@ -157,7 +159,7 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 	 * Converts the given string to camelCase by removing the non-alphanumeric
 	 * symbols '$' and '_' and capitalizing the character which is following
 	 * them, unless it is the fist character of the string. Furthermore, checks
-	 * whether new string is eligible for being used as a variable name (i.e. it
+	 * whether the new string is eligible for being used as a variable name (i.e. it
 	 * doesn't start with a digit and is not a java key word).
 	 * <p>
 	 * For instance, the following string:
@@ -318,7 +320,7 @@ class FieldReferencesASTVisitor extends ASTVisitor {
 		List<SimpleName> localDeclarations = declarationsVisitor.getVariableDeclarationNames();
 		List<String> localDeclarationNames = localDeclarations.stream().map(SimpleName::getIdentifier)
 				.collect(Collectors.toList());
-		ReferencesInBlockVisitor visitor = new ReferencesInBlockVisitor(fieldName, parentTypeBinding, fieldTypeBinding,
+		ReferencesVisitor visitor = new ReferencesVisitor(fieldName, parentTypeBinding, fieldTypeBinding,
 				localDeclarationNames);
 		bodyDeclaration.accept(visitor);
 		fieldReferences.addAll(visitor.getReferences());
@@ -336,21 +338,21 @@ class FieldReferencesASTVisitor extends ASTVisitor {
 
 /**
  * Finds the references of the given field in a block. Requires the names of the
- * local variables to be provided. Distinguishes between local variables and
- * fields with the same name.
+ * local variables to be provided. Distinguishes between the local variables and
+ * the fields with the same name.
  * 
  * @author Ardit Ymeri
  * @since 1.2
  *
  */
-class ReferencesInBlockVisitor extends ASTVisitor {
+class ReferencesVisitor extends ASTVisitor {
 	private String targetNameIdentifier;
 	private ITypeBinding targetTypeBinding;
 	private List<String> declaredLocalVarName;
 	private List<SimpleName> references;
 	private ITypeBinding parentTypeBinding;
 
-	public ReferencesInBlockVisitor(SimpleName targetNode, ITypeBinding parentTypeBinding,
+	public ReferencesVisitor(SimpleName targetNode, ITypeBinding parentTypeBinding,
 			ITypeBinding targetTypeBinding, List<String> declaredLocalVarNames) {
 		this.targetNameIdentifier = targetNode.getIdentifier();
 		this.declaredLocalVarName = declaredLocalVarNames;
@@ -413,33 +415,5 @@ class ReferencesInBlockVisitor extends ASTVisitor {
 
 	public List<SimpleName> getReferences() {
 		return references;
-	}
-}
-
-/**
- * Gathers the names of the declared variables.
- * 
- * @author Ardit Ymeri
- * @since 1.2
- *
- */
-class VariableDeclarationsVisitor extends ASTVisitor {
-	private List<SimpleName> variableDelcarations;
-
-	public VariableDeclarationsVisitor() {
-		variableDelcarations = new ArrayList<>();
-	}
-
-	@Override
-	public boolean visit(SimpleName simpleName) {
-		IBinding resolvedBinding = simpleName.resolveBinding();
-		if (resolvedBinding != null && resolvedBinding.getKind() == IBinding.VARIABLE && simpleName.isDeclaration()) {
-			variableDelcarations.add(simpleName);
-		}
-		return true;
-	}
-
-	public List<SimpleName> getVariableDeclarationNames() {
-		return variableDelcarations;
 	}
 }
