@@ -6,6 +6,8 @@ import java.util.List;
 import org.eclipse.jface.fieldassist.AutoCompleteField;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -17,6 +19,7 @@ import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
@@ -30,7 +33,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private Composite filterComposite;
 
-	private Label groupFilterLabel;
+	private Label selectProfileLabel;
 	private Combo selectProfileCombo;
 
 	private Label nameFilterLabel;
@@ -88,20 +91,43 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 				if (e.detail == SWT.CANCEL) {
 					Text text = (Text) e.getSource();
 					text.setText(Messages.SelectRulesWizardPage_emptyString);
-				}
-				if (e.detail == SWT.ICON_SEARCH) {
+				} else if (e.detail == SWT.ICON_SEARCH) {
 					Text text = (Text) e.getSource();
-					((SelectRulesWizardPageControler) controler).searchPressed(text.getText());
-					addTagInComposite(text.getText());
-					nameFilterText.setText(""); //$NON-NLS-1$
+					String input = text.getText();
+					if (!((SelectRulesWizardPageModel)model).getAppliedTags().contains(input)) {
+						((SelectRulesWizardPageControler) controler).searchPressed(input);
+						addTagInComposite(input);						
+						nameFilterText.setText(""); //$NON-NLS-1$
+					}
 				}
 			}
 		});
 
-		groupFilterLabel = new Label(filterComposite, SWT.NONE);
-		groupFilterLabel.setText(Messages.SelectRulesWizardPage_selectProfile);
+		// when enter is pressed behave same as if search was pressed
+		nameFilterText.addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR) {
+					String input = ((Text) e.getSource()).getText();
+					if (!((SelectRulesWizardPageModel)model).getAppliedTags().contains(input)) {
+						((SelectRulesWizardPageControler) controler).searchPressed(input);
+						addTagInComposite(input);						
+						nameFilterText.setText(""); //$NON-NLS-1$
+					}
+				}
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// nothing
+			}
+		});
+
+		selectProfileLabel = new Label(filterComposite, SWT.NONE);
+		selectProfileLabel.setText(Messages.SelectRulesWizardPage_selectProfile);
 		gridData = new GridData(GridData.END, GridData.CENTER, true, false);
-		groupFilterLabel.setLayoutData(gridData);
+		selectProfileLabel.setLayoutData(gridData);
 
 		selectProfileCombo = new Combo(filterComposite, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateGroupFilterCombo();
@@ -152,6 +178,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 					// nothing
 				} else {
 					nameFilterText.setText(""); //$NON-NLS-1$
+					((SelectRulesWizardPageModel) model).getAppliedTags().clear();
+					removeAllTagButtons();
 					((SelectRulesWizardPageControler) controler).profileChanged(selectedProfileId);
 				}
 			}
@@ -191,6 +219,16 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 				recalculateLayout();
 			}
 		});
+		tagsComposite.layout(true, true);
+		filterComposite.layout(true, true);
+		recalculateLayout();
+	}
+	
+
+	private void removeAllTagButtons() {
+		for (Control child : tagsComposite.getChildren()) {
+			child.dispose();
+		}
 		tagsComposite.layout(true, true);
 		filterComposite.layout(true, true);
 		recalculateLayout();

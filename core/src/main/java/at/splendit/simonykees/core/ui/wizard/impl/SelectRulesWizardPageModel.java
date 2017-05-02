@@ -1,7 +1,6 @@
 package at.splendit.simonykees.core.ui.wizard.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,7 +15,7 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 
 	private String[] tags;
 
-	private final List<String> appliedTags = new ArrayList<>();
+	private final Set<String> appliedTags = new HashSet<>();
 
 	public SelectRulesWizardPageModel(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		super(rules);
@@ -34,7 +33,7 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 		return tags;
 	}
 
-	public List<String> getAppliedTags() {
+	public Set<String> getAppliedTags() {
 		return appliedTags;
 	}
 
@@ -59,16 +58,30 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 		if (!appliedTags.isEmpty()) {
 			Set<Object> currentPossibilities = getPosibilities();
 			setPosibilitiesFilteredByTag(currentPossibilities.stream()
-					.filter(object -> !Collections.disjoint(
-							((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).getTags(), appliedTags))
+					.filter(object -> containsTag((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object))
 					.collect(Collectors.toSet()));
 		} else {
 			setPosibilitiesFilteredByTag(getAllPosibilities());
 		}
+
+		// !Collections.disjoint(
+		// ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>)
+		// object).getTags(), appliedTags)
+
 		// ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>)
 		// object).getTags().stream()
 		// .anyMatch(tag ->
 		// appliedTags.contains(tag))).collect(Collectors.toSet());
+	}
+
+	private boolean containsTag(RefactoringRule<? extends AbstractASTRewriteASTVisitor> object) {
+		for (String tag : appliedTags) {
+			if (object.getTags().contains(tag) || object.getName().contains(tag)
+					|| object.getDescription().contains(tag)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
