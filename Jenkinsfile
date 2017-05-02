@@ -6,7 +6,6 @@
 
 node {
 	try {
-		notifyBuild('STARTED')
 		// variable for maven home
 		def mvnHome = tool 'mvn system'
 		// defines the backup repository to push to
