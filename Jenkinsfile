@@ -79,17 +79,17 @@ node {
 			}
 		}
 	} catch (e) {
-	  // If there was an exception thrown, the build failed
+		// If there was an exception thrown, the build failed
 		currentBuild.result = "FAILURE"
-	  throw e
+		throw e
 	} finally {
-	  // Success or failure, always send notifications
-	  notifyBuild(currentBuild.result)
+		// Success or failure, always send notifications
+		notifyBuild(currentBuild.result)
 	}
 }
 
 def setTestStatus(testStatus) {
-	if (testStatus == 0) {
+	if ( testStatus == 0 ) {
 		currentBuild.result = 'SUCCESS'
 	} else if ( testStatus == 1 ) {
 		currentBuild.result = 'UNSTABLE'
@@ -98,7 +98,7 @@ def setTestStatus(testStatus) {
 
 
 def notifyBuild(String buildStatus) {
-  // send to email only if buildStatus is UNSTABLE or FAILED
+	// send to email only if buildStatus is UNSTABLE or FAILED
 	if (buildStatus == 'FAILURE' || buildStatus == 'UNSTABLE') {
 		jobName = env.JOB_NAME.replace("%2F", "/")
 	
@@ -109,6 +109,6 @@ def notifyBuild(String buildStatus) {
 			subject: subject,
 			body: details,
 			recipientProviders: [[$class: 'CulpritsRecipientProvider']]
-	  )
+		)
 	}
 }
