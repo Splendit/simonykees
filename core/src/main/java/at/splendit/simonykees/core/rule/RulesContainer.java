@@ -22,6 +22,7 @@ import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
 import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
+import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
 import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
@@ -39,6 +40,7 @@ import at.splendit.simonykees.core.visitor.RemoveToStringOnStringASTVisitor;
 import at.splendit.simonykees.core.visitor.SerialVersionUidASTVisitor;
 import at.splendit.simonykees.core.visitor.StringConcatToPlusASTVisitor;
 import at.splendit.simonykees.core.visitor.StringFormatLineSeparatorASTVisitor;
+import at.splendit.simonykees.core.visitor.StringLiteralEqualityCheckASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
@@ -88,6 +90,7 @@ public class RulesContainer {
 				new DiamondOperatorRule(DiamondOperatorASTVisitor.class),
 				new RearrangeClassMembersRule(RearrangeClassMembersASTVisitor.class),
 				new OverrideAnnotationRule(OverrideAnnotationRuleASTVisitor.class),
+				new StringLiteralEqualityCheckRule(StringLiteralEqualityCheckASTVisitor.class),
 				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
 
 				/*
