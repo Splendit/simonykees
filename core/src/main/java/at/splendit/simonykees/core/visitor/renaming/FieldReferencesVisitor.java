@@ -14,9 +14,9 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
- * Finds the references of the given target. Requires the names of the
- * local variables to be provided. Distinguishes between the local variables and
- * the fields with the same name.
+ * Finds the references of the field whose name is given as a constructor parameter. 
+ * Requires the names of the local variables to be provided. Distinguishes between the 
+ * local variables and the fields with the same name.
  * 
  * @author Ardit Ymeri
  * @since 1.2
@@ -31,6 +31,7 @@ class FieldReferencesVisitor extends ASTVisitor {
 
 	public FieldReferencesVisitor(SimpleName targetNode, ITypeBinding parentTypeBinding,
 			ITypeBinding targetTypeBinding, List<String> declaredLocalVarNames) {
+		
 		this.targetNameIdentifier = targetNode.getIdentifier();
 		this.declaredLocalVarName = declaredLocalVarNames;
 		this.references = new ArrayList<>();
@@ -76,7 +77,7 @@ class FieldReferencesVisitor extends ASTVisitor {
 				} else if (!declaredLocalVarName.contains(identifier)) {
 					/*
 					 * If not a field access and not a qualified name, then the
-					 * simpleName which is not a local variable, is field
+					 * simpleName which is not a local variable, is a field
 					 * access.
 					 */
 					isReference = true;
