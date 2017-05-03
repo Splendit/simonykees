@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
-import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
+import at.splendit.simonykees.core.visitor.functionalInterface.FunctionalInterfaceASTVisitor;
 
 /**
  * Testing functional interface rule.

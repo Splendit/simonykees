@@ -5,14 +5,17 @@ public abstract class TestFunctionalInterface3Rule {
 		return new Runnable() {
 			@Override
 			public void run() {
-				getClass();
-
+				hashCode();
 			}
 		};
+	}
+	public int hashCode(){
+		return 0;
 	}
 	
 	static {
 		staticGetRunnable();
+		Runnable r = () -> {};
 	}
 	
 	public Runnable getRunnable() {
