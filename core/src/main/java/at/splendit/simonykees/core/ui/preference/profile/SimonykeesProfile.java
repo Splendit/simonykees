@@ -11,6 +11,7 @@ public interface SimonykeesProfile {
 	String getProfileName();
 
 	List<String> getEnabledRuleIds();
+	public void setEnabledRulesIds(List<String> enabledRulesIds);
 	boolean containsRule(String id);
 	
 	boolean isBuiltInProfile();

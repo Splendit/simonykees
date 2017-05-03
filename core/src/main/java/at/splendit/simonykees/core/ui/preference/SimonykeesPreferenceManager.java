@@ -26,6 +26,17 @@ public class SimonykeesPreferenceManager {
 
 	private static List<SimonykeesProfile> profiles = new ArrayList<>();
 
+	private static SimonykeesProfile defaultProfile = new DefaultProfile();
+
+	public static String getDefaultProfileList() {
+		return defaultProfile.getProfileName() + SimonykeesPreferenceConstants.NAME_RULES_DELIMITER + StringUtils
+				.join(defaultProfile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER);
+	}
+
+	public static String getDefaultProfileName() {
+		return defaultProfile.getProfileName();
+	}
+
 	public static List<SimonykeesProfile> getProfiles() {
 		return profiles;
 	}
@@ -39,19 +50,21 @@ public class SimonykeesPreferenceManager {
 	}
 
 	public static void updateProfile(int index, String name, List<String> ruleIds) {
-		((Profile) profiles.get(index)).setProfileName(name);
-		((Profile) profiles.get(index)).setEnabledRulesIds(ruleIds);
+		if (profiles.get(index) instanceof Profile) {
+			((Profile) profiles.get(index)).setProfileName(name);
+		}
+		profiles.get(index).setEnabledRulesIds(ruleIds);
 	}
 
 	public static boolean useProfile() {
-		if (store.getString(SimonykeesPreferenceConstants.PROFILE_USE_OPTION).equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
+		if (store.getString(SimonykeesPreferenceConstants.PROFILE_USE_OPTION)
+				.equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
 			return false;
-		}
-		else {
+		} else {
 			return true;
 		}
 	}
-	
+
 	/**
 	 * Returns the current profileId.
 	 * 
@@ -100,7 +113,7 @@ public class SimonykeesPreferenceManager {
 					profileInfo.substring(profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
 							.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
 			if (name.equals(Messages.Profile_DefaultProfile_profileName)) {
-				profiles.add(new DefaultProfile());
+				profiles.add(defaultProfile);
 			} else {
 				profiles.add(new Profile(name, rules));
 			}
@@ -160,6 +173,18 @@ public class SimonykeesPreferenceManager {
 			setAllProfiles();
 		}
 		profiles.clear();
+		loadProfilesFromStore();
+	}
+
+	public static void performDefaults() {
+		store.setValue(SimonykeesPreferenceConstants.PROFILE_LIST,
+				store.getDefaultString(SimonykeesPreferenceConstants.PROFILE_LIST));
+
+		store.setValue(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT,
+				store.getDefaultString(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT));
+
+		profiles.clear();
+		defaultProfile = new DefaultProfile();
 		loadProfilesFromStore();
 	}
 

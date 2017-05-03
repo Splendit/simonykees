@@ -16,9 +16,13 @@ import at.splendit.simonykees.i18n.Messages;
  */
 public class DefaultProfile implements SimonykeesProfile {
 
+	private List<String> enabledRulesIds;
+
 	boolean isBuiltInProfile = true;
 
 	public DefaultProfile() {
+		enabledRulesIds = Arrays.asList(new CodeFormatterRule(AbstractASTRewriteASTVisitor.class).getId(),
+				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class).getId());
 	}
 
 	@Override
@@ -32,9 +36,13 @@ public class DefaultProfile implements SimonykeesProfile {
 	}
 
 	@Override
+	public void setEnabledRulesIds(List<String> enabledRulesIds) {
+		this.enabledRulesIds = enabledRulesIds;
+	}
+	
+	@Override
 	public List<String> getEnabledRuleIds() {
-		return Arrays.asList(new CodeFormatterRule(AbstractASTRewriteASTVisitor.class).getId(),
-				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class).getId());
+		return enabledRulesIds;
 	}
 
 	@Override

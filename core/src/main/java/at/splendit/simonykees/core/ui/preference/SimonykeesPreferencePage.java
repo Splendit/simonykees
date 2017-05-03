@@ -41,7 +41,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	private Button newProfileButton;
 	private Button editProfileButton;
 	private Button removeProfileButton;
-	
+
 	private Font font;
 
 	public SimonykeesPreferencePage() {
@@ -59,8 +59,11 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		GridLayout gridLayout = new GridLayout(2, false);
 		composite.setLayout(gridLayout);
 
-		String[][] useProfileOption = new String[][] { { Messages.SimonykeesPreferencePage_useProfileOptionNoProfile, SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE },
-				{ Messages.SimonykeesPreferencePage_useProfileOptionSelectedProfile, SimonykeesPreferenceConstants.PROFILE_USE_OPTION_SELECTED_PROFILE } };
+		String[][] useProfileOption = new String[][] {
+				{ Messages.SimonykeesPreferencePage_useProfileOptionNoProfile,
+						SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE },
+				{ Messages.SimonykeesPreferencePage_useProfileOptionSelectedProfile,
+						SimonykeesPreferenceConstants.PROFILE_USE_OPTION_SELECTED_PROFILE } };
 
 		useProfileOptionRadioGroup = new RadioGroupFieldEditor(SimonykeesPreferenceConstants.PROFILE_USE_OPTION,
 				Messages.SimonykeesPreferencePage_useProfileOptionRadioGroupTitle, 1, useProfileOption, composite);
@@ -248,33 +251,32 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	private void initializeView() {
 		// profilesTableVIewer.setInput(SimonykeesPreferenceManager.getAllProfileNamesAndIdsArray());
-		Activator.getDefault().getPreferenceStore().setDefault(SimonykeesPreferenceConstants.PROFILE_USE_OPTION, SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE);
-		currentProfileSelection = SimonykeesPreferenceManager.getProfiles()
-				.indexOf(SimonykeesPreferenceManager.getProfileFromName(SimonykeesPreferenceManager.getCurrentProfileId()));// loadCurrentProfileId()));
+		Activator.getDefault().getPreferenceStore().setDefault(SimonykeesPreferenceConstants.PROFILE_USE_OPTION,
+				SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE);
+		currentProfileSelection = SimonykeesPreferenceManager.getProfiles().indexOf(
+				SimonykeesPreferenceManager.getProfileFromName(SimonykeesPreferenceManager.getCurrentProfileId()));// loadCurrentProfileId()));
 		buttons.get(currentProfileSelection).setSelection(true);
 		if (Activator.getDefault().getPreferenceStore().getString(SimonykeesPreferenceConstants.PROFILE_USE_OPTION)
 				.equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
 			profilesTable.setEnabled(false);
+			newProfileButton.setEnabled(false);
 		} else {
 			profilesTable.setEnabled(true);
+			newProfileButton.setEnabled(true);
 		}
-
-		newProfileButton.setEnabled(true);
 		editProfileButton.setEnabled(false);
 		removeProfileButton.setEnabled(false);
 	}
-	
-	private void updateView() {		
+
+	private void updateView() {
 		profilesTable.removeAll();
-		profilesTable.getItemCount();
-		for(Button button : buttons) {
+		for (Button button : buttons) {
 			button.dispose();
 		}
 		buttons.clear();
 		populateTable();
 		buttons.get(currentProfileSelection).setSelection(true);
 	}
-	
 
 	@Override
 	public void init(IWorkbench workbench) {
@@ -286,5 +288,19 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 				.setCurrentProfileId(SimonykeesPreferenceManager.getAllProfileIds().get(currentProfileSelection));
 		SimonykeesPreferenceManager.loadCurrentProfiles();
 		return super.performOk();
+	}
+
+	@Override
+	protected void performDefaults() {
+		super.performDefaults();
+
+		SimonykeesPreferenceManager.performDefaults();
+		SimonykeesPreferenceManager.loadCurrentProfiles();
+		updateView();
+		
+		profilesTable.setEnabled(false);
+		newProfileButton.setEnabled(false);
+		editProfileButton.setEnabled(false);
+		removeProfileButton.setEnabled(false);
 	}
 }

@@ -21,7 +21,6 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.RowData;
@@ -41,8 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.i18n.ExceptionMessages;
+import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.license.api.LicenseValidationService;
 
 /**
