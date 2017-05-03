@@ -67,7 +67,6 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 
 	private static final int LICENSE_LABEL_MAX_WIDTH = 370;
 
-	private static final String DATE_FORMAT_PATTERN = "MMMM dd, yyyy"; //$NON-NLS-1$
 	private static final String LOGO_PATH_ACTIVE = "icons/jSparrow_FIN_2_scaled.png"; //$NON-NLS-1$
 	private static final String LOGO_PATH_INACTIVE = "icons/jSparrow_FIN_3_scaled.png"; //$NON-NLS-1$
 
