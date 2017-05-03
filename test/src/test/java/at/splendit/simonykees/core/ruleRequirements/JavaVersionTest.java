@@ -39,9 +39,9 @@ public class JavaVersionTest {
 
 	@Parameters(name = "{index}: test java version[{0}]")
 	public static Collection<Object[]> data() {
-		return Arrays.asList(new Object[][] { { JavaCore.VERSION_1_1, 9 }, { JavaCore.VERSION_1_2, 10 },
-				{ JavaCore.VERSION_1_3, 10 }, { JavaCore.VERSION_1_4, 11 }, { JavaCore.VERSION_1_5, 15 },
-				{ JavaCore.VERSION_1_6, 16 }, { JavaCore.VERSION_1_7, 19 }, { JavaCore.VERSION_1_8, 20 } });
+		return Arrays.asList(new Object[][] { { JavaCore.VERSION_1_1, 10 }, { JavaCore.VERSION_1_2, 11 },
+				{ JavaCore.VERSION_1_3, 11 }, { JavaCore.VERSION_1_4, 12 }, { JavaCore.VERSION_1_5, 17 },
+				{ JavaCore.VERSION_1_6, 18 }, { JavaCore.VERSION_1_7, 21 }, { JavaCore.VERSION_1_8, 22 } });
 	}
 
 	private String javaVersion;
