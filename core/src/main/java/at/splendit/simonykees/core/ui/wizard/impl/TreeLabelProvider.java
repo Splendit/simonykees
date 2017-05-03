@@ -21,6 +21,13 @@ import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Label provider for left view in select rules wizard
+ * 
+ * @author Andreja Sambolec
+ * @since 1.2
+ *
+ */
 public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 
 	private ResourceManager resourceManager;

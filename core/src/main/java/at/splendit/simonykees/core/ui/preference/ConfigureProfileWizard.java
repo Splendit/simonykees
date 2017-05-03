@@ -11,6 +11,13 @@ import at.splendit.simonykees.core.ui.wizard.impl.AbstractSelectRulesWizardPage;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
+/**
+ * Wizard for selecting rules when creating new profile in preferences page
+ * 
+ * @author Andreja Sambolec
+ * @since 1.2
+ *
+ */
 public class ConfigureProfileWizard extends Wizard {
 
 	private AbstractSelectRulesWizardPage page;

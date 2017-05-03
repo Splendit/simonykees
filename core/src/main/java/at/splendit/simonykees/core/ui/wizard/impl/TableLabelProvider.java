@@ -8,6 +8,13 @@ import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.ExceptionMessages;
 
+/**
+ * Label provider for right view in select rules wizard
+ * 
+ * @author Andreja Sambolec
+ * @since 1.2
+ *
+ */
 public class TableLabelProvider extends BaseLabelProvider implements ITableLabelProvider {
 
 	@Override
