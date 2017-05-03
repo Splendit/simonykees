@@ -4,7 +4,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
+import at.splendit.simonykees.core.visitor.functionalInterface.FunctionalInterfaceASTVisitor;
 
 /** 
  * @see FunctionalInterfaceASTVisitor
