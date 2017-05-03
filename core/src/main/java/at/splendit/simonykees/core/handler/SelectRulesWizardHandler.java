@@ -43,8 +43,10 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 
 				dialog.open();
 			} else {
-				// do not display the SelectRulesWizard if the license is
-				// invalid
+				/*
+				 * do not display the SelectRulesWizard if the license is
+				 * invalid
+				 */
 				final Shell shell = HandlerUtil.getActiveShell(event);
 				LicenseUtil.getInstance().displayLicenseErrorDialog(shell);
 			}

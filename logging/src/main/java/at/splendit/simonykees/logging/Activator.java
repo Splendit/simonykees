@@ -106,8 +106,11 @@ public class Activator extends AbstractUIPlugin {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IPath logFilePath = workspace.getRoot().getLocation().append(".metadata").append("jSparrow.log");
 		String logFilePathStr = logFilePath.toString();
-		
-		// set pattern according to logback documentation (https://logback.qos.ch/manual/layouts.html)
+
+		/*
+		 * set pattern according to logback documentation
+		 * (https://logback.qos.ch/manual/layouts.html)
+		 */
 		PatternLayoutEncoder ple = new PatternLayoutEncoder();
 		ple.setContext(loggerContext);
 		ple.setPattern("%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n");
