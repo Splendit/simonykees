@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -77,9 +75,9 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 		/**
 		 * Only private fields can be renamed, unless they are static final. 
 		 */
-		if (hasModifier(fieldDeclaration, modifier -> modifier.isPrivate())
-				&& !(hasModifier(fieldDeclaration, modifier -> modifier.isStatic())
-						&& hasModifier(fieldDeclaration, modifier -> modifier.isFinal()))) {
+		if (ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isPrivate())
+				&& !(ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isStatic())
+						&& ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isFinal()))) {
 
 			ASTNode parent = fieldDeclaration.getParent();
 			if (parent != null && parent.getNodeType() == ASTNode.TYPE_DECLARATION) {
@@ -193,10 +191,5 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 
 		return Optional.ofNullable(newName).filter(s -> !s.isEmpty());
-	}
-
-	private boolean hasModifier(FieldDeclaration field, Predicate<? super Modifier> predicate) {
-		return ASTNodeUtil.convertToTypedList(field.modifiers(), Modifier.class).stream().filter(predicate).findAny()
-				.isPresent();
 	}
 }
