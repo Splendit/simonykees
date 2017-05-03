@@ -35,7 +35,7 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
-	
+
 	/**
 	 * The constructor
 	 */
@@ -44,7 +44,9 @@ public class Activator extends AbstractUIPlugin {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
+	 * 
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.
+	 * BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
@@ -54,7 +56,9 @@ public class Activator extends AbstractUIPlugin {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
+	 * 
+	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.
+	 * BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
@@ -69,39 +73,42 @@ public class Activator extends AbstractUIPlugin {
 	public static Activator getDefault() {
 		return plugin;
 	}
-	
+
 	/**
 	 * Configures logback and the jul-to-slf4j logging bridge
-	 * @param bundle current Bundle
+	 * 
+	 * @param bundle
+	 *            current Bundle
 	 * @throws JoranException
 	 * @throws IOException
 	 */
 	private void configureLogbackInBundle(Bundle bundle) throws JoranException, IOException {
-        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-        JoranConfigurator jc = new JoranConfigurator();
-        jc.setContext(context);
-        context.reset();
+		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+		JoranConfigurator jc = new JoranConfigurator();
+		jc.setContext(context);
+		context.reset();
 
-        // this assumes that the logback.xml file is in the root of the bundle.
-        URL logbackConfigFileUrl = FileLocator.find(bundle, new Path("logback.xml"),null);
-        jc.doConfigure(logbackConfigFileUrl.openStream());
-        
-        configureFileAppender(context);
-        
-        // configure jul-to-slf4j bridge
-        LogManager.getLogManager().reset();
-        SLF4JBridgeHandler.removeHandlersForRootLogger();
-        SLF4JBridgeHandler.install();
-        java.util.logging.Logger.getLogger("global").setLevel(Level.FINEST);
+		// this assumes that the logback.xml file is in the root of the bundle.
+		URL logbackConfigFileUrl = FileLocator.find(bundle, new Path("logback.xml"), null);
+		jc.doConfigure(logbackConfigFileUrl.openStream());
+
+		configureFileAppender(context);
+
+		// configure jul-to-slf4j bridge
+		LogManager.getLogManager().reset();
+		SLF4JBridgeHandler.removeHandlersForRootLogger();
+		SLF4JBridgeHandler.install();
+		java.util.logging.Logger.getLogger("global").setLevel(Level.FINEST);
 	}
-	
+
 	/**
-	 * configures a file appender to set the log file path from code 
-	 * and attaches it to the root logger
+	 * configures a file appender to set the log file path from code and
+	 * attaches it to the root logger
+	 * 
 	 * @param loggerContext
 	 */
 	private void configureFileAppender(LoggerContext loggerContext) {
-		
+
 		// get path to logfile in <eclipse-workspace>/.metadata/jSparrow.log
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IPath logFilePath = workspace.getRoot().getLocation().append(".metadata").append("jSparrow.log");
@@ -115,7 +122,7 @@ public class Activator extends AbstractUIPlugin {
 		ple.setContext(loggerContext);
 		ple.setPattern("%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n");
 		ple.start();
-		
+
 		// create and configure file appender
 		FileAppender<ILoggingEvent> fileAppender = new FileAppender<>();
 		fileAppender.setContext(loggerContext);
@@ -123,7 +130,7 @@ public class Activator extends AbstractUIPlugin {
 		fileAppender.setFile(logFilePathStr);
 		fileAppender.setEncoder(ple);
 		fileAppender.start();
-		
+
 		// add file appender to the root logger
 		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
 		rootLogger.addAppender(fileAppender);

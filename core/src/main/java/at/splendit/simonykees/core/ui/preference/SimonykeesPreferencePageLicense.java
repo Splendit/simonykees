@@ -2,8 +2,6 @@ package at.splendit.simonykees.core.ui.preference;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
@@ -56,7 +54,7 @@ import at.splendit.simonykees.license.api.LicenseValidationService;
 public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
 	private static final Logger logger = LoggerFactory.getLogger(SimonykeesPreferencePageLicense.class);
-	
+
 	private Label licenseLabel;
 	private Label licenseStatusLabel;
 	private Button updateButton;
@@ -73,18 +71,19 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 	@Inject
 	private LicenseValidationService licenseValidationService;
 	private boolean isLicenseValidationServiceAvailable = false;
+
 	public SimonykeesPreferencePageLicense() {
 		super(GRID);
 		setPreferenceStore(Activator.getDefault().getPreferenceStore());
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 	}
-	
+
 	@PostConstruct
 	private void postConstruct() {
-		if(licenseValidationService != null)
+		if (licenseValidationService != null)
 			isLicenseValidationServiceAvailable = true;
 	}
-	
+
 	@PreDestroy
 	private void preDestroy() {
 		isLicenseValidationServiceAvailable = false;
@@ -134,7 +133,7 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 		licenseStatusLabel.setFont(boldFont);
 		licenseStatusLabel.setForeground(display.getSystemColor(SWT.COLOR_RED));
 		licenseStatusLabel.setVisible(true);
-		
+
 		updateButton = new Button(composite, SWT.PUSH);
 		updateButton.setText(Messages.SimonykeesPreferencePageLicense_update_license_key_button);
 		updateButton.addSelectionListener(new SelectionAdapter() {
@@ -166,24 +165,24 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 		updateDisplayedInformation();
 
 		updateButton.setVisible(true);
-		
+
 		composite.addDisposeListener(new DisposeListener() {
-			
+
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				jSparrowImageActive.dispose();
 				jSparrowImageInactive.dispose();
 				boldFont.dispose();
 			}
-		});		
-		
+		});
+
 		composite.pack();
 	}
 
 	private void updateDisplayedInformation() {
-		if(isLicenseValidationServiceAvailable) {
+		if (isLicenseValidationServiceAvailable) {
 			licenseLabel.setText(licenseValidationService.getDisplayableLicenseInformation());
-	
+
 			if (!licenseValidationService.isValid()) {
 				licenseStatusLabel.setText(licenseValidationService.getLicenseStautsUserMessage());
 				logoLabel.setImage(jSparrowImageInactive);

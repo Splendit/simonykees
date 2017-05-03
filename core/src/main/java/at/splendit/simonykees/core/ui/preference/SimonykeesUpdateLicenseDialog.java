@@ -77,7 +77,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	@Inject
 	private LicenseValidationService licenseValidationService;
 	private boolean isLicenseValidationServiceAvailable = false;
-	
+
 	protected SimonykeesUpdateLicenseDialog(Shell parentShell) {
 		super(parentShell);
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
@@ -85,15 +85,15 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
 	@PostConstruct
 	private void postConstruct() {
-		if(licenseValidationService != null)
+		if (licenseValidationService != null)
 			isLicenseValidationServiceAvailable = true;
 	}
-	
+
 	@PreDestroy
 	private void preDestroy() {
 		isLicenseValidationServiceAvailable = false;
 	}
-	
+
 	@Override
 	public void create() {
 		super.create();
@@ -167,9 +167,10 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 			public void widgetSelected(SelectionEvent arg0) {
 				BusyIndicator.showWhile(Display.getDefault(), new Runnable() {
 					public void run() {
-						if(isLicenseValidationServiceAvailable) {
+						if (isLicenseValidationServiceAvailable) {
 							String licenseKey = getLicenseKey();
-							boolean updated = licenseValidationService.updateLicenseeNumber(licenseKey, DEFAULT_LICENSEE_NAME);
+							boolean updated = licenseValidationService.updateLicenseeNumber(licenseKey,
+									DEFAULT_LICENSEE_NAME);
 							updateWarningInformation(updated);
 						} else {
 							// TODO: proper error handling
@@ -212,17 +213,18 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		updatedLabel.setVisible(false);
 
 		/*
-		 * Automatic release does not work for Image, so we do it manually when container is disposed 
+		 * Automatic release does not work for Image, so we do it manually when
+		 * container is disposed
 		 */
 		container.addDisposeListener(new DisposeListener() {
-			
+
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				scaledJSparrowImageActive.dispose();
 				scaledJSparrowImageInactive.dispose();
 			}
 		});
-		
+
 		return container;
 	}
 
