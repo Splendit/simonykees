@@ -67,7 +67,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 */
 	protected void createFilteringPart(Composite parent) {
 		filterComposite = new Composite(parent, SWT.NONE);
-		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
 		filterComposite.setLayoutData(gridData);
 		GridLayout gridLayout = new GridLayout(4, false);
 		gridLayout.horizontalSpacing = 3;
