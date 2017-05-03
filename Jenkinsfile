@@ -3,7 +3,7 @@
 // if this script is changed expand the documentation on confluence!
 // url: https://confluence.splendit.loc/display/SIM/Jenkins+Pipeline+Description
 
-// add timestaps
+// add timestaps to the "Console Output" of Jenkins
 timestamps {
 	node {
 		try {
