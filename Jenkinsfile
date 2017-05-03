@@ -87,29 +87,29 @@ timestamps {
 			notifyBuild(currentBuild.result)
 		}
 	}
+}
 	
-	def setTestStatus(testStatus) {
-		if ( testStatus == 0 ) {
-			currentBuild.result = 'SUCCESS'
-		} else if ( testStatus == 1 ) {
-			currentBuild.result = 'UNSTABLE'
-		}
+def setTestStatus(testStatus) {
+	if ( testStatus == 0 ) {
+		currentBuild.result = 'SUCCESS'
+	} else if ( testStatus == 1 ) {
+		currentBuild.result = 'UNSTABLE'
 	}
+}
+
+
+def notifyBuild(String buildStatus) {
+	// send to email only if buildStatus is UNSTABLE or FAILED
+	if (buildStatus == 'FAILURE' || buildStatus == 'UNSTABLE') {
+		jobName = env.JOB_NAME.replace("%2F", "/")
 	
+		def subject = "${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]'"
+		def details = "<p>${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]':</p>\n<p>Check console output at \"<a href='${env.BUILD_URL}'>${jobName} [${env.BUILD_NUMBER}]</a>\"</p>"
 	
-	def notifyBuild(String buildStatus) {
-		// send to email only if buildStatus is UNSTABLE or FAILED
-		if (buildStatus == 'FAILURE' || buildStatus == 'UNSTABLE') {
-			jobName = env.JOB_NAME.replace("%2F", "/")
-		
-			def subject = "${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]'"
-			def details = "<p>${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]':</p>\n<p>Check console output at \"<a href='${env.BUILD_URL}'>${jobName} [${env.BUILD_NUMBER}]</a>\"</p>"
-		
-			emailext (
-				subject: subject,
-				body: details,
-				recipientProviders: [[$class: 'CulpritsRecipientProvider']]
-			)
-		}
+		emailext (
+			subject: subject,
+			body: details,
+			recipientProviders: [[$class: 'CulpritsRecipientProvider']]
+		)
 	}
 }
