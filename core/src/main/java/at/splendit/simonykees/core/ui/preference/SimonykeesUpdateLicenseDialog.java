@@ -53,7 +53,7 @@ import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 /**
  * Dialog for updating license key.
  * 
- * @author Ardit Ymeri, Andreja Sambolec
+ * @author Ardit Ymeri, Andreja Sambolec, Matthias Webhofer
  * @since 1.0
  *
  */

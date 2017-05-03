@@ -21,56 +21,54 @@ import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
  * GUI related convenience class to check the validity of the license and
  * display appropriate popups if not.
  * 
- * @author Ludwig Werzowa, Andreja Sambolec
+ * @author Ludwig Werzowa, Andreja Sambolec, Matthias Webhofer
  * @since 1.0
  */
 public class LicenseUtil {
 	private static final Logger logger = LoggerFactory.getLogger(LicenseUtil.class);
-	
+
 	private static LicenseUtil instance;
-	
+
 	@Inject
 	private LicenseValidationService licenseValidationService;
 	private boolean isLicenseValidationServiceAvailable = false;
-	
+
 	private LicenseUtil() {
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 	}
-	
+
 	public static LicenseUtil getInstance() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new LicenseUtil();
 		}
 		return instance;
 	}
-	
+
 	@PostConstruct
 	private void postConstruct() {
-		if(licenseValidationService != null)
+		if (licenseValidationService != null)
 			isLicenseValidationServiceAvailable = true;
 	}
-	
+
 	@PreDestroy
 	private void preDestroy() {
 		isLicenseValidationServiceAvailable = false;
 	}
-	
+
 	public boolean isValid() {
-		if(isLicenseValidationServiceAvailable)
+		if (isLicenseValidationServiceAvailable)
 			return licenseValidationService.isValid();
 		return false;
 	}
 
 	public void displayLicenseErrorDialog(Shell shell) {
 
-		if(isLicenseValidationServiceAvailable) {
+		if (isLicenseValidationServiceAvailable) {
 			String userMessage = licenseValidationService.getLicenseStautsUserMessage();
-	
-			SimonykeesMessageDialog.openMessageDialog(shell, 
-					NLS.bind(Messages.LicenseHelper_licenseProblem, userMessage), 
-					MessageDialog.ERROR);
-		}
-		else {
+
+			SimonykeesMessageDialog.openMessageDialog(shell,
+					NLS.bind(Messages.LicenseHelper_licenseProblem, userMessage), MessageDialog.ERROR);
+		} else {
 			// TODO: proper error handling
 			logger.error(ExceptionMessages.LicenseUtil_license_service_unavailable);
 		}

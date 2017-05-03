@@ -47,7 +47,7 @@ import at.splendit.simonykees.license.api.LicenseValidationService;
 /**
  * Preference page for displaying license information and updating license key.
  * 
- * @author Ardit Ymeri, Andreja Sambolec
+ * @author Ardit Ymeri, Andreja Sambolec, Matthias Webhofer
  * @since 1.0
  *
  */
