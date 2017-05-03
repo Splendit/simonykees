@@ -1,6 +1,21 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
 public abstract class TestFunctionalInterface3Rule {
+
+	static {
+		staticGetRunnableHash();
+	}
+
+	static {
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				hashCode();
+			}
+		};
+		r.run();
+	}
+
 	static {
 		staticGetRunnable();
 	}
@@ -17,9 +32,25 @@ public abstract class TestFunctionalInterface3Rule {
 
 	{
 		Runnable r = () -> {
+			hashCode();
+		};
+		r.run();
+	}
+
+	{
+		Runnable r = () -> {
 			getClass();
 		};
 		r.run();
+	}
+
+	private static Runnable staticGetRunnableHash() {
+		return new Runnable() {
+			@Override
+			public void run() {
+				hashCode();
+			}
+		};
 	}
 
 	private static Runnable staticGetRunnable() {
@@ -27,8 +58,18 @@ public abstract class TestFunctionalInterface3Rule {
 			@Override
 			public void run() {
 				getClass();
-
 			}
+		};
+	}
+
+	@Override
+	public int hashCode() {
+		return 0;
+	}
+
+	public Runnable getRunnableHash() {
+		return () -> {
+			hashCode();
 		};
 	}
 
