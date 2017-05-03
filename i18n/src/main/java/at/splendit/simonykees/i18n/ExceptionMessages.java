@@ -23,9 +23,12 @@ public class ExceptionMessages extends NLS {
 	public static String AbstractRefactorer_warn_no_compilation_units_found;
 	public static String AbstractRefactorer_warn_no_working_copies_foung;
 	public static String AbstractRefactorer_warn_working_copies_already_generated;
+	public static String LicenseUtil_license_service_unavailable;
 	public static String PersistenceManager_decryption_error;
 	public static String PersistenceManager_encryption_error;
 	public static String SimonykeesException_default_ui_message;
+	public static String SimonykeesPreferencePageLicense_license_service_unavailable;
+	public static String SimonykeesUpdateLicenseDialog_license_service_unavailable;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, ExceptionMessages.class);
