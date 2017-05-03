@@ -76,8 +76,10 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 		List<MethodDeclaration> toBeAnnotated = new ArrayList<>();
 
 		for (MethodDeclaration method : methods) {
-			// skip constructors and private methods
-			if (!method.isConstructor() && !isPrivate(method) && !isOverrideAnnotated(method)) {
+			// skip constructors, private methods and methods that have the @Override annotation 
+			if (!method.isConstructor()
+					&& !ASTNodeUtil.hasModifier(method.modifiers(), modifier -> modifier.isPrivate())
+					&& !isOverrideAnnotated(method)) {
 
 				IMethodBinding methodBinding = method.resolveBinding();
 				if (methodBinding != null) {
@@ -112,19 +114,6 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 		return ASTNodeUtil.convertToTypedList(method.modifiers(), MarkerAnnotation.class).stream()
 				.map(MarkerAnnotation::getTypeName)
 				.filter(typeName -> OVERRIDE.equals(typeName.getFullyQualifiedName())).findAny().isPresent();
-	}
-
-	/**
-	 * Checks whether the given method has a private access modifier.
-	 * 
-	 * @param method
-	 *            method to be checked.
-	 * @return true if the given method is {@code private}
-	 */
-	private boolean isPrivate(MethodDeclaration method) {
-
-		return ASTNodeUtil.convertToTypedList(method.modifiers(), Modifier.class).stream().filter(Modifier::isPrivate)
-				.findAny().isPresent();
 	}
 
 	/**

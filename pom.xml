@@ -44,15 +44,20 @@
 	</prerequisites>
 
 	<modules>
-		<module>i18n</module>
+		<!-- plug-in functionality -->
 		<module>logging</module>
-		<module>license</module>
+		<module>i18n</module>	
+		<module>license.api</module>
+		<module>license.netlicensing</module>
 		<module>core</module>
+		<!-- test-data -->
 		<module>sample</module>
-		<module>license.test</module>
+		<!-- all integration test modules -->
+		<module>license.netlicensing.test</module>
 		<module>test</module>
+		<!-- OSGi feature + site deployment -->
 		<module>feature</module>
-		<module>site</module>
+		<module>site</module>	
 	</modules>
 
 	<scm>

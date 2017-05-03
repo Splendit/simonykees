@@ -40,7 +40,7 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 					Messages.SelectRulesWizardHandler_allready_running, MessageDialog.INFORMATION);
 		} else {
 			Activator.setRunning(true);
-			if (LicenseUtil.isValid()) {
+			if (LicenseUtil.getInstance().isValid()) {
 				List<IJavaElement> selectedJavaElements = getSelectedJavaElements(event);
 				if (!selectedJavaElements.isEmpty()) {
 					IJavaProject selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
@@ -81,10 +81,12 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 					}
 				}
 			} else {
-				// do not display the SelectRulesWizard if the license is
-				// invalid
+				/*
+				 * do not display the SelectRulesWizard if the license is
+				 * invalid
+				 */
 				final Shell shell = HandlerUtil.getActiveShell(event);
-				LicenseUtil.displayLicenseErrorDialog(shell);
+				LicenseUtil.getInstance().displayLicenseErrorDialog(shell);
 			}
 		}
 

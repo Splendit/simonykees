@@ -132,7 +132,7 @@ public class SelectRulesWizard extends Wizard {
 			public void done(IJobChangeEvent event) {
 
 				if (event.getResult().isOK()) {
-					if (LicenseUtil.isValid()) {
+					if (LicenseUtil.getInstance().isValid()) {
 						if (refactorer.hasChanges()) {
 
 							synchronizeWithUIShowRefactoringPreviewWizard(refactorer, rectangle);
@@ -204,7 +204,7 @@ public class SelectRulesWizard extends Wizard {
 			@Override
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				LicenseUtil.displayLicenseErrorDialog(shell);
+				LicenseUtil.getInstance().displayLicenseErrorDialog(shell);
 
 				Activator.setRunning(false);
 			}

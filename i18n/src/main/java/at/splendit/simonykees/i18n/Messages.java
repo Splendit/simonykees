@@ -36,6 +36,8 @@ public class Messages extends NLS {
 	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;
 	public static String MultiCatchRule_name;
+	public static String FieldNameConventionRule_description;
+	public static String FieldNameConventionRule_name;
 	public static String ForToForEachRule_description;
 	public static String ForToForEachRule_name;
 	public static String FunctionalInterfaceRule_description;
@@ -141,6 +143,8 @@ public class Messages extends NLS {
 	public static String StringFormatLineSeparatorRule_name;
 	public static String StringConcatToPlusRule_description;
 	public static String StringConcatToPlusRule_name;
+	public static String StringLiteralEqualityCheckRule_description;
+	public static String StringLiteralEqualityCheckRule_name;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
 	public static String TryWithResourceRule_description;
