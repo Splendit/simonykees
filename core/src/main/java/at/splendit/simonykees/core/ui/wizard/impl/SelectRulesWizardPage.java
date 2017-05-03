@@ -26,9 +26,18 @@ import org.eclipse.swt.widgets.Text;
 import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
 import at.splendit.simonykees.i18n.Messages;
 
+/**
+ * Wizard page for selecting rules when applying rules to selected resources
+ * 
+ * @author Andreja Sambolec
+ * @since 1.2
+ *
+ */
 public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private Composite filterComposite;
+	
+	private final String EMPTY_PROFIL = ""; //$NON-NLS-1$
 
 	private Label selectProfileLabel;
 	private Combo selectProfileCombo;
@@ -162,7 +171,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 */
 	private void populateGroupFilterCombo() {
 		List<String> profiles = SimonykeesPreferenceManager.getAllProfileIds();
-		selectProfileCombo.add("");
+		selectProfileCombo.add(EMPTY_PROFIL);
 		for (String profile : profiles) {
 			selectProfileCombo.add(profile);
 		}

@@ -3,6 +3,13 @@ package at.splendit.simonykees.core.ui.preference.profile;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Profile object
+ * 
+ * @author Andreja Sambolec
+ * @since 1.2
+ *
+ */
 public class Profile implements SimonykeesProfile {
 
 	List<String> enabledRulesIds = new ArrayList<>();

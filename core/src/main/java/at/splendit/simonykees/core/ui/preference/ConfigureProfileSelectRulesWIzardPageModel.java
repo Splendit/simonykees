@@ -11,6 +11,14 @@ import at.splendit.simonykees.core.ui.wizard.impl.AbstractSelectRulesWizardModel
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
+/**
+ * Model for Wizard page for selecting rules when creating new profile in
+ * preferences page
+ * 
+ * @author Andreja Sambolec
+ * @since 1.2
+ *
+ */
 public class ConfigureProfileSelectRulesWIzardPageModel extends AbstractSelectRulesWizardModel {
 
 	private String name;
@@ -42,8 +50,7 @@ public class ConfigureProfileSelectRulesWIzardPageModel extends AbstractSelectRu
 		StatusInfo status = new StatusInfo();
 		// if name is changed and already exists in profiles list it can not be
 		// used, name has to be unique
-		if (SimonykeesPreferenceManager.getAllProfileIds().contains(name.trim())
-				&& !name.trim().equals(this.name)) {
+		if (SimonykeesPreferenceManager.getAllProfileIds().contains(name.trim()) && !name.trim().equals(this.name)) {
 			status.setError(Messages.ConfigureProfileSelectRulesWIzardPageModel_error_NameExists);
 		} else {
 			this.newName = name.trim();

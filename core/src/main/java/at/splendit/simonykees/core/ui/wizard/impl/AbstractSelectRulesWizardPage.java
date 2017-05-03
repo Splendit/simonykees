@@ -352,12 +352,12 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 				// updates enabling Finish button according to right side table
 				// view
 				// if selection is empty Finish button is disabled
-				getContainer().updateButtons();
 			} else {
 				leftTreeViewer.setInput(model.getPosibilities());
 				rightTableViewer.setInput(model.getSelection());
 				model.resetForced();
 			}
+			getContainer().updateButtons();
 			model.resetChanged();
 		}
 		populateDescriptionTextViewer();

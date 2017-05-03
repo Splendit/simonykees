@@ -29,6 +29,13 @@ import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
 
+/**
+ * Tag object for filtering rules
+ * 
+ * @author Martin Huter, Andreja Sambolec
+ * @since 1.2
+ *
+ */
 @SuppressWarnings("nls")
 public enum Tag {
 
@@ -45,7 +52,6 @@ public enum Tag {
 	public List<String> getTagNames() {
 		return tagName;
 	}
-	
 
 	@SuppressWarnings("rawtypes")
 	public static List<Tag> getTagsForRule(Class<? extends RefactoringRule> clazz) {
@@ -63,7 +69,7 @@ public enum Tag {
 		} else if (FieldNameConventionRule.class == clazz) {
 			return Arrays.asList(JAVA_0_9);
 		} else if (ForToForEachRule.class == clazz) {
-			return Arrays.asList(JAVA_1_5,LOOP);
+			return Arrays.asList(JAVA_1_5, LOOP);
 		} else if (FunctionalInterfaceRule.class == clazz) {
 			return Arrays.asList(JAVA_1_8);
 		} else if (InefficientConstructorRule.class == clazz) {
@@ -95,15 +101,16 @@ public enum Tag {
 		} else if (TryWithResourceRule.class == clazz) {
 			return Arrays.asList(JAVA_1_7);
 		} else if (WhileToForEachRule.class == clazz) {
-			return Arrays.asList(JAVA_1_5,LOOP);
+			return Arrays.asList(JAVA_1_5, LOOP);
 		}
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["
 				+ Tag.class.getCanonicalName() + "]");
 	}
-	
+
 	public static Tag getTageForName(String name) {
-		return Arrays.stream(Tag.class.getEnumConstants()).filter(tag -> tag.name().equals(name)).findFirst().orElse(null);
+		return Arrays.stream(Tag.class.getEnumConstants()).filter(tag -> tag.name().equals(name)).findFirst()
+				.orElse(null);
 	}
 
 	public static String[] getAllTags() {

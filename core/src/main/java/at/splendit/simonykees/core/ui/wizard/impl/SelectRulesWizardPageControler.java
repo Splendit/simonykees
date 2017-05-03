@@ -1,8 +1,17 @@
 package at.splendit.simonykees.core.ui.wizard.impl;
 
+/**
+ * Controller for Wizard page for selecting rules when applying rules to
+ * selected resources
+ * 
+ * @author Andreja Sambolec
+ * @since 1.2
+ *
+ */
 public class SelectRulesWizardPageControler extends AbstractSelectRulesWizardControler {
 
 	SelectRulesWizardPageModel model;
+
 	public SelectRulesWizardPageControler(SelectRulesWizardPageModel model) {
 		super(model);
 		this.model = model;

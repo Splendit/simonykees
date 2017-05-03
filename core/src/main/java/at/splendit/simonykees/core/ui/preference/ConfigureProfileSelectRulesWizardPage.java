@@ -13,6 +13,13 @@ import org.eclipse.swt.widgets.Text;
 import at.splendit.simonykees.core.ui.wizard.impl.AbstractSelectRulesWizardPage;
 import at.splendit.simonykees.i18n.Messages;
 
+/**
+ * Wizard page for selecting rules when creating new profile in preferences page
+ * 
+ * @author Andreja Sambolec
+ * @since 1.2
+ *
+ */
 public class ConfigureProfileSelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private Label nameInputLabel;

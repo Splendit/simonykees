@@ -9,6 +9,14 @@ import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.Tag;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Model for Wizard page for selecting rules when applying rules to selected
+ * resources
+ * 
+ * @author Andreja Sambolec
+ * @since 1.2
+ *
+ */
 public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 
 	private String nameFilter = ""; //$NON-NLS-1$
