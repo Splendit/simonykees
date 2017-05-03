@@ -8,6 +8,13 @@ import org.osgi.service.component.annotations.Component;
 import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.license.api.LicenseValidationService;
 
+/**
+ * provides an implementation for the declarative service specified by the
+ * {@link at.splendit.simonykees.license.api.LicenseValidationService} interface
+ * 
+ * @author Matthias Webhofer
+ * @since 1.2
+ */
 @Component
 public class NetLicensingLicenseValidationService implements LicenseValidationService {
 

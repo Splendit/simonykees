@@ -25,7 +25,8 @@ import at.splendit.simonykees.license.api.LicenseValidationService;
 /**
  * The activator class controls the plug-in life cycle
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
+ *         Matthias Webhofer
  * @since 0.9
  */
 public class Activator extends AbstractUIPlugin {
