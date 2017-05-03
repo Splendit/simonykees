@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.i18n.Messages;
+import at.splendit.simonykees.i18n.ExceptionMessages;
 import at.splendit.simonykees.license.api.LicenseValidationService;
 
 /**
@@ -191,10 +192,9 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 				licenseStatusLabel.setText(""); //$NON-NLS-1$
 				logoLabel.setImage(jSparrowImageActive);
 			}
-		}
-		else {
-			// TODO: propper error handling
-			logger.error("license service unavailable!");
+		} else {
+			// TODO: proper error handling
+			logger.error(ExceptionMessages.SimonykeesPreferencePageLicense_license_service_unavailable);
 		}
 
 		licenseLabel.getParent().pack();

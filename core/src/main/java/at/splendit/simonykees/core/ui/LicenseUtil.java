@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.splendit.simonykees.i18n.ExceptionMessages;
 import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.license.api.LicenseValidationService;
 import at.splendit.simonykees.core.Activator;
@@ -70,8 +71,8 @@ public class LicenseUtil {
 					MessageDialog.ERROR);
 		}
 		else {
-			// TODO: propper error handling
-			logger.error("license validation survice unavailable!");
+			// TODO: proper error handling
+			logger.error(ExceptionMessages.LicenseUtil_license_service_unavailable);
 		}
 	}
 

@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.i18n.ExceptionMessages;
 import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.license.api.LicenseValidationService;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
@@ -170,10 +171,9 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 							String licenseKey = getLicenseKey();
 							boolean updated = licenseValidationService.updateLicenseeNumber(licenseKey, DEFAULT_LICENSEE_NAME);
 							updateWarningInformation(updated);
-						}
-						else {
-							// TODO: propper error handling
-							logger.error("license validation service unavailable!");
+						} else {
+							// TODO: proper error handling
+							logger.error(ExceptionMessages.SimonykeesUpdateLicenseDialog_license_service_unavailable);
 						}
 					}
 				});
