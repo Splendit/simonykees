@@ -87,7 +87,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				Text source = (Text) e.getSource();
-				((SelectRulesWizardPageControler) controler).nameFilterTextChanged(source.getText());
+				((SelectRulesWizardPageControler) controler).nameFilterTextChanged(source.getText().trim().toLowerCase());
 			}
 		});
 		// following doesn't work under Windows7
@@ -99,8 +99,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 					text.setText(Messages.SelectRulesWizardPage_emptyString);
 				} else if (e.detail == SWT.ICON_SEARCH) {
 					Text text = (Text) e.getSource();
-					String input = text.getText();
-					if (!((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
+					String input = text.getText().trim().toLowerCase();
+					if (!input.isEmpty() && !((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
 						((SelectRulesWizardPageControler) controler).searchPressed(input);
 						addTagInComposite(input);
 						nameFilterText.setText(""); //$NON-NLS-1$
@@ -115,8 +115,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR) {
-					String input = ((Text) e.getSource()).getText();
-					if (!((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
+					String input = ((Text) e.getSource()).getText().trim().toLowerCase();
+					if (!input.isEmpty() && !((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
 						((SelectRulesWizardPageControler) controler).searchPressed(input);
 						addTagInComposite(input);
 						nameFilterText.setText(""); //$NON-NLS-1$
