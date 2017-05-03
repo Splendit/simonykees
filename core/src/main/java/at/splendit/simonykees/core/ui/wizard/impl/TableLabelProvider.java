@@ -6,6 +6,7 @@ import org.eclipse.swt.graphics.Image;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.i18n.ExceptionMessages;
 
 public class TableLabelProvider extends BaseLabelProvider implements ITableLabelProvider {
 
@@ -24,7 +25,7 @@ public class TableLabelProvider extends BaseLabelProvider implements ITableLabel
 		case 1:
 			return rule.getDescription();
 		}
-		return "Not supported";
+		return ExceptionMessages.TableLabelProvider_not_supported;
 	}
 
 }
