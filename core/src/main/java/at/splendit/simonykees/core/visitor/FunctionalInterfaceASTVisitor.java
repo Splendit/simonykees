@@ -12,10 +12,10 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -97,17 +97,14 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						 * static functions
 						 */
 
-						List<IExtendedModifier> modifiers = null;
+						@SuppressWarnings("rawtypes")
+						List modifiers = null;
 						if (ASTNode.INITIALIZER == scope.getNodeType()) {
-							modifiers = ASTNodeUtil.returnTypedList(((Initializer) scope).modifiers(),
-									IExtendedModifier.class);
+							modifiers = ((Initializer) scope).modifiers();
 						} else if (ASTNode.METHOD_DECLARATION == scope.getNodeType()) {
-							modifiers = ASTNodeUtil.returnTypedList(((MethodDeclaration) scope).modifiers(),
-									IExtendedModifier.class);
+							modifiers = ((MethodDeclaration) scope).modifiers();
 						}
-						if (modifiers != null && modifiers.stream().filter(Modifier.class::isInstance)
-								.map(Modifier.class::cast).anyMatch(modifier -> Modifier.ModifierKeyword.STATIC_KEYWORD
-										.equals(modifier.getKeyword()))) {
+						if (modifiers != null && ASTNodeUtil.hasModifier(modifiers, modifier->modifier.isStatic())) {
 							/*
 							 * TODO skipping static methods for the moment Need
 							 * to implement handling of non static method calls

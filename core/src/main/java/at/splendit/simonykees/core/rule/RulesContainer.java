@@ -8,6 +8,7 @@ import at.splendit.simonykees.core.rule.impl.BracketsToControlRule;
 import at.splendit.simonykees.core.rule.impl.CodeFormatterRule;
 import at.splendit.simonykees.core.rule.impl.CollectionRemoveAllRule;
 import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
+import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.RearrangeClassMembersRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
@@ -44,6 +45,7 @@ import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
 import at.splendit.simonykees.core.visitor.loop.WhileToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.renaming.FieldNameConventionASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.MultiCatchASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisitor;
 
@@ -89,6 +91,7 @@ public class RulesContainer {
 				new RearrangeClassMembersRule(RearrangeClassMembersASTVisitor.class),
 				new OverrideAnnotationRule(OverrideAnnotationRuleASTVisitor.class),
 				new StringLiteralEqualityCheckRule(StringLiteralEqualityCheckASTVisitor.class),
+				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
 
 				/*
 				 * Code formatting and organizing imports should always happen
