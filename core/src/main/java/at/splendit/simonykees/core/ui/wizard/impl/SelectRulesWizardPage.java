@@ -3,6 +3,7 @@ package at.splendit.simonykees.core.ui.wizard.impl;
 
 import java.util.List;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.fieldassist.AutoCompleteField;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.swt.SWT;
@@ -34,7 +35,7 @@ import at.splendit.simonykees.i18n.Messages;
  *
  */
 public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
-
+	
 	private Composite filterComposite;
 	
 	private final String EMPTY_PROFIL = ""; //$NON-NLS-1$
@@ -155,6 +156,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		gridData = new GridData();
 		gridData.horizontalSpan = 2;
 		removeDisabledRulesButton.setLayoutData(gridData);
+		
+		Dialog.applyDialogFont(parent);
 	}
 
 	private void initializeGroupFilterCombo() {

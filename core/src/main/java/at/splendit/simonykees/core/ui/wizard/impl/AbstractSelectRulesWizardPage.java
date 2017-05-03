@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -92,6 +93,8 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 			}
 		});
 
+		Dialog.applyDialogFont(composite);
+		
 		updateData();
 	}
 

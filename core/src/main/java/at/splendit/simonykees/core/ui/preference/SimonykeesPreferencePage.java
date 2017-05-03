@@ -14,6 +14,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -40,6 +41,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	private Button newProfileButton;
 	private Button editProfileButton;
 	private Button removeProfileButton;
+	
+	private Font font;
 
 	public SimonykeesPreferencePage() {
 		super(GRID);
@@ -49,7 +52,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	@Override
 	protected void createFieldEditors() {
+		font = getFieldEditorParent().getFont();
 		Composite composite = new Composite(getFieldEditorParent(), SWT.NONE);
+		composite.setFont(font);
 		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout gridLayout = new GridLayout(2, false);
 		composite.setLayout(gridLayout);
@@ -88,6 +93,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	private void createProfilesTableView(Composite composite) {
 		Composite viewerComposite = new Composite(composite, SWT.NONE);
+		viewerComposite.setFont(font);
 		GridLayout layout = new GridLayout(2, false);
 		layout.marginHeight = layout.marginWidth = 0;
 		layout.horizontalSpacing = convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
@@ -100,6 +106,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		profilesTable = new Table(viewerComposite, SWT.BORDER | SWT.MULTI);
 		data = new GridData(GridData.FILL_BOTH);
 		profilesTable.setLayoutData(data);
+		profilesTable.setFont(font);
 		TableColumn column = new TableColumn(profilesTable, SWT.NONE);
 		column.setWidth(100);
 		populateTable();
@@ -129,6 +136,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			TableItem item = items[i];
 			Button button = new Button(profilesTable, SWT.RADIO);
 			button.setText(SimonykeesPreferenceManager.getAllProfileIds().get(i));
+			button.setFont(font);
 			button.pack();
 			button.addSelectionListener(new SelectionAdapter() {
 				@Override
@@ -161,18 +169,22 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout(1, false));
 		composite.setLayoutData(new GridData(SWT.CENTER));
+		composite.setFont(font);
 
 		newProfileButton = new Button(composite, SWT.PUSH);
 		newProfileButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		newProfileButton.setText(Messages.SimonykeesPreferencePage_newProfileButtonLabel);
+		newProfileButton.setFont(font);
 
 		editProfileButton = new Button(composite, SWT.PUSH);
 		editProfileButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		editProfileButton.setText(Messages.SimonykeesPreferencePage_editProfileButtonLabel);
+		editProfileButton.setFont(font);
 
 		removeProfileButton = new Button(composite, SWT.PUSH);
 		removeProfileButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		removeProfileButton.setText(Messages.SimonykeesPreferencePage_removeProfileButtonLabel);
+		removeProfileButton.setFont(font);
 
 		newProfileButton.addSelectionListener(new SelectionAdapter() {
 			@Override
