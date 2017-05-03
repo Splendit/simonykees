@@ -41,11 +41,11 @@ import at.splendit.simonykees.i18n.Messages;
  */
 public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage {
 
-	private AbstractSelectRulesWizardModel model;
-	private AbstractSelectRulesWizardControler controler;
+	protected AbstractSelectRulesWizardModel model;
+	protected AbstractSelectRulesWizardControler controler;
 
 	private Composite composite;
-	
+
 	private TreeViewer leftTreeViewer;
 	private TableViewer rightTableViewer;
 
@@ -340,16 +340,24 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 		// check if model has changed to update table and tree view or is just
 		// selection changed to update description field and buttons
 		if (model.hasChanged()) {
-			model.filterPosibilitiesByTags();
-			if (model.getNameFilter().isEmpty()) {
-				leftTreeViewer.setInput(model.getPosibilities());
+			if (!model.isForced()) {
+				model.filterPosibilitiesByTags();
+				model.removeAlreadySelected();
+				if (model.getNameFilter().isEmpty()) {
+					leftTreeViewer.setInput(model.getPosibilities());
+				} else {
+					leftTreeViewer.setInput(model.filterPosibilitiesByName());
+				}
+				rightTableViewer.setInput(model.getSelection());
+				// updates enabling Finish button according to right side table
+				// view
+				// if selection is empty Finish button is disabled
+				getContainer().updateButtons();
 			} else {
-				leftTreeViewer.setInput(model.filterPosibilitiesByName());
+				leftTreeViewer.setInput(model.getPosibilities());
+				rightTableViewer.setInput(model.getSelection());
+				model.resetForced();
 			}
-			rightTableViewer.setInput(model.getSelection());
-			// updates enabling Finish button according to right side table view
-			// if selection is empty Finish button is disabled
-			getContainer().updateButtons();
 			model.resetChanged();
 		}
 		populateDescriptionTextViewer();
@@ -385,7 +393,7 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 		}
 		return false;
 	}
-	
+
 	public void recalculateLayout() {
 		composite.layout(true, true);
 	}

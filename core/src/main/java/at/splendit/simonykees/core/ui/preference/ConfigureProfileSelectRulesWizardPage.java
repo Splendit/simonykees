@@ -22,17 +22,11 @@ public class ConfigureProfileSelectRulesWizardPage extends AbstractSelectRulesWi
 
 	protected IStatus fTypeNameStatus;
 
-	private ConfigureProfileSelectRulesWizardPageControler controler;
-
 	@SuppressWarnings("restriction")
 	public ConfigureProfileSelectRulesWizardPage(ConfigureProfileSelectRulesWIzardPageModel model,
 			ConfigureProfileSelectRulesWizardPageControler controler, String profileId) {
 		super(model, controler);
-		this.controler = controler;
 		this.profileId = profileId;
-		if (!this.profileId.isEmpty()) {
-			controler.profileChanged(this.profileId);
-		}
 		fTypeNameStatus = new StatusInfo();
 	}
 
@@ -57,7 +51,8 @@ public class ConfigureProfileSelectRulesWizardPage extends AbstractSelectRulesWi
 			@Override
 			public void modifyText(ModifyEvent e) {
 				Text source = (Text) e.getSource();
-				fTypeNameStatus = controler.nameTextChanged(source.getText());
+				fTypeNameStatus = ((ConfigureProfileSelectRulesWizardPageControler) controler)
+						.nameTextChanged(source.getText());
 				doStatusUpdate();
 				getContainer().updateButtons();
 			}
@@ -66,7 +61,7 @@ public class ConfigureProfileSelectRulesWizardPage extends AbstractSelectRulesWi
 
 	private void doStatusUpdate() {
 		// status of all used components
-		IStatus[] status = new IStatus[] {fTypeNameStatus};
+		IStatus[] status = new IStatus[] { fTypeNameStatus };
 
 		// the mode severe status will be displayed and the OK button
 		// enabled/disabled.

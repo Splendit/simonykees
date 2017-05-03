@@ -20,4 +20,8 @@ public class SelectRulesWizardPageControler extends AbstractSelectRulesWizardCon
 		model.removeTag(text);
 	}
 
+	public void profileChanged(String selectedProfileId) {
+		model.selectFromProfile(selectedProfileId);
+	}
+
 }

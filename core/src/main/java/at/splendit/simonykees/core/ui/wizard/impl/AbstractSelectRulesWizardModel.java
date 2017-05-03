@@ -11,7 +11,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
-import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.core.ui.wizard.IWizardPageModel;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -26,11 +25,9 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel {
 
 	private Set<Object> allPosibilities = new HashSet<>();
-	
+
 	private Set<Object> posibilities = new HashSet<>();
 	private Set<Object> selection = new HashSet<>();
-
-	private String currentProfileId = ""; //$NON-NLS-1$
 
 	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
@@ -38,6 +35,9 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 
 	// flag if model is changed or is just selection change
 	private boolean changed = false;
+	private boolean forced = false;
+
+	private boolean removeDisabled = false;
 
 	public AbstractSelectRulesWizardModel(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		this.rules = rules;
@@ -71,7 +71,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	public Set<Object> getAllPosibilities() {
 		return allPosibilities;
 	}
-	
+
 	/**
 	 * Getter for all values that should be shown in right view
 	 * 
@@ -79,15 +79,6 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 */
 	public Set<Object> getSelection() {
 		return selection;
-	}
-
-	/**
-	 * Getter for currently selected profile in combo view
-	 * 
-	 * @return String id of currently selected profile in combo
-	 */
-	public String getCurrentProfileId() {
-		return currentProfileId;
 	}
 
 	/**
@@ -135,6 +126,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 */
 	@SuppressWarnings("unchecked")
 	public void moveToLeft(IStructuredSelection selectedElements) {
+
 		selection.removeAll(selectedElements.toList());
 
 		posibilities.addAll(selectedElements.toList());
@@ -149,6 +141,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 * disabled elements.
 	 */
 	public void moveAllToLeft() {
+
 		posibilities.addAll(selection);
 
 		selection.clear();
@@ -174,31 +167,23 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 * @param applicable
 	 *            Set to fill with all possible elements from all groups
 	 */
-	private void addAllItems(final Set<Object> applicable) {
-		applicable.addAll(rules);
-	}
-
 	@SuppressWarnings("unchecked")
-	public void selectFromProfile(final String profileId) {
-		currentProfileId = profileId;
-		moveAllToLeft();
-		Set<Object> currentPosibilities = new HashSet<>();
-		currentPosibilities.addAll(posibilities);
-		for (Object posibility : currentPosibilities) {
-			if (SimonykeesPreferenceManager.getProfileFromName(currentProfileId).containsRule(//SimonykeesPreferenceManager.isRuleSelectedInProfile(
-					//SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
-					((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getId())) {
-				selection.add(posibility);
-				posibilities.remove(posibility);
+	protected void addAllItems(final Set<Object> applicable) {
+		applicable.addAll(rules);
+		if (removeDisabled) {
+			Set<Object> currentPosibilities = new HashSet<>();
+			currentPosibilities.addAll(posibilities);
+			for (Object posibility : currentPosibilities) {
+				if (!((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
+					applicable.remove(posibility);
+				}
 			}
 		}
-
-		setChanged();
-		notifyListeners();
 	}
 
 	@SuppressWarnings("unchecked")
 	public void removeDisabledPosibilities(boolean doit) {
+		removeDisabled = doit;
 		if (doit) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
@@ -212,7 +197,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 			posibilities.addAll(rules);
 
 		}
-		changed = true;
+		setChanged(false);
 		notifyListeners();
 	}
 
@@ -249,13 +234,22 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	public void resetChanged() {
 		this.changed = false;
 	}
-	
-	public void setChanged() {
-		this.changed = true;
+
+	public boolean isForced() {
+		return forced;
 	}
-	
+
+	public void resetForced() {
+		this.forced = false;
+	}
+
+	public void setChanged(boolean forced) {
+		this.changed = true;
+		this.forced = forced;
+	}
+
 	public abstract String getNameFilter();
-	
+
 	public abstract Set<Object> filterPosibilitiesByName();
 
 	public abstract void filterPosibilitiesByTags();
@@ -264,4 +258,15 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		posibilities.clear();
 		posibilities.addAll(filteredPosibilities);
 	}
+
+	public void removeAlreadySelected() {
+		Set<Object> currentPosibilities = new HashSet<>();
+		currentPosibilities.addAll(posibilities);
+		for (Object posibility : currentPosibilities) {
+			if (selection.contains(posibility)) {
+				posibilities.remove(posibility);
+			}
+		}
+	}
+
 }

@@ -43,6 +43,15 @@ public class SimonykeesPreferenceManager {
 		((Profile) profiles.get(index)).setEnabledRulesIds(ruleIds);
 	}
 
+	public static boolean useProfile() {
+		if (store.getString(SimonykeesPreferenceConstants.PROFILE_USE_OPTION).equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+	
 	/**
 	 * Returns the current profileId.
 	 * 
@@ -66,6 +75,9 @@ public class SimonykeesPreferenceManager {
 	 * @return a list of all {@link SimonykeesProfile#getProfileId()}
 	 */
 	public static List<String> getAllProfileIds() {
+		if (profiles.isEmpty()) {
+			loadProfilesFromStore();
+		}
 		return profiles.stream().map(SimonykeesProfile::getProfileName).collect(Collectors.toList());
 	}
 
@@ -77,7 +89,7 @@ public class SimonykeesPreferenceManager {
 		store.setValue(SimonykeesPreferenceConstants.PROFILE_LIST, getStringFromProfiles());
 	}
 
-	private static List<SimonykeesProfile> getProfilesFromString() {
+	private static List<SimonykeesProfile> loadProfilesFromStore() {
 		// profiles are saved in store as collected list
 		// ex. Profil1^rule1~rule2|profil 2^rule3~rule5~rule2
 		String[] profilesArray = parseString(getAllProfiles());
@@ -148,7 +160,7 @@ public class SimonykeesPreferenceManager {
 			setAllProfiles();
 		}
 		profiles.clear();
-		getProfilesFromString();
+		loadProfilesFromStore();
 	}
 
 }

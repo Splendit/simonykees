@@ -28,9 +28,6 @@ import at.splendit.simonykees.i18n.Messages;
 
 public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
-	private AbstractSelectRulesWizardModel model;
-	private AbstractSelectRulesWizardControler controler;
-
 	private Composite filterComposite;
 
 	private Label selectProfileLabel;
@@ -43,13 +40,12 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private Button removeDisabledRulesButton;
 
+	private boolean update = true;
+
 	public SelectRulesWizardPage(SelectRulesWizardPageModel model, SelectRulesWizardPageControler controler) {
 		super(model, controler);
 		setTitle(Messages.SelectRulesWizardPage_title);
 		setDescription(Messages.SelectRulesWizardPage_description);
-
-		this.model = model;
-		this.controler = controler;
 	}
 
 	/**
@@ -94,9 +90,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 				} else if (e.detail == SWT.ICON_SEARCH) {
 					Text text = (Text) e.getSource();
 					String input = text.getText();
-					if (!((SelectRulesWizardPageModel)model).getAppliedTags().contains(input)) {
+					if (!((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
 						((SelectRulesWizardPageControler) controler).searchPressed(input);
-						addTagInComposite(input);						
+						addTagInComposite(input);
 						nameFilterText.setText(""); //$NON-NLS-1$
 					}
 				}
@@ -110,9 +106,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			public void keyReleased(KeyEvent e) {
 				if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR) {
 					String input = ((Text) e.getSource()).getText();
-					if (!((SelectRulesWizardPageModel)model).getAppliedTags().contains(input)) {
+					if (!((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
 						((SelectRulesWizardPageControler) controler).searchPressed(input);
-						addTagInComposite(input);						
+						addTagInComposite(input);
 						nameFilterText.setText(""); //$NON-NLS-1$
 					}
 				}
@@ -135,6 +131,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		gridData = new GridData(GridData.END, GridData.FILL, false, false);
 		gridData.widthHint = 200;
 		selectProfileCombo.setLayoutData(gridData);
+		initializeGroupFilterCombo();
 
 		tagsComposite = new Composite(filterComposite, SWT.NONE);
 		RowLayout tagsLayout = new RowLayout();
@@ -151,12 +148,21 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		removeDisabledRulesButton.setLayoutData(gridData);
 	}
 
+	private void initializeGroupFilterCombo() {
+		if (SimonykeesPreferenceManager.useProfile()) {
+			selectProfileCombo.select(selectProfileCombo.indexOf(SimonykeesPreferenceManager.getCurrentProfileId()));
+			((SelectRulesWizardPageControler) controler)
+					.profileChanged(SimonykeesPreferenceManager.getCurrentProfileId());
+		}
+	}
+
 	/**
 	 * Set all items for the dropdown ({@link Combo}) and select All as default
 	 * group
 	 */
 	private void populateGroupFilterCombo() {
 		List<String> profiles = SimonykeesPreferenceManager.getAllProfileIds();
+		selectProfileCombo.add("");
 		for (String profile : profiles) {
 			selectProfileCombo.add(profile);
 		}
@@ -177,10 +183,14 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 				if (selectedProfileId.equals(((SelectRulesWizardPageModel) model).getCurrentProfileId())) {
 					// nothing
 				} else {
-					nameFilterText.setText(""); //$NON-NLS-1$
-					((SelectRulesWizardPageModel) model).getAppliedTags().clear();
-					removeAllTagButtons();
-					((SelectRulesWizardPageControler) controler).profileChanged(selectedProfileId);
+					if (update) {
+						nameFilterText.setText(""); //$NON-NLS-1$
+						((SelectRulesWizardPageModel) model).getAppliedTags().clear();
+						removeAllTagButtons();
+						((SelectRulesWizardPageControler) controler).profileChanged(selectedProfileId);
+					} else {
+						update = true;
+					}
 				}
 			}
 		};
@@ -223,7 +233,6 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		filterComposite.layout(true, true);
 		recalculateLayout();
 	}
-	
 
 	private void removeAllTagButtons() {
 		for (Control child : tagsComposite.getChildren()) {
