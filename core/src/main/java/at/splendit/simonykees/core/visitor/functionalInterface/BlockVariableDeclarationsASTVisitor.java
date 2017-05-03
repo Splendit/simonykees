@@ -9,7 +9,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-
 /**
  * Collects the Variable Declaration SimpleNames within a Block
  * 
@@ -29,12 +28,12 @@ class BlockVariableDeclarationsASTVisitor extends ASTVisitor {
 		blockVariableNames.add(node.getName());
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(SingleVariableDeclaration node) {
 		blockVariableNames.add(node.getName());

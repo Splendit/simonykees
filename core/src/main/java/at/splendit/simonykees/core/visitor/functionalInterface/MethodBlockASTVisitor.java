@@ -9,7 +9,6 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
-
 /**
  * Find the MethodDeclaration of the Functionalinterface
  * 
@@ -30,13 +29,13 @@ class MethodBlockASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
-		if (!node.parameters().isEmpty()) { 
-			/** 
-             * node.parameters() ensures that the List contains only 
-             * SingleVariableDeclaration 
-             */ 
-            parameters = ASTNodeUtil.returnTypedList(node.parameters(),SingleVariableDeclaration.class); 
-		} 
+		if (!node.parameters().isEmpty()) {
+			/**
+			 * node.parameters() ensures that the List contains only
+			 * SingleVariableDeclaration
+			 */
+			parameters = ASTNodeUtil.returnTypedList(node.parameters(), SingleVariableDeclaration.class);
+		}
 		methodBlock = node.getBody();
 		return false;
 	}
@@ -49,4 +48,3 @@ class MethodBlockASTVisitor extends AbstractASTRewriteASTVisitor {
 		return parameters;
 	}
 }
-

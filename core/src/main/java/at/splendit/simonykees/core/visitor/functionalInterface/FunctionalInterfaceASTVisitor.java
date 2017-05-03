@@ -108,7 +108,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						if (modifiers != null && ASTNodeUtil.hasModifier(modifiers, modifier -> modifier.isStatic())) {
 							CheckNativeMethodInvocationASTVisitor visitor = new CheckNativeMethodInvocationASTVisitor();
 							node.accept(visitor);
-							if(visitor.objectMethodDeclarationInvocated()){
+							if (visitor.objectMethodDeclarationInvocated()) {
 								return true;
 							}
 						}
