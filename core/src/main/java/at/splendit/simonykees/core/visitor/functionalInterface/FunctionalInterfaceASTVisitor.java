@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -107,21 +106,11 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 							modifiers = ((MethodDeclaration) scope).modifiers();
 						}
 						if (modifiers != null && ASTNodeUtil.hasModifier(modifiers, modifier -> modifier.isStatic())) {
-							IMethodBinding mb = ((org.eclipse.jdt.core.dom.MethodInvocation) ((org.eclipse.jdt.core.dom.ExpressionStatement) ((MethodDeclaration) node
-									.bodyDeclarations().get(0)).getBody().statements().get(0)).getExpression())
-											.resolveMethodBinding();
-							"Object".equals(
-									((org.eclipse.jdt.core.dom.MethodInvocation) ((org.eclipse.jdt.core.dom.ExpressionStatement) ((MethodDeclaration) node
-											.bodyDeclarations().get(0)).getBody().statements().get(0)).getExpression())
-													.resolveTypeBinding());
-							log.debug("TODO: SIM-324"); //$NON-NLS-1$
-							/*
-							 * TODO skipping static methods for the moment Need
-							 * to implement handling of non static method calls
-							 * (scopechange with functionalinterface) SIM-321 ->
-							 * SIM-324
-							 */
-							return true;
+							CheckNativeMethodInvocationASTVisitor visitor = new CheckNativeMethodInvocationASTVisitor();
+							node.accept(visitor);
+							if(visitor.objectMethodDeclarationInvocated()){
+								return true;
+							}
 						}
 
 						VariableDefinitionASTVisitor varVisistor = new VariableDefinitionASTVisitor(node,
