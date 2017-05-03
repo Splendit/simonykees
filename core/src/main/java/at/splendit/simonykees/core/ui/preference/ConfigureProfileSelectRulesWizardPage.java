@@ -27,6 +27,7 @@ public class ConfigureProfileSelectRulesWizardPage extends AbstractSelectRulesWi
 			ConfigureProfileSelectRulesWizardPageControler controler, String profileId) {
 		super(model, controler);
 		this.profileId = profileId;
+		controler.profileChanged(this.profileId);
 		fTypeNameStatus = new StatusInfo();
 	}
 

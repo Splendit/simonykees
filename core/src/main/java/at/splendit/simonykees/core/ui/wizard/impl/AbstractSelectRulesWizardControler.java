@@ -36,4 +36,8 @@ public abstract class AbstractSelectRulesWizardControler {
 	public void selectionChanged() {
 		model.notifyListeners();
 	}
+	
+	public void profileChanged(String selectedProfileId) {
+		model.selectFromProfile(selectedProfileId);
+	}
 }

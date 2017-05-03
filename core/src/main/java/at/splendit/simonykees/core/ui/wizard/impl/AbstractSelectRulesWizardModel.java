@@ -11,6 +11,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
+import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.core.ui.wizard.IWizardPageModel;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -28,6 +29,8 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 
 	private Set<Object> posibilities = new HashSet<>();
 	private Set<Object> selection = new HashSet<>();
+
+	private String currentProfileId = ""; //$NON-NLS-1$
 
 	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
@@ -79,6 +82,15 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 */
 	public Set<Object> getSelection() {
 		return selection;
+	}
+
+	/**
+	 * Getter for currently selected profile in combo view
+	 * 
+	 * @return String id of currently selected profile in combo
+	 */
+	public String getCurrentProfileId() {
+		return currentProfileId;
 	}
 
 	/**
@@ -257,6 +269,30 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	public void setPosibilitiesFilteredByTag(Set<Object> filteredPosibilities) {
 		posibilities.clear();
 		posibilities.addAll(filteredPosibilities);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void selectFromProfile(final String profileId) {
+		currentProfileId = profileId;
+		moveAllToLeft();
+		if (!currentProfileId.isEmpty()) {
+			Set<Object> currentPosibilities = new HashSet<>();
+			currentPosibilities.addAll(posibilities);
+			for (Object posibility : currentPosibilities) {
+				if (SimonykeesPreferenceManager.getProfileFromName(currentProfileId).containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
+						// SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
+						((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getId())) {
+					if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
+						selection.add(posibility);
+						posibilities.remove(posibility);
+					}
+				}
+			}
+		}
+
+		setChanged(true);
+		notifyListeners();
+
 	}
 
 	public void removeAlreadySelected() {
