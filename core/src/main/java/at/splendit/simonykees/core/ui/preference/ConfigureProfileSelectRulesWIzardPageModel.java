@@ -19,6 +19,7 @@ import at.splendit.simonykees.i18n.Messages;
  * @since 1.2
  *
  */
+@SuppressWarnings("restriction") // StatusInfo is internal
 public class ConfigureProfileSelectRulesWIzardPageModel extends AbstractSelectRulesWizardModel {
 
 	private String name;
@@ -45,7 +46,6 @@ public class ConfigureProfileSelectRulesWIzardPageModel extends AbstractSelectRu
 		return newName;
 	}
 
-	@SuppressWarnings("restriction")
 	public IStatus setName(String name) {
 		StatusInfo status = new StatusInfo();
 		// if name is changed and already exists in profiles list it can not be

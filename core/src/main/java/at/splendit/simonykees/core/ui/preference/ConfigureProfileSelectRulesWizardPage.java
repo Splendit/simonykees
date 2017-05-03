@@ -20,6 +20,7 @@ import at.splendit.simonykees.i18n.Messages;
  * @since 1.2
  *
  */
+@SuppressWarnings("restriction") // StatusInfo is internal
 public class ConfigureProfileSelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private Label nameInputLabel;
@@ -29,7 +30,6 @@ public class ConfigureProfileSelectRulesWizardPage extends AbstractSelectRulesWi
 
 	protected IStatus fTypeNameStatus;
 
-	@SuppressWarnings("restriction")
 	public ConfigureProfileSelectRulesWizardPage(ConfigureProfileSelectRulesWIzardPageModel model,
 			ConfigureProfileSelectRulesWizardPageControler controler, String profileId) {
 		super(model, controler);
