@@ -10,6 +10,7 @@ import at.splendit.simonykees.core.rule.impl.BracketsToControlRule;
 import at.splendit.simonykees.core.rule.impl.CodeFormatterRule;
 import at.splendit.simonykees.core.rule.impl.CollectionRemoveAllRule;
 import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
+import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
@@ -23,6 +24,7 @@ import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
 import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
+import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
 import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
@@ -30,7 +32,7 @@ import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
 @SuppressWarnings("nls")
 public enum Tag {
 
-	LOOP("loop"), JAVA_1_1("1.1", "1"), JAVA_1_2("1.2", "2"), JAVA_1_3("1.3", "3"), JAVA_1_4("1.4",
+	LOOP("loop"), JAVA_0_9("0.9"), JAVA_1_1("1.1", "1"), JAVA_1_2("1.2", "2"), JAVA_1_3("1.3", "3"), JAVA_1_4("1.4",
 			"4"), JAVA_1_5("1.5", "5"), JAVA_1_6("1.6", "6"), JAVA_1_7("1.7", "7"), JAVA_1_8("1.8", "8"), EMPTY();
 	// not yet arrived! JAVA_1_9("1.5","5");
 
@@ -58,6 +60,8 @@ public enum Tag {
 			return Arrays.asList(JAVA_1_2);
 		} else if (DiamondOperatorRule.class == clazz) {
 			return Arrays.asList(JAVA_1_7);
+		} else if (FieldNameConventionRule.class == clazz) {
+			return Arrays.asList(JAVA_0_9);
 		} else if (ForToForEachRule.class == clazz) {
 			return Arrays.asList(JAVA_1_5,LOOP);
 		} else if (FunctionalInterfaceRule.class == clazz) {
@@ -84,6 +88,8 @@ public enum Tag {
 			return Arrays.asList(JAVA_1_1);
 		} else if (StringFormatLineSeparatorRule.class == clazz) {
 			return Arrays.asList(JAVA_1_5);
+		} else if (StringLiteralEqualityCheckRule.class == clazz) {
+			return Arrays.asList(JAVA_1_1);
 		} else if (StringUtilsRule.class == clazz) {
 			return Arrays.asList(JAVA_1_1);
 		} else if (TryWithResourceRule.class == clazz) {

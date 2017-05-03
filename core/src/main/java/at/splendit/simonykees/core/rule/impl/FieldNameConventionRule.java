@@ -19,7 +19,10 @@ public class FieldNameConventionRule extends RefactoringRule<FieldNameConvention
 		super(visitor);
 		this.name = Messages.FieldNameConventionRule_name;
 		this.description = Messages.FieldNameConventionRule_description;
-		this.requiredJavaVersion = JavaVersion.JAVA_0_9;
 	}
 
+	@Override
+	protected JavaVersion provideRequiredJavaVersion() {
+		return JavaVersion.JAVA_0_9;
+	}
 }
