@@ -15,6 +15,7 @@ import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceManager;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.core.ui.wizard.IWizardPageModel;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * Model that is storing all the data required for
@@ -30,7 +31,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	private Set<Object> posibilities = new HashSet<>();
 	private Set<Object> selection = new HashSet<>();
 
-	private String currentProfileId = ""; //$NON-NLS-1$
+	private String currentProfileId = Messages.SelectRulesWizardPage_EmptyProfileLabel;
 
 	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
@@ -275,7 +276,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	public void selectFromProfile(final String profileId) {
 		currentProfileId = profileId;
 		moveAllToLeft();
-		if (!currentProfileId.isEmpty()) {
+		if (!currentProfileId.equals(Messages.SelectRulesWizardPage_EmptyProfileLabel)) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
 			for (Object posibility : currentPosibilities) {

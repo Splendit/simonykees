@@ -100,6 +100,7 @@ public class Messages extends NLS {
 	public static String SelectRulesWizardPage_addButtonLabel;
 	public static String SelectRulesWizardPage_defaultDescriptionText;
 	public static String SelectRulesWizardPage_description;
+	public static String SelectRulesWizardPage_EmptyProfileLabel;
 	public static String SelectRulesWizardPage_emptyString;
 	public static String SelectRulesWizardPage_selectProfile;
 	public static String SelectRulesWizardPage_filterByName;

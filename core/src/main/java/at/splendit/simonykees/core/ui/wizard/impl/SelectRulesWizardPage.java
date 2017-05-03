@@ -38,7 +38,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	
 	private Composite filterComposite;
 	
-	private final String EMPTY_PROFIL = ""; //$NON-NLS-1$
+	private final String EMPTY_PROFIL = Messages.SelectRulesWizardPage_EmptyProfileLabel; 
 
 	private Label selectProfileLabel;
 	private Combo selectProfileCombo;
@@ -160,14 +160,6 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		Dialog.applyDialogFont(parent);
 	}
 
-	private void initializeGroupFilterCombo() {
-		if (SimonykeesPreferenceManager.useProfile()) {
-			selectProfileCombo.select(selectProfileCombo.indexOf(SimonykeesPreferenceManager.getCurrentProfileId()));
-			((SelectRulesWizardPageControler) controler)
-					.profileChanged(SimonykeesPreferenceManager.getCurrentProfileId());
-		}
-	}
-
 	/**
 	 * Set all items for the dropdown ({@link Combo}) and select All as default
 	 * group
@@ -177,6 +169,20 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		selectProfileCombo.add(EMPTY_PROFIL);
 		for (String profile : profiles) {
 			selectProfileCombo.add(profile);
+		}
+	}
+
+	/**
+	 * Initializes profile combo to None if No profile option is selected in
+	 * preferences or to currently selected profile otherwise
+	 */
+	private void initializeGroupFilterCombo() {
+		if (SimonykeesPreferenceManager.useProfile()) {
+			selectProfileCombo.select(selectProfileCombo.indexOf(SimonykeesPreferenceManager.getCurrentProfileId()));
+			((SelectRulesWizardPageControler) controler)
+					.profileChanged(SimonykeesPreferenceManager.getCurrentProfileId());
+		} else {
+			selectProfileCombo.select(selectProfileCombo.indexOf(EMPTY_PROFIL));
 		}
 	}
 
