@@ -20,6 +20,38 @@ public class TestForToForEachRule {
 		List<Integer> fooHashCodes = foo.stream().map(s -> s.hashCode()).collect(Collectors.toList());
 		return fooHashCodes;
 	}
+	
+	public String tesTempForDebugtIteratingIndex(String input) {
+		List<String> foo = generateList(input);
+
+		StringBuilder sb = new StringBuilder();
+		int i = 0, j;
+		
+		for (i = 0; i < foo.size(); i++) {
+			// i want my comments here
+			
+			String s = foo.get(i);
+			"".equals(foo.get(i));
+			sb.append(s);
+		}
+
+		return sb.toString();
+	}
+	
+	public String testConvertIteratorToForEachTemp(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		Iterator<String> iterator = foo.iterator();
+		{
+			for (; iterator.hasNext();) {
+				// I have my comments
+				String s = iterator.next();
+				sb.append(s);
+			}
+		}
+		return sb.toString();
+	}
 
 	public String testConvertIteratorToForEach(String input) {
 		List<String> foo = generateList(input);

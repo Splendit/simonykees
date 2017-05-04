@@ -20,6 +20,34 @@ public class TestForToForEachRule {
 		List<Integer> fooHashCodes = foo.stream().map(s -> s.hashCode()).collect(Collectors.toList());
 		return fooHashCodes;
 	}
+	
+	public String tesTempForDebugtIteratingIndex(String input) {
+		List<String> foo = generateList(input);
+
+		StringBuilder sb = new StringBuilder();
+		int j;
+		for (String s:foo){
+			"".equals(s);
+			sb.append(s);
+		}
+
+		return sb.toString();
+	}
+	
+	public String testConvertIteratorToForEachTemp(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		Iterator<String> iterator = foo.iterator();
+		{
+			for (; iterator.hasNext();) {
+				// I have my comments
+				String s = iterator.next();
+				sb.append(s);
+			}
+		}
+		return sb.toString();
+	}
 
 	public String testConvertIteratorToForEach(String input) {
 		List<String> foo = generateList(input);
@@ -115,10 +143,9 @@ public class TestForToForEachRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (int i = 0; i < foo.size(); i++) {
-			String s = foo.get(i);
+		for (String s:foo){
 			sb.append(s);
-			sb.append(foo.get(i));
+			sb.append(s);
 		}
 	}
 
@@ -127,9 +154,7 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		int i;
-		for (i = 0; i < foo.size(); i++) {
-			String s = foo.get(i);
+		for (String s:foo){
 			sb.append(s);
 		}
 
@@ -218,12 +243,10 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		for (int i = 0; i < foo.size(); i++) {
-			String s = foo.get(i);
+		for (String s:foo){
 			s += ";";
 			sb.append(s);
-			for (int j = 0; j < secondFoo.size(); j++) {
-				String r = secondFoo.get(j);
+			for (String r:secondFoo){
 				sb.append(r);
 			}
 		}
@@ -255,12 +278,10 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		for (int i = 0; i < foo.size(); i++) {
-			String s = foo.get(i);
+		for (String s:foo){
 			s += ";";
 			sb.append(s);
-			for (int j = 0; j < foo.size(); j++) {
-				String r = foo.get(j);
+			for (String r:foo){
 				sb.append(r);
 			}
 		}
@@ -275,16 +296,13 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		for (int i = 0; i < stFoo.size(); i++) {
-			String s = stFoo.get(i);
+		for (String s:stFoo){
 			s += ";";
 			sb.append(s);
-			for (int j = 0; j < ndFoo.size(); j++) {
-				String n = ndFoo.get(j);
+			for (String n:ndFoo){
 				sb.append(n + ",");
-				for (int k = 0; k < rdFoo.size(); k++) {
-					String t = stFoo.get(i);
-					String r = rdFoo.get(k);
+				for (String r:rdFoo){
+					String t = s;
 					sb.append(r + t);
 				}
 			}
@@ -298,16 +316,12 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		int i;
-		for (i = 0; i < foo.size(); i++) {
-			String it = foo.get(i);
+		for (String it:foo){
 			String someConstant = "const";
 			sb.append(it + someConstant);
 		}
 
-		int j;
-		for (j = 0; j < foo.size(); j++) {
-			String it = foo.get(j);
+		for (String it:foo){
 			String someConstant = "const";
 			sb.append(it + someConstant);
 		}
@@ -320,8 +334,7 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 		if (foo != null) {
-			for (int i = 0; i < foo.size(); i++) {
-				String it = foo.get(i);
+			for (String it:foo){
 				String someConstant = "const";
 				sb.append(it + someConstant);
 			}
@@ -336,12 +349,11 @@ public class TestForToForEachRule {
 		StringBuilder sb = new StringBuilder();
 		try {
 			if (foo != null) {
-				for (int i = 0; i < foo.size(); i++) {
+				for (String s:foo){
 					String someConstant = "const";
 					try {
-						sb.append(foo.get(i) + someConstant);
+						sb.append(s + someConstant);
 					} finally {
-						String s = foo.get(i);
 						sb.append(",");
 					}
 				}
@@ -360,9 +372,7 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		int i;
-		for (i = 0; i < foo.size(); i = i + 2) {
-			String s = foo.get(i);
+		for (String s:foo){
 			sb.append(s);
 		}
 
@@ -417,10 +427,7 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		int i;
-		for (i = 0; i < foo.size(); i = i + 1) {
-			// FIXME SIM-212
-			Number s = foo.get(i);
+		for (Number s:foo){
 			sb.append(s.toString());
 		}
 
@@ -444,9 +451,7 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		int i;
-		for (i = 0; i < foo.size(); i = i + 2) {
-			Number s = foo.get(i);
+		for (Number s:foo){
 			sb.append(s.toString());
 		}
 
