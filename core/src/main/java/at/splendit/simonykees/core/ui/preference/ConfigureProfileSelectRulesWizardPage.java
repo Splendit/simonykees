@@ -67,13 +67,21 @@ public class ConfigureProfileSelectRulesWizardPage extends AbstractSelectRulesWi
 		});
 	}
 
-	private void doStatusUpdate() {
-		// status of all used components
-		IStatus[] status = new IStatus[] { fTypeNameStatus };
+	@Override
+	protected void doStatusUpdate() {
+		// if name is changed and already exists in profiles list it can not be
+		// used, name has to be unique
+		if (fTypeNameStatus.isOK()) {
+			if (((ConfigureProfileSelectRulesWIzardPageModel) model).getName().isEmpty()) {
+				((StatusInfo) fTypeNameStatus).setError(Messages.ConfigureProfileSelectRulesWizardPage_error_EmptyName);
+			} else {
+				fTypeNameStatus = new StatusInfo();
+			}
+		} else {
+			// if status already contains exception, do nothing 
+		}
 
-		// the mode severe status will be displayed and the OK button
-		// enabled/disabled.
-		updateStatus(status);
+		super.doStatusUpdate(fTypeNameStatus);
 	}
 
 }

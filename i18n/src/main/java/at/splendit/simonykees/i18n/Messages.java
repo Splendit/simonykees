@@ -13,6 +13,7 @@ public class Messages extends NLS {
 	public static String aa_codename;
 	public static String ui_ok;
 	public static String ui_cancel;
+	public static String AbstractSelectRulesWizardPage_error_NoRulesSelected;
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
@@ -26,6 +27,7 @@ public class Messages extends NLS {
 	public static String CodeFormatterRule_name;
 	public static String CollectionRemoveAllRule_description;
 	public static String CollectionRemoveAllRule_name;
+	public static String ConfigureProfileSelectRulesWizardPage_error_EmptyName;
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputLabel;
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputText;
 	public static String ConfigureProfileSelectRulesWIzardPageModel_error_NameExists;

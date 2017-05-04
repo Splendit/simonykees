@@ -260,4 +260,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		filterComposite.layout(true, true);
 		recalculateLayout();
 	}
+	
+	@Override
+	protected void doStatusUpdate() {
+		super.doStatusUpdate(null);
+	}
 }
