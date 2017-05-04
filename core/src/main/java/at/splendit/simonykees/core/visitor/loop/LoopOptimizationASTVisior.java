@@ -101,7 +101,7 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 					Expression iterableExpression =  nodeInitializer.getExpression();
 					ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
 
-					try {
+//					try {
 						String iterableFullyQualifiedName = Iterable.class.getName();
 						// check if iterable object is compatible with java Iterable
 						boolean isIterable = ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
@@ -112,9 +112,9 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 							return false;
 						}
 
-					} catch (Exception e) {
-						logger.error(e.getMessage(), new ITypeNotFoundRuntimeException());
-					}
+//					} catch (Exception e) {
+//						logger.error(e.getMessage(), new ITypeNotFoundRuntimeException());
+//					}
 				}
 			}
 		}
@@ -190,7 +190,7 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		Type iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 
 		/*
-		 * iterator has no type-parameter therefore a optimization is could not
+		 * iterator has no type-parameter therefore an optimization could not
 		 * be applied
 		 */
 		if (null == iteratorType) {
