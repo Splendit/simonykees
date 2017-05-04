@@ -3,6 +3,8 @@ package at.splendit.simonykees.core.ui.wizard.impl;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 import org.eclipse.jface.dialogs.Dialog;
@@ -40,6 +42,7 @@ import at.splendit.simonykees.i18n.Messages;
  * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter, Andreja Sambolec
  * @since 0.9 refactored in 1.3
  */
+@SuppressWarnings("restriction") // StatusInfo is internal
 public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage {
 
 	protected AbstractSelectRulesWizardModel model;
@@ -57,11 +60,15 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 
 	private StyledText descriptionStyledText;
 
+	protected IStatus fSelectionStatus;
+
 	public AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
 			AbstractSelectRulesWizardControler controler) {
 		super(Messages.SelectRulesWizardPage_page_name);
 		setTitle(Messages.SelectRulesWizardPage_title);
 		setDescription(Messages.SelectRulesWizardPage_description);
+
+		fSelectionStatus = new StatusInfo();
 
 		this.model = model;
 		this.controler = controler;
@@ -94,7 +101,7 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 		});
 
 		Dialog.applyDialogFont(composite);
-		
+
 		updateData();
 	}
 
@@ -370,6 +377,8 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 		addAllButton.setEnabled(((Set<Object>) leftTreeViewer.getInput()).size() > 0);
 		removeButton.setEnabled(!rightTableViewer.getSelection().isEmpty());
 		removeAllButton.setEnabled(((Set<Object>) rightTableViewer.getInput()).size() > 0);
+
+		doStatusUpdate();
 	}
 
 	/**
@@ -399,5 +408,27 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 
 	public void recalculateLayout() {
 		composite.layout(true, true);
+	}
+
+	protected abstract void doStatusUpdate();
+
+	protected void doStatusUpdate(IStatus additionalStatus) {
+		if (model.getSelectionAsList().isEmpty()) {
+			((StatusInfo) fSelectionStatus).setError(Messages.AbstractSelectRulesWizardPage_error_NoRulesSelected);
+		} else {
+			fSelectionStatus = new StatusInfo();
+		}
+
+		// status of all used components
+		IStatus[] status;
+		if (null != additionalStatus) {
+			status = new IStatus[] { fSelectionStatus, additionalStatus };
+		} else {
+			status = new IStatus[] { fSelectionStatus };
+		}
+
+		// the mode severe status will be displayed and the OK button
+		// enabled/disabled.
+		updateStatus(status);
 	}
 }
