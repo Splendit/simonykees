@@ -35,11 +35,7 @@
 ## steps after importing the project in eclipse ##
 
 	Build the project with 
-	```
 	mvn clean validate
-	```
 
 	Execute 
-	```
 	Maven > Update Project...
-	```
