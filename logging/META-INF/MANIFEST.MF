@@ -10,8 +10,8 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: at.splendit.simonykees.logging
-Bundle-ClassPath: lib/slf4j-api-1.7.25.jar,
- lib/logback-core-1.2.3.jar,
- lib/logback-classic-1.2.3.jar,
- lib/jul-to-slf4j-1.7.25.jar,
+Bundle-ClassPath: lib/slf4j-api.jar,
+ lib/logback-core.jar,
+ lib/logback-classic.jar,
+ lib/jul-to-slf4j.jar,
  .

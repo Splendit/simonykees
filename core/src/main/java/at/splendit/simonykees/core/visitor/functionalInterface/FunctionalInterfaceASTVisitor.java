@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.visitor;
+package at.splendit.simonykees.core.visitor.functionalInterface;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,13 +8,11 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -22,10 +20,12 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.sub.VariableDefinitionASTVisitor;
 
 /**
@@ -37,10 +37,12 @@ import at.splendit.simonykees.core.visitor.sub.VariableDefinitionASTVisitor;
  *
  */
 public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor {
-	
-	private Map<String, Integer>renamings = new HashMap<>();
+
+	Logger log = LoggerFactory.getLogger(FunctionalInterfaceASTVisitor.class);
+
+	private Map<String, Integer> renamings = new HashMap<>();
 	private CompilationUnit compilationUnit;
-	
+
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
@@ -73,9 +75,10 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					}
 					LambdaExpression newInitializer = node.getAST().newLambdaExpression();
 					MethodBlockASTVisitor methodBlockASTVisitor = new MethodBlockASTVisitor();
+					methodBlockASTVisitor.setAstRewrite(astRewrite);
 					node.accept(methodBlockASTVisitor);
 					Block moveBlock = methodBlockASTVisitor.getMethodBlock();
-					
+
 					if (moveBlock != null && isCommentFree(node, moveBlock)) {
 						// find variable declarations inside the method block
 						BlockVariableDeclarationsASTVisitor varDeclarationVisitor = new BlockVariableDeclarationsASTVisitor();
@@ -85,7 +88,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						// find parent scope and variable declarations in it
 						List<ASTNode> relevantBlocks = new ArrayList<>();
 						ASTNode scope = findScope(node, relevantBlocks);
-						
+
 						/*
 						 * check if the scope is static for methods and
 						 * initializer
@@ -102,14 +105,12 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						} else if (ASTNode.METHOD_DECLARATION == scope.getNodeType()) {
 							modifiers = ((MethodDeclaration) scope).modifiers();
 						}
-						if (modifiers != null && ASTNodeUtil.hasModifier(modifiers, modifier->modifier.isStatic())) {
-							/*
-							 * TODO skipping static methods for the moment Need
-							 * to implement handling of non static method calls
-							 * (scopechange with functionalinterface) SIM-321 ->
-							 * SIM-324
-							 */
-							return true;
+						if (modifiers != null && ASTNodeUtil.hasModifier(modifiers, modifier -> modifier.isStatic())) {
+							CheckNativeMethodInvocationASTVisitor visitor = new CheckNativeMethodInvocationASTVisitor();
+							node.accept(visitor);
+							if (visitor.objectMethodDeclarationInvocated()) {
+								return true;
+							}
 						}
 
 						VariableDefinitionASTVisitor varVisistor = new VariableDefinitionASTVisitor(node,
@@ -158,9 +159,10 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		if (node.getParent() != null && ASTNode.TYPE_DECLARATION == node.getParent().getNodeType()) {
 			renamings.clear();
 		}
-		//FIXME SIM-335: it is better to detected the uninitialized fields that are referenced in the body. 
+		// FIXME SIM-335: it is better to detected the uninitialized fields that
+		// are referenced in the body.
 		boolean isConstructor = node.isConstructor();
-		
+
 		return !isConstructor;
 	}
 
@@ -303,127 +305,28 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		return parameters.stream().map(parameter -> parameter.getName())
 				.filter(parameter -> varNames.contains(parameter.getIdentifier())).collect(Collectors.toList());
 	}
-	
+
 	private boolean isCommentFree(AnonymousClassDeclaration node, Block moveBlock) {
 		boolean commentFree = false;
-		if(compilationUnit != null) {
+		if (compilationUnit != null) {
 			int nodeStartPos = node.getStartPosition();
 			int nodeLength = node.getLength();
 			int nodeLastPos = nodeStartPos + nodeLength;
 			int blockStartPos = moveBlock.getStartPosition();
 			int blockEndPos = moveBlock.getStartPosition() + moveBlock.getLength();
-			
-			List<Comment> allComments = 
-					ASTNodeUtil.returnTypedList(compilationUnit.getCommentList(), Comment.class); 
-			
-			boolean hasComments =  
-					allComments
-					.stream()
-					.filter(comment -> {
-						int commentStartPos = comment.getStartPosition();
-						int commentLastPOs = commentStartPos + comment.getLength();
-						return 
-								(commentStartPos > nodeStartPos && commentLastPOs < blockStartPos) 
-								|| (commentStartPos > blockEndPos && commentLastPOs < nodeLastPos);
-					})
-					.findAny()
-					.isPresent();
-			
+
+			List<Comment> allComments = ASTNodeUtil.returnTypedList(compilationUnit.getCommentList(), Comment.class);
+
+			boolean hasComments = allComments.stream().filter(comment -> {
+				int commentStartPos = comment.getStartPosition();
+				int commentLastPOs = commentStartPos + comment.getLength();
+				return (commentStartPos > nodeStartPos && commentLastPOs < blockStartPos)
+						|| (commentStartPos > blockEndPos && commentLastPOs < nodeLastPos);
+			}).findAny().isPresent();
+
 			commentFree = !hasComments;
 		}
-		
+
 		return commentFree;
-	}
-
-	private class MethodBlockASTVisitor extends ASTVisitor {
-		private Block methodBlock = null;
-		private List<SingleVariableDeclaration> parameters = null;
-
-		@Override
-		public boolean visit(Block node) {
-			methodBlock = (Block) getAstRewrite().createMoveTarget(node);
-			getAstRewrite().remove(node, null);
-			return false;
-		}
-
-		@Override
-		public boolean visit(MethodDeclaration node) {
-			if (!node.parameters().isEmpty()) { 
-				/** 
-	             * node.parameters() ensures that the List contains only 
-	             * SingleVariableDeclaration 
-	             */ 
-	            parameters = ASTNodeUtil.returnTypedList(node.parameters(),SingleVariableDeclaration.class); 
-			} 
-			methodBlock = node.getBody();
-			return false;
-		}
-
-		public Block getMethodBlock() {
-			return methodBlock;
-		}
-
-		public List<SingleVariableDeclaration> getParameters() {
-			return parameters;
-		}
-	}
-
-	/**
-	 * A Visitor that collects all occurrences of a local variable.
-	 * 
-	 * @author Ardit Ymeri
-	 *
-	 */
-	private class LocalVariableUsagesASTVisitor extends ASTVisitor {
-		private List<SimpleName> usages;
-		private SimpleName targetName;
-
-		public LocalVariableUsagesASTVisitor(SimpleName targetName) {
-			usages = new ArrayList<>();
-			this.targetName = targetName;
-		}
-
-		@Override
-		public boolean visit(SimpleName node) {
-			if (node.resolveBinding().getKind() == IBinding.VARIABLE) {
-				if (StringUtils.equals(node.getIdentifier(), targetName.getIdentifier())) {
-					usages.add(node);
-				}
-			}
-			return false;
-		}
-
-		public List<SimpleName> getUsages() {
-			return this.usages;
-		}
-	}
-
-	private class BlockVariableDeclarationsASTVisitor extends ASTVisitor {
-		private List<SimpleName> blockVariableNames;
-
-		public BlockVariableDeclarationsASTVisitor() {
-			blockVariableNames = new ArrayList<>();
-		}
-
-		@Override
-		public boolean visit(VariableDeclarationFragment node) {
-			blockVariableNames.add(node.getName());
-			return true;
-		}
-		
-		@Override
-		public boolean visit(ClassInstanceCreation node) {
-			return false;
-		}
-		
-		@Override
-		public boolean visit(SingleVariableDeclaration node) {
-			blockVariableNames.add(node.getName());
-			return true;
-		}
-
-		public List<SimpleName> getBlockVariableDelcarations() {
-			return blockVariableNames;
-		}
 	}
 }
