@@ -83,9 +83,9 @@
 			<url>https://jenkins.splendit.loc/view/simonykees/job/simonykees%20master/site/</url>
 		</site>
 		<repository>
-    		<id>pdrone.85838837-477a-445f-aee1-757e4a362481</id>
-    		<url>http://packagedrone-vm-01.splendit.loc:8080/maven/85838837-477a-445f-aee1-757e4a362481</url>
-    	</repository>	
+			<id>pdrone.85838837-477a-445f-aee1-757e4a362481</id>
+			<url>http://packagedrone-vm-01.splendit.loc:8080/maven/85838837-477a-445f-aee1-757e4a362481</url>
+		</repository>
 	</distributionManagement>
 
 	<properties>
@@ -237,7 +237,6 @@
 				</configuration>
 			</plugin>
 		</plugins>
-
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -310,8 +309,8 @@
 					<configuration>
 						<useUIHarness>false</useUIHarness>
 						<argLine>${tycho.test.jvmArgs}</argLine>
-						<!-- kill test JVM if tests take more than 5 minutes (300 seconds) to 
-							finish -->
+						<!-- kill test JVM if tests take more than 5 minutes (300 seconds) 
+							to finish -->
 						<forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
 					</configuration>
 				</plugin>

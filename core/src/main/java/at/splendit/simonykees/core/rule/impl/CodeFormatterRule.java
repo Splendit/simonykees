@@ -44,7 +44,11 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 		super(visitor);
 		this.name = Messages.CodeFormatterRule_name;
 		this.description = Messages.CodeFormatterRule_description;
-		this.requiredJavaVersion = JavaVersion.JAVA_0_9;
+	}
+	
+	@Override
+	protected JavaVersion provideRequiredJavaVersion() {
+		return JavaVersion.JAVA_1_1;
 	}
 
 	@Override

@@ -13,7 +13,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
@@ -21,13 +21,13 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -40,8 +40,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.i18n.ExceptionMessages;
+import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.license.api.LicenseValidationService;
 
 /**
@@ -51,7 +51,7 @@ import at.splendit.simonykees.license.api.LicenseValidationService;
  * @since 1.0
  *
  */
-public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+public class SimonykeesPreferencePageLicense extends PreferencePage implements IWorkbenchPreferencePage {
 
 	private static final Logger logger = LoggerFactory.getLogger(SimonykeesPreferencePageLicense.class);
 
@@ -73,7 +73,7 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 	private boolean isLicenseValidationServiceAvailable = false;
 
 	public SimonykeesPreferencePageLicense() {
-		super(GRID);
+		super();
 		setPreferenceStore(Activator.getDefault().getPreferenceStore());
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 	}
@@ -95,10 +95,10 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 	}
 
 	@Override
-	protected void createFieldEditors() {
-
+	protected Control createContents(Composite parent) {
 		Display display = getShell().getDisplay();
-		Composite composite = new Composite(getFieldEditorParent(), SWT.NONE);
+		Composite composite = new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
 		GridData gd = new GridData(SWT.LEFT, SWT.CENTER, false, true);
 		gd.verticalSpan = 5;
 		composite.setLayoutData(gd);
@@ -123,19 +123,21 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 		RowData licenseRowData = new RowData();
 		licenseRowData.width = LICENSE_LABEL_MAX_WIDTH;
 		licenseLabel.setLayoutData(licenseRowData);
+		licenseLabel.setFont(parent.getFont());
 
 		Link jSparrowLink = new Link(composite, SWT.NONE);
+		jSparrowLink.setFont(parent.getFont());
 		jSparrowLink.setText(Messages.SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow);
 
 		licenseStatusLabel = new Label(composite, SWT.NONE);
-		FontDescriptor boldDescriptor = FontDescriptor.createFrom(licenseStatusLabel.getFont()).setStyle(SWT.BOLD);
-		Font boldFont = boldDescriptor.createFont(composite.getDisplay());
-		licenseStatusLabel.setFont(boldFont);
+		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont()).setStyle(SWT.BOLD);
+		licenseStatusLabel.setFont(boldDescriptor.createFont(composite.getDisplay()));
 		licenseStatusLabel.setForeground(display.getSystemColor(SWT.COLOR_RED));
 		licenseStatusLabel.setVisible(true);
 
 		updateButton = new Button(composite, SWT.PUSH);
 		updateButton.setText(Messages.SimonykeesPreferencePageLicense_update_license_key_button);
+		updateButton.setFont(parent.getFont());
 		updateButton.addSelectionListener(new SelectionAdapter() {
 
 			@Override
@@ -172,11 +174,11 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 			public void widgetDisposed(DisposeEvent e) {
 				jSparrowImageActive.dispose();
 				jSparrowImageInactive.dispose();
-				boldFont.dispose();
 			}
 		});
 
 		composite.pack();
+		return composite;
 	}
 
 	private void updateDisplayedInformation() {
@@ -198,4 +200,5 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 		licenseLabel.getParent().pack();
 		licenseLabel.getParent().layout(true);
 	}
+
 }
