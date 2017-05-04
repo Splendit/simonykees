@@ -62,7 +62,7 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	@SuppressWarnings("unchecked")
 	public void filterPosibilitiesByTags() {
 		if (!appliedTags.isEmpty()) {
-			Set<Object> currentPossibilities = getPosibilities();
+			Set<Object> currentPossibilities = getAllPosibilities();
 			setPosibilitiesFilteredByTag(currentPossibilities.stream()
 					.filter(object -> containsTag((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object))
 					.collect(Collectors.toSet()));
@@ -73,7 +73,11 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 
 	private boolean containsTag(RefactoringRule<? extends AbstractASTRewriteASTVisitor> object) {
 		for (String tag : appliedTags) {
-			if (object.getTags().contains(tag) || object.getName().toLowerCase().contains(tag)) {
+			if(null != Tag.getTageForName(tag)) {
+				if (object.getTags().contains(Tag.getTageForName(tag))) {
+					return true;
+				}
+			} else if (object.getName().toLowerCase().contains(tag)) {
 				return true;
 			}
 		}

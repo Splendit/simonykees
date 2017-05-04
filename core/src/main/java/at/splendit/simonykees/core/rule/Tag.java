@@ -109,7 +109,7 @@ public enum Tag {
 	}
 
 	public static Tag getTageForName(String name) {
-		return Arrays.stream(Tag.class.getEnumConstants()).filter(tag -> tag.name().equals(name)).findFirst()
+		return Arrays.stream(Tag.class.getEnumConstants()).filter(tag -> tag.getTagNames().contains(name)).findFirst()
 				.orElse(null);
 	}
 
