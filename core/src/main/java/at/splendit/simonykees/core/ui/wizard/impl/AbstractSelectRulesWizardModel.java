@@ -276,7 +276,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	public void selectFromProfile(final String profileId) {
 		currentProfileId = profileId;
 		moveAllToLeft();
-		if (!currentProfileId.equals(Messages.SelectRulesWizardPage_EmptyProfileLabel)) {
+		if (!currentProfileId.equals(Messages.SelectRulesWizardPage_EmptyProfileLabel) && !currentProfileId.isEmpty()) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
 			for (Object posibility : currentPosibilities) {
