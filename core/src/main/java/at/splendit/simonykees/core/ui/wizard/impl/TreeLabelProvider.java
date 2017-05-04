@@ -5,6 +5,9 @@ import java.net.URL;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.fieldassist.FieldDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.resource.LocalResourceManager;
@@ -31,9 +34,9 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 
 	private ResourceManager resourceManager;
-	
+
 	private static final String ICON_ENABLED_RULE = "icons/check.png"; //$NON-NLS-1$
-	private static final String ICON_DISABLED_RULE = "icons/error.png"; //$NON-NLS-1$ 
+	private static final String ICON_DISABLED_RULE = "icons/error.png"; //$NON-NLS-1$
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -51,14 +54,13 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 	@Override
 	public Image getImage(Object element) {
 		if (element instanceof RefactoringRule<?>) {
-			Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
-            URL url;
 			if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) element).isEnabled()) {
-                url = FileLocator.find(bundle, new Path(ICON_ENABLED_RULE), null);
+				// without icon
 			} else {
-                url = FileLocator.find(bundle, new Path(ICON_DISABLED_RULE), null);
+				// info icon that rule is disabled, explanation appears in
+				// description text when rule is clicked
+				return JFaceResources.getImage(Dialog.DLG_IMG_MESSAGE_INFO);
 			}
-			return getResourceManager().createImage(ImageDescriptor.createFromURL(url));
 		}
 		return super.getImage(element);
 	}
