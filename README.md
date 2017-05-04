@@ -31,3 +31,15 @@
 
 	This command produces a *.zip artifact in ./site/target that contains obfuscated eclipse-site artifact
 	The profile is executed without tests by default, because they are not working with obfuscation.
+
+## steps after importing the project in eclipse ##
+
+	Build the project with 
+	```
+	mvn clean validate
+	```
+
+	Execute 
+	```
+	Maven > Update Project...
+	```
