@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,17 +25,20 @@ import at.splendit.simonykees.license.LicenseManager;
 public class Activator extends AbstractUIPlugin {
 
 	private static final Logger logger = LoggerFactory.getLogger(Activator.class);
-	
+
 	// The plug-in ID
 	public static final String PLUGIN_ID = "jSparrow.core"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Activator plugin;
 
+	// is used for configuring the test fragment
+	private static BundleActivator testFragmentActivator;
+
 	private static List<Job> jobs = Collections.synchronizedList(new ArrayList<>());
 
 	private long loggingBundleID = 0;
-	
+
 	// Flag is jSparrow is already running
 	private static boolean running = false;
 
@@ -68,15 +72,30 @@ public class Activator extends AbstractUIPlugin {
 		System.setProperty("jna.nosys", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		// start jSparrow logging bundle
-		for(Bundle bundle : context.getBundles()) {
-			if(bundle.getSymbolicName().equals("jSparrow.logging")  //$NON-NLS-1$ //name of the logging api bundle
+		for (Bundle bundle : context.getBundles()) {
+			if (bundle.getSymbolicName().equals("jSparrow.logging") //$NON-NLS-1$ //name
+																	// of the
+																	// logging
+																	// api
+																	// bundle
 					&& bundle.getState() != Bundle.ACTIVE) {
 				bundle.start();
 				loggingBundleID = bundle.getBundleId();
 				break;
 			}
 		}
-		
+
+		// load pseudo-activator from test fragment and execute its start method
+		try {
+			Class<? extends BundleActivator> frgActClass = Class
+					.forName("at.splendit.simonykees.core.TestFragmentActivator").asSubclass(BundleActivator.class); //$NON-NLS-1$
+			testFragmentActivator = frgActClass.newInstance();
+			testFragmentActivator.start(context);
+		} catch (ClassNotFoundException e) {
+			// ignore! exception is thrown, if the test fragment is not
+			// available.
+		}
+
 		// starting the license heartbeat
 		LicenseManager.getInstance();
 		logger.info(Messages.Activator_start);
@@ -98,17 +117,22 @@ public class Activator extends AbstractUIPlugin {
 		LicenseManager.getInstance().checkIn();
 		// FIXME (see SIM-331) figure out better logging configuration
 		logger.info(Messages.Activator_stop);
-		
+
 		plugin = null;
 
 		synchronized (jobs) {
 			jobs.forEach(job -> job.cancel());
 			jobs.clear();
 		}
-		
+
+		// stop test fragment pseudo-activator
+		if (testFragmentActivator != null) {
+			testFragmentActivator.stop(context);
+		}
+
 		// stop jSparrow.logging
 		Bundle loggingBundle = context.getBundle(loggingBundleID);
-		if(loggingBundle.getState() == Bundle.ACTIVE) {
+		if (loggingBundle.getState() == Bundle.ACTIVE) {
 			loggingBundle.stop();
 		}
 
