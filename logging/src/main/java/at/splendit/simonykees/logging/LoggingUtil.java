@@ -24,6 +24,7 @@ import ch.qos.logback.core.OutputStreamAppender;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.RollingFileAppender;
+import ch.qos.logback.core.rolling.RollingPolicy;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
 import ch.qos.logback.core.util.FileSize;
 
@@ -44,16 +45,42 @@ public class LoggingUtil {
 	private static final String ROLLING_FILE_APPENDER_NAME = "at.splendit.simonykees.logging.rollingFile"; //$NON-NLS-1$
 	private static final String TEST_ROLLING_FILE_APPENDER_NAME = "at.splendit.simonykees.logging.test.rollingFile"; //$NON-NLS-1$
 
-	public static boolean configureLoggerForTesting(Bundle bundle) throws JoranException, IOException {
-		configureLogback(bundle);
-		configureRollingFileAppender(TEST_ROLLING_FILE_APPENDER_NAME, getTestLogFilePath());
-		return true;
+	private static Bundle bundle = null;
+
+	private static boolean isLogbackConfigured = false;
+
+	/**
+	 * Triggers the logging configuration for plug in tests
+	 * 
+	 * @return true, if the configuration was successful, false otherwise
+	 * @throws JoranException
+	 * @throws IOException
+	 */
+	public static boolean configureLoggerForTesting() throws JoranException, IOException {
+		if (bundle != null) {
+			configureLogback(bundle);
+			removeAppenderFromRootLogger(ROLLING_FILE_APPENDER_NAME);
+			configureRollingFileAppender(TEST_ROLLING_FILE_APPENDER_NAME, getTestLogFilePath());
+			return true;
+		}
+		return false;
 	}
 
-	public static boolean configureLogger(Bundle bundle) throws JoranException, IOException {
-		configureLogback(bundle);
-		configureRollingFileAppender(ROLLING_FILE_APPENDER_NAME, getLogFilePath());
-		return true;
+	/**
+	 * Triggers the standard logging configuration
+	 * 
+	 * @return true, if the configuration was successful, false otherwise
+	 * @throws JoranException
+	 * @throws IOException
+	 */
+	public static boolean configureLogger() throws JoranException, IOException {
+		if (bundle != null) {
+			configureLogback(bundle);
+			removeAppenderFromRootLogger(TEST_ROLLING_FILE_APPENDER_NAME);
+			configureRollingFileAppender(ROLLING_FILE_APPENDER_NAME, getLogFilePath());
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -66,17 +93,23 @@ public class LoggingUtil {
 	 * @throws IOException
 	 */
 	private static void configureLogback(Bundle bundle) throws JoranException, IOException {
-		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-		JoranConfigurator jc = new JoranConfigurator();
-		jc.setContext(context);
-		context.reset();
+		if (!isLogbackConfigured) {
+			LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+			context.reset();
 
-		// this assumes that the logback.xml file is in the root of the bundle.
-		URL logbackConfigFileUrl = FileLocator.find(bundle, new org.eclipse.core.runtime.Path("logback-test.xml"), //$NON-NLS-1$
-				null);
-		jc.doConfigure(logbackConfigFileUrl.openStream());
+			JoranConfigurator jc = new JoranConfigurator();
+			jc.setContext(context);
 
-		configureJulToSlf4jBridge();
+			// this assumes that the logback.xml file is in the root of the
+			// bundle.
+			URL logbackConfigFileUrl = FileLocator.find(bundle, new org.eclipse.core.runtime.Path("logback-test.xml"), //$NON-NLS-1$
+					null);
+			jc.doConfigure(logbackConfigFileUrl.openStream());
+
+			configureJulToSlf4jBridge();
+
+			isLogbackConfigured = true;
+		}
 	}
 
 	/**
@@ -147,6 +180,16 @@ public class LoggingUtil {
 	}
 
 	/**
+	 * Removes the appender with the given name from the root logger
+	 * 
+	 * @param appenderName
+	 */
+	private static void removeAppenderFromRootLogger(String appenderName) {
+		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+		rootLogger.detachAppender(appenderName);
+	}
+
+	/**
 	 * get path to log file in <eclipse-workspace>/.metadata/jSparrow.log
 	 * 
 	 * @return path to log file as string
@@ -163,14 +206,14 @@ public class LoggingUtil {
 	 * @return path to log file as string
 	 */
 	private static String getTestLogFilePath() {
-		Path logFilePath = Paths.get("var", "log"); //$NON-NLS-1$ //$NON-NLS-2$
+		Path logFilePath = Paths.get("/home", "matthias", "log"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		// create directory /var/log if it does not exist yet
 		if (!logFilePath.toFile().exists()) {
 			logFilePath.toFile().mkdirs();
 		}
 
-		logFilePath = Paths.get(logFilePath.toString(), "jSparrow.text.log"); //$NON-NLS-1$
+		logFilePath = Paths.get(logFilePath.toString(), "jSparrow.test.log"); //$NON-NLS-1$
 		return logFilePath.toString();
 	}
 
@@ -189,4 +232,13 @@ public class LoggingUtil {
 		}
 		return fname;
 	}
+
+	public static Bundle getBundle() {
+		return bundle;
+	}
+
+	public static void setBundle(Bundle newBundle) {
+		bundle = newBundle;
+	}
+
 }
