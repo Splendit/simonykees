@@ -21,23 +21,6 @@ public class TestForToForEachRule {
 		return fooHashCodes;
 	}
 	
-	public String tesTempForDebugtIteratingIndex(String input) {
-		List<String> foo = generateList(input);
-
-		StringBuilder sb = new StringBuilder();
-		int i = 0, j;
-		
-		for (i = 0; i < foo.size(); i++) {
-			// i want my comments here
-			
-			String s = foo.get(i);
-			"".equals(foo.get(i));
-			sb.append(s);
-		}
-
-		return sb.toString();
-	}
-	
 	public String testConvertIteratorToForEachTemp(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
@@ -167,6 +150,47 @@ public class TestForToForEachRule {
 		for (i = 0; i < foo.size(); i++) {
 			String s = foo.get(i);
 			sb.append(s);
+		}
+
+		return sb.toString();
+	}
+	
+	
+	public String tesDuplicateIteratorName(String input) {
+		List<String> foo = generateList(input);
+
+		StringBuilder sb = new StringBuilder();
+		int i = 0, j;
+		
+		for (i = 0; i < foo.size(); i++) {
+			// i want my comments here
+			if(foo.size() > 0) {				
+				String s = foo.get(i);
+				"".equals(foo.get(i));
+				sb.append(s);
+			} else {
+				String s = foo.get(i), d;
+				"".equals(foo.get(i));
+				sb.append(s);
+			}
+
+		}
+
+		return sb.toString();
+	}
+	
+	public String tesLoopCondition(String input) {
+		List<String> foo = generateList(input);
+
+		StringBuilder sb = new StringBuilder();
+		int i = 0, j;
+		
+		for (i = 0; i <= foo.size(); i++) {
+			// i want my comments here
+			String s = foo.get(i);
+			"".equals(foo.get(i));
+			sb.append(s);
+
 		}
 
 		return sb.toString();

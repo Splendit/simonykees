@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.constants.ReservedNames;
-import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeException;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -101,20 +100,15 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 					Expression iterableExpression =  nodeInitializer.getExpression();
 					ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
 
-//					try {
-						String iterableFullyQualifiedName = Iterable.class.getName();
-						// check if iterable object is compatible with java Iterable
-						boolean isIterable = ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
-								Collections.singletonList(iterableFullyQualifiedName));
-						
-						if(isIterable) {
-							listName = (Name) iterableExpression;
-							return false;
-						}
-
-//					} catch (Exception e) {
-//						logger.error(e.getMessage(), new ITypeNotFoundRuntimeException());
-//					}
+					String iterableFullyQualifiedName = Iterable.class.getName();
+					// check if iterable object is compatible with java Iterable
+					boolean isIterable = ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
+							Collections.singletonList(iterableFullyQualifiedName));
+					
+					if(isIterable) {
+						listName = (Name) iterableExpression;
+						return false;
+					}
 				}
 			}
 		}
