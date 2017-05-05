@@ -206,7 +206,9 @@ public class LoggingUtil {
 	 * @return path to log file as string
 	 */
 	private static String getTestLogFilePath() {
-		Path logFilePath = Paths.get("/home", "matthias", "log"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String userHomeDir = System.getProperty("user.home"); //$NON-NLS-1$
+		
+		Path logFilePath = Paths.get(userHomeDir, ".log"); //$NON-NLS-1$
 
 		// create directory /var/log if it does not exist yet
 		if (!logFilePath.toFile().exists()) {
