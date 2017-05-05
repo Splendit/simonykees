@@ -8,6 +8,8 @@ import java.util.Map;
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
@@ -34,14 +36,16 @@ import at.splendit.simonykees.i18n.Messages;
 public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringRule.class);
-	
+
 	protected String id;
 
 	protected String name = Messages.RefactoringRule_default_name;
 
 	protected String description = Messages.RefactoringRule_default_description;
+	
+	protected final JavaVersion requiredJavaVersion;
 
-	protected JavaVersion requiredJavaVersion = JavaVersion.JAVA_1_4;
+	protected final List<Tag> tags;
 
 	protected boolean enabled = true;
 
@@ -53,7 +57,15 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		this.visitor = visitor;
 		// TODO maybe add a better id
 		this.id = this.getClass().getSimpleName();
+		this.tags = Tag.getTagsForRule(this.getClass());
+		this.requiredJavaVersion = provideRequiredJavaVersion();
 	}
+	
+	/**
+	 * the required java version of the implemented rule
+	 * @return
+	 */
+	protected abstract JavaVersion provideRequiredJavaVersion();
 
 	public String getName() {
 		return name;
@@ -61,6 +73,14 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	public String getDescription() {
 		return description;
+	}
+	
+	public JavaVersion getRequiredJavaVersion() {
+		return requiredJavaVersion;
+	}
+	
+	public List<Tag> getTags() {
+		return tags;
 	}
 
 	public boolean isEnabled() {
@@ -73,10 +93,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	public String getId() {
 		return id;
-	}
-
-	public JavaVersion getRequiredJavaVersion() {
-		return requiredJavaVersion;
 	}
 
 	/**
@@ -178,5 +194,30 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		} else {
 			// no changes
 		}
+	}
+
+	/** Responsible to calculate of the rule is executable in the current project. 
+	 * 
+	 * @param project
+	 */
+	public void calculateEnabledForProject(IJavaProject project){
+		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		if(null != compilerCompliance){
+			String enumRepresentation = "JAVA_"+compilerCompliance.replace(".", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			enabled = JavaVersion.valueOf(enumRepresentation).atLeast(requiredJavaVersion);
+			if(enabled){
+				enabled = ruleSpecificImplementation(project);
+			}	
+		}
+	}
+	
+	/** JavaVersion independent requirements for rules that need to be defined for each rule.
+	 * 	Returns true as default implementation
+	 * 
+	 * @param project
+	 * @return
+	 */
+	public boolean ruleSpecificImplementation(IJavaProject project){
+		return true;
 	}
 }

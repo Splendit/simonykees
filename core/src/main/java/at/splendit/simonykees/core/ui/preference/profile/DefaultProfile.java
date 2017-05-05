@@ -3,11 +3,10 @@ package at.splendit.simonykees.core.ui.preference.profile;
 import java.util.Arrays;
 import java.util.List;
 
-import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.core.rule.impl.CodeFormatterRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
-import at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceConstants;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * Default profile.
@@ -17,14 +16,13 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public class DefaultProfile implements SimonykeesProfile {
 
-	public static final String PROFILE_ID = SimonykeesPreferenceConstants.PROFILE_PREFIX + "default"; //$NON-NLS-1$
+	private List<String> enabledRulesIds;
+
+	boolean isBuiltInProfile = true;
 
 	public DefaultProfile() {
-	}
-
-	@Override
-	public String getProfileId() {
-		return PROFILE_ID;
+		enabledRulesIds = Arrays.asList(new CodeFormatterRule(AbstractASTRewriteASTVisitor.class).getId(),
+				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class).getId());
 	}
 
 	@Override
@@ -34,13 +32,22 @@ public class DefaultProfile implements SimonykeesProfile {
 
 	@Override
 	public boolean isBuiltInProfile() {
-		return false; // obsolete, just for readability
+		return isBuiltInProfile;
 	}
 
 	@Override
+	public void setEnabledRulesIds(List<String> enabledRulesIds) {
+		this.enabledRulesIds = enabledRulesIds;
+	}
+	
+	@Override
 	public List<String> getEnabledRuleIds() {
-		return Arrays.asList(new CodeFormatterRule(AbstractASTRewriteASTVisitor.class).getId(),
-				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class).getId());
+		return enabledRulesIds;
+	}
+
+	@Override
+	public boolean containsRule(String id) {
+		return getEnabledRuleIds().contains(id);
 	}
 
 }

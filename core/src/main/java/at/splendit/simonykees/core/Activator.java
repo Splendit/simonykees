@@ -4,7 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
@@ -13,18 +20,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.i18n.Messages;
-import at.splendit.simonykees.license.LicenseManager;
+import at.splendit.simonykees.license.api.LicenseValidationService;
 
 /**
  * The activator class controls the plug-in life cycle
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
+ *         Matthias Webhofer
  * @since 0.9
  */
 public class Activator extends AbstractUIPlugin {
 
 	private static final Logger logger = LoggerFactory.getLogger(Activator.class);
-	
+
 	// The plug-in ID
 	public static final String PLUGIN_ID = "jSparrow.core"; //$NON-NLS-1$
 
@@ -34,9 +42,15 @@ public class Activator extends AbstractUIPlugin {
 	private static List<Job> jobs = Collections.synchronizedList(new ArrayList<>());
 
 	private long loggingBundleID = 0;
-	
+
 	// Flag is jSparrow is already running
 	private static boolean running = false;
+
+	private static BundleContext bundleContext;
+	private static IEclipseContext eclipseContext;
+
+	@Inject
+	private LicenseValidationService licenseValidationService;
 
 	/**
 	 * The constructor
@@ -53,6 +67,10 @@ public class Activator extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		bundleContext = context;
+
+		eclipseContext = EclipseContextFactory.getServiceContext(context);
+		ContextInjectionFactory.inject(this, eclipseContext);
 
 		/*
 		 * JNA first tries to read from jna.boot.library.path. If system
@@ -68,17 +86,16 @@ public class Activator extends AbstractUIPlugin {
 		System.setProperty("jna.nosys", "true"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		// start jSparrow logging bundle
-		for(Bundle bundle : context.getBundles()) {
-			if(bundle.getSymbolicName().equals("jSparrow.logging")  //$NON-NLS-1$ //name of the logging api bundle
+		for (Bundle bundle : context.getBundles()) {
+			// name of the logging api bundle
+			if (bundle.getSymbolicName().equals("jSparrow.logging") //$NON-NLS-1$
 					&& bundle.getState() != Bundle.ACTIVE) {
 				bundle.start();
 				loggingBundleID = bundle.getBundleId();
 				break;
 			}
 		}
-		
-		// starting the license heartbeat
-		LicenseManager.getInstance();
+
 		logger.info(Messages.Activator_start);
 	}
 
@@ -92,27 +109,40 @@ public class Activator extends AbstractUIPlugin {
 
 		running = false;
 
-		/*
-		 * release the current license session (in case of a floating license)
-		 */
-		LicenseManager.getInstance().checkIn();
 		// FIXME (see SIM-331) figure out better logging configuration
 		logger.info(Messages.Activator_stop);
-		
+
 		plugin = null;
+		bundleContext = null;
 
 		synchronized (jobs) {
 			jobs.forEach(job -> job.cancel());
 			jobs.clear();
 		}
-		
+
 		// stop jSparrow.logging
 		Bundle loggingBundle = context.getBundle(loggingBundleID);
-		if(loggingBundle.getState() == Bundle.ACTIVE) {
+		if (loggingBundle.getState() == Bundle.ACTIVE) {
 			loggingBundle.stop();
 		}
 
 		super.stop(context);
+	}
+
+	/**
+	 * starts the license validation service after it has been injected
+	 */
+	@PostConstruct
+	private void startValidation() {
+		licenseValidationService.startValidation();
+	}
+
+	/**
+	 * stops the license validation service before it gets uninjected
+	 */
+	@PreDestroy
+	private void stopValidation() {
+		licenseValidationService.stopValidation();
 	}
 
 	/**
@@ -154,5 +184,13 @@ public class Activator extends AbstractUIPlugin {
 
 	public static void setRunning(boolean isRunning) {
 		running = isRunning;
+	}
+
+	public static BundleContext getBundleContext() {
+		return bundleContext;
+	}
+
+	public static IEclipseContext getEclipseContext() {
+		return eclipseContext;
 	}
 }

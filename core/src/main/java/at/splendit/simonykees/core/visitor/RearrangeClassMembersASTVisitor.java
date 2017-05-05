@@ -211,12 +211,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 	 * @return if it is a static body declaration.
 	 */
 	private <T extends BodyDeclaration> boolean isStaticMember(T member) {
-		return 
-				ASTNodeUtil.convertToTypedList(member.modifiers(), Modifier.class)
-				.stream()
-				.filter(Modifier::isStatic)
-				.findAny()
-				.isPresent();
+		return ASTNodeUtil.hasModifier(member.modifiers(), modifier -> modifier.isStatic());
 	}
 
 	/**
@@ -237,10 +232,10 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 	private <T extends BodyDeclaration> List<T> sortByAccessModifier(List<T> member) {
 		List<T> sortedDeclarations = new ArrayList<>();
 		
-		sortedDeclarations.addAll(filterByModifier(member, Modifier.PUBLIC));
-		sortedDeclarations.addAll(filterByModifier(member, Modifier.PROTECTED));
+		sortedDeclarations.addAll(filterByModifier(member, modifier -> modifier.isPublic()));
+		sortedDeclarations.addAll(filterByModifier(member, modifier -> modifier.isProtected()));
 		sortedDeclarations.addAll(filterByPackageProtectedModifier(member));
-		sortedDeclarations.addAll(filterByModifier(member, Modifier.PRIVATE));
+		sortedDeclarations.addAll(filterByModifier(member, modifier -> modifier.isPrivate()));
 		
 		return sortedDeclarations;
 	}
@@ -272,8 +267,8 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 	 * @param modifierFlag modifier flag.
 	 * @return list of body declarations having the given modifier.
 	 */
-	private <T extends BodyDeclaration> List<T> filterByModifier(List<T>members, int modifierFlag) {
-		Predicate<T> filter = member -> {
+	private <T extends BodyDeclaration> List<T> filterByModifier(List<T>members, Predicate<Modifier> modifierPredicate) {
+		/*Predicate<T> filter = member -> {
 			 
 			 return 
 					 ASTNodeUtil.convertToTypedList(member.modifiers(), Modifier.class)
@@ -281,8 +276,9 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 					 .filter(modifier -> modifier.getKeyword().toFlagValue() == modifierFlag)
 					 .findAny()
 					 .isPresent();
-		};
-		return applyFilter(members, filter);
+		};*/
+		
+		return applyFilter(members, member -> ASTNodeUtil.hasModifier(member.modifiers(), modifierPredicate));
 	}
 	
 	/**

@@ -11,7 +11,7 @@ public class TestFunctionalInterfaceRule {
 
 	private static Logger log = LogManager.getLogger(TestFunctionalInterfaceRule.class);
 
-	private final String FINAL_STRING_FIELD;
+	private final String finalStringField;
 
 	int a;
 
@@ -30,12 +30,12 @@ public class TestFunctionalInterfaceRule {
 
 			@Override
 			public void method(int a) {
-				String sthToLog = a + FINAL_STRING_FIELD;
+				String sthToLog = a + finalStringField;
 
 			}
 		};
 
-		FINAL_STRING_FIELD = "irritating";
+		finalStringField = "irritating";
 	}
 
 	@Test
