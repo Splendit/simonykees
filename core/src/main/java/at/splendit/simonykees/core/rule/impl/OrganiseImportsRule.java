@@ -51,7 +51,11 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 		super(visitor);
 		this.name = Messages.OrganiseImportsRule_name;
 		this.description = Messages.OrganiseImportsRule_description;
-		this.requiredJavaVersion = JavaVersion.JAVA_0_9;
+	}
+	
+	@Override
+	protected JavaVersion provideRequiredJavaVersion() {
+		return JavaVersion.JAVA_1_1;
 	}
 
 	@Override

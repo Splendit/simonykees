@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.util;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +16,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -247,5 +249,17 @@ public class ASTNodeUtil {
 			.filter(type::isInstance)
 			.map(type::cast)
 			.collect(Collectors.toList());
+	}
+	
+	/** Filters a list of modifiers if specific modifiers are present defined by the predicate
+	 * 
+	 * @param modifiers List of Assuming to be modifiers, can't use type because JDT doesn't support those
+	 * @param predicate is definition which modifiers have to be present
+	 * @return
+	 */
+	@SuppressWarnings("rawtypes")
+	public static boolean hasModifier(List modifiers, Predicate<? super Modifier> predicate) {
+		return ASTNodeUtil.convertToTypedList(modifiers, Modifier.class).stream().filter(predicate).findAny()
+				.isPresent();
 	}
 }

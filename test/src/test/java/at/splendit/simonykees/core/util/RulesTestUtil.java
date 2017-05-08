@@ -39,13 +39,19 @@ import org.w3c.dom.NodeList;
 @SuppressWarnings("nls")
 public class RulesTestUtil {
 
+	/**
+	 * relative reference to the maven sample module
+	 */
+	public static final String SAMPLE_MODULE_PATH = "../sample/";
+
 	private static final Path[] EMPTY_PATHS = new Path[0];
 	public static final String RULE_SUFFIX = "*Rule.java";
 
 	public static final String BASE_PACKAGE = "package at.splendit.simonykees.sample";
 	public static final String PRERULE_PACKAGE = "package at.splendit.simonykees.sample.preRule";
-	public static final String BASE_DIRECTORY = "../sample/src/test/java/at/splendit/simonykees/sample";
-	public static final String PRERULE_DIRECTORY = "../sample/src/test/java/at/splendit/simonykees/sample/preRule";
+	public static final String BASE_DIRECTORY = SAMPLE_MODULE_PATH + "src/test/java/at/splendit/simonykees/sample";
+	public static final String PRERULE_DIRECTORY = SAMPLE_MODULE_PATH
+			+ "src/test/java/at/splendit/simonykees/sample/preRule";
 
 	private RulesTestUtil() {
 		// hiding
@@ -67,11 +73,11 @@ public class RulesTestUtil {
 		entries.add(srcEntry);
 		entries.add(rtJarEntry);
 
-		extractClasspathEntries(entries, "../sample/pom.xml");
+		extractClasspathEntries(entries, SAMPLE_MODULE_PATH + "pom.xml");
 		return entries;
 	}
 
-	private static void extractClasspathEntries(List<IClasspathEntry> entries, String classpathFile) throws Exception {
+	public static void extractClasspathEntries(List<IClasspathEntry> entries, String classpathFile) throws Exception {
 		final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		final DocumentBuilder builder = factory.newDocumentBuilder();
 		final Document document = builder.parse(new File(classpathFile));
@@ -163,7 +169,7 @@ public class RulesTestUtil {
 		return root;
 	}
 
-	private static void addToClasspath(IJavaProject javaProject, List<IClasspathEntry> classpathEntries)
+	public static void addToClasspath(IJavaProject javaProject, List<IClasspathEntry> classpathEntries)
 			throws Exception {
 		if (!classpathEntries.isEmpty()) {
 			IClasspathEntry[] oldEntries = javaProject.getRawClasspath();

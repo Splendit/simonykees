@@ -50,7 +50,7 @@ public class RefactoringPreviewWizard extends Wizard {
 
 			@Override
 			public void run() {
-				if (LicenseUtil.isValid()) {
+				if (LicenseUtil.getInstance().isValid()) {
 					try {
 						abstractRefactorer.commitRefactoring();
 						Activator.setRunning(false);
@@ -63,7 +63,7 @@ public class RefactoringPreviewWizard extends Wizard {
 						Activator.setRunning(false);
 					}
 				} else {
-					LicenseUtil.displayLicenseErrorDialog(getShell());
+					LicenseUtil.getInstance().displayLicenseErrorDialog(getShell());
 					Activator.setRunning(false);
 				}
 				return;

@@ -19,7 +19,10 @@ public class StringLiteralEqualityCheckRule extends RefactoringRule<StringLitera
 		super(visitor);
 		this.name = Messages.StringLiteralEqualityCheckRule_name;
 		this.description = Messages.StringLiteralEqualityCheckRule_description;
-		this.requiredJavaVersion = JavaVersion.JAVA_1_1;
 	}
 
+	@Override
+	protected JavaVersion provideRequiredJavaVersion() {
+		return JavaVersion.JAVA_1_1;
+	}
 }

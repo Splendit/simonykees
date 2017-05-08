@@ -8,8 +8,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.loop.WhileToForEachASTVisitor;
 
 /**
@@ -33,7 +35,8 @@ public class WhileToForEachRulesTest extends AbstractRulesTest {
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
-		rulesList.add(new WhileToForEachRule(WhileToForEachASTVisitor.class));
+		RefactoringRule<? extends AbstractASTRewriteASTVisitor> whileRule = new WhileToForEachRule(WhileToForEachASTVisitor.class);
+		rulesList.add(whileRule);
 	}
 
 	@Parameters(name = "{index}: test file[{0}]")

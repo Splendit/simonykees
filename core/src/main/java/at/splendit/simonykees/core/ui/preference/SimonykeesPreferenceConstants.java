@@ -10,11 +10,16 @@ package at.splendit.simonykees.core.ui.preference;
 public class SimonykeesPreferenceConstants {
 
 	public static final String PROFILE_PREFIX = "profile.";
+	public static final String PROFILE_USE_OPTION_PREFIX = "useProfileOption";
+	
+	public static final String PROFILE_USE_OPTION = PROFILE_PREFIX + PROFILE_USE_OPTION_PREFIX;
+	public static final String PROFILE_USE_OPTION_NO_PROFILE = PROFILE_PREFIX + PROFILE_USE_OPTION_PREFIX + "noProfile";
+	public static final String PROFILE_USE_OPTION_SELECTED_PROFILE = PROFILE_PREFIX + PROFILE_USE_OPTION_PREFIX + "selectedProfile";
+
+	public static final String NAME_RULES_DELIMITER = "^";
+	public static final String RULE_RULE_DELIMITER = "~";
 	
 	public static final String PROFILE_ID_CURRENT = PROFILE_PREFIX + "currentId";
 	public static final String PROFILE_LIST = PROFILE_PREFIX + "list";
-	
-	public static final String PROFILE_NAME = "name";
-	public static final String PROFILE_IS_BUILT_IN = "builtIn";
 	
 }
