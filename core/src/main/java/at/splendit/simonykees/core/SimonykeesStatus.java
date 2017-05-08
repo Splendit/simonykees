@@ -10,7 +10,7 @@ import org.eclipse.core.runtime.Status;
  */
 public class SimonykeesStatus extends Status {
 
-	private StackTraceElement caller;
+	pivate StackTraceElement caller;
 
 	public SimonykeesStatus(int severity, String pluginId, String message) {
 		super(severity, pluginId, message);
