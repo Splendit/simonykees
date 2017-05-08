@@ -406,6 +406,11 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 		}
 	}
 
+	/**
+	 * Creating description for rule to be displayed using StyledText
+	 * 
+	 * @param rule
+	 */
 	private void createTextForDescription(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		String lineDelimiter = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_lineDelimiter;
 		String name = rule.getName();
@@ -414,7 +419,8 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 		String minJavaVersionLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_minJavaVersionLabel;
 		String minJavaVersionValue = rule.getRequiredJavaVersion().toString();
 		String requiredLibrariesLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesLabel;
-		String requiredLibrariesValue = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
+		String requiredLibrariesValue = (null != rule.requiredLibraries()) ? rule.requiredLibraries()
+				: Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
 		String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 		String tagsValue = StringUtils
 				.join(rule.getTags().stream().map(tag -> tag.getTagNames()).collect(Collectors.toList()), "  "); //$NON-NLS-1$
@@ -464,12 +470,12 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 				+ lineDelimiter.length() + lineDelimiter.length();
 		tagsLabelStyleRange.length = tagsLabel.length();
 		tagsLabelStyleRange.font = paragraphTitle;
-		
+
 		StyleRange style0 = new StyleRange();
 		style0.metrics = new GlyphMetrics(0, 0, 40);
 		style0.foreground = getShell().getDisplay().getSystemColor(SWT.COLOR_BLACK);
 		Bullet bullet0 = new Bullet(style0);
-		
+
 		descriptionStyledText.setText(descriptionText);
 		descriptionStyledText.setStyleRange(ruleNameStyleRange);
 		descriptionStyledText.setStyleRange(requirementsLabelStyleRange);
@@ -477,7 +483,7 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 		descriptionStyledText.setStyleRange(requiredLibrariesLabelStyleRange);
 		descriptionStyledText.setStyleRange(tagsLabelStyleRange);
 
-		if (!rule.isEnabled()) {
+		if (!rule.isSatisfiedJavaVersion()) {
 			StyleRange minJavaVersionUnsatisfiedValueStyleRange = new StyleRange();
 			minJavaVersionUnsatisfiedValueStyleRange.start = name.length() + lineDelimiter.length()
 					+ lineDelimiter.length() + description.length() + lineDelimiter.length() + lineDelimiter.length()
@@ -486,6 +492,17 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 			minJavaVersionUnsatisfiedValueStyleRange.font = paragraphTitle;
 			minJavaVersionUnsatisfiedValueStyleRange.foreground = unsetisfiedRequirementsColor;
 			descriptionStyledText.setStyleRange(minJavaVersionUnsatisfiedValueStyleRange);
+		}
+		if (!rule.isSatisfiedLibraries()) {
+			StyleRange requiredLibrariesUnsatisfiedValueStyleRange = new StyleRange();
+			requiredLibrariesUnsatisfiedValueStyleRange.start = name.length() + lineDelimiter.length()
+					+ lineDelimiter.length() + description.length() + lineDelimiter.length() + lineDelimiter.length()
+					+ requirementsLabel.length() + lineDelimiter.length() + minJavaVersionLabel.length()
+					+ minJavaVersionValue.length() + lineDelimiter.length() + requiredLibrariesLabel.length();
+			requiredLibrariesUnsatisfiedValueStyleRange.length = requiredLibrariesValue.length();
+			requiredLibrariesUnsatisfiedValueStyleRange.font = paragraphTitle;
+			requiredLibrariesUnsatisfiedValueStyleRange.foreground = unsetisfiedRequirementsColor;
+			descriptionStyledText.setStyleRange(requiredLibrariesUnsatisfiedValueStyleRange);
 		}
 
 		int requirementsBulletingStartLine = descriptionStyledText.getLineAtOffset(name.length()

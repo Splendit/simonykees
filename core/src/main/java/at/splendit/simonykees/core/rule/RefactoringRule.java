@@ -42,12 +42,14 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	protected String name = Messages.RefactoringRule_default_name;
 
 	protected String description = Messages.RefactoringRule_default_description;
-	
+
 	protected final JavaVersion requiredJavaVersion;
 
 	protected final List<Tag> tags;
 
 	protected boolean enabled = true;
+	protected boolean satisfiedJavaVersion = true;
+	protected boolean satisfiedLibraries = true;
 
 	private Class<T> visitor;
 
@@ -60,9 +62,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		this.tags = Tag.getTagsForRule(this.getClass());
 		this.requiredJavaVersion = provideRequiredJavaVersion();
 	}
-	
+
 	/**
 	 * the required java version of the implemented rule
+	 * 
 	 * @return
 	 */
 	protected abstract JavaVersion provideRequiredJavaVersion();
@@ -74,11 +77,11 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	public String getDescription() {
 		return description;
 	}
-	
+
 	public JavaVersion getRequiredJavaVersion() {
 		return requiredJavaVersion;
 	}
-	
+
 	public List<Tag> getTags() {
 		return tags;
 	}
@@ -196,28 +199,65 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		}
 	}
 
-	/** Responsible to calculate of the rule is executable in the current project. 
+	/**
+	 * Responsible to calculate of the rule is executable in the current
+	 * project.
 	 * 
 	 * @param project
 	 */
-	public void calculateEnabledForProject(IJavaProject project){
+	public void calculateEnabledForProject(IJavaProject project) {
 		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-		if(null != compilerCompliance){
-			String enumRepresentation = "JAVA_"+compilerCompliance.replace(".", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		if (null != compilerCompliance) {
+			String enumRepresentation = "JAVA_" + compilerCompliance.replace(".", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			enabled = JavaVersion.valueOf(enumRepresentation).atLeast(requiredJavaVersion);
-			if(enabled){
+			satisfiedJavaVersion = enabled;
+			if (enabled) {
 				enabled = ruleSpecificImplementation(project);
-			}	
+				satisfiedLibraries = enabled;
+			}
 		}
 	}
-	
-	/** JavaVersion independent requirements for rules that need to be defined for each rule.
-	 * 	Returns true as default implementation
+
+	/**
+	 * JavaVersion independent requirements for rules that need to be defined
+	 * for each rule. Returns true as default implementation
 	 * 
 	 * @param project
 	 * @return
 	 */
-	public boolean ruleSpecificImplementation(IJavaProject project){
+	public boolean ruleSpecificImplementation(IJavaProject project) {
 		return true;
+	}
+
+	/**
+	 * Independent library requirements for rules that need to be defined for
+	 * each rule. Returns null as default implementation
+	 * 
+	 * @return String value of required library fully qualified class name
+	 */
+	public String requiredLibraries() {
+		return null;
+	}
+
+	/**
+	 * Helper method for description building. Saves information if java version
+	 * is satisfied for rule on selected project.
+	 * 
+	 * @return true if rule can be applied according to java version, false
+	 *         otherwise
+	 */
+	public boolean isSatisfiedJavaVersion() {
+		return satisfiedJavaVersion;
+	}
+
+	/**
+	 * Helper method for description building. Saves information if required
+	 * libraries are satisfied for rule on selected project.
+	 * 
+	 * @return true if rule can be applied according to required libraries,
+	 *         false otherwise
+	 */
+	public boolean isSatisfiedLibraries() {
+		return satisfiedLibraries;
 	}
 }
