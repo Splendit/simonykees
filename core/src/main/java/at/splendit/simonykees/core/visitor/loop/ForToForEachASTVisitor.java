@@ -8,16 +8,19 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -26,9 +29,13 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
@@ -49,13 +56,26 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String SIZE = "size"; //$NON-NLS-1$
 	private static final String DEFAULT_ITERATOR_NAME = "iterator"; //$NON-NLS-1$
 	private static final String SMALLER_THAN = "<"; //$NON-NLS-1$
+	private static final String JAVA_LANG = "java.lang"; //$NON-NLS-1$
+	private static final String KEY_SEPARATOR = "->"; //$NON-NLS-1$
 
 	private Map<ForStatement, LoopOptimizationASTVisior> replaceInformationASTVisitorList;
 	private Map<String, Integer> multipleIteratorUse;
+	private CompilationUnit compilationUnit;
+	private List<String> newImports;
+	private Map<String, String> tempIntroducedNames;
 
 	public ForToForEachASTVisitor() {
 		this.replaceInformationASTVisitorList = new HashMap<>();
 		this.multipleIteratorUse = new HashMap<>();
+		this.newImports = new ArrayList<>();
+		this.tempIntroducedNames = new HashMap<>();
+	}
+	
+	@Override
+	public boolean visit(CompilationUnit compilationUnit) {
+		this.compilationUnit = compilationUnit;
+		return true;
 	}
 
 	@Override
@@ -95,17 +115,16 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 					&& ASTNode.METHOD_INVOCATION == rhs.getNodeType()) {
 				MethodInvocation condition = (MethodInvocation) rhs;
 				Expression conditionExpression = condition.getExpression();
-				if (Expression.SIMPLE_NAME == conditionExpression.getNodeType()) {
+				if (conditionExpression != null && Expression.SIMPLE_NAME == conditionExpression.getNodeType()) {
 					SimpleName iterableNode = (SimpleName) conditionExpression;
 					ITypeBinding iterableTypeBinding = iterableNode.resolveTypeBinding();
-					ITypeBinding iteratorType = findIteratorType(iterableTypeBinding);
+
 
 					/*
 					 * ...and the right hand side of the infix expression is an
 					 * invocation of List::size in the iterable object
 					 */
-					if (iteratorType != null
-							&& ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
+					if (ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
 									Collections.singletonList(ITERABLE_FULLY_QUALIFIED_NAME))
 							&& StringUtils.equals(SIZE, condition.getName().getIdentifier())
 							&& condition.arguments().isEmpty()) {
@@ -123,55 +142,59 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 							ForLoopIteratingIndexVisitor indexVisitor = new ForLoopIteratingIndexVisitor(index, iterableNode, node);
 							Block outerBlock = ASTNodeUtil.getSpecificAncestor(node, Block.class);
 							outerBlock.accept(indexVisitor);
-							if (indexVisitor.checkTransformPrecondition()) {
-
-								// invocations of List::get to be replaced with
-								// the iterator object
-								List<MethodInvocation> toBeReplaced = indexVisitor.getIteratorExpressions();
-								List<ASTNode> toBeRemoved = indexVisitor.getNodesToBeRemoved();
-								SimpleName firstIteratorName = indexVisitor.getIteratorName();
-								Statement loopBody = node.getBody();
-								// generate a safe iterator name
-								Map<String, Boolean> nameMap = generateNewIteratorName(firstIteratorName, loopBody);
-								String newIteratorIdentifier = nameMap.keySet().iterator().next();
-								boolean eligiblePreferredName = nameMap.get(newIteratorIdentifier);
-								if(eligiblePreferredName && indexVisitor.getPreferredNameFragment() != null) {
-									toBeRemoved.add(indexVisitor.getPreferredNameFragment());
-								}
-
-								// remove the redundant nodes
-								toBeRemoved.forEach(remove -> {
-									if (remove
-											.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-										VariableDeclarationStatement declStatement = (VariableDeclarationStatement) remove
-												.getParent();
-										if (declStatement.fragments().size() == 1) {
-											astRewrite.remove(declStatement, null);
-										}
+							if (indexVisitor.checkTransformPrecondition() ) {
+								Type iteratorType = findIteratorType(iterableTypeBinding);
+								if(iteratorType != null) {
+									// invocations of List::get to be replaced with
+									// the iterator object
+									List<MethodInvocation> toBeReplaced = indexVisitor.getIteratorExpressions();
+									List<ASTNode> toBeRemoved = indexVisitor.getNodesToBeRemoved();
+									SimpleName firstIteratorName = indexVisitor.getIteratorName();
+									Statement loopBody = node.getBody();
+									// generate a safe iterator name
+									Map<String, Boolean> nameMap = generateNewIteratorName(firstIteratorName, loopBody);
+									String newIteratorIdentifier = nameMap.keySet().iterator().next();
+									storeTempName(node, newIteratorIdentifier);
+									boolean eligiblePreferredName = nameMap.get(newIteratorIdentifier);
+									if(eligiblePreferredName && indexVisitor.getPreferredNameFragment() != null) {
+										toBeRemoved.add(indexVisitor.getPreferredNameFragment());
 									}
-									astRewrite.remove(remove, null);
-								});
 
-								// replace the List::get invocations with the
-								// new iterator
-								toBeReplaced.forEach(target -> astRewrite.replace(target,
-										astRewrite.getAST().newSimpleName(newIteratorIdentifier), null));
+									// remove the redundant nodes
+									toBeRemoved.forEach(remove -> {
+										if (remove
+												.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+											VariableDeclarationStatement declStatement = (VariableDeclarationStatement) remove
+													.getParent();
+											if (declStatement.fragments().size() == 1) {
+												astRewrite.remove(declStatement, null);
+											}
+										}
+										astRewrite.remove(remove, null);
+									});
 
-								// create a declaration of the new iterator
-								SingleVariableDeclaration iteratorDecl = NodeBuilder.newSingleVariableDeclaration(
-										loopBody.getAST(), astRewrite.getAST().newSimpleName(newIteratorIdentifier),
-										astRewrite.getAST()
-												.newSimpleType(astRewrite.getAST().newName(iteratorType.getName())));
+									AST ast = astRewrite.getAST();
+									
+									// replace the List::get invocations with the
+									// new iterator
+									toBeReplaced.forEach(target -> astRewrite.replace(target,
+											ast.newSimpleName(newIteratorIdentifier), null));
 
-								// create the new enhanced for loop
-								EnhancedForStatement newFor = NodeBuilder.newEnhancedForStatement(loopBody.getAST(),
-										(Statement) astRewrite.createCopyTarget(loopBody),
-										(Expression) astRewrite.createCopyTarget(iterableNode), iteratorDecl);
+									// create a declaration of the new iterator 
+									SingleVariableDeclaration iteratorDecl = NodeBuilder.newSingleVariableDeclaration(
+											loopBody.getAST(), ast.newSimpleName(newIteratorIdentifier), iteratorType);
+									
+									
 
-								// replace the existing for loop with the new
-								// one
-								astRewrite.replace(node, newFor, null);
+									// create the new enhanced for loop
+									EnhancedForStatement newFor = NodeBuilder.newEnhancedForStatement(loopBody.getAST(),
+											(Statement) astRewrite.createCopyTarget(loopBody),
+											(Expression) astRewrite.createCopyTarget(iterableNode), iteratorDecl);
 
+									// replace the existing for loop with the new
+									// one
+									astRewrite.replace(node, newFor, null);
+								}
 							}
 						}
 					}
@@ -181,22 +204,46 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 		return true;
 	}
 
+	private void storeTempName(ForStatement node, String newIteratorIdentifier) {
+		String key = node.getStartPosition() + KEY_SEPARATOR + node.getLength();
+		tempIntroducedNames.put(key, newIteratorIdentifier);
+		
+	}
+
 	/**
-	 * Finds the type binding of the new iterator object from the type of the
+	 * Finds the {@link Type} of the new iterator object from the type of the
 	 * iterable object. If the type is a wild card then gets its upper bound.
+	 * Furthermore, it collects the names of the new import statements that 
+	 * need to be added after introducing the iterator object.
 	 * 
 	 * @param iterableNode
 	 *            node expected to represent a parameterized type object
 	 * @return type binding of the iterator
 	 */
-	private ITypeBinding findIteratorType(ITypeBinding iterableTypeBinding) {
-		ITypeBinding iteratorType = null;
-		if (iterableTypeBinding != null && iterableTypeBinding.isParameterizedType()) {
-			iteratorType = iterableTypeBinding.getTypeArguments()[0];
-			if (iteratorType.getTypeBounds().length > 0) {
-				iteratorType = iteratorType.getTypeBounds()[0];
+	private Type findIteratorType(ITypeBinding iterableTypeBinding) {
+		Type iteratorType = null;
+		if(iterableTypeBinding.isParameterizedType()) {
+			ITypeBinding[] typeArguments = iterableTypeBinding.getTypeArguments();
+			if(typeArguments.length == 1) {
+				ITypeBinding iteratorTypeBinding = typeArguments[0];
+				if (iteratorTypeBinding.getTypeBounds().length > 0) {
+					iteratorTypeBinding = iteratorTypeBinding.getTypeBounds()[0];
+					//TODO: test with lower bounds
+				}
+				ASTRewrite astRewrite = getAstRewrite();
+				ImportRewrite importRewrite = ImportRewrite.create(compilationUnit, true);
+				iteratorType = importRewrite.addImport(iteratorTypeBinding, astRewrite.getAST());
+				String[] newImports = importRewrite.getAddedImports();
+				for(String newImport : newImports) {
+					if(!newImport.startsWith(JAVA_LANG) && !this.newImports.contains(newImport)) {
+						this.newImports.add(newImport);
+					}
+				}
 			}
 		}
+
+		//TODO: update docs of this method. make a test case with a new import declaration.
+		
 		return iteratorType;
 	}
 
@@ -222,7 +269,7 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		String newName;
 		Boolean allowedPreferedName;
-		if (preferedName == null || declaredNames.contains(preferedName.getIdentifier())) {
+		if (preferedName == null || declaredNames.contains(preferedName.getIdentifier()) || tempIntroducedNames.containsValue(preferedName)) {
 			allowedPreferedName = false;
 			int counter = 0;
 			String suffix = ""; //$NON-NLS-1$
@@ -231,7 +278,7 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 			scope.accept(loopScopeVisitor);
 			
 			declaredNames = loobBodyDeclarations.stream().map(SimpleName::getIdentifier).collect(Collectors.toList());
-			while (declaredNames.contains(DEFAULT_ITERATOR_NAME + suffix)) {
+			while (declaredNames.contains(DEFAULT_ITERATOR_NAME + suffix) || tempIntroducedNames.containsValue(DEFAULT_ITERATOR_NAME + suffix)) {
 				counter++;
 				suffix = Integer.toString(counter);
 			}
@@ -268,6 +315,21 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 				multipleIteratorUse.clear();
 			}
 		}
+		
+		this.tempIntroducedNames.remove(node.getStartPosition() + KEY_SEPARATOR + node.getLength());
+	}
+	
+	@Override
+	public void endVisit(CompilationUnit cu) {
+		for(String createdImportName : newImports) {
+			AST ast = compilationUnit.getAST();
+			ImportDeclaration importDecl = ast.newImportDeclaration();
+			importDecl.setName(ast.newName(createdImportName));
+			ListRewrite listRewrite = astRewrite.getListRewrite(compilationUnit, CompilationUnit.IMPORTS_PROPERTY);
+			listRewrite.insertLast(importDecl, null);
+		}
+		
+		this.newImports.clear();
 	}
 }
 
