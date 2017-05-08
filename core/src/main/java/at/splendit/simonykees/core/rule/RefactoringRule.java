@@ -209,12 +209,11 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 		if (null != compilerCompliance) {
 			String enumRepresentation = "JAVA_" + compilerCompliance.replace(".", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			enabled = JavaVersion.valueOf(enumRepresentation).atLeast(requiredJavaVersion);
-			satisfiedJavaVersion = enabled;
-			if (enabled) {
-				enabled = ruleSpecificImplementation(project);
-				satisfiedLibraries = enabled;
-			}
+			satisfiedJavaVersion = JavaVersion.valueOf(enumRepresentation).atLeast(requiredJavaVersion);
+			
+			satisfiedLibraries = ruleSpecificImplementation(project);
+			
+			enabled = satisfiedJavaVersion && satisfiedLibraries;
 		}
 	}
 
