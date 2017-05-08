@@ -11,6 +11,11 @@
                   label="%command.label.select_rules_wizard"
                   style="push">
             </command>
+            <command
+                  commandId="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler"
+                  label="%command.label.logger_rule_wizard"
+                  style="push">
+            </command>
          </menu>
       </menuContribution>
       <menuContribution
@@ -22,12 +27,22 @@
                   label="%command.label.select_rules_wizard"
                   style="push">
             </command>
+            <command
+                  commandId="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler"
+                  label="%command.label.logger_rule_wizard"
+                  style="push">
+            </command>
          </menu>
       </menuContribution>
       <menuContribution locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.refactoring.menu">
          <menu
                label="%menu.label">
+ 
             <command
+                  commandId="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler"
+                  label="%command.label.logger_rule_wizard"
+                  style="push">
+            </command>           <command
                   commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
                   label="%command.label.select_rules_wizard"
                   style="push">
@@ -36,6 +51,11 @@
       </menuContribution>
    </extension>
    <extension point="org.eclipse.ui.commands">
+      <command
+            defaultHandler="at.splendit.simonykees.core.handler.LoggerRuleWizardHandler"
+            id="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler"
+            name="%command.name.logger_rule_wizard_handler">
+      </command>
       <command
             defaultHandler="at.splendit.simonykees.core.handler.SelectRulesWizardHandler"
             id="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler"
