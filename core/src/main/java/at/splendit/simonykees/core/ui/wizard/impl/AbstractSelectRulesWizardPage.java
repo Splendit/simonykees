@@ -63,7 +63,7 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 
 	protected IStatus fSelectionStatus;
 
-	private boolean forcedSelect = false;
+	private boolean forcedSelectLeft = false;
 
 	public AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
 			AbstractSelectRulesWizardControler controler) {
@@ -182,8 +182,8 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 
 		leftTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				if (forcedSelect) {
-					forcedSelect = false;
+				if (forcedSelectLeft) {
+					forcedSelectLeft = false;
 					/*
 					 * if it is manually selected because of moving, don't
 					 * update view
@@ -384,10 +384,10 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 				if (model.isMovedToRight()) {
 					rightTableViewer.setSelection(new StructuredSelection(model.getRecentlyMoved().toArray()), false);
 				} else {
+					forcedSelectLeft = true;
 					leftTreeViewer.setSelection(new StructuredSelection(model.getRecentlyMoved().toArray()), false);
 				}
 				model.getRecentlyMoved().clear();
-				forcedSelect = true;
 			}
 			getContainer().updateButtons();
 			model.resetChanged();
