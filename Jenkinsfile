@@ -119,7 +119,7 @@ def notifyBuild(String buildStatus) {
 		emailext (
 			subject: subject,
 			body: details,
-			recipientProviders: [[$class: 'CulpritsRecipientProvider']].collect { "cc:$it" }
+			recipientProviders: [[$class: 'CulpritsRecipientProvider']]
 		)
 	}
 }
