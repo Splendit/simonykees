@@ -30,7 +30,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 
 	private Set<Object> posibilities = new HashSet<>();
 	private Set<Object> selection = new HashSet<>();
-	
+
 	private Set<Object> recentlyMoved = new HashSet<>();
 
 	private String currentProfileId = Messages.SelectRulesWizardPage_EmptyProfileLabel;
@@ -45,8 +45,10 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 
 	private boolean removeDisabled = false;
 
-	// flag for making selection when moved from one side to other, true for
-	// moving from left to right, false otherwise
+	/*
+	 * flag for making selection when moved from one side to other, true for
+	 * moving from left to right, false otherwise
+	 */
 	private boolean movedToRight = false;
 
 	public AbstractSelectRulesWizardModel(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
@@ -270,11 +272,11 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		this.changed = true;
 		this.forced = forced;
 	}
-	
+
 	public boolean isMovedToRight() {
 		return movedToRight;
 	}
-	
+
 	public Set<Object> getRecentlyMoved() {
 		return recentlyMoved;
 	}

@@ -184,8 +184,10 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (forcedSelect) {
 					forcedSelect = false;
-					// if it is manualy selected because of moving, don't update
-					// view
+					/*
+					 * if it is manually selected because of moving, don't
+					 * update view
+					 */
 				} else {
 					controler.selectionChanged();
 				}
@@ -355,8 +357,10 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 	 */
 	@SuppressWarnings("unchecked")
 	private void updateData() {
-		// check if model has changed to update table and tree view or is just
-		// selection changed to update description field and buttons
+		/*
+		 * check if model has changed to update table and tree view or is just
+		 * selection changed to update description field and buttons
+		 */
 		if (model.hasChanged()) {
 			if (!model.isForced()) {
 				model.filterPosibilitiesByTags();
@@ -367,9 +371,10 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 					leftTreeViewer.setInput(model.filterPosibilitiesByName());
 				}
 				rightTableViewer.setInput(model.getSelection());
-				// updates enabling Finish button according to right side table
-				// view
-				// if selection is empty Finish button is disabled
+				/*
+				 * updates enabling Finish button according to right side table
+				 * view if selection is empty Finish button is disabled
+				 */
 			} else {
 				leftTreeViewer.setInput(model.getPosibilities());
 				rightTableViewer.setInput(model.getSelection());
@@ -444,8 +449,10 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 			status = new IStatus[] { fSelectionStatus };
 		}
 
-		// the mode severe status will be displayed and the OK button
-		// enabled/disabled.
+		/*
+		 * the mode severe status will be displayed and the OK button
+		 * enabled/disabled.
+		 */
 		updateStatus(status);
 	}
 }
