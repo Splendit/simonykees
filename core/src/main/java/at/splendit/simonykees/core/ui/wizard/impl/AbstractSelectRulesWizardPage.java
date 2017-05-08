@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -61,6 +62,8 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 	private StyledText descriptionStyledText;
 
 	protected IStatus fSelectionStatus;
+
+	private boolean forcedSelect = false;
 
 	public AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
 			AbstractSelectRulesWizardControler controler) {
@@ -179,7 +182,13 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 
 		leftTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				controler.selectionChanged();
+				if (forcedSelect) {
+					forcedSelect = false;
+					// if it is manualy selected because of moving, don't update
+					// view
+				} else {
+					controler.selectionChanged();
+				}
 			}
 		});
 
@@ -256,7 +265,6 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		rightTableViewer.getControl().setLayoutData(gd);
-
 		rightTableViewer.setUseHashlookup(true);
 
 		configureTable(rightTableViewer);
@@ -366,6 +374,15 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 				leftTreeViewer.setInput(model.getPosibilities());
 				rightTableViewer.setInput(model.getSelection());
 				model.resetForced();
+			}
+			if (!model.getRecentlyMoved().isEmpty()) {
+				if (model.isMovedToRight()) {
+					rightTableViewer.setSelection(new StructuredSelection(model.getRecentlyMoved().toArray()), false);
+				} else {
+					leftTreeViewer.setSelection(new StructuredSelection(model.getRecentlyMoved().toArray()), false);
+				}
+				model.getRecentlyMoved().clear();
+				forcedSelect = true;
 			}
 			getContainer().updateButtons();
 			model.resetChanged();

@@ -30,6 +30,8 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 
 	private Set<Object> posibilities = new HashSet<>();
 	private Set<Object> selection = new HashSet<>();
+	
+	private Set<Object> recentlyMoved = new HashSet<>();
 
 	private String currentProfileId = Messages.SelectRulesWizardPage_EmptyProfileLabel;
 
@@ -42,6 +44,10 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	private boolean forced = false;
 
 	private boolean removeDisabled = false;
+
+	// flag for making selection when moved from one side to other, true for
+	// moving from left to right, false otherwise
+	private boolean movedToRight = false;
 
 	public AbstractSelectRulesWizardModel(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		this.rules = rules;
@@ -106,9 +112,11 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 			if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
 				selection.add(posibility);
 				posibilities.remove(posibility);
+				recentlyMoved.add(posibility);
 				changed = true;
 			}
 		}
+		movedToRight = true;
 		notifyListeners();
 	}
 
@@ -143,8 +151,10 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		selection.removeAll(selectedElements.toList());
 
 		posibilities.addAll(selectedElements.toList());
+		recentlyMoved.addAll(selectedElements.toList());
 
 		changed = true;
+		movedToRight = false;
 		notifyListeners();
 	}
 
@@ -259,6 +269,14 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	public void setChanged(boolean forced) {
 		this.changed = true;
 		this.forced = forced;
+	}
+	
+	public boolean isMovedToRight() {
+		return movedToRight;
+	}
+	
+	public Set<Object> getRecentlyMoved() {
+		return recentlyMoved;
 	}
 
 	public abstract String getNameFilter();
