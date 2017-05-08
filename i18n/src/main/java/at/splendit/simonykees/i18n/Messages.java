@@ -72,6 +72,9 @@ public class Messages extends NLS {
 	public static String LicenseValidator_cannot_reach_license_provider_on_validation_call;
 	public static String LicenseValidator_invalid_licensee_number;
 	public static String LicenseValidator_received_validation_response;
+	public static String LoggerRuleWizard_title;
+	public static String LoggerRuleWizardPage_description;
+	public static String LoggerRuleWizardPage_pageName;
 	public static String InefficientConstructorRule_description;
 	public static String InefficientConstructorRule_name;
 	public static String Java5Profile_profileName;
