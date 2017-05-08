@@ -105,8 +105,6 @@ def notifyBuild(String buildStatus) {
 
 		println "------"
 
-
-
 		//currently not supported by pipeline variable
 		def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 		def commitURL = "https://bitbucket.splendit.loc/projects/LM/repos/simonykees/commits/${gitCommit}"
