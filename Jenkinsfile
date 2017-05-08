@@ -103,12 +103,18 @@ def notifyBuild(String buildStatus) {
 	if (buildStatus == 'FAILURE' || buildStatus == 'UNSTABLE') {
 		jobName = env.JOB_NAME.replace("%2F", "/")
 
+
+		def commitURL = "https://bitbucket.splendit.loc/projects/LM/repos/simonykees/commits/${env.GIT_COMMIT}"
+		println commitURL
 		def emailOfBuildInitiate = [$class: 'UpstreamComitterRecipientProvider']
+		println emailOfBuildInitiate
 		def subject = "${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]'"
+		println subject
 		def details = "<p>${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]':</p>" +
 									"\n<p>Persons commited for this build: [${emailOfBuildInitiate}]</p>" +
+									"\n<p>CommitUrl: ${commitURL}" +
 									"\n<p>Check console output at \"<a href='${env.BUILD_URL}'>${jobName} [${env.BUILD_NUMBER}]</a>\"</p>"
-
+		println details
 
 
 	
