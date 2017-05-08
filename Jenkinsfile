@@ -110,8 +110,8 @@ def notifyBuild(String buildStatus) {
 
 		def subject = "${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]'"
 		def details = "<p>${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]':</p>" +
-									"\n<p>Persons commited for this build: [${emailOfBuildInitiate}]</p>" +
-									"\n<p>CommitUrl: ${commitURL}" +
+									"\n<p>List of committers for this build: [${emailOfBuildInitiate}]</p>" +
+									"\n<p>Last commit url: ${commitURL}" +
 									"\n<p>Check console output at \"<a href='${env.BUILD_URL}'>${jobName} [${env.BUILD_NUMBER}]</a>\"</p>"
 
 
