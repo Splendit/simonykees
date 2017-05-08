@@ -107,12 +107,16 @@ def notifyBuild(String buildStatus) {
 		def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 		def commitURL = "https://bitbucket.splendit.loc/projects/LM/repos/simonykees/commits/${gitCommit}"
 		println commitURL
-		def to = emailextrecipients( [[$class: 'DevelopersRecipientProvider'],[$class: 'CulpritsRecipientProvider'],[$class: 'UpstreamComitterRecipientProvider'],[$class: 'FirstFailingBuildSuspectsRecipientProvider'],[$class: 'FailingTestSuspectsRecipientProvider']])
+		def to = emailextrecipients( [[$class: 'DevelopersRecipientProvider']])
 		println to
-		def em = emailextrecipients( [[$class: 'UpstreamComitterRecipientProvider']])
+		def to2 = emailextrecipients( [[$class: 'CulpritsRecipientProvider']])
+		println to2
+		def to3 = emailextrecipients( [[$class: 'UpstreamComitterRecipientProvider']])
+		println to3
+		def to4 = emailextrecipients( [[$class: 'FailingTestSuspectsRecipientProvider']])
+		println to4
+		def em = emailextrecipients( [[$class: 'FailingTestSuspectsRecipientProvider']])
 		println em
-		def emailOfBuildInitiate4 = emailextrecipients( [[$class: 'CulpritsRecipientProvider']])
-		println emailOfBuildInitiate4
 		def emailOfBuildInitiate2 = emailextrecipients( [[$class: 'RequesterRecipientProvider']])
 		println emailOfBuildInitiate2
 		def emailOfBuildInitiate3 = sh(returnStdout: true, script: 'git log -1 | pcregrep -o1 "Author:.*<(.*)>"')
