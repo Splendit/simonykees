@@ -477,20 +477,20 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 		descriptionStyledText.setStyleRange(requiredLibrariesLabelStyleRange);
 		descriptionStyledText.setStyleRange(tagsLabelStyleRange);
 
-		if(!rule.isEnabled()) {
+		if (!rule.isEnabled()) {
 			StyleRange minJavaVersionUnsatisfiedValueStyleRange = new StyleRange();
-			minJavaVersionUnsatisfiedValueStyleRange.start = name.length() + lineDelimiter.length() + lineDelimiter.length()
-					+ description.length() + lineDelimiter.length() + lineDelimiter.length() + requirementsLabel.length()
-					+ lineDelimiter.length() + minJavaVersionLabel.length();
+			minJavaVersionUnsatisfiedValueStyleRange.start = name.length() + lineDelimiter.length()
+					+ lineDelimiter.length() + description.length() + lineDelimiter.length() + lineDelimiter.length()
+					+ requirementsLabel.length() + lineDelimiter.length() + minJavaVersionLabel.length();
 			minJavaVersionUnsatisfiedValueStyleRange.length = minJavaVersionValue.length();
 			minJavaVersionUnsatisfiedValueStyleRange.font = paragraphTitle;
 			minJavaVersionUnsatisfiedValueStyleRange.foreground = unsetisfiedRequirementsColor;
 			descriptionStyledText.setStyleRange(minJavaVersionUnsatisfiedValueStyleRange);
 		}
-		
-		int requirementsBulletingStartLine = descriptionStyledText.getLineAtOffset(name.length() + lineDelimiter.length() + lineDelimiter.length()
-		+ description.length() + lineDelimiter.length() + lineDelimiter.length() + requirementsLabel.length()
-		+ lineDelimiter.length());
+
+		int requirementsBulletingStartLine = descriptionStyledText.getLineAtOffset(name.length()
+				+ lineDelimiter.length() + lineDelimiter.length() + description.length() + lineDelimiter.length()
+				+ lineDelimiter.length() + requirementsLabel.length() + lineDelimiter.length());
 
 		descriptionStyledText.setLineBullet(requirementsBulletingStartLine, 2, bullet0);
 	}
