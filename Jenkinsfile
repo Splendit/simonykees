@@ -103,6 +103,8 @@ def notifyBuild(String buildStatus) {
 	if (buildStatus == 'FAILURE' || buildStatus == 'UNSTABLE') {
 		jobName = env.JOB_NAME.replace("%2F", "/")
 
+		println "------"
+
 		//currently not supported by pipeline variable
 		def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
 		def commitURL = "https://bitbucket.splendit.loc/projects/LM/repos/simonykees/commits/${gitCommit}"
@@ -121,6 +123,8 @@ def notifyBuild(String buildStatus) {
 		println emailOfBuildInitiate2
 		def emailOfBuildInitiate3 = sh(returnStdout: true, script: 'git log -1 | pcregrep -o1 "Author:.*<(.*)>"')
 		println emailOfBuildInitiate3
+
+		println "------"
 
 		def subject = "${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]'"
 		println subject
