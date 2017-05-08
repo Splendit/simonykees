@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -61,6 +62,8 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 	private StyledText descriptionStyledText;
 
 	protected IStatus fSelectionStatus;
+
+	private boolean forcedSelectLeft = false;
 
 	public AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
 			AbstractSelectRulesWizardControler controler) {
@@ -179,7 +182,15 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 
 		leftTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				controler.selectionChanged();
+				if (forcedSelectLeft) {
+					forcedSelectLeft = false;
+					/*
+					 * if it is manually selected because of moving, don't
+					 * update view
+					 */
+				} else {
+					controler.selectionChanged();
+				}
 			}
 		});
 
@@ -256,7 +267,6 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		rightTableViewer.getControl().setLayoutData(gd);
-
 		rightTableViewer.setUseHashlookup(true);
 
 		configureTable(rightTableViewer);
@@ -347,8 +357,10 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 	 */
 	@SuppressWarnings("unchecked")
 	private void updateData() {
-		// check if model has changed to update table and tree view or is just
-		// selection changed to update description field and buttons
+		/*
+		 * check if model has changed to update table and tree view or is just
+		 * selection changed to update description field and buttons
+		 */
 		if (model.hasChanged()) {
 			if (!model.isForced()) {
 				model.filterPosibilitiesByTags();
@@ -359,13 +371,23 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 					leftTreeViewer.setInput(model.filterPosibilitiesByName());
 				}
 				rightTableViewer.setInput(model.getSelection());
-				// updates enabling Finish button according to right side table
-				// view
-				// if selection is empty Finish button is disabled
+				/*
+				 * updates enabling Finish button according to right side table
+				 * view if selection is empty Finish button is disabled
+				 */
 			} else {
 				leftTreeViewer.setInput(model.getPosibilities());
 				rightTableViewer.setInput(model.getSelection());
 				model.resetForced();
+			}
+			if (!model.getRecentlyMoved().isEmpty()) {
+				if (model.isMovedToRight()) {
+					rightTableViewer.setSelection(new StructuredSelection(model.getRecentlyMoved().toArray()), false);
+				} else {
+					forcedSelectLeft = true;
+					leftTreeViewer.setSelection(new StructuredSelection(model.getRecentlyMoved().toArray()), false);
+				}
+				model.getRecentlyMoved().clear();
 			}
 			getContainer().updateButtons();
 			model.resetChanged();
@@ -427,8 +449,10 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 			status = new IStatus[] { fSelectionStatus };
 		}
 
-		// the mode severe status will be displayed and the OK button
-		// enabled/disabled.
+		/*
+		 * the mode severe status will be displayed and the OK button
+		 * enabled/disabled.
+		 */
 		updateStatus(status);
 	}
 }
