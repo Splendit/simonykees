@@ -1,14 +1,12 @@
 package at.splendit.simonykees.core.ui.wizard.semiautomatic;
 
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -29,7 +27,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	private Combo systemErrCombo;
 	private Combo stackTraceCombo;
 	
-	private final String EMPTY_PROFIL = "None"; 
+	private final String NO_SEVERITY_LEVEL = "";  //$NON-NLS-1$
 
 	public LoggerRuleWizardPage(LoggerRuleWizardPageModel model, LoggerRuleWizardPageControler controler) {
 		super(Messages.LoggerRuleWizardPage_pageName);
@@ -45,7 +43,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		initializeDialogUnits(parent);
 
 		composite = new Composite(parent, SWT.NONE);
-		composite.setLayout(new GridLayout());
+		composite.setLayout(new GridLayout(2, true));
 
 		setControl(composite);
 		
@@ -60,6 +58,8 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 				updateData();
 			}
 		});
+		
+		initializeData();
 	}
 
 	private void createSystemOutPart(Composite parent) {
@@ -68,11 +68,17 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		
 		systemOutCombo = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateSystemOutCombo();
-		systemOutCombo.addSelectionListener(createComboSelectionListener());
+		systemOutCombo.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				//TODO validateSelection();
+				controler.selectionChanged(model.sysOutComboValueId, ((Combo)e.getSource()).getItem(((Combo)e.getSource()).getSelectionIndex()));
+			}
+		});
 		GridData gridData = new GridData(GridData.END, GridData.FILL, false, false);
 		gridData.widthHint = 200;
 		systemOutCombo.setLayoutData(gridData);
-		initializeSystemOutCombo();
 	}
 
 	private void createSystemErrPart(Composite parent) {
@@ -81,11 +87,17 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		
 		systemErrCombo = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateSystemErrCombo();
-		systemErrCombo.addSelectionListener(createComboSelectionListener());
+		systemErrCombo.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				//TODO validateSelection();
+				controler.selectionChanged(model.sysErrComboValueId, ((Combo)e.getSource()).getItem(((Combo)e.getSource()).getSelectionIndex()));
+			}
+		});
 		GridData gridData = new GridData(GridData.END, GridData.FILL, false, false);
 		gridData.widthHint = 200;
 		systemErrCombo.setLayoutData(gridData);
-		initializeSystemErrCombo();
 	}
 
 	private void createStackTracePart(Composite parent) {
@@ -94,37 +106,25 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		
 		stackTraceCombo = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateStackTraceCombo();
-		stackTraceCombo.addSelectionListener(createComboSelectionListener());
-		GridData gridData = new GridData(GridData.END, GridData.FILL, false, false);
-		gridData.widthHint = 200;
-		stackTraceCombo.setLayoutData(gridData);
-		initializeStackTraceCombo();
-	}
-
-	/**
-	 * {@link SelectionListener} for the profile dropdown ({@link Combo}).
-	 * 
-	 * @return {@link SelectionListener} that reacts to changes of the selected
-	 *         element.
-	 */
-	private SelectionListener createComboSelectionListener() {
-		return new SelectionAdapter() {
+		stackTraceCombo.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				//TODO validateSelection();
-				controler.selectionChanged(e.getSource(), ((Combo)e.getSource()).getSelectionIndex());
+				controler.selectionChanged(model.stackTraceComboValueId, ((Combo)e.getSource()).getItem(((Combo)e.getSource()).getSelectionIndex()));
 			}
-		};
+		});
+		GridData gridData = new GridData(GridData.END, GridData.FILL, false, false);
+		gridData.widthHint = 200;
+		stackTraceCombo.setLayoutData(gridData);
 	}
-	
+
 	/**
 	 * Set all items for the dropdown ({@link Combo}) 
 	 */
 	private void populateSystemOutCombo() {
 		//TODO add all severity levels defined in rule for sys out log
-		List<String> severityLevels = new ArrayList<>();  
-		systemOutCombo.add(EMPTY_PROFIL);
+		Set<String> severityLevels = model.getSeverityNameLevelMap().keySet();  
 		for (String severityLevel : severityLevels) {
 			systemOutCombo.add(severityLevel);
 		}
@@ -135,8 +135,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 */
 	private void populateSystemErrCombo() {
 		//TODO add all severity levels defined in rule for sys err log
-		List<String> severityLevels = new ArrayList<>();  
-		systemErrCombo.add(EMPTY_PROFIL);
+		Set<String> severityLevels = model.getSeverityNameLevelMap().keySet();  
 		for (String severityLevel : severityLevels) {
 			systemErrCombo.add(severityLevel);
 		}
@@ -147,38 +146,22 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 */
 	private void populateStackTraceCombo() {
 		//TODO add all severity levels defined in rule for stack trace log
-		List<String> severityLevels = new ArrayList<>();  
-		stackTraceCombo.add(EMPTY_PROFIL);
+		Set<String> severityLevels = model.getSeverityNameLevelMap().keySet();  
 		for (String severityLevel : severityLevels) {
 			stackTraceCombo.add(severityLevel);
 		}
 	}
-	
-	/**
-	 * Initializes systemOut combo to INFO severity level
-	 */
-	private void initializeSystemOutCombo() {
-		//TODO init to INFO
-	}
-	
-	/**
-	 * Initializes systemErr combo to ERROR severity level
-	 */
-	private void initializeSystemErrCombo() {
-		//TODO init to ERROR
-	}
-	
-	/**
-	 * Initializes stackTrace combo to ERROR severity level
-	 */
-	private void initializeStackTraceCombo() {
-		//TODO init to ERROR
-	}
-	
+
 	/**
 	 * Updates view with data every time something is changed in model.
 	 */
 	private void updateData() {
-		// TODO implement
+		//TODO update view
+	}
+	
+	private void initializeData() {
+		systemOutCombo.select(systemErrCombo.indexOf(model.getCurrentSelectionMap().get(model.sysOutComboValueId)));
+		systemErrCombo.select(systemErrCombo.indexOf(model.getCurrentSelectionMap().get(model.sysErrComboValueId)));
+		stackTraceCombo.select(stackTraceCombo.indexOf(model.getCurrentSelectionMap().get(model.stackTraceComboValueId)));
 	}
 }
