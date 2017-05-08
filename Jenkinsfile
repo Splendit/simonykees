@@ -109,6 +109,8 @@ def notifyBuild(String buildStatus) {
 		println commitURL
 		def emailOfBuildInitiate = emailextrecipients( [[$class: 'UpstreamComitterRecipientProvider']])
 		println emailOfBuildInitiate
+		def emailOfBuildInitiate4 = emailextrecipients( [[$class: 'CulpritsRecipientProvider']])
+		println emailOfBuildInitiate4
 		def emailOfBuildInitiate2 = emailextrecipients( [[$class: 'RequesterRecipientProvider']])
 		println emailOfBuildInitiate2
 		def emailOfBuildInitiate3 = sh(returnStdout: true, script: 'git log -1 | pcregrep -o1 "Author:.*<(.*)>"')
