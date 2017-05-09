@@ -28,6 +28,7 @@ import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
 import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
+import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 
 /**
  * Tag object for filtering rules
@@ -102,6 +103,10 @@ public enum Tag {
 			return Arrays.asList(JAVA_1_7);
 		} else if (WhileToForEachRule.class == clazz) {
 			return Arrays.asList(JAVA_1_5, LOOP);
+		}
+		
+		else if (StandardLoggerRule.class == clazz) {
+			return Arrays.asList(JAVA_0_9);
 		}
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["

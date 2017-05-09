@@ -6,34 +6,33 @@ import java.util.Map;
 import java.util.Set;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerOptions;
+import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 public class LoggerRuleWizardPageModel {
 
-	private RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule;
-
-	public final String sysOutComboValueId = "sysOutComboValue"; //$NON-NLS-1$
-	public final String sysErrComboValueId = "sysErrComboValue"; //$NON-NLS-1$
-	public final String stackTraceComboValueId = "stackTraceComboValue"; //$NON-NLS-1$
+	private StandardLoggerRule rule;
 
 	private Map<String, String> currentSelectionMap = new HashMap<>();
-	private Map<String, Integer> severityNameLevelMap = new HashMap<>();
+	
+	Map<String, Integer> systemOutReplaceOptions = new HashMap<>();
+	Map<String, Integer> systemErrReplaceOptions = new HashMap<>();
+	Map<String, Integer> printStackTraceReplaceOptions = new HashMap<>();
 
 	Set<IValueChangeListener> listeners = new HashSet<>();
+	
+	private String selectionStatus = ""; //$NON-NLS-1$
 
 	public LoggerRuleWizardPageModel(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
-		this.rule = rule;
+		this.rule = (StandardLoggerRule) rule;
 
-		severityNameLevelMap.put("", 0);
-		severityNameLevelMap.put("DEBUG", 1);
-		severityNameLevelMap.put("INFO", 2);
-		severityNameLevelMap.put("WARN", 3);
-		severityNameLevelMap.put("ERROR", 4);
-
-		currentSelectionMap.put(sysOutComboValueId, "INFO");
-		currentSelectionMap.put(sysErrComboValueId, "ERROR");
-		currentSelectionMap.put(stackTraceComboValueId, "ERROR");
+		currentSelectionMap.putAll(this.rule.getDefaultOptions());
+		
+		systemOutReplaceOptions.putAll(this.rule.getSystemOutReplaceOptions());
+		systemErrReplaceOptions.putAll(this.rule.getSystemErrReplaceOptions());
+		printStackTraceReplaceOptions.putAll(this.rule.getPrintStackTraceReplaceOptions());
 	}
 
 	/**
@@ -44,11 +43,6 @@ public class LoggerRuleWizardPageModel {
 	 */
 	public Map<String, String> getCurrentSelectionMap() {
 		return currentSelectionMap;
-	}
-	
-	//TODO DELETE, just for testing!!!
-	public Map<String, Integer> getSeverityNameLevelMap() {
-		return severityNameLevelMap;
 	}
 
 	/**
@@ -72,30 +66,52 @@ public class LoggerRuleWizardPageModel {
 	public void setNewSelection(String source, String selection) {
 		currentSelectionMap.put(source, selection);
 		validateSelection();
+		notifyListeners();
 	}
 
 	private void validateSelection() {
-		String sysOutCurr = currentSelectionMap.get(sysOutComboValueId);
-		String sysErrCurr = currentSelectionMap.get(sysErrComboValueId);
-		String stackTraceCurr = currentSelectionMap.get(stackTraceComboValueId);
+		String sysOutCurr = currentSelectionMap.get(StandardLoggerOptions.SYSTEM_OUT_PRINT);
+		String sysErrCurr = currentSelectionMap.get(StandardLoggerOptions.SYSTEM_ERR_PRINT);
+		String stackTraceCurr = currentSelectionMap.get(StandardLoggerOptions.PRINT_STACKTRACE);
 
-		int sysOutCurrSeverityLevel = severityNameLevelMap.get(sysOutCurr);
-		int sysErrCurrSeverityLevel = severityNameLevelMap.get(sysErrCurr);
-		int stackTraceCurrSeverityLevel = severityNameLevelMap.get(stackTraceCurr);
+		int sysOutCurrSeverityLevel = (sysOutCurr.isEmpty()) ? 0 : rule.getSystemOutReplaceOptions().get(sysOutCurr);
+		int sysErrCurrSeverityLevel = (sysErrCurr.isEmpty()) ? 0 : rule.getSystemErrReplaceOptions().get(sysErrCurr);
+		int stackTraceCurrSeverityLevel = (stackTraceCurr.isEmpty()) ? 0 : rule.getPrintStackTraceReplaceOptions().get(stackTraceCurr);
 
 		if (!(stackTraceCurrSeverityLevel == 0) && (stackTraceCurrSeverityLevel < sysOutCurrSeverityLevel
 				|| stackTraceCurrSeverityLevel < sysErrCurrSeverityLevel)) {
 			// if stackTraceCurrSeverityLevel is empty skip validation of it
 			// TODO validation failed, StatusInfo warning
+			selectionStatus = "printStackTrace shouldn't have lesser severity level than System.out.println or System.err.println";
 			// stack.trace shouldn't have lesser severity level than System.out
 			// or System.err
 		} else if (!(sysErrCurrSeverityLevel == 0) && (sysErrCurrSeverityLevel < sysOutCurrSeverityLevel)) {
 			// TODO validation failed, StatusInfo warning
+			selectionStatus = "System.err.println shouldn't have lesser severity level than System.out.println";
 			// System.err shouldn't have lesser severity level than System.out
 		} else if (sysOutCurrSeverityLevel == 0 || sysErrCurrSeverityLevel == 0 || stackTraceCurrSeverityLevel == 0) {
 			// TODO validation failed, StatusInfo warning
+			selectionStatus = "No logging type should be left blank";
 			// No logging type should be left blank
+		} else {
+			selectionStatus = ""; //$NON-NLS-1$
 		}
+	}
+
+	public Set<String> getSystemOutReplaceOptions() {
+		return systemOutReplaceOptions.keySet();
+	}
+
+	public Set<String> getSystemErrReplaceOptions() {
+		return systemErrReplaceOptions.keySet();
+	}
+
+	public Set<String> getPrintStackTraceReplaceOptions() {
+		return printStackTraceReplaceOptions.keySet();
+	}
+
+	public String getSelectionStatus() {
+		return selectionStatus;
 	}
 
 }

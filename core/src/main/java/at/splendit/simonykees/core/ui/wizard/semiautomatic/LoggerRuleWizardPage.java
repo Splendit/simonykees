@@ -1,8 +1,9 @@
 package at.splendit.simonykees.core.ui.wizard.semiautomatic;
 
-
 import java.util.Set;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -13,6 +14,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerOptions;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -20,14 +22,16 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 	private LoggerRuleWizardPageModel model;
 	private LoggerRuleWizardPageControler controler;
-	
+
 	private Composite composite;
-	
+
 	private Combo systemOutCombo;
 	private Combo systemErrCombo;
 	private Combo stackTraceCombo;
-	
-	private final String NO_SEVERITY_LEVEL = "";  //$NON-NLS-1$
+
+	protected IStatus fSelectionStatus;
+
+	private final String NO_SEVERITY_LEVEL = ""; //$NON-NLS-1$
 
 	public LoggerRuleWizardPage(LoggerRuleWizardPageModel model, LoggerRuleWizardPageControler controler) {
 		super(Messages.LoggerRuleWizardPage_pageName);
@@ -46,34 +50,35 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		composite.setLayout(new GridLayout(2, true));
 
 		setControl(composite);
-		
-		createSystemOutPart(composite);		
+
+		createSystemOutPart(composite);
 		createSystemErrPart(composite);
 		createStackTracePart(composite);
-		
+
 		model.addListener(new IValueChangeListener() {
 
 			@Override
 			public void valueChanged() {
-				updateData();
+				doStatusUpdate();
 			}
 		});
-		
+
 		initializeData();
+		doStatusUpdate();
 	}
 
 	private void createSystemOutPart(Composite parent) {
 		Label systemOutLabel = new Label(parent, SWT.NONE);
-		systemOutLabel.setText("System.out.print");
-		
+		systemOutLabel.setText("System.out.print to Logger?");
+
 		systemOutCombo = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateSystemOutCombo();
 		systemOutCombo.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO validateSelection();
-				controler.selectionChanged(model.sysOutComboValueId, ((Combo)e.getSource()).getItem(((Combo)e.getSource()).getSelectionIndex()));
+				controler.selectionChanged(StandardLoggerOptions.SYSTEM_OUT_PRINT,
+						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 			}
 		});
 		GridData gridData = new GridData(GridData.END, GridData.FILL, false, false);
@@ -83,16 +88,16 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 	private void createSystemErrPart(Composite parent) {
 		Label systemErrLabel = new Label(parent, SWT.NONE);
-		systemErrLabel.setText("System.err.print");
-		
+		systemErrLabel.setText("System.err.print to Logger?");
+
 		systemErrCombo = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateSystemErrCombo();
 		systemErrCombo.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO validateSelection();
-				controler.selectionChanged(model.sysErrComboValueId, ((Combo)e.getSource()).getItem(((Combo)e.getSource()).getSelectionIndex()));
+				controler.selectionChanged(StandardLoggerOptions.SYSTEM_ERR_PRINT,
+						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 			}
 		});
 		GridData gridData = new GridData(GridData.END, GridData.FILL, false, false);
@@ -102,16 +107,16 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 	private void createStackTracePart(Composite parent) {
 		Label stackTraceLabel = new Label(parent, SWT.NONE);
-		stackTraceLabel.setText("Print.stack.trace");
-		
+		stackTraceLabel.setText("printStackTrace to Logger?");
+
 		stackTraceCombo = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateStackTraceCombo();
 		stackTraceCombo.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				//TODO validateSelection();
-				controler.selectionChanged(model.stackTraceComboValueId, ((Combo)e.getSource()).getItem(((Combo)e.getSource()).getSelectionIndex()));
+				controler.selectionChanged(StandardLoggerOptions.PRINT_STACKTRACE,
+						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 			}
 		});
 		GridData gridData = new GridData(GridData.END, GridData.FILL, false, false);
@@ -120,33 +125,33 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	}
 
 	/**
-	 * Set all items for the dropdown ({@link Combo}) 
+	 * Set all items for the dropdown ({@link Combo})
 	 */
 	private void populateSystemOutCombo() {
-		//TODO add all severity levels defined in rule for sys out log
-		Set<String> severityLevels = model.getSeverityNameLevelMap().keySet();  
+		Set<String> severityLevels = model.getSystemOutReplaceOptions();
+		systemOutCombo.add(NO_SEVERITY_LEVEL);
 		for (String severityLevel : severityLevels) {
 			systemOutCombo.add(severityLevel);
 		}
 	}
-	
+
 	/**
-	 * Set all items for the dropdown ({@link Combo}) 
+	 * Set all items for the dropdown ({@link Combo})
 	 */
 	private void populateSystemErrCombo() {
-		//TODO add all severity levels defined in rule for sys err log
-		Set<String> severityLevels = model.getSeverityNameLevelMap().keySet();  
+		Set<String> severityLevels = model.getSystemErrReplaceOptions();
+		systemErrCombo.add(NO_SEVERITY_LEVEL);
 		for (String severityLevel : severityLevels) {
 			systemErrCombo.add(severityLevel);
 		}
 	}
-	
+
 	/**
-	 * Set all items for the dropdown ({@link Combo}) 
+	 * Set all items for the dropdown ({@link Combo})
 	 */
 	private void populateStackTraceCombo() {
-		//TODO add all severity levels defined in rule for stack trace log
-		Set<String> severityLevels = model.getSeverityNameLevelMap().keySet();  
+		Set<String> severityLevels = model.getPrintStackTraceReplaceOptions();
+		stackTraceCombo.add(NO_SEVERITY_LEVEL);
 		for (String severityLevel : severityLevels) {
 			stackTraceCombo.add(severityLevel);
 		}
@@ -156,12 +161,33 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 * Updates view with data every time something is changed in model.
 	 */
 	private void updateData() {
-		//TODO update view
+		// TODO update view
 	}
-	
+
 	private void initializeData() {
-		systemOutCombo.select(systemErrCombo.indexOf(model.getCurrentSelectionMap().get(model.sysOutComboValueId)));
-		systemErrCombo.select(systemErrCombo.indexOf(model.getCurrentSelectionMap().get(model.sysErrComboValueId)));
-		stackTraceCombo.select(stackTraceCombo.indexOf(model.getCurrentSelectionMap().get(model.stackTraceComboValueId)));
+		systemOutCombo.select(
+				systemOutCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerOptions.SYSTEM_OUT_PRINT)));
+		systemErrCombo.select(
+				systemErrCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerOptions.SYSTEM_ERR_PRINT)));
+		stackTraceCombo.select(
+				stackTraceCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerOptions.PRINT_STACKTRACE)));
+	}
+
+	protected void doStatusUpdate() {
+		if (!model.getSelectionStatus().isEmpty()) {
+			((StatusInfo) fSelectionStatus).setError(model.getSelectionStatus());
+		} else {
+			fSelectionStatus = new StatusInfo();
+		}
+
+		// status of all used components
+		IStatus[] status;
+		status = new IStatus[] { fSelectionStatus };
+
+		/*
+		 * the mode severe status will be displayed and the OK button
+		 * enabled/disabled.
+		 */
+		updateStatus(status);
 	}
 }

@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jface.wizard.Wizard;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -16,12 +17,12 @@ public class LoggerRuleWizard extends Wizard {
 	private LoggerRuleWizardPageControler controler;
 
 	private final List<IJavaElement> javaElements;
-	private final RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule;
+	private final StandardLoggerRule rule;
 
 	public LoggerRuleWizard(List<IJavaElement> javaElements, RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		super();
 		this.javaElements = javaElements;
-		this.rule = rule;
+		this.rule = (StandardLoggerRule) rule;
 		setNeedsProgressMonitor(true);
 	}
 
