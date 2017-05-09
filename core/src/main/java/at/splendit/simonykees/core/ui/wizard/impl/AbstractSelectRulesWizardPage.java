@@ -345,7 +345,7 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 		descriptionStyledText.setAlwaysShowScrollBars(false);
 		descriptionStyledText.setEditable(false);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.minimumHeight = 100;
+		gridData.minimumHeight = 110;
 		descriptionStyledText.setLayoutData(gridData);
 		descriptionStyledText.setMargins(2, 2, 2, 2);
 	}
