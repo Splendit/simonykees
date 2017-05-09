@@ -73,8 +73,15 @@ public class Messages extends NLS {
 	public static String LicenseValidator_invalid_licensee_number;
 	public static String LicenseValidator_received_validation_response;
 	public static String LoggerRuleWizard_title;
+	public static String LoggerRuleWizardHandler_noLogger;
 	public static String LoggerRuleWizardPage_description;
 	public static String LoggerRuleWizardPage_pageName;
+	public static String LoggerRuleWizardPage_stackTraceLabel;
+	public static String LoggerRuleWizardPage_sysErrLabel;
+	public static String LoggerRuleWizardPage_sysOutLabel;
+	public static String LoggerRuleWizardPageModel_warn_blankLoggingType;
+	public static String LoggerRuleWizardPageModel_warn_errSeverity;
+	public static String LoggerRuleWizardPageModel_warn_stackTraceSeverity;
 	public static String InefficientConstructorRule_description;
 	public static String InefficientConstructorRule_name;
 	public static String Java5Profile_profileName;

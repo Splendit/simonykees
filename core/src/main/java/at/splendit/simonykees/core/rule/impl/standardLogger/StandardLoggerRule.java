@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.rule.impl.standardLogger;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.JavaVersion;
@@ -49,9 +50,9 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	private static final String TRACE = "trace"; //$NON-NLS-1$
 	private static final String ERROR = "error"; //$NON-NLS-1$
 
-	private Map<String, Integer> systemOutReplaceOptions = new HashMap<>();
-	private Map<String, Integer> systemErrReplaceOptions = new HashMap<>();
-	private Map<String, Integer> pritntStacktraceReplaceOptions = new HashMap<>();
+	private Map<String, Integer> systemOutReplaceOptions = new LinkedHashMap<>();
+	private Map<String, Integer> systemErrReplaceOptions = new LinkedHashMap<>();
+	private Map<String, Integer> pritntStacktraceReplaceOptions = new LinkedHashMap<>();
 
 	private SupportedLogger supportedLoger;
 	private IType loggerType;

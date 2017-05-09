@@ -21,6 +21,7 @@ import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.wizard.semiautomatic.LoggerRuleWizard;
 import at.splendit.simonykees.core.visitor.semiAutomatic.StandardLoggerASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * Handler for semi-automatic logging rule
@@ -64,23 +65,18 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 								return monitor;
 							}
 						};
-						/*
-						 * the dialog is made as smaller than necessary
-						 * horizontally (we want line breaks for rule
-						 * descriptions)
-						 */
-						dialog.setPageSize(750, 500);
-
+						
 						dialog.open();
+						
 					} else {
-						SimonykeesMessageDialog.openMessageDialog(HandlerUtil.getActiveShell(event), "No Logger available", MessageDialog.ERROR);
+						SimonykeesMessageDialog.openMessageDialog(HandlerUtil.getActiveShell(event), Messages.LoggerRuleWizardHandler_noLogger, MessageDialog.ERROR);
 					}
 
 				}
 			}
 		} else {
 			/*
-			 * do not display the SelectRulesWizard if the license is invalid
+			 * do not display the Wizard if the license is invalid
 			 */
 			final Shell shell = HandlerUtil.getActiveShell(event);
 			LicenseUtil.getInstance().displayLicenseErrorDialog(shell);

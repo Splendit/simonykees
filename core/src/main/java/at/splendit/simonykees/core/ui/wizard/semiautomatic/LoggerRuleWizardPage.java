@@ -18,6 +18,14 @@ import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerOption
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.i18n.Messages;
 
+/**
+ * Wizard page for configuring logger rule when applying to selected resources
+ * 
+ * @author andreja.sambolec
+ * @since 1.2
+ *
+ */
+@SuppressWarnings("restriction")
 public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 	private LoggerRuleWizardPageModel model;
@@ -69,7 +77,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 	private void createSystemOutPart(Composite parent) {
 		Label systemOutLabel = new Label(parent, SWT.NONE);
-		systemOutLabel.setText("System.out.print to Logger?");
+		systemOutLabel.setText(Messages.LoggerRuleWizardPage_sysOutLabel);
 
 		systemOutCombo = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateSystemOutCombo();
@@ -88,7 +96,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 	private void createSystemErrPart(Composite parent) {
 		Label systemErrLabel = new Label(parent, SWT.NONE);
-		systemErrLabel.setText("System.err.print to Logger?");
+		systemErrLabel.setText(Messages.LoggerRuleWizardPage_sysErrLabel);
 
 		systemErrCombo = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateSystemErrCombo();
@@ -107,7 +115,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 	private void createStackTracePart(Composite parent) {
 		Label stackTraceLabel = new Label(parent, SWT.NONE);
-		stackTraceLabel.setText("printStackTrace to Logger?");
+		stackTraceLabel.setText(Messages.LoggerRuleWizardPage_stackTraceLabel);
 
 		stackTraceCombo = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateStackTraceCombo();
@@ -157,13 +165,6 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		}
 	}
 
-	/**
-	 * Updates view with data every time something is changed in model.
-	 */
-	private void updateData() {
-		// TODO update view
-	}
-
 	private void initializeData() {
 		systemOutCombo.select(
 				systemOutCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerOptions.SYSTEM_OUT_PRINT)));
@@ -173,9 +174,14 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 				stackTraceCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerOptions.PRINT_STACKTRACE)));
 	}
 
+	/**
+	 * Updates title status with status info every time something is changed in
+	 * model. If status has any message, warning will be shown, otherwise title
+	 * will be shown.
+	 */
 	protected void doStatusUpdate() {
 		if (!model.getSelectionStatus().isEmpty()) {
-			((StatusInfo) fSelectionStatus).setError(model.getSelectionStatus());
+			((StatusInfo) fSelectionStatus).setWarning(model.getSelectionStatus());
 		} else {
 			fSelectionStatus = new StatusInfo();
 		}
