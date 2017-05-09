@@ -15,6 +15,7 @@ import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
 import at.splendit.simonykees.core.rule.impl.MultiCatchRule;
+import at.splendit.simonykees.core.rule.impl.MultiVariableDeclarationLineRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
 import at.splendit.simonykees.core.rule.impl.OverrideAnnotationRule;
 import at.splendit.simonykees.core.rule.impl.PrimitiveBoxedForStringRule;
@@ -76,6 +77,8 @@ public enum Tag {
 			return Arrays.asList(JAVA_1_5);
 		} else if (MultiCatchRule.class == clazz) {
 			return Arrays.asList(JAVA_1_7);
+		} else if (MultiVariableDeclarationLineRule.class == clazz) {
+			return Arrays.asList(JAVA_0_9);
 		} else if (OrganiseImportsRule.class == clazz) {
 			return Arrays.asList(JAVA_1_1);
 		} else if (OverrideAnnotationRule.class == clazz) {
