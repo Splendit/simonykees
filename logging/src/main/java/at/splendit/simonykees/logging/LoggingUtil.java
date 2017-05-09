@@ -205,7 +205,7 @@ public class LoggingUtil {
 	}
 
 	/**
-	 * get path to log file for tests in /var/log/jSparrow.test.log
+	 * get path to log file for tests in <user.home>/.log/jSparrow.test.log
 	 * 
 	 * @return path to log file as string
 	 */
@@ -214,7 +214,7 @@ public class LoggingUtil {
 
 		Path logFilePath = Paths.get(userHomeDir, ".log"); //$NON-NLS-1$
 
-		// create directory /var/log if it does not exist yet
+		// create directory <user.home>/.log if it does not exist yet
 		if (!logFilePath.toFile().exists()) {
 			logFilePath.toFile().mkdirs();
 		}
