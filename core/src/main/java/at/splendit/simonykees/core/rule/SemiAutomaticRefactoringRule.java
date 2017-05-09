@@ -5,6 +5,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 /**
  * 
  * @author Ardit Ymeri
+ * @since 1.2
  *
  * @param <T>
  */
