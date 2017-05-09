@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -45,8 +46,8 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 					if (loggerRule.isEnabled()) {
 
 						if (SimonykeesMessageDialog.openConfirmDialog(HandlerUtil.getActiveShell(event),
-								Messages.LoggerRuleWizardHandler_info_supportedFrameworkFound
-										+ loggerRule.getAvailableLoggerType())) {
+								NLS.bind(Messages.LoggerRuleWizardHandler_info_supportedFrameworkFound,
+										loggerRule.getAvailableLoggerType()))) {
 							final WizardDialog dialog = new WizardDialog(HandlerUtil.getActiveShell(event),
 									new LoggerRuleWizard(selectedJavaElements, loggerRule)) {
 								/*
