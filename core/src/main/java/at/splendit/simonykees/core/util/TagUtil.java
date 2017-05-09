@@ -54,7 +54,7 @@ public class TagUtil {
 		} else if (ForToForEachRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.LOOP, Tag.OLD_LANGUAGE_CONSTRUCTS);
 		} else if (FunctionalInterfaceRule.class == clazz) {
-			return Arrays.asList(Tag.JAVA_1_8, Tag.OLD_LANGUAGE_CONSTRUCTS);
+			return Arrays.asList(Tag.JAVA_1_8, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.LAMBDA);
 		} else if (InefficientConstructorRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE);
 		} else if (MultiCatchRule.class == clazz) {
