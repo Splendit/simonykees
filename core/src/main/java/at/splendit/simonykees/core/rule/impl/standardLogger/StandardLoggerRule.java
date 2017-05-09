@@ -41,7 +41,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 
 	private static final String SLF4J_LOGGER = "org.slf4j.Logger"; //$NON-NLS-1$
 	private static final String LOGBACK_LOGGER = "ch.qos.logback.classic.Logger"; //$NON-NLS-1$
-	private static final String LOG4J_LOGGER = "org.apache.log4j.Logger"; //$NON-NLS-1$
+	private static final String LOG4J_LOGGER = "org.apache.logging.log4j.Logger"; //$NON-NLS-1$
 
 	private static final String INFO = "info"; //$NON-NLS-1$
 	private static final String WARN = "warn"; //$NON-NLS-1$
@@ -64,7 +64,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
-		return JavaVersion.JAVA_0_9;
+		return JavaVersion.JAVA_1_1;
 	}
 
 	@Override
