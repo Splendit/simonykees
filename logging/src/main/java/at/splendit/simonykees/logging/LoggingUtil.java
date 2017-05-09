@@ -28,8 +28,13 @@ import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
 import ch.qos.logback.core.util.FileSize;
 
 /**
- * provides methods to configure the logging framework for testing and for
- * normal use
+ * Provides methods to configure the logging framework for testing and for
+ * normal use.
+ * <p>
+ * Two different logging configurations get built from scratch for testing and
+ * normal use respectively. See {@link LoggingUtil#getLogFilePath()} and
+ * {@link LoggingUtil#getTestLogFilePath()} for the corresponding normal- and
+ * test-configuration logging paths.
  * 
  * @author Matthias Webhofer
  * @since 1.2
