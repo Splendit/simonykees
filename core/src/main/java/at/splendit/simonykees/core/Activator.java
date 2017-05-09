@@ -109,8 +109,15 @@ public class Activator extends AbstractUIPlugin {
 			testFragmentActivator = fragmentActivatorClass.newInstance();
 			testFragmentActivator.start(context);
 		} catch (ClassNotFoundException e) {
-			// ignore! exception is thrown, if the test fragment is not
-			// available.
+			/*
+			 * Ignore! Exception is thrown, if the test fragment is not
+			 * available.
+			 * 
+			 * Note: The test fragment is always available, except in the
+			 * deployed version. We do not want to have any log message at all
+			 * in that case because customers should not know about test
+			 * fragments.
+			 */
 		}
 
 		logger.info(Messages.Activator_start);
