@@ -20,6 +20,7 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.splendit.simonykees.i18n.ExceptionMessages;
 import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.license.api.LicenseValidationService;
 
@@ -110,8 +111,11 @@ public class Activator extends AbstractUIPlugin {
 			testFragmentActivator = frgActClass.newInstance();
 			testFragmentActivator.start(context);
 		} catch (ClassNotFoundException e) {
-			// ignore! exception is thrown, if the test fragment is not
-			// available.
+			/*
+			 * exception is thrown, if the test fragment is not
+			 * available.
+			 */
+			logger.error(ExceptionMessages.Activator_never_gonna_happen_exception, e);
 		}
 
 		logger.info(Messages.Activator_start);
