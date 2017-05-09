@@ -24,13 +24,17 @@ import ch.qos.logback.core.OutputStreamAppender;
 import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
 import ch.qos.logback.core.rolling.RollingFileAppender;
-import ch.qos.logback.core.rolling.RollingPolicy;
 import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
 import ch.qos.logback.core.util.FileSize;
 
 /**
- * provides methods to configure the logging framework for testing and for
- * normal use
+ * Provides methods to configure the logging framework for testing and for
+ * normal use.
+ * <p>
+ * Two different logging configurations get built from scratch for testing and
+ * normal use respectively. See {@link LoggingUtil#getLogFilePath()} and
+ * {@link LoggingUtil#getTestLogFilePath()} for the corresponding normal- and
+ * test-configuration logging paths.
  * 
  * @author Matthias Webhofer
  * @since 1.2
@@ -201,16 +205,16 @@ public class LoggingUtil {
 	}
 
 	/**
-	 * get path to log file for tests in /var/log/jSparrow.test.log
+	 * get path to log file for tests in <user.home>/.log/jSparrow.test.log
 	 * 
 	 * @return path to log file as string
 	 */
 	private static String getTestLogFilePath() {
 		String userHomeDir = System.getProperty("user.home"); //$NON-NLS-1$
-		
+
 		Path logFilePath = Paths.get(userHomeDir, ".log"); //$NON-NLS-1$
 
-		// create directory /var/log if it does not exist yet
+		// create directory <user.home>/.log if it does not exist yet
 		if (!logFilePath.toFile().exists()) {
 			logFilePath.toFile().mkdirs();
 		}

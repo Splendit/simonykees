@@ -9,7 +9,6 @@ import org.osgi.framework.BundleContext;
  * @author Matthias Webhofer
  * @since 1.2
  */
-@SuppressWarnings("nls")
 public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
