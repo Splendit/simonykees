@@ -180,10 +180,12 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 * will be shown.
 	 */
 	protected void doStatusUpdate() {
-		if (!model.getSelectionStatus().isEmpty()) {
-			((StatusInfo) fSelectionStatus).setWarning(model.getSelectionStatus());
-		} else {
+		if (model.getSelectionStatus().isEmpty()) {
 			fSelectionStatus = new StatusInfo();
+		} else if (model.getSelectionStatus().equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)){
+			((StatusInfo) fSelectionStatus).setError(model.getSelectionStatus());			
+		} else {
+			((StatusInfo) fSelectionStatus).setWarning(model.getSelectionStatus());
 		}
 
 		// status of all used components

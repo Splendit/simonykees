@@ -104,8 +104,10 @@ public class LoggerRuleWizardPageModel {
 		int sysErrCurrSeverityLevel = (sysErrCurr.isEmpty()) ? 0 : rule.getSystemErrReplaceOptions().get(sysErrCurr);
 		int stackTraceCurrSeverityLevel = (stackTraceCurr.isEmpty()) ? 0
 				: rule.getPrintStackTraceReplaceOptions().get(stackTraceCurr);
-
-		if (!(stackTraceCurrSeverityLevel == 0) && (stackTraceCurrSeverityLevel < sysOutCurrSeverityLevel
+		
+		if (sysOutCurrSeverityLevel == 0 && sysErrCurrSeverityLevel == 0 && stackTraceCurrSeverityLevel == 0) {
+			selectionStatus = Messages.LoggerRuleWizardPageModel_err_noTransformation;
+		} else if (!(stackTraceCurrSeverityLevel == 0) && (stackTraceCurrSeverityLevel < sysOutCurrSeverityLevel
 				|| stackTraceCurrSeverityLevel < sysErrCurrSeverityLevel)) {
 			// if stackTraceCurrSeverityLevel is empty skip validation of it
 			selectionStatus = Messages.LoggerRuleWizardPageModel_warn_stackTraceSeverity;

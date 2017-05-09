@@ -80,6 +80,7 @@ public class Messages extends NLS {
 	public static String LoggerRuleWizardPage_stackTraceLabel;
 	public static String LoggerRuleWizardPage_sysErrLabel;
 	public static String LoggerRuleWizardPage_sysOutLabel;
+	public static String LoggerRuleWizardPageModel_err_noTransformation;
 	public static String LoggerRuleWizardPageModel_warn_blankLoggingType;
 	public static String LoggerRuleWizardPageModel_warn_errSeverity;
 	public static String LoggerRuleWizardPageModel_warn_stackTraceSeverity;
