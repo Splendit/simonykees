@@ -15,11 +15,19 @@ import java.util.List;
  */
 public enum ParameterType {
 
-	STRING(String.class), CHARSEQUENCE(CharSequence.class), // TODO which
-															// classes exactly?
-	INTEGER(Integer.class, Integer.TYPE), DOUBLE(Double.class, Double.TYPE), FLOAT(Float.class, Float.TYPE), LONG(
-			Long.class, Long.TYPE), SHORT(Short.class,
-					Short.TYPE), BYTE(Byte.class, Byte.TYPE), CHARACTER(Character.class, Character.TYPE);
+	STRING(String.class),
+
+	/*
+	 * TODO which classes exactly?
+	 */
+	CHARSEQUENCE(CharSequence.class),
+	INTEGER(Integer.class, Integer.TYPE),
+	DOUBLE(Double.class, Double.TYPE),
+	FLOAT(Float.class, Float.TYPE),
+	LONG(Long.class, Long.TYPE),
+	SHORT(Short.class, Short.TYPE),
+	BYTE(Byte.class, Byte.TYPE),
+	CHARACTER(Character.class, Character.TYPE);
 
 	private List<Class<?>> possibleTypes;
 
