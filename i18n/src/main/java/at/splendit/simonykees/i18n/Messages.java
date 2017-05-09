@@ -73,6 +73,7 @@ public class Messages extends NLS {
 	public static String LicenseValidator_invalid_licensee_number;
 	public static String LicenseValidator_received_validation_response;
 	public static String LoggerRuleWizard_title;
+	public static String LoggerRuleWizardHandler_info_supportedFrameworkFound;
 	public static String LoggerRuleWizardHandler_noLogger;
 	public static String LoggerRuleWizardPage_description;
 	public static String LoggerRuleWizardPage_pageName;

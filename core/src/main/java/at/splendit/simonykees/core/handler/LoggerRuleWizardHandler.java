@@ -43,33 +43,45 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 				if (null != selectedJavaProjekt) {
 					loggerRule.calculateEnabledForProject(selectedJavaProjekt);
 					if (loggerRule.isEnabled()) {
-						final WizardDialog dialog = new WizardDialog(HandlerUtil.getActiveShell(event),
-								new LoggerRuleWizard(selectedJavaElements, loggerRule)) {
-							// Removed unnecessary empty space on the bottom of
-							// the wizard intended for ProgressMonitor that is
-							// not used
-							@Override
-							protected Control createDialogArea(Composite parent) {
-								Control ctrl = super.createDialogArea(parent);
-								getProgressMonitor();
-								return ctrl;
-							}
 
-							@Override
-							protected IProgressMonitor getProgressMonitor() {
-								ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
-								GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-								gridData.heightHint = 0;
-								monitor.setLayoutData(gridData);
-								monitor.setVisible(false);
-								return monitor;
-							}
-						};
-						
-						dialog.open();
-						
+						if (SimonykeesMessageDialog.openConfirmDialog(HandlerUtil.getActiveShell(event),
+								Messages.LoggerRuleWizardHandler_info_supportedFrameworkFound
+										+ loggerRule.getAvailableLoggerType())) {
+							final WizardDialog dialog = new WizardDialog(HandlerUtil.getActiveShell(event),
+									new LoggerRuleWizard(selectedJavaElements, loggerRule)) {
+								/*
+								 * Removed unnecessary empty space on the bottom
+								 * of the wizard intended for ProgressMonitor
+								 * that is not used(non-Javadoc)
+								 * 
+								 * @see org.eclipse.jface.wizard.WizardDialog#
+								 * createDialogArea(org.eclipse.swt.widgets.
+								 * Composite)
+								 */
+								@Override
+								protected Control createDialogArea(Composite parent) {
+									Control ctrl = super.createDialogArea(parent);
+									getProgressMonitor();
+									return ctrl;
+								}
+
+								@Override
+								protected IProgressMonitor getProgressMonitor() {
+									ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
+									GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+									gridData.heightHint = 0;
+									monitor.setLayoutData(gridData);
+									monitor.setVisible(false);
+									return monitor;
+								}
+							};
+
+							dialog.open();
+						}
+
 					} else {
-						SimonykeesMessageDialog.openMessageDialog(HandlerUtil.getActiveShell(event), Messages.LoggerRuleWizardHandler_noLogger, MessageDialog.ERROR);
+						SimonykeesMessageDialog.openMessageDialog(HandlerUtil.getActiveShell(event),
+								Messages.LoggerRuleWizardHandler_noLogger, MessageDialog.WARNING);
 					}
 
 				}
