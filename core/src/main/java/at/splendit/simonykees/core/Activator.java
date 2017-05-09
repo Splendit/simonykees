@@ -92,11 +92,10 @@ public class Activator extends AbstractUIPlugin {
 
 		// start jSparrow logging bundle
 		for (Bundle bundle : context.getBundles()) {
-			if (bundle.getSymbolicName().equals("jSparrow.logging") //$NON-NLS-1$ //name
-																	// of the
-																	// logging
-																	// api
-																	// bundle
+			if (bundle.getSymbolicName().equals("jSparrow.logging") //$NON-NLS-1$
+					/*
+					 * name of the logging api bundle
+					 */
 					&& bundle.getState() != Bundle.ACTIVE) {
 				bundle.start();
 				loggingBundleID = bundle.getBundleId();
@@ -106,9 +105,9 @@ public class Activator extends AbstractUIPlugin {
 
 		// load pseudo-activator from test fragment and execute its start method
 		try {
-			Class<? extends BundleActivator> frgActClass = Class
+			Class<? extends BundleActivator> fragmentActivatorClass = Class
 					.forName("at.splendit.simonykees.core.TestFragmentActivator").asSubclass(BundleActivator.class); //$NON-NLS-1$
-			testFragmentActivator = frgActClass.newInstance();
+			testFragmentActivator = fragmentActivatorClass.newInstance();
 			testFragmentActivator.start(context);
 		} catch (ClassNotFoundException e) {
 			/*
