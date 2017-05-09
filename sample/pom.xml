@@ -69,6 +69,16 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>2</id>
+						<phase>package</phase>
+						<goals>
+							<goal>get</goal>
+						</goals>
+						<configuration>
+							<artifact>org.apache.commons:commons-lang3:2.1</artifact>
+						</configuration>
+					</execution>
+					<execution>
 						<id>3</id>
 						<phase>package</phase>
 						<goals>
