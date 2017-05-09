@@ -13,6 +13,12 @@ public class Messages extends NLS {
 	public static String aa_codename;
 	public static String ui_ok;
 	public static String ui_cancel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_librariesLabel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_lineDelimiter;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_minJavaVersionLabel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 	public static String AbstractSelectRulesWizardPage_error_NoRulesSelected;
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
