@@ -3,6 +3,7 @@ package at.splendit.simonykees.license.netlicensing;
 
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,9 @@ public class Activator extends Plugin {
 
 		// The shared instance
 		private static Activator plugin;
+		
+		// is used for configuring the test fragment
+		private static BundleActivator testFragmentActivator;
 
 
 		/**
@@ -40,6 +44,17 @@ public class Activator extends Plugin {
 					bundle.start();
 					break;
 				}
+			}
+			
+			// load pseudo-activator from test fragment and execute its start method
+			try {
+				Class<? extends BundleActivator> frgActClass = Class
+						.forName("at.splendit.simonykees.license.netlicensing.TestFragmentActivator").asSubclass(BundleActivator.class); //$NON-NLS-1$
+				testFragmentActivator = frgActClass.newInstance();
+				testFragmentActivator.start(context);
+			} catch (ClassNotFoundException e) {
+				// ignore! exception is thrown, if the test fragment is not
+				// available.
 			}
 		}
 
