@@ -75,7 +75,7 @@
 							<goal>get</goal>
 						</goals>
 						<configuration>
-							<artifact>org.apache.commons:commons-lang3:2.1</artifact>
+							<artifact>org.apache.commons:commons-lang3:3.2.1</artifact>
 						</configuration>
 					</execution>
 					<execution>
