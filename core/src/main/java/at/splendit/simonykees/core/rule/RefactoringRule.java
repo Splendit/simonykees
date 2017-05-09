@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
+import at.splendit.simonykees.core.util.TagUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -59,7 +60,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		this.visitor = visitor;
 		// TODO maybe add a better id
 		this.id = this.getClass().getSimpleName();
-		this.tags = Tag.getTagsForRule(this.getClass());
+		this.tags = TagUtil.getTagsForRule(this.getClass());
 		this.requiredJavaVersion = provideRequiredJavaVersion();
 	}
 
