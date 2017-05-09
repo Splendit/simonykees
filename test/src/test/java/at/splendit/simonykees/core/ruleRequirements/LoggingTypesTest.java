@@ -15,6 +15,14 @@ import at.splendit.simonykees.core.rule.impl.standardLogger.SupportedLogger;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.semiAutomatic.StandardLoggerASTVisitor;
 
+/**
+ * Tests for the LoggingTypes library check
+ * 
+ * @author Martin Huter
+ * @since 1.2
+ *
+ */
+
 @SuppressWarnings("nls")
 public class LoggingTypesTest {
 
