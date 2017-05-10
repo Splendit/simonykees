@@ -13,10 +13,8 @@ public class MultiVariableDeclarationLineRule {
 	private int b;
 	int c = 10;
 	int d;
-	@TestAnnotation
-	List<Integer> list = new LinkedList<>();
-	@TestAnnotation
-	List<Integer> list2;
+	@TestAnnotation List<Integer> list = new LinkedList<>();
+	@TestAnnotation List<Integer> list2;
 
 	public String methodWithVariables() {
 		Integer foo = 0;
@@ -39,8 +37,7 @@ public class MultiVariableDeclarationLineRule {
 	}
 
 	enum Foo {
-		ASD,
-		DFG;
+		ASD, DFG;
 
 		int a;
 		int b;

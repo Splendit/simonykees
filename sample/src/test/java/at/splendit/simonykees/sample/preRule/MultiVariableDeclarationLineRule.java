@@ -9,10 +9,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class MultiVariableDeclarationLineRule {
-	private int a, b, e;
+	private int a, b;
 	int c = 10, d;
-	@TestAnnotation
-	List<Integer> list = new LinkedList<>(), list2;
+	@TestAnnotation List<Integer> list = new LinkedList<>(), list2;
 
 	public String methodWithVariables() {
 		Integer foo = 0, foo2, foo3 = Integer.valueOf(0);
@@ -30,8 +29,7 @@ public class MultiVariableDeclarationLineRule {
 	}
 
 	enum Foo {
-		ASD,
-		DFG;
+		ASD, DFG;
 
 		int a, b, c;
 	}
