@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+@SuppressWarnings({ "unused", "nls" })
 public class MultiVariableDeclarationLineRule {
 	private int a;
 	private int b;
