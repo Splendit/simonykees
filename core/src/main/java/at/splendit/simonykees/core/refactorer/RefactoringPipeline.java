@@ -43,48 +43,72 @@ public class RefactoringPipeline {
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
 	/**
-	 * 1. We immediately prepare the working copies now instead of waiting for
-	 * the SelectRulesWizard to finish.
 	 * 
-	 * @param javaElements
+	 * 
 	 * @param rules
-	 * @param monitor
-	 * @throws RefactoringException
+	 *            {@link List} of {@link RefactoringRule}s to apply to the
+	 *            selected {@link IJavaElement}s
 	 */
-	public RefactoringPipeline() {
+	public RefactoringPipeline(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+
 		/*
-		 * We cannot immediately call prepareRefactoring because we need to call
-		 * prepareRefactoring in the SelectRulesWizard when finishing (in a Job)
-		 * but we need the RefactoringPipeline instance outside of the Job.
-		 * Since the Job needs the pipeline to be "final or effectively final",
-		 * the constructor has to be called outside of the Job. Plus we only
-		 * know the list of rules when finishing.
+		 * Note: We cannot immediately call prepareRefactoring because we need
+		 * to call prepareRefactoring in the SelectRulesWizard when finishing
+		 * (in a Job) but we need the RefactoringPipeline instance outside of
+		 * the Job. Since the Job needs the pipeline to be
+		 * "final or effectively final", the constructor has to be called
+		 * outside of the Job. Plus we only know the list of rules when
+		 * finishing.
 		 */
+
+		this.rules = rules;
+		this.refactoringStates = new ArrayList<>();
 	}
-	
+
 	public List<PreviewNode> getPreviewNodes() {
-		
+
 		List<PreviewNode> previewNodes = new ArrayList<>();
-		
+
 		Map<ICompilationUnit, DocumentChange> currentChanges;
-		
+
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : rules) {
-			
+
 			currentChanges = new HashMap<ICompilationUnit, DocumentChange>();
-			
+
 			for (RefactoringState refactoringState : refactoringStates) {
 				DocumentChange documentChange = refactoringState.getChangeIfPresent(rule);
 				if (null != documentChange) {
 					currentChanges.put(refactoringState.getWorkingCopy(), documentChange);
 				}
 			}
-			
+
 			if (!currentChanges.isEmpty()) {
 				previewNodes.add(new PreviewNode(rule, currentChanges));
 			}
 		}
-		
+
 		return previewNodes;
+	}
+
+	/**
+	 * Check if any {@link RefactoringRule} lead to changes in any
+	 * {@link RefactoringState}
+	 * 
+	 * @return
+	 *         <ul>
+	 *         <li>{@code true} if changes were made</li>
+	 *         <li>{@code false} if no changes were made</li>
+	 *         </ul>
+	 * 
+	 * @since 1.2
+	 */
+	public boolean hasChanges() {
+		for (RefactoringState refactoringState : refactoringStates) {
+			if (refactoringState.hasChange()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -106,13 +130,8 @@ public class RefactoringPipeline {
 	 * 
 	 * @see SimonykeesUtil#collectICompilationUnits(List, List)
 	 */
-	public List<RefactoringState> prepareRefactoring(
-			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules, List<IJavaElement> javaElements,
-			IProgressMonitor monitor) throws RefactoringException {
-
-		// TODO make nicer
-		this.rules = rules;
-		this.refactoringStates = new ArrayList<>();
+	public List<RefactoringState> prepareRefactoring(List<IJavaElement> javaElements, IProgressMonitor monitor)
+			throws RefactoringException {
 
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
 
@@ -122,6 +141,10 @@ public class RefactoringPipeline {
 				logger.warn(ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found);
 				throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found,
 						ExceptionMessages.AbstractRefactorer_user_warn_no_compilation_units_found);
+			} else if (!refactoringStates.isEmpty()) {
+				logger.warn(ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated);
+				throw new RefactoringException(
+						ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated);
 			} else {
 
 				/*
@@ -135,7 +158,6 @@ public class RefactoringPipeline {
 
 				for (ICompilationUnit compilationUnit : compilationUnits) {
 					subMonitor.subTask(compilationUnit.getElementName());
-					// TODO monitor?
 					refactoringStates.add(new RefactoringState(compilationUnit.getWorkingCopy(null)));
 
 					/*
@@ -157,7 +179,81 @@ public class RefactoringPipeline {
 					ExceptionMessages.AbstractRefactorer_user_java_element_resoltuion_failed, e);
 		}
 	}
-	
+
+	/**
+	 * Apply {@link RefactoringRule}s to the working copies of each
+	 * {@link RefactoringState}
+	 * 
+	 * @param IProgressMonitor
+	 *            monitor used to show progress in UI
+	 * 
+	 * @throws RefactoringException
+	 *             if no working copies were found to apply
+	 *             {@link RefactoringRule}s to
+	 * @throws RuleException
+	 *             if the {@link RefactoringRule} could no be initialised or not
+	 *             applied
+	 * 
+	 * @since 1.2
+	 * 
+	 * @see RefactoringRule#generateDocumentChanges(List)
+	 * 
+	 */
+	public void doRefactoring(IProgressMonitor monitor) throws RefactoringException, RuleException {
+		if (refactoringStates.isEmpty()) {
+			// TODO warning adjustment
+			logger.warn(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
+			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
+		}
+
+		/*
+		 * Converts the monitor to a SubMonitor and sets name of task on
+		 * progress monitor dialog Size is set to number 100 and then scaled to
+		 * size of the rules list Each refactoring rule increases worked amount
+		 * for same size
+		 */
+		// XXX we now check for refactoringStates size
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(refactoringStates.size());
+		subMonitor.setTaskName(""); //$NON-NLS-1$
+
+		List<String> notWorkingRules = new ArrayList<>();
+		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
+
+			/*
+			 * TODO catch all exceptions from ASTVisitor execution? if any
+			 * exception is thrown discard all changes from this rule
+			 */
+			subMonitor.subTask(refactoringRule.getName());
+
+			try {
+				/*
+				 * Sends new child of subMonitor which takes in progress bar
+				 * size of 1 of rules size In method that part of progress bar
+				 * is split to number of compilation units
+				 */
+				applyRuleToAllStates(refactoringRule, subMonitor.newChild(1));
+
+			} catch (JavaModelException | ReflectiveOperationException e) {
+				logger.error(e.getMessage(), e);
+				notWorkingRules.add(refactoringRule.getName());
+			}
+			/*
+			 * If cancel is pressed on progress monitor, abort all and return,
+			 * else continue
+			 */
+			if (subMonitor.isCanceled()) {
+				return;
+			}
+		}
+
+		if (!notWorkingRules.isEmpty()) {
+			String notWorkingRulesCollected = notWorkingRules.stream().collect(Collectors.joining(", ")); //$NON-NLS-1$
+			throw new RuleException(
+					NLS.bind(ExceptionMessages.AbstractRefactorer_rule_execute_failed, notWorkingRulesCollected),
+					NLS.bind(ExceptionMessages.AbstractRefactorer_user_rule_execute_failed, notWorkingRulesCollected));
+		}
+	}
+
 	/**
 	 * TODO adjust description
 	 * 
@@ -199,66 +295,37 @@ public class RefactoringPipeline {
 		}
 	}
 
-	public void doRefactoring(IProgressMonitor monitor) throws RefactoringException, RuleException {
-		if (refactoringStates.isEmpty()) {
-			// TODO warning adjustment
-			logger.warn(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
-			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
-		}
-
-		/*
-		 * Converts the monitor to a SubMonitor and sets name of task on
-		 * progress monitor dialog Size is set to number 100 and then scaled to
-		 * size of the rules list Each refactoring rule increases worked amount
-		 * for same size
-		 */
-		// XXX we now check for refactoringStates size
-		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(refactoringStates.size());
-		subMonitor.setTaskName(""); //$NON-NLS-1$
-
-		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
-			applyRule(refactoringRule, subMonitor);
-		}
-
-		// List<String> notWorkingRules = new ArrayList<>();
-		// for (RefactoringRule<? extends ASTVisitor> refactoringRule : rules) {
-
-		// if (!notWorkingRules.isEmpty()) {
-		// String notWorkingRulesCollected =
-		// notWorkingRules.stream().collect(Collectors.joining(", "));
-		// //$NON-NLS-1$
-		// throw new RuleException(
-		// NLS.bind(ExceptionMessages.AbstractRefactorer_rule_execute_failed,
-		// notWorkingRulesCollected),
-		// NLS.bind(ExceptionMessages.AbstractRefactorer_user_rule_execute_failed,
-		// notWorkingRulesCollected));
-		// }
-	}
-	
 	public void clearStates() {
 		refactoringStates.forEach(s -> s.clearWorkingCopies());
 		refactoringStates.clear();
 	}
 
-	private void applyRule(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, IProgressMonitor subMonitor) {
+	/**
+	 * This functionality used to be in the {@link RefactoringRule}
+	 * 
+	 * @param rule
+	 * @param subMonitor
+	 * @throws JavaModelException
+	 * @throws ReflectiveOperationException
+	 */
+	private void applyRuleToAllStates(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, IProgressMonitor subMonitor)
+			throws JavaModelException, ReflectiveOperationException {
+
 		for (RefactoringState refactoringState : refactoringStates) {
 			/*
 			 * TODO catch all exceptions from ASTVisitor execution? if any
 			 * exception is thrown discard all changes from this rule
 			 */
-			subMonitor.subTask(refactoringState.getName());
-			try {
+			subMonitor.subTask(refactoringState.getWorkingCopyName());
 
-				refactoringState.addRule(rule);
+			refactoringState.addRule(rule);
 
-				// TODO we used to have a test for try with resource here
+			// TODO we used to have a test for try with resource here
 
-			} catch (JavaModelException | ReflectiveOperationException e) {
-				logger.error(e.getMessage(), e);
-				// notWorkingRules.add(refactoringState.getName()); //TODO
-			}
-			// If cancel is pressed on progress monitor, abort all and return,
-			// else continue
+			/*
+			 * If cancel is pressed on progress monitor, abort all and return,
+			 * else continue
+			 */
 			if (subMonitor.isCanceled()) {
 				return;
 			}

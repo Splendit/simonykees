@@ -36,22 +36,23 @@ public class RefactoringState {
 
 	private Map<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> changes = new HashMap<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange>();
 
-	private String name;
-
 	public RefactoringState(ICompilationUnit workingCopy) {
 		super();
 		this.workingCopy = workingCopy;
-		this.name = workingCopy.getElementName();
 	}
 
-	public String getName() {
-		return name;
+	public String getWorkingCopyName() {
+		return this.workingCopy.getElementName();
 	}
 
 	public DocumentChange getChangeIfPresent(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		// TODO check if the rule has been processed already
 
 		return changes.get(rule);
+	}
+	
+	public boolean hasChange() {
+		return !changes.isEmpty();
 	}
 
 	public ICompilationUnit getWorkingCopy() {
@@ -64,6 +65,7 @@ public class RefactoringState {
 
 	public void addRules(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules)
 			throws JavaModelException, ReflectiveOperationException {
+		
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
 			addRule(refactoringRule);
 		}
@@ -72,7 +74,20 @@ public class RefactoringState {
 	// TODO add monitor
 	public void addRule(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule)
 			throws JavaModelException, ReflectiveOperationException {
+		
+		/*
+		 * Sends new child of subMonitor which takes in progress bar
+		 * size of 1 of rules size In method that part of progress bar
+		 * is split to number of compilation units
+		 */
+//		generateDocumentChanges(rule, subMonitor.newChild(1));
 		generateDocumentChanges(rule);
+
+		if (rule instanceof TryWithResourceRule) {
+//			generateDocumentChanges(rule, subMonitor.newChild(0));
+			generateDocumentChanges(rule);
+		}
+		
 	}
 
 	/**
@@ -94,15 +109,6 @@ public class RefactoringState {
 		applyRule(rule);
 	}
 
-	public void clearWorkingCopies() {
-		try {
-			SimonykeesUtil.discardWorkingCopy(workingCopy);
-		} catch (JavaModelException e) {
-			logger.error(NLS.bind(ExceptionMessages.AbstractRefactorer_unable_to_discard_working_copy,
-					workingCopy.getPath().toString(), e.getMessage()), e);
-		}
-	}
-
 	private void applyRule(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule)
 			throws JavaModelException, ReflectiveOperationException {
 
@@ -118,7 +124,7 @@ public class RefactoringState {
 				collectChanges(rule);
 			} else {
 				// already have changes
-				logger.info(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
+				logger.info(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, getWorkingCopyName()));
 			}
 		} else {
 			collectChanges(rule);
@@ -165,6 +171,15 @@ public class RefactoringState {
 			changes.put(rule, documentChange);
 		} else {
 			// no changes
+		}
+	}
+	
+	public void clearWorkingCopies() {
+		try {
+			SimonykeesUtil.discardWorkingCopy(workingCopy);
+		} catch (JavaModelException e) {
+			logger.error(NLS.bind(ExceptionMessages.AbstractRefactorer_unable_to_discard_working_copy,
+					workingCopy.getPath().toString(), e.getMessage()), e);
 		}
 	}
 }
