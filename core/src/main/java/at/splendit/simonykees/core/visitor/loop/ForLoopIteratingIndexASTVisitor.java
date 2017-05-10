@@ -32,7 +32,7 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
  * @author Ardit Ymeri
  * @since 1.2
  */
-class ForLoopIteratingIndexVisitor extends ASTVisitor {
+class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 
 	private static final String OUTSIDE_LOOP_INDEX_DECLARATION = "outside-declaration-fragment"; //$NON-NLS-1$
 	private static final String LOOP_INITIALIZER = "loop-initializer"; //$NON-NLS-1$
@@ -67,7 +67,7 @@ class ForLoopIteratingIndexVisitor extends ASTVisitor {
 	private List<ASTNode> nodesToBeRemoved;
 	private VariableDeclarationFragment preferredNameFragment;
 
-	public ForLoopIteratingIndexVisitor(SimpleName iteratingIndexName, SimpleName iterableName,
+	public ForLoopIteratingIndexASTVisitor(SimpleName iteratingIndexName, SimpleName iterableName,
 			ForStatement forStatement) {
 		this.iteratingIndexName = iteratingIndexName;
 		this.iterableName = iterableName;

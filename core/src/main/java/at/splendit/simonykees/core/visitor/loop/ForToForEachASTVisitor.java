@@ -123,7 +123,7 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 							 * replacement precondition and gathering the
 							 * replacement information
 							 */
-							ForLoopIteratingIndexVisitor indexVisitor = new ForLoopIteratingIndexVisitor(index,
+							ForLoopIteratingIndexASTVisitor indexVisitor = new ForLoopIteratingIndexASTVisitor(index,
 									iterableNode, node);
 							Block outerBlock = ASTNodeUtil.getSpecificAncestor(node, Block.class);
 							outerBlock.accept(indexVisitor);
