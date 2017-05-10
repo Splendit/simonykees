@@ -3,7 +3,6 @@
  */
 package at.splendit.simonykees.core.refactorer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,8 +32,6 @@ public class RefactoringState {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringState.class);
 
-	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = new ArrayList<>();
-
 	private ICompilationUnit workingCopy;
 
 	private Map<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> changes = new HashMap<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange>();
@@ -43,7 +40,6 @@ public class RefactoringState {
 
 	public RefactoringState(ICompilationUnit workingCopy) {
 		super();
-		// this.rules = rules;
 		this.workingCopy = workingCopy;
 		this.name = workingCopy.getElementName();
 	}
@@ -79,6 +75,19 @@ public class RefactoringState {
 		generateDocumentChanges(rule);
 	}
 
+	/**
+	 * Changes are applied to working copy but <b>not</b> committed. 
+	 * 
+	 * @param workingCopies
+	 *            List of {@link ICompilationUnit} for which a
+	 *            {@link DocumentChange} for each selected rule is created
+	 * @throws JavaModelException
+	 *             if this element does not exist or if an exception occurs
+	 *             while accessing its corresponding resource.
+	 * @throws ReflectiveOperationException
+	 *             is thrown if the default constructor of {@link #visitor} is
+	 *             not present and the reflective construction fails.
+	 */
 	public void generateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule)
 			throws JavaModelException, ReflectiveOperationException {
 
@@ -117,6 +126,19 @@ public class RefactoringState {
 
 	}
 
+	/**
+	 * Apply the current rule and collect all resulting changes.
+	 * 
+	 * @param workingCopies
+	 *            List of {@link ICompilationUnit} for which a
+	 *            {@link DocumentChange} for each selected rule is created
+	 * @throws JavaModelException
+	 *             if this element does not exist or if an exception occurs
+	 *             while accessing its corresponding resource.
+	 * @throws ReflectiveOperationException
+	 *             is thrown if the default constructor of {@link #visitor} is
+	 *             not present and the reflective construction fails.
+	 */
 	private void collectChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule)
 			throws JavaModelException, ReflectiveOperationException {
 		DocumentChange documentChange = SimonykeesUtil.applyRule(workingCopy, rule.getVisitor());

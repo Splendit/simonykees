@@ -35,6 +35,8 @@ public class PreviewNode {
 	}
 	
 	/**
+	 * Used to be in {@link RefactoringRule}. 
+	 * 
 	 * Changes should be generated with {@code generateDocumentChanges} first
 	 * 
 	 * @return Map containing {@code ICompilationUnit}s as key and corresponding
