@@ -2,7 +2,9 @@ package at.splendit.simonykees.core.ui.wizard.impl;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.ui.JavaElementComparator;
@@ -15,14 +17,21 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.Bullet;
+import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.GlyphMetrics;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -61,6 +70,8 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 	private StyledText descriptionStyledText;
 
 	protected IStatus fSelectionStatus;
+
+	private boolean forcedSelectLeft = false;
 
 	public AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
 			AbstractSelectRulesWizardControler controler) {
@@ -179,7 +190,15 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 
 		leftTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				controler.selectionChanged();
+				if (forcedSelectLeft) {
+					forcedSelectLeft = false;
+					/*
+					 * if it is manually selected because of moving, don't
+					 * update view
+					 */
+				} else {
+					controler.selectionChanged();
+				}
 			}
 		});
 
@@ -256,7 +275,6 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		rightTableViewer.getControl().setLayoutData(gd);
-
 		rightTableViewer.setUseHashlookup(true);
 
 		configureTable(rightTableViewer);
@@ -337,7 +355,7 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 		descriptionStyledText.setAlwaysShowScrollBars(false);
 		descriptionStyledText.setEditable(false);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gridData.minimumHeight = 60;
+		gridData.minimumHeight = 110;
 		descriptionStyledText.setLayoutData(gridData);
 		descriptionStyledText.setMargins(2, 2, 2, 2);
 	}
@@ -347,8 +365,10 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 	 */
 	@SuppressWarnings("unchecked")
 	private void updateData() {
-		// check if model has changed to update table and tree view or is just
-		// selection changed to update description field and buttons
+		/*
+		 * check if model has changed to update table and tree view or is just
+		 * selection changed to update description field and buttons
+		 */
 		if (model.hasChanged()) {
 			if (!model.isForced()) {
 				model.filterPosibilitiesByTags();
@@ -359,13 +379,23 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 					leftTreeViewer.setInput(model.filterPosibilitiesByName());
 				}
 				rightTableViewer.setInput(model.getSelection());
-				// updates enabling Finish button according to right side table
-				// view
-				// if selection is empty Finish button is disabled
+				/*
+				 * updates enabling Finish button according to right side table
+				 * view if selection is empty Finish button is disabled
+				 */
 			} else {
 				leftTreeViewer.setInput(model.getPosibilities());
 				rightTableViewer.setInput(model.getSelection());
 				model.resetForced();
+			}
+			if (!model.getRecentlyMoved().isEmpty()) {
+				if (model.isMovedToRight()) {
+					rightTableViewer.setSelection(new StructuredSelection(model.getRecentlyMoved().toArray()), false);
+				} else {
+					forcedSelectLeft = true;
+					leftTreeViewer.setSelection(new StructuredSelection(model.getRecentlyMoved().toArray()), false);
+				}
+				model.getRecentlyMoved().clear();
 			}
 			getContainer().updateButtons();
 			model.resetChanged();
@@ -389,11 +419,119 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 	private void populateDescriptionTextViewer() {
 		List<Object> selection = ((IStructuredSelection) leftTreeViewer.getSelection()).toList();
 		if (selection.size() == 1) {
-			descriptionStyledText.setText(
-					((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) selection.get(0)).getDescription());
+			// descriptionStyledText.setText(
+			// ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>)
+			// selection.get(0)).getDescription());
+			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) selection.get(0));
 		} else {
 			descriptionStyledText.setText(Messages.SelectRulesWizardPage_defaultDescriptionText);
 		}
+	}
+
+	/**
+	 * Creating description for rule to be displayed using StyledText
+	 * 
+	 * @param rule
+	 */
+	private void createTextForDescription(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+		String lineDelimiter = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_lineDelimiter;
+		String name = rule.getName();
+		String description = rule.getDescription();
+		String requirementsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
+		String minJavaVersionLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_minJavaVersionLabel;
+		String minJavaVersionValue = rule.getRequiredJavaVersion().toString();
+		String requiredLibrariesLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesLabel;
+		String requiredLibrariesValue = (null != rule.requiredLibraries()) ? rule.requiredLibraries()
+				: Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
+		String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
+		String tagsValue = StringUtils
+				.join(rule.getTags().stream().map(tag -> tag.getTagNames()).collect(Collectors.toList()), "  "); //$NON-NLS-1$
+
+		String descriptionText = name + lineDelimiter + lineDelimiter + description + lineDelimiter + lineDelimiter
+				+ requirementsLabel + lineDelimiter + minJavaVersionLabel + minJavaVersionValue + lineDelimiter
+				+ requiredLibrariesLabel + requiredLibrariesValue + lineDelimiter + lineDelimiter + tagsLabel
+				+ lineDelimiter + tagsValue;
+
+		FontData data = descriptionStyledText.getFont().getFontData()[0];
+		Font ruleName = new Font(getShell().getDisplay(), data.getName(), data.getHeight() * 3 / 2, data.getStyle());
+		Font paragraphTitle = new Font(getShell().getDisplay(), data.getName(), data.getHeight(), SWT.BOLD);
+		Font normalTitle = new Font(getShell().getDisplay(), data.getName(), data.getHeight(), data.getStyle());
+		Color unsetisfiedRequirementsColor = getShell().getDisplay().getSystemColor(SWT.COLOR_RED);
+
+		StyleRange ruleNameStyleRange = new StyleRange();
+		ruleNameStyleRange.start = 0;
+		ruleNameStyleRange.length = name.length();
+		ruleNameStyleRange.font = ruleName;
+
+		StyleRange requirementsLabelStyleRange = new StyleRange();
+		requirementsLabelStyleRange.start = name.length() + lineDelimiter.length() + lineDelimiter.length()
+				+ description.length() + lineDelimiter.length() + lineDelimiter.length();
+		requirementsLabelStyleRange.length = requirementsLabel.length();
+		requirementsLabelStyleRange.font = paragraphTitle;
+
+		StyleRange minJavaVersionLabelStyleRange = new StyleRange();
+		minJavaVersionLabelStyleRange.start = name.length() + lineDelimiter.length() + lineDelimiter.length()
+				+ description.length() + lineDelimiter.length() + lineDelimiter.length() + requirementsLabel.length()
+				+ lineDelimiter.length();
+		minJavaVersionLabelStyleRange.length = minJavaVersionLabel.length();
+		minJavaVersionLabelStyleRange.font = normalTitle;
+
+		StyleRange requiredLibrariesLabelStyleRange = new StyleRange();
+		requiredLibrariesLabelStyleRange.start = name.length() + lineDelimiter.length() + lineDelimiter.length()
+				+ description.length() + lineDelimiter.length() + lineDelimiter.length() + requirementsLabel.length()
+				+ lineDelimiter.length() + minJavaVersionLabel.length() + minJavaVersionValue.length()
+				+ lineDelimiter.length();
+		requiredLibrariesLabelStyleRange.length = requiredLibrariesLabel.length();
+		requiredLibrariesLabelStyleRange.font = normalTitle;
+
+		StyleRange tagsLabelStyleRange = new StyleRange();
+		tagsLabelStyleRange.start = name.length() + lineDelimiter.length() + lineDelimiter.length()
+				+ description.length() + lineDelimiter.length() + lineDelimiter.length() + requirementsLabel.length()
+				+ lineDelimiter.length() + minJavaVersionLabel.length() + minJavaVersionValue.length()
+				+ lineDelimiter.length() + requiredLibrariesLabel.length() + requiredLibrariesValue.length()
+				+ lineDelimiter.length() + lineDelimiter.length();
+		tagsLabelStyleRange.length = tagsLabel.length();
+		tagsLabelStyleRange.font = paragraphTitle;
+
+		StyleRange style0 = new StyleRange();
+		style0.metrics = new GlyphMetrics(0, 0, 40);
+		style0.foreground = getShell().getDisplay().getSystemColor(SWT.COLOR_BLACK);
+		Bullet bullet0 = new Bullet(style0);
+
+		descriptionStyledText.setText(descriptionText);
+		descriptionStyledText.setStyleRange(ruleNameStyleRange);
+		descriptionStyledText.setStyleRange(requirementsLabelStyleRange);
+		descriptionStyledText.setStyleRange(minJavaVersionLabelStyleRange);
+		descriptionStyledText.setStyleRange(requiredLibrariesLabelStyleRange);
+		descriptionStyledText.setStyleRange(tagsLabelStyleRange);
+
+		if (!rule.isSatisfiedJavaVersion()) {
+			StyleRange minJavaVersionUnsatisfiedValueStyleRange = new StyleRange();
+			minJavaVersionUnsatisfiedValueStyleRange.start = name.length() + lineDelimiter.length()
+					+ lineDelimiter.length() + description.length() + lineDelimiter.length() + lineDelimiter.length()
+					+ requirementsLabel.length() + lineDelimiter.length() + minJavaVersionLabel.length();
+			minJavaVersionUnsatisfiedValueStyleRange.length = minJavaVersionValue.length();
+			minJavaVersionUnsatisfiedValueStyleRange.font = paragraphTitle;
+			minJavaVersionUnsatisfiedValueStyleRange.foreground = unsetisfiedRequirementsColor;
+			descriptionStyledText.setStyleRange(minJavaVersionUnsatisfiedValueStyleRange);
+		}
+		if (!rule.isSatisfiedLibraries()) {
+			StyleRange requiredLibrariesUnsatisfiedValueStyleRange = new StyleRange();
+			requiredLibrariesUnsatisfiedValueStyleRange.start = name.length() + lineDelimiter.length()
+					+ lineDelimiter.length() + description.length() + lineDelimiter.length() + lineDelimiter.length()
+					+ requirementsLabel.length() + lineDelimiter.length() + minJavaVersionLabel.length()
+					+ minJavaVersionValue.length() + lineDelimiter.length() + requiredLibrariesLabel.length();
+			requiredLibrariesUnsatisfiedValueStyleRange.length = requiredLibrariesValue.length();
+			requiredLibrariesUnsatisfiedValueStyleRange.font = paragraphTitle;
+			requiredLibrariesUnsatisfiedValueStyleRange.foreground = unsetisfiedRequirementsColor;
+			descriptionStyledText.setStyleRange(requiredLibrariesUnsatisfiedValueStyleRange);
+		}
+
+		int requirementsBulletingStartLine = descriptionStyledText.getLineAtOffset(name.length()
+				+ lineDelimiter.length() + lineDelimiter.length() + description.length() + lineDelimiter.length()
+				+ lineDelimiter.length() + requirementsLabel.length() + lineDelimiter.length());
+
+		descriptionStyledText.setLineBullet(requirementsBulletingStartLine, 2, bullet0);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -427,8 +565,10 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 			status = new IStatus[] { fSelectionStatus };
 		}
 
-		// the mode severe status will be displayed and the OK button
-		// enabled/disabled.
+		/*
+		 * the mode severe status will be displayed and the OK button
+		 * enabled/disabled.
+		 */
 		updateStatus(status);
 	}
 }

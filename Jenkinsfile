@@ -102,9 +102,19 @@ def notifyBuild(String buildStatus) {
 	// send to email only if buildStatus is UNSTABLE or FAILED
 	if (buildStatus == 'FAILURE' || buildStatus == 'UNSTABLE') {
 		jobName = env.JOB_NAME.replace("%2F", "/")
-	
+
+		//currently not supported by pipeline variable
+		def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+		def commitURL = "https://bitbucket.splendit.loc/projects/LM/repos/simonykees/commits/${gitCommit}"
+		def emailOfBuildInitiate = emailextrecipients( [[$class: 'DevelopersRecipientProvider']])
+
 		def subject = "${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]'"
-		def details = "<p>${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]':</p>\n<p>Check console output at \"<a href='${env.BUILD_URL}'>${jobName} [${env.BUILD_NUMBER}]</a>\"</p>"
+		def details = "<p>${buildStatus}: Job '${jobName} [${env.BUILD_NUMBER}]':</p>" +
+									"\n<p>List of committers for this build: [${emailOfBuildInitiate}]</p>" +
+									"\n<p>Last commit url: ${commitURL}" +
+									"\n<p>Check console output at \"<a href='${env.BUILD_URL}'>${jobName} [${env.BUILD_NUMBER}]</a>\"</p>"
+
+
 	
 		emailext (
 			subject: subject,
@@ -113,3 +123,4 @@ def notifyBuild(String buildStatus) {
 		)
 	}
 }
+

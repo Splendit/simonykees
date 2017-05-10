@@ -3,14 +3,14 @@ package at.splendit.simonykees.sample.test;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO SIM-103 add class description
@@ -21,7 +21,7 @@ import org.junit.runners.Parameterized.Parameters;
 @RunWith(Parameterized.class)
 public class TestBracketsToControlRule extends AbstractReflectiveMethodTester {
 	
-	private static Logger log = LogManager.getLogger(TestBracketsToControlRule.class);
+	private static Logger log = LoggerFactory.getLogger(TestBracketsToControlRule.class);
 
 	// we want this to be initialized only once for all parameterized values
 	private static PreAndPostClassHolder holder;

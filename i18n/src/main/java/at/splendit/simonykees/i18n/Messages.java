@@ -13,6 +13,12 @@ public class Messages extends NLS {
 	public static String aa_codename;
 	public static String ui_ok;
 	public static String ui_cancel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_librariesLabel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_lineDelimiter;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_minJavaVersionLabel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 	public static String AbstractSelectRulesWizardPage_error_NoRulesSelected;
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
@@ -72,6 +78,9 @@ public class Messages extends NLS {
 	public static String LicenseValidator_cannot_reach_license_provider_on_validation_call;
 	public static String LicenseValidator_invalid_licensee_number;
 	public static String LicenseValidator_received_validation_response;
+	public static String LoggerRuleWizard_title;
+	public static String LoggerRuleWizardPage_description;
+	public static String LoggerRuleWizardPage_pageName;
 	public static String InefficientConstructorRule_description;
 	public static String InefficientConstructorRule_name;
 	public static String Java5Profile_profileName;

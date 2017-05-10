@@ -240,10 +240,10 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			}
 		};
 		/*
-		 * the dialog is made as smaller than necessary horizontally (we want
-		 * line breaks for rule descriptions)
+		 * the dialog is made as big enough to show rule description vertically
+		 * and horizontally to avoid two scrollers
 		 */
-		dialog.setPageSize(750, 500);
+		dialog.setPageSize(800, 700);
 
 		dialog.open();
 
@@ -297,7 +297,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		SimonykeesPreferenceManager.performDefaults();
 		SimonykeesPreferenceManager.loadCurrentProfiles();
 		updateView();
-		
+
 		profilesTable.setEnabled(false);
 		newProfileButton.setEnabled(false);
 		editProfileButton.setEnabled(false);
