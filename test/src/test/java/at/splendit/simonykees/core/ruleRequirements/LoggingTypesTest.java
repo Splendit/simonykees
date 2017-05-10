@@ -16,7 +16,11 @@ import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.semiAutomatic.StandardLoggerASTVisitor;
 
 /**
- * Tests for the LoggingTypes library check
+ * Tests for the LoggingTypes library check.
+ * 
+ * Tests which logging framework is present within the Project and sets the
+ * {@link SupportedLogger} within the rule, which will be used to configure the
+ * behavior of the ASTVisitor.
  * 
  * @author Martin Huter
  * @since 1.2
@@ -39,13 +43,14 @@ public class LoggingTypesTest {
 	public void tearDown() {
 		testproject = null;
 	}
-	
+
 	@Test
 	public void allPresent() throws Exception {
 		List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25"));
-		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("ch.qos.logback","logback-classic","1.2.3"));
-		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j","log4j-api","2.7"));
+		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("ch.qos.logback", "logback-classic", "1.2.3"));
+		entries.add(
+				RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 
 		StandardLoggerRule slr = new StandardLoggerRule(StandardLoggerASTVisitor.class);
@@ -53,12 +58,13 @@ public class LoggingTypesTest {
 
 		Assert.assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
 	}
-	
+
 	@Test
 	public void slf4jLog4jPresent() throws Exception {
 		List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25"));
-		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j","log4j-api","2.7"));
+		entries.add(
+				RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 
 		StandardLoggerRule slr = new StandardLoggerRule(StandardLoggerASTVisitor.class);
@@ -66,12 +72,13 @@ public class LoggingTypesTest {
 
 		Assert.assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
 	}
-	
+
 	@Test
 	public void logbackLog4jPresent() throws Exception {
 		List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
-		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("ch.qos.logback","logback-classic","1.2.3"));
-		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j","log4j-api","2.7"));
+		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("ch.qos.logback", "logback-classic", "1.2.3"));
+		entries.add(
+				RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 
 		StandardLoggerRule slr = new StandardLoggerRule(StandardLoggerASTVisitor.class);
@@ -79,12 +86,12 @@ public class LoggingTypesTest {
 
 		Assert.assertEquals(SupportedLogger.LOGBACK, slr.getAvailableLoggerType());
 	}
-	
+
 	@Test
 	public void slf4jLogbackPresent() throws Exception {
 		List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25"));
-		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("ch.qos.logback","logback-classic","1.2.3"));
+		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("ch.qos.logback", "logback-classic", "1.2.3"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 
 		StandardLoggerRule slr = new StandardLoggerRule(StandardLoggerASTVisitor.class);
@@ -104,10 +111,10 @@ public class LoggingTypesTest {
 
 		Assert.assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
 	}
-	
+
 	@Test
 	public void logbackPresent() throws Exception {
-		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("ch.qos.logback","logback-classic","1.2.3"));
+		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("ch.qos.logback", "logback-classic", "1.2.3"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 
 		StandardLoggerRule slr = new StandardLoggerRule(StandardLoggerASTVisitor.class);
@@ -115,10 +122,11 @@ public class LoggingTypesTest {
 
 		Assert.assertEquals(SupportedLogger.LOGBACK, slr.getAvailableLoggerType());
 	}
-	
+
 	@Test
 	public void log4jApiPresent() throws Exception {
-		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j","log4j-api","2.7"));
+		entries.add(
+				RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 
 		StandardLoggerRule slr = new StandardLoggerRule(StandardLoggerASTVisitor.class);
@@ -126,5 +134,15 @@ public class LoggingTypesTest {
 
 		Assert.assertEquals(SupportedLogger.LOG4J, slr.getAvailableLoggerType());
 	}
-	
+
+	@Test
+	public void noLoggerPresent() throws Exception {
+		RulesTestUtil.addToClasspath(testproject, entries);
+
+		StandardLoggerRule slr = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+		slr.calculateEnabledForProject(testproject);
+
+		Assert.assertEquals(null, slr.getAvailableLoggerType());
+	}
+
 }

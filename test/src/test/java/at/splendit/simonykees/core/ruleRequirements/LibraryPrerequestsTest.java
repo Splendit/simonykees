@@ -18,6 +18,16 @@ import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 
+/**
+ * Tests IJavaProject if a specific version of a library is present. The first
+ * parameter contains a list of {@link IClasspathEntriy} that represent the
+ * maven dependency in a eclipse appropriate way. The second one is a boolean
+ * that represents the enabled state of the tested rule, for the test case.
+ * 
+ * @author Martin Huter
+ * @since 1.2
+ *
+ */
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
 public class LibraryPrerequestsTest {
