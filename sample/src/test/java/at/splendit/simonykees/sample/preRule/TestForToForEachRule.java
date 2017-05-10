@@ -130,6 +130,69 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 
+	String iterator;
+	Runnable r = () -> {
+		List<String> fInterfaceRule = generateList("");
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i< fInterfaceRule.size(); i++) {
+			sb.append(fInterfaceRule.get(i));
+		}
+	};
+	
+	@interface MyFooAnnotation {
+		String iterator = "";
+		Runnable r = () -> {
+			String iterator;
+			List<String> fInterfaceRule = new ArrayList<>();
+			StringBuilder sb = new StringBuilder();
+			for(int i = 0; i< fInterfaceRule.size(); i++) {
+				sb.append(fInterfaceRule.get(i));
+			}
+		};
+	}
+	
+	public String testRawType(String input) {
+		List rawList = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i<rawList.size(); i++) {
+			sb.append(rawList.get(i));
+		}
+		return sb.toString();
+	}
+	
+	public String testWildCard(String input) {
+		List<?> fooList = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i<fooList.size(); i++) {
+			sb.append(fooList.get(i));
+		}
+		return sb.toString();
+	}
+	
+	public String testIeratingThroughListOfLists(String input) {
+		List<List<String>> nestedList = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < nestedList.size(); i++) {
+			List<String> val = nestedList.get(i);
+			for(int j = 0; j<val.size(); j++) {
+				sb.append(val.get(j));
+			}
+		}
+		return "";
+	}
+	
+	public String testDublicateIteratorName(String input) {
+		List<String> fooList = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < fooList.size(); i++) {
+			sb.append(fooList.get(i));
+			for(int j = 0; j<fooList.size(); j++) {
+				sb.append(fooList.get(i) + input + fooList.get(j));
+			}
+		}
+		return "";
+	}
+
 	public void testForToForEach2(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();

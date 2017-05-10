@@ -11,6 +11,14 @@ import java.util.stream.Collectors;
 @SuppressWarnings({ "nls", "unused", "unchecked" })
 public class TestForToForEachRule {
 
+	String iterator;
+	Runnable r = () -> {
+		List<String> fInterfaceRule = generateList("");
+		StringBuilder sb = new StringBuilder();
+		for (String iterator1 : fInterfaceRule) {
+			sb.append(iterator1);
+		}
+	};
 	private List<String> a;
 
 	public String testConvertIteratorToForEachTemp(String input) {
@@ -116,6 +124,47 @@ public class TestForToForEachRule {
 			sb.append(anotherString);
 		}
 		return sb.toString();
+	}
+
+	public String testRawType(String input) {
+		List rawList = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < rawList.size(); i++) {
+			sb.append(rawList.get(i));
+		}
+		return sb.toString();
+	}
+
+	public String testWildCard(String input) {
+		List<?> fooList = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < fooList.size(); i++) {
+			sb.append(fooList.get(i));
+		}
+		return sb.toString();
+	}
+
+	public String testIeratingThroughListOfLists(String input) {
+		List<List<String>> nestedList = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		for (List<String> val : nestedList) {
+			for (String iterator : val) {
+				sb.append(iterator);
+			}
+		}
+		return "";
+	}
+
+	public String testDublicateIteratorName(String input) {
+		List<String> fooList = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		for (String iterator : fooList) {
+			sb.append(iterator);
+			for (String iterator1 : fooList) {
+				sb.append(iterator + input + iterator1);
+			}
+		}
+		return "";
 	}
 
 	public void testForToForEach2(String input) {
@@ -531,6 +580,18 @@ public class TestForToForEachRule {
 		List<String> foo = generateList(input);
 		List<Integer> fooHashCodes = foo.stream().map(s -> s.hashCode()).collect(Collectors.toList());
 		return fooHashCodes;
+	}
+
+	@interface MyFooAnnotation {
+		String iterator = "";
+		Runnable r = () -> {
+			String iterator;
+			List<String> fInterfaceRule = new ArrayList<>();
+			StringBuilder sb = new StringBuilder();
+			for (String iterator1 : fInterfaceRule) {
+				sb.append(iterator1);
+			}
+		};
 	}
 
 	private class Point {
