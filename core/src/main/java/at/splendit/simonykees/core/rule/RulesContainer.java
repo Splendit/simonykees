@@ -7,7 +7,6 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import at.splendit.simonykees.core.rule.impl.ArithmethicAssignmentRule;
 import at.splendit.simonykees.core.rule.impl.BracketsToControlRule;
-import at.splendit.simonykees.core.rule.impl.CodeFormatterRule;
 import at.splendit.simonykees.core.rule.impl.CollectionRemoveAllRule;
 import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
 import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
@@ -15,7 +14,6 @@ import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
 import at.splendit.simonykees.core.rule.impl.MultiCatchRule;
-import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
 import at.splendit.simonykees.core.rule.impl.OverrideAnnotationRule;
 import at.splendit.simonykees.core.rule.impl.PrimitiveBoxedForStringRule;
 import at.splendit.simonykees.core.rule.impl.RearrangeClassMembersRule;
@@ -93,14 +91,15 @@ public class RulesContainer {
 				new RearrangeClassMembersRule(RearrangeClassMembersASTVisitor.class),
 				new OverrideAnnotationRule(OverrideAnnotationRuleASTVisitor.class),
 				new StringLiteralEqualityCheckRule(StringLiteralEqualityCheckASTVisitor.class),
-				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
+				new FieldNameConventionRule(FieldNameConventionASTVisitor.class)//,
 
 				/*
 				 * Code formatting and organizing imports should always happen
 				 * last.
 				 */
-				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
-				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class));
+//				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
+//				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class)
+				);
 	}
 
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getRulesForProject(IJavaProject selectedJavaProjekt) {

@@ -27,18 +27,19 @@ import at.splendit.simonykees.core.rule.RefactoringRule;
 @SuppressWarnings("restriction")
 public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 
-	private RefactoringRule<? extends ASTVisitor> refactoringRule;
+//	private RefactoringRule<? extends ASTVisitor> previewNode;
+	private PreviewNode previewNode;
 	private CompilationUnitNode currentCompilationUnitNode;
 	private IChangePreviewViewer currentPreviewViewer;
 
-	public RefactoringPreviewWizardPage(RefactoringRule<? extends ASTVisitor> rule) {
-		super(rule.getName());
-		setTitle(rule.getName());
-		setDescription(rule.getDescription());
-		this.refactoringRule = rule;
+	public RefactoringPreviewWizardPage(PreviewNode node) {
+		super(node.getRule().getName());
+		setTitle(node.getRule().getName());
+		setDescription(node.getRule().getDescription());
+		this.previewNode = node;
 
 		this.currentCompilationUnitNode = new CompilationUnitNode(
-				refactoringRule.getDocumentChanges().keySet().stream().findFirst().orElse(null));
+				previewNode.getDocumentChanges().keySet().stream().findFirst().orElse(null));
 	}
 
 	/*
@@ -81,7 +82,7 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 
 		treeViewer.setContentProvider(contentProvider);
 		treeViewer.addSelectionChangedListener(createSelectionChangedListener());
-		treeViewer.setInput(refactoringRule.getDocumentChanges().keySet());
+		treeViewer.setInput(previewNode.getDocumentChanges().keySet());
 		
 	}
 
@@ -122,7 +123,7 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 	}
 
 	private DocumentChange getCurrentDocumentChange() {
-		return refactoringRule.getDocumentChanges().get(currentCompilationUnitNode.getCompilationUnit());
+		return previewNode.getDocumentChanges().get(currentCompilationUnitNode.getCompilationUnit());
 	}
 
 }

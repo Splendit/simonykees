@@ -21,7 +21,7 @@ import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.exception.SimonykeesException;
-import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
+import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.RefactoringPreviewWizard;
@@ -87,8 +87,9 @@ public class SelectRulesWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = model.getSelectionAsList();
-		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
-		};
+		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
+//		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
+//		};
 		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
 
 		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
@@ -97,9 +98,11 @@ public class SelectRulesWizard extends Wizard {
 			protected IStatus run(IProgressMonitor monitor) {
 
 				try {
-					refactorer.prepareRefactoring(monitor);
+					refactoringPipeline.prepareRefactoring(rules, javaElements, monitor);
+//					refactorer.prepareRefactoring(monitor);
 					if (monitor.isCanceled()) {
-						refactorer.clearWorkingCopies();
+//						refactorer.clearWorkingCopies();
+						// TODO
 						return Status.CANCEL_STATUS;
 					}
 				} catch (RefactoringException e) {
@@ -107,9 +110,11 @@ public class SelectRulesWizard extends Wizard {
 					return Status.CANCEL_STATUS;
 				}
 				try {
-					refactorer.doRefactoring(monitor);
+//					refactorer.doRefactoring(monitor);
+					refactoringPipeline.doRefactoring(monitor);
 					if (monitor.isCanceled()) {
-						refactorer.clearWorkingCopies();
+//						refactorer.clearWorkingCopies();
+						// TODO
 						return Status.CANCEL_STATUS;
 					}
 				} catch (RefactoringException e) {
@@ -133,13 +138,13 @@ public class SelectRulesWizard extends Wizard {
 
 				if (event.getResult().isOK()) {
 					if (LicenseUtil.getInstance().isValid()) {
-						if (refactorer.hasChanges()) {
+//						if (refactorer.hasChanges()) {
 
-							synchronizeWithUIShowRefactoringPreviewWizard(refactorer, rectangle);
-						} else {
+							synchronizeWithUIShowRefactoringPreviewWizard(refactoringPipeline, rectangle);
+//						} else {
 
-							synchronizeWithUIShowWarningNoRefactoringDialog();
-						}
+//							synchronizeWithUIShowWarningNoRefactoringDialog();
+//						}
 					} else {
 
 						synchronizeWithUIShowLicenseError();
@@ -160,13 +165,14 @@ public class SelectRulesWizard extends Wizard {
 	/**
 	 * Method used to open RefactoringPreviewWizard from non UI thread
 	 */
-	private void synchronizeWithUIShowRefactoringPreviewWizard(AbstractRefactorer refactorer, Rectangle rectangle) {
+	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
+			Rectangle rectangle) {
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactorer));
+				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactoringPipeline));
 
 				// maximizes the RefactoringPreviewWizard
 				dialog.setPageSize(rectangle.width, rectangle.height);

@@ -7,7 +7,7 @@ import org.eclipse.swt.custom.BusyIndicator;
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.ReconcileException;
 import at.splendit.simonykees.core.exception.RefactoringException;
-import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
+import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 
 /**
@@ -21,11 +21,11 @@ import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
  */
 public class RefactoringPreviewWizard extends Wizard {
 
-	private AbstractRefactorer abstractRefactorer;
+	private RefactoringPipeline refactoringPipeline;
 
-	public RefactoringPreviewWizard(AbstractRefactorer abstractRefactorer) {
+	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
-		this.abstractRefactorer = abstractRefactorer;
+		this.refactoringPipeline = refactoringPipeline;
 	}
 
 	/*
@@ -35,8 +35,9 @@ public class RefactoringPreviewWizard extends Wizard {
 	 */
 	@Override
 	public void addPages() {
-		abstractRefactorer.getRules().stream().filter(rule -> !rule.getDocumentChanges().isEmpty())
-				.forEach(rule -> addPage(new RefactoringPreviewWizardPage(rule)));
+//		refactoringPipeline.getRules().stream().filter(rule -> !rule.getDocumentChanges().isEmpty())
+//				.forEach(rule -> addPage(new RefactoringPreviewWizardPage(rule)));
+		refactoringPipeline.getPreviewNodes().forEach(node -> addPage(new RefactoringPreviewWizardPage(node)));
 	}
 
 	/*
@@ -52,7 +53,7 @@ public class RefactoringPreviewWizard extends Wizard {
 			public void run() {
 				if (LicenseUtil.getInstance().isValid()) {
 					try {
-						abstractRefactorer.commitRefactoring();
+						refactoringPipeline.commitRefactoring();
 						Activator.setRunning(false);
 					} catch (RefactoringException e) {
 						SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
@@ -80,14 +81,14 @@ public class RefactoringPreviewWizard extends Wizard {
 	 */
 	@Override
 	public boolean performCancel() {
-		abstractRefactorer.clearWorkingCopies();
+		refactoringPipeline.clearStates();
 		Activator.setRunning(false);
 		return super.performCancel();
 	}
 
 	@Override
 	public void dispose() {
-		abstractRefactorer.clearWorkingCopies();
+		refactoringPipeline.clearStates();
 		super.dispose();
 	}
 }
