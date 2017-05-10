@@ -43,10 +43,10 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	private static final String LOGBACK_LOGGER = "ch.qos.logback.classic.Logger"; //$NON-NLS-1$
 	private static final String LOG4J_LOGGER = "org.apache.logging.log4j.Logger"; //$NON-NLS-1$
 
+	private static final String TRACE = "trace"; //$NON-NLS-1$
+	private static final String DEBUG = "debug"; //$NON-NLS-1$
 	private static final String INFO = "info"; //$NON-NLS-1$
 	private static final String WARN = "warn"; //$NON-NLS-1$
-	private static final String DEBUG = "debug"; //$NON-NLS-1$
-	private static final String TRACE = "trace"; //$NON-NLS-1$
 	private static final String ERROR = "error"; //$NON-NLS-1$
 
 	private Map<String, Integer> systemOutReplaceOptions = new HashMap<>();
@@ -80,7 +80,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 			}
 
 			if (loggerType != null) {
-				initLog4jOptions();
+				initLogLevelOptions();
 			}
 		} catch (JavaModelException e) {
 			logger.error(e.getMessage(), new ITypeNotFoundRuntimeException());
@@ -89,7 +89,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		return loggerType != null && super.ruleSpecificImplementation(project);
 	}
 
-	private void initLog4jOptions() {
+	private void initLogLevelOptions() {
 		systemOutReplaceOptions.put(TRACE, 1);
 		systemOutReplaceOptions.put(DEBUG, 2);
 		systemOutReplaceOptions.put(INFO, 3);
