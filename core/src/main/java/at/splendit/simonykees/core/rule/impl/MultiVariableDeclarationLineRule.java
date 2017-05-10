@@ -5,7 +5,8 @@ import org.apache.commons.lang3.JavaVersion;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.MultiVariableDeclarationLineASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
-/** 
+
+/**
  * @see MultiVariableDeclarationLineASTVisitor
  * 
  * @author Matthias Webhofer
@@ -16,10 +17,10 @@ public class MultiVariableDeclarationLineRule extends RefactoringRule<MultiVaria
 
 	public MultiVariableDeclarationLineRule(Class<MultiVariableDeclarationLineASTVisitor> visitor) {
 		super(visitor);
-		this.name = "MultiVariableDeclaration";
-		this.description = "MultiVariableDeclaration";
+		this.name = Messages.MultiVariableDeclarationLineRule_name;
+		this.description = Messages.MultiVariableDeclarationLineRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_0_9;
