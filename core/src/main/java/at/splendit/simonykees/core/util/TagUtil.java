@@ -30,6 +30,7 @@ import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
 import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
+import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 
 public class TagUtil {
 
