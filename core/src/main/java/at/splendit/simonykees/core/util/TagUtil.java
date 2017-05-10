@@ -29,6 +29,7 @@ import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
 import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
+import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 
 public class TagUtil {
 
@@ -85,6 +86,8 @@ public class TagUtil {
 			return Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS);
 		} else if (WhileToForEachRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.LOOP, Tag.OLD_LANGUAGE_CONSTRUCTS);
+		} else if (StandardLoggerRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_1);
 		}
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["
