@@ -91,15 +91,19 @@ class ForLoopIteratingIndexVisitor extends ASTVisitor {
 			multipleLoopUpdaters = true;
 		}
 
-		List<Statement> statements = ASTNodeUtil.returnTypedList(((Block) forStatement.getBody()).statements(),
-				Statement.class);
-		if (!statements.isEmpty()) {
-			Statement lastStatement = statements.get(statements.size() - 1);
-			if (isValidIncrementStatement(lastStatement, iteratingIndexName)) {
-				indexUpdater.put(INTERNAL_INDEX_UPDATER, lastStatement);
-				nodesToBeRemoved.add(lastStatement);
+		Statement loopBody = forStatement.getBody();
+		if(loopBody.getNodeType() == ASTNode.BLOCK) {
+			List<Statement> statements = ASTNodeUtil.returnTypedList(((Block) loopBody).statements(),
+					Statement.class);
+			if (!statements.isEmpty()) {
+				Statement lastStatement = statements.get(statements.size() - 1);
+				if (isValidIncrementStatement(lastStatement, iteratingIndexName)) {
+					indexUpdater.put(INTERNAL_INDEX_UPDATER, lastStatement);
+					nodesToBeRemoved.add(lastStatement);
+				}
 			}
 		}
+
 	}
 
 	public VariableDeclarationFragment getPreferredNameFragment() {
