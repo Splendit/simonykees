@@ -77,10 +77,15 @@ public class Messages extends NLS {
 	public static String LoggerRuleWizardHandler_noLogger;
 	public static String LoggerRuleWizardPage_description;
 	public static String LoggerRuleWizardPage_pageName;
+	public static String LoggerRuleWizardPage_severityLevelLabel;
 	public static String LoggerRuleWizardPage_stackTraceLabel;
+	public static String LoggerRuleWizardPage_stackTraceMessageLabel;
 	public static String LoggerRuleWizardPage_sysErrLabel;
+	public static String LoggerRuleWizardPage_sysErrMessageLabel;
 	public static String LoggerRuleWizardPage_sysOutLabel;
+	public static String LoggerRuleWizardPage_sysOutMessageLabel;
 	public static String LoggerRuleWizardPageModel_err_noTransformation;
+	public static String LoggerRuleWizardPageModel_noSeverityLevel;
 	public static String LoggerRuleWizardPageModel_warn_blankLoggingType;
 	public static String LoggerRuleWizardPageModel_warn_errSeverity;
 	public static String LoggerRuleWizardPageModel_warn_stackTraceSeverity;

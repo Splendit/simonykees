@@ -89,11 +89,13 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 								};
 
 								dialog.open();
+							} else {
+								Activator.setRunning(false);
 							}
-
 						} else {
 							SimonykeesMessageDialog.openMessageDialog(HandlerUtil.getActiveShell(event),
 									Messages.LoggerRuleWizardHandler_noLogger, MessageDialog.WARNING);
+							Activator.setRunning(false);
 						}
 
 					}

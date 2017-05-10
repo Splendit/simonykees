@@ -5,13 +5,17 @@ import java.util.Set;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
 import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerOptions;
@@ -37,15 +41,15 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	private Combo systemErrCombo;
 	private Combo stackTraceCombo;
 
-	protected IStatus fSelectionStatus;
+	private Font boldFont;
 
-	private final String NO_SEVERITY_LEVEL = ""; //$NON-NLS-1$
+	protected IStatus fSelectionStatus;
 
 	public LoggerRuleWizardPage(LoggerRuleWizardPageModel model, LoggerRuleWizardPageControler controler) {
 		super(Messages.LoggerRuleWizardPage_pageName);
 		setTitle(Messages.LoggerRuleWizard_title);
 		setDescription(Messages.LoggerRuleWizardPage_description);
-
+		
 		this.model = model;
 		this.controler = controler;
 	}
@@ -55,9 +59,12 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		initializeDialogUnits(parent);
 
 		composite = new Composite(parent, SWT.NONE);
-		composite.setLayout(new GridLayout(2, true));
+		composite.setLayout(new GridLayout());
 
 		setControl(composite);
+
+		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont()).setStyle(SWT.BOLD);
+		boldFont = boldDescriptor.createFont(composite.getDisplay());
 
 		createSystemOutPart(composite);
 		createSystemErrPart(composite);
@@ -73,13 +80,24 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 		initializeData();
 		doStatusUpdate();
+
+		Dialog.applyDialogFont(parent);
 	}
 
 	private void createSystemOutPart(Composite parent) {
-		Label systemOutLabel = new Label(parent, SWT.NONE);
-		systemOutLabel.setText(Messages.LoggerRuleWizardPage_sysOutLabel);
+		Group sysOutGroup = new Group(parent, SWT.NONE);
+		sysOutGroup.setText(Messages.LoggerRuleWizardPage_sysOutLabel);
+		sysOutGroup.setFont(boldFont);
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gridData.horizontalSpan = 2;
+		gridData.widthHint = 400;
+		sysOutGroup.setLayoutData(gridData);
+		sysOutGroup.setLayout(new GridLayout(2, false));
 
-		systemOutCombo = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		Label systemOutLabel = new Label(sysOutGroup, SWT.NONE);
+		systemOutLabel.setText(Messages.LoggerRuleWizardPage_severityLevelLabel);
+
+		systemOutCombo = new Combo(sysOutGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateSystemOutCombo();
 		systemOutCombo.addSelectionListener(new SelectionAdapter() {
 
@@ -89,16 +107,34 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 			}
 		});
-		GridData gridData = new GridData(GridData.END, GridData.FILL, false, false);
-		gridData.widthHint = 200;
+		gridData = new GridData(GridData.FILL, GridData.FILL, false, false);
+		gridData.widthHint = 150;
 		systemOutCombo.setLayoutData(gridData);
+
+		Label systemOutExplainLabel = new Label(sysOutGroup, SWT.WRAP | SWT.LEFT);
+		gridData = new GridData(SWT.HORIZONTAL, SWT.TOP, true, false, 1, 1);
+		gridData.horizontalSpan = 2;
+		gridData.verticalIndent = 5;
+		systemOutExplainLabel.setLayoutData(gridData);
+		systemOutExplainLabel.setText(
+				Messages.LoggerRuleWizardPage_sysOutMessageLabel);
 	}
 
 	private void createSystemErrPart(Composite parent) {
-		Label systemErrLabel = new Label(parent, SWT.NONE);
-		systemErrLabel.setText(Messages.LoggerRuleWizardPage_sysErrLabel);
+		Group sysErrGroup = new Group(parent, SWT.NONE);
+		sysErrGroup.setText(Messages.LoggerRuleWizardPage_sysErrLabel);
+		sysErrGroup.setFont(boldFont);
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gridData.horizontalSpan = 2;
+		gridData.verticalIndent = 15;
+		gridData.widthHint = 400;
+		sysErrGroup.setLayoutData(gridData);
+		sysErrGroup.setLayout(new GridLayout(2, false));
 
-		systemErrCombo = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		Label systemErrLabel = new Label(sysErrGroup, SWT.NONE);
+		systemErrLabel.setText(Messages.LoggerRuleWizardPage_severityLevelLabel);
+
+		systemErrCombo = new Combo(sysErrGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateSystemErrCombo();
 		systemErrCombo.addSelectionListener(new SelectionAdapter() {
 
@@ -108,16 +144,34 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 			}
 		});
-		GridData gridData = new GridData(GridData.END, GridData.FILL, false, false);
-		gridData.widthHint = 200;
+		gridData = new GridData(GridData.FILL, GridData.FILL, false, false);
+		gridData.widthHint = 150;
 		systemErrCombo.setLayoutData(gridData);
+
+		Label systemErrExplainLabel = new Label(sysErrGroup, SWT.WRAP | SWT.LEFT);
+		gridData = new GridData(SWT.HORIZONTAL, SWT.TOP, true, false, 1, 1);
+		gridData.horizontalSpan = 2;
+		gridData.verticalIndent = 5;
+		systemErrExplainLabel.setLayoutData(gridData);
+		systemErrExplainLabel.setText(
+				Messages.LoggerRuleWizardPage_sysErrMessageLabel);
 	}
 
 	private void createStackTracePart(Composite parent) {
-		Label stackTraceLabel = new Label(parent, SWT.NONE);
-		stackTraceLabel.setText(Messages.LoggerRuleWizardPage_stackTraceLabel);
+		Group stackTraceGroup = new Group(parent, SWT.NONE);
+		stackTraceGroup.setText(Messages.LoggerRuleWizardPage_stackTraceLabel);
+		stackTraceGroup.setFont(boldFont);
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gridData.horizontalSpan = 2;
+		gridData.verticalIndent = 15;
+		gridData.widthHint = 400;
+		stackTraceGroup.setLayoutData(gridData);
+		stackTraceGroup.setLayout(new GridLayout(2, false));
 
-		stackTraceCombo = new Combo(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		Label stackTraceLabel = new Label(stackTraceGroup, SWT.NONE);
+		stackTraceLabel.setText(Messages.LoggerRuleWizardPage_severityLevelLabel);
+
+		stackTraceCombo = new Combo(stackTraceGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateStackTraceCombo();
 		stackTraceCombo.addSelectionListener(new SelectionAdapter() {
 
@@ -127,9 +181,23 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 			}
 		});
-		GridData gridData = new GridData(GridData.END, GridData.FILL, false, false);
+		gridData = new GridData(GridData.FILL, GridData.FILL, false, false);
 		gridData.widthHint = 200;
 		stackTraceCombo.setLayoutData(gridData);
+
+		Label stackTraceExplainLabel = new Label(stackTraceGroup, SWT.WRAP | SWT.LEFT);
+		gridData = new GridData(SWT.HORIZONTAL, SWT.TOP, true, false, 1, 1);
+		gridData.horizontalSpan = 2;
+		gridData.verticalIndent = 5;
+		stackTraceExplainLabel.setLayoutData(gridData);
+		stackTraceExplainLabel.setText(
+				Messages.LoggerRuleWizardPage_stackTraceMessageLabel);
+	}
+
+	@Override
+	public void dispose() {
+		super.dispose();
+		boldFont.dispose();
 	}
 
 	/**
@@ -137,7 +205,6 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 */
 	private void populateSystemOutCombo() {
 		Set<String> severityLevels = model.getSystemOutReplaceOptions();
-		systemOutCombo.add(NO_SEVERITY_LEVEL);
 		for (String severityLevel : severityLevels) {
 			systemOutCombo.add(severityLevel);
 		}
@@ -148,7 +215,6 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 */
 	private void populateSystemErrCombo() {
 		Set<String> severityLevels = model.getSystemErrReplaceOptions();
-		systemErrCombo.add(NO_SEVERITY_LEVEL);
 		for (String severityLevel : severityLevels) {
 			systemErrCombo.add(severityLevel);
 		}
@@ -159,7 +225,6 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 */
 	private void populateStackTraceCombo() {
 		Set<String> severityLevels = model.getPrintStackTraceReplaceOptions();
-		stackTraceCombo.add(NO_SEVERITY_LEVEL);
 		for (String severityLevel : severityLevels) {
 			stackTraceCombo.add(severityLevel);
 		}
@@ -182,8 +247,8 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	protected void doStatusUpdate() {
 		if (model.getSelectionStatus().isEmpty()) {
 			fSelectionStatus = new StatusInfo();
-		} else if (model.getSelectionStatus().equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)){
-			((StatusInfo) fSelectionStatus).setError(model.getSelectionStatus());			
+		} else if (model.getSelectionStatus().equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)) {
+			((StatusInfo) fSelectionStatus).setError(model.getSelectionStatus());
 		} else {
 			((StatusInfo) fSelectionStatus).setWarning(model.getSelectionStatus());
 		}

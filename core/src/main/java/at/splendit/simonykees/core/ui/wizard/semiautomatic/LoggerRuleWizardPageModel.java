@@ -3,6 +3,7 @@ package at.splendit.simonykees.core.ui.wizard.semiautomatic;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,6 +35,8 @@ public class LoggerRuleWizardPageModel {
 	Set<IValueChangeListener> listeners = new HashSet<>();
 
 	private String selectionStatus = ""; //$NON-NLS-1$
+
+	private final String NO_SEVERITY_LEVEL = Messages.LoggerRuleWizardPageModel_noSeverityLevel;
 
 	public LoggerRuleWizardPageModel(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		this.rule = (StandardLoggerRule) rule;
@@ -100,11 +103,13 @@ public class LoggerRuleWizardPageModel {
 		String sysErrCurr = currentSelectionMap.get(StandardLoggerOptions.SYSTEM_ERR_PRINT);
 		String stackTraceCurr = currentSelectionMap.get(StandardLoggerOptions.PRINT_STACKTRACE);
 
-		int sysOutCurrSeverityLevel = (sysOutCurr.isEmpty()) ? 0 : rule.getSystemOutReplaceOptions().get(sysOutCurr);
-		int sysErrCurrSeverityLevel = (sysErrCurr.isEmpty()) ? 0 : rule.getSystemErrReplaceOptions().get(sysErrCurr);
-		int stackTraceCurrSeverityLevel = (stackTraceCurr.isEmpty()) ? 0
+		int sysOutCurrSeverityLevel = (sysOutCurr.equals(NO_SEVERITY_LEVEL)) ? 0
+				: rule.getSystemOutReplaceOptions().get(sysOutCurr);
+		int sysErrCurrSeverityLevel = (sysErrCurr.equals(NO_SEVERITY_LEVEL)) ? 0
+				: rule.getSystemErrReplaceOptions().get(sysErrCurr);
+		int stackTraceCurrSeverityLevel = (stackTraceCurr.equals(NO_SEVERITY_LEVEL)) ? 0
 				: rule.getPrintStackTraceReplaceOptions().get(stackTraceCurr);
-		
+
 		if (sysOutCurrSeverityLevel == 0 && sysErrCurrSeverityLevel == 0 && stackTraceCurrSeverityLevel == 0) {
 			selectionStatus = Messages.LoggerRuleWizardPageModel_err_noTransformation;
 		} else if (!(stackTraceCurrSeverityLevel == 0) && (stackTraceCurrSeverityLevel < sysOutCurrSeverityLevel
@@ -118,9 +123,9 @@ public class LoggerRuleWizardPageModel {
 		} else if (!(sysErrCurrSeverityLevel == 0) && (sysErrCurrSeverityLevel < sysOutCurrSeverityLevel)) {
 			// System.err shouldn't have lesser severity level than System.out
 			selectionStatus = Messages.LoggerRuleWizardPageModel_warn_errSeverity;
-		} else if (sysOutCurrSeverityLevel == 0 || sysErrCurrSeverityLevel == 0 || stackTraceCurrSeverityLevel == 0) {
-			// No logging type should be left blank
-			selectionStatus = Messages.LoggerRuleWizardPageModel_warn_blankLoggingType;
+//		} else if (sysOutCurrSeverityLevel == 0 || sysErrCurrSeverityLevel == 0 || stackTraceCurrSeverityLevel == 0) {
+//			// No logging type should be left blank
+//			selectionStatus = Messages.LoggerRuleWizardPageModel_warn_blankLoggingType;
 		} else {
 			selectionStatus = ""; //$NON-NLS-1$
 		}
@@ -132,7 +137,10 @@ public class LoggerRuleWizardPageModel {
 	 * @return a set of replacement options.
 	 */
 	public Set<String> getSystemOutReplaceOptions() {
-		return systemOutReplaceOptions.keySet();
+		Set<String> systemOutReplaceOptionsSet = new LinkedHashSet<>();
+		systemOutReplaceOptionsSet.add(NO_SEVERITY_LEVEL);
+		systemOutReplaceOptionsSet.addAll(systemOutReplaceOptions.keySet());
+		return systemOutReplaceOptionsSet;
 	}
 
 	/**
@@ -141,7 +149,10 @@ public class LoggerRuleWizardPageModel {
 	 * @return a set of replacement options.
 	 */
 	public Set<String> getSystemErrReplaceOptions() {
-		return systemErrReplaceOptions.keySet();
+		Set<String> systemErrReplaceOptionsSet = new LinkedHashSet<>();
+		systemErrReplaceOptionsSet.add(NO_SEVERITY_LEVEL);
+		systemErrReplaceOptionsSet.addAll(systemErrReplaceOptions.keySet());
+		return systemErrReplaceOptionsSet;
 	}
 
 	/**
@@ -150,7 +161,10 @@ public class LoggerRuleWizardPageModel {
 	 * @return a set of replacement options.
 	 */
 	public Set<String> getPrintStackTraceReplaceOptions() {
-		return printStackTraceReplaceOptions.keySet();
+		Set<String> printStackTraceReplaceOptionsSet = new LinkedHashSet<>();
+		printStackTraceReplaceOptionsSet.add(NO_SEVERITY_LEVEL);
+		printStackTraceReplaceOptionsSet.addAll(printStackTraceReplaceOptions.keySet());
+		return printStackTraceReplaceOptionsSet;
 	}
 
 	/**
