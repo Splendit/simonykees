@@ -47,7 +47,7 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 						.createMoveTarget(fragment);
 
 				newFieldDeclaration.fragments().clear();
-				
+
 				ListRewrite fieldRewrite = astRewrite.getListRewrite(newFieldDeclaration,
 						FieldDeclaration.FRAGMENTS_PROPERTY);
 				fieldRewrite.insertLast(newFragment, null);
