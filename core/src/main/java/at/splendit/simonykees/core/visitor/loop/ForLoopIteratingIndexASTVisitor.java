@@ -88,7 +88,7 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 		List<Expression> updaters = ASTNodeUtil.returnTypedList(forStatement.updaters(), Expression.class);
 		if (updaters.size() == 1 ) {
 			Expression updater = updaters.get(0);
-			if(isValidIncrementStatement(updater, iteratingIndexName)) {				
+			if(isValidIncrementExpression(updater, iteratingIndexName)) {				
 				indexUpdater.put(LOOP_UPDATER, updater);
 			}
 		} else if (updaters.size() > 1) {
@@ -103,7 +103,7 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 				Statement lastStatement = statements.get(statements.size() - 1);
 				if(lastStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
 					Expression expression = ((ExpressionStatement)lastStatement).getExpression();
-					if (isValidIncrementStatement(expression, iteratingIndexName)) {
+					if (isValidIncrementExpression(expression, iteratingIndexName)) {
 						indexUpdater.put(INTERNAL_INDEX_UPDATER, lastStatement);
 						nodesToBeRemoved.add(lastStatement);
 					}
@@ -215,12 +215,13 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Checks if the given statement is an increment statement of the operand.
+	 * Checks if the given expression is incrementing the given operand by 1.
 	 * The following three cases are considered:
 	 * <ul>
 	 * <li>{@code operand++;}</li>
 	 * <li>{@code ++operand;}</li>
 	 * <li>{@code operand = operand + 1;}</li>
+	 * <li>{@code operand += 1;}</li>
 	 * </ul>
 	 * 
 	 * @param expressionNode
@@ -229,7 +230,7 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 	 *            operand name
 	 * @return if the statement is an increment statement.
 	 */
-	private boolean isValidIncrementStatement(Expression expression, SimpleName operandName) {
+	private boolean isValidIncrementExpression(Expression expression, SimpleName operandName) {
 		boolean isIncrement = false;
 		
 		int expressionType = expression.getNodeType();
@@ -259,9 +260,9 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 					Expression rightOperand = infixExpression.getRightOperand();
 					/*
 					 * the form of the expression should either be:
-					 * 		i = i + 1;
+					 * 		operand = operand + 1;
 					 * or
-					 * 		i = 1 + i; 
+					 * 		operand = 1 + operand; 
 					 * 
 					 */
 					if (PLUS.equals(infixExpression.getOperator().toString()) && ((ASTNode.SIMPLE_NAME == leftOperand.getNodeType()
@@ -296,7 +297,6 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 				isIncrement = true;
 			}
 		}
-		
 
 		return isIncrement;
 	}
