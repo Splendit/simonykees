@@ -147,7 +147,7 @@ public class RefactoringState {
 	 */
 	private void collectChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule)
 			throws JavaModelException, ReflectiveOperationException {
-		DocumentChange documentChange = SimonykeesUtil.applyRule(workingCopy, rule.getVisitor());
+		DocumentChange documentChange = rule.applyRule(workingCopy);
 		if (documentChange != null) {
 
 			/*
