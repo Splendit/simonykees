@@ -44,6 +44,7 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 	private static final String ONE = "1"; //$NON-NLS-1$
 	private static final String ZERO = "0"; //$NON-NLS-1$
 	private static final String GET = "get"; //$NON-NLS-1$
+	private static final String PLUS_EQUALS = "+="; //$NON-NLS-1$
 
 	private SimpleName iteratingIndexName;
 	private SimpleName newIteratorName;
@@ -85,8 +86,11 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 		}
 
 		List<Expression> updaters = ASTNodeUtil.returnTypedList(forStatement.updaters(), Expression.class);
-		if (updaters.size() == 1) {
-			indexUpdater.put(LOOP_UPDATER, updaters.get(0));
+		if (updaters.size() == 1 ) {
+			Expression updater = updaters.get(0);
+			if(isValidIncrementStatement(updater, iteratingIndexName)) {				
+				indexUpdater.put(LOOP_UPDATER, updater);
+			}
 		} else if (updaters.size() > 1) {
 			multipleLoopUpdaters = true;
 		}
@@ -97,9 +101,12 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 					Statement.class);
 			if (!statements.isEmpty()) {
 				Statement lastStatement = statements.get(statements.size() - 1);
-				if (isValidIncrementStatement(lastStatement, iteratingIndexName)) {
-					indexUpdater.put(INTERNAL_INDEX_UPDATER, lastStatement);
-					nodesToBeRemoved.add(lastStatement);
+				if(lastStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+					Expression expression = ((ExpressionStatement)lastStatement).getExpression();
+					if (isValidIncrementStatement(expression, iteratingIndexName)) {
+						indexUpdater.put(INTERNAL_INDEX_UPDATER, lastStatement);
+						nodesToBeRemoved.add(lastStatement);
+					}
 				}
 			}
 		}
@@ -193,7 +200,9 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 				} else if (parent.getLocationInParent() != ForStatement.UPDATERS_PROPERTY
 						&& parent.getParent().getLocationInParent() != ForStatement.UPDATERS_PROPERTY
 						&& parent.getLocationInParent() != ForStatement.INITIALIZERS_PROPERTY
-						&& parent.getParent().getLocationInParent() != ForStatement.INITIALIZERS_PROPERTY) {
+						&& parent.getParent().getLocationInParent() != ForStatement.INITIALIZERS_PROPERTY
+						&& parent.getParent() != indexUpdater.get(INTERNAL_INDEX_UPDATER)
+						&& parent.getParent().getParent() != indexUpdater.get(INTERNAL_INDEX_UPDATER)) {
 
 					this.indexReferencedInsideLoop = true;
 				}
@@ -214,43 +223,48 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 	 * <li>{@code operand = operand + 1;}</li>
 	 * </ul>
 	 * 
-	 * @param statement
+	 * @param expressionNode
 	 *            statement to be checked
 	 * @param operandName
 	 *            operand name
 	 * @return if the statement is an increment statement.
 	 */
-	private boolean isValidIncrementStatement(Statement statement, SimpleName operandName) {
+	private boolean isValidIncrementStatement(Expression expression, SimpleName operandName) {
 		boolean isIncrement = false;
-		if (ASTNode.EXPRESSION_STATEMENT == statement.getNodeType()) {
-			ExpressionStatement expressionStatement = (ExpressionStatement) statement;
-			Expression expression = expressionStatement.getExpression();
-			int expressionType = expression.getNodeType();
+		
+		int expressionType = expression.getNodeType();
 
-			if (ASTNode.POSTFIX_EXPRESSION == expressionType) {
-				// covers the case: operand++;
-				PostfixExpression postfixExpression = (PostfixExpression) expression;
-				Expression operand = postfixExpression.getOperand();
-				if (ASTNode.SIMPLE_NAME == operand.getNodeType()
-						&& ((SimpleName) operand).getIdentifier().equals(operandName.getIdentifier())
-						&& PLUS_PLUS.equals(postfixExpression.getOperator())) {
+		if (ASTNode.POSTFIX_EXPRESSION == expressionType) {
+			// covers the case: operand++;
+			PostfixExpression postfixExpression = (PostfixExpression) expression;
+			Expression operand = postfixExpression.getOperand();
+			if (ASTNode.SIMPLE_NAME == operand.getNodeType()
+					&& ((SimpleName) operand).getIdentifier().equals(operandName.getIdentifier())
+					&& PLUS_PLUS.equals(postfixExpression.getOperator().toString())) {
 
-					isIncrement = true;
-				}
-			} else if (ASTNode.ASSIGNMENT == expressionType) {
-				Assignment assignmentExpression = (Assignment) expression;
-				Expression lhs = assignmentExpression.getLeftHandSide();
-				Expression rhs = assignmentExpression.getRightHandSide();
+				isIncrement = true;
+			}
+		} else if (ASTNode.ASSIGNMENT == expressionType) {
+			Assignment assignmentExpression = (Assignment) expression;
+			Expression lhs = assignmentExpression.getLeftHandSide();
+			Expression rhs = assignmentExpression.getRightHandSide();
 
-				if (ASTNode.SIMPLE_NAME == lhs.getNodeType()
-						&& ((SimpleName) lhs).getIdentifier().equals(operandName.getIdentifier())
-						&& ASTNode.INFIX_EXPRESSION == rhs.getNodeType()) {
+			if (ASTNode.SIMPLE_NAME == lhs.getNodeType()
+					&& ((SimpleName) lhs).getIdentifier().equals(operandName.getIdentifier())) {
+				if(ASTNode.INFIX_EXPRESSION == rhs.getNodeType()) {
 					// covers the case: operand = operand +1;
 
 					InfixExpression infixExpression = (InfixExpression) rhs;
 					Expression leftOperand = infixExpression.getLeftOperand();
 					Expression rightOperand = infixExpression.getRightOperand();
-					if (PLUS.equals(infixExpression.getOperator()) && ((ASTNode.SIMPLE_NAME == leftOperand.getNodeType()
+					/*
+					 * the form of the expression should either be:
+					 * 		i = i + 1;
+					 * or
+					 * 		i = 1 + i; 
+					 * 
+					 */
+					if (PLUS.equals(infixExpression.getOperator().toString()) && ((ASTNode.SIMPLE_NAME == leftOperand.getNodeType()
 							&& ((SimpleName) leftOperand).getIdentifier().equals(operandName.getIdentifier())
 							&& ASTNode.NUMBER_LITERAL == rightOperand.getNodeType()
 							&& ONE.equals(((NumberLiteral) rightOperand).getToken()))
@@ -261,19 +275,28 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 
 						isIncrement = true;
 					}
-				}
-
-			} else if (ASTNode.PREFIX_EXPRESSION == expressionType) {
-				// covers the case: ++operand;
-				PrefixExpression postfixExpression = (PrefixExpression) expression;
-				Expression operand = postfixExpression.getOperand();
-				if (ASTNode.SIMPLE_NAME == operand.getNodeType()
-						&& ((SimpleName) operand).getIdentifier().equals(operandName.getIdentifier())
-						&& PLUS_PLUS.equals(postfixExpression.getOperator())) {
-					isIncrement = true;
+				} else if (ASTNode.NUMBER_LITERAL == rhs.getNodeType()) {
+					// covers the case: operand += 1;
+					String operator = assignmentExpression.getOperator().toString();
+					String numLiteral = ((NumberLiteral)rhs).getToken();
+					if(ONE.equals(numLiteral) && PLUS_EQUALS.equals(operator)) {
+						isIncrement = true;
+					}
+					
 				}
 			}
+
+		} else if (ASTNode.PREFIX_EXPRESSION == expressionType) {
+			// covers the case: ++operand;
+			PrefixExpression postfixExpression = (PrefixExpression) expression;
+			Expression operand = postfixExpression.getOperand();
+			if (ASTNode.SIMPLE_NAME == operand.getNodeType()
+					&& ((SimpleName) operand).getIdentifier().equals(operandName.getIdentifier())
+					&& PLUS_PLUS.equals(postfixExpression.getOperator().toString())) {
+				isIncrement = true;
+			}
 		}
+		
 
 		return isIncrement;
 	}
