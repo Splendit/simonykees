@@ -4,14 +4,14 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO SIM-103 add class description
@@ -22,7 +22,7 @@ import org.junit.runners.Parameterized.Parameters;
 @RunWith(Parameterized.class)
 public class TestStringUtilsRefactorRule extends AbstractReflectiveMethodTester {
 	
-	private static Logger log = LogManager.getLogger(TestStringUtilsRefactorRule.class);
+	private static Logger log = LoggerFactory.getLogger(TestStringUtilsRefactorRule.class);
 
 	private static PreAndPostClassHolder holder;
 

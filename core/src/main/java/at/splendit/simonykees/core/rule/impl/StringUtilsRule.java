@@ -95,6 +95,11 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 		return false;
 	}
 
+	@Override
+	public String requiredLibraries() {
+		return "org.apache.commons.lang3.StringUtils"; //$NON-NLS-1$
+	}
+	
 	private IPackageFragmentRoot getProject(IJavaElement iJavaElement) {
 		if (null == iJavaElement) {
 			return null;
