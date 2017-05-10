@@ -13,10 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
 import org.junit.Test;
 import org.junit.internal.ArrayComparisonFailure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -36,7 +37,7 @@ import com.google.common.collect.Table;
 @SuppressWarnings("nls")
 public abstract class AbstractReflectiveMethodTester {
 
-	private static Logger log = LogManager.getLogger(AbstractReflectiveMethodTester.class);
+	private static Logger log = LoggerFactory.getLogger(AbstractReflectiveMethodTester.class);
 
 	private ParameterType parameterType;
 

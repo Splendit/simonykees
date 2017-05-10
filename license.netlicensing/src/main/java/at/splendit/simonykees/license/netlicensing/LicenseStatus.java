@@ -12,15 +12,15 @@ import at.splendit.simonykees.i18n.Messages; //TODO: add i18n support
 public enum LicenseStatus {
 
 	NONE(Messages.LicenseStatus_userMessage_NONE),
-	TRIAL_REGISTERED(Messages.LicenseStatus_userMessage_TRIAL_REGISTERED), 
-	TRIAL_EXPIRED(Messages.LicenseStatus_userMessage_TRIAL_EXPIRED), 
+	TRIAL_REGISTERED(Messages.LicenseStatus_userMessage_TRIAL_REGISTERED),
+	TRIAL_EXPIRED(Messages.LicenseStatus_userMessage_TRIAL_EXPIRED),
 	TRIAL_HW_ID_FAILURE(Messages.LicenseStatus_userMessage_TRIAL_HW_ID_FAILURE),
-	NODE_LOCKED_REGISTERED(Messages.LicenseStatus_userMessage_NODE_LOCKED_REGISTERED), 
-	NODE_LOCKED_EXPIRED(Messages.LicenseStatus_userMessage_NODE_LOCKED_EXPIRED), 
+	NODE_LOCKED_REGISTERED(Messages.LicenseStatus_userMessage_NODE_LOCKED_REGISTERED),
+	NODE_LOCKED_EXPIRED(Messages.LicenseStatus_userMessage_NODE_LOCKED_EXPIRED),
 	NODE_LOCKED_HW_ID_FAILURE(Messages.LicenseStatus_userMessage_NODE_LOCKED_HW_ID_FAILURE),
-	FLOATING_CHECKED_OUT(Messages.LicenseStatus_userMessage_FLOATING_CHECKED_OUT), 
-	FLOATING_EXPIRED(Messages.LicenseStatus_userMessage_FLOATING_EXPIRED), 
-	FLOATING_OUT_OF_SESSION(Messages.LicenseStatus_userMessage_FLOATING_OUT_OF_SESSION), 
+	FLOATING_CHECKED_OUT(Messages.LicenseStatus_userMessage_FLOATING_CHECKED_OUT),
+	FLOATING_EXPIRED(Messages.LicenseStatus_userMessage_FLOATING_EXPIRED),
+	FLOATING_OUT_OF_SESSION(Messages.LicenseStatus_userMessage_FLOATING_OUT_OF_SESSION),
 	FLOATING_CHECKED_IN(Messages.LicenseStatus_userMessage_FLOATING_CHECKED_IN),
 	CONNECTION_FAILURE_UNREGISTERED(Messages.LicenseStatus_userMessage_CONNECTION_FAILURE_UNREGISTERED),
 	CONNECTION_FAILURE(Messages.LicenseStatus_userMessage_CONNECTION_FAILURE);
