@@ -41,7 +41,7 @@ public class JavaVersionTest {
 	public static Collection<Object[]> data() {
 		return Arrays.asList(new Object[][] { { JavaCore.VERSION_1_1, 10 }, { JavaCore.VERSION_1_2, 11 },
 				{ JavaCore.VERSION_1_3, 11 }, { JavaCore.VERSION_1_4, 12 }, { JavaCore.VERSION_1_5, 17 },
-				{ JavaCore.VERSION_1_6, 18 }, { JavaCore.VERSION_1_7, 21 }, { JavaCore.VERSION_1_8, 22 } });
+				{ JavaCore.VERSION_1_6, 18 }, { JavaCore.VERSION_1_7, 21 }, { JavaCore.VERSION_1_8, 23 } });
 	}
 
 	private String javaVersion;
