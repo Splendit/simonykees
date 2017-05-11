@@ -4,17 +4,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
@@ -35,14 +30,12 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(),
 				VariableDeclarationFragment.class);
 
-		ASTRewrite astRewrite = getAstRewrite();
-		AST ast = astRewrite.getAST();
-
 		if (fragments.size() > 1) {
 
 			List<FieldDeclaration> newFieldDeclarations = fragments.stream().skip(1).map(fragment -> {
 
-				FieldDeclaration newFieldDeclaration = (FieldDeclaration) ASTNode.copySubtree(ast, fieldDeclaration);
+				FieldDeclaration newFieldDeclaration = (FieldDeclaration) ASTNode.copySubtree(astRewrite.getAST(),
+						fieldDeclaration);
 				VariableDeclarationFragment newFragment = (VariableDeclarationFragment) astRewrite
 						.createMoveTarget(fragment);
 
@@ -55,21 +48,7 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 				return newFieldDeclaration;
 			}).collect(Collectors.toList());
 
-			ChildListPropertyDescriptor propertyDescriptor;
-
-			ASTNode parent = fieldDeclaration.getParent();
-
-			if (parent instanceof EnumDeclaration) {
-				propertyDescriptor = EnumDeclaration.BODY_DECLARATIONS_PROPERTY;
-			} else if (parent instanceof AnnotationTypeDeclaration) {
-				propertyDescriptor = AnnotationTypeDeclaration.BODY_DECLARATIONS_PROPERTY;
-			} else {
-				propertyDescriptor = TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
-			}
-
-			ListRewrite listRewrite = astRewrite.getListRewrite(parent, propertyDescriptor);
-			Collections.reverse(newFieldDeclarations);
-			newFieldDeclarations.forEach(field -> listRewrite.insertAfter(field, fieldDeclaration, null));
+			writeNewDeclation(fieldDeclaration, newFieldDeclarations);
 		}
 
 		return true;
@@ -80,16 +59,13 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil
 				.convertToTypedList(variableDeclarationStatement.fragments(), VariableDeclarationFragment.class);
 
-		ASTRewrite astRewrite = getAstRewrite();
-		AST ast = astRewrite.getAST();
-
 		if (fragments.size() > 1) {
 
 			List<VariableDeclarationStatement> newVariableDeclarationStatements = fragments.stream().skip(1)
 					.map(fragment -> {
 
 						VariableDeclarationStatement newVariableDeclarationStatement = (VariableDeclarationStatement) ASTNode
-								.copySubtree(ast, variableDeclarationStatement);
+								.copySubtree(astRewrite.getAST(), variableDeclarationStatement);
 						VariableDeclarationFragment newFragment = (VariableDeclarationFragment) astRewrite
 								.createMoveTarget(fragment);
 
@@ -101,13 +77,25 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 						return newVariableDeclarationStatement;
 					}).collect(Collectors.toList());
 
-			ListRewrite listRewrite = astRewrite.getListRewrite(variableDeclarationStatement.getParent(),
-					Block.STATEMENTS_PROPERTY);
-			Collections.reverse(newVariableDeclarationStatements);
-			newVariableDeclarationStatements
-					.forEach(var -> listRewrite.insertAfter(var, variableDeclarationStatement, null));
+			writeNewDeclation(variableDeclarationStatement, newVariableDeclarationStatements);
 		}
 
 		return true;
+	}
+
+	/**
+	 * Execution of the Refactoring of the rule
+	 * 
+	 * @param declaration starting {@link ASTNode} from which the addition fragment nodes are appended
+	 * @param declarations fragments that are added to the listRewrite List
+	 */
+	private void writeNewDeclation(ASTNode declaration, List<? extends ASTNode> declarations) {
+		StructuralPropertyDescriptor locationInParent = declaration.getLocationInParent();
+		if (locationInParent instanceof ChildListPropertyDescriptor) {
+			ListRewrite listRewrite = astRewrite.getListRewrite(declaration.getParent(),
+					(ChildListPropertyDescriptor) locationInParent);
+			Collections.reverse(declarations);
+			declarations.forEach(field -> listRewrite.insertAfter(field, declaration, null));
+		}
 	}
 }
