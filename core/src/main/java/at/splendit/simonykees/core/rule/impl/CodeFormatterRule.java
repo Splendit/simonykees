@@ -44,7 +44,7 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 	}
 
 	@Override
-	public DocumentChange applyRule(ICompilationUnit workingCopy)
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException {
 		
 		// TODO monitor?

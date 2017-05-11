@@ -50,7 +50,7 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 	}
 
 	@Override
-	public DocumentChange applyRule(ICompilationUnit workingCopy)
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException {
 		
 		// TODO monitor?

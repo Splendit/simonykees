@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,8 +155,25 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	 * @since 0.9
 	 * 
 	 */
-	public DocumentChange applyRule(ICompilationUnit workingCopy)
+	public final DocumentChange applyRule(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException {
+		
+		logger.trace(NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.name, workingCopy.getElementName()));
+		
+		return applyRuleImpl(workingCopy);
+	}
+	
+	/**
+	 * This method may be overridden. 
+	 * 
+	 * @param workingCopy
+	 * @return
+	 * @throws ReflectiveOperationException
+	 * @throws JavaModelException
+	 */
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
+			throws ReflectiveOperationException, JavaModelException {
+		
 		final CompilationUnit astRoot = SimonykeesUtil.parse(workingCopy);
 		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 		// FIXME resolves that comments are manipulated during astrewrite
@@ -194,6 +212,5 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		} else {
 			return null;
 		}
-
 	}
 }
