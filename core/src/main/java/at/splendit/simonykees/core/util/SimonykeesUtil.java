@@ -16,14 +16,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 //import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
 
 import at.splendit.simonykees.i18n.Messages;
-import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Utility class for Simonykees

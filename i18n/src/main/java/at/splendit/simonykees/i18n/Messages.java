@@ -94,6 +94,7 @@ public class Messages extends NLS {
 	public static String RefactoringRule_default_description;
 	public static String RefactoringRule_default_name;
 	public static String RefactoringRule_warning_workingcopy_already_present;
+	public static String RefactoringState_no_changes_found;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;

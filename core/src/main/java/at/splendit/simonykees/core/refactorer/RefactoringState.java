@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.ExceptionMessages;
@@ -46,11 +45,9 @@ public class RefactoringState {
 	}
 
 	public DocumentChange getChangeIfPresent(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
-		// TODO check if the rule has been processed already
-
 		return changes.get(rule);
 	}
-	
+
 	public boolean hasChange() {
 		return !changes.isEmpty();
 	}
@@ -63,39 +60,19 @@ public class RefactoringState {
 		this.workingCopy = workingCopy;
 	}
 
-	public void addRules(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules)
+	public void addRulesAndGenerateDocumentChanges(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules)
 			throws JavaModelException, ReflectiveOperationException {
-		
+
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
-			addRule(refactoringRule);
+			addRuleAndGenerateDocumentChanges(refactoringRule);
 		}
 	}
 
 	// TODO add monitor
-	public void addRule(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule)
-			throws JavaModelException, ReflectiveOperationException {
-		
-		/*
-		 * Sends new child of subMonitor which takes in progress bar
-		 * size of 1 of rules size In method that part of progress bar
-		 * is split to number of compilation units
-		 */
-//		generateDocumentChanges(rule, subMonitor.newChild(1));
-		generateDocumentChanges(rule);
-
-		if (rule instanceof TryWithResourceRule) {
-//			generateDocumentChanges(rule, subMonitor.newChild(0));
-			generateDocumentChanges(rule);
-		}
-		
-	}
-
 	/**
-	 * Changes are applied to working copy but <b>not</b> committed. 
+	 * Changes are applied to working copy but <b>not</b> committed. s
 	 * 
-	 * @param workingCopies
-	 *            List of {@link ICompilationUnit} for which a
-	 *            {@link DocumentChange} for each selected rule is created
+	 * @param rule
 	 * @throws JavaModelException
 	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
@@ -103,77 +80,33 @@ public class RefactoringState {
 	 *             is thrown if the default constructor of {@link #visitor} is
 	 *             not present and the reflective construction fails.
 	 */
-	public void generateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule)
+	public void addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule)
 			throws JavaModelException, ReflectiveOperationException {
 
-		applyRule(rule);
-	}
+		/*
+		 * Sends new child of subMonitor which takes in progress bar size of 1
+		 * of rules size In method that part of progress bar is split to number
+		 * of compilation units
+		 */
+		// generateDocumentChanges(rule, subMonitor.newChild(1));
 
-	private void applyRule(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule)
-			throws JavaModelException, ReflectiveOperationException {
-
-		// FIXME SIM-206: TryWithResource multiple new resource on empty list
-		boolean dirtyHack = rule instanceof TryWithResourceRule;
-
-		// TODO test this
 		boolean changesAlreadyPresent = changes.containsKey(rule);
 
 		if (changesAlreadyPresent) {
-			if (dirtyHack) {
-				// we have to collect changes a second time (see SIM-206)
-				collectChanges(rule);
+			// already have changes
+			logger.warn(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, getWorkingCopyName()));
+		} else {
+			DocumentChange documentChange = rule.applyRule(workingCopy);
+			if (documentChange != null) {
+				changes.put(rule, documentChange);
 			} else {
-				// already have changes
-				logger.info(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, getWorkingCopyName()));
+				logger.trace(NLS.bind(Messages.RefactoringState_no_changes_found, rule.getName(),
+						workingCopy.getElementName()));
 			}
-		} else {
-			collectChanges(rule);
 		}
 
 	}
 
-	/**
-	 * Apply the current rule and collect all resulting changes.
-	 * 
-	 * @param workingCopies
-	 *            List of {@link ICompilationUnit} for which a
-	 *            {@link DocumentChange} for each selected rule is created
-	 * @throws JavaModelException
-	 *             if this element does not exist or if an exception occurs
-	 *             while accessing its corresponding resource.
-	 * @throws ReflectiveOperationException
-	 *             is thrown if the default constructor of {@link #visitor} is
-	 *             not present and the reflective construction fails.
-	 */
-	private void collectChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule)
-			throws JavaModelException, ReflectiveOperationException {
-		DocumentChange documentChange = rule.applyRule(workingCopy);
-		if (documentChange != null) {
-
-			/*
-			 * FIXME SIM-206: TryWithResource multiple new resource on empty
-			 * list
-			 */
-			/*
-			 * FIXME SIM-206: this particular part of the fix does not work.
-			 * This will create the correct results. However, the
-			 * RefactoringPreviewWizard will show the diff between the first and
-			 * the second run, rather than the diff between the original source
-			 * and the second run. See comment in SIM-206.
-			 */
-			// if (dirtyHack) {
-			// DocumentChange temp = changes.get(workingCopy);
-			// if (temp != null) {
-			// documentChange.addEdit(temp.getEdit());
-			// }
-			// }
-
-			changes.put(rule, documentChange);
-		} else {
-			// no changes
-		}
-	}
-	
 	public void clearWorkingCopies() {
 		try {
 			SimonykeesUtil.discardWorkingCopy(workingCopy);

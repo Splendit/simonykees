@@ -1,6 +1,9 @@
 package at.splendit.simonykees.core.rule.impl;
 
 import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisitor;
@@ -24,4 +27,22 @@ public class TryWithResourceRule extends RefactoringRule<TryWithResourceASTVisit
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_7;
 	}
+
+	@Override
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
+			throws ReflectiveOperationException, JavaModelException {
+		
+		/*
+		 * The TryWithResourceRule has to be applied twice. 
+		 * 
+		 * See: 
+		 * FIXME SIM-396: Make all changes of the TryWithResourceRule visible
+		 */
+		DocumentChange tmp1 = super.applyRuleImpl(workingCopy);
+		DocumentChange tmp2 = super.applyRuleImpl(workingCopy);
+		
+		return null == tmp2 ? tmp1 : tmp2;
+	}
+	
+	
 }

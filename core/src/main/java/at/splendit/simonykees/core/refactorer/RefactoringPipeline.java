@@ -318,7 +318,7 @@ public class RefactoringPipeline {
 			 */
 			subMonitor.subTask(refactoringState.getWorkingCopyName());
 
-			refactoringState.addRule(rule);
+			refactoringState.addRuleAndGenerateDocumentChanges(rule);
 
 			// TODO we used to have a test for try with resource here
 
