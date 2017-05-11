@@ -31,9 +31,7 @@ public abstract class TestFunctionalInterface2Rule {
 
 	public void setFields(Object fields) {
 		Object proxyFields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
-				(Object proxy, Method method, Object[] args) -> {
-					return method.invoke(fields, args);
-				});
+				(Object proxy, Method method, Object[] args) -> method.invoke(fields, args));
 		this.fields = proxyFields;
 	}
 
