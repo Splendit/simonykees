@@ -254,30 +254,30 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 	 */
 	private boolean isInitializedToZero(ASTNode initExpresion) {
 		boolean assignedToZero = false;
-//		if (ASTNode.ASSIGNMENT == initExpresion.getNodeType()) {
-//			Assignment assignment = (Assignment) initExpresion;
-//			Expression rhs = assignment.getRightHandSide();
-//			if (ASTNode.NUMBER_LITERAL == rhs.getNodeType()) {
-//				assignedToZero = ((NumberLiteral) rhs).getToken().equals(ZERO);
-//			}
-//		} else if (ASTNode.VARIABLE_DECLARATION_EXPRESSION == initExpresion.getNodeType()) {
-//			VariableDeclarationExpression declExpresion = (VariableDeclarationExpression) initExpresion;
-//			List<VariableDeclarationFragment> fragments = ASTNodeUtil.returnTypedList(declExpresion.fragments(),
-//					VariableDeclarationFragment.class);
-//			if (fragments.size() == 1) {
-//				VariableDeclarationFragment fragment = fragments.get(0);
-//				Expression initializer = fragment.getInitializer();
-//				if (initializer != null && ASTNode.NUMBER_LITERAL == initializer.getNodeType()) {
-//					assignedToZero = ((NumberLiteral) initializer).getToken().equals(ZERO);
-//				}
-//			}
-//		} else if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == initExpresion.getNodeType()) {
-//			VariableDeclarationFragment declFragment = (VariableDeclarationFragment) initExpresion;
-//			Expression initializer = declFragment.getInitializer();
-//			if (initializer != null && ASTNode.NUMBER_LITERAL == initializer.getNodeType()) {
-//				assignedToZero = ((NumberLiteral) initializer).getToken().equals(ZERO);
-//			}
-//		}
+		if (ASTNode.ASSIGNMENT == initExpresion.getNodeType()) {
+			Assignment assignment = (Assignment) initExpresion;
+			Expression rhs = assignment.getRightHandSide();
+			if (ASTNode.NUMBER_LITERAL == rhs.getNodeType()) {
+				assignedToZero = ((NumberLiteral) rhs).getToken().equals(ZERO);
+			}
+		} else if (ASTNode.VARIABLE_DECLARATION_EXPRESSION == initExpresion.getNodeType()) {
+			VariableDeclarationExpression declExpresion = (VariableDeclarationExpression) initExpresion;
+			List<VariableDeclarationFragment> fragments = ASTNodeUtil.returnTypedList(declExpresion.fragments(),
+					VariableDeclarationFragment.class);
+			if (fragments.size() == 1) {
+				VariableDeclarationFragment fragment = fragments.get(0);
+				Expression initializer = fragment.getInitializer();
+				if (initializer != null && ASTNode.NUMBER_LITERAL == initializer.getNodeType()) {
+					assignedToZero = ((NumberLiteral) initializer).getToken().equals(ZERO);
+				}
+			}
+		} else if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == initExpresion.getNodeType()) {
+			VariableDeclarationFragment declFragment = (VariableDeclarationFragment) initExpresion;
+			Expression initializer = declFragment.getInitializer();
+			if (initializer != null && ASTNode.NUMBER_LITERAL == initializer.getNodeType()) {
+				assignedToZero = ((NumberLiteral) initializer).getToken().equals(ZERO);
+			}
+		}
 
 		return assignedToZero;
 	}
