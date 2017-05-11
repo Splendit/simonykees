@@ -61,7 +61,7 @@ public class TagUtil {
 		} else if (MultiCatchRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS);
 		} else if (MultiVariableDeclarationLineRule.class == clazz) {
-			return Arrays.asList(Tag.JAVA_0_9, Tag.READABILITY, Tag.CODING_CONVENTIONS);
+			return Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS);
 		} else if (OrganiseImportsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.FORMATTING, Tag.READABILITY);
 		} else if (OverrideAnnotationRule.class == clazz) {

@@ -23,6 +23,6 @@ public class MultiVariableDeclarationLineRule extends RefactoringRule<MultiVaria
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
-		return JavaVersion.JAVA_0_9;
+		return JavaVersion.JAVA_1_1;
 	}
 }
