@@ -1,6 +1,3 @@
-/**
- * 
- */
 package at.splendit.simonykees.core.refactorer;
 
 import java.util.HashMap;
@@ -44,20 +41,27 @@ public class RefactoringState {
 		return this.workingCopy.getElementName();
 	}
 
+	/**
+	 * Returns the {@link DocumentChange} to one rule.
+	 * 
+	 * @param rule
+	 * @return the corresponding {@link DocumentChange} to a rule or null
+	 */
 	public DocumentChange getChangeIfPresent(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		return changes.get(rule);
 	}
 
+	/**
+	 * Whether or not any changes were calculated for all given rules.
+	 * 
+	 * @return true if at least one rule generated changes, false otherwise
+	 */
 	public boolean hasChange() {
 		return !changes.isEmpty();
 	}
 
 	public ICompilationUnit getWorkingCopy() {
 		return workingCopy;
-	}
-
-	public void setWorkingCopy(ICompilationUnit workingCopy) {
-		this.workingCopy = workingCopy;
 	}
 
 	public void addRulesAndGenerateDocumentChanges(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules)

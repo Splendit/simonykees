@@ -5,7 +5,10 @@ import java.util.Set;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 /**
- * TODO SIM-103 add class description
+ * Representation of an {@link ICompilationUnit} in the file view of a
+ * {@link RefactoringPreviewWizardPage}.
+ * <p>
+ * Displays an {@link ICompilationUnit} as "[class name] - [package name]"
  * 
  * @author Ludwig Werzowa
  * @since 0.9

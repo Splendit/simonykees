@@ -1,7 +1,6 @@
 package at.splendit.simonykees.core.ui.preview;
 
 import org.eclipse.compare.CompareViewerSwitchingPane;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -15,7 +14,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
-import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.ui.AbstractWizardPage;
 
 /**
@@ -28,7 +26,6 @@ import at.splendit.simonykees.core.ui.AbstractWizardPage;
 @SuppressWarnings("restriction")
 public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 
-//	private RefactoringRule<? extends ASTVisitor> previewNode;
 	private PreviewNode previewNode;
 	private CompilationUnitNode currentCompilationUnitNode;
 	private IChangePreviewViewer currentPreviewViewer;

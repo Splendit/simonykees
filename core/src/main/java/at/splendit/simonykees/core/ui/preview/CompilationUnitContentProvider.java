@@ -7,6 +7,9 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
 /**
+ * Content provider for the file view of a {@link RefactoringPreviewWizardPage}.
+ * <p>
+ * Provides {@link CompilationUnitNode}s for {@link ICompilationUnit}s. 
  * 
  * @author Ludwig Werzowa
  * @since 0.9
@@ -16,7 +19,7 @@ public class CompilationUnitContentProvider implements ITreeContentProvider {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Object[] getElements(Object inputElement) {
-		return CompilationUnitNode.createCompilationUnitNodes((Set<ICompilationUnit>)inputElement);
+		return CompilationUnitNode.createCompilationUnitNodes((Set<ICompilationUnit>) inputElement);
 	}
 
 	@Override
@@ -35,11 +38,11 @@ public class CompilationUnitContentProvider implements ITreeContentProvider {
 	}
 
 	public void dispose() {
-		//Only needed for 4.5.x (Mars)
+		// Only needed for 4.5.x (Mars)
 	}
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		//Only needed for 4.5.x (Mars)
+		// Only needed for 4.5.x (Mars)
 	}
 
 }

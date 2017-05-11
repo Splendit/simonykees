@@ -1,6 +1,3 @@
-/**
- * 
- */
 package at.splendit.simonykees.core.refactorer;
 
 import java.util.ArrayList;
@@ -65,6 +62,13 @@ public class RefactoringPipeline {
 		this.refactoringStates = new ArrayList<>();
 	}
 
+	/**
+	 * Creates a map of changes per rule.
+	 * <p>
+	 * This method enables viewing all changes from one specific rule.
+	 * 
+	 * @return a list of {@link PreviewNode}s
+	 */
 	public List<PreviewNode> getPreviewNodes() {
 
 		List<PreviewNode> previewNodes = new ArrayList<>();
@@ -295,6 +299,11 @@ public class RefactoringPipeline {
 		}
 	}
 
+	/**
+	 * Clears everything.
+	 * <p>
+	 * This method should be called when canceling or finishing refactorings.
+	 */
 	public void clearStates() {
 		refactoringStates.forEach(s -> s.clearWorkingCopies());
 		refactoringStates.clear();
@@ -308,8 +317,8 @@ public class RefactoringPipeline {
 	 * @throws JavaModelException
 	 * @throws ReflectiveOperationException
 	 */
-	private void applyRuleToAllStates(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, IProgressMonitor subMonitor)
-			throws JavaModelException, ReflectiveOperationException {
+	private void applyRuleToAllStates(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
+			IProgressMonitor subMonitor) throws JavaModelException, ReflectiveOperationException {
 
 		for (RefactoringState refactoringState : refactoringStates) {
 			/*
