@@ -252,7 +252,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 	 * Checks whether the given expression is an initialization to zero
 	 * expression.
 	 */
-	private boolean isIniti alizedToZero(ASTNode initExpresion) {
+	private boolean isInitializedToZero(ASTNode initExpresion) {
 		boolean assignedToZero = false;
 //		if (ASTNode.ASSIGNMENT == initExpresion.getNodeType()) {
 //			Assignment assignment = (Assignment) initExpresion;
