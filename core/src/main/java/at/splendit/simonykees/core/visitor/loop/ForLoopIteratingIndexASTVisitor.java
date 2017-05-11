@@ -12,9 +12,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
@@ -32,46 +30,41 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
  * @author Ardit Ymeri
  * @since 1.2
  */
-class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
+abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 
-	private static final String OUTSIDE_LOOP_INDEX_DECLARATION = "outside-declaration-fragment"; //$NON-NLS-1$
-	private static final String LOOP_INITIALIZER = "loop-initializer"; //$NON-NLS-1$
-	private static final String LOOP_UPDATER = "loop-updater"; //$NON-NLS-1$
-	private static final String INTERNAL_INDEX_UPDATER = "internal-index-updater"; //$NON-NLS-1$
+	protected static final String OUTSIDE_LOOP_INDEX_DECLARATION = "outside-declaration-fragment"; //$NON-NLS-1$
+	protected static final String LOOP_INITIALIZER = "loop-initializer"; //$NON-NLS-1$
+	protected static final String LOOP_UPDATER = "loop-updater"; //$NON-NLS-1$
+	protected static final String INTERNAL_INDEX_UPDATER = "internal-index-updater"; //$NON-NLS-1$
 
 	private static final String PLUS_PLUS = "++"; //$NON-NLS-1$
 	private static final String PLUS = "+"; //$NON-NLS-1$
 	private static final String ONE = "1"; //$NON-NLS-1$
 	private static final String ZERO = "0"; //$NON-NLS-1$
-	private static final String GET = "get"; //$NON-NLS-1$
 	private static final String PLUS_EQUALS = "+="; //$NON-NLS-1$
 
-	private SimpleName iteratingIndexName;
-	private SimpleName newIteratorName;
-	private SimpleName iterableName;
 	private ForStatement forStatement;
 
 	private Map<String, ASTNode> indexInitializer;
 	private Map<String, ASTNode> indexUpdater;
 
-	private boolean insideLoop = false;
-	private boolean beforeLoop = true;
-	private boolean afterLoop = false;
-
-	private boolean indexReferencedOutsideLoop = false;
 	private boolean indexReferencedInsideLoop = false;
 	private boolean multipleLoopInits = false;
 	private boolean multipleLoopUpdaters = false;
 	private boolean hasEmptyStatement = false;
+	private boolean indexReferencedOutsideLoop = false;
 
-	private List<MethodInvocation> iteratingObjectInitializers;
+	private List<ASTNode> iteratingObjectInitializers;
 	private List<ASTNode> nodesToBeRemoved;
-	private VariableDeclarationFragment preferredNameFragment;
 
-	public ForLoopIteratingIndexASTVisitor(SimpleName iteratingIndexName, SimpleName iterableName,
+	
+	private boolean insideLoop = false;
+	private boolean beforeLoop = true;
+	private boolean afterLoop = false;
+
+	public ForLoopIteratingIndexASTVisitor(SimpleName iteratingIndexName,
 			ForStatement forStatement) {
-		this.iteratingIndexName = iteratingIndexName;
-		this.iterableName = iterableName;
+
 		this.forStatement = forStatement;
 		this.iteratingObjectInitializers = new ArrayList<>();
 		this.indexInitializer = new HashMap<>();
@@ -112,28 +105,16 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 		}
 
 	}
-
-	public VariableDeclarationFragment getPreferredNameFragment() {
-		return preferredNameFragment;
-	}
-
-	public List<ASTNode> getNodesToBeRemoved() {
-		return this.nodesToBeRemoved;
-	}
-
-	public SimpleName getIteratorName() {
-		return this.newIteratorName;
-	}
-
-	public List<MethodInvocation> getIteratorExpressions() {
-		return iteratingObjectInitializers;
-	}
+	
+	public abstract SimpleName getIteratorName();
+	
+	public abstract VariableDeclarationFragment getPreferredNameFragment();
 
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		return !multipleLoopInits && !multipleLoopUpdaters;
 	}
-
+	
 	@Override
 	public boolean visit(ForStatement node) {
 		if (node == forStatement) {
@@ -149,69 +130,6 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 			insideLoop = false;
 			afterLoop = true;
 		}
-	}
-
-	@Override
-	public boolean visit(SimpleName simpleName) {
-		IBinding resolvedBinding = simpleName.resolveBinding();
-		if (resolvedBinding != null && IBinding.VARIABLE == resolvedBinding.getKind()
-				&& simpleName.getIdentifier().equals(iteratingIndexName.getIdentifier())) {
-
-			ASTNode parent = simpleName.getParent();
-			if (beforeLoop) {
-				if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()) {
-					VariableDeclarationFragment declarationFragment = (VariableDeclarationFragment) parent;
-					indexInitializer.put(OUTSIDE_LOOP_INDEX_DECLARATION, declarationFragment);
-					nodesToBeRemoved.add(declarationFragment);
-
-				} else {
-					indexReferencedOutsideLoop = true;
-				}
-			} else if (insideLoop
-					&& (parent != indexInitializer.get(LOOP_INITIALIZER)
-							|| parent.getParent() != indexInitializer.get(LOOP_INITIALIZER))
-					&& parent != forStatement.getExpression() && (parent != indexInitializer.get(LOOP_UPDATER)
-							|| parent.getParent() != indexInitializer.get(LOOP_UPDATER))) {
-
-				if (ASTNode.METHOD_INVOCATION == parent.getNodeType()) {
-					MethodInvocation methodInvocation = (MethodInvocation) parent;
-					Expression methodExpression = methodInvocation.getExpression();
-
-					if (ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent().getNodeType()) {
-						this.hasEmptyStatement = true;
-					} else if (GET.equals(methodInvocation.getName().getIdentifier())
-							&& methodInvocation.arguments().size() == 1 && methodExpression != null
-							&& methodExpression.getNodeType() == ASTNode.SIMPLE_NAME
-							&& ((SimpleName) methodExpression).getIdentifier().equals(iterableName.getIdentifier())) {
-						iteratingObjectInitializers.add(methodInvocation);
-
-						if (newIteratorName == null
-								&& VariableDeclarationFragment.INITIALIZER_PROPERTY == methodInvocation
-										.getLocationInParent()) {
-							VariableDeclarationFragment fragment = (VariableDeclarationFragment) methodInvocation
-									.getParent();
-							this.newIteratorName = fragment.getName();
-							this.preferredNameFragment = fragment;
-						}
-
-					} else {
-						this.indexReferencedInsideLoop = true;
-					}
-				} else if (parent.getLocationInParent() != ForStatement.UPDATERS_PROPERTY
-						&& parent.getParent().getLocationInParent() != ForStatement.UPDATERS_PROPERTY
-						&& parent.getLocationInParent() != ForStatement.INITIALIZERS_PROPERTY
-						&& parent.getParent().getLocationInParent() != ForStatement.INITIALIZERS_PROPERTY
-						&& parent.getParent() != indexUpdater.get(INTERNAL_INDEX_UPDATER)
-						&& parent.getParent().getParent() != indexUpdater.get(INTERNAL_INDEX_UPDATER)) {
-
-					this.indexReferencedInsideLoop = true;
-				}
-			} else if (afterLoop) {
-				indexReferencedOutsideLoop = true;
-			}
-		}
-
-		return true;
 	}
 
 	/**
@@ -375,6 +293,64 @@ class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 
 	public ExpressionStatement getInternalIndexUpdater() {
 		return (ExpressionStatement) indexUpdater.get(INTERNAL_INDEX_UPDATER);
+	}
+	
+	protected void putIndexInitializer(String key, ASTNode node) {
+		indexInitializer.put(key, node);
+	}
+	
+	protected ForStatement getForStatment() {
+		return this.forStatement;
+	}
+	
+	protected ASTNode getIndexUpdater(String key) {
+		return indexUpdater.get(INTERNAL_INDEX_UPDATER);
+	}
+	
+	protected void setHasEmptyStatement() {
+		this.hasEmptyStatement = true;
+	}
+	
+	protected ASTNode getIndexInitializer(String key) {
+		return indexInitializer.get(key);
+	}
+	
+	protected void setIndexReferencedInsideLoop() {
+		this.indexReferencedInsideLoop = true;
+		
+	}
+
+	public List<ASTNode> getNodesToBeRemoved() {
+		return this.nodesToBeRemoved;
+	}
+
+	public List<ASTNode> getIteratingObjectInitializers() {
+		return iteratingObjectInitializers;
+	}
+	
+	protected void addIteratingObjectInitializer(ASTNode node) {
+		iteratingObjectInitializers.add(node);
+	}
+	
+	protected void markAsToBeRemoved(ASTNode node) {
+		nodesToBeRemoved.add(node);
+	}
+	
+	protected boolean isBeforeLoop() {
+		return beforeLoop;
+	}
+	
+	protected boolean isInsideLoop() {
+		return insideLoop;
+	}
+	
+	protected boolean isAfterLoop() {
+		return afterLoop;
+	}
+	
+	protected void setIndexReferencedOutsideLoop() {
+		this.indexReferencedOutsideLoop = true;
+		
 	}
 }
 

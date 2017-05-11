@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -42,6 +44,7 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String ITERATOR_FULLY_QUALLIFIED_NAME = "java.util.Iterator"; //$NON-NLS-1$
 	private static final String ITERABLE_FULLY_QUALIFIED_NAME = Iterable.class.getName();
 	private static final String SIZE = "size"; //$NON-NLS-1$
+	private static final String LENGTH = "length"; //$NON-NLS-1$
 	private static final String DEFAULT_ITERATOR_NAME = "iterator"; //$NON-NLS-1$
 	private static final String SMALLER_THAN = "<"; //$NON-NLS-1$
 	private static final String KEY_SEPARATOR = "->"; //$NON-NLS-1$
@@ -95,99 +98,125 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 			// if the condition of the for loop is an infix expression....
 			InfixExpression infixExpression = (InfixExpression) node.getExpression();
 			Expression rhs = infixExpression.getRightOperand();
+			Expression lhs = infixExpression.getLeftOperand();
 
+			// if the expression operator is '<' and lhs is a simple name...
 			if (SMALLER_THAN.equals(infixExpression.getOperator().toString())
-					&& ASTNode.METHOD_INVOCATION == rhs.getNodeType()) {
-				MethodInvocation condition = (MethodInvocation) rhs;
-				Expression conditionExpression = condition.getExpression();
-				if (conditionExpression != null && Expression.SIMPLE_NAME == conditionExpression.getNodeType()) {
-					SimpleName iterableNode = (SimpleName) conditionExpression;
-					ITypeBinding iterableTypeBinding = iterableNode.resolveTypeBinding();
+					&& Expression.SIMPLE_NAME == lhs.getNodeType()) {
+				SimpleName index = (SimpleName) lhs;
 
-					/*
-					 * ...and the right hand side of the infix expression is an
-					 * invocation of List::size in the iterable object
-					 */
-					if (ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
-							Collections.singletonList(ITERABLE_FULLY_QUALIFIED_NAME))
-							&& StringUtils.equals(SIZE, condition.getName().getIdentifier())
-							&& condition.arguments().isEmpty()) {
+				if (ASTNode.METHOD_INVOCATION == rhs.getNodeType()) {
+					MethodInvocation condition = (MethodInvocation) rhs;
+					Expression conditionExpression = condition.getExpression();
+					if (conditionExpression != null && Expression.SIMPLE_NAME == conditionExpression.getNodeType()) {
+						SimpleName iterableNode = (SimpleName) conditionExpression;
+						ITypeBinding iterableTypeBinding = iterableNode.resolveTypeBinding();
 
-						// ... and the left hand side is a simple name
-						Expression lhs = infixExpression.getLeftOperand();
-						if (Expression.SIMPLE_NAME == lhs.getNodeType()) {
-							SimpleName index = (SimpleName) lhs;
+						/*
+						 * ...and the right hand side of the infix expression is
+						 * an invocation of List::size in the iterable object
+						 */
+						if (ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
+								Collections.singletonList(ITERABLE_FULLY_QUALIFIED_NAME))
+								&& StringUtils.equals(SIZE, condition.getName().getIdentifier())
+								&& condition.arguments().isEmpty()) {
 
 							/*
 							 * Initiate a visitor for investigating the
 							 * replacement precondition and gathering the
 							 * replacement information
 							 */
-							ForLoopIteratingIndexASTVisitor indexVisitor = new ForLoopIteratingIndexASTVisitor(index,
-									iterableNode, node);
 							Block outerBlock = ASTNodeUtil.getSpecificAncestor(node, Block.class);
+							ForLoopIteratingIndexASTVisitor indexVisitor = new ForLoopOverListsASTVisitor(index,
+									iterableNode, node);
 							outerBlock.accept(indexVisitor);
+
 							if (indexVisitor.checkTransformPrecondition()) {
 								Type iteratorType = findIteratorType(iterableTypeBinding);
 								if (iteratorType != null) {
-									/*
-									 * invocations of List::get to be replaced
-									 * with the iterator object
-									 */
-									List<MethodInvocation> toBeReplaced = indexVisitor.getIteratorExpressions();
-									List<ASTNode> toBeRemoved = indexVisitor.getNodesToBeRemoved();
-									SimpleName firstIteratorName = indexVisitor.getIteratorName();
-									Statement loopBody = node.getBody();
-									// generate a safe iterator name
-									Map<String, Boolean> nameMap = generateNewIteratorName(firstIteratorName, loopBody);
-									String newIteratorIdentifier = nameMap.keySet().iterator().next();
-									storeTempName(node, newIteratorIdentifier);
-									boolean eligiblePreferredName = nameMap.get(newIteratorIdentifier);
-									if (eligiblePreferredName && indexVisitor.getPreferredNameFragment() != null) {
-										toBeRemoved.add(indexVisitor.getPreferredNameFragment());
-									}
-
-									// remove the redundant nodes
-									toBeRemoved.forEach(remove -> {
-										if (remove
-												.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-											VariableDeclarationStatement declStatement = (VariableDeclarationStatement) remove
-													.getParent();
-											if (declStatement.fragments().size() == 1) {
-												astRewrite.remove(declStatement, null);
-											}
-										}
-										astRewrite.remove(remove, null);
-									});
-
-									AST ast = astRewrite.getAST();
-
-									/*
-									 * replace the List::get invocations with
-									 * the new iterator
-									 */
-									toBeReplaced.forEach(target -> astRewrite.replace(target,
-											ast.newSimpleName(newIteratorIdentifier), null));
-
-									// create a declaration of the new iterator
-									SingleVariableDeclaration iteratorDecl = NodeBuilder.newSingleVariableDeclaration(
-											loopBody.getAST(), ast.newSimpleName(newIteratorIdentifier), iteratorType);
-
-									// create the new enhanced for loop
-									EnhancedForStatement newFor = NodeBuilder.newEnhancedForStatement(loopBody.getAST(),
-											(Statement) astRewrite.createCopyTarget(loopBody),
-											(Expression) astRewrite.createCopyTarget(iterableNode), iteratorDecl);
-
-									// replace the existing for loop with
-									astRewrite.replace(node, newFor, null);
+									replaceWithEnhancedFor(node, iterableNode, indexVisitor, iteratorType);
 								}
 							}
+						}
+					}
+
+				} else if (ASTNode.QUALIFIED_NAME == rhs.getNodeType()) {
+					QualifiedName condition = (QualifiedName) rhs;
+					Name qualifier = condition.getQualifier();
+					SimpleName name = condition.getName();
+
+					if (LENGTH.equals(name.getIdentifier()) && qualifier.isSimpleName()) {
+						SimpleName iterableNode = (SimpleName) qualifier;
+						ITypeBinding iterableTypeBinding = qualifier.resolveTypeBinding();
+						if (iterableTypeBinding.isArray()) {
+
+							Block outerBlock = ASTNodeUtil.getSpecificAncestor(node, Block.class);
+							ForLoopIteratingIndexASTVisitor indexVisitor = new ForLoopOverArraysASTVisitor(index,
+									iterableNode, node);
+							outerBlock.accept(indexVisitor);
+
+							if (indexVisitor.checkTransformPrecondition()) {
+								Type iteratorType = findIteratorType(iterableTypeBinding);
+								if (iteratorType != null) {
+									replaceWithEnhancedFor(node, iterableNode, indexVisitor, iteratorType);
+								}
+							}
+
 						}
 					}
 				}
 			}
 		}
 		return true;
+	}
+
+	private void replaceWithEnhancedFor(ForStatement node, SimpleName iterableNode,
+			ForLoopIteratingIndexASTVisitor indexVisitor, Type iteratorType) {
+		/*
+		 * invocations of List::get to be replaced with the iterator object
+		 */
+		List<ASTNode> toBeReplaced = indexVisitor.getIteratingObjectInitializers();
+		List<ASTNode> toBeRemoved = indexVisitor.getNodesToBeRemoved();
+		SimpleName firstIteratorName = indexVisitor.getIteratorName();
+		Statement loopBody = node.getBody();
+		// generate a safe iterator name
+		Map<String, Boolean> nameMap = generateNewIteratorName(firstIteratorName, loopBody);
+		String newIteratorIdentifier = nameMap.keySet().iterator().next();
+		storeTempName(node, newIteratorIdentifier);
+		boolean eligiblePreferredName = nameMap.get(newIteratorIdentifier);
+		if (eligiblePreferredName && indexVisitor.getPreferredNameFragment() != null) {
+			toBeRemoved.add(indexVisitor.getPreferredNameFragment());
+		}
+
+		// remove the redundant nodes
+		toBeRemoved.forEach(remove -> {
+			if (remove.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+				VariableDeclarationStatement declStatement = (VariableDeclarationStatement) remove.getParent();
+				if (declStatement.fragments().size() == 1) {
+					astRewrite.remove(declStatement, null);
+				}
+			}
+			astRewrite.remove(remove, null);
+		});
+
+		AST ast = astRewrite.getAST();
+
+		/*
+		 * replace the List::get invocations with the new iterator
+		 */
+		toBeReplaced.forEach(target -> astRewrite.replace(target, ast.newSimpleName(newIteratorIdentifier), null));
+
+		// create a declaration of the new iterator
+		SingleVariableDeclaration iteratorDecl = NodeBuilder.newSingleVariableDeclaration(loopBody.getAST(),
+				ast.newSimpleName(newIteratorIdentifier), iteratorType);
+
+		// create the new enhanced for loop
+		EnhancedForStatement newFor = NodeBuilder.newEnhancedForStatement(loopBody.getAST(),
+				(Statement) astRewrite.createCopyTarget(loopBody),
+				(Expression) astRewrite.createCopyTarget(iterableNode), iteratorDecl);
+
+		// replace the existing for loop with
+		astRewrite.replace(node, newFor, null);
 	}
 
 	private void storeTempName(ForStatement node, String newIteratorIdentifier) {
@@ -208,23 +237,24 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	private Type findIteratorType(ITypeBinding iterableTypeBinding) {
 		Type iteratorType = null;
+		ITypeBinding iteratorTypeBinding = null;
 		if (iterableTypeBinding.isParameterizedType()) {
 
 			ITypeBinding[] typeArguments = iterableTypeBinding.getTypeArguments();
 			if (typeArguments.length == 1) {
-				ITypeBinding iteratorTypeBinding = typeArguments[0];
-				if (iteratorTypeBinding != null) {
-					if (iteratorTypeBinding.getTypeBounds().length > 0) {
-						iteratorTypeBinding = iteratorTypeBinding.getTypeBounds()[0];
-					}
-					
-					if (!iteratorTypeBinding.getName().isEmpty()) {
-						ASTRewrite astRewrite = getAstRewrite();
-						ImportRewrite importRewrite = ImportRewrite.create(compilationUnit, true);
-						iteratorType = importRewrite.addImport(iteratorTypeBinding, astRewrite.getAST());
-					}
+				iteratorTypeBinding = typeArguments[0];
+				if (iteratorTypeBinding != null && iteratorTypeBinding.getTypeBounds().length > 0) {
+					iteratorTypeBinding = iteratorTypeBinding.getTypeBounds()[0];
 				}
 			}
+		} else if (iterableTypeBinding.isArray()) {
+			iteratorTypeBinding = iterableTypeBinding.getElementType();
+		}
+
+		if (iteratorTypeBinding != null && !iteratorTypeBinding.getName().isEmpty()) {
+			ASTRewrite astRewrite = getAstRewrite();
+			ImportRewrite importRewrite = ImportRewrite.create(compilationUnit, true);
+			iteratorType = importRewrite.addImport(iteratorTypeBinding, astRewrite.getAST());
 		}
 
 		return iteratorType;
@@ -278,29 +308,29 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		return nameMap;
 	}
-	
+
 	/**
-	 * Finds the scope where the statement belongs to. A scope 
-	 * is either the body of: 
+	 * Finds the scope where the statement belongs to. A scope is either the
+	 * body of:
 	 * <ul>
-	 * 	<li> a method</li>
-	 * 	<li> an initializer</li>
-	 * 	<li> a class/interface</li>
-	 *  <li> an enumeration</li>
-	 *  <li> an annotation declaration</li>
+	 * <li>a method</li>
+	 * <li>an initializer</li>
+	 * <li>a class/interface</li>
+	 * <li>an enumeration</li>
+	 * <li>an annotation declaration</li>
 	 * </ul>
 	 * 
-	 * @param statement a statement to look for the scope where it falls into.
+	 * @param statement
+	 *            a statement to look for the scope where it falls into.
 	 * @return an {@link ASTNode} representing either of the above
 	 */
 	private ASTNode findScopeOfLoop(Statement statement) {
 		ASTNode parent = statement.getParent();
 		while (parent != null && parent.getNodeType() != ASTNode.METHOD_DECLARATION
-				&& parent.getNodeType() != ASTNode.INITIALIZER 
-				&& parent.getNodeType() != ASTNode.TYPE_DECLARATION 
+				&& parent.getNodeType() != ASTNode.INITIALIZER && parent.getNodeType() != ASTNode.TYPE_DECLARATION
 				&& parent.getNodeType() != ASTNode.ENUM_DECLARATION
 				&& parent.getNodeType() != ASTNode.ANNOTATION_TYPE_DECLARATION) {
-			
+
 			parent = parent.getParent();
 		}
 		return parent;

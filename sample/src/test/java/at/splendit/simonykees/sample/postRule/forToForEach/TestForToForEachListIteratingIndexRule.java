@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.preRule;
+package at.splendit.simonykees.sample.postRule.forToForEach;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"nls", "unused", "rawtypes"})
-public class TestForToForEachIteratingIndexRule {
+public class TestForToForEachListIteratingIndexRule {
 	
 	private List<String> generateList(String input) {
 		return Arrays.asList(input.split(";"));
@@ -23,8 +23,8 @@ public class TestForToForEachIteratingIndexRule {
 	Runnable r = () -> {
 		List<String> fInterfaceRule = generateList("");
 		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i< fInterfaceRule.size(); i++) {
-			sb.append(fInterfaceRule.get(i));
+		for (String iterator1:fInterfaceRule){
+			sb.append(iterator1);
 		}
 	};
 	
@@ -34,8 +34,8 @@ public class TestForToForEachIteratingIndexRule {
 			String iterator;
 			List<String> fInterfaceRule = new ArrayList<>();
 			StringBuilder sb = new StringBuilder();
-			for(int i = 0; i< fInterfaceRule.size(); i++) {
-				sb.append(fInterfaceRule.get(i));
+			for (String iterator1:fInterfaceRule){
+				sb.append(iterator1);
 			}
 		};
 	}
@@ -61,10 +61,9 @@ public class TestForToForEachIteratingIndexRule {
 	public String testIeratingThroughListOfLists(String input) {
 		List<List<String>> nestedList = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < nestedList.size(); i++) {
-			List<String> val = nestedList.get(i);
-			for(int j = 0; j<val.size(); j++) {
-				sb.append(val.get(j));
+		for (List<String> val:nestedList){
+			for (String iterator:val){
+				sb.append(iterator);
 			}
 		}
 		return "";
@@ -73,10 +72,10 @@ public class TestForToForEachIteratingIndexRule {
 	public String testDublicateIteratorName(String input) {
 		List<String> fooList = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < fooList.size(); i++) {
-			sb.append(fooList.get(i));
-			for(int j = 0; j<fooList.size(); j++) {
-				sb.append(fooList.get(i) + input + fooList.get(j));
+		for (String iterator:fooList){
+			sb.append(iterator);
+			for (String iterator1:fooList){
+				sb.append(iterator + input + iterator1);
 			}
 		}
 		return "";
@@ -86,10 +85,9 @@ public class TestForToForEachIteratingIndexRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (int i = 0; i < foo.size(); i++) {
-			String s = foo.get(i);
+		for (String s:foo){
 			sb.append(s);
-			sb.append(foo.get(i));
+			sb.append(s);
 		}
 	}
 
@@ -98,9 +96,7 @@ public class TestForToForEachIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		int i;
-		for (i = 0; i < foo.size(); i++) {
-			String s = foo.get(i);
+		for (String s:foo){
 			sb.append(s);
 		}
 
@@ -112,17 +108,17 @@ public class TestForToForEachIteratingIndexRule {
 		List<String> foo = generateList(input);
 
 		StringBuilder sb = new StringBuilder();
-		int i = 0, j;
+		int j;
 		
-		for (i = 0; i < foo.size(); i++) {
+		for (String iterator:foo){
 			// i want my comments here
 			if(foo.size() > 0) {				
-				String s = foo.get(i);
-				"".equals(foo.get(i));
+				String s = iterator;
+				"".equals(iterator);
 				sb.append(s);
 			} else {
-				String s = foo.get(i), d;
-				"".equals(foo.get(i));
+				String s = iterator, d;
+				"".equals(iterator);
 				sb.append(s);
 			}
 
@@ -182,7 +178,7 @@ public class TestForToForEachIteratingIndexRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (int j = 0; j < foo.size(); j++) {
+		for (String iterator:foo){
 			int i = 0;
 			int k = 0;
 			String it = foo.get(i);
@@ -230,12 +226,10 @@ public class TestForToForEachIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		for (int i = 0; i < foo.size(); i++) {
-			String s = foo.get(i);
+		for (String s:foo){
 			s += ";";
 			sb.append(s);
-			for (int j = 0; j < secondFoo.size(); j++) {
-				String r = secondFoo.get(j);
+			for (String r:secondFoo){
 				sb.append(r);
 			}
 		}
@@ -248,12 +242,12 @@ public class TestForToForEachIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 		String s, t;
-		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext();) {
-			s = iterator.next();
+		for (String fooIterator2:foo){
+			s = fooIterator2;
 			s += ";";
 			sb.append(s);
-			for (Iterator<String> iterator2 = foo.iterator(); iterator2.hasNext();) {
-				t = iterator2.next();
+			for (String fooIterator:foo){
+				t = fooIterator;
 				sb.append(t);
 			}
 		}
@@ -267,12 +261,10 @@ public class TestForToForEachIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		for (int i = 0; i < foo.size(); i++) {
-			String s = foo.get(i);
+		for (String s:foo){
 			s += ";";
 			sb.append(s);
-			for (int j = 0; j < foo.size(); j++) {
-				String r = foo.get(j);
+			for (String r:foo){
 				sb.append(r);
 			}
 		}
@@ -287,16 +279,13 @@ public class TestForToForEachIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		for (int i = 0; i < stFoo.size(); i++) {
-			String s = stFoo.get(i);
+		for (String s:stFoo){
 			s += ";";
 			sb.append(s);
-			for (int j = 0; j < ndFoo.size(); j++) {
-				String n = ndFoo.get(j);
+			for (String n:ndFoo){
 				sb.append(n + ",");
-				for (int k = 0; k < rdFoo.size(); k++) {
-					String t = stFoo.get(i);
-					String r = rdFoo.get(k);
+				for (String r:rdFoo){
+					String t = s;
 					sb.append(r + t);
 				}
 			}
@@ -310,16 +299,12 @@ public class TestForToForEachIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		int i;
-		for (i = 0; i < foo.size(); i++) {
-			String it = foo.get(i);
+		for (String it:foo){
 			String someConstant = "const";
 			sb.append(it + someConstant);
 		}
 
-		int j;
-		for (j = 0; j < foo.size(); j++) {
-			String it = foo.get(j);
+		for (String it:foo){
 			String someConstant = "const";
 			sb.append(it + someConstant);
 		}
@@ -332,8 +317,7 @@ public class TestForToForEachIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 		if (foo != null) {
-			for (int i = 0; i < foo.size(); i++) {
-				String it = foo.get(i);
+			for (String it:foo){
 				String someConstant = "const";
 				sb.append(it + someConstant);
 			}
@@ -348,12 +332,11 @@ public class TestForToForEachIteratingIndexRule {
 		StringBuilder sb = new StringBuilder();
 		try {
 			if (foo != null) {
-				for (int i = 0; i < foo.size(); i++) {
+				for (String s:foo){
 					String someConstant = "const";
 					try {
-						sb.append(foo.get(i) + someConstant);
+						sb.append(s + someConstant);
 					} finally {
-						String s = foo.get(i);
 						sb.append(",");
 					}
 				}
@@ -409,30 +392,12 @@ public class TestForToForEachIteratingIndexRule {
 		return sb.toString();
 	}
 
-	public String testForToForEachWithArray(String input) {
-
-		List<String> foo = generateList(input);
-		// FIXME: SIM-159: forEach on the arrays is to be implemented
-		String[] ms = (String[]) foo.toArray();
-		StringBuilder sb = new StringBuilder();
-
-		for (int i = 0; i < ms.length; i++) {
-			String s = ms[i];
-			sb.append(s);
-		}
-
-		return sb.toString();
-	}
-
 	public String testIterateWithSizeNumberCollection(String input) {
 		List<? extends Number> foo = generateHashCodeList(input);
 
 		StringBuilder sb = new StringBuilder();
 
-		int i;
-		for (i = 0; i < foo.size(); i = i + 1) {
-			// FIXME SIM-212
-			Number s = foo.get(i);
+		for (Number s:foo){
 			sb.append(s.toString());
 		}
 
@@ -455,9 +420,7 @@ public class TestForToForEachIteratingIndexRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		int i;
-		for (i = 0; i < foo.size(); i+=1) {
-			String s = foo.get(i);
+		for (String s:foo){
 			sb.append(s);
 		}
 
@@ -468,11 +431,8 @@ public class TestForToForEachIteratingIndexRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		int i;
-		for (i = 0; i < foo.size();) {
-			String s = foo.get(i);
+		for (String s:foo){
 			sb.append(s);
-			i+=1;
 		}
 
 		return sb.toString();
@@ -482,9 +442,7 @@ public class TestForToForEachIteratingIndexRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		int i;
-		for (i = 0; i < foo.size(); ++i) {
-			String s = foo.get(i);
+		for (String s:foo){
 			sb.append(s);
 		}
 
