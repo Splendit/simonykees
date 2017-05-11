@@ -24,8 +24,8 @@ import at.splendit.simonykees.core.exception.SimonykeesException;
 import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.ui.LicenseUtil;
-import at.splendit.simonykees.core.ui.RefactoringPreviewWizard;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
+import at.splendit.simonykees.core.ui.preview.RefactoringPreviewWizard;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 

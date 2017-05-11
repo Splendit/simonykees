@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.ui;
+package at.splendit.simonykees.core.ui.preview;
 
 import java.util.Collections;
 import java.util.Map;
@@ -20,7 +20,6 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 public class PreviewNode {
 
 	private RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule;
-	// TODO do we even need the compilation unit?
 	private Map<ICompilationUnit, DocumentChange> changes;
 
 	public PreviewNode(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,

@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.ui;
+package at.splendit.simonykees.core.ui.preview;
 
 import java.util.Set;
 

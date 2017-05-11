@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.ui;
+package at.splendit.simonykees.core.ui.preview;
 
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
@@ -8,6 +8,7 @@ import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.ReconcileException;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
+import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 
 /**

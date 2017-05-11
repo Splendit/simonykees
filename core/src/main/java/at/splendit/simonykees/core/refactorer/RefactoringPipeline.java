@@ -24,7 +24,7 @@ import at.splendit.simonykees.core.exception.ReconcileException;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.ui.PreviewNode;
+import at.splendit.simonykees.core.ui.preview.PreviewNode;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.ExceptionMessages;
