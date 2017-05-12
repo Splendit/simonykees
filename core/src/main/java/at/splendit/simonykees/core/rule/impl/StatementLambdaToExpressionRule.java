@@ -4,6 +4,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.StatementLambdaToExpressionASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * @see StatementLambdaToExpressionASTVisitor
@@ -17,8 +18,8 @@ public class StatementLambdaToExpressionRule extends RefactoringRule<StatementLa
 	public StatementLambdaToExpressionRule(Class<StatementLambdaToExpressionASTVisitor> visitor) {
 		super(visitor);
 		// TODO i18n
-		this.name = "StatementLambdaToExpressionRule";
-		this.description = "StatementLambdaToExpressionRule";
+		this.name = Messages.StatementLambdaToExpressionRule_name;
+		this.description = Messages.StatementLambdaToExpressionRule_description;
 	}
 
 	@Override
