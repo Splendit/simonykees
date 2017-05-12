@@ -32,7 +32,9 @@ public class DiamondOperatorRule {
 	}
 
 	public void multipleDeclarationStatement(String input) {
-		List<String> list1 = new ArrayList<>(), list2 = new ArrayList<>(), list3 = new ArrayList<>();
+		List<String> list1 = new ArrayList<>();
+		List<String> list2 = new ArrayList<>();
+		List<String> list3 = new ArrayList<>();
 		list1.add(input);
 		list2.add(input);
 		list3.add(input);
@@ -51,7 +53,9 @@ public class DiamondOperatorRule {
 	}
 
 	public void multipleMapDeclarationStatement(String input) {
-		Map<String, Number> map1 = new HashMap<>(), map2 = new HashMap<>(), map3 = new HashMap<>();
+		Map<String, Number> map1 = new HashMap<>();
+		Map<String, Number> map2 = new HashMap<>();
+		Map<String, Number> map3 = new HashMap<>();
 		map1.put(input, 10);
 		map2.put(input, 11);
 		map3.put(input, 12);

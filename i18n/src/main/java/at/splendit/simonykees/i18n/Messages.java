@@ -13,6 +13,12 @@ public class Messages extends NLS {
 	public static String aa_codename;
 	public static String ui_ok;
 	public static String ui_cancel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_librariesLabel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_lineDelimiter;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_minJavaVersionLabel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
+	public static String AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 	public static String AbstractSelectRulesWizardPage_error_NoRulesSelected;
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
@@ -72,8 +78,13 @@ public class Messages extends NLS {
 	public static String LicenseValidator_cannot_reach_license_provider_on_validation_call;
 	public static String LicenseValidator_invalid_licensee_number;
 	public static String LicenseValidator_received_validation_response;
+	public static String LoggerRuleWizard_title;
+	public static String LoggerRuleWizardPage_description;
+	public static String LoggerRuleWizardPage_pageName;
 	public static String InefficientConstructorRule_description;
 	public static String InefficientConstructorRule_name;
+	public static String MultiVariableDeclarationLineRule_name;
+	public static String MultiVariableDeclarationLineRule_description;
 	public static String Java5Profile_profileName;
 	public static String Java7Profile_profileName;
 	public static String OrganiseImportsRule_description;
@@ -142,6 +153,8 @@ public class Messages extends NLS {
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_title;
 	public static String SimonykeesUpdateLicenseDialog_update_llicense_dialog_button;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_group_title;
+	public static String StatementLambdaToExpressionRule_description;
+	public static String StatementLambdaToExpressionRule_name;
 	public static String StringFormatLineSeparatorRule_description;
 	public static String StringFormatLineSeparatorRule_name;
 	public static String StringConcatToPlusRule_description;

@@ -5,7 +5,11 @@ import java.util.Optional;
 @SuppressWarnings({ "nls", "unused" })
 public class FieldNameConventionRule {
 	private static final String DONT_RENAME_ME = "";
-	private static String iNt, i$nt, sWitch, $int, _int;
+	private static String iNt;
+	private static String i$nt;
+	private static String sWitch;
+	private static String $int;
+	private static String _int;
 	private static String canBeRenamed = "expecting renaming";
 	private static String CAMEL_CASE_ME = "this can be converted to camel case";
 	private String string;
@@ -24,7 +28,8 @@ public class FieldNameConventionRule {
 	private String myVal = myval;
 	private String mon = myval$;
 	private String shadowedVar;
-	private String österreich, Österreich;
+	private String österreich;
+	private String Österreich;
 	private String[] myArray = { "my", "array" };
 	public Integer MyInt;
 

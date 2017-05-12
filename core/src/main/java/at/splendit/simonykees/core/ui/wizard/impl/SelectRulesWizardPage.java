@@ -4,7 +4,8 @@ package at.splendit.simonykees.core.ui.wizard.impl;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.fieldassist.AutoCompleteField;
+import org.eclipse.jface.fieldassist.ContentProposalAdapter;
+import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -14,6 +15,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -35,10 +37,10 @@ import at.splendit.simonykees.i18n.Messages;
  *
  */
 public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
-	
+
 	private Composite filterComposite;
-	
-	private final String EMPTY_PROFIL = Messages.SelectRulesWizardPage_EmptyProfileLabel; 
+
+	private final String EMPTY_PROFIL = Messages.SelectRulesWizardPage_EmptyProfileLabel;
 
 	private Label selectProfileLabel;
 	private Combo selectProfileCombo;
@@ -77,7 +79,17 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		nameFilterLabel.setText(Messages.SelectRulesWizardPage_filterByName);
 
 		nameFilterText = new Text(filterComposite, SWT.SEARCH | SWT.CANCEL | SWT.ICON_SEARCH);
-		new AutoCompleteField(nameFilterText, new TextContentAdapter(), ((SelectRulesWizardPageModel) model).getTags());
+
+		// content for autocomplete proposal window with specified size
+		SimpleContentProposalProvider proposalProvider = new SimpleContentProposalProvider(
+				((SelectRulesWizardPageModel) model).getTags());
+		ContentProposalAdapter proposalAdapter = new ContentProposalAdapter(nameFilterText, new TextContentAdapter(),
+				proposalProvider, null, null);
+		proposalProvider.setFiltering(true);
+		proposalAdapter.setPropagateKeys(true);
+		proposalAdapter.setProposalAcceptanceStyle(ContentProposalAdapter.PROPOSAL_REPLACE);
+		proposalAdapter.setPopupSize(new Point(100, 80));
+
 		nameFilterText.setMessage(Messages.SelectRulesWizardPage_searchString);
 		gridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
 		gridData.widthHint = 180;
@@ -87,7 +99,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				Text source = (Text) e.getSource();
-				((SelectRulesWizardPageControler) controler).nameFilterTextChanged(source.getText().trim().toLowerCase());
+				((SelectRulesWizardPageControler) controler)
+						.nameFilterTextChanged(source.getText().trim().toLowerCase());
 			}
 		});
 		// following doesn't work under Windows7
@@ -156,7 +169,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		gridData = new GridData();
 		gridData.horizontalSpan = 2;
 		removeDisabledRulesButton.setLayoutData(gridData);
-		
+
 		Dialog.applyDialogFont(parent);
 	}
 
@@ -260,7 +273,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		filterComposite.layout(true, true);
 		recalculateLayout();
 	}
-	
+
 	@Override
 	protected void doStatusUpdate() {
 		super.doStatusUpdate(null);

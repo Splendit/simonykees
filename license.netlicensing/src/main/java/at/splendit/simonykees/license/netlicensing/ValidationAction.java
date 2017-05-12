@@ -8,13 +8,15 @@ package at.splendit.simonykees.license.netlicensing;
  *
  */
 public enum ValidationAction {
-	CHECK_IN, CHECK_OUT, NONE;
-	
+	CHECK_IN,
+	CHECK_OUT,
+	NONE;
+
 	@SuppressWarnings("nls")
 	public static ValidationAction fromString(String action) {
 		ValidationAction validationAction = NONE;
-		
-		if(action != null) {
+
+		if (action != null) {
 			switch (action) {
 			case "check-in":
 				validationAction = CHECK_IN;
@@ -27,10 +29,10 @@ public enum ValidationAction {
 				break;
 			}
 		}
-		
+
 		return validationAction;
 	}
-	
+
 	@SuppressWarnings("nls")
 	public String toString() {
 		String action = "none";
@@ -47,7 +49,7 @@ public enum ValidationAction {
 			action = "none";
 			break;
 		}
-		
+
 		return action;
 	}
 

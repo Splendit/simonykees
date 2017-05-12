@@ -329,9 +329,7 @@ public class TestWhileToForEachRule {
 		String suffix = "";
 		String prefix = "";
 		for (String s : l) {
-			result = k.stream().map(key -> {
-				return s + "|" + key + ";";
-			}).collect(Collectors.toList());
+			result = k.stream().map(key -> s + "|" + key + ";").collect(Collectors.toList());
 
 			result.forEach(sb::append);
 		}
