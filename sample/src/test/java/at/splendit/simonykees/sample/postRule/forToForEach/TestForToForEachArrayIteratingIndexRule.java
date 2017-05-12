@@ -172,6 +172,18 @@ public class TestForToForEachArrayIteratingIndexRule {
 		return sb.toString();
 	}
 	
+	public String clashingWithMethodParamter(String iterator) {
+		
+		String[] ms = {"3", "1", "2"};
+		StringBuilder sb = new StringBuilder();
+		String iterator1;
+		for (String iterator2:ms){
+			sb.append(iterator2);
+		}
+
+		return sb.toString();
+	}
+	
 	/**
 	 * This collection is not subtype of {@code Iterable}.
 	 */

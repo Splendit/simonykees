@@ -141,6 +141,42 @@ public class TestForToForEachArrayIteratingIndexRule {
 		return sb.toString();
 	}
 
+	public String confusingDeclaringIndex(String input) {
+
+		List<String> foo = generateList(input);
+		MyCollection[] ms = { new MyCollection<>(), new MyCollection<>() };
+		StringBuilder sb = new StringBuilder();
+
+		if (foo.isEmpty()) {
+			int i = 1;
+			i++;
+		} else {
+			int i = 2;
+			i++;
+		}
+		Runnable r = () -> {
+			int i1 = 0;
+		};
+		for (MyCollection iterator : ms) {
+			String s = iterator.toString();
+			sb.append(s);
+		}
+
+		return sb.toString();
+	}
+
+	public String clashingWithMethodParamter(String iterator) {
+
+		String[] ms = { "3", "1", "2" };
+		StringBuilder sb = new StringBuilder();
+		String iterator1;
+		for (String iterator2 : ms) {
+			sb.append(iterator2);
+		}
+
+		return sb.toString();
+	}
+
 	private List<String> generateList(String input) {
 		return Arrays.asList(input.split(";"));
 	}

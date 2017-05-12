@@ -187,10 +187,11 @@ public class TestForToForEachArrayIteratingIndexRule {
 		return sb.toString();
 	}
 	
-	public String clashingWithMethodParamter(String itreator) {
+	public String clashingWithMethodParamter(String iterator) {
 		
 		String[] ms = {"3", "1", "2"};
 		StringBuilder sb = new StringBuilder();
+		String iterator1;
 		int i = 0;
 		for (i = 0; i < ms.length; i = i + 1) {
 			sb.append(ms[i]);
