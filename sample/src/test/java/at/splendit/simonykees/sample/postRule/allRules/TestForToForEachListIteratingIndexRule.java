@@ -93,7 +93,8 @@ public class TestForToForEachListIteratingIndexRule {
 				"".equals(iterator);
 				sb.append(s);
 			} else {
-				String s = iterator, d;
+				String s = iterator;
+				String d;
 				"".equals(iterator);
 				sb.append(s);
 			}
@@ -107,7 +108,8 @@ public class TestForToForEachListIteratingIndexRule {
 		List<String> foo = generateList(input);
 
 		StringBuilder sb = new StringBuilder();
-		int i = 0, j;
+		int i = 0;
+		int j;
 
 		for (i = 0; i <= foo.size(); i++) {
 			// i want my comments here
@@ -217,7 +219,8 @@ public class TestForToForEachListIteratingIndexRule {
 		List<String> foo = generateList(input);
 
 		StringBuilder sb = new StringBuilder();
-		String s, t;
+		String s;
+		String t;
 		for (String fooIterator2 : foo) {
 			s = fooIterator2;
 			s += ";";
@@ -345,7 +348,8 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		int i, a;
+		int i;
+		int a;
 		for (i = 0, a = 0; i < foo.size(); i++) {
 			String s = foo.get(i);
 			sb.append(s);
@@ -359,7 +363,8 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		int i, a;
+		int i;
+		int a;
 		for (i = 0, a = 0; i < foo.size(); i++, a++) {
 			String s = foo.get(i);
 			sb.append(s);
