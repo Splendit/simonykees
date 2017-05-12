@@ -153,6 +153,8 @@ public class Messages extends NLS {
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_title;
 	public static String SimonykeesUpdateLicenseDialog_update_llicense_dialog_button;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_group_title;
+	public static String StatementLambdaToExpressionRule_description;
+	public static String StatementLambdaToExpressionRule_name;
 	public static String StringFormatLineSeparatorRule_description;
 	public static String StringFormatLineSeparatorRule_name;
 	public static String StringConcatToPlusRule_description;

@@ -31,16 +31,12 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	{
-		Runnable r = () -> {
-			hashCode();
-		};
+		Runnable r = () -> hashCode();
 		r.run();
 	}
 
 	{
-		Runnable r = () -> {
-			getClass();
-		};
+		Runnable r = () -> getClass();
 		r.run();
 	}
 
@@ -68,15 +64,11 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	public Runnable getRunnableHash() {
-		return () -> {
-			hashCode();
-		};
+		return () -> hashCode();
 	}
 
 	public Runnable getRunnable() {
-		return () -> {
-			getClass();
-		};
+		return () -> getClass();
 	}
 
 }

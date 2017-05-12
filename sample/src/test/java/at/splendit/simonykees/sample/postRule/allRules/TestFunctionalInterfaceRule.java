@@ -41,15 +41,11 @@ public class TestFunctionalInterfaceRule {
 	@Test
 	public void test1() {
 
-		Runnable runnable = () -> {
-			log.debug("xx");
-		};
+		Runnable runnable = () -> log.debug("xx");
 
 		runnable.run();
 
-		MyClass mYClass = new MyClass(() -> {
-			log.debug("xy");
-		});
+		MyClass mYClass = new MyClass(() -> log.debug("xy"));
 
 		mYClass.test();
 

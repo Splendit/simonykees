@@ -24,6 +24,7 @@ import at.splendit.simonykees.core.rule.impl.RearrangeClassMembersRule;
 import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
+import at.splendit.simonykees.core.rule.impl.StatementLambdaToExpressionRule;
 import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
 import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
@@ -76,6 +77,8 @@ public class TagUtil {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE);
 		} else if (SerialVersionUidRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1);
+		} else if (StatementLambdaToExpressionRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA);
 		} else if (StringConcatToPlusRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION);
 		} else if (StringFormatLineSeparatorRule.class == clazz) {
