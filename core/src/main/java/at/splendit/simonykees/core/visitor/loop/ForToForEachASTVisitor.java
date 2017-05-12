@@ -41,8 +41,8 @@ import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
  */
 public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final String ITERATOR_FULLY_QUALLIFIED_NAME = "java.util.Iterator"; //$NON-NLS-1$
-	private static final String ITERABLE_FULLY_QUALIFIED_NAME = Iterable.class.getName();
+	private static final String ITERATOR_FULLY_QUALLIFIED_NAME = java.util.Iterator.class.getName();
+	private static final String ITERABLE_FULLY_QUALIFIED_NAME = java.lang.Iterable.class.getName();
 	private static final String SIZE = "size"; //$NON-NLS-1$
 	private static final String LENGTH = "length"; //$NON-NLS-1$
 	private static final String DEFAULT_ITERATOR_NAME = "iterator"; //$NON-NLS-1$

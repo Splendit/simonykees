@@ -22,7 +22,7 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  */
 public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
+	private static String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
 
 	private List<MethodInvocation> methodInvocationSkipList;
 
