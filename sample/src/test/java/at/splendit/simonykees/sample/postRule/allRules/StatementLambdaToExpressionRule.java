@@ -15,6 +15,8 @@ public class StatementLambdaToExpressionRule {
 
 	private Function<Function, Function> g = (Function function) -> function.compose(function);
 
+	private String elementString;
+
 	private void testMethod(List<Integer> list) {
 		list.stream().map(element -> element * 2);
 		list.stream().map(element -> {
@@ -23,5 +25,12 @@ public class StatementLambdaToExpressionRule {
 			return element;
 		});
 		list.stream().map(element -> element * 2);
+		list.forEach(element -> doSomething(element));
+		list.forEach(element -> elementString = element.toString());
+		list.forEach(element -> Integer.valueOf(1));
+	}
+
+	private void doSomething(int element) {
+		System.out.println(element);
 	}
 }
