@@ -227,7 +227,8 @@ public class TestForToForEachRule {
 		List<String> foo = generateList(input);
 
 		StringBuilder sb = new StringBuilder();
-		String s, t;
+		String s;
+		String t;
 		for (String fooIterator2 : foo) {
 			s = fooIterator2;
 			s += ";";
@@ -366,7 +367,8 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		int i, a;
+		int i;
+		int a;
 		for (i = 0, a = 0; i < foo.size(); i++) {
 			String s = foo.get(i);
 			sb.append(s);
@@ -380,7 +382,8 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		int i, a;
+		int i;
+		int a;
 		for (i = 0, a = 0; i < foo.size(); i++, a++) {
 			String s = foo.get(i);
 			sb.append(s);

@@ -74,7 +74,8 @@ public class TestFunctionalInterfaceRule {
 	}
 
 	public void clashingLocalVariableNames(int l) {
-		int a, a1;
+		int a;
+		int a1;
 		a = 5;
 		a1 = 6;
 		int a4 = 8;
