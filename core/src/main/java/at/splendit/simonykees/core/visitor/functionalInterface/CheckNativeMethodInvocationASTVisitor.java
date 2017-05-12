@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  */
 class CheckNativeMethodInvocationASTVisitor extends ASTVisitor {
 
-	private static String OBJECT = "java.lang.Object"; //$NON-NLS-1$
+	private static String OBJECT = java.lang.Object.class.getName();
 
 	private boolean nonObjectMethodsInvocated = true;
 

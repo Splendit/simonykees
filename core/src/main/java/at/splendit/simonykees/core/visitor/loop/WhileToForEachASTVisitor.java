@@ -21,7 +21,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public class WhileToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static String ITERATOR_FULLY_QUALLIFIED_NAME = "java.util.Iterator"; //$NON-NLS-1$
+	private static String ITERATOR_FULLY_QUALLIFIED_NAME = java.util.Iterator.class.getName();
 
 	// private SimpleName iterationVariable = null;
 
