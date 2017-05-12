@@ -48,7 +48,7 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 				return newFieldDeclaration;
 			}).collect(Collectors.toList());
 
-			writeNewDeclation(fieldDeclaration, newFieldDeclarations);
+			writeNewDeclaration(fieldDeclaration, newFieldDeclarations);
 		}
 
 		return true;
@@ -77,7 +77,7 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 						return newVariableDeclarationStatement;
 					}).collect(Collectors.toList());
 
-			writeNewDeclation(variableDeclarationStatement, newVariableDeclarationStatements);
+			writeNewDeclaration(variableDeclarationStatement, newVariableDeclarationStatements);
 		}
 
 		return true;
@@ -89,7 +89,7 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 	 * @param declaration starting {@link ASTNode} from which the addition fragment nodes are appended
 	 * @param declarations fragments that are added to the listRewrite List
 	 */
-	private void writeNewDeclation(ASTNode declaration, List<? extends ASTNode> declarations) {
+	private void writeNewDeclaration(ASTNode declaration, List<? extends ASTNode> declarations) {
 		StructuralPropertyDescriptor locationInParent = declaration.getLocationInParent();
 		if (locationInParent instanceof ChildListPropertyDescriptor) {
 			ListRewrite listRewrite = astRewrite.getListRewrite(declaration.getParent(),
