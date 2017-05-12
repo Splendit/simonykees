@@ -1,6 +1,10 @@
 package at.splendit.simonykees.core.visitor.loop;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -9,7 +13,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
- * 
+ * A visitor for checking the precondition of replacing a for loop 
+ * iterating over a {@link List} with an {@link EnhancedForStatement}.
  * 
  * @author Ardit Ymeri
  * @since 1.2
@@ -25,8 +30,8 @@ class ForLoopOverListsASTVisitor extends ForLoopIteratingIndexASTVisitor {
 	private VariableDeclarationFragment preferredNameFragment;
 	
 	public ForLoopOverListsASTVisitor(SimpleName iteratingIndexName, SimpleName iterableName,
-			ForStatement forStatement) {
-		super(iteratingIndexName, forStatement);	
+			ForStatement forStatement, Block scopeBlock) {
+		super(iteratingIndexName, forStatement, scopeBlock);	
 		this.iteratingIndexName = iteratingIndexName;
 		this.iterableName = iterableName;
 		this.forStatement = super.getForStatment();
@@ -40,19 +45,8 @@ class ForLoopOverListsASTVisitor extends ForLoopIteratingIndexASTVisitor {
 
 			ASTNode parent = simpleName.getParent();
 			if (isBeforeLoop()) {
-				if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()) {
-					VariableDeclarationFragment declarationFragment = (VariableDeclarationFragment) parent;
-					putIndexInitializer(OUTSIDE_LOOP_INDEX_DECLARATION, declarationFragment);
-					markAsToBeRemoved(declarationFragment);
-
-				} else {
-					setIndexReferencedOutsideLoop();
-				}
-			} else if (isInsideLoop()
-					&& (parent != getIndexInitializer(LOOP_INITIALIZER)
-							|| parent.getParent() != getIndexInitializer(LOOP_INITIALIZER))
-					&& parent != forStatement.getExpression() && (parent != getIndexInitializer(LOOP_UPDATER)
-							|| parent.getParent() != getIndexInitializer(LOOP_UPDATER))) {
+				analyseBeforeLoopOccurrence(simpleName);
+			} else if (isInsideLoop() && !isLoopProperty(simpleName)) {
 
 				if (ASTNode.METHOD_INVOCATION == parent.getNodeType()) {
 					MethodInvocation methodInvocation = (MethodInvocation) parent;

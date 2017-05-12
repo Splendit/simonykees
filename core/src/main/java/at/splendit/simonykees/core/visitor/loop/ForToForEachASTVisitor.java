@@ -46,7 +46,6 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String SIZE = "size"; //$NON-NLS-1$
 	private static final String LENGTH = "length"; //$NON-NLS-1$
 	private static final String DEFAULT_ITERATOR_NAME = "iterator"; //$NON-NLS-1$
-	private static final String SMALLER_THAN = "<"; //$NON-NLS-1$
 	private static final String KEY_SEPARATOR = "->"; //$NON-NLS-1$
 
 	private Map<ForStatement, LoopOptimizationASTVisior> replaceInformationASTVisitorList;
@@ -101,7 +100,7 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 			Expression lhs = infixExpression.getLeftOperand();
 
 			// if the expression operator is '<' and lhs is a simple name...
-			if (SMALLER_THAN.equals(infixExpression.getOperator().toString())
+			if (InfixExpression.Operator.LESS.equals(infixExpression.getOperator())
 					&& Expression.SIMPLE_NAME == lhs.getNodeType()) {
 				SimpleName index = (SimpleName) lhs;
 
@@ -128,7 +127,7 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 							 */
 							Block outerBlock = ASTNodeUtil.getSpecificAncestor(node, Block.class);
 							ForLoopIteratingIndexASTVisitor indexVisitor = new ForLoopOverListsASTVisitor(index,
-									iterableNode, node);
+									iterableNode, node, outerBlock);
 							outerBlock.accept(indexVisitor);
 
 							if (indexVisitor.checkTransformPrecondition()) {
@@ -152,7 +151,7 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 
 							Block outerBlock = ASTNodeUtil.getSpecificAncestor(node, Block.class);
 							ForLoopIteratingIndexASTVisitor indexVisitor = new ForLoopOverArraysASTVisitor(index,
-									iterableNode, node);
+									iterableNode, node, outerBlock);
 							outerBlock.accept(indexVisitor);
 
 							if (indexVisitor.checkTransformPrecondition()) {
@@ -177,10 +176,10 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 		 */
 		List<ASTNode> toBeReplaced = indexVisitor.getIteratingObjectInitializers();
 		List<ASTNode> toBeRemoved = indexVisitor.getNodesToBeRemoved();
-		SimpleName firstIteratorName = indexVisitor.getIteratorName();
+		SimpleName preferredIteratorName = indexVisitor.getIteratorName();
 		Statement loopBody = node.getBody();
 		// generate a safe iterator name
-		Map<String, Boolean> nameMap = generateNewIteratorName(firstIteratorName, loopBody);
+		Map<String, Boolean> nameMap = generateNewIteratorName(preferredIteratorName, loopBody);
 		String newIteratorIdentifier = nameMap.keySet().iterator().next();
 		storeTempName(node, newIteratorIdentifier);
 		boolean eligiblePreferredName = nameMap.get(newIteratorIdentifier);

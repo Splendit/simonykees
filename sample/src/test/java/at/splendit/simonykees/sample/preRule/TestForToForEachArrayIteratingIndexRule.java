@@ -158,6 +158,47 @@ public class TestForToForEachArrayIteratingIndexRule {
 		return sb.toString();
 	}
 	
+	public String confusingDeclaringIndex(String input) {
+
+		List<String> foo = generateList(input);
+		MyCollection[] ms = {new MyCollection<>(), new MyCollection<>()};
+		StringBuilder sb = new StringBuilder();
+
+		if(foo.isEmpty()) {
+			int i = 1;
+			i++;
+		} else {
+			int i = 2;
+			i++;
+		}
+		int i = 0;
+		
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				int i = 0;
+			}
+		};
+		for (i = 0; i < ms.length; i++) {
+			String s = ms[i].toString();
+			sb.append(s);
+		}
+
+		return sb.toString();
+	}
+	
+	public String clashingWithMethodParamter(String itreator) {
+		
+		String[] ms = {"3", "1", "2"};
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		for (i = 0; i < ms.length; i = i + 1) {
+			sb.append(ms[i]);
+		}
+
+		return sb.toString();
+	}
+	
 	/**
 	 * This collection is not subtype of {@code Iterable}.
 	 */

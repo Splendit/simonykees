@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
@@ -37,39 +38,33 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 	protected static final String LOOP_UPDATER = "loop-updater"; //$NON-NLS-1$
 	protected static final String INTERNAL_INDEX_UPDATER = "internal-index-updater"; //$NON-NLS-1$
 
-	private static final String PLUS_PLUS = "++"; //$NON-NLS-1$
-	private static final String PLUS = "+"; //$NON-NLS-1$
 	private static final String ONE = "1"; //$NON-NLS-1$
 	private static final String ZERO = "0"; //$NON-NLS-1$
-	private static final String PLUS_EQUALS = "+="; //$NON-NLS-1$
 
 	private ForStatement forStatement;
-
 	private Map<String, ASTNode> indexInitializer;
 	private Map<String, ASTNode> indexUpdater;
-
 	private boolean indexReferencedInsideLoop = false;
 	private boolean multipleLoopInits = false;
 	private boolean multipleLoopUpdaters = false;
 	private boolean hasEmptyStatement = false;
 	private boolean indexReferencedOutsideLoop = false;
-
 	private List<ASTNode> iteratingObjectInitializers;
 	private List<ASTNode> nodesToBeRemoved;
-
-	
 	private boolean insideLoop = false;
 	private boolean beforeLoop = true;
 	private boolean afterLoop = false;
+	private Block parentBlock;
 
 	public ForLoopIteratingIndexASTVisitor(SimpleName iteratingIndexName,
-			ForStatement forStatement) {
+			ForStatement forStatement, Block scopeBlock) {
 
 		this.forStatement = forStatement;
 		this.iteratingObjectInitializers = new ArrayList<>();
 		this.indexInitializer = new HashMap<>();
 		this.indexUpdater = new HashMap<>();
 		this.nodesToBeRemoved = new ArrayList<>();
+		this.parentBlock = scopeBlock;
 
 		List<Expression> initializers = ASTNodeUtil.returnTypedList(forStatement.initializers(), Expression.class);
 		if (initializers.size() == 1) {
@@ -103,7 +98,6 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 				}
 			}
 		}
-
 	}
 	
 	public abstract SimpleName getIteratorName();
@@ -112,7 +106,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 
 	@Override
 	public boolean preVisit2(ASTNode node) {
-		return !multipleLoopInits && !multipleLoopUpdaters;
+		return this.parentBlock == forStatement.getParent() && !multipleLoopInits && !multipleLoopUpdaters;
 	}
 	
 	@Override
@@ -132,6 +126,25 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 		}
 	}
 
+	@Override
+	public boolean visit(AnonymousClassDeclaration node) {
+		// Anonymous classes have their own scope
+		return false;
+	}
+	
+	public boolean visit(Block block) {
+		boolean visitBlock = true;
+		/*
+		 * inner blocks before declaration of the loop initializer
+		 * have their own loop
+		 */
+		if(block != parentBlock && isBeforeLoop() && getIndexInitializer(OUTSIDE_LOOP_INDEX_DECLARATION) == null) {
+			visitBlock = false;
+		}
+		
+		return visitBlock;
+	}
+	
 	/**
 	 * Checks if the given expression is incrementing the given operand by 1.
 	 * The following three cases are considered:
@@ -159,7 +172,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 			Expression operand = postfixExpression.getOperand();
 			if (ASTNode.SIMPLE_NAME == operand.getNodeType()
 					&& ((SimpleName) operand).getIdentifier().equals(operandName.getIdentifier())
-					&& PLUS_PLUS.equals(postfixExpression.getOperator().toString())) {
+					&& PostfixExpression.Operator.INCREMENT.equals(postfixExpression.getOperator())) {
 
 				isIncrement = true;
 			}
@@ -183,7 +196,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 					 * 		operand = 1 + operand; 
 					 * 
 					 */
-					if (PLUS.equals(infixExpression.getOperator().toString()) && ((ASTNode.SIMPLE_NAME == leftOperand.getNodeType()
+					if (InfixExpression.Operator.PLUS.equals(infixExpression.getOperator()) && ((ASTNode.SIMPLE_NAME == leftOperand.getNodeType()
 							&& ((SimpleName) leftOperand).getIdentifier().equals(operandName.getIdentifier())
 							&& ASTNode.NUMBER_LITERAL == rightOperand.getNodeType()
 							&& ONE.equals(((NumberLiteral) rightOperand).getToken()))
@@ -196,9 +209,8 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 					}
 				} else if (ASTNode.NUMBER_LITERAL == rhs.getNodeType()) {
 					// covers the case: operand += 1;
-					String operator = assignmentExpression.getOperator().toString();
 					String numLiteral = ((NumberLiteral)rhs).getToken();
-					if(ONE.equals(numLiteral) && PLUS_EQUALS.equals(operator)) {
+					if(ONE.equals(numLiteral) && Assignment.Operator.PLUS_ASSIGN.equals(assignmentExpression.getOperator())) {
 						isIncrement = true;
 					}
 					
@@ -211,7 +223,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 			Expression operand = postfixExpression.getOperand();
 			if (ASTNode.SIMPLE_NAME == operand.getNodeType()
 					&& ((SimpleName) operand).getIdentifier().equals(operandName.getIdentifier())
-					&& PLUS_PLUS.equals(postfixExpression.getOperator().toString())) {
+					&& PrefixExpression.Operator.INCREMENT.equals(postfixExpression.getOperator())) {
 				isIncrement = true;
 			}
 		}
@@ -304,7 +316,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 	}
 	
 	protected ASTNode getIndexUpdater(String key) {
-		return indexUpdater.get(INTERNAL_INDEX_UPDATER);
+		return indexUpdater.get(key);
 	}
 	
 	protected void setHasEmptyStatement() {
@@ -350,7 +362,35 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 	
 	protected void setIndexReferencedOutsideLoop() {
 		this.indexReferencedOutsideLoop = true;
+	}
+	
+	protected Block getForStatementParent() {
+		return this.parentBlock;
+	}
+
+	protected boolean isLoopProperty(SimpleName simpleName) {
+		ASTNode parent = simpleName.getParent();
+		ASTNode grandParent = parent.getParent();
 		
+		return parent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY
+				|| grandParent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY
+				|| parent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY
+				|| grandParent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY
+				|| parent.getLocationInParent() == ForStatement.EXPRESSION_PROPERTY
+				|| grandParent == getIndexUpdater(INTERNAL_INDEX_UPDATER)
+				|| grandParent.getParent() == getIndexUpdater(INTERNAL_INDEX_UPDATER);
+	}
+
+	protected void analyseBeforeLoopOccurrence(SimpleName simpleName) {
+		ASTNode parent = simpleName.getParent();
+		if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()) {
+			VariableDeclarationFragment declarationFragment = (VariableDeclarationFragment) parent;
+			putIndexInitializer(OUTSIDE_LOOP_INDEX_DECLARATION, declarationFragment);
+			markAsToBeRemoved(declarationFragment);
+	
+		} else {
+			setIndexReferencedOutsideLoop();
+		}
 	}
 }
 
