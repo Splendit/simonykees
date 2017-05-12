@@ -32,7 +32,17 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 		ASTNode lambdaBody = lambdaExpression.getBody();
 		if (lambdaBody instanceof Block) {
 			Block block = (Block) lambdaBody;
-			if (block.statements().size() == 1) {
+			boolean hasExplicitReturnStatement = false;
+			if(block.statements().size() == 2) {
+				Statement statement = (Statement) block.statements().get(1);
+				if(statement instanceof ReturnStatement) {
+					ReturnStatement returnStatement = (ReturnStatement) statement;
+					if(returnStatement.getExpression() == null) {
+						hasExplicitReturnStatement = true;
+					}
+				}
+			}
+			if (block.statements().size() == 1 || hasExplicitReturnStatement) {
 				// change to expression
 				Statement statement = (Statement) block.statements().get(0);
 				if (statement instanceof ReturnStatement) {

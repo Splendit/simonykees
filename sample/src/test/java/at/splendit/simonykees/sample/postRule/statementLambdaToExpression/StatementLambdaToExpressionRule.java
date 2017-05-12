@@ -28,6 +28,7 @@ public class StatementLambdaToExpressionRule {
 		list.forEach(element -> doSomething(element));
 		list.forEach(element -> elementString = element.toString());
 		list.forEach(element -> new Integer(1));
+		list.forEach(element -> doSomething(element));
 	}
 
 	private void doSomething(int element) {

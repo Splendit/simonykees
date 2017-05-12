@@ -38,6 +38,10 @@ public class StatementLambdaToExpressionRule {
 		list.forEach(element -> {
 			new Integer(1);
 		});
+		list.forEach(element -> {
+			doSomething(element);
+			return;
+		});
 	}
 
 	private void doSomething(int element) {
