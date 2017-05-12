@@ -368,6 +368,15 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 		return this.parentBlock;
 	}
 
+	/**
+	 * Checks whether the given simpleName is occurring in the 
+	 * properties of a for loop (i.e. loop initializer, loop expression
+	 * or loop updater).
+	 *  
+	 * @param simpleName simpleName to be checked.
+	 * @return {@code true} if the simpleName is occurring 
+	 * in the for loop properties. 
+	 */
 	protected boolean isLoopProperty(SimpleName simpleName) {
 		ASTNode parent = simpleName.getParent();
 		ASTNode grandParent = parent.getParent();
@@ -381,10 +390,18 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 				|| grandParent.getParent() == getIndexUpdater(INTERNAL_INDEX_UPDATER);
 	}
 
+	/**
+	 * Checks whether the given simpleName is the name property
+	 * of a {@link VariableDeclarationFragment}. Otherwise, a flag
+	 * is stored for indicating that the simpleName is referenced
+	 * outside the loop.
+	 *  
+	 * @param simpleName
+	 */
 	protected void analyseBeforeLoopOccurrence(SimpleName simpleName) {
-		ASTNode parent = simpleName.getParent();
-		if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()) {
-			VariableDeclarationFragment declarationFragment = (VariableDeclarationFragment) parent;
+		
+		if (VariableDeclarationFragment.NAME_PROPERTY == simpleName.getLocationInParent()) {
+			VariableDeclarationFragment declarationFragment = (VariableDeclarationFragment) simpleName.getParent();
 			putIndexInitializer(OUTSIDE_LOOP_INDEX_DECLARATION, declarationFragment);
 			markAsToBeRemoved(declarationFragment);
 	

@@ -25,7 +25,6 @@ class ForLoopOverListsASTVisitor extends ForLoopIteratingIndexASTVisitor {
 	
 	private SimpleName iteratingIndexName;
 	private SimpleName iterableName;
-	private ForStatement forStatement;
 	private SimpleName newIteratorName;
 	private VariableDeclarationFragment preferredNameFragment;
 	
@@ -34,7 +33,6 @@ class ForLoopOverListsASTVisitor extends ForLoopIteratingIndexASTVisitor {
 		super(iteratingIndexName, forStatement, scopeBlock);	
 		this.iteratingIndexName = iteratingIndexName;
 		this.iterableName = iterableName;
-		this.forStatement = super.getForStatment();
 	}
 
 	@Override
@@ -53,13 +51,20 @@ class ForLoopOverListsASTVisitor extends ForLoopIteratingIndexASTVisitor {
 					Expression methodExpression = methodInvocation.getExpression();
 
 					if (ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent().getNodeType()) {
+						/*
+						 * replacing the expression statement with a variable name leads to compile error
+						 */
 						setHasEmptyStatement();
 					} else if (GET.equals(methodInvocation.getName().getIdentifier())
 							&& methodInvocation.arguments().size() == 1 && methodExpression != null
 							&& methodExpression.getNodeType() == ASTNode.SIMPLE_NAME
 							&& ((SimpleName) methodExpression).getIdentifier().equals(iterableName.getIdentifier())) {
+						/*
+						 * simpleName is the parameter of the get() method in the iterable object. 
+						 */
 						addIteratingObjectInitializer(methodInvocation);
 
+						// store the preferred iterator name
 						if (newIteratorName == null
 								&& VariableDeclarationFragment.INITIALIZER_PROPERTY == methodInvocation
 										.getLocationInParent()) {
@@ -72,13 +77,7 @@ class ForLoopOverListsASTVisitor extends ForLoopIteratingIndexASTVisitor {
 					} else {
 						setIndexReferencedInsideLoop();
 					}
-				} else if (parent.getLocationInParent() != ForStatement.UPDATERS_PROPERTY
-						&& parent.getParent().getLocationInParent() != ForStatement.UPDATERS_PROPERTY
-						&& parent.getLocationInParent() != ForStatement.INITIALIZERS_PROPERTY
-						&& parent.getParent().getLocationInParent() != ForStatement.INITIALIZERS_PROPERTY
-						&& parent.getParent() != getIndexUpdater(INTERNAL_INDEX_UPDATER)
-						&& parent.getParent().getParent() != getIndexUpdater(INTERNAL_INDEX_UPDATER)) {
-
+				} else {
 					setIndexReferencedInsideLoop();
 				}
 			} else if (isAfterLoop()) {
