@@ -15,6 +15,7 @@ import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
+import at.splendit.simonykees.core.rule.impl.LambdaToMethodReferenceRule;
 import at.splendit.simonykees.core.rule.impl.MultiCatchRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
 import at.splendit.simonykees.core.rule.impl.OverrideAnnotationRule;
@@ -57,6 +58,8 @@ public class TagUtil {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.LAMBDA);
 		} else if (InefficientConstructorRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE);
+		} else if (LambdaToMethodReferenceRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_8);
 		} else if (MultiCatchRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS);
 		} else if (OrganiseImportsRule.class == clazz) {
