@@ -55,6 +55,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 	private boolean beforeLoop = true;
 	private boolean afterLoop = false;
 	private Block parentBlock;
+	private boolean prequisite = false;
 
 	public ForLoopIteratingIndexASTVisitor(SimpleName iteratingIndexName,
 			ForStatement forStatement, Block scopeBlock) {
@@ -106,7 +107,8 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 
 	@Override
 	public boolean preVisit2(ASTNode node) {
-		return this.parentBlock == forStatement.getParent() && !multipleLoopInits && !multipleLoopUpdaters;
+		this.prequisite =  this.parentBlock == ASTNodeUtil.getSpecificAncestor(forStatement, Block.class) && !multipleLoopInits && !multipleLoopUpdaters;
+		return prequisite;
 	}
 	
 	@Override
@@ -295,7 +297,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends ASTVisitor {
 	}
 
 	public boolean checkTransformPrecondition() {
-		return !hasEmptyStatement && !indexReferencedInsideLoop && !indexReferencedOutsideLoop && isIndexInitToZero()
+		return prequisite && !hasEmptyStatement && !indexReferencedInsideLoop && !indexReferencedOutsideLoop && isIndexInitToZero()
 				&& isIndexIncremented();
 	}
 

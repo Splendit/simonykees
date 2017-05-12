@@ -7,6 +7,23 @@ import java.util.List;
 @SuppressWarnings({ "nls", "unused", "rawtypes" })
 public class TestForToForEachArrayIteratingIndexRule {
 
+	public String multiDimensionArrayUnderIf(String input) {
+
+		String[][] ms = { { "3", "1", "2" }, { "5", "6", "7" }, { "8", "9", "4" } };
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		if (sb != null) {
+			for (String[] inner : ms) {
+				String[] another = inner;
+				for (String iterator : inner) {
+					sb.append(iterator);
+				}
+			}
+		}
+
+		return sb.toString();
+	}
+
 	public String testForToForEachWithArray(String input) {
 
 		List<String> foo = generateList(input);
@@ -172,6 +189,20 @@ public class TestForToForEachArrayIteratingIndexRule {
 		String iterator1;
 		for (String iterator2 : ms) {
 			sb.append(iterator2);
+		}
+
+		return sb.toString();
+	}
+
+	public String multiDimensionArray(String input) {
+
+		String[][] ms = { { "3", "1", "2" }, { "5", "6", "7" }, { "8", "9", "4" } };
+		StringBuilder sb = new StringBuilder();
+		for (String[] inner : ms) {
+			String[] another = inner;
+			for (String iterator : inner) {
+				sb.append(iterator);
+			}
 		}
 
 		return sb.toString();

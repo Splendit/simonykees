@@ -105,6 +105,7 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 				SimpleName index = (SimpleName) lhs;
 
 				if (ASTNode.METHOD_INVOCATION == rhs.getNodeType()) {
+					// iterating over Lists
 					MethodInvocation condition = (MethodInvocation) rhs;
 					Expression conditionExpression = condition.getExpression();
 					if (conditionExpression != null && Expression.SIMPLE_NAME == conditionExpression.getNodeType()) {
@@ -140,6 +141,7 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 					}
 
 				} else if (ASTNode.QUALIFIED_NAME == rhs.getNodeType()) {
+					// iterating over arrays
 					QualifiedName condition = (QualifiedName) rhs;
 					Name qualifier = condition.getQualifier();
 					SimpleName name = condition.getName();
@@ -147,7 +149,7 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 					if (LENGTH.equals(name.getIdentifier()) && qualifier.isSimpleName()) {
 						SimpleName iterableNode = (SimpleName) qualifier;
 						ITypeBinding iterableTypeBinding = qualifier.resolveTypeBinding();
-						if (iterableTypeBinding.isArray()) {
+						if (iterableTypeBinding != null && iterableTypeBinding.isArray()) {
 
 							Block outerBlock = ASTNodeUtil.getSpecificAncestor(node, Block.class);
 							ForLoopIteratingIndexASTVisitor indexVisitor = new ForLoopOverArraysASTVisitor(index,
@@ -247,7 +249,7 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 				}
 			}
 		} else if (iterableTypeBinding.isArray()) {
-			iteratorTypeBinding = iterableTypeBinding.getElementType();
+			iteratorTypeBinding = iterableTypeBinding.getComponentType();
 		}
 
 		if (iteratorTypeBinding != null && !iteratorTypeBinding.getName().isEmpty()) {

@@ -11,6 +11,20 @@ public class TestForToForEachArrayIteratingIndexRule {
 		return Arrays.asList(input.split(";"));
 	}
 	
+	public String multiDimensionArrayUnderIf(String input) {
+		
+		String[][] ms = {{"3", "1", "2"}, {"5", "6", "7"}, {"8", "9", "4"}};
+		StringBuilder sb = new StringBuilder();
+		if(sb != null)for (String[] inner:ms){
+			String []another = inner;
+			for (String iterator:inner){
+				sb.append(iterator);
+			}
+		}
+
+		return sb.toString();
+	}
+	
 	public String testForToForEachWithArray(String input) {
 
 		List<String> foo = generateList(input);
@@ -183,7 +197,21 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 		return sb.toString();
 	}
-	
+
+	public String multiDimensionArray(String input) {
+		
+		String[][] ms = {{"3", "1", "2"}, {"5", "6", "7"}, {"8", "9", "4"}};
+		StringBuilder sb = new StringBuilder();
+		for (String[] inner:ms){
+			String []another = inner;
+			for (String iterator:inner){
+				sb.append(iterator);
+			}
+		}
+
+		return sb.toString();
+	}
+
 	/**
 	 * This collection is not subtype of {@code Iterable}.
 	 */
