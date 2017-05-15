@@ -27,6 +27,9 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.ExceptionMessages;
 
 /**
+ * This class manages the selected {@link RefactoringRule}s and the selected
+ * {@link IJavaElement}s and offers functionality to apply the first to the
+ * latter.
  * 
  * @author Ludwig Werzowa
  * @since 1.2
@@ -35,12 +38,19 @@ public class RefactoringPipeline {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringPipeline.class);
 
+	/**
+	 * List of selected {@link IJavaElement}s wrapped as
+	 * {@link RefactoringState}s
+	 */
 	private List<RefactoringState> refactoringStates;
 
+	/**
+	 * List of selected rules.
+	 */
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
 	/**
-	 * 
+	 * Stores the selected rules.
 	 * 
 	 * @param rules
 	 *            {@link List} of {@link RefactoringRule}s to apply to the
@@ -96,7 +106,7 @@ public class RefactoringPipeline {
 
 	/**
 	 * Check if any {@link RefactoringRule} lead to changes in any
-	 * {@link RefactoringState}
+	 * {@link RefactoringState}.
 	 * 
 	 * @return
 	 *         <ul>
@@ -116,12 +126,11 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * TODO description
-	 * 
-	 * 
-	 * Prepare working copies for refactoring<br>
-	 * Find {@link ICompilationUnit}s and create working copies for the
-	 * {@link IJavaElement}s
+	 * Prepare working copies for refactoring.
+	 * <p>
+	 * Takes a list of {@link IJavaElement}s and creates
+	 * {@link ICompilationUnit}s for them. Those {@link ICompilationUnit}s are
+	 * stored as working copies in a list of {@link RefactoringState}s.
 	 * 
 	 * @param IProgressMonitor
 	 *            monitor used to show progress in UI
@@ -185,7 +194,7 @@ public class RefactoringPipeline {
 
 	/**
 	 * Apply {@link RefactoringRule}s to the working copies of each
-	 * {@link RefactoringState}
+	 * {@link RefactoringState}. Changes are <b>not</b> yet committed.
 	 * 
 	 * @param IProgressMonitor
 	 *            monitor used to show progress in UI
@@ -199,7 +208,7 @@ public class RefactoringPipeline {
 	 * 
 	 * @since 1.2
 	 * 
-	 * @see RefactoringRule#generateDocumentChanges(List)
+	 * @see RefactoringState#addRulesAndGenerateDocumentChanges(List)
 	 * 
 	 */
 	public void doRefactoring(IProgressMonitor monitor) throws RefactoringException, RuleException {
@@ -257,10 +266,15 @@ public class RefactoringPipeline {
 					NLS.bind(ExceptionMessages.RefactoringPipeline_user_rule_execute_failed, notWorkingRulesCollected));
 		}
 	}
-
+	
 	/**
-	 * TODO adjust description
+	 * This functionality used to be in the {@link RefactoringRule}
 	 * 
+	 * @param rule
+	 * @param subMonitor
+	 * @throws JavaModelException
+	 * @throws ReflectiveOperationException
+	 */
 	private void applyRuleToAllStates(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
 			IProgressMonitor subMonitor) throws JavaModelException, ReflectiveOperationException {
 
@@ -283,8 +297,8 @@ public class RefactoringPipeline {
 		}
 	}
 
+	/**
 	 * Commit the working copies to the underlying {@link ICompilationUnit}s
-	 * 
 	 * 
 	 * @throws RefactoringException
 	 *             if no working copies were found
@@ -293,8 +307,6 @@ public class RefactoringPipeline {
 	 *             {@link ICompilationUnit}
 	 * 
 	 * @since 0.9
-	 * 
-	 * @see SimonykeesUtil#commitAndDiscardWorkingCopy(ICompilationUnit)
 	 */
 	public void commitRefactoring() throws RefactoringException, ReconcileException {
 		if (refactoringStates.isEmpty()) {
@@ -327,7 +339,7 @@ public class RefactoringPipeline {
 	 * This method should be called when canceling or finishing refactorings.
 	 */
 	public void clearStates() {
-		refactoringStates.forEach(s -> s.clearWorkingCopies());
+		refactoringStates.forEach(s -> s.discardWorkingCopy());
 		refactoringStates.clear();
 	}
 

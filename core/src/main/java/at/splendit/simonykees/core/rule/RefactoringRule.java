@@ -52,7 +52,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	public RefactoringRule(Class<T> visitor) {
 		this.visitor = visitor;
-		// TODO maybe add a better id
 		this.id = this.getClass().getSimpleName();
 		this.tags = Tag.getTagsForRule(this.getClass());
 		this.requiredJavaVersion = provideRequiredJavaVersion();
@@ -206,6 +205,9 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 					edits.copy());
 
 			workingCopy.applyTextEdit(edits, null);
+			
+			// TODO think about using IProblemRequestor
+			// TODO think about returning the new AST
 			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
 
 			return documentChange;

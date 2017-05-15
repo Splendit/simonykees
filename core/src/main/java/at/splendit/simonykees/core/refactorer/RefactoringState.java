@@ -6,20 +6,19 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.ExceptionMessages;
-import at.splendit.simonykees.i18n.Messages;
 
 /**
- * One {@link RefactoringState} per {@link CompilationUnit}.
+ * Manages the transformation state of one {@link ICompilationUnit} and offers
+ * capabilities to apply or undo {@link RefactoringRule}s, as well as storing
+ * the corresponding {@link DocumentChange}s for each {@link RefactoringRule}.
  * 
  * @author Ludwig Werzowa
  * @since 1.2
@@ -42,9 +41,11 @@ public class RefactoringState {
 	}
 
 	/**
-	 * Returns the {@link DocumentChange} to one rule.
+	 * Returns a specific {@link DocumentChange} related to one rule.
 	 * 
-	 * @param rule
+	 * @param rules
+	 *            {@link RefactoringRule} for which {@link DocumentChange}s
+	 *            should be returned
 	 * @return the corresponding {@link DocumentChange} to a rule or null
 	 */
 	public DocumentChange getChangeIfPresent(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
@@ -60,10 +61,25 @@ public class RefactoringState {
 		return !changes.isEmpty();
 	}
 
+	/**
+	 * Returns the working copy ({@link ICompilationUnit}) for this
+	 * {@link RefactoringState}.
+	 * 
+	 * @return the working copy related to this instance
+	 */
 	public ICompilationUnit getWorkingCopy() {
 		return workingCopy;
 	}
 
+	/**
+	 * Applies all given {@link RefactoringRule}s to the working copy. Changes
+	 * to the working copy are <b>not</b> committed yet.
+	 * 
+	 * @param rules
+	 *            List of {@link RefactoringRule} to be applied
+	 * @throws JavaModelException
+	 * @throws ReflectiveOperationException
+	 */
 	public void addRulesAndGenerateDocumentChanges(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules)
 			throws JavaModelException, ReflectiveOperationException {
 
@@ -74,9 +90,11 @@ public class RefactoringState {
 
 	// TODO add monitor
 	/**
-	 * Changes are applied to working copy but <b>not</b> committed. s
+	 * Applies a given {@link RefactoringRule}s to the working copy. Changes to
+	 * the working copy are <b>not</b> committed yet.
 	 * 
 	 * @param rule
+	 *            {@link RefactoringRule} to be applied
 	 * @throws JavaModelException
 	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
