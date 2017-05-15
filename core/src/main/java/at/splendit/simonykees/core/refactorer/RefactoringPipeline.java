@@ -261,6 +261,28 @@ public class RefactoringPipeline {
 	/**
 	 * TODO adjust description
 	 * 
+	private void applyRuleToAllStates(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
+			IProgressMonitor subMonitor) throws JavaModelException, ReflectiveOperationException {
+
+		for (RefactoringState refactoringState : refactoringStates) {
+			/*
+			 * TODO catch all exceptions from ASTVisitor execution? if any
+			 * exception is thrown discard all changes from this rule
+			 */
+			subMonitor.subTask(refactoringState.getWorkingCopyName());
+
+			refactoringState.addRuleAndGenerateDocumentChanges(rule);
+
+			/*
+			 * If cancel is pressed on progress monitor, abort all and return,
+			 * else continue
+			 */
+			if (subMonitor.isCanceled()) {
+				return;
+			}
+		}
+	}
+
 	 * Commit the working copies to the underlying {@link ICompilationUnit}s
 	 * 
 	 * 
@@ -307,38 +329,6 @@ public class RefactoringPipeline {
 	public void clearStates() {
 		refactoringStates.forEach(s -> s.clearWorkingCopies());
 		refactoringStates.clear();
-	}
-
-	/**
-	 * This functionality used to be in the {@link RefactoringRule}
-	 * 
-	 * @param rule
-	 * @param subMonitor
-	 * @throws JavaModelException
-	 * @throws ReflectiveOperationException
-	 */
-	private void applyRuleToAllStates(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
-			IProgressMonitor subMonitor) throws JavaModelException, ReflectiveOperationException {
-
-		for (RefactoringState refactoringState : refactoringStates) {
-			/*
-			 * TODO catch all exceptions from ASTVisitor execution? if any
-			 * exception is thrown discard all changes from this rule
-			 */
-			subMonitor.subTask(refactoringState.getWorkingCopyName());
-
-			refactoringState.addRuleAndGenerateDocumentChanges(rule);
-
-			// TODO we used to have a test for try with resource here
-
-			/*
-			 * If cancel is pressed on progress monitor, abort all and return,
-			 * else continue
-			 */
-			if (subMonitor.isCanceled()) {
-				return;
-			}
-		}
 	}
 
 }
