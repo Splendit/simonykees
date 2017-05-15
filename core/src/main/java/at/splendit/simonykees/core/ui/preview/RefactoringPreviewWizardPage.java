@@ -1,10 +1,17 @@
 package at.splendit.simonykees.core.ui.preview;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.compare.CompareViewerSwitchingPane;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
@@ -27,8 +34,10 @@ import at.splendit.simonykees.core.ui.AbstractWizardPage;
 public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 
 	private PreviewNode previewNode;
-	private CompilationUnitNode currentCompilationUnitNode;
+	private ICompilationUnit currentCompilationUnit;
 	private IChangePreviewViewer currentPreviewViewer;
+
+	private Map<ICompilationUnit, Boolean> changedSelections = new HashMap<>();
 
 	public RefactoringPreviewWizardPage(PreviewNode node) {
 		super(node.getRule().getName());
@@ -36,8 +45,7 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 		setDescription(node.getRule().getDescription());
 		this.previewNode = node;
 
-		this.currentCompilationUnitNode = new CompilationUnitNode(
-				previewNode.getDocumentChanges().keySet().stream().findFirst().orElse(null));
+		this.currentCompilationUnit = previewNode.getDocumentChanges().keySet().stream().findFirst().orElse(null);
 	}
 
 	/*
@@ -65,23 +73,38 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 
 		createFileView(sashForm);
 		createPreviewViewer(sashForm);
-		
+
 		/*
-		 * sets height relation between children to be 1:3 
-		 * when it has two children
+		 * sets height relation between children to be 1:3 when it has two
+		 * children
 		 */
-		sashForm.setWeights(new int[] {1, 3});
-	    
+		sashForm.setWeights(new int[] { 1, 3 });
+
 	}
 
 	private void createFileView(Composite parent) {
-		TreeViewer treeViewer = new TreeViewer(parent);
-		CompilationUnitContentProvider contentProvider = new CompilationUnitContentProvider();
+		CheckboxTableViewer viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI);
 
-		treeViewer.setContentProvider(contentProvider);
-		treeViewer.addSelectionChangedListener(createSelectionChangedListener());
-		treeViewer.setInput(previewNode.getDocumentChanges().keySet());
-		
+		/*
+		 * label provider that sets the text displayed in CompilationUnits table
+		 * to show the name of the CompilationUnit
+		 */
+		viewer.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				ICompilationUnit compUnit = (ICompilationUnit) element;
+				return compUnit.getElementName();
+			}
+		});
+
+		viewer.addSelectionChangedListener(createSelectionChangedListener());
+		viewer.addCheckStateListener(createCheckStateListener());
+
+		// adding all elements in table and checking appropriately
+		previewNode.getDocumentChanges().keySet().stream().forEach(entry -> {
+			viewer.add(entry);
+			viewer.setChecked(entry, previewNode.getSelections().get(entry));
+		});
 	}
 
 	private void createPreviewViewer(Composite parent) {
@@ -92,9 +115,9 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 
 		currentPreviewViewer = new TextEditChangePreviewViewer();
 		currentPreviewViewer.createControl(parent);
-		
+
 		populatePreviewViewer();
-				
+
 	}
 
 	private ISelectionChangedListener createSelectionChangedListener() {
@@ -104,9 +127,9 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 				IStructuredSelection sel = (IStructuredSelection) event.getSelection();
 
 				if (sel.size() == 1) {
-					CompilationUnitNode newSelection = (CompilationUnitNode) sel.getFirstElement();
-					if (!newSelection.equals(currentCompilationUnitNode)) {
-						currentCompilationUnitNode = newSelection;
+					ICompilationUnit newSelection = (ICompilationUnit) sel.getFirstElement();
+					if (!newSelection.equals(currentCompilationUnit)) {
+						currentCompilationUnit = newSelection;
 						populatePreviewViewer();
 					}
 				}
@@ -114,14 +137,39 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 		};
 	}
 
+	private ICheckStateListener createCheckStateListener() {
+		return new ICheckStateListener() {
+
+			public void checkStateChanged(CheckStateChangedEvent event) {
+
+				ICompilationUnit newSelection = (ICompilationUnit) event.getElement();
+				if (event.getChecked() != previewNode.getSelections().get(newSelection)) {
+					changedSelections.put(newSelection, event.getChecked());
+				} else {
+					if (changedSelections.containsKey(newSelection)) {
+						changedSelections.remove(newSelection);
+					}
+				}
+			}
+
+		};
+	}
+
 	private void populatePreviewViewer() {
 		currentPreviewViewer.setInput(TextEditChangePreviewViewer.createInput(getCurrentDocumentChange()));
 		((CompareViewerSwitchingPane) currentPreviewViewer.getControl())
-				.setTitleArgument(currentCompilationUnitNode.getClassName());
+				.setTitleArgument(currentCompilationUnit.getParent().getElementName());
 	}
 
 	private DocumentChange getCurrentDocumentChange() {
-		return previewNode.getDocumentChanges().get(currentCompilationUnitNode.getCompilationUnit());
+		return previewNode.getDocumentChanges().get(currentCompilationUnit);
 	}
 
+	public PreviewNode getPreviewNode() {
+		return previewNode;
+	}
+
+	public Map<ICompilationUnit, Boolean> getChangedSelections() {
+		return changedSelections;
+	}
 }

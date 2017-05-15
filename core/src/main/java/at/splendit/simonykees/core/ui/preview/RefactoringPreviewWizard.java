@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.ui.preview;
 
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -39,6 +40,18 @@ public class RefactoringPreviewWizard extends Wizard {
 //		refactoringPipeline.getRules().stream().filter(rule -> !rule.getDocumentChanges().isEmpty())
 //				.forEach(rule -> addPage(new RefactoringPreviewWizardPage(rule)));
 		refactoringPipeline.getPreviewNodes().forEach(node -> addPage(new RefactoringPreviewWizardPage(node)));
+	}
+	
+	@Override
+	public IWizardPage getNextPage(IWizardPage page) {
+		// TODO check if recalculation is needed and recalculate
+		return super.getNextPage(page);
+	}
+	
+	@Override
+	public IWizardPage getPreviousPage(IWizardPage page) {
+		// TODO check if recalculation is needed and recalculate
+		return super.getPreviousPage(page);
 	}
 
 	/*
