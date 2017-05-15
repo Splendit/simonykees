@@ -37,20 +37,34 @@ public class RefactoringPreviewWizard extends Wizard {
 	 */
 	@Override
 	public void addPages() {
-//		refactoringPipeline.getRules().stream().filter(rule -> !rule.getDocumentChanges().isEmpty())
-//				.forEach(rule -> addPage(new RefactoringPreviewWizardPage(rule)));
+		// refactoringPipeline.getRules().stream().filter(rule ->
+		// !rule.getDocumentChanges().isEmpty())
+		// .forEach(rule -> addPage(new RefactoringPreviewWizardPage(rule)));
 		refactoringPipeline.getPreviewNodes().forEach(node -> addPage(new RefactoringPreviewWizardPage(node)));
 	}
-	
+
 	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
-		// TODO check if recalculation is needed and recalculate
+		if (!((RefactoringPreviewWizardPage) page).getChangedSelections().isEmpty()) {
+			recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
+		}
 		return super.getNextPage(page);
 	}
-	
+
+	private void recalculateRulesAndClearChanges(RefactoringPreviewWizardPage page) {
+		// TODO recalculate again
+		// refactoringPipeline.doAdditionalRefactoring();
+
+		page.getChangedSelections().keySet().stream().forEach(compilationUnit -> page.getPreviewNode().getSelections()
+				.put(compilationUnit, page.getChangedSelections().get(compilationUnit)));
+		page.getChangedSelections().clear();
+	}
+
 	@Override
 	public IWizardPage getPreviousPage(IWizardPage page) {
-		// TODO check if recalculation is needed and recalculate
+		if (!((RefactoringPreviewWizardPage) page).getChangedSelections().isEmpty()) {
+			recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
+		}
 		return super.getPreviousPage(page);
 	}
 
