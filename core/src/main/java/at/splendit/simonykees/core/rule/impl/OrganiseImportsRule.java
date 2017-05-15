@@ -14,8 +14,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
@@ -36,14 +34,12 @@ import at.splendit.simonykees.i18n.Messages;
 @SuppressWarnings("restriction")
 public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
 
-	private static final Logger logger = LoggerFactory.getLogger(OrganiseImportsRule.class);
-	
 	public OrganiseImportsRule(Class<AbstractASTRewriteASTVisitor> visitor) {
 		super(visitor);
 		this.name = Messages.OrganiseImportsRule_name;
 		this.description = Messages.OrganiseImportsRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
@@ -52,25 +48,26 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 	@Override
 	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException {
-		
+
 		// TODO monitor?
-		
-//		subMonitor.setWorkRemaining(workingCopies.size());
-		
-//		for (ICompilationUnit wc : workingCopies) {
-//			subMonitor.subTask(getName() + ": " + wc.getElementName()); //$NON-NLS-1$
-//			try {
-//				applyOrganising(wc);
-//			} catch (CoreException e) {
-//				throw new JavaModelException(e);
-//			}
-//			if (subMonitor.isCanceled()) {
-//				return;
-//			} else {
-//				subMonitor.worked(1);
-//			}
-//		}
-		
+
+		// subMonitor.setWorkRemaining(workingCopies.size());
+
+		// for (ICompilationUnit wc : workingCopies) {
+		// subMonitor.subTask(getName() + ": " + wc.getElementName());
+		// //$NON-NLS-1$
+		// try {
+		// applyOrganising(wc);
+		// } catch (CoreException e) {
+		// throw new JavaModelException(e);
+		// }
+		// if (subMonitor.isCanceled()) {
+		// return;
+		// } else {
+		// subMonitor.worked(1);
+		// }
+		// }
+
 		try {
 			return applyOrganising(workingCopy);
 		} catch (CoreException e) {
@@ -78,50 +75,37 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 		}
 	}
 
-	private DocumentChange applyOrganising(ICompilationUnit workingCopy) throws OperationCanceledException, CoreException {
-//		if (changes.containsKey(workingCopy)) {
-//			// already have changes
-//			logger.info(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
-//		} else {
+	private DocumentChange applyOrganising(ICompilationUnit workingCopy)
+			throws OperationCanceledException, CoreException {
 
-			final CompilationUnit astRoot = SimonykeesUtil.parse(workingCopy);
-			final boolean hasAmbiguity[]= new boolean[] { false };
-			IChooseImportQuery query= new IChooseImportQuery() {
-				@Override
-				public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
-					hasAmbiguity[0]= true;
-					return new TypeNameMatch[0];
-				}
-			};
-
-			OrganizeImportsOperation importsOperation = new OrganizeImportsOperation(workingCopy, astRoot, false, true,
-					true, query);
-			TextEdit edit = importsOperation.createTextEdit(null);
-			
-			DocumentChange documentChange = null;
-
-			if (!hasAmbiguity[0]
-					&& importsOperation.getParseError() == null 
-					&& edit != null 
-					&& !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
-				Document document = new Document(workingCopy.getSource());
-				documentChange = SimonykeesUtil
-						.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document, edit.copy());
-
-				workingCopy.applyTextEdit(edit, null);
-				workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
-
-//				if (documentChange != null) {
-//					changes.put(workingCopy, documentChange);
-//				} else {
-//					// no changes
-//				}
-//			} else {
-//				// no changes
+		final CompilationUnit astRoot = SimonykeesUtil.parse(workingCopy);
+		final boolean hasAmbiguity[] = new boolean[] { false };
+		IChooseImportQuery query = new IChooseImportQuery() {
+			@Override
+			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
+				hasAmbiguity[0] = true;
+				return new TypeNameMatch[0];
 			}
-			
-			return documentChange;
-//		}
+		};
+
+		OrganizeImportsOperation importsOperation = new OrganizeImportsOperation(workingCopy, astRoot, false, true,
+				true, query);
+		TextEdit edit = importsOperation.createTextEdit(null);
+
+		DocumentChange documentChange = null;
+
+		if (!hasAmbiguity[0] && importsOperation.getParseError() == null && edit != null
+				&& !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
+			Document document = new Document(workingCopy.getSource());
+			documentChange = SimonykeesUtil.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document,
+					edit.copy());
+
+			workingCopy.applyTextEdit(edit, null);
+			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+
+		}
+
+		return documentChange;
 
 	}
 

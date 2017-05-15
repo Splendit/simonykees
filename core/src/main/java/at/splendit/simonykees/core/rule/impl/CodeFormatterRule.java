@@ -11,8 +11,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
@@ -30,14 +28,12 @@ import at.splendit.simonykees.i18n.Messages;
  */
 public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
 
-	private static final Logger logger = LoggerFactory.getLogger(CodeFormatterRule.class);
-	
 	public CodeFormatterRule(Class<AbstractASTRewriteASTVisitor> visitor) {
 		super(visitor);
 		this.name = Messages.CodeFormatterRule_name;
 		this.description = Messages.CodeFormatterRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
@@ -46,20 +42,21 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 	@Override
 	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException {
-		
+
 		// TODO monitor?
-//		subMonitor.setWorkRemaining(workingCopies.size());
-		
-//		for (ICompilationUnit wc : workingCopies) {
-//			subMonitor.subTask(getName() + ": " + wc.getElementName()); //$NON-NLS-1$
-//			applyFormating(wc);
-//			if (subMonitor.isCanceled()) {
-//				return;
-//			} else {
-//				subMonitor.worked(1);
-//			}
-//		}
-		
+		// subMonitor.setWorkRemaining(workingCopies.size());
+
+		// for (ICompilationUnit wc : workingCopies) {
+		// subMonitor.subTask(getName() + ": " + wc.getElementName());
+		// //$NON-NLS-1$
+		// applyFormating(wc);
+		// if (subMonitor.isCanceled()) {
+		// return;
+		// } else {
+		// subMonitor.worked(1);
+		// }
+		// }
+
 		try {
 			return applyFormating(workingCopy);
 		} catch (CoreException e) {
@@ -68,41 +65,28 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 	}
 
 	private DocumentChange applyFormating(ICompilationUnit workingCopy) throws JavaModelException {
-//		if (changes.containsKey(workingCopy)) {
-//			// already have changes
-//			logger.info(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
-//		} else {
-			ISourceRange sourceRange = workingCopy.getSourceRange();
-			// TODO check formating style
-			CodeFormatter formatter = ToolFactory
-					.createCodeFormatter(DefaultCodeFormatterConstants.getEclipseDefaultSettings());
-			int formatingKind = CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS
-					| CodeFormatter.K_UNKNOWN;
-			TextEdit edit = formatter.format(formatingKind, workingCopy.getSource(), sourceRange.getOffset(),
-					sourceRange.getLength(), 0, SimonykeesUtil.LINE_SEPARATOR);
+		ISourceRange sourceRange = workingCopy.getSourceRange();
+		// TODO check formating style
+		CodeFormatter formatter = ToolFactory
+				.createCodeFormatter(DefaultCodeFormatterConstants.getEclipseDefaultSettings());
+		int formatingKind = CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS
+				| CodeFormatter.K_UNKNOWN;
+		TextEdit edit = formatter.format(formatingKind, workingCopy.getSource(), sourceRange.getOffset(),
+				sourceRange.getLength(), 0, SimonykeesUtil.LINE_SEPARATOR);
 
-			DocumentChange documentChange = null;
-			
-			if (edit.hasChildren()) {
-				Document document = new Document(workingCopy.getSource());
-				documentChange = SimonykeesUtil
-						.generateDocumentChange(CodeFormatterRule.class.getSimpleName(), document, edit.copy());
+		DocumentChange documentChange = null;
 
-				workingCopy.applyTextEdit(edit, null);
-				workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+		if (edit.hasChildren()) {
+			Document document = new Document(workingCopy.getSource());
+			documentChange = SimonykeesUtil.generateDocumentChange(CodeFormatterRule.class.getSimpleName(), document,
+					edit.copy());
 
-//				if (documentChange != null) {
-//					changes.put(workingCopy, documentChange);
-//				} else {
-//					// no changes
-//				}
-//			} else {
-//				// no changes
-				
-			}
+			workingCopy.applyTextEdit(edit, null);
+			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
 
-			return documentChange;
-//		}
+		}
+
+		return documentChange;
 
 	}
 
