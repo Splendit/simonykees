@@ -1,14 +1,18 @@
 package at.splendit.simonykees.core.visitor.loop;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -18,6 +22,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -30,7 +35,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
-import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.core.visitor.AbstractAddImportASTVisitor;
 import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
@@ -39,7 +44,7 @@ import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
  * @author Martin Huter, Ardit Ymeri
  * @since 0.9.2
  */
-public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
+public class ForToForEachASTVisitor extends AbstractAddImportASTVisitor {
 
 	private static final String ITERATOR_FULLY_QUALLIFIED_NAME = java.util.Iterator.class.getName();
 	private static final String ITERABLE_FULLY_QUALIFIED_NAME = java.lang.Iterable.class.getName();
@@ -47,11 +52,13 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String LENGTH = "length"; //$NON-NLS-1$
 	private static final String DEFAULT_ITERATOR_NAME = "iterator"; //$NON-NLS-1$
 	private static final String KEY_SEPARATOR = "->"; //$NON-NLS-1$
+	private static final String DOT = "."; //$NON-NLS-1$
 
 	private Map<ForStatement, LoopOptimizationASTVisior> replaceInformationASTVisitorList;
 	private Map<String, Integer> multipleIteratorUse;
 	private CompilationUnit compilationUnit;
 	private Map<String, String> tempIntroducedNames;
+	private Set<String> newImports = new HashSet<>();
 
 	public ForToForEachASTVisitor() {
 		this.replaceInformationASTVisitorList = new HashMap<>();
@@ -63,6 +70,21 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
 		return true;
+	}
+
+	@Override
+	public void endVisit(CompilationUnit cu) {
+		PackageDeclaration cuPackage = cu.getPackage();
+		Name packageName = cuPackage.getName();
+		String packageQualifiedName = packageName.getFullyQualifiedName();
+		List<AbstractTypeDeclaration> cuDeclaredTypes = ASTNodeUtil.convertToTypedList(compilationUnit.types(),
+				AbstractTypeDeclaration.class);
+
+		List<String> toBeAdded = newImports.stream()
+				.filter(newImport -> !isInSamePackage(newImport, packageQualifiedName, cuDeclaredTypes))
+				.collect(Collectors.toList());
+		super.addImports.addAll(toBeAdded);
+		super.endVisit(cu);
 	}
 
 	@Override
@@ -256,6 +278,14 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 			ASTRewrite astRewrite = getAstRewrite();
 			ImportRewrite importRewrite = ImportRewrite.create(compilationUnit, true);
 			iteratorType = importRewrite.addImport(iteratorTypeBinding, astRewrite.getAST());
+			if(!iteratorTypeBinding.isMember()) {				
+				String[] addedImports = importRewrite.getAddedImports();
+				for (String addedImport : addedImports) {
+					if (!addedImport.startsWith(JAVA_LANG_PACKAGE)) {
+						newImports.add(addedImport);
+					}
+				}
+			}
 		}
 
 		return iteratorType;
@@ -335,6 +365,39 @@ public class ForToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 			parent = parent.getParent();
 		}
 		return parent;
+	}
+	
+	/**
+	 * Checks whether the new import points to a class in the same package or in
+	 * the same file as the compilation unit.
+	 * 
+	 * @param newImport
+	 *            qualified name of the new import
+	 * @param cuPackageQualifiedName
+	 *            qualified name of the compilation unit's package
+	 * @param cuDeclaredTypes
+	 *            types declared in the compilation unit.
+	 * @return true if the new import points to a type in the same package as
+	 *         the compilation unit or to a type declared inside the compilation
+	 *         unit.
+	 */
+	private boolean isInSamePackage(String newImport, String cuPackageQualifiedName,
+			List<AbstractTypeDeclaration> cuDeclaredTypes) {
+		boolean isInSamePackage = false;
+
+		if (newImport.startsWith(cuPackageQualifiedName)) {
+			int dotLastIndex = newImport.lastIndexOf(DOT);
+			String suffix = newImport.substring(dotLastIndex);
+			List<String> suffixComponents = Arrays.asList(suffix.split(DOT));
+			if (suffixComponents.size() > 1) {
+				isInSamePackage = cuDeclaredTypes.stream().map(type -> type.getName().getIdentifier())
+						.filter(name -> name.equals(suffixComponents.get(0))).findAny().isPresent();
+			} else {
+				isInSamePackage = true;
+			}
+		}
+
+		return isInSamePackage;
 	}
 
 	@Override

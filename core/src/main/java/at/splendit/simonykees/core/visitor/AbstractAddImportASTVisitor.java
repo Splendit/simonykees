@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
  */
 public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final String JAVA_LANG_PACKAGE = "java.lang"; //$NON-NLS-1$
+	protected static final String JAVA_LANG_PACKAGE = "java.lang"; //$NON-NLS-1$
 
 	protected Set<String> addImports;
 
