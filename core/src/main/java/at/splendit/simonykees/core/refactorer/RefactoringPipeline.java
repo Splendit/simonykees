@@ -142,13 +142,14 @@ public class RefactoringPipeline {
 		try {
 			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements, monitor);
 			if (compilationUnits.isEmpty()) {
-				logger.warn(ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found);
-				throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found,
-						ExceptionMessages.AbstractRefactorer_user_warn_no_compilation_units_found);
+				logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found);
+				throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found,
+						ExceptionMessages.RefactoringPipeline_user_warn_no_compilation_units_found);
 			} else if (!refactoringStates.isEmpty()) {
-				logger.warn(ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated);
+				logger.warn(ExceptionMessages.RefactoringPipeline_warn_working_copies_already_generated);
 				throw new RefactoringException(
-						ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated);
+						ExceptionMessages.RefactoringPipeline_warn_working_copies_already_generated,
+						ExceptionMessages.RefactoringPipeline_user_warn_changes_already_generated);
 			} else {
 
 				/*
@@ -179,8 +180,8 @@ public class RefactoringPipeline {
 			}
 		} catch (JavaModelException e) {
 			logger.error(e.getMessage(), e);
-			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_java_element_resoltuion_failed,
-					ExceptionMessages.AbstractRefactorer_user_java_element_resoltuion_failed, e);
+			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+					ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e);
 		}
 	}
 
@@ -206,8 +207,9 @@ public class RefactoringPipeline {
 	public void doRefactoring(IProgressMonitor monitor) throws RefactoringException, RuleException {
 		if (refactoringStates.isEmpty()) {
 			// TODO warning adjustment
-			logger.warn(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
-			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
+			logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
+			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found,
+					ExceptionMessages.RefactoringPipeline_user_warn_no_java_files_found_to_apply_rules);
 		}
 
 		/*
@@ -253,8 +255,8 @@ public class RefactoringPipeline {
 		if (!notWorkingRules.isEmpty()) {
 			String notWorkingRulesCollected = notWorkingRules.stream().collect(Collectors.joining(", ")); //$NON-NLS-1$
 			throw new RuleException(
-					NLS.bind(ExceptionMessages.AbstractRefactorer_rule_execute_failed, notWorkingRulesCollected),
-					NLS.bind(ExceptionMessages.AbstractRefactorer_user_rule_execute_failed, notWorkingRulesCollected));
+					NLS.bind(ExceptionMessages.RefactoringPipeline_rule_execute_failed, notWorkingRulesCollected),
+					NLS.bind(ExceptionMessages.RefactoringPipeline_user_rule_execute_failed, notWorkingRulesCollected));
 		}
 	}
 
@@ -277,8 +279,8 @@ public class RefactoringPipeline {
 	public void commitRefactoring() throws RefactoringException, ReconcileException {
 		if (refactoringStates.isEmpty()) {
 			// TODO adjust
-			logger.warn(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
-			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
+			logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
+			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
 		}
 		List<String> refactoringStatesNotCommited = new ArrayList<>();
 		for (Iterator<RefactoringState> iterator = refactoringStates.iterator(); iterator.hasNext();) {
@@ -294,8 +296,8 @@ public class RefactoringPipeline {
 		if (!refactoringStatesNotCommited.isEmpty()) {
 			String notWorkingRulesCollected = refactoringStatesNotCommited.stream().collect(Collectors.joining("\n")); //$NON-NLS-1$
 			throw new ReconcileException(
-					NLS.bind(ExceptionMessages.AbstractRefactorer_reconcile_failed, notWorkingRulesCollected),
-					NLS.bind(ExceptionMessages.AbstractRefactorer_user_reconcile_failed, notWorkingRulesCollected));
+					NLS.bind(ExceptionMessages.RefactoringPipeline_reconcile_failed, notWorkingRulesCollected),
+					NLS.bind(ExceptionMessages.RefactoringPipeline_user_reconcile_failed, notWorkingRulesCollected));
 		}
 	}
 

@@ -98,7 +98,7 @@ public class RefactoringState {
 
 		if (changesAlreadyPresent) {
 			// already have changes
-			logger.warn(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, getWorkingCopyName()));
+			logger.warn(NLS.bind(Messages.RefactoringState_warning_workingcopy_already_present, getWorkingCopyName()));
 		} else {
 			DocumentChange documentChange = rule.applyRule(workingCopy);
 			if (documentChange != null) {
@@ -115,7 +115,7 @@ public class RefactoringState {
 		try {
 			SimonykeesUtil.discardWorkingCopy(workingCopy);
 		} catch (JavaModelException e) {
-			logger.error(NLS.bind(ExceptionMessages.AbstractRefactorer_unable_to_discard_working_copy,
+			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_discard_working_copy,
 					workingCopy.getPath().toString(), e.getMessage()), e);
 		}
 	}
