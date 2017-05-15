@@ -9,7 +9,9 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
+import at.splendit.simonykees.core.rule.impl.LambdaToMethodReferenceRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
+import at.splendit.simonykees.core.visitor.LambdaToMethodReferenceASTVisitor;
 import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
 
 @SuppressWarnings("nls")
@@ -26,7 +28,7 @@ public class LambdaToMethodReferenceRulesTest extends AbstractRulesTest {
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
-		rulesList.add(new ForToForEachRule(ForToForEachASTVisitor.class));
+		rulesList.add(new LambdaToMethodReferenceRule(LambdaToMethodReferenceASTVisitor.class));
 	}
 
 	@Parameters(name = "{index}: test file[{0}]")
