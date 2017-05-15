@@ -98,22 +98,53 @@ public class RefactoringState {
 
 		if (changesAlreadyPresent) {
 			// already have changes
-			logger.warn(NLS.bind(Messages.RefactoringState_warning_workingcopy_already_present, getWorkingCopyName()));
+			logger.warn(NLS.bind(ExceptionMessages.RefactoringState_warning_workingcopy_already_present, getWorkingCopyName()));
 		} else {
 			DocumentChange documentChange = rule.applyRule(workingCopy);
 			if (documentChange != null) {
 				changes.put(rule, documentChange);
 			} else {
-				logger.trace(NLS.bind(Messages.RefactoringState_no_changes_found, rule.getName(),
+				logger.trace(NLS.bind(ExceptionMessages.RefactoringState_no_changes_found, rule.getName(),
 						workingCopy.getElementName()));
 			}
 		}
 
 	}
 
-	public void clearWorkingCopies() {
+	/**
+	 * Commit changes to a {@code ICompilationUnit} and discard the working
+	 * copy.
+	 * 
+	 * @param workingCopy
+	 *            java document working copy where changes are present
+	 * @throws JavaModelException
+	 *             if this working copy could not commit. Reasons include: A
+	 *             org.eclipse.core.runtime.CoreException occurred while
+	 *             updating an underlying resource This element is not a working
+	 *             copy (INVALID_ELEMENT_TYPES) A update conflict (described
+	 *             above) (UPDATE_CONFLICT) if this working copy could not
+	 *             return in its original mode.
+	 * @since 0.9
+	 */
+	public void commitAndDiscardWorkingCopy() throws JavaModelException {
+		workingCopy.commitWorkingCopy(false, null);
+		discardWorkingCopy();
+	}
+
+	/**
+	 * Discard a working copy of {@code ICompilationUnit}.
+	 * 
+	 * @param workingCopy
+	 *            java document working copy where changes are present
+	 * @throws JavaModelException
+	 *             if the working copy could not be discarded or closed.
+	 *             Possible reasons: if this working copy could not return in
+	 *             its original mode OR if an error occurs closing this element.
+	 */
+	public void discardWorkingCopy() {
 		try {
-			SimonykeesUtil.discardWorkingCopy(workingCopy);
+			workingCopy.discardWorkingCopy();
+			workingCopy.close();
 		} catch (JavaModelException e) {
 			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_discard_working_copy,
 					workingCopy.getPath().toString(), e.getMessage()), e);

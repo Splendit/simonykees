@@ -306,7 +306,7 @@ public class RefactoringPipeline {
 		for (Iterator<RefactoringState> iterator = refactoringStates.iterator(); iterator.hasNext();) {
 			RefactoringState refactoringState = (RefactoringState) iterator.next();
 			try {
-				SimonykeesUtil.commitAndDiscardWorkingCopy(refactoringState.getWorkingCopy());
+				refactoringState.commitAndDiscardWorkingCopy();
 				iterator.remove();
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
