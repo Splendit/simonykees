@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
 import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerOptions;
+import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -262,5 +263,13 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		 * enabled/disabled.
 		 */
 		updateStatus(status);
+	}
+	
+	/**
+	 * Open help dialog
+	 */
+	@Override
+	public void performHelp() {
+		SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
 	}
 }
