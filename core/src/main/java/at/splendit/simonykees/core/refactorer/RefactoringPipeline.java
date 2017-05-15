@@ -134,7 +134,7 @@ public class RefactoringPipeline {
 	 * 
 	 * @see SimonykeesUtil#collectICompilationUnits(List, List)
 	 */
-	public List<RefactoringState> prepareRefactoring(List<IJavaElement> javaElements, IProgressMonitor monitor)
+	public void prepareRefactoring(List<IJavaElement> javaElements, IProgressMonitor monitor)
 			throws RefactoringException {
 
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
@@ -170,13 +170,11 @@ public class RefactoringPipeline {
 					 * return, else continue
 					 */
 					if (subMonitor.isCanceled()) {
-						return refactoringStates;
+						return;
 					} else {
 						subMonitor.worked(1);
 					}
 				}
-
-				return refactoringStates;
 			}
 		} catch (JavaModelException e) {
 			logger.error(e.getMessage(), e);
