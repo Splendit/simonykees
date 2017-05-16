@@ -3,12 +3,15 @@ package at.splendit.simonykees.core.visitor;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
@@ -100,7 +103,24 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 			 * transferElements(personList, HashSet<Person>::new);
 			 */
 			else if (expression instanceof ClassInstanceCreation) {
-				// TODO implement case 4
+				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) expression;
+				Type classInstanceCreationType = classInstanceCreation.getType();
+				
+				CreationReference ref = astRewrite.getAST().newCreationReference();
+
+				if (classInstanceCreationType instanceof ParameterizedType) {
+					if (((ParameterizedType) classInstanceCreationType).typeArguments().size() > 0) {
+						ref.setType((Type) astRewrite.createCopyTarget(classInstanceCreationType));
+					}
+					else {
+						ref.setType((Type) astRewrite.createMoveTarget(((ParameterizedType) classInstanceCreationType).getType()));
+					}
+				}
+				else {
+					ref.setType((Type) astRewrite.createCopyTarget(classInstanceCreationType));
+				}
+
+				astRewrite.replace(lambdaExpressionNode, ref, null);
 			}
 		}
 
