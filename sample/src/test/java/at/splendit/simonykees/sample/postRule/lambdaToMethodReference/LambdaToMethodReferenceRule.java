@@ -17,7 +17,7 @@ import at.splendit.simonykees.sample.lambdaToMethodReferenceRuleHelper.Person;
  * @since 1.2
  *
  */
-@SuppressWarnings({ "nls", "unused" })
+@SuppressWarnings({ "nls", "unused", "unchecked", "rawtypes" })
 public class LambdaToMethodReferenceRule {
 
 	List<LocalDate> dateList = Arrays.asList(LocalDate.of(1992, 1, 1), LocalDate.of(2001, 2, 3),
@@ -115,9 +115,13 @@ public class LambdaToMethodReferenceRule {
 			return new HashSet<>();
 		});
 
-		Set<Person> persSet2 = transferElements(personList, HashSet<Person>::new);
+		Set<Person> persSet2 = transferElements(personList, HashSet::new);
 
-		Set<Person> persSet3 = transferElements(personList, HashSet<Person>::new);
+		Set<Person> persSet3 = transferElements(personList, HashSet::new);
+
+		Set<Person> persSet4 = transferElements(personList, HashSet<Person>::new);
+
+		Set<Person> persSet5 = transferElements(personList, HashSet<Person>::new);
 	}
 
 	class ComparisonProvider {

@@ -2,6 +2,15 @@ package at.splendit.simonykees.sample.lambdaToMethodReferenceRuleHelper;
 
 import java.time.LocalDate;
 
+import at.splendit.simonykees.sample.preRule.LambdaToMethodReferenceRule;
+
+/**
+ * class is jsut for test purposes for {@link LambdaToMethodReferenceRule}
+ * 
+ * @author Matthias Webhofer
+ * @since 1.2
+ *
+ */
 public class Person {
 	private String name;
 	private LocalDate birthday;
