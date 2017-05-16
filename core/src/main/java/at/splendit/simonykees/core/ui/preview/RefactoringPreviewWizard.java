@@ -36,8 +36,6 @@ public class RefactoringPreviewWizard extends Wizard {
 	 */
 	@Override
 	public void addPages() {
-//		refactoringPipeline.getRules().stream().filter(rule -> !rule.getDocumentChanges().isEmpty())
-//				.forEach(rule -> addPage(new RefactoringPreviewWizardPage(rule)));
 		refactoringPipeline.getPreviewNodes().forEach(node -> addPage(new RefactoringPreviewWizardPage(node)));
 	}
 

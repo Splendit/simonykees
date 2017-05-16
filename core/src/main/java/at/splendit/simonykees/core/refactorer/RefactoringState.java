@@ -6,20 +6,19 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.ExceptionMessages;
-import at.splendit.simonykees.i18n.Messages;
 
 /**
- * One {@link RefactoringState} per {@link CompilationUnit}.
+ * Manages the transformation state of one {@link ICompilationUnit} and offers
+ * capabilities to apply or undo {@link RefactoringRule}s, as well as storing
+ * the corresponding {@link DocumentChange}s for each {@link RefactoringRule}.
  * 
  * @author Ludwig Werzowa
  * @since 1.2
@@ -42,9 +41,11 @@ public class RefactoringState {
 	}
 
 	/**
-	 * Returns the {@link DocumentChange} to one rule.
+	 * Returns a specific {@link DocumentChange} related to one rule.
 	 * 
-	 * @param rule
+	 * @param rules
+	 *            {@link RefactoringRule} for which {@link DocumentChange}s
+	 *            should be returned
 	 * @return the corresponding {@link DocumentChange} to a rule or null
 	 */
 	public DocumentChange getChangeIfPresent(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
@@ -60,10 +61,25 @@ public class RefactoringState {
 		return !changes.isEmpty();
 	}
 
+	/**
+	 * Returns the working copy ({@link ICompilationUnit}) for this
+	 * {@link RefactoringState}.
+	 * 
+	 * @return the working copy related to this instance
+	 */
 	public ICompilationUnit getWorkingCopy() {
 		return workingCopy;
 	}
 
+	/**
+	 * Applies all given {@link RefactoringRule}s to the working copy. Changes
+	 * to the working copy are <b>not</b> committed yet.
+	 * 
+	 * @param rules
+	 *            List of {@link RefactoringRule} to be applied
+	 * @throws JavaModelException
+	 * @throws ReflectiveOperationException
+	 */
 	public void addRulesAndGenerateDocumentChanges(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules)
 			throws JavaModelException, ReflectiveOperationException {
 
@@ -74,9 +90,11 @@ public class RefactoringState {
 
 	// TODO add monitor
 	/**
-	 * Changes are applied to working copy but <b>not</b> committed. s
+	 * Applies a given {@link RefactoringRule}s to the working copy. Changes to
+	 * the working copy are <b>not</b> committed yet.
 	 * 
 	 * @param rule
+	 *            {@link RefactoringRule} to be applied
 	 * @throws JavaModelException
 	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
@@ -98,24 +116,55 @@ public class RefactoringState {
 
 		if (changesAlreadyPresent) {
 			// already have changes
-			logger.warn(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, getWorkingCopyName()));
+			logger.warn(NLS.bind(ExceptionMessages.RefactoringState_warning_workingcopy_already_present, getWorkingCopyName()));
 		} else {
 			DocumentChange documentChange = rule.applyRule(workingCopy);
 			if (documentChange != null) {
 				changes.put(rule, documentChange);
 			} else {
-				logger.trace(NLS.bind(Messages.RefactoringState_no_changes_found, rule.getName(),
+				logger.trace(NLS.bind(ExceptionMessages.RefactoringState_no_changes_found, rule.getName(),
 						workingCopy.getElementName()));
 			}
 		}
 
 	}
 
-	public void clearWorkingCopies() {
+	/**
+	 * Commit changes to a {@code ICompilationUnit} and discard the working
+	 * copy.
+	 * 
+	 * @param workingCopy
+	 *            java document working copy where changes are present
+	 * @throws JavaModelException
+	 *             if this working copy could not commit. Reasons include: A
+	 *             org.eclipse.core.runtime.CoreException occurred while
+	 *             updating an underlying resource This element is not a working
+	 *             copy (INVALID_ELEMENT_TYPES) A update conflict (described
+	 *             above) (UPDATE_CONFLICT) if this working copy could not
+	 *             return in its original mode.
+	 * @since 0.9
+	 */
+	public void commitAndDiscardWorkingCopy() throws JavaModelException {
+		workingCopy.commitWorkingCopy(false, null);
+		discardWorkingCopy();
+	}
+
+	/**
+	 * Discard a working copy of {@code ICompilationUnit}.
+	 * 
+	 * @param workingCopy
+	 *            java document working copy where changes are present
+	 * @throws JavaModelException
+	 *             if the working copy could not be discarded or closed.
+	 *             Possible reasons: if this working copy could not return in
+	 *             its original mode OR if an error occurs closing this element.
+	 */
+	public void discardWorkingCopy() {
 		try {
-			SimonykeesUtil.discardWorkingCopy(workingCopy);
+			workingCopy.discardWorkingCopy();
+			workingCopy.close();
 		} catch (JavaModelException e) {
-			logger.error(NLS.bind(ExceptionMessages.AbstractRefactorer_unable_to_discard_working_copy,
+			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_discard_working_copy,
 					workingCopy.getPath().toString(), e.getMessage()), e);
 		}
 	}
