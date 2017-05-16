@@ -1,12 +1,145 @@
 package at.splendit.simonykees.core.visitor;
 
-//TODO: JAVA DOC!
+import java.util.List;
+
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+
+import at.splendit.simonykees.core.util.ASTNodeUtil;
+
 /**
- *
+ * converts lambda expressions to method references of the form
+ * {@code <Expression>::<MethodName>}. statement lambdas have to be converted to
+ * expression lambdas first, using {@link StatementLambdaToExpressionASTVisitor}
+ * 
  * @author Matthias Webhofer
  * @since 1.2
  *
  */
 public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisitor {
 
+	@Override
+	public boolean visit(LambdaExpression lambdaExpressionNode) {
+
+		// work only with expression lambdas
+		if (lambdaExpressionNode.getBody() instanceof Expression) {
+			Expression expression = (Expression) lambdaExpressionNode.getBody();
+			List<VariableDeclaration> lambdaParams = ASTNodeUtil.convertToTypedList(lambdaExpressionNode.parameters(),
+					VariableDeclaration.class);
+
+			// only single method invocations are relevant for cases 1, 2 and 3
+			if (expression instanceof MethodInvocation) {
+				MethodInvocation methodInvocation = (MethodInvocation) expression;
+				List<Expression> methodArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
+						Expression.class);
+
+				/*
+				 * case 1: reference to static method case 2: reference to
+				 * instance method i.e. personList.forEach(element ->
+				 * System.out.println(element)); becomes
+				 * personList.forEach(System.out::println);
+				 */
+				if (methodArguments.size() == lambdaParams.size()
+						&& checkMethodParameters(lambdaParams, methodArguments)) {
+
+					SimpleName methodName = (SimpleName) astRewrite.createCopyTarget(methodInvocation.getName());
+					Expression methodInvocationExpression = (Expression) astRewrite
+							.createCopyTarget(methodInvocation.getExpression());
+
+					ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
+					ref.setExpression(methodInvocationExpression);
+					ref.setName(methodName);
+
+					astRewrite.replace(lambdaExpressionNode, ref, null);
+				}
+
+				/*
+				 * case 3: reference to instance method of arbitrary type i.e.
+				 * Arrays.sort(stringArray, (a, b) -> a.compareToIgnoreCase(b));
+				 * becomes Arrays.sort(stringArray,
+				 * String::compareToIgnoreCase);
+				 */
+				else if ((lambdaParams.size() - 1) == methodArguments.size()) {
+					Expression methodInvocationExpression = methodInvocation.getExpression();
+
+					if (methodInvocationExpression instanceof SimpleName) {
+						SimpleName methodInvocationExpressionName = (SimpleName) methodInvocationExpression;
+						String methodInvocationExpressionNameStr = methodInvocationExpressionName.getIdentifier();
+						String lambdaParamNameStr = lambdaParams.get(0).getName().getIdentifier();
+
+						if (methodInvocationExpressionNameStr.equals(lambdaParamNameStr) && checkMethodParameters(
+								lambdaParams.subList(1, lambdaParams.size()), methodArguments)) {
+
+							ITypeBinding binding = methodInvocationExpressionName.resolveTypeBinding();
+							String typeNameStr = binding.getName();
+
+							SimpleName typeName = astRewrite.getAST().newSimpleName(typeNameStr);
+							SimpleName methodName = (SimpleName) astRewrite
+									.createCopyTarget(methodInvocation.getName());
+
+							ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
+							ref.setExpression(typeName);
+							ref.setName(methodName);
+
+							astRewrite.replace(lambdaExpressionNode, ref, null);
+						}
+					}
+				}
+			}
+
+			/*
+			 * case 4: reference to class instance creation (new) i.e.
+			 * Set<Person> persSet2 = transferElements(personList, () -> new
+			 * HashSet<>()); becomes Set<Person> persSet3 =
+			 * transferElements(personList, HashSet<Person>::new);
+			 */
+			else if (expression instanceof ClassInstanceCreation) {
+				// TODO implement case 4
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * compares the lambda parameter names with the method argument names one by
+	 * one
+	 * 
+	 * @param lambdaParams
+	 *            list of lambda parameters with type
+	 *            {@link VariableDeclaration}
+	 * @param methodArgs
+	 *            list of method arguments with type {@link Expression}
+	 * @return true, if the parameters have the same name in the same order,
+	 *         false otherwise
+	 */
+	private boolean checkMethodParameters(List<VariableDeclaration> lambdaParams, List<Expression> methodArgs) {
+
+		boolean paramsEqual = true;
+		for (int i = 0; i < lambdaParams.size(); i++) {
+			Expression methodArgument = methodArgs.get(i);
+			VariableDeclaration lambdaParam = lambdaParams.get(i);
+
+			// method argument has to be a SimpleName, not an Expression
+			if (methodArgument instanceof SimpleName) {
+				String methodArgumentName = ((SimpleName) methodArgument).getIdentifier();
+				String lambdaParamName = lambdaParam.getName().getIdentifier();
+
+				if (!methodArgumentName.equals(lambdaParamName)) {
+					paramsEqual = false;
+					break;
+				}
+			} else {
+				paramsEqual = false;
+			}
+		}
+
+		return paramsEqual;
+	}
 }
