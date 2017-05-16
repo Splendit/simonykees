@@ -27,9 +27,13 @@ public class LambdaToMethodReferenceRule {
 			new Person("jkl", LocalDate.of(2009, 2, 2)), new Person("yxcv", LocalDate.of(1989, 1, 1)));
 
 	public void referenceToStaticMethod() {
-		Collections.sort(personList, Person::compareByAge);
+		Collections.sort(personList, (Person a, Person b) -> {
+			return Person.compareByAge(a, b);
+		});
 
-		Collections.sort(personList, Person::compareByAge);
+		Collections.sort(personList, (a, b) -> {
+			return Person.compareByAge(a, b);
+		});
 
 		Collections.sort(personList, Person::compareByAge);
 
@@ -37,33 +41,67 @@ public class LambdaToMethodReferenceRule {
 
 		Collections.sort(personList, Person::compareByAge);
 		
-		personList.forEach(System.out::println);
+		personList.forEach(element -> {
+			System.out.println(element);
+		});
 		
 		personList.forEach(System.out::println);
 		
 		personList.forEach(System.out::println);
+		
+		Collections.sort(personList, (Person a, Person b) -> {
+			return Person.compareByAge(a.getParent2(), b);
+		});
+		
+		Collections.sort(personList, (a, b) -> {
+			return Person.compareByAge(a, b.getParent1());
+		});
+		
+		Collections.sort(personList, (Person a, Person b) -> Person.compareByAge(a, b.getParent2()));
+		
+		Collections.sort(personList, (a, b) -> Person.compareByAge(a.getParent1(), b));
 	}
 
 	public void referenceToInstanceMethod() {
 		ComparisonProvider comparisonProvider = new ComparisonProvider();
 
-		Collections.sort(personList, comparisonProvider::compareByName);
+		Collections.sort(personList, (Person a, Person b) -> {
+			return comparisonProvider.compareByName(a, b);
+		});
+
+		Collections.sort(personList, (a, b) -> {
+			return comparisonProvider.compareByName(a, b);
+		});
 
 		Collections.sort(personList, comparisonProvider::compareByName);
 
 		Collections.sort(personList, comparisonProvider::compareByName);
-		
+
 		Collections.sort(personList, comparisonProvider::compareByName);
-		
-		Collections.sort(personList, comparisonProvider::compareByName);
+
+		Collections.sort(personList, (Person a, Person b) -> {
+			return comparisonProvider.compareByName(a.getParent2(), b);
+		});
+
+		Collections.sort(personList, (a, b) -> {
+			return comparisonProvider.compareByName(a, b.getParent1());
+		});
+
+		Collections.sort(personList, (Person a, Person b) -> comparisonProvider.compareByName(a, b.getParent2()));
+
+		Collections.sort(personList, (a, b) -> comparisonProvider.compareByName(a.getParent1(), b));
 	}
 
 	public void referenceToInstanceMethodOfArbitraryType() {
 		String[] stringArray = { "Barbara", "James", "Mary", "John", "Patricia", "Robert", "Michael", "Linda" };
 
-		Arrays.sort(stringArray, String::compareToIgnoreCase);
+		Arrays.sort(stringArray, (String a, String b) -> {
+			return a.compareToIgnoreCase(b);
+		});
 
-		Arrays.sort(stringArray, String::compareToIgnoreCase);
+		Arrays.sort(stringArray, (a, b) -> {
+			return a.compareToIgnoreCase(b);
+		});
 
 		Arrays.sort(stringArray, String::compareToIgnoreCase);
 
@@ -73,7 +111,9 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	public void referenceToConstructor() {
-		Set<Person> persSet1 = transferElements(personList, HashSet<Person>::new);
+		Set<Person> persSet1 = transferElements(personList, () -> {
+			return new HashSet<>();
+		});
 
 		Set<Person> persSet2 = transferElements(personList, HashSet<Person>::new);
 
