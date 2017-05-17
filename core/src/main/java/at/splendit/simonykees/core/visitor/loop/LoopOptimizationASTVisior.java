@@ -22,12 +22,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.constants.ReservedNames;
-import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeException;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -41,8 +38,6 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
-	private static final Logger logger = LoggerFactory.getLogger(LoopOptimizationASTVisior.class);
-	
 	/*
 	 * is initialized in constructor and set to null again if condition is
 	 * broken
@@ -101,19 +96,14 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 					Expression iterableExpression =  nodeInitializer.getExpression();
 					ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
 
-					try {
-						String iterableFullyQualifiedName = Iterable.class.getName();
-						// check if iterable object is compatible with java Iterable
-						boolean isIterable = ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
-								Collections.singletonList(iterableFullyQualifiedName));
-						
-						if(isIterable) {
-							listName = (Name) iterableExpression;
-							return false;
-						}
-
-					} catch (Exception e) {
-						logger.error(e.getMessage(), new ITypeNotFoundRuntimeException());
+					String iterableFullyQualifiedName = Iterable.class.getName();
+					// check if iterable object is compatible with java Iterable
+					boolean isIterable = ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
+							Collections.singletonList(iterableFullyQualifiedName));
+					
+					if(isIterable) {
+						listName = (Name) iterableExpression;
+						return false;
 					}
 				}
 			}
@@ -190,7 +180,7 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		Type iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 
 		/*
-		 * iterator has no type-parameter therefore a optimization is could not
+		 * iterator has no type-parameter therefore an optimization could not
 		 * be applied
 		 */
 		if (null == iteratorType) {

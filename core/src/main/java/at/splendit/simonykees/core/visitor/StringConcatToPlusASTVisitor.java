@@ -24,9 +24,9 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class StringConcatToPlusASTVisitor extends AbstractCompilationUnitASTVisitor {
+public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
+	private static final String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
 
 	private Set<MethodInvocation> modifyMethodInvocation = new HashSet<>();
 	private Map<MethodInvocation, Expression> alreadyReplacedExpression = new HashMap<>();
