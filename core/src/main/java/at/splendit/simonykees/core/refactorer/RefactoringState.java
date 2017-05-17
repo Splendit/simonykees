@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.refactorer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,12 +28,19 @@ public class RefactoringState {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringState.class);
 
+	private ICompilationUnit original;
+
 	private ICompilationUnit workingCopy;
+
+	private Map<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> initialChanges = new HashMap<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange>();
 
 	private Map<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> changes = new HashMap<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange>();
 
-	public RefactoringState(ICompilationUnit workingCopy) {
+	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ignoredRules = new ArrayList<>();
+
+	public RefactoringState(ICompilationUnit original, ICompilationUnit workingCopy) {
 		super();
+		this.original = original;
 		this.workingCopy = workingCopy;
 	}
 
@@ -50,6 +58,10 @@ public class RefactoringState {
 	 */
 	public DocumentChange getChangeIfPresent(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		return changes.get(rule);
+	}
+
+	public boolean wasChangeInitialyPresent(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+		return initialChanges.containsKey(rule);
 	}
 
 	/**
@@ -84,7 +96,7 @@ public class RefactoringState {
 			throws JavaModelException, ReflectiveOperationException {
 
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
-			addRuleAndGenerateDocumentChanges(refactoringRule);
+			addRuleAndGenerateDocumentChanges(refactoringRule, false);
 		}
 	}
 
@@ -102,8 +114,8 @@ public class RefactoringState {
 	 *             is thrown if the default constructor of {@link #visitor} is
 	 *             not present and the reflective construction fails.
 	 */
-	public void addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule)
-			throws JavaModelException, ReflectiveOperationException {
+	public void addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
+			boolean initialApply) throws JavaModelException, ReflectiveOperationException {
 
 		/*
 		 * Sends new child of subMonitor which takes in progress bar size of 1
@@ -112,20 +124,24 @@ public class RefactoringState {
 		 */
 		// generateDocumentChanges(rule, subMonitor.newChild(1));
 
-		boolean changesAlreadyPresent = changes.containsKey(rule);
-
-		if (changesAlreadyPresent) {
-			// already have changes
-			logger.warn(NLS.bind(ExceptionMessages.RefactoringState_warning_workingcopy_already_present, getWorkingCopyName()));
+		// boolean changesAlreadyPresent = changes.containsKey(rule);
+		//
+		// if (changesAlreadyPresent) {
+		// // already have changes
+		// logger.warn(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present,
+		// getWorkingCopyName()));
+		// } else {
+		DocumentChange documentChange = rule.applyRule(workingCopy);
+		if (documentChange != null) {
+			changes.put(rule, documentChange);
+			if (initialApply) {
+				initialChanges.put(rule, documentChange);
+			}
 		} else {
-			DocumentChange documentChange = rule.applyRule(workingCopy);
-			if (documentChange != null) {
-				changes.put(rule, documentChange);
-			} else {
 				logger.trace(NLS.bind(ExceptionMessages.RefactoringState_no_changes_found, rule.getName(),
 						workingCopy.getElementName()));
-			}
 		}
+		// }
 
 	}
 
@@ -166,6 +182,56 @@ public class RefactoringState {
 		} catch (JavaModelException e) {
 			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_discard_working_copy,
 					workingCopy.getPath().toString(), e.getMessage()), e);
+		}
+	}
+
+	/**
+	 * Returns list of rules that are ignored (unselected) for current
+	 * refactoring state. This can contain only rules for which refactoring
+	 * state contained changes at one point.
+	 * 
+	 * @return list of rules that are ignored
+	 */
+	public List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getIgnoredRules() {
+		return ignoredRules;
+	}
+
+	/**
+	 * Adds rule to list of rules that are ignored for current refactoring
+	 * state. Used when working copy is unchecked.
+	 * 
+	 * @param rule
+	 *            to be ignored
+	 */
+	public void addRuleToIgnoredRules(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+		ignoredRules.add(rule);
+		changes.put(rule, null);
+	}
+
+	/**
+	 * Removes rule from list of rules that are ignored for current refactoring
+	 * state. Used when working copy is again checked from unchecked state.
+	 * 
+	 * @param rule
+	 *            to be removed from ignored rules
+	 */
+	public void removeRuleFromIgnoredRules(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+		if (ignoredRules.contains(rule)) {
+			ignoredRules.remove(rule);
+		}
+	}
+
+	/**
+	 * When working copy gets unselected in preview view its state has to be
+	 * returned to original
+	 */
+	public void resetWorkingCopy() {
+		try {
+			this.workingCopy = original.getWorkingCopy(null);
+			changes.clear();
+		} catch (JavaModelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 }
