@@ -272,7 +272,7 @@ public class RefactoringPipeline {
 			 */
 			subMonitor.subTask(refactoringState.getWorkingCopyName());
 
-			refactoringState.addRuleAndGenerateDocumentChanges(rule);
+			refactoringState.addRuleAndGenerateDocumentChanges(rule, false);
 
 			/*
 			 * If cancel is pressed on progress monitor, abort all and return,
@@ -326,8 +326,8 @@ public class RefactoringPipeline {
 		if (!notWorkingRules.isEmpty()) {
 			String notWorkingRulesCollected = notWorkingRules.stream().collect(Collectors.joining(", ")); //$NON-NLS-1$
 			throw new RuleException(
-					NLS.bind(ExceptionMessages.AbstractRefactorer_rule_execute_failed, notWorkingRulesCollected),
-					NLS.bind(ExceptionMessages.AbstractRefactorer_user_rule_execute_failed, notWorkingRulesCollected));
+					NLS.bind(ExceptionMessages.RefactoringPipeline_rule_execute_failed, notWorkingRulesCollected),
+					NLS.bind(ExceptionMessages.RefactoringPipeline_user_rule_execute_failed, notWorkingRulesCollected));
 		}
 	}
 
@@ -372,8 +372,8 @@ public class RefactoringPipeline {
 		if (!notWorkingRules.isEmpty()) {
 			String notWorkingRulesCollected = notWorkingRules.stream().collect(Collectors.joining(", ")); //$NON-NLS-1$
 			throw new RuleException(
-					NLS.bind(ExceptionMessages.AbstractRefactorer_rule_execute_failed, notWorkingRulesCollected),
-					NLS.bind(ExceptionMessages.AbstractRefactorer_user_rule_execute_failed, notWorkingRulesCollected));
+					NLS.bind(ExceptionMessages.RefactoringPipeline_rule_execute_failed, notWorkingRulesCollected),
+					NLS.bind(ExceptionMessages.RefactoringPipeline_user_rule_execute_failed, notWorkingRulesCollected));
 		}
 	}
 
