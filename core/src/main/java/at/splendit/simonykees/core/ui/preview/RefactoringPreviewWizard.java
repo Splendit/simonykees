@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.ui.preview;
 
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -37,6 +38,31 @@ public class RefactoringPreviewWizard extends Wizard {
 	@Override
 	public void addPages() {
 		refactoringPipeline.getPreviewNodes().forEach(node -> addPage(new RefactoringPreviewWizardPage(node)));
+	}
+
+	@Override
+	public IWizardPage getNextPage(IWizardPage page) {
+		if (!((RefactoringPreviewWizardPage) page).getChangedSelections().isEmpty()) {
+			recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
+		}
+		return super.getNextPage(page);
+	}
+
+	private void recalculateRulesAndClearChanges(RefactoringPreviewWizardPage page) {
+		// TODO recalculate again
+		// refactoringPipeline.doAdditionalRefactoring();
+
+		page.getChangedSelections().keySet().stream().forEach(compilationUnit -> page.getPreviewNode().getSelections()
+				.put(compilationUnit, page.getChangedSelections().get(compilationUnit)));
+		page.getChangedSelections().clear();
+	}
+
+	@Override
+	public IWizardPage getPreviousPage(IWizardPage page) {
+		if (!((RefactoringPreviewWizardPage) page).getChangedSelections().isEmpty()) {
+			recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
+		}
+		return super.getPreviousPage(page);
 	}
 
 	/*
