@@ -2,8 +2,13 @@ package at.splendit.simonykees.sample.postRule.allRules;
 
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings("nls")
 public class TestBracketsToControlRule {
+	private static final Logger logger = LoggerFactory.getLogger(TestBracketsToControlRule.class);
+
 	public static void testforIf() {
 		int i = 0;
 
@@ -42,9 +47,9 @@ public class TestBracketsToControlRule {
 					;
 				} while (t != null);
 			} else if (s == "aaa") {
-				System.out.print("aa");
+				logger.debug("aa");
 			} else {
-				System.out.print("bbb");
+				logger.debug("bbb");
 			}
 		} else {
 			;

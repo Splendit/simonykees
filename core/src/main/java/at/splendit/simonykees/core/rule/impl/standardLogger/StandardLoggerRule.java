@@ -40,10 +40,6 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 
 	private static final Logger logger = LoggerFactory.getLogger(StandardLoggerRule.class);
 
-	private static final String SLF4J_LOGGER = "org.slf4j.Logger"; //$NON-NLS-1$
-	private static final String LOGBACK_LOGGER = "ch.qos.logback.classic.Logger"; //$NON-NLS-1$
-	private static final String LOG4J_LOGGER = "org.apache.logging.log4j.Logger"; //$NON-NLS-1$
-
 	private static final String TRACE = "trace"; //$NON-NLS-1$
 	private static final String DEBUG = "debug"; //$NON-NLS-1$
 	private static final String INFO = "info"; //$NON-NLS-1$
