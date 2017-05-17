@@ -74,14 +74,14 @@ public class StandardLoggerASTVisitor extends AbstractCompilationUnitASTVisitor 
 	private Map<String, List<String>> newImports;
 	private Map<String, String> loggerNames;
 
-	public StandardLoggerASTVisitor() {
-		// this.replacingOptions = replacingOptions;
-		// this.loggerQualifiedName = loggerQualifiedName;
-		this.replacingOptions = new HashMap<>();
-		this.loggerQualifiedName = StandardLoggerOptions.SLF4J_LOGGER;
-		this.replacingOptions.put(StandardLoggerOptions.PRINT_STACKTRACE, "error");
-		this.replacingOptions.put(StandardLoggerOptions.SYSTEM_ERR_PRINT, "warn");
-		this.replacingOptions.put(StandardLoggerOptions.SYSTEM_OUT_PRINT, "debug");
+	public StandardLoggerASTVisitor(String loggerQualifiedName, Map<String, String>replacingOptions) {
+		 this.replacingOptions = replacingOptions;
+		 this.loggerQualifiedName = loggerQualifiedName;
+//		this.replacingOptions = new HashMap<>();
+//		this.loggerQualifiedName = StandardLoggerOptions.SLF4J_LOGGER;
+//		this.replacingOptions.put(StandardLoggerOptions.PRINT_STACKTRACE, "error");
+//		this.replacingOptions.put(StandardLoggerOptions.SYSTEM_ERR_PRINT, "warn");
+//		this.replacingOptions.put(StandardLoggerOptions.SYSTEM_OUT_PRINT, "debug");
 		this.loggerNames = new HashMap<>();
 		this.newImports = new HashMap<>();
 		

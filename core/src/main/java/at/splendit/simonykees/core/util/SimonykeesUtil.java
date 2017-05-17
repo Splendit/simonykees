@@ -260,11 +260,10 @@ public final class SimonykeesUtil {
 	 * @since 0.9
 	 * 
 	 */
-	public static DocumentChange applyRule(ICompilationUnit workingCopy,
-			Class<? extends AbstractASTRewriteASTVisitor> ruleClazz)
-			throws ReflectiveOperationException, JavaModelException {
+	public static <T extends AbstractASTRewriteASTVisitor> DocumentChange applyRule(ICompilationUnit workingCopy,
+			T ruleVisitor) throws ReflectiveOperationException, JavaModelException {
+
 		final CompilationUnit astRoot = parse(workingCopy);
-		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 		// FIXME resolves that comments are manipulated during astrewrite
 		//
 		// Solution from https://bugs.eclipse.org/bugs/show_bug.cgi?id=250142
@@ -275,14 +274,15 @@ public final class SimonykeesUtil {
 
 		// astRewrite.setTargetSourceRangeComputer(new
 		// NoCommentSourceRangeComputer());
-
-		AbstractASTRewriteASTVisitor rule = ruleClazz.newInstance();
-		rule.setAstRewrite(astRewrite);
-		astRoot.accept(rule);
+		
+		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
+		ruleVisitor.setAstRewrite(astRewrite);
+		astRoot.accept(ruleVisitor);
 
 		Document document = new Document(workingCopy.getSource());
 		TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
-
+		String classSimpleName = ruleVisitor.getClass().getSimpleName();
+		
 		if (edits.hasChildren()) {
 
 			/*
@@ -291,7 +291,7 @@ public final class SimonykeesUtil {
 			 * DocumentChange. To fix this issue, a copy of the TextEdit is used
 			 * for the DocumentChange.
 			 */
-			DocumentChange documentChange = generateDocumentChange(ruleClazz.getSimpleName(), document, edits.copy());
+			DocumentChange documentChange = generateDocumentChange(classSimpleName , document, edits.copy());
 
 			workingCopy.applyTextEdit(edits, null);
 			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
@@ -300,7 +300,6 @@ public final class SimonykeesUtil {
 		} else {
 			return null;
 		}
-
 	}
 
 }

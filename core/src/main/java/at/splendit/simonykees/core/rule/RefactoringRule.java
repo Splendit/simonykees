@@ -17,9 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
+import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.util.TagUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.core.visitor.semiAutomatic.StandardLoggerASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
@@ -173,6 +175,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	 *             not present and the reflective construction fails.
 	 */
 	private void collectChanges(ICompilationUnit workingCopy) throws JavaModelException, ReflectiveOperationException {
+		T visitor = visitorFactory();
 		DocumentChange documentChange = SimonykeesUtil.applyRule(workingCopy, visitor);
 		if (documentChange != null) {
 
@@ -198,6 +201,20 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		} else {
 			// no changes
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private T visitorFactory() throws InstantiationException, IllegalAccessException {
+		T astVisitor;
+		if(this.visitor.isAssignableFrom(StandardLoggerASTVisitor.class)) {
+			StandardLoggerRule standardLoggerRule = (StandardLoggerRule)this;
+			Map<String, String> replacingOptions = standardLoggerRule.getSelectedOptions();
+			String availableLogger = standardLoggerRule.getAvailableQualifiedLoggerName();
+			astVisitor = (T)new StandardLoggerASTVisitor(availableLogger, replacingOptions);
+		} else {
+			astVisitor = visitor.newInstance();
+		}
+		return astVisitor;
 	}
 
 	/**
