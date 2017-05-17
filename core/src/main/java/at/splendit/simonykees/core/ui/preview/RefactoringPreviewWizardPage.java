@@ -93,7 +93,7 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 			@Override
 			public String getText(Object element) {
 				ICompilationUnit compUnit = (ICompilationUnit) element;
-				return compUnit.getElementName();
+				return String.format("%s - %s", getClassNameString(compUnit), getPathString(compUnit)); //$NON-NLS-1$
 			}
 		});
 
@@ -105,6 +105,28 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 			viewer.add(entry);
 			viewer.setChecked(entry, previewNode.getSelections().get(entry));
 		});
+	}
+
+	/**
+	 * Returns the class name of an {@link ICompilationUnit}, including ".java"
+	 * 
+	 * @param compilationUnit
+	 * @return
+	 */
+	private String getClassNameString(ICompilationUnit compilationUnit) {
+		return compilationUnit.getElementName();
+	}
+
+	/**
+	 * Returns the path of an {@link ICompilationUnit} without leading slash
+	 * (the same as in the Externalize Strings refactoring view).
+	 * 
+	 * @param compilationUnit
+	 * @return
+	 */
+	private String getPathString(ICompilationUnit compilationUnit) {
+		String temp = compilationUnit.getParent().getPath().toString();
+		return temp.startsWith("/") ? temp.substring(1) : temp; //$NON-NLS-1$
 	}
 
 	private void createPreviewViewer(Composite parent) {
