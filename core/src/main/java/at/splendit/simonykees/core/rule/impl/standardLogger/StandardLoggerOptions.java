@@ -16,7 +16,7 @@ public interface StandardLoggerOptions {
 	
 	String SLF4J_LOGGER = "org.slf4j.Logger"; //$NON-NLS-1$
 	String LOGBACK_LOGGER = "ch.qos.logback.classic.Logger"; //$NON-NLS-1$
-	String LOG4J_LOGGER = "org.apache.log4j.Logger"; //$NON-NLS-1$
+	String LOG4J_LOGGER = "org.apache.logging.log4j.Logger"; //$NON-NLS-1$
 	
 	String SYSTEM_OUT_PRINT = "System.out.print"; //$NON-NLS-1$
 	String SYSTEM_ERR_PRINT = "System.err.print"; //$NON-NLS-1$

@@ -261,7 +261,7 @@ public final class SimonykeesUtil {
 	 * 
 	 */
 	public static <T extends AbstractASTRewriteASTVisitor> DocumentChange applyRule(ICompilationUnit workingCopy,
-			T ruleVisitor) throws ReflectiveOperationException, JavaModelException {
+			T ruleVisitor) throws JavaModelException {
 
 		final CompilationUnit astRoot = parse(workingCopy);
 		// FIXME resolves that comments are manipulated during astrewrite

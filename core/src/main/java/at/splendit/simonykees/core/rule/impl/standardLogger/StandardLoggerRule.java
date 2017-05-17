@@ -159,9 +159,17 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		return loggerQualifiedName;
 	}
 
+	@Override
 	public void activateDefaultOptions() {
 		// default options should be activated only for test purposes
 		setSelectedOptions(getDefaultOptions());
 		this.loggerQualifiedName = SLF4J_LOGGER;
+	}
+	
+	@Override
+	protected StandardLoggerASTVisitor visitorFactory() {
+		Map<String, String> replacingOptions = getSelectedOptions();
+		String availableLogger = getAvailableQualifiedLoggerName();
+		return new StandardLoggerASTVisitor(availableLogger, replacingOptions);
 	}
 }
