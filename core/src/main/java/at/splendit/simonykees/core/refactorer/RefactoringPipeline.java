@@ -27,6 +27,9 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.ExceptionMessages;
 
 /**
+ * This class manages the selected {@link RefactoringRule}s and the selected
+ * {@link IJavaElement}s and offers functionality to apply the first to the
+ * latter.
  * 
  * @author Ludwig Werzowa
  * @since 1.2
@@ -35,12 +38,19 @@ public class RefactoringPipeline {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringPipeline.class);
 
+	/**
+	 * List of selected {@link IJavaElement}s wrapped as
+	 * {@link RefactoringState}s
+	 */
 	private List<RefactoringState> refactoringStates;
 
+	/**
+	 * List of selected rules.
+	 */
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
 	/**
-	 * 
+	 * Stores the selected rules.
 	 * 
 	 * @param rules
 	 *            {@link List} of {@link RefactoringRule}s to apply to the
@@ -96,7 +106,7 @@ public class RefactoringPipeline {
 
 	/**
 	 * Check if any {@link RefactoringRule} lead to changes in any
-	 * {@link RefactoringState}
+	 * {@link RefactoringState}.
 	 * 
 	 * @return
 	 *         <ul>
@@ -116,12 +126,11 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * TODO description
-	 * 
-	 * 
-	 * Prepare working copies for refactoring<br>
-	 * Find {@link ICompilationUnit}s and create working copies for the
-	 * {@link IJavaElement}s
+	 * Prepare working copies for refactoring.
+	 * <p>
+	 * Takes a list of {@link IJavaElement}s and creates
+	 * {@link ICompilationUnit}s for them. Those {@link ICompilationUnit}s are
+	 * stored as working copies in a list of {@link RefactoringState}s.
 	 * 
 	 * @param IProgressMonitor
 	 *            monitor used to show progress in UI
@@ -134,7 +143,7 @@ public class RefactoringPipeline {
 	 * 
 	 * @see SimonykeesUtil#collectICompilationUnits(List, List)
 	 */
-	public List<RefactoringState> prepareRefactoring(List<IJavaElement> javaElements, IProgressMonitor monitor)
+	public void prepareRefactoring(List<IJavaElement> javaElements, IProgressMonitor monitor)
 			throws RefactoringException {
 
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
@@ -142,13 +151,14 @@ public class RefactoringPipeline {
 		try {
 			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements, monitor);
 			if (compilationUnits.isEmpty()) {
-				logger.warn(ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found);
-				throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_compilation_units_found,
-						ExceptionMessages.AbstractRefactorer_user_warn_no_compilation_units_found);
+				logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found);
+				throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found,
+						ExceptionMessages.RefactoringPipeline_user_warn_no_compilation_units_found);
 			} else if (!refactoringStates.isEmpty()) {
-				logger.warn(ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated);
+				logger.warn(ExceptionMessages.RefactoringPipeline_warn_working_copies_already_generated);
 				throw new RefactoringException(
-						ExceptionMessages.AbstractRefactorer_warn_working_copies_already_generated);
+						ExceptionMessages.RefactoringPipeline_warn_working_copies_already_generated,
+						ExceptionMessages.RefactoringPipeline_user_warn_changes_already_generated);
 			} else {
 
 				/*
@@ -169,24 +179,22 @@ public class RefactoringPipeline {
 					 * return, else continue
 					 */
 					if (subMonitor.isCanceled()) {
-						return refactoringStates;
+						return;
 					} else {
 						subMonitor.worked(1);
 					}
 				}
-
-				return refactoringStates;
 			}
 		} catch (JavaModelException e) {
 			logger.error(e.getMessage(), e);
-			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_java_element_resoltuion_failed,
-					ExceptionMessages.AbstractRefactorer_user_java_element_resoltuion_failed, e);
+			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+					ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e);
 		}
 	}
 
 	/**
 	 * Apply {@link RefactoringRule}s to the working copies of each
-	 * {@link RefactoringState}
+	 * {@link RefactoringState}. Changes are <b>not</b> yet committed.
 	 * 
 	 * @param IProgressMonitor
 	 *            monitor used to show progress in UI
@@ -200,14 +208,15 @@ public class RefactoringPipeline {
 	 * 
 	 * @since 1.2
 	 * 
-	 * @see RefactoringRule#generateDocumentChanges(List)
+	 * @see RefactoringState#addRulesAndGenerateDocumentChanges(List)
 	 * 
 	 */
 	public void doRefactoring(IProgressMonitor monitor) throws RefactoringException, RuleException {
 		if (refactoringStates.isEmpty()) {
 			// TODO warning adjustment
-			logger.warn(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
-			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
+			logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
+			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found,
+					ExceptionMessages.RefactoringPipeline_user_warn_no_java_files_found_to_apply_rules);
 		}
 
 		/*
@@ -253,62 +262,11 @@ public class RefactoringPipeline {
 		if (!notWorkingRules.isEmpty()) {
 			String notWorkingRulesCollected = notWorkingRules.stream().collect(Collectors.joining(", ")); //$NON-NLS-1$
 			throw new RuleException(
-					NLS.bind(ExceptionMessages.AbstractRefactorer_rule_execute_failed, notWorkingRulesCollected),
-					NLS.bind(ExceptionMessages.AbstractRefactorer_user_rule_execute_failed, notWorkingRulesCollected));
+					NLS.bind(ExceptionMessages.RefactoringPipeline_rule_execute_failed, notWorkingRulesCollected),
+					NLS.bind(ExceptionMessages.RefactoringPipeline_user_rule_execute_failed, notWorkingRulesCollected));
 		}
 	}
-
-	/**
-	 * TODO adjust description
-	 * 
-	 * Commit the working copies to the underlying {@link ICompilationUnit}s
-	 * 
-	 * 
-	 * @throws RefactoringException
-	 *             if no working copies were found
-	 * @throws ReconcileException
-	 *             if a working copy cannot be applied to the underlying
-	 *             {@link ICompilationUnit}
-	 * 
-	 * @since 0.9
-	 * 
-	 * @see SimonykeesUtil#commitAndDiscardWorkingCopy(ICompilationUnit)
-	 */
-	public void commitRefactoring() throws RefactoringException, ReconcileException {
-		if (refactoringStates.isEmpty()) {
-			// TODO adjust
-			logger.warn(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
-			throw new RefactoringException(ExceptionMessages.AbstractRefactorer_warn_no_working_copies_foung);
-		}
-		List<String> refactoringStatesNotCommited = new ArrayList<>();
-		for (Iterator<RefactoringState> iterator = refactoringStates.iterator(); iterator.hasNext();) {
-			RefactoringState refactoringState = (RefactoringState) iterator.next();
-			try {
-				SimonykeesUtil.commitAndDiscardWorkingCopy(refactoringState.getWorkingCopy());
-				iterator.remove();
-			} catch (JavaModelException e) {
-				logger.error(e.getMessage(), e);
-				refactoringStatesNotCommited.add(refactoringState.getWorkingCopy().getPath().toString());
-			}
-		}
-		if (!refactoringStatesNotCommited.isEmpty()) {
-			String notWorkingRulesCollected = refactoringStatesNotCommited.stream().collect(Collectors.joining("\n")); //$NON-NLS-1$
-			throw new ReconcileException(
-					NLS.bind(ExceptionMessages.AbstractRefactorer_reconcile_failed, notWorkingRulesCollected),
-					NLS.bind(ExceptionMessages.AbstractRefactorer_user_reconcile_failed, notWorkingRulesCollected));
-		}
-	}
-
-	/**
-	 * Clears everything.
-	 * <p>
-	 * This method should be called when canceling or finishing refactorings.
-	 */
-	public void clearStates() {
-		refactoringStates.forEach(s -> s.clearWorkingCopies());
-		refactoringStates.clear();
-	}
-
+	
 	/**
 	 * This functionality used to be in the {@link RefactoringRule}
 	 * 
@@ -329,8 +287,6 @@ public class RefactoringPipeline {
 
 			refactoringState.addRuleAndGenerateDocumentChanges(rule);
 
-			// TODO we used to have a test for try with resource here
-
 			/*
 			 * If cancel is pressed on progress monitor, abort all and return,
 			 * else continue
@@ -339,6 +295,52 @@ public class RefactoringPipeline {
 				return;
 			}
 		}
+	}
+
+	/**
+	 * Commit the working copies to the underlying {@link ICompilationUnit}s
+	 * 
+	 * @throws RefactoringException
+	 *             if no working copies were found
+	 * @throws ReconcileException
+	 *             if a working copy cannot be applied to the underlying
+	 *             {@link ICompilationUnit}
+	 * 
+	 * @since 0.9
+	 */
+	public void commitRefactoring() throws RefactoringException, ReconcileException {
+		if (refactoringStates.isEmpty()) {
+			// TODO adjust
+			logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
+			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
+		}
+		List<String> refactoringStatesNotCommited = new ArrayList<>();
+		for (Iterator<RefactoringState> iterator = refactoringStates.iterator(); iterator.hasNext();) {
+			RefactoringState refactoringState = (RefactoringState) iterator.next();
+			try {
+				refactoringState.commitAndDiscardWorkingCopy();
+				iterator.remove();
+			} catch (JavaModelException e) {
+				logger.error(e.getMessage(), e);
+				refactoringStatesNotCommited.add(refactoringState.getWorkingCopy().getPath().toString());
+			}
+		}
+		if (!refactoringStatesNotCommited.isEmpty()) {
+			String notWorkingRulesCollected = refactoringStatesNotCommited.stream().collect(Collectors.joining("\n")); //$NON-NLS-1$
+			throw new ReconcileException(
+					NLS.bind(ExceptionMessages.RefactoringPipeline_reconcile_failed, notWorkingRulesCollected),
+					NLS.bind(ExceptionMessages.RefactoringPipeline_user_reconcile_failed, notWorkingRulesCollected));
+		}
+	}
+
+	/**
+	 * Clears everything.
+	 * <p>
+	 * This method should be called when canceling or finishing refactorings.
+	 */
+	public void clearStates() {
+		refactoringStates.forEach(s -> s.discardWorkingCopy());
+		refactoringStates.clear();
 	}
 
 }

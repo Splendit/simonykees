@@ -192,38 +192,4 @@ public final class SimonykeesUtil {
 		return documentChange;
 	}
 
-	/**
-	 * Commit changes to a {@code ICompilationUnit} and discard the working copy
-	 * 
-	 * @param workingCopy
-	 *            java document working copy where changes are present
-	 * @throws JavaModelException
-	 *             if this working copy could not commit. Reasons include: A
-	 *             org.eclipse.core.runtime.CoreException occurred while
-	 *             updating an underlying resource This element is not a working
-	 *             copy (INVALID_ELEMENT_TYPES) A update conflict (described
-	 *             above) (UPDATE_CONFLICT) if this working copy could not
-	 *             return in its original mode.
-	 * @since 0.9
-	 */
-	public static void commitAndDiscardWorkingCopy(ICompilationUnit workingCopy) throws JavaModelException {
-		workingCopy.commitWorkingCopy(false, null);
-		discardWorkingCopy(workingCopy);
-	}
-
-	/**
-	 * Discard a working copy of {@code ICompilationUnit}
-	 * 
-	 * @param workingCopy
-	 *            java document working copy where changes are present
-	 * @throws JavaModelException
-	 *             if the working copy could not be discarded or closed.
-	 *             Possible reasons: if this working copy could not return in
-	 *             its original mode OR if an error occurs closing this element.
-	 */
-	public static void discardWorkingCopy(ICompilationUnit workingCopy) throws JavaModelException {
-		workingCopy.discardWorkingCopy();
-		workingCopy.close();
-	}
-
 }
