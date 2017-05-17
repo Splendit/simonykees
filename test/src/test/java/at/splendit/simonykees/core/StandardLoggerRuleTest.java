@@ -34,7 +34,10 @@ public class StandardLoggerRuleTest extends AbstractRulesTest {
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
-		rulesList.add(new StandardLoggerRule(StandardLoggerASTVisitor.class));
+		
+		StandardLoggerRule standardLoggerRule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+		standardLoggerRule.activateDefaultOptions();
+		rulesList.add(standardLoggerRule);
 	}
 	
 	@Parameters(name = "{index}: test file[{0}]")

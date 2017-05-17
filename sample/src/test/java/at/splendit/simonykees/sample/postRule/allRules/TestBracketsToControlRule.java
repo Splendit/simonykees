@@ -47,9 +47,9 @@ public class TestBracketsToControlRule {
 					;
 				} while (t != null);
 			} else if (s == "aaa") {
-				logger.debug("aa");
+				logger.info("aa");
 			} else {
-				logger.debug("bbb");
+				logger.info("bbb");
 			}
 		} else {
 			;

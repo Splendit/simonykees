@@ -10,19 +10,19 @@ public class TestStandardLoggerRule {
 	private static String logger;
 	
 	public void replaceSystemOutPrint(String input) {
-		logger1.debug(input);
+		logger1.info(input);
 	}
 	
 	public void replaceSystemOutPrintln(String input) {
-		logger1.debug(input);
+		logger1.info(input);
 	}
 	
 	public void replaceSystemErrPrint(String input) {
-		logger1.debug(input);
+		logger1.info(input);
 	}
 	
 	public void replaceSystemErrPrintln(String input) {
-		logger1.debug(input);
+		logger1.info(input);
 	}
 	
 	public void replacePrintStackTrace(String input) {
@@ -38,7 +38,7 @@ public class TestStandardLoggerRule {
 		private final Logger logger2 = LoggerFactory.getLogger(InnerClass.class);
 
 		public void dontUseOuterClassLogger(String input) {
-			logger2.debug("a log message");
+			logger2.info("a log message");
 		}
 		
 		class DoubleNestedInnerClass {
@@ -46,21 +46,21 @@ public class TestStandardLoggerRule {
 			private final Logger logger3 = LoggerFactory.getLogger(DoubleNestedInnerClass.class);
 
 			public void loggerInDoubleNestedClass(String input) {
-				logger3.debug(input);
+				logger3.info(input);
 			}
 			
 			public void useDeepNestedLogger(String input) {
-				logger3.debug(input);
+				logger3.info(input);
 			}
 		}
 		
 		public void useCorrectLogger(String input) {
-			logger2.debug(input);
+			logger2.info(input);
 		}
 	}
 	
 	public void replaceAfterInnerClass(String input) {
-		logger1.debug(input);
+		logger1.info(input);
 	}
 }
 
@@ -69,11 +69,11 @@ class TopLevelClass {
 	private static final Logger logger = LoggerFactory.getLogger(TopLevelClass.class);
 
 	public void replaceSystemOutPrint(String input) {
-		logger.debug(input);
+		logger.info(input);
 	}
 	
 	public void replaceSystemErrPrintln(String input) {
-		logger.debug(input);
+		logger.info(input);
 	}
 	
 	public void replacePrintStackTrace(String input) {
@@ -92,6 +92,6 @@ enum Days {
 	private static final Logger logger1 = LoggerFactory.getLogger(Days.class);
 	private static final String logger = "";
 	public void loggerInEnumType(String input) {
-		logger1.debug(input);
+		logger1.info(input);
 	}
 }

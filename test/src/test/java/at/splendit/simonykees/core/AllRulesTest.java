@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
@@ -16,8 +17,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
+import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * TODO SIM-103 add class description
@@ -68,7 +72,14 @@ public class AllRulesTest extends AbstractRulesTest {
 		String expectedSource = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		String content = new String(Files.readAllBytes(preRule), StandardCharsets.UTF_8);
 
-		String compilationUnitSource = processFile(fileName, content, RulesContainer.getAllRules());
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules = RulesContainer.getAllRules().stream()
+				.map(rule -> {
+					if(rule instanceof StandardLoggerRule) {
+						((StandardLoggerRule) rule).activateDefaultOptions();
+					}
+					return rule;
+				}).collect(Collectors.toList());
+		String compilationUnitSource = processFile(fileName, content, allRules);
 
 		// Replace the package for comparison
 		compilationUnitSource = StringUtils.replace(compilationUnitSource, RulesTestUtil.PRERULE_PACKAGE,
