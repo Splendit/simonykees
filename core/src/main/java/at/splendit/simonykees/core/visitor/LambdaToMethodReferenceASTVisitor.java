@@ -9,8 +9,10 @@ import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
@@ -41,35 +43,54 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 				MethodInvocation methodInvocation = (MethodInvocation) expression;
 				List<Expression> methodArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 						Expression.class);
+				Expression methodInvocationExpression = methodInvocation.getExpression();
 
 				/*
 				 * case 1: reference to static method case 2: reference to
 				 * instance method i.e. personList.forEach(element ->
 				 * System.out.println(element)); becomes
-				 * personList.forEach(System.out::println);
+				 * personList.forEach(System.out::println); case 3: reference to
+				 * 'this' i.e. personList.forEach(person ->
+				 * doSomething(person)); becomes
+				 * personList.forEach(this::doSomething);
 				 */
 				if (methodArguments.size() == lambdaParams.size()
 						&& checkMethodParameters(lambdaParams, methodArguments)) {
 
 					SimpleName methodName = (SimpleName) astRewrite.createCopyTarget(methodInvocation.getName());
-					Expression methodInvocationExpression = (Expression) astRewrite
-							.createCopyTarget(methodInvocation.getExpression());
 
 					ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
-					ref.setExpression(methodInvocationExpression);
 					ref.setName(methodName);
 
-					astRewrite.replace(lambdaExpressionNode, ref, null);
+					boolean isReferenceExpressionSet = false;
+
+					// simple name, qualified name or 'this'
+					if (methodInvocationExpression instanceof Name
+							|| methodInvocationExpression instanceof ThisExpression) {
+						Expression newMethodInvocationExpression = (Expression) astRewrite
+								.createCopyTarget(methodInvocation.getExpression());
+						ref.setExpression(newMethodInvocationExpression);
+						isReferenceExpressionSet = true;
+					}
+					// no expression present -> assume 'this'
+					else if (methodInvocationExpression == null) {
+						ThisExpression thisExpression = astRewrite.getAST().newThisExpression();
+						ref.setExpression(thisExpression);
+						isReferenceExpressionSet = true;
+					}
+
+					if (isReferenceExpressionSet) {
+						astRewrite.replace(lambdaExpressionNode, ref, null);
+					}
 				}
 
 				/*
-				 * case 3: reference to instance method of arbitrary type i.e.
+				 * case 4: reference to instance method of arbitrary type i.e.
 				 * Arrays.sort(stringArray, (a, b) -> a.compareToIgnoreCase(b));
 				 * becomes Arrays.sort(stringArray,
 				 * String::compareToIgnoreCase);
 				 */
-				else if ((lambdaParams.size() - 1) == methodArguments.size()) {
-					Expression methodInvocationExpression = methodInvocation.getExpression();
+				else if ((lambdaParams.size() - 1) == methodArguments.size() && methodInvocationExpression != null) {
 
 					if (methodInvocationExpression instanceof SimpleName) {
 						SimpleName methodInvocationExpressionName = (SimpleName) methodInvocationExpression;
@@ -97,7 +118,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 			}
 
 			/*
-			 * case 4: reference to class instance creation (new) i.e.
+			 * case 5: reference to class instance creation (new) i.e.
 			 * Set<Person> persSet2 = transferElements(personList, () -> new
 			 * HashSet<>()); becomes Set<Person> persSet3 =
 			 * transferElements(personList, HashSet<Person>::new);
@@ -105,18 +126,14 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 			else if (expression instanceof ClassInstanceCreation) {
 				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) expression;
 				Type classInstanceCreationType = classInstanceCreation.getType();
-				
+
 				CreationReference ref = astRewrite.getAST().newCreationReference();
 
-				if (classInstanceCreationType instanceof ParameterizedType) {
-					if (((ParameterizedType) classInstanceCreationType).typeArguments().size() > 0) {
-						ref.setType((Type) astRewrite.createCopyTarget(classInstanceCreationType));
-					}
-					else {
-						ref.setType((Type) astRewrite.createMoveTarget(((ParameterizedType) classInstanceCreationType).getType()));
-					}
-				}
-				else {
+				if (classInstanceCreationType instanceof ParameterizedType
+						&& ((ParameterizedType) classInstanceCreationType).typeArguments().size() == 0) {
+					ref.setType((Type) astRewrite
+							.createMoveTarget(((ParameterizedType) classInstanceCreationType).getType()));
+				} else {
 					ref.setType((Type) astRewrite.createCopyTarget(classInstanceCreationType));
 				}
 
