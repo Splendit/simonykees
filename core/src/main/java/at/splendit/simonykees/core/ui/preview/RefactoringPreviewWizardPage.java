@@ -126,7 +126,7 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 		// adding all elements in table and checking appropriately
 		changesForRule.keySet().stream().forEach(entry -> {
 			viewer.add(entry);
-			viewer.setChecked(entry, unselected.containsKey(entry.getElementName()) ? false : true);
+			viewer.setChecked(entry, (unselected.containsKey(entry.getElementName()) || unselectedChange.contains(entry)) ? false : true);
 		});
 	}
 
