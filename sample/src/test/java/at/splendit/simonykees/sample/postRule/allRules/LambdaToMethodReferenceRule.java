@@ -37,13 +37,7 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	public void referenceToStaticMethod() {
-		Collections.sort(personList, (Person a, Person b) -> {
-			return Person.compareByAge(a, b);
-		});
-
-		Collections.sort(personList, (a, b) -> {
-			return Person.compareByAge(a, b);
-		});
+		Collections.sort(personList, Person::compareByAge);
 
 		Collections.sort(personList, Person::compareByAge);
 
@@ -51,21 +45,17 @@ public class LambdaToMethodReferenceRule {
 
 		Collections.sort(personList, Person::compareByAge);
 
-		personList.forEach(element -> {
-			System.out.println(element);
-		});
+		Collections.sort(personList, Person::compareByAge);
 
 		personList.forEach(System.out::println);
 
 		personList.forEach(System.out::println);
 
-		Collections.sort(personList, (Person a, Person b) -> {
-			return Person.compareByAge(a.getParent2(), b);
-		});
+		personList.forEach(System.out::println);
 
-		Collections.sort(personList, (a, b) -> {
-			return Person.compareByAge(a, b.getParent1());
-		});
+		Collections.sort(personList, (Person a, Person b) -> Person.compareByAge(a.getParent2(), b));
+
+		Collections.sort(personList, (a, b) -> Person.compareByAge(a, b.getParent1()));
 
 		Collections.sort(personList, (Person a, Person b) -> Person.compareByAge(a, b.getParent2()));
 
@@ -75,13 +65,7 @@ public class LambdaToMethodReferenceRule {
 	public void referenceToInstanceMethod() {
 		ComparisonProvider comparisonProvider = new ComparisonProvider();
 
-		Collections.sort(personList, (Person a, Person b) -> {
-			return comparisonProvider.compareByName(a, b);
-		});
-
-		Collections.sort(personList, (a, b) -> {
-			return comparisonProvider.compareByName(a, b);
-		});
+		Collections.sort(personList, comparisonProvider::compareByName);
 
 		Collections.sort(personList, comparisonProvider::compareByName);
 
@@ -89,13 +73,11 @@ public class LambdaToMethodReferenceRule {
 
 		Collections.sort(personList, comparisonProvider::compareByName);
 
-		Collections.sort(personList, (Person a, Person b) -> {
-			return comparisonProvider.compareByName(a.getParent2(), b);
-		});
+		Collections.sort(personList, comparisonProvider::compareByName);
 
-		Collections.sort(personList, (a, b) -> {
-			return comparisonProvider.compareByName(a, b.getParent1());
-		});
+		Collections.sort(personList, (Person a, Person b) -> comparisonProvider.compareByName(a.getParent2(), b));
+
+		Collections.sort(personList, (a, b) -> comparisonProvider.compareByName(a, b.getParent1()));
 
 		Collections.sort(personList, (Person a, Person b) -> comparisonProvider.compareByName(a, b.getParent2()));
 
@@ -103,21 +85,13 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	public void referenceToLocalMethod() {
-		personList.forEach((Person person) -> {
-			doSomething(person);
-		});
+		personList.forEach(this::doSomething);
 
-		personList.forEach(person -> {
-			doSomething(person);
-		});
+		personList.forEach(this::doSomething);
 
-		personList.forEach((Person person) -> {
-			this.doSomething(person);
-		});
+		personList.forEach(this::doSomething);
 
-		personList.forEach(person -> {
-			this.doSomething(person);
-		});
+		personList.forEach(this::doSomething);
 
 		personList.forEach(this::doSomething);
 
@@ -139,13 +113,9 @@ public class LambdaToMethodReferenceRule {
 	public void referenceToInstanceMethodOfArbitraryType() {
 		String[] stringArray = { "Barbara", "James", "Mary", "John", "Patricia", "Robert", "Michael", "Linda" };
 
-		Arrays.sort(stringArray, (String a, String b) -> {
-			return a.compareToIgnoreCase(b);
-		});
+		Arrays.sort(stringArray, String::compareToIgnoreCase);
 
-		Arrays.sort(stringArray, (a, b) -> {
-			return a.compareToIgnoreCase(b);
-		});
+		Arrays.sort(stringArray, String::compareToIgnoreCase);
 
 		Arrays.sort(stringArray, String::compareToIgnoreCase);
 
@@ -155,9 +125,7 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	public void referenceToConstructor() {
-		Set<Person> persSet1 = transferElements(personList, () -> {
-			return new HashSet<>();
-		});
+		Set<Person> persSet1 = transferElements(personList, HashSet::new);
 
 		Set<Person> persSet2 = transferElements(personList, HashSet::new);
 

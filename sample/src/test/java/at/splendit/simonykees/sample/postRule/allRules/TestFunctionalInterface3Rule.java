@@ -31,12 +31,12 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	{
-		Runnable r = () -> hashCode();
+		Runnable r = this::hashCode;
 		r.run();
 	}
 
 	{
-		Runnable r = () -> getClass();
+		Runnable r = this::getClass;
 		r.run();
 	}
 
@@ -64,11 +64,11 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	public Runnable getRunnableHash() {
-		return () -> hashCode();
+		return this::hashCode;
 	}
 
 	public Runnable getRunnable() {
-		return () -> getClass();
+		return this::getClass;
 	}
 
 }
