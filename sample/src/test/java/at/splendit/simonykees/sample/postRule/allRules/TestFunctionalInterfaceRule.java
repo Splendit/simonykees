@@ -41,15 +41,11 @@ public class TestFunctionalInterfaceRule {
 	@Test
 	public void test1() {
 
-		Runnable runnable = () -> {
-			log.debug("xx");
-		};
+		Runnable runnable = () -> log.debug("xx");
 
 		runnable.run();
 
-		MyClass mYClass = new MyClass(() -> {
-			log.debug("xy");
-		});
+		MyClass mYClass = new MyClass(() -> log.debug("xy"));
 
 		mYClass.test();
 
@@ -78,7 +74,8 @@ public class TestFunctionalInterfaceRule {
 	}
 
 	public void clashingLocalVariableNames(int l) {
-		int a, a1;
+		int a;
+		int a1;
 		a = 5;
 		a1 = 6;
 		int a4 = 8;

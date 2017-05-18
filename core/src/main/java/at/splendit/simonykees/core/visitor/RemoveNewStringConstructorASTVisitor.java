@@ -24,7 +24,7 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  */
 public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
+	private static final String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
 
 	@SuppressWarnings("unchecked")
 	@Override

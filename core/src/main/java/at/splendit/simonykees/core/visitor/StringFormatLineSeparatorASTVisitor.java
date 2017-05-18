@@ -24,8 +24,8 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  */
 public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
-	private static String LOCALE_FULLY_QUALLIFIED_NAME = "java.util.Locale"; //$NON-NLS-1$
+	private static String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
+	private static String LOCALE_FULLY_QUALLIFIED_NAME = java.util.Locale.class.getName();
 
 	/**
 	 * checks every String.format invocation for a static format string and
