@@ -3,6 +3,7 @@ package at.splendit.simonykees.core.ui.preview;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
@@ -35,6 +36,7 @@ public class RefactoringPreviewWizard extends Wizard {
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
 		this.refactoringPipeline = refactoringPipeline;
+		setNeedsProgressMonitor(true);
 	}
 
 	/*
@@ -62,7 +64,8 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	private void recalculateRulesAndClearChanges(RefactoringPreviewWizardPage page) {
 		try {
-			refactoringPipeline.doAdditionalRefactoring(page.getUnselectedChange(), page.getRule());
+			refactoringPipeline.doAdditionalRefactoring(page.getUnselectedChange(), page.getRule(),
+					new NullProgressMonitor());
 		} catch (RuleException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -189,7 +189,8 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 
 				ICompilationUnit newSelection = (ICompilationUnit) event.getElement();
 				if (event.getChecked()) {
-					// remove from unselected and recalculate rules for this compilationUnit
+					// remove from unselected and recalculate rules for this
+					// compilationUnit
 					if (unselected.containsKey(newSelection.getElementName())) {
 						unselected.remove(newSelection.getElementName());
 					}
@@ -203,11 +204,10 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 			}
 		};
 	}
-	
 
 	private void imediatelyUpdateForSelected(ICompilationUnit newSelection) {
 		// TODO Auto-generated method stub
-		((RefactoringPreviewWizard)getWizard()).imediatelyUpdateForSelected(newSelection, rule);
+		((RefactoringPreviewWizard) getWizard()).imediatelyUpdateForSelected(newSelection, rule);
 	}
 
 	private void populatePreviewViewer() {
@@ -248,14 +248,16 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 
 	public void update(Map<ICompilationUnit, DocumentChange> changesForRule) {
 		this.changesForRule = changesForRule;
-		if (isCurrentPage()) {
-			changesForRule.keySet().stream().forEach(unit -> {
-				if (unit.getElementName().equals(currentCompilationUnit.getElementName())) {
-					if (!unit.equals(currentCompilationUnit)) {
-						currentCompilationUnit = unit;
-					}
-				};});
-		}
+		// if (isCurrentPage()) {
+		changesForRule.keySet().stream().forEach(unit -> {
+			if (unit.getElementName().equals(currentCompilationUnit.getElementName())) {
+				if (!unit.equals(currentCompilationUnit)) {
+					currentCompilationUnit = unit;
+				}
+			}
+			;
+		});
+		// }
 		populateFileView();
 		populatePreviewViewer();
 	}
