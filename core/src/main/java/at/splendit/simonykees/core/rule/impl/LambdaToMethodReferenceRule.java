@@ -4,6 +4,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.LambdaToMethodReferenceASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * @see LambdaToMethodReferenceASTVisitor
@@ -15,8 +16,8 @@ import at.splendit.simonykees.core.visitor.LambdaToMethodReferenceASTVisitor;
 public class LambdaToMethodReferenceRule extends RefactoringRule<LambdaToMethodReferenceASTVisitor> {
 	public LambdaToMethodReferenceRule(Class<LambdaToMethodReferenceASTVisitor> visitor) {
 		super(visitor);
-		this.name = "LambdaToMethodReferenceRule";
-		this.description = "LambdaToMethodReferenceRule";
+		this.name = Messages.LambdaToMethodReferenceRule_name;
+		this.description = Messages.LambdaToMethodReferenceRule_description;
 	}
 
 	@Override
