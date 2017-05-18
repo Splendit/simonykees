@@ -176,8 +176,7 @@ public abstract class AbstractRefactorer {
 
 				if (refactoringRule instanceof TryWithResourceRule) {
 					refactoringRule.generateDocumentChanges(workingCopies, subMonitor.newChild(0));
-				}
-				
+				}				
 			} catch (JavaModelException | ReflectiveOperationException e) {
 				logger.error(e.getMessage(), e);
 				notWorkingRules.add(refactoringRule.getName());

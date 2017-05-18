@@ -31,14 +31,33 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerOptions;
+import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
 import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
- * Replaces the occurrences of {@code System.out/err.print/ln} and {@code Throwable::printStackTrace()}
- * with a logger method. 
+ * Replaces the occurrences of {@code System.out/err.print/ln} and
+ * {@code Throwable::printStackTrace()} with a logger method. The qualified
+ * name of the logger and the replacing options must be provided as 
+ * constructor parameters, otherwise the visiting is interrupted.
+ * 
+ * <pre>
+ * 
+ * As an example, assuming that the <b>default</b> replacing options from {@link StandardLoggerRule#getDefaultOptions()}
+ * the following replacements are possible:
+ * 
+ * <ul>
+ * 	<li>The occurrences of {@code System.out.println("Some message");} 
+ * and {@code System.out.print("Some message");}will be replaced with:
+ * 		{@code logger.info("Some message")}</li>
+ * 	<li>The occurrences of {@code System.err.println("Error message");} 
+ * and {@code System.err.print("Error message");} will be replaced with:
+ * 		{@code logger.error("Error message")}</li>
+ * 	<li>The occurrences of {@code e.printStackTrace()} will be replaced with:
+ * 		{@code logger.error(e.getMessage(), e)}</li>
+ * </ul>
  * 
  * @author Ardit Ymeri
  * @since 1.2
@@ -56,10 +75,10 @@ public class StandardLoggerASTVisitor extends AbstractCompilationUnitASTVisitor 
 	private static final String DEFAULT_LOGGER_NAME = "logger"; //$NON-NLS-1$
 	private static final String SLF4J_LOGGER_GET_LOGGER = "getLogger"; //$NON-NLS-1$
 	private static final String THROWABLE_GET_MESSAGE = "getMessage"; //$NON-NLS-1$
-	private static final String LOGGER_CLASS_NAME = "Logger"; //$NON-NLS-1$
-	private static final String SLF4J_LOGGER_FACTORY = "LoggerFactory"; //$NON-NLS-1$
+	private static final String LOGGER_CLASS_NAME = org.slf4j.Logger.class.getSimpleName();
+	private static final String SLF4J_LOGGER_FACTORY = org.slf4j.LoggerFactory.class.getSimpleName();
 	private static final String LOG4J_GET_LOGGER = "getLogger"; //$NON-NLS-1$
-	private static final String SLF4J_LOGGER_FACTORY_QUALIFIED_NAME = "org.slf4j.LoggerFactory"; //$NON-NLS-1$
+	private static final String SLF4J_LOGGER_FACTORY_QUALIFIED_NAME = org.slf4j.LoggerFactory.class.getName();
 	private static final String SEPARATOR = "->"; //$NON-NLS-1$
 
 	private boolean loggerAdded = false;
@@ -74,17 +93,12 @@ public class StandardLoggerASTVisitor extends AbstractCompilationUnitASTVisitor 
 	private Map<String, List<String>> newImports;
 	private Map<String, String> loggerNames;
 
-	public StandardLoggerASTVisitor(String loggerQualifiedName, Map<String, String>replacingOptions) {
-		 this.replacingOptions = replacingOptions;
-		 this.loggerQualifiedName = loggerQualifiedName;
-//		this.replacingOptions = new HashMap<>();
-//		this.loggerQualifiedName = StandardLoggerOptions.SLF4J_LOGGER;
-//		this.replacingOptions.put(StandardLoggerOptions.PRINT_STACKTRACE, "error");
-//		this.replacingOptions.put(StandardLoggerOptions.SYSTEM_ERR_PRINT, "warn");
-//		this.replacingOptions.put(StandardLoggerOptions.SYSTEM_OUT_PRINT, "debug");
+	public StandardLoggerASTVisitor(String loggerQualifiedName, Map<String, String> replacingOptions) {
+		this.replacingOptions = replacingOptions;
+		this.loggerQualifiedName = loggerQualifiedName;
 		this.loggerNames = new HashMap<>();
 		this.newImports = new HashMap<>();
-		
+
 		List<String> slf4jImports = new ArrayList<>();
 		slf4jImports.add(StandardLoggerOptions.SLF4J_LOGGER);
 		slf4jImports.add(SLF4J_LOGGER_FACTORY_QUALIFIED_NAME);
@@ -127,18 +141,18 @@ public class StandardLoggerASTVisitor extends AbstractCompilationUnitASTVisitor 
 
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
-		newTypeDeclaration(typeDeclaration);
+		visitNewTypeDeclaration(typeDeclaration);
 		return true;
 	}
 
 	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
-		endNewTypeDeclaration(typeDeclaration);
+		endVisitNewTypeDeclaration(typeDeclaration);
 	}
 
 	@Override
 	public boolean visit(EnumDeclaration enumDeclaration) {
-		newTypeDeclaration(enumDeclaration);
+		visitNewTypeDeclaration(enumDeclaration);
 		return true;
 	}
 
@@ -149,10 +163,17 @@ public class StandardLoggerASTVisitor extends AbstractCompilationUnitASTVisitor 
 
 	@Override
 	public void endVisit(EnumDeclaration enumDeclaration) {
-		endNewTypeDeclaration(enumDeclaration);
+		endVisitNewTypeDeclaration(enumDeclaration);
 	}
 
-	private void newTypeDeclaration(AbstractTypeDeclaration abstractType) {
+	/**
+	 * Keeps track of the possibly nested types (classes or enums) declared
+	 * inside the compilation unit.
+	 * 
+	 * @param abstractType
+	 *            node representing a type declaration.
+	 */
+	private void visitNewTypeDeclaration(AbstractTypeDeclaration abstractType) {
 		loggerAdded = false;
 		if (nestedTypeDeclarationLevel == 0) {
 			this.rootType = abstractType;
@@ -161,7 +182,14 @@ public class StandardLoggerASTVisitor extends AbstractCompilationUnitASTVisitor 
 		this.nestedTypeDeclarationLevel++;
 	}
 
-	private void endNewTypeDeclaration(AbstractTypeDeclaration typeDeclaration2) {
+	/**
+	 * Discard stored information related to the type after its corresponding
+	 * node is visited.
+	 * 
+	 * @param typeDeclaration2
+	 *            end visit node
+	 */
+	private void endVisitNewTypeDeclaration(AbstractTypeDeclaration typeDeclaration2) {
 		nestedTypeDeclarationLevel--;
 		this.typeDeclaration = ASTNodeUtil.getSpecificAncestor(typeDeclaration2, AbstractTypeDeclaration.class);
 		if (nestedTypeDeclarationLevel == 0) {
@@ -220,17 +248,17 @@ public class StandardLoggerASTVisitor extends AbstractCompilationUnitASTVisitor 
 	}
 
 	/**
-	 * Replaces the method invocation with a logger method having one 
-	 * string as a parameter 
+	 * Replaces the method invocation with a logger method having one string as
+	 * a parameter
 	 * 
-	 * @param methodInvocation to be replaced
-	 * @param replacingMethod name of the replacing method
+	 * @param methodInvocation
+	 *            to be replaced
+	 * @param replacingMethod
+	 *            name of the replacing method
 	 */
 	private void replaceMethod(MethodInvocation methodInvocation, String replacingMethod) {
 		if (!loggerAdded) {
 			addLogger();
-			loggerAdded = true;
-			importsNeeded = true;
 		}
 		String loggerNameIdentifier = getLoggerName();
 		AST ast = methodInvocation.getAST();
@@ -241,7 +269,7 @@ public class StandardLoggerASTVisitor extends AbstractCompilationUnitASTVisitor 
 	}
 
 	/**
-	 * Replaces the given method invocation with a logger method having the 
+	 * Replaces the given method invocation with a logger method having the
 	 * error message and the throwable object as parameters. For example:
 	 * 
 	 * {@code e.printStackTrace();}
@@ -250,15 +278,16 @@ public class StandardLoggerASTVisitor extends AbstractCompilationUnitASTVisitor 
 	 * 
 	 * {@code logger.error(e.getMessage(), e);}
 	 * 
-	 * @param methodInvocation to be replaced
-	 * @param throwableName the name of the throwable object
-	 * @param replacingMethod the replacing method name of the logger
+	 * @param methodInvocation
+	 *            the method invocation to be replaced
+	 * @param throwableName
+	 *            the name of the throwable object
+	 * @param replacingMethod
+	 *            the replacing method name of the logger
 	 */
 	private void replaceMethod(MethodInvocation methodInvocation, SimpleName throwableName, String replacingMethod) {
 		if (!loggerAdded) {
 			addLogger();
-			loggerAdded = true;
-			importsNeeded = true;
 		}
 		String loggerNameIdentifier = getLoggerName();
 		AST ast = methodInvocation.getAST();
@@ -280,11 +309,12 @@ public class StandardLoggerASTVisitor extends AbstractCompilationUnitASTVisitor 
 	}
 
 	/**
-	 * Creates a logger object as a final field and initializes it
-	 * using a proper factory. The field is inserted at the beginning 
-	 * of the class body. 
+	 * Creates a logger object as a final field and initializes it using a
+	 * proper factory. The field is inserted at the beginning of the class body.
 	 */
 	private void addLogger() {
+		loggerAdded = true;
+		importsNeeded = true;
 		String loggerName = generateLoggerName();
 		setCurrentLoggerName(loggerName);
 		AST ast = compilationUnit.getAST();
@@ -328,16 +358,18 @@ public class StandardLoggerASTVisitor extends AbstractCompilationUnitASTVisitor 
 	}
 
 	/**
-	 * Generates an initializer expression for the logger based on the 
-	 * qualified name of the logger ({@value #typeDeclaration}).  The initializer
-	 * generated for {@value StandardLoggerOptions#SLF4J_LOGGER} is:
+	 * Generates an initializer expression for the logger based on the qualified
+	 * name of the logger ({@value #typeDeclaration}). The initializer generated
+	 * for {@value StandardLoggerOptions#SLF4J_LOGGER} is:
 	 * 
 	 * {@code LoggerFactory.getLogger()}
 	 * 
 	 * whereas for {@value StandardLoggerOptions#LOG4J_LOGGER} is:
 	 * 
 	 * @param loggerDeclaration
-	 * @return
+	 *            Field declaration representing the logger declaration.
+	 * 
+	 * @return the generated initializer expression
 	 */
 	private Expression generateLoggerInitializer(FieldDeclaration loggerDeclaration) {
 		Expression initializer;
@@ -369,13 +401,13 @@ public class StandardLoggerASTVisitor extends AbstractCompilationUnitASTVisitor 
 	}
 
 	/**
-	 * Generates a name for the logger object. Avoids clashes with the 
-	 * rest of the fields in the current class or in the outer classes
-	 * in case it is being introduced in a nested class. The default
-	 * logger name is {@value #DEFAULT_LOGGER_NAME}. A number is added
-	 * as a suffix if the default name is already taken.
+	 * Generates a name for the logger object. Avoids clashes with the rest of
+	 * the fields in the current class or in the outer classes in case the logger 
+	 * is being introduced in a nested class. The default logger name is
+	 * {@value #DEFAULT_LOGGER_NAME}. A number is added as a suffix if the
+	 * default name is already taken by some other object within the scope. 
 	 * 
-	 * @return a string representing the logger name. 
+	 * @return a string representing the logger name.
 	 */
 	private String generateLoggerName() {
 
@@ -398,6 +430,15 @@ public class StandardLoggerASTVisitor extends AbstractCompilationUnitASTVisitor 
 		return loggerNames.get(generateUniqueTypeId(this.typeDeclaration));
 	}
 
+	/**
+	 * Generates a unique id for the logger name declared in the body of a type.
+	 * 
+	 * @param typeDeclaration
+	 *            a node representing a type declaration.
+	 * 
+	 * @return a mixture of the type name, its starting position in the
+	 *         compilation unit and its length.
+	 */
 	private String generateUniqueTypeId(AbstractTypeDeclaration typeDeclaration) {
 		return typeDeclaration.getName().getIdentifier() + SEPARATOR + typeDeclaration.getStartPosition() + SEPARATOR
 				+ typeDeclaration.getLength();
