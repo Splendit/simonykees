@@ -67,10 +67,20 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 					// simple name, qualified name or 'this'
 					if (methodInvocationExpression instanceof Name
 							|| methodInvocationExpression instanceof ThisExpression) {
-						Expression newMethodInvocationExpression = (Expression) astRewrite
-								.createCopyTarget(methodInvocation.getExpression());
-						ref.setExpression(newMethodInvocationExpression);
-						isReferenceExpressionSet = true;
+
+						boolean paramUserdForMethodInvocation = false;
+						if (methodInvocationExpression instanceof Name) {
+							Name name = (Name) methodInvocationExpression;
+							String nameStr = name.getFullyQualifiedName();
+							paramUserdForMethodInvocation = this.containsName(methodArguments, nameStr);
+						}
+
+						if (!paramUserdForMethodInvocation) {
+							Expression newMethodInvocationExpression = (Expression) astRewrite
+									.createCopyTarget(methodInvocation.getExpression());
+							ref.setExpression(newMethodInvocationExpression);
+							isReferenceExpressionSet = true;
+						}
 					}
 					// no expression present -> assume 'this'
 					else if (methodInvocationExpression == null) {
@@ -178,5 +188,21 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 		}
 
 		return paramsEqual;
+	}
+
+	private boolean containsName(List<Expression> list, String name) {
+		boolean retVal = false;
+
+		for (Expression element : list) {
+			if (element instanceof Name) {
+				String elementName = ((Name) element).getFullyQualifiedName();
+				if (name.equals(elementName)) {
+					retVal = true;
+					break;
+				}
+			}
+		}
+
+		return retVal;
 	}
 }
