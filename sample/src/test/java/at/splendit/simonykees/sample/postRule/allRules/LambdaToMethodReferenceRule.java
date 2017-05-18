@@ -102,6 +102,40 @@ public class LambdaToMethodReferenceRule {
 		Collections.sort(personList, (a, b) -> comparisonProvider.compareByName(a.getParent1(), b));
 	}
 
+	public void referenceToLocalMethod() {
+		personList.forEach((Person person) -> {
+			doSomething(person);
+		});
+
+		personList.forEach(person -> {
+			doSomething(person);
+		});
+
+		personList.forEach((Person person) -> {
+			this.doSomething(person);
+		});
+
+		personList.forEach(person -> {
+			this.doSomething(person);
+		});
+
+		personList.forEach(this::doSomething);
+
+		personList.forEach(this::doSomething);
+
+		personList.forEach(this::doSomething);
+
+		personList.forEach(this::doSomething);
+
+		personList.forEach((Person person) -> getRandomPerson().doSomething(person));
+
+		personList.forEach(person -> getRandomPerson().doSomething(person));
+
+		personList.forEach((Person person) -> this.getRandomPerson().doSomething(person));
+
+		personList.forEach(person -> this.getRandomPerson().doSomething(person));
+	}
+
 	public void referenceToInstanceMethodOfArbitraryType() {
 		String[] stringArray = { "Barbara", "James", "Mary", "John", "Patricia", "Robert", "Michael", "Linda" };
 
@@ -132,6 +166,14 @@ public class LambdaToMethodReferenceRule {
 		Set<Person> persSet4 = transferElements(personList, HashSet<Person>::new);
 
 		Set<Person> persSet5 = transferElements(personList, HashSet<Person>::new);
+	}
+
+	private void doSomething(Object o) {
+
+	}
+
+	private Person getRandomPerson() {
+		return new Person("Random Person", LocalDate.of(1995, 8, 1));
 	}
 
 	class ComparisonProvider {

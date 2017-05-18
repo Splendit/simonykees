@@ -58,5 +58,7 @@ public class Person {
 		this.parent2 = parent2;
 	}
 	
-	
+	public void doSomething(Person p) {
+		
+	}
 }

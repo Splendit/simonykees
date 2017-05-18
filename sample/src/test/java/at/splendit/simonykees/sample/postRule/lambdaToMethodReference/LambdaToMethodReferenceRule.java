@@ -40,25 +40,25 @@ public class LambdaToMethodReferenceRule {
 		Collections.sort(personList, Person::compareByAge);
 
 		Collections.sort(personList, Person::compareByAge);
-		
+
 		personList.forEach(element -> {
 			System.out.println(element);
 		});
-		
+
 		personList.forEach(System.out::println);
-		
+
 		personList.forEach(System.out::println);
-		
+
 		Collections.sort(personList, (Person a, Person b) -> {
 			return Person.compareByAge(a.getParent2(), b);
 		});
-		
+
 		Collections.sort(personList, (a, b) -> {
 			return Person.compareByAge(a, b.getParent1());
 		});
-		
+
 		Collections.sort(personList, (Person a, Person b) -> Person.compareByAge(a, b.getParent2()));
-		
+
 		Collections.sort(personList, (a, b) -> Person.compareByAge(a.getParent1(), b));
 	}
 
@@ -90,6 +90,40 @@ public class LambdaToMethodReferenceRule {
 		Collections.sort(personList, (Person a, Person b) -> comparisonProvider.compareByName(a, b.getParent2()));
 
 		Collections.sort(personList, (a, b) -> comparisonProvider.compareByName(a.getParent1(), b));
+	}
+
+	public void referenceToLocalMethod() {
+		personList.forEach((Person person) -> {
+			doSomething(person);
+		});
+
+		personList.forEach(person -> {
+			doSomething(person);
+		});
+
+		personList.forEach((Person person) -> {
+			this.doSomething(person);
+		});
+
+		personList.forEach(person -> {
+			this.doSomething(person);
+		});
+
+		personList.forEach(this::doSomething);
+
+		personList.forEach(this::doSomething);
+
+		personList.forEach(this::doSomething);
+
+		personList.forEach(this::doSomething);
+
+		personList.forEach((Person person) -> getRandomPerson().doSomething(person));
+
+		personList.forEach(person -> getRandomPerson().doSomething(person));
+
+		personList.forEach((Person person) -> this.getRandomPerson().doSomething(person));
+
+		personList.forEach(person -> this.getRandomPerson().doSomething(person));
 	}
 
 	public void referenceToInstanceMethodOfArbitraryType() {
@@ -142,5 +176,13 @@ public class LambdaToMethodReferenceRule {
 			result.add(t);
 		}
 		return result;
+	}
+
+	private void doSomething(Object o) {
+
+	}
+
+	private Person getRandomPerson() {
+		return new Person("Random Person", LocalDate.of(1995, 8, 1));
 	}
 }
