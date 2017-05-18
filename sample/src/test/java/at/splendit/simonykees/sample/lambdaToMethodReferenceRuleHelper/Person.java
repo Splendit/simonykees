@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import at.splendit.simonykees.sample.preRule.LambdaToMethodReferenceRule;
 
 /**
- * class is jsut for test purposes for {@link LambdaToMethodReferenceRule}
+ * class is just for test purposes for {@link LambdaToMethodReferenceRule}
  * 
  * @author Matthias Webhofer
  * @since 1.2
@@ -21,7 +21,7 @@ public class Person {
 		this.name = name;
 		this.birthday = birthday;
 	}
-	
+
 	public LocalDate getBirthday() {
 		return birthday;
 	}
@@ -33,11 +33,11 @@ public class Person {
 	public void setBirthday(LocalDate birthday) {
 		this.birthday = birthday;
 	}
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
@@ -57,8 +57,8 @@ public class Person {
 	public void setParent2(Person parent2) {
 		this.parent2 = parent2;
 	}
-	
+
 	public void doSomething(Person p) {
-		
+
 	}
 }

@@ -8,12 +8,15 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.LambdaToMethodReferenceRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.LambdaToMethodReferenceASTVisitor;
-import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
 
+/**
+ * 
+ * @author Matthias Webhofer
+ * @since 1.2
+ */
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
 public class LambdaToMethodReferenceRulesTest extends AbstractRulesTest {
