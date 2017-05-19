@@ -1,24 +1,33 @@
 package at.splendit.simonykees.core.ui.preview;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.ReconcileException;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
+import at.splendit.simonykees.core.exception.SimonykeesException;
 import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * This {@link Wizard} holds a {@link RefactoringPreviewWizardPage} for every
@@ -33,9 +42,12 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	private RefactoringPipeline refactoringPipeline;
 
+	private Shell shell;
+
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
 		this.refactoringPipeline = refactoringPipeline;
+		this.shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 		setNeedsProgressMonitor(true);
 	}
 
@@ -55,41 +67,109 @@ public class RefactoringPreviewWizard extends Wizard {
 	}
 
 	@Override
-	public IWizardPage getNextPage(IWizardPage page) {
+	public IWizardPage getPreviousPage(IWizardPage page) {
+
 		if (!((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
-			recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
+			/*
+			 * if there are changes in refactoring page, it means that Back
+			 * button was pressed and recalculation is needed
+			 */
+			startRecalculationRunnable((RefactoringPreviewWizardPage) page);
+		} else {
+			/*
+			 * if there are no changes in refactoring page, just populate the
+			 * view with current updated values
+			 */
+			((RefactoringPreviewWizardPage) page).populateViews();
 		}
+
+		return super.getPreviousPage(page);
+	}
+
+	@Override
+	public IWizardPage getNextPage(IWizardPage page) {
+
+		if (!((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
+			/*
+			 * if there are changes in refactoring page, it means that Next
+			 * button was pressed and recalculation is needed
+			 */
+			startRecalculationRunnable((RefactoringPreviewWizardPage) page);
+		} else {
+			/*
+			 * if there are no changes in refactoring page, just populate the
+			 * view with current updated values
+			 */
+			((RefactoringPreviewWizardPage) page).populateViews();
+		}
+
 		return super.getNextPage(page);
 	}
 
-	private void recalculateRulesAndClearChanges(RefactoringPreviewWizardPage page) {
-		try {
-			refactoringPipeline.doAdditionalRefactoring(page.getUnselectedChange(), page.getRule(),
-					new NullProgressMonitor());
-		} catch (RuleException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	/**
+	 * Method used to start new {@link IRunnableWithProgress} every time Back or
+	 * Next is pressed and current page contains new changes in selection.
+	 * 
+	 * @param page
+	 *            on which are changes
+	 */
+	private void startRecalculationRunnable(RefactoringPreviewWizardPage page) {
+		IRunnableWithProgress job = recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
+
+		if (null != job) {
+			try {
+				getContainer().run(true, true, job);
+			} catch (InvocationTargetException | InterruptedException e) {
+				SimonykeesMessageDialog.openMessageDialog(shell,
+						Messages.RefactoringPreviewWizard_err_runnableWithProgress, MessageDialog.ERROR);
+				Activator.setRunning(false);
+			}
 		}
-
-		page.applyUnselectedChange();
-
-		updateAllPages();
 	}
 
+	/**
+	 * Creates new {@link IRunnableWithProgress} which blocks UI thread, shows
+	 * progress monitor for refactoring and recalculates all rules for
+	 * unselected working copies.
+	 * 
+	 * @param page
+	 *            on which changes were made
+	 * @return new IRunnableWithProgress
+	 */
+	private IRunnableWithProgress recalculateRulesAndClearChanges(RefactoringPreviewWizardPage page) {
+
+		IRunnableWithProgress job = new IRunnableWithProgress() {
+
+			@Override
+			public void run(IProgressMonitor monitor) {
+
+				try {
+					refactoringPipeline.doAdditionalRefactoring(page.getUnselectedChange(), page.getRule(), monitor);
+					if (monitor.isCanceled()) {
+						refactoringPipeline.clearStates();
+					}
+				} catch (RuleException e) {
+					synchronizeWithUIShowError(e);
+				} finally {
+					monitor.done();
+				}
+
+				((RefactoringPreviewWizardPage) page).applyUnselectedChange();
+				updateAllPages();
+			}
+		};
+
+		return job;
+	}
+
+	/**
+	 * Updates changesForRule map for every page in {@link Wizard}
+	 */
 	private void updateAllPages() {
-		// TODO Auto-generated method stub
 		for (IWizardPage page : getPages()) {
 			((RefactoringPreviewWizardPage) page)
 					.update(refactoringPipeline.getChangesForRule(((RefactoringPreviewWizardPage) page).getRule()));
 		}
-	}
-
-	@Override
-	public IWizardPage getPreviousPage(IWizardPage page) {
-		if (!((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
-			recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
-		}
-		return super.getPreviousPage(page);
 	}
 
 	/*
@@ -151,15 +231,62 @@ public class RefactoringPreviewWizard extends Wizard {
 		super.dispose();
 	}
 
+	/**
+	 * When one compilation unit is checked from previously unchecked state it
+	 * has to be recalculated and shown immediately.
+	 * 
+	 * @param newSelection
+	 *            checked working copy
+	 * @param rule
+	 *            for which working copy is checked
+	 */
 	public void imediatelyUpdateForSelected(ICompilationUnit newSelection,
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		try {
 			refactoringPipeline.refactoringForCurrent(newSelection, rule);
-		} catch (RuleException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (RuleException exception) {
+			SimonykeesMessageDialog.openErrorMessageDialog(shell, exception);
+			Activator.setRunning(false);
 		}
 
 		updateAllPages();
+		((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).populateViews();
+	}
+
+	/**
+	 * Method used to open ErrorDialog from non UI thread
+	 */
+	private void synchronizeWithUIShowError(SimonykeesException exception) {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				SimonykeesMessageDialog.openErrorMessageDialog(shell, exception);
+				Activator.setRunning(false);
+			}
+		});
+	}
+
+	/**
+	 * Called from {@link WizardDialog} when Next button is pressed. Triggers
+	 * recalculation if needed, otherwise populating new view, with method
+	 * getNextPage
+	 */
+	public void pressedNext() {
+		if (null != getContainer()) {
+			getNextPage(getContainer().getCurrentPage());
+		}
+	}
+
+	/**
+	 * Called from {@link WizardDialog} when Back button is pressed. Triggers
+	 * recalculation if needed, otherwise populating new view, with method
+	 * getPreviousPage
+	 */
+	public void pressedBack() {
+		if (null != getContainer()) {
+			getPreviousPage(getContainer().getCurrentPage());
+		}
 	}
 }

@@ -168,8 +168,23 @@ public class SelectRulesWizard extends Wizard {
 			@Override
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactoringPipeline));
-
+				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactoringPipeline)) {
+					
+					@Override
+					protected void nextPressed() {
+						((RefactoringPreviewWizard)getWizard()).pressedNext();
+						super.nextPressed();
+					}
+					
+					@Override
+					protected void backPressed() {
+						((RefactoringPreviewWizard)getWizard()).pressedBack();
+						super.backPressed();
+					}
+					
+					
+				};
+	
 				// maximizes the RefactoringPreviewWizard
 				dialog.setPageSize(rectangle.width, rectangle.height);
 				dialog.open();
