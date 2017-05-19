@@ -28,6 +28,7 @@ import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
 import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
+import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
@@ -48,6 +49,7 @@ import at.splendit.simonykees.core.visitor.functionalInterface.FunctionalInterfa
 import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
 import at.splendit.simonykees.core.visitor.loop.WhileToForEachASTVisitor;
 import at.splendit.simonykees.core.visitor.renaming.FieldNameConventionASTVisitor;
+import at.splendit.simonykees.core.visitor.semiAutomatic.StandardLoggerASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.MultiCatchASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisitor;
 
@@ -94,6 +96,7 @@ public class RulesContainer {
 				new OverrideAnnotationRule(OverrideAnnotationRuleASTVisitor.class),
 				new StringLiteralEqualityCheckRule(StringLiteralEqualityCheckASTVisitor.class),
 				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
+				new StandardLoggerRule(StandardLoggerASTVisitor.class),
 
 				/*
 				 * Code formatting and organizing imports should always happen

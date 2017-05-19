@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.rule.impl.standardLogger;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -40,10 +41,6 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 
 	private static final Logger logger = LoggerFactory.getLogger(StandardLoggerRule.class);
 
-	private static final String SLF4J_LOGGER = "org.slf4j.Logger"; //$NON-NLS-1$
-	private static final String LOGBACK_LOGGER = "ch.qos.logback.classic.Logger"; //$NON-NLS-1$
-	private static final String LOG4J_LOGGER = "org.apache.logging.log4j.Logger"; //$NON-NLS-1$
-
 	private static final String TRACE = "trace"; //$NON-NLS-1$
 	private static final String DEBUG = "debug"; //$NON-NLS-1$
 	private static final String INFO = "info"; //$NON-NLS-1$
@@ -53,8 +50,10 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	private Map<String, Integer> systemOutReplaceOptions = new LinkedHashMap<>();
 	private Map<String, Integer> systemErrReplaceOptions = new LinkedHashMap<>();
 	private Map<String, Integer> pritntStacktraceReplaceOptions = new LinkedHashMap<>();
+	private Map<String, String> selectedOptions = new HashMap<>();
 
 	private SupportedLogger supportedLoger;
+	private String loggerQualifiedName;
 	private IType loggerType;
 
 	public StandardLoggerRule(Class<StandardLoggerASTVisitor> visitor) {
@@ -74,10 +73,13 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		try {
 			if ((loggerType = project.findType(SLF4J_LOGGER)) != null) {
 				supportedLoger = SupportedLogger.SLF4J;
+				loggerQualifiedName = SLF4J_LOGGER;
 			} else if ((loggerType = project.findType(LOGBACK_LOGGER)) != null) {
 				supportedLoger = SupportedLogger.LOGBACK;
+				loggerQualifiedName = LOGBACK_LOGGER;
 			} else if ((loggerType = project.findType(LOG4J_LOGGER)) != null) {
 				supportedLoger = SupportedLogger.LOG4J;
+				loggerQualifiedName = LOG4J_LOGGER;
 			}
 
 			if (loggerType != null) {
@@ -88,6 +90,14 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		}
 
 		return loggerType != null && super.ruleSpecificImplementation(project);
+	}
+	
+	public void setSelectedOptions(Map<String, String> selectedOptions) {
+		this.selectedOptions.putAll(selectedOptions);
+	}
+	
+	public Map<String, String> getSelectedOptions() {
+		return Collections.unmodifiableMap(selectedOptions);
 	}
 
 	private void initLogLevelOptions() {
@@ -143,5 +153,23 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	@Override
 	public IType getLoggerType() {
 		return this.loggerType;
+	}
+
+	public String getAvailableQualifiedLoggerName() {
+		return loggerQualifiedName;
+	}
+
+	@Override
+	public void activateDefaultOptions() {
+		// default options should be activated only for test purposes
+		setSelectedOptions(getDefaultOptions());
+		this.loggerQualifiedName = SLF4J_LOGGER;
+	}
+	
+	@Override
+	protected StandardLoggerASTVisitor visitorFactory() {
+		Map<String, String> replacingOptions = getSelectedOptions();
+		String availableLogger = getAvailableQualifiedLoggerName();
+		return new StandardLoggerASTVisitor(availableLogger, replacingOptions);
 	}
 }

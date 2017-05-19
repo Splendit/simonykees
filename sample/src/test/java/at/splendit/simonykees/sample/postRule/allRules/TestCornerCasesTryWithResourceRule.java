@@ -17,8 +17,13 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.logging.LogRecord;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings({ "nls", "null" })
 public class TestCornerCasesTryWithResourceRule {
+
+	private static final Logger logger = LoggerFactory.getLogger(TestCornerCasesTryWithResourceRule.class);
 
 	static void readFirstLineFromFile(String path) {
 
@@ -26,7 +31,7 @@ public class TestCornerCasesTryWithResourceRule {
 				BufferedReader br2 = new BufferedReader(new FileReader(path));
 				Closeable cl = new BufferedReader(new FileReader(path))) {
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -66,7 +71,7 @@ public class TestCornerCasesTryWithResourceRule {
 				pw.close();
 				sb.append(sw.toString());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 			}
 		}
 	}
@@ -82,7 +87,7 @@ public class TestCornerCasesTryWithResourceRule {
 				record.getThrown().printStackTrace(pw);
 				sb.append(sw.toString());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 			}
 		}
 	}
@@ -105,7 +110,7 @@ public class TestCornerCasesTryWithResourceRule {
 				record.getThrown().printStackTrace(pw);
 				sb.append(sw.toString());
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 			}
 		}
 	}

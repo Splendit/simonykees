@@ -89,6 +89,7 @@ public class LoggerRuleWizard extends Wizard {
 		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
 		};
 		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
+		rule.setSelectedOptions(model.getCurrentSelectionMap());
 
 		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
 

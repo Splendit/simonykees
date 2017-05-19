@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.rule.Tag;
 import at.splendit.simonykees.core.rule.impl.ArithmethicAssignmentRule;
 import at.splendit.simonykees.core.rule.impl.BracketsToControlRule;

@@ -173,7 +173,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	 *             not present and the reflective construction fails.
 	 */
 	private void collectChanges(ICompilationUnit workingCopy) throws JavaModelException, ReflectiveOperationException {
-		DocumentChange documentChange = SimonykeesUtil.applyRule(workingCopy, visitor);
+		T astVisitor = visitorFactory();
+		DocumentChange documentChange = SimonykeesUtil.applyRule(workingCopy, astVisitor);
 		if (documentChange != null) {
 
 			/*
@@ -198,6 +199,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		} else {
 			// no changes
 		}
+	}
+
+	protected T visitorFactory() throws InstantiationException, IllegalAccessException {
+		return visitor.newInstance();
 	}
 
 	/**
