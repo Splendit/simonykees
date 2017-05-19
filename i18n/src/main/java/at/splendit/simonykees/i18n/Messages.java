@@ -90,6 +90,7 @@ public class Messages extends NLS {
 	public static String ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName;
 	public static String RearrangeClassMembersRule_description;
 	public static String RearrangeClassMembersRule_name;
+	public static String RefactoringPreviewWizard_err_runnableWithProgress;
 	public static String RefactoringRule_applying_rule_to_workingcopy;
 	public static String RefactoringRule_default_description;
 	public static String RefactoringRule_default_name;

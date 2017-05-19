@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
@@ -25,6 +26,8 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.ui.AbstractWizardPage;
@@ -47,8 +50,19 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 	private Map<ICompilationUnit, DocumentChange> changesForRule;
 	private RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule;
 
+	/*
+	 * map that contains all names of working copies and working copies that
+	 * were unselected for this page
+	 */
 	private Map<String, ICompilationUnit> unselected = new HashMap<>();
+
+	/*
+	 * map that contains working copies that are unselected in one iteration
+	 * when this page is active
+	 */
 	private List<ICompilationUnit> unselectedChange = new ArrayList<>();
+
+	private static final Logger logger = LoggerFactory.getLogger(RefactoringPreviewWizardPage.class);
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule,
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
@@ -126,7 +140,9 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 		// adding all elements in table and checking appropriately
 		changesForRule.keySet().stream().forEach(entry -> {
 			viewer.add(entry);
-			viewer.setChecked(entry, (unselected.containsKey(entry.getElementName()) || unselectedChange.contains(entry)) ? false : true);
+			viewer.setChecked(entry,
+					(unselected.containsKey(entry.getElementName()) || unselectedChange.contains(entry)) ? false
+							: true);
 		});
 	}
 
@@ -194,6 +210,9 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 					if (unselected.containsKey(newSelection.getElementName())) {
 						unselected.remove(newSelection.getElementName());
 					}
+					if (unselectedChange.contains(newSelection)) {
+						unselectedChange.remove(newSelection);
+					}
 					imediatelyUpdateForSelected(newSelection);
 				} else {
 					// add in list with unselected classes
@@ -206,7 +225,6 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 	}
 
 	private void imediatelyUpdateForSelected(ICompilationUnit newSelection) {
-		// TODO Auto-generated method stub
 		((RefactoringPreviewWizard) getWizard()).imediatelyUpdateForSelected(newSelection, rule);
 	}
 
@@ -224,8 +242,7 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 				document = new Document(currentCompilationUnit.getSource());
 				textChange = new DocumentChange(currentCompilationUnit.getElementName(), document);
 			} catch (JavaModelException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 			}
 			return (DocumentChange) textChange;
 		} else {
@@ -237,6 +254,11 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 		return unselectedChange;
 	}
 
+	/**
+	 * When page is no more in focus, all changes are already stored and
+	 * calculated, so unselected changes go to unselected map and cleans
+	 * unselectedChanges list.
+	 */
 	public void applyUnselectedChange() {
 		unselectedChange.stream().forEach(unit -> unselected.put(unit.getElementName(), unit));
 		unselectedChange.clear();
@@ -246,9 +268,14 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 		return rule;
 	}
 
+	/**
+	 * Updates changes for this page. IF there were changes in currently
+	 * displayed working copy, it needs to be updated too.
+	 * 
+	 * @param changesForRule
+	 */
 	public void update(Map<ICompilationUnit, DocumentChange> changesForRule) {
 		this.changesForRule = changesForRule;
-		// if (isCurrentPage()) {
 		changesForRule.keySet().stream().forEach(unit -> {
 			if (unit.getElementName().equals(currentCompilationUnit.getElementName())) {
 				if (!unit.equals(currentCompilationUnit)) {
@@ -257,8 +284,17 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 			}
 			;
 		});
-		// }
+	}
+
+	/**
+	 * Used to populate IChangePreviewViewer currentPreviewViewer and
+	 * CheckboxTableViewer viewer every time page gets displayed. Sets the
+	 * selection in file view part to match file whose changes are displayed in
+	 * changes view.
+	 */
+	public void populateViews() {
 		populateFileView();
 		populatePreviewViewer();
+		viewer.setSelection(new StructuredSelection(currentCompilationUnit));
 	}
 }
