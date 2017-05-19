@@ -211,6 +211,22 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 		return sb.toString();
 	}
+	
+	public String assigningArrayAccess(String input) {
+		
+		String[] ms = {"", "", ""};
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = 0; i < ms.length; i = i + 1) {
+			ms[i] = "-";
+		}
+		
+		for (String iterator:ms){
+			sb.append(iterator);
+		}
+
+		return sb.toString();
+	}
 
 	/**
 	 * This collection is not subtype of {@code Iterable}.

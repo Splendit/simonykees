@@ -208,6 +208,22 @@ public class TestForToForEachArrayIteratingIndexRule {
 		return sb.toString();
 	}
 
+	public String assigningArrayAccess(String input) {
+
+		String[] ms = { "", "", "" };
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < ms.length; i += 1) {
+			ms[i] = "-";
+		}
+
+		for (String iterator : ms) {
+			sb.append(iterator);
+		}
+
+		return sb.toString();
+	}
+
 	private List<String> generateList(String input) {
 		return Arrays.asList(input.split(";"));
 	}

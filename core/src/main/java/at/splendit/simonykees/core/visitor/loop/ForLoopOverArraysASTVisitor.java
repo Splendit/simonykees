@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -79,7 +80,7 @@ class ForLoopOverArraysASTVisitor extends ForLoopIteratingIndexASTVisitor {
 	private boolean isReplaceableArrayAccess(SimpleName simpleName) {
 		ASTNode node = simpleName.getParent();
 		boolean replacableAccess = false;
-		if(ASTNode.ARRAY_ACCESS == node.getNodeType()) {
+		if(ASTNode.ARRAY_ACCESS == node.getNodeType() && node.getLocationInParent() != Assignment.LEFT_HAND_SIDE_PROPERTY) {
 			ArrayAccess arrayAccess = (ArrayAccess) node;
 			Expression arrayExpression = arrayAccess.getArray();
 			if(ASTNode.SIMPLE_NAME == arrayExpression.getNodeType()) {
