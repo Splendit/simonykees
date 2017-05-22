@@ -11,6 +11,26 @@ import org.apache.commons.lang3.StringUtils;
 @SuppressWarnings({ "nls", "unused", "rawtypes" })
 public class TestWhileToForEachRule {
 
+	public String loopingOverArrays(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = { "-", input, "." };
+		for (String t : array) {
+			System.out.println(t);
+			sb.append(t);
+		}
+		return sb.toString();
+	}
+
+	public String loopingOverLists(String input) {
+		StringBuilder sb = new StringBuilder();
+		List<String> list = generateList(input);
+		for (String t : list) {
+			System.out.println(t);
+			sb.append(t);
+		}
+		return sb.toString();
+	}
+
 	public String testWhileToFor(String input) {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
