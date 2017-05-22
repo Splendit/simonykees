@@ -338,7 +338,7 @@ public class TestWhileToForEachRule {
 
 	public String testWhileLoopsNumericIterator(String input) {
 		List<String> l = generateList(input);
-		List<Number> numbers = l.stream().map(val -> val.hashCode()).collect(Collectors.toList());
+		List<Number> numbers = l.stream().map(String::hashCode).collect(Collectors.toList());
 
 		StringBuilder sb = new StringBuilder();
 

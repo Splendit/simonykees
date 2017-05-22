@@ -436,7 +436,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 	private List<Integer> generateHashCodeList(String input) {
 		List<String> foo = generateList(input);
-		List<Integer> fooHashCodes = foo.stream().map(s -> s.hashCode()).collect(Collectors.toList());
+		List<Integer> fooHashCodes = foo.stream().map(String::hashCode).collect(Collectors.toList());
 		return fooHashCodes;
 	}
 
