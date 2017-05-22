@@ -14,6 +14,32 @@ public class TestWhileToForEachRule {
 	private List<String> generateList(String input) {
 		return Arrays.asList(input.split(";")); //$NON-NLS-1$
 	}
+	
+	public String loopingOverArrays(String input) {
+		StringBuilder sb = new StringBuilder();
+		String []array = {"-", input, "."};
+		int i = 0;
+		while (i < array.length) {
+			String t = array[i];
+			System.out.println(t);
+			sb.append(t);
+			i++;
+		}
+		return sb.toString();
+	}
+	
+	public String loopingOverLists(String input) {
+		StringBuilder sb = new StringBuilder();
+		List<String>list = generateList(input);
+		int i = 0;
+		while (i < list.size()) {
+			String t = list.get(i);
+			System.out.println(t);
+			sb.append(t);
+			i++;
+		}
+		return sb.toString();
+	}
 
 	public String testWhileToFor(String input) {
 		List<String> l = generateList(input);
