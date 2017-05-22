@@ -61,7 +61,7 @@ public class TagUtil {
 		} else if (InefficientConstructorRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE);
 		} else if (LambdaToMethodReferenceRule.class == clazz) {
-			return Arrays.asList(Tag.JAVA_1_8);
+			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA);
 		} else if (MultiCatchRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS);
 		} else if (MultiVariableDeclarationLineRule.class == clazz) {
