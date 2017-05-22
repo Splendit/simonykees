@@ -46,12 +46,22 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 				Expression methodInvocationExpression = methodInvocation.getExpression();
 
 				/*
-				 * case 1: reference to static method case 2: reference to
-				 * instance method i.e. personList.forEach(element ->
-				 * System.out.println(element)); becomes
-				 * personList.forEach(System.out::println); case 3: reference to
-				 * 'this' i.e. personList.forEach(person ->
-				 * doSomething(person)); becomes
+				 * case 1: reference to static method
+				 * 
+				 * case 2: reference to instance method i.e.
+				 * 
+				 * personList.forEach(element -> System.out.println(element));
+				 * 
+				 * becomes
+				 * 
+				 * personList.forEach(System.out::println);
+				 * 
+				 * case 3: reference to 'this' i.e.
+				 * 
+				 * personList.forEach(person -> doSomething(person));
+				 * 
+				 * becomes
+				 * 
 				 * personList.forEach(this::doSomething);
 				 */
 				if (methodArguments.size() == lambdaParams.size()
@@ -68,14 +78,14 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 					if (methodInvocationExpression instanceof Name
 							|| methodInvocationExpression instanceof ThisExpression) {
 
-						boolean paramUserdForMethodInvocation = false;
+						boolean paramUserForMethodInvocation = false;
 						if (methodInvocationExpression instanceof Name) {
 							Name name = (Name) methodInvocationExpression;
 							String nameStr = name.getFullyQualifiedName();
-							paramUserdForMethodInvocation = this.containsName(methodArguments, nameStr);
+							paramUserForMethodInvocation = this.containsName(methodArguments, nameStr);
 						}
 
-						if (!paramUserdForMethodInvocation) {
+						if (!paramUserForMethodInvocation) {
 							Expression newMethodInvocationExpression = (Expression) astRewrite
 									.createCopyTarget(methodInvocation.getExpression());
 							ref.setExpression(newMethodInvocationExpression);
@@ -96,9 +106,12 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 
 				/*
 				 * case 4: reference to instance method of arbitrary type i.e.
+				 * 
 				 * Arrays.sort(stringArray, (a, b) -> a.compareToIgnoreCase(b));
-				 * becomes Arrays.sort(stringArray,
-				 * String::compareToIgnoreCase);
+				 * 
+				 * becomes
+				 * 
+				 * Arrays.sort(stringArray, String::compareToIgnoreCase);
 				 */
 				else if ((lambdaParams.size() - 1) == methodArguments.size() && methodInvocationExpression != null) {
 
@@ -129,9 +142,14 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 
 			/*
 			 * case 5: reference to class instance creation (new) i.e.
+			 * 
 			 * Set<Person> persSet2 = transferElements(personList, () -> new
-			 * HashSet<>()); becomes Set<Person> persSet3 =
-			 * transferElements(personList, HashSet<Person>::new);
+			 * HashSet<>());
+			 * 
+			 * becomes
+			 * 
+			 * Set<Person> persSet3 = transferElements(personList,
+			 * HashSet<Person>::new);
 			 */
 			else if (expression instanceof ClassInstanceCreation) {
 				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) expression;
