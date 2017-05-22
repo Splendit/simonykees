@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
 import at.splendit.simonykees.core.visitor.sub.VariableDefinitionASTVisitor;
 
 /**
