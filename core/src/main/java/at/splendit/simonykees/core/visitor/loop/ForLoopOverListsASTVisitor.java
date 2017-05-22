@@ -7,7 +7,6 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -23,7 +22,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 class ForLoopOverListsASTVisitor extends ForLoopIteratingIndexASTVisitor {
 	private static final String GET = "get"; //$NON-NLS-1$
 	
-	private SimpleName iteratingIndexName;
 	private SimpleName iterableName;
 	private SimpleName newIteratorName;
 	private VariableDeclarationFragment preferredNameFragment;
@@ -31,7 +29,6 @@ class ForLoopOverListsASTVisitor extends ForLoopIteratingIndexASTVisitor {
 	public ForLoopOverListsASTVisitor(SimpleName iteratingIndexName, SimpleName iterableName,
 			ForStatement forStatement, Block scopeBlock) {
 		super(iteratingIndexName, forStatement, scopeBlock);	
-		this.iteratingIndexName = iteratingIndexName;
 		this.iterableName = iterableName;
 	}
 
