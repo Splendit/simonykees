@@ -21,7 +21,7 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
  * @since 1.2
  *
  */
-abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisior {
+abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisitor {
 
 	protected static final String INDEX_DECLARATION = "index-declaration-fragment"; //$NON-NLS-1$
 	protected static final String INDEX_UPDATER = "index-updater"; //$NON-NLS-1$

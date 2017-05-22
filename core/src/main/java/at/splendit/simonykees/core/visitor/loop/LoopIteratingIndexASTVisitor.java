@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 
-abstract class LoopIteratingIndexASTVisior extends ASTVisitor {
+abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	
 	protected static final String ONE = "1"; //$NON-NLS-1$
 	protected static final String ZERO = "0"; //$NON-NLS-1$
@@ -29,7 +29,7 @@ abstract class LoopIteratingIndexASTVisior extends ASTVisitor {
 	protected SimpleName newIteratorName;
 	protected VariableDeclarationFragment preferredNameFragment;
 	
-	protected LoopIteratingIndexASTVisior(SimpleName iterableNode) {
+	protected LoopIteratingIndexASTVisitor(SimpleName iterableNode) {
 		this.iterableName = iterableNode;
 	}
 
@@ -319,5 +319,11 @@ abstract class LoopIteratingIndexASTVisior extends ASTVisitor {
 	protected abstract void setIndexReferencedOutsideLoop();
 	
 	protected abstract void setHasEmptyStatement();
+	
+	protected abstract List<ASTNode> getIteratingObjectInitializers();
+	
+	protected abstract List<ASTNode> getNodesToBeRemoved();
+	
+	public abstract boolean checkTransformPrecondition();
 
 }

@@ -25,7 +25,7 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
  * @author Ardit Ymeri
  * @since 1.2
  */
-abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisior {
+abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisitor {
 
 	protected static final String OUTSIDE_LOOP_INDEX_DECLARATION = "outside-declaration-fragment"; //$NON-NLS-1$
 	protected static final String LOOP_INITIALIZER = "loop-initializer"; //$NON-NLS-1$
