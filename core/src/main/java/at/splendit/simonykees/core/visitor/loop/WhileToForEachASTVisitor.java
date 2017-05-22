@@ -42,9 +42,11 @@ public class WhileToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 					generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
 				Block parentNode = ASTNodeUtil.getSpecificAncestor(node, Block.class);
 				if (parentNode == null) {
-					// No surrounding parent block found
-					// should not happen, because the Iterator has to be
-					// defined in an parent block.
+					/*
+					 * No surrounding parent block found should not happen,
+					 * because the Iterator has to be defined in an parent
+					 * block.
+					 */
 					return false;
 				}
 				LoopOptimizationASTVisior iteratorDefinitionAstVisior = new LoopOptimizationASTVisior(
@@ -59,16 +61,16 @@ public class WhileToForEachASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void endVisit(WhileStatement node) {
 		// Do the replacement
 		if (replaceInformationASTVisitorList.containsKey(node)) {
 			LoopOptimizationASTVisior iteratorDefinitionAstVisior = replaceInformationASTVisitorList.remove(node);
 			iteratorDefinitionAstVisior.replaceLoop(node, node.getBody(), multipleIteratorUse);
-			
-			//clear the variableIterator if no other loop is present
-			if(replaceInformationASTVisitorList.isEmpty()){
+
+			// clear the variableIterator if no other loop is present
+			if (replaceInformationASTVisitorList.isEmpty()) {
 				multipleIteratorUse.clear();
 			}
 		}

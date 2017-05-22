@@ -12,8 +12,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
- * A visitor for checking the precondition of replacing a for loop 
- * iterating over a {@link List} with an {@link EnhancedForStatement}.
+ * A visitor for checking the precondition of replacing a for loop iterating
+ * over a {@link List} with an {@link EnhancedForStatement}.
  * 
  * @author Ardit Ymeri
  * @since 1.2
@@ -21,20 +21,20 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  */
 class ForLoopOverListsASTVisitor extends ForLoopIteratingIndexASTVisitor {
 	private static final String GET = "get"; //$NON-NLS-1$
-	
+
 	private SimpleName iterableName;
 	private SimpleName newIteratorName;
 	private VariableDeclarationFragment preferredNameFragment;
-	
-	public ForLoopOverListsASTVisitor(SimpleName iteratingIndexName, SimpleName iterableName,
-			ForStatement forStatement, Block scopeBlock) {
-		super(iteratingIndexName, forStatement, scopeBlock);	
+
+	public ForLoopOverListsASTVisitor(SimpleName iteratingIndexName, SimpleName iterableName, ForStatement forStatement,
+			Block scopeBlock) {
+		super(iteratingIndexName, forStatement, scopeBlock);
 		this.iterableName = iterableName;
 	}
 
 	@Override
 	public boolean visit(SimpleName simpleName) {
-		if(!isNameOfIteratingIndex(simpleName)) {
+		if (!isNameOfIteratingIndex(simpleName)) {
 			return true;
 		}
 
@@ -49,7 +49,8 @@ class ForLoopOverListsASTVisitor extends ForLoopIteratingIndexASTVisitor {
 
 				if (ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent().getNodeType()) {
 					/*
-					 * replacing the expression statement with a variable name leads to compile error
+					 * replacing the expression statement with a variable name
+					 * leads to compile error
 					 */
 					setHasEmptyStatement();
 				} else if (GET.equals(methodInvocation.getName().getIdentifier())
@@ -57,14 +58,14 @@ class ForLoopOverListsASTVisitor extends ForLoopIteratingIndexASTVisitor {
 						&& methodExpression.getNodeType() == ASTNode.SIMPLE_NAME
 						&& ((SimpleName) methodExpression).getIdentifier().equals(iterableName.getIdentifier())) {
 					/*
-					 * simpleName is the parameter of the get() method in the iterable object. 
+					 * simpleName is the parameter of the get() method in the
+					 * iterable object.
 					 */
 					addIteratingObjectInitializer(methodInvocation);
 
 					// store the preferred iterator name
-					if (newIteratorName == null
-							&& VariableDeclarationFragment.INITIALIZER_PROPERTY == methodInvocation
-									.getLocationInParent()) {
+					if (newIteratorName == null && VariableDeclarationFragment.INITIALIZER_PROPERTY == methodInvocation
+							.getLocationInParent()) {
 						VariableDeclarationFragment fragment = (VariableDeclarationFragment) methodInvocation
 								.getParent();
 						this.newIteratorName = fragment.getName();
@@ -88,7 +89,7 @@ class ForLoopOverListsASTVisitor extends ForLoopIteratingIndexASTVisitor {
 	public SimpleName getIteratorName() {
 		return this.newIteratorName;
 	}
-	
+
 	@Override
 	public VariableDeclarationFragment getPreferredNameFragment() {
 		return preferredNameFragment;
