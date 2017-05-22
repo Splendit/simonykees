@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.visitor.loop;
+package at.splendit.simonykees.core.visitor.loop.forToForEach;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -15,34 +16,38 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.WhileStatement;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
+import at.splendit.simonykees.core.visitor.loop.LoopIteratingIndexASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.LoopOptimizationASTVisior;
+import at.splendit.simonykees.core.visitor.loop.LoopToForEachASTVisitor;
 
 /**
- * While-loops over Iterators that could be expressed with a for-loop are
- * transformed to a equivalent for-loop.
+ * For loops with an iterator can be replaced with a forEach loop since 1.7
  * 
- * @author Martin Huter
+ * @author Martin Huter, Ardit Ymeri
  * @since 0.9.2
- *
  */
-public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor {
+public class ForToForEachASTVisitor extends LoopToForEachASTVisitor {
 
-	private Map<WhileStatement, LoopOptimizationASTVisior> replaceInformationASTVisitorList;
+	private Map<ForStatement, LoopOptimizationASTVisior> replaceInformationASTVisitorList;
 	private Map<String, Integer> multipleIteratorUse;
 
-	public WhileToForEachASTVisitor() {
+	public ForToForEachASTVisitor() {
 		this.replaceInformationASTVisitorList = new HashMap<>();
 		this.multipleIteratorUse = new HashMap<>();
 	}
 
 	@Override
-	public boolean visit(WhileStatement node) {
+	public boolean visit(ForStatement node) {
+
 		SimpleName iteratorName = ASTNodeUtil.replaceableIteratorCondition(node.getExpression());
-		Expression loopCondition = node.getExpression();
 		if (iteratorName != null) {
+			// Defined updaters are not allowed
+			if (!node.updaters().isEmpty()) {
+				return true;
+			}
 			if (ClassRelationUtil.isContentOfTypes(iteratorName.resolveTypeBinding(),
 					generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
 				Block parentNode = ASTNodeUtil.getSpecificAncestor(node, Block.class);
@@ -63,9 +68,10 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor {
 					replaceInformationASTVisitorList.put(node, iteratorDefinitionAstVisior);
 				}
 			}
-		} else if (loopCondition != null && ASTNode.INFIX_EXPRESSION == loopCondition.getNodeType()) {
+
+		} else if (node.getExpression() != null && ASTNode.INFIX_EXPRESSION == node.getExpression().getNodeType()) {
 			// if the condition of the for loop is an infix expression....
-			InfixExpression infixExpression = (InfixExpression) loopCondition;
+			InfixExpression infixExpression = (InfixExpression) node.getExpression();
 			Expression rhs = infixExpression.getRightOperand();
 			Expression lhs = infixExpression.getLeftOperand();
 
@@ -97,7 +103,7 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor {
 							 * replacement information
 							 */
 							Block outerBlock = ASTNodeUtil.getSpecificAncestor(node, Block.class);
-							LoopIteratingIndexASTVisitor indexVisitor = new WhileLoopOverListsASTVisitor(index,
+							LoopIteratingIndexASTVisitor indexVisitor = new ForLoopOverListsASTVisitor(index,
 									iterableNode, node, outerBlock);
 							outerBlock.accept(indexVisitor);
 
@@ -122,7 +128,7 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor {
 						if (iterableTypeBinding != null && iterableTypeBinding.isArray()) {
 
 							Block outerBlock = ASTNodeUtil.getSpecificAncestor(node, Block.class);
-							LoopIteratingIndexASTVisitor indexVisitor = new WhileLoopOverArraysASTVisitor(index,
+							LoopIteratingIndexASTVisitor indexVisitor = new ForLoopOverArraysASTVisitor(index,
 									iterableNode, node, outerBlock);
 							outerBlock.accept(indexVisitor);
 
@@ -140,9 +146,9 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor {
 		}
 		return true;
 	}
-
+	
 	@Override
-	public void endVisit(WhileStatement node) {
+	public void endVisit(ForStatement node) {
 		// Do the replacement
 		if (replaceInformationASTVisitorList.containsKey(node)) {
 			LoopOptimizationASTVisior iteratorDefinitionAstVisior = replaceInformationASTVisitorList.remove(node);
@@ -153,8 +159,9 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor {
 				multipleIteratorUse.clear();
 			}
 		}
-		
+
 		clearTempItroducedNames(node);
 	}
+
 
 }

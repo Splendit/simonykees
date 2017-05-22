@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.visitor.loop;
+package at.splendit.simonykees.core.visitor.loop.whileToForEach;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.visitor.loop.LoopIteratingIndexASTVisitor;
 
 /**
  * 

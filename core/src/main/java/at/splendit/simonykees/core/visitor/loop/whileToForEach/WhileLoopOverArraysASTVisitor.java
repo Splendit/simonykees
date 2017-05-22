@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.visitor.loop;
+package at.splendit.simonykees.core.visitor.loop.whileToForEach;
 
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.SimpleName;

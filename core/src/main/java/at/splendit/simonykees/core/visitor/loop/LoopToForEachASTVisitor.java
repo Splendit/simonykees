@@ -30,6 +30,12 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.visitor.AbstractAddImportASTVisitor;
 import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
 
+/**
+ * 
+ * @author Ardit Ymeri
+ * @since 1.2
+ *
+ */
 public abstract class LoopToForEachASTVisitor extends AbstractAddImportASTVisitor {
 
 	protected static final String ITERATOR_FULLY_QUALLIFIED_NAME = java.util.Iterator.class.getName();

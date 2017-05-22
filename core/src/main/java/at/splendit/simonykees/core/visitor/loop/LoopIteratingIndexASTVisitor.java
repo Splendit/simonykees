@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 
-abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
+public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	
 	protected static final String ONE = "1"; //$NON-NLS-1$
 	protected static final String ZERO = "0"; //$NON-NLS-1$

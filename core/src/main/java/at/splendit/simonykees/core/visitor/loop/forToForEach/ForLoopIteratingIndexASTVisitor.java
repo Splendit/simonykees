@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.visitor.loop;
+package at.splendit.simonykees.core.visitor.loop.forToForEach;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.visitor.loop.LoopIteratingIndexASTVisitor;
 
 /**
  * A visitor for investigating the replace precondition of a for loop with an
