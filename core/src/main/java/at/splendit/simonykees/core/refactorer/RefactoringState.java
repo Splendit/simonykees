@@ -84,24 +84,6 @@ public class RefactoringState {
 	}
 
 	/**
-	 * Applies all given {@link RefactoringRule}s to the working copy. Changes
-	 * to the working copy are <b>not</b> committed yet.
-	 * 
-	 * @param rules
-	 *            List of {@link RefactoringRule} to be applied
-	 * @throws JavaModelException
-	 * @throws ReflectiveOperationException
-	 */
-	public void addRulesAndGenerateDocumentChanges(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules)
-			throws JavaModelException, ReflectiveOperationException {
-
-		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
-			addRuleAndGenerateDocumentChanges(refactoringRule, false);
-		}
-	}
-
-	// TODO add monitor
-	/**
 	 * Applies a given {@link RefactoringRule}s to the working copy. Changes to
 	 * the working copy are <b>not</b> committed yet.
 	 * 
@@ -117,20 +99,6 @@ public class RefactoringState {
 	public void addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
 			boolean initialApply) throws JavaModelException, ReflectiveOperationException {
 
-		/*
-		 * Sends new child of subMonitor which takes in progress bar size of 1
-		 * of rules size In method that part of progress bar is split to number
-		 * of compilation units
-		 */
-		// generateDocumentChanges(rule, subMonitor.newChild(1));
-
-		// boolean changesAlreadyPresent = changes.containsKey(rule);
-		//
-		// if (changesAlreadyPresent) {
-		// // already have changes
-		// logger.warn(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present,
-		// getWorkingCopyName()));
-		// } else {
 		DocumentChange documentChange = rule.applyRule(workingCopy);
 		if (documentChange != null) {
 			changes.put(rule, documentChange);
@@ -141,7 +109,6 @@ public class RefactoringState {
 				logger.trace(NLS.bind(ExceptionMessages.RefactoringState_no_changes_found, rule.getName(),
 						workingCopy.getElementName()));
 		}
-		// }
 
 	}
 

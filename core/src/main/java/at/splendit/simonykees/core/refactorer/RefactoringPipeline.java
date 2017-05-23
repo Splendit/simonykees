@@ -200,7 +200,6 @@ public class RefactoringPipeline {
 	 */
 	public void doRefactoring(IProgressMonitor monitor) throws RefactoringException, RuleException {
 		if (refactoringStates.isEmpty()) {
-			// TODO warning adjustment
 			logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
 			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found,
 					ExceptionMessages.RefactoringPipeline_user_warn_no_java_files_found_to_apply_rules);
@@ -250,36 +249,6 @@ public class RefactoringPipeline {
 			throw new RuleException(
 					NLS.bind(ExceptionMessages.RefactoringPipeline_rule_execute_failed, notWorkingRulesCollected),
 					NLS.bind(ExceptionMessages.RefactoringPipeline_user_rule_execute_failed, notWorkingRulesCollected));
-		}
-	}
-	
-	/**
-	 * This functionality used to be in the {@link RefactoringRule}
-	 * 
-	 * @param rule
-	 * @param subMonitor
-	 * @throws JavaModelException
-	 * @throws ReflectiveOperationException
-	 */
-	private void applyRuleToAllStates(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
-			IProgressMonitor subMonitor) throws JavaModelException, ReflectiveOperationException {
-
-		for (RefactoringState refactoringState : refactoringStates) {
-			/*
-			 * TODO catch all exceptions from ASTVisitor execution? if any
-			 * exception is thrown discard all changes from this rule
-			 */
-			subMonitor.subTask(refactoringState.getWorkingCopyName());
-
-			refactoringState.addRuleAndGenerateDocumentChanges(rule, false);
-
-			/*
-			 * If cancel is pressed on progress monitor, abort all and return,
-			 * else continue
-			 */
-			if (subMonitor.isCanceled()) {
-				return;
-			}
 		}
 	}
 
@@ -406,7 +375,6 @@ public class RefactoringPipeline {
 	 */
 	public void commitRefactoring() throws RefactoringException, ReconcileException {
 		if (refactoringStates.isEmpty()) {
-			// TODO adjust
 			logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
 			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
 		}
