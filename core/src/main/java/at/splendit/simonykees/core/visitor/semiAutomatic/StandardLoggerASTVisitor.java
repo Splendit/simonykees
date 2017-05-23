@@ -39,24 +39,25 @@ import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
  * Replaces the occurrences of {@code System.out/err.print/ln} and
- * {@code Throwable::printStackTrace()} with a logger method. The qualified
- * name of the logger and the replacing options must be provided as 
- * constructor parameters, otherwise the visiting is interrupted.
+ * {@code Throwable::printStackTrace()} with a logger method. The qualified name
+ * of the logger and the replacing options must be provided as constructor
+ * parameters, otherwise the visiting is interrupted.
  * 
  * <pre>
  * 
- * As an example, assuming that the <b>default</b> replacing options from {@link StandardLoggerRule#getDefaultOptions()}
- * the following replacements are possible:
+ * As an example, assuming that the <b>default</b> replacing options from
+ * {@link StandardLoggerRule#getDefaultOptions()} the following replacements are
+ * possible:
  * 
  * <ul>
- * 	<li>The occurrences of {@code System.out.println("Some message");} 
- * and {@code System.out.print("Some message");}will be replaced with:
- * 		{@code logger.info("Some message")}</li>
- * 	<li>The occurrences of {@code System.err.println("Error message");} 
- * and {@code System.err.print("Error message");} will be replaced with:
- * 		{@code logger.error("Error message")}</li>
- * 	<li>The occurrences of {@code e.printStackTrace()} will be replaced with:
- * 		{@code logger.error(e.getMessage(), e)}</li>
+ * <li>The occurrences of {@code System.out.println("Some message");} and
+ * {@code System.out.print("Some message");}will be replaced with:
+ * {@code logger.info("Some message")}</li>
+ * <li>The occurrences of {@code System.err.println("Error message");} and
+ * {@code System.err.print("Error message");} will be replaced with:
+ * {@code logger.error("Error message")}</li>
+ * <li>The occurrences of {@code e.printStackTrace()} will be replaced with:
+ * {@code logger.error(e.getMessage(), e)}</li>
  * </ul>
  * 
  * @author Ardit Ymeri
@@ -77,8 +78,13 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String THROWABLE_GET_MESSAGE = "getMessage"; //$NON-NLS-1$
 	private static final String LOGGER_CLASS_NAME = org.slf4j.Logger.class.getSimpleName();
 	private static final String SLF4J_LOGGER_FACTORY = org.slf4j.LoggerFactory.class.getSimpleName();
+	private static final String LOG4J_LOGGER_MANAGER = "LogManager"; //$NON-NLS-1$
 	private static final String LOG4J_GET_LOGGER = "getLogger"; //$NON-NLS-1$
 	private static final String SLF4J_LOGGER_FACTORY_QUALIFIED_NAME = org.slf4j.LoggerFactory.class.getName();
+	/**
+	 * log4j is not within the class path
+	 */
+	private static final String LOG4J_LOGGER_FACTORY_QUALIFIED_NAME = "org.apache.logging.log4j.LogManager"; //$NON-NLS-1$
 	private static final String SEPARATOR = "->"; //$NON-NLS-1$
 
 	private boolean loggerAdded = false;
@@ -103,8 +109,10 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		slf4jImports.add(StandardLoggerOptions.SLF4J_LOGGER);
 		slf4jImports.add(SLF4J_LOGGER_FACTORY_QUALIFIED_NAME);
 		newImports.put(StandardLoggerOptions.SLF4J_LOGGER, slf4jImports);
-		newImports.put(StandardLoggerOptions.LOG4J_LOGGER,
-				Collections.singletonList(StandardLoggerOptions.LOG4J_LOGGER));
+		List<String> log4jImports = new ArrayList<>();
+		log4jImports.add(StandardLoggerOptions.LOG4J_LOGGER);
+		log4jImports.add(LOG4J_LOGGER_FACTORY_QUALIFIED_NAME);
+		newImports.put(StandardLoggerOptions.LOG4J_LOGGER, log4jImports);
 	}
 
 	@Override
@@ -390,7 +398,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		case StandardLoggerOptions.LOG4J_LOGGER:
 			methodInvocation.setName(ast.newSimpleName(LOG4J_GET_LOGGER));
 			miListRewrite.insertFirst(typeLiteral, null);
-			methodInvocation.setExpression(ast.newSimpleName(LOGGER_CLASS_NAME));
+			methodInvocation.setExpression(ast.newSimpleName(LOG4J_LOGGER_MANAGER));
 			initializer = methodInvocation;
 			break;
 		default:
@@ -402,10 +410,10 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 	/**
 	 * Generates a name for the logger object. Avoids clashes with the rest of
-	 * the fields in the current class or in the outer classes in case the logger 
-	 * is being introduced in a nested class. The default logger name is
+	 * the fields in the current class or in the outer classes in case the
+	 * logger is being introduced in a nested class. The default logger name is
 	 * {@value #DEFAULT_LOGGER_NAME}. A number is added as a suffix if the
-	 * default name is already taken by some other object within the scope. 
+	 * default name is already taken by some other object within the scope.
 	 * 
 	 * @return a string representing the logger name.
 	 */

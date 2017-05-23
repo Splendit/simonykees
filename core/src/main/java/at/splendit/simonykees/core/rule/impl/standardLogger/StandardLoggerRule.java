@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,17 +17,18 @@ import at.splendit.simonykees.core.visitor.semiAutomatic.StandardLoggerASTVisito
 import at.splendit.simonykees.i18n.Messages;
 
 /**
- * This rule replaces the System.out/err.print calls and the Throwable.printStacktrace with
- * logger methods, if any of the supported loggers is in the classpath of the project. 
- * The supported loggers are:
+ * This rule replaces the System.out/err.print calls and the
+ * Throwable.printStacktrace with logger methods, if any of the supported
+ * loggers is in the classpath of the project. The supported loggers are:
  * 
  * <ul>
- * 	<li> {@value #SLF4J_LOGGER} </li>
- * 	<li> {@value #LOGBACK_LOGGER} </li>
- * 	<li> {@value #LOG4J_LOGGER} </li>
+ * <li>{@value #SLF4J_LOGGER}</li>
+ * <li>{@value #LOGBACK_LOGGER}</li>
+ * <li>{@value #LOG4J_LOGGER}</li>
  * </ul>
  * 
- * If none of the supported loggers is in the classpath, then the rule cannot be applied. 
+ * If none of the supported loggers is in the classpath, then the rule cannot be
+ * applied.
  * 
  * @see StandardLoggerASTVisitor
  * 
@@ -52,9 +52,8 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	private Map<String, Integer> pritntStacktraceReplaceOptions = new LinkedHashMap<>();
 	private Map<String, String> selectedOptions = new HashMap<>();
 
-	private SupportedLogger supportedLoger;
-	private String loggerQualifiedName;
-	private IType loggerType;
+	private SupportedLogger supportedLoger = null;
+	private String loggerQualifiedName = null;
 
 	public StandardLoggerRule(Class<StandardLoggerASTVisitor> visitor) {
 		super(visitor);
@@ -69,30 +68,30 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
-
 		try {
-			if ((loggerType = project.findType(SLF4J_LOGGER)) != null) {
+			if (project.findType(SLF4J_LOGGER) != null) {
 				supportedLoger = SupportedLogger.SLF4J;
 				loggerQualifiedName = SLF4J_LOGGER;
-			} else if ((loggerType = project.findType(LOG4J_LOGGER)) != null) {
+			} else if (project.findType(LOG4J_LOGGER) != null) {
 				supportedLoger = SupportedLogger.LOG4J;
 				loggerQualifiedName = LOG4J_LOGGER;
 			}
 
-			if (loggerType != null) {
+			if (supportedLoger != null) {
 				initLogLevelOptions();
+				return true;
 			}
 		} catch (JavaModelException e) {
 			logger.error(e.getMessage(), new ITypeNotFoundRuntimeException());
 		}
 
-		return loggerType != null && super.ruleSpecificImplementation(project);
+		return false;
 	}
-	
+
 	public void setSelectedOptions(Map<String, String> selectedOptions) {
 		this.selectedOptions.putAll(selectedOptions);
 	}
-	
+
 	public Map<String, String> getSelectedOptions() {
 		return Collections.unmodifiableMap(selectedOptions);
 	}
@@ -147,10 +146,6 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		return this.supportedLoger;
 	}
 
-	@Override
-	public IType getLoggerType() {
-		return this.loggerType;
-	}
 
 	public String getAvailableQualifiedLoggerName() {
 		return loggerQualifiedName;
@@ -162,7 +157,18 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		setSelectedOptions(getDefaultOptions());
 		this.loggerQualifiedName = SLF4J_LOGGER;
 	}
-	
+
+	public void activateOptions(Map<String, String> options) {
+		// default options should be activated only for test purposes
+		Map<String, String> defaultOptions = getDefaultOptions();
+		options.forEach((key, value) -> {
+			if (defaultOptions.containsKey(key))
+				defaultOptions.put(key, value);
+		});
+		setSelectedOptions(defaultOptions);
+		this.loggerQualifiedName = options.get(LOGGER_QUALIFIED_NAME);
+	}
+
 	@Override
 	protected StandardLoggerASTVisitor visitorFactory() {
 		Map<String, String> replacingOptions = getSelectedOptions();

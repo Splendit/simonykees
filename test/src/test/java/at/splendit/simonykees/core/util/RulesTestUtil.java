@@ -62,22 +62,23 @@ public class RulesTestUtil {
 		IPackageFragmentRoot root = addSourceContainer(javaProject, "/allRulesTestRoot");
 
 		addToClasspath(javaProject, getClassPathEntries(root));
+		addToClasspath(javaProject, extractMavenDependenciesFromPom(SAMPLE_MODULE_PATH + "pom.xml"));
 
 		return root.createPackageFragment("at.splendit.simonykees", true, null);
 	}
 
-	private static List<IClasspathEntry> getClassPathEntries(IPackageFragmentRoot root) throws Exception {
+	public static List<IClasspathEntry> getClassPathEntries(IPackageFragmentRoot root) throws Exception {
 		final List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 		final IClasspathEntry srcEntry = JavaCore.newSourceEntry(root.getPath(), EMPTY_PATHS, EMPTY_PATHS, null);
 		final IClasspathEntry rtJarEntry = JavaCore.newLibraryEntry(getPathToRtJar(), null, null);
 		entries.add(srcEntry);
 		entries.add(rtJarEntry);
-
-		extractClasspathEntries(entries, SAMPLE_MODULE_PATH + "pom.xml");
+		
 		return entries;
 	}
 
-	public static void extractClasspathEntries(List<IClasspathEntry> entries, String classpathFile) throws Exception {
+	public static List<IClasspathEntry> extractMavenDependenciesFromPom(String classpathFile) throws Exception {
+		List<IClasspathEntry> collectedEntries = new ArrayList<>();
 		final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		final DocumentBuilder builder = factory.newDocumentBuilder();
 		final Document document = builder.parse(new File(classpathFile));
@@ -90,8 +91,10 @@ public class RulesTestUtil {
 			String groupId = getNodeByNodeName(children, "groupId").getTextContent();
 			String artifactId = getNodeByNodeName(children, "artifactId").getTextContent();
 			String version = getNodeByNodeName(children, "version").getTextContent();
-			entries.add(generateMavenEntryFromDepedencyString(groupId, artifactId, version));
+			collectedEntries.add(generateMavenEntryFromDepedencyString(groupId, artifactId, version));
 		}
+		
+		return collectedEntries;
 	}
 
 	public static IClasspathEntry generateMavenEntryFromDepedencyString(String groupId, String artifactId,
@@ -167,7 +170,7 @@ public class RulesTestUtil {
 		return new Path(classPath.substring(start, end));
 	}
 
-	private static IPackageFragmentRoot addSourceContainer(IJavaProject javaProject, String containerName)
+	public static IPackageFragmentRoot addSourceContainer(IJavaProject javaProject, String containerName)
 			throws Exception {
 		IProject project = javaProject.getProject();
 		IFolder folder = project.getFolder(containerName);

@@ -1,12 +1,12 @@
-package at.splendit.simonykees.sample.postRule.standardLogger;
+package at.splendit.simonykees.sample.postRule.standardLoggerLog4j;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 @SuppressWarnings({"unused", "nls"})
 public class TestStandardLoggerRule {
 
-	private static final Logger logger1 = LoggerFactory.getLogger(TestStandardLoggerRule.class);
+	private static final Logger logger1 = LogManager.getLogger(TestStandardLoggerRule.class);
 	private static String logger;
 	
 	public void replaceSystemOutPrint(String input) {
@@ -35,7 +35,7 @@ public class TestStandardLoggerRule {
 	
 	class InnerClass {
 		
-		private final Logger logger2 = LoggerFactory.getLogger(InnerClass.class);
+		private final Logger logger2 = LogManager.getLogger(InnerClass.class);
 
 		public void dontUseOuterClassLogger(String input) {
 			logger2.info("a log message");
@@ -43,7 +43,7 @@ public class TestStandardLoggerRule {
 		
 		class DoubleNestedInnerClass {
 			
-			private final Logger logger3 = LoggerFactory.getLogger(DoubleNestedInnerClass.class);
+			private final Logger logger3 = LogManager.getLogger(DoubleNestedInnerClass.class);
 
 			public void loggerInDoubleNestedClass(String input) {
 				logger3.info(input);
@@ -66,7 +66,7 @@ public class TestStandardLoggerRule {
 
 class TopLevelClass {
 	
-	private static final Logger logger = LoggerFactory.getLogger(TopLevelClass.class);
+	private static final Logger logger = LogManager.getLogger(TopLevelClass.class);
 
 	public void replaceSystemOutPrint(String input) {
 		logger.info(input);
@@ -89,7 +89,7 @@ class TopLevelClass {
 enum Days {
 	Mon, Tue, Thu, Frii, Saaat, Sun;
 
-	private static final Logger logger1 = LoggerFactory.getLogger(Days.class);
+	private static final Logger logger1 = LogManager.getLogger(Days.class);
 	private static final String logger = "";
 	public void loggerInEnumType(String input) {
 		logger1.info(input);

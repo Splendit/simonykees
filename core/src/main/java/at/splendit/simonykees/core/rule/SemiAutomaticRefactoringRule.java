@@ -1,5 +1,7 @@
 package at.splendit.simonykees.core.rule;
 
+import java.util.Map;
+
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -20,4 +22,9 @@ public abstract class SemiAutomaticRefactoringRule<T extends AbstractASTRewriteA
 	 * Sets the default options of the user interaction.
 	 */
 	protected abstract void activateDefaultOptions();
+	
+	/**
+	 * Sets the given options of the user interaction.
+	 */
+	protected abstract void activateOptions(Map<String, String> options);
 }

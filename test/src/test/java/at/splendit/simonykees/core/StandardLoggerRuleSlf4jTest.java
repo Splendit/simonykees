@@ -21,16 +21,16 @@ import at.splendit.simonykees.core.visitor.semiAutomatic.StandardLoggerASTVisito
  */
 @RunWith(Parameterized.class)
 @SuppressWarnings("nls")
-public class StandardLoggerRuleTest extends AbstractRulesTest {
+public class StandardLoggerRuleSlf4jTest extends AbstractRulesTest {
 	
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.standardLogger";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/standardLogger";
+	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.standardLoggerSlf4j";
+	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/standardLoggerSlf4j";
 
 	private String fileName;
 	private Path preRule;
 	private Path postRule;
 	
-	public StandardLoggerRuleTest(String fileName, Path preRule, Path postRule) {
+	public StandardLoggerRuleSlf4jTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;

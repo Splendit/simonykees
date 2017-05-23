@@ -2,8 +2,6 @@ package at.splendit.simonykees.core.rule.impl.standardLogger;
 
 import java.util.Map;
 
-import org.eclipse.jdt.core.IType;
-
 /**
  * A type for representing the information that the {@link StandardLoggerRule} should
  * provide to its clients. 
@@ -14,8 +12,12 @@ import org.eclipse.jdt.core.IType;
  */
 public interface StandardLoggerOptions {
 	
+	// option to set specific logger for testing
+	String LOGGER_QUALIFIED_NAME = "loggerQualifiedName"; //$NON-NLS-1$
+	
 	String SLF4J_LOGGER = "org.slf4j.Logger"; //$NON-NLS-1$
 	String LOG4J_LOGGER = "org.apache.logging.log4j.Logger"; //$NON-NLS-1$
+	
 	
 	String SYSTEM_OUT_PRINT = "System.out.print"; //$NON-NLS-1$
 	String SYSTEM_ERR_PRINT = "System.err.print"; //$NON-NLS-1$
@@ -64,12 +66,4 @@ public interface StandardLoggerOptions {
 	 * is in the classpat or {@code null} otherwise.
 	 */
 	SupportedLogger getAvailableLoggerType();
-	
-	/**
-	 * Provides the {@link IType} of the supported logger available in the classpath. 
-	 * 
-	 * @return an {@link IType} or {@code null} if there is no supported logger
-	 * in the classpath.
-	 */
-	IType getLoggerType();
 }
