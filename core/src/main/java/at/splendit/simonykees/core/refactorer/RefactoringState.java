@@ -12,6 +12,7 @@ import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.ExceptionMessages;
@@ -100,9 +101,10 @@ public class RefactoringState {
 	 * @throws ReflectiveOperationException
 	 *             is thrown if the default constructor of {@link #visitor} is
 	 *             not present and the reflective construction fails.
+	 * @throws RefactoringException 
 	 */
 	public void addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
-			boolean initialApply) throws JavaModelException, ReflectiveOperationException {
+			boolean initialApply) throws JavaModelException, ReflectiveOperationException, RefactoringException {
 
 		DocumentChange documentChange = rule.applyRule(workingCopy);
 		if (documentChange != null) {

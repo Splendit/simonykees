@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
+import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
@@ -30,7 +31,7 @@ public class TryWithResourceRule extends RefactoringRule<TryWithResourceASTVisit
 
 	@Override
 	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
-			throws ReflectiveOperationException, JavaModelException {
+			throws ReflectiveOperationException, JavaModelException, RefactoringException {
 		
 		/*
 		 * The TryWithResourceRule has to be applied twice. 
