@@ -34,7 +34,7 @@ import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerOption
 import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
-import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
+import at.splendit.simonykees.core.visitor.AbstractAddImportASTVisitor;
 import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
@@ -63,7 +63,7 @@ import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
  * @since 1.2
  *
  */
-public class StandardLoggerASTVisitor extends AbstractCompilationUnitASTVisitor {
+public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 	private static final String JAVA_LANG_SYSTEM = java.lang.System.class.getName();
 	private static final String JAVA_LANG_THROWABLE = java.lang.Throwable.class.getName();

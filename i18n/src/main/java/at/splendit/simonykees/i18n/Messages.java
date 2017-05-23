@@ -50,6 +50,8 @@ public class Messages extends NLS {
 	public static String ForToForEachRule_name;
 	public static String FunctionalInterfaceRule_description;
 	public static String FunctionalInterfaceRule_name;
+	public static String LambdaToMethodReferenceRule_description;
+	public static String LambdaToMethodReferenceRule_name;
 	public static String LicenseHelper_licenseProblem;
 	public static String LicenseManager_cannot_reach_licensing_provider_on_checkin;
 	public static String LicenseManager_cannot_reach_licensing_provider_on_prevalidation;
@@ -97,6 +99,8 @@ public class Messages extends NLS {
 	public static String LoggerRuleWizardPageModel_warn_stackTraceSeverity;
 	public static String InefficientConstructorRule_description;
 	public static String InefficientConstructorRule_name;
+	public static String MultiVariableDeclarationLineRule_name;
+	public static String MultiVariableDeclarationLineRule_description;
 	public static String Java5Profile_profileName;
 	public static String Java7Profile_profileName;
 	public static String OrganiseImportsRule_description;
@@ -167,6 +171,8 @@ public class Messages extends NLS {
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_group_title;
 	public static String StandardLoggerRule_description;
 	public static String StandardLoggerRule_name;
+	public static String StatementLambdaToExpressionRule_description;
+	public static String StatementLambdaToExpressionRule_name;
 	public static String StringFormatLineSeparatorRule_description;
 	public static String StringFormatLineSeparatorRule_name;
 	public static String StringConcatToPlusRule_description;

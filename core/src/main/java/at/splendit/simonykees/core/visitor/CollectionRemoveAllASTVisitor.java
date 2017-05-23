@@ -26,7 +26,7 @@ public class CollectionRemoveAllASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	private static final Logger logger = LoggerFactory.getLogger(CollectionRemoveAllASTVisitor.class);
 
-	private static String COLLECTION_FULLY_QUALLIFIED_NAME = "java.util.Collection"; //$NON-NLS-1$
+	private static String COLLECTION_FULLY_QUALLIFIED_NAME = java.util.Collection.class.getName();
 
 	private ASTMatcher astMatcher = new ASTMatcher();
 

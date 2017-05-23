@@ -15,7 +15,9 @@ import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
+import at.splendit.simonykees.core.rule.impl.LambdaToMethodReferenceRule;
 import at.splendit.simonykees.core.rule.impl.MultiCatchRule;
+import at.splendit.simonykees.core.rule.impl.MultiVariableDeclarationLineRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
 import at.splendit.simonykees.core.rule.impl.OverrideAnnotationRule;
 import at.splendit.simonykees.core.rule.impl.PrimitiveBoxedForStringRule;
@@ -23,6 +25,7 @@ import at.splendit.simonykees.core.rule.impl.RearrangeClassMembersRule;
 import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
+import at.splendit.simonykees.core.rule.impl.StatementLambdaToExpressionRule;
 import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
 import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
@@ -58,8 +61,12 @@ public class TagUtil {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.LAMBDA);
 		} else if (InefficientConstructorRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE);
+		} else if (LambdaToMethodReferenceRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA);
 		} else if (MultiCatchRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS);
+		} else if (MultiVariableDeclarationLineRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS);
 		} else if (OrganiseImportsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.FORMATTING, Tag.READABILITY);
 		} else if (OverrideAnnotationRule.class == clazz) {
@@ -74,6 +81,8 @@ public class TagUtil {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE);
 		} else if (SerialVersionUidRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1);
+		} else if (StatementLambdaToExpressionRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA);
 		} else if (StringConcatToPlusRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION);
 		} else if (StringFormatLineSeparatorRule.class == clazz) {
