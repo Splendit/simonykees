@@ -10,6 +10,5 @@ package at.splendit.simonykees.core.rule.impl.standardLogger;
  */
 public enum SupportedLogger {
 	SLF4J,
-	LOGBACK,
 	LOG4J
 }

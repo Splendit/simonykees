@@ -74,9 +74,6 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 			if ((loggerType = project.findType(SLF4J_LOGGER)) != null) {
 				supportedLoger = SupportedLogger.SLF4J;
 				loggerQualifiedName = SLF4J_LOGGER;
-			} else if ((loggerType = project.findType(LOGBACK_LOGGER)) != null) {
-				supportedLoger = SupportedLogger.LOGBACK;
-				loggerQualifiedName = LOGBACK_LOGGER;
 			} else if ((loggerType = project.findType(LOG4J_LOGGER)) != null) {
 				supportedLoger = SupportedLogger.LOG4J;
 				loggerQualifiedName = LOG4J_LOGGER;
