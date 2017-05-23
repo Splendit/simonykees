@@ -66,7 +66,7 @@ public class RulesTestUtil {
 		return root.createPackageFragment("at.splendit.simonykees", true, null);
 	}
 
-	private static List<IClasspathEntry> getClassPathEntries(IPackageFragmentRoot root) throws Exception {
+	public static List<IClasspathEntry> getClassPathEntries(IPackageFragmentRoot root) throws Exception {
 		final List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 		final IClasspathEntry srcEntry = JavaCore.newSourceEntry(root.getPath(), EMPTY_PATHS, EMPTY_PATHS, null);
 		final IClasspathEntry rtJarEntry = JavaCore.newLibraryEntry(getPathToRtJar(), null, null);
@@ -157,7 +157,7 @@ public class RulesTestUtil {
 		return new Path(classPath.substring(start, end));
 	}
 
-	private static IPackageFragmentRoot addSourceContainer(IJavaProject javaProject, String containerName)
+	public static IPackageFragmentRoot addSourceContainer(IJavaProject javaProject, String containerName)
 			throws Exception {
 		IProject project = javaProject.getProject();
 		IFolder folder = project.getFolder(containerName);

@@ -4,10 +4,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -301,6 +305,14 @@ public final class SimonykeesUtil {
 			return null;
 		}
 
+	}
+	
+	public static boolean checkForSyntaxErrors(ICompilationUnit iCompilationUnit) {
+		try {
+			return IMarker.SEVERITY_ERROR == iCompilationUnit.getResource().findMaxProblemSeverity(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
+		} catch (CoreException e) {
+			return false;
+		}
 	}
 
 }
