@@ -44,6 +44,11 @@ public class RefactoringState {
 		this.workingCopy = workingCopy;
 	}
 
+	/**
+	 * File name with extension.
+	 * 
+	 * @return e.g.: Example.java
+	 */
 	public String getWorkingCopyName() {
 		return this.workingCopy.getElementName();
 	}
@@ -106,8 +111,8 @@ public class RefactoringState {
 				initialChanges.put(rule, documentChange);
 			}
 		} else {
-				logger.trace(NLS.bind(ExceptionMessages.RefactoringState_no_changes_found, rule.getName(),
-						workingCopy.getElementName()));
+			logger.trace(NLS.bind(ExceptionMessages.RefactoringState_no_changes_found, rule.getName(),
+					workingCopy.getElementName()));
 		}
 
 	}
@@ -197,8 +202,8 @@ public class RefactoringState {
 			this.workingCopy = original.getWorkingCopy(null);
 			changes.clear();
 		} catch (JavaModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_reset_working_copy,
+					workingCopy.getPath().toString(), e.getMessage()), e);
 		}
 	}
 }

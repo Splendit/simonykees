@@ -205,8 +205,10 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 
 				ICompilationUnit newSelection = (ICompilationUnit) event.getElement();
 				if (event.getChecked()) {
-					// remove from unselected and recalculate rules for this
-					// compilationUnit
+					/*
+					 * remove from unselected and recalculate rules for this
+					 * compilationUnit
+					 */
 					if (unselected.containsKey(newSelection.getElementName())) {
 						unselected.remove(newSelection.getElementName());
 					}
