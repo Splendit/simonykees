@@ -56,5 +56,22 @@ public class LambdaForEachIfWrapperToFilterRule {
 		intList.stream().filter(i -> i == 5).forEach(i -> {
 			System.out.println(i);
 		});
+		
+		intList.stream().forEach(i -> {
+			if(getRandomNuber() > 0) {
+				System.out.println(i);
+			}
+		});
+		
+		intList.stream().forEach(i -> {
+			int j;
+			if((j = getRandomNuber()) > 0) {
+				System.out.println(i + j);
+			}
+		});
+	}
+	
+	private int getRandomNuber() {
+		return 0;
 	}
 }
