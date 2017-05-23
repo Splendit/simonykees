@@ -81,4 +81,21 @@
             class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceInitializer">
       </initializer>
    </extension>
+ <extension point="org.eclipse.epp.logging.aeri.ide.servers">
+    <server id="at.splendit.jsparrow"
+        name="jSparrow"
+        description="Help improve jSparrow by sending error reports to us."
+        class="org.eclipse.epp.internal.logging.aeri.ide.server.mars.ServerConnection"
+        icon16="icons/jSparrow_active_icon_100.png"
+        icon32="icons/jSparrow_active_icon_100.png"> 
+
+    <link rel="provider"
+      title="jSparrow"
+      href="https://jsparrow.eu"/>
+
+        <link rel="discovery"
+              title="Discovery URL"
+              href="https://aer.ctrlflow.com/jsparrow/community/discovery"/>
+    </server>
+</extension>
 </plugin>
