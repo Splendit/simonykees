@@ -14,6 +14,7 @@ import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
+import at.splendit.simonykees.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
 import at.splendit.simonykees.core.rule.impl.MultiCatchRule;
 import at.splendit.simonykees.core.rule.impl.MultiVariableDeclarationLineRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
@@ -35,6 +36,7 @@ import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 import at.splendit.simonykees.core.visitor.DiamondOperatorASTVisitor;
 import at.splendit.simonykees.core.visitor.InefficientConstructorASTVisitor;
+import at.splendit.simonykees.core.visitor.LambdaForEachIfWrapperToFilterASTVisitor;
 import at.splendit.simonykees.core.visitor.MultiVariableDeclarationLineASTVisitor;
 import at.splendit.simonykees.core.visitor.OverrideAnnotationRuleASTVisitor;
 import at.splendit.simonykees.core.visitor.PrimitiveBoxedForStringASTVisitor;
@@ -99,6 +101,7 @@ public class RulesContainer {
 				new StringLiteralEqualityCheckRule(StringLiteralEqualityCheckASTVisitor.class),
 				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
 				new MultiVariableDeclarationLineRule(MultiVariableDeclarationLineASTVisitor.class),
+				new LambdaForEachIfWrapperToFilterRule(LambdaForEachIfWrapperToFilterASTVisitor.class),
 				new StatementLambdaToExpressionRule(StatementLambdaToExpressionASTVisitor.class),
 
 				/*
