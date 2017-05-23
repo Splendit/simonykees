@@ -22,6 +22,7 @@ import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.core.visitor.semiAutomatic.StandardLoggerASTVisitor;
 
 /**
  * TODO SIM-103 add class description
@@ -44,6 +45,11 @@ public class AllRulesTest extends AbstractRulesTest {
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
+		
+		StandardLoggerRule standardLoggerRule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+		standardLoggerRule.activateDefaultOptions();
+		rulesList.add(standardLoggerRule);
+		rulesList.addAll(RulesContainer.getAllRules());
 	}
 
 	/**
@@ -66,20 +72,18 @@ public class AllRulesTest extends AbstractRulesTest {
 		}
 		return data;
 	}
-
+	
 	@Test
+	public void testTransformation() throws Exception {
+		super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
+	}
+
+	/*@Test
 	public void testTransformation() throws Exception {
 		String expectedSource = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		String content = new String(Files.readAllBytes(preRule), StandardCharsets.UTF_8);
-
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules = RulesContainer.getAllRules().stream()
-				.map(rule -> {
-					if(rule instanceof StandardLoggerRule) {
-						((StandardLoggerRule) rule).activateDefaultOptions();
-					}
-					return rule;
-				}).collect(Collectors.toList());
-		String compilationUnitSource = processFile(fileName, content, allRules);
+		
+		String compilationUnitSource = processFile(fileName, content, rulesList);
 
 		// Replace the package for comparison
 		compilationUnitSource = StringUtils.replace(compilationUnitSource, RulesTestUtil.PRERULE_PACKAGE,
@@ -87,5 +91,5 @@ public class AllRulesTest extends AbstractRulesTest {
 
 		// TODO check if tabs and newlines make a difference
 		assertEquals(expectedSource, compilationUnitSource);
-	}
+	}*/
 }

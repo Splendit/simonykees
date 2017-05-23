@@ -31,7 +31,6 @@ import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
 import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
-import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
@@ -102,7 +101,6 @@ public class RulesContainer {
 				new OverrideAnnotationRule(OverrideAnnotationRuleASTVisitor.class),
 				new StringLiteralEqualityCheckRule(StringLiteralEqualityCheckASTVisitor.class),
 				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
-				new StandardLoggerRule(StandardLoggerASTVisitor.class),
 				new MultiVariableDeclarationLineRule(MultiVariableDeclarationLineASTVisitor.class),
 				new StatementLambdaToExpressionRule(StatementLambdaToExpressionASTVisitor.class),
 				new LambdaToMethodReferenceRule(LambdaToMethodReferenceASTVisitor.class),

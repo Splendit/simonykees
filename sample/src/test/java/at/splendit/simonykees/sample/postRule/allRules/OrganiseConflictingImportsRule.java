@@ -1,5 +1,8 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
+import java.lang.reflect.*;
+import java.math.BigDecimal;
+
 import at.splendit.simonykees.sample.utilities.NumberUtils;
 import at.splendit.simonykees.sample.utilities.StringUtils;
 
