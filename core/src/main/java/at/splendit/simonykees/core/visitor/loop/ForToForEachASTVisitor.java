@@ -100,9 +100,11 @@ public class ForToForEachASTVisitor extends AbstractAddImportASTVisitor {
 					generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
 				Block parentNode = ASTNodeUtil.getSpecificAncestor(node, Block.class);
 				if (parentNode == null) {
-					// No surrounding parent block found
-					// should not happen, because the Iterator has to be
-					// defined in an parent block.
+					/*
+					 * No surrounding parent block found should not happen,
+					 * because the Iterator has to be defined in an parent
+					 * block.
+					 */
 					return false;
 				}
 				LoopOptimizationASTVisior iteratorDefinitionAstVisior = new LoopOptimizationASTVisior(
@@ -278,7 +280,7 @@ public class ForToForEachASTVisitor extends AbstractAddImportASTVisitor {
 			ASTRewrite astRewrite = getAstRewrite();
 			ImportRewrite importRewrite = ImportRewrite.create(compilationUnit, true);
 			iteratorType = importRewrite.addImport(iteratorTypeBinding, astRewrite.getAST());
-			if(!iteratorTypeBinding.isMember()) {				
+			if (!iteratorTypeBinding.isMember()) {
 				String[] addedImports = importRewrite.getAddedImports();
 				for (String addedImport : addedImports) {
 					if (!addedImport.startsWith(JAVA_LANG_PACKAGE)) {
@@ -366,7 +368,7 @@ public class ForToForEachASTVisitor extends AbstractAddImportASTVisitor {
 		}
 		return parent;
 	}
-	
+
 	/**
 	 * Checks whether the new import points to a class in the same package or in
 	 * the same file as the compilation unit.

@@ -104,7 +104,7 @@ public class DiamondOperatorRule {
 
 	private String concatRawTypeList(List objects) {
 		objects.add(new Object());
-		Object val = objects.stream().map(o -> o.toString()).collect(Collectors.joining(", "));
+		Object val = objects.stream().map(Object::toString).collect(Collectors.joining(", "));
 		return val.toString();
 	}
 

@@ -25,10 +25,10 @@ public class StatementLambdaToExpressionRule {
 			return element;
 		});
 		list.stream().map(element -> element * 2);
-		list.forEach(element -> doSomething(element));
+		list.forEach(this::doSomething);
 		list.forEach(element -> elementString = element.toString());
 		list.forEach(element -> Integer.valueOf(1));
-		list.forEach(element -> doSomething(element));
+		list.forEach(this::doSomething);
 	}
 
 	private void doSomething(int element) {

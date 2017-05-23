@@ -232,6 +232,106 @@ public class TestForToForEachArrayIteratingIndexRule {
 
 		return sb.toString();
 	}
+	
+	public String assigningArrayAccess(String input) {
+		
+		String[] ms = {"", "", ""};
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = 0; i < ms.length; i = i + 1) {
+			ms[i] = "-";
+		}
+		
+		for (int j = 0; j < ms.length; j = j + 1) {
+			sb.append(ms[j]);
+		}
+
+		return sb.toString();
+	}
+	
+	public String cascadedLoopsSameIndexName(String input) {
+		
+		String[] ms = {"1", "2", "3"};
+		String[] ms2 = {"4", "5", "6"};
+		StringBuilder sb = new StringBuilder();
+		
+		for (int i = 0; i < ms.length; i = i + 1) {
+			sb.append(ms[i]);
+		}
+		
+		for (int i = 0; i < ms2.length; i = i + 1) {
+			sb.append(ms2[i]);
+		}
+
+		return sb.toString();
+	}
+	
+	public String confusingIteratingIndex(String input) {
+		
+		String[] ms = {"1", "2", "3"};
+		StringBuilder sb = new StringBuilder();
+		int i = 1;
+		for (int j = 0; i < ms.length; i = i + 1) {
+			sb.append(ms[i]);
+		}
+		
+		return sb.toString();
+	}
+	
+	public String confusingIteratingIndex2(String input) {
+		
+		String[] ms = {};
+		StringBuilder sb = new StringBuilder();
+		int j = 0;
+		if(ms.length == 0) {
+			for (int i = 0; i < ms.length; j++) {
+				sb.append(ms[i]);
+			}
+		}
+		
+		return sb.toString();
+	}
+	
+	public String confusingIteratingIndex3(String input) {
+		
+		String[] ms = {"1", "2", "3"};
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		for (int j = 0; i < ms.length; i = i + 1) {
+			sb.append(ms[i]);
+			sb.append(ms[j]);
+		}
+		
+		return sb.toString();
+	}
+	
+	public String confusingIteratingIndex4(String input) {
+		
+		String[] ms = {"1", "2", "3"};
+		StringBuilder sb = new StringBuilder();
+		int j = 0;
+		for (int i = 0; i < ms.length; j++) {
+			sb.append(ms[i]);
+			sb.append(ms[j]);
+			i++;
+		}
+		
+		return sb.toString();
+	}
+	
+	public String compoundCondition(String input) {
+		
+		String[] ms = {};
+		StringBuilder sb = new StringBuilder();
+		int j = 0;
+		if(ms.length == 0) {
+			for (int i = 0; i < ms.length || i == 2; i++) {
+				sb.append(ms[i]);
+			}
+		}
+		
+		return sb.toString();
+	}
 
 	/**
 	 * This collection is not subtype of {@code Iterable}.

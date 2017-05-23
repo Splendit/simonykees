@@ -92,28 +92,28 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 				if (ReservedNames.MI_Iterator.equals(nodeInitializer.getName().getFullyQualifiedName())
 						&& nodeInitializer.arguments().isEmpty() && null != nodeInitializer.getExpression()
 						&& nodeInitializer.getExpression() instanceof Name) {
-					
-					Expression iterableExpression =  nodeInitializer.getExpression();
+
+					Expression iterableExpression = nodeInitializer.getExpression();
 					ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
 
 					String iterableFullyQualifiedName = Iterable.class.getName();
 					// check if iterable object is compatible with java Iterable
 					boolean isIterable = ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
 							Collections.singletonList(iterableFullyQualifiedName));
-					
-					if(isIterable) {
+
+					if (isIterable) {
 						listName = (Name) iterableExpression;
 						return false;
 					}
 				}
 			}
 		}
-		
+
 		return true;
 	}
 
 	/**
-	 *  While Definition
+	 * While Definition
 	 */
 	@Override
 	public void endVisit(VariableDeclarationStatement node) {
@@ -124,7 +124,7 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 *  For Definition
+	 * For Definition
 	 */
 	@Override
 	public void endVisit(VariableDeclarationExpression node) {
@@ -180,8 +180,8 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		Type iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 
 		/*
-		 * iterator has no type-parameter therefore an optimization could not
-		 * be applied
+		 * iterator has no type-parameter therefore an optimization could not be
+		 * applied
 		 */
 		if (null == iteratorType) {
 			return;
