@@ -46,10 +46,10 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractASTRewrite
 			 */
 			ITypeBinding streamTypeBinding = methodInvocationNode.getExpression().resolveTypeBinding();
 
-			if (ClassRelationUtil.isContentOfTypes(streamTypeBinding.getErasure(),
+			if (streamTypeBinding != null && (ClassRelationUtil.isContentOfTypes(streamTypeBinding.getErasure(),
 					Collections.singletonList(STREAM_QUALIFIED_NAME))
 					|| ClassRelationUtil.isInheritingContentOfTypes(streamTypeBinding,
-							Collections.singletonList(STREAM_QUALIFIED_NAME))) {
+							Collections.singletonList(STREAM_QUALIFIED_NAME)))) {
 
 				// get arguments from forEach method, check for size and type
 				List<Expression> methodArgs = ASTNodeUtil.convertToTypedList(methodInvocationNode.arguments(),
