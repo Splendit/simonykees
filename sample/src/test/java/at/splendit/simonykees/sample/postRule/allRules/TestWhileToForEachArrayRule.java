@@ -1,0 +1,222 @@
+package at.splendit.simonykees.sample.postRule.allRules;
+
+@SuppressWarnings("unused")
+public class TestWhileToForEachArrayRule {
+
+	public String loopingOverLists(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(input);
+		for (String t : array) {
+			System.out.println(t);
+			sb.append(t);
+		}
+		return sb.toString();
+	}
+
+	public String nestedLoops(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(input);
+		for (String t : array) {
+			System.out.println(t);
+			sb.append(t);
+			for (String iterator : array) {
+				sb.append(iterator);
+			}
+		}
+		return sb.toString();
+	}
+
+	public String tripleNestedLoops(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(input);
+		for (String t : array) {
+			System.out.println(t);
+			sb.append(t);
+			for (String iterator : array) {
+				sb.append(iterator);
+				for (String iterator1 : array) {
+					sb.append(iterator1);
+					System.out.print(iterator1);
+				}
+			}
+		}
+
+		return sb.toString();
+	}
+
+	public String cascadedLoops(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(input);
+		String[] array2 = generateList(input);
+		for (String t : array) {
+			System.out.println(t);
+			sb.append(t);
+		}
+
+		for (String s : array2) {
+			System.out.println(s);
+			sb.append(s);
+		}
+
+		return sb.toString();
+	}
+
+	public String indexAccessedBeforeLoop(String input) {
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		i = 1;
+		String[] array = generateList(input);
+		i = 0;
+		while (i < array.length) {
+			String t = array[i];
+			System.out.println(t);
+			sb.append(t);
+			i++;
+		}
+		return sb.toString();
+	}
+
+	public String indexAccessedInsideLoop(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(input);
+		int i = 0;
+		while (i < array.length) {
+			String t = array[i];
+			System.out.println(t);
+			sb.append(t + i);
+			i++;
+		}
+		return sb.toString();
+	}
+
+	public String indexAccessedAfterLoop(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(input);
+		int i = 0;
+		while (i < array.length) {
+			String t = array[i];
+			System.out.println(t);
+			sb.append(t);
+			i++;
+		}
+		sb.append(i);
+		return sb.toString();
+	}
+
+	public String prefixIndexUpdate(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(input);
+		for (String t : array) {
+			System.out.println(t);
+			sb.append(t);
+		}
+		return sb.toString();
+	}
+
+	public String infixIndexUpdate(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(input);
+		for (String t : array) {
+			System.out.println(t);
+			sb.append(t);
+		}
+		return sb.toString();
+	}
+
+	public String assignmentIndexUpdate(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(input);
+		for (String t : array) {
+			System.out.println(t);
+			sb.append(t);
+		}
+		return sb.toString();
+	}
+
+	public String loopInIfBody(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(input);
+		int i = 0;
+		if (array.length > 0) {
+			while (i < array.length) {
+				String t = array[i];
+				System.out.println(t);
+				sb.append(t);
+				i += 1;
+			}
+		}
+		return sb.toString();
+	}
+
+	public String confusingIndexUpdate(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(input);
+		int i = 0;
+		int j = 0;
+		while (i < array.length) {
+			String t = array[i];
+			System.out.println(t);
+			sb.append(t);
+			i += 1;
+			j++;
+		}
+		return sb.toString();
+	}
+
+	public String incorrectIndexInitialization(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(input);
+		int i = 1;
+		int j = 0;
+		while (i < array.length) {
+			String t = array[i];
+			System.out.println(t);
+			sb.append(t);
+			j++;
+			i += 1;
+		}
+		return sb.toString();
+	}
+
+	public String incorrectIndexUpdate(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(input);
+		int i = 0;
+		int j = 0;
+		while (i < array.length) {
+			String t = array[i];
+			System.out.println(t);
+			sb.append(t);
+			j++;
+			i += 2;
+		}
+		return sb.toString();
+	}
+
+	public String incorrectIndexInfixUpdate(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(input);
+		int i = 0;
+		while (i < array.length) {
+			String t = array[i];
+			System.out.println(t);
+			sb.append(t);
+			i += 2;
+		}
+		return sb.toString();
+	}
+
+	public String confusingIteratorName(String iterator) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = generateList(iterator);
+		for (String iterator1 : array) {
+			System.out.println(iterator1);
+			sb.append(iterator1);
+		}
+		return sb.toString();
+	}
+
+	private String[] generateList(String input) {
+		return input.split(";"); //$NON-NLS-1$
+	}
+}
