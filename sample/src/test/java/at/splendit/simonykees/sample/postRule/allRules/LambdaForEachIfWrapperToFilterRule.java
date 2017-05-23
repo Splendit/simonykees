@@ -21,9 +21,9 @@ public class LambdaForEachIfWrapperToFilterRule {
 			System.out.println(s + s);
 		});
 
-		list.parallelStream().filter((s) -> "asdf".equals(s)).forEach((s) -> System.out.println(s));
+		list.parallelStream().filter((s) -> "asdf".equals(s)).forEach(System.out::println);
 
-		list.parallelStream().filter((s) -> "asdf".equals(s)).forEach((s) -> System.out.println(s));
+		list.parallelStream().filter((s) -> "asdf".equals(s)).forEach(System.out::println);
 
 		list.forEach(s -> {
 			if (s.length() > 3) {
@@ -37,13 +37,13 @@ public class LambdaForEachIfWrapperToFilterRule {
 			System.out.println(i);
 		});
 
-		intList.stream().filter((i) -> i == 5).forEach((i) -> System.out.println(i));
+		intList.stream().filter((i) -> i == 5).forEach(System.out::println);
 
-		booleanList.stream().filter((b) -> b).forEach((b) -> System.out.println(b));
+		booleanList.stream().filter((b) -> b).forEach(System.out::println);
 
-		booleanList.stream().filter((b) -> !b).forEach((b) -> System.out.println(b));
+		booleanList.stream().filter((b) -> !b).forEach(System.out::println);
 
-		intList.stream().filter(i -> i == 5).forEach(i -> System.out.println(i));
+		intList.stream().filter(i -> i == 5).forEach(System.out::println);
 
 		intList.stream().forEach(i -> {
 			if (getRandomNuber() > 0) {
