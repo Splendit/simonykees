@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -79,13 +80,15 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractASTRewrite
 
 								VariableDeclaration variableDeclaration = lambdaExpressionParams.get(0);
 								SimpleName paramName = variableDeclaration.getName();
-
+								
 								/*
+								 * an else statement must not be present and
 								 * the parameter passed to the forEach lambda
 								 * must be used for filtering in the containing
 								 * if statement
 								 */
-								if (this.isParameterUsedInExpression(paramName, ifStatementExpression)) {
+								if (isElseStatementNullOrEmpty(ifStatement.getElseStatement())
+										&& this.isParameterUsedInExpression(paramName, ifStatementExpression)) {
 
 									/*
 									 * create lambda expression for the filter()
@@ -201,5 +204,36 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractASTRewrite
 		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(parameter);
 		expression.accept(visitor);
 		return !visitor.getUsages().isEmpty();
+	}
+
+	/**
+	 * checks if the given else statement is null or empty, where empty means
+	 * either one empty statement or a block, which only contains empty
+	 * statements
+	 * 
+	 * @param elseStatement
+	 * @return true, if the else statement is null or empty, false otherwise
+	 */
+	private boolean isElseStatementNullOrEmpty(Statement elseStatement) {
+		if (elseStatement == null) {
+			return true;
+		} else {
+			if (elseStatement instanceof Block) {
+				Block elseStatementBlock = (Block) elseStatement;
+				List<Statement> statements = ASTNodeUtil.convertToTypedList(elseStatementBlock.statements(),
+						Statement.class);
+				boolean onlyEmptyStatementsInBlock = true;
+				for (Statement statement : statements) {
+					if (!(statement instanceof EmptyStatement)) {
+						onlyEmptyStatementsInBlock = false;
+						break;
+					}
+				}
+				return onlyEmptyStatementsInBlock;
+			} else if (elseStatement instanceof EmptyStatement) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
