@@ -21,7 +21,7 @@ import at.splendit.simonykees.i18n.ExceptionMessages;
  * capabilities to apply or undo {@link RefactoringRule}s, as well as storing
  * the corresponding {@link DocumentChange}s for each {@link RefactoringRule}.
  * 
- * @author Ludwig Werzowa
+ * @author Ludwig Werzowa, Andreja Sambolec
  * @since 1.2
  */
 public class RefactoringState {

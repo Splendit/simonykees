@@ -30,7 +30,7 @@ import at.splendit.simonykees.i18n.ExceptionMessages;
  * {@link IJavaElement}s and offers functionality to apply the first to the
  * latter.
  * 
- * @author Ludwig Werzowa
+ * @author Ludwig Werzowa, Andreja Sambolec
  * @since 1.2
  */
 public class RefactoringPipeline {
