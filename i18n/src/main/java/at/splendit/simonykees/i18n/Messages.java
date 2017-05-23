@@ -50,6 +50,8 @@ public class Messages extends NLS {
 	public static String ForToForEachRule_name;
 	public static String FunctionalInterfaceRule_description;
 	public static String FunctionalInterfaceRule_name;
+	public static String LambdaForEachIfWrapperToFilterRule_description;
+	public static String LambdaForEachIfWrapperToFilterRule_name;
 	public static String LicenseHelper_licenseProblem;
 	public static String LicenseManager_cannot_reach_licensing_provider_on_checkin;
 	public static String LicenseManager_cannot_reach_licensing_provider_on_prevalidation;
