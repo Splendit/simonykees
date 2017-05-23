@@ -102,11 +102,18 @@ public abstract class AbstractRefactorer {
 				 */
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(compilationUnits.size());
 				subMonitor.setTaskName(""); //$NON-NLS-1$
+				
+				List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 				for (ICompilationUnit compilationUnit : compilationUnits) {
 					subMonitor.subTask(compilationUnit.getElementName());
-					workingCopies.add(compilationUnit.getWorkingCopy(null));
-
+					if(SimonykeesUtil.checkForSyntaxErrors(compilationUnit)){
+						containingErrorList.add(compilationUnit);
+					}
+					else {
+						workingCopies.add(compilationUnit.getWorkingCopy(null));
+					}
+					
 					/*
 					 * If cancel is pressed on progress monitor, abort all and
 					 * return, else continue
@@ -116,6 +123,13 @@ public abstract class AbstractRefactorer {
 					} else {
 						subMonitor.worked(1);
 					}
+				}
+				
+				/**
+				 * if there are syntax errors within source files display it to the user
+				 */
+				if(!containingErrorList.isEmpty()) {
+					// TODO SIM-416 add the opening of the dialog and processing
 				}
 			}
 		} catch (JavaModelException e) {
