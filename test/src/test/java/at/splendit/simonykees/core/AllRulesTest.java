@@ -1,27 +1,20 @@
 package at.splendit.simonykees.core;
 
-import static org.junit.Assert.assertEquals;
-
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
-import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.semiAutomatic.StandardLoggerASTVisitor;
 
 /**
@@ -77,19 +70,4 @@ public class AllRulesTest extends AbstractRulesTest {
 	public void testTransformation() throws Exception {
 		super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
 	}
-
-	/*@Test
-	public void testTransformation() throws Exception {
-		String expectedSource = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
-		String content = new String(Files.readAllBytes(preRule), StandardCharsets.UTF_8);
-		
-		String compilationUnitSource = processFile(fileName, content, rulesList);
-
-		// Replace the package for comparison
-		compilationUnitSource = StringUtils.replace(compilationUnitSource, RulesTestUtil.PRERULE_PACKAGE,
-				POSTRULE_PACKAGE);
-
-		// TODO check if tabs and newlines make a difference
-		assertEquals(expectedSource, compilationUnitSource);
-	}*/
 }
