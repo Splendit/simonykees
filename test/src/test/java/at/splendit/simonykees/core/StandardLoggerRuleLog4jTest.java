@@ -35,7 +35,15 @@ public class StandardLoggerRuleLog4jTest extends AbstractRulesTest {
 	private Path preRule;
 	private Path postRule;
 
-	static {
+	public StandardLoggerRuleLog4jTest(String fileName, Path preRule, Path postRule) {
+		this.fileName = fileName;
+		this.preRule = preRule;
+		this.postRule = postRule;
+
+		StandardLoggerRule standardLoggerRule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+		standardLoggerRule.activateDefaultOptions();
+		rulesList.add(standardLoggerRule);
+		
 		try {
 			IJavaProject javaProject = RulesTestUtil.createJavaProject("allRulesTest", "bin");
 			IPackageFragmentRoot root = RulesTestUtil.addSourceContainer(javaProject, "/allRulesTestRoot");
@@ -49,16 +57,6 @@ public class StandardLoggerRuleLog4jTest extends AbstractRulesTest {
 			packageFragment = root.createPackageFragment("at.splendit.simonykees", true, null);
 		} catch (Exception e) {
 		}
-	}
-
-	public StandardLoggerRuleLog4jTest(String fileName, Path preRule, Path postRule) {
-		this.fileName = fileName;
-		this.preRule = preRule;
-		this.postRule = postRule;
-
-		StandardLoggerRule standardLoggerRule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
-		standardLoggerRule.activateDefaultOptions();
-		rulesList.add(standardLoggerRule);
 	}
 
 	@Parameters(name = "{index}: test file[{0}]")

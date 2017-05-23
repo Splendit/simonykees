@@ -31,7 +31,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 public abstract class AbstractRulesTest {
 
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
-	protected static IPackageFragment packageFragment = null;
+	protected IPackageFragment packageFragment = null;
 
 	public AbstractRulesTest() {
 		super();
