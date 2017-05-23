@@ -276,8 +276,8 @@ public class RefactoringPipeline {
 		subMonitor.setTaskName(""); //$NON-NLS-1$
 
 		for (RefactoringState refactoringState : refactoringStates) {
-			if (changedCompilationUnits.stream().anyMatch(
-					unit -> unit.getElementName().equals(refactoringState.getWorkingCopy().getElementName()))) {
+			if (changedCompilationUnits.stream()
+					.anyMatch(unit -> unit.getElementName().equals(refactoringState.getWorkingCopyName()))) {
 				refactoringState.resetWorkingCopy();
 			}
 		}
@@ -328,23 +328,20 @@ public class RefactoringPipeline {
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> currentRule) throws RuleException {
 		List<String> notWorkingRules = new ArrayList<>();
 
-		for (RefactoringState refactoringState : refactoringStates) {
-			if (newSelection.getElementName().equals(refactoringState.getWorkingCopy().getElementName())) {
-				refactoringState.resetWorkingCopy();
-			}
-		}
+		// get the correct RefactoringState
+		RefactoringState refactoringState = refactoringStates.stream()
+				.filter(s -> newSelection.getElementName().equals(s.getWorkingCopyName())).findFirst().get();
+
+		refactoringState.resetWorkingCopy();
 
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
 			try {
-				for (RefactoringState refactoringState : refactoringStates) {
-					if (newSelection.getElementName().equals(refactoringState.getWorkingCopy().getElementName())) {
-						if (refactoringRule.equals(currentRule)) {
-							refactoringState.removeRuleFromIgnoredRules(currentRule);
-						}
-						if (!refactoringState.getIgnoredRules().contains(refactoringRule)) {
-							refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, false);
-						}
-					}
+
+				if (refactoringRule.equals(currentRule)) {
+					refactoringState.removeRuleFromIgnoredRules(currentRule);
+				}
+				if (!refactoringState.getIgnoredRules().contains(refactoringRule)) {
+					refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, false);
 				}
 			} catch (JavaModelException | ReflectiveOperationException e) {
 				logger.error(e.getMessage(), e);
