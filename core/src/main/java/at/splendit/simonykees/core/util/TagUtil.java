@@ -35,12 +35,24 @@ import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
 import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 
+/**
+ * Tags for our rules.
+ * <p>
+ * Customers can filter rules by tags.
+ * 
+ * @author Martin Huter
+ * @since 1.2
+ */
 public class TagUtil {
 
 	private TagUtil() {
 
 	}
 
+	/*
+	 * IMPORTANT: Tags have to match the labels on the individual rule sites in
+	 * Confluence: https://confluence.splendit.loc/display/SIM/Implemented+Rules
+	 */
 	@SuppressWarnings({ "rawtypes", "nls" })
 	public static List<Tag> getTagsForRule(Class<? extends RefactoringRule> clazz) {
 
@@ -63,7 +75,7 @@ public class TagUtil {
 		} else if (InefficientConstructorRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE);
 		} else if (LambdaForEachIfWrapperToFilterRule.class == clazz) {
-			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA);
+			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
 		} else if (LambdaToMethodReferenceRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA);
 		} else if (MultiCatchRule.class == clazz) {
@@ -91,7 +103,7 @@ public class TagUtil {
 		} else if (StringFormatLineSeparatorRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.STRING_MANIPULATION);
 		} else if (StringLiteralEqualityCheckRule.class == clazz) {
-			return Arrays.asList(Tag.JAVA_1_1);
+			return Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION);
 		} else if (StringUtilsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION);
 		} else if (TryWithResourceRule.class == clazz) {
@@ -99,7 +111,7 @@ public class TagUtil {
 		} else if (WhileToForEachRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.LOOP, Tag.OLD_LANGUAGE_CONSTRUCTS);
 		} else if (StandardLoggerRule.class == clazz) {
-			return Arrays.asList(Tag.JAVA_1_1);
+			return Arrays.asList(Tag.JAVA_1_1, Tag.LOGGING);
 		}
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["
