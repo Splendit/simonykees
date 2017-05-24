@@ -1,6 +1,5 @@
 package at.splendit.simonykees.core.visitor.loop.whileToForEach;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -17,6 +16,8 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.visitor.loop.LoopIteratingIndexASTVisitor;
 
 /**
+ * A visitor for investigating the replace precondition of a while loop with an
+ * enhanced for loop.
  * 
  * @author Ardit Ymeri
  * @since 1.2
@@ -33,14 +34,13 @@ abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVi
 	private boolean insideLoop = false;
 	private boolean beforeLoop = true;
 	private boolean afterLoop = false;
-	private List<ASTNode> nodesToBeRemoved;
 	private Block parentBlock;
 	private SimpleName iteratingIndexName;
 
 	private WhileStatement whileStatement;
 	private VariableDeclarationFragment indexDeclaration;
 	private ExpressionStatement indexUpdater;
-	private List<ASTNode> iteratingObjectInitializers;
+
 	private boolean prequisite = false;
 
 	protected WhileLoopIteratingIndexASTVisitor(SimpleName iteratingIndexName, SimpleName iterableNode,
@@ -49,8 +49,7 @@ abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVi
 		this.whileStatement = whileStatement;
 		this.iteratingIndexName = iteratingIndexName;
 		this.parentBlock = parentBlock;
-		this.nodesToBeRemoved = new ArrayList<>();
-		this.iteratingObjectInitializers = new ArrayList<>();
+
 
 		// checking loop updater inside the body
 		Statement loopBody = whileStatement.getBody();
@@ -63,7 +62,7 @@ abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVi
 					Expression expression = ((ExpressionStatement) lastStatement).getExpression();
 					if (isValidIncrementExpression(expression, iteratingIndexName)) {
 						indexUpdater = lastBodyExpressionStatement;
-						nodesToBeRemoved.add(lastStatement);
+						markAsToBeRemoved(lastStatement);
 					}
 				}
 			}
@@ -141,6 +140,7 @@ abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVi
 		return isValidIncrementExpression(indexUpdater.getExpression(), iteratingIndexName);
 	}
 
+	@Override
 	public boolean checkTransformPrecondition() {
 		return prequisite && !hasEmptyStatement && !indexReferencedInsideLoop && !indexReferencedOutsideLoop
 				&& isIndexInitToZero() && isIndexIncremented();
@@ -149,23 +149,6 @@ abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVi
 	@Override
 	protected void setHasEmptyStatement() {
 		this.hasEmptyStatement = true;
-	}
-
-	public List<ASTNode> getNodesToBeRemoved() {
-		return this.nodesToBeRemoved;
-	}
-
-	public List<ASTNode> getIteratingObjectInitializers() {
-		return iteratingObjectInitializers;
-	}
-
-	@Override
-	protected void addIteratingObjectInitializer(ASTNode node) {
-		iteratingObjectInitializers.add(node);
-	}
-
-	protected void markAsToBeRemoved(ASTNode node) {
-		nodesToBeRemoved.add(node);
 	}
 
 	@Override

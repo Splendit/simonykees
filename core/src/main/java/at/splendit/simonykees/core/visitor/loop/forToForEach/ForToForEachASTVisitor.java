@@ -1,25 +1,20 @@
 package at.splendit.simonykees.core.visitor.loop.forToForEach;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Type;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
-import at.splendit.simonykees.core.visitor.loop.LoopIteratingIndexASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.IteratingIndexVisitorFactory;
 import at.splendit.simonykees.core.visitor.loop.LoopOptimizationASTVisior;
 import at.splendit.simonykees.core.visitor.loop.LoopToForEachASTVisitor;
 
@@ -29,7 +24,7 @@ import at.splendit.simonykees.core.visitor.loop.LoopToForEachASTVisitor;
  * @author Martin Huter, Ardit Ymeri
  * @since 0.9.2
  */
-public class ForToForEachASTVisitor extends LoopToForEachASTVisitor {
+public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement> {
 
 	private Map<ForStatement, LoopOptimizationASTVisior> replaceInformationASTVisitorList;
 	private Map<String, Integer> multipleIteratorUse;
@@ -82,71 +77,21 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor {
 
 				if (ASTNode.METHOD_INVOCATION == rhs.getNodeType()) {
 					// iterating over Lists
+					IteratingIndexVisitorFactory<ForStatement> visitorCreator = ForLoopOverListsASTVisitor::new;
 					MethodInvocation condition = (MethodInvocation) rhs;
-					Expression conditionExpression = condition.getExpression();
-					if (conditionExpression != null && Expression.SIMPLE_NAME == conditionExpression.getNodeType()) {
-						SimpleName iterableNode = (SimpleName) conditionExpression;
-						ITypeBinding iterableTypeBinding = iterableNode.resolveTypeBinding();
-
-						/*
-						 * ...and the right hand side of the infix expression is
-						 * an invocation of List::size in the iterable object
-						 */
-						if (ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
-								Collections.singletonList(ITERABLE_FULLY_QUALIFIED_NAME))
-								&& StringUtils.equals(SIZE, condition.getName().getIdentifier())
-								&& condition.arguments().isEmpty()) {
-
-							/*
-							 * Initiate a visitor for investigating the
-							 * replacement precondition and gathering the
-							 * replacement information
-							 */
-							Block outerBlock = ASTNodeUtil.getSpecificAncestor(node, Block.class);
-							LoopIteratingIndexASTVisitor indexVisitor = new ForLoopOverListsASTVisitor(index,
-									iterableNode, node, outerBlock);
-							outerBlock.accept(indexVisitor);
-
-							if (indexVisitor.checkTransformPrecondition()) {
-								Type iteratorType = findIteratorType(iterableTypeBinding);
-								if (iteratorType != null) {
-									replaceWithEnhancedFor(node, node.getBody(), iterableNode, indexVisitor, iteratorType);
-								}
-							}
-						}
-					}
+					analyzeLoopOverList(node, node.getBody(), condition, index, visitorCreator);
 
 				} else if (ASTNode.QUALIFIED_NAME == rhs.getNodeType()) {
 					// iterating over arrays
+					IteratingIndexVisitorFactory<ForStatement> visitorCreator = ForLoopOverArraysASTVisitor::new;
 					QualifiedName condition = (QualifiedName) rhs;
-					Name qualifier = condition.getQualifier();
-					SimpleName name = condition.getName();
-
-					if (LENGTH.equals(name.getIdentifier()) && qualifier.isSimpleName()) {
-						SimpleName iterableNode = (SimpleName) qualifier;
-						ITypeBinding iterableTypeBinding = qualifier.resolveTypeBinding();
-						if (iterableTypeBinding != null && iterableTypeBinding.isArray()) {
-
-							Block outerBlock = ASTNodeUtil.getSpecificAncestor(node, Block.class);
-							LoopIteratingIndexASTVisitor indexVisitor = new ForLoopOverArraysASTVisitor(index,
-									iterableNode, node, outerBlock);
-							outerBlock.accept(indexVisitor);
-
-							if (indexVisitor.checkTransformPrecondition()) {
-								Type iteratorType = findIteratorType(iterableTypeBinding);
-								if (iteratorType != null) {
-									replaceWithEnhancedFor(node, node.getBody(), iterableNode, indexVisitor, iteratorType);
-								}
-							}
-
-						}
-					}
+					analyzeLoopOverArray(node, node.getBody(), condition, index, visitorCreator);
 				}
 			}
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void endVisit(ForStatement node) {
 		// Do the replacement
@@ -162,6 +107,5 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor {
 
 		clearTempItroducedNames(node);
 	}
-
 
 }

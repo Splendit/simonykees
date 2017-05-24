@@ -25,7 +25,8 @@ class ForLoopOverArraysASTVisitor extends ForLoopIteratingIndexASTVisitor {
 
 	@Override
 	public boolean visit(SimpleName simpleName) {
-		return visitIndexOfArrayAccess(simpleName);
+		visitIndexOfArrayAccess(simpleName);
+		return true;
 	}
 
 }

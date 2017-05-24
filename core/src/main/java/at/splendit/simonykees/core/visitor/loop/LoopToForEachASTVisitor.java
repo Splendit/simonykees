@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.visitor.loop;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -8,35 +9,47 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractAddImportASTVisitor;
 import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
+ * A superclass of the visitors converting a loop ({@link ForStatement} or
+ * {@link WhileStatement}) to a {@link EnhancedForStatement}.
  * 
  * @author Ardit Ymeri
  * @since 1.2
  *
+ * @param <T>
+ *            type of the target loop statement, expected to be either a
+ *            ({@link ForStatement} or a {@link WhileStatement}).
  */
-public abstract class LoopToForEachASTVisitor extends AbstractAddImportASTVisitor {
+public abstract class LoopToForEachASTVisitor<T extends Statement> extends AbstractAddImportASTVisitor {
 
 	protected static final String ITERATOR_FULLY_QUALLIFIED_NAME = java.util.Iterator.class.getName();
 	protected static final String ITERABLE_FULLY_QUALIFIED_NAME = java.lang.Iterable.class.getName();
@@ -45,21 +58,21 @@ public abstract class LoopToForEachASTVisitor extends AbstractAddImportASTVisito
 	protected static final String DEFAULT_ITERATOR_NAME = "iterator"; //$NON-NLS-1$
 	protected static final String KEY_SEPARATOR = "->"; //$NON-NLS-1$
 	protected static final String DOT = "."; //$NON-NLS-1$
-	
+
 	private CompilationUnit compilationUnit;
 	private Map<String, String> tempIntroducedNames;
 	private Set<String> newImports = new HashSet<>();
-	
+
 	protected LoopToForEachASTVisitor() {
 		this.tempIntroducedNames = new HashMap<>();
 	}
-	
+
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
 		return true;
 	}
-	
+
 	@Override
 	public void endVisit(CompilationUnit cu) {
 		PackageDeclaration cuPackage = cu.getPackage();
@@ -74,7 +87,7 @@ public abstract class LoopToForEachASTVisitor extends AbstractAddImportASTVisito
 		super.addImports.addAll(toBeAdded);
 		super.endVisit(cu);
 	}
-	
+
 	/**
 	 * Finds the {@link Type} of the new iterator object from the type of the
 	 * iterable object. If the type is a wild card then gets its upper bound.
@@ -105,7 +118,7 @@ public abstract class LoopToForEachASTVisitor extends AbstractAddImportASTVisito
 			ASTRewrite astRewrite = getAstRewrite();
 			ImportRewrite importRewrite = ImportRewrite.create(compilationUnit, true);
 			iteratorType = importRewrite.addImport(iteratorTypeBinding, astRewrite.getAST());
-			if(!iteratorTypeBinding.isMember()) {				
+			if (!iteratorTypeBinding.isMember()) {
 				String[] addedImports = importRewrite.getAddedImports();
 				for (String addedImport : addedImports) {
 					if (!addedImport.startsWith(JAVA_LANG_PACKAGE)) {
@@ -117,7 +130,7 @@ public abstract class LoopToForEachASTVisitor extends AbstractAddImportASTVisito
 
 		return iteratorType;
 	}
-	
+
 	/**
 	 * Generates a unique name for the iterator of the enhanced for loop, by
 	 * adding a suffix to the given preferred name if there is another variable
@@ -166,7 +179,7 @@ public abstract class LoopToForEachASTVisitor extends AbstractAddImportASTVisito
 
 		return nameMap;
 	}
-	
+
 	/**
 	 * Finds the scope where the statement belongs to. A scope is either the
 	 * body of:
@@ -193,13 +206,13 @@ public abstract class LoopToForEachASTVisitor extends AbstractAddImportASTVisito
 		}
 		return parent;
 	}
-	
+
 	protected void storeTempName(Statement node, String newIteratorIdentifier) {
 		String key = generateTempIteratorKey(node);
 		tempIntroducedNames.put(key, newIteratorIdentifier);
 
 	}
-	
+
 	/**
 	 * Checks whether the new import points to a class in the same package or in
 	 * the same file as the compilation unit.
@@ -232,7 +245,24 @@ public abstract class LoopToForEachASTVisitor extends AbstractAddImportASTVisito
 
 		return isInSamePackage;
 	}
-	
+
+	/**
+	 * Performs the replacements of a loop (either {@link ForStatement} or
+	 * {@link WhileStatement}) with an {@link EnhancedForStatement}. Removes the
+	 * redundant nodes.
+	 * 
+	 * @param loop
+	 *            a node representing the loop to be replaced
+	 * @param loopBody
+	 *            body of the loop to be replaced
+	 * @param iterableNode
+	 *            the node representing the object that the loops iterates
+	 *            through
+	 * @param indexVisitor
+	 *            a node representing the iterating index
+	 * @param iteratorType
+	 *            the type binding of the elements of the iterable object.
+	 */
 	protected void replaceWithEnhancedFor(Statement loop, Statement loopBody, SimpleName iterableNode,
 			LoopIteratingIndexASTVisitor indexVisitor, Type iteratorType) {
 		/*
@@ -241,7 +271,7 @@ public abstract class LoopToForEachASTVisitor extends AbstractAddImportASTVisito
 		List<ASTNode> toBeReplaced = indexVisitor.getIteratingObjectInitializers();
 		List<ASTNode> toBeRemoved = indexVisitor.getNodesToBeRemoved();
 		SimpleName preferredIteratorName = indexVisitor.getIteratorName();
-		
+
 		// generate a safe iterator name
 		Map<String, Boolean> nameMap = generateNewIteratorName(preferredIteratorName, loopBody);
 		String newIteratorIdentifier = nameMap.keySet().iterator().next();
@@ -285,10 +315,120 @@ public abstract class LoopToForEachASTVisitor extends AbstractAddImportASTVisito
 	private String generateTempIteratorKey(Statement node) {
 		return node.getStartPosition() + KEY_SEPARATOR + node.getLength();
 	}
-	
+
 	protected void clearTempItroducedNames(Statement node) {
 		this.tempIntroducedNames.remove(generateTempIteratorKey(node));
-		
+
 	}
-	
+
+	/**
+	 * Analyzes a loop over arrays and replaces it with an
+	 * {@link EnhancedForStatement} if possible. Supports while loops and for
+	 * loop using an iterating index.
+	 * 
+	 * @param loop
+	 *            a node representing the whole loop.
+	 * @param body
+	 *            a node representing the body of the loop
+	 * @param condition
+	 *            a qualified name accessing the length property of an array
+	 * @param index
+	 *            a simple name representing the iterating index
+	 * @param factory
+	 *            a pointer to the corresponding helper visitor constructor
+	 */
+	protected void analyzeLoopOverArray(T loop, Statement body, QualifiedName condition, SimpleName index,
+			IteratingIndexVisitorFactory<T> factory) {
+
+		Name qualifier = condition.getQualifier();
+		SimpleName name = condition.getName();
+
+		if (LENGTH.equals(name.getIdentifier()) && qualifier.isSimpleName()) {
+			SimpleName iterableNode = (SimpleName) qualifier;
+			ITypeBinding iterableTypeBinding = qualifier.resolveTypeBinding();
+			if (iterableTypeBinding != null && iterableTypeBinding.isArray()) {
+
+				Block outerBlock = ASTNodeUtil.getSpecificAncestor(loop, Block.class);
+				LoopIteratingIndexASTVisitor indexVisitor = createIteratingIndexVisitor(index, iterableNode, loop,
+						outerBlock, factory);
+				outerBlock.accept(indexVisitor);
+
+				if (indexVisitor.checkTransformPrecondition()) {
+					Type iteratorType = findIteratorType(iterableTypeBinding);
+					if (iteratorType != null) {
+						replaceWithEnhancedFor(loop, body, iterableNode, indexVisitor, iteratorType);
+					}
+				}
+
+			}
+		}
+	}
+
+	/**
+	 * Analyzes a loop over a {@link List} and replaces it with an
+	 * {@link EnhancedForStatement} if possible. Supports while loops and for
+	 * loop using an iterating index.
+	 * 
+	 * @param loop
+	 *            a node representing the whole loop.
+	 * @param body
+	 *            a node representing the body of the loop
+	 * @param condition
+	 *            the condition expression of the loop
+	 * @param index
+	 *            a simple name representing the iterating index
+	 * @param factory
+	 *            a pointer to the corresponding helper visitor constructor
+	 */
+	protected void analyzeLoopOverList(T loop, Statement body, MethodInvocation condition, SimpleName index,
+			IteratingIndexVisitorFactory<T> factory) {
+
+		Expression conditionExpression = condition.getExpression();
+		if (conditionExpression != null && Expression.SIMPLE_NAME == conditionExpression.getNodeType()) {
+			SimpleName iterableNode = (SimpleName) conditionExpression;
+			ITypeBinding iterableTypeBinding = iterableNode.resolveTypeBinding();
+
+			/*
+			 * ...and the right hand side of the infix expression is an
+			 * invocation of List::size in the iterable object
+			 */
+			if (ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
+					Collections.singletonList(ITERABLE_FULLY_QUALIFIED_NAME))
+					&& StringUtils.equals(SIZE, condition.getName().getIdentifier())
+					&& condition.arguments().isEmpty()) {
+
+				/*
+				 * Initiate a visitor for investigating the replacement
+				 * precondition and gathering the replacement information
+				 */
+				Block outerBlock = ASTNodeUtil.getSpecificAncestor(loop, Block.class);
+				LoopIteratingIndexASTVisitor indexVisitor = createIteratingIndexVisitor(index, iterableNode, loop,
+						outerBlock, factory);
+				outerBlock.accept(indexVisitor);
+
+				if (indexVisitor.checkTransformPrecondition()) {
+					Type iteratorType = findIteratorType(iterableTypeBinding);
+					if (iteratorType != null) {
+						replaceWithEnhancedFor(loop, body, iterableNode, indexVisitor, iteratorType);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Makes use of {@link IteratingIndexVisitorFactory} to construct an instance of {@link LoopIteratingIndexASTVisitor}.
+	 * 
+	 * @param index a simple name representing the iterating index of the loop
+	 * @param iterable a simple name representing the object that the loop iterates through
+	 * @param node a node representing the whole loop
+	 * @param outerBlock the outer block of the loop
+	 * @param factory a pointer to the constructor of a {@link LoopIteratingIndexASTVisitor}
+	 * 
+	 * @return an instance of {@link LoopIteratingIndexASTVisitor}
+	 */
+	private LoopIteratingIndexASTVisitor createIteratingIndexVisitor(SimpleName index, SimpleName iterable, T node,
+			Block outerBlock, IteratingIndexVisitorFactory<T> factory) {
+		return factory.create(index, iterable, node, outerBlock);
+	}
 }

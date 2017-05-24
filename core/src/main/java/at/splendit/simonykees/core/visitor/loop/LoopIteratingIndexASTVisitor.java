@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.visitor.loop;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -7,7 +8,9 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -16,9 +19,18 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.WhileStatement;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 
+/**
+ * A super class of the visitors that analyzes a loop (@link {@link ForStatement} or {@link WhileStatement})
+ * whether it can be transformed to an {@link EnhancedForStatement} or not.
+ * 
+ * @author Ardit Ymeri
+ * @since 1.2
+ *
+ */
 public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	
 	protected static final String ONE = "1"; //$NON-NLS-1$
@@ -28,9 +40,13 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	private SimpleName iterableName;
 	protected SimpleName newIteratorName;
 	protected VariableDeclarationFragment preferredNameFragment;
+	private List<ASTNode> nodesToBeRemoved;
+	private List<ASTNode> iteratingObjectInitializers;
 	
 	protected LoopIteratingIndexASTVisitor(SimpleName iterableNode) {
 		this.iterableName = iterableNode;
+		this.nodesToBeRemoved = new ArrayList<>();
+		this.iteratingObjectInitializers = new ArrayList<>();
 	}
 
 	/**
@@ -65,6 +81,22 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	
 	public SimpleName getIteratorName() {
 		return this.newIteratorName;
+	}
+	
+	public List<ASTNode> getNodesToBeRemoved() {
+		return this.nodesToBeRemoved;
+	}
+	
+	protected void markAsToBeRemoved(ASTNode node) {
+		nodesToBeRemoved.add(node);
+	}
+	
+	public List<ASTNode> getIteratingObjectInitializers() {
+		return iteratingObjectInitializers;
+	}
+
+	protected void addIteratingObjectInitializer(ASTNode node) {
+		iteratingObjectInitializers.add(node);
 	}
 
 	public VariableDeclarationFragment getPreferredNameFragment() {
@@ -193,7 +225,8 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	
 	/**
 	 * Checks whether the given instance of a {@link SimpleName} is used as an
-	 * index for accessing an element of the given iterableName.
+	 * index for accessing an element of the given iterableName. Furthermore, checks
+	 * whether the array access occurs in the left hand side of an assignment.
 	 * 
 	 * @param simpleName
 	 *            simple name to be checked.
@@ -217,9 +250,16 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 		return replacableAccess;
 	}
 	
-	protected boolean visitIndexOfArrayAccess(SimpleName simpleName) {
+	/**
+	 * Analyzes the occurrences of the iterating index of a loop. Checks whether 
+	 * the iterating index is referenced outside the loop and whether it is 
+	 * used only as an index of an array access. 
+	 * 
+	 * @param simpleName name of the iterating index
+	 */
+	protected void visitIndexOfArrayAccess(SimpleName simpleName) {
 		if (!isNameOfIteratingIndex(simpleName)) {
-			return true;
+			return;
 		}
 
 		if (isBeforeLoop()) {
@@ -245,13 +285,19 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 			// the iterating index is referenced after the loop
 			setIndexReferencedOutsideLoop();
 		}
-
-		return true;
 	}
 	
-	protected boolean visitIndexOfIterableGet(SimpleName simpleName) {
+	/**
+	 * Analyzes the occurrences of the iterating index of a loop. Checks whether 
+	 * the iterating index is referenced outside the loop and whether it is 
+	 * only used as an index for getting an element of the iterable object {@link #iterableName}
+	 * i.e. it is only used as a parameter in the invocation of {@link List#get(int)} . 
+	 * 
+	 * @param simpleName name of the iterating index
+	 */
+	protected void visitIndexOfIterableGet(SimpleName simpleName) {
 		if(!isNameOfIteratingIndex(simpleName)) {
-			return true;
+			return;
 		}
 
 		ASTNode parent = simpleName.getParent();
@@ -296,8 +342,6 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 		} else if (isAfterLoop()) {
 			setIndexReferencedOutsideLoop();
 		}
-
-		return true;
 	}
 	
 	protected abstract boolean isNameOfIteratingIndex(SimpleName simpleName);
@@ -312,17 +356,11 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	
 	protected abstract void analyseBeforeLoopOccurrence(SimpleName simpleName);
 	
-	protected abstract void addIteratingObjectInitializer(ASTNode astNode);
-	
 	protected abstract void setIndexReferencedInsideLoop();
 	
 	protected abstract void setIndexReferencedOutsideLoop();
 	
 	protected abstract void setHasEmptyStatement();
-	
-	protected abstract List<ASTNode> getIteratingObjectInitializers();
-	
-	protected abstract List<ASTNode> getNodesToBeRemoved();
 	
 	public abstract boolean checkTransformPrecondition();
 

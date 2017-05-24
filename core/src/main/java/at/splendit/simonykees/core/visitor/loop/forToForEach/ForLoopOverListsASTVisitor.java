@@ -24,6 +24,7 @@ class ForLoopOverListsASTVisitor extends ForLoopIteratingIndexASTVisitor {
 
 	@Override
 	public boolean visit(SimpleName simpleName) {
-		return visitIndexOfIterableGet(simpleName);
+		visitIndexOfIterableGet(simpleName);
+		return true;
 	}
 }

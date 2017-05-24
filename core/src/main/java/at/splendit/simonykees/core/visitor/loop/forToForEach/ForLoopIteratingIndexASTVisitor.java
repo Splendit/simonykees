@@ -1,6 +1,5 @@
 package at.splendit.simonykees.core.visitor.loop.forToForEach;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +39,6 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 	private boolean insideLoop = false;
 	private boolean beforeLoop = true;
 	private boolean afterLoop = false;
-	private List<ASTNode> nodesToBeRemoved;
 	private Block parentBlock;
 	private SimpleName iteratingIndexName;
 	
@@ -50,7 +48,6 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 	private Map<String, ASTNode> indexUpdater;
 	private boolean multipleLoopInits = false;
 	private boolean multipleLoopUpdaters = false;
-	private List<ASTNode> iteratingObjectInitializers;
 	private boolean prequisite = false;
 	private boolean indexDeclaredInInitializer = false;
 
@@ -58,10 +55,8 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 			ForStatement forStatement, Block scopeBlock) {
 		super(iterableName);
 		this.forStatement = forStatement;
-		this.iteratingObjectInitializers = new ArrayList<>();
 		this.indexInitializer = new HashMap<>();
 		this.indexUpdater = new HashMap<>();
-		this.nodesToBeRemoved = new ArrayList<>();
 		this.parentBlock = scopeBlock;
 		this.iteratingIndexName = iteratingIndexName;
 
@@ -104,7 +99,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 					Expression expression = ((ExpressionStatement) lastStatement).getExpression();
 					if (isValidIncrementExpression(expression, iteratingIndexName)) {
 						indexUpdater.put(INTERNAL_INDEX_UPDATER, lastStatement);
-						nodesToBeRemoved.add(lastStatement);
+						markAsToBeRemoved(lastStatement);
 					}
 				}
 			}
@@ -260,23 +255,6 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 	protected void setIndexReferencedInsideLoop() {
 		this.indexReferencedInsideLoop = true;
 	}
-
-	public List<ASTNode> getNodesToBeRemoved() {
-		return this.nodesToBeRemoved;
-	}
-
-	public List<ASTNode> getIteratingObjectInitializers() {
-		return iteratingObjectInitializers;
-	}
-	
-	@Override
-	protected void addIteratingObjectInitializer(ASTNode node) {
-		iteratingObjectInitializers.add(node);
-	}
-
-	protected void markAsToBeRemoved(ASTNode node) {
-		nodesToBeRemoved.add(node);
-	}
 	
 	@Override
 	protected boolean isBeforeLoop() {
@@ -296,10 +274,6 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 	@Override
 	protected void setIndexReferencedOutsideLoop() {
 		this.indexReferencedOutsideLoop = true;
-	}
-
-	protected Block getForStatementParent() {
-		return this.parentBlock;
 	}
 
 	/**
