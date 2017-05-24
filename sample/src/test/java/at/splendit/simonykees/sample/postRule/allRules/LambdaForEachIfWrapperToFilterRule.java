@@ -3,6 +3,9 @@ package at.splendit.simonykees.sample.postRule.allRules;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 
  * @author Matthias Webhofer
@@ -11,23 +14,24 @@ import java.util.List;
 @SuppressWarnings({ "nls" })
 public class LambdaForEachIfWrapperToFilterRule {
 
+	private static final Logger logger = LoggerFactory.getLogger(LambdaForEachIfWrapperToFilterRule.class);
 	public List<String> list = Arrays.asList("asdf", "jkl", "yxcv", "bnm,");
 	public List<Integer> intList = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 0);
 	public List<Boolean> booleanList = Arrays.asList(true, false, true, true, false);
 
 	public void doSomething() {
 		list.stream().filter((s) -> s.length() > 3).forEach((s) -> {
-			System.out.println(s);
-			System.out.println(s + s);
+			logger.info(s);
+			logger.info(s + s);
 		});
 
-		list.parallelStream().filter((s) -> "asdf".equals(s)).forEach(System.out::println);
+		list.parallelStream().filter((s) -> "asdf".equals(s)).forEach(logger::info);
 
-		list.parallelStream().filter((s) -> "asdf".equals(s)).forEach(System.out::println);
+		list.parallelStream().filter((s) -> "asdf".equals(s)).forEach(logger::info);
 
 		list.forEach(s -> {
 			if (s.length() > 3) {
-				System.out.println(s);
+				logger.info(s);
 			}
 		});
 
