@@ -145,7 +145,6 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		return this.supportedLoger;
 	}
 
-
 	public String getAvailableQualifiedLoggerName() {
 		return loggerQualifiedName;
 	}
