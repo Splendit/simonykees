@@ -11,6 +11,7 @@ import at.splendit.simonykees.core.rule.impl.BracketsToControlRule;
 import at.splendit.simonykees.core.rule.impl.CodeFormatterRule;
 import at.splendit.simonykees.core.rule.impl.CollectionRemoveAllRule;
 import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
+import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamForEachRule;
 import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
@@ -52,6 +53,8 @@ public class TagUtil {
 			return Arrays.asList(Tag.JAVA_1_2, Tag.OLD_LANGUAGE_CONSTRUCTS);
 		} else if (DiamondOperatorRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS);
+		} else if (EnhancedForLoopToStreamForEachRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
 		} else if (FieldNameConventionRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_0_9, Tag.READABILITY);
 		} else if (ForToForEachRule.class == clazz) {
