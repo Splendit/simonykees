@@ -22,9 +22,8 @@ import at.splendit.simonykees.i18n.Messages;
  * loggers is in the classpath of the project. The supported loggers are:
  * 
  * <ul>
- * <li>{@value #SLF4J_LOGGER}</li>
- * <li>{@value #LOGBACK_LOGGER}</li>
- * <li>{@value #LOG4J_LOGGER}</li>
+ * <li>{@value StandardLoggerConstants#SLF4J_LOGGER}</li>
+ * <li>{@value StandardLoggerConstants#LOG4J_LOGGER}</li>
  * </ul>
  * 
  * If none of the supported loggers is in the classpath, then the rule cannot be
@@ -69,12 +68,12 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
 		try {
-			if (project.findType(SLF4J_LOGGER) != null) {
+			if (project.findType(StandardLoggerConstants.SLF4J_LOGGER) != null) {
 				supportedLoger = SupportedLogger.SLF4J;
-				loggerQualifiedName = SLF4J_LOGGER;
-			} else if (project.findType(LOG4J_LOGGER) != null) {
+				loggerQualifiedName = StandardLoggerConstants.SLF4J_LOGGER;
+			} else if (project.findType(StandardLoggerConstants.LOG4J_LOGGER) != null) {
 				supportedLoger = SupportedLogger.LOG4J;
-				loggerQualifiedName = LOG4J_LOGGER;
+				loggerQualifiedName = StandardLoggerConstants.LOG4J_LOGGER;
 			}
 
 			if (supportedLoger != null) {
@@ -134,9 +133,9 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	@Override
 	public Map<String, String> getDefaultOptions() {
 		Map<String, String> defaultOptions = new HashMap<>();
-		defaultOptions.put(SYSTEM_OUT_PRINT, INFO);
-		defaultOptions.put(SYSTEM_ERR_PRINT, ERROR);
-		defaultOptions.put(PRINT_STACKTRACE, ERROR);
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT, INFO);
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT, ERROR);
+		defaultOptions.put(StandardLoggerConstants.PRINT_STACKTRACE, ERROR);
 
 		return defaultOptions;
 	}
@@ -155,7 +154,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	public void activateDefaultOptions() {
 		// default options should be activated only for test purposes
 		setSelectedOptions(getDefaultOptions());
-		this.loggerQualifiedName = SLF4J_LOGGER;
+		this.loggerQualifiedName = StandardLoggerConstants.SLF4J_LOGGER;
 	}
 
 	public void activateOptions(Map<String, String> options) {
@@ -166,7 +165,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 				defaultOptions.put(key, value);
 		});
 		setSelectedOptions(defaultOptions);
-		this.loggerQualifiedName = options.get(LOGGER_QUALIFIED_NAME);
+		this.loggerQualifiedName = options.get(StandardLoggerConstants.LOGGER_QUALIFIED_NAME);
 	}
 
 	@Override

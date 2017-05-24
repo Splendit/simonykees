@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerOptions;
+import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerConstants;
 import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -99,9 +99,9 @@ public class LoggerRuleWizardPageModel {
 	 * 
 	 */
 	private void validateSelection() {
-		String sysOutCurr = currentSelectionMap.get(StandardLoggerOptions.SYSTEM_OUT_PRINT);
-		String sysErrCurr = currentSelectionMap.get(StandardLoggerOptions.SYSTEM_ERR_PRINT);
-		String stackTraceCurr = currentSelectionMap.get(StandardLoggerOptions.PRINT_STACKTRACE);
+		String sysOutCurr = currentSelectionMap.get(StandardLoggerConstants.SYSTEM_OUT_PRINT);
+		String sysErrCurr = currentSelectionMap.get(StandardLoggerConstants.SYSTEM_ERR_PRINT);
+		String stackTraceCurr = currentSelectionMap.get(StandardLoggerConstants.PRINT_STACKTRACE);
 
 		int sysOutCurrSeverityLevel = (sysOutCurr.equals(NO_SEVERITY_LEVEL)) ? 0
 				: rule.getSystemOutReplaceOptions().get(sysOutCurr);

@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
-import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerOptions;
+import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerConstants;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.i18n.Messages;
@@ -104,7 +104,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.selectionChanged(StandardLoggerOptions.SYSTEM_OUT_PRINT,
+				controler.selectionChanged(StandardLoggerConstants.SYSTEM_OUT_PRINT,
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 			}
 		});
@@ -141,7 +141,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.selectionChanged(StandardLoggerOptions.SYSTEM_ERR_PRINT,
+				controler.selectionChanged(StandardLoggerConstants.SYSTEM_ERR_PRINT,
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 			}
 		});
@@ -178,7 +178,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.selectionChanged(StandardLoggerOptions.PRINT_STACKTRACE,
+				controler.selectionChanged(StandardLoggerConstants.PRINT_STACKTRACE,
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 			}
 		});
@@ -233,11 +233,11 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 	private void initializeData() {
 		systemOutCombo.select(
-				systemOutCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerOptions.SYSTEM_OUT_PRINT)));
+				systemOutCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.SYSTEM_OUT_PRINT)));
 		systemErrCombo.select(
-				systemErrCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerOptions.SYSTEM_ERR_PRINT)));
+				systemErrCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.SYSTEM_ERR_PRINT)));
 		stackTraceCombo.select(
-				stackTraceCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerOptions.PRINT_STACKTRACE)));
+				stackTraceCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.PRINT_STACKTRACE)));
 	}
 
 	/**

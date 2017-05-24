@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerOptions;
+import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerConstants;
 import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
@@ -106,22 +106,22 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		this.newImports = new HashMap<>();
 
 		List<String> slf4jImports = new ArrayList<>();
-		slf4jImports.add(StandardLoggerOptions.SLF4J_LOGGER);
+		slf4jImports.add(StandardLoggerConstants.SLF4J_LOGGER);
 		slf4jImports.add(SLF4J_LOGGER_FACTORY_QUALIFIED_NAME);
-		newImports.put(StandardLoggerOptions.SLF4J_LOGGER, slf4jImports);
+		newImports.put(StandardLoggerConstants.SLF4J_LOGGER, slf4jImports);
 		List<String> log4jImports = new ArrayList<>();
-		log4jImports.add(StandardLoggerOptions.LOG4J_LOGGER);
+		log4jImports.add(StandardLoggerConstants.LOG4J_LOGGER);
 		log4jImports.add(LOG4J_LOGGER_FACTORY_QUALIFIED_NAME);
-		newImports.put(StandardLoggerOptions.LOG4J_LOGGER, log4jImports);
+		newImports.put(StandardLoggerConstants.LOG4J_LOGGER, log4jImports);
 	}
 
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		// rule precondition: all options must be set
 		return loggerQualifiedName != null && replacingOptions != null
-				&& replacingOptions.containsKey(StandardLoggerOptions.PRINT_STACKTRACE)
-				&& replacingOptions.containsKey(StandardLoggerOptions.SYSTEM_ERR_PRINT)
-				&& replacingOptions.containsKey(StandardLoggerOptions.SYSTEM_OUT_PRINT);
+				&& replacingOptions.containsKey(StandardLoggerConstants.PRINT_STACKTRACE)
+				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_ERR_PRINT)
+				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_OUT_PRINT);
 	}
 
 	@Override
@@ -230,7 +230,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 							&& ClassRelationUtil.isContentOfTypes(qualifier.resolveTypeBinding(),
 									Collections.singletonList(JAVA_LANG_SYSTEM))) {
 						// replace the System.out.println with a logger
-						String replacingMethod = replacingOptions.get(StandardLoggerOptions.SYSTEM_OUT_PRINT);
+						String replacingMethod = replacingOptions.get(StandardLoggerConstants.SYSTEM_OUT_PRINT);
 						replaceMethod(methodInvocation, replacingMethod);
 					}
 				}
@@ -247,7 +247,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				if (ClassRelationUtil.isInheritingContentOfTypes(iTypeBinding,
 						Collections.singletonList(JAVA_LANG_THROWABLE))) {
 					// replace printStackTrace with the logger method.
-					String replacingMethod = replacingOptions.get(StandardLoggerOptions.PRINT_STACKTRACE);
+					String replacingMethod = replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE);
 					replaceMethod(methodInvocation, simpleName, replacingMethod);
 				}
 			}
@@ -368,11 +368,11 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	/**
 	 * Generates an initializer expression for the logger based on the qualified
 	 * name of the logger ({@value #typeDeclaration}). The initializer generated
-	 * for {@value StandardLoggerOptions#SLF4J_LOGGER} is:
+	 * for {@value StandardLoggerConstants#SLF4J_LOGGER} is:
 	 * 
 	 * {@code LoggerFactory.getLogger()}
 	 * 
-	 * whereas for {@value StandardLoggerOptions#LOG4J_LOGGER} is:
+	 * whereas for {@value StandardLoggerConstants#LOG4J_LOGGER} is:
 	 * 
 	 * @param loggerDeclaration
 	 *            Field declaration representing the logger declaration.
@@ -388,14 +388,14 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		typeLiteral.setType(ast.newSimpleType(ast.newName(typeDeclaration.getName().getIdentifier())));
 
 		switch (this.loggerQualifiedName) {
-		case StandardLoggerOptions.SLF4J_LOGGER:
+		case StandardLoggerConstants.SLF4J_LOGGER:
 
 			methodInvocation.setName(ast.newSimpleName(SLF4J_LOGGER_GET_LOGGER));
 			miListRewrite.insertFirst(typeLiteral, null);
 			methodInvocation.setExpression(ast.newSimpleName(SLF4J_LOGGER_FACTORY));
 			initializer = methodInvocation;
 			break;
-		case StandardLoggerOptions.LOG4J_LOGGER:
+		case StandardLoggerConstants.LOG4J_LOGGER:
 			methodInvocation.setName(ast.newSimpleName(LOG4J_GET_LOGGER));
 			miListRewrite.insertFirst(typeLiteral, null);
 			methodInvocation.setExpression(ast.newSimpleName(LOG4J_LOGGER_MANAGER));
