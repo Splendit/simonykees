@@ -58,8 +58,10 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractASTRewrite
 
 				if (methodArgs.size() == 1 && methodArgs.get(0) instanceof LambdaExpression) {
 
-					// get lambda expression and its parameters and check for
-					// size
+					/*
+					 * get lambda expression and its parameters and check for
+					 * size
+					 */
 					LambdaExpression lambdaExpression = (LambdaExpression) methodArgs.get(0);
 					List<VariableDeclaration> lambdaExpressionParams = ASTNodeUtil
 							.convertToTypedList(lambdaExpression.parameters(), VariableDeclaration.class);
@@ -80,12 +82,12 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractASTRewrite
 
 								VariableDeclaration variableDeclaration = lambdaExpressionParams.get(0);
 								SimpleName paramName = variableDeclaration.getName();
-								
+
 								/*
-								 * an else statement must not be present and
-								 * the parameter passed to the forEach lambda
-								 * must be used for filtering in the containing
-								 * if statement
+								 * an else statement must not be present and the
+								 * parameter passed to the forEach lambda must
+								 * be used for filtering in the containing if
+								 * statement
 								 */
 								if (isElseStatementNullOrEmpty(ifStatement.getElseStatement())
 										&& this.isParameterUsedInExpression(paramName, ifStatementExpression)) {
