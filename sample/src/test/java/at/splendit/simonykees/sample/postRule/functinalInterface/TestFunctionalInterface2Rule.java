@@ -14,7 +14,7 @@ public abstract class TestFunctionalInterface2Rule {
 
 	public void setFields(Object fields) {
 		Object proxyFields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
-				(Object proxy,Method method,Object[] args)->{
+				(Object proxy, Method method, Object[] args) -> {
 					return method.invoke(fields, args);
 				});
 		this.fields = proxyFields;
@@ -64,7 +64,7 @@ public abstract class TestFunctionalInterface2Rule {
 	}
 
 	public void testCorrectTypeVarDecl() {
-		Runnable r = ()->{
+		Runnable r = () -> {
 		};
 	}
 
@@ -79,7 +79,7 @@ public abstract class TestFunctionalInterface2Rule {
 
 	public void testCorrectTypeAssignment() {
 		Runnable r;
-		r = ()->{
+		r = () -> {
 		};
 	}
 
@@ -94,7 +94,7 @@ public abstract class TestFunctionalInterface2Rule {
 	}
 
 	public void testCorrectForInitializer() {
-		for (Runnable r = ()->{
+		for (Runnable r = () -> {
 
 		}; true;) {
 			break;
@@ -114,7 +114,7 @@ public abstract class TestFunctionalInterface2Rule {
 	}
 
 	public void testCorrectTryWithResourceHeader() {
-		try (Closeable c = ()->{
+		try (Closeable c = () -> {
 
 		}) {
 
@@ -138,7 +138,7 @@ public abstract class TestFunctionalInterface2Rule {
 	}
 
 	public void testCorrectMethodInvocation() {
-		doSomethingRunnable(()->{
+		doSomethingRunnable(() -> {
 
 		});
 	}
@@ -154,7 +154,7 @@ public abstract class TestFunctionalInterface2Rule {
 	}
 
 	public void testCorrectMethodInvocation2ndParam() {
-		doSomethingRunnable("addition", ()->{
+		doSomethingRunnable("addition", () -> {
 
 		});
 	}
