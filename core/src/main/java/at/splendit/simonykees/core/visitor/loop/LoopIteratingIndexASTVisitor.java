@@ -41,7 +41,15 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	protected SimpleName newIteratorName;
 	protected VariableDeclarationFragment preferredNameFragment;
 	private List<ASTNode> nodesToBeRemoved;
+	
+	protected boolean insideLoop = false;
+	protected boolean beforeLoop = true;
+	protected boolean afterLoop = false;
+	protected boolean hasEmptyStatement = false;
+	
 	private List<ASTNode> iteratingObjectInitializers;
+	protected boolean indexReferencedOutsideLoop = false;
+	protected boolean indexReferencedInsideLoop = false;
 	
 	protected LoopIteratingIndexASTVisitor(SimpleName iterableNode) {
 		this.iterableName = iterableNode;
@@ -98,9 +106,34 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	protected void addIteratingObjectInitializer(ASTNode node) {
 		iteratingObjectInitializers.add(node);
 	}
+	
+	protected boolean isBeforeLoop() {
+		return beforeLoop;
+	}
+	
+	protected boolean isInsideLoop() {
+		return insideLoop;
+	}
+	
+	protected boolean isAfterLoop() {
+		return afterLoop;
+	}
+	
+	protected void setIndexReferencedOutsideLoop() {
+		this.indexReferencedOutsideLoop = true;
+	}
 
 	public VariableDeclarationFragment getPreferredNameFragment() {
 		return this.preferredNameFragment;
+	}
+	
+	protected void setIndexReferencedInsideLoop() {
+		this.indexReferencedInsideLoop = true;
+
+	}
+	
+	protected void setHasEmptyStatement() {
+		this.hasEmptyStatement = true;
 	}
 
 	/**
@@ -346,21 +379,9 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	
 	protected abstract boolean isNameOfIteratingIndex(SimpleName simpleName);
 	
-	protected abstract boolean isBeforeLoop();
-	
-	protected abstract boolean isInsideLoop();
-	
-	protected abstract boolean isAfterLoop();
-	
 	protected abstract boolean isLoopProperty(SimpleName simpleName);
 	
 	protected abstract void analyseBeforeLoopOccurrence(SimpleName simpleName);
-	
-	protected abstract void setIndexReferencedInsideLoop();
-	
-	protected abstract void setIndexReferencedOutsideLoop();
-	
-	protected abstract void setHasEmptyStatement();
 	
 	public abstract boolean checkTransformPrecondition();
 

@@ -33,12 +33,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 	protected static final String LOOP_UPDATER = "loop-updater"; //$NON-NLS-1$
 	protected static final String INTERNAL_INDEX_UPDATER = "internal-index-updater"; //$NON-NLS-1$
 
-	private boolean indexReferencedInsideLoop = false;
 	private boolean hasEmptyStatement = false;
-	private boolean indexReferencedOutsideLoop = false;
-	private boolean insideLoop = false;
-	private boolean beforeLoop = true;
-	private boolean afterLoop = false;
 	private Block parentBlock;
 	private SimpleName iteratingIndexName;
 	
@@ -218,6 +213,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 				|| (!indexUpdater.containsKey(LOOP_UPDATER) && indexUpdater.containsKey(INTERNAL_INDEX_UPDATER));
 	}
 
+	@Override
 	public boolean checkTransformPrecondition() {
 		return prequisite && !hasEmptyStatement && !indexReferencedInsideLoop && !indexReferencedOutsideLoop
 				&& isIndexInitToZero() && isIndexIncremented();
@@ -243,37 +239,8 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 		return indexUpdater.get(key);
 	}
 
-	protected void setHasEmptyStatement() {
-		this.hasEmptyStatement = true;
-	}
-
 	protected ASTNode getIndexInitializer(String key) {
 		return indexInitializer.get(key);
-	}
-	
-	@Override
-	protected void setIndexReferencedInsideLoop() {
-		this.indexReferencedInsideLoop = true;
-	}
-	
-	@Override
-	protected boolean isBeforeLoop() {
-		return beforeLoop;
-	}
-	
-	@Override
-	protected boolean isInsideLoop() {
-		return insideLoop;
-	}
-	
-	@Override
-	protected boolean isAfterLoop() {
-		return afterLoop;
-	}
-	
-	@Override
-	protected void setIndexReferencedOutsideLoop() {
-		this.indexReferencedOutsideLoop = true;
 	}
 
 	/**

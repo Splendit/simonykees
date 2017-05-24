@@ -28,12 +28,6 @@ abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVi
 	protected static final String INDEX_DECLARATION = "index-declaration-fragment"; //$NON-NLS-1$
 	protected static final String INDEX_UPDATER = "index-updater"; //$NON-NLS-1$
 
-	private boolean indexReferencedInsideLoop = false;
-	private boolean hasEmptyStatement = false;
-	private boolean indexReferencedOutsideLoop = false;
-	private boolean insideLoop = false;
-	private boolean beforeLoop = true;
-	private boolean afterLoop = false;
 	private Block parentBlock;
 	private SimpleName iteratingIndexName;
 
@@ -146,31 +140,6 @@ abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVi
 				&& isIndexInitToZero() && isIndexIncremented();
 	}
 
-	@Override
-	protected void setHasEmptyStatement() {
-		this.hasEmptyStatement = true;
-	}
-
-	@Override
-	protected boolean isBeforeLoop() {
-		return beforeLoop;
-	}
-
-	@Override
-	protected boolean isInsideLoop() {
-		return insideLoop;
-	}
-
-	@Override
-	protected boolean isAfterLoop() {
-		return afterLoop;
-	}
-
-	@Override
-	protected void setIndexReferencedOutsideLoop() {
-		this.indexReferencedOutsideLoop = true;
-	}
-
 	/**
 	 * Checks whether the given simpleName is the name property of a
 	 * {@link VariableDeclarationFragment}. Otherwise, a flag is stored for
@@ -206,11 +175,5 @@ abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVi
 		return parent.getLocationInParent() == WhileStatement.EXPRESSION_PROPERTY || parent == indexUpdater
 				|| parent.getParent() == indexUpdater || parent.getParent().getParent() == indexUpdater
 				|| parent == indexDeclaration || parent.getParent() == indexDeclaration;
-	}
-
-	@Override
-	protected void setIndexReferencedInsideLoop() {
-		this.indexReferencedInsideLoop = true;
-
 	}
 }
