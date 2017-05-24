@@ -34,7 +34,7 @@ import at.splendit.simonykees.i18n.Messages;
 /**
  * Wizard for configuring logger rule when applying to selected resources
  * 
- * @author andreja.sambolec
+ * @author Andreja Sambolec
  * @since 1.2
  *
  */

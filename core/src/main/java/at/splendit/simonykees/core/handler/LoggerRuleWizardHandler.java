@@ -29,7 +29,7 @@ import at.splendit.simonykees.i18n.Messages;
 /**
  * Handler for semi-automatic logging rule
  * 
- * @author andreja.sambolec
+ * @author Andreja Sambolec
  * @since 1.2
  *
  */
