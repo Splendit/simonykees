@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
@@ -570,5 +571,13 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 		 * enabled/disabled.
 		 */
 		updateStatus(status);
+	}
+	
+	/**
+	 * Open help dialog
+	 */
+	@Override
+	public void performHelp() {
+		SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
 	}
 }

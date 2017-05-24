@@ -173,7 +173,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	 *             not present and the reflective construction fails.
 	 */
 	private void collectChanges(ICompilationUnit workingCopy) throws JavaModelException, ReflectiveOperationException {
-		DocumentChange documentChange = SimonykeesUtil.applyRule(workingCopy, visitor);
+		T astVisitor = visitorFactory();
+		DocumentChange documentChange = SimonykeesUtil.applyRule(workingCopy, astVisitor);
 		if (documentChange != null) {
 
 			/*
@@ -200,6 +201,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		}
 	}
 
+	protected T visitorFactory() throws InstantiationException, IllegalAccessException {
+		return visitor.newInstance();
+	}
+
 	/**
 	 * Responsible to calculate of the rule is executable in the current
 	 * project.
@@ -211,9 +216,9 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		if (null != compilerCompliance) {
 			String enumRepresentation = "JAVA_" + compilerCompliance.replace(".", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			satisfiedJavaVersion = JavaVersion.valueOf(enumRepresentation).atLeast(requiredJavaVersion);
-			
+
 			satisfiedLibraries = ruleSpecificImplementation(project);
-			
+
 			enabled = satisfiedJavaVersion && satisfiedLibraries;
 		}
 	}
