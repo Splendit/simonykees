@@ -46,7 +46,7 @@
 	<modules>
 		<!-- plug-in functionality -->
 		<module>logging</module>
-		<module>i18n</module>	
+		<module>i18n</module>
 		<module>license.api</module>
 		<module>license.netlicensing</module>
 		<module>core</module>
@@ -57,7 +57,7 @@
 		<module>test</module>
 		<!-- OSGi feature + site deployment -->
 		<module>feature</module>
-		<module>site</module>	
+		<module>site</module>
 	</modules>
 
 	<scm>
@@ -125,6 +125,8 @@
 
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
+		
+		<basedir>/simonykees</basedir>
 	</properties>
 
 	<repositories>
@@ -149,6 +151,21 @@
 	<dependencyManagement>
 		<dependencies>
 			<!-- jSparrow -->
+			<dependency>
+				<groupId>at.splendit.jSparrow</groupId>
+				<artifactId>jSparrow.logging</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit.jSparrow</groupId>
+				<artifactId>jSparrow.i18n</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit.jSparrow</groupId>
+				<artifactId>jSparrow.license.api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>at.splendit.jSparrow</groupId>
 				<artifactId>jSparrow.core</artifactId>
@@ -406,7 +423,58 @@
 				<!-- skipping test for proguard because they dont work -->
 				<maven.test.skip>true</maven.test.skip>
 			</properties>
-
+			<!-- <activation>
+				<property>
+					With this profile active, obfuscation will happen
+					<name>proguard</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.wvengen</groupId>
+						<artifactId>proguard-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>proguard</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<obfuscate>true</obfuscate>
+							<proguardInclude>${basedir}/proguard.conf</proguardInclude>
+							
+							<injar>${project.build.finalName}.jar</injar>
+							<outjar>${project.build.finalName}-small.jar</outjar>
+							<libs>
+								<lib>${java.home}/lib/rt.jar</lib>
+								<lib>${java.home}/lib/jsse.jar</lib>
+							</libs>
+							<options>
+								<option>-keep public class * extends
+									org.eclipse.ui.plugin.AbstractUIPlugin</option>
+								<option>-keep public class * extends
+									at.splendit.simonykees.core.handler.AbstractSimonykeesHandler</option>
+								<option>-keepclassmembers public class * extends
+									org.eclipse.osgi.util.NLS { public static &lt;fields&gt;; }</option>
+								<option>-keep public class * implements
+									org.eclipse.ui.IWorkbenchPreferencePage</option>
+								<option>-keep public class * extends
+									org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer</option>
+								<option>-dontnote org.eclipse.**</option>
+								<option>-dontnote org.osgi.**</option>
+								<option>-dontnote javax.xml.**</option>
+								<option>-dontnote javax.annotation.**</option>
+								<option>-dontnote org.xml.sax.**</option>
+								<option>-dontnote org.w3c.dom.**</option>
+								<option>-dontwarn javax.crypto.**</option>
+							</options>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build> -->
 			<distributionManagement>
 				<repository>
 					<id>pdrone.76310b5f-bf75-4782-bd20-c44376584fc5</id>
