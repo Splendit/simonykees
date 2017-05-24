@@ -87,11 +87,10 @@ public class SelectRulesWizard extends Wizard {
 
 	@Override
 	public boolean performFinish() {
+		
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = model.getSelectionAsList();
+		
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules);
-		// AbstractRefactorer refactorer = new AbstractRefactorer(javaElements,
-		// rules) {
-		// };
 		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
 
 		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {

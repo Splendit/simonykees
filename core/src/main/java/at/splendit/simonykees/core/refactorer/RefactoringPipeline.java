@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import at.splendit.simonykees.core.exception.ReconcileException;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
+import at.splendit.simonykees.core.exception.model.NotWorkingRuleModel;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -30,7 +31,7 @@ import at.splendit.simonykees.i18n.ExceptionMessages;
  * {@link IJavaElement}s and offers functionality to apply the first to the
  * latter.
  * 
- * @author Ludwig Werzowa
+ * @author Ludwig Werzowa, Andreja Sambolec
  * @since 1.2
  */
 public class RefactoringPipeline {
@@ -182,6 +183,9 @@ public class RefactoringPipeline {
 	/**
 	 * Apply {@link RefactoringRule}s to the working copies of each
 	 * {@link RefactoringState}. Changes are <b>not</b> yet committed.
+	 * <p>
+	 * All rules that throw an exception are collected and thrown as a
+	 * RuleException at the end.
 	 * 
 	 * @param IProgressMonitor
 	 *            monitor used to show progress in UI
@@ -200,7 +204,6 @@ public class RefactoringPipeline {
 	 */
 	public void doRefactoring(IProgressMonitor monitor) throws RefactoringException, RuleException {
 		if (refactoringStates.isEmpty()) {
-			// TODO warning adjustment
 			logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
 			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found,
 					ExceptionMessages.RefactoringPipeline_user_warn_no_java_files_found_to_apply_rules);
@@ -215,27 +218,18 @@ public class RefactoringPipeline {
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(rules.size());
 		subMonitor.setTaskName(""); //$NON-NLS-1$
 
-		List<String> notWorkingRules = new ArrayList<>();
+		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
 
-			/*
-			 * TODO catch all exceptions from ASTVisitor execution? if any
-			 * exception is thrown discard all changes from this rule
-			 */
 			subMonitor.subTask(refactoringRule.getName());
 
-			try {
-				/*
-				 * Sends new child of subMonitor which takes in progress bar
-				 * size of 1 of rules size In method that part of progress bar
-				 * is split to number of compilation units
-				 */
-				applyRuleToAllStates(refactoringRule, true, subMonitor.newChild(1));
+			/*
+			 * Sends new child of subMonitor which takes in progress bar size of
+			 * 1 of rules size In method that part of progress bar is split to
+			 * number of compilation units
+			 */
+			applyRuleToAllStates(refactoringRule, true, subMonitor.newChild(1), notWorkingRules);
 
-			} catch (JavaModelException | ReflectiveOperationException e) {
-				logger.error(e.getMessage(), e);
-				notWorkingRules.add(refactoringRule.getName());
-			}
 			/*
 			 * If cancel is pressed on progress monitor, abort all and return,
 			 * else continue
@@ -246,40 +240,10 @@ public class RefactoringPipeline {
 		}
 
 		if (!notWorkingRules.isEmpty()) {
-			String notWorkingRulesCollected = notWorkingRules.stream().collect(Collectors.joining(", ")); //$NON-NLS-1$
+			String notWorkingRulesCollected = NotWorkingRuleModel.asString(notWorkingRules);
 			throw new RuleException(
 					NLS.bind(ExceptionMessages.RefactoringPipeline_rule_execute_failed, notWorkingRulesCollected),
 					NLS.bind(ExceptionMessages.RefactoringPipeline_user_rule_execute_failed, notWorkingRulesCollected));
-		}
-	}
-	
-	/**
-	 * This functionality used to be in the {@link RefactoringRule}
-	 * 
-	 * @param rule
-	 * @param subMonitor
-	 * @throws JavaModelException
-	 * @throws ReflectiveOperationException
-	 */
-	private void applyRuleToAllStates(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
-			IProgressMonitor subMonitor) throws JavaModelException, ReflectiveOperationException {
-
-		for (RefactoringState refactoringState : refactoringStates) {
-			/*
-			 * TODO catch all exceptions from ASTVisitor execution? if any
-			 * exception is thrown discard all changes from this rule
-			 */
-			subMonitor.subTask(refactoringState.getWorkingCopyName());
-
-			refactoringState.addRuleAndGenerateDocumentChanges(rule, false);
-
-			/*
-			 * If cancel is pressed on progress monitor, abort all and return,
-			 * else continue
-			 */
-			if (subMonitor.isCanceled()) {
-				return;
-			}
 		}
 	}
 
@@ -294,8 +258,9 @@ public class RefactoringPipeline {
 	 * @throws RuleException
 	 */
 	public void doAdditionalRefactoring(List<ICompilationUnit> changedCompilationUnits,
-			RefactoringRule<? extends AbstractASTRewriteASTVisitor> currentRule, IProgressMonitor monitor) throws RuleException {
-		List<String> notWorkingRules = new ArrayList<>();
+			RefactoringRule<? extends AbstractASTRewriteASTVisitor> currentRule, IProgressMonitor monitor)
+			throws RuleException {
+		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
 
 		/*
 		 * Converts the monitor to a SubMonitor and sets name of task on
@@ -303,42 +268,44 @@ public class RefactoringPipeline {
 		 * size of the rules list Each refactoring rule increases worked amount
 		 * for same size
 		 */
-		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(rules.size() * changedCompilationUnits.size());
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
+				.setWorkRemaining(rules.size() * changedCompilationUnits.size());
 		subMonitor.setTaskName(""); //$NON-NLS-1$
 
 		for (RefactoringState refactoringState : refactoringStates) {
-			if (changedCompilationUnits.stream().anyMatch(
-					unit -> unit.getElementName().equals(refactoringState.getWorkingCopy().getElementName()))) {
+			if (changedCompilationUnits.stream()
+					.anyMatch(unit -> unit.getElementName().equals(refactoringState.getWorkingCopyName()))) {
 				refactoringState.resetWorkingCopy();
 			}
 		}
 
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
-			try {
-				for (RefactoringState refactoringState : refactoringStates) {
-					if (changedCompilationUnits.stream().anyMatch(
-							unit -> unit.getElementName().equals(refactoringState.getWorkingCopy().getElementName()))) {
-						subMonitor.subTask(refactoringRule.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
-						if (refactoringRule.equals(currentRule)) {
-							refactoringState.addRuleToIgnoredRules(currentRule);
-						} else if (!refactoringState.getIgnoredRules().contains(refactoringRule)) {
+			for (RefactoringState refactoringState : refactoringStates) {
+				if (changedCompilationUnits.stream()
+						.anyMatch(unit -> unit.getElementName().equals(refactoringState.getWorkingCopyName()))) {
+					subMonitor.subTask(refactoringRule.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
+					if (refactoringRule.equals(currentRule)) {
+						refactoringState.addRuleToIgnoredRules(currentRule);
+					} else if (!refactoringState.getIgnoredRules().contains(refactoringRule)) {
+						try {
 							refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, false);
-						}
-						if (subMonitor.isCanceled()) {
-							return;
-						} else {
-							subMonitor.worked(1);				
+						} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
+							logger.error(e.getMessage(), e);
+							notWorkingRules.add(new NotWorkingRuleModel(refactoringRule.getName(),
+									refactoringState.getWorkingCopyName()));
 						}
 					}
+					if (subMonitor.isCanceled()) {
+						return;
+					} else {
+						subMonitor.worked(1);
+					}
 				}
-			} catch (JavaModelException | ReflectiveOperationException e) {
-				logger.error(e.getMessage(), e);
-				notWorkingRules.add(refactoringRule.getName());
 			}
 		}
 
 		if (!notWorkingRules.isEmpty()) {
-			String notWorkingRulesCollected = notWorkingRules.stream().collect(Collectors.joining(", ")); //$NON-NLS-1$
+			String notWorkingRulesCollected = NotWorkingRuleModel.asString(notWorkingRules);
 			throw new RuleException(
 					NLS.bind(ExceptionMessages.RefactoringPipeline_rule_execute_failed, notWorkingRulesCollected),
 					NLS.bind(ExceptionMessages.RefactoringPipeline_user_rule_execute_failed, notWorkingRulesCollected));
@@ -357,34 +324,33 @@ public class RefactoringPipeline {
 	 */
 	public void refactoringForCurrent(ICompilationUnit newSelection,
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> currentRule) throws RuleException {
-		List<String> notWorkingRules = new ArrayList<>();
+		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
 
-		for (RefactoringState refactoringState : refactoringStates) {
-			if (newSelection.getElementName().equals(refactoringState.getWorkingCopy().getElementName())) {
-				refactoringState.resetWorkingCopy();
-			}
-		}
+		// get the correct RefactoringState
+		RefactoringState refactoringState = refactoringStates.stream()
+				.filter(s -> newSelection.getElementName().equals(s.getWorkingCopyName())).findFirst().get();
+
+		refactoringState.resetWorkingCopy();
 
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
 			try {
-				for (RefactoringState refactoringState : refactoringStates) {
-					if (newSelection.getElementName().equals(refactoringState.getWorkingCopy().getElementName())) {
-						if (refactoringRule.equals(currentRule)) {
-							refactoringState.removeRuleFromIgnoredRules(currentRule);
-						}
-						if (!refactoringState.getIgnoredRules().contains(refactoringRule)) {
-							refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, false);
-						}
-					}
+
+				if (refactoringRule.equals(currentRule)) {
+					refactoringState.removeRuleFromIgnoredRules(currentRule);
 				}
-			} catch (JavaModelException | ReflectiveOperationException e) {
+				if (!refactoringState.getIgnoredRules().contains(refactoringRule)) {
+					refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, false);
+				}
+
+			} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 				logger.error(e.getMessage(), e);
-				notWorkingRules.add(refactoringRule.getName());
+				notWorkingRules
+						.add(new NotWorkingRuleModel(refactoringRule.getName(), refactoringState.getWorkingCopyName()));
 			}
 		}
 
 		if (!notWorkingRules.isEmpty()) {
-			String notWorkingRulesCollected = notWorkingRules.stream().collect(Collectors.joining(", ")); //$NON-NLS-1$
+			String notWorkingRulesCollected = NotWorkingRuleModel.asString(notWorkingRules);
 			throw new RuleException(
 					NLS.bind(ExceptionMessages.RefactoringPipeline_rule_execute_failed, notWorkingRulesCollected),
 					NLS.bind(ExceptionMessages.RefactoringPipeline_user_rule_execute_failed, notWorkingRulesCollected));
@@ -406,7 +372,6 @@ public class RefactoringPipeline {
 	 */
 	public void commitRefactoring() throws RefactoringException, ReconcileException {
 		if (refactoringStates.isEmpty()) {
-			// TODO adjust
 			logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
 			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
 		}
@@ -440,28 +405,38 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * This functionality used to be in the {@link RefactoringRule}
+	 * Adds a {@link RefactoringRule} to all {@link RefactoringState}s.
+	 * <p>
+	 * If an Exception occurs while applying a rule to a state, the combination
+	 * of rule and state is added to the "not working rules" list and the
+	 * refactoring continues.
+	 * <p>
+	 * This functionality used to be in the {@link RefactoringRule}.
 	 * 
 	 * @param rule
+	 *            {@link RefactoringRule} to apply to all
+	 *            {@link RefactoringState} instances
+	 * @param initialApply
 	 * @param subMonitor
-	 * @throws JavaModelException
-	 * @throws ReflectiveOperationException
+	 * @param returnListNotWorkingRules
+	 *            rules that throw an exception are added to this list
 	 */
 	private void applyRuleToAllStates(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
-			boolean initialApply, IProgressMonitor subMonitor) throws JavaModelException, ReflectiveOperationException {
+			boolean initialApply, IProgressMonitor subMonitor, List<NotWorkingRuleModel> returnListNotWorkingRules) {
 
 		SubMonitor monitor = SubMonitor.convert(subMonitor).setWorkRemaining(refactoringStates.size());
 
 		for (RefactoringState refactoringState : refactoringStates) {
-			/*
-			 * TODO catch all exceptions from ASTVisitor execution? if any
-			 * exception is thrown discard all changes from this rule
-			 */
+
 			subMonitor.subTask(rule.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 
-			refactoringState.addRuleAndGenerateDocumentChanges(rule, true);
-
-			// TODO we used to have a test for try with resource here
+			try {
+				refactoringState.addRuleAndGenerateDocumentChanges(rule, true);
+			} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
+				logger.error(e.getMessage(), e);
+				returnListNotWorkingRules
+						.add(new NotWorkingRuleModel(rule.getName(), refactoringState.getWorkingCopyName()));
+			}
 
 			/*
 			 * If cancel is pressed on progress monitor, abort all and return,
@@ -470,7 +445,7 @@ public class RefactoringPipeline {
 			if (monitor.isCanceled()) {
 				return;
 			} else {
-				monitor.worked(1);				
+				monitor.worked(1);
 			}
 		}
 	}

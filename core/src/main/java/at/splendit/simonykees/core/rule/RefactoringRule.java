@@ -16,6 +16,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
@@ -151,11 +152,12 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	 *             if the contents of the original element cannot be accessed.
 	 *             Reasons include: The original Java element does not exist
 	 *             (ELEMENT_DOES_NOT_EXIST)
+	 * @throws RefactoringException 
 	 * @since 0.9
 	 * 
 	 */
 	public final DocumentChange applyRule(ICompilationUnit workingCopy)
-			throws ReflectiveOperationException, JavaModelException {
+			throws ReflectiveOperationException, JavaModelException, RefactoringException {
 		
 		logger.trace(NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.name, workingCopy.getElementName()));
 		
@@ -169,9 +171,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	 * @return
 	 * @throws ReflectiveOperationException
 	 * @throws JavaModelException
+	 * @throws RefactoringException 
 	 */
 	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
-			throws ReflectiveOperationException, JavaModelException {
+			throws ReflectiveOperationException, JavaModelException, RefactoringException {
 		
 		final CompilationUnit astRoot = SimonykeesUtil.parse(workingCopy);
 		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
@@ -188,7 +191,11 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 		AbstractASTRewriteASTVisitor rule = visitor.newInstance();
 		rule.setAstRewrite(astRewrite);
-		astRoot.accept(rule);
+		try {
+			astRoot.accept(rule);
+		} catch (RuntimeException e) {
+			throw new RefactoringException(e);
+		}
 
 		Document document = new Document(workingCopy.getSource());
 		TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));

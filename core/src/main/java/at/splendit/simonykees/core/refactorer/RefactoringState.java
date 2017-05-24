@@ -12,6 +12,7 @@ import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.ExceptionMessages;
@@ -21,7 +22,7 @@ import at.splendit.simonykees.i18n.ExceptionMessages;
  * capabilities to apply or undo {@link RefactoringRule}s, as well as storing
  * the corresponding {@link DocumentChange}s for each {@link RefactoringRule}.
  * 
- * @author Ludwig Werzowa
+ * @author Ludwig Werzowa, Andreja Sambolec
  * @since 1.2
  */
 public class RefactoringState {
@@ -44,6 +45,11 @@ public class RefactoringState {
 		this.workingCopy = workingCopy;
 	}
 
+	/**
+	 * File name with extension.
+	 * 
+	 * @return e.g.: Example.java
+	 */
 	public String getWorkingCopyName() {
 		return this.workingCopy.getElementName();
 	}
@@ -84,24 +90,6 @@ public class RefactoringState {
 	}
 
 	/**
-	 * Applies all given {@link RefactoringRule}s to the working copy. Changes
-	 * to the working copy are <b>not</b> committed yet.
-	 * 
-	 * @param rules
-	 *            List of {@link RefactoringRule} to be applied
-	 * @throws JavaModelException
-	 * @throws ReflectiveOperationException
-	 */
-	public void addRulesAndGenerateDocumentChanges(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules)
-			throws JavaModelException, ReflectiveOperationException {
-
-		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
-			addRuleAndGenerateDocumentChanges(refactoringRule, false);
-		}
-	}
-
-	// TODO add monitor
-	/**
 	 * Applies a given {@link RefactoringRule}s to the working copy. Changes to
 	 * the working copy are <b>not</b> committed yet.
 	 * 
@@ -113,24 +101,11 @@ public class RefactoringState {
 	 * @throws ReflectiveOperationException
 	 *             is thrown if the default constructor of {@link #visitor} is
 	 *             not present and the reflective construction fails.
+	 * @throws RefactoringException 
 	 */
 	public void addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
-			boolean initialApply) throws JavaModelException, ReflectiveOperationException {
+			boolean initialApply) throws JavaModelException, ReflectiveOperationException, RefactoringException {
 
-		/*
-		 * Sends new child of subMonitor which takes in progress bar size of 1
-		 * of rules size In method that part of progress bar is split to number
-		 * of compilation units
-		 */
-		// generateDocumentChanges(rule, subMonitor.newChild(1));
-
-		// boolean changesAlreadyPresent = changes.containsKey(rule);
-		//
-		// if (changesAlreadyPresent) {
-		// // already have changes
-		// logger.warn(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present,
-		// getWorkingCopyName()));
-		// } else {
 		DocumentChange documentChange = rule.applyRule(workingCopy);
 		if (documentChange != null) {
 			changes.put(rule, documentChange);
@@ -138,10 +113,9 @@ public class RefactoringState {
 				initialChanges.put(rule, documentChange);
 			}
 		} else {
-				logger.trace(NLS.bind(ExceptionMessages.RefactoringState_no_changes_found, rule.getName(),
-						workingCopy.getElementName()));
+			logger.trace(NLS.bind(ExceptionMessages.RefactoringState_no_changes_found, rule.getName(),
+					workingCopy.getElementName()));
 		}
-		// }
 
 	}
 
@@ -230,8 +204,8 @@ public class RefactoringState {
 			this.workingCopy = original.getWorkingCopy(null);
 			changes.clear();
 		} catch (JavaModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_reset_working_copy,
+					workingCopy.getPath().toString(), e.getMessage()), e);
 		}
 	}
 }
