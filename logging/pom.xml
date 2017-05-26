@@ -100,13 +100,13 @@
 		</pluginManagement>
 	</build>
 
-	<!-- <profiles>
-		SIM-361 configure proguard to work with multiple modules
+	<profiles>
+		<!-- SIM-361 configure proguard to work with multiple modules -->
 		<profile>
 			<id>proguard</id>
 			<activation>
 				<property>
-					With this profile active, obfuscation will happen
+					<!-- With this profile active, obfuscation will happen -->
 					<name>proguard</name>
 				</property>
 			</activation>
@@ -134,37 +134,26 @@
 						</executions>
 						<configuration>
 							<obfuscate>true</obfuscate>
-							<proguardInclude>${basedir}/proguard.conf</proguardInclude>
-							<exclusions> <exclusion> <groupId>org.slf4j</groupId> <artifactId>slf4j-api</artifactId> 
-								</exclusion> </exclusions>
-
 							<options>
 								<option>-keep public class
 									at.splendit.simonykees.logging.Activator</option>
-								<option>-dontwarn org.slf4j.**</option>
-								<option>-libraryjars lib/slf4j.jar</option>
-								<option>-dontnote org.osgi.**</option> <option>-dontnote javax.xml.**</option> 
-									<option>-dontnote javax.annotation.**</option> <option>-dontnote org.xml.sax.**</option> 
-									<option>-dontnote org.w3c.dom.**</option> <option>-dontwarn javax.crypto.**</option>
+								<option>-dontnote org.osgi.**</option>
+								<option>-dontnote javax.xml.**</option>
+								<option>-dontnote javax.annotation.**</option>
+								<option>-dontnote org.xml.sax.**</option>
+								<option>-dontnote org.w3c.dom.**</option>
+								<option>-dontwarn javax.crypto.**</option>
 							</options>
-
 
 							<libs>
 								<lib>${java.home}/lib/rt.jar</lib>
 								<lib>${java.home}/lib/jsse.jar</lib>
-								<lib>${basedir}/lib/slf4j-api.jar</lib>
 							</libs>
-							<exclusions>
-								<exclusion>
-									<groupId>org.slf4j</groupId>
-									<artifactId>slf4j-api</artifactId>
-								</exclusion>
-							</exclusions>
 						</configuration>
 					</plugin>
 				</plugins>
 			</build>
 		</profile>
-	</profiles> -->
+	</profiles>
 
 </project>

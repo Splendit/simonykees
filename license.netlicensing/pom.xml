@@ -1,14 +1,66 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>jSparrow.license.netlicensing</groupId>
-  <artifactId>jSparrow.license.netlicensing</artifactId>
-  <packaging>eclipse-plugin</packaging>
-  <name>jSparrow :: license NetLicensing</name>
-  <description>jSparrow License NetLicensing Plugin</description>
-  <parent>
-  	<groupId>at.splendit.jSparrow</groupId>
-  	<artifactId>jSparrow</artifactId>
-  	<version>1.2.0-SNAPSHOT</version>
-  	<relativePath>..</relativePath>
-  </parent>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>jSparrow.license.netlicensing</groupId>
+	<artifactId>jSparrow.license.netlicensing</artifactId>
+	<packaging>eclipse-plugin</packaging>
+	<name>jSparrow :: license NetLicensing</name>
+	<description>jSparrow License NetLicensing Plugin</description>
+	<parent>
+		<groupId>at.splendit.jSparrow</groupId>
+		<artifactId>jSparrow</artifactId>
+		<version>1.2.0-SNAPSHOT</version>
+		<relativePath>..</relativePath>
+	</parent>
+
+	<profiles>
+		<!-- SIM-361 configure proguard to work with multiple modules -->
+		<profile>
+			<id>proguard</id>
+			<activation>
+				<property>
+					<!-- With this profile active, obfuscation will happen -->
+					<name>proguard</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.wvengen</groupId>
+						<artifactId>proguard-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>proguard</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<obfuscate>true</obfuscate>
+							<!-- <attach>true</attach> -->
+							<!-- <injar>${project.build.finalName}.jar</injar> <outjar>${project.build.finalName}-small.jar</outjar> -->
+							<libs>
+								<lib>${java.home}/lib/rt.jar</lib>
+								<lib>${java.home}/lib/jsse.jar</lib>
+							</libs>
+							<options>
+								<option>-keep public class
+									at.splendit.simonykees.license.netlicensing.NetLicensingLicenseValidationService{
+									public *;}</option>
+								<option>-dontnote org.eclipse.**</option>
+								<option>-dontnote org.osgi.**</option>
+								<option>-dontnote javax.xml.**</option>
+								<option>-dontnote javax.annotation.**</option>
+								<option>-dontnote org.xml.sax.**</option>
+								<option>-dontnote org.w3c.dom.**</option>
+								<option>-dontwarn javax.crypto.**</option>
+								<option>-dontwarn org.slf4j.**</option>
+							</options>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
