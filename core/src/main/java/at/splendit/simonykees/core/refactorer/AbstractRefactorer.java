@@ -130,6 +130,9 @@ public abstract class AbstractRefactorer {
 				 */
 				if(!containingErrorList.isEmpty()) {
 					// TODO SIM-416 add the opening of the dialog and processing
+					logger.warn(NLS.bind(ExceptionMessages.AbstractRefactorer_syntax_errors_exist, containingErrorList
+							.stream().map(ICompilationUnit::getElementName).collect(Collectors.joining(", ")))); //$NON-NLS-1$
+
 				}
 			}
 		} catch (JavaModelException e) {

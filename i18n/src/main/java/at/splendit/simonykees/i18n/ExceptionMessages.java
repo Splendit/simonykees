@@ -15,6 +15,7 @@ public class ExceptionMessages extends NLS {
 	public static String AbstractRefactorer_java_element_resoltuion_failed;
 	public static String AbstractRefactorer_reconcile_failed;
 	public static String AbstractRefactorer_rule_execute_failed;
+	public static String AbstractRefactorer_syntax_errors_exist;
 	public static String AbstractRefactorer_unable_to_discard_working_copy;
 	public static String AbstractRefactorer_user_java_element_resoltuion_failed;
 	public static String AbstractRefactorer_user_reconcile_failed;
