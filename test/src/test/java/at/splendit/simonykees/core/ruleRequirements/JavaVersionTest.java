@@ -21,6 +21,17 @@ import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Tests how many rules are active for each java version.
+ * First parameter is a JavaCore Version that is active
+ * Second parameter is the number of rules that should be active
+ * 
+ * The second parameter needs to be adopted if the rule set size increases.
+ * 
+ * @author Martin Huter
+ * @since 1.2
+ *
+ */
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
 public class JavaVersionTest {
@@ -41,7 +52,7 @@ public class JavaVersionTest {
 	public static Collection<Object[]> data() {
 		return Arrays.asList(new Object[][] { { JavaCore.VERSION_1_1, 11 }, { JavaCore.VERSION_1_2, 12 },
 				{ JavaCore.VERSION_1_3, 12 }, { JavaCore.VERSION_1_4, 13 }, { JavaCore.VERSION_1_5, 18 },
-				{ JavaCore.VERSION_1_6, 19 }, { JavaCore.VERSION_1_7, 22 }, { JavaCore.VERSION_1_8, 25 } });
+				{ JavaCore.VERSION_1_6, 19 }, { JavaCore.VERSION_1_7, 22 }, { JavaCore.VERSION_1_8, 26 } });
 	}
 
 	private String javaVersion;

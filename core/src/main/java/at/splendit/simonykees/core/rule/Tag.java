@@ -31,7 +31,8 @@ public enum Tag {
 	PERFORMANCE("performance"),
 	READABILITY("readability"),
 	OLD_LANGUAGE_CONSTRUCTS("outdated constructs"),
-	LAMBDA("lambda");
+	LAMBDA("lambda"),
+	LOGGING("logging");
 	// not yet arrived! JAVA_1_9("1.9","9");
 
 	private List<String> tagName;
