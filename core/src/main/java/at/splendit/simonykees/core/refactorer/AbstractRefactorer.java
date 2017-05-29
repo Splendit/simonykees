@@ -41,7 +41,7 @@ import at.splendit.simonykees.i18n.ExceptionMessages;
 public abstract class AbstractRefactorer {
 
 	private static final Logger logger = LoggerFactory.getLogger(AbstractRefactorer.class);
-	
+
 	protected List<IJavaElement> javaElements;
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 	protected List<ICompilationUnit> workingCopies = new ArrayList<>();
@@ -102,18 +102,17 @@ public abstract class AbstractRefactorer {
 				 */
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(compilationUnits.size());
 				subMonitor.setTaskName(""); //$NON-NLS-1$
-				
+
 				List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 				for (ICompilationUnit compilationUnit : compilationUnits) {
 					subMonitor.subTask(compilationUnit.getElementName());
-					if(SimonykeesUtil.checkForSyntaxErrors(compilationUnit)){
+					if (SimonykeesUtil.checkForSyntaxErrors(compilationUnit)) {
 						containingErrorList.add(compilationUnit);
-					}
-					else {
+					} else {
 						workingCopies.add(compilationUnit.getWorkingCopy(null));
 					}
-					
+
 					/*
 					 * If cancel is pressed on progress monitor, abort all and
 					 * return, else continue
@@ -124,11 +123,12 @@ public abstract class AbstractRefactorer {
 						subMonitor.worked(1);
 					}
 				}
-				
+
 				/**
-				 * if there are syntax errors within source files display it to the user
+				 * if there are syntax errors within source files display it to
+				 * the user
 				 */
-				if(!containingErrorList.isEmpty()) {
+				if (!containingErrorList.isEmpty()) {
 					// TODO SIM-416 add the opening of the dialog and processing
 					logger.warn(NLS.bind(ExceptionMessages.AbstractRefactorer_syntax_errors_exist, containingErrorList
 							.stream().map(ICompilationUnit::getElementName).collect(Collectors.joining(", ")))); //$NON-NLS-1$
@@ -289,7 +289,7 @@ public abstract class AbstractRefactorer {
 				SimonykeesUtil.discardWorkingCopy(workingCopy);
 			} catch (JavaModelException e) {
 				logger.error(NLS.bind(ExceptionMessages.AbstractRefactorer_unable_to_discard_working_copy,
-								workingCopy.getPath().toString(), e.getMessage()), e);
+						workingCopy.getPath().toString(), e.getMessage()), e);
 			}
 		}
 		workingCopies.clear();
