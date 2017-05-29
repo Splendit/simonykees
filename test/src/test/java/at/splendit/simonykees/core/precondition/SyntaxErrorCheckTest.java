@@ -12,6 +12,13 @@ import org.junit.Test;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 
+/**
+ * TestSuite to check if a {@link ICompilationUnit} got Error markers in the
+ * current Eclipse environment
+ * 
+ * @author Martin Huter
+ * @since 1.2
+ */
 @SuppressWarnings("nls")
 public class SyntaxErrorCheckTest {
 
