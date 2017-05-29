@@ -3,7 +3,7 @@ package at.splendit.simonykees.core.rule.impl;
 import org.apache.commons.lang3.JavaVersion;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.visitor.EnhancedForLoopToStreamForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamForEachASTVisitor;
 
 /**
  * @see EnhancedForLoopToStreamForEachASTVisitor
