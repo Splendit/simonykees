@@ -101,7 +101,7 @@ public class RefactoringState {
 	 * @throws ReflectiveOperationException
 	 *             is thrown if the default constructor of {@link #visitor} is
 	 *             not present and the reflective construction fails.
-	 * @throws RefactoringException 
+	 * @throws RefactoringException
 	 */
 	public void addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
 			boolean initialApply) throws JavaModelException, ReflectiveOperationException, RefactoringException {

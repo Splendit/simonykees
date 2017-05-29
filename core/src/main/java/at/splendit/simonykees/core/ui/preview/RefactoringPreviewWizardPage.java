@@ -300,7 +300,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		populatePreviewViewer();
 		viewer.setSelection(new StructuredSelection(currentCompilationUnit));
 	}
-	
+
 	/**
 	 * Open help dialog
 	 */
