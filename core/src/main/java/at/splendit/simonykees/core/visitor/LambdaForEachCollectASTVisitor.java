@@ -82,8 +82,7 @@ public class LambdaForEachCollectASTVisitor extends AbstractAddImportASTVisitor 
 	public boolean visit(MethodInvocation methodInvocation) {
 
 		SimpleName methodName = methodInvocation.getName();
-		// if the method name matches with 'java.util.stream.Stream::forEach'
-		// ...
+		// if the method name matches with 'Stream::forEach' ...
 		if (FOR_EACH_METHOD_NAME.equals(methodName.getIdentifier())
 				&& ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent().getNodeType()) {
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
