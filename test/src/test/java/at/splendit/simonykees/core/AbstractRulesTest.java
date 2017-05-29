@@ -34,25 +34,25 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 public abstract class AbstractRulesTest {
 
 	private static final String UTILITY_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/utilities"; //$NON-NLS-1$
-	
+
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
 
 	protected static IPackageFragmentRoot root = null;
-	
+
 	@BeforeClass
 	public static void setUp() throws Exception {
-		if(root == null) {
+		if (root == null) {
 			root = RulesTestUtil.getPackageFragement();
 			String packageString = "at.splendit.simonykees.sample.utilities"; //$NON-NLS-1$
 			IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
-			for(Path utilityPath : loadUtilityClasses(UTILITY_DIRECTORY)){
+			for (Path utilityPath : loadUtilityClasses(UTILITY_DIRECTORY)) {
 				String utilityClassName = utilityPath.getFileName().toString();
 				String utilitySource = new String(Files.readAllBytes(utilityPath), StandardCharsets.UTF_8);
 				packageFragment.createCompilationUnit(utilityClassName, utilitySource, true, null);
 			}
 		}
 	}
-	
+
 	@AfterClass
 	public static void tearDown() throws Exception {
 		root = null;
@@ -61,7 +61,7 @@ public abstract class AbstractRulesTest {
 	public AbstractRulesTest() {
 		super();
 		try {
-			
+
 		} catch (Exception e) {
 			// to skip the implementation of throws in inherited constructors
 			throw new RuntimeException(e);
