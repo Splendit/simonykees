@@ -1,6 +1,7 @@
 package at.splendit.simonykees.sample.postRule.enhancedForLoopToStreamForEach;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -12,7 +13,19 @@ import java.util.List;
 public class EnhancedForLoopToStreamForEachRule {
 	public static List<String> stringList1 = Arrays.asList("str1", "str2", "str3", "str4");
 	public static List<String> stringList2 = Arrays.asList("str1", "str2", "str3", "str4");
+	public static List<String> stringList3;
 	public List<List<String>> stringListList = Arrays.asList(stringList1, stringList2);
+	private TestClass testClassField = new TestClass();
+	private int intField = 0;
+
+	static {
+		stringList3 = new LinkedList<>();
+		stringList1.stream().forEach((String s)->{
+			stringList2.stream().forEach((String t)->{
+				stringList3.add(s + t);
+			});
+		});
+	}
 
 	public String doSomething() throws ClassNotFoundException {
 
@@ -53,7 +66,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			System.out.println(s);
 		}
 
-		stringList1.stream().forEach((String s)-> {
+		stringList1.stream().forEach((String s)->{
 			stringList2.stream().forEach((String t)->{
 				System.out.println(s + t);
 			});
@@ -98,12 +111,6 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		});
 
-		for (String s : stringList1) {
-			int length = 0;
-			if (s.length() < 2) {
-				length /= s.length();
-			}
-		}
 		stringList1.stream().forEach((String s)->{
 			int length = 0;
 			if (s.length() < 2) {
@@ -125,9 +132,62 @@ public class EnhancedForLoopToStreamForEachRule {
 
 		int length3 = 0;
 		for (String s : stringList1) {
-			length3 += s.length();
+			length3++;
+			--length3;
+			this.intField++;
+			--this.intField;
 		}
 
+		String u = "asdf";
+		for(String s : stringList1) {
+			if(s.equals(u)) {
+				System.out.println(u.length());
+			}
+		}
+
+		for (String s : stringList1) {
+			if(s.length() > u.length()) {
+				u = s;
+			}
+		}
+
+		stringList1.stream().forEach((String s)->{
+			this.intField++;
+		});
+
+		stringList1.stream().forEach((String s)->{
+			intField++;
+		});
+
+		stringList1.stream().forEach((String s)->{
+			testClassField.testIntField++;
+		});
+
+		stringList1.stream().forEach((String s)->{
+			--testClassField.testIntField;
+		});
+
+		stringList1.stream().forEach((String s)->{
+			testClassField.testIntField += s.length();
+		});
+
+		TestClass testClassLocal = new TestClass();
+		stringList1.stream().forEach((String s)->{
+			testClassLocal.testIntField++;
+		});
+
+		stringList1.stream().forEach((String s)->{
+			--testClassLocal.testIntField;
+		});
+
+		stringList1.stream().forEach((String s)->{
+			testClassLocal.testIntField += s.length();
+		});
+
 		return "";
+	}
+
+	private class TestClass {
+		public int testIntField = 0;
 	}
 }

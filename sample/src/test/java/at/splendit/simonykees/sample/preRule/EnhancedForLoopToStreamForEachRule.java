@@ -1,6 +1,7 @@
 package at.splendit.simonykees.sample.preRule;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -12,7 +13,19 @@ import java.util.List;
 public class EnhancedForLoopToStreamForEachRule {
 	public static List<String> stringList1 = Arrays.asList("str1", "str2", "str3", "str4");
 	public static List<String> stringList2 = Arrays.asList("str1", "str2", "str3", "str4");
+	public static List<String> stringList3;
 	public List<List<String>> stringListList = Arrays.asList(stringList1, stringList2);
+	private TestClass testClassField = new TestClass();
+	private int intField = 0;
+
+	static {
+		stringList3 = new LinkedList<>();
+		for(String s : stringList1) {
+			for(String t : stringList2) {
+				stringList3.add(s + t);
+			}
+		}
+	}
 
 	public String doSomething() throws ClassNotFoundException {
 
@@ -120,9 +133,62 @@ public class EnhancedForLoopToStreamForEachRule {
 
 		int length3 = 0;
 		for (String s : stringList1) {
-			length3 += s.length();
+			length3++;
+			--length3;
+			this.intField++;
+			--this.intField;
+		}
+
+		String u = "asdf";
+		for(String s : stringList1) {
+			if(s.equals(u)) {
+				System.out.println(u.length());
+			}
+		}
+
+		for (String s : stringList1) {
+			if(s.length() > u.length()) {
+				u = s;
+			}
+		}
+
+		for (String s : stringList1) {
+			this.intField++;
+		}
+
+		for (String s : stringList1) {
+			intField++;
+		}
+
+		for (String s : stringList1) {
+			testClassField.testIntField++;
+		}
+
+		for (String s : stringList1) {
+			--testClassField.testIntField;
+		}
+
+		for (String s : stringList1) {
+			testClassField.testIntField += s.length();
+		}
+
+		TestClass testClassLocal = new TestClass();
+		for (String s : stringList1) {
+			testClassLocal.testIntField++;
+		}
+
+		for (String s : stringList1) {
+			--testClassLocal.testIntField;
+		}
+
+		for (String s : stringList1) {
+			testClassLocal.testIntField += s.length();
 		}
 
 		return "";
+	}
+
+	private class TestClass {
+		public int testIntField = 0;
 	}
 }
