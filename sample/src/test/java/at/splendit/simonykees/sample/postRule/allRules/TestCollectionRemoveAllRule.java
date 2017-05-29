@@ -14,7 +14,7 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList.stream().forEach((s) -> sb.append(s));
+		resultList.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -28,7 +28,7 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList2.stream().forEach((s) -> sb.append(s));
+		resultList2.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -46,9 +46,9 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList1.stream().forEach((s) -> sb.append(s));
-		resultList2.stream().forEach((s) -> sb.append(s));
-		resultList3.stream().forEach((s) -> sb.append(s));
+		resultList1.stream().forEach(sb::append);
+		resultList2.stream().forEach(sb::append);
+		resultList3.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -64,7 +64,7 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList2.stream().forEach((s) -> sb.append(s));
+		resultList2.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -82,7 +82,7 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList2.stream().forEach((s) -> sb.append(s));
+		resultList2.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -100,7 +100,7 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList2.stream().forEach((s) -> sb.append(s));
+		resultList2.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -123,7 +123,7 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList2.stream().forEach((s) -> sb.append(s));
+		resultList2.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -145,7 +145,7 @@ public class TestCollectionRemoveAllRule {
 		}
 
 		StringBuilder sb = new StringBuilder();
-		resultList.stream().forEach((s) -> sb.append(s));
+		resultList.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -157,7 +157,7 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList.stream().forEach((s) -> sb.append(s));
+		resultList.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -169,7 +169,7 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList.stream().forEach((s) -> sb.append(s));
+		resultList.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -182,7 +182,7 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList.stream().forEach((s) -> sb.append(s));
+		resultList.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -196,7 +196,7 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		numericList.stream().forEach((n) -> sb.append(n));
+		numericList.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -212,8 +212,8 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		numericList.stream().forEach((n) -> sb.append(n));
-		resultList.stream().forEach((s) -> sb.append(s));
+		numericList.stream().forEach(sb::append);
+		resultList.stream().forEach(sb::append);
 
 		return sb.toString();
 	}

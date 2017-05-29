@@ -2,14 +2,14 @@ package at.splendit.simonykees.sample.postRule.allRules;
 
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "nls", "unused", "rawtypes" })
 public class TestFunctionalInterfaceRule {
 
-	private static Logger log = LogManager.getLogger(TestFunctionalInterfaceRule.class);
+	private static Logger log = LoggerFactory.getLogger(TestFunctionalInterfaceRule.class);
 
 	private final String finalStringField;
 
@@ -41,15 +41,11 @@ public class TestFunctionalInterfaceRule {
 	@Test
 	public void test1() {
 
-		Runnable runnable = () -> {
-			log.debug("xx");
-		};
+		Runnable runnable = () -> log.debug("xx");
 
 		runnable.run();
 
-		MyClass mYClass = new MyClass(() -> {
-			log.debug("xy");
-		});
+		MyClass mYClass = new MyClass(() -> log.debug("xy"));
 
 		mYClass.test();
 
@@ -78,7 +74,8 @@ public class TestFunctionalInterfaceRule {
 	}
 
 	public void clashingLocalVariableNames(int l) {
-		int a, a1;
+		int a;
+		int a1;
 		a = 5;
 		a1 = 6;
 		int a4 = 8;

@@ -15,6 +15,7 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,9 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
+
+	// is used for configuring the test fragment
+	private static BundleActivator testFragmentActivator;
 
 	private static List<Job> jobs = Collections.synchronizedList(new ArrayList<>());
 
@@ -87,13 +91,33 @@ public class Activator extends AbstractUIPlugin {
 
 		// start jSparrow logging bundle
 		for (Bundle bundle : context.getBundles()) {
-			// name of the logging api bundle
 			if (bundle.getSymbolicName().equals("jSparrow.logging") //$NON-NLS-1$
+					/*
+					 * name of the logging api bundle
+					 */
 					&& bundle.getState() != Bundle.ACTIVE) {
 				bundle.start();
 				loggingBundleID = bundle.getBundleId();
 				break;
 			}
+		}
+
+		// load pseudo-activator from test fragment and execute its start method
+		try {
+			Class<? extends BundleActivator> fragmentActivatorClass = Class
+					.forName("at.splendit.simonykees.core.TestFragmentActivator").asSubclass(BundleActivator.class); //$NON-NLS-1$
+			testFragmentActivator = fragmentActivatorClass.newInstance();
+			testFragmentActivator.start(context);
+		} catch (ClassNotFoundException e) {
+			/*
+			 * Ignore! Exception is thrown, if the test fragment is not
+			 * available.
+			 * 
+			 * Note: The test fragment is always available, except in the
+			 * deployed version. We do not want to have any log message at all
+			 * in that case because customers should not know about test
+			 * fragments.
+			 */
 		}
 
 		logger.info(Messages.Activator_start);
@@ -118,6 +142,11 @@ public class Activator extends AbstractUIPlugin {
 		synchronized (jobs) {
 			jobs.forEach(job -> job.cancel());
 			jobs.clear();
+		}
+
+		// stop test fragment pseudo-activator
+		if (testFragmentActivator != null) {
+			testFragmentActivator.stop(context);
 		}
 
 		// stop jSparrow.logging

@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Finds the definition of the variable thats given at construction. Checks if
@@ -20,7 +20,7 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class VariableDefinitionASTVisitor extends AbstractCompilationUnitASTVisitor {
+public class VariableDefinitionASTVisitor extends AbstractASTRewriteASTVisitor {
 	private ASTNode beforeThis;
 	private boolean endThis;
 	private List<SimpleName> variableNames;

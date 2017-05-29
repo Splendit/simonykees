@@ -9,7 +9,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public abstract class TestFunctionalInterface2Rule {
+	private static final Logger logger = LoggerFactory.getLogger(TestFunctionalInterface2Rule.class);
 	Object fields;
 	MouseAdapter a = new MouseAdapter() {
 
@@ -31,9 +35,7 @@ public abstract class TestFunctionalInterface2Rule {
 
 	public void setFields(Object fields) {
 		Object proxyFields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
-				(Object proxy, Method method, Object[] args) -> {
-					return method.invoke(fields, args);
-				});
+				(Object proxy, Method method, Object[] args) -> method.invoke(fields, args));
 		this.fields = proxyFields;
 	}
 
@@ -118,7 +120,7 @@ public abstract class TestFunctionalInterface2Rule {
 		}) {
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -132,7 +134,7 @@ public abstract class TestFunctionalInterface2Rule {
 		}) {
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 

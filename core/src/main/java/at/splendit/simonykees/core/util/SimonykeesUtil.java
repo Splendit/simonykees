@@ -170,7 +170,7 @@ public final class SimonykeesUtil {
 		astParser.setCompilerOptions(options);
 		return (CompilationUnit) astParser.createAST(null);
 	}
-
+	
 	/**
 	 * Generate a {@code DocumentChange} from a {@code Document} and a
 	 * {@code TextEdit}
@@ -191,5 +191,4 @@ public final class SimonykeesUtil {
 		documentChange.setTextType("java"); //$NON-NLS-1$
 		return documentChange;
 	}
-
 }

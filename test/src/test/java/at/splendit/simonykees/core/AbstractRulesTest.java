@@ -31,9 +31,17 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 public abstract class AbstractRulesTest {
 
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
+	protected IPackageFragment packageFragment = null;
 
 	public AbstractRulesTest() {
 		super();
+		if (packageFragment == null) {
+			try {
+				packageFragment = RulesTestUtil.getPackageFragement();
+			} catch (Exception e) {
+				// ignoring exception to ease Constructors
+			}
+		}
 	}
 
 	/**
@@ -59,7 +67,6 @@ public abstract class AbstractRulesTest {
 	protected String processFile(String fileName, String content,
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) throws Exception {
 
-		IPackageFragment packageFragment = RulesTestUtil.getPackageFragement();
 		ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);
 
 		List<IJavaElement> javaElements = new ArrayList<>();
@@ -72,7 +79,7 @@ public abstract class AbstractRulesTest {
 		 * purposes
 		 */
 		IProgressMonitor monitor = new NullProgressMonitor();
-		
+
 		rules.stream().forEach(rule -> rule.calculateEnabledForProject(packageFragment.getJavaProject()));
 
 		refactoringPipeline.prepareRefactoring(javaElements, monitor);

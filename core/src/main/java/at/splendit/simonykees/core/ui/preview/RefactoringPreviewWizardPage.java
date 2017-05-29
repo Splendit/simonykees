@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
@@ -30,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.ui.AbstractWizardPage;
+import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -41,7 +42,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * @since 0.9
  */
 @SuppressWarnings("restriction")
-public class RefactoringPreviewWizardPage extends AbstractWizardPage {
+public class RefactoringPreviewWizardPage extends WizardPage {
 
 	private ICompilationUnit currentCompilationUnit;
 	private IChangePreviewViewer currentPreviewViewer;
@@ -298,5 +299,13 @@ public class RefactoringPreviewWizardPage extends AbstractWizardPage {
 		populateFileView();
 		populatePreviewViewer();
 		viewer.setSelection(new StructuredSelection(currentCompilationUnit));
+	}
+	
+	/**
+	 * Open help dialog
+	 */
+	@Override
+	public void performHelp() {
+		SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
 	}
 }
