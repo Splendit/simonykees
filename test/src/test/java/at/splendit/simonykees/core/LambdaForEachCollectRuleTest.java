@@ -13,6 +13,7 @@ import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.LambdaForEachCollectASTVisitor;
 
 /**
+ * Testing stream forEach to stream collect.
  * 
  * @author Ardit Ymeri
  * @since 1.2

@@ -1,33 +1,55 @@
 package at.splendit.simonykees.core.visitor;
 
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
+ * Replaces {@link Stream#forEach(java.util.function.Consumer)} with
+ * {@link Stream#collect(Collector)} and introduces a 
+ * new method invocation expression {@link List#addAll(Collection)} for adding
+ * for adding the result of the {@link Stream#collect(Collector)} to 
+ * the target list. 
+ * <pre>
+ * For example, the following code:
+ * <pre>
+ * {@code 
+ * 		List<String> oStrings = new ArrayList<>();
+ * 		List<String> objectList = new ArrayList<>();
+ * 		objectList.stream().map(o -> o.substring(0))
+ * 		.forEach( oString -> { 
+ * 			oStrings.add(oString);
+ * 		});}
+ * <pre>
+ * is transformed to the following:
+ * <pre>
+ * {@code 
+ * 		List<String> oStrings = new ArrayList<>();
+ * 		List<String> objectList = new ArrayList<>();
+ * 		oStrings.addAll(objectList.stream().map(o -> StringUtils.substring(o, 0)).collect(Collectors.toList()));
+ * }
  * 
  * @author Ardit Ymeri
  * @since 1.2
@@ -42,29 +64,40 @@ public class LambdaForEachCollectASTVisitor extends AbstractAddImportASTVisitor 
 	private static final String JAVA_UTIL_STREAM_COLLECTORS_SIMPLE_NAME = java.util.stream.Collectors.class
 			.getSimpleName();
 	private static final String JAVA_UTIL_LIST = java.util.List.class.getName();
-	private static final String JAVA_UTIL_ARRAY_LIST = java.util.ArrayList.class.getName();
-	private static final String JAVA_UTIL_HASHSET = java.util.HashSet.class.getName();
 	private static final String TO_LIST = "toList"; //$NON-NLS-1$
 	private static final String COLLECT = "collect"; //$NON-NLS-1$
+	private static final String ADD_ALL = "addAll"; //$NON-NLS-1$
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
-		// TODO: check if there is another Collectors class imported
-		return super.visit(compilationUnit);
+		boolean safeToAddImport = ASTNodeUtil.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
+				.stream().map(ImportDeclaration::getName).filter(Name::isQualifiedName)
+				.map(name -> ((QualifiedName) name).getName())
+				.noneMatch(JAVA_UTIL_STREAM_COLLECTORS_SIMPLE_NAME::equals);
+
+		return safeToAddImport && super.visit(compilationUnit);
 	}
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 
 		SimpleName methodName = methodInvocation.getName();
+		// if the method name matches with 'java.util.stream.Stream::forEach'
+		// ...
 		if (FOR_EACH_METHOD_NAME.equals(methodName.getIdentifier())
 				&& ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent().getNodeType()) {
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-			if (methodBinding != null && ClassRelationUtil.isContentOfTypes(methodBinding.getDeclaringClass(), Collections.singletonList(JAVA_UTIL_STREAM))) {
+			if (methodBinding != null && ClassRelationUtil.isContentOfTypes(methodBinding.getDeclaringClass(),
+					Collections.singletonList(JAVA_UTIL_STREAM))) {
+				// and if the parameter of 'forEach' is a lambda expression ...
 				List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 						Expression.class);
 				if (arguments.size() == 1 && ASTNode.LAMBDA_EXPRESSION == arguments.get(0).getNodeType()) {
-
+					/*
+					 * the lambda expression must have only one parameter and
+					 * its body must contain only one expression invoking the
+					 * 'List::add' method.
+					 */
 					LambdaExpression lambdaExpression = (LambdaExpression) arguments.get(0);
 					SimpleName parameter = extractSingleParameter(lambdaExpression);
 					MethodInvocation bodyExpression = extractSingleBodyExpression(lambdaExpression);
@@ -73,21 +106,14 @@ public class LambdaForEachCollectASTVisitor extends AbstractAddImportASTVisitor 
 						Expression collectionExpression = bodyExpression.getExpression();
 						if (ASTNode.SIMPLE_NAME == collectionExpression.getNodeType()) {
 							SimpleName collection = (SimpleName) collectionExpression;
-							Block outerBlock = ASTNodeUtil.getSpecificAncestor(methodInvocation, Block.class);
-							if (outerBlock != null) {
-								VariableDeclarationFragment collectionDeclarationFragment = findEmptyCollectionInitialization(
-										collection, outerBlock);
 
-								if (collectionDeclarationFragment != null) {
-
-									VariableDeclarationStatement targetDecl = createTargetVariableDeclaration(
-											methodInvocation, collection, collectionDeclarationFragment);
-
-									astRewrite.replace(methodInvocation.getParent(), targetDecl, null);
-
-									removeFragmentFromAst(collectionDeclarationFragment);
-								}
-							}
+							/*
+							 * Replace forEach with collect(Collectors.toList())
+							 * and use the result as parameter in
+							 * Collection::addAll method.
+							 */
+							Expression targetDecl = createTargetExpression(methodInvocation, collection);
+							astRewrite.replace(methodInvocation, targetDecl, null);
 						}
 					}
 
@@ -98,8 +124,23 @@ public class LambdaForEachCollectASTVisitor extends AbstractAddImportASTVisitor 
 		return true;
 	}
 
-	private VariableDeclarationStatement createTargetVariableDeclaration(MethodInvocation methodInvocation,
-			SimpleName collection, VariableDeclarationFragment collectionDeclarationFragment) {
+	/**
+	 * Creates a new method invocation expression of the form:
+	 * 
+	 * <pre>
+	 * {@code collection.addAll(streamObject.steam(). ... .collect(Collectors.toList()))}
+	 * 
+	 * <pre>
+	 * 
+	 * @param methodInvocation
+	 *            method invocation of
+	 *            {@link Stream#forEach(java.util.function.Consumer)}
+	 * @param collection
+	 *            target list name
+	 * 
+	 * @return new method invocation expression 
+	 */
+	private Expression createTargetExpression(MethodInvocation methodInvocation, SimpleName collection) {
 
 		AST ast = methodInvocation.getAST();
 		MethodInvocation collect = ast.newMethodInvocation();
@@ -114,48 +155,29 @@ public class LambdaForEachCollectASTVisitor extends AbstractAddImportASTVisitor 
 
 		collect.setExpression((Expression) astRewrite.createCopyTarget(methodInvocation.getExpression()));
 
-		VariableDeclarationStatement targetDecl = (VariableDeclarationStatement) ASTNode.copySubtree(
-				collectionDeclarationFragment.getAST(),
-				(VariableDeclarationStatement) collectionDeclarationFragment.getParent());
-		targetDecl.setType((Type) astRewrite.createCopyTarget(
-				((VariableDeclarationStatement) collectionDeclarationFragment.getParent()).getType()));
-		ASTNodeUtil.returnTypedList(targetDecl.fragments(), VariableDeclarationFragment.class).stream()
-				.forEach(fragment -> {
-					if (fragment.getName().getIdentifier()
-							.equals(collectionDeclarationFragment.getName().getIdentifier())) {
-						fragment.setInitializer(collect);
-					} else {
-						astRewrite.remove(fragment, null);
-					}
-				});
+		MethodInvocation addAllInvocation = ast.newMethodInvocation();
+		addAllInvocation.setName(ast.newSimpleName(ADD_ALL));
+		addAllInvocation.setExpression((SimpleName) astRewrite.createCopyTarget(collection));
+		listRewirte = astRewrite.getListRewrite(addAllInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
+		listRewirte.insertFirst(collect, null);
 
-		return targetDecl;
+		return addAllInvocation;
 	}
 
-	private void removeFragmentFromAst(VariableDeclarationFragment collectionDeclarationFragment) {
-		if (ASTNode.VARIABLE_DECLARATION_STATEMENT == collectionDeclarationFragment.getParent().getNodeType()) {
-			VariableDeclarationStatement statement = (VariableDeclarationStatement) collectionDeclarationFragment
-					.getParent();
-			if (statement.fragments().size() == 1) {
-				astRewrite.remove(statement, null);
-			} else {
-				astRewrite.remove(collectionDeclarationFragment, null);
-			}
-		}
-
-	}
-
-	private VariableDeclarationFragment findEmptyCollectionInitialization(SimpleName collection, Block block) {
-		EmptyListInitializationVisitor visitor = new EmptyListInitializationVisitor(collection);
-		block.accept(visitor);
-		return visitor.getInitializationFragment();
-	}
-
-	private boolean isListAddInvocation(MethodInvocation bodyExpression) {
+	/**
+	 * Checks whether the given method invocation is an occurrence of
+	 * {@link List#add(Object)}
+	 * 
+	 * @param methodInvocation
+	 *            a node representing the method invocation to look for.
+	 * @return {@code true} if the method invocation is an
+	 *         {@link List#add(Object)} or {@code false} otherwise.
+	 */
+	private boolean isListAddInvocation(MethodInvocation methodInvocation) {
 		boolean isAddInvocation = false;
-		SimpleName name = bodyExpression.getName();
+		SimpleName name = methodInvocation.getName();
 		if (ADD_METHOD_NAME.equals(name.getIdentifier())) {
-			Expression expression = bodyExpression.getExpression();
+			Expression expression = methodInvocation.getExpression();
 			if (ClassRelationUtil.isContentOfTypes(expression.resolveTypeBinding(),
 					Collections.singletonList(JAVA_UTIL_LIST))) {
 				isAddInvocation = true;
@@ -164,6 +186,17 @@ public class LambdaForEachCollectASTVisitor extends AbstractAddImportASTVisitor 
 		return isAddInvocation;
 	}
 
+	/**
+	 * Checks whether the body of the lambda expression consist of a single
+	 * method invocation.
+	 * 
+	 * @param lambdaExpression
+	 *            a node representing a lambda expression
+	 * 
+	 * @return a {@link MethodInvocation} consisting the body of the lambda
+	 *         expression or {@code null} if the body lambda expression is not a
+	 *         single method invocation or contains more than one statements.
+	 */
 	private MethodInvocation extractSingleBodyExpression(LambdaExpression lambdaExpression) {
 		MethodInvocation methodInvocation = null;
 		ASTNode body = lambdaExpression.getBody();
@@ -186,6 +219,14 @@ public class LambdaForEachCollectASTVisitor extends AbstractAddImportASTVisitor 
 		return methodInvocation;
 	}
 
+	/**
+	 * Checks whether a lambda expression has a single parameter.
+	 * 
+	 * @param lambdaExpression
+	 *            lambda expression to check for.
+	 * @return the name of the parameter or {@code null} if the lambda
+	 *         expression has more than one ore zero parameters.
+	 */
 	private SimpleName extractSingleParameter(LambdaExpression lambdaExpression) {
 		SimpleName parameter = null;
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
@@ -202,56 +243,5 @@ public class LambdaForEachCollectASTVisitor extends AbstractAddImportASTVisitor 
 			}
 		}
 		return parameter;
-	}
-
-	private class EmptyListInitializationVisitor extends ASTVisitor {
-		private SimpleName listName;
-		private VariableDeclarationFragment emptyListInitialization;
-		private boolean referenced = false;
-		private boolean terminate = false;
-
-		public EmptyListInitializationVisitor(SimpleName listName) {
-			this.listName = listName;
-		}
-
-		@Override
-		public boolean preVisit2(ASTNode node) {
-			return !terminate && !referenced;
-		}
-
-		@Override
-		public boolean visit(SimpleName simpleName) {
-			if (simpleName == listName) {
-				terminate = true;
-				return true;
-			}
-
-			IBinding binding = simpleName.resolveBinding();
-			if (IBinding.VARIABLE == binding.getKind() && simpleName.getIdentifier().equals(listName.getIdentifier())) {
-				if (VariableDeclarationFragment.NAME_PROPERTY == simpleName.getLocationInParent()) {
-					VariableDeclarationFragment fragment = (VariableDeclarationFragment) simpleName.getParent();
-					Expression initializer = fragment.getInitializer();
-					if (initializer != null && ASTNode.CLASS_INSTANCE_CREATION == initializer.getNodeType()) {
-						ClassInstanceCreation instanceCreation = (ClassInstanceCreation) initializer;
-						IMethodBinding ctorBinding = instanceCreation.resolveConstructorBinding();
-						ITypeBinding declClass = ctorBinding.getDeclaringClass();
-						if (instanceCreation.arguments().isEmpty() && ClassRelationUtil.isContentOfTypes(
-								declClass.getErasure(), Arrays.asList(JAVA_UTIL_ARRAY_LIST, JAVA_UTIL_HASHSET))) {
-							this.emptyListInitialization = fragment;
-
-						}
-					}
-				} else {
-					referenced = true;
-					emptyListInitialization = null;
-				}
-			}
-
-			return true;
-		}
-
-		public VariableDeclarationFragment getInitializationFragment() {
-			return this.emptyListInitialization;
-		}
 	}
 }

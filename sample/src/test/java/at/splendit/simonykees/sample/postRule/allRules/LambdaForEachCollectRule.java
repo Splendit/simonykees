@@ -6,21 +6,36 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-@SuppressWarnings({ "nls" })
+@SuppressWarnings({ "nls", "unused" })
 public class LambdaForEachCollectRule {
 
+	List<String> listField = new ArrayList<>();
+
 	public String convertForEachToCollect(String input) {
+		List<String> oStrings = new ArrayList<>();
 		List<String> objectList = new ArrayList<>();
 
-		List<String> oStrings = objectList.stream().map(o -> StringUtils.substring(o, 0)).collect(Collectors.toList());
+		oStrings.addAll(objectList.stream().map(o -> StringUtils.substring(o, 0)).collect(Collectors.toList()));
 
 		return oStrings.stream().collect(Collectors.joining(","));
 	}
 
 	public String convertForEachExpressionToCollect(String input) {
+		List<String> oStrings = new ArrayList<>();
 		List<String> objectList = new ArrayList<>();
 
-		List<String> oStrings = objectList.stream().map(o -> o).collect(Collectors.toList());
+		oStrings.addAll(objectList.stream().map(o -> o).collect(Collectors.toList()));
+
+		return oStrings.stream().collect(Collectors.joining(","));
+	}
+
+	public String multiDeclarationFragment(String input) {
+		List<String> oStrings = new ArrayList<>();
+		List<String> ostrings2;
+		List<String> ostrings3 = new ArrayList<>();
+		List<String> objectList = new ArrayList<>();
+
+		oStrings.addAll(objectList.stream().map(o -> StringUtils.substring(o, 0)).collect(Collectors.toList()));
 
 		return oStrings.stream().collect(Collectors.joining(","));
 	}
@@ -30,24 +45,26 @@ public class LambdaForEachCollectRule {
 		List<String> objectList = new ArrayList<>();
 
 		oStrings.add("");
-		objectList.stream().map(o -> StringUtils.substring(o, 0)).forEach(oStrings::add);
+		oStrings.addAll(objectList.stream().map(o -> StringUtils.substring(o, 0)).collect(Collectors.toList()));
 
 		return oStrings.stream().collect(Collectors.joining(","));
 	}
 
 	public String addAfterForEach(String input) {
+		List<String> oStrings = new ArrayList<>();
 		List<String> objectList = new ArrayList<>();
 
-		List<String> oStrings = objectList.stream().map(o -> StringUtils.substring(o, 0)).collect(Collectors.toList());
+		oStrings.addAll(objectList.stream().map(o -> StringUtils.substring(o, 0)).collect(Collectors.toList()));
 
 		oStrings.add("-");
 		return oStrings.stream().collect(Collectors.joining(","));
 	}
 
 	public String blockBody(String input) {
+		List<String> oStrings = new ArrayList<>();
 		List<String> objectList = new ArrayList<>();
 
-		List<String> oStrings = objectList.stream().map(o -> StringUtils.substring(o, 0)).collect(Collectors.toList());
+		oStrings.addAll(objectList.stream().map(o -> StringUtils.substring(o, 0)).collect(Collectors.toList()));
 
 		return oStrings.stream().collect(Collectors.joining(","));
 	}
@@ -67,11 +84,35 @@ public class LambdaForEachCollectRule {
 	}
 
 	public String referencingOtherLocalVars(String input) {
+		List<String> oStrings = new ArrayList<>();
 		List<String> objectList = new ArrayList<>();
 		String s = "";
-		List<String> oStrings = objectList.stream().filter(oString -> oString.equals(s))
-				.map(o -> StringUtils.substring(o, 0)).collect(Collectors.toList());
+		oStrings.addAll(objectList.stream().filter(oString -> oString.equals(s)).map(o -> StringUtils.substring(o, 0))
+				.collect(Collectors.toList()));
 
 		return oStrings.stream().collect(Collectors.joining(","));
+	}
+
+	public String nestedBlocks(String input) {
+		List<String> oStrings = new ArrayList<>();
+		{
+			List<String> objectList = new ArrayList<>();
+			String s = "";
+			if (StringUtils.isEmpty(s)) {
+				oStrings.addAll(objectList.stream().filter(oString -> oString.equals(s))
+						.map(o -> StringUtils.substring(o, 0)).collect(Collectors.toList()));
+			}
+		}
+
+		return oStrings.stream().collect(Collectors.joining(","));
+	}
+
+	public String addingToFieldMethod(String input) {
+		List<String> objectList = new ArrayList<>();
+		String s = "";
+		listField.addAll(objectList.stream().filter(oString -> oString.equals(s)).map(o -> StringUtils.substring(o, 0))
+				.collect(Collectors.toList()));
+
+		return listField.stream().collect(Collectors.joining(","));
 	}
 }
