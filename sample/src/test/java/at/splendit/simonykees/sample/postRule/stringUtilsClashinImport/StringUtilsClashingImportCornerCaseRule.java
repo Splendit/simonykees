@@ -2,8 +2,6 @@ package at.splendit.simonykees.sample.postRule.stringUtilsClashinImport;
 
 import java.util.List;
 
-import at.splendit.simonykees.sample.test.AbstractReflectiveMethodTester;
-import at.splendit.simonykees.sample.test.ParameterType;
 import at.splendit.simonykees.sample.utilities.NumberUtils;
 import at.splendit.simonykees.sample.utilities.StringUtils;
 
@@ -25,8 +23,6 @@ public class StringUtilsClashingImportCornerCaseRule {
 		NumberUtils numUtil;
 		NumberUtils.explode();
 		List<String>list;
-		AbstractReflectiveMethodTester tester;
-		ParameterType paramType;
 		return testString.indexOf("e");
 	}
 }

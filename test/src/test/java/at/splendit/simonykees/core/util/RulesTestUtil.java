@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.w3c.dom.Document;
@@ -57,16 +56,18 @@ public class RulesTestUtil {
 		// hiding
 	}
 
-	public static IPackageFragment getPackageFragement() throws Exception {
+	public static IPackageFragmentRoot getPackageFragement() throws Exception {
 		IJavaProject javaProject = createJavaProject("allRulesTest", "bin");
+		javaProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		javaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		javaProject.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
 		IPackageFragmentRoot root = addSourceContainer(javaProject, "/allRulesTestRoot");
-
 		addToClasspath(javaProject, getClassPathEntries(root));
-
-		return root.createPackageFragment("at.splendit.simonykees", true, null);
+		
+		return root;
 	}
 
-	private static List<IClasspathEntry> getClassPathEntries(IPackageFragmentRoot root) throws Exception {
+	public static List<IClasspathEntry> getClassPathEntries(IPackageFragmentRoot root) throws Exception {
 		final List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 		final IClasspathEntry srcEntry = JavaCore.newSourceEntry(root.getPath(), EMPTY_PATHS, EMPTY_PATHS, null);
 		final IClasspathEntry rtJarEntry = JavaCore.newLibraryEntry(getPathToRtJar(), null, null);
@@ -157,7 +158,7 @@ public class RulesTestUtil {
 		return new Path(classPath.substring(start, end));
 	}
 
-	private static IPackageFragmentRoot addSourceContainer(IJavaProject javaProject, String containerName)
+	public static IPackageFragmentRoot addSourceContainer(IJavaProject javaProject, String containerName)
 			throws Exception {
 		IProject project = javaProject.getProject();
 		IFolder folder = project.getFolder(containerName);

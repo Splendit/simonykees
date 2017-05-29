@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.lambdaToMethodReferenceRuleHelper;
+package at.splendit.simonykees.sample.utilities;
 
 import java.time.LocalDate;
 

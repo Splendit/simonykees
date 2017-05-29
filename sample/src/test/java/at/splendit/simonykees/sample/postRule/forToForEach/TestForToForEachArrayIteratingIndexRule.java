@@ -15,12 +15,13 @@ public class TestForToForEachArrayIteratingIndexRule {
 		
 		String[][] ms = {{"3", "1", "2"}, {"5", "6", "7"}, {"8", "9", "4"}};
 		StringBuilder sb = new StringBuilder();
-		if(sb != null)for (String[] inner:ms){
-			String []another = inner;
-			for (String iterator:inner){
-				sb.append(iterator);
+		if(sb != null)
+			for (String[] inner : ms) {
+				String []another = inner;
+				for (String iterator : inner) {
+					sb.append(iterator);
+				}
 			}
-		}
 
 		return sb.toString();
 	}
@@ -31,7 +32,7 @@ public class TestForToForEachArrayIteratingIndexRule {
 		String[] ms = (String[]) foo.toArray();
 		StringBuilder sb = new StringBuilder();
 
-		for (String s:ms){
+		for (String s : ms) {
 			sb.append(s);
 		}
 
@@ -43,7 +44,7 @@ public class TestForToForEachArrayIteratingIndexRule {
 		List<String> foo = generateList(input);
 		String[] ms = (String[]) foo.toArray();
 		StringBuilder sb = new StringBuilder();
-		for (String s:ms){
+		for (String s : ms) {
 			sb.append(s);
 		}
 
@@ -55,7 +56,7 @@ public class TestForToForEachArrayIteratingIndexRule {
 		List<String> foo = generateList(input);
 		String[] ms = (String[]) foo.toArray();
 		StringBuilder sb = new StringBuilder();
-		for (String s:ms){
+		for (String s : ms) {
 			sb.append(s);
 		}
 
@@ -67,7 +68,7 @@ public class TestForToForEachArrayIteratingIndexRule {
 		List<String> foo = generateList(input);
 		String[] ms = (String[]) foo.toArray();
 		StringBuilder sb = new StringBuilder();
-		for (String s:ms){
+		for (String s : ms) {
 			sb.append(s);
 		}
 
@@ -79,7 +80,7 @@ public class TestForToForEachArrayIteratingIndexRule {
 		List<String> foo = generateList(input);
 		String[] ms = (String[]) foo.toArray();
 		StringBuilder sb = new StringBuilder();
-		for (String s:ms){
+		for (String s : ms) {
 			sb.append(s);
 		}
 
@@ -136,8 +137,8 @@ public class TestForToForEachArrayIteratingIndexRule {
 		List<String> foo = generateList(input);
 		String[] ms = (String[]) foo.toArray();
 		StringBuilder sb = new StringBuilder();
-		for (String s:ms){
-			for (String iterator:ms){
+		for (String s : ms) {
+			for (String iterator : ms) {
 				sb.append(iterator);
 				sb.append(s);
 			}
@@ -151,7 +152,7 @@ public class TestForToForEachArrayIteratingIndexRule {
 		List<String> foo = generateList(input);
 		MyCollection[] ms = {new MyCollection<>(), new MyCollection<>()};
 		StringBuilder sb = new StringBuilder();
-		for (MyCollection iterator:ms){
+		for (MyCollection iterator : ms) {
 			String s = iterator.toString();
 			sb.append(s);
 		}
@@ -178,7 +179,7 @@ public class TestForToForEachArrayIteratingIndexRule {
 				int i = 0;
 			}
 		};
-		for (MyCollection iterator:ms){
+		for (MyCollection iterator : ms) {
 			String s = iterator.toString();
 			sb.append(s);
 		}
@@ -191,7 +192,7 @@ public class TestForToForEachArrayIteratingIndexRule {
 		String[] ms = {"3", "1", "2"};
 		StringBuilder sb = new StringBuilder();
 		String iterator1;
-		for (String iterator2:ms){
+		for (String iterator2 : ms) {
 			sb.append(iterator2);
 		}
 
@@ -202,9 +203,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 		
 		String[][] ms = {{"3", "1", "2"}, {"5", "6", "7"}, {"8", "9", "4"}};
 		StringBuilder sb = new StringBuilder();
-		for (String[] inner:ms){
+		for (String[] inner : ms) {
 			String []another = inner;
-			for (String iterator:inner){
+			for (String iterator : inner) {
 				sb.append(iterator);
 			}
 		}
@@ -221,7 +222,7 @@ public class TestForToForEachArrayIteratingIndexRule {
 			ms[i] = "-";
 		}
 		
-		for (String iterator:ms){
+		for (String iterator : ms) {
 			sb.append(iterator);
 		}
 
@@ -234,11 +235,11 @@ public class TestForToForEachArrayIteratingIndexRule {
 		String[] ms2 = {"4", "5", "6"};
 		StringBuilder sb = new StringBuilder();
 		
-		for (String iterator:ms){
+		for (String iterator : ms) {
 			sb.append(iterator);
 		}
 		
-		for (String iterator:ms2){
+		for (String iterator : ms2) {
 			sb.append(iterator);
 		}
 
