@@ -130,6 +130,10 @@ public abstract class AbstractRefactorer {
 				 */
 				if (!containingErrorList.isEmpty()) {
 					// TODO SIM-416 add the opening of the dialog and processing
+					/*
+					 * TODO make the check sooner (when the SelectRulesWizard
+					 * opens rather than when finish is clicked)
+					 */
 					logger.warn(NLS.bind(ExceptionMessages.AbstractRefactorer_syntax_errors_exist, containingErrorList
 							.stream().map(ICompilationUnit::getElementName).collect(Collectors.joining(", ")))); //$NON-NLS-1$
 
