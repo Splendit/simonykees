@@ -3,14 +3,19 @@ package at.splendit.simonykees.sample.postRule.allRules;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings("unused")
 public class TestWhileToForEachListRule {
+
+	private static final Logger logger = LoggerFactory.getLogger(TestWhileToForEachListRule.class);
 
 	public String loopingOverLists(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
 		for (String t : list) {
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 		}
 		return sb.toString();
@@ -20,7 +25,7 @@ public class TestWhileToForEachListRule {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
 		for (String t : list) {
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			for (String iterator : list) {
 				sb.append(iterator);
@@ -33,13 +38,13 @@ public class TestWhileToForEachListRule {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
 		for (String t : list) {
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			for (String iterator : list) {
 				sb.append(iterator);
 				for (String iterator1 : list) {
 					sb.append(iterator1);
-					System.out.print(iterator1);
+					logger.info(iterator1);
 				}
 			}
 		}
@@ -52,12 +57,12 @@ public class TestWhileToForEachListRule {
 		List<String> list = generateList(input);
 		List<String> list2 = generateList(input);
 		for (String t : list) {
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 		}
 
 		for (String s : list2) {
-			System.out.println(s);
+			logger.info(s);
 			sb.append(s);
 		}
 
@@ -72,7 +77,7 @@ public class TestWhileToForEachListRule {
 		i = 0;
 		while (i < list.size()) {
 			String t = list.get(i);
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			i++;
 		}
@@ -85,7 +90,7 @@ public class TestWhileToForEachListRule {
 		int i = 0;
 		while (i < list.size()) {
 			String t = list.get(i);
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t + i);
 			i++;
 		}
@@ -98,7 +103,7 @@ public class TestWhileToForEachListRule {
 		int i = 0;
 		while (i < list.size()) {
 			String t = list.get(i);
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			i++;
 		}
@@ -110,7 +115,7 @@ public class TestWhileToForEachListRule {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
 		for (String t : list) {
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 		}
 		return sb.toString();
@@ -120,7 +125,7 @@ public class TestWhileToForEachListRule {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
 		for (String t : list) {
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 		}
 		return sb.toString();
@@ -130,7 +135,7 @@ public class TestWhileToForEachListRule {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
 		for (String t : list) {
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 		}
 		return sb.toString();
@@ -143,7 +148,7 @@ public class TestWhileToForEachListRule {
 		if (list.size() > 0) {
 			while (i < list.size()) {
 				String t = list.get(i);
-				System.out.println(t);
+				logger.info(t);
 				sb.append(t);
 				i += 1;
 			}
@@ -158,7 +163,7 @@ public class TestWhileToForEachListRule {
 		int j = 0;
 		while (i < list.size()) {
 			String t = list.get(i);
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			i += 1;
 			j++;
@@ -173,7 +178,7 @@ public class TestWhileToForEachListRule {
 		int j = 0;
 		while (i < list.size()) {
 			String t = list.get(i);
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			j++;
 			i += 1;
@@ -188,7 +193,7 @@ public class TestWhileToForEachListRule {
 		int j = 0;
 		while (i < list.size()) {
 			String t = list.get(i);
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			j++;
 			i += 2;
@@ -202,7 +207,7 @@ public class TestWhileToForEachListRule {
 		int i = 0;
 		while (i < list.size()) {
 			String t = list.get(i);
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			i += 2;
 		}
@@ -213,7 +218,7 @@ public class TestWhileToForEachListRule {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(iterator);
 		for (String iterator1 : list) {
-			System.out.println(iterator1);
+			logger.info(iterator1);
 			sb.append(iterator1);
 		}
 		return sb.toString();
