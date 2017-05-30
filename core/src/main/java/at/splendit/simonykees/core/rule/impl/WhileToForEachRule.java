@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.visitor.loop.WhileToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.whileToForEach.WhileToForEachASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
