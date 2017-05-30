@@ -24,6 +24,7 @@ public enum Tag {
 	JAVA_1_6("1.6", "6"),
 	JAVA_1_7("1.7", "7"),
 	JAVA_1_8("1.8", "8"),
+	// not yet arrived! JAVA_1_9("1.9","9"),
 	EMPTY(),
 	STRING_MANIPULATION("string-manipulation"),
 	FORMATTING("format", "organize"),
@@ -31,8 +32,9 @@ public enum Tag {
 	PERFORMANCE("performance"),
 	READABILITY("readability"),
 	OLD_LANGUAGE_CONSTRUCTS("outdated constructs"),
-	LAMBDA("lambda");
-	// not yet arrived! JAVA_1_9("1.9","9");
+	LAMBDA("lambda"),
+	LOGGING("logging");
+
 
 	private List<String> tagName;
 

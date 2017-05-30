@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
+import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -36,13 +36,14 @@ public abstract class AbstractRulesTest {
 	private static final String UTILITY_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/utilities"; //$NON-NLS-1$
 
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
+	protected IPackageFragment packageFragment = null;
 
 	protected static IPackageFragmentRoot root = null;
 
 	@BeforeClass
 	public static void setUp() throws Exception {
 		if (root == null) {
-			root = RulesTestUtil.getPackageFragement();
+			root = RulesTestUtil.getPackageFragementRoot();
 			String packageString = "at.splendit.simonykees.sample.utilities"; //$NON-NLS-1$
 			IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
 			for (Path utilityPath : loadUtilityClasses(UTILITY_DIRECTORY)) {
@@ -60,12 +61,6 @@ public abstract class AbstractRulesTest {
 
 	public AbstractRulesTest() {
 		super();
-		try {
-
-		} catch (Exception e) {
-			// to skip the implementation of throws in inherited constructors
-			throw new RuntimeException(e);
-		}
 	}
 
 	/**
@@ -107,8 +102,7 @@ public abstract class AbstractRulesTest {
 		List<IJavaElement> javaElements = new ArrayList<>();
 		javaElements.add(compilationUnit);
 
-		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
-		};
+		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules);
 
 		/*
 		 * A default progress monitor implementation, used just for testing
@@ -118,9 +112,9 @@ public abstract class AbstractRulesTest {
 
 		rules.stream().forEach(rule -> rule.calculateEnabledForProject(packageFragment.getJavaProject()));
 
-		refactorer.prepareRefactoring(monitor);
-		refactorer.doRefactoring(monitor);
-		refactorer.commitRefactoring();
+		refactoringPipeline.prepareRefactoring(javaElements, monitor);
+		refactoringPipeline.doRefactoring(monitor);
+		refactoringPipeline.commitRefactoring();
 
 		return compilationUnit.getSource();
 	}

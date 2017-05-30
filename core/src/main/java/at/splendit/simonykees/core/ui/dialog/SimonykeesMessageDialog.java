@@ -55,6 +55,12 @@ public class SimonykeesMessageDialog extends MessageDialog {
 		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, dialogImage,
 				defaultIndex, dialogButtonLabels).open() == 0;
 	}
+	
+	public static boolean openConfirmDialog(Shell parentShell, String message) {
+		messageText = message;
+		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, MessageDialog.CONFIRM,
+				defaultIndex, new String[] { Messages.ui_cancel, Messages.ui_ok }).open() == 1;
+	}
 
 	public static boolean openErrorMessageDialog(Shell parentShell, SimonykeesException simonykeesException) {
 		messageText = ((simonykeesException != null) ? simonykeesException.getUiMessage() : dialogErrorMessage)

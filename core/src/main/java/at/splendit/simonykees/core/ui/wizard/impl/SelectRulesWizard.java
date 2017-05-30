@@ -21,17 +21,17 @@ import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.exception.SimonykeesException;
-import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
+import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.ui.LicenseUtil;
-import at.splendit.simonykees.core.ui.RefactoringPreviewWizard;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
+import at.splendit.simonykees.core.ui.preview.RefactoringPreviewWizard;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
- * {@link Wizard} holding the {@link AbstractSelectRulesWizardPage}, which contains a
- * list of all selectable rules.
+ * {@link Wizard} holding the {@link AbstractSelectRulesWizardPage}, which
+ * contains a list of all selectable rules.
  * 
  * Clicking the OK button either calls the {@link RefactoringPreviewWizard} (if
  * there are changes within the code for the selected rules), or a
@@ -45,11 +45,12 @@ public class SelectRulesWizard extends Wizard {
 	private AbstractSelectRulesWizardPage page;
 	private SelectRulesWizardPageControler controler;
 	private SelectRulesWizardPageModel model;
-	
+
 	private final List<IJavaElement> javaElements;
 	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
-	public SelectRulesWizard(List<IJavaElement> javaElements, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+	public SelectRulesWizard(List<IJavaElement> javaElements,
+			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		super();
 		this.javaElements = javaElements;
 		this.rules = rules;
@@ -74,10 +75,10 @@ public class SelectRulesWizard extends Wizard {
 		Activator.setRunning(false);
 		return super.performCancel();
 	}
-	
+
 	@Override
 	public boolean canFinish() {
-		if(model.getSelectionAsList().isEmpty()) {
+		if (model.getSelectionAsList().isEmpty()) {
 			return false;
 		} else {
 			return true;
@@ -86,9 +87,10 @@ public class SelectRulesWizard extends Wizard {
 
 	@Override
 	public boolean performFinish() {
+		
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = model.getSelectionAsList();
-		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
-		};
+		
+		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules);
 		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
 
 		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
@@ -97,9 +99,9 @@ public class SelectRulesWizard extends Wizard {
 			protected IStatus run(IProgressMonitor monitor) {
 
 				try {
-					refactorer.prepareRefactoring(monitor);
+					refactoringPipeline.prepareRefactoring(javaElements, monitor);
 					if (monitor.isCanceled()) {
-						refactorer.clearWorkingCopies();
+						refactoringPipeline.clearStates();
 						return Status.CANCEL_STATUS;
 					}
 				} catch (RefactoringException e) {
@@ -107,9 +109,9 @@ public class SelectRulesWizard extends Wizard {
 					return Status.CANCEL_STATUS;
 				}
 				try {
-					refactorer.doRefactoring(monitor);
+					refactoringPipeline.doRefactoring(monitor);
 					if (monitor.isCanceled()) {
-						refactorer.clearWorkingCopies();
+						refactoringPipeline.clearStates();
 						return Status.CANCEL_STATUS;
 					}
 				} catch (RefactoringException e) {
@@ -133,11 +135,9 @@ public class SelectRulesWizard extends Wizard {
 
 				if (event.getResult().isOK()) {
 					if (LicenseUtil.getInstance().isValid()) {
-						if (refactorer.hasChanges()) {
-
-							synchronizeWithUIShowRefactoringPreviewWizard(refactorer, rectangle);
+						if (refactoringPipeline.hasChanges()) {
+							synchronizeWithUIShowRefactoringPreviewWizard(refactoringPipeline, rectangle);
 						} else {
-
 							synchronizeWithUIShowWarningNoRefactoringDialog();
 						}
 					} else {
@@ -160,14 +160,30 @@ public class SelectRulesWizard extends Wizard {
 	/**
 	 * Method used to open RefactoringPreviewWizard from non UI thread
 	 */
-	private void synchronizeWithUIShowRefactoringPreviewWizard(AbstractRefactorer refactorer, Rectangle rectangle) {
+	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
+			Rectangle rectangle) {
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactorer));
-
+				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactoringPipeline)) {
+					
+					@Override
+					protected void nextPressed() {
+						((RefactoringPreviewWizard)getWizard()).pressedNext();
+						super.nextPressed();
+					}
+					
+					@Override
+					protected void backPressed() {
+						((RefactoringPreviewWizard)getWizard()).pressedBack();
+						super.backPressed();
+					}
+					
+					
+				};
+	
 				// maximizes the RefactoringPreviewWizard
 				dialog.setPageSize(rectangle.width, rectangle.height);
 				dialog.open();

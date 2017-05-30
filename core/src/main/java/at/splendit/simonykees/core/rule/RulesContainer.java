@@ -14,6 +14,8 @@ import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
+import at.splendit.simonykees.core.rule.impl.LambdaForEachCollectRule;
+import at.splendit.simonykees.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
 import at.splendit.simonykees.core.rule.impl.LambdaToMethodReferenceRule;
 import at.splendit.simonykees.core.rule.impl.MultiCatchRule;
 import at.splendit.simonykees.core.rule.impl.MultiVariableDeclarationLineRule;
@@ -36,8 +38,10 @@ import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 import at.splendit.simonykees.core.visitor.DiamondOperatorASTVisitor;
 import at.splendit.simonykees.core.visitor.InefficientConstructorASTVisitor;
-import at.splendit.simonykees.core.visitor.MultiVariableDeclarationLineASTVisitor;
+import at.splendit.simonykees.core.visitor.LambdaForEachCollectASTVisitor;
+import at.splendit.simonykees.core.visitor.LambdaForEachIfWrapperToFilterASTVisitor;
 import at.splendit.simonykees.core.visitor.LambdaToMethodReferenceASTVisitor;
+import at.splendit.simonykees.core.visitor.MultiVariableDeclarationLineASTVisitor;
 import at.splendit.simonykees.core.visitor.OverrideAnnotationRuleASTVisitor;
 import at.splendit.simonykees.core.visitor.PrimitiveBoxedForStringASTVisitor;
 import at.splendit.simonykees.core.visitor.RearrangeClassMembersASTVisitor;
@@ -51,8 +55,8 @@ import at.splendit.simonykees.core.visitor.StringLiteralEqualityCheckASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import at.splendit.simonykees.core.visitor.functionalInterface.FunctionalInterfaceASTVisitor;
-import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
-import at.splendit.simonykees.core.visitor.loop.WhileToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.forToForEach.ForToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.whileToForEach.WhileToForEachASTVisitor;
 import at.splendit.simonykees.core.visitor.renaming.FieldNameConventionASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.MultiCatchASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisitor;
@@ -101,7 +105,9 @@ public class RulesContainer {
 				new StringLiteralEqualityCheckRule(StringLiteralEqualityCheckASTVisitor.class),
 				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
 				new MultiVariableDeclarationLineRule(MultiVariableDeclarationLineASTVisitor.class),
+				new LambdaForEachIfWrapperToFilterRule(LambdaForEachIfWrapperToFilterASTVisitor.class),
 				new StatementLambdaToExpressionRule(StatementLambdaToExpressionASTVisitor.class),
+				new LambdaForEachCollectRule(LambdaForEachCollectASTVisitor.class),
 				new LambdaToMethodReferenceRule(LambdaToMethodReferenceASTVisitor.class),
 
 				/*
@@ -109,7 +115,8 @@ public class RulesContainer {
 				 * last.
 				 */
 				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
-				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class));
+				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class)
+				);
 	}
 
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getRulesForProject(IJavaProject selectedJavaProjekt) {

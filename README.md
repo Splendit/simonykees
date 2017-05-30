@@ -39,3 +39,13 @@
 
 	Execute 
 	Maven > Update Project...
+
+## faster builds ##
+
+	To avoid fetching indexes, the --offline flag can be used (avoids checking timestamps for cached p2 artifacts and metadata files):
+	
+	mvn clean verify -o
+	
+	To just clean the project, tycho can be deactivated:
+	
+	mvn clean -Dtycho.mode=maven
