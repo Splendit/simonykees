@@ -112,7 +112,8 @@ public class RulesContainer {
 				 * last.
 				 */
 				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
-				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class));
+				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class)
+				);
 	}
 
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getRulesForProject(IJavaProject selectedJavaProjekt) {

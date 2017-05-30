@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
+import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -72,8 +72,7 @@ public abstract class AbstractRulesTest {
 		List<IJavaElement> javaElements = new ArrayList<>();
 		javaElements.add(compilationUnit);
 
-		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
-		};
+		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules);
 
 		/*
 		 * A default progress monitor implementation, used just for testing
@@ -83,9 +82,9 @@ public abstract class AbstractRulesTest {
 
 		rules.stream().forEach(rule -> rule.calculateEnabledForProject(packageFragment.getJavaProject()));
 
-		refactorer.prepareRefactoring(monitor);
-		refactorer.doRefactoring(monitor);
-		refactorer.commitRefactoring();
+		refactoringPipeline.prepareRefactoring(javaElements, monitor);
+		refactoringPipeline.doRefactoring(monitor);
+		refactoringPipeline.commitRefactoring();
 
 		return compilationUnit.getSource();
 	}
