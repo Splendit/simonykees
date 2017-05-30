@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
+import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -31,9 +31,17 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 public abstract class AbstractRulesTest {
 
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
+	protected IPackageFragment packageFragment = null;
 
 	public AbstractRulesTest() {
 		super();
+		if (packageFragment == null) {
+			try {
+				packageFragment = RulesTestUtil.getPackageFragement();
+			} catch (Exception e) {
+				// ignoring exception to ease Constructors
+			}
+		}
 	}
 
 	/**
@@ -59,26 +67,24 @@ public abstract class AbstractRulesTest {
 	protected String processFile(String fileName, String content,
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) throws Exception {
 
-		IPackageFragment packageFragment = RulesTestUtil.getPackageFragement();
 		ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);
 
 		List<IJavaElement> javaElements = new ArrayList<>();
 		javaElements.add(compilationUnit);
 
-		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
-		};
+		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules);
 
 		/*
 		 * A default progress monitor implementation, used just for testing
 		 * purposes
 		 */
 		IProgressMonitor monitor = new NullProgressMonitor();
-		
+
 		rules.stream().forEach(rule -> rule.calculateEnabledForProject(packageFragment.getJavaProject()));
 
-		refactorer.prepareRefactoring(monitor);
-		refactorer.doRefactoring(monitor);
-		refactorer.commitRefactoring();
+		refactoringPipeline.prepareRefactoring(javaElements, monitor);
+		refactoringPipeline.doRefactoring(monitor);
+		refactoringPipeline.commitRefactoring();
 
 		return compilationUnit.getSource();
 	}

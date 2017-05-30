@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>at.splendit.jSparrow</groupId>
@@ -29,13 +31,33 @@
 		</developer>
 		<developer>
 			<id>ludwig.werzowa</id>
-			<name>Ludwig Werzova</name>
+			<name>Ludwig Werzowa</name>
 			<email>ludwig.werzowa@splendit.at</email>
 		</developer>
 		<developer>
 			<id>martin.huter</id>
 			<name>Martin Huter</name>
 			<email>martin.huter@splendit.at</email>
+		</developer>
+		<developer>
+			<id>ardit.ymeri</id>
+			<name>Ardit Ymeri</name>
+			<email>ardit.ymeri@splendit.at</email>
+		</developer>
+		<developer>
+			<id>andreja.sambolec</id>
+			<name>Andreja Sambolec</name>
+			<email>andreja.sambolec@splendit.at</email>
+		</developer>
+		<developer>
+			<id>matthias.webhofer</id>
+			<name>Matthias Webhofer</name>
+			<email>matthias.webhofer@splendit.at</email>
+		</developer>
+		<developer>
+			<id>ali.kardoush</id>
+			<name>Ali Kardoush</name>
+			<email>ali.kardoush@splendit.at </email>
 		</developer>
 	</developers>
 
@@ -131,14 +153,9 @@
 
 	<repositories>
 		<repository>
-			<id>eclipse-neon</id>
-			<layout>p2</layout>
-			<url>http://download.eclipse.org/releases/neon</url>
-		</repository>
-		<repository>
 			<id>splendit-nexus-2</id>
 			<layout>p2</layout>
-			<url>http://nexus-vm-02.splendit.loc/content/repositories/p2-eclipse-neon/</url>
+			<url>http://nexus-vm-02.splendit.loc/content/repositories/neon-p2/</url>
 		</repository>
 		<repository>
 			<id>netlicensing</id>

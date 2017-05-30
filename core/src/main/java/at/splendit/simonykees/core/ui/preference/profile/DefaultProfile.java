@@ -3,9 +3,8 @@ package at.splendit.simonykees.core.ui.preference.profile;
 import java.util.Arrays;
 import java.util.List;
 
-import at.splendit.simonykees.core.rule.impl.CodeFormatterRule;
-import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
-import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.core.rule.impl.ArithmethicAssignmentRule;
+import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
@@ -21,8 +20,7 @@ public class DefaultProfile implements SimonykeesProfile {
 	boolean isBuiltInProfile = true;
 
 	public DefaultProfile() {
-		enabledRulesIds = Arrays.asList(new CodeFormatterRule(AbstractASTRewriteASTVisitor.class).getId(),
-				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class).getId());
+		enabledRulesIds = Arrays.asList(new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class).getId());
 	}
 
 	@Override

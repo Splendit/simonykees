@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.visitor.functionalInterface;
+package at.splendit.simonykees.core.visitor.sub;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
  * @since 1.2
  *
  */
-class LocalVariableUsagesASTVisitor extends ASTVisitor {
+public class LocalVariableUsagesASTVisitor extends ASTVisitor {
 	private List<SimpleName> usages;
 	private SimpleName targetName;
 

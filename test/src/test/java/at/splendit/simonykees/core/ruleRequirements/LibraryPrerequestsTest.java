@@ -1,6 +1,5 @@
 package at.splendit.simonykees.core.ruleRequirements;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -19,6 +18,16 @@ import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 
+/**
+ * Tests IJavaProject if a specific version of a library is present. The first
+ * parameter contains a list of {@link IClasspathEntriy} that represent the
+ * maven dependency in a eclipse appropriate way. The second one is a boolean
+ * that represents the enabled state of the tested rule, for the test case.
+ * 
+ * @author Martin Huter
+ * @since 1.2
+ *
+ */
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
 public class LibraryPrerequestsTest {
@@ -36,23 +45,24 @@ public class LibraryPrerequestsTest {
 	}
 
 	@Parameters(name = "{index}: test with pom:[{0}]")
-	public static Collection<Object[]> data() {
-		return Arrays.asList(new Object[][] { { "src/test/resources/apache-commons-lang-pom.xml", true },
-				{ "src/test/resources/apache-commons-lang-3-2-1-pom.xml", false } });
+	public static Collection<Object[]> data() throws Exception {
+		return Arrays.asList(new Object[][] {
+				{ Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+						"commons-lang3", "3.1")), true },
+				{ Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
+						"commons-lang3", "3.2.1")), false } });
 	}
 
-	private String pom;
+	private List<IClasspathEntry> entries;
 	private boolean enabled;
 
-	public LibraryPrerequestsTest(String pom, boolean enabled) {
-		this.pom = pom;
+	public LibraryPrerequestsTest(List<IClasspathEntry> entries, boolean enabled) {
+		this.entries = entries;
 		this.enabled = enabled;
 	}
 
 	@Test
 	public void filterWithStringUtilsIsPresent() throws Exception {
-		List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
-		RulesTestUtil.extractClasspathEntries(entries, pom);
 		RulesTestUtil.addToClasspath(testproject, entries);
 
 		StringUtilsRule sur = new StringUtilsRule(StringUtilsASTVisitor.class);

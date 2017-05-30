@@ -1,5 +1,13 @@
 package at.splendit.simonykees.core.ui.wizard.semiautomatic;
 
+/**
+ * Wizard page controller for configuring logger rule when applying to selected
+ * resources
+ * 
+ * @author Andreja Sambolec
+ * @since 1.2
+ *
+ */
 public class LoggerRuleWizardPageControler {
 
 	private LoggerRuleWizardPageModel model;
@@ -8,8 +16,7 @@ public class LoggerRuleWizardPageControler {
 		this.model = model;
 	}
 
-	public void selectionChanged(Object source, int selectionIndex) {
-		// TODO Auto-generated method stub
-		
+	public void selectionChanged(String source, String selection) {
+		model.setNewSelection(source, selection);
 	}
 }
