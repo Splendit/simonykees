@@ -48,6 +48,7 @@
 						</executions>
 						<configuration>
 							<obfuscate>true</obfuscate>
+							<proguardInclude>${basedir}/proguard.conf</proguardInclude>
 							<!-- <injar>${project.build.finalName}.jar</injar> <outjar>${project.build.finalName}-small.jar</outjar> -->
 							<libs>
 								<lib>${java.home}/lib/rt.jar</lib>
@@ -55,7 +56,14 @@
 							</libs>
 							<options>
 								<option>-keep public class * extends
-									org.eclipse.ui.plugin.AbstractUIPlugin</option>
+									org.eclipse.ui.plugin.AbstractUIPlugin{*;}</option>
+								<option>-keep class at.splendit.simonykees.core.rule.RefactoringRule</option> 
+								<option>-keep class at.splendit.simonykees.core.rule.Tag{*;}</option> 
+								<option>-keep public class
+									at.splendit.simonykees.core.ui.LicenseUtil{*;}</option>
+								<option>-keep public class
+									at.splendit.simonykees.core.ui.preference.SimonykeesUpdateLicenseDialog</option>
+
 								<option>-keep public class * extends
 									at.splendit.simonykees.core.handler.AbstractSimonykeesHandler</option>
 								<option>-keep public class * implements
@@ -64,15 +72,6 @@
 									org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer</option>
 								<option>-dontnote org.eclipse.**</option>
 								<option>-dontnote org.osgi.**</option>
-								<option>-dontnote javax.xml.**</option>
-								<option>-dontwarn javax.annotation.**</option>
-								<option>-dontnote org.xml.sax.**</option>
-								<option>-dontnote org.w3c.dom.**</option>
-								<option>-dontwarn javax.crypto.**</option>
-								<option>-dontwarn java.**</option>
-								<!-- <option>-dontwarn org.slf4j.**</option> -->
-								<option>-dontwarn org.**</option>
-								<!-- <option>-keep class org.** { *; }</option> -->
 							</options>
 
 							<exclusions>

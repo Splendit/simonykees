@@ -38,8 +38,7 @@
 						</executions>
 						<configuration>
 							<obfuscate>true</obfuscate>
-							<!-- <attach>true</attach> -->
-							<!-- <injar>${project.build.finalName}.jar</injar> <outjar>${project.build.finalName}-small.jar</outjar> -->
+							<proguardInclude>${basedir}/proguard.conf</proguardInclude>
 							<libs>
 								<lib>${java.home}/lib/rt.jar</lib>
 								<lib>${java.home}/lib/jsse.jar</lib>
@@ -48,14 +47,15 @@
 								<option>-keep public class
 									at.splendit.simonykees.license.netlicensing.NetLicensingLicenseValidationService{
 									public *;}</option>
+								<option>-keep public class
+									at.splendit.simonykees.license.netlicensing.Activator{
+									*;}</option>
 								<option>-dontnote org.eclipse.**</option>
 								<option>-dontnote org.osgi.**</option>
 								<option>-dontnote javax.xml.**</option>
-								<option>-dontnote javax.annotation.**</option>
+								<option>-dontwarn javax.crypto.**</option>
 								<option>-dontnote org.xml.sax.**</option>
 								<option>-dontnote org.w3c.dom.**</option>
-								<option>-dontwarn javax.crypto.**</option>
-								<option>-dontwarn org.slf4j.**</option>
 							</options>
 						</configuration>
 					</plugin>

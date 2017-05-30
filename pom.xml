@@ -147,7 +147,7 @@
 
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
-		
+
 		<basedir>/simonykees</basedir>
 	</properties>
 
@@ -322,6 +322,9 @@
 					<groupId>com.github.wvengen</groupId>
 					<artifactId>proguard-maven-plugin</artifactId>
 					<version>${proguard.plugin.version}</version>
+					<configuration>
+						<proguardInclude>${basedir}/proguard.conf</proguardInclude>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.eclipse.tycho</groupId>

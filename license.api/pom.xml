@@ -46,16 +46,15 @@
 							</libs>
 							<options>
 								<option>-keep public class
-									at.splendit.simonykees.license.api.LicenseValidationService{
-									public *;}</option>
+									at.splendit.simonykees.license.api.LicenseValidationService{ *;}</option>
 								<option>-dontnote org.eclipse.**</option>
 								<option>-dontnote org.osgi.**</option>
 								<option>-dontnote javax.xml.**</option>
-								<option>-dontnote javax.annotation.**</option>
+								<!-- <option>-dontnote javax.annotation.**</option>
 								<option>-dontnote org.xml.sax.**</option>
 								<option>-dontnote org.w3c.dom.**</option>
 								<option>-dontwarn javax.crypto.**</option>
-								<option>-dontwarn org.slf4j.**</option>
+								<option>-dontwarn org.slf4j.**</option> -->
 							</options>
 						</configuration>
 					</plugin>
