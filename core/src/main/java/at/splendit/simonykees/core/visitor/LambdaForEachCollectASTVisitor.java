@@ -28,28 +28,33 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
  * Replaces {@link Stream#forEach(java.util.function.Consumer)} with
- * {@link Stream#collect(Collector)} and introduces a 
- * new method invocation expression {@link List#addAll(Collection)} for adding
- * for adding the result of the {@link Stream#collect(Collector)} to 
- * the target list. 
- * <pre>
+ * {@link Stream#collect(Collector)} and introduces a new method invocation
+ * expression {@link List#addAll(Collection)} for adding for adding the result
+ * of the {@link Stream#collect(Collector)} to the target list.
+ * 
  * For example, the following code:
+ * 
  * <pre>
- * {@code 
- * 		List<String> oStrings = new ArrayList<>();
- * 		List<String> objectList = new ArrayList<>();
- * 		objectList.stream().map(o -> o.substring(0))
- * 		.forEach( oString -> { 
- * 			oStrings.add(oString);
- * 		});}
- * <pre>
- * is transformed to the following:
- * <pre>
- * {@code 
- * 		List<String> oStrings = new ArrayList<>();
- * 		List<String> objectList = new ArrayList<>();
- * 		oStrings.addAll(objectList.stream().map(o -> StringUtils.substring(o, 0)).collect(Collectors.toList()));
+ * <code>{@code
+ * List<String> oStrings = new ArrayList<>();
+ * List<String> objectList = new ArrayList<>();
  * }
+ * objectList.stream().map(o -> o.substring(0)).forEach(oString -> {
+ * 	oStrings.add(oString);
+ * });
+ * </code>
+ * </pre>
+ * 
+ * is transformed to the following:
+ * 
+ * <pre>
+ * <code>{@code 
+ * List<String> oStrings = new ArrayList<>();
+ * List<String> objectList = new ArrayList<>();
+ * }
+ * oStrings.addAll(objectList.stream().map(o -> StringUtils.substring(o, 0)).collect(Collectors.toList()));
+ * </code>
+ * </pre>
  * 
  * @author Ardit Ymeri
  * @since 1.2
@@ -137,7 +142,7 @@ public class LambdaForEachCollectASTVisitor extends AbstractAddImportASTVisitor 
 	 * @param collection
 	 *            target list name
 	 * 
-	 * @return new method invocation expression 
+	 * @return new method invocation expression
 	 */
 	private Expression createTargetExpression(MethodInvocation methodInvocation, SimpleName collection) {
 
