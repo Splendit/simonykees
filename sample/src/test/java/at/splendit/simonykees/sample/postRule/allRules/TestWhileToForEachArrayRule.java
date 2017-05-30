@@ -1,13 +1,18 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings("unused")
 public class TestWhileToForEachArrayRule {
+
+	private static final Logger logger = LoggerFactory.getLogger(TestWhileToForEachArrayRule.class);
 
 	public String loopingOverLists(String input) {
 		StringBuilder sb = new StringBuilder();
 		String[] array = generateList(input);
 		for (String t : array) {
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 		}
 		return sb.toString();
@@ -17,7 +22,7 @@ public class TestWhileToForEachArrayRule {
 		StringBuilder sb = new StringBuilder();
 		String[] array = generateList(input);
 		for (String t : array) {
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			for (String iterator : array) {
 				sb.append(iterator);
@@ -30,13 +35,13 @@ public class TestWhileToForEachArrayRule {
 		StringBuilder sb = new StringBuilder();
 		String[] array = generateList(input);
 		for (String t : array) {
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			for (String iterator : array) {
 				sb.append(iterator);
 				for (String iterator1 : array) {
 					sb.append(iterator1);
-					System.out.print(iterator1);
+					logger.info(iterator1);
 				}
 			}
 		}
@@ -49,12 +54,12 @@ public class TestWhileToForEachArrayRule {
 		String[] array = generateList(input);
 		String[] array2 = generateList(input);
 		for (String t : array) {
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 		}
 
 		for (String s : array2) {
-			System.out.println(s);
+			logger.info(s);
 			sb.append(s);
 		}
 
@@ -69,7 +74,7 @@ public class TestWhileToForEachArrayRule {
 		i = 0;
 		while (i < array.length) {
 			String t = array[i];
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			i++;
 		}
@@ -82,7 +87,7 @@ public class TestWhileToForEachArrayRule {
 		int i = 0;
 		while (i < array.length) {
 			String t = array[i];
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t + i);
 			i++;
 		}
@@ -95,7 +100,7 @@ public class TestWhileToForEachArrayRule {
 		int i = 0;
 		while (i < array.length) {
 			String t = array[i];
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			i++;
 		}
@@ -107,7 +112,7 @@ public class TestWhileToForEachArrayRule {
 		StringBuilder sb = new StringBuilder();
 		String[] array = generateList(input);
 		for (String t : array) {
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 		}
 		return sb.toString();
@@ -117,7 +122,7 @@ public class TestWhileToForEachArrayRule {
 		StringBuilder sb = new StringBuilder();
 		String[] array = generateList(input);
 		for (String t : array) {
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 		}
 		return sb.toString();
@@ -127,7 +132,7 @@ public class TestWhileToForEachArrayRule {
 		StringBuilder sb = new StringBuilder();
 		String[] array = generateList(input);
 		for (String t : array) {
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 		}
 		return sb.toString();
@@ -140,7 +145,7 @@ public class TestWhileToForEachArrayRule {
 		if (array.length > 0) {
 			while (i < array.length) {
 				String t = array[i];
-				System.out.println(t);
+				logger.info(t);
 				sb.append(t);
 				i += 1;
 			}
@@ -155,7 +160,7 @@ public class TestWhileToForEachArrayRule {
 		int j = 0;
 		while (i < array.length) {
 			String t = array[i];
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			i += 1;
 			j++;
@@ -170,7 +175,7 @@ public class TestWhileToForEachArrayRule {
 		int j = 0;
 		while (i < array.length) {
 			String t = array[i];
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			j++;
 			i += 1;
@@ -185,7 +190,7 @@ public class TestWhileToForEachArrayRule {
 		int j = 0;
 		while (i < array.length) {
 			String t = array[i];
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			j++;
 			i += 2;
@@ -199,7 +204,7 @@ public class TestWhileToForEachArrayRule {
 		int i = 0;
 		while (i < array.length) {
 			String t = array[i];
-			System.out.println(t);
+			logger.info(t);
 			sb.append(t);
 			i += 2;
 		}
@@ -210,7 +215,7 @@ public class TestWhileToForEachArrayRule {
 		StringBuilder sb = new StringBuilder();
 		String[] array = generateList(iterator);
 		for (String iterator1 : array) {
-			System.out.println(iterator1);
+			logger.info(iterator1);
 			sb.append(iterator1);
 		}
 		return sb.toString();
