@@ -24,22 +24,22 @@
 		</menuContribution>
 		<menuContribution locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.refactoring.menu">
 			<menu label="%menu.label">
-				<command commandId="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
-					label="%command.label.logger_rule_wizard" 
-					style="push"/>
 				<command commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler" 
 					label="%command.label.select_rules_wizard" 
+					style="push"/>
+				<command commandId="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
+					label="%command.label.logger_rule_wizard" 
 					style="push"/>
 			</menu>
 		</menuContribution>
 	</extension>
 	<extension point="org.eclipse.ui.commands">
-		<command defaultHandler="at.splendit.simonykees.core.handler.LoggerRuleWizardHandler" 
-			id="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
-			name="%command.name.logger_rule_wizard_handler"/>
 		<command defaultHandler="at.splendit.simonykees.core.handler.SelectRulesWizardHandler" 
 			id="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler" 
 			name="%command.name.select_rules_wizard_handler"/>
+		<command defaultHandler="at.splendit.simonykees.core.handler.LoggerRuleWizardHandler" 
+			id="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
+			name="%command.name.logger_rule_wizard_handler"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferencePage" 
