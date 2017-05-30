@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
-import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.forToForEach.ForToForEachASTVisitor;
 
 /**
  * TODO SIM-103 add class description

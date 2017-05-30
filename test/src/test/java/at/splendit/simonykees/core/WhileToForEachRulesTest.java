@@ -12,7 +12,7 @@ import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
-import at.splendit.simonykees.core.visitor.loop.WhileToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.whileToForEach.WhileToForEachASTVisitor;
 
 /**
  * TODO SIM-103 add class description
