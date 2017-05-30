@@ -89,8 +89,9 @@ public class TagUtil {
 
 		} else if (LambdaToMethodReferenceRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA);
+
 		} else if (LambdaForEachCollectRule.class == clazz) {
-			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA);
+			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
 
 		} else if (MultiCatchRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY);
