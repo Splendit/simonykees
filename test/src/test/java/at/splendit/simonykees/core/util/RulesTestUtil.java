@@ -59,6 +59,10 @@ public class RulesTestUtil {
 
 	public static IPackageFragment getPackageFragement() throws Exception {
 		IJavaProject javaProject = createJavaProject("allRulesTest", "bin");
+		javaProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		javaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		javaProject.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		
 		IPackageFragmentRoot root = addSourceContainer(javaProject, "/allRulesTestRoot");
 
 		addToClasspath(javaProject, getClassPathEntries(root));
