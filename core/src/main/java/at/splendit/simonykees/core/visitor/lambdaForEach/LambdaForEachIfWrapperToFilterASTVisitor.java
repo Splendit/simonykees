@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.visitor;
+package at.splendit.simonykees.core.visitor.lambdaForEach;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +31,7 @@ import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
  * @author Matthias Webhofer
  * @since 1.2
  */
-public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractASTRewriteASTVisitor {
+public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForEachASTVisitor {
 
 	private static final String STREAM_QUALIFIED_NAME = java.util.stream.Stream.class.getName();
 
@@ -39,7 +39,7 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractASTRewrite
 	public boolean visit(MethodInvocation methodInvocationNode) {
 
 		// only forEach method is interesting
-		if ("forEach".equals(methodInvocationNode.getName().getIdentifier())) { //$NON-NLS-1$
+		if (isStreamForEachInvocation(methodInvocationNode)) {
 
 			/*
 			 * check if forEach is called on an instance of

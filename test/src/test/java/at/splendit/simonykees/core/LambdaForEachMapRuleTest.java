@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.rule.impl.LambdaForEachMapRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
-import at.splendit.simonykees.core.visitor.LambdaForEachMapASTVisitor;
+import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachMapASTVisitor;
 
 /**
  * Testing {@link LambdaForEachMapRule}

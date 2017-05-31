@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.visitor;
+package at.splendit.simonykees.core.visitor.lambdaForEach;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -12,15 +12,12 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
@@ -60,11 +57,9 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * @since 1.2
  *
  */
-public class LambdaForEachCollectASTVisitor extends AbstractAddImportASTVisitor {
+public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisitor {
 
-	private static final String FOR_EACH_METHOD_NAME = "forEach"; //$NON-NLS-1$
 	private static final String ADD_METHOD_NAME = "add"; //$NON-NLS-1$
-	private static final String JAVA_UTIL_STREAM = java.util.stream.Stream.class.getName();
 	private static final String JAVA_UTIL_STREAM_COLLECTORS = java.util.stream.Collectors.class.getName();
 	private static final String JAVA_UTIL_STREAM_COLLECTORS_SIMPLE_NAME = java.util.stream.Collectors.class
 			.getSimpleName();
@@ -86,42 +81,35 @@ public class LambdaForEachCollectASTVisitor extends AbstractAddImportASTVisitor 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 
-		SimpleName methodName = methodInvocation.getName();
 		// if the method name matches with 'Stream::forEach' ...
-		if (FOR_EACH_METHOD_NAME.equals(methodName.getIdentifier())
-				&& ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent().getNodeType()) {
-			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-			if (methodBinding != null && ClassRelationUtil.isContentOfTypes(methodBinding.getDeclaringClass(),
-					Collections.singletonList(JAVA_UTIL_STREAM))) {
-				// and if the parameter of 'forEach' is a lambda expression ...
-				List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
-						Expression.class);
-				if (arguments.size() == 1 && ASTNode.LAMBDA_EXPRESSION == arguments.get(0).getNodeType()) {
-					/*
-					 * the lambda expression must have only one parameter and
-					 * its body must contain only one expression invoking the
-					 * 'List::add' method.
-					 */
-					LambdaExpression lambdaExpression = (LambdaExpression) arguments.get(0);
-					SimpleName parameter = extractSingleParameter(lambdaExpression);
-					MethodInvocation bodyExpression = extractSingleBodyExpression(lambdaExpression);
+		if (isStreamForEachInvocation(methodInvocation)) {
+			// and if the parameter of 'forEach' is a lambda expression ...
+			List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+			if (arguments.size() == 1 && ASTNode.LAMBDA_EXPRESSION == arguments.get(0).getNodeType()) {
+				/*
+				 * the lambda expression must have only one parameter and its
+				 * body must contain only one expression invoking the
+				 * 'List::add' method.
+				 */
+				LambdaExpression lambdaExpression = (LambdaExpression) arguments.get(0);
+				SimpleName parameter = extractSingleParameter(lambdaExpression);
+				MethodInvocation bodyExpression = extractSingleBodyExpression(lambdaExpression);
 
-					if (parameter != null && bodyExpression != null && isListAddInvocation(bodyExpression)) {
-						Expression collectionExpression = bodyExpression.getExpression();
-						if (ASTNode.SIMPLE_NAME == collectionExpression.getNodeType()) {
-							SimpleName collection = (SimpleName) collectionExpression;
+				if (parameter != null && bodyExpression != null && isListAddInvocation(bodyExpression, parameter)) {
+					Expression collectionExpression = bodyExpression.getExpression();
+					if (ASTNode.SIMPLE_NAME == collectionExpression.getNodeType()) {
+						SimpleName collection = (SimpleName) collectionExpression;
 
-							/*
-							 * Replace forEach with collect(Collectors.toList())
-							 * and use the result as parameter in
-							 * Collection::addAll method.
-							 */
-							Expression targetDecl = createTargetExpression(methodInvocation, collection);
-							astRewrite.replace(methodInvocation, targetDecl, null);
-						}
+						/*
+						 * Replace forEach with collect(Collectors.toList()) and
+						 * use the result as parameter in Collection::addAll
+						 * method.
+						 */
+						Expression targetDecl = createTargetExpression(methodInvocation, collection);
+						astRewrite.replace(methodInvocation, targetDecl, null);
 					}
-
 				}
+
 			}
 		}
 
@@ -177,14 +165,21 @@ public class LambdaForEachCollectASTVisitor extends AbstractAddImportASTVisitor 
 	 * @return {@code true} if the method invocation is an
 	 *         {@link List#add(Object)} or {@code false} otherwise.
 	 */
-	private boolean isListAddInvocation(MethodInvocation methodInvocation) {
+	private boolean isListAddInvocation(MethodInvocation methodInvocation, SimpleName parameter) {
 		boolean isAddInvocation = false;
 		SimpleName name = methodInvocation.getName();
 		if (ADD_METHOD_NAME.equals(name.getIdentifier())) {
-			Expression expression = methodInvocation.getExpression();
-			if (ClassRelationUtil.isContentOfTypes(expression.resolveTypeBinding(),
-					Collections.singletonList(JAVA_UTIL_LIST))) {
-				isAddInvocation = true;
+			List<Expression> arguments = ASTNodeUtil.returnTypedList(methodInvocation.arguments(), Expression.class);
+			if (arguments.size() == 1) {
+				Expression argument = arguments.get(0);
+				if (ASTNode.SIMPLE_NAME == argument.getNodeType()
+						&& ((SimpleName) argument).getIdentifier().equals(parameter.getIdentifier())) {
+					Expression expression = methodInvocation.getExpression();
+					if (ClassRelationUtil.isContentOfTypes(expression.resolveTypeBinding(),
+							Collections.singletonList(JAVA_UTIL_LIST))) {
+						isAddInvocation = true;
+					}
+				}
 			}
 		}
 		return isAddInvocation;
@@ -221,31 +216,5 @@ public class LambdaForEachCollectASTVisitor extends AbstractAddImportASTVisitor 
 		}
 
 		return methodInvocation;
-	}
-
-	/**
-	 * Checks whether a lambda expression has a single parameter.
-	 * 
-	 * @param lambdaExpression
-	 *            lambda expression to check for.
-	 * @return the name of the parameter or {@code null} if the lambda
-	 *         expression has more than one ore zero parameters.
-	 */
-	private SimpleName extractSingleParameter(LambdaExpression lambdaExpression) {
-		SimpleName parameter = null;
-		List<VariableDeclarationFragment> fragments = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
-				VariableDeclarationFragment.class);
-		if (fragments.size() == 1) {
-			VariableDeclarationFragment fragment = fragments.get(0);
-			parameter = fragment.getName();
-		} else {
-			List<SingleVariableDeclaration> declarations = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
-					SingleVariableDeclaration.class);
-			if (declarations.size() == 1) {
-				SingleVariableDeclaration declaration = declarations.get(0);
-				parameter = declaration.getName();
-			}
-		}
-		return parameter;
 	}
 }

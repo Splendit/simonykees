@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.rule.impl.LambdaForEachCollectRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
-import at.splendit.simonykees.core.visitor.LambdaForEachCollectASTVisitor;
+import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachCollectASTVisitor;
 
 /**
  * Testing stream forEach to stream collect.

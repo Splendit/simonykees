@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
-import at.splendit.simonykees.core.visitor.LambdaForEachIfWrapperToFilterASTVisitor;
+import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachIfWrapperToFilterASTVisitor;
 
 @RunWith(Parameterized.class)
 public class LambdaForEachIfWrapperToFilterRulesTest extends AbstractRulesTest {
