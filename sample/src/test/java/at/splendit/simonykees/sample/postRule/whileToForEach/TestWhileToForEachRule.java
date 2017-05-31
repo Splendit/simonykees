@@ -18,7 +18,7 @@ public class TestWhileToForEachRule {
 	public String loopingOverArrays(String input) {
 		StringBuilder sb = new StringBuilder();
 		String []array = {"-", input, "."};
-		for (String t:array){
+		for (String t : array) {
 			System.out.println(t);
 			sb.append(t);
 		}
@@ -28,7 +28,7 @@ public class TestWhileToForEachRule {
 	public String loopingOverLists(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String>list = generateList(input);
-		for (String t:list){
+		for (String t : list) {
 			System.out.println(t);
 			sb.append(t);
 		}
