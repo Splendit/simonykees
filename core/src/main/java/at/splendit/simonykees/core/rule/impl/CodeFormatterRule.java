@@ -45,20 +45,6 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException {
 
-		// TODO monitor?
-		// subMonitor.setWorkRemaining(workingCopies.size());
-
-		// for (ICompilationUnit wc : workingCopies) {
-		// subMonitor.subTask(getName() + ": " + wc.getElementName());
-		// //$NON-NLS-1$
-		// applyFormating(wc);
-		// if (subMonitor.isCanceled()) {
-		// return;
-		// } else {
-		// subMonitor.worked(1);
-		// }
-		// }
-
 		try {
 			return applyFormating(workingCopy);
 		} catch (CoreException e) {
