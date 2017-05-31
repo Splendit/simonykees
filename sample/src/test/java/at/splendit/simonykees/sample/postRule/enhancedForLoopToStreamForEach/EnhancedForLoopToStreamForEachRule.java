@@ -20,8 +20,8 @@ public class EnhancedForLoopToStreamForEachRule {
 
 	static {
 		stringList3 = new LinkedList<>();
-		stringList1.stream().forEach((String s)->{
-			stringList2.stream().forEach((String t)->{
+		stringList1.stream().forEach((String s) -> {
+			stringList2.stream().forEach((String t) -> {
 				stringList3.add(s + t);
 			});
 		});
@@ -29,11 +29,11 @@ public class EnhancedForLoopToStreamForEachRule {
 
 	public String doSomething() throws ClassNotFoundException {
 
-		stringList1.stream().forEach((String s)->{
+		stringList1.stream().forEach((String s) -> {
 			System.out.println(s);
 		});
 
-		stringList1.stream().forEach((String s)->System.out.println(s));
+		stringList1.stream().forEach((String s) -> System.out.println(s));
 
 		for (String s : stringList1) {
 			if (s.length() > 5) {
@@ -66,8 +66,8 @@ public class EnhancedForLoopToStreamForEachRule {
 			System.out.println(s);
 		}
 
-		stringList1.stream().forEach((String s)->{
-			stringList2.stream().forEach((String t)->{
+		stringList1.stream().forEach((String s) -> {
+			stringList2.stream().forEach((String t) -> {
 				System.out.println(s + t);
 			});
 		});
@@ -85,10 +85,10 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		}
 
-		stringListList.stream().forEach((List<String> list)->{
+		stringListList.stream().forEach((List<String> list) -> {
 			stringList1.add(list.get(0));
-			list.stream().forEach((String s)->{
-				stringList2.stream().forEach((String t)->{
+			list.stream().forEach((String s) -> {
+				stringList2.stream().forEach((String t) -> {
 					if (t.equals(s)) {
 						System.out.println(t);
 					}
@@ -103,7 +103,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			Class.forName(s);
 		}
 
-		stringList1.stream().forEach((String s)->{
+		stringList1.stream().forEach((String s) -> {
 			try {
 				Class.forName(s);
 			} catch (ClassNotFoundException cnfe) {
@@ -111,7 +111,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		});
 
-		stringList1.stream().forEach((String s)->{
+		stringList1.stream().forEach((String s) -> {
 			int length = 0;
 			if (s.length() < 2) {
 				length /= s.length();
@@ -123,8 +123,8 @@ public class EnhancedForLoopToStreamForEachRule {
 			length += s.length();
 		}
 
-		int length2 = 0;
-		stringList1.stream().forEach((String s)->{
+		final int length2 = 0;
+		stringList1.stream().forEach((String s) -> {
 			if (length2 > 0) {
 				System.out.println(length2);
 			}
@@ -138,49 +138,59 @@ public class EnhancedForLoopToStreamForEachRule {
 			--this.intField;
 		}
 
+		int length4 = 0;
+		for (String s : stringList1) {
+			length4++;
+		}
+
+		int length5 = 0;
+		for (String s : stringList1) {
+			--length5;
+		}
+
 		String u = "asdf";
-		for(String s : stringList1) {
-			if(s.equals(u)) {
+		for (String s : stringList1) {
+			if (s.equals(u)) {
 				System.out.println(u.length());
 			}
 		}
 
 		for (String s : stringList1) {
-			if(s.length() > u.length()) {
+			if (s.length() > u.length()) {
 				u = s;
 			}
 		}
 
-		stringList1.stream().forEach((String s)->{
+		stringList1.stream().forEach((String s) -> {
 			this.intField++;
 		});
 
-		stringList1.stream().forEach((String s)->{
+		stringList1.stream().forEach((String s) -> {
 			intField++;
 		});
 
-		stringList1.stream().forEach((String s)->{
+		stringList1.stream().forEach((String s) -> {
 			testClassField.testIntField++;
 		});
 
-		stringList1.stream().forEach((String s)->{
+		stringList1.stream().forEach((String s) -> {
 			--testClassField.testIntField;
 		});
 
-		stringList1.stream().forEach((String s)->{
+		stringList1.stream().forEach((String s) -> {
 			testClassField.testIntField += s.length();
 		});
 
 		TestClass testClassLocal = new TestClass();
-		stringList1.stream().forEach((String s)->{
+		stringList1.stream().forEach((String s) -> {
 			testClassLocal.testIntField++;
 		});
 
-		stringList1.stream().forEach((String s)->{
+		stringList1.stream().forEach((String s) -> {
 			--testClassLocal.testIntField;
 		});
 
-		stringList1.stream().forEach((String s)->{
+		stringList1.stream().forEach((String s) -> {
 			testClassLocal.testIntField += s.length();
 		});
 

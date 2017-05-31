@@ -20,8 +20,8 @@ public class EnhancedForLoopToStreamForEachRule {
 
 	static {
 		stringList3 = new LinkedList<>();
-		for(String s : stringList1) {
-			for(String t : stringList2) {
+		for (String s : stringList1) {
+			for (String t : stringList2) {
 				stringList3.add(s + t);
 			}
 		}
@@ -124,7 +124,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			length += s.length();
 		}
 
-		int length2 = 0;
+		final int length2 = 0;
 		for (String s : stringList1) {
 			if (length2 > 0) {
 				System.out.println(length2);
@@ -139,15 +139,25 @@ public class EnhancedForLoopToStreamForEachRule {
 			--this.intField;
 		}
 
+		int length4 = 0;
+		for (String s : stringList1) {
+			length4++;
+		}
+
+		int length5 = 0;
+		for (String s : stringList1) {
+			--length5;
+		}
+
 		String u = "asdf";
-		for(String s : stringList1) {
-			if(s.equals(u)) {
+		for (String s : stringList1) {
+			if (s.equals(u)) {
 				System.out.println(u.length());
 			}
 		}
 
 		for (String s : stringList1) {
-			if(s.length() > u.length()) {
+			if (s.length() > u.length()) {
 				u = s;
 			}
 		}
