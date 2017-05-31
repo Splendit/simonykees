@@ -13,7 +13,7 @@ public class TestWhileToForEachListRule {
 	public String loopingOverLists(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String>list = generateList(input);
-		for (String t:list){
+		for (String t : list) {
 			System.out.println(t);
 			sb.append(t);
 		}
@@ -23,10 +23,10 @@ public class TestWhileToForEachListRule {
 	public String nestedLoops(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String>list = generateList(input);
-		for (String t:list){
+		for (String t : list) {
 			System.out.println(t);
 			sb.append(t);
-			for (String iterator:list){
+			for (String iterator : list) {
 				sb.append(iterator);
 			}
 		}
@@ -36,12 +36,12 @@ public class TestWhileToForEachListRule {
 	public String tripleNestedLoops(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String>list = generateList(input);
-		for (String t:list){
+		for (String t : list) {
 			System.out.println(t);
 			sb.append(t);
-			for (String iterator:list){
+			for (String iterator : list) {
 				sb.append(iterator);
-				for (String iterator1:list){
+				for (String iterator1 : list) {
 					sb.append(iterator1);
 					System.out.print(iterator1);
 				}
@@ -55,12 +55,12 @@ public class TestWhileToForEachListRule {
 		StringBuilder sb = new StringBuilder();
 		List<String>list = generateList(input);
 		List<String>list2 = generateList(input);
-		for (String t:list){
+		for (String t : list) {
 			System.out.println(t);
 			sb.append(t);
 		}
 		
-		for (String s:list2){
+		for (String s : list2) {
 			System.out.println(s);
 			sb.append(s);
 		}
@@ -113,7 +113,7 @@ public class TestWhileToForEachListRule {
 	public String prefixIndexUpdate(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String>list = generateList(input);
-		for (String t:list){
+		for (String t : list) {
 			System.out.println(t);
 			sb.append(t);
 		}
@@ -123,7 +123,7 @@ public class TestWhileToForEachListRule {
 	public String infixIndexUpdate(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String>list = generateList(input);
-		for (String t:list){
+		for (String t : list) {
 			System.out.println(t);
 			sb.append(t);
 		}
@@ -133,7 +133,7 @@ public class TestWhileToForEachListRule {
 	public String assignmentIndexUpdate(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String>list = generateList(input);
-		for (String t:list){
+		for (String t : list) {
 			System.out.println(t);
 			sb.append(t);
 		}
@@ -143,10 +143,11 @@ public class TestWhileToForEachListRule {
 	public String loopInIfBody(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String>list = generateList(input);
-		if(list.size() > 0)for (String t:list){
-			System.out.println(t);
-			sb.append(t);
-		}
+		if(list.size() > 0)
+			for (String t : list) {
+				System.out.println(t);
+				sb.append(t);
+			}
 		return sb.toString();
 	}
 	
@@ -211,7 +212,7 @@ public class TestWhileToForEachListRule {
 	public String confusingIteratorName(String iterator) {
 		StringBuilder sb = new StringBuilder();
 		List<String>list = generateList(iterator);
-		for (String iterator1:list){
+		for (String iterator1 : list) {
 			System.out.println(iterator1);
 			sb.append(iterator1);
 		}

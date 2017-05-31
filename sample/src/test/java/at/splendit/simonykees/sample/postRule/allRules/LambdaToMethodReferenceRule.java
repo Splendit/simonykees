@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import at.splendit.simonykees.sample.lambdaToMethodReferenceRuleHelper.Person;
+import at.splendit.simonykees.sample.utilities.Person;
 
 /**
  * 

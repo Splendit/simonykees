@@ -16,6 +16,7 @@ public class ExceptionMessages extends NLS {
 	public static String RefactoringPipeline_rule_execute_failed;
 	public static String RefactoringState_unable_to_discard_working_copy;
 	public static String RefactoringState_unable_to_reset_working_copy;
+	public static String RefactoringPipeline_syntax_errors_exist;
 	public static String RefactoringPipeline_user_java_element_resolution_failed;
 	public static String RefactoringPipeline_user_reconcile_failed;
 	public static String RefactoringPipeline_user_rule_execute_failed;
