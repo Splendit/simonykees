@@ -8,7 +8,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -46,13 +45,14 @@ public class SelectRulesWizard extends Wizard {
 	private SelectRulesWizardPageControler controler;
 	private SelectRulesWizardPageModel model;
 
-	private final List<IJavaElement> javaElements;
 	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
+	
+	private RefactoringPipeline refactoringPipeline;
 
-	public SelectRulesWizard(List<IJavaElement> javaElements,
+	public SelectRulesWizard(RefactoringPipeline refactoringPipeline, 
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		super();
-		this.javaElements = javaElements;
+		this.refactoringPipeline = refactoringPipeline;
 		this.rules = rules;
 		setNeedsProgressMonitor(true);
 	}
@@ -87,27 +87,17 @@ public class SelectRulesWizard extends Wizard {
 
 	@Override
 	public boolean performFinish() {
-		
+
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = model.getSelectionAsList();
+
+		refactoringPipeline.setRules(rules);
 		
-		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules);
 		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
 
 		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-
-				try {
-					refactoringPipeline.prepareRefactoring(javaElements, monitor);
-					if (monitor.isCanceled()) {
-						refactoringPipeline.clearStates();
-						return Status.CANCEL_STATUS;
-					}
-				} catch (RefactoringException e) {
-					synchronizeWithUIShowInfo(e);
-					return Status.CANCEL_STATUS;
-				}
 				try {
 					refactoringPipeline.doRefactoring(monitor);
 					if (monitor.isCanceled()) {
@@ -168,22 +158,21 @@ public class SelectRulesWizard extends Wizard {
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactoringPipeline)) {
-					
+
 					@Override
 					protected void nextPressed() {
-						((RefactoringPreviewWizard)getWizard()).pressedNext();
+						((RefactoringPreviewWizard) getWizard()).pressedNext();
 						super.nextPressed();
 					}
-					
+
 					@Override
 					protected void backPressed() {
-						((RefactoringPreviewWizard)getWizard()).pressedBack();
+						((RefactoringPreviewWizard) getWizard()).pressedBack();
 						super.backPressed();
 					}
-					
-					
+
 				};
-	
+
 				// maximizes the RefactoringPreviewWizard
 				dialog.setPageSize(rectangle.width, rectangle.height);
 				dialog.open();
