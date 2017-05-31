@@ -342,15 +342,19 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 				MethodInvocation methodInvocation = (MethodInvocation) parent;
 				Expression methodExpression = methodInvocation.getExpression();
 
-				if (ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent().getNodeType()) {
-					/*
-					 * replacing the expression statement with a variable name leads to compile error
-					 */
-					setHasEmptyStatement();
-				} else if (GET.equals(methodInvocation.getName().getIdentifier())
+				if (GET.equals(methodInvocation.getName().getIdentifier())
 						&& methodInvocation.arguments().size() == 1 && methodExpression != null
 						&& methodExpression.getNodeType() == ASTNode.SIMPLE_NAME
 						&& ((SimpleName) methodExpression).getIdentifier().equals(iterableName.getIdentifier())) {
+					
+					if (ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent().getNodeType()) {
+						/*
+						 * replacing the expression statement with a variable name leads to compile error
+						 */
+						setHasEmptyStatement();
+						return;
+					}
+					
 					/*
 					 * simpleName is the parameter of the get() method in the iterable object. 
 					 */
