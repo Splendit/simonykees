@@ -1,9 +1,13 @@
 package at.splendit.simonykees.core.rule.impl;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
@@ -11,6 +15,8 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
@@ -27,6 +33,8 @@ import at.splendit.simonykees.i18n.Messages;
  *
  */
 public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
+
+	private static final Logger logger = LoggerFactory.getLogger(CodeFormatterRule.class);
 
 	public CodeFormatterRule(Class<AbstractASTRewriteASTVisitor> visitor) {
 		super(visitor);
@@ -67,8 +75,20 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 	private DocumentChange applyFormating(ICompilationUnit workingCopy) throws JavaModelException {
 		ISourceRange sourceRange = workingCopy.getSourceRange();
 		// TODO check formating style
-		CodeFormatter formatter = ToolFactory
-				.createCodeFormatter(DefaultCodeFormatterConstants.getEclipseDefaultSettings());
+
+		logger.warn("javaProject:\n" + workingCopy.getJavaProject().getOptions(true).entrySet().stream() //$NON-NLS-1$
+				.map(entry -> String.format("%s - %s", entry.getKey(), entry.getValue())) //$NON-NLS-1$
+				.collect(Collectors.joining("; "))); //$NON-NLS-1$
+		
+		logger.warn("javaCore:\n" + JavaCore.getOptions().entrySet().stream() //$NON-NLS-1$
+				.map(entry -> String.format("%s - %s", entry.getKey(), entry.getValue())) //$NON-NLS-1$
+				.collect(Collectors.joining("; "))); //$NON-NLS-1$
+
+		/*
+		 * Our sample module makes it necessary to use the options of the currently used IJavaProject
+		 */
+		CodeFormatter formatter = ToolFactory.createCodeFormatter(workingCopy.getJavaProject().getOptions(true));
+//		CodeFormatter formatter = ToolFactory.createCodeFormatter(null);
 		int formatingKind = CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS
 				| CodeFormatter.K_UNKNOWN;
 		TextEdit edit = formatter.format(formatingKind, workingCopy.getSource(), sourceRange.getOffset(),
