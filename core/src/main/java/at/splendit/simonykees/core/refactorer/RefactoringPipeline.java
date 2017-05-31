@@ -206,7 +206,7 @@ public class RefactoringPipeline {
 					 * return, else continue
 					 */
 					if (subMonitor.isCanceled()) {
-						return null;
+						return containingErrorList;
 					} else {
 						subMonitor.worked(1);
 					}
