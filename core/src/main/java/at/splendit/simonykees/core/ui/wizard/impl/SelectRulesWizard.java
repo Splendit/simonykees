@@ -98,23 +98,6 @@ public class SelectRulesWizard extends Wizard {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-//
-//				try {
-//					List<ICompilationUnit> containingErrorList = refactoringPipeline.prepareRefactoring(javaElements,
-//							monitor);
-//					if (monitor.isCanceled()) {
-//						refactoringPipeline.clearStates();
-//						return Status.CANCEL_STATUS;
-//					}
-//					if (null != containingErrorList && !containingErrorList.isEmpty()) {
-//						synchronizeWithUIShowCompilationErrorMessage(containingErrorList);
-//						// return Status.CANCEL_STATUS;
-//					}
-//
-//				} catch (RefactoringException e) {
-//					synchronizeWithUIShowInfo(e);
-//					return Status.CANCEL_STATUS;
-//				}
 				try {
 					refactoringPipeline.doRefactoring(monitor);
 					if (monitor.isCanceled()) {
