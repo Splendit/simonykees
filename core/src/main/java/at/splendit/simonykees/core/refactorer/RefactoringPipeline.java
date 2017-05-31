@@ -135,6 +135,7 @@ public class RefactoringPipeline {
 			throws RefactoringException {
 
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
+		List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 		try {
 			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements, monitor);
@@ -160,7 +161,12 @@ public class RefactoringPipeline {
 
 				for (ICompilationUnit compilationUnit : compilationUnits) {
 					subMonitor.subTask(compilationUnit.getElementName());
-					refactoringStates.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
+					if (SimonykeesUtil.checkForSyntaxErrors(compilationUnit)) {
+						containingErrorList.add(compilationUnit);
+					} else {
+						refactoringStates
+								.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
+					}
 
 					/*
 					 * If cancel is pressed on progress monitor, abort all and
@@ -172,6 +178,22 @@ public class RefactoringPipeline {
 						subMonitor.worked(1);
 					}
 				}
+
+				/**
+				 * if there are syntax errors within source files display it to
+				 * the user
+				 */
+				if (!containingErrorList.isEmpty()) {
+					// TODO SIM-416 add the opening of the dialog and processing
+					/*
+					 * TODO make the check sooner (when the SelectRulesWizard
+					 * opens rather than when finish is clicked)
+					 */
+					logger.warn(NLS.bind(ExceptionMessages.RefactoringPipeline_syntax_errors_exist, containingErrorList.stream().map(ICompilationUnit::getElementName)
+							.collect(Collectors.joining(", ")))); //$NON-NLS-1$
+
+				}
+
 			}
 		} catch (JavaModelException e) {
 			logger.error(e.getMessage(), e);
