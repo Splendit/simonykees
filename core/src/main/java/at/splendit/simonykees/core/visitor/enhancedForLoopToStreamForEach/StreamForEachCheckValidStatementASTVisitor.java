@@ -4,23 +4,21 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ContinueStatement;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.PostfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
@@ -38,8 +36,8 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 	private static final List<String> CHECKED_EXCEPTION_TYPE_LIST = Collections
 			.singletonList(CHECKED_EXCEPTION_SUPERTYPE);
 
-	private List<SimpleName> fieldNames;
 	private List<SimpleName> variableNames = new LinkedList<>();
+	private List<SimpleName> parameters;
 	private List<String> currentHandledExceptionsTypes = new LinkedList<>();
 
 	private boolean containsBreakStatement = false;
@@ -47,9 +45,10 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 	private boolean containsReturnStatement = false;
 	private boolean containsCheckedException = false;
 	private boolean containsInvalidAssignments = false;
+	private List<IVariableBinding> invalidVariables = new LinkedList<>();
 
-	public StreamForEachCheckValidStatementASTVisitor(List<SimpleName> fieldNames) {
-		this.fieldNames = fieldNames;
+	public StreamForEachCheckValidStatementASTVisitor(List<SimpleName> parameters) {
+		this.parameters = parameters;
 	}
 
 	@Override
@@ -115,81 +114,49 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 	@Override
 	public boolean visit(VariableDeclarationFragment variableDeclarationFragmentNode) {
 		variableNames.add(variableDeclarationFragmentNode.getName());
-		return true;
+		return false;
 	}
+
+	
 
 	@Override
-	public boolean visit(Assignment assignmentNode) {
-		if (containsInvalidAssignments)
-			return false;
-
-		Expression expression = assignmentNode.getLeftHandSide();
-		if(!isExpressionValidForAssignment(expression)) {
-			containsInvalidAssignments = true;
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public boolean visit(PostfixExpression postfixExpressionNode) {
-		if (containsInvalidAssignments)
-			return false;
-
-		Expression expression = postfixExpressionNode.getOperand();
-		if(!isExpressionValidForAssignment(expression)) {
-			containsInvalidAssignments = true;
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public boolean visit(PrefixExpression prefixExpressionNode) {
-		if (containsInvalidAssignments)
-			return false;
-
-		Expression expression = prefixExpressionNode.getOperand();
-		if(!isExpressionValidForAssignment(expression)) {
-			containsInvalidAssignments = true;
-			return false;
-		}
-		return true;
-	}
-
-	private boolean isExpressionValidForAssignment(Expression expression) {
-
-		if (expression instanceof SimpleName) {
-			SimpleName simpleName = (SimpleName) expression;
-			boolean fieldNameFound = fieldNames.stream().anyMatch(fieldName -> fieldName.getIdentifier().equals(simpleName.getIdentifier()));
+	public boolean visit(SimpleName simpleNameNode) {
+		if (!(simpleNameNode.getParent() instanceof VariableDeclaration)) {
+		
+		IBinding binding = simpleNameNode.resolveBinding();
+		if (binding instanceof IVariableBinding) {
+			IVariableBinding variableBinding = (IVariableBinding) binding;
+			boolean isField = variableBinding.isField();
+			boolean isFinal = Modifier.isFinal(variableBinding.getModifiers());
 			boolean variableNameFound = variableNames.stream()
-					.anyMatch(variableName -> variableName.getIdentifier().equals(simpleName.getIdentifier()));
+					.anyMatch(variableName -> variableName.getIdentifier().equals(simpleNameNode.getIdentifier()));
+			boolean isForParameter = parameters.stream().anyMatch(param -> simpleNameNode.getIdentifier().equals(param.getIdentifier()));
+			boolean isParameter = variableBinding.isParameter();
 			
-//			IBinding binding = simpleName.resolveBinding();
-//			if(binding instanceof IVariableBinding) {
-//				IVariableBinding variableBinding = (IVariableBinding) binding;
-//				IMethodBinding methodBindng = variableBinding.getDeclaringMethod();
-//				boolean isField = variableBinding.isField();
-//				boolean isEffectivelyFinal = variableBinding.isEffectivelyFinal();
-//				System.out.println("asdf");
-//			}
 			
-			return fieldNameFound || variableNameFound;
-		}
-		else if (expression instanceof QualifiedName) {
-			QualifiedName qualifiedName = (QualifiedName) expression;
-			return true;
-		}
-		else if (expression instanceof FieldAccess) {
-			FieldAccess fieldAccess = (FieldAccess) expression;
-			return true; // TODO implement properly
-		}
+			if (isField || isFinal || variableNameFound || isParameter || isForParameter) {
 
+				
+			} else {
+				invalidVariables.add(variableBinding);
+			}
+		}
+		}
+		return false;
+	}
+	
+	@Override
+	public boolean visit(FieldAccess node) {
+		return false;
+	}
+
+	@Override
+	public boolean visit(QualifiedName node) {
 		return false;
 	}
 
 	public boolean isStatementsValid() {
 		return !containsBreakStatement && !containsContinueStatement && !containsReturnStatement
-				&& !containsCheckedException && !containsInvalidAssignments;
+				&& !containsCheckedException && !containsInvalidAssignments && invalidVariables.size() == 0;
 	}
 }

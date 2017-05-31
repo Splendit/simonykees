@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -33,9 +35,17 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 	private static final List<String> TYPE_BINDING_CHECK_LIST = Collections.singletonList(COLLECTION_QUALIFIED_NAME);
 
 	private List<SimpleName> fieldNames = new LinkedList<>();
+	private List<SimpleName> parameters = new LinkedList<>();
 
 	@Override
 	public boolean visit(EnhancedForStatement enhancedForStatementNode) {
+		SingleVariableDeclaration parameter = enhancedForStatementNode.getParameter();
+		parameters.add(parameter.getName());
+		return true;
+	}
+	
+	@Override
+	public void endVisit(EnhancedForStatement enhancedForStatementNode) {
 		SingleVariableDeclaration parameter = enhancedForStatementNode.getParameter();
 		Expression expression = enhancedForStatementNode.getExpression();
 		Statement statement = enhancedForStatementNode.getBody();
@@ -46,7 +56,8 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 				&& (ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST)
 						|| ClassRelationUtil.isContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST))) { // TODO
 																													// probably
-			ASTNode approvedStatement = getApprovedStatement(statement);
+			ASTNode approvedStatement = getApprovedStatement(statement, parameters);
+			
 			if (approvedStatement != null) {
 
 				/*
@@ -104,16 +115,6 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 				logger.info(sb.toString());
 			}
 		}
-
-		return true;
-	}
-
-	@Override
-	public boolean visit(FieldDeclaration fieldDeclarationNode) {
-		List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(fieldDeclarationNode.fragments(),
-				VariableDeclarationFragment.class);
-		fragments.stream().forEach(fragment -> fieldNames.add(fragment.getName()));
-		return true;
 	}
 
 	/**
@@ -121,12 +122,11 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 	 * @param statement
 	 * @return
 	 */
-	private ASTNode getApprovedStatement(Statement statement) {
+	private ASTNode getApprovedStatement(Statement statement, List<SimpleName> parameters) {
 		if (statement instanceof Block) {
 			Block body = (Block) statement;
 
-			StreamForEachCheckValidStatementASTVisitor statementVisitor = new StreamForEachCheckValidStatementASTVisitor(
-					fieldNames);
+			StreamForEachCheckValidStatementASTVisitor statementVisitor = new StreamForEachCheckValidStatementASTVisitor(parameters);
 			body.accept(statementVisitor);
 
 			if (statementVisitor.isStatementsValid()) {
