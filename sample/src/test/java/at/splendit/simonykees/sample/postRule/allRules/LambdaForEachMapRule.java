@@ -119,10 +119,8 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 
 		int offset = 10;
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).map((s) -> {// I may
-																		// be
-																		// necessary
-																		// here
+		list.stream().filter(s -> !StringUtils.isEmpty(s)).map((s) -> {
+			// I may be necessary here
 			if (offset > 0) {
 				sb.append(s);
 			}
