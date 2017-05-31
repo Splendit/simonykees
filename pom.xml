@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>at.splendit.jSparrow</groupId>
@@ -147,6 +145,8 @@
 
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
+
+		<basedir>/simonykees</basedir>
 	</properties>
 
 	<repositories>
@@ -166,6 +166,21 @@
 	<dependencyManagement>
 		<dependencies>
 			<!-- jSparrow -->
+			<dependency>
+				<groupId>at.splendit.jSparrow</groupId>
+				<artifactId>jSparrow.logging</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit.jSparrow</groupId>
+				<artifactId>jSparrow.i18n</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit.jSparrow</groupId>
+				<artifactId>jSparrow.license.api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>at.splendit.jSparrow</groupId>
 				<artifactId>jSparrow.core</artifactId>
@@ -305,6 +320,30 @@
 					<groupId>com.github.wvengen</groupId>
 					<artifactId>proguard-maven-plugin</artifactId>
 					<version>${proguard.plugin.version}</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>proguard</goal>
+							</goals>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>net.sf.proguard</groupId>
+							<artifactId>proguard-base</artifactId>
+							<version>5.2</version>
+							<scope>runtime</scope>
+						</dependency>
+					</dependencies>
+					<configuration>
+						<obfuscate>true</obfuscate>
+						<proguardInclude>${basedir}/proguard.conf</proguardInclude>
+						<libs>
+							<lib>/usr/lib/jvm/java-8-oracle/jre/lib/rt.jar</lib>
+							<lib>/usr/lib/jvm/java-8-oracle/jre/lib/jsse.jar</lib>
+						</libs>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.eclipse.tycho</groupId>
@@ -419,11 +458,15 @@
 		</profile>
 		<profile>
 			<id>proguard</id>
+			<activation>
+				<property>
+					<name>proguard</name>
+				</property>
+			</activation>
 			<properties>
 				<!-- skipping test for proguard because they dont work -->
 				<maven.test.skip>true</maven.test.skip>
 			</properties>
-
 			<distributionManagement>
 				<repository>
 					<id>pdrone.76310b5f-bf75-4782-bd20-c44376584fc5</id>

@@ -49,25 +49,6 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException {
 
-		// TODO monitor?
-
-		// subMonitor.setWorkRemaining(workingCopies.size());
-
-		// for (ICompilationUnit wc : workingCopies) {
-		// subMonitor.subTask(getName() + ": " + wc.getElementName());
-		// //$NON-NLS-1$
-		// try {
-		// applyOrganising(wc);
-		// } catch (CoreException e) {
-		// throw new JavaModelException(e);
-		// }
-		// if (subMonitor.isCanceled()) {
-		// return;
-		// } else {
-		// subMonitor.worked(1);
-		// }
-		// }
-
 		try {
 			return applyOrganising(workingCopy);
 		} catch (CoreException e) {

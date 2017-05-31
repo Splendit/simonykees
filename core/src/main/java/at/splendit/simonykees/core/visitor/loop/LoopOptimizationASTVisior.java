@@ -36,7 +36,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * @author Martin Huter
  * @since 0.9.2
  */
-class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
+public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 	/*
 	 * is initialized in constructor and set to null again if condition is

@@ -5,8 +5,13 @@ import java.util.List;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -15,11 +20,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.exception.RefactoringException;
+import at.splendit.simonykees.core.exception.SimonykeesException;
+import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.ui.LicenseUtil;
+import at.splendit.simonykees.core.ui.dialog.CompilationErrorsMessageDialog;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.wizard.impl.SelectRulesWizard;
 import at.splendit.simonykees.i18n.Messages;
@@ -46,40 +56,42 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 					IJavaProject selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
 
 					if (null != selectedJavaProjekt) {
-						final WizardDialog dialog = new WizardDialog(HandlerUtil.getActiveShell(event),
-								new SelectRulesWizard(selectedJavaElements,
-										RulesContainer.getRulesForProject(selectedJavaProjekt))) {
-							// Removed unnecessary empty space on the bottom of
-							// the wizard intended for ProgressMonitor that is
-							// not used
-							@Override
-							protected Control createDialogArea(Composite parent) {
-								Control ctrl = super.createDialogArea(parent);
-								getProgressMonitor();
-								return ctrl;
-							}
+
+						RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
+
+						Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
 
 							@Override
-							protected IProgressMonitor getProgressMonitor() {
-								ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
-								GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-								gridData.heightHint = 0;
-								monitor.setLayoutData(gridData);
-								monitor.setVisible(false);
-								return monitor;
+							protected IStatus run(IProgressMonitor monitor) {
+
+								try {
+									List<ICompilationUnit> containingErrorList = refactoringPipeline
+											.prepareRefactoring(selectedJavaElements, monitor);
+									if (monitor.isCanceled()) {
+										refactoringPipeline.clearStates();
+										Activator.setRunning(false);
+										return Status.CANCEL_STATUS;
+									} else if (null != containingErrorList && !containingErrorList.isEmpty()) {
+										synchronizeWithUIShowCompilationErrorMessage(containingErrorList, event,
+												refactoringPipeline, selectedJavaElements, selectedJavaProjekt);
+									} else {
+										synchronizeWithUIShowSelectRulesWizard(event, refactoringPipeline,
+												selectedJavaElements, selectedJavaProjekt);
+									}
+
+								} catch (RefactoringException e) {
+									synchronizeWithUIShowInfo(e);
+									return Status.CANCEL_STATUS;
+								}
+
+								return Status.OK_STATUS;
 							}
 						};
-						/*
-						 * the dialog is made as big enough to show rule
-						 * description vertically and horizontally to avoid two
-						 * scrollers
-						 * 
-						 * note: if the size is too big, it will be reduced to
-						 * the maximum possible size.
-						 */
-						dialog.setPageSize(800, 700);
 
-						dialog.open();
+						job.setUser(true);
+						job.schedule();
+
+						return true;
 
 					}
 				}
@@ -96,4 +108,119 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 		return null;
 	}
 
+	/**
+	 * Method used to open SelectRulesWizard from non UI thread
+	 */
+	private void synchronizeWithUIShowSelectRulesWizard(ExecutionEvent event, RefactoringPipeline refactoringPipeline,
+			List<IJavaElement> selectedJavaElements, IJavaProject selectedJavaProjekt) {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				//HandlerUtil.getActiveShell(event)
+				final WizardDialog dialog = new WizardDialog(shell, new SelectRulesWizard(
+						refactoringPipeline, RulesContainer.getRulesForProject(selectedJavaProjekt))) {
+					// Removed unnecessary empty space on the bottom of
+					// the wizard intended for ProgressMonitor that is
+					// not used
+					@Override
+					protected Control createDialogArea(Composite parent) {
+						Control ctrl = super.createDialogArea(parent);
+						getProgressMonitor();
+						return ctrl;
+					}
+
+					@Override
+					protected IProgressMonitor getProgressMonitor() {
+						ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
+						GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+						gridData.heightHint = 0;
+						monitor.setLayoutData(gridData);
+						monitor.setVisible(false);
+						return monitor;
+					}
+				};
+				/*
+				 * the dialog is made as big enough to show rule description
+				 * vertically and horizontally to avoid two scrollers
+				 * 
+				 * note: if the size is too big, it will be reduced to the
+				 * maximum possible size.
+				 */
+				dialog.setPageSize(800, 700);
+
+				dialog.open();
+			}
+		});
+	}
+
+	/**
+	 * Method used to open CompilationErrorsMessageDialog from non UI thread to
+	 * list all Java files that will be skipped because they contain compilation
+	 * errors.
+	 */
+	private void synchronizeWithUIShowCompilationErrorMessage(List<ICompilationUnit> containingErrorList,
+			ExecutionEvent event, RefactoringPipeline refactoringPipeline, List<IJavaElement> selectedJavaElements,
+			IJavaProject selectedJavaProjekt) {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				CompilationErrorsMessageDialog dialog = new CompilationErrorsMessageDialog(shell);
+				dialog.create();
+				dialog.setTableViewerInput(containingErrorList);
+				dialog.open();
+				if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
+					if (refactoringPipeline.hasRefactoringStates()) {
+						synchronizeWithUIShowSelectRulesWizard(event, refactoringPipeline, selectedJavaElements,
+								selectedJavaProjekt);
+					} else {
+						synchronizeWithUIShowWarningNoComlipationUnitDialog();
+					}
+				} else {
+					Activator.setRunning(false);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Method used to open InformationDialog from non UI thread
+	 * RefactoringException is thrown if java element does not exist or if an
+	 * exception occurs while accessing its corresponding resource, or if no
+	 * working copies were found to apply
+	 */
+	private void synchronizeWithUIShowInfo(SimonykeesException exception) {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
+
+				Activator.setRunning(false);
+			}
+		});
+	}
+
+	/**
+	 * Method used to open MessageDialog informing the user that selection
+	 * contains no Java files without compilation error from non UI thread
+	 */
+	private void synchronizeWithUIShowWarningNoComlipationUnitDialog() {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizardHandler_noFileWithoutError,
+						MessageDialog.INFORMATION);
+
+				Activator.setRunning(false);
+			}
+
+		});
+	}
 }

@@ -57,8 +57,8 @@ import at.splendit.simonykees.core.visitor.functionalInterface.FunctionalInterfa
 import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachCollectASTVisitor;
 import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachIfWrapperToFilterASTVisitor;
 import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachMapASTVisitor;
-import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
-import at.splendit.simonykees.core.visitor.loop.WhileToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.forToForEach.ForToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.whileToForEach.WhileToForEachASTVisitor;
 import at.splendit.simonykees.core.visitor.renaming.FieldNameConventionASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.MultiCatchASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisitor;

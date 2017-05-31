@@ -99,4 +99,27 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+
+	<profiles>
+		<!-- SIM-361 configure proguard to work with multiple modules -->
+		<profile>
+			<id>proguard</id>
+			<activation>
+				<property>
+					<!-- With this profile active, obfuscation will happen -->
+					<name>proguard</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.wvengen</groupId>
+						<artifactId>proguard-maven-plugin</artifactId>
+						<version>2.0.8</version>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>

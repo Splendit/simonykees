@@ -7,7 +7,6 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
@@ -21,6 +20,9 @@ import at.splendit.simonykees.i18n.Messages;
  * Format a Java class, the rule does not use an
  * {@link AbstractASTRewriteASTVisitor} so the abstract class itself can be
  * passed to the constructor.
+ * <p>
+ * The formatter selected in the Eclipse settings of the processed project is
+ * used.
  * 
  * @author Hannes Schweighofer, Ludwig Werzowa
  * @since 0.9.2
@@ -43,20 +45,6 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException {
 
-		// TODO monitor?
-		// subMonitor.setWorkRemaining(workingCopies.size());
-
-		// for (ICompilationUnit wc : workingCopies) {
-		// subMonitor.subTask(getName() + ": " + wc.getElementName());
-		// //$NON-NLS-1$
-		// applyFormating(wc);
-		// if (subMonitor.isCanceled()) {
-		// return;
-		// } else {
-		// subMonitor.worked(1);
-		// }
-		// }
-
 		try {
 			return applyFormating(workingCopy);
 		} catch (CoreException e) {
@@ -66,9 +54,14 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 
 	private DocumentChange applyFormating(ICompilationUnit workingCopy) throws JavaModelException {
 		ISourceRange sourceRange = workingCopy.getSourceRange();
-		// TODO check formating style
-		CodeFormatter formatter = ToolFactory
-				.createCodeFormatter(DefaultCodeFormatterConstants.getEclipseDefaultSettings());
+
+		/*
+		 * Our sample module makes it necessary to use the options of the
+		 * currently used IJavaProject instead of JavaCore.getOptions() (used
+		 * when passing null), which works in runtime Eclipse etc.
+		 */
+		CodeFormatter formatter = ToolFactory.createCodeFormatter(workingCopy.getJavaProject().getOptions(true));
+
 		int formatingKind = CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS
 				| CodeFormatter.K_UNKNOWN;
 		TextEdit edit = formatter.format(formatingKind, workingCopy.getSource(), sourceRange.getOffset(),

@@ -45,7 +45,9 @@ public class TestCornerCasesTryWithResourceRule {
 
 	static void readFirstLineFromFile(String path) {
 
-		try (BufferedReader br = new BufferedReader(new FileReader(path)); BufferedReader br2 = new BufferedReader(new FileReader(path)); Closeable cl = new BufferedReader(new FileReader(path))) {
+		try (BufferedReader br = new BufferedReader(new FileReader(path));
+				BufferedReader br2 = new BufferedReader(new FileReader(path));
+				Closeable cl = new BufferedReader(new FileReader(path))) {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -77,7 +79,8 @@ public class TestCornerCasesTryWithResourceRule {
 		final StringBuilder sb = new StringBuilder();
 		
 		if (record.getThrown() != null) {
-			try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
+			try (final StringWriter sw = new StringWriter();
+					final PrintWriter pw = new PrintWriter(sw)) {
 	            //CHECKSTYLE:OFF
 	            record.getThrown().printStackTrace(pw);
 	            sb.append(sw.toString());
@@ -100,7 +103,8 @@ public class TestCornerCasesTryWithResourceRule {
 		final StringBuilder sb = new StringBuilder();
 		
 		if (record.getThrown() != null) {
-			try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
+			try (final StringWriter sw = new StringWriter();
+					final PrintWriter pw = new PrintWriter(sw)) {
 	            //CHECKSTYLE:OFF
 	            record.getThrown().printStackTrace(pw);
 	            sb.append(sw.toString());
