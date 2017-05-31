@@ -22,12 +22,12 @@ import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.exception.SimonykeesException;
-import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
+import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.ui.LicenseUtil;
-import at.splendit.simonykees.core.ui.RefactoringPreviewWizard;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
+import at.splendit.simonykees.core.ui.preview.RefactoringPreviewWizard;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -86,8 +86,8 @@ public class LoggerRuleWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(rule);
-		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
-		};
+		RefactoringPipeline refactorer = new RefactoringPipeline(rules);
+		//AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules);
 		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
 		rule.setSelectedOptions(model.getCurrentSelectionMap());
 
@@ -97,9 +97,9 @@ public class LoggerRuleWizard extends Wizard {
 			protected IStatus run(IProgressMonitor monitor) {
 
 				try {
-					refactorer.prepareRefactoring(monitor);
+					refactorer.prepareRefactoring(javaElements, monitor);
 					if (monitor.isCanceled()) {
-						refactorer.clearWorkingCopies();
+						refactorer.clearStates();
 						return Status.CANCEL_STATUS;
 					}
 				} catch (RefactoringException e) {
@@ -109,7 +109,7 @@ public class LoggerRuleWizard extends Wizard {
 				try {
 					refactorer.doRefactoring(monitor);
 					if (monitor.isCanceled()) {
-						refactorer.clearWorkingCopies();
+						refactorer.clearStates();
 						return Status.CANCEL_STATUS;
 					}
 				} catch (RefactoringException e) {
@@ -160,7 +160,7 @@ public class LoggerRuleWizard extends Wizard {
 	/**
 	 * Method used to open RefactoringPreviewWizard from non UI thread
 	 */
-	private void synchronizeWithUIShowRefactoringPreviewWizard(AbstractRefactorer refactorer, Rectangle rectangle) {
+	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactorer, Rectangle rectangle) {
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override

@@ -7,9 +7,33 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "nls", "unused", "rawtypes" })
 public class TestWhileToForEachRule {
+
+	private static final Logger logger = LoggerFactory.getLogger(TestWhileToForEachRule.class);
+
+	public String loopingOverArrays(String input) {
+		StringBuilder sb = new StringBuilder();
+		String[] array = { "-", input, "." };
+		for (String t : array) {
+			logger.info(t);
+			sb.append(t);
+		}
+		return sb.toString();
+	}
+
+	public String loopingOverLists(String input) {
+		StringBuilder sb = new StringBuilder();
+		List<String> list = generateList(input);
+		for (String t : list) {
+			logger.info(t);
+			sb.append(t);
+		}
+		return sb.toString();
+	}
 
 	public String testWhileToFor(String input) {
 		List<String> l = generateList(input);

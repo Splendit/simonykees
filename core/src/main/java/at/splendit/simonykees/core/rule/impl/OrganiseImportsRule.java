@@ -1,14 +1,8 @@
 package at.splendit.simonykees.core.rule.impl;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
@@ -18,11 +12,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
@@ -43,87 +34,78 @@ import at.splendit.simonykees.i18n.Messages;
 @SuppressWarnings("restriction")
 public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
 
-	private static final Logger logger = LoggerFactory.getLogger(OrganiseImportsRule.class);
-	
-	private Map<ICompilationUnit, DocumentChange> changes = new HashMap<ICompilationUnit, DocumentChange>();
-
 	public OrganiseImportsRule(Class<AbstractASTRewriteASTVisitor> visitor) {
 		super(visitor);
 		this.name = Messages.OrganiseImportsRule_name;
 		this.description = Messages.OrganiseImportsRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
 	}
 
 	@Override
-	public Map<ICompilationUnit, DocumentChange> getDocumentChanges() {
-		return Collections.unmodifiableMap(changes);
-	}
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
+			throws ReflectiveOperationException, JavaModelException {
 
-	@Override
-	public void generateDocumentChanges(List<ICompilationUnit> workingCopies, SubMonitor subMonitor)
-			throws JavaModelException, ReflectiveOperationException {
-		
-		subMonitor.setWorkRemaining(workingCopies.size());
-		
-		for (ICompilationUnit wc : workingCopies) {
-			subMonitor.subTask(getName() + ": " + wc.getElementName()); //$NON-NLS-1$
-			try {
-				applyOrganising(wc);
-			} catch (CoreException e) {
-				throw new JavaModelException(e);
-			}
-			if (subMonitor.isCanceled()) {
-				return;
-			} else {
-				subMonitor.worked(1);
-			}
+		// TODO monitor?
+
+		// subMonitor.setWorkRemaining(workingCopies.size());
+
+		// for (ICompilationUnit wc : workingCopies) {
+		// subMonitor.subTask(getName() + ": " + wc.getElementName());
+		// //$NON-NLS-1$
+		// try {
+		// applyOrganising(wc);
+		// } catch (CoreException e) {
+		// throw new JavaModelException(e);
+		// }
+		// if (subMonitor.isCanceled()) {
+		// return;
+		// } else {
+		// subMonitor.worked(1);
+		// }
+		// }
+
+		try {
+			return applyOrganising(workingCopy);
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
 		}
 	}
 
-	private void applyOrganising(ICompilationUnit workingCopy) throws OperationCanceledException, CoreException {
-		if (changes.containsKey(workingCopy)) {
-			// already have changes
-			logger.info(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
-		} else {
+	private DocumentChange applyOrganising(ICompilationUnit workingCopy)
+			throws OperationCanceledException, CoreException {
 
-			final CompilationUnit astRoot = SimonykeesUtil.parse(workingCopy);
-			final boolean hasAmbiguity[]= new boolean[] { false };
-			IChooseImportQuery query= new IChooseImportQuery() {
-				@Override
-				public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
-					hasAmbiguity[0]= true;
-					return new TypeNameMatch[0];
-				}
-			};
-
-			OrganizeImportsOperation importsOperation = new OrganizeImportsOperation(workingCopy, astRoot, false, true,
-					true, query);
-			TextEdit edit = importsOperation.createTextEdit(null);
-
-			if (!hasAmbiguity[0]
-					&& importsOperation.getParseError() == null 
-					&& edit != null 
-					&& !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
-				Document document = new Document(workingCopy.getSource());
-				DocumentChange documentChange = SimonykeesUtil
-						.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document, edit.copy());
-
-				workingCopy.applyTextEdit(edit, null);
-				workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
-
-				if (documentChange != null) {
-					changes.put(workingCopy, documentChange);
-				} else {
-					// no changes
-				}
-			} else {
-				// no changes
+		final CompilationUnit astRoot = SimonykeesUtil.parse(workingCopy);
+		final boolean hasAmbiguity[] = new boolean[] { false };
+		IChooseImportQuery query = new IChooseImportQuery() {
+			@Override
+			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
+				hasAmbiguity[0] = true;
+				return new TypeNameMatch[0];
 			}
+		};
+
+		OrganizeImportsOperation importsOperation = new OrganizeImportsOperation(workingCopy, astRoot, false, true,
+				true, query);
+		TextEdit edit = importsOperation.createTextEdit(null);
+
+		DocumentChange documentChange = null;
+
+		if (!hasAmbiguity[0] && importsOperation.getParseError() == null && edit != null
+				&& !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
+			Document document = new Document(workingCopy.getSource());
+			documentChange = SimonykeesUtil.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document,
+					edit.copy());
+
+			workingCopy.applyTextEdit(edit, null);
+			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+
 		}
+
+		return documentChange;
 
 	}
 

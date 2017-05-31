@@ -50,6 +50,8 @@ public class Messages extends NLS {
 	public static String ForToForEachRule_name;
 	public static String FunctionalInterfaceRule_description;
 	public static String FunctionalInterfaceRule_name;
+	public static String LambdaForEachCollectRule_description;
+	public static String LambdaForEachCollectRule_name;
 	public static String LambdaForEachIfWrapperToFilterRule_description;
 	public static String LambdaForEachIfWrapperToFilterRule_name;
 	public static String LambdaToMethodReferenceRule_description;
@@ -119,9 +121,10 @@ public class Messages extends NLS {
 	public static String ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName;
 	public static String RearrangeClassMembersRule_description;
 	public static String RearrangeClassMembersRule_name;
+	public static String RefactoringPreviewWizard_err_runnableWithProgress;
+	public static String RefactoringRule_applying_rule_to_workingcopy;
 	public static String RefactoringRule_default_description;
 	public static String RefactoringRule_default_name;
-	public static String RefactoringRule_warning_workingcopy_already_present;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;

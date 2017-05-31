@@ -1,22 +1,22 @@
 package at.splendit.simonykees.core.rule;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.JavaVersion;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
+import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.util.TagUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -54,11 +54,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	private Class<T> visitor;
 
-	private Map<ICompilationUnit, DocumentChange> changes = new HashMap<ICompilationUnit, DocumentChange>();
-
 	public RefactoringRule(Class<T> visitor) {
 		this.visitor = visitor;
-		// TODO maybe add a better id
 		this.id = this.getClass().getSimpleName();
 		this.tags = TagUtil.getTagsForRule(this.getClass());
 		this.requiredJavaVersion = provideRequiredJavaVersion();
@@ -100,112 +97,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	/**
-	 * Changes should be generated with {@code generateDocumentChanges} first
-	 * 
-	 * @return Map containing {@code ICompilationUnit}s as key and corresponding
-	 *         {@code DocumentChange}s as value
-	 */
-	public Map<ICompilationUnit, DocumentChange> getDocumentChanges() {
-		return Collections.unmodifiableMap(changes);
-	}
-
-	/**
-	 * Changes are applied to working copy but <b>not</b> committed
-	 * 
-	 * @param workingCopies
-	 *            List of {@link ICompilationUnit} for which a
-	 *            {@link DocumentChange} for each selected rule is created
-	 * @throws JavaModelException
-	 *             if this element does not exist or if an exception occurs
-	 *             while accessing its corresponding resource.
-	 * @throws ReflectiveOperationException
-	 *             is thrown if the default constructor of {@link #visitor} is
-	 *             not present and the reflective construction fails.
-	 */
-	public void generateDocumentChanges(List<ICompilationUnit> workingCopies, SubMonitor subMonitor)
-			throws JavaModelException, ReflectiveOperationException {
-
-		subMonitor.setWorkRemaining(workingCopies.size());
-
-		for (ICompilationUnit wc : workingCopies) {
-			subMonitor.subTask(getName() + ": " + wc.getElementName()); //$NON-NLS-1$
-			applyRule(wc);
-			if (subMonitor.isCanceled()) {
-				return;
-			} else {
-				subMonitor.worked(1);
-			}
-		}
-	}
-
-	private void applyRule(ICompilationUnit workingCopy) throws JavaModelException, ReflectiveOperationException {
-
-		// FIXME SIM-206: TryWithResource multiple new resource on empty list
-		boolean dirtyHack = this instanceof TryWithResourceRule;
-
-		boolean changesAlreadyPresent = changes.containsKey(workingCopy);
-
-		if (changesAlreadyPresent) {
-			if (dirtyHack) {
-				// we have to collect changes a second time (see SIM-206)
-				collectChanges(workingCopy);
-			} else {
-				// already have changes
-				logger.info(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
-			}
-		} else {
-			collectChanges(workingCopy);
-		}
-
-	}
-
-	/**
-	 * Apply the current rule and collect all resulting changes.
-	 * 
-	 * @param workingCopies
-	 *            List of {@link ICompilationUnit} for which a
-	 *            {@link DocumentChange} for each selected rule is created
-	 * @throws JavaModelException
-	 *             if this element does not exist or if an exception occurs
-	 *             while accessing its corresponding resource.
-	 * @throws ReflectiveOperationException
-	 *             is thrown if the default constructor of {@link #visitor} is
-	 *             not present and the reflective construction fails.
-	 */
-	private void collectChanges(ICompilationUnit workingCopy) throws JavaModelException, ReflectiveOperationException {
-		T astVisitor = visitorFactory();
-		DocumentChange documentChange = SimonykeesUtil.applyRule(workingCopy, astVisitor);
-		if (documentChange != null) {
-
-			/*
-			 * FIXME SIM-206: TryWithResource multiple new resource on empty
-			 * list
-			 */
-			/*
-			 * FIXME SIM-206: this particular part of the fix does not work.
-			 * This will create the correct results. However, the
-			 * RefactoringPreviewWizard will show the diff between the first and
-			 * the second run, rather than the diff between the original source
-			 * and the second run. See comment in SIM-206.
-			 */
-			// if (dirtyHack) {
-			// DocumentChange temp = changes.get(workingCopy);
-			// if (temp != null) {
-			// documentChange.addEdit(temp.getEdit());
-			// }
-			// }
-
-			changes.put(workingCopy, documentChange);
-		} else {
-			// no changes
-		}
-	}
-
-	protected T visitorFactory() throws InstantiationException, IllegalAccessException {
-		return visitor.newInstance();
-	}
-
-	/**
 	 * Responsible to calculate of the rule is executable in the current
 	 * project.
 	 * 
@@ -215,11 +106,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 		if (null != compilerCompliance) {
 			String enumRepresentation = "JAVA_" + compilerCompliance.replace(".", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			satisfiedJavaVersion = JavaVersion.valueOf(enumRepresentation).atLeast(requiredJavaVersion);
-
-			satisfiedLibraries = ruleSpecificImplementation(project);
-
-			enabled = satisfiedJavaVersion && satisfiedLibraries;
+			enabled = JavaVersion.valueOf(enumRepresentation).atLeast(requiredJavaVersion);
+			if (enabled) {
+				enabled = ruleSpecificImplementation(project);
+			}
 		}
 	}
 
@@ -232,6 +122,83 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	 */
 	public boolean ruleSpecificImplementation(IJavaProject project) {
 		return true;
+	}
+
+
+	protected T visitorFactory() throws InstantiationException, IllegalAccessException {
+		return visitor.newInstance();
+	}
+
+	/**
+	 * Responsible to calculate of the rule is executable in the current
+	 * project.
+	 * 
+	 */
+	public final DocumentChange applyRule(ICompilationUnit workingCopy)
+			throws ReflectiveOperationException, JavaModelException, RefactoringException {
+		
+		logger.trace(NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.name, workingCopy.getElementName()));
+		
+		return applyRuleImpl(workingCopy);
+	}
+	
+	/**
+	 * This method may be overridden. 
+	 * 
+	 * @param workingCopy
+	 * @return
+	 * @throws ReflectiveOperationException
+	 * @throws JavaModelException
+	 * @throws RefactoringException 
+	 */
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
+			throws ReflectiveOperationException, JavaModelException, RefactoringException {
+		
+		final CompilationUnit astRoot = SimonykeesUtil.parse(workingCopy);
+		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
+		// FIXME resolves that comments are manipulated during astrewrite
+		//
+		// Solution from https://bugs.eclipse.org/bugs/show_bug.cgi?id=250142
+		// The best solution for such problems is usually to call
+		// ASTRewrite#setTargetSourceRangeComputer(TargetSourceRangeComputer)
+		// and set a NoCommentSourceRangeComputer or a properly configured
+		// TightSourceRangeComputer.
+
+		// astRewrite.setTargetSourceRangeComputer(new
+		// NoCommentSourceRangeComputer());
+
+		AbstractASTRewriteASTVisitor rule = visitorFactory();
+		rule.setAstRewrite(astRewrite);
+		try {
+			astRoot.accept(rule);
+		} catch (RuntimeException e) {
+			throw new RefactoringException(e);
+		}
+
+		Document document = new Document(workingCopy.getSource());
+		TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
+
+		if (edits.hasChildren()) {
+
+			/*
+			 * The TextEdit instance changes as soon as it is applied to the
+			 * working copy. This results in an incorrect preview of the
+			 * DocumentChange. To fix this issue, a copy of the TextEdit is used
+			 * for the DocumentChange.
+			 */
+			DocumentChange documentChange = SimonykeesUtil.generateDocumentChange(visitor.getSimpleName(), document,
+					edits.copy());
+
+			workingCopy.applyTextEdit(edits, null);
+			
+			// TODO think about using IProblemRequestor
+			// TODO think about returning the new AST
+			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+
+			return documentChange;
+		} else {
+			return null;
+		}
 	}
 
 	/**
