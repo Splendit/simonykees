@@ -42,7 +42,11 @@ import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
  * 
  * <pre>
  * <code> {@code 
- * 		list.stream().filter(s -> !s.isEmpty()).map((s)->{int i = 10;return s.substring(1) + i;}).forEach(subString -> {
+ * 		list.stream().filter(s -> !s.isEmpty()).map((s) -> {
+ * 			int i = 10;
+ * 			return s.substring(1) + i;
+ * 		}).
+ * 		forEach(subString -> {
  *			String lower = subString.toLowerCase();
  *			sb.append(lower);
  *		});
@@ -122,6 +126,14 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		return lambdaExpression;
 	}
 
+	/**
+	 * Checks if the body of the lambda expression is a block, and extracts it. 
+	 * 
+	 * @param lambdaExpression lambda expression to check for.
+	 * 
+	 * @return the {@link Block} representing the body of the lambda expression, 
+	 * or {@code null} if its is not a block.
+	 */
 	private Block extractLambdaExpressionBlockBody(LambdaExpression lambdaExpression) {
 		ASTNode body = lambdaExpression.getBody();
 		if (ASTNode.BLOCK == body.getNodeType()) {
@@ -293,7 +305,6 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			return this.remainingBlock;
 		}
 
-		
 		private boolean referencesNames(Statement statement, List<SimpleName> declaredNames2) {
 			for (SimpleName simpleName : declaredNames2) {
 				if (referencesName(statement, simpleName)) {
@@ -342,5 +353,4 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			return this.returnStatement != null;
 		}
 	}
-
 }
