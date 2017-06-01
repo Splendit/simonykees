@@ -140,21 +140,23 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 			sortedDeclarations.addAll(sortMembers(annotations));
 			sortedDeclarations.addAll(annotationMembers);
 			
+			int startFrom = calcStartFromIndex(bodyDeclarations, sortedDeclarations);
+			
 			// swap the position according to the new order.
-			if(!sortedDeclarations.isEmpty()) {
+			if(!sortedDeclarations.isEmpty() && startFrom >= 0) {
 				ASTRewrite astRewrite = getAstRewrite();
 				ListRewrite listRewrite = 
 						astRewrite.getListRewrite(node, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 				
-				BodyDeclaration firstDeclaration = sortedDeclarations.get(0);
+				BodyDeclaration firstDeclaration = sortedDeclarations.get(startFrom);
 				ASTNode firstTarget = astRewrite.createMoveTarget(firstDeclaration);
 				
 				List<Comment>firstDeclComments = boundedComments.get(firstDeclaration);
 				firstDeclComments.forEach(comment -> comment.getAlternateRoot().delete());
-				listRewrite.insertFirst((BodyDeclaration)firstTarget, null);
+				listRewrite.insertAt((BodyDeclaration)firstTarget, startFrom, null);
 				listRewrite.remove(firstDeclaration, null);
 				
-				for(int i = 1; i<sortedDeclarations.size(); i++) {
+				for(int i = startFrom + 1; i<sortedDeclarations.size(); i++) {
 					
 					BodyDeclaration declaration = sortedDeclarations.get(i);
 					ASTNode target = astRewrite.createMoveTarget(declaration);
@@ -171,6 +173,18 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 		return true;
 	}
 	
+	private int calcStartFromIndex(List<BodyDeclaration> bodyDeclarations, List<BodyDeclaration> sortedDeclarations) {
+		int i = 0;
+		while(i<sortedDeclarations.size()) {
+			if(sortedDeclarations.get(i) != bodyDeclarations.get(i)) {
+				return i;
+			}
+			i++;
+		}
+		
+		return -1;
+	}
+
 	/**
 	 * Sorts the given list of body declarations of the same type, 
 	 * by the modifier. Static members have higher priority. Then, comes
