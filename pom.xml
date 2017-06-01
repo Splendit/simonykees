@@ -343,6 +343,10 @@
 							<lib>/usr/lib/jvm/java-8-oracle/jre/lib/rt.jar</lib>
 							<lib>/usr/lib/jvm/java-8-oracle/jre/lib/jsse.jar</lib>
 						</libs>
+						<options>
+							<option>-printmapping ${basedir}/../output.map</option>
+							<option>-applymapping ${basedir}/../input.map</option>
+						</options>
 					</configuration>
 				</plugin>
 				<plugin>
