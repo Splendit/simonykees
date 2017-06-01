@@ -7,6 +7,7 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -17,9 +18,11 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.util.ISignatureAttribute;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
@@ -37,7 +40,7 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 			.singletonList(CHECKED_EXCEPTION_SUPERTYPE);
 
 	private List<SimpleName> variableNames = new LinkedList<>();
-	private List<SimpleName> parameters;
+	private SimpleName parameter;
 	private List<String> currentHandledExceptionsTypes = new LinkedList<>();
 
 	private boolean containsBreakStatement = false;
@@ -45,21 +48,25 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 	private boolean containsReturnStatement = false;
 	private boolean containsCheckedException = false;
 	private boolean containsInvalidAssignments = false;
+	private boolean containsThrowStatement = false;
 	private List<IVariableBinding> invalidVariables = new LinkedList<>();
+	LinkedList<Boolean> insideNestedForLoopList = new LinkedList<>();
 
-	public StreamForEachCheckValidStatementASTVisitor(List<SimpleName> parameters) {
-		this.parameters = parameters;
+	public StreamForEachCheckValidStatementASTVisitor(SimpleName parameter) {
+		this.parameter = parameter;
 	}
 
 	@Override
 	public boolean visit(BreakStatement breakStatementNode) {
-		containsBreakStatement = true;
+		if (insideNestedForLoopList.isEmpty())
+			containsBreakStatement = true;
 		return false;
 	}
 
 	@Override
 	public boolean visit(ContinueStatement continueStatementNode) {
-		containsContinueStatement = true;
+		if (insideNestedForLoopList.isEmpty())
+			containsContinueStatement = true;
 		return false;
 	}
 
@@ -71,6 +78,7 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
+
 		IMethodBinding methodBinding = methodInvocationNode.resolveMethodBinding();
 		if (methodBinding != null) {
 			ITypeBinding[] exceptions = methodBinding.getExceptionTypes();
@@ -113,50 +121,63 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 
 	@Override
 	public boolean visit(VariableDeclarationFragment variableDeclarationFragmentNode) {
+		if(insideNestedForLoopList.isEmpty())
 		variableNames.add(variableDeclarationFragmentNode.getName());
 		return false;
 	}
 
-	
+	@Override
+	public boolean visit(EnhancedForStatement node) {
+		insideNestedForLoopList.addFirst(true);
+		return true;
+	}
+
+	@Override
+	public void endVisit(EnhancedForStatement node) {
+		insideNestedForLoopList.removeFirst();
+	}
 
 	@Override
 	public boolean visit(SimpleName simpleNameNode) {
-		if (!(simpleNameNode.getParent() instanceof VariableDeclaration)) {
-		
-		IBinding binding = simpleNameNode.resolveBinding();
-		if (binding instanceof IVariableBinding) {
-			IVariableBinding variableBinding = (IVariableBinding) binding;
-			boolean isField = variableBinding.isField();
-			boolean isFinal = Modifier.isFinal(variableBinding.getModifiers());
-			boolean variableNameFound = variableNames.stream()
-					.anyMatch(variableName -> variableName.getIdentifier().equals(simpleNameNode.getIdentifier()));
-			boolean isForParameter = parameters.stream().anyMatch(param -> simpleNameNode.getIdentifier().equals(param.getIdentifier()));
-			boolean isParameter = variableBinding.isParameter();
-			
-			
-			if (isField || isFinal || variableNameFound || isParameter || isForParameter) {
+		//if (insideNestedForLoopList.isEmpty()) {
+			if (!(simpleNameNode.getParent() instanceof VariableDeclaration)) {
 
-				
-			} else {
-				invalidVariables.add(variableBinding);
+				IBinding binding = simpleNameNode.resolveBinding();
+				if (binding instanceof IVariableBinding) {
+					IVariableBinding variableBinding = (IVariableBinding) binding;
+					boolean isField = variableBinding.isField();
+					boolean isFinal = Modifier.isFinal(variableBinding.getModifiers());
+					boolean variableNameFound = variableNames.stream().anyMatch(
+							variableName -> variableName.getIdentifier().equals(simpleNameNode.getIdentifier()));
+//					boolean isForParameter = parameters.stream()
+//							.anyMatch(param -> simpleNameNode.getIdentifier().equals(param.getIdentifier()));
+					boolean isForParameter = simpleNameNode.getIdentifier().equals(parameter.getIdentifier());
+
+					if (isField || isFinal || variableNameFound || isForParameter) {
+
+					} else {
+						invalidVariables.add(variableBinding);
+					}
+				}
 			}
-		}
-		}
+		//}
 		return false;
 	}
-	
+
 	@Override
 	public boolean visit(FieldAccess node) {
 		return false;
 	}
 
 	@Override
-	public boolean visit(QualifiedName node) {
+	public boolean visit(ThrowStatement throwStatementNode) {
+		containsThrowStatement = true;
 		return false;
 	}
 
 	public boolean isStatementsValid() {
 		return !containsBreakStatement && !containsContinueStatement && !containsReturnStatement
-				&& !containsCheckedException && !containsInvalidAssignments && invalidVariables.size() == 0;
+				&& !containsCheckedException && !containsInvalidAssignments && !containsThrowStatement
+				&& invalidVariables.size() == 0;
 	}
 }

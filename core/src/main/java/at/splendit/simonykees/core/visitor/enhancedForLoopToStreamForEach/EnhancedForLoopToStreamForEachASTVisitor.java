@@ -56,7 +56,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 				&& (ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST)
 						|| ClassRelationUtil.isContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST))) { // TODO
 																													// probably
-			ASTNode approvedStatement = getApprovedStatement(statement, parameters);
+			ASTNode approvedStatement = getApprovedStatement(statement, parameter.getName());
 			
 			if (approvedStatement != null) {
 
@@ -115,6 +115,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 				logger.info(sb.toString());
 			}
 		}
+		parameters.remove(parameter.getName());
 	}
 
 	/**
@@ -122,11 +123,11 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 	 * @param statement
 	 * @return
 	 */
-	private ASTNode getApprovedStatement(Statement statement, List<SimpleName> parameters) {
+	private ASTNode getApprovedStatement(Statement statement, SimpleName parameter) {
 		if (statement instanceof Block) {
 			Block body = (Block) statement;
 
-			StreamForEachCheckValidStatementASTVisitor statementVisitor = new StreamForEachCheckValidStatementASTVisitor(parameters);
+			StreamForEachCheckValidStatementASTVisitor statementVisitor = new StreamForEachCheckValidStatementASTVisitor(parameter);
 			body.accept(statementVisitor);
 
 			if (statementVisitor.isStatementsValid()) {
