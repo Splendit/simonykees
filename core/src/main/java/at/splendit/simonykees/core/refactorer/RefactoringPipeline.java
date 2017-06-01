@@ -50,6 +50,14 @@ public class RefactoringPipeline {
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
 	/**
+	 * Constructor without parameters, used to create RefactoringPipeline before
+	 * SelectRulesWizard is opened
+	 */
+	public RefactoringPipeline() {
+		this.refactoringStates = new ArrayList<>();
+	}
+
+	/**
 	 * Stores the selected rules.
 	 * 
 	 * @param rules
@@ -74,6 +82,17 @@ public class RefactoringPipeline {
 
 	public List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getRules() {
 		return rules;
+	}
+
+	/**
+	 * Setter for rules when finish button is pressed in SelectRulesWizard to
+	 * store selected rules
+	 * 
+	 * @param rules
+	 *            selected rules
+	 */
+	public void setRules(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+		this.rules = rules;
 	}
 
 	public Map<ICompilationUnit, DocumentChange> getChangesForRule(
@@ -114,6 +133,20 @@ public class RefactoringPipeline {
 	}
 
 	/**
+	 * When prepare refactoring is finished it can happen that there is no
+	 * refactoringStates if all selected classes have compilation errors.
+	 * 
+	 * @return true if has at least one refactoring state, false otherwise
+	 */
+	public boolean hasRefactoringStates() {
+		if (!refactoringStates.isEmpty()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * Prepare working copies for refactoring.
 	 * <p>
 	 * Takes a list of {@link IJavaElement}s and creates
@@ -131,10 +164,11 @@ public class RefactoringPipeline {
 	 * 
 	 * @see SimonykeesUtil#collectICompilationUnits(List, List)
 	 */
-	public void prepareRefactoring(List<IJavaElement> javaElements, IProgressMonitor monitor)
+	public List<ICompilationUnit> prepareRefactoring(List<IJavaElement> javaElements, IProgressMonitor monitor)
 			throws RefactoringException {
 
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
+		List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 		try {
 			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements, monitor);
@@ -160,18 +194,34 @@ public class RefactoringPipeline {
 
 				for (ICompilationUnit compilationUnit : compilationUnits) {
 					subMonitor.subTask(compilationUnit.getElementName());
-					refactoringStates.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
+					if (SimonykeesUtil.checkForSyntaxErrors(compilationUnit)) {
+						containingErrorList.add(compilationUnit);
+					} else {
+						refactoringStates
+								.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
+					}
 
 					/*
 					 * If cancel is pressed on progress monitor, abort all and
 					 * return, else continue
 					 */
 					if (subMonitor.isCanceled()) {
-						return;
+						return containingErrorList;
 					} else {
 						subMonitor.worked(1);
 					}
 				}
+
+				/**
+				 * if there are syntax errors within source files display it to
+				 * the user
+				 */
+				if (!containingErrorList.isEmpty()) {
+					logger.info(NLS.bind(ExceptionMessages.RefactoringPipeline_syntax_errors_exist, containingErrorList
+							.stream().map(ICompilationUnit::getElementName).collect(Collectors.joining(", ")))); //$NON-NLS-1$
+
+				}
+				return containingErrorList;
 			}
 		} catch (JavaModelException e) {
 			logger.error(e.getMessage(), e);

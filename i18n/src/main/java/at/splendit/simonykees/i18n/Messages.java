@@ -33,6 +33,8 @@ public class Messages extends NLS {
 	public static String CodeFormatterRule_name;
 	public static String CollectionRemoveAllRule_description;
 	public static String CollectionRemoveAllRule_name;
+	public static String CompilationErrorsMessageDialog_compilationErrorDialogMessage;
+	public static String CompilationErrorsMessageDialog_compilationErrorDialogTitle;
 	public static String ConfigureProfileSelectRulesWizardPage_error_EmptyName;
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputLabel;
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputText;
@@ -132,6 +134,7 @@ public class Messages extends NLS {
 	public static String RemoveNewStringConstructorRule_description;
 	public static String RemoveNewStringConstructorRule_name;
 	public static String SelectRulesWizardHandler_allready_running;
+	public static String SelectRulesWizardHandler_noFileWithoutError;
 	public static String SelectRulesWizardPage_addAllButtonLabel;
 	public static String SelectRulesWizardPage_addButtonLabel;
 	public static String SelectRulesWizardPage_defaultDescriptionText;

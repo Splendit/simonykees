@@ -12,7 +12,10 @@
 	</server>
 
 	deploy with: mvn clean deploy
-	deploy with proguard: mvn clean deploy -Pproguard
+	deploy with proguard: mvn clean deploy -Dproguard
+	
+	Don't use -Pproguard, because with -D the tycho-source-plugin is deactivated
+	(resulted in double dependencies within the classpath)
 
 	updated osgi bundle will be visible on:
 	http://packagedrone-vm-01.splendit.loc:8080/p2/jSparrow-test-channel/
