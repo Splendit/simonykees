@@ -231,6 +231,7 @@ public class TestWhileToForEachListRule {
 		while (i < list.size()) {
 			sb.append(list.get(i));
 			list.get(i);
+			i++;
 		}
 
 		return sb.toString();
