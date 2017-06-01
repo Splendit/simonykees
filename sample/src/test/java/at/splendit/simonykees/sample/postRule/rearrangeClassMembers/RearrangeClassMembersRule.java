@@ -109,7 +109,7 @@ public class RearrangeClassMembersRule {
         private String foo = "it-shadows-the-outer-class";
 
 
-		// comment above the default ctor
+        // comment above the default ctor
         /**
          * Docs above the default ctor.
          */
@@ -117,11 +117,11 @@ public class RearrangeClassMembersRule {
             foo = "it-shadows-the-outer-class";
         }
 
-		public SomethingCouldBeInnerType(String input) {
+        public SomethingCouldBeInnerType(String input) {
             foo = input;
         }
 
-		private void resetFoo() {
+        private void resetFoo() {
             foo = "";
         }
     }
