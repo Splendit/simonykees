@@ -1,8 +1,10 @@
 package at.splendit.simonykees.sample.preRule;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -17,6 +19,7 @@ public class EnhancedForLoopToStreamForEachRule {
 	public List<List<String>> stringListList = Arrays.asList(stringList1, stringList2);
 	private TestClass testClassField = new TestClass();
 	private int intField = 0;
+	protected Map<String, Map<String, String>> validationConfigurations = new HashMap<String, Map<String,String>>();
 
 	static {
 		stringList3 = new LinkedList<>();
@@ -183,6 +186,8 @@ public class EnhancedForLoopToStreamForEachRule {
 		}
 
 		TestClass testClassLocal = new TestClass();
+		EnhancedForLoopToStreamForEachRule rule = new EnhancedForLoopToStreamForEachRule();
+
 		for (String s : stringList1) {
 			testClassLocal.testIntField++;
 		}
@@ -194,6 +199,19 @@ public class EnhancedForLoopToStreamForEachRule {
 		for (String s : stringList1) {
 			testClassLocal.testIntField += s.length();
 		}
+
+		rule.intField = 12;
+		rule.testClassField.testIntField = 1;
+		for(Map.Entry<String, Map<String, String>> entry : validationConfigurations.entrySet()) {
+            Map<String, String> clone = new HashMap<String, String>(entry.getValue().size());
+            for (Map.Entry<String, String> entry2 : entry.getValue().entrySet()) {
+                clone.put(entry2.getKey(), entry2.getValue());
+            }
+            rule.validationConfigurations.put(entry.getKey(), clone);
+        }
+		rule.intField = 12;
+		rule.testClassField.testIntField = 1;
+		rule = null;
 
 		return "";
 	}

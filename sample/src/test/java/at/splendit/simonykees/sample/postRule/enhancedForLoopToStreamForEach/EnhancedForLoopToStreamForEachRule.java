@@ -1,8 +1,10 @@
 package at.splendit.simonykees.sample.postRule.enhancedForLoopToStreamForEach;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -17,14 +19,15 @@ public class EnhancedForLoopToStreamForEachRule {
 	public List<List<String>> stringListList = Arrays.asList(stringList1, stringList2);
 	private TestClass testClassField = new TestClass();
 	private int intField = 0;
+	protected Map<String, Map<String, String>> validationConfigurations = new HashMap<String, Map<String,String>>();
 
 	static {
 		stringList3 = new LinkedList<>();
-		stringList1.stream().forEach((String s) -> {
-			stringList2.stream().forEach((String t) -> {
+		for (String s : stringList1) {
+			for (String t : stringList2) {
 				stringList3.add(s + t);
-			});
-		});
+			}
+		}
 	}
 
 	public String doSomething() throws ClassNotFoundException {
@@ -66,11 +69,11 @@ public class EnhancedForLoopToStreamForEachRule {
 			System.out.println(s);
 		}
 
-		stringList1.stream().forEach((String s) -> {
-			stringList2.stream().forEach((String t) -> {
+		for (String s : stringList1) {
+			for (String t : stringList2) {
 				System.out.println(s + t);
-			});
-		});
+			}
+		}
 
 		for (List<String> list : stringListList) {
 			for (String s : list) {
@@ -85,19 +88,19 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		}
 
-		stringListList.stream().forEach((List<String> list) -> {
+		for (List<String> list : stringListList) {
 			stringList1.add(list.get(0));
-			list.stream().forEach((String s) -> {
-				stringList2.stream().forEach((String t) -> {
+			for (String s : list) {
+				for (String t : stringList2) {
 					if (t.equals(s)) {
 						System.out.println(t);
 					}
 					if (t.length() > s.length()) {
 						System.out.println(s + t);
 					}
-				});
-			});
-		});
+				}
+			}
+		}
 
 		for (String s : stringList1) {
 			Class.forName(s);
@@ -182,17 +185,32 @@ public class EnhancedForLoopToStreamForEachRule {
 		});
 
 		TestClass testClassLocal = new TestClass();
-		stringList1.stream().forEach((String s) -> {
+		EnhancedForLoopToStreamForEachRule rule = new EnhancedForLoopToStreamForEachRule();
+
+		for (String s : stringList1) {
 			testClassLocal.testIntField++;
-		});
+		}
 
-		stringList1.stream().forEach((String s) -> {
+		for (String s : stringList1) {
 			--testClassLocal.testIntField;
-		});
+		}
 
-		stringList1.stream().forEach((String s) -> {
+		for (String s : stringList1) {
 			testClassLocal.testIntField += s.length();
-		});
+		}
+
+		rule.intField = 12;
+		rule.testClassField.testIntField = 1;
+		for(Map.Entry<String, Map<String, String>> entry : validationConfigurations.entrySet()) {
+            Map<String, String> clone = new HashMap<String, String>(entry.getValue().size());
+            for (Map.Entry<String, String> entry2 : entry.getValue().entrySet()) {
+                clone.put(entry2.getKey(), entry2.getValue());
+            }
+            rule.validationConfigurations.put(entry.getKey(), clone);
+        }
+		rule.intField = 12;
+		rule.testClassField.testIntField = 1;
+		rule = null;
 
 		return "";
 	}
