@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.visitor.lambdaForEach;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -16,6 +17,9 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractAddImportASTVisitor;
 
 /**
+ * A super class for the visitors targeting {@link Stream#forEach(Consumer)}
+ * method. Provides the functionality for checking whether a method invocation
+ * is a {@link Stream#forEach(Consumer)} invocation.
  * 
  * @author Ardit Ymeri
  * @since 1.2
@@ -26,6 +30,16 @@ public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor
 	private static final String FOR_EACH_METHOD_NAME = "forEach"; //$NON-NLS-1$
 	private static final String JAVA_UTIL_STREAM = java.util.stream.Stream.class.getName();
 
+	/**
+	 * Checks whether a {@link MethodInvocation} node, is an invocation of
+	 * {@link Stream#forEach(Consumer)} method.
+	 * 
+	 * @param methodInvocation
+	 *            a node representing a method invocation
+	 * 
+	 * @return {@code true} if the the given node is represents an invocation of
+	 *         {@link Stream#forEach(Consumer)} or {@code false} otherwise.
+	 */
 	protected boolean isStreamForEachInvocation(MethodInvocation methodInvocation) {
 		SimpleName methodName = methodInvocation.getName();
 		boolean isForEachInvocation = false;
