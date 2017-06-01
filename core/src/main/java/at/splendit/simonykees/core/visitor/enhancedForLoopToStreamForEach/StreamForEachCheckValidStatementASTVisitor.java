@@ -15,21 +15,21 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.util.ISignatureAttribute;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
+ * visits blocks and checks their validity
  * 
+ * @see {@link EnhancedForLoopToStreamForEachASTVisitor}
  * @author Matthias Webhofer
  * @since 1.2
  */
@@ -39,10 +39,16 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 	private static final List<String> CHECKED_EXCEPTION_TYPE_LIST = Collections
 			.singletonList(CHECKED_EXCEPTION_SUPERTYPE);
 
+	/*
+	 * helper fields
+	 */
 	private List<SimpleName> variableNames = new LinkedList<>();
 	private SimpleName parameter;
 	private List<String> currentHandledExceptionsTypes = new LinkedList<>();
 
+	/*
+	 * variables for checking validity
+	 */
 	private boolean containsBreakStatement = false;
 	private boolean containsContinueStatement = false;
 	private boolean containsReturnStatement = false;
@@ -79,6 +85,11 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
 
+		/*
+		 * check each method invocation for possible exceptions and if they are
+		 * caught with a try catch. uncaught exceptions are not allowed within
+		 * the consumer lambda.
+		 */
 		IMethodBinding methodBinding = methodInvocationNode.resolveMethodBinding();
 		if (methodBinding != null) {
 			ITypeBinding[] exceptions = methodBinding.getExceptionTypes();
@@ -121,8 +132,11 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 
 	@Override
 	public boolean visit(VariableDeclarationFragment variableDeclarationFragmentNode) {
-		if(insideNestedForLoopList.isEmpty())
-		variableNames.add(variableDeclarationFragmentNode.getName());
+		/*
+		 * search local variables
+		 */
+		if (insideNestedForLoopList.isEmpty())
+			variableNames.add(variableDeclarationFragmentNode.getName());
 		return false;
 	}
 
@@ -139,28 +153,27 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 
 	@Override
 	public boolean visit(SimpleName simpleNameNode) {
-		//if (insideNestedForLoopList.isEmpty()) {
-			if (!(simpleNameNode.getParent() instanceof VariableDeclaration)) {
+		if (!(simpleNameNode.getParent() instanceof VariableDeclaration)) {
 
-				IBinding binding = simpleNameNode.resolveBinding();
-				if (binding instanceof IVariableBinding) {
-					IVariableBinding variableBinding = (IVariableBinding) binding;
-					boolean isField = variableBinding.isField();
-					boolean isFinal = Modifier.isFinal(variableBinding.getModifiers());
-					boolean variableNameFound = variableNames.stream().anyMatch(
-							variableName -> variableName.getIdentifier().equals(simpleNameNode.getIdentifier()));
-//					boolean isForParameter = parameters.stream()
-//							.anyMatch(param -> simpleNameNode.getIdentifier().equals(param.getIdentifier()));
-					boolean isForParameter = simpleNameNode.getIdentifier().equals(parameter.getIdentifier());
-
-					if (isField || isFinal || variableNameFound || isForParameter) {
-
-					} else {
-						invalidVariables.add(variableBinding);
-					}
-				}
+			/*
+			 * only final or effectively final variables are allowed. 
+			 * TODO:check if effectively final (corresponding method doesn't work
+			 * right now). currently transformations are only allowed, if all
+			 * variables in a block are either fields, final or local variables.
+			 */
+			IBinding binding = simpleNameNode.resolveBinding();
+			if (binding instanceof IVariableBinding) {
+				IVariableBinding variableBinding = (IVariableBinding) binding;
+				boolean isField = variableBinding.isField();
+				boolean isFinal = Modifier.isFinal(variableBinding.getModifiers());
+				boolean variableNameFound = variableNames.stream()
+						.anyMatch(variableName -> variableName.getIdentifier().equals(simpleNameNode.getIdentifier()));
+				boolean isForParameter = simpleNameNode.getIdentifier().equals(parameter.getIdentifier());
+				
+				if(!(isField || isFinal || variableNameFound || isForParameter))
+					invalidVariables.add(variableBinding);
 			}
-		//}
+		}
 		return false;
 	}
 

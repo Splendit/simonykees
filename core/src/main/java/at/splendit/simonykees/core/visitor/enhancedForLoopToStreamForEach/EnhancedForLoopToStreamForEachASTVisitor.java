@@ -1,8 +1,6 @@
 package at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -10,40 +8,32 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * this rule visits all enhanced for loops and checks if the corresponding loop
+ * body is applicable for lambda expressions as parameter for
+ * {@link java.util.stream.Stream#forEach(java.util.function.Consumer)}. Each
+ * loop body is checked sparatley by the
+ * {@link StreamForEachCheckValidStatementASTVisitor}
+ * 
+ * @author Matthias Webhofer
+ * @since 1.2
+ */
 public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewriteASTVisitor {
-
-	private static final Logger logger = LoggerFactory.getLogger(EnhancedForLoopToStreamForEachASTVisitor.class);
 
 	private static final String COLLECTION_QUALIFIED_NAME = java.util.Collection.class.getName();
 	private static final List<String> TYPE_BINDING_CHECK_LIST = Collections.singletonList(COLLECTION_QUALIFIED_NAME);
 
-	private List<SimpleName> fieldNames = new LinkedList<>();
-	private List<SimpleName> parameters = new LinkedList<>();
-
-	@Override
-	public boolean visit(EnhancedForStatement enhancedForStatementNode) {
-		SingleVariableDeclaration parameter = enhancedForStatementNode.getParameter();
-		parameters.add(parameter.getName());
-		return true;
-	}
-	
 	@Override
 	public void endVisit(EnhancedForStatement enhancedForStatementNode) {
 		SingleVariableDeclaration parameter = enhancedForStatementNode.getParameter();
@@ -57,7 +47,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 						|| ClassRelationUtil.isContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST))) { // TODO
 																													// probably
 			ASTNode approvedStatement = getApprovedStatement(statement, parameter.getName());
-			
+
 			if (approvedStatement != null) {
 
 				/*
@@ -108,43 +98,47 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 				ExpressionStatement expressionStatement = astRewrite.getAST()
 						.newExpressionStatement(forEachMethodInvocation);
 				astRewrite.replace(enhancedForStatementNode, expressionStatement, null);
-			} else {
-				StringBuffer sb = new StringBuffer();
-				sb.append("Unable to transform enhanced for-loop to Stream::forEach\n");
-				sb.append(enhancedForStatementNode.toString());
-				logger.info(sb.toString());
 			}
 		}
-		parameters.remove(parameter.getName());
 	}
 
 	/**
+	 * this method starts an instance of
+	 * {@link StreamForEachCheckValidStatementASTVisitor} on the loop block and
+	 * checks its validity.
 	 * 
 	 * @param statement
-	 * @return
+	 *            the body of the enhanced for loop
+	 * @param parameter
+	 *            the parameter of the enhanced for loop
+	 * @return an {@link ASTNode} if the block is valid, null otherwise
 	 */
 	private ASTNode getApprovedStatement(Statement statement, SimpleName parameter) {
 		if (statement instanceof Block) {
 			Block body = (Block) statement;
-
-			StreamForEachCheckValidStatementASTVisitor statementVisitor = new StreamForEachCheckValidStatementASTVisitor(parameter);
-			body.accept(statementVisitor);
-
-			if (statementVisitor.isStatementsValid()) {
+			if (isStatementValid(body, parameter)) {
 				return body;
 			}
 		} else if (statement instanceof ExpressionStatement) {
-			if (isStatementValid(statement)) {
-				ExpressionStatement body = (ExpressionStatement) statement;
-				return body.getExpression();
+			if (isStatementValid(statement, parameter)) {
+				return ((ExpressionStatement) statement).getExpression();
 			}
 		}
 
 		return null;
 	}
 
-	private boolean isStatementValid(Statement statement) {
-
-		return true;
+	/**
+	 * @see {@link EnhancedForLoopToStreamForEachASTVisitor#getApprovedStatement(Statement, SimpleName)}
+	 * 
+	 * @param statement
+	 * @param parameter
+	 * @return
+	 */
+	private boolean isStatementValid(Statement statement, SimpleName parameter) {
+		StreamForEachCheckValidStatementASTVisitor statementVisitor = new StreamForEachCheckValidStatementASTVisitor(
+				parameter);
+		statement.accept(statementVisitor);
+		return statementVisitor.isStatementsValid();
 	}
 }
