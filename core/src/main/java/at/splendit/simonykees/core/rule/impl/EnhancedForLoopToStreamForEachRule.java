@@ -4,6 +4,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamForEachASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * @see EnhancedForLoopToStreamForEachASTVisitor
@@ -15,8 +16,8 @@ public class EnhancedForLoopToStreamForEachRule extends RefactoringRule<Enhanced
 
 	public EnhancedForLoopToStreamForEachRule(Class<EnhancedForLoopToStreamForEachASTVisitor> visitor) {
 		super(visitor);
-		this.name = "EnhancedForLoopToStreamForEachRule";
-		this.description = "EnhancedForLoopToStreamForEachRule";
+		this.name = Messages.EnhancedForLoopToStreamForEachRule_name;
+		this.description = Messages.EnhancedForLoopToStreamForEachRule_description;
 	}
 
 	@Override
