@@ -442,6 +442,18 @@ public class TestForToForEachListIteratingIndexRule {
 		}
 	}
 
+	public String avoidEmptyStatement(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < foo.size(); i++) {
+			foo.get(i);
+			sb.append(foo.get(i));
+		}
+
+		return sb.toString();
+	}
+
 	private List<String> generateList(String input) {
 		return Arrays.asList(input.split(";"));
 	}

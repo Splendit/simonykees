@@ -253,5 +253,16 @@ public class TestWhileToForEachListRule {
 		}
 		return sb.toString();
 	}
-
+	
+	public String avoidEmptyStatement(String input) {
+		StringBuilder sb = new StringBuilder();
+		List<String> list = generateList(input);
+		int i = 0;
+		while(i < list.size()) {
+			sb.append(list.get(i));
+			list.get(i);
+		}
+		
+		return sb.toString();
+	}
 }
