@@ -23,12 +23,12 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
 
 /**
- * Extracts, if possible, a part of the body of the lambda expression occurring as a
- * consumer of a {@link Stream#forEach(Consumer)} and handles it
- * by using a {@link Stream#map(Function)} instead. 
- * For example, the following code:
+ * Extracts, if possible, a part of the body of the lambda expression occurring
+ * as a consumer of a {@link Stream#forEach(Consumer)} and handles it by using a
+ * {@link Stream#map(Function)} instead. For example, the following code:
+ * 
  * <pre>
- * <code> {@code 
+ * <code>
  * 		list.stream().filter(s -> !s.isEmpty()).forEach(s -> {
  *			int i = 10;
  *			String subString = s.substring(1) + i;
@@ -41,7 +41,7 @@ import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
  * will be transformed into
  * 
  * <pre>
- * <code> {@code 
+ * <code> 
  * 		list.stream().filter(s -> !s.isEmpty()).map((s) -> {
  * 			int i = 10;
  * 			return s.substring(1) + i;
@@ -70,36 +70,42 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 				SimpleName parameter = extractSingleParameter(lambdaExpression);
 				Block body = extractLambdaExpressionBlockBody(lambdaExpression);
 				if (body != null) {
-					// use the analyzer for checking for extractable part in the forEach
+					/*
+					 * use the analyzer for checking for extractable part in the
+					 * forEach
+					 */
 					ForEachBodyAnalyzer analyzer = new ForEachBodyAnalyzer(parameter, body);
 					if (analyzer.foundExtractableMapStatement()) {
 						// get the extractable information from analyzer
 						ASTNode extractableBlock = analyzer.getExtractableBlock();
 						ASTNode remainingBlock = analyzer.getRemainingBlock();
 						SimpleName newForEachParamName = analyzer.getNewForEachParameterName();
-						
+
 						// introduce a Stream::map
 						Expression streamExpression = methodInvocation.getExpression();
 						AST ast = methodInvocation.getAST();
 						MethodInvocation mapInvocation = ast.newMethodInvocation();
 						mapInvocation.setName(ast.newSimpleName(STREAM_MAP_METHOD_NAME));
 						mapInvocation.setExpression((Expression) astRewrite.createCopyTarget(streamExpression));
-						
+
 						ListRewrite argumentsPropertyRewriter = astRewrite.getListRewrite(mapInvocation,
 								MethodInvocation.ARGUMENTS_PROPERTY);
 						LambdaExpression mapExpression = genereateLambdaExpression(ast, parameter, extractableBlock);
 						argumentsPropertyRewriter.insertFirst(mapExpression, null);
 
 						/*
-						 * replace the existing stream expression with the new one having the 
-						 * introduced map method in the tail
+						 * replace the existing stream expression with the new
+						 * one having the introduced map method in the tail
 						 */
 						astRewrite.replace(streamExpression, mapInvocation, null);
-						
-						//replace the body of the forEach with the new body
+
+						// replace the body of the forEach with the new body
 						astRewrite.replace(body, remainingBlock, null);
 
-						// replace the parameter of the forEach lambda expression
+						/*
+						 * replace the parameter of the forEach lambda
+						 * expression
+						 */
 						astRewrite.replace(parameter, newForEachParamName, null);
 					}
 				}
@@ -109,11 +115,15 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 	}
 
 	/**
-	 * Creates a new lambda expression with the given parameter name and the body.
+	 * Creates a new lambda expression with the given parameter name and the
+	 * body.
 	 * 
-	 * @param ast the ast where the new lambda expression belongs to
-	 * @param paramName name of the parameter
-	 * @param body the body of the new lambda expression
+	 * @param ast
+	 *            the ast where the new lambda expression belongs to
+	 * @param paramName
+	 *            name of the parameter
+	 * @param body
+	 *            the body of the new lambda expression
 	 * 
 	 * @return the generated {@link LambdaExpression}.
 	 */
@@ -127,12 +137,13 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 	}
 
 	/**
-	 * Checks if the body of the lambda expression is a block, and extracts it. 
+	 * Checks if the body of the lambda expression is a block, and extracts it.
 	 * 
-	 * @param lambdaExpression lambda expression to check for.
+	 * @param lambdaExpression
+	 *            lambda expression to check for.
 	 * 
-	 * @return the {@link Block} representing the body of the lambda expression, 
-	 * or {@code null} if its is not a block.
+	 * @return the {@link Block} representing the body of the lambda expression,
+	 *         or {@code null} if its is not a block.
 	 */
 	private Block extractLambdaExpressionBlockBody(LambdaExpression lambdaExpression) {
 		ASTNode body = lambdaExpression.getBody();
@@ -165,18 +176,24 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			AST ast = block.getAST();
 
 			for (Statement statement : statements) {
-				
+
 				if (!mapVariableFound) {
-					//search for a map variable
-					
+
+					// search for a map variable
 					if (ASTNode.VARIABLE_DECLARATION_STATEMENT == statement.getNodeType()) {
-						// only variable declaration statements can introduce a map variable
+						/*
+						 * only variable declaration statements can introduce a
+						 * map variable
+						 */
 						VariableDeclarationStatement declStatement = (VariableDeclarationStatement) statement;
 						List<VariableDeclarationFragment> fragments = ASTNodeUtil
 								.convertToTypedList(declStatement.fragments(), VariableDeclarationFragment.class);
 						if (referencesName(declStatement, parameter)) {
 							if (fragments.size() == 1) {
-								// a map variable is found. store its name and its initializer
+								/*
+								 * a map variable is found. store its name and
+								 * its initializer
+								 */
 								VariableDeclarationFragment fragment = fragments.get(0);
 								SimpleName fragmentName = fragment.getName();
 								Expression initializer = fragment.getInitializer();
@@ -186,16 +203,19 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 							} else {
 								/*
-								 * only one fragment is allowed in the declaration of the map variable.
-								 * As an improvement, the fragments can be split into separate declarations.
+								 * only one fragment is allowed in the
+								 * declaration of the map variable. As an
+								 * improvement, the fragments can be split into
+								 * separate declarations.
 								 */
 								clearParameters();
 								return;
 							}
 						} else {
 							/*
-							 * if the parameter is not referenced, then just store the declared name
-							 * it will be checked for references after the map variable is found.
+							 * if the parameter is not referenced, then just
+							 * store the declared name it will be checked for
+							 * references after the map variable is found.
 							 */
 							extractableStatements.add(statement);
 							for (VariableDeclarationFragment fragment : fragments) {
@@ -237,26 +257,30 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 		/**
 		 * An indicator for showing whether all parameters are found for
-		 * extracting a part of the {@code Stream::forEach} to a {@code Stream::map}. 
+		 * extracting a part of the {@code Stream::forEach} to a
+		 * {@code Stream::map}.
 		 * 
 		 * @return
 		 */
 		public boolean foundExtractableMapStatement() {
-			return extractableBlock != null && remainingBlock != null && newForEachVarName != null && mapExpression != null;
+			return extractableBlock != null && remainingBlock != null && newForEachVarName != null
+					&& mapExpression != null;
 		}
 
 		/**
-		 * Creates the body of the lambda expression to be used in the introduced {@code Stream::map}
+		 * Creates the body of the lambda expression to be used in the
+		 * introduced {@code Stream::map}
 		 * 
-		 * @param ast either a {@link Block} or a {@link Expression}
-		 */ 
+		 * @param ast
+		 *            either a {@link Block} or a {@link Expression}
+		 */
 		private void prepareExtractableBlock(AST ast) {
 			if (!this.extractableStatements.isEmpty() && mapExpression != null) {
 				Block block = ast.newBlock();
 				ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
 
 				for (Statement statement : this.extractableStatements) {
-					listRewrite.insertLast((Statement)astRewrite.createCopyTarget(statement), null);
+					listRewrite.insertLast((Statement) astRewrite.createCopyTarget(statement), null);
 				}
 
 				ReturnStatement returnStatement = ast.newReturnStatement();
@@ -270,18 +294,20 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		}
 
 		/**
-		 * Creates a the body of the lambda expression in the forEach after extracting 
-		 * the part to be placed in {@code Stream::map}. 
+		 * Creates a the body of the lambda expression in the forEach after
+		 * extracting the part to be placed in {@code Stream::map}.
 		 * 
-		 * @param ast either a {@link Block} or a single {@link Expression} if the remaining block
-		 * has only one expression.
+		 * @param ast
+		 *            either a {@link Block} or a single {@link Expression} if
+		 *            the remaining block has only one expression.
 		 */
 		private void prepareRemainingBlock(AST ast) {
 			ASTNode block;
-			if(this.remainingStatements.size() == 1 && ASTNode.EXPRESSION_STATEMENT == remainingStatements.get(0).getNodeType()) {
-				Expression expression = ((ExpressionStatement)remainingStatements.get(0)).getExpression();
+			if (this.remainingStatements.size() == 1
+					&& ASTNode.EXPRESSION_STATEMENT == remainingStatements.get(0).getNodeType()) {
+				Expression expression = ((ExpressionStatement) remainingStatements.get(0)).getExpression();
 				block = astRewrite.createCopyTarget(expression);
-				
+
 			} else {
 				block = ast.newBlock();
 				ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
@@ -315,13 +341,16 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		}
 
 		/**
-		 * Checks whether there is a reference of the variable with the given simple name
-		 * in the code represented by the given ast node. 
+		 * Checks whether there is a reference of the variable with the given
+		 * simple name in the code represented by the given ast node.
 		 * 
-		 * @param node node to look for
-		 * @param simpleName name of the variable to look for
+		 * @param node
+		 *            node to look for
+		 * @param simpleName
+		 *            name of the variable to look for
 		 * 
-		 * @return {@code true} if there is a reference of the given simple name in the node, and {@code false otherwise}
+		 * @return {@code true} if there is a reference of the given simple name
+		 *         in the node, and {@code false otherwise}
 		 */
 		private boolean referencesName(ASTNode node, SimpleName simpleName) {
 			LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(simpleName);
@@ -331,7 +360,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 	}
 
 	/**
-	 * A visitor searching for return statements. 
+	 * A visitor searching for return statements.
 	 *
 	 */
 	class ReturnStatementVisitor extends ASTVisitor {
@@ -342,7 +371,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			this.returnStatement = returnStatement;
 			return true;
 		}
-		
+
 		@Override
 		public boolean preVisit2(ASTNode node) {
 			// stop searching if a return statement is already found

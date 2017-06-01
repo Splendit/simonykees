@@ -34,11 +34,11 @@ public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 			if (methodBinding != null && ClassRelationUtil.isContentOfTypes(methodBinding.getDeclaringClass(),
 					Collections.singletonList(JAVA_UTIL_STREAM))) {
-	
+
 				isForEachInvocation = true;
 			}
 		}
-	
+
 		return isForEachInvocation;
 	}
 
