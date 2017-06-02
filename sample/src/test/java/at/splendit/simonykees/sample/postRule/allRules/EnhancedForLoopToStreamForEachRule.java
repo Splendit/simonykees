@@ -20,7 +20,6 @@ public class EnhancedForLoopToStreamForEachRule {
 	public static List<String> stringList1 = Arrays.asList("str1", "str2", "str3", "str4");
 	public static List<String> stringList2 = Arrays.asList("str1", "str2", "str3", "str4");
 	public static List<String> stringList3;
-
 	static {
 		stringList3 = new LinkedList<>();
 		stringList1.stream().forEach((String s) -> stringList2.stream().forEach((String t) -> stringList3.add(s + t)));
