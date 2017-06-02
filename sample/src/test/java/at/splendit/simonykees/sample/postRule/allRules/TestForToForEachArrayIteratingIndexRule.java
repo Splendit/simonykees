@@ -7,6 +7,10 @@ import java.util.List;
 @SuppressWarnings({ "nls", "unused", "rawtypes" })
 public class TestForToForEachArrayIteratingIndexRule {
 
+	private List<String> generateList(String input) {
+		return Arrays.asList(input.split(";"));
+	}
+
 	public String multiDimensionArrayUnderIf(String input) {
 
 		String[][] ms = { { "3", "1", "2" }, { "5", "6", "7" }, { "8", "9", "4" } };
@@ -306,10 +310,6 @@ public class TestForToForEachArrayIteratingIndexRule {
 		}
 
 		return sb.toString();
-	}
-
-	private List<String> generateList(String input) {
-		return Arrays.asList(input.split(";"));
 	}
 
 	/**

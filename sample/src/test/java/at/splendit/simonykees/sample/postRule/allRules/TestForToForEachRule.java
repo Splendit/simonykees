@@ -13,6 +13,16 @@ public class TestForToForEachRule {
 
 	private List<String> a;
 
+	private List<String> generateList(String input) {
+		return Arrays.asList(input.split(";"));
+	}
+
+	private List<Integer> generateHashCodeList(String input) {
+		List<String> foo = generateList(input);
+		List<Integer> fooHashCodes = foo.stream().map(String::hashCode).collect(Collectors.toList());
+		return fooHashCodes;
+	}
+
 	public String testConvertIteratorToForEachTemp(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
@@ -182,16 +192,6 @@ public class TestForToForEachRule {
 			// do nothing
 		}
 		return false;
-	}
-
-	private List<String> generateList(String input) {
-		return Arrays.asList(input.split(";"));
-	}
-
-	private List<Integer> generateHashCodeList(String input) {
-		List<String> foo = generateList(input);
-		List<Integer> fooHashCodes = foo.stream().map(String::hashCode).collect(Collectors.toList());
-		return fooHashCodes;
 	}
 
 	private class Point {

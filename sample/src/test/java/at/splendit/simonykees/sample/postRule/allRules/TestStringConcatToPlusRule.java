@@ -10,6 +10,14 @@ public class TestStringConcatToPlusRule {
 
 	private static final String STATIC_VALUE = "static-value";
 
+	private String sampleMethod() {
+		return "method-invocation-result";
+	}
+
+	private String sampleMethod(String param) {
+		return "method-invocation-result" + param;
+	}
+
 	public String testConcatWithLiteral(String input) {
 		return input + "abc";
 	}
@@ -115,13 +123,5 @@ public class TestStringConcatToPlusRule {
 	public String testConcatInMethodInvocationParam(String input, String param) {
 		boolean startsWitParam = input.startsWith((param + "a"), 0);
 		return input + Boolean.toString(startsWitParam);
-	}
-
-	private String sampleMethod() {
-		return "method-invocation-result";
-	}
-
-	private String sampleMethod(String param) {
-		return "method-invocation-result" + param;
 	}
 }

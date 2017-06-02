@@ -37,6 +37,11 @@ public class FieldNameConventionRule {
 		String insideInitializer = finalInstanceVariablesCanBeRenamed;
 	}
 
+	protected int getInt() {
+		String aFinalIncanceVariable = finalInstanceVariablesCanBeRenamed;
+		return Int;
+	}
+
 	public String someFieldsAreShadowed() {
 		String shadowed_var = "myLocalVal";
 		String Österreich = "Österreich";
@@ -91,11 +96,6 @@ public class FieldNameConventionRule {
 		Foo foo = new Foo();
 
 		String t = foo.canBeRenamed;
-	}
-
-	protected int getInt() {
-		String aFinalIncanceVariable = finalInstanceVariablesCanBeRenamed;
-		return Int;
 	}
 
 	enum WeekDays {

@@ -58,6 +58,8 @@ public class Messages extends NLS {
 	public static String LambdaForEachCollectRule_name;
 	public static String LambdaForEachIfWrapperToFilterRule_description;
 	public static String LambdaForEachIfWrapperToFilterRule_name;
+	public static String LambdaForEachMapRule_description;
+	public static String LambdaForEachMapRule_name;
 	public static String LambdaToMethodReferenceRule_description;
 	public static String LambdaToMethodReferenceRule_name;
 	public static String LicenseHelper_licenseProblem;

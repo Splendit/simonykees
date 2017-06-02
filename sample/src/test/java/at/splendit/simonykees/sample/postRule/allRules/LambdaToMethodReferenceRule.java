@@ -134,6 +134,16 @@ public class LambdaToMethodReferenceRule {
 		Set<Person> persSet5 = transferElements(personList, HashSet<Person>::new);
 	}
 
+	public static <T, SOURCE extends Collection<T>, DEST extends Collection<T>> DEST transferElements(
+			SOURCE sourceCollection, Supplier<DEST> collectionFactory) {
+
+		DEST result = collectionFactory.get();
+		for (T t : sourceCollection) {
+			result.add(t);
+		}
+		return result;
+	}
+
 	private void doSomething(Object o) {
 
 	}

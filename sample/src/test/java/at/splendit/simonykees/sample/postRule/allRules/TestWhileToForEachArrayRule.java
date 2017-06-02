@@ -8,6 +8,10 @@ public class TestWhileToForEachArrayRule {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestWhileToForEachArrayRule.class);
 
+	private String[] generateList(String input) {
+		return input.split(";"); //$NON-NLS-1$
+	}
+
 	public String loopingOverLists(String input) {
 		StringBuilder sb = new StringBuilder();
 		String[] array = generateList(input);
@@ -219,9 +223,5 @@ public class TestWhileToForEachArrayRule {
 			sb.append(iterator1);
 		}
 		return sb.toString();
-	}
-
-	private String[] generateList(String input) {
-		return input.split(";"); //$NON-NLS-1$
 	}
 }

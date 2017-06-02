@@ -8,34 +8,33 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import at.splendit.simonykees.core.rule.impl.LambdaForEachCollectRule;
+import at.splendit.simonykees.core.rule.impl.LambdaForEachMapRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
-import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachCollectASTVisitor;
+import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachMapASTVisitor;
 
 /**
- * Testing stream forEach to stream collect.
+ * Testing {@link LambdaForEachMapRule}
  * 
  * @author Ardit Ymeri
  * @since 1.2
  *
  */
-@RunWith(Parameterized.class)
 @SuppressWarnings("nls")
-public class LambdaForEachCollectRuleTest extends AbstractRulesTest {
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.lambdaForEachCollect";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/lambdaForEachCollect";
-	
+@RunWith(Parameterized.class)
+public class LambdaForEachMapRuleTest extends AbstractRulesTest {
+	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.lambdForEachMap";
+	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/lambdForEachMap";
+
 	private String fileName;
-	private Path preRule;
-	private Path postRule;
-	
-	public LambdaForEachCollectRuleTest(String fileName, Path preRule, Path postRule) {
+	private Path preRule, postRule;
+
+	public LambdaForEachMapRuleTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
-		rulesList.add(new  LambdaForEachCollectRule(LambdaForEachCollectASTVisitor.class));
+		rulesList.add(new LambdaForEachMapRule(LambdaForEachMapASTVisitor.class));
 	}
-	
+
 	@Parameters(name = "{index}: test file[{0}]")
 	public static Collection<Object[]> data() throws Exception {
 		return AbstractRulesTest.load(POSTRULE_DIRECTORY);

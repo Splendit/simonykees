@@ -7,6 +7,10 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings({ "nls", "unused" })
 public class TestCollectionRemoveAllRule {
+	private List<String> generateList(String input) {
+		return Arrays.asList(input.split(";"));
+	}
+
 	public String testIfCollectionIsEmpty(String input) {
 		List<String> resultList = generateList(input);
 
@@ -216,9 +220,5 @@ public class TestCollectionRemoveAllRule {
 		resultList.stream().forEach(sb::append);
 
 		return sb.toString();
-	}
-
-	private List<String> generateList(String input) {
-		return Arrays.asList(input.split(";"));
 	}
 }

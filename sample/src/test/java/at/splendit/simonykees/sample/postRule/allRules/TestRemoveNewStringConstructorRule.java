@@ -10,6 +10,14 @@ import org.apache.commons.lang3.StringUtils;
 @SuppressWarnings("nls")
 public class TestRemoveNewStringConstructorRule {
 
+	private String sampleMethod() {
+		return "sample-method";
+	}
+
+	private String sampleMethod(String input) {
+		return "sample-method-" + input;
+	}
+
 	public String testNewEmptyStrig() {
 		return "";
 	}
@@ -97,13 +105,5 @@ public class TestRemoveNewStringConstructorRule {
 		List<String> list = Arrays.asList(input);
 		String result = list.stream().map(t -> t).collect(Collectors.joining());
 		return result;
-	}
-
-	private String sampleMethod() {
-		return "sample-method";
-	}
-
-	private String sampleMethod(String input) {
-		return "sample-method-" + input;
 	}
 }

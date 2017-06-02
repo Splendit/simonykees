@@ -22,9 +22,6 @@ public abstract class OverrideAnnotationRule<T> {
 		return s + string + object;
 	}
 
-	@Override
-	public abstract int hashCode();
-
 	protected T genericMethod(T value) {
 		T myVal = null;
 
@@ -50,6 +47,9 @@ public abstract class OverrideAnnotationRule<T> {
 	private String iAmPrivate() {
 		return "I am a very private method";
 	}
+
+	@Override
+	public abstract int hashCode();
 
 }
 
@@ -91,6 +91,20 @@ class Foo extends OverrideAnnotationRule<String> implements IFoo {
 	}
 
 	@Override
+	protected String genericMethod(String value) {
+		String myString = "";
+		if (value != null && !StringUtils.isEmpty(value)) {
+			myString = value;
+		}
+		return myString;
+	}
+
+	@Override
+	protected <Type extends List<String>> Type methodUsingTypeVariablesInSignature(Type someCollection) {
+		return null;
+	}
+
+	@Override
 	public void methodFromYouFoo(String foo) {
 
 	}
@@ -106,31 +120,17 @@ class Foo extends OverrideAnnotationRule<String> implements IFoo {
 	}
 
 	@Override
-	public int hashCode() {
-		return 0;
-	}
-
-	@Override
-	protected String genericMethod(String value) {
-		String myString = "";
-		if (value != null && !StringUtils.isEmpty(value)) {
-			myString = value;
-		}
-		return myString;
-	}
-
-	@Override
-	protected <Type extends List<String>> Type methodUsingTypeVariablesInSignature(Type someCollection) {
-		return null;
-	}
-
-	@Override
 	protected String alreadyAnnotated() {
 		return "Already annotated";
 	}
 
 	private String iAmPrivate() {
 		return "I am a very private method";
+	}
+
+	@Override
+	public int hashCode() {
+		return 0;
 	}
 
 	enum FooEnum {
