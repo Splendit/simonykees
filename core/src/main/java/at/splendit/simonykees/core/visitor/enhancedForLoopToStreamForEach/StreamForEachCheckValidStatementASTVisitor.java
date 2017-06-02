@@ -7,7 +7,6 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ContinueStatement;
-import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -43,7 +42,6 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 	 * helper fields
 	 */
 	private List<SimpleName> variableNames = new LinkedList<>();
-	private SimpleName parameter;
 	private List<String> currentHandledExceptionsTypes = new LinkedList<>();
 
 	/*
@@ -53,26 +51,22 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 	private boolean containsContinueStatement = false;
 	private boolean containsReturnStatement = false;
 	private boolean containsCheckedException = false;
-	private boolean containsInvalidAssignments = false;
 	private boolean containsThrowStatement = false;
 	private List<IVariableBinding> invalidVariables = new LinkedList<>();
-	LinkedList<Boolean> insideNestedForLoopList = new LinkedList<>();
 
 	public StreamForEachCheckValidStatementASTVisitor(SimpleName parameter) {
-		this.parameter = parameter;
+		this.variableNames.add(parameter);
 	}
 
 	@Override
 	public boolean visit(BreakStatement breakStatementNode) {
-		if (insideNestedForLoopList.isEmpty())
-			containsBreakStatement = true;
+		containsBreakStatement = true;
 		return false;
 	}
 
 	@Override
 	public boolean visit(ContinueStatement continueStatementNode) {
-		if (insideNestedForLoopList.isEmpty())
-			containsContinueStatement = true;
+		containsContinueStatement = true;
 		return false;
 	}
 
@@ -135,20 +129,8 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 		/*
 		 * search local variables
 		 */
-		if (insideNestedForLoopList.isEmpty())
-			variableNames.add(variableDeclarationFragmentNode.getName());
-		return false;
-	}
-
-	@Override
-	public boolean visit(EnhancedForStatement node) {
-		insideNestedForLoopList.addFirst(true);
+		variableNames.add(variableDeclarationFragmentNode.getName());
 		return true;
-	}
-
-	@Override
-	public void endVisit(EnhancedForStatement node) {
-		insideNestedForLoopList.removeFirst();
 	}
 
 	@Override
@@ -156,21 +138,19 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 		if (!(simpleNameNode.getParent() instanceof VariableDeclaration)) {
 
 			/*
-			 * only final or effectively final variables are allowed. 
-			 * TODO:check if effectively final (corresponding method doesn't work
-			 * right now). currently transformations are only allowed, if all
-			 * variables in a block are either fields, final or local variables.
+			 * only local, final or effectively final variables or fields are
+			 * allowed.
 			 */
 			IBinding binding = simpleNameNode.resolveBinding();
 			if (binding instanceof IVariableBinding) {
 				IVariableBinding variableBinding = (IVariableBinding) binding;
 				boolean isField = variableBinding.isField();
 				boolean isFinal = Modifier.isFinal(variableBinding.getModifiers());
-				boolean variableNameFound = variableNames.stream()
-						.anyMatch(variableName -> variableName.getIdentifier().equals(simpleNameNode.getIdentifier()));
-				boolean isForParameter = simpleNameNode.getIdentifier().equals(parameter.getIdentifier());
-				
-				if(!(isField || isFinal || variableNameFound || isForParameter))
+				boolean isEffectivelyFinal = variableBinding.isEffectivelyFinal();
+				boolean isLocalVariable = variableNames.stream()
+						.anyMatch(var -> var.getIdentifier().equals(simpleNameNode.getIdentifier()));
+
+				if (!(isField || isFinal || isEffectivelyFinal || isLocalVariable))
 					invalidVariables.add(variableBinding);
 			}
 		}
@@ -190,7 +170,6 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 
 	public boolean isStatementsValid() {
 		return !containsBreakStatement && !containsContinueStatement && !containsReturnStatement
-				&& !containsCheckedException && !containsInvalidAssignments && !containsThrowStatement
-				&& invalidVariables.size() == 0;
+				&& !containsCheckedException && !containsThrowStatement && invalidVariables.isEmpty();
 	}
 }
