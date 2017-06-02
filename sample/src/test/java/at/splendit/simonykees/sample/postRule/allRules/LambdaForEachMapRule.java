@@ -8,6 +8,10 @@ import org.apache.commons.lang3.StringUtils;
 @SuppressWarnings({ "nls", "unused" })
 public class LambdaForEachMapRule {
 
+	private List<String> generateList(String input) {
+		return Arrays.asList(input.split(";"));
+	}
+
 	public String unwrapOneExpression(String input) {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
@@ -163,9 +167,5 @@ public class LambdaForEachMapRule {
 			sb.append(pos + "d");
 		});
 		return sb.toString();
-	}
-
-	private List<String> generateList(String input) {
-		return Arrays.asList(input.split(";"));
 	}
 }
