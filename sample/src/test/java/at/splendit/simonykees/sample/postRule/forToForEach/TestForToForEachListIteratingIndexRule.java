@@ -449,6 +449,30 @@ public class TestForToForEachListIteratingIndexRule {
 		return sb.toString();
 	}
 	
+	public void stringTemplate4CornerCase() {
+		
+		List<Object> exprs = new ArrayList<>();
+		for (int i = 0; i < exprs.size(); i++) {
+			  Object attr = exprs.get(i);
+			  if ( attr!=null ) {
+				  exprs.set(i, null);
+				  
+			  }
+			}
+	}
+	
+	public String avoidEmptyStatement(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		for(int i = 0; i<foo.size(); i++) {
+			foo.get(i);
+			sb.append(foo.get(i));
+		}
+		
+		return sb.toString();
+	}
+	
 	/**
 	 * This collection is not subtype of {@code Iterable}.
 	 */

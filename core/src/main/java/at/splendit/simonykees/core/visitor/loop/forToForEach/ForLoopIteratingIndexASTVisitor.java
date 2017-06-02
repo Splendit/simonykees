@@ -33,10 +33,8 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 	protected static final String LOOP_UPDATER = "loop-updater"; //$NON-NLS-1$
 	protected static final String INTERNAL_INDEX_UPDATER = "internal-index-updater"; //$NON-NLS-1$
 
-	private boolean hasEmptyStatement = false;
 	private Block parentBlock;
 	private SimpleName iteratingIndexName;
-	
 	
 	private ForStatement forStatement;
 	private Map<String, ASTNode> indexInitializer;
