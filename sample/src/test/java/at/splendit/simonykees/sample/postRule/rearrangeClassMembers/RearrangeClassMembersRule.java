@@ -59,15 +59,6 @@ public class RearrangeClassMembersRule {
     	description += "and is static";
     }
 
-	/**
-     * A static method for testing code rearrange
-     */
-    private static void sampleStaticMethod() {
-    	// doesn't do much 
-    	String description = "has comments and javadoc ";
-    	description += "and is static";
-    }
-
 	public void instanceMethod() {
     	// should show up below static methods
     	String description = "is public, has comments  ";
@@ -78,6 +69,15 @@ public class RearrangeClassMembersRule {
         if(foo != null && foo.isEmpty()) {
             foo = "foo-value";
         }
+    }
+
+	/**
+     * A static method for testing code rearrange
+     */
+    private static void sampleStaticMethod() {
+    	// doesn't do much 
+    	String description = "has comments and javadoc ";
+    	description += "and is static";
     }
 
 	private enum Days {

@@ -17,6 +17,16 @@ public class TestForToForEachListIteratingIndexRule {
 		}
 	};
 
+	private List<String> generateList(String input) {
+		return Arrays.asList(input.split(";"));
+	}
+
+	private List<Integer> generateHashCodeList(String input) {
+		List<String> foo = generateList(input);
+		List<Integer> fooHashCodes = foo.stream().map(String::hashCode).collect(Collectors.toList());
+		return fooHashCodes;
+	}
+
 	public String testRawType(String input) {
 		List rawList = generateList(input);
 		StringBuilder sb = new StringBuilder();
@@ -428,16 +438,6 @@ public class TestForToForEachListIteratingIndexRule {
 		}
 
 		return sb.toString();
-	}
-
-	private List<String> generateList(String input) {
-		return Arrays.asList(input.split(";"));
-	}
-
-	private List<Integer> generateHashCodeList(String input) {
-		List<String> foo = generateList(input);
-		List<Integer> fooHashCodes = foo.stream().map(String::hashCode).collect(Collectors.toList());
-		return fooHashCodes;
 	}
 
 	@interface MyFooAnnotation {

@@ -9,6 +9,18 @@ import org.apache.commons.lang3.StringUtils;
 @SuppressWarnings("nls")
 public class TestToStringOnStringRule {
 
+	private String sampleMethod() {
+		return "sample-method";
+	}
+
+	private Number numberSampleMethod() {
+		return Integer.valueOf("100");
+	}
+
+	private String sampleMethod(String param) {
+		return param + "sample-method";
+	}
+
 	public String testToStringOnStringLiteral() {
 
 		return "anStringLiteral";
@@ -123,17 +135,5 @@ public class TestToStringOnStringRule {
 	public String testChainMethodInvocatioonToString(String input) {
 		String className = this.getClass().getName();
 		return input + className;
-	}
-
-	private String sampleMethod() {
-		return "sample-method";
-	}
-
-	private Number numberSampleMethod() {
-		return Integer.valueOf("100");
-	}
-
-	private String sampleMethod(String param) {
-		return param + "sample-method";
 	}
 }

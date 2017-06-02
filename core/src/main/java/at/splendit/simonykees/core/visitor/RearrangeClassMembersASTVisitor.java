@@ -36,7 +36,7 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
  * 		 <li> inner classes </li>
  * 		</ul>
  * <p>
- * Furthermore, the members of the same type (except for fields), are also sorted
+ * Furthermore, the members of the same type (except for fields and methods), are also sorted
  * according to their modifier. The priority of the modifiers is 
  * as follows:
  * 		<ul>
@@ -135,7 +135,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 			sortedDeclarations.addAll(instanceFields); 
 			sortedDeclarations.addAll(instanceInitializers);
 			sortedDeclarations.addAll(sortMembers(constructors));
-			sortedDeclarations.addAll(sortMembers(methods));
+			sortedDeclarations.addAll(methods);
 			sortedDeclarations.addAll(sortMembers(enums));
 			sortedDeclarations.addAll(sortMembers(annotations));
 			sortedDeclarations.addAll(annotationMembers);
@@ -173,15 +173,29 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 		return true;
 	}
 	
+	/**
+	 * Finds the first body declaration in the list of the sorted body
+	 * declarations, which is different from the corresponding position in the
+	 * list of unsorted body declarations.
+	 * 
+	 * @param bodyDeclarations
+	 *            unsorted list of body declarations
+	 * @param sortedDeclarations
+	 *            sorted list of body declarations
+	 * @return the index of the first element in the sorted list which is
+	 *         different from the unsorted list, or {@code -1} if every element
+	 *         in the sorted list matches with the corresponding element in the
+	 *         unsorted list.
+	 */
 	private int calcStartFromIndex(List<BodyDeclaration> bodyDeclarations, List<BodyDeclaration> sortedDeclarations) {
 		int i = 0;
-		while(i<sortedDeclarations.size()) {
-			if(sortedDeclarations.get(i) != bodyDeclarations.get(i)) {
+		while (i < sortedDeclarations.size()) {
+			if (sortedDeclarations.get(i) != bodyDeclarations.get(i)) {
 				return i;
 			}
 			i++;
 		}
-		
+
 		return -1;
 	}
 
