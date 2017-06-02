@@ -4,6 +4,14 @@ import org.apache.commons.lang3.StringUtils;
 
 public class TestPrimitiveBoxedForStringWithExpressionsRule {
 
+	private int intSampleMethod() {
+		return 1;
+	}
+
+	private int intSampleMethod(String intVal) {
+		return Integer.valueOf(intVal);
+	}
+
 	public String testIntegerValueOfExpressionToString(int input) {
 		return Integer.toString(input + 3);
 	}
@@ -46,13 +54,5 @@ public class TestPrimitiveBoxedForStringWithExpressionsRule {
 
 	public String testLiteralConcatWithExpression(int input) {
 		return Integer.toString((input + 1 + intSampleMethod("4")));
-	}
-
-	private int intSampleMethod() {
-		return 1;
-	}
-
-	private int intSampleMethod(String intVal) {
-		return Integer.valueOf(intVal);
 	}
 }

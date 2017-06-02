@@ -11,6 +11,10 @@ public class TestWhileToForEachListRule {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestWhileToForEachListRule.class);
 
+	private List<String> generateList(String input) {
+		return Arrays.asList(input.split(";")); //$NON-NLS-1$
+	}
+
 	public String loopingOverLists(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
@@ -235,9 +239,5 @@ public class TestWhileToForEachListRule {
 		}
 
 		return sb.toString();
-	}
-
-	private List<String> generateList(String input) {
-		return Arrays.asList(input.split(";")); //$NON-NLS-1$
 	}
 }

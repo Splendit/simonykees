@@ -40,6 +40,11 @@ public abstract class TestFunctionalInterface3Rule {
 		r.run();
 	}
 
+	@Override
+	public int hashCode() {
+		return 0;
+	}
+
 	private static Runnable staticGetRunnableHash() {
 		return new Runnable() {
 			@Override
@@ -49,6 +54,10 @@ public abstract class TestFunctionalInterface3Rule {
 		};
 	}
 
+	public Runnable getRunnableHash() {
+		return this::hashCode;
+	}
+
 	private static Runnable staticGetRunnable() {
 		return new Runnable() {
 			@Override
@@ -56,15 +65,6 @@ public abstract class TestFunctionalInterface3Rule {
 				getClass();
 			}
 		};
-	}
-
-	@Override
-	public int hashCode() {
-		return 0;
-	}
-
-	public Runnable getRunnableHash() {
-		return this::hashCode;
 	}
 
 	public Runnable getRunnable() {

@@ -26,16 +26,6 @@ public class LambdaToMethodReferenceRule {
 	List<Person> personList = Arrays.asList(new Person("asdf", LocalDate.of(1999, 1, 1)),
 			new Person("jkl", LocalDate.of(2009, 2, 2)), new Person("yxcv", LocalDate.of(1989, 1, 1)));
 
-	public static <T, SOURCE extends Collection<T>, DEST extends Collection<T>> DEST transferElements(
-			SOURCE sourceCollection, Supplier<DEST> collectionFactory) {
-
-		DEST result = collectionFactory.get();
-		for (T t : sourceCollection) {
-			result.add(t);
-		}
-		return result;
-	}
-
 	public void referenceToStaticMethod() {
 		Collections.sort(personList, Person::compareByAge);
 
@@ -134,6 +124,16 @@ public class LambdaToMethodReferenceRule {
 		Set<Person> persSet4 = transferElements(personList, HashSet<Person>::new);
 
 		Set<Person> persSet5 = transferElements(personList, HashSet<Person>::new);
+	}
+
+	public static <T, SOURCE extends Collection<T>, DEST extends Collection<T>> DEST transferElements(
+			SOURCE sourceCollection, Supplier<DEST> collectionFactory) {
+
+		DEST result = collectionFactory.get();
+		for (T t : sourceCollection) {
+			result.add(t);
+		}
+		return result;
 	}
 
 	private void doSomething(Object o) {

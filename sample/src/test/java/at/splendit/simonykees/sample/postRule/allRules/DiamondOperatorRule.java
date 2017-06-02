@@ -12,8 +12,18 @@ import java.util.stream.Collectors;
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "nls" })
 public class DiamondOperatorRule {
 
+	private String concatRawTypeList(List objects) {
+		objects.add(new Object());
+		Object val = objects.stream().map(Object::toString).collect(Collectors.joining(", "));
+		return val.toString();
+	}
+
 	public List<String> sampleGenericReturnTypeMethod(String input) {
 		return new ArrayList<>();
+	}
+
+	private String concatTypedList(List<String> foo, int i, Map<String, List<String>> map) {
+		return foo.stream().collect(Collectors.joining(","));
 	}
 
 	public void inferListType() {
@@ -102,16 +112,6 @@ public class DiamondOperatorRule {
 		return foo.getValue();
 	}
 
-	private String concatRawTypeList(List objects) {
-		objects.add(new Object());
-		Object val = objects.stream().map(Object::toString).collect(Collectors.joining(", "));
-		return val.toString();
-	}
-
-	private String concatTypedList(List<String> foo, int i, Map<String, List<String>> map) {
-		return foo.stream().collect(Collectors.joining(","));
-	}
-
 	private class GenericSample<T> {
 		private T t;
 
@@ -134,6 +134,10 @@ public class DiamondOperatorRule {
 			arrayList = new ArrayList[2];
 		}
 
+		private void setValue(T t) {
+			this.t = t;
+		}
+
 		public T getValue() {
 			return t;
 		}
@@ -144,10 +148,6 @@ public class DiamondOperatorRule {
 			for (List<String> list = new ArrayList<>(); !list.isEmpty();) {
 				list.add("");
 			}
-		}
-
-		private void setValue(T t) {
-			this.t = t;
 		}
 	}
 }
