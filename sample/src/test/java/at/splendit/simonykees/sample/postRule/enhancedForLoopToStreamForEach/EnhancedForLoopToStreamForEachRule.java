@@ -23,11 +23,11 @@ public class EnhancedForLoopToStreamForEachRule {
 
 	static {
 		stringList3 = new LinkedList<>();
-		for (String s : stringList1) {
-			for (String t : stringList2) {
+		stringList1.stream().forEach((String s) -> {
+			stringList2.stream().forEach((String t) -> {
 				stringList3.add(s + t);
-			}
-		}
+			});
+		});
 	}
 
 	public String doSomething() throws ClassNotFoundException {
@@ -69,11 +69,11 @@ public class EnhancedForLoopToStreamForEachRule {
 			System.out.println(s);
 		}
 
-		for (String s : stringList1) {
-			for (String t : stringList2) {
+		stringList1.stream().forEach((String s) -> {
+			stringList2.stream().forEach((String t) -> {
 				System.out.println(s + t);
-			}
-		}
+			});
+		});
 
 		for (List<String> list : stringListList) {
 			for (String s : list) {
@@ -88,19 +88,19 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		}
 
-		for (List<String> list : stringListList) {
+		stringListList.stream().forEach((List<String> list) -> {
 			stringList1.add(list.get(0));
-			for (String s : list) {
-				for (String t : stringList2) {
+			list.stream().forEach((String s) -> {
+				stringList2.stream().forEach((String t) -> {
 					if (t.equals(s)) {
 						System.out.println(t);
 					}
 					if (t.length() > s.length()) {
 						System.out.println(s + t);
 					}
-				}
-			}
-		}
+				});
+			});
+		});
 
 		for (String s : stringList1) {
 			Class.forName(s);
@@ -187,25 +187,25 @@ public class EnhancedForLoopToStreamForEachRule {
 		TestClass testClassLocal = new TestClass();
 		EnhancedForLoopToStreamForEachRule rule = new EnhancedForLoopToStreamForEachRule();
 
-		for (String s : stringList1) {
+		stringList1.stream().forEach((String s) -> {
 			testClassLocal.testIntField++;
-		}
+		});
 
-		for (String s : stringList1) {
+		stringList1.stream().forEach((String s) -> {
 			--testClassLocal.testIntField;
-		}
+		});
 
-		for (String s : stringList1) {
+		stringList1.stream().forEach((String s) -> {
 			testClassLocal.testIntField += s.length();
-		}
+		});
 
 		rule.intField = 12;
 		rule.testClassField.testIntField = 1;
 		for(Map.Entry<String, Map<String, String>> entry : validationConfigurations.entrySet()) {
             Map<String, String> clone = new HashMap<String, String>(entry.getValue().size());
-            for (Map.Entry<String, String> entry2 : entry.getValue().entrySet()) {
+            entry.getValue().entrySet().stream().forEach((Map.Entry<String, String> entry2) -> {
                 clone.put(entry2.getKey(), entry2.getValue());
-            }
+            });
             rule.validationConfigurations.put(entry.getKey(), clone);
         }
 		rule.intField = 12;

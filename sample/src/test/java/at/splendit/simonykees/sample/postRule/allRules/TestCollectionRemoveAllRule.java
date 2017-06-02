@@ -74,11 +74,11 @@ public class TestCollectionRemoveAllRule {
 		List<String> resultList2 = generateList(input);
 		resultList2.add("d");
 
-		for (String s : resultList2) {
+		resultList2.stream().forEach((String s) -> {
 			if (!resultList.isEmpty()) {
 				resultList.clear();
 			}
-		}
+		});
 
 		StringBuilder sb = new StringBuilder();
 

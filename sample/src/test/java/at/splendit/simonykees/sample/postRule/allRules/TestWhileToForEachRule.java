@@ -28,10 +28,10 @@ public class TestWhileToForEachRule {
 	public String loopingOverLists(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		for (String t : list) {
+		list.stream().forEach((String t) -> {
 			logger.info(t);
 			sb.append(t);
-		}
+		});
 		return sb.toString();
 	}
 
@@ -39,9 +39,7 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (String s : l) {
-			sb.append(s);
-		}
+		l.stream().forEach(sb::append);
 		return sb.toString();
 	}
 
@@ -157,13 +155,11 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (String outerVal : l) {
+		l.stream().forEach((String outerVal) -> {
 			sb.append(outerVal);
 
-			for (String innerStr : l) {
-				sb.append(innerStr);
-			}
-		}
+			l.stream().forEach(sb::append);
+		});
 
 		return sb.toString();
 	}
@@ -173,13 +169,9 @@ public class TestWhileToForEachRule {
 		List<String> k = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (String s : l) {
-			sb.append(s);
-		}
+		l.stream().forEach(sb::append);
 
-		for (String s : k) {
-			sb.append(s);
-		}
+		k.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -190,20 +182,11 @@ public class TestWhileToForEachRule {
 		List<String> m = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (String outerVal : l) {
+		l.stream().forEach((String outerVal) -> {
 			sb.append(outerVal);
 
-			for (String kVal : k) {
-				sb.append(kVal);
-
-				// FIXME SIM-173: RuleException is thrown
-				// Iterator<String> mIterator = m.iterator();
-				// while (mIterator.hasNext()) {
-				// String mVal = mIterator.next();
-				// sb.append(mVal);
-				// }
-			}
-		}
+			k.stream().forEach(sb::append);
+		});
 
 		return sb.toString();
 	}
@@ -214,7 +197,7 @@ public class TestWhileToForEachRule {
 		List<String> m = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (String outerVal : l) {
+		l.stream().forEach((String outerVal) -> {
 			sb.append(outerVal);
 
 			Iterator<String> kIterator = k.iterator();
@@ -222,11 +205,9 @@ public class TestWhileToForEachRule {
 			if ((kVal = kIterator.next()) != null) {
 				sb.append(kVal);
 
-				for (String mVal : m) {
-					sb.append(mVal);
-				}
+				m.stream().forEach(sb::append);
 			}
-		}
+		});
 
 		return sb.toString();
 	}
@@ -235,7 +216,7 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (String m : l) {
+		l.stream().forEach((String m) -> {
 			String n = "nothing";
 			Integer i = 1;
 			String o = "-";
@@ -245,7 +226,7 @@ public class TestWhileToForEachRule {
 			sb.append(o);
 			sb.append(p);
 			sb.append(i.toString());
-		}
+		});
 
 		return sb.toString();
 	}
@@ -254,10 +235,10 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		for (String lIterator : l) {
+		l.stream().forEach((String lIterator) -> {
 			String p = "foo";
 			sb.append(p);
-		}
+		});
 
 		return sb.toString();
 	}
@@ -268,9 +249,7 @@ public class TestWhileToForEachRule {
 
 		String s;
 		String foo = "foo";
-		for (String lIterator : l) {
-			sb.append(lIterator);
-		}
+		l.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -366,10 +345,10 @@ public class TestWhileToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		for (Number s : numbers) {
+		numbers.stream().forEach((Number s) -> {
 			String foo = "foo";
 			sb.append(s);
-		}
+		});
 		return sb.toString();
 	}
 

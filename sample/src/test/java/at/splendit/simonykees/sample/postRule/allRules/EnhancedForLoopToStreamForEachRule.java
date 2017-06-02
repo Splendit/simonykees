@@ -23,11 +23,7 @@ public class EnhancedForLoopToStreamForEachRule {
 
 	static {
 		stringList3 = new LinkedList<>();
-		for (String s : stringList1) {
-			for (String t : stringList2) {
-				stringList3.add(s + t);
-			}
-		}
+		stringList1.stream().forEach((String s) -> stringList2.stream().forEach((String t) -> stringList3.add(s + t)));
 	}
 
 	public List<List<String>> stringListList = Arrays.asList(stringList1, stringList2);
@@ -72,11 +68,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			logger.info(s);
 		}
 
-		for (String s : stringList1) {
-			for (String t : stringList2) {
-				logger.info(s + t);
-			}
-		}
+		stringList1.stream().forEach((String s) -> stringList2.stream().forEach((String t) -> logger.info(s + t)));
 
 		for (List<String> list : stringListList) {
 			for (String s : list) {
@@ -91,19 +83,17 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		}
 
-		for (List<String> list : stringListList) {
+		stringListList.stream().forEach((List<String> list) -> {
 			stringList1.add(list.get(0));
-			for (String s : list) {
-				for (String t : stringList2) {
-					if (t.equals(s)) {
-						logger.info(t);
-					}
-					if (t.length() > s.length()) {
-						logger.info(s + t);
-					}
+			list.stream().forEach((String s) -> stringList2.stream().forEach((String t) -> {
+				if (t.equals(s)) {
+					logger.info(t);
 				}
-			}
-		}
+				if (t.length() > s.length()) {
+					logger.info(s + t);
+				}
+			}));
+		});
 
 		for (String s : stringList1) {
 			Class.forName(s);
@@ -180,25 +170,18 @@ public class EnhancedForLoopToStreamForEachRule {
 		TestClass testClassLocal = new TestClass();
 		EnhancedForLoopToStreamForEachRule rule = new EnhancedForLoopToStreamForEachRule();
 
-		for (String s : stringList1) {
-			testClassLocal.testIntField++;
-		}
+		stringList1.stream().forEach((String s) -> testClassLocal.testIntField++);
 
-		for (String s : stringList1) {
-			--testClassLocal.testIntField;
-		}
+		stringList1.stream().forEach((String s) -> --testClassLocal.testIntField);
 
-		for (String s : stringList1) {
-			testClassLocal.testIntField += s.length();
-		}
+		stringList1.stream().forEach((String s) -> testClassLocal.testIntField += s.length());
 
 		rule.intField = 12;
 		rule.testClassField.testIntField = 1;
 		for (Map.Entry<String, Map<String, String>> entry : validationConfigurations.entrySet()) {
 			Map<String, String> clone = new HashMap<>(entry.getValue().size());
-			for (Map.Entry<String, String> entry2 : entry.getValue().entrySet()) {
-				clone.put(entry2.getKey(), entry2.getValue());
-			}
+			entry.getValue().entrySet().stream()
+					.forEach((Map.Entry<String, String> entry2) -> clone.put(entry2.getKey(), entry2.getValue()));
 			rule.validationConfigurations.put(entry.getKey(), clone);
 		}
 		rule.intField = 12;
