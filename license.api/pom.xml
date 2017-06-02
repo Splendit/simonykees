@@ -28,6 +28,11 @@
 					<plugin>
 						<groupId>com.github.wvengen</groupId>
 						<artifactId>proguard-maven-plugin</artifactId>
+						<configuration>
+							<options>
+								<option>-printmapping ${project.build.directory}/license.api.out</option>
+							</options>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>

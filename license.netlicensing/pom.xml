@@ -45,13 +45,21 @@
 					<plugin>
 						<groupId>com.github.wvengen</groupId>
 						<artifactId>proguard-maven-plugin</artifactId>
+						<configuration>
+							<options>
+ 	 							<option>
+									-libraryjars  ${project.basedir}/../license.api/target/jSparrow.license.api-1.2.0-SNAPSHOT_proguard_base.jar
+								</option> 
+								<option>-applymapping
+									${project.basedir}/../license.api/target/license.api.out</option>
+								<option>-printmapping
+									${project.build.directory}/license.netlicensing.out</option>
+							</options>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
 		</profile>
-
-
-
 
 		<profile>
 			<id>test</id>
