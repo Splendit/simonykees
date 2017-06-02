@@ -464,16 +464,6 @@ public class TestForToForEachListIteratingIndexRule {
 		return sb.toString();
 	}
 
-	private List<String> generateList(String input) {
-		return Arrays.asList(input.split(";"));
-	}
-
-	private List<Integer> generateHashCodeList(String input) {
-		List<String> foo = generateList(input);
-		List<Integer> fooHashCodes = foo.stream().map(String::hashCode).collect(Collectors.toList());
-		return fooHashCodes;
-	}
-
 	@interface MyFooAnnotation {
 		String iterator = "";
 		Runnable r = () -> {
