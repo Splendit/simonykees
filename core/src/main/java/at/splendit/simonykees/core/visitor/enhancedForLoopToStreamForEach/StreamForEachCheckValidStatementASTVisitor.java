@@ -7,6 +7,7 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -18,7 +19,6 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
@@ -43,6 +43,7 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 	 */
 	private List<SimpleName> variableNames = new LinkedList<>();
 	private List<String> currentHandledExceptionsTypes = new LinkedList<>();
+	private List<SimpleName> parameters = new LinkedList<>();
 
 	/*
 	 * variables for checking validity
@@ -55,7 +56,7 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 	private List<IVariableBinding> invalidVariables = new LinkedList<>();
 
 	public StreamForEachCheckValidStatementASTVisitor(SimpleName parameter) {
-		this.variableNames.add(parameter);
+		this.parameters.add(parameter);
 	}
 
 	@Override
@@ -134,25 +135,36 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 	}
 
 	@Override
+	public boolean visit(EnhancedForStatement node) {
+		this.parameters.add(node.getParameter().getName());
+		return true;
+	}
+
+	@Override
+	public void endVisit(EnhancedForStatement node) {
+		this.parameters.remove(node.getParameter().getName());
+	}
+
+	@Override
 	public boolean visit(SimpleName simpleNameNode) {
-		if (!(simpleNameNode.getParent() instanceof VariableDeclaration)) {
 
-			/*
-			 * only local, final or effectively final variables or fields are
-			 * allowed.
-			 */
-			IBinding binding = simpleNameNode.resolveBinding();
-			if (binding instanceof IVariableBinding) {
-				IVariableBinding variableBinding = (IVariableBinding) binding;
-				boolean isField = variableBinding.isField();
-				boolean isFinal = Modifier.isFinal(variableBinding.getModifiers());
-				boolean isEffectivelyFinal = variableBinding.isEffectivelyFinal();
-				boolean isLocalVariable = variableNames.stream()
-						.anyMatch(var -> var.getIdentifier().equals(simpleNameNode.getIdentifier()));
+		/*
+		 * only local, final or effectively final variables or fields are
+		 * allowed.
+		 */
+		IBinding binding = simpleNameNode.resolveBinding();
+		if (binding instanceof IVariableBinding) {
+			IVariableBinding variableBinding = (IVariableBinding) binding;
+			boolean isField = variableBinding.isField();
+			boolean isFinal = Modifier.isFinal(variableBinding.getModifiers());
+			boolean isEffectivelyFinal = variableBinding.isEffectivelyFinal();
+			boolean isLocalVariable = variableNames.stream()
+					.anyMatch(var -> var.getIdentifier().equals(simpleNameNode.getIdentifier()));
+			boolean isEnhancedForParameter = parameters.stream()
+					.anyMatch(parameter -> parameter.getIdentifier().equals(simpleNameNode.getIdentifier()));
 
-				if (!(isField || isFinal || isEffectivelyFinal || isLocalVariable))
-					invalidVariables.add(variableBinding);
-			}
+			if (!(isField || isFinal || isEffectivelyFinal || isLocalVariable || isEnhancedForParameter))
+				invalidVariables.add(variableBinding);
 		}
 		return false;
 	}
