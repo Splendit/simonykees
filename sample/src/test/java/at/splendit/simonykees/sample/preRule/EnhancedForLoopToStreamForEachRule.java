@@ -213,6 +213,30 @@ public class EnhancedForLoopToStreamForEachRule {
 		rule.testClassField.testIntField = 1;
 		rule = null;
 
+		StringBuffer sb = new StringBuffer();
+		for(String s : stringList1) {
+			sb.append(s);
+			for (String n : stringList2) {
+				sb.append(n + ",");
+				for (String r : stringList3) {
+					String t = s;
+					sb.append(r + t);
+				}
+			}
+		}
+
+		for(String s : stringList1) {
+			s += ";";
+			sb.append(s);
+			for (String n : stringList2) {
+				sb.append(n + ",");
+				for (String r : stringList3) {
+					String t = s;
+					sb.append(r + t);
+				}
+			}
+		}
+
 		return "";
 	}
 
