@@ -234,7 +234,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 						extractableStatements.add(statement);
 					}
 				} else {
-					if (referencesNames(statement, declaredNames)) {
+					if (referencesName(statement, parameter) || referencesNames(statement, declaredNames)) {
 						clearParameters();
 						return;
 					}
