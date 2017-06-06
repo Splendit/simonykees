@@ -257,13 +257,13 @@ public class TestForToForEachListIteratingIndexRule {
 		stFoo.stream().forEach((String s) -> {
 			s += ";";
 			sb.append(s);
-			ndFoo.stream().forEach((String n) -> {
+			for (String n : ndFoo) {
 				sb.append(n + ",");
-				rdFoo.stream().forEach((String r) -> {
+				for (String r : rdFoo) {
 					String t = s;
 					sb.append(r + t);
-				});
-			});
+				}
+			}
 		});
 
 		return sb.toString();
