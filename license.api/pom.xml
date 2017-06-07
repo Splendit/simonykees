@@ -23,7 +23,7 @@
 					<name>proguard</name>
 				</property>
 			</activation>
-			<build>
+<!-- 			<build>
 				<plugins>
 					<plugin>
 						<groupId>com.github.wvengen</groupId>
@@ -35,7 +35,7 @@
 						</configuration>
 					</plugin>
 				</plugins>
-			</build>
+			</build> -->
 		</profile>
 	</profiles>
 

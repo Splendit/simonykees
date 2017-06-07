@@ -32,12 +32,12 @@
 						<artifactId>proguard-maven-plugin</artifactId>
 						<configuration>
 							<options>
-								<option>
+<!-- 								<option>
 									-libraryjars
 									${project.basedir}/../license.api/target/jSparrow.license.api-1.2.0-SNAPSHOT_proguard_base.jar
 								</option>
 								<option>-applymapping
-									${project.basedir}/../license.api/target/license.api.out</option>
+									${project.basedir}/../license.api/target/license.api.out</option> -->
 								<option>
 									-libraryjars
 									${project.basedir}/../logging/target/jSparrow.logging-1.2.0-SNAPSHOT_proguard_base.jar
