@@ -114,12 +114,11 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 	 * @return an {@link ASTNode} if the block is valid, null otherwise
 	 */
 	private ASTNode getApprovedStatement(Statement statement, SimpleName parameter) {
-		if (statement instanceof Block) {
-			Block body = (Block) statement;
-			if (isStatementValid(body, parameter)) {
-				return body;
+		if (ASTNode.BLOCK == statement.getNodeType()) {
+			if (isStatementValid(statement, parameter)) {
+				return statement;
 			}
-		} else if (statement instanceof ExpressionStatement) {
+		} else if (ASTNode.EXPRESSION_STATEMENT == statement.getNodeType()) {
 			if (isStatementValid(statement, parameter)) {
 				return ((ExpressionStatement) statement).getExpression();
 			}
