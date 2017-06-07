@@ -63,6 +63,23 @@ public class LambdaForEachMapRule {
 		return sb.toString();
 	}
 	
+	public String unsplittableBody3(String input) {
+		List<String> list = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		list.stream().filter(s -> !s.isEmpty()).forEach(s -> {
+			int i = 10;
+			int c = 0;
+			String subString = s.substring(1) + i + c;
+			String lower = subString.toLowerCase();
+			sb.append(lower);
+			if(lower.isEmpty()) {
+				sb.append(s);
+			}
+		});
+		return sb.toString();
+	}
+	
 	public String mapToDifferentType(String input) {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
