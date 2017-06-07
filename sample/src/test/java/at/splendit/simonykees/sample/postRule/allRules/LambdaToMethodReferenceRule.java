@@ -4,8 +4,11 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -124,6 +127,22 @@ public class LambdaToMethodReferenceRule {
 		Set<Person> persSet4 = transferElements(personList, HashSet<Person>::new);
 
 		Set<Person> persSet5 = transferElements(personList, HashSet<Person>::new);
+	}
+
+	// test cases for SIM-455 bugfix IllegalArgumentException with parameterized
+	// type
+	public void referenceToParameterizedType() {
+		Map<String, String> map = new HashMap<>();
+
+		map.entrySet().stream().forEach(Entry::getValue);
+
+		map.entrySet().stream().forEach(Entry::getValue);
+
+		map.entrySet().stream().forEach(Entry::getValue);
+
+		map.entrySet().stream().forEach(Entry<String, String>::getValue);
+
+		map.entrySet().stream().forEach(Entry::getValue);
 	}
 
 	public static <T, SOURCE extends Collection<T>, DEST extends Collection<T>> DEST transferElements(
