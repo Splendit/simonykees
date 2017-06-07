@@ -161,7 +161,9 @@ public class LambdaToMethodReferenceRule {
 		Set<Person> persSet5 = transferElements(personList, HashSet<Person>::new);
 	}
 
-	// test cases for SIM-455 bugfix IllegalArgumentException with parameterized type
+	/*
+	 * test cases for SIM-455 bugfix IllegalArgumentException with parameterized type
+	 */
 	public void referenceToParameterizedType() {
 		Map<String, String> map = new HashMap<>();
 
