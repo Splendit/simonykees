@@ -23,9 +23,7 @@ public class TestBracketsToControlRule {
 		for (int i = 1; i < 2; i++) {
 			;
 		}
-		for (Integer i : Arrays.asList(1, 2, 3)) {
-			System.out.println(i);
-		}
+		Arrays.asList(1, 2, 3).stream().forEach(System.out::println);
 	}
 
 	public static void thestWhileLoop() {

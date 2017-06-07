@@ -10,6 +10,7 @@ import at.splendit.simonykees.core.rule.impl.BracketsToControlRule;
 import at.splendit.simonykees.core.rule.impl.CodeFormatterRule;
 import at.splendit.simonykees.core.rule.impl.CollectionRemoveAllRule;
 import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
+import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamForEachRule;
 import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
@@ -53,6 +54,7 @@ import at.splendit.simonykees.core.visitor.StringFormatLineSeparatorASTVisitor;
 import at.splendit.simonykees.core.visitor.StringLiteralEqualityCheckASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
+import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamForEachASTVisitor;
 import at.splendit.simonykees.core.visitor.functionalInterface.FunctionalInterfaceASTVisitor;
 import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachCollectASTVisitor;
 import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachIfWrapperToFilterASTVisitor;
@@ -91,8 +93,6 @@ public class RulesContainer {
 				new MultiCatchRule(MultiCatchASTVisitor.class),
 				new BracketsToControlRule(BracketsToControlASTVisitor.class),
 				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class),
-				new WhileToForEachRule(WhileToForEachASTVisitor.class),
-				new ForToForEachRule(ForToForEachASTVisitor.class),
 				new CollectionRemoveAllRule(CollectionRemoveAllASTVisitor.class),
 				new SerialVersionUidRule(SerialVersionUidASTVisitor.class),
 				new StringFormatLineSeparatorRule(StringFormatLineSeparatorASTVisitor.class),
@@ -107,6 +107,9 @@ public class RulesContainer {
 				new StringLiteralEqualityCheckRule(StringLiteralEqualityCheckASTVisitor.class),
 				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
 				new MultiVariableDeclarationLineRule(MultiVariableDeclarationLineASTVisitor.class),
+				new WhileToForEachRule(WhileToForEachASTVisitor.class),
+				new ForToForEachRule(ForToForEachASTVisitor.class),
+				new EnhancedForLoopToStreamForEachRule(EnhancedForLoopToStreamForEachASTVisitor.class),
 				new LambdaForEachIfWrapperToFilterRule(LambdaForEachIfWrapperToFilterASTVisitor.class),
 				new StatementLambdaToExpressionRule(StatementLambdaToExpressionASTVisitor.class),
 				new LambdaForEachCollectRule(LambdaForEachCollectASTVisitor.class),
