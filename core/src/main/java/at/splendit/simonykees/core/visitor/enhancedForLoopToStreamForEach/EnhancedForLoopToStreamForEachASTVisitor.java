@@ -23,7 +23,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * this rule visits all enhanced for loops and checks if the corresponding loop
  * body is applicable for lambda expressions as parameter for
  * {@link java.util.stream.Stream#forEach(java.util.function.Consumer)}. Each
- * loop body is checked sparatley by the
+ * loop body is checked separately by the
  * {@link StreamForEachCheckValidStatementASTVisitor}
  * 
  * @author Matthias Webhofer
@@ -44,8 +44,8 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 		ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
 		if (expressionTypeBinding != null
 				&& (ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST)
-						|| ClassRelationUtil.isContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST))) { // TODO
-																													// probably
+						|| ClassRelationUtil.isContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST))) {
+
 			ASTNode approvedStatement = getApprovedStatement(statement, parameter.getName());
 
 			if (approvedStatement != null) {
