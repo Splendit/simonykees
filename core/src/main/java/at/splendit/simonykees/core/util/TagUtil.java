@@ -73,6 +73,7 @@ public class TagUtil {
 
 		} else if (DiamondOperatorRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS);
+
 		} else if (EnhancedForLoopToStreamForEachRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
 
@@ -96,7 +97,7 @@ public class TagUtil {
 
 		} else if (LambdaForEachCollectRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
-			
+
 		} else if (LambdaForEachMapRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
 
