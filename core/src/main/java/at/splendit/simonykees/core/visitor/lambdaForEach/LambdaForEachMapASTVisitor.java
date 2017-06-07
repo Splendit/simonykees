@@ -90,7 +90,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 						ListRewrite argumentsPropertyRewriter = astRewrite.getListRewrite(mapInvocation,
 								MethodInvocation.ARGUMENTS_PROPERTY);
-						LambdaExpression mapExpression = genereateLambdaExpression(ast, parameter, extractableBlock);
+						LambdaExpression mapExpression = genereateLambdaExpression(ast, parameter, extractableBlock, lambdaExpression);
 						argumentsPropertyRewriter.insertFirst(mapExpression, null);
 
 						/*
@@ -127,12 +127,13 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 	 * 
 	 * @return the generated {@link LambdaExpression}.
 	 */
-	private LambdaExpression genereateLambdaExpression(AST ast, SimpleName paramName, ASTNode body) {
-		LambdaExpression lambdaExpression = ast.newLambdaExpression();
+	private LambdaExpression genereateLambdaExpression(AST ast, SimpleName paramName, ASTNode body, LambdaExpression original) {
+		/*
+		 * A workaround for keeping the formatting 
+		 * of the original lambda expression.
+		 */
+		LambdaExpression lambdaExpression = (LambdaExpression)ASTNode.copySubtree(ast, original);
 		lambdaExpression.setBody(body);
-		ListRewrite listRewrite = astRewrite.getListRewrite(lambdaExpression, LambdaExpression.PARAMETERS_PROPERTY);
-		listRewrite.insertFirst((SimpleName) astRewrite.createCopyTarget(paramName), null);
-
 		return lambdaExpression;
 	}
 
@@ -233,7 +234,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 						extractableStatements.add(statement);
 					}
 				} else {
-					if (referencesNames(statement, declaredNames)) {
+					if (referencesName(statement, parameter) || referencesNames(statement, declaredNames)) {
 						clearParameters();
 						return;
 					}
