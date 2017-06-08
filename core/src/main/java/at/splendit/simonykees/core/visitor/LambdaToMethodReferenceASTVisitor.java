@@ -171,19 +171,22 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 			 */
 			else if (expression instanceof ClassInstanceCreation) {
 				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) expression;
-				Type classInstanceCreationType = classInstanceCreation.getType();
 
-				CreationReference ref = astRewrite.getAST().newCreationReference();
+				if (lambdaParams.size() == classInstanceCreation.arguments().size()) {
+					Type classInstanceCreationType = classInstanceCreation.getType();
 
-				if (classInstanceCreationType instanceof ParameterizedType
-						&& ((ParameterizedType) classInstanceCreationType).typeArguments().size() == 0) {
-					ref.setType((Type) astRewrite
-							.createMoveTarget(((ParameterizedType) classInstanceCreationType).getType()));
-				} else {
-					ref.setType((Type) astRewrite.createCopyTarget(classInstanceCreationType));
+					CreationReference ref = astRewrite.getAST().newCreationReference();
+
+					if (classInstanceCreationType instanceof ParameterizedType
+							&& ((ParameterizedType) classInstanceCreationType).typeArguments().size() == 0) {
+						ref.setType((Type) astRewrite
+								.createMoveTarget(((ParameterizedType) classInstanceCreationType).getType()));
+					} else {
+						ref.setType((Type) astRewrite.createCopyTarget(classInstanceCreationType));
+					}
+
+					astRewrite.replace(lambdaExpressionNode, ref, null);
 				}
-
-				astRewrite.replace(lambdaExpressionNode, ref, null);
 			}
 		}
 
