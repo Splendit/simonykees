@@ -35,7 +35,6 @@ public enum Tag {
 	LAMBDA("lambda"),
 	LOGGING("logging");
 
-
 	private List<String> tagName;
 
 	private Tag(String... tagName) {
@@ -47,14 +46,12 @@ public enum Tag {
 	}
 
 	public static Tag getTageForName(String name) {
-		return Arrays.stream(Tag.class.getEnumConstants()).filter(tag -> tag.getTagNames().contains(name)).findFirst()
-				.orElse(null);
+		return Arrays.stream(values()).filter(tag -> tag.getTagNames().contains(name)).findFirst().orElse(null);
 	}
 
 	public static String[] getAllTags() {
-		List<String> allTagsList = Arrays.stream(Tag.class.getEnumConstants()).map(t -> t.getTagNames())
-				.flatMap(List::stream).collect(Collectors.toList());
-		return allTagsList.stream().toArray(String[]::new);
+		return Arrays.stream(values()).map(t -> t.getTagNames()).flatMap(List::stream).collect(Collectors.toList())
+				.stream().toArray(String[]::new);
 	}
 
 }
