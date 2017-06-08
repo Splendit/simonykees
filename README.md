@@ -43,6 +43,10 @@
 	</server>
 	
 	The deployed artifact can be seen at: http://packagedrone-vm-01.splendit.loc:8080/channel/0c59cce1-cb2c-4942-8e44-465609fe2fdb/view
+	
+	The channel can be used as update site in Eclipse with the following URL:
+	
+	http://packagedrone-vm-01.splendit.loc:8080/p2/jSparrow-test-channel/
 
 ## faster builds ##
 
