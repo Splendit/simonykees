@@ -32,6 +32,9 @@ public class FieldNameConventionRule {
 	private String Österreich;
 	private String[] myArray = { "my", "array" };
 	public Integer MyInt;
+	private int True;
+	private double False;
+	private Object Null;
 
 	{
 		String insideInitializer = finalInstanceVariablesCanBeRenamed;

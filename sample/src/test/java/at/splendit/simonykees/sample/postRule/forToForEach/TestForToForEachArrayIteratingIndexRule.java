@@ -312,6 +312,22 @@ public class TestForToForEachArrayIteratingIndexRule {
 		
 		return sb.toString();
 	}
+	
+    public static boolean hasDuplicateItems(Object[] array) {
+    	// jFreeChart corner case
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < i; j++) {
+            	Object o1 = array[i];
+                Object o2 = array[j];
+                if (o1 != null && o2 != null) {
+                    if (o1.equals(o2)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
 	/**
 	 * This collection is not subtype of {@code Iterable}.

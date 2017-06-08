@@ -224,4 +224,24 @@ public class TestWhileToForEachArrayRule {
 		}
 		return sb.toString();
 	}
+
+	public static boolean hasDuplicateItems(Object[] array) {
+		// jFreeChart corner case
+		int i = 0;
+		while (i < array.length) {
+			int j = 0;
+			while (j < i) {
+				Object o1 = array[i];
+				Object o2 = array[j];
+				if (o1 != null && o2 != null) {
+					if (o1.equals(o2)) {
+						return true;
+					}
+				}
+				j++;
+			}
+			i++;
+		}
+		return false;
+	}
 }

@@ -500,6 +500,22 @@ public class TestForToForEachListIteratingIndexRule {
 		return sb.toString();
 	}
 	
+    public static boolean hasDuplicateItems(List<Object> array) {
+    	// jFreeChart corner case
+        for (int i = 0; i < array.size(); i++) {
+            for (int j = 0; j < i; j++) {
+            	Object o1 = array.get(i);
+                Object o2 = array.get(j);
+                if (o1 != null && o2 != null) {
+                    if (o1.equals(o2)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+	
 	/**
 	 * This collection is not subtype of {@code Iterable}.
 	 */
