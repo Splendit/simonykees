@@ -4,8 +4,11 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -60,6 +63,17 @@ public class LambdaToMethodReferenceRule {
 		Collections.sort(personList, (Person a, Person b) -> Person.compareByAge(a, b.getParent2()));
 
 		Collections.sort(personList, (a, b) -> Person.compareByAge(a.getParent1(), b));
+
+		// SIM-454 bugfix static methods
+		personList.stream().filter(p -> isPerson(p));
+
+		personList.stream().filter((Person p) -> isPerson(p));
+
+		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+
+		personList.stream().filter(p -> LambdaToMethodReferenceRule.isPerson(p));
+
+		personList.stream().filter((Person p) -> LambdaToMethodReferenceRule.isPerson(p));
 	}
 
 	public void referenceToInstanceMethod() {
@@ -158,6 +172,23 @@ public class LambdaToMethodReferenceRule {
 		Set<Person> persSet5 = transferElements(personList, HashSet<Person>::new);
 	}
 
+	/*
+	 * test cases for SIM-455 bugfix IllegalArgumentException with parameterized type
+	 */
+	public void referenceToParameterizedType() {
+		Map<String, String> map = new HashMap<>();
+
+		map.entrySet().stream().forEach(element -> element.getValue());
+
+		map.entrySet().stream().forEach((Entry element) -> element.getValue());
+
+		map.entrySet().stream().forEach((Entry<String, String> element) -> element.getValue());
+
+		map.entrySet().stream().forEach(Entry<String, String>::getValue);
+
+		map.entrySet().stream().forEach(Entry::getValue);
+	}
+
 	class ComparisonProvider {
 		public int compareByName(Person a, Person b) {
 			return a.getName().compareTo(b.getName());
@@ -176,6 +207,10 @@ public class LambdaToMethodReferenceRule {
 			result.add(t);
 		}
 		return result;
+	}
+
+	public static boolean isPerson(Person a) {
+		return true;
 	}
 
 	private void doSomething(Object o) {

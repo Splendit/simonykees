@@ -1,11 +1,13 @@
 package at.splendit.simonykees.core.visitor;
 
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -94,9 +96,19 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 					}
 					// no expression present -> assume 'this'
 					else if (methodInvocationExpression == null) {
-						ThisExpression thisExpression = astRewrite.getAST().newThisExpression();
-						ref.setExpression(thisExpression);
-						isReferenceExpressionSet = true;
+
+						IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+						if (!Modifier.isStatic(methodBinding.getModifiers())) {
+							ThisExpression thisExpression = astRewrite.getAST().newThisExpression();
+							ref.setExpression(thisExpression);
+							isReferenceExpressionSet = true;
+						} else {
+							SimpleName staticClassName = astRewrite.getAST()
+									.newSimpleName(methodBinding.getDeclaringClass().getErasure().getName());
+							ref.setExpression(staticClassName);
+							isReferenceExpressionSet = true;
+						}
+
 					}
 
 					if (isReferenceExpressionSet) {
@@ -124,7 +136,13 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 								lambdaParams.subList(1, lambdaParams.size()), methodArguments)) {
 
 							ITypeBinding binding = methodInvocationExpressionName.resolveTypeBinding();
-							String typeNameStr = binding.getName();
+							String typeNameStr;
+							if (binding.isParameterizedType()) {
+								ITypeBinding erasure = binding.getErasure();
+								typeNameStr = erasure.getName();
+							} else {
+								typeNameStr = binding.getName();
+							}
 
 							SimpleName typeName = astRewrite.getAST().newSimpleName(typeNameStr);
 							SimpleName methodName = (SimpleName) astRewrite

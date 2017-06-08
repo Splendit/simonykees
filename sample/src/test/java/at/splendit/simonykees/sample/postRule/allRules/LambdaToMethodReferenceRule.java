@@ -4,8 +4,11 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -50,6 +53,17 @@ public class LambdaToMethodReferenceRule {
 		Collections.sort(personList, (Person a, Person b) -> Person.compareByAge(a, b.getParent2()));
 
 		Collections.sort(personList, (a, b) -> Person.compareByAge(a.getParent1(), b));
+
+		// SIM-454 bugfix static methods
+		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+
+		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+
+		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+
+		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+
+		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
 	}
 
 	public void referenceToInstanceMethod() {
@@ -126,14 +140,34 @@ public class LambdaToMethodReferenceRule {
 		Set<Person> persSet5 = transferElements(personList, HashSet<Person>::new);
 	}
 
+	/*
+	 * test cases for SIM-455 bugfix IllegalArgumentException with parameterized
+	 * type
+	 */
+	public void referenceToParameterizedType() {
+		Map<String, String> map = new HashMap<>();
+
+		map.entrySet().stream().forEach(Entry::getValue);
+
+		map.entrySet().stream().forEach(Entry::getValue);
+
+		map.entrySet().stream().forEach(Entry::getValue);
+
+		map.entrySet().stream().forEach(Entry<String, String>::getValue);
+
+		map.entrySet().stream().forEach(Entry::getValue);
+	}
+
 	public static <T, SOURCE extends Collection<T>, DEST extends Collection<T>> DEST transferElements(
 			SOURCE sourceCollection, Supplier<DEST> collectionFactory) {
 
 		DEST result = collectionFactory.get();
-		for (T t : sourceCollection) {
-			result.add(t);
-		}
+		sourceCollection.stream().forEach(result::add);
 		return result;
+	}
+
+	public static boolean isPerson(Person a) {
+		return true;
 	}
 
 	private void doSomething(Object o) {
