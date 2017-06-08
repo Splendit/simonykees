@@ -35,6 +35,10 @@ public class FieldNameConventionRule {
 	
 	public Integer MyInt;
 	
+	private int True;
+	private double False;
+	private Object Null;
+	
 	{
 		String insideInitializer = finalInstanceVariablesCanBeRenamed;
 	}

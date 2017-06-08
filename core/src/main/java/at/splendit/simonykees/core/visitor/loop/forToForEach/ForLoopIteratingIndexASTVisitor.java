@@ -254,12 +254,13 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 	protected boolean isLoopProperty(SimpleName simpleName) {
 		ASTNode parent = simpleName.getParent();
 		ASTNode grandParent = parent.getParent();
+		ASTNode ggParent = grandParent.getParent();
 
-		return parent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY
-				|| grandParent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY
-				|| parent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY
-				|| grandParent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY
-				|| parent.getLocationInParent() == ForStatement.EXPRESSION_PROPERTY
+		return (parent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY && grandParent == forStatement)
+				|| (grandParent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY && ggParent == forStatement)
+				|| (parent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY && grandParent == forStatement)
+				|| (grandParent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY && ggParent == forStatement)
+				|| (parent.getLocationInParent() == ForStatement.EXPRESSION_PROPERTY && grandParent == forStatement)
 				|| grandParent == getIndexUpdater(INTERNAL_INDEX_UPDATER)
 				|| grandParent.getParent() == getIndexUpdater(INTERNAL_INDEX_UPDATER);
 	}

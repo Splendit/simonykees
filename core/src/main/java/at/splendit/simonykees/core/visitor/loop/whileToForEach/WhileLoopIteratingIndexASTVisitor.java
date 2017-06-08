@@ -172,8 +172,10 @@ abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVi
 	@Override
 	protected boolean isLoopProperty(SimpleName simpleName) {
 		ASTNode parent = simpleName.getParent();
-		return parent.getLocationInParent() == WhileStatement.EXPRESSION_PROPERTY || parent == indexUpdater
-				|| parent.getParent() == indexUpdater || parent.getParent().getParent() == indexUpdater
-				|| parent == indexDeclaration || parent.getParent() == indexDeclaration;
+		ASTNode grandParent = parent.getParent();
+		return (parent.getLocationInParent() == WhileStatement.EXPRESSION_PROPERTY && grandParent == whileStatement)
+				|| parent == indexUpdater || parent.getParent() == indexUpdater
+				|| parent.getParent().getParent() == indexUpdater || parent == indexDeclaration
+				|| parent.getParent() == indexDeclaration;
 	}
 }

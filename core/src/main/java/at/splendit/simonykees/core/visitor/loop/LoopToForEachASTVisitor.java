@@ -76,8 +76,13 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	@Override
 	public void endVisit(CompilationUnit cu) {
 		PackageDeclaration cuPackage = cu.getPackage();
-		Name packageName = cuPackage.getName();
-		String packageQualifiedName = packageName.getFullyQualifiedName();
+		String packageQualifiedName;
+		if(cuPackage != null) {
+			Name packageName = cuPackage.getName();
+			packageQualifiedName = packageName.getFullyQualifiedName();
+		} else {
+			packageQualifiedName = ""; //$NON-NLS-1$
+		}
 		List<AbstractTypeDeclaration> cuDeclaredTypes = ASTNodeUtil.convertToTypedList(compilationUnit.types(),
 				AbstractTypeDeclaration.class);
 
