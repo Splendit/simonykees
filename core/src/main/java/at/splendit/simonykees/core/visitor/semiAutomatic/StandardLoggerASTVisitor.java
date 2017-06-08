@@ -7,8 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
@@ -16,14 +18,17 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
@@ -129,6 +134,15 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		importsNeeded = false;
 		this.compilationUnit = compilationUnit;
 
+		// TODO: if there is a Logger or LoggerFactory in the package, skip the
+		// rule
+		// TODO: if there is a Logger class or LoggerFactory class declared as
+		// inner classes, skip the rule
+
+		ClashingLoggerTypesASTVisitor clashingTypesVisitor = new ClashingLoggerTypesASTVisitor();
+		compilationUnit.accept(clashingTypesVisitor);
+		boolean noClashingTypes = clashingTypesVisitor.isLoggerFree();
+
 		// checking whether there is a logger imported!!!
 		boolean exisitngLoggerImported = ASTNodeUtil
 				.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class).stream()
@@ -136,7 +150,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				.filter(Name::isQualifiedName).map(name -> ((QualifiedName) name).getName())
 				.map(SimpleName::getIdentifier).filter(LOGGER_CLASS_NAME::equals).findAny().isPresent();
 
-		return !exisitngLoggerImported && super.visit(compilationUnit);
+		return noClashingTypes && !exisitngLoggerImported && super.visit(compilationUnit);
 	}
 
 	@Override
@@ -450,5 +464,47 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private String generateUniqueTypeId(AbstractTypeDeclaration typeDeclaration) {
 		return typeDeclaration.getName().getIdentifier() + SEPARATOR + typeDeclaration.getStartPosition() + SEPARATOR
 				+ typeDeclaration.getLength();
+	}
+
+	private class ClashingLoggerTypesASTVisitor extends ASTVisitor {
+
+		boolean clashingFound = false;
+
+		@Override
+		public boolean preVisit2(ASTNode node) {
+			return !clashingFound;
+		}
+
+		@Override
+		public boolean visit(TypeDeclaration typeDeclaration) {
+			String typeIdentifier = typeDeclaration.getName().getIdentifier();
+			if(isClashingLoggerName(typeIdentifier)) {
+				clashingFound = true;
+			}
+			return true;
+		}
+		
+		@Override
+		public boolean visit(SimpleType simpleType) {
+			Name typeName = simpleType.getName();
+			if(typeName.isSimpleName()) {
+				if(isClashingLoggerName(((SimpleName)typeName).getIdentifier())) {
+					clashingFound = true;
+				}
+			}
+			return true;
+		}
+		
+		private boolean isClashingLoggerName(String typeIdentifier) {
+			if (LOGGER_CLASS_NAME.equals(typeIdentifier) || LOG4J_LOGGER_MANAGER.equals(typeIdentifier)
+					|| SLF4J_LOGGER_FACTORY.equals(typeIdentifier)) {
+				return true;
+			}
+			return false;
+		}
+		
+		public boolean isLoggerFree() {
+			return !clashingFound;
+		}
 	}
 }
