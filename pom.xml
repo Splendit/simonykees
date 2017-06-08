@@ -340,14 +340,9 @@
 						<obfuscate>true</obfuscate>
 						<proguardInclude>${basedir}/proguard.conf</proguardInclude>
 						<libs>
-							<lib>/usr/lib/jvm/java-8-oracle/jre/lib/rt.jar</lib>
-							<lib>/usr/lib/jvm/java-8-oracle/jre/lib/jsse.jar</lib>
+							<lib>${java.home}/lib/rt.jar</lib>
+							<lib>${java.home}/lib/jsse.jar</lib>
 						</libs>
-<!-- 						<options>
-							<option>-useuniqueclassmembernames</option>
-							<option>-dontshrink</option>
-							<option>-dontoptimize</option>
-						</options> -->
 					</configuration>
 				</plugin>
 				<plugin>
