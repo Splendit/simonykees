@@ -42,6 +42,8 @@ public class Messages extends NLS {
 	public static String DiamondOperatorASTVisitor_using_diamond_operator;
 	public static String DiamondOperatorRule_description;
 	public static String DiamondOperatorRule_name;
+	public static String EnhancedForLoopToStreamForEachRule_description;
+	public static String EnhancedForLoopToStreamForEachRule_name;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;

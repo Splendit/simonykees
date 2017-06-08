@@ -136,7 +136,13 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 								lambdaParams.subList(1, lambdaParams.size()), methodArguments)) {
 
 							ITypeBinding binding = methodInvocationExpressionName.resolveTypeBinding();
-							String typeNameStr = binding.getName();
+							String typeNameStr;
+							if (binding.isParameterizedType()) {
+								ITypeBinding erasure = binding.getErasure();
+								typeNameStr = erasure.getName();
+							} else {
+								typeNameStr = binding.getName();
+							}
 
 							SimpleName typeName = astRewrite.getAST().newSimpleName(typeNameStr);
 							SimpleName methodName = (SimpleName) astRewrite
