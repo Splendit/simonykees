@@ -53,6 +53,17 @@ public class LambdaToMethodReferenceRule {
 		Collections.sort(personList, (Person a, Person b) -> Person.compareByAge(a, b.getParent2()));
 
 		Collections.sort(personList, (a, b) -> Person.compareByAge(a.getParent1(), b));
+
+		// SIM-454 bugfix static methods
+		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+
+		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+
+		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+
+		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+
+		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
 	}
 
 	public void referenceToInstanceMethod() {
@@ -153,6 +164,10 @@ public class LambdaToMethodReferenceRule {
 		DEST result = collectionFactory.get();
 		sourceCollection.stream().forEach(result::add);
 		return result;
+	}
+
+	public static boolean isPerson(Person a) {
+		return true;
 	}
 
 	private void doSomething(Object o) {
