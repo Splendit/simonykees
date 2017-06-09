@@ -14,7 +14,9 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -90,7 +92,8 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 						ListRewrite argumentsPropertyRewriter = astRewrite.getListRewrite(mapInvocation,
 								MethodInvocation.ARGUMENTS_PROPERTY);
-						LambdaExpression mapExpression = genereateLambdaExpression(ast, parameter, extractableBlock, lambdaExpression);
+						LambdaExpression mapExpression = genereateLambdaExpression(ast, parameter, extractableBlock,
+								lambdaExpression);
 						argumentsPropertyRewriter.insertFirst(mapExpression, null);
 
 						/*
@@ -107,6 +110,14 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 						 * expression
 						 */
 						astRewrite.replace(parameter, newForEachParamName, null);
+
+						/*
+						 * Replace the type of the parameter if any
+						 */
+						Type type = extractSingleParameterType(lambdaExpression);
+						if (type != null) {
+							astRewrite.replace(type, analyzer.getNewForEachParameterType(), null);
+						}
 					}
 				}
 			}
@@ -127,12 +138,13 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 	 * 
 	 * @return the generated {@link LambdaExpression}.
 	 */
-	private LambdaExpression genereateLambdaExpression(AST ast, SimpleName paramName, ASTNode body, LambdaExpression original) {
+	private LambdaExpression genereateLambdaExpression(AST ast, SimpleName paramName, ASTNode body,
+			LambdaExpression original) {
 		/*
-		 * A workaround for keeping the formatting 
-		 * of the original lambda expression.
+		 * A workaround for keeping the formatting of the original lambda
+		 * expression.
 		 */
-		LambdaExpression lambdaExpression = (LambdaExpression)ASTNode.copySubtree(ast, original);
+		LambdaExpression lambdaExpression = (LambdaExpression) ASTNode.copySubtree(ast, original);
 		lambdaExpression.setBody(body);
 		return lambdaExpression;
 	}
@@ -155,6 +167,31 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 	}
 
 	/**
+	 * Extracts the {@link Type} of the parameter of the lambda expression, if
+	 * any.
+	 * 
+	 * @param lambdaExpression
+	 *            lambda expression to be checked
+	 * 
+	 * @return the {@link Type} of the parameter if the lambda expression has
+	 *         only one parameter expressed as a
+	 *         {@link SingleVariableDeclaration}, or {@code null} otherwise.
+	 */
+	private Type extractSingleParameterType(LambdaExpression lambdaExpression) {
+		Type parameter = null;
+
+		List<SingleVariableDeclaration> declarations = ASTNodeUtil.returnTypedList(lambdaExpression.parameters(),
+				SingleVariableDeclaration.class);
+		if (declarations.size() == 1) {
+			SingleVariableDeclaration declaration = declarations.get(0);
+			parameter = declaration.getType();
+
+		}
+
+		return parameter;
+	}
+
+	/**
 	 * A helper class for analyzing the block body of a lambda expression.
 	 * 
 	 * @author Ardit Ymeri
@@ -170,6 +207,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		private List<Statement> remainingStatements = new ArrayList<>();
 		private Expression mapExpression = null;
 		private SimpleName newForEachVarName = null;
+		private Type parameterType = null;
 
 		public ForEachBodyAnalyzer(SimpleName parameter, Block block) {
 			List<Statement> statements = ASTNodeUtil.returnTypedList(block.statements(), Statement.class);
@@ -200,6 +238,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 								Expression initializer = fragment.getInitializer();
 								mapVariableFound = true;
 								newForEachVarName = fragmentName;
+								parameterType = declStatement.getType();
 								mapExpression = initializer;
 
 							} else {
@@ -254,6 +293,10 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 		public SimpleName getNewForEachParameterName() {
 			return newForEachVarName;
+		}
+
+		public Type getNewForEachParameterType() {
+			return this.parameterType;
 		}
 
 		/**
