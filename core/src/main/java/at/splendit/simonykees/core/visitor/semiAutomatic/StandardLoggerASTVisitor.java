@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -18,14 +17,13 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -92,7 +90,6 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String LOG4J_LOGGER_FACTORY_QUALIFIED_NAME = "org.apache.logging.log4j.LogManager"; //$NON-NLS-1$
 	private static final String SEPARATOR = "->"; //$NON-NLS-1$
 
-	private boolean loggerAdded = false;
 	private boolean importsNeeded = false;
 
 	private Map<String, String> replacingOptions;
@@ -187,6 +184,19 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	public void endVisit(EnumDeclaration enumDeclaration) {
 		endVisitNewTypeDeclaration(enumDeclaration);
 	}
+	
+	@Override
+	public boolean visit(MethodDeclaration methodDeclaration) {
+		/*
+		 * Since it is not possible to have a static field in a nested class, 
+		 * the introduced logger will be an instance field too. Therefore, 
+		 * it cannot be used in a static method. 
+		 */
+		if(nestedTypeDeclarationLevel > 1 && ASTNodeUtil.hasModifier(methodDeclaration.modifiers(), modifier -> modifier.isStatic())) {
+			return false;
+		}
+		return true;
+	}
 
 	/**
 	 * Keeps track of the possibly nested types (classes or enums) declared
@@ -196,7 +206,6 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 *            node representing a type declaration.
 	 */
 	private void visitNewTypeDeclaration(AbstractTypeDeclaration abstractType) {
-		loggerAdded = false;
 		if (nestedTypeDeclarationLevel == 0) {
 			this.rootType = abstractType;
 		}
@@ -279,7 +288,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 *            name of the replacing method
 	 */
 	private void replaceMethod(MethodInvocation methodInvocation, String replacingMethod) {
-		if (!loggerAdded) {
+		if (getLoggerName() == null) {
 			addLogger();
 		}
 		String loggerNameIdentifier = getLoggerName();
@@ -308,7 +317,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 *            the replacing method name of the logger
 	 */
 	private void replaceMethod(MethodInvocation methodInvocation, SimpleName throwableName, String replacingMethod) {
-		if (!loggerAdded) {
+		if (getLoggerName() == null) {
 			addLogger();
 		}
 		String loggerNameIdentifier = getLoggerName();
@@ -335,7 +344,6 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 * proper factory. The field is inserted at the beginning of the class body.
 	 */
 	private void addLogger() {
-		loggerAdded = true;
 		importsNeeded = true;
 		String loggerName = generateLoggerName();
 		setCurrentLoggerName(loggerName);
@@ -375,6 +383,12 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		return typeDeclarationProperty;
 	}
 
+	/**
+	 * Stores the name of the logger for the current type declaration which is being visited. 
+	 * Generates a unique identification for it.
+	 * 
+	 * @param loggerName name to be stored.
+	 */
 	private void setCurrentLoggerName(String loggerName) {
 		loggerNames.put(generateUniqueTypeId(this.typeDeclaration), loggerName);
 	}
