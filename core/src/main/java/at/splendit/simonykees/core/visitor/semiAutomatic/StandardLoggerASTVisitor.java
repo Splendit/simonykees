@@ -131,11 +131,6 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		importsNeeded = false;
 		this.compilationUnit = compilationUnit;
 
-		// TODO: if there is a Logger or LoggerFactory in the package, skip the
-		// rule
-		// TODO: if there is a Logger class or LoggerFactory class declared as
-		// inner classes, skip the rule
-
 		ClashingLoggerTypesASTVisitor clashingTypesVisitor = new ClashingLoggerTypesASTVisitor();
 		compilationUnit.accept(clashingTypesVisitor);
 		boolean noClashingTypes = clashingTypesVisitor.isLoggerFree();
@@ -489,6 +484,14 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				+ typeDeclaration.getLength();
 	}
 
+	/**
+	 * Checks for occurrences of {@link SimpleType}s with name {@value #LOGGER_CLASS_NAME}, {@value #SLF4J_LOGGER_FACTORY}
+	 * or {@value #SLF4J_LOGGER_FACTORY}.
+	 * 
+	 * @author Ardit Ymeri
+	 * @since 1.2
+	 *
+	 */
 	private class ClashingLoggerTypesASTVisitor extends ASTVisitor {
 
 		boolean clashingFound = false;
