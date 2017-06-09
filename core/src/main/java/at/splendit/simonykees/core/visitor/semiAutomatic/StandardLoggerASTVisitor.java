@@ -357,9 +357,11 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		loggerDeclaration.setType(loggerType);
 		ListRewrite loggerListRewirte = astRewrite.getListRewrite(loggerDeclaration,
 				FieldDeclaration.MODIFIERS2_PROPERTY);
-		Modifier privateModifier = ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD);
+		if(!isInterface(typeDeclaration)) {			
+			Modifier privateModifier = ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD);
+			loggerListRewirte.insertLast(privateModifier, null);
+		}
 		Modifier finalModifier = ast.newModifier(ModifierKeyword.FINAL_KEYWORD);
-		loggerListRewirte.insertLast(privateModifier, null);
 		if (nestedTypeDeclarationLevel == 1) {
 			Modifier staticModifier = ast.newModifier(ModifierKeyword.STATIC_KEYWORD);
 			loggerListRewirte.insertLast(staticModifier, null);
@@ -368,6 +370,13 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 		ListRewrite listRewrite = astRewrite.getListRewrite(typeDeclaration, getBodyDeclarationProperty());
 		listRewrite.insertFirst(loggerDeclaration, null);
+	}
+
+	private boolean isInterface(AbstractTypeDeclaration typeDeclaration2) {
+		if(typeDeclaration2 instanceof TypeDeclaration && ((TypeDeclaration)typeDeclaration2).isInterface()) {
+			return true;
+		}
+		return false;
 	}
 
 	private ChildListPropertyDescriptor getBodyDeclarationProperty() {

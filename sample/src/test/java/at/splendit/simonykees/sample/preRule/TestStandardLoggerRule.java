@@ -1,5 +1,7 @@
 package at.splendit.simonykees.sample.preRule;
 
+import java.util.function.Consumer;
+
 @SuppressWarnings({"unused", "nls"})
 public class TestStandardLoggerRule {
 
@@ -30,6 +32,14 @@ public class TestStandardLoggerRule {
 	}
 	
 	class InnerClass {
+		
+		{{
+			System.out.println("a log message");
+		}}
+		
+		Consumer<String> p = (String input) -> {
+			System.out.println(input);
+		};
 		
 		public void dontUseOuterClassLogger(String input) {
 			System.out.println("a log message");
@@ -81,6 +91,14 @@ enum Days {
 
 	private static final String logger = "";
 	public void loggerInEnumType(String input) {
+		System.out.println(input);
+	}
+}
+
+
+interface OneHavingAnImplementedMethod {
+	
+	default void makeUseOfSystemOut(String input) {
 		System.out.println(input);
 	}
 }
