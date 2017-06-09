@@ -2,6 +2,8 @@ package at.splendit.simonykees.core.visitor.lambdaForEach;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -110,14 +112,22 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 						 * expression
 						 */
 						astRewrite.replace(parameter, newForEachParamName, null);
-
+						
 						/*
 						 * Replace the type of the parameter if any
 						 */
 						Type type = extractSingleParameterType(lambdaExpression);
 						if (type != null) {
-							astRewrite.replace(type, analyzer.getNewForEachParameterType(), null);
+							Type newType = analyzer.getNewForEachParameterType();
+							if(newType.isPrimitiveType()) {
+								// implicit boxing! primitives are not allowed in forEach
+								astRewrite.replace((ASTNode)lambdaExpression.parameters().get(0), newForEachParamName, null);
+							} else {							
+								astRewrite.replace(type, newType, null);
+							}
 						}
+
+
 					}
 				}
 			}
@@ -185,7 +195,6 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		if (declarations.size() == 1) {
 			SingleVariableDeclaration declaration = declarations.get(0);
 			parameter = declaration.getType();
-
 		}
 
 		return parameter;
@@ -227,7 +236,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 						VariableDeclarationStatement declStatement = (VariableDeclarationStatement) statement;
 						List<VariableDeclarationFragment> fragments = ASTNodeUtil
 								.convertToTypedList(declStatement.fragments(), VariableDeclarationFragment.class);
-						if (referencesName(declStatement, parameter)) {
+						if (!declStatement.getType().isArrayType() && referencesName(declStatement, parameter)) {
 							if (fragments.size() == 1) {
 								/*
 								 * a map variable is found. store its name and

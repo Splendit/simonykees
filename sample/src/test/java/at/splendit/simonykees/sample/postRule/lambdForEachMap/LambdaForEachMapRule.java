@@ -195,4 +195,46 @@ public class LambdaForEachMapRule {
 		
 		return sb.toString();
 	}
+	
+	public String explicitParameterizedArgumentType() {
+		List<Number> numbers = new ArrayList<>();
+		numbers.add(2.3);
+		numbers.add(4.5);
+		
+		StringBuilder sb = new StringBuilder();
+		numbers.stream().filter(n -> n.doubleValue() > 0).map((Number n) -> Arrays.asList(n)).forEach((List<Number> nums) -> {
+			Double d = (Double)nums.get(0);
+			String s = d.toString();
+			sb.append(nums.toString());
+		});
+		
+		return sb.toString();
+	}
+	
+	public String explicitArrayArgumentType() {
+		List<Number> numbers = new ArrayList<>();
+		numbers.add(2.3);
+		numbers.add(4.5);
+		
+		StringBuilder sb = new StringBuilder();
+		numbers.stream().filter(n -> n.doubleValue() > 0).forEach((Number n) -> {
+			Number[] nums = {n};
+			Double d = (Double)nums[0];
+			String s = d.toString();
+			sb.append(nums.toString());
+		});
+		
+		return sb.toString();
+	}
+	
+	public String explicitPrimitiveType() {
+		List<Number> numbers = new ArrayList<>();
+		numbers.add(2.3);
+		numbers.add(4.5);
+		
+		StringBuilder sb = new StringBuilder();
+		numbers.stream().filter(n -> n.doubleValue() > 0).map((Number n) -> (int)n/2).forEach((d) -> sb.append(d));
+		
+		return sb.toString();
+	}
 }
