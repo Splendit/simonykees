@@ -77,19 +77,18 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 
 					boolean isReferenceExpressionSet = false;
 
-					
 					// no expression present -> assume 'this'
 					if (methodInvocationExpression == null) {
 
 						IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-						if (!Modifier.isStatic(methodBinding.getModifiers())) {
-							ThisExpression thisExpression = astRewrite.getAST().newThisExpression();
-							ref.setExpression(thisExpression);
-							isReferenceExpressionSet = true;
-						} else {
+						if (Modifier.isStatic(methodBinding.getModifiers())) {
 							SimpleName staticClassName = astRewrite.getAST()
 									.newSimpleName(methodBinding.getDeclaringClass().getErasure().getName());
 							ref.setExpression(staticClassName);
+							isReferenceExpressionSet = true;
+						} else {
+							ThisExpression thisExpression = astRewrite.getAST().newThisExpression();
+							ref.setExpression(thisExpression);
 							isReferenceExpressionSet = true;
 						}
 
@@ -112,7 +111,6 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 							isReferenceExpressionSet = true;
 						}
 					}
-					
 
 					if (isReferenceExpressionSet) {
 						astRewrite.replace(lambdaExpressionNode, ref, null);
@@ -233,8 +231,17 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 	}
 
 	private boolean containsName(List<Expression> list, String name) {
-		boolean retVal = false;
+		/*
+		 * replacement suggestion
+		 */
+		//return list.stream().filter(element -> element instanceof Name)
+		//		.anyMatch(nameIter -> name.equals(((Name) nameIter).getFullyQualifiedName()));
 
+		/*
+		 * old implementation
+		 */
+		boolean retVal = false;
+		
 		for (Expression element : list) {
 			if (element instanceof Name) {
 				String elementName = ((Name) element).getFullyQualifiedName();
