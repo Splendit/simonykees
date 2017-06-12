@@ -170,6 +170,15 @@ public class LambdaToMethodReferenceRule {
 		Set<Person> persSet4 = transferElements(personList, HashSet<Person>::new);
 
 		Set<Person> persSet5 = transferElements(personList, HashSet<Person>::new);
+
+		/*
+		 * SIM-464 bugfix
+		 */
+		List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 0);
+
+		list.stream().map((Integer iterator) -> new java.awt.geom.Ellipse2D.Double(iterator, 2.0, 4.0, 4.0));
+
+		list.stream().map(Double::new);
 	}
 
 	/*
