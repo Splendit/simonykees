@@ -1,5 +1,6 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -183,6 +184,62 @@ public class LambdaForEachMapRule {
 			sb.append("c");
 			sb.append(pos + "d");
 		});
+		return sb.toString();
+	}
+
+	public String explicitParameterType() {
+		List<Number> numbers = new ArrayList<>();
+		numbers.add(2.3);
+		numbers.add(4.5);
+
+		StringBuilder sb = new StringBuilder();
+		numbers.stream().filter(n -> n.doubleValue() > 0).map((Number n) -> (Double) n).forEach((Double d) -> {
+			String s = d.toString();
+			sb.append(s);
+		});
+
+		return sb.toString();
+	}
+
+	public String explicitParameterizedArgumentType() {
+		List<Number> numbers = new ArrayList<>();
+		numbers.add(2.3);
+		numbers.add(4.5);
+
+		StringBuilder sb = new StringBuilder();
+		numbers.stream().filter(n -> n.doubleValue() > 0).map(Arrays::asList).forEach((List<Number> nums) -> {
+			Double d = (Double) nums.get(0);
+			String s = d.toString();
+			sb.append(nums.toString());
+		});
+
+		return sb.toString();
+	}
+
+	public String explicitArrayArgumentType() {
+		List<Number> numbers = new ArrayList<>();
+		numbers.add(2.3);
+		numbers.add(4.5);
+
+		StringBuilder sb = new StringBuilder();
+		numbers.stream().filter(n -> n.doubleValue() > 0).forEach((Number n) -> {
+			Number[] nums = { n };
+			Double d = (Double) nums[0];
+			String s = d.toString();
+			sb.append(nums.toString());
+		});
+
+		return sb.toString();
+	}
+
+	public String explicitPrimitiveType() {
+		List<Number> numbers = new ArrayList<>();
+		numbers.add(2.3);
+		numbers.add(4.5);
+
+		StringBuilder sb = new StringBuilder();
+		numbers.stream().filter(n -> n.doubleValue() > 0).map((Number n) -> (int) n / 2).forEach(sb::append);
+
 		return sb.toString();
 	}
 }
