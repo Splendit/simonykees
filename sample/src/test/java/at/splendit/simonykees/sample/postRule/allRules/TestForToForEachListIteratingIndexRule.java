@@ -254,7 +254,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		stFoo.stream().forEach((String s) -> {
+		for (String s : stFoo) {
 			s += ";";
 			sb.append(s);
 			for (String n : ndFoo) {
@@ -264,7 +264,7 @@ public class TestForToForEachListIteratingIndexRule {
 					sb.append(r + t);
 				}
 			}
-		});
+		}
 
 		return sb.toString();
 	}

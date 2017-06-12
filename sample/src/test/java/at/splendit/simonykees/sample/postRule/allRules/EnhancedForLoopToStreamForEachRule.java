@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -199,7 +200,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			});
 		});
 
-		stringList1.stream().forEach((String s) -> {
+		for (String s : stringList1) {
 			s += ";";
 			sb.append(s);
 			for (String n : stringList2) {
@@ -209,12 +210,24 @@ public class EnhancedForLoopToStreamForEachRule {
 					sb.append(r + t);
 				}
 			}
-		});
+		}
+
+		int testClassStringListSize = testClassLocal.stringList.size();
+		LinkedList<String> stringListLocal = new LinkedList<>();
+		for (int i = 0; i < testClassStringListSize; i++) {
+			for (String s : stringListLocal) {
+				if (StringUtils.contains(testClassLocal.stringList.get(i), s)) {
+					testClassLocal.stringList.get(i);
+					testClassLocal.stringList.get(i);
+				}
+			}
+		}
 
 		return "";
 	}
 
 	private class TestClass {
 		public int testIntField = 0;
+		public List<String> stringList = Arrays.asList("asdf", "jkl");
 	}
 }
