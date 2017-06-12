@@ -1,31 +1,24 @@
 package at.splendit.simonykees.sample.postRule.standardLoggerSlf4j;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @SuppressWarnings("nls")
 public class TestStandardLoggerConflictRule {
 
-	private static final Logger logger = LoggerFactory.getLogger(TestStandardLoggerConflictRule.class);
-
 	public void dontReplace(String input) {
-		logger.info(input);
+		System.out.print(input);
 	}
 	
-	class Logger1 {
+	class Logger {
 		
-		private final Logger logger1 = LoggerFactory.getLogger(Logger1.class);
-
 		public void debut(String input) {
-			logger1.info("input");
+			System.out.println("input");
 		}
 		
 		public void warn(String input) {
-			logger1.info("input");
+			System.err.println("input");
 		}
 		
 		public void error(String input) {
-			logger1.info("input");
+			System.err.println("input");
 		}
 		
 	}
