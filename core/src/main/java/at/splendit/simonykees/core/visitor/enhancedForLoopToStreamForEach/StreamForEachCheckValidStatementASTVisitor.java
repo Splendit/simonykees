@@ -1,14 +1,15 @@
 package at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
-import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -43,7 +44,7 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 	 */
 	private List<SimpleName> variableNames = new LinkedList<>();
 	private List<String> currentHandledExceptionsTypes = new LinkedList<>();
-	private List<SimpleName> parameters = new LinkedList<>();
+	private Map<SimpleName, Integer> parameters = new HashMap<>();
 
 	/*
 	 * variables for checking validity
@@ -56,7 +57,7 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 	private List<IVariableBinding> invalidVariables = new LinkedList<>();
 
 	public StreamForEachCheckValidStatementASTVisitor(SimpleName parameter) {
-		this.parameters.add(parameter);
+		this.parameters.put(parameter, 0);
 	}
 
 	@Override
@@ -136,13 +137,19 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 
 	@Override
 	public boolean visit(EnhancedForStatement node) {
-		this.parameters.add(node.getParameter().getName());
+		this.parameters.entrySet().stream().forEach(entry -> {
+			entry.setValue(entry.getValue() + 1);
+		});
+		this.parameters.put(node.getParameter().getName(), 0);
 		return true;
 	}
 
 	@Override
 	public void endVisit(EnhancedForStatement node) {
 		this.parameters.remove(node.getParameter().getName());
+		this.parameters.entrySet().stream().forEach(entry -> {
+			entry.setValue(entry.getValue() - 1);
+		});
 	}
 
 	@Override
@@ -160,17 +167,32 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 			boolean isEffectivelyFinal = variableBinding.isEffectivelyFinal();
 			boolean isLocalVariable = variableNames.stream()
 					.anyMatch(var -> var.getIdentifier().equals(simpleNameNode.getIdentifier()));
-			boolean isEnhancedForParameter = parameters.stream()
-					.anyMatch(parameter -> parameter.getIdentifier().equals(simpleNameNode.getIdentifier()));
+
+			/*
+			 * if the value is 0, then the parameter is treated as a local
+			 * variable. a higher value indicates a nested loop where a separate
+			 * check for final or effectively final has to be done.
+			 */
+			boolean isEnhancedForParameter = parameters.entrySet().stream().anyMatch(entry -> {
+				boolean result = false;
+
+				if (entry.getKey().getIdentifier().equals(simpleNameNode.getIdentifier())) {
+					if (entry.getValue() > 0) {
+						IVariableBinding entryBinding = (IVariableBinding) entry.getKey().resolveBinding();
+						if (entryBinding.isEffectivelyFinal() || Modifier.isFinal(entryBinding.getModifiers())) {
+							result = true;
+						}
+					} else {
+						result = true;
+					}
+				}
+
+				return result;
+			});
 
 			if (!(isField || isFinal || isEffectivelyFinal || isLocalVariable || isEnhancedForParameter))
 				invalidVariables.add(variableBinding);
 		}
-		return false;
-	}
-
-	@Override
-	public boolean visit(FieldAccess node) {
 		return false;
 	}
 
