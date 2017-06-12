@@ -1,6 +1,8 @@
 package at.splendit.simonykees.core.visitor.lambdaForEach;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -12,6 +14,8 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -24,6 +28,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
 
 /**
@@ -64,10 +69,13 @@ import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
 public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor {
 
 	private static final String STREAM_MAP_METHOD_NAME = "map"; //$NON-NLS-1$
+	private static final String COLLECTION_FULLY_QUALIFIED_NAME = java.util.Collection.class.getName();
+	private static final String STREAM_METHOD_NAME = "stream"; //$NON-NLS-1$
+	private static final String PARALLEL_STREAM_METHOD_NAME = "parallelStream"; //$NON-NLS-1$
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		if (isStreamForEachInvocation(methodInvocation)) {
+		if (isStreamForEachInvocation(methodInvocation) && !isStreamOfRawList(methodInvocation)) {
 			List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
 			if (arguments.size() == 1 && ASTNode.LAMBDA_EXPRESSION == arguments.get(0).getNodeType()) {
 				LambdaExpression lambdaExpression = (LambdaExpression) arguments.get(0);
@@ -112,27 +120,55 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 						 * expression
 						 */
 						astRewrite.replace(parameter, newForEachParamName, null);
-						
+
 						/*
 						 * Replace the type of the parameter if any
 						 */
 						Type type = extractSingleParameterType(lambdaExpression);
 						if (type != null) {
 							Type newType = analyzer.getNewForEachParameterType();
-							if(newType.isPrimitiveType()) {
-								// implicit boxing! primitives are not allowed in forEach
-								astRewrite.replace((ASTNode)lambdaExpression.parameters().get(0), newForEachParamName, null);
-							} else {							
+							if (newType.isPrimitiveType()) {
+								// implicit boxing! primitives are not allowed
+								// in forEach
+								astRewrite.replace((ASTNode) lambdaExpression.parameters().get(0), newForEachParamName,
+										null);
+							} else {
 								astRewrite.replace(type, newType, null);
 							}
 						}
-
 
 					}
 				}
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Checks whether the expression of the method invocation is a 
+	 * stream generated from a raw collection. 
+	 * 
+	 * @param methodInvocation to be checked
+	 * 
+	 * @return {@code true} the expression of the method invocation is 
+	 * a stream generated from a raw collection, or {@code false} otherwise. 
+	 */
+	private boolean isStreamOfRawList(MethodInvocation methodInvocation) {
+		Expression expression = methodInvocation.getExpression();
+		StreamInvocationVisitor visitor = new StreamInvocationVisitor();
+		expression.accept(visitor);
+		MethodInvocation streamInvocation = visitor.getStreamInvocation();
+		if(streamInvocation != null) {			
+			Expression iterableExpression = streamInvocation.getExpression();
+			if (iterableExpression != null) {
+				ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
+				if (iterableTypeBinding.isRawType()) {
+					return true;
+				}
+				
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -433,6 +469,40 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 		public boolean hasReturnStatement() {
 			return this.returnStatement != null;
+		}
+	}
+
+	/**
+	 * 
+	 * A visitor for finding the first invocation of {@link Collection#stream()}
+	 * method.
+	 *
+	 */
+	class StreamInvocationVisitor extends ASTVisitor {
+
+		private MethodInvocation streamInvocation = null;
+
+		@Override
+		public boolean preVisit2(ASTNode node) {
+			return streamInvocation == null;
+		}
+
+		@Override
+		public boolean visit(MethodInvocation methodInvocation) {
+			if (methodInvocation.getName().getIdentifier().equals(STREAM_METHOD_NAME) || 
+					methodInvocation.getName().getIdentifier().equals(PARALLEL_STREAM_METHOD_NAME)) {
+				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+				if (ClassRelationUtil.isContentOfTypes(methodBinding.getDeclaringClass(),
+						Collections.singletonList(COLLECTION_FULLY_QUALIFIED_NAME))) {
+					streamInvocation = methodInvocation;
+				}
+			}
+
+			return true;
+		}
+
+		public MethodInvocation getStreamInvocation() {
+			return streamInvocation;
 		}
 	}
 }
