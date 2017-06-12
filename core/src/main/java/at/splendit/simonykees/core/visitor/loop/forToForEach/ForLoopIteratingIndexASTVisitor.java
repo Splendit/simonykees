@@ -35,7 +35,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 
 	private Block parentBlock;
 	private SimpleName iteratingIndexName;
-	
+
 	private ForStatement forStatement;
 	private Map<String, ASTNode> indexInitializer;
 	private Map<String, ASTNode> indexUpdater;
@@ -57,10 +57,10 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 		List<Expression> initializers = ASTNodeUtil.returnTypedList(forStatement.initializers(), Expression.class);
 		if (initializers.size() == 1) {
 			Expression initializer = initializers.get(0);
-			if(isVariableDeclarationExpression(iteratingIndexName, initializer)) {
+			if (isVariableDeclarationExpression(iteratingIndexName, initializer)) {
 				indexInitializer.put(LOOP_INITIALIZER, initializer);
 				indexDeclaredInInitializer = true;
-			} else if(isAssignmetnToZero(iteratingIndexName, initializer)) {
+			} else if (isAssignmetnToZero(iteratingIndexName, initializer)) {
 				indexInitializer.put(LOOP_INITIALIZER, initializer);
 			} else {
 				indexInitializer.put(LOOP_INITIALIZER_INCORRECT_EXPRESSION, initializer);
@@ -100,8 +100,8 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 	}
 
 	/**
-	 * Checks whether the given expression is a variable declaration
-	 * expression of a variable with the same name as the given simple name. 
+	 * Checks whether the given expression is a variable declaration expression
+	 * of a variable with the same name as the given simple name.
 	 * 
 	 * @param name
 	 *            simple name to check for
@@ -166,7 +166,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 
 		return visitBlock;
 	}
-	
+
 	@Override
 	protected boolean isNameOfIteratingIndex(SimpleName simpleName) {
 		boolean doVisit = false;
@@ -256,13 +256,36 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 		ASTNode grandParent = parent.getParent();
 		ASTNode ggParent = grandParent.getParent();
 
+		/*
+		 * check if it is a direct increment (i++;++i;i+=1) or left hand side of the expression
+		 */
+		if (((parent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY
+				|| parent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY
+				|| parent.getLocationInParent() == ForStatement.EXPRESSION_PROPERTY) && grandParent == forStatement)
+				|| grandParent == getIndexUpdater(INTERNAL_INDEX_UPDATER)) {
+			return true;
+		}
+		
+		/*
+		 * check if it is a increment with another layer (i=i+1)
+		 */
+		if ( ((grandParent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY
+				|| grandParent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY) && ggParent == forStatement)
+				|| ggParent == getIndexUpdater(INTERNAL_INDEX_UPDATER)){
+			return true;
+		}
+
+		return false;
+		
+		/* old implementation, remove after check 
 		return (parent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY && grandParent == forStatement)
 				|| (grandParent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY && ggParent == forStatement)
 				|| (parent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY && grandParent == forStatement)
 				|| (grandParent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY && ggParent == forStatement)
 				|| (parent.getLocationInParent() == ForStatement.EXPRESSION_PROPERTY && grandParent == forStatement)
 				|| grandParent == getIndexUpdater(INTERNAL_INDEX_UPDATER)
-				|| grandParent.getParent() == getIndexUpdater(INTERNAL_INDEX_UPDATER);
+				|| ggParent == getIndexUpdater(INTERNAL_INDEX_UPDATER);
+		*/
 	}
 
 	/**
