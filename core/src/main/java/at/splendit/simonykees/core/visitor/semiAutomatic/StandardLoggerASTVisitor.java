@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
@@ -18,12 +19,14 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
@@ -87,7 +90,6 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String LOG4J_LOGGER_FACTORY_QUALIFIED_NAME = "org.apache.logging.log4j.LogManager"; //$NON-NLS-1$
 	private static final String SEPARATOR = "->"; //$NON-NLS-1$
 
-	private boolean loggerAdded = false;
 	private boolean importsNeeded = false;
 
 	private Map<String, String> replacingOptions;
@@ -129,6 +131,10 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		importsNeeded = false;
 		this.compilationUnit = compilationUnit;
 
+		ClashingLoggerTypesASTVisitor clashingTypesVisitor = new ClashingLoggerTypesASTVisitor();
+		compilationUnit.accept(clashingTypesVisitor);
+		boolean noClashingTypes = clashingTypesVisitor.isLoggerFree();
+
 		// checking whether there is a logger imported!!!
 		boolean exisitngLoggerImported = ASTNodeUtil
 				.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class).stream()
@@ -136,7 +142,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				.filter(Name::isQualifiedName).map(name -> ((QualifiedName) name).getName())
 				.map(SimpleName::getIdentifier).filter(LOGGER_CLASS_NAME::equals).findAny().isPresent();
 
-		return !exisitngLoggerImported && super.visit(compilationUnit);
+		return noClashingTypes && !exisitngLoggerImported && super.visit(compilationUnit);
 	}
 
 	@Override
@@ -173,6 +179,19 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	public void endVisit(EnumDeclaration enumDeclaration) {
 		endVisitNewTypeDeclaration(enumDeclaration);
 	}
+	
+	@Override
+	public boolean visit(MethodDeclaration methodDeclaration) {
+		/*
+		 * Since it is not possible to have a static field in a nested class, 
+		 * the introduced logger will be an instance field too. Therefore, 
+		 * it cannot be used in a static method. 
+		 */
+		if(nestedTypeDeclarationLevel > 1 && ASTNodeUtil.hasModifier(methodDeclaration.modifiers(), modifier -> modifier.isStatic())) {
+			return false;
+		}
+		return true;
+	}
 
 	/**
 	 * Keeps track of the possibly nested types (classes or enums) declared
@@ -182,7 +201,6 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 *            node representing a type declaration.
 	 */
 	private void visitNewTypeDeclaration(AbstractTypeDeclaration abstractType) {
-		loggerAdded = false;
 		if (nestedTypeDeclarationLevel == 0) {
 			this.rootType = abstractType;
 		}
@@ -265,7 +283,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 *            name of the replacing method
 	 */
 	private void replaceMethod(MethodInvocation methodInvocation, String replacingMethod) {
-		if (!loggerAdded) {
+		if (getLoggerName() == null) {
 			addLogger();
 		}
 		String loggerNameIdentifier = getLoggerName();
@@ -294,7 +312,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 *            the replacing method name of the logger
 	 */
 	private void replaceMethod(MethodInvocation methodInvocation, SimpleName throwableName, String replacingMethod) {
-		if (!loggerAdded) {
+		if (getLoggerName() == null) {
 			addLogger();
 		}
 		String loggerNameIdentifier = getLoggerName();
@@ -321,7 +339,6 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 * proper factory. The field is inserted at the beginning of the class body.
 	 */
 	private void addLogger() {
-		loggerAdded = true;
 		importsNeeded = true;
 		String loggerName = generateLoggerName();
 		setCurrentLoggerName(loggerName);
@@ -335,9 +352,11 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		loggerDeclaration.setType(loggerType);
 		ListRewrite loggerListRewirte = astRewrite.getListRewrite(loggerDeclaration,
 				FieldDeclaration.MODIFIERS2_PROPERTY);
-		Modifier privateModifier = ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD);
+		if(!isInterface(typeDeclaration)) {			
+			Modifier privateModifier = ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD);
+			loggerListRewirte.insertLast(privateModifier, null);
+		}
 		Modifier finalModifier = ast.newModifier(ModifierKeyword.FINAL_KEYWORD);
-		loggerListRewirte.insertLast(privateModifier, null);
 		if (nestedTypeDeclarationLevel == 1) {
 			Modifier staticModifier = ast.newModifier(ModifierKeyword.STATIC_KEYWORD);
 			loggerListRewirte.insertLast(staticModifier, null);
@@ -346,6 +365,13 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 		ListRewrite listRewrite = astRewrite.getListRewrite(typeDeclaration, getBodyDeclarationProperty());
 		listRewrite.insertFirst(loggerDeclaration, null);
+	}
+
+	private boolean isInterface(AbstractTypeDeclaration typeDeclaration2) {
+		if(typeDeclaration2 instanceof TypeDeclaration && ((TypeDeclaration)typeDeclaration2).isInterface()) {
+			return true;
+		}
+		return false;
 	}
 
 	private ChildListPropertyDescriptor getBodyDeclarationProperty() {
@@ -361,6 +387,12 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		return typeDeclarationProperty;
 	}
 
+	/**
+	 * Stores the name of the logger for the current type declaration which is being visited. 
+	 * Generates a unique identification for it.
+	 * 
+	 * @param loggerName name to be stored.
+	 */
 	private void setCurrentLoggerName(String loggerName) {
 		loggerNames.put(generateUniqueTypeId(this.typeDeclaration), loggerName);
 	}
@@ -450,5 +482,55 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private String generateUniqueTypeId(AbstractTypeDeclaration typeDeclaration) {
 		return typeDeclaration.getName().getIdentifier() + SEPARATOR + typeDeclaration.getStartPosition() + SEPARATOR
 				+ typeDeclaration.getLength();
+	}
+
+	/**
+	 * Checks for occurrences of {@link SimpleType}s with name {@value #LOGGER_CLASS_NAME}, {@value #SLF4J_LOGGER_FACTORY}
+	 * or {@value #SLF4J_LOGGER_FACTORY}.
+	 * 
+	 * @author Ardit Ymeri
+	 * @since 1.2
+	 *
+	 */
+	private class ClashingLoggerTypesASTVisitor extends ASTVisitor {
+
+		boolean clashingFound = false;
+
+		@Override
+		public boolean preVisit2(ASTNode node) {
+			return !clashingFound;
+		}
+
+		@Override
+		public boolean visit(TypeDeclaration typeDeclaration) {
+			String typeIdentifier = typeDeclaration.getName().getIdentifier();
+			if(isClashingLoggerName(typeIdentifier)) {
+				clashingFound = true;
+			}
+			return true;
+		}
+		
+		@Override
+		public boolean visit(SimpleType simpleType) {
+			Name typeName = simpleType.getName();
+			if(typeName.isSimpleName()) {
+				if(isClashingLoggerName(((SimpleName)typeName).getIdentifier())) {
+					clashingFound = true;
+				}
+			}
+			return true;
+		}
+		
+		private boolean isClashingLoggerName(String typeIdentifier) {
+			if (LOGGER_CLASS_NAME.equals(typeIdentifier) || LOG4J_LOGGER_MANAGER.equals(typeIdentifier)
+					|| SLF4J_LOGGER_FACTORY.equals(typeIdentifier)) {
+				return true;
+			}
+			return false;
+		}
+		
+		public boolean isLoggerFree() {
+			return !clashingFound;
+		}
 	}
 }

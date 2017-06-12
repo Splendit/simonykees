@@ -1,5 +1,6 @@
 package at.splendit.simonykees.sample.postRule.standardLoggerSlf4j;
 
+import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,14 @@ public class TestStandardLoggerRule {
 		
 		private final Logger logger2 = LoggerFactory.getLogger(InnerClass.class);
 
+		{{
+			logger2.info("a log message");
+		}}
+		
+		Consumer<String> p = (String input) -> {
+			logger2.info(input);
+		};
+		
 		public void dontUseOuterClassLogger(String input) {
 			logger2.info("a log message");
 		}
@@ -93,5 +102,15 @@ enum Days {
 	private static final String logger = "";
 	public void loggerInEnumType(String input) {
 		logger1.info(input);
+	}
+}
+
+
+interface OneHavingAnImplementedMethod {
+	
+	static final Logger logger = LoggerFactory.getLogger(OneHavingAnImplementedMethod.class);
+
+	default void makeUseOfSystemOut(String input) {
+		logger.info(input);
 	}
 }
