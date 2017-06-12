@@ -3,6 +3,7 @@ package at.splendit.simonykees.core.visitor;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Expression;
@@ -41,7 +42,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 					VariableDeclaration.class);
 
 			// only single method invocations are relevant for cases 1, 2 and 3
-			if (expression instanceof MethodInvocation) {
+			if (ASTNode.METHOD_INVOCATION == expression.getNodeType()) {
 				MethodInvocation methodInvocation = (MethodInvocation) expression;
 				List<Expression> methodArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 						Expression.class);
@@ -76,9 +77,26 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 
 					boolean isReferenceExpressionSet = false;
 
+					
+					// no expression present -> assume 'this'
+					if (methodInvocationExpression == null) {
+
+						IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+						if (!Modifier.isStatic(methodBinding.getModifiers())) {
+							ThisExpression thisExpression = astRewrite.getAST().newThisExpression();
+							ref.setExpression(thisExpression);
+							isReferenceExpressionSet = true;
+						} else {
+							SimpleName staticClassName = astRewrite.getAST()
+									.newSimpleName(methodBinding.getDeclaringClass().getErasure().getName());
+							ref.setExpression(staticClassName);
+							isReferenceExpressionSet = true;
+						}
+
+					}
 					// simple name, qualified name or 'this'
-					if (methodInvocationExpression instanceof Name
-							|| methodInvocationExpression instanceof ThisExpression) {
+					else if (methodInvocationExpression instanceof Name
+							|| ASTNode.THIS_EXPRESSION == methodInvocationExpression.getNodeType()) {
 
 						boolean paramUserForMethodInvocation = false;
 						if (methodInvocationExpression instanceof Name) {
@@ -94,22 +112,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 							isReferenceExpressionSet = true;
 						}
 					}
-					// no expression present -> assume 'this'
-					else if (methodInvocationExpression == null) {
-
-						IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-						if (!Modifier.isStatic(methodBinding.getModifiers())) {
-							ThisExpression thisExpression = astRewrite.getAST().newThisExpression();
-							ref.setExpression(thisExpression);
-							isReferenceExpressionSet = true;
-						} else {
-							SimpleName staticClassName = astRewrite.getAST()
-									.newSimpleName(methodBinding.getDeclaringClass().getErasure().getName());
-							ref.setExpression(staticClassName);
-							isReferenceExpressionSet = true;
-						}
-
-					}
+					
 
 					if (isReferenceExpressionSet) {
 						astRewrite.replace(lambdaExpressionNode, ref, null);
@@ -127,7 +130,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 				 */
 				else if ((lambdaParams.size() - 1) == methodArguments.size() && methodInvocationExpression != null) {
 
-					if (methodInvocationExpression instanceof SimpleName) {
+					if (ASTNode.SIMPLE_NAME == methodInvocationExpression.getNodeType()) {
 						SimpleName methodInvocationExpressionName = (SimpleName) methodInvocationExpression;
 						String methodInvocationExpressionNameStr = methodInvocationExpressionName.getIdentifier();
 						String lambdaParamNameStr = lambdaParams.get(0).getName().getIdentifier();
@@ -169,7 +172,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 			 * Set<Person> persSet3 = transferElements(personList,
 			 * HashSet<Person>::new);
 			 */
-			else if (expression instanceof ClassInstanceCreation) {
+			else if (ASTNode.CLASS_INSTANCE_CREATION == expression.getNodeType()) {
 				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) expression;
 
 				if (lambdaParams.size() == classInstanceCreation.arguments().size()) {
@@ -177,7 +180,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 
 					CreationReference ref = astRewrite.getAST().newCreationReference();
 
-					if (classInstanceCreationType instanceof ParameterizedType
+					if (ASTNode.PARAMETERIZED_TYPE == classInstanceCreationType.getNodeType()
 							&& ((ParameterizedType) classInstanceCreationType).typeArguments().size() == 0) {
 						ref.setType((Type) astRewrite
 								.createMoveTarget(((ParameterizedType) classInstanceCreationType).getType()));
@@ -213,7 +216,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 			VariableDeclaration lambdaParam = lambdaParams.get(i);
 
 			// method argument has to be a SimpleName, not an Expression
-			if (methodArgument instanceof SimpleName) {
+			if (ASTNode.SIMPLE_NAME == methodArgument.getNodeType()) {
 				String methodArgumentName = ((SimpleName) methodArgument).getIdentifier();
 				String lambdaParamName = lambdaParam.getName().getIdentifier();
 
