@@ -231,27 +231,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 	}
 
 	private boolean containsName(List<Expression> list, String name) {
-		/*
-		 * replacement suggestion
-		 */
-		//return list.stream().filter(element -> element instanceof Name)
-		//		.anyMatch(nameIter -> name.equals(((Name) nameIter).getFullyQualifiedName()));
-
-		/*
-		 * old implementation
-		 */
-		boolean retVal = false;
-		
-		for (Expression element : list) {
-			if (element instanceof Name) {
-				String elementName = ((Name) element).getFullyQualifiedName();
-				if (name.equals(elementName)) {
-					retVal = true;
-					break;
-				}
-			}
-		}
-
-		return retVal;
+		return list.stream().filter(element -> element instanceof Name)
+				.anyMatch(nameIter -> name.equals(((Name) nameIter).getFullyQualifiedName()));
 	}
 }
