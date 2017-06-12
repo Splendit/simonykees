@@ -237,10 +237,22 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		}
 
+		int testClassStringListSize = testClassLocal.stringList.size();
+		LinkedList<String> stringListLocal = new LinkedList<>();
+		for (int i = 0; i < testClassStringListSize; i++) {
+			for (String s : stringListLocal) {
+				if (testClassLocal.stringList.get(i).contains(s)) {
+					testClassLocal.stringList.get(i);
+					testClassLocal.stringList.get(i);
+				}
+			}
+		}
+
 		return "";
 	}
 
 	private class TestClass {
 		public int testIntField = 0;
+		public List<String> stringList = Arrays.asList("asdf", "jkl");
 	}
 }

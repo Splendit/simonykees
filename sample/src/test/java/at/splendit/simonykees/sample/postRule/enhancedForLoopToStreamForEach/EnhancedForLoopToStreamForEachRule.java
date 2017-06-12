@@ -224,7 +224,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			});
 		});
 
-		stringList1.stream().forEach((String s) -> {
+		for(String s : stringList1) {
 			s += ";";
 			sb.append(s);
 			for (String n : stringList2) {
@@ -234,12 +234,24 @@ public class EnhancedForLoopToStreamForEachRule {
 					sb.append(r + t);
 				}
 			}
-		});
+		}
+
+		int testClassStringListSize = testClassLocal.stringList.size();
+		LinkedList<String> stringListLocal = new LinkedList<>();
+		for (int i = 0; i < testClassStringListSize; i++) {
+			for (String s : stringListLocal) {
+				if (testClassLocal.stringList.get(i).contains(s)) {
+					testClassLocal.stringList.get(i);
+					testClassLocal.stringList.get(i);
+				}
+			}
+		}
 
 		return "";
 	}
 
 	private class TestClass {
 		public int testIntField = 0;
+		public List<String> stringList = Arrays.asList("asdf", "jkl");
 	}
 }
