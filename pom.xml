@@ -529,10 +529,6 @@
 				<artifactId>findbugs-maven-plugin</artifactId>
 				<version>${maven.findbugs.version}</version>
 			</plugin>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-pmd-plugin</artifactId> 
-				<version>${maven.pmd.version}</version> </plugin> -->
-			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>cobertura-maven-plugin</artifactId> 
-				<version>${maven.cobertura.version}</version> </plugin> -->
 		</plugins>
 	</reporting>
 
