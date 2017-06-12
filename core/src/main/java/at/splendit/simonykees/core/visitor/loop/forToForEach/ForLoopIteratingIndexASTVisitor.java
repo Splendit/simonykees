@@ -276,16 +276,6 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 		}
 
 		return false;
-		
-		/* old implementation, remove after check 
-		return (parent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY && grandParent == forStatement)
-				|| (grandParent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY && ggParent == forStatement)
-				|| (parent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY && grandParent == forStatement)
-				|| (grandParent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY && ggParent == forStatement)
-				|| (parent.getLocationInParent() == ForStatement.EXPRESSION_PROPERTY && grandParent == forStatement)
-				|| grandParent == getIndexUpdater(INTERNAL_INDEX_UPDATER)
-				|| ggParent == getIndexUpdater(INTERNAL_INDEX_UPDATER);
-		*/
 	}
 
 	/**
