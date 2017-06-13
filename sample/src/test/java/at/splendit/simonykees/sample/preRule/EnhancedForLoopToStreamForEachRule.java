@@ -1,5 +1,6 @@
 package at.splendit.simonykees.sample.preRule;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -30,7 +31,7 @@ public class EnhancedForLoopToStreamForEachRule {
 		}
 	}
 
-	public String doSomething() throws ClassNotFoundException {
+	public String doSomething() throws ClassNotFoundException, FileNotFoundException {
 
 		for (String s : stringList1) {
 			System.out.println(s);
@@ -248,11 +249,30 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		}
 
+		/*
+		 * SIM-472 bugfix
+		 */
+		for (String s : stringList1) {
+			TestClass tc = new TestClass();
+		}
+
+		for (String s : stringList1) {
+			TestClass tc = new TestClass(1);
+		}
+
 		return "";
 	}
 
 	private class TestClass {
 		public int testIntField = 0;
 		public List<String> stringList = Arrays.asList("asdf", "jkl");
+
+		public TestClass() {
+
+		}
+
+		public TestClass(int testIntField) throws FileNotFoundException {
+			throw new FileNotFoundException();
+		}
 	}
 }
