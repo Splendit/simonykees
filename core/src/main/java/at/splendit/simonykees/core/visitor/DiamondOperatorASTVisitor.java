@@ -74,50 +74,55 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 				if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()) {
 
-					/*
-					 * Declaration and initialization occur in the same
-					 * statement. For example: List<String> names = new
-					 * ArrayList<String>(); should be replaced with:
-					 * List<String> names = new ArrayList<>();
-					 */
-					ASTNode declarationStatement = parent.getParent();
-					Type lhsType = null;
-
-					if (ASTNode.VARIABLE_DECLARATION_STATEMENT == declarationStatement.getNodeType()) {
-						lhsType = ((VariableDeclarationStatement) declarationStatement).getType();
-					} else if (ASTNode.FIELD_DECLARATION == declarationStatement.getNodeType()) {
-						lhsType = ((FieldDeclaration) declarationStatement).getType();
-					} else if (ASTNode.VARIABLE_DECLARATION_EXPRESSION == declarationStatement.getNodeType()) {
-						lhsType = ((VariableDeclarationExpression) declarationStatement).getType();
-					}
-					if (lhsType != null && ASTNode.PARAMETERIZED_TYPE == lhsType.getNodeType()) {
-						sameTypes = areParameterizedTypeEqual((ParameterizedType) lhsType, rhsTypeArguments);
+					if(node.arguments().isEmpty() || isMethodArgumentsTypeInferable()) {
+						/*
+						 * Declaration and initialization occur in the same
+						 * statement. For example: List<String> names = new
+						 * ArrayList<String>(); should be replaced with:
+						 * List<String> names = new ArrayList<>();
+						 */
+						ASTNode declarationStatement = parent.getParent();
+						Type lhsType = null;
+						
+						if (ASTNode.VARIABLE_DECLARATION_STATEMENT == declarationStatement.getNodeType()) {
+							lhsType = ((VariableDeclarationStatement) declarationStatement).getType();
+						} else if (ASTNode.FIELD_DECLARATION == declarationStatement.getNodeType()) {
+							lhsType = ((FieldDeclaration) declarationStatement).getType();
+						} else if (ASTNode.VARIABLE_DECLARATION_EXPRESSION == declarationStatement.getNodeType()) {
+							lhsType = ((VariableDeclarationExpression) declarationStatement).getType();
+						}
+						if (lhsType != null && ASTNode.PARAMETERIZED_TYPE == lhsType.getNodeType()) {
+							sameTypes = areParameterizedTypeEqual((ParameterizedType) lhsType, rhsTypeArguments);
+						}
 					}
 
 				} else if (ASTNode.ASSIGNMENT == parent.getNodeType()) {
 
-					/*
-					 * Declaration and assignment occur on different statements:
-					 * For example: List<String> names; names = new
-					 * ArrayList<String>();
-					 * 
-					 * should be replaced with: List<String> names; names = new
-					 * ArrayList<>();
-					 */
-					Assignment assignmentNode = ((Assignment) parent);
-					Expression lhsNode = assignmentNode.getLeftHandSide();
-					ITypeBinding lhsTypeBinding = lhsNode.resolveTypeBinding();
-					if (lhsTypeBinding != null) {
-						ITypeBinding[] lhsTypeBindingArguments = lhsTypeBinding.getTypeArguments();
-						ITypeBinding rhsTypeBinding = node.resolveTypeBinding();
-						if (rhsTypeBinding != null) {
-							ITypeBinding[] rhsTypeBindingArguments = rhsTypeBinding.getTypeArguments();
-							// compare type arguments in new instance creation
-							// with
-							// the ones in declaration
-							sameTypes = ClassRelationUtil.compareITypeBinding(lhsTypeBindingArguments,
-									rhsTypeBindingArguments);
-						}
+					if(node.arguments().isEmpty() || isMethodArgumentsTypeInferable()) {
+						/*
+						 * Declaration and assignment occur on different statements:
+						 * For example: List<String> names; names = new
+						 * ArrayList<String>();
+						 * 
+						 * should be replaced with: List<String> names; names = new
+						 * ArrayList<>();
+						 */
+						Assignment assignmentNode = ((Assignment) parent);
+						Expression lhsNode = assignmentNode.getLeftHandSide();
+						ITypeBinding lhsTypeBinding = lhsNode.resolveTypeBinding();
+						if (lhsTypeBinding != null) {
+							ITypeBinding[] lhsTypeBindingArguments = lhsTypeBinding.getTypeArguments();
+							ITypeBinding rhsTypeBinding = node.resolveTypeBinding();
+							if (rhsTypeBinding != null) {
+								ITypeBinding[] rhsTypeBindingArguments = rhsTypeBinding.getTypeArguments();
+								// compare type arguments in new instance creation
+								// with
+								// the ones in declaration
+	
+									sameTypes = ClassRelationUtil.compareITypeBinding(lhsTypeBindingArguments,
+											rhsTypeBindingArguments);
+								}
+							}
 					}
 
 				} else if (ASTNode.METHOD_INVOCATION == parent.getNodeType() && isMethodArgumentsTypeInferable()
