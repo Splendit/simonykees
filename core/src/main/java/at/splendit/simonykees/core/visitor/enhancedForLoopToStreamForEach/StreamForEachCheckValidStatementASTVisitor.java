@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ContinueStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -80,27 +81,15 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
-
-		/*
-		 * check each method invocation for possible exceptions and if they are
-		 * caught with a try catch. uncaught exceptions are not allowed within
-		 * the consumer lambda.
-		 */
 		IMethodBinding methodBinding = methodInvocationNode.resolveMethodBinding();
-		if (methodBinding != null) {
-			ITypeBinding[] exceptions = methodBinding.getExceptionTypes();
-			for (ITypeBinding exception : exceptions) {
-				if (ClassRelationUtil.isInheritingContentOfTypes(exception, CHECKED_EXCEPTION_TYPE_LIST)
-						|| ClassRelationUtil.isContentOfTypes(exception, CHECKED_EXCEPTION_TYPE_LIST)) {
-					if (!currentHandledExceptionsTypes.contains(exception.getQualifiedName())) {
-						containsCheckedException = true;
-						return false;
-					}
-				}
-			}
-		}
+		return checkForExceptions(methodBinding);
 
-		return true;
+	}
+
+	@Override
+	public boolean visit(ClassInstanceCreation classInstanceCreationNode) {
+		IMethodBinding methodBinding = classInstanceCreationNode.resolveConstructorBinding();
+		return checkForExceptions(methodBinding);
 	}
 
 	@Override
@@ -205,5 +194,33 @@ public class StreamForEachCheckValidStatementASTVisitor extends AbstractASTRewri
 	public boolean isStatementsValid() {
 		return !containsBreakStatement && !containsContinueStatement && !containsReturnStatement
 				&& !containsCheckedException && !containsThrowStatement && invalidVariables.isEmpty();
+	}
+
+	/**
+	 * checks the given method binding for declared exceptions and looks if
+	 * those exceptions are handled. if there is an unhandled exception the
+	 * {@link StreamForEachCheckValidStatementASTVisitor#containsCheckedException}
+	 * property is set, which prevents the enhanced for loop from transforming.
+	 * 
+	 * @param methodBinding
+	 *            the methodBinding for the method invocation to check
+	 * @return true, if the visitor should continue with this statement, false
+	 *         otherwise.
+	 */
+	private boolean checkForExceptions(IMethodBinding methodBinding) {
+		if (methodBinding != null) {
+			ITypeBinding[] exceptions = methodBinding.getExceptionTypes();
+			for (ITypeBinding exception : exceptions) {
+				if (ClassRelationUtil.isInheritingContentOfTypes(exception, CHECKED_EXCEPTION_TYPE_LIST)
+						|| ClassRelationUtil.isContentOfTypes(exception, CHECKED_EXCEPTION_TYPE_LIST)) {
+					if (!currentHandledExceptionsTypes.contains(exception.getQualifiedName())) {
+						containsCheckedException = true;
+						return false;
+					}
+				}
+			}
+		}
+
+		return true;
 	}
 }
