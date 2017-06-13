@@ -97,7 +97,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	/**
-	 * Responsible to calculate of the rule is executable in the current
+	 * Responsible to calculate if the rule is executable in the current
 	 * project.
 	 * 
 	 * @param project
@@ -105,12 +105,16 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	public void calculateEnabledForProject(IJavaProject project) {
 		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 		if (null != compilerCompliance) {
-			String enumRepresentation = "JAVA_" + compilerCompliance.replace(".", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String enumRepresentation = convertCompilerComplianceToEnumRepresentation(compilerCompliance);
 			enabled = JavaVersion.valueOf(enumRepresentation).atLeast(requiredJavaVersion);
 			if (enabled) {
 				enabled = ruleSpecificImplementation(project);
 			}
 		}
+	}
+
+	protected String convertCompilerComplianceToEnumRepresentation(String compilerCompliance) {
+		return "JAVA_" + compilerCompliance.replace(".", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/**

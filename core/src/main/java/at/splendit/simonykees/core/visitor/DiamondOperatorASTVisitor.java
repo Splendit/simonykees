@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.visitor;
 
 import java.util.List;
 
+import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -41,6 +42,12 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final Logger logger = LoggerFactory.getLogger(DiamondOperatorASTVisitor.class);
 	
+	private JavaVersion compilerCompliance;
+	
+	public DiamondOperatorASTVisitor(JavaVersion compilerCompliance) {
+		this.compilerCompliance = compilerCompliance;
+	}
+	
 	/**
 	 * Covers the case when a diamond operator can be used in the initialization
 	 * or in an assignment expression.
@@ -52,7 +59,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 			boolean sameTypes = false;
 			ParameterizedType parameterizedType = (ParameterizedType) nodeType;
 			// safe casting to typed list
-			
+
 			List<Type> rhsTypeArguments = ASTNodeUtil.returnTypedList(parameterizedType.typeArguments(), Type.class);
 
 			if (rhsTypeArguments != null && !rhsTypeArguments.isEmpty()) {
@@ -100,19 +107,20 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					Assignment assignmentNode = ((Assignment) parent);
 					Expression lhsNode = assignmentNode.getLeftHandSide();
 					ITypeBinding lhsTypeBinding = lhsNode.resolveTypeBinding();
-					if(lhsTypeBinding != null) {
+					if (lhsTypeBinding != null) {
 						ITypeBinding[] lhsTypeBindingArguments = lhsTypeBinding.getTypeArguments();
 						ITypeBinding rhsTypeBinding = node.resolveTypeBinding();
-						if(rhsTypeBinding != null) {
+						if (rhsTypeBinding != null) {
 							ITypeBinding[] rhsTypeBindingArguments = rhsTypeBinding.getTypeArguments();
-							// compare type arguments in new instance creation with
+							// compare type arguments in new instance creation
+							// with
 							// the ones in declaration
 							sameTypes = ClassRelationUtil.compareITypeBinding(lhsTypeBindingArguments,
 									rhsTypeBindingArguments);
 						}
 					}
 
-				} else if (ASTNode.METHOD_INVOCATION == parent.getNodeType()
+				} else if (ASTNode.METHOD_INVOCATION == parent.getNodeType() && isMethodArgumentsTypeInferable()
 						&& MethodInvocation.ARGUMENTS_PROPERTY == node.getLocationInParent()) {
 
 					/*
@@ -122,7 +130,8 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					 * replaced with: <br/> {@code map.put("key", new
 					 * ArrayList<>());} <br/>
 					 */
-					List<Expression> argumentList = ASTNodeUtil.returnTypedList(((MethodInvocation) parent).arguments(), Expression.class);
+					List<Expression> argumentList = ASTNodeUtil.returnTypedList(((MethodInvocation) parent).arguments(),
+							Expression.class);
 
 					ITypeBinding[] parameterTypeArgs = null;
 
@@ -164,6 +173,20 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Checks whether the compiler compliance level is at least
+	 * {@value JavaVersion#JAVA_1_8}.
+	 * 
+	 * @return {@code true} if the compliance level is
+	 *         {@value JavaVersion#JAVA_1_8} or new, {@code false} otherwise.
+	 */
+	private boolean isMethodArgumentsTypeInferable() {
+		if(compilerCompliance != null) {
+			return compilerCompliance.atLeast(JavaVersion.JAVA_1_8);
+		}
+		return false;
 	}
 
 	private MethodDeclaration findMethodSignature(ASTNode node) {
