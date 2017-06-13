@@ -92,8 +92,8 @@ public class TestForToForEachRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		foo.stream().forEach((String s) -> {
-			foo.stream().forEach((String t) -> sb.append(t + ","));
+		foo.stream().forEach((s) -> {
+			foo.stream().forEach((t) -> sb.append(t + ","));
 			sb.append(s + ";");
 		});
 
@@ -117,7 +117,7 @@ public class TestForToForEachRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		foo.stream().forEach((String fooIterator) -> {
+		foo.stream().forEach((fooIterator) -> {
 			String anotherString = "foo";
 			sb.append(anotherString);
 		});
@@ -129,7 +129,7 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		foo.stream().forEach((Number s) -> sb.append(s.toString()));
+		foo.stream().forEach((s) -> sb.append(s.toString()));
 
 		return sb.toString();
 	}
