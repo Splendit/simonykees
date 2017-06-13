@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>at.splendit.jSparrow</groupId>
@@ -139,7 +141,7 @@
 		<maven.install.version>2.5.2</maven.install.version>
 		<maven.release.version>2.5.3</maven.release.version>
 		<maven.resources.version>3.0.1</maven.resources.version>
-		<proguard.plugin.version>2.0.13</proguard.plugin.version>
+		<proguard.plugin.version>2.0.14</proguard.plugin.version>
 
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 
@@ -332,7 +334,7 @@
 						<dependency>
 							<groupId>net.sf.proguard</groupId>
 							<artifactId>proguard-base</artifactId>
-							<version>5.2</version>
+							<version>5.3.3</version>
 							<scope>runtime</scope>
 						</dependency>
 					</dependencies>
@@ -340,8 +342,8 @@
 						<obfuscate>true</obfuscate>
 						<proguardInclude>${basedir}/proguard.conf</proguardInclude>
 						<libs>
-							<lib>/usr/lib/jvm/java-8-oracle/jre/lib/rt.jar</lib>
-							<lib>/usr/lib/jvm/java-8-oracle/jre/lib/jsse.jar</lib>
+							<lib>${java.home}/lib/rt.jar</lib>
+							<lib>${java.home}/lib/jsse.jar</lib>
 						</libs>
 					</configuration>
 				</plugin>
@@ -351,6 +353,14 @@
 					<version>${tycho.version}</version>
 					<configuration>
 						<format>yyyyMMdd-HHmm</format>
+						<archive>
+							<manifestEntries>
+								<!-- "Built-By" should not be the logged in user -->
+								<Built-By>Splendit IT-Consulting GmbH</Built-By>
+							</manifestEntries>
+							<!-- We do not want to include the pom in our artifacts -->
+							<addMavenDescriptor>false</addMavenDescriptor>
+						</archive>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -364,7 +374,7 @@
 					<version>${tycho.version}</version>
 					<configuration>
 						<useUIHarness>false</useUIHarness>
-						<argLine>${tycho.test.jvmArgs}</argLine>
+						<argLine>${tycho.test.jvmArgs} -Dfile.encoding=UTF-8</argLine>
 						<!-- kill test JVM if tests take more than 5 minutes (300 seconds) 
 							to finish -->
 						<forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
@@ -529,10 +539,6 @@
 				<artifactId>findbugs-maven-plugin</artifactId>
 				<version>${maven.findbugs.version}</version>
 			</plugin>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-pmd-plugin</artifactId> 
-				<version>${maven.pmd.version}</version> </plugin> -->
-			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>cobertura-maven-plugin</artifactId> 
-				<version>${maven.cobertura.version}</version> </plugin> -->
 		</plugins>
 	</reporting>
 

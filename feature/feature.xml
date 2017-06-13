@@ -222,5 +222,17 @@ This product also includes libraries which are covered by the following licenses
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+   <plugin
+         id="jSparrow.license.api"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+   <plugin
+         id="jSparrow.i18n"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>

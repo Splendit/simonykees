@@ -27,7 +27,7 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 
 	public SelectRulesWizardPageModel(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		super(rules);
-
+		
 		tags = Tag.getAllTags();
 	}
 

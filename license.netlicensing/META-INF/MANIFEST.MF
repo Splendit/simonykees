@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: jSparrow.license.netlicensing
+Bundle-Name: jSparrow Licensing
 Bundle-SymbolicName: jSparrow.license.netlicensing
 Bundle-Version: 1.2.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
