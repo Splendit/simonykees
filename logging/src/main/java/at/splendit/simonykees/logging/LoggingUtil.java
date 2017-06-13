@@ -44,7 +44,7 @@ public class LoggingUtil {
 	private static final int ROLLING_POLICY_MIN_INDEX = 0;
 	private static final int ROLLING_POLICY_MAX_INDEX = 5;
 
-	private static final String TRIGGER_MAX_FILE_SIZE = "10MB"; //$NON-NLS-1$
+	private static final String TRIGGER_MAX_FILE_SIZE = "5MB"; //$NON-NLS-1$
 
 	private static final String ROLLING_FILE_APPENDER_NAME = "at.splendit.simonykees.logging.rollingFile"; //$NON-NLS-1$
 	private static final String TEST_ROLLING_FILE_APPENDER_NAME = "at.splendit.simonykees.logging.test.rollingFile"; //$NON-NLS-1$
@@ -106,7 +106,7 @@ public class LoggingUtil {
 
 			// this assumes that the logback.xml file is in the root of the
 			// bundle.
-			URL logbackConfigFileUrl = FileLocator.find(bundle, new org.eclipse.core.runtime.Path("logback-test.xml"), //$NON-NLS-1$
+			URL logbackConfigFileUrl = FileLocator.find(bundle, new org.eclipse.core.runtime.Path("logback.xml"), //$NON-NLS-1$
 					null);
 			jc.doConfigure(logbackConfigFileUrl.openStream());
 
