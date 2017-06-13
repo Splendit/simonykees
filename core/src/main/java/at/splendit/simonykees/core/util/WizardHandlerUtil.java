@@ -1,11 +1,10 @@
-package at.splendit.simonykees.core.handler;
+package at.splendit.simonykees.core.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -30,36 +29,52 @@ import org.slf4j.LoggerFactory;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
- * TODO SIM-103 class description
+ * Utility class that handles requests from handlers. 
  * 
- * @author Hannes Schweighofer
+ * @author Hannes Schweighofer, Martin Huter
  * @since 0.9
  */
-public abstract class AbstractSimonykeesHandler extends AbstractHandler {
+public class WizardHandlerUtil {
 
-	private static final Logger logger = LoggerFactory.getLogger(AbstractSimonykeesHandler.class);
-	
+	private static final Logger logger = LoggerFactory.getLogger(WizardHandlerUtil.class);
+
 	private static final String EDITOR = "org.eclipse.jdt.ui.CompilationUnitEditor"; //$NON-NLS-1$
 	private static final String PACKAGE_EXPLORER = "org.eclipse.jdt.ui.PackageExplorer"; //$NON-NLS-1$
 	private static final String PROJECT_EXPLORER = "org.eclipse.ui.navigator.ProjectExplorer"; //$NON-NLS-1$
 
-	static List<IJavaElement> getSelectedJavaElements(ExecutionEvent event) {
-		final Shell shell = HandlerUtil.getActiveShell(event);
+	private WizardHandlerUtil() {
+
+	}
+
+	/**
+	 * Collects all the {@link IJavaElement} that are selected with the
+	 * {@link ExecutionEvent} during an UI interaction in eclipse
+	 * 
+	 * @param event
+	 *            that is triggered with an UI interaction in eclipse
+	 * @return <b>{@code List<IJavaElement}></b> that are selected with the given <b>{@code event}</b>
+	 */
+	public static List<IJavaElement> getSelectedJavaElements(ExecutionEvent event) {
 		final String activePartId = HandlerUtil.getActivePartId(event);
 
 		switch (activePartId) {
 		case EDITOR:
-			return getFromEditor(shell, HandlerUtil.getActiveEditor(event));
+			return getFromEditor(HandlerUtil.getActiveEditor(event));
 		case PACKAGE_EXPLORER:
 		case PROJECT_EXPLORER:
-			return getFromExplorer(shell, getCurrentStructuredSelection(event));
+			return getFromExplorer(getCurrentStructuredSelection(event));
 		default:
 			logger.error(NLS.bind(Messages.AbstractSimonykeesHandler_error_activePartId_unknown, activePartId));
 			return Collections.emptyList();
 		}
 	}
 
-	static List<IJavaElement> getFromEditor(Shell shell, IEditorPart editorPart) {
+	/**
+	 * 
+	 * @param editorPart
+	 * @return
+	 */
+	private static List<IJavaElement> getFromEditor(IEditorPart editorPart) {
 		final IEditorInput editorInput = editorPart.getEditorInput();
 		final IJavaElement javaElement = JavaUI.getEditorInputJavaElement(editorInput);
 		if (javaElement instanceof ICompilationUnit) {
@@ -71,7 +86,12 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 		return Collections.emptyList();
 	}
 
-	static List<IJavaElement> getFromExplorer(Shell shell, IStructuredSelection iStructuredSelection) {
+	/**
+	 * 
+	 * @param iStructuredSelection
+	 * @return
+	 */
+	private static List<IJavaElement> getFromExplorer(IStructuredSelection iStructuredSelection) {
 		final List<IJavaElement> javaElements = new ArrayList<>();
 		for (Iterator<?> iterator = iStructuredSelection.iterator(); iterator.hasNext();) {
 			final Object object = iterator.next();
@@ -85,7 +105,7 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 				}
 			} else {
 				logger.error(NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_explorer,
-								object.getClass().getName()));
+						object.getClass().getName()));
 			}
 		}
 		return javaElements;
@@ -101,7 +121,7 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 	 * @return the current IStructuredSelection, or
 	 *         <code>StructuredSelection.EMPTY</code>.
 	 */
-	static IStructuredSelection getCurrentStructuredSelection(ExecutionEvent event) {
+	private static IStructuredSelection getCurrentStructuredSelection(ExecutionEvent event) {
 		ISelection selection = HandlerUtil.getCurrentSelection(event);
 		if (selection instanceof IStructuredSelection) {
 			return (IStructuredSelection) selection;
@@ -109,7 +129,13 @@ public abstract class AbstractSimonykeesHandler extends AbstractHandler {
 		return StructuredSelection.EMPTY;
 	}
 
-	static boolean hasNature(IProject project, String natureId) {
+	/**
+	 * 
+	 * @param project
+	 * @param natureId
+	 * @return
+	 */
+	private static boolean hasNature(IProject project, String natureId) {
 		try {
 			return project.hasNature(natureId);
 		} catch (CoreException e) {

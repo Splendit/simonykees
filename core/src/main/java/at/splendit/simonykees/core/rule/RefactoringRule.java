@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.exception.RefactoringException;
-import at.splendit.simonykees.core.util.SimonykeesUtil;
+import at.splendit.simonykees.core.util.RefactoringUtil;
 import at.splendit.simonykees.core.util.TagUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
@@ -154,7 +154,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException, RefactoringException {
 		
-		final CompilationUnit astRoot = SimonykeesUtil.parse(workingCopy);
+		final CompilationUnit astRoot = RefactoringUtil.parse(workingCopy);
 		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 		// FIXME resolves that comments are manipulated during astrewrite
 		//
@@ -186,7 +186,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 			 * DocumentChange. To fix this issue, a copy of the TextEdit is used
 			 * for the DocumentChange.
 			 */
-			DocumentChange documentChange = SimonykeesUtil.generateDocumentChange(visitor.getSimpleName(), document,
+			DocumentChange documentChange = RefactoringUtil.generateDocumentChange(visitor.getSimpleName(), document,
 					edits.copy());
 
 			workingCopy.applyTextEdit(edits, null);

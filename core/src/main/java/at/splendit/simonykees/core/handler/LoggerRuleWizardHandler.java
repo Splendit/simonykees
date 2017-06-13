@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.handler;
 
 import java.util.List;
 
+import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -23,6 +24,7 @@ import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.wizard.semiautomatic.LoggerRuleWizard;
+import at.splendit.simonykees.core.util.WizardHandlerUtil;
 import at.splendit.simonykees.core.visitor.semiAutomatic.StandardLoggerASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -33,7 +35,7 @@ import at.splendit.simonykees.i18n.Messages;
  * @since 1.2
  *
  */
-public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
+public class LoggerRuleWizardHandler extends AbstractHandler  {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -45,7 +47,7 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 			Activator.setRunning(true);
 
 			if (LicenseUtil.getInstance().isValid()) {
-				List<IJavaElement> selectedJavaElements = getSelectedJavaElements(event);
+				List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
 				if (!selectedJavaElements.isEmpty()) {
 					IJavaProject selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
 					StandardLoggerRule loggerRule = new StandardLoggerRule(StandardLoggerASTVisitor.class);

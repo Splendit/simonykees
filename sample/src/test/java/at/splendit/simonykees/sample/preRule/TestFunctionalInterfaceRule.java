@@ -283,7 +283,7 @@ public class TestFunctionalInterfaceRule {
 			    String toString = "toString"; 
 			} 
 			   
-			//TODO: some important comment. shall not be removed! 
+			//some important comment. shall not be removed! 
 		}; 
 		
 		AFunctionalInterface fooComments3 = new AFunctionalInterface() { 
