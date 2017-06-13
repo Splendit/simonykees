@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@SuppressWarnings({"nls", "unused"})
+@SuppressWarnings({"nls", "unused", "rawtypes", "unchecked"})
 public class LambdaForEachMapRule {
 	
 	private List<String> generateList(String input) {
@@ -236,5 +236,35 @@ public class LambdaForEachMapRule {
 		numbers.stream().filter(n -> n.doubleValue() > 0).map((Number n) -> (int)n/2).forEach((d) -> sb.append(d));
 		
 		return sb.toString();
+	}
+	
+	public String rawType() {
+		
+		List rawList = generateRawListOfStrings();
+		StringBuilder sb = new StringBuilder();
+		rawList.stream().filter(o -> o != null).forEach((Object n) -> {
+			String s = (String)n;
+			Number d = (int)Integer.valueOf(s)/2;
+			sb.append(d);
+		});
+		
+		return sb.toString();
+	}
+	
+	public String rawTypeFromMethodInvocation() {
+		
+		StringBuilder sb = new StringBuilder();
+		this.generateRawListOfStrings().stream().filter(o -> o != null).forEach((Object n) -> {
+			String s = (String)n;
+			Number d = (int)Integer.valueOf(s)/2;
+			sb.append(d);
+		});
+		
+		return sb.toString();
+	}
+	
+	private List generateRawListOfStrings() {
+		List rawList = Arrays.asList("2.3", "4.5");
+		return rawList;
 	}
 }
