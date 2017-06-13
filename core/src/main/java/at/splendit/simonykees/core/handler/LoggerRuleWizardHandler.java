@@ -106,6 +106,7 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 				 */
 				final Shell shell = HandlerUtil.getActiveShell(event);
 				LicenseUtil.getInstance().displayLicenseErrorDialog(shell);
+				Activator.setRunning(false);
 			}
 		}
 		return null;
