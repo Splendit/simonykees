@@ -67,8 +67,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 				 * of the enhanced for loop will be used for the corresponding
 				 * parts of the lambda expression.
 				 */
-				SingleVariableDeclaration parameterCopy = (SingleVariableDeclaration) astRewrite
-						.createCopyTarget(parameter);
+				SimpleName parameterCopy = (SimpleName) astRewrite.createCopyTarget(parameter.getName());
 				ASTNode statementCopy = astRewrite.createCopyTarget(approvedStatement);
 
 				LambdaExpression lambdaExpression = astRewrite.getAST().newLambdaExpression();
