@@ -213,8 +213,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 
 	@Override
 	public boolean checkTransformPrecondition() {
-		return prequisite && !hasEmptyStatement && !indexReferencedInsideLoop && !indexReferencedOutsideLoop
-				&& isIndexInitToZero() && isIndexIncremented();
+		return super.checkTransformPrecondition() && prequisite && isIndexInitToZero() && isIndexIncremented();
 	}
 
 	public VariableDeclarationFragment getOutsideIndexDeclaration() {

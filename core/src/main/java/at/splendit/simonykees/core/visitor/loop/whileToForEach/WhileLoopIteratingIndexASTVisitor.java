@@ -136,8 +136,7 @@ abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVi
 
 	@Override
 	public boolean checkTransformPrecondition() {
-		return prequisite && !hasEmptyStatement && !indexReferencedInsideLoop && !indexReferencedOutsideLoop
-				&& isIndexInitToZero() && isIndexIncremented();
+		return super.checkTransformPrecondition() && prequisite && isIndexInitToZero() && isIndexIncremented();
 	}
 
 	/**
