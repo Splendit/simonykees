@@ -143,7 +143,7 @@ public class DiamondOperatorRule {
 	}
 	
 	public void collectionArgumentInConstructor(String input) {
-		List<String> list = new ArrayList<>(new ArrayList<String>(1));
+		ArrayList<String> ndCollection = new ArrayList<>(new ArrayList<String>(1));
 	}
 	
 	public String anonymousGenericInstatiation(String input) {

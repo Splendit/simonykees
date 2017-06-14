@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.util.Collection;
 
 import org.eclipse.jdt.core.JavaCore;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -31,8 +33,16 @@ public class DiamondRulesJ7Test extends AbstractRulesTest {
 	private Path preRule;
 	private Path postRule;
 	
-	static {
+	@BeforeClass
+	public static void setUpJavaVersion() throws Exception {		
 		javaVersion = JavaCore.VERSION_1_7;
+		root = null;
+		setUp();
+	}
+	
+	@AfterClass
+	public static void resetJavaVersion() {
+		javaVersion = JavaCore.VERSION_1_8;
 	}
 	
 	public DiamondRulesJ7Test(String fileName, Path preRule, Path postRule) {
