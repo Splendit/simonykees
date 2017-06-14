@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -46,15 +45,13 @@ public class StandardLoggerRuleLog4jTest extends AbstractRulesTest {
 		
 		try {
 			IJavaProject javaProject = RulesTestUtil.createJavaProject("allRulesTest", "bin");
-			IPackageFragmentRoot root = RulesTestUtil.addSourceContainer(javaProject, "/allRulesTestRoot");
+			root = RulesTestUtil.addSourceContainer(javaProject, "/allRulesTestRoot");
 
 			List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 			entries.add(
 					RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
 			RulesTestUtil.addToClasspath(javaProject, entries);
 			RulesTestUtil.addToClasspath(javaProject, RulesTestUtil.getClassPathEntries(root));
-
-			packageFragment = root.createPackageFragment("at.splendit.simonykees", true, null);
 		} catch (Exception e) {
 		}
 	}
