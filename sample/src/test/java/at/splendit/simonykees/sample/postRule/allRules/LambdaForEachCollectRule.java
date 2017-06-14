@@ -115,4 +115,17 @@ public class LambdaForEachCollectRule {
 
 		return listField.stream().collect(Collectors.joining(","));
 	}
+
+	public String thisAddInvocation(String input) {
+		List<String> objectList = new ArrayList<>();
+		String s = "";
+		objectList.stream().filter(oString -> oString.equals(s)).map(o -> StringUtils.substring(o, 0))
+				.forEach(this::add);
+
+		return listField.stream().collect(Collectors.joining(","));
+	}
+
+	private void add(String string) {
+		listField.add(string);
+	}
 }
