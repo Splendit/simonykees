@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.ui.wizard.semiautomatic;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -13,10 +14,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.RefactoringException;
@@ -28,6 +32,7 @@ import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.preview.RefactoringPreviewWizard;
+import at.splendit.simonykees.core.ui.wizard.impl.SelectRulesWizard;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -39,6 +44,8 @@ import at.splendit.simonykees.i18n.Messages;
  *
  */
 public class LoggerRuleWizard extends Wizard {
+
+	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
 
 	private LoggerRuleWizardPage page;
 	private LoggerRuleWizardPageModel model;
@@ -73,10 +80,10 @@ public class LoggerRuleWizard extends Wizard {
 		Activator.setRunning(false);
 		return super.performCancel();
 	}
-	
+
 	@Override
 	public boolean canFinish() {
-		if(model.getSelectionStatus().equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)) {
+		if (model.getSelectionStatus().equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)) {
 			return false;
 		} else {
 			return true;
@@ -85,9 +92,14 @@ public class LoggerRuleWizard extends Wizard {
 
 	@Override
 	public boolean performFinish() {
+
+		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass().getSimpleName(),
+				this.javaElements.get(0).getJavaProject().getElementName()));
+
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(rule);
 		RefactoringPipeline refactorer = new RefactoringPipeline(rules);
-		//AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules);
+		// AbstractRefactorer refactorer = new AbstractRefactorer(javaElements,
+		// rules);
 		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
 		rule.setSelectedOptions(model.getCurrentSelectionMap());
 
@@ -161,6 +173,17 @@ public class LoggerRuleWizard extends Wizard {
 	 * Method used to open RefactoringPreviewWizard from non UI thread
 	 */
 	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactorer, Rectangle rectangle) {
+
+		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
+				this.javaElements.get(0).getJavaProject().getElementName()));
+		logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
+				javaElements.get(0).getJavaProject().getElementName(),
+				refactorer.getRules().stream()
+						.filter(rule -> null != refactorer.getChangesForRule(rule)
+								&& !refactorer.getChangesForRule(rule).isEmpty())
+						.map(RefactoringRule<? extends AbstractASTRewriteASTVisitor>::getName)
+						.collect(Collectors.joining("; ")))); //$NON-NLS-1$
+
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override
@@ -181,6 +204,10 @@ public class LoggerRuleWizard extends Wizard {
 	 * are required from non UI thread
 	 */
 	private void synchronizeWithUIShowWarningNoRefactoringDialog() {
+
+		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
+				this.javaElements.get(0).getJavaProject()));
+
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override

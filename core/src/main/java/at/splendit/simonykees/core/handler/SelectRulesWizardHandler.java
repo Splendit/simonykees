@@ -119,8 +119,8 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 			@Override
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				//HandlerUtil.getActiveShell(event)
-				final WizardDialog dialog = new WizardDialog(shell, new SelectRulesWizard(
+				// HandlerUtil.getActiveShell(event)
+				final WizardDialog dialog = new WizardDialog(shell, new SelectRulesWizard(selectedJavaElements,
 						refactoringPipeline, RulesContainer.getRulesForProject(selectedJavaProjekt))) {
 					// Removed unnecessary empty space on the bottom of
 					// the wizard intended for ProgressMonitor that is
