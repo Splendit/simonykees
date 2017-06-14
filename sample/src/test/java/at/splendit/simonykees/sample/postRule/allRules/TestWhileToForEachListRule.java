@@ -1,12 +1,13 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({ "unused", "rawtypes" })
 public class TestWhileToForEachListRule {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestWhileToForEachListRule.class);
@@ -233,6 +234,22 @@ public class TestWhileToForEachListRule {
 		while (i < list.size()) {
 			sb.append(list.get(i));
 			list.get(i);
+			i++;
+		}
+
+		return sb.toString();
+	}
+
+	public String rawIteratingObject(String input) {
+		List<List<String>> listOfLists = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+
+		int i = 0;
+		while (i < listOfLists.size()) {
+			List rawIterator = listOfLists.get(i);
+			// Incorrect casting to double
+			Double d = (Double) rawIterator.get(0);
+			sb.append(d);
 			i++;
 		}
 
