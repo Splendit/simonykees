@@ -9,12 +9,17 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.RefactoringException;
@@ -37,16 +42,21 @@ import at.splendit.simonykees.i18n.Messages;
  */
 public class LoggerRuleWizard extends Wizard {
 
+	private static final Logger logger = LoggerFactory.getLogger(LoggerRuleWizard.class);
+
 	private LoggerRuleWizardPage page;
 	private LoggerRuleWizardPageModel model;
 	private LoggerRuleWizardPageControler controler;
 
+	private IJavaProject selectedJavaProjekt;
 	private final StandardLoggerRule rule;
 
 	private RefactoringPipeline refactoringPipeline;
 
-	public LoggerRuleWizard(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, 	RefactoringPipeline refactoringPipeline) {
+	public LoggerRuleWizard(IJavaProject selectedJavaProjekt,
+			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, RefactoringPipeline refactoringPipeline) {
 		super();
+		this.selectedJavaProjekt = selectedJavaProjekt;
 		this.refactoringPipeline = refactoringPipeline;
 		this.rule = (StandardLoggerRule) rule;
 		setNeedsProgressMonitor(true);
@@ -70,10 +80,10 @@ public class LoggerRuleWizard extends Wizard {
 		Activator.setRunning(false);
 		return super.performCancel();
 	}
-	
+
 	@Override
 	public boolean canFinish() {
-		if(model.getSelectionStatus().equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)) {
+		if (model.getSelectionStatus().equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)) {
 			return false;
 		} else {
 			return true;
@@ -82,9 +92,14 @@ public class LoggerRuleWizard extends Wizard {
 
 	@Override
 	public boolean performFinish() {
+
+		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass().getSimpleName(),
+				selectedJavaProjekt.getElementName()));
+
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(rule);
 		refactoringPipeline.setRules(rules);
-		//AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules);
+		// AbstractRefactorer refactorer = new AbstractRefactorer(javaElements,
+		// rules);
 		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
 		rule.setSelectedOptions(model.getCurrentSelectionMap());
 
@@ -148,6 +163,12 @@ public class LoggerRuleWizard extends Wizard {
 	 * Method used to open RefactoringPreviewWizard from non UI thread
 	 */
 	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactorer, Rectangle rectangle) {
+
+		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
+				selectedJavaProjekt.getElementName()));
+		logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
+				selectedJavaProjekt.getElementName(), rule.getName()));
+
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override

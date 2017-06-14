@@ -83,10 +83,10 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 												return Status.CANCEL_STATUS;
 											} else if (null != containingErrorList && !containingErrorList.isEmpty()) {
 												synchronizeWithUIShowCompilationErrorMessage(containingErrorList, event,
-														refactoringPipeline, selectedJavaElements, loggerRule);
+														refactoringPipeline, selectedJavaElements, loggerRule, selectedJavaProjekt);
 											} else {
 												synchronizeWithUIShowLoggerRuleWizard(event, refactoringPipeline,
-														selectedJavaElements, loggerRule);
+														selectedJavaElements, loggerRule, selectedJavaProjekt);
 											}
 
 										} catch (RefactoringException e) {
@@ -131,7 +131,7 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 	 * Method used to open SelectRulesWizard from non UI thread
 	 */
 	private void synchronizeWithUIShowLoggerRuleWizard(ExecutionEvent event, RefactoringPipeline refactoringPipeline,
-			List<IJavaElement> selectedJavaElements, StandardLoggerRule loggerRule) {
+			List<IJavaElement> selectedJavaElements, StandardLoggerRule loggerRule, IJavaProject selectedJavaProjekt) {
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override
@@ -139,7 +139,7 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				//HandlerUtil.getActiveShell(event)
 				final WizardDialog dialog = new WizardDialog(shell,
-						new LoggerRuleWizard(loggerRule, refactoringPipeline)) {
+						new LoggerRuleWizard(selectedJavaProjekt, loggerRule, refactoringPipeline)) {
 					/*
 					 * Removed unnecessary empty space on the
 					 * bottom of the wizard intended for
@@ -181,7 +181,7 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 	 */
 	private void synchronizeWithUIShowCompilationErrorMessage(List<ICompilationUnit> containingErrorList,
 			ExecutionEvent event, RefactoringPipeline refactoringPipeline, List<IJavaElement> selectedJavaElements,
-			StandardLoggerRule loggerRule) {
+			StandardLoggerRule loggerRule, IJavaProject selectedJavaProjekt) {
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override
@@ -194,7 +194,7 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 				if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
 					if (refactoringPipeline.hasRefactoringStates()) {
 						synchronizeWithUIShowLoggerRuleWizard(event, refactoringPipeline, selectedJavaElements,
-								loggerRule);
+								loggerRule, selectedJavaProjekt);
 					} else {
 						synchronizeWithUIShowWarningNoComlipationUnitDialog();
 					}

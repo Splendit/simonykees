@@ -153,6 +153,9 @@ public class Messages extends NLS {
 	public static String SelectRulesWizardPage_searchString;
 	public static String SelectRulesWizardPage_select_unselect_all;
 	public static String SelectRulesWizardPage_title;
+	public static String SelectRulesWizard_end_refactoring;
+	public static String SelectRulesWizard_rules_with_changes;
+	public static String SelectRulesWizard_start_refactoring;
 	public static String SelectRulesWizard_title;
 	public static String SelectRulesWizard_warning_no_refactorings;
 	public static String SerialVersionUidRule_description;
