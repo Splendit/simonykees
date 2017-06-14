@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -36,14 +37,15 @@ public abstract class AbstractRulesTest {
 	private static final String UTILITY_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/utilities"; //$NON-NLS-1$
 
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
-	protected IPackageFragment packageFragment = null;
 
 	protected static IPackageFragmentRoot root = null;
+	
+	protected static String javaVersion = JavaCore.VERSION_1_8;
 
 	@BeforeClass
 	public static void setUp() throws Exception {
 		if (root == null) {
-			root = RulesTestUtil.getPackageFragementRoot();
+			root = RulesTestUtil.getPackageFragementRoot(javaVersion);
 			String packageString = "at.splendit.simonykees.sample.utilities"; //$NON-NLS-1$
 			IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
 			for (Path utilityPath : loadUtilityClasses(UTILITY_DIRECTORY)) {
