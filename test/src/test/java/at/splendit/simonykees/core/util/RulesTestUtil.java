@@ -57,14 +57,18 @@ public class RulesTestUtil {
 	}
 
 	public static IPackageFragmentRoot getPackageFragementRoot() throws Exception {
+		return getPackageFragementRoot(JavaCore.VERSION_1_8);
+	}
+
+	public static IPackageFragmentRoot getPackageFragementRoot(String javaVersion) throws Exception {
 		IJavaProject javaProject = createJavaProject("allRulesTest", "bin");
-		javaProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
-		javaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
-		javaProject.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
+		javaProject.setOption(JavaCore.COMPILER_COMPLIANCE, javaVersion);
+		javaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, javaVersion);
+		javaProject.setOption(JavaCore.COMPILER_SOURCE, javaVersion);
 		IPackageFragmentRoot root = addSourceContainer(javaProject, "/allRulesTestRoot");
 		addToClasspath(javaProject, getClassPathEntries(root));
 		addToClasspath(javaProject, extractMavenDependenciesFromPom(SAMPLE_MODULE_PATH + "pom.xml"));
-		
+
 		return root;
 	}
 
@@ -74,7 +78,7 @@ public class RulesTestUtil {
 		final IClasspathEntry rtJarEntry = JavaCore.newLibraryEntry(getPathToRtJar(), null, null);
 		entries.add(srcEntry);
 		entries.add(rtJarEntry);
-		
+
 		return entries;
 	}
 
@@ -94,7 +98,7 @@ public class RulesTestUtil {
 			String version = getNodeByNodeName(children, "version").getTextContent();
 			collectedEntries.add(generateMavenEntryFromDepedencyString(groupId, artifactId, version));
 		}
-		
+
 		return collectedEntries;
 	}
 

@@ -166,7 +166,6 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 	 *         {@link List#add(Object)} or {@code false} otherwise.
 	 */
 	private boolean isListAddInvocation(MethodInvocation methodInvocation, SimpleName parameter) {
-		boolean isAddInvocation = false;
 		SimpleName name = methodInvocation.getName();
 		if (ADD_METHOD_NAME.equals(name.getIdentifier())) {
 			List<Expression> arguments = ASTNodeUtil.returnTypedList(methodInvocation.arguments(), Expression.class);
@@ -175,14 +174,15 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 				if (ASTNode.SIMPLE_NAME == argument.getNodeType()
 						&& ((SimpleName) argument).getIdentifier().equals(parameter.getIdentifier())) {
 					Expression expression = methodInvocation.getExpression();
-					if (ClassRelationUtil.isContentOfTypes(expression.resolveTypeBinding(),
+					if (expression != null && ClassRelationUtil.isContentOfTypes(expression.resolveTypeBinding(),
 							Collections.singletonList(JAVA_UTIL_LIST))) {
-						isAddInvocation = true;
+						return true;
 					}
 				}
 			}
 		}
-		return isAddInvocation;
+		
+		return false;
 	}
 
 	/**

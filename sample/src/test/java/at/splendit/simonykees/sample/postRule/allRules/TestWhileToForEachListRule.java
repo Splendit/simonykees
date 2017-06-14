@@ -18,7 +18,7 @@ public class TestWhileToForEachListRule {
 	public String loopingOverLists(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((String t) -> {
+		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
@@ -28,7 +28,7 @@ public class TestWhileToForEachListRule {
 	public String nestedLoops(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((String t) -> {
+		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 			list.stream().forEach(sb::append);
@@ -39,12 +39,12 @@ public class TestWhileToForEachListRule {
 	public String tripleNestedLoops(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((String t) -> {
+		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
-			list.stream().forEach((String iterator) -> {
+			list.stream().forEach((iterator) -> {
 				sb.append(iterator);
-				list.stream().forEach((String iterator1) -> {
+				list.stream().forEach((iterator1) -> {
 					sb.append(iterator1);
 					logger.info(iterator1);
 				});
@@ -58,12 +58,12 @@ public class TestWhileToForEachListRule {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
 		List<String> list2 = generateList(input);
-		list.stream().forEach((String t) -> {
+		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
 
-		list2.stream().forEach((String s) -> {
+		list2.stream().forEach((s) -> {
 			logger.info(s);
 			sb.append(s);
 		});
@@ -116,7 +116,7 @@ public class TestWhileToForEachListRule {
 	public String prefixIndexUpdate(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((String t) -> {
+		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
@@ -126,7 +126,7 @@ public class TestWhileToForEachListRule {
 	public String infixIndexUpdate(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((String t) -> {
+		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
@@ -136,7 +136,7 @@ public class TestWhileToForEachListRule {
 	public String assignmentIndexUpdate(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((String t) -> {
+		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
@@ -219,7 +219,7 @@ public class TestWhileToForEachListRule {
 	public String confusingIteratorName(String iterator) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(iterator);
-		list.stream().forEach((String iterator1) -> {
+		list.stream().forEach((iterator1) -> {
 			logger.info(iterator1);
 			sb.append(iterator1);
 		});

@@ -10,7 +10,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
@@ -24,13 +24,12 @@ import org.slf4j.LoggerFactory;
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
-import at.splendit.simonykees.core.exception.SimonykeesException;
 import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.ui.LicenseUtil;
-import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.preview.RefactoringPreviewWizard;
+import at.splendit.simonykees.core.ui.wizard.impl.WizardMessageDialog;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -49,13 +48,16 @@ public class LoggerRuleWizard extends Wizard {
 	private LoggerRuleWizardPageModel model;
 	private LoggerRuleWizardPageControler controler;
 
-	private final List<IJavaElement> javaElements;
+	private IJavaProject selectedJavaProjekt;
 	private final StandardLoggerRule rule;
 
-	public LoggerRuleWizard(List<IJavaElement> javaElements,
-			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+	private RefactoringPipeline refactoringPipeline;
+
+	public LoggerRuleWizard(IJavaProject selectedJavaProjekt,
+			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, RefactoringPipeline refactoringPipeline) {
 		super();
-		this.javaElements = javaElements;
+		this.selectedJavaProjekt = selectedJavaProjekt;
+		this.refactoringPipeline = refactoringPipeline;
 		this.rule = (StandardLoggerRule) rule;
 		setNeedsProgressMonitor(true);
 	}
@@ -92,10 +94,10 @@ public class LoggerRuleWizard extends Wizard {
 	public boolean performFinish() {
 
 		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass().getSimpleName(),
-				this.javaElements.get(0).getJavaProject().getElementName()));
+				selectedJavaProjekt.getElementName()));
 
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(rule);
-		RefactoringPipeline refactorer = new RefactoringPipeline(rules);
+		refactoringPipeline.setRules(rules);
 		// AbstractRefactorer refactorer = new AbstractRefactorer(javaElements,
 		// rules);
 		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
@@ -107,26 +109,16 @@ public class LoggerRuleWizard extends Wizard {
 			protected IStatus run(IProgressMonitor monitor) {
 
 				try {
-					refactorer.prepareRefactoring(javaElements, monitor);
+					refactoringPipeline.doRefactoring(monitor);
 					if (monitor.isCanceled()) {
-						refactorer.clearStates();
+						refactoringPipeline.clearStates();
 						return Status.CANCEL_STATUS;
 					}
 				} catch (RefactoringException e) {
-					synchronizeWithUIShowInfo(e);
-					return Status.CANCEL_STATUS;
-				}
-				try {
-					refactorer.doRefactoring(monitor);
-					if (monitor.isCanceled()) {
-						refactorer.clearStates();
-						return Status.CANCEL_STATUS;
-					}
-				} catch (RefactoringException e) {
-					synchronizeWithUIShowInfo(e);
+					WizardMessageDialog.synchronizeWithUIShowInfo(e);
 					return Status.CANCEL_STATUS;
 				} catch (RuleException e) {
-					synchronizeWithUIShowError(e);
+					WizardMessageDialog.synchronizeWithUIShowError(e);
 					return Status.CANCEL_STATUS;
 
 				} finally {
@@ -143,16 +135,16 @@ public class LoggerRuleWizard extends Wizard {
 
 				if (event.getResult().isOK()) {
 					if (LicenseUtil.getInstance().isValid()) {
-						if (refactorer.hasChanges()) {
+						if (refactoringPipeline.hasChanges()) {
 
-							synchronizeWithUIShowRefactoringPreviewWizard(refactorer, rectangle);
+							synchronizeWithUIShowRefactoringPreviewWizard(refactoringPipeline, rectangle);
 						} else {
 
-							synchronizeWithUIShowWarningNoRefactoringDialog();
+							WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
 						}
 					} else {
 
-						synchronizeWithUIShowLicenseError();
+						WizardMessageDialog.synchronizeWithUIShowLicenseError();
 					}
 				} else {
 					// do nothing if status is canceled, close
@@ -173,9 +165,9 @@ public class LoggerRuleWizard extends Wizard {
 	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactorer, Rectangle rectangle) {
 
 		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
-				this.javaElements.get(0).getJavaProject().getElementName()));
+				selectedJavaProjekt.getElementName()));
 		logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
-				javaElements.get(0).getJavaProject().getElementName(), rule.getName()));
+				selectedJavaProjekt.getElementName(), rule.getName()));
 
 		Display.getDefault().asyncExec(new Runnable() {
 
@@ -189,80 +181,6 @@ public class LoggerRuleWizard extends Wizard {
 				dialog.open();
 			}
 
-		});
-	}
-
-	/**
-	 * Method used to open MessageDialog informing the user that no refactorings
-	 * are required from non UI thread
-	 */
-	private void synchronizeWithUIShowWarningNoRefactoringDialog() {
-
-		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
-				this.javaElements.get(0).getJavaProject()));
-
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizard_warning_no_refactorings,
-						MessageDialog.INFORMATION);
-
-				Activator.setRunning(false);
-			}
-
-		});
-	}
-
-	/**
-	 * Method used to open License ErrorDialog from non UI thread
-	 */
-	private void synchronizeWithUIShowLicenseError() {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				LicenseUtil.getInstance().displayLicenseErrorDialog(shell);
-
-				Activator.setRunning(false);
-			}
-		});
-	}
-
-	/**
-	 * Method used to open ErrorDialog from non UI thread
-	 */
-	private void synchronizeWithUIShowError(SimonykeesException exception) {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openErrorMessageDialog(shell, exception);
-
-				Activator.setRunning(false);
-			}
-		});
-	}
-
-	/**
-	 * Method used to open InformationDialog from non UI thread
-	 * RefactoringException is thrown if java element does not exist or if an
-	 * exception occurs while accessing its corresponding resource, or if no
-	 * working copies were found to apply
-	 */
-	private void synchronizeWithUIShowInfo(SimonykeesException exception) {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
-
-				Activator.setRunning(false);
-			}
 		});
 	}
 }

@@ -1,5 +1,6 @@
 package at.splendit.simonykees.sample.postRule.enhancedForLoopToStreamForEach;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -23,20 +24,20 @@ public class EnhancedForLoopToStreamForEachRule {
 
 	static {
 		stringList3 = new LinkedList<>();
-		stringList1.stream().forEach((String s) -> {
-			stringList2.stream().forEach((String t) -> {
+		stringList1.stream().forEach((s) -> {
+			stringList2.stream().forEach((t) -> {
 				stringList3.add(s + t);
 			});
 		});
 	}
 
-	public String doSomething() throws ClassNotFoundException {
+	public String doSomething() throws ClassNotFoundException, FileNotFoundException {
 
-		stringList1.stream().forEach((String s) -> {
+		stringList1.stream().forEach((s) -> {
 			System.out.println(s);
 		});
 
-		stringList1.stream().forEach((String s) -> System.out.println(s));
+		stringList1.stream().forEach((s) -> System.out.println(s));
 
 		for (String s : stringList1) {
 			if (s.length() > 5) {
@@ -69,8 +70,8 @@ public class EnhancedForLoopToStreamForEachRule {
 			System.out.println(s);
 		}
 
-		stringList1.stream().forEach((String s) -> {
-			stringList2.stream().forEach((String t) -> {
+		stringList1.stream().forEach((s) -> {
+			stringList2.stream().forEach((t) -> {
 				System.out.println(s + t);
 			});
 		});
@@ -88,10 +89,10 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		}
 
-		stringListList.stream().forEach((List<String> list) -> {
+		stringListList.stream().forEach((list) -> {
 			stringList1.add(list.get(0));
-			list.stream().forEach((String s) -> {
-				stringList2.stream().forEach((String t) -> {
+			list.stream().forEach((s) -> {
+				stringList2.stream().forEach((t) -> {
 					if (t.equals(s)) {
 						System.out.println(t);
 					}
@@ -106,7 +107,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			Class.forName(s);
 		}
 
-		stringList1.stream().forEach((String s) -> {
+		stringList1.stream().forEach((s) -> {
 			try {
 				Class.forName(s);
 			} catch (ClassNotFoundException cnfe) {
@@ -114,7 +115,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		});
 
-		stringList1.stream().forEach((String s) -> {
+		stringList1.stream().forEach((s) -> {
 			int length = 0;
 			if (s.length() < 2) {
 				length /= s.length();
@@ -127,7 +128,7 @@ public class EnhancedForLoopToStreamForEachRule {
 		}
 
 		final int length2 = 0;
-		stringList1.stream().forEach((String s) -> {
+		stringList1.stream().forEach((s) -> {
 			if (length2 > 0) {
 				System.out.println(length2);
 			}
@@ -164,38 +165,38 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		}
 
-		stringList1.stream().forEach((String s) -> {
+		stringList1.stream().forEach((s) -> {
 			this.intField++;
 		});
 
-		stringList1.stream().forEach((String s) -> {
+		stringList1.stream().forEach((s) -> {
 			intField++;
 		});
 
-		stringList1.stream().forEach((String s) -> {
+		stringList1.stream().forEach((s) -> {
 			testClassField.testIntField++;
 		});
 
-		stringList1.stream().forEach((String s) -> {
+		stringList1.stream().forEach((s) -> {
 			--testClassField.testIntField;
 		});
 
-		stringList1.stream().forEach((String s) -> {
+		stringList1.stream().forEach((s) -> {
 			testClassField.testIntField += s.length();
 		});
 
 		TestClass testClassLocal = new TestClass();
 		EnhancedForLoopToStreamForEachRule rule = new EnhancedForLoopToStreamForEachRule();
 
-		stringList1.stream().forEach((String s) -> {
+		stringList1.stream().forEach((s) -> {
 			testClassLocal.testIntField++;
 		});
 
-		stringList1.stream().forEach((String s) -> {
+		stringList1.stream().forEach((s) -> {
 			--testClassLocal.testIntField;
 		});
 
-		stringList1.stream().forEach((String s) -> {
+		stringList1.stream().forEach((s) -> {
 			testClassLocal.testIntField += s.length();
 		});
 
@@ -203,7 +204,7 @@ public class EnhancedForLoopToStreamForEachRule {
 		rule.testClassField.testIntField = 1;
 		for(Map.Entry<String, Map<String, String>> entry : validationConfigurations.entrySet()) {
             Map<String, String> clone = new HashMap<String, String>(entry.getValue().size());
-            entry.getValue().entrySet().stream().forEach((Map.Entry<String, String> entry2) -> {
+            entry.getValue().entrySet().stream().forEach((entry2) -> {
                 clone.put(entry2.getKey(), entry2.getValue());
             });
             rule.validationConfigurations.put(entry.getKey(), clone);
@@ -213,11 +214,11 @@ public class EnhancedForLoopToStreamForEachRule {
 		rule = null;
 
 		StringBuffer sb = new StringBuffer();
-		stringList1.stream().forEach((String s) -> {
+		stringList1.stream().forEach((s) -> {
 			sb.append(s);
-			stringList2.stream().forEach((String n) -> {
+			stringList2.stream().forEach((n) -> {
 				sb.append(n + ",");
-				stringList3.stream().forEach((String r) -> {
+				stringList3.stream().forEach((r) -> {
 					String t = s;
 					sb.append(r + t);
 				});
@@ -247,11 +248,27 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		}
 
+		stringList1.stream().forEach((s) -> {
+			TestClass tc = new TestClass();
+		});
+
+		for (String s : stringList1) {
+			TestClass tc = new TestClass(1);
+		}
+
 		return "";
 	}
 
 	private class TestClass {
 		public int testIntField = 0;
 		public List<String> stringList = Arrays.asList("asdf", "jkl");
+
+		public TestClass() {
+
+		}
+
+		public TestClass(int testIntField) throws FileNotFoundException {
+			throw new FileNotFoundException();
+		}
 	}
 }
