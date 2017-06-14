@@ -154,7 +154,7 @@ public class TagUtil {
 		}
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["
-				+ Tag.class.getCanonicalName() + "]");
+				+ TagUtil.class.getCanonicalName() + "]");
 	}
 
 }
