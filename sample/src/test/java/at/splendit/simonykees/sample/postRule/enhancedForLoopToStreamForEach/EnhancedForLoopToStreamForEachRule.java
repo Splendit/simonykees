@@ -248,7 +248,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		}
 
-		stringList1.stream().forEach((String s) -> {
+		stringList1.stream().forEach((s) -> {
 			TestClass tc = new TestClass();
 		});
 
