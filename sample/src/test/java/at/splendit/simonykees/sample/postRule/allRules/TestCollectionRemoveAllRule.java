@@ -78,7 +78,7 @@ public class TestCollectionRemoveAllRule {
 		List<String> resultList2 = generateList(input);
 		resultList2.add("d");
 
-		resultList2.stream().forEach((String s) -> {
+		resultList2.stream().forEach((s) -> {
 			if (!resultList.isEmpty()) {
 				resultList.clear();
 			}

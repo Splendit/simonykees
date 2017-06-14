@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -67,8 +66,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 				 * of the enhanced for loop will be used for the corresponding
 				 * parts of the lambda expression.
 				 */
-				SingleVariableDeclaration parameterCopy = (SingleVariableDeclaration) astRewrite
-						.createCopyTarget(parameter);
+				SimpleName parameterCopy = (SimpleName) astRewrite.createCopyTarget(parameter.getName());
 				ASTNode statementCopy = astRewrite.createCopyTarget(approvedStatement);
 
 				LambdaExpression lambdaExpression = astRewrite.getAST().newLambdaExpression();
