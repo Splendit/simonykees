@@ -2,7 +2,6 @@ package at.splendit.simonykees.core.ui.wizard.semiautomatic;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -32,7 +31,6 @@ import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.preview.RefactoringPreviewWizard;
-import at.splendit.simonykees.core.ui.wizard.impl.SelectRulesWizard;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -45,7 +43,7 @@ import at.splendit.simonykees.i18n.Messages;
  */
 public class LoggerRuleWizard extends Wizard {
 
-	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
+	private static final Logger logger = LoggerFactory.getLogger(LoggerRuleWizard.class);
 
 	private LoggerRuleWizardPage page;
 	private LoggerRuleWizardPageModel model;
@@ -177,12 +175,7 @@ public class LoggerRuleWizard extends Wizard {
 		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
 				this.javaElements.get(0).getJavaProject().getElementName()));
 		logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
-				javaElements.get(0).getJavaProject().getElementName(),
-				refactorer.getRules().stream()
-						.filter(rule -> null != refactorer.getChangesForRule(rule)
-								&& !refactorer.getChangesForRule(rule).isEmpty())
-						.map(RefactoringRule<? extends AbstractASTRewriteASTVisitor>::getName)
-						.collect(Collectors.joining("; ")))); //$NON-NLS-1$
+				javaElements.get(0).getJavaProject().getElementName(), rule.getName()));
 
 		Display.getDefault().asyncExec(new Runnable() {
 
