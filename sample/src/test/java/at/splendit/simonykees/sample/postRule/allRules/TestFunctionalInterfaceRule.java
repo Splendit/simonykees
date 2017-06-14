@@ -218,7 +218,7 @@ public class TestFunctionalInterfaceRule {
 				String toString = "toString";
 			}
 
-			//some important comment. shall not be removed!
+			// some important comment. shall not be removed!
 		};
 
 		AFunctionalInterface fooComments3 = (int fooComments1) -> {
