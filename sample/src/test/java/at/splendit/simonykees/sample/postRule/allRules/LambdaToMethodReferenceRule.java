@@ -1,6 +1,7 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import at.splendit.simonykees.sample.utilities.Person;
 
@@ -165,6 +167,11 @@ public class LambdaToMethodReferenceRule {
 		map.entrySet().stream().forEach(Entry<String, String>::getValue);
 
 		map.entrySet().stream().forEach(Entry::getValue);
+	}
+
+	public void captureTypes(String input) {
+		List<? extends Person> persons = new ArrayList<>();
+		List<String> names = persons.stream().map(Person::getName).collect(Collectors.toList());
 	}
 
 	public static <T, SOURCE extends Collection<T>, DEST extends Collection<T>> DEST transferElements(

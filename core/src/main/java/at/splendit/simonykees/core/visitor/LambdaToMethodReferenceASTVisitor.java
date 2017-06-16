@@ -1,13 +1,16 @@
 package at.splendit.simonykees.core.visitor;
 
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -15,6 +18,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -35,15 +39,17 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 	@Override
 	public boolean visit(LambdaExpression lambdaExpressionNode) {
 
+		Expression body = extractSingleBodyExpression(lambdaExpressionNode);
+		
 		// work only with expression lambdas
-		if (lambdaExpressionNode.getBody() instanceof Expression) {
-			Expression expression = (Expression) lambdaExpressionNode.getBody();
+		if (body != null) {
+			
 			List<VariableDeclaration> lambdaParams = ASTNodeUtil.convertToTypedList(lambdaExpressionNode.parameters(),
 					VariableDeclaration.class);
 
 			// only single method invocations are relevant for cases 1, 2 and 3
-			if (ASTNode.METHOD_INVOCATION == expression.getNodeType()) {
-				MethodInvocation methodInvocation = (MethodInvocation) expression;
+			if (ASTNode.METHOD_INVOCATION == body.getNodeType()) {
+				MethodInvocation methodInvocation = (MethodInvocation) body;
 				List<Expression> methodArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 						Expression.class);
 				Expression methodInvocationExpression = methodInvocation.getExpression();
@@ -136,24 +142,20 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 						if (methodInvocationExpressionNameStr.equals(lambdaParamNameStr) && checkMethodParameters(
 								lambdaParams.subList(1, lambdaParams.size()), methodArguments)) {
 
-							ITypeBinding binding = methodInvocationExpressionName.resolveTypeBinding();
-							String typeNameStr;
-							if (binding.isParameterizedType()) {
-								ITypeBinding erasure = binding.getErasure();
-								typeNameStr = erasure.getName();
-							} else {
-								typeNameStr = binding.getName();
+							String typeNameStr = findTypeOfSimpleName(methodInvocationExpressionName);
+							
+							if(typeNameStr != null && !typeNameStr.isEmpty()) {
+								
+								SimpleName typeName = astRewrite.getAST().newSimpleName(typeNameStr);
+								SimpleName methodName = (SimpleName) astRewrite
+										.createCopyTarget(methodInvocation.getName());
+								
+								ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
+								ref.setExpression(typeName);
+								ref.setName(methodName);
+								
+								astRewrite.replace(lambdaExpressionNode, ref, null);
 							}
-
-							SimpleName typeName = astRewrite.getAST().newSimpleName(typeNameStr);
-							SimpleName methodName = (SimpleName) astRewrite
-									.createCopyTarget(methodInvocation.getName());
-
-							ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
-							ref.setExpression(typeName);
-							ref.setName(methodName);
-
-							astRewrite.replace(lambdaExpressionNode, ref, null);
 						}
 					}
 				}
@@ -170,8 +172,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 			 * Set<Person> persSet3 = transferElements(personList,
 			 * HashSet<Person>::new);
 			 */
-			else if (ASTNode.CLASS_INSTANCE_CREATION == expression.getNodeType()) {
-				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) expression;
+			else if (ASTNode.CLASS_INSTANCE_CREATION == body.getNodeType()) {
+				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) body;
 
 				if (lambdaParams.size() == classInstanceCreation.arguments().size()) {
 					Type classInstanceCreationType = classInstanceCreation.getType();
@@ -192,6 +194,61 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 		}
 
 		return true;
+	}
+
+	/**
+	 * Finds the type of the expression represented by the given node, 
+	 * by resolving its {@link ITypeBinding} and extracting the simple name 
+	 * out of it. If the type is a parameterized type, then its 
+	 * erasure is returned. If the type is a capture, then its upper-bound 
+	 * is  returned. Otherwise, the name of the type binding is returned. 
+	 * 
+	 * @param expression
+	 * @return a string representing the simple name of the type 
+	 * of the expression or an empty string otherwise. 
+	 */
+	private String findTypeOfSimpleName(SimpleName expression) {
+		String typeNameStr;
+		ITypeBinding binding = expression.resolveTypeBinding();
+		if (binding.isParameterizedType()) {
+			ITypeBinding erasure = binding.getErasure();
+			typeNameStr = erasure.getName();
+		} else if (binding.isCapture()) {
+			typeNameStr = Arrays.asList(binding.getTypeBounds()).stream().findFirst()
+					.map(ITypeBinding::getName).orElse(""); //$NON-NLS-1$
+		} else {
+			typeNameStr = binding.getName();
+		}
+		return typeNameStr;
+	}
+
+	/**
+	 * Checks whether the body of the lambda expression is a {@link Expression} or a 
+	 * {@link Block} consisting of a single {@link ExpressionStatement}, and if yes extracts
+	 * the expression out of the it. 
+	 * 
+	 * @param lambdaExpressionNode a node representing a lambda expression.
+	 * 
+	 * @return an {@link Expression} if the body consists of a single expression, or 
+	 * {@code null} if the body is not a single expression.  
+	 */
+	private Expression extractSingleBodyExpression(LambdaExpression lambdaExpressionNode) {
+		ASTNode body = lambdaExpressionNode.getBody();
+		
+		if(ASTNode.BLOCK == body.getNodeType()) {
+			Block block = (Block)body;
+			List<Statement> statements = ASTNodeUtil.returnTypedList(block.statements(), Statement.class);
+			if(statements.size() == 1) {
+				Statement singleStatement = statements.get(0);
+				if(ASTNode.EXPRESSION_STATEMENT == singleStatement.getNodeType()) {
+					return ((ExpressionStatement) singleStatement).getExpression();
+				}
+			}
+		} else if (body instanceof Expression) {
+			return (Expression)body;
+		}
+		
+		return null;
 	}
 
 	/**
