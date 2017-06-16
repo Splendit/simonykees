@@ -396,14 +396,14 @@
 				<tycho.test.platformArgs>-XstartOnFirstThread</tycho.test.platformArgs>
 			</properties>
 		</profile>
-		<profile>
+		<!--  <profile>
 			<id>source-feature</id>
 			<activation>
 				<file>
 					<exists>feature.xml</exists>
 				</file>
 				<property>
-					<!-- Sources will only be added if the proguard profile is not active -->
+					<!- Sources will only be added if the proguard profile is not active ->
 					<name>!proguard</name>
 				</property>
 			</activation>
@@ -439,7 +439,7 @@
 					</plugin>
 				</plugins>
 			</build>
-		</profile>
+		</profile> -->
 		<profile>
 			<id>no-proguard</id>
 			<activation>
