@@ -188,4 +188,12 @@ public class SimonykeesPreferenceManager {
 		loadProfilesFromStore();
 	}
 
+	/**
+	 * If cancel is pressed in Preferences page, no changes should be stored and
+	 * profiles list has to be returned to state before any change was made.
+	 */
+	public static void resetProfilesList() {
+		profiles.clear();
+		loadProfilesFromStore();
+	}
 }
