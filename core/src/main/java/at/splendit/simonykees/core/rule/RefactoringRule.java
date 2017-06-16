@@ -106,11 +106,12 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 		if (null != compilerCompliance) {
 			String enumRepresentation = convertCompilerComplianceToEnumRepresentation(compilerCompliance);
-			enabled = JavaVersion.valueOf(enumRepresentation).atLeast(requiredJavaVersion);
-			if (enabled) {
-				enabled = ruleSpecificImplementation(project);
+			satisfiedJavaVersion = JavaVersion.valueOf(enumRepresentation).atLeast(requiredJavaVersion);
+			if (satisfiedJavaVersion) {
+				satisfiedLibraries = ruleSpecificImplementation(project);
 			}
 		}
+		enabled = satisfiedJavaVersion && satisfiedLibraries;
 	}
 
 	protected String convertCompilerComplianceToEnumRepresentation(String compilerCompliance) {
