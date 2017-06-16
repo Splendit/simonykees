@@ -48,9 +48,9 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	protected final List<Tag> tags;
 
-	protected boolean enabled = true;
-	protected boolean satisfiedJavaVersion = true;
-	protected boolean satisfiedLibraries = true;
+	protected boolean enabled = false;
+	protected boolean satisfiedJavaVersion = false;
+	protected boolean satisfiedLibraries = false;
 
 	private Class<T> visitor;
 
@@ -106,11 +106,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 		if (null != compilerCompliance) {
 			String enumRepresentation = convertCompilerComplianceToEnumRepresentation(compilerCompliance);
-			enabled = JavaVersion.valueOf(enumRepresentation).atLeast(requiredJavaVersion);
-			if (enabled) {
-				enabled = ruleSpecificImplementation(project);
-			}
+			satisfiedJavaVersion = JavaVersion.valueOf(enumRepresentation).atLeast(requiredJavaVersion);
 		}
+		satisfiedLibraries = ruleSpecificImplementation(project);
+		enabled = satisfiedJavaVersion && satisfiedLibraries;
 	}
 
 	protected String convertCompilerComplianceToEnumRepresentation(String compilerCompliance) {
