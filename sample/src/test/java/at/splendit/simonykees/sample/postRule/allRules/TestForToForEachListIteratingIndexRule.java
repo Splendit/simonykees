@@ -458,6 +458,20 @@ public class TestForToForEachListIteratingIndexRule {
 		return false;
 	}
 
+	public String rawIteratingObject(String input) {
+		List<List<String>> listOfLists = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < listOfLists.size(); i++) {
+			List rawIterator = listOfLists.get(i);
+			// Incorrect casting to double
+			Double d = (Double) rawIterator.get(0);
+			sb.append(d);
+		}
+
+		return sb.toString();
+	}
+
 	@interface MyFooAnnotation {
 		String iterator = "";
 		Runnable r = () -> {
