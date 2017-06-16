@@ -136,24 +136,20 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 						if (methodInvocationExpressionNameStr.equals(lambdaParamNameStr) && checkMethodParameters(
 								lambdaParams.subList(1, lambdaParams.size()), methodArguments)) {
 
-							ITypeBinding binding = methodInvocationExpressionName.resolveTypeBinding();
-							String typeNameStr;
-							if (binding.isParameterizedType()) {
-								ITypeBinding erasure = binding.getErasure();
-								typeNameStr = erasure.getName();
-							} else {
-								typeNameStr = binding.getName();
+							String typeNameStr = findTypeOfSimpleName(methodInvocationExpressionName);
+							
+							if(typeNameStr != null && !typeNameStr.isEmpty()) {
+								
+								SimpleName typeName = astRewrite.getAST().newSimpleName(typeNameStr);
+								SimpleName methodName = (SimpleName) astRewrite
+										.createCopyTarget(methodInvocation.getName());
+								
+								ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
+								ref.setExpression(typeName);
+								ref.setName(methodName);
+								
+								astRewrite.replace(lambdaExpressionNode, ref, null);
 							}
-
-							SimpleName typeName = astRewrite.getAST().newSimpleName(typeNameStr);
-							SimpleName methodName = (SimpleName) astRewrite
-									.createCopyTarget(methodInvocation.getName());
-
-							ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
-							ref.setExpression(typeName);
-							ref.setName(methodName);
-
-							astRewrite.replace(lambdaExpressionNode, ref, null);
 						}
 					}
 				}
@@ -192,6 +188,61 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 		}
 
 		return true;
+	}
+
+	/**
+	 * Finds the type of the expression represented by the given node, 
+	 * by resolving its {@link ITypeBinding} and extracting the simple name 
+	 * out of it. If the type is a parameterized type, then its 
+	 * erasure is returned. If the type is a capture, then its upper-bound 
+	 * is  returned. Otherwise, the name of the type binding is returned. 
+	 * 
+	 * @param expression
+	 * @return a string representing the simple name of the type 
+	 * of the expression or an empty string otherwise. 
+	 */
+	private String findTypeOfSimpleName(SimpleName expression) {
+		String typeNameStr;
+		ITypeBinding binding = expression.resolveTypeBinding();
+		if (binding.isParameterizedType()) {
+			ITypeBinding erasure = binding.getErasure();
+			typeNameStr = erasure.getName();
+		} else if (binding.isCapture()) {
+			typeNameStr = Arrays.asList(binding.getTypeBounds()).stream().findFirst()
+					.map(ITypeBinding::getName).orElse(""); //$NON-NLS-1$
+		} else {
+			typeNameStr = binding.getName();
+		}
+		return typeNameStr;
+	}
+
+	/**
+	 * Checks whether the body of the lambda expression is a {@link Expression} or a 
+	 * {@link Block} consisting of a single {@link ExpressionStatement}, and if yes extracts
+	 * the expression out of the it. 
+	 * 
+	 * @param lambdaExpressionNode a node representing a lambda expression.
+	 * 
+	 * @return an {@link Expression} if the body consists of a single expression, or 
+	 * {@code null} if the body is not a single expression.  
+	 */
+	private Expression extractSingleBodyExpression(LambdaExpression lambdaExpressionNode) {
+		ASTNode body = lambdaExpressionNode.getBody();
+		
+		if(ASTNode.BLOCK == body.getNodeType()) {
+			Block block = (Block)body;
+			List<Statement> statements = ASTNodeUtil.returnTypedList(block.statements(), Statement.class);
+			if(statements.size() == 1) {
+				Statement singleStatement = statements.get(0);
+				if(ASTNode.EXPRESSION_STATEMENT == singleStatement.getNodeType()) {
+					return ((ExpressionStatement) singleStatement).getExpression();
+				}
+			}
+		} else if (body instanceof Expression) {
+			return (Expression)body;
+		}
+		
+		return null;
 	}
 
 	/**
