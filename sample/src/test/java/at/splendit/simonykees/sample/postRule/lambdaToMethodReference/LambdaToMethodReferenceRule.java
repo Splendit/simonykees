@@ -1,6 +1,7 @@
 package at.splendit.simonykees.sample.postRule.lambdaToMethodReference;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import at.splendit.simonykees.sample.utilities.Person;
 
@@ -44,9 +46,7 @@ public class LambdaToMethodReferenceRule {
 
 		Collections.sort(personList, Person::compareByAge);
 
-		personList.forEach(element -> {
-			System.out.println(element);
-		});
+		personList.forEach(System.out::println);
 
 		personList.forEach(System.out::println);
 
@@ -107,21 +107,13 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	public void referenceToLocalMethod() {
-		personList.forEach((Person person) -> {
-			doSomething(person);
-		});
+		personList.forEach(this::doSomething);
 
-		personList.forEach(person -> {
-			doSomething(person);
-		});
+		personList.forEach(this::doSomething);
 
-		personList.forEach((Person person) -> {
-			this.doSomething(person);
-		});
+		personList.forEach(this::doSomething);
 
-		personList.forEach(person -> {
-			this.doSomething(person);
-		});
+		personList.forEach(this::doSomething);
 
 		personList.forEach(this::doSomething);
 
@@ -196,6 +188,11 @@ public class LambdaToMethodReferenceRule {
 		map.entrySet().stream().forEach(Entry<String, String>::getValue);
 
 		map.entrySet().stream().forEach(Entry::getValue);
+	}
+	
+	public void captureTypes(String input) {
+		List<? extends Person> persons = new ArrayList<>();
+		List<String> names = persons.stream().map(Person::getName).collect(Collectors.toList());
 	}
 
 	class ComparisonProvider {
