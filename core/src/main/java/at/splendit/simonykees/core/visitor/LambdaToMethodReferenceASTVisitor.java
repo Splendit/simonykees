@@ -1,13 +1,16 @@
 package at.splendit.simonykees.core.visitor;
 
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -15,6 +18,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -35,15 +39,17 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 	@Override
 	public boolean visit(LambdaExpression lambdaExpressionNode) {
 
+		Expression body = extractSingleBodyExpression(lambdaExpressionNode);
+		
 		// work only with expression lambdas
-		if (lambdaExpressionNode.getBody() instanceof Expression) {
-			Expression expression = (Expression) lambdaExpressionNode.getBody();
+		if (body != null) {
+			
 			List<VariableDeclaration> lambdaParams = ASTNodeUtil.convertToTypedList(lambdaExpressionNode.parameters(),
 					VariableDeclaration.class);
 
 			// only single method invocations are relevant for cases 1, 2 and 3
-			if (ASTNode.METHOD_INVOCATION == expression.getNodeType()) {
-				MethodInvocation methodInvocation = (MethodInvocation) expression;
+			if (ASTNode.METHOD_INVOCATION == body.getNodeType()) {
+				MethodInvocation methodInvocation = (MethodInvocation) body;
 				List<Expression> methodArguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(),
 						Expression.class);
 				Expression methodInvocationExpression = methodInvocation.getExpression();
@@ -166,8 +172,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 			 * Set<Person> persSet3 = transferElements(personList,
 			 * HashSet<Person>::new);
 			 */
-			else if (ASTNode.CLASS_INSTANCE_CREATION == expression.getNodeType()) {
-				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) expression;
+			else if (ASTNode.CLASS_INSTANCE_CREATION == body.getNodeType()) {
+				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) body;
 
 				if (lambdaParams.size() == classInstanceCreation.arguments().size()) {
 					Type classInstanceCreationType = classInstanceCreation.getType();

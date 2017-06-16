@@ -44,9 +44,7 @@ public class LambdaToMethodReferenceRule {
 
 		Collections.sort(personList, Person::compareByAge);
 
-		personList.forEach(element -> {
-			System.out.println(element);
-		});
+		personList.forEach(System.out::println);
 
 		personList.forEach(System.out::println);
 
@@ -107,21 +105,13 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	public void referenceToLocalMethod() {
-		personList.forEach((Person person) -> {
-			doSomething(person);
-		});
+		personList.forEach(this::doSomething);
 
-		personList.forEach(person -> {
-			doSomething(person);
-		});
+		personList.forEach(this::doSomething);
 
-		personList.forEach((Person person) -> {
-			this.doSomething(person);
-		});
+		personList.forEach(this::doSomething);
 
-		personList.forEach(person -> {
-			this.doSomething(person);
-		});
+		personList.forEach(this::doSomething);
 
 		personList.forEach(this::doSomething);
 
