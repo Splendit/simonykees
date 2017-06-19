@@ -2,9 +2,12 @@ package at.splendit.simonykees.sample.postRule.allRules;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+
+import at.splendit.simonykees.sample.utilities.Person;
 
 @SuppressWarnings({ "nls", "unused", "rawtypes", "unchecked" })
 public class LambdaForEachMapRule {
@@ -266,6 +269,35 @@ public class LambdaForEachMapRule {
 		});
 
 		return sb.toString();
+	}
+
+	public <T> void mapToGenericType(List<Person> refs) {
+		List<List<T>> keys = new ArrayList<>();
+		refs.stream().forEach(ref -> {
+			final List<T> testKey = refToKey(ref);
+			keys.add(testKey);
+		});
+	}
+
+	public <T> void mapToNestedType(List<Person> refs) {
+		List<List<String>> keys = new ArrayList<>();
+		refs.stream().map(ref -> Collections.singletonList(ref.getName())).forEach(keys::add);
+	}
+
+	public <T> void mapToTypeVariable(List<Person> refs) {
+		List<T> keys = new ArrayList<>();
+		refs.stream().forEach(ref -> {
+			final T testKey = refToKeyT(ref);
+			keys.add(testKey);
+		});
+	}
+
+	private <T> T refToKeyT(Person ref) {
+		return null;
+	}
+
+	private <T> List<T> refToKey(Person ref) {
+		return new ArrayList<>();
 	}
 
 	private List generateRawListOfStrings() {
