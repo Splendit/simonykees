@@ -48,9 +48,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	protected final List<Tag> tags;
 
-	protected boolean enabled = false;
-	protected boolean satisfiedJavaVersion = false;
-	protected boolean satisfiedLibraries = false;
+	// default is true because of preferences page
+	protected boolean enabled = true;
+	protected boolean satisfiedJavaVersion = true;
+	protected boolean satisfiedLibraries = true;
 
 	private Class<T> visitor;
 
@@ -127,7 +128,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		return true;
 	}
 
-
 	protected T visitorFactory() throws InstantiationException, IllegalAccessException {
 		return visitor.newInstance();
 	}
@@ -139,24 +139,25 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	 */
 	public final DocumentChange applyRule(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException, RefactoringException {
-		
-		logger.trace(NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.name, workingCopy.getElementName()));
-		
+
+		logger.trace(NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.name,
+				workingCopy.getElementName()));
+
 		return applyRuleImpl(workingCopy);
 	}
-	
+
 	/**
-	 * This method may be overridden. 
+	 * This method may be overridden.
 	 * 
 	 * @param workingCopy
 	 * @return
 	 * @throws ReflectiveOperationException
 	 * @throws JavaModelException
-	 * @throws RefactoringException 
+	 * @throws RefactoringException
 	 */
 	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException, RefactoringException {
-		
+
 		final CompilationUnit astRoot = SimonykeesUtil.parse(workingCopy);
 		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
 		// FIXME resolves that comments are manipulated during astrewrite
@@ -193,7 +194,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 					edits.copy());
 
 			workingCopy.applyTextEdit(edits, null);
-			
+
 			// TODO think about using IProblemRequestor
 			// TODO think about returning the new AST
 			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
