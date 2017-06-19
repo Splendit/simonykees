@@ -136,6 +136,7 @@ public class Messages extends NLS {
 	public static String RemoveNewStringConstructorRule_description;
 	public static String RemoveNewStringConstructorRule_name;
 	public static String SelectRulesWizardHandler_allready_running;
+	public static String SelectRulesWizardHandler_multipleProjectsWarning;
 	public static String SelectRulesWizardHandler_noFileWithoutError;
 	public static String SelectRulesWizardPage_addAllButtonLabel;
 	public static String SelectRulesWizardPage_addButtonLabel;

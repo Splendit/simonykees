@@ -78,6 +78,9 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 											List<ICompilationUnit> containingErrorList = refactoringPipeline
 													.prepareRefactoring(selectedJavaElements, monitor);
 											if (monitor.isCanceled()) {
+												if (refactoringPipeline.isMultipleProjects()) {
+													synchronizeWithUIShowMultiprojectMessage();
+												}
 												refactoringPipeline.clearStates();
 												Activator.setRunning(false);
 												return Status.CANCEL_STATUS;
@@ -243,4 +246,16 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 		});
 	}
 
+
+	private void synchronizeWithUIShowMultiprojectMessage() {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizardHandler_multipleProjectsWarning,
+						MessageDialog.WARNING);
+			}
+		});
+	}
 }
