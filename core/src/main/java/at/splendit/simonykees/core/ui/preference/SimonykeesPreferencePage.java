@@ -129,7 +129,6 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	}
 
 	private void populateTable() {
-		SimonykeesPreferenceManager.loadCurrentProfiles();
 		for (int i = 0; i < SimonykeesPreferenceManager.getAllProfileIds().size(); i++) {
 			new TableItem(profilesTable, SWT.NONE);
 		}
@@ -249,8 +248,10 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	}
 
+	/**
+	 * View initialization called on first creation of the view.
+	 */
 	private void initializeView() {
-		// profilesTableVIewer.setInput(SimonykeesPreferenceManager.getAllProfileNamesAndIdsArray());
 		Activator.getDefault().getPreferenceStore().setDefault(SimonykeesPreferenceConstants.PROFILE_USE_OPTION,
 				SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE);
 		currentProfileSelection = SimonykeesPreferenceManager.getProfiles().indexOf(
@@ -268,6 +269,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		removeProfileButton.setEnabled(false);
 	}
 
+	/**
+	 * Updates view every time something changes in profiles list.
+	 */
 	private void updateView() {
 		profilesTable.removeAll();
 		for (Button button : buttons) {
@@ -302,5 +306,15 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		newProfileButton.setEnabled(false);
 		editProfileButton.setEnabled(false);
 		removeProfileButton.setEnabled(false);
+	}
+
+	/**
+	 * If cancel is pressed, no changes from current manipulation should get
+	 * stored.
+	 */
+	@Override
+	public boolean performCancel() {
+		SimonykeesPreferenceManager.resetProfilesList();
+		return super.performCancel();
 	}
 }
