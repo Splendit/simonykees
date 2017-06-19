@@ -143,7 +143,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 	/**
 	 * creates a copy target for the expression on the left of the stream()
 	 * method invocation. if the expression itself is a cast expression, then it
-	 * will be wrapped in a parenthesized exprssion.
+	 * will be wrapped in a parenthesized expression.
 	 * 
 	 * @param expression
 	 *            the expression, which will be on the left of the stream method
