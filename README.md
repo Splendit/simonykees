@@ -17,6 +17,21 @@ Execute
 ## release ##
 
     mvn org.eclipse.tycho:tycho-versions-plugin:0.26.0:set-version -DnewVersion=<newVersion>
+    
+## additional information how to trigger special profiles ##
+
+Our profiles production and proguard are activated with a maven property (-Dproguard, -Dproduction), because we need other profiles to get deactivated on this step and this is solved with an profile activator that triggers on the absence of a property.  
+
+	Example:
+	<profile>
+		<id>test</id>
+		<activation>
+			<property>
+				<name>!production</name>
+			</property>
+		</activation>
+		<!-- actions of the profile -->
+	</profile>
 
 ## proguard build ##
 
@@ -68,7 +83,7 @@ Since Netlicensing distinguishes between test and productive versions of the plu
 
 or
 	
-	mvn -pproduction clean verify
+	mvn -Dproduction clean verify
 
 This would result in
 	
