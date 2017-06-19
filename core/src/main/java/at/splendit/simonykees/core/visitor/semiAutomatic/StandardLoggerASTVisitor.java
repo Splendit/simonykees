@@ -244,7 +244,6 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 					QualifiedName expressionQualifier = (QualifiedName) expression;
 					Name qualifier = expressionQualifier.getQualifier();
 					
-					
 					if(ClassRelationUtil.isContentOfTypes(qualifier.resolveTypeBinding(),
 							Collections.singletonList(JAVA_LANG_SYSTEM))) {
 						SimpleName qualiferName = expressionQualifier.getName();
