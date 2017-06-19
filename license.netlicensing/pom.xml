@@ -103,6 +103,11 @@
 		</profile>
 		<profile>
 			<id>production</id>
+			<activation>
+				<property>
+					<name>production</name>
+				</property>
+			</activation>
 			<build>
 				<resources>
 					<resource>
