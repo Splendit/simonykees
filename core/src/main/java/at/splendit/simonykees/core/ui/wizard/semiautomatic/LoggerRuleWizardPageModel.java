@@ -87,6 +87,9 @@ public class LoggerRuleWizardPageModel {
 	 *            new value of selected field
 	 */
 	public void setNewSelection(String source, String selection) {
+		if (selection.equals(NO_SEVERITY_LEVEL)) {
+			selection = ""; //$NON-NLS-1$
+		}
 		currentSelectionMap.put(source, selection);
 		validateSelection();
 		notifyListeners();
