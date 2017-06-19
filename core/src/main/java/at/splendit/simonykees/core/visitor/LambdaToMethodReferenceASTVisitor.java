@@ -76,11 +76,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 				if (methodArguments.size() == lambdaParams.size()
 						&& checkMethodParameters(lambdaParams, methodArguments)) {
 
-					SimpleName methodName = (SimpleName) astRewrite.createCopyTarget(methodInvocation.getName());
-
 					ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
-					ref.setName(methodName);
-
+					
 					boolean isReferenceExpressionSet = false;
 
 					// no expression present -> assume 'this'
@@ -119,6 +116,9 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 					}
 
 					if (isReferenceExpressionSet) {
+
+						SimpleName methodName = (SimpleName) astRewrite.createCopyTarget(methodInvocation.getName());
+						ref.setName(methodName);
 						astRewrite.replace(lambdaExpressionNode, ref, null);
 					}
 				}
