@@ -66,21 +66,21 @@ timestamps {
 			}
 			
 			// master and develop builds get deployed to packagedrone (see pom.xml) and tagged (see tag-deployment.sh)
-			if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
+			//if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
 				if ( currentBuild.result == 'SUCCESS' ) {
 					// skipping tests, because integration tests have passed already
 					// -B batch mode for clean output (otherwise upload status will spam the console)
-					def mvnCommand = 'clean deploy -DskipTests -B'
+					def mvnCommand = 'clean install -DskipTests -B'
 				
 				
 					stage('Deploy and Tag') {
-						sh "'${mvnHome}/bin/mvn' ${mvnCommand} -P${env.BRANCH_NAME}-test-noProguard"	
+						//sh "'${mvnHome}/bin/mvn' ${mvnCommand} -P${env.BRANCH_NAME}-test-noProguard"	
 						
 						// tag build in repository
-						sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
+						//sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
 							// first parameter is the dir, second parameter is the subdirectory and optional
-							sh("./tag-deployment.sh $env.BRANCH_NAME main")
-							sh("git push $backupOrigin --tags")
+						//	sh("./tag-deployment.sh $env.BRANCH_NAME main")
+						//	sh("git push $backupOrigin --tags")
 						}
 					}
 					
@@ -89,21 +89,22 @@ timestamps {
 					println qualifier
 					
 					stage('Deploy obfuscation') {
-						def mvnOptions = '-Dproguard -DforceContextQualifier=${qualifier}_test'
-						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-test-proguard"
+						def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
+						println mvnOptions
+						//sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-test-proguard"
 					}
 					if ( env.BRANCH_NAME == 'master') {
 						stage('Deploy production') {
-							def mvnOptions = '-Dproduction -DforceContextQualifier=${qualifier}_noProguard'
+							def mvnOptions = "-Dproduction -DforceContextQualifier=${qualifier}_noProguard"
 							sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-noProguard"
 						}
 						stage('Deploy production, obfuscation') {
-							def mvnOptions = '-Dproduction -Dproguard -DforceContextQualifier=${qualifier}'
+							def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
 							sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-proguard"
 						}
 					}
 				}
-			}
+			//}
 		} catch (e) {
 			// If there was an exception thrown, the build failed
 			currentBuild.result = "FAILURE"
