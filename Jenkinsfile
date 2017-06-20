@@ -52,11 +52,6 @@ timestamps {
 						statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${rerunTests}")
 						i = i + 1
 					}
-					
-					def q = "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,(.*-\\d{4})\" site/target/p2content.xml"
-					println q
-					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,(.*-\\d{4})\" site/target/p2content.xml")
-					println qualifier
 			
 					setTestStatus(statusCode)
 					
@@ -86,7 +81,7 @@ timestamps {
 					}
 					
 					// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
-					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group\' range='\\[.*,(.*-\\d{4})\" site/target/p2content.xml")
+					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,(.*-\\d{4})\" site/target/p2content.xml")
 					
 					stage('Deploy obfuscation') {
 						def mvnOptions = '-Dproguard -DforceContextQualifier=${qualifier}_test'
