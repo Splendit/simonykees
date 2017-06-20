@@ -55,6 +55,10 @@ timestamps {
 			
 					setTestStatus(statusCode)
 					
+					// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
+					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,(.*-\\d{4})\" site/target/p2content.xml")
+					println qualifier
+					
 					// collects unit test results
 					junit '**/target/surefire-reports/TEST-*.xml'
 					archive 'target/*.jar'
@@ -82,6 +86,7 @@ timestamps {
 					
 					// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
 					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,(.*-\\d{4})\" site/target/p2content.xml")
+					println qualifier
 					
 					stage('Deploy obfuscation') {
 						def mvnOptions = '-Dproguard -DforceContextQualifier=${qualifier}_test'
