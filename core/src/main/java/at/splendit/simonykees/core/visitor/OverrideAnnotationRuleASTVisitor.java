@@ -29,7 +29,8 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  */
 public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final String OVERRIDE = Override.class.getSimpleName();
+	private static final String OVERRIDE_SIMPLE_NAME = Override.class.getSimpleName();
+	private static final String JAVA_LANG_OVERRIDE = java.lang.Override.class.getName();
 
 	@Override
 	public boolean visit(TypeDeclaration node) {
@@ -99,7 +100,7 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 		// add @Override to methods marked for annotation
 		toBeAnnotated.stream()
 				.forEach(method -> astRewrite.getListRewrite(method, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(
-						NodeBuilder.newMarkerAnnotation(node.getAST(), node.getAST().newName(OVERRIDE)), null));
+						NodeBuilder.newMarkerAnnotation(node.getAST(), node.getAST().newName(OVERRIDE_SIMPLE_NAME)), null));
 	}
 
 	/**
@@ -112,8 +113,9 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	private boolean isOverrideAnnotated(MethodDeclaration method) {
 
 		return ASTNodeUtil.convertToTypedList(method.modifiers(), MarkerAnnotation.class).stream()
-				.map(MarkerAnnotation::getTypeName)
-				.filter(typeName -> OVERRIDE.equals(typeName.getFullyQualifiedName())).findAny().isPresent();
+				.map(MarkerAnnotation::getTypeName).filter(typeName -> OVERRIDE_SIMPLE_NAME.equals(typeName.getFullyQualifiedName())
+						|| JAVA_LANG_OVERRIDE.equals(typeName.getFullyQualifiedName()))
+				.findAny().isPresent();
 	}
 
 	/**
