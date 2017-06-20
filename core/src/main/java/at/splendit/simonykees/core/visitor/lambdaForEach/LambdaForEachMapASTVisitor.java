@@ -149,13 +149,25 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		return true;
 	}
 
+	/**
+	 * Inserts the modifier to the parameter of the lambda expression if it has
+	 * only one parameter represented with a {@link SingleVariableDeclaration}.
+	 * 
+	 * @param lambdaExpression
+	 *            a node representing a lambda expression
+	 * @param modifier
+	 *            the modifier to be inserted
+	 */
 	private void insertModifier(LambdaExpression lambdaExpression, Modifier modifier) {
 		if (modifier != null) {
 			List<SingleVariableDeclaration> params = ASTNodeUtil.convertToTypedList(lambdaExpression.parameters(),
 					SingleVariableDeclaration.class);
-			SingleVariableDeclaration param = params.get(0);
-			ListRewrite paramRewriter = astRewrite.getListRewrite(param, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
-			paramRewriter.insertFirst(astRewrite.createCopyTarget(modifier), null);
+			if (params.size() == 1) {
+				SingleVariableDeclaration param = params.get(0);
+				ListRewrite paramRewriter = astRewrite.getListRewrite(param,
+						SingleVariableDeclaration.MODIFIERS2_PROPERTY);
+				paramRewriter.insertFirst(astRewrite.createCopyTarget(modifier), null);
+			}
 		}
 	}
 
@@ -316,7 +328,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 									
 								} else {
 									/*
-									 * if the parameter is not referenced, then just
+									 * if the parameter is not referenced, then
 									 * store the declared name it will be checked for
 									 * references after the map variable is found.
 									 */
