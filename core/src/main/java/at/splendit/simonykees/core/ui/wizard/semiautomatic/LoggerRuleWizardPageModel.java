@@ -106,11 +106,11 @@ public class LoggerRuleWizardPageModel {
 		String sysErrCurr = currentSelectionMap.get(StandardLoggerConstants.SYSTEM_ERR_PRINT);
 		String stackTraceCurr = currentSelectionMap.get(StandardLoggerConstants.PRINT_STACKTRACE);
 
-		int sysOutCurrSeverityLevel = (sysOutCurr.equals(NO_SEVERITY_LEVEL) || sysOutCurr.isEmpty()) ? 0
+		int sysOutCurrSeverityLevel = (NO_SEVERITY_LEVEL.equals(sysOutCurr) || sysOutCurr.isEmpty()) ? 0
 				: rule.getSystemOutReplaceOptions().get(sysOutCurr);
-		int sysErrCurrSeverityLevel = (sysErrCurr.equals(NO_SEVERITY_LEVEL) || sysErrCurr.isEmpty()) ? 0
+		int sysErrCurrSeverityLevel = (NO_SEVERITY_LEVEL.equalsIgnoreCase(sysErrCurr) || sysErrCurr.isEmpty()) ? 0
 				: rule.getSystemErrReplaceOptions().get(sysErrCurr);
-		int stackTraceCurrSeverityLevel = (stackTraceCurr.equals(NO_SEVERITY_LEVEL) || stackTraceCurr.isEmpty()) ? 0
+		int stackTraceCurrSeverityLevel = (NO_SEVERITY_LEVEL.equals(stackTraceCurr) || stackTraceCurr.isEmpty()) ? 0
 				: rule.getPrintStackTraceReplaceOptions().get(stackTraceCurr);
 
 		if (sysOutCurrSeverityLevel == 0 && sysErrCurrSeverityLevel == 0 && stackTraceCurrSeverityLevel == 0) {
@@ -126,9 +126,6 @@ public class LoggerRuleWizardPageModel {
 		} else if (!(sysErrCurrSeverityLevel == 0) && (sysErrCurrSeverityLevel < sysOutCurrSeverityLevel)) {
 			// System.err shouldn't have lesser severity level than System.out
 			selectionStatus = Messages.LoggerRuleWizardPageModel_warn_errSeverity;
-//		} else if (sysOutCurrSeverityLevel == 0 || sysErrCurrSeverityLevel == 0 || stackTraceCurrSeverityLevel == 0) {
-//			// No logging type should be left blank
-//			selectionStatus = Messages.LoggerRuleWizardPageModel_warn_blankLoggingType;
 		} else {
 			selectionStatus = ""; //$NON-NLS-1$
 		}
