@@ -82,7 +82,7 @@ timestamps {
 					
 					// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
 					// grep returns result with an \n therefore we need to trim
-					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,(.*-\\d{4})\" site/target/p2content.xml").trim()
+					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
 					
 					stage('Deploy obfuscation') {
 						def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
