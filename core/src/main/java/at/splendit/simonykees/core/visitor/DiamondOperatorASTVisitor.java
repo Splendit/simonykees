@@ -153,7 +153,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 						}
 					}
 
-					if (!rhsTypeArguments.isEmpty() && rhsTypeArguments.size() == parameterTypeArgs.length) {
+					if (parameterTypeArgs != null && rhsTypeArguments.size() == parameterTypeArgs.length) {
 						ITypeBinding argBinding = parameterizedType.resolveBinding();
 						ITypeBinding[] argTypeBindings = argBinding.getTypeArguments();
 
