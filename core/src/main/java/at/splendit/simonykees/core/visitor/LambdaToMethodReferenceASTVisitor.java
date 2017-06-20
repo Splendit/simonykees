@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CreationReference;
@@ -175,7 +176,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 			else if (ASTNode.CLASS_INSTANCE_CREATION == body.getNodeType()) {
 				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) body;
 
-				if (lambdaParams.size() == classInstanceCreation.arguments().size()) {
+				AnonymousClassDeclaration annonymousClass = classInstanceCreation.getAnonymousClassDeclaration();
+				if (annonymousClass == null && lambdaParams.size() == classInstanceCreation.arguments().size()) {
 					Type classInstanceCreationType = classInstanceCreation.getType();
 
 					CreationReference ref = astRewrite.getAST().newCreationReference();

@@ -170,6 +170,15 @@ public class LambdaToMethodReferenceRule {
 		Set<Person> persSet3 = transferElements(personList, () -> new HashSet());
 
 		Set<Person> persSet4 = transferElements(personList, () -> new HashSet<Person>());
+		
+		Runnable t = () -> new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				
+			}
+		};
 
 		Set<Person> persSet5 = transferElements(personList, HashSet<Person>::new);
 
