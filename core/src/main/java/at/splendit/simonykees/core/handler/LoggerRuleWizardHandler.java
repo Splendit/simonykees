@@ -78,12 +78,24 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 											List<ICompilationUnit> containingErrorList = refactoringPipeline
 													.prepareRefactoring(selectedJavaElements, monitor);
 											if (monitor.isCanceled()) {
+												/*
+												 * Workaround that prevents
+												 * selection of multiple
+												 * projects in the Package
+												 * Explorer.
+												 * 
+												 * See SIM-496
+												 */
+												if (refactoringPipeline.isMultipleProjects()) {
+													synchronizeWithUIShowMultiprojectMessage();
+												}
 												refactoringPipeline.clearStates();
 												Activator.setRunning(false);
 												return Status.CANCEL_STATUS;
 											} else if (null != containingErrorList && !containingErrorList.isEmpty()) {
 												synchronizeWithUIShowCompilationErrorMessage(containingErrorList, event,
-														refactoringPipeline, selectedJavaElements, loggerRule, selectedJavaProjekt);
+														refactoringPipeline, selectedJavaElements, loggerRule,
+														selectedJavaProjekt);
 											} else {
 												synchronizeWithUIShowLoggerRuleWizard(event, refactoringPipeline,
 														selectedJavaElements, loggerRule, selectedJavaProjekt);
@@ -102,8 +114,7 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 								job.schedule();
 
 								return true;
-								
-								
+
 							} else {
 								Activator.setRunning(false);
 							}
@@ -125,8 +136,9 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 			}
 		}
 		return null;
+
 	}
-	
+
 	/**
 	 * Method used to open SelectRulesWizard from non UI thread
 	 */
@@ -137,19 +149,16 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 			@Override
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				//HandlerUtil.getActiveShell(event)
+				// HandlerUtil.getActiveShell(event)
 				final WizardDialog dialog = new WizardDialog(shell,
 						new LoggerRuleWizard(selectedJavaProjekt, loggerRule, refactoringPipeline)) {
 					/*
-					 * Removed unnecessary empty space on the
-					 * bottom of the wizard intended for
-					 * ProgressMonitor that is not
+					 * Removed unnecessary empty space on the bottom of the
+					 * wizard intended for ProgressMonitor that is not
 					 * used(non-Javadoc)
 					 * 
-					 * @see
-					 * org.eclipse.jface.wizard.WizardDialog#
-					 * createDialogArea(org.eclipse.swt.widgets.
-					 * Composite)
+					 * @see org.eclipse.jface.wizard.WizardDialog#
+					 * createDialogArea(org.eclipse.swt.widgets. Composite)
 					 */
 					@Override
 					protected Control createDialogArea(Composite parent) {
@@ -173,7 +182,7 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 			}
 		});
 	}
-	
+
 	/**
 	 * Method used to open CompilationErrorsMessageDialog from non UI thread to
 	 * list all Java files that will be skipped because they contain compilation
@@ -204,7 +213,7 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 			}
 		});
 	}
-	
+
 	/**
 	 * Method used to open InformationDialog from non UI thread
 	 * RefactoringException is thrown if java element does not exist or if an
@@ -223,7 +232,7 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 			}
 		});
 	}
-	
+
 	/**
 	 * Method used to open MessageDialog informing the user that selection
 	 * contains no Java files without compilation error from non UI thread
@@ -243,4 +252,15 @@ public class LoggerRuleWizardHandler extends AbstractSimonykeesHandler {
 		});
 	}
 
+	private void synchronizeWithUIShowMultiprojectMessage() {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				SimonykeesMessageDialog.openMessageDialog(shell,
+						Messages.SelectRulesWizardHandler_multipleProjectsWarning, MessageDialog.WARNING);
+			}
+		});
+	}
 }

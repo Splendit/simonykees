@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>at.splendit.jSparrow</groupId>
@@ -105,7 +103,7 @@
 			<url>https://jenkins.splendit.loc/view/simonykees/job/simonykees%20master/site/</url>
 		</site>
 		<repository>
-			<id>pdrone.85838837-477a-445f-aee1-757e4a362481</id>
+			<id>pdrone</id>
 			<url>http://packagedrone-vm-01.splendit.loc:8080/maven/85838837-477a-445f-aee1-757e4a362481</url>
 		</repository>
 	</distributionManagement>
@@ -149,6 +147,11 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 
 		<basedir>/simonykees</basedir>
+
+		<jsparrow.qualifier.quotes></jsparrow.qualifier.quotes>
+		<jsparrow.qualifier.noProguard></jsparrow.qualifier.noProguard>
+		<jsparrow.qualifier.production></jsparrow.qualifier.production>
+		<jsparrow.qualifier.tycho>${jsparrow.qualifier.quotes}${jsparrow.qualifier.noProguard}${jsparrow.qualifier.production}${jsparrow.qualifier.quotes}</jsparrow.qualifier.tycho>
 	</properties>
 
 	<repositories>
@@ -352,7 +355,7 @@
 					<artifactId>tycho-packaging-plugin</artifactId>
 					<version>${tycho.version}</version>
 					<configuration>
-						<format>yyyyMMdd-HHmm</format>
+						<format>yyyyMMdd-HHmm${jsparrow.qualifier.tycho}</format>
 						<archive>
 							<manifestEntries>
 								<!-- "Built-By" should not be the logged in user -->
@@ -406,14 +409,91 @@
 			<properties>
 				<!-- skipping test for proguard because they dont work -->
 				<maven.test.skip>true</maven.test.skip>
+
+				<jsparrow.qualifier.noProguard></jsparrow.qualifier.noProguard>
 			</properties>
+		</profile>
+		<profile>
+			<id>noProguard</id>
+			<activation>
+				<property>
+					<name>!proguard</name>
+				</property>
+			</activation>
+			<properties>
+				<jsparrow.qualifier.quotes>'</jsparrow.qualifier.quotes>
+				<jsparrow.qualifier.noProguard>_noProguard</jsparrow.qualifier.noProguard>
+			</properties>
+		</profile>
+		<profile>
+			<id>test</id>
+			<activation>
+				<property>
+					<name>!production</name>
+				</property>
+			</activation>
+			<properties>
+				<jsparrow.qualifier.quotes>'</jsparrow.qualifier.quotes>
+				<jsparrow.qualifier.production>_test</jsparrow.qualifier.production>
+			</properties>
+		</profile>
+
+		<!-- all deployment channels on packagedrone -->
+		<profile>
+			<id>develop-test-noProguard</id>
 			<distributionManagement>
 				<repository>
-					<id>pdrone.76310b5f-bf75-4782-bd20-c44376584fc5</id>
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/76310b5f-bf75-4782-bd20-c44376584fc5</url>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/a32ae4dc-cb4b-4e24-bd06-f9a8b70beccf</url>
 				</repository>
 			</distributionManagement>
 		</profile>
+		<profile>
+			<id>develop-test-proguard</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/7a1744d9-a035-4a13-94a6-2cda46bb451c</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>master-test-noProguard</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/653a7028-10df-46ba-b767-fb84d9568e25</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>master-test-proguard</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/01c6ea10-b7f6-44a5-8198-02d8d76f62d6</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>master-production-noProguard</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/ba0aba2a-c2dc-4b08-afd9-75d16b083bc8</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>master-production-proguard</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/60a872b9-167b-4a41-a1d3-f2d6ca0df79d</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+
 	</profiles>
 
 	<reporting>

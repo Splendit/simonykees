@@ -275,7 +275,10 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 						VariableDeclarationStatement declStatement = (VariableDeclarationStatement) statement;
 						List<VariableDeclarationFragment> fragments = ASTNodeUtil
 								.convertToTypedList(declStatement.fragments(), VariableDeclarationFragment.class);
-						if (!declStatement.getType().isArrayType() && referencesName(declStatement, parameter)) {
+						Type type = declStatement.getType();
+
+						if (!involvesTypeVariables(type.resolveBinding()) && !declStatement.getType().isArrayType()
+								&& referencesName(declStatement, parameter)) {
 							if (fragments.size() == 1) {
 								/*
 								 * a map variable is found. store its name and
@@ -301,8 +304,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 							}
 						} else {
 							/*
-							 * if the parameter is not referenced, then just
-							 * store the declared name it will be checked for
+							 * store the declared name. It will be checked for
 							 * references after the map variable is found.
 							 */
 							extractableStatements.add(statement);
@@ -507,5 +509,36 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		public MethodInvocation getStreamInvocation() {
 			return streamInvocation;
 		}
+	}
+
+	/**
+	 * Checks if the given type is a type variable or involves a type 
+	 * variable as a parameter.
+	 * 
+	 * @param type
+	 *            a type to be checked
+	 * 
+	 * @return {@code true} if the type involves a type variable, or {@code false} otherwise.
+	 */
+	public boolean involvesTypeVariables(ITypeBinding type) {
+		
+		if (type.isParameterizedType()) {
+			ITypeBinding[] arguments = type.getTypeArguments();
+			for (ITypeBinding argument : arguments) {
+				if(argument.isParameterizedType()) {
+					// recursive call
+					return involvesTypeVariables(argument);
+				}
+				
+				ITypeBinding typeDeclaration = argument.getTypeDeclaration();
+				if (typeDeclaration.isTypeVariable()) {
+					return true;
+				}
+			}
+		} else if(type.isTypeVariable()) {
+			return true;
+		}
+
+		return false;
 	}
 }
