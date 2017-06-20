@@ -231,6 +231,8 @@ public class EnhancedForLoopToStreamForEachRule {
 			TestClass tc = new TestClass(1);
 		}
 
+		((List) stringList1).stream().forEach(System.out::println);
+
 		return "";
 	}
 

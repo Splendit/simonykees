@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -53,7 +54,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 				 * create method invocation java.util.Collection::stream on the
 				 * expression of the enhanced for loop with no parameters
 				 */
-				Expression expressionCopy = (Expression) astRewrite.createCopyTarget(expression);
+				Expression expressionCopy = createExpressionForStreamMethodInvocation(expression);
 				SimpleName streamMethodName = astRewrite.getAST().newSimpleName("stream"); //$NON-NLS-1$
 
 				MethodInvocation streamMethodInvocation = astRewrite.getAST().newMethodInvocation();
@@ -137,5 +138,26 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 				parameter);
 		statement.accept(statementVisitor);
 		return statementVisitor.isStatementsValid();
+	}
+
+	/**
+	 * creates a copy target for the expression on the left of the stream()
+	 * method invocation. if the expression itself is a cast expression, then it
+	 * will be wrapped in a parenthesized expression.
+	 * 
+	 * @param expression
+	 *            the expression, which will be on the left of the stream method
+	 *            invocation
+	 * @return a copy target of the given expression, or a parenthesized
+	 *         expression (if expression is of type CastExpression.
+	 */
+	private Expression createExpressionForStreamMethodInvocation(Expression expression) {
+		Expression expressionCopy = (Expression) astRewrite.createCopyTarget(expression);
+		if (expression.getNodeType() == ASTNode.CAST_EXPRESSION) {
+			ParenthesizedExpression parenthesizedExpression = astRewrite.getAST().newParenthesizedExpression();
+			parenthesizedExpression.setExpression(expressionCopy);
+			return parenthesizedExpression;
+		}
+		return expressionCopy;
 	}
 }
