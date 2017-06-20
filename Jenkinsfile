@@ -81,7 +81,7 @@ timestamps {
 							// first parameter is the dir, second parameter is the subdirectory and optional
 						//	sh("./tag-deployment.sh $env.BRANCH_NAME main")
 						//	sh("git push $backupOrigin --tags")
-						}
+						//}
 					}
 					
 					// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
