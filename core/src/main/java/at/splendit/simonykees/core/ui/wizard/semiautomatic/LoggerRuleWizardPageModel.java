@@ -106,11 +106,11 @@ public class LoggerRuleWizardPageModel {
 		String sysErrCurr = currentSelectionMap.get(StandardLoggerConstants.SYSTEM_ERR_PRINT);
 		String stackTraceCurr = currentSelectionMap.get(StandardLoggerConstants.PRINT_STACKTRACE);
 
-		int sysOutCurrSeverityLevel = (sysOutCurr.equals(NO_SEVERITY_LEVEL)) ? 0
+		int sysOutCurrSeverityLevel = (sysOutCurr.equals(NO_SEVERITY_LEVEL) || sysOutCurr.isEmpty()) ? 0
 				: rule.getSystemOutReplaceOptions().get(sysOutCurr);
-		int sysErrCurrSeverityLevel = (sysErrCurr.equals(NO_SEVERITY_LEVEL)) ? 0
+		int sysErrCurrSeverityLevel = (sysErrCurr.equals(NO_SEVERITY_LEVEL) || sysErrCurr.isEmpty()) ? 0
 				: rule.getSystemErrReplaceOptions().get(sysErrCurr);
-		int stackTraceCurrSeverityLevel = (stackTraceCurr.equals(NO_SEVERITY_LEVEL)) ? 0
+		int stackTraceCurrSeverityLevel = (stackTraceCurr.equals(NO_SEVERITY_LEVEL) || stackTraceCurr.isEmpty()) ? 0
 				: rule.getPrintStackTraceReplaceOptions().get(stackTraceCurr);
 
 		if (sysOutCurrSeverityLevel == 0 && sysErrCurrSeverityLevel == 0 && stackTraceCurrSeverityLevel == 0) {
