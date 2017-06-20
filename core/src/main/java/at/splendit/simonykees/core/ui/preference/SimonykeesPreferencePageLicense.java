@@ -2,15 +2,18 @@ package at.splendit.simonykees.core.ui.preference;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
@@ -18,13 +21,13 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -33,22 +36,24 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Bundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.i18n.Messages;
-import at.splendit.simonykees.core.license.LicenseChecker;
-import at.splendit.simonykees.core.license.LicenseManager;
-import at.splendit.simonykees.core.license.LicenseStatus;
-import at.splendit.simonykees.core.license.LicenseType;
+import at.splendit.simonykees.i18n.ExceptionMessages;
+import at.splendit.simonykees.i18n.Messages;
+import at.splendit.simonykees.license.api.LicenseValidationService;
 
 /**
  * Preference page for displaying license information and updating license key.
  * 
- * @author Ardit Ymeri, Andreja Sambolec
+ * @author Ardit Ymeri, Andreja Sambolec, Matthias Webhofer
  * @since 1.0
  *
  */
-public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
+public class SimonykeesPreferencePageLicense extends PreferencePage implements IWorkbenchPreferencePage {
+
+	private static final Logger logger = LoggerFactory.getLogger(SimonykeesPreferencePageLicense.class);
 
 	private Label licenseLabel;
 	private Label licenseStatusLabel;
@@ -60,13 +65,28 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 
 	private static final int LICENSE_LABEL_MAX_WIDTH = 370;
 
-	private static final String DATE_FORMAT_PATTERN = "MMMM dd, yyyy"; //$NON-NLS-1$
 	private static final String LOGO_PATH_ACTIVE = "icons/jSparrow_FIN_2_scaled.png"; //$NON-NLS-1$
 	private static final String LOGO_PATH_INACTIVE = "icons/jSparrow_FIN_3_scaled.png"; //$NON-NLS-1$
 
+	@Inject
+	private LicenseValidationService licenseValidationService;
+	private boolean isLicenseValidationServiceAvailable = false;
+
 	public SimonykeesPreferencePageLicense() {
-		super(GRID);
+		super();
 		setPreferenceStore(Activator.getDefault().getPreferenceStore());
+		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
+	}
+
+	@PostConstruct
+	private void postConstruct() {
+		if (licenseValidationService != null)
+			isLicenseValidationServiceAvailable = true;
+	}
+
+	@PreDestroy
+	private void preDestroy() {
+		isLicenseValidationServiceAvailable = false;
 	}
 
 	@Override
@@ -75,10 +95,10 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 	}
 
 	@Override
-	protected void createFieldEditors() {
-
+	protected Control createContents(Composite parent) {
 		Display display = getShell().getDisplay();
-		Composite composite = new Composite(getFieldEditorParent(), SWT.NONE);
+		Composite composite = new Composite(parent, SWT.NONE);
+		composite.setFont(parent.getFont());
 		GridData gd = new GridData(SWT.LEFT, SWT.CENTER, false, true);
 		gd.verticalSpan = 5;
 		composite.setLayoutData(gd);
@@ -103,19 +123,21 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 		RowData licenseRowData = new RowData();
 		licenseRowData.width = LICENSE_LABEL_MAX_WIDTH;
 		licenseLabel.setLayoutData(licenseRowData);
+		licenseLabel.setFont(parent.getFont());
 
 		Link jSparrowLink = new Link(composite, SWT.NONE);
+		jSparrowLink.setFont(parent.getFont());
 		jSparrowLink.setText(Messages.SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow);
 
 		licenseStatusLabel = new Label(composite, SWT.NONE);
-		FontDescriptor boldDescriptor = FontDescriptor.createFrom(licenseStatusLabel.getFont()).setStyle(SWT.BOLD);
-		Font boldFont = boldDescriptor.createFont(composite.getDisplay());
-		licenseStatusLabel.setFont(boldFont);
+		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont()).setStyle(SWT.BOLD);
+		licenseStatusLabel.setFont(boldDescriptor.createFont(composite.getDisplay()));
 		licenseStatusLabel.setForeground(display.getSystemColor(SWT.COLOR_RED));
 		licenseStatusLabel.setVisible(true);
-		
+
 		updateButton = new Button(composite, SWT.PUSH);
 		updateButton.setText(Messages.SimonykeesPreferencePageLicense_update_license_key_button);
+		updateButton.setFont(parent.getFont());
 		updateButton.addSelectionListener(new SelectionAdapter() {
 
 			@Override
@@ -145,63 +167,38 @@ public class SimonykeesPreferencePageLicense extends FieldEditorPreferencePage i
 		updateDisplayedInformation();
 
 		updateButton.setVisible(true);
-		
+
 		composite.addDisposeListener(new DisposeListener() {
-			
+
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
 				jSparrowImageActive.dispose();
 				jSparrowImageInactive.dispose();
-				boldFont.dispose();
 			}
-		});		
-		
+		});
+
 		composite.pack();
-	}
-
-	private String extractDateFormat(ZonedDateTime date) {
-
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
-		String strDate = date.format(formatter);
-
-		return strDate;
+		return composite;
 	}
 
 	private void updateDisplayedInformation() {
-		LicenseManager licenseManger = LicenseManager.getInstance();
-		LicenseChecker licenseData = licenseManger.getValidationData();
-		LicenseType licenseType = licenseData.getType();
-		ZonedDateTime expireationDate = licenseData.getExpirationDate();
-		LicenseStatus status = licenseData.getLicenseStatus();
+		if (isLicenseValidationServiceAvailable) {
+			licenseLabel.setText(licenseValidationService.getDisplayableLicenseInformation());
 
-		if (licenseType != null && expireationDate != null) {
-			String licenseLabelText = Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as
-					+ licenseType.getLicenseName();
-
-			if (!LicenseType.TRY_AND_BUY.equals(licenseType)) {
-				String licenseKey = licenseManger.getLicensee().getLicenseeNumber();
-				licenseLabelText += " " + Messages.SimonykeesPreferencePageLicense_under_key_label //$NON-NLS-1$
-						+ " " + licenseKey //$NON-NLS-1$
-						+ "."; //$NON-NLS-1$
+			if (!licenseValidationService.isValid()) {
+				licenseStatusLabel.setText(licenseValidationService.getLicenseStautsUserMessage());
+				logoLabel.setImage(jSparrowImageInactive);
 			} else {
-				licenseLabelText += "."; //$NON-NLS-1$
+				licenseStatusLabel.setText(""); //$NON-NLS-1$
+				logoLabel.setImage(jSparrowImageActive);
 			}
-			licenseLabelText += " " //$NON-NLS-1$
-					+ Messages.SimonykeesPreferencePageLicense_jsparrow_valid_until + extractDateFormat(expireationDate)
-					+ "."; //$NON-NLS-1$
-			licenseLabel.setText(licenseLabelText);
-		}
-
-		if (!licenseData.isValid()) {
-			licenseStatusLabel.setText(status.getUserMessage());
-			logoLabel.setImage(jSparrowImageInactive);
 		} else {
-			licenseStatusLabel.setText(""); //$NON-NLS-1$
-			;
-			logoLabel.setImage(jSparrowImageActive);
+			// TODO: proper error handling
+			logger.error(ExceptionMessages.SimonykeesPreferencePageLicense_license_service_unavailable);
 		}
 
 		licenseLabel.getParent().pack();
 		licenseLabel.getParent().layout(true);
 	}
+
 }

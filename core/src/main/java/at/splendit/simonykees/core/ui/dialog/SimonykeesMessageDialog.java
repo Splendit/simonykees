@@ -3,7 +3,6 @@ package at.splendit.simonykees.core.ui.dialog;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
@@ -18,10 +17,11 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.SimonykeesException;
-import at.splendit.simonykees.core.i18n.Messages;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * Simple help dialog that gets populated with default values
@@ -30,6 +30,8 @@ import at.splendit.simonykees.core.i18n.Messages;
  * @since 0.9
  */
 public class SimonykeesMessageDialog extends MessageDialog {
+
+	private static final Logger logger = LoggerFactory.getLogger(SimonykeesMessageDialog.class);
 
 	private static final String MAIL_BUGREPORT = Messages.SimonykeesMessageDialog_bugreport_email;
 	private static final String dialogTitle = Messages.aa_codename;
@@ -54,9 +56,15 @@ public class SimonykeesMessageDialog extends MessageDialog {
 				defaultIndex, dialogButtonLabels).open() == 0;
 	}
 
+	public static boolean openConfirmDialog(Shell parentShell, String message) {
+		messageText = message;
+		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText,
+				MessageDialog.CONFIRM, defaultIndex, new String[] { Messages.ui_cancel, Messages.ui_ok }).open() == 1;
+	}
+
 	public static boolean openErrorMessageDialog(Shell parentShell, SimonykeesException simonykeesException) {
 		messageText = ((simonykeesException != null) ? simonykeesException.getUiMessage() : dialogErrorMessage)
-				+ System.lineSeparator() + "<a>" + MAIL_BUGREPORT + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$
+				+ System.lineSeparator() + MAIL_BUGREPORT;
 		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, MessageDialog.ERROR,
 				defaultIndex, dialogButtonLabels).open() == 0;
 	}
@@ -87,7 +95,7 @@ public class SimonykeesMessageDialog extends MessageDialog {
 					try {
 						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(arg0.text));
 					} catch (PartInitException | MalformedURLException e) {
-						Activator.log(IStatus.ERROR, Messages.SimonykeesMessageDialog_open_browser_error_message, e);
+						logger.error(Messages.SimonykeesMessageDialog_open_browser_error_message, e);
 					}
 				}
 			});

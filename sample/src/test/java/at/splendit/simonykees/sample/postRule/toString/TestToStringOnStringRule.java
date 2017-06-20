@@ -84,7 +84,7 @@ public class TestToStringOnStringRule {
 		String result = 
 				stringList
 				.stream()
-				.map(s -> s.toString() + ";")
+				.map(s -> s + ";")
 				.collect(Collectors.joining(","));
 		return result;
 	}

@@ -12,48 +12,9 @@ import java.util.stream.Collectors;
 @SuppressWarnings({ "unused", "unchecked", "rawtypes", "nls" })
 public class DiamondOperatorRule {
 
-	private class GenericSample<T> {
-		private T t;
-
-		public GenericSample(T t) {
-			this.t = t;
-		}
-
-		public T getValue() {
-			return t;
-		}
-	}
-
-	private abstract class Foo<T> {
-		private T t;
-		private List<T> field = new ArrayList<>();
-		private List<String>[] arrayList;
-
-		public Foo(T t) {
-			setValue(t);
-			arrayList = new ArrayList[2];
-		}
-
-		private void setValue(T t) {
-			this.t = t;
-		}
-
-		public T getValue() {
-			return t;
-		}
-
-		public void resetValue() {
-			this.field = new ArrayList<>();
-			arrayList[0] = new ArrayList<>();
-			for (List<String> list = new ArrayList<>(); !list.isEmpty();) {
-				list.add("");
-			}
-		}
-	}
-
 	private String concatRawTypeList(List objects) {
 		objects.add(new Object());
-		Object val = objects.stream().map(o -> o.toString()).collect(Collectors.joining(", "));
+		Object val = objects.stream().map(Object::toString).collect(Collectors.joining(", "));
 		return val.toString();
 	}
 
@@ -81,7 +42,9 @@ public class DiamondOperatorRule {
 	}
 
 	public void multipleDeclarationStatement(String input) {
-		List<String> list1 = new ArrayList<>(), list2 = new ArrayList<>(), list3 = new ArrayList<>();
+		List<String> list1 = new ArrayList<>();
+		List<String> list2 = new ArrayList<>();
+		List<String> list3 = new ArrayList<>();
 		list1.add(input);
 		list2.add(input);
 		list3.add(input);
@@ -100,7 +63,9 @@ public class DiamondOperatorRule {
 	}
 
 	public void multipleMapDeclarationStatement(String input) {
-		Map<String, Number> map1 = new HashMap<>(), map2 = new HashMap<>(), map3 = new HashMap<>();
+		Map<String, Number> map1 = new HashMap<>();
+		Map<String, Number> map2 = new HashMap<>();
+		Map<String, Number> map3 = new HashMap<>();
 		map1.put(input, 10);
 		map2.put(input, 11);
 		map3.put(input, 12);
@@ -141,9 +106,52 @@ public class DiamondOperatorRule {
 		concatTypedList(new ArrayList<>(), 1, new HashMap<>());
 	}
 
+	public void collectionArgumentInConstructor(String input) {
+		ArrayList<String> ndCollection = new ArrayList<>(new ArrayList<String>(1));
+	}
+
 	public String anonymousGenericInstatiation(String input) {
 		Foo<String> foo = new Foo<String>(input) {
 		};
 		return foo.getValue();
+	}
+
+	private class GenericSample<T> {
+		private T t;
+
+		public GenericSample(T t) {
+			this.t = t;
+		}
+
+		public T getValue() {
+			return t;
+		}
+	}
+
+	private abstract class Foo<T> {
+		private T t;
+		private List<T> field = new ArrayList<>();
+		private List<String>[] arrayList;
+
+		public Foo(T t) {
+			setValue(t);
+			arrayList = new ArrayList[2];
+		}
+
+		private void setValue(T t) {
+			this.t = t;
+		}
+
+		public T getValue() {
+			return t;
+		}
+
+		public void resetValue() {
+			this.field = new ArrayList<>();
+			arrayList[0] = new ArrayList<>();
+			for (List<String> list = new ArrayList<>(); !list.isEmpty();) {
+				list.add("");
+			}
+		}
 	}
 }

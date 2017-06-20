@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
-import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * The {@link TryWithResourceASTVisitor} is used to find resources in an
@@ -37,17 +37,13 @@ import at.splendit.simonykees.core.visitor.AbstractCompilationUnitASTVisitor;
  * @since 0.9
  */
 
-public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor {
+public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final Integer AUTO_CLOSEABLE_KEY = 1;
-	private static final String AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME = "java.lang.AutoCloseable"; //$NON-NLS-1$
-	private static final String CLOSEABLE_FULLY_QUALLIFIED_NAME = "java.io.Closeable"; //$NON-NLS-1$
+	private static final String AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME = java.lang.AutoCloseable.class.getName();
+	private static final String CLOSEABLE_FULLY_QUALLIFIED_NAME = java.io.Closeable.class.getName();
 	private static final String CLOSE = "close"; //$NON-NLS-1$
 
 	public TryWithResourceASTVisitor() {
-		super();
-		this.fullyQuallifiedNameMap.put(AUTO_CLOSEABLE_KEY,
-				generateFullyQuallifiedNameList(AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME, CLOSEABLE_FULLY_QUALLIFIED_NAME));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -71,8 +67,8 @@ public class TryWithResourceASTVisitor extends AbstractCompilationUnitASTVisitor
 			 * after first non resource object
 			 */
 			ITypeBinding typeBind = varDeclStatmentNode.getType().resolveBinding();
-			if (ClassRelationUtil.isInheritingContentOfRegistertITypes(typeBind,
-					iTypeMap.get(AUTO_CLOSEABLE_KEY))) {
+			if (ClassRelationUtil.isInheritingContentOfTypes(typeBind,
+					generateFullyQuallifiedNameList(AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME, CLOSEABLE_FULLY_QUALLIFIED_NAME))) {
 	
 				List<VariableDeclarationFragment>fragments = 
 						((List<Object>)varDeclStatmentNode.fragments())

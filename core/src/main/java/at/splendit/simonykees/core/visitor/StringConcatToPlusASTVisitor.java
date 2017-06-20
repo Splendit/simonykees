@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.visitor;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,27 +24,21 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class StringConcatToPlusASTVisitor extends AbstractCompilationUnitASTVisitor {
+public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final Integer STRING_KEY = 1;
-	private static final String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
+	private static final String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
 
 	private Set<MethodInvocation> modifyMethodInvocation = new HashSet<>();
 	private Map<MethodInvocation, Expression> alreadyReplacedExpression = new HashMap<>();
 
-	public StringConcatToPlusASTVisitor() {
-		super();
-		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
-	}
-
 	@Override
 	public boolean visit(MethodInvocation node) {
+		List<String> fullyQualifiedStringName = generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME);
 		if (StringUtils.equals("concat", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
-				&& ClassRelationUtil.isContentOfRegistertITypes(node.getExpression().resolveTypeBinding(),
-						iTypeMap.get(STRING_KEY))
+				&& ClassRelationUtil.isContentOfTypes(node.getExpression().resolveTypeBinding(), fullyQualifiedStringName)
 				&& ASTNode.EXPRESSION_STATEMENT != node.getParent().getNodeType() && node.arguments().size() == 1
-				&& ClassRelationUtil.isContentOfRegistertITypes(
-						((Expression) node.arguments().get(0)).resolveTypeBinding(), iTypeMap.get(STRING_KEY))) {
+				&& ClassRelationUtil.isContentOfTypes(
+						((Expression) node.arguments().get(0)).resolveTypeBinding(), fullyQualifiedStringName)) {
 			modifyMethodInvocation.add(node);
 		}
 		return true;

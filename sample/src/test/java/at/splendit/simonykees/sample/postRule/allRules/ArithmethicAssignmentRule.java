@@ -7,10 +7,10 @@ package at.splendit.simonykees.sample.postRule.allRules;
 @SuppressWarnings("nls")
 public class ArithmethicAssignmentRule {
 
-	private int int_a = 3;
-	private int int_c = 3;
-	private int int_b = 3;
-	private int int_q = 3;
+	private int intA = 3;
+	private int intC = 3;
+	private int intB = 3;
+	private int intQ = 3;
 
 	public String a(String i) {
 		i = i + "aaa";
@@ -20,7 +20,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * INTEGER
 	 */
-
 	public int testA(int i) {
 		i = (int) i + 1;
 		return i;
@@ -67,22 +66,22 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public int testI(int i) {
-		i = int_a + i - 4;
+		i = intA + i - 4;
 		return i;
 	}
 
 	public int testJ(int i) {
-		i = int_a + int_b;
+		i = intA + intB;
 		return i;
 	}
 
 	public int testK(int i) {
-		i += int_a;
+		i += intA;
 		return i;
 	}
 
 	public int testL(int i) {
-		i *= int_a;
+		i *= intA;
 		return i;
 	}
 
@@ -97,7 +96,7 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public int testO(int i) {
-		i = int_a * int_b / int_c * int_q * 3 - i;
+		i = intA * intB / intC * intQ * 3 - i;
 		return i;
 	}
 
@@ -264,7 +263,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * Corner cases
 	 */
-
 	// SIM-94
 	public Integer cornerCaseInteger(Integer i) {
 		i = i + 1;
@@ -329,7 +327,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * DOUBLE
 	 */
-
 	public double testA(double d) {
 		d = (double) d + 1;
 		return d;
@@ -371,22 +368,22 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public double testI(double d) {
-		d = int_a + d - 4;
+		d = intA + d - 4;
 		return d;
 	}
 
 	public double testJ(double d) {
-		d = int_a + int_b;
+		d = intA + intB;
 		return d;
 	}
 
 	public double testK(double d) {
-		d += int_a;
+		d += intA;
 		return d;
 	}
 
 	public double testL(double d) {
-		d *= int_a;
+		d *= intA;
 		return d;
 	}
 
@@ -401,7 +398,7 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public double testO(double d) {
-		d = int_a * int_b / int_c * int_q * 3 - d;
+		d = intA * intB / intC * intQ * 3 - d;
 		return d;
 	}
 
@@ -489,7 +486,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * FLOAT
 	 */
-
 	public float testA(float f) {
 		f = (float) f + 1;
 		return f;
@@ -531,22 +527,22 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public float testI(float f) {
-		f = int_a + f - 4;
+		f = intA + f - 4;
 		return f;
 	}
 
 	public float testJ(float f) {
-		f = int_a + int_b;
+		f = intA + intB;
 		return f;
 	}
 
 	public float testK(float f) {
-		f += int_a;
+		f += intA;
 		return f;
 	}
 
 	public float testL(float f) {
-		f *= int_a;
+		f *= intA;
 		return f;
 	}
 
@@ -561,7 +557,7 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public float testO(float f) {
-		f = int_a * int_b / int_c * int_q * 3 - f;
+		f = intA * intB / intC * intQ * 3 - f;
 		return f;
 	}
 
@@ -649,7 +645,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * LONG
 	 */
-
 	public long testA(long l) {
 		l = (long) l + 1;
 		return l;
@@ -691,22 +686,22 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public long testI(long l) {
-		l = int_a + l - 4;
+		l = intA + l - 4;
 		return l;
 	}
 
 	public long testJ(long l) {
-		l = int_a + int_b;
+		l = intA + intB;
 		return l;
 	}
 
 	public long testK(long l) {
-		l += int_a;
+		l += intA;
 		return l;
 	}
 
 	public long testL(long l) {
-		l *= int_a;
+		l *= intA;
 		return l;
 	}
 
@@ -721,7 +716,7 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public long testO(long l) {
-		l = int_a * int_b / int_c * int_q * 3 - l;
+		l = intA * intB / intC * intQ * 3 - l;
 		return l;
 	}
 
@@ -809,7 +804,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * SHORT
 	 */
-
 	public short testA(short s) {
 		s = (short) ((short) s + 1);
 		return s;
@@ -851,22 +845,22 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public short testI(short s) {
-		s = (short) (int_a + s - 4);
+		s = (short) (intA + s - 4);
 		return s;
 	}
 
 	public short testJ(short s) {
-		s = (short) (int_a + int_b);
+		s = (short) (intA + intB);
 		return s;
 	}
 
 	public short testK(short s) {
-		s = (short) (int_a + s);
+		s = (short) (intA + s);
 		return s;
 	}
 
 	public short testL(short s) {
-		s = (short) (s * int_a);
+		s = (short) (s * intA);
 		return s;
 	}
 
@@ -881,7 +875,7 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public short testO(short s) {
-		s = (short) (int_a * int_b / int_c * int_q * 3 - s);
+		s = (short) (intA * intB / intC * intQ * 3 - s);
 		return s;
 	}
 
@@ -969,7 +963,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * BYTE
 	 */
-
 	public byte testA(byte b) {
 		b = (byte) ((byte) b + 1);
 		return b;
@@ -1011,22 +1004,22 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public byte testI(byte b) {
-		b = (byte) (int_a + b - 4);
+		b = (byte) (intA + b - 4);
 		return b;
 	}
 
 	public byte testJ(byte b) {
-		b = (byte) (int_a + int_b);
+		b = (byte) (intA + intB);
 		return b;
 	}
 
 	public byte testK(byte b) {
-		b = (byte) (int_a + b);
+		b = (byte) (intA + b);
 		return b;
 	}
 
 	public byte testL(byte b) {
-		b = (byte) (b * int_a);
+		b = (byte) (b * intA);
 		return b;
 	}
 
@@ -1041,7 +1034,7 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public byte testO(byte b) {
-		b = (byte) (int_a * int_b / int_c * int_q * 3 - b);
+		b = (byte) (intA * intB / intC * intQ * 3 - b);
 		return b;
 	}
 
@@ -1129,7 +1122,6 @@ public class ArithmethicAssignmentRule {
 	/*
 	 * CHAR
 	 */
-
 	public char testA(char c) {
 		c = (char) ((char) c + 1);
 		return c;
@@ -1171,22 +1163,22 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public char testI(char c) {
-		c = (char) (int_a + c - 4);
+		c = (char) (intA + c - 4);
 		return c;
 	}
 
 	public char testJ(char c) {
-		c = (char) (int_a + int_b);
+		c = (char) (intA + intB);
 		return c;
 	}
 
 	public char testK(char c) {
-		c = (char) (int_a + c);
+		c = (char) (intA + c);
 		return c;
 	}
 
 	public char testL(char c) {
-		c = (char) (c * int_a);
+		c = (char) (c * intA);
 		return c;
 	}
 
@@ -1201,7 +1193,7 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public char testO(char c) {
-		c = (char) (int_a * int_b / int_c * int_q * 3 - c);
+		c = (char) (intA * intB / intC * intQ * 3 - c);
 		return c;
 	}
 

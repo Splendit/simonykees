@@ -103,7 +103,7 @@ public class TestRemoveNewStringConstructorRule {
 
 	public String testConvertInLambdaExpressionBody(String input) {
 		List<String> list = Arrays.asList(input);
-		String result = new String(list.stream().map(t -> new String(t)).collect(Collectors.joining()));
+		String result = list.stream().map(t -> t).collect(Collectors.joining());
 		return result;
 	}
 }

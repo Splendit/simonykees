@@ -1,6 +1,5 @@
 package at.splendit.simonykees.core.ui.preference.profile;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -9,13 +8,12 @@ import java.util.List;
  */
 public interface SimonykeesProfile {
 	
-	String getProfileId();
 	String getProfileName();
-	default boolean isBuiltInProfile() {
-		return false;
-	}
-	default List<String> getEnabledRuleIds() {
-		return Collections.emptyList();
-	}
 
+	List<String> getEnabledRuleIds();
+	public void setEnabledRulesIds(List<String> enabledRulesIds);
+	boolean containsRule(String id);
+	
+	boolean isBuiltInProfile();
+	
 }

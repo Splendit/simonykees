@@ -22,19 +22,10 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * @since 0.9.2
  *
  */
-public class StringFormatLineSeparatorASTVisitor extends AbstractCompilationUnitASTVisitor {
+public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static Integer STRING_KEY = 1;
-	private static String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
-
-	private static Integer LOCALE_KEY = 2;
-	private static String LOCALE_FULLY_QUALLIFIED_NAME = "java.util.Locale"; //$NON-NLS-1$
-
-	public StringFormatLineSeparatorASTVisitor() {
-		super();
-		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
-		this.fullyQuallifiedNameMap.put(LOCALE_KEY, generateFullyQuallifiedNameList(LOCALE_FULLY_QUALLIFIED_NAME));
-	}
+	private static String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
+	private static String LOCALE_FULLY_QUALLIFIED_NAME = java.util.Locale.class.getName();
 
 	/**
 	 * checks every String.format invocation for a static format string and
@@ -43,8 +34,8 @@ public class StringFormatLineSeparatorASTVisitor extends AbstractCompilationUnit
 	@Override
 	public boolean visit(MethodInvocation node) {
 		if (StringUtils.equals("format", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
-				&& node.getExpression() instanceof SimpleName && ClassRelationUtil.isContentOfRegistertITypes(
-						node.getExpression().resolveTypeBinding(), iTypeMap.get(STRING_KEY))) {
+				&& node.getExpression() instanceof SimpleName && ClassRelationUtil.isContentOfTypes(
+						node.getExpression().resolveTypeBinding(), generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 
 			@SuppressWarnings("rawtypes")
 			List arguments = node.arguments();
@@ -57,8 +48,8 @@ public class StringFormatLineSeparatorASTVisitor extends AbstractCompilationUnit
 			 * be an LOCALE & the second an StringLiteral
 			 */
 			else if (arguments.size() >= 2 && arguments.get(0) instanceof QualifiedName
-					&& ClassRelationUtil.isContentOfRegistertITypes(
-							((QualifiedName) arguments.get(0)).resolveTypeBinding(), iTypeMap.get(LOCALE_KEY))
+					&& ClassRelationUtil.isContentOfTypes(
+							((QualifiedName) arguments.get(0)).resolveTypeBinding(), generateFullyQuallifiedNameList(LOCALE_FULLY_QUALLIFIED_NAME))
 					&& arguments.get(1) instanceof StringLiteral) {
 				formatString = (StringLiteral) arguments.get(1);
 			}

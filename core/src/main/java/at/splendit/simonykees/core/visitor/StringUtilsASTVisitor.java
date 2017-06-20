@@ -22,16 +22,14 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * This ASTVisitor finds the usage of specified string operation and wraps it in
  * {@link StringUtils} commands.
  * 
+ * 
  * @author Martin Huter
  * @since 0.9
  */
-public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
+public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 
-	private static final Integer STRING_KEY = 1;
-	private static final String STRING_FULLY_QUALLIFIED_NAME = "java.lang.String"; //$NON-NLS-1$
-
-	private static final Integer STRING_UTILS_KEY = 2;
-	private static final String STRING_UTILS_FULLY_QUALLIFIED_NAME = "org.apache.commons.lang3.StringUtils"; //$NON-NLS-1$
+	private static final String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
+	private static final String STRING_UTILS_FULLY_QUALLIFIED_NAME = org.apache.commons.lang3.StringUtils.class.getName();
 
 	private static final String STRING_UTILS = "StringUtils"; //$NON-NLS-1$
 	private static final String IS_EMPTY = "isEmpty"; //$NON-NLS-1$
@@ -62,8 +60,6 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 
 	public StringUtilsASTVisitor() {
 		super();
-		this.fullyQuallifiedNameMap.put(STRING_KEY, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME));
-		this.fullyQuallifiedNameMap.put(STRING_UTILS_KEY, generateFullyQuallifiedNameList(STRING_UTILS_FULLY_QUALLIFIED_NAME));
 	}
 	
 	@Override
@@ -118,8 +114,8 @@ public class StringUtilsASTVisitor extends AbstractCompilationUnitASTVisitor {
 			return true;
 		}
 
-		if (ClassRelationUtil.isContentOfRegistertITypes(optionalExpression.resolveTypeBinding(),
-				this.iTypeMap.get(STRING_KEY))) {
+		if (ClassRelationUtil.isContentOfTypes(optionalExpression.resolveTypeBinding(),
+				generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 			AST currentAST = node.getAST();
 			String replacementOperation = null;
 			String stringOperation = node.getName().getFullyQualifiedName();

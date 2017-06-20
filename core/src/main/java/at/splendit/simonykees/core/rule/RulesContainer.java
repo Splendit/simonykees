@@ -3,22 +3,35 @@ package at.splendit.simonykees.core.rule;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jdt.core.IJavaProject;
+
 import at.splendit.simonykees.core.rule.impl.ArithmethicAssignmentRule;
 import at.splendit.simonykees.core.rule.impl.BracketsToControlRule;
 import at.splendit.simonykees.core.rule.impl.CodeFormatterRule;
 import at.splendit.simonykees.core.rule.impl.CollectionRemoveAllRule;
 import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
+import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamForEachRule;
+import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
+import at.splendit.simonykees.core.rule.impl.LambdaForEachCollectRule;
+import at.splendit.simonykees.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
+import at.splendit.simonykees.core.rule.impl.LambdaForEachMapRule;
+import at.splendit.simonykees.core.rule.impl.LambdaToMethodReferenceRule;
 import at.splendit.simonykees.core.rule.impl.MultiCatchRule;
+import at.splendit.simonykees.core.rule.impl.MultiVariableDeclarationLineRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
+import at.splendit.simonykees.core.rule.impl.OverrideAnnotationRule;
 import at.splendit.simonykees.core.rule.impl.PrimitiveBoxedForStringRule;
+import at.splendit.simonykees.core.rule.impl.RearrangeClassMembersRule;
 import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
+import at.splendit.simonykees.core.rule.impl.StatementLambdaToExpressionRule;
 import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
+import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
 import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
@@ -26,18 +39,29 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 import at.splendit.simonykees.core.visitor.DiamondOperatorASTVisitor;
-import at.splendit.simonykees.core.visitor.FunctionalInterfaceASTVisitor;
 import at.splendit.simonykees.core.visitor.InefficientConstructorASTVisitor;
+import at.splendit.simonykees.core.visitor.LambdaToMethodReferenceASTVisitor;
+import at.splendit.simonykees.core.visitor.MultiVariableDeclarationLineASTVisitor;
+import at.splendit.simonykees.core.visitor.OverrideAnnotationRuleASTVisitor;
 import at.splendit.simonykees.core.visitor.PrimitiveBoxedForStringASTVisitor;
+import at.splendit.simonykees.core.visitor.RearrangeClassMembersASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveNewStringConstructorASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveToStringOnStringASTVisitor;
 import at.splendit.simonykees.core.visitor.SerialVersionUidASTVisitor;
+import at.splendit.simonykees.core.visitor.StatementLambdaToExpressionASTVisitor;
 import at.splendit.simonykees.core.visitor.StringConcatToPlusASTVisitor;
 import at.splendit.simonykees.core.visitor.StringFormatLineSeparatorASTVisitor;
+import at.splendit.simonykees.core.visitor.StringLiteralEqualityCheckASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
-import at.splendit.simonykees.core.visitor.loop.ForToForEachASTVisitor;
-import at.splendit.simonykees.core.visitor.loop.WhileToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.functionalInterface.FunctionalInterfaceASTVisitor;
+import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachCollectASTVisitor;
+import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachIfWrapperToFilterASTVisitor;
+import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachMapASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.forToForEach.ForToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.whileToForEach.WhileToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.renaming.FieldNameConventionASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.MultiCatchASTVisitor;
 import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisitor;
 
@@ -69,8 +93,6 @@ public class RulesContainer {
 				new MultiCatchRule(MultiCatchASTVisitor.class),
 				new BracketsToControlRule(BracketsToControlASTVisitor.class),
 				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class),
-				new WhileToForEachRule(WhileToForEachASTVisitor.class),
-				new ForToForEachRule(ForToForEachASTVisitor.class),
 				new CollectionRemoveAllRule(CollectionRemoveAllASTVisitor.class),
 				new SerialVersionUidRule(SerialVersionUidASTVisitor.class),
 				new StringFormatLineSeparatorRule(StringFormatLineSeparatorASTVisitor.class),
@@ -80,13 +102,33 @@ public class RulesContainer {
 				new PrimitiveBoxedForStringRule(PrimitiveBoxedForStringASTVisitor.class),
 				new InefficientConstructorRule(InefficientConstructorASTVisitor.class),
 				new DiamondOperatorRule(DiamondOperatorASTVisitor.class),
+				new RearrangeClassMembersRule(RearrangeClassMembersASTVisitor.class),
+				new OverrideAnnotationRule(OverrideAnnotationRuleASTVisitor.class),
+				new StringLiteralEqualityCheckRule(StringLiteralEqualityCheckASTVisitor.class),
+				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
+				new MultiVariableDeclarationLineRule(MultiVariableDeclarationLineASTVisitor.class),
+				new WhileToForEachRule(WhileToForEachASTVisitor.class),
+				new ForToForEachRule(ForToForEachASTVisitor.class),
+				new EnhancedForLoopToStreamForEachRule(EnhancedForLoopToStreamForEachASTVisitor.class),
+				new LambdaForEachIfWrapperToFilterRule(LambdaForEachIfWrapperToFilterASTVisitor.class),
+				new StatementLambdaToExpressionRule(StatementLambdaToExpressionASTVisitor.class),
+				new LambdaForEachCollectRule(LambdaForEachCollectASTVisitor.class),
+				new LambdaForEachMapRule(LambdaForEachMapASTVisitor.class),
+				new LambdaToMethodReferenceRule(LambdaToMethodReferenceASTVisitor.class),
 
 				/*
 				 * Code formatting and organizing imports should always happen
 				 * last.
 				 */
 				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
-				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class));
+				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class)
+				);
+	}
+
+	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getRulesForProject(IJavaProject selectedJavaProjekt) {
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result = getAllRules();
+		result.stream().forEach(rule -> rule.calculateEnabledForProject(selectedJavaProjekt));
+		return result;
 	}
 
 }

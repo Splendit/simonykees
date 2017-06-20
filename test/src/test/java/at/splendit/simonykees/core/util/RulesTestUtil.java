@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.w3c.dom.Document;
@@ -39,39 +38,52 @@ import org.w3c.dom.NodeList;
 @SuppressWarnings("nls")
 public class RulesTestUtil {
 
+	/**
+	 * relative reference to the maven sample module
+	 */
+	public static final String SAMPLE_MODULE_PATH = "../sample/";
+
 	private static final Path[] EMPTY_PATHS = new Path[0];
 	public static final String RULE_SUFFIX = "*Rule.java";
 
 	public static final String BASE_PACKAGE = "package at.splendit.simonykees.sample";
 	public static final String PRERULE_PACKAGE = "package at.splendit.simonykees.sample.preRule";
-	public static final String BASE_DIRECTORY = "../sample/src/test/java/at/splendit/simonykees/sample";
-	public static final String PRERULE_DIRECTORY = "../sample/src/test/java/at/splendit/simonykees/sample/preRule";
+	public static final String BASE_DIRECTORY = SAMPLE_MODULE_PATH + "src/test/java/at/splendit/simonykees/sample";
+	public static final String PRERULE_DIRECTORY = SAMPLE_MODULE_PATH
+			+ "src/test/java/at/splendit/simonykees/sample/preRule";
 
 	private RulesTestUtil() {
 		// hiding
 	}
 
-	public static IPackageFragment getPackageFragement() throws Exception {
-		IJavaProject javaProject = createJavaProject("allRulesTest", "bin");
-		IPackageFragmentRoot root = addSourceContainer(javaProject, "/allRulesTestRoot");
-
-		addToClasspath(javaProject, getClassPathEntries(root));
-
-		return root.createPackageFragment("at.splendit.simonykees", true, null);
+	public static IPackageFragmentRoot getPackageFragementRoot() throws Exception {
+		return getPackageFragementRoot(JavaCore.VERSION_1_8);
 	}
 
-	private static List<IClasspathEntry> getClassPathEntries(IPackageFragmentRoot root) throws Exception {
+	public static IPackageFragmentRoot getPackageFragementRoot(String javaVersion) throws Exception {
+		IJavaProject javaProject = createJavaProject("allRulesTest", "bin");
+		javaProject.setOption(JavaCore.COMPILER_COMPLIANCE, javaVersion);
+		javaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, javaVersion);
+		javaProject.setOption(JavaCore.COMPILER_SOURCE, javaVersion);
+		IPackageFragmentRoot root = addSourceContainer(javaProject, "/allRulesTestRoot");
+		addToClasspath(javaProject, getClassPathEntries(root));
+		addToClasspath(javaProject, extractMavenDependenciesFromPom(SAMPLE_MODULE_PATH + "pom.xml"));
+
+		return root;
+	}
+
+	public static List<IClasspathEntry> getClassPathEntries(IPackageFragmentRoot root) throws Exception {
 		final List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 		final IClasspathEntry srcEntry = JavaCore.newSourceEntry(root.getPath(), EMPTY_PATHS, EMPTY_PATHS, null);
 		final IClasspathEntry rtJarEntry = JavaCore.newLibraryEntry(getPathToRtJar(), null, null);
 		entries.add(srcEntry);
 		entries.add(rtJarEntry);
 
-		extractClasspathEntries(entries, "../sample/pom.xml");
 		return entries;
 	}
 
-	private static void extractClasspathEntries(List<IClasspathEntry> entries, String classpathFile) throws Exception {
+	public static List<IClasspathEntry> extractMavenDependenciesFromPom(String classpathFile) throws Exception {
+		List<IClasspathEntry> collectedEntries = new ArrayList<>();
 		final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		final DocumentBuilder builder = factory.newDocumentBuilder();
 		final Document document = builder.parse(new File(classpathFile));
@@ -79,17 +91,29 @@ public class RulesTestUtil {
 		final Node projectNode = getNodeByNodeName(document.getChildNodes(), "project");
 		final List<Node> dependencies = asList(
 				getNodeByNodeName(projectNode.getChildNodes(), "dependencies").getChildNodes());
-		final String m2Repo = getM2Repository();
 		for (Node dependency : dependencies) {
 			final NodeList children = dependency.getChildNodes();
 			String groupId = getNodeByNodeName(children, "groupId").getTextContent();
 			String artifactId = getNodeByNodeName(children, "artifactId").getTextContent();
 			String version = getNodeByNodeName(children, "version").getTextContent();
-			String sep = File.separator;
-			final String jarPath = m2Repo + sep + toPath(groupId) + sep + artifactId + sep + version + sep + artifactId
-					+ "-" + version + ".jar";
-			entries.add(JavaCore.newLibraryEntry(new Path(jarPath), null, null));
+			collectedEntries.add(generateMavenEntryFromDepedencyString(groupId, artifactId, version));
 		}
+
+		return collectedEntries;
+	}
+
+	public static IClasspathEntry generateMavenEntryFromDepedencyString(String groupId, String artifactId,
+			String version) throws Exception {
+		Path jarPath = new Path(getM2Repository() + File.separator + toPath(groupId) + File.separator + artifactId
+				+ File.separator + version + File.separator + artifactId + "-" + version + ".jar");
+		if (!jarPath.toFile().exists()) {
+			throw new IllegalArgumentException(String.format(
+					"Maven Dependency :[%s:%s:%s] not found in local repository, add it to ../sample/pom.xml in the maven-dependency-plugin and execute package to download",
+					groupId, artifactId, version));
+		}
+		IClasspathEntry returnValue = JavaCore.newLibraryEntry(jarPath, null, null);
+
+		return returnValue;
 	}
 
 	private static String getM2Repository() throws Exception {
@@ -151,7 +175,7 @@ public class RulesTestUtil {
 		return new Path(classPath.substring(start, end));
 	}
 
-	private static IPackageFragmentRoot addSourceContainer(IJavaProject javaProject, String containerName)
+	public static IPackageFragmentRoot addSourceContainer(IJavaProject javaProject, String containerName)
 			throws Exception {
 		IProject project = javaProject.getProject();
 		IFolder folder = project.getFolder(containerName);
@@ -163,7 +187,7 @@ public class RulesTestUtil {
 		return root;
 	}
 
-	private static void addToClasspath(IJavaProject javaProject, List<IClasspathEntry> classpathEntries)
+	public static void addToClasspath(IJavaProject javaProject, List<IClasspathEntry> classpathEntries)
 			throws Exception {
 		if (!classpathEntries.isEmpty()) {
 			IClasspathEntry[] oldEntries = javaProject.getRawClasspath();

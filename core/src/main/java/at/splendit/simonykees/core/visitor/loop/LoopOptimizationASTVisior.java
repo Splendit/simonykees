@@ -5,13 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -28,10 +23,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.constants.ReservedNames;
-import at.splendit.simonykees.core.exception.runtime.ITypeNotFoundRuntimeException;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -43,7 +36,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * @author Martin Huter
  * @since 0.9.2
  */
-class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
+public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 	/*
 	 * is initialized in constructor and set to null again if condition is
@@ -99,40 +92,28 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 				if (ReservedNames.MI_Iterator.equals(nodeInitializer.getName().getFullyQualifiedName())
 						&& nodeInitializer.arguments().isEmpty() && null != nodeInitializer.getExpression()
 						&& nodeInitializer.getExpression() instanceof Name) {
-					
-					Expression iterableExpression =  nodeInitializer.getExpression();
-					ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
-					ASTNode rootNode = node.getRoot();
-					if(ASTNode.COMPILATION_UNIT == rootNode.getNodeType()) {
-						CompilationUnit compilationUnit = (CompilationUnit)rootNode;
-						IJavaElement javaElement = compilationUnit.getJavaElement();
-						if(javaElement != null) {
-							IJavaProject iJavaProject = javaElement.getJavaProject();
-							try {
-								String iterableFullyQualifiedName = Iterable.class.getName();
-								IType classtype = iJavaProject.findType(iterableFullyQualifiedName);
-								// check if iterable object is compatible with java Iterable
-								boolean isIterable = ClassRelationUtil.isInheritingContentOfRegistertITypes(iterableTypeBinding,
-										Collections.singletonList(classtype));
-								
-								if(isIterable) {
-									listName = (Name) iterableExpression;
-									return false;
-								}
 
-							} catch (Exception e) {
-								Activator.log(Status.ERROR, e.getMessage() ,new ITypeNotFoundRuntimeException());
-							}
-						}
+					Expression iterableExpression = nodeInitializer.getExpression();
+					ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
+
+					String iterableFullyQualifiedName = Iterable.class.getName();
+					// check if iterable object is compatible with java Iterable
+					boolean isIterable = ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
+							Collections.singletonList(iterableFullyQualifiedName));
+
+					if (isIterable) {
+						listName = (Name) iterableExpression;
+						return false;
 					}
 				}
 			}
 		}
+
 		return true;
 	}
 
 	/**
-	 *  While Definition
+	 * While Definition
 	 */
 	@Override
 	public void endVisit(VariableDeclarationStatement node) {
@@ -143,7 +124,7 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 *  For Definition
+	 * For Definition
 	 */
 	@Override
 	public void endVisit(VariableDeclarationExpression node) {
@@ -199,8 +180,8 @@ class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		Type iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 
 		/*
-		 * iterator has no type-parameter therefore a optimization is could not
-		 * be applied
+		 * iterator has no type-parameter therefore an optimization could not be
+		 * applied
 		 */
 		if (null == iteratorType) {
 			return;

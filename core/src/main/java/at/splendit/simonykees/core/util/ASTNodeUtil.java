@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.util;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +16,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -218,18 +220,46 @@ public class ASTNodeUtil {
 	 * @return emptyList if not all objects are from the listType, otherwise the
 	 *         list with generic parameter.
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T> List<T> returnTypedList(@SuppressWarnings("rawtypes") List rawList, Class<T> listType) {
 		if (rawList == null || listType == null) {
 			return Collections.emptyList();
 		}
 
-		List<T> returnList = ((List<Object>) rawList).stream().filter(listType::isInstance).map(listType::cast)
-				.collect(Collectors.toList());
+		List<T> returnList = convertToTypedList(rawList, listType);
 
 		if (returnList.size() != rawList.size()) {
 			return Collections.emptyList();
 		}
 		return returnList;
+	}
+
+	/**
+	 * Converts the raw list to a typed list.
+	 * Filters out the elements that are not instances of the given type.
+	 * 
+	 * @param rawlist
+	 * @param type
+	 * @return list of the given type. 
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> List<T> convertToTypedList(@SuppressWarnings("rawtypes") List rawlist, Class<T>type) {
+		return
+			((List<Object>)rawlist)
+			.stream()
+			.filter(type::isInstance)
+			.map(type::cast)
+			.collect(Collectors.toList());
+	}
+	
+	/** Filters a list of modifiers if specific modifiers are present defined by the predicate
+	 * 
+	 * @param modifiers List of Assuming to be modifiers, can't use type because JDT doesn't support those
+	 * @param predicate is definition which modifiers have to be present
+	 * @return
+	 */
+	@SuppressWarnings("rawtypes")
+	public static boolean hasModifier(List modifiers, Predicate<? super Modifier> predicate) {
+		return ASTNodeUtil.convertToTypedList(modifiers, Modifier.class).stream().filter(predicate).findAny()
+				.isPresent();
 	}
 }

@@ -2,8 +2,13 @@ package at.splendit.simonykees.sample.postRule.allRules;
 
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings("nls")
 public class TestBracketsToControlRule {
+	private static final Logger logger = LoggerFactory.getLogger(TestBracketsToControlRule.class);
+
 	public static void testforIf() {
 		int i = 0;
 
@@ -18,9 +23,7 @@ public class TestBracketsToControlRule {
 		for (int i = 1; i < 2; i++) {
 			;
 		}
-		for (Integer i : Arrays.asList(1, 2, 3)) {
-			System.out.println(i);
-		}
+		Arrays.asList(1, 2, 3).stream().forEach(System.out::println);
 	}
 
 	public static void thestWhileLoop() {
@@ -42,9 +45,9 @@ public class TestBracketsToControlRule {
 					;
 				} while (t != null);
 			} else if (s == "aaa") {
-				System.out.print("aa");
+				logger.info("aa");
 			} else {
-				System.out.print("bbb");
+				logger.info("bbb");
 			}
 		} else {
 			;

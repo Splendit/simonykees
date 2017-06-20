@@ -1,19 +1,18 @@
 package at.splendit.simonykees.core.ui.preference;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jface.preference.ComboFieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.i18n.Messages;
-import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.ui.preference.profile.DefaultProfile;
+import at.splendit.simonykees.core.ui.preference.profile.Profile;
 import at.splendit.simonykees.core.ui.preference.profile.SimonykeesProfile;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * Central point to access property values.
@@ -25,65 +24,45 @@ public class SimonykeesPreferenceManager {
 
 	private static IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 
-	/**
-	 * Whether or not a specific rule is selected in the given profile.
-	 * 
-	 * @param profileId
-	 *            the {@link SimonykeesProfile#getProfileId()} of a profile
-	 * @param ruleId
-	 *            the {@link RefactoringRule#getId()} of a rule
-	 * 
-	 * @return whether or not the given rule is selected in the given profile
-	 */
-	public static boolean isRuleSelectedInProfile(String profileId, String ruleId) {
-		return store.getBoolean(getProfileRuleKey(profileId, ruleId));
+	private static List<SimonykeesProfile> profiles = new ArrayList<>();
+
+	private static SimonykeesProfile defaultProfile = new DefaultProfile();
+
+	public static String getDefaultProfileList() {
+		return defaultProfile.getProfileName() + SimonykeesPreferenceConstants.NAME_RULES_DELIMITER + StringUtils
+				.join(defaultProfile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER);
 	}
 
-	/**
-	 * Convenience method to get the needed entryNamesAndValues array for
-	 * {@link ComboFieldEditor}.
-	 * 
-	 * @return String[][] array with profile names (with built-in suffix) and
-	 *         values (keys for the preference page)
-	 */
-	public static String[][] getAllProfileNamesAndIdsArray() {
-		String[] profileIds = getAllProfileIds();
-		String[][] retVal = new String[profileIds.length][profileIds.length];
-		for (int i = 0; i < profileIds.length; i++) {
-			String profileId = profileIds[i];
+	public static String getDefaultProfileName() {
+		return defaultProfile.getProfileName();
+	}
 
-			/*
-			 * this is the displayed profile name: "{profile name} [built-in]"
-			 * or "{profile name}"
-			 */
-			retVal[i] = new String[] { getProfileNameWithBuiltInSuffix(profileId), profileId };
+	public static List<SimonykeesProfile> getProfiles() {
+		return profiles;
+	}
+
+	public static void addProfile(String name, List<String> ruleIds) {
+		profiles.add(new Profile(name, ruleIds));
+	}
+
+	public static void removeProfile(String name) {
+		profiles.remove(getProfileFromName(name));
+	}
+
+	public static void updateProfile(int index, String name, List<String> ruleIds) {
+		if (profiles.get(index) instanceof Profile) {
+			((Profile) profiles.get(index)).setProfileName(name);
 		}
-
-		return retVal;
+		profiles.get(index).setEnabledRulesIds(ruleIds);
 	}
 
-	/**
-	 * Returns a {@link List} of all profile names as displayed in the UI (with
-	 * built-in suffix).
-	 * 
-	 * @return all profile names with built-in suffix.
-	 */
-	public static List<String> getAllProfileNamesWithBuiltInSuffix() {
-		return Arrays.stream(getAllProfileIds()).map(profileId -> getProfileNameWithBuiltInSuffix(profileId))
-				.collect(Collectors.toList());
-	}
-
-	/**
-	 * Returns a {@link LinkedHashMap} (ordered by insertion) with profile names
-	 * as keys and profile ids as value.
-	 * 
-	 * @return ordered map with profile names and ids.
-	 */
-	public static Map<String, String> getAllProfileNamesAndIdsMap() {
-		return Arrays.stream(getAllProfileIds()).collect(Collectors
-				.toMap(profileId -> getProfileNameWithBuiltInSuffix(profileId), profileId -> profileId, (u, v) -> {
-					throw new IllegalStateException(String.format("Duplicate key %s", u)); //$NON-NLS-1$
-				}, LinkedHashMap::new));
+	public static boolean useProfile() {
+		if (store.getString(SimonykeesPreferenceConstants.PROFILE_USE_OPTION)
+				.equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	/**
@@ -96,23 +75,69 @@ public class SimonykeesPreferenceManager {
 	}
 
 	/**
+	 * Sets the current profileId.
+	 * 
+	 */
+	public static void setCurrentProfileId(String currentProfileId) {
+		store.setValue(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT, currentProfileId);
+	}
+
+	/**
 	 * Get the ids of all profiles.
 	 * 
 	 * @return a list of all {@link SimonykeesProfile#getProfileId()}
 	 */
-	private static String[] getAllProfileIds() {
-		return parseString(store.getString(SimonykeesPreferenceConstants.PROFILE_LIST));
+	public static List<String> getAllProfileIds() {
+		if (profiles.isEmpty()) {
+			loadProfilesFromStore();
+		}
+		return profiles.stream().map(SimonykeesProfile::getProfileName).collect(Collectors.toList());
 	}
 
-	/**
-	 * Returns the built-in status of a given profile.
-	 * 
-	 * @param profileId
-	 *            the profile id
-	 * @return whether or not the given profileId belongs to a built-in profile
-	 */
-	public static boolean isProfileBuiltIn(String profileId) {
-		return store.getBoolean(getProfileBuiltInKey(profileId));
+	private static String getAllProfiles() {
+		return store.getString(SimonykeesPreferenceConstants.PROFILE_LIST);
+	}
+
+	private static void setAllProfiles() {
+		store.setValue(SimonykeesPreferenceConstants.PROFILE_LIST, getStringFromProfiles());
+	}
+
+	private static List<SimonykeesProfile> loadProfilesFromStore() {
+		// profiles are saved in store as collected list
+		// ex. Profil1^rule1~rule2|profil 2^rule3~rule5~rule2
+		String[] profilesArray = parseString(getAllProfiles());
+		for (String profileInfo : profilesArray) {
+			String name = profileInfo.substring(0,
+					profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER));
+			List<String> rules = Arrays.asList(
+					profileInfo.substring(profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
+							.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
+			if (name.equals(Messages.Profile_DefaultProfile_profileName)) {
+				profiles.add(defaultProfile);
+			} else {
+				profiles.add(new Profile(name, rules));
+			}
+		}
+		return profiles;
+	}
+
+	public static String getStringFromProfiles() {
+		List<String> profilesAsString = new ArrayList<>();
+		for (SimonykeesProfile profile : profiles) {
+			String profileAsString = profile.getProfileName() + SimonykeesPreferenceConstants.NAME_RULES_DELIMITER
+					+ StringUtils.join(profile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER);
+			profilesAsString.add(profileAsString);
+		}
+		return flattenArray(profilesAsString);
+	}
+
+	public static SimonykeesProfile getProfileFromName(String name) {
+		for (SimonykeesProfile profile : profiles) {
+			if (profile.getProfileName().equals(name)) {
+				return profile;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -143,61 +168,32 @@ public class SimonykeesPreferenceManager {
 		return StringUtils.split(stringList, "|"); //$NON-NLS-1$
 	}
 
-	/**
-	 * Returns the profile name of a given profileId.
-	 * 
-	 * @param profileId
-	 *            the profile id
-	 * @return the profile name for a given profileId
-	 */
-	private static String getProfileName(String profileId) {
-		return store.getString(getProfileNameKey(profileId));
+	public static void loadCurrentProfiles() {
+		if (!profiles.isEmpty()) {
+			setAllProfiles();
+		}
+		profiles.clear();
+		loadProfilesFromStore();
+	}
+
+	public static void performDefaults() {
+		store.setValue(SimonykeesPreferenceConstants.PROFILE_LIST,
+				store.getDefaultString(SimonykeesPreferenceConstants.PROFILE_LIST));
+
+		store.setValue(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT,
+				store.getDefaultString(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT));
+
+		profiles.clear();
+		defaultProfile = new DefaultProfile();
+		loadProfilesFromStore();
 	}
 
 	/**
-	 * Convenience method that returns the key for a specific rule in a specific
-	 * profile.
-	 * 
-	 * @param profileId
-	 * @param ruleId
-	 * @return preference page key
+	 * If cancel is pressed in Preferences page, no changes should be stored and
+	 * profiles list has to be returned to state before any change was made.
 	 */
-	public static String getProfileRuleKey(String profileId, String ruleId) {
-		return String.format("%s.%s", profileId, ruleId); //$NON-NLS-1$
+	public static void resetProfilesList() {
+		profiles.clear();
+		loadProfilesFromStore();
 	}
-
-	/**
-	 * Convenience method that returns the "name"-key for a specific profile.
-	 * 
-	 * @param profileId
-	 * @return preference page key
-	 */
-	public static String getProfileNameKey(String profileId) {
-		return String.format("%s.%s", profileId, SimonykeesPreferenceConstants.PROFILE_NAME); //$NON-NLS-1$
-	}
-
-	/**
-	 * Convenience method that returns the "builtIn"-key for a specific profile.
-	 * 
-	 * @param profileId
-	 * @return
-	 */
-	public static String getProfileBuiltInKey(String profileId) {
-		return String.format("%s.%s", profileId, SimonykeesPreferenceConstants.PROFILE_IS_BUILT_IN); //$NON-NLS-1$
-	}
-
-	/**
-	 * This method returns the profile name as displayed by the UI.
-	 * 
-	 * @param profileId
-	 *            the profile id
-	 * @return either "{profile name} [built-in]" or "{profile name}"
-	 */
-	private static String getProfileNameWithBuiltInSuffix(String profileId) {
-		String profileName = getProfileName(profileId);
-		return isProfileBuiltIn(profileId)
-				? String.format("%s [%s]", profileName, Messages.SimonykeesPreferenceManager_builtIn) //$NON-NLS-1$
-				: profileName;
-	}
-
 }

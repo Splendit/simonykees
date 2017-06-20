@@ -2,14 +2,14 @@ package at.splendit.simonykees.sample.postRule.functinalInterface;
 
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "nls", "unused", "rawtypes" })
 public class TestFunctionalInterfaceRule {
 	
-	private static Logger log = LogManager.getLogger(TestFunctionalInterfaceRule.class);
+	private static Logger log = LoggerFactory.getLogger(TestFunctionalInterfaceRule.class);
 	
 	private final String FINAL_STRING_FIELD;
 	
@@ -30,13 +30,13 @@ public class TestFunctionalInterfaceRule {
 	@Test
 	public void test1() {
 
-		Runnable runnable = ()->{
+		Runnable runnable = () -> {
 			log.debug("xx");
 		};
 
 		runnable.run();
 
-		MyClass mYClass = new MyClass(()->{
+		MyClass mYClass = new MyClass(() -> {
 			log.debug("xy");
 		});
 
@@ -57,7 +57,7 @@ public class TestFunctionalInterfaceRule {
 
 		nonFunctionalInterface.method();
 
-		AFunctionalInterface aFunctionalInterface = (int a)->{
+		AFunctionalInterface aFunctionalInterface = (int a) -> {
 		};
 
 		AFunctionalInterface aFunctionalInterface2 = (int a) -> {
@@ -67,12 +67,12 @@ public class TestFunctionalInterfaceRule {
 	}
 	
 	int a;
-	AFunctionalInterface aFunctionalInterface = (int a)->{
+	AFunctionalInterface aFunctionalInterface = (int a) -> {
 	};
 	
 	{
 		int a;
-		AFunctionalInterface aFunctionalInterface = (int a1)->{
+		AFunctionalInterface aFunctionalInterface = (int a1) -> {
 		};
 	}
 	
@@ -93,23 +93,23 @@ public class TestFunctionalInterfaceRule {
 					int m = 1;
 				}
 				
-				AFunctionalInterface foo = (int a3)->{
+				AFunctionalInterface foo = (int a3) -> {
 					int b = a3; 
 				};
 				
-				AFunctionalInterface foo2 = (int m)->{
+				AFunctionalInterface foo2 = (int m) -> {
 					int b = m; 
 				};
 				
-				AFunctionalInterface foo3 = (int k1)->{
+				AFunctionalInterface foo3 = (int k1) -> {
 					int b = k1; 
 				};
 				
-				AFunctionalInterface foo4 = (int c1)->{
+				AFunctionalInterface foo4 = (int c1) -> {
 					int b = c1; 
 				};
 				
-				AFunctionalInterface foo5 = (int l1)->{
+				AFunctionalInterface foo5 = (int l1) -> {
 					int b = l1; 
 				};
 			}
@@ -138,10 +138,10 @@ public class TestFunctionalInterfaceRule {
 	
 	public void nestedLambdaExpressions(String input) {
 		int repeatedName = 0;
-		AFunctionalInterface foo = (int repeatedName1)->{
+		AFunctionalInterface foo = (int repeatedName1) -> {
 			if(repeatedName1 > 0) {
 
-				AFunctionalInterface innerFoo = (int repeatedName2)->{
+				AFunctionalInterface innerFoo = (int repeatedName2) -> {
 					int c = repeatedName2;
 					c++;
 				};
@@ -151,14 +151,14 @@ public class TestFunctionalInterfaceRule {
 	}
 	
 	public void cascadedLambdaExpressions(String input) {
-		AFunctionalInterface foo = (int a)->{
+		AFunctionalInterface foo = (int a) -> {
 			if(a > 0) {
 				int b = a;
 			}
 			
 		};
 
-		AFunctionalInterface innerFoo = (int a)->{
+		AFunctionalInterface innerFoo = (int a) -> {
 			int b = a;
 			b++;
 		};
@@ -169,7 +169,7 @@ public class TestFunctionalInterfaceRule {
 		int a = 0;
 		int toString = a;
 		
-		AFunctionalInterface foo = (int a1)->{
+		AFunctionalInterface foo = (int a1) -> {
 			String toString1 = "toString";
 			String local1 = Integer.toString(a1);
 			String input1 = local1;
@@ -183,12 +183,12 @@ public class TestFunctionalInterfaceRule {
 		int a = 0;
 		int toString = a;
 		
-		AFunctionalInterface foo = (int a1)->{
+		AFunctionalInterface foo = (int a1) -> {
 			String toString1 = "toString";
 			String local1 = Integer.toString(a1);
 			String input1 = local1;
 			
-			AFunctionalInterface foo1 = (int a2)->{
+			AFunctionalInterface foo1 = (int a2) -> {
 				String toString2 = "toString";
 				String local2 = Integer.toString(a2);
 				String input2 = local2;
@@ -224,7 +224,7 @@ public class TestFunctionalInterfaceRule {
 			//TODO: some important comment. shall not be removed! 
 		}; 
 		
-		AFunctionalInterface fooComments3 = (int fooComments1)->{ 
+		AFunctionalInterface fooComments3 = (int fooComments1) -> { 
 	        String toString = "toString"; 
 	        
 		  };
@@ -253,7 +253,7 @@ public class TestFunctionalInterfaceRule {
 	}
 	
 	public void renamingVarInCatchClause(String e) {
-		AFunctionalInterface foo = (int param)->{ 
+		AFunctionalInterface foo = (int param) -> { 
 	        String toString = "toString"; 
 	        try {
 	        	

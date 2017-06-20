@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>at.splendit.jSparrow</groupId>
 	<artifactId>jSparrow</artifactId>
-	<version>1.1.0-SNAPSHOT</version>
+	<version>2.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>jSparrow :: parent</name>
 	<description>jSparrow Parent</description>
@@ -29,13 +29,33 @@
 		</developer>
 		<developer>
 			<id>ludwig.werzowa</id>
-			<name>Ludwig Werzova</name>
+			<name>Ludwig Werzowa</name>
 			<email>ludwig.werzowa@splendit.at</email>
 		</developer>
 		<developer>
 			<id>martin.huter</id>
 			<name>Martin Huter</name>
 			<email>martin.huter@splendit.at</email>
+		</developer>
+		<developer>
+			<id>ardit.ymeri</id>
+			<name>Ardit Ymeri</name>
+			<email>ardit.ymeri@splendit.at</email>
+		</developer>
+		<developer>
+			<id>andreja.sambolec</id>
+			<name>Andreja Sambolec</name>
+			<email>andreja.sambolec@splendit.at</email>
+		</developer>
+		<developer>
+			<id>matthias.webhofer</id>
+			<name>Matthias Webhofer</name>
+			<email>matthias.webhofer@splendit.at</email>
+		</developer>
+		<developer>
+			<id>ali.kardoush</id>
+			<name>Ali Kardoush</name>
+			<email>ali.kardoush@splendit.at </email>
 		</developer>
 	</developers>
 
@@ -44,11 +64,20 @@
 	</prerequisites>
 
 	<modules>
+		<!-- plug-in functionality -->
+		<module>logging</module>
+		<module>i18n</module>
+		<module>license.api</module>
+		<module>license.netlicensing</module>
 		<module>core</module>
+		<!-- test-data -->
+		<module>sample</module>
+		<!-- all integration test modules -->
+		<module>license.netlicensing.test</module>
 		<module>test</module>
+		<!-- OSGi feature + site deployment -->
 		<module>feature</module>
 		<module>site</module>
-		<module>sample</module>
 	</modules>
 
 	<scm>
@@ -68,25 +97,14 @@
 	</ciManagement>
 
 	<distributionManagement>
-<!--		<repository>
-			<id>nexus</id>
-			<name>Nexus Simonykees Releases</name>
-			<url>http://nexus.splendit.loc/repository/maven-simonykees-releases/</url>
-		</repository> -->
-	<!--	<snapshotRepository>
-			<id>nexus</id>
-			<name>Nexus Simonykees Snapshots</name>
-			<url>http://nexus.splendit.loc/repository/maven-simonykees-snapshots/</url>
-		</snapshotRepository> -->
 		<site>
 			<id>nexus</id>
 			<name>Nexus Simonykees Site</name>
 			<url>https://jenkins.splendit.loc/view/simonykees/job/simonykees%20master/site/</url>
 		</site>
 		<repository>
-			<name>package-drone</name>
-			<id>pdrone.b8eed447-5f46-42c2-bfc1-1b9b174069e5</id>
-			<url>http://packagedrone-vm-01.splendit.loc:8080/maven/0c59cce1-cb2c-4942-8e44-465609fe2fdb</url>
+			<id>pdrone</id>
+			<url>http://packagedrone-vm-01.splendit.loc:8080/maven/85838837-477a-445f-aee1-757e4a362481</url>
 		</repository>
 	</distributionManagement>
 
@@ -94,7 +112,6 @@
 
 		<!-- skipping install and deployment of non-site modules -->
 		<maven.deploy.skip>true</maven.deploy.skip>
-		<maven.install.skip>true</maven.install.skip>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -116,30 +133,32 @@
 		<maven.versions.version>2.3</maven.versions.version>
 		<maven.antrun.version>1.8</maven.antrun.version>
 		<maven.assembly.version>2.6</maven.assembly.version>
-		<maven.dependency.version>2.10</maven.dependency.version>
+		<maven.dependency.version>3.0.0</maven.dependency.version>
 		<maven.clean.version>3.0.0</maven.clean.version>
 		<maven.deploy.version>2.8.2</maven.deploy.version>
 		<maven.install.version>2.5.2</maven.install.version>
 		<maven.release.version>2.5.3</maven.release.version>
 		<maven.resources.version>3.0.1</maven.resources.version>
-		<proguard.plugin.version>2.0.13</proguard.plugin.version>
+		<proguard.plugin.version>2.0.14</proguard.plugin.version>
 
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
+
+		<basedir>/simonykees</basedir>
+
+		<jsparrow.qualifier.quotes></jsparrow.qualifier.quotes>
+		<jsparrow.qualifier.noProguard></jsparrow.qualifier.noProguard>
+		<jsparrow.qualifier.production></jsparrow.qualifier.production>
+		<jsparrow.qualifier.tycho>${jsparrow.qualifier.quotes}${jsparrow.qualifier.noProguard}${jsparrow.qualifier.production}${jsparrow.qualifier.quotes}</jsparrow.qualifier.tycho>
 	</properties>
 
 	<repositories>
 		<repository>
-			<id>eclipse-neon</id>
-			<layout>p2</layout>
-			<url>http://download.eclipse.org/releases/neon</url>
-		</repository>
-		<repository>
 			<id>splendit-nexus-2</id>
 			<layout>p2</layout>
-			<url>http://nexus-vm-02.splendit.loc/content/repositories/p2-eclipse-neon/</url>
+			<url>http://nexus-vm-02.splendit.loc/content/repositories/neon-p2/</url>
 		</repository>
 		<repository>
 			<id>netlicensing</id>
@@ -152,6 +171,21 @@
 	<dependencyManagement>
 		<dependencies>
 			<!-- jSparrow -->
+			<dependency>
+				<groupId>at.splendit.jSparrow</groupId>
+				<artifactId>jSparrow.logging</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit.jSparrow</groupId>
+				<artifactId>jSparrow.i18n</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit.jSparrow</groupId>
+				<artifactId>jSparrow.license.api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>at.splendit.jSparrow</groupId>
 				<artifactId>jSparrow.core</artifactId>
@@ -240,7 +274,6 @@
 				</configuration>
 			</plugin>
 		</plugins>
-
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -292,13 +325,45 @@
 					<groupId>com.github.wvengen</groupId>
 					<artifactId>proguard-maven-plugin</artifactId>
 					<version>${proguard.plugin.version}</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>proguard</goal>
+							</goals>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>net.sf.proguard</groupId>
+							<artifactId>proguard-base</artifactId>
+							<version>5.3.3</version>
+							<scope>runtime</scope>
+						</dependency>
+					</dependencies>
+					<configuration>
+						<obfuscate>true</obfuscate>
+						<proguardInclude>${basedir}/proguard.conf</proguardInclude>
+						<libs>
+							<lib>${java.home}/lib/rt.jar</lib>
+							<lib>${java.home}/lib/jsse.jar</lib>
+						</libs>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>tycho-packaging-plugin</artifactId>
 					<version>${tycho.version}</version>
 					<configuration>
-						<format>yyyyMMdd-HHmm</format>
+						<format>yyyyMMdd-HHmm${jsparrow.qualifier.tycho}</format>
+						<archive>
+							<manifestEntries>
+								<!-- "Built-By" should not be the logged in user -->
+								<Built-By>Splendit IT-Consulting GmbH</Built-By>
+							</manifestEntries>
+							<!-- We do not want to include the pom in our artifacts -->
+							<addMavenDescriptor>false</addMavenDescriptor>
+						</archive>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -312,9 +377,9 @@
 					<version>${tycho.version}</version>
 					<configuration>
 						<useUIHarness>false</useUIHarness>
-						<argLine>${tycho.test.jvmArgs}</argLine>
-						<!-- kill test JVM if tests take more than 5 minutes (300 seconds) to 
-							finish -->
+						<argLine>${tycho.test.jvmArgs} -Dfile.encoding=UTF-8</argLine>
+						<!-- kill test JVM if tests take more than 5 minutes (300 seconds) 
+							to finish -->
 						<forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
 					</configuration>
 				</plugin>
@@ -335,91 +400,100 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>source-feature</id>
-			<activation>
-				<file>
-					<exists>feature.xml</exists>
-				</file>
-				<property>
-					<!-- Sources will only be added if the proguard profile is not active -->
-					<name>!proguard</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.eclipse.tycho.extras</groupId>
-						<artifactId>tycho-source-feature-plugin</artifactId>
-						<version>${tycho.extras.version}</version>
-						<executions>
-							<execution>
-								<id>source-feature</id>
-								<phase>package</phase>
-								<goals>
-									<goal>source-feature</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-					<plugin>
-						<groupId>org.eclipse.tycho</groupId>
-						<artifactId>tycho-p2-plugin</artifactId>
-						<version>${tycho.version}</version>
-						<executions>
-							<execution>
-								<id>attach-p2-metadata</id>
-								<phase>package</phase>
-								<goals>
-									<goal>p2-metadata</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>no-proguard</id>
-			<activation>
-				<property>
-					<!-- Sources will only be added if the proguard profile is not active -->
-					<name>!proguard</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.eclipse.tycho</groupId>
-						<artifactId>tycho-source-plugin</artifactId>
-						<version>${tycho.version}</version>
-						<executions>
-							<execution>
-								<id>attach-source</id>
-								<goals>
-									<goal>plugin-source</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
 			<id>proguard</id>
+			<activation>
+				<property>
+					<name>proguard</name>
+				</property>
+			</activation>
 			<properties>
 				<!-- skipping test for proguard because they dont work -->
 				<maven.test.skip>true</maven.test.skip>
-			</properties>
 
+				<jsparrow.qualifier.noProguard></jsparrow.qualifier.noProguard>
+			</properties>
+		</profile>
+		<profile>
+			<id>noProguard</id>
+			<activation>
+				<property>
+					<name>!proguard</name>
+				</property>
+			</activation>
+			<properties>
+				<jsparrow.qualifier.quotes>'</jsparrow.qualifier.quotes>
+				<jsparrow.qualifier.noProguard>_noProguard</jsparrow.qualifier.noProguard>
+			</properties>
+		</profile>
+		<profile>
+			<id>test</id>
+			<activation>
+				<property>
+					<name>!production</name>
+				</property>
+			</activation>
+			<properties>
+				<jsparrow.qualifier.quotes>'</jsparrow.qualifier.quotes>
+				<jsparrow.qualifier.production>_test</jsparrow.qualifier.production>
+			</properties>
+		</profile>
+
+		<!-- all deployment channels on packagedrone -->
+		<profile>
+			<id>develop-test-noProguard</id>
 			<distributionManagement>
 				<repository>
-					<id>pdrone.b8eed447-5f46-42c2-bfc1-1b9b174069e5</id>
-					<!-- should be this id for correct channel id reference in id, but then this id also needed to be added to settings.xml, will be improved with automated deployment -->
-					<!-- <id>pdrone.45eec635-9bd5-4b75-8b69-69e9e126d733</id>-->
-					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/45eec635-9bd5-4b75-8b69-69e9e126d733</url>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/a32ae4dc-cb4b-4e24-bd06-f9a8b70beccf</url>
 				</repository>
 			</distributionManagement>
 		</profile>
+		<profile>
+			<id>develop-test-proguard</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/7a1744d9-a035-4a13-94a6-2cda46bb451c</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>master-test-noProguard</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/653a7028-10df-46ba-b767-fb84d9568e25</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>master-test-proguard</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/01c6ea10-b7f6-44a5-8198-02d8d76f62d6</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>master-production-noProguard</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/ba0aba2a-c2dc-4b08-afd9-75d16b083bc8</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+		<profile>
+			<id>master-production-proguard</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/60a872b9-167b-4a41-a1d3-f2d6ca0df79d</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+
 	</profiles>
 
 	<reporting>
@@ -475,10 +549,6 @@
 				<artifactId>findbugs-maven-plugin</artifactId>
 				<version>${maven.findbugs.version}</version>
 			</plugin>
-			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-pmd-plugin</artifactId> 
-				<version>${maven.pmd.version}</version> </plugin> -->
-			<!-- <plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>cobertura-maven-plugin</artifactId> 
-				<version>${maven.cobertura.version}</version> </plugin> -->
 		</plugins>
 	</reporting>
 

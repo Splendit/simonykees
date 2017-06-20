@@ -9,14 +9,33 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public abstract class TestFunctionalInterface2Rule {
+	private static final Logger logger = LoggerFactory.getLogger(TestFunctionalInterface2Rule.class);
 	Object fields;
+	MouseAdapter a = new MouseAdapter() {
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			e.getX();
+			e.getY();
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			mouseMoved(e);
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+		}
+	};
 
 	public void setFields(Object fields) {
 		Object proxyFields = Proxy.newProxyInstance(getClass().getClassLoader(), new Class<?>[] { List.class },
-				(Object proxy, Method method, Object[] args) -> {
-					return method.invoke(fields, args);
-				});
+				(Object proxy, Method method, Object[] args) -> method.invoke(fields, args));
 		this.fields = proxyFields;
 	}
 
@@ -36,24 +55,6 @@ public abstract class TestFunctionalInterface2Rule {
 				});
 		this.fields = proxyFields;
 	}
-
-	MouseAdapter a = new MouseAdapter() {
-
-		@Override
-		public void mouseMoved(MouseEvent e) {
-			e.getX();
-			e.getY();
-		}
-
-		@Override
-		public void mouseEntered(MouseEvent e) {
-			mouseMoved(e);
-		}
-
-		@Override
-		public void mouseExited(MouseEvent e) {
-		}
-	};
 
 	public void testNotCorrectTypeVarDecl() {
 		Object o = new Runnable() {
@@ -119,7 +120,7 @@ public abstract class TestFunctionalInterface2Rule {
 		}) {
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -133,7 +134,7 @@ public abstract class TestFunctionalInterface2Rule {
 		}) {
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -185,16 +186,6 @@ public abstract class TestFunctionalInterface2Rule {
 		});
 	}
 
-	private class MyRunnableClass {
-		public MyRunnableClass(Runnable run) {
-		}
-	}
-
-	private class MyClass {
-		public MyClass(Object run) {
-		}
-	}
-
 	private void doSomething(Object o) {
 
 	}
@@ -209,5 +200,15 @@ public abstract class TestFunctionalInterface2Rule {
 
 	private void doSomethingRunnable(String s, Runnable o) {
 
+	}
+
+	private class MyRunnableClass {
+		public MyRunnableClass(Runnable run) {
+		}
+	}
+
+	private class MyClass {
+		public MyClass(Object run) {
+		}
 	}
 }

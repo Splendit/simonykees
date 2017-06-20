@@ -5,8 +5,13 @@ import java.io.Closeable;
 import java.io.FileReader;
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings({ "resource", "unused" })
 public class TestTryWithResourceRule {
+
+	private static final Logger logger = LoggerFactory.getLogger(TestTryWithResourceRule.class);
 
 	static void readFirstLineFromFile(String path) {
 
@@ -15,7 +20,7 @@ public class TestTryWithResourceRule {
 				Closeable cl = new BufferedReader(new FileReader(path))) {
 			br.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -28,7 +33,7 @@ public class TestTryWithResourceRule {
 			br.close();
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -45,7 +50,7 @@ public class TestTryWithResourceRule {
 			br4.read();
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -62,7 +67,7 @@ public class TestTryWithResourceRule {
 			br4.read();
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -77,7 +82,7 @@ public class TestTryWithResourceRule {
 			br4.read();
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -90,7 +95,7 @@ public class TestTryWithResourceRule {
 			br4.read();
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -102,7 +107,7 @@ public class TestTryWithResourceRule {
 			br.readLine();
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -118,7 +123,7 @@ public class TestTryWithResourceRule {
 			br2.close();
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -134,7 +139,7 @@ public class TestTryWithResourceRule {
 			br2.close();
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -148,7 +153,7 @@ public class TestTryWithResourceRule {
 			br2.close();
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -159,13 +164,13 @@ public class TestTryWithResourceRule {
 			try (BufferedReader br3 = new BufferedReader(new FileReader(path))) {
 				br3.read();
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 			}
 			br2.readLine();
 			br.readLine();
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 	}
 }

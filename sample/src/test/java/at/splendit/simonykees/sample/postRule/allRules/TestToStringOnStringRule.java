@@ -81,7 +81,7 @@ public class TestToStringOnStringRule {
 
 	public String testToStringInLambdaExpressionBody(String input) {
 		List<String> stringList = Arrays.asList(input, "foo");
-		String result = stringList.stream().map(s -> s.toString() + ";").collect(Collectors.joining(","));
+		String result = stringList.stream().map(s -> s + ";").collect(Collectors.joining(","));
 		return result;
 	}
 

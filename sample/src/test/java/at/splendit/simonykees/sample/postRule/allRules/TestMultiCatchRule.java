@@ -2,15 +2,14 @@ package at.splendit.simonykees.sample.postRule.allRules;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("nls")
 public class TestMultiCatchRule {
 
-	private static Logger log = LogManager.getLogger(TestMultiCatchRule.class);
+	private static Logger log = LoggerFactory.getLogger(TestMultiCatchRule.class);
 
 	@Test
 	public void tryWithResourceCommentBugTest() {
@@ -19,7 +18,7 @@ public class TestMultiCatchRule {
 			String.class.getConstructor(String.class).newInstance("aa");
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 		}
 	}
 
@@ -27,7 +26,7 @@ public class TestMultiCatchRule {
 		try {
 			throwSomethingWithInheritance(i);
 		} catch (FirstException | SecondException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		}
 		return i;
@@ -36,12 +35,11 @@ public class TestMultiCatchRule {
 	/*
 	 * UnionType cornercase
 	 */
-
 	public int unionTypeCornerCaseInheritance(int i) {
 		try {
 			throwSomethingWithInheritance(i);
 		} catch (FirstException | SecondException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		}
 		return i;
@@ -54,7 +52,7 @@ public class TestMultiCatchRule {
 		try {
 			throwSomethingWithInheritance(i);
 		} catch (FirstException | SecondException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		}
 		return i;

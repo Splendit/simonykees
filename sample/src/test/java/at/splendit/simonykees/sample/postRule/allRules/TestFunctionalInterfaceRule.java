@@ -2,16 +2,27 @@ package at.splendit.simonykees.sample.postRule.allRules;
 
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({ "nls", "unused", "rawtypes" })
 public class TestFunctionalInterfaceRule {
 
-	private static Logger log = LogManager.getLogger(TestFunctionalInterfaceRule.class);
+	private static Logger log = LoggerFactory.getLogger(TestFunctionalInterfaceRule.class);
 
-	private final String FINAL_STRING_FIELD;
+	private final String finalStringField;
+
+	int a;
+
+	AFunctionalInterface aFunctionalInterface = (int a) -> {
+	};
+
+	{
+		int a;
+		AFunctionalInterface aFunctionalInterface = (int a1) -> {
+		};
+	}
 
 	public TestFunctionalInterfaceRule() {
 
@@ -19,26 +30,22 @@ public class TestFunctionalInterfaceRule {
 
 			@Override
 			public void method(int a) {
-				String sthToLog = a + FINAL_STRING_FIELD;
+				String sthToLog = a + finalStringField;
 
 			}
 		};
 
-		FINAL_STRING_FIELD = "irritating";
+		finalStringField = "irritating";
 	}
 
 	@Test
 	public void test1() {
 
-		Runnable runnable = () -> {
-			log.debug("xx");
-		};
+		Runnable runnable = () -> log.debug("xx");
 
 		runnable.run();
 
-		MyClass mYClass = new MyClass(() -> {
-			log.debug("xy");
-		});
+		MyClass mYClass = new MyClass(() -> log.debug("xy"));
 
 		mYClass.test();
 
@@ -66,18 +73,9 @@ public class TestFunctionalInterfaceRule {
 		aFunctionalInterface.method(0);
 	}
 
-	int a;
-	AFunctionalInterface aFunctionalInterface = (int a) -> {
-	};
-
-	{
-		int a;
-		AFunctionalInterface aFunctionalInterface = (int a1) -> {
-		};
-	}
-
 	public void clashingLocalVariableNames(int l) {
-		int a, a1;
+		int a;
+		int a1;
 		a = 5;
 		a1 = 6;
 		int a4 = 8;
@@ -263,6 +261,10 @@ public class TestFunctionalInterfaceRule {
 		};
 	}
 
+	private void sampleMethodAcceptingFunction(GenericFoo foo) {
+		// do nothing
+	}
+
 	private interface AFunctionalInterface {
 		public void method(int a);
 	}
@@ -287,9 +289,5 @@ public class TestFunctionalInterfaceRule {
 
 	private interface GenericFoo<T> {
 		T foo(String t, List<T> fooList);
-	}
-
-	private void sampleMethodAcceptingFunction(GenericFoo foo) {
-		// do nothing
 	}
 }

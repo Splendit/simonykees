@@ -1,6 +1,6 @@
 package at.splendit.simonykees.core.exception;
 
-import at.splendit.simonykees.core.i18n.ExceptionMessages;
+import at.splendit.simonykees.i18n.ExceptionMessages;
 
 /**
  * TODO SIM-103 add class description

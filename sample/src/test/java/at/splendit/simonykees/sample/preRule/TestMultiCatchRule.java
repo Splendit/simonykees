@@ -2,15 +2,14 @@ package at.splendit.simonykees.sample.preRule;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("nls")
 public class TestMultiCatchRule {
 
-	private static Logger log = LogManager.getLogger(TestMultiCatchRule.class);
+	private static Logger log = LoggerFactory.getLogger(TestMultiCatchRule.class);
 
 	@Test
 	public void tryWithResourceCommentBugTest() {
@@ -18,17 +17,17 @@ public class TestMultiCatchRule {
 		try {
 			String.class.getConstructor(String.class).newInstance("aa");
 		} catch (InstantiationException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 		} catch (IllegalAccessException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 		} catch (IllegalArgumentException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 		} catch (InvocationTargetException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 		} catch (NoSuchMethodException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 		} catch (SecurityException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 		}
 	}
 
@@ -36,19 +35,19 @@ public class TestMultiCatchRule {
 		try {
 			throwSomethingWithInheritance(i);
 		} catch (SecondChildChildException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		} catch (SecondChildException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		} catch (SecondChildSecondException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		} catch (FirstException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		} catch (SecondException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		}
 		return i;
@@ -57,21 +56,20 @@ public class TestMultiCatchRule {
 	/*
 	 * UnionType cornercase
 	 */
-	
 	public int unionTypeCornerCaseInheritance(int i) {
 		try {
 			throwSomethingWithInheritance(i);
 		} catch (SecondChildChildException | FirstException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		} catch (SecondChildException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		} catch (SecondChildSecondException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		} catch (SecondException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		}
 		return i;
@@ -84,19 +82,19 @@ public class TestMultiCatchRule {
 		try {
 			throwSomethingWithInheritance(i);
 		} catch (SecondChildChildException e) {
-			log.log(Level.TRACE, e);
+			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		} catch (SecondChildException e2) {
-			log.log(Level.TRACE, e2);
+			log.trace(e2.getLocalizedMessage(), e2);
 			i++;
 		} catch (SecondChildSecondException e3) {
-			log.log(Level.TRACE, e3);
+			log.trace(e3.getLocalizedMessage(), e3);
 			i++;
 		} catch (FirstException e4) {
-			log.log(Level.TRACE, e4);
+			log.trace(e4.getLocalizedMessage(), e4);
 			i++;
 		} catch (SecondException e5) {
-			log.log(Level.TRACE, e5);
+			log.trace(e5.getLocalizedMessage(), e5);
 			i++;
 		}
 		return i;

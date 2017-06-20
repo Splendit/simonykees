@@ -4,7 +4,7 @@
 	<parent>
 		<artifactId>jSparrow</artifactId>
 		<groupId>at.splendit.jSparrow</groupId>
-		<version>1.1.0-SNAPSHOT</version>
+		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jSparrow.core</artifactId>
@@ -30,39 +30,16 @@
 					<plugin>
 						<groupId>com.github.wvengen</groupId>
 						<artifactId>proguard-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<phase>package</phase>
-								<goals>
-									<goal>proguard</goal>
-								</goals>
-							</execution>
-						</executions>
 						<configuration>
-							<obfuscate>true</obfuscate>
-							<!-- <injar>${project.build.finalName}.jar</injar> <outjar>${project.build.finalName}-small.jar</outjar> -->
-							<libs>
-								<lib>${java.home}/lib/rt.jar</lib>
-								<lib>${java.home}/lib/jsse.jar</lib>
-							</libs>
 							<options>
-								<option>-keep public class * extends
-									org.eclipse.ui.plugin.AbstractUIPlugin</option>
-								<option>-keep public class * extends
-									at.splendit.simonykees.core.handler.AbstractSimonykeesHandler</option>
-								<option>-keepclassmembers public class * extends
-									org.eclipse.osgi.util.NLS { public static &lt;fields&gt;; }</option>
-								<option>-keep public class * implements
-									org.eclipse.ui.IWorkbenchPreferencePage</option>
-								<option>-keep public class * extends
-									org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer</option>
-								<option>-dontnote org.eclipse.**</option>
-								<option>-dontnote org.osgi.**</option>
-								<option>-dontnote javax.xml.**</option>
-								<option>-dontnote javax.annotation.**</option>
-								<option>-dontnote org.xml.sax.**</option>
-								<option>-dontnote org.w3c.dom.**</option>
-								<option>-dontwarn javax.crypto.**</option>
+								<option>
+									-libraryjars
+									${project.basedir}/../logging/target/jSparrow.logging-1.2.0-SNAPSHOT_proguard_base.jar
+								</option>
+								<option>-applymapping
+									${project.basedir}/../logging/target/logging.out</option>
+								<option>-printmapping
+									${project.build.directory}/core.out</option>
 							</options>
 						</configuration>
 					</plugin>
@@ -70,5 +47,4 @@
 			</build>
 		</profile>
 	</profiles>
-
 </project>

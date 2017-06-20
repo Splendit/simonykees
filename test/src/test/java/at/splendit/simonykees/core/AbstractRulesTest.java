@@ -16,8 +16,12 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
-import at.splendit.simonykees.core.refactorer.AbstractRefactorer;
+import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -30,7 +34,33 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public abstract class AbstractRulesTest {
 
+	private static final String UTILITY_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/utilities"; //$NON-NLS-1$
+
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
+
+	protected static IPackageFragmentRoot root = null;
+	
+	protected static String javaVersion = JavaCore.VERSION_1_8;
+
+	@BeforeClass
+	public static void setUp() throws Exception {
+		if (root == null) {
+			root = RulesTestUtil.getPackageFragementRoot(javaVersion);
+			String packageString = "at.splendit.simonykees.sample.utilities"; //$NON-NLS-1$
+			IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
+			for (Path utilityPath : loadUtilityClasses(UTILITY_DIRECTORY)) {
+				String utilityClassName = utilityPath.getFileName().toString();
+				String utilitySource = new String(Files.readAllBytes(utilityPath), StandardCharsets.UTF_8);
+				packageFragment.createCompilationUnit(utilityClassName, utilitySource, true, null);
+			}
+		}
+	}
+
+	@AfterClass
+	public static void tearDown() throws Exception {
+		root = null;
+		javaVersion = JavaCore.VERSION_1_8;
+	}
 
 	public AbstractRulesTest() {
 		super();
@@ -56,17 +86,26 @@ public abstract class AbstractRulesTest {
 		return data;
 	}
 
+	protected static List<Path> loadUtilityClasses(String utilityDirectory) throws IOException {
+		List<Path> data = new ArrayList<>();
+		for (Path utilityPath : Files.newDirectoryStream(Paths.get(utilityDirectory), "*.java")) { //$NON-NLS-1$
+			data.add(utilityPath);
+		}
+		return data;
+	}
+
 	protected String processFile(String fileName, String content,
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) throws Exception {
 
-		IPackageFragment packageFragment = RulesTestUtil.getPackageFragement();
+		String packageString = "at.splendit.simonykees.sample.preRule"; //$NON-NLS-1$
+		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
+
 		ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);
 
 		List<IJavaElement> javaElements = new ArrayList<>();
 		javaElements.add(compilationUnit);
 
-		AbstractRefactorer refactorer = new AbstractRefactorer(javaElements, rules) {
-		};
+		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules);
 
 		/*
 		 * A default progress monitor implementation, used just for testing
@@ -74,9 +113,11 @@ public abstract class AbstractRulesTest {
 		 */
 		IProgressMonitor monitor = new NullProgressMonitor();
 
-		refactorer.prepareRefactoring(monitor);
-		refactorer.doRefactoring(monitor);
-		refactorer.commitRefactoring();
+		rules.stream().forEach(rule -> rule.calculateEnabledForProject(packageFragment.getJavaProject()));
+
+		refactoringPipeline.prepareRefactoring(javaElements, monitor);
+		refactoringPipeline.doRefactoring(monitor);
+		refactoringPipeline.commitRefactoring();
 
 		return compilationUnit.getSource();
 	}

@@ -2,7 +2,7 @@
 <feature
       id="jSparrow.feature"
       label="jSparrow"
-      version="1.1.0.qualifier"
+      version="2.0.0.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
 
    <description url="https://jsparrow.eu/description">
@@ -206,6 +206,48 @@ This product also includes libraries which are covered by the following licenses
 
    <plugin
          id="jSparrow.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="jSparrow.logging"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="jSparrow.license.netlicensing"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="jSparrow.license.api"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="jSparrow.i18n"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.oshi.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.labs64.netlicensing.client"
          download-size="0"
          install-size="0"
          version="0.0.0"

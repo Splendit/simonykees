@@ -1,33 +1,28 @@
 package at.splendit.simonykees.core.rule.impl;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang3.JavaVersion;
-import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.text.edits.TextEdit;
 
-import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.util.SimonykeesUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * Format a Java class, the rule does not use an
  * {@link AbstractASTRewriteASTVisitor} so the abstract class itself can be
  * passed to the constructor.
+ * <p>
+ * The formatter selected in the Eclipse settings of the processed project is
+ * used.
  * 
  * @author Hannes Schweighofer, Ludwig Werzowa
  * @since 0.9.2
@@ -35,68 +30,56 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
 
-	private Map<ICompilationUnit, DocumentChange> changes = new HashMap<ICompilationUnit, DocumentChange>();
-
 	public CodeFormatterRule(Class<AbstractASTRewriteASTVisitor> visitor) {
 		super(visitor);
 		this.name = Messages.CodeFormatterRule_name;
 		this.description = Messages.CodeFormatterRule_description;
-		this.requiredJavaVersion = JavaVersion.JAVA_0_9;
 	}
 
 	@Override
-	public Map<ICompilationUnit, DocumentChange> getDocumentChanges() {
-		return Collections.unmodifiableMap(changes);
+	protected JavaVersion provideRequiredJavaVersion() {
+		return JavaVersion.JAVA_1_1;
 	}
 
 	@Override
-	public void generateDocumentChanges(List<ICompilationUnit> workingCopies, SubMonitor subMonitor)
-			throws JavaModelException, ReflectiveOperationException {
-		
-		subMonitor.setWorkRemaining(workingCopies.size());
-		
-		for (ICompilationUnit wc : workingCopies) {
-			subMonitor.subTask(getName() + ": " + wc.getElementName()); //$NON-NLS-1$
-			applyFormating(wc);
-			if (subMonitor.isCanceled()) {
-				return;
-			} else {
-				subMonitor.worked(1);
-			}
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
+			throws ReflectiveOperationException, JavaModelException {
+
+		try {
+			return applyFormating(workingCopy);
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
 		}
 	}
 
-	private void applyFormating(ICompilationUnit workingCopy) throws JavaModelException {
-		if (changes.containsKey(workingCopy)) {
-			// already have changes
-			Activator.log(NLS.bind(Messages.RefactoringRule_warning_workingcopy_already_present, this.name));
-		} else {
-			ISourceRange sourceRange = workingCopy.getSourceRange();
-			// TODO check formating style
-			CodeFormatter formatter = ToolFactory
-					.createCodeFormatter(DefaultCodeFormatterConstants.getEclipseDefaultSettings());
-			int formatingKind = CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS
-					| CodeFormatter.K_UNKNOWN;
-			TextEdit edit = formatter.format(formatingKind, workingCopy.getSource(), sourceRange.getOffset(),
-					sourceRange.getLength(), 0, SimonykeesUtil.LINE_SEPARATOR);
+	private DocumentChange applyFormating(ICompilationUnit workingCopy) throws JavaModelException {
+		ISourceRange sourceRange = workingCopy.getSourceRange();
 
-			if (edit.hasChildren()) {
-				Document document = new Document(workingCopy.getSource());
-				DocumentChange documentChange = SimonykeesUtil
-						.generateDocumentChange(CodeFormatterRule.class.getSimpleName(), document, edit.copy());
+		/*
+		 * Our sample module makes it necessary to use the options of the
+		 * currently used IJavaProject instead of JavaCore.getOptions() (used
+		 * when passing null), which works in runtime Eclipse etc.
+		 */
+		CodeFormatter formatter = ToolFactory.createCodeFormatter(workingCopy.getJavaProject().getOptions(true));
 
-				workingCopy.applyTextEdit(edit, null);
-				workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+		int formatingKind = CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS
+				| CodeFormatter.K_UNKNOWN;
+		TextEdit edit = formatter.format(formatingKind, workingCopy.getSource(), sourceRange.getOffset(),
+				sourceRange.getLength(), 0, SimonykeesUtil.LINE_SEPARATOR);
 
-				if (documentChange != null) {
-					changes.put(workingCopy, documentChange);
-				} else {
-					// no changes
-				}
-			} else {
-				// no changes
-			}
+		DocumentChange documentChange = null;
+
+		if (edit.hasChildren()) {
+			Document document = new Document(workingCopy.getSource());
+			documentChange = SimonykeesUtil.generateDocumentChange(CodeFormatterRule.class.getSimpleName(), document,
+					edit.copy());
+
+			workingCopy.applyTextEdit(edit, null);
+			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+
 		}
+
+		return documentChange;
 
 	}
 

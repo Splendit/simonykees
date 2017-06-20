@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.visitor;
 
 import java.util.List;
 
+import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -18,11 +19,12 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.i18n.Messages;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * Diamond operator should be used instead of explicit type arguments.
@@ -38,6 +40,14 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  */
 public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
+	private static final Logger logger = LoggerFactory.getLogger(DiamondOperatorASTVisitor.class);
+	
+	private JavaVersion compilerCompliance;
+	
+	public DiamondOperatorASTVisitor(JavaVersion compilerCompliance) {
+		this.compilerCompliance = compilerCompliance;
+	}
+	
 	/**
 	 * Covers the case when a diamond operator can be used in the initialization
 	 * or in an assignment expression.
@@ -49,7 +59,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 			boolean sameTypes = false;
 			ParameterizedType parameterizedType = (ParameterizedType) nodeType;
 			// safe casting to typed list
-			
+
 			List<Type> rhsTypeArguments = ASTNodeUtil.returnTypedList(parameterizedType.typeArguments(), Type.class);
 
 			if (rhsTypeArguments != null && !rhsTypeArguments.isEmpty()) {
@@ -62,7 +72,8 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 				 * arguments with a diamond operator.
 				 */
 
-				if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()) {
+				if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()
+						&& (!hasParameterizedArguments(node) || isMethodArgumentsTypeInferable())) {
 
 					/*
 					 * Declaration and initialization occur in the same
@@ -84,7 +95,8 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 						sameTypes = areParameterizedTypeEqual((ParameterizedType) lhsType, rhsTypeArguments);
 					}
 
-				} else if (ASTNode.ASSIGNMENT == parent.getNodeType()) {
+				} else if (ASTNode.ASSIGNMENT == parent.getNodeType()
+						&& (!hasParameterizedArguments(node) || isMethodArgumentsTypeInferable())) {
 
 					/*
 					 * Declaration and assignment occur on different statements:
@@ -97,19 +109,21 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					Assignment assignmentNode = ((Assignment) parent);
 					Expression lhsNode = assignmentNode.getLeftHandSide();
 					ITypeBinding lhsTypeBinding = lhsNode.resolveTypeBinding();
-					if(lhsTypeBinding != null) {
+					if (lhsTypeBinding != null) {
 						ITypeBinding[] lhsTypeBindingArguments = lhsTypeBinding.getTypeArguments();
 						ITypeBinding rhsTypeBinding = node.resolveTypeBinding();
-						if(rhsTypeBinding != null) {
+						if (rhsTypeBinding != null) {
 							ITypeBinding[] rhsTypeBindingArguments = rhsTypeBinding.getTypeArguments();
-							// compare type arguments in new instance creation with
-							// the ones in declaration
+							/*
+							 * compare type arguments in new instance creation with 
+							 * the ones in declaration
+							 */
 							sameTypes = ClassRelationUtil.compareITypeBinding(lhsTypeBindingArguments,
 									rhsTypeBindingArguments);
 						}
 					}
 
-				} else if (ASTNode.METHOD_INVOCATION == parent.getNodeType()
+				} else if (ASTNode.METHOD_INVOCATION == parent.getNodeType() && isMethodArgumentsTypeInferable()
 						&& MethodInvocation.ARGUMENTS_PROPERTY == node.getLocationInParent()) {
 
 					/*
@@ -119,7 +133,8 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					 * replaced with: <br/> {@code map.put("key", new
 					 * ArrayList<>());} <br/>
 					 */
-					List<Expression> argumentList = ASTNodeUtil.returnTypedList(((MethodInvocation) parent).arguments(), Expression.class);
+					List<Expression> argumentList = ASTNodeUtil.returnTypedList(((MethodInvocation) parent).arguments(),
+							Expression.class);
 
 					ITypeBinding[] parameterTypeArgs = null;
 
@@ -163,6 +178,34 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		return true;
 	}
 
+	/**
+	 * Checks whether any of the arguments of the class creation node is
+	 * a parameterized type. 
+	 * 
+	 * @param node representing a new instance creation
+	 * 
+	 * @return {@code true} if any of the arguments is parameterized, or {@code false} otherwise.
+	 */
+	protected boolean hasParameterizedArguments(ClassInstanceCreation node) {
+		List<Expression> arguments = ASTNodeUtil.returnTypedList(node.arguments(), Expression.class);
+		return arguments.stream().map(Expression::resolveTypeBinding).filter(ITypeBinding::isParameterizedType)
+				.findAny().isPresent();
+	}
+
+	/**
+	 * Checks whether the compiler compliance level is at least
+	 * {@value JavaVersion#JAVA_1_8}.
+	 * 
+	 * @return {@code true} if the compliance level is
+	 *         {@value JavaVersion#JAVA_1_8} or new, {@code false} otherwise.
+	 */
+	private boolean isMethodArgumentsTypeInferable() {
+		if(compilerCompliance != null) {
+			return compilerCompliance.atLeast(JavaVersion.JAVA_1_8);
+		}
+		return false;
+	}
+
 	private MethodDeclaration findMethodSignature(ASTNode node) {
 		MethodDeclaration methodDeclaration = null;
 		if (node != null) {
@@ -197,7 +240,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	private void replaceWithDiamond(ParameterizedType parameterizedType, List<Type> rhsTypeArguments) {
 		// removing type arguments in new class instance creation
-		Activator.log(Messages.DiamondOperatorASTVisitor_using_diamond_operator);
+		logger.debug(Messages.DiamondOperatorASTVisitor_using_diamond_operator);
 		ListRewrite typeArgumentsListRewrite = astRewrite.getListRewrite(parameterizedType,
 				ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
 		rhsTypeArguments.stream().forEach(type -> typeArgumentsListRewrite.remove(type, null));
