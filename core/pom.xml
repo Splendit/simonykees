@@ -34,7 +34,7 @@
 							<options>
 								<option>
 									-libraryjars
-									${project.basedir}/../logging/target/jSparrow.logging-1.2.0-SNAPSHOT_proguard_base.jar
+									${project.basedir}/../logging/target/jSparrow.logging-${project.version}_proguard_base.jar
 								</option>
 								<option>-applymapping
 									${project.basedir}/../logging/target/logging.out</option>
