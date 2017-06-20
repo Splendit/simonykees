@@ -10,10 +10,10 @@ package at.splendit.simonykees.license.netlicensing;
  *
  */
 @SuppressWarnings("nls")
-public class LicenseProperties {	
-	static final String LICENSE_ENVIRONMENT = "production";
+public class LicenseProperties {
+	static final String LICENSE_ENVIRONMENT = "Test";
 	static final String DEFAULT_LICENSEE_NUMBER_PREFIX = "demo";
-	static final String LICENSE_PRODUCT_NUMBER = "P27GH3XNG";
-	static final String LICENSE_PASS_API_KEY = "b61db5be-c350-4cab-8497-6c07d0f39409";
-	static final String LICENSE_PRODUCT_MODULE_NUMBER = "MVIG9MWGS";
+	static final String LICENSE_PRODUCT_NUMBER = "PNZNF7Y7E";
+	static final String LICENSE_PASS_API_KEY = "bf7f1092-3c88-492f-8a52-d00823d225a8";
+	static final String LICENSE_PRODUCT_MODULE_NUMBER = "M6IS9TIWG";
 }
