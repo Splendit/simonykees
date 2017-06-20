@@ -68,6 +68,13 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 									List<ICompilationUnit> containingErrorList = refactoringPipeline
 											.prepareRefactoring(selectedJavaElements, monitor);
 									if (monitor.isCanceled()) {
+										/*
+										 * Workaround that prevents selection of
+										 * multiple projects in the Package
+										 * Explorer.
+										 * 
+										 * See SIM-496
+										 */
 										if (refactoringPipeline.isMultipleProjects()) {
 											synchronizeWithUIShowMultiprojectMessage();
 										}
@@ -125,9 +132,10 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 				// HandlerUtil.getActiveShell(event)
 				final WizardDialog dialog = new WizardDialog(shell, new SelectRulesWizard(selectedJavaElements,
 						refactoringPipeline, RulesContainer.getRulesForProject(selectedJavaProjekt))) {
-					// Removed unnecessary empty space on the bottom of
-					// the wizard intended for ProgressMonitor that is
-					// not used
+					/*
+					 * Removed unnecessary empty space on the bottom of the
+					 * wizard intended for ProgressMonitor that is not used
+					 */
 					@Override
 					protected Control createDialogArea(Composite parent) {
 						Control ctrl = super.createDialogArea(parent);
@@ -226,15 +234,15 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 			}
 		});
 	}
-	
+
 	private void synchronizeWithUIShowMultiprojectMessage() {
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizardHandler_multipleProjectsWarning,
-						MessageDialog.WARNING);
+				SimonykeesMessageDialog.openMessageDialog(shell,
+						Messages.SelectRulesWizardHandler_multipleProjectsWarning, MessageDialog.WARNING);
 			}
 		});
 	}

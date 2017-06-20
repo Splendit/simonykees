@@ -207,6 +207,8 @@ public class RefactoringPipeline {
 					 * Project explorer when selected project is not Java
 					 * project to not show the jSparrow, but solution for
 					 * multiple project selection is not done.
+					 * 
+					 * See SIM-496
 					 */
 					if (!compilationUnit.getJavaProject().equals(javaProjekt)) {
 						subMonitor.setCanceled(true);
