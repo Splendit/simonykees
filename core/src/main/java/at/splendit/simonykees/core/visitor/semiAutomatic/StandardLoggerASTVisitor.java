@@ -242,19 +242,27 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				Expression expression = methodInvocation.getExpression();
 				if (expression != null && ASTNode.QUALIFIED_NAME == expression.getNodeType()) {
 					QualifiedName expressionQualifier = (QualifiedName) expression;
-					SimpleName qualiferName = expressionQualifier.getName();
 					Name qualifier = expressionQualifier.getQualifier();
-					if ((OUT.equals(qualiferName.getIdentifier()) || ERR.equals(qualiferName.getIdentifier()))
-							&& ClassRelationUtil.isContentOfTypes(qualifier.resolveTypeBinding(),
-									Collections.singletonList(JAVA_LANG_SYSTEM))) {
-						// replace the System.out.println with a logger
-						String replacingMethod = replacingOptions.get(StandardLoggerConstants.SYSTEM_OUT_PRINT);
-						replaceMethod(methodInvocation, replacingMethod);
+					
+					if(ClassRelationUtil.isContentOfTypes(qualifier.resolveTypeBinding(),
+							Collections.singletonList(JAVA_LANG_SYSTEM))) {
+						SimpleName qualiferName = expressionQualifier.getName();
+						String systemOutOption = replacingOptions.get(StandardLoggerConstants.SYSTEM_OUT_PRINT);
+						String systemErrOption = replacingOptions.get(StandardLoggerConstants.SYSTEM_ERR_PRINT);
+						
+						if(OUT.equals(qualiferName.getIdentifier()) && !systemOutOption.isEmpty()) {
+							// replace the System.out.println with a logger
+							replaceMethod(methodInvocation, systemOutOption);
+						} else if (ERR.equals(qualiferName.getIdentifier()) && !systemErrOption.isEmpty()) {
+							// replace the System.err.println with a logger
+							replaceMethod(methodInvocation, systemErrOption);
+						}
 					}
 				}
 			}
 
-		} else if (PRINT_STACK_TRACE.equals(methodName.getIdentifier())) {
+		} else if (PRINT_STACK_TRACE.equals(methodName.getIdentifier()) 
+				&& !replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE).isEmpty()) {
 			/*
 			 * Looking for e.printStackTrace() where 'e' is a throwable object.
 			 */
