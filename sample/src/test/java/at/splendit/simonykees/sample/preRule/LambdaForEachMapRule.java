@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import at.splendit.simonykees.sample.utilities.Person;
 
@@ -260,6 +259,35 @@ public class LambdaForEachMapRule {
 		rawList.stream().filter(o -> o != null).forEach((Object n) -> {
 			String s = (String)n;
 			Number d = (int)Integer.valueOf(s)/2;
+			sb.append(d);
+		});
+		
+		return sb.toString();
+	}
+	
+	public String finalLocalVariable() {
+		
+		List<Object> rawList = generateRawListOfStrings();
+		StringBuilder sb = new StringBuilder();
+		rawList.stream().filter(o -> o != null).forEach((Object n) -> {
+			final String s = (String)n;
+			Number d = (int)Integer.valueOf(s)/2;
+			
+			sb.append(d);
+		});
+		
+		return sb.toString();
+	}
+	
+	public String annotatedLocalVariable() {
+		
+		List<Object> rawList = generateRawListOfStrings();
+		StringBuilder sb = new StringBuilder();
+		rawList.stream().filter(o -> o != null).forEach((Object n) -> {
+			@Deprecated
+			final String s = (String)n;
+			Number d = (int)Integer.valueOf(s)/2;
+			
 			sb.append(d);
 		});
 		

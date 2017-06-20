@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -18,6 +19,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -136,14 +138,25 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 										null);
 							} else {
 								astRewrite.replace(type, newType, null);
+								Modifier modifier = analyzer.getNewForEachParameterModifier();
+								insertModifier(lambdaExpression, modifier);
 							}
 						}
-
 					}
 				}
 			}
 		}
 		return true;
+	}
+
+	private void insertModifier(LambdaExpression lambdaExpression, Modifier modifier) {
+		if (modifier != null) {
+			List<SingleVariableDeclaration> params = ASTNodeUtil.convertToTypedList(lambdaExpression.parameters(),
+					SingleVariableDeclaration.class);
+			SingleVariableDeclaration param = params.get(0);
+			ListRewrite paramRewriter = astRewrite.getListRewrite(param, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
+			paramRewriter.insertFirst(astRewrite.createCopyTarget(modifier), null);
+		}
 	}
 
 	/**
@@ -256,6 +269,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		private Expression mapExpression = null;
 		private SimpleName newForEachVarName = null;
 		private Type parameterType = null;
+		private Modifier modifier;
 
 		public ForEachBodyAnalyzer(SimpleName parameter, Block block) {
 			List<Statement> statements = ASTNodeUtil.returnTypedList(block.statements(), Statement.class);
@@ -273,44 +287,55 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 						 * map variable
 						 */
 						VariableDeclarationStatement declStatement = (VariableDeclarationStatement) statement;
-						List<VariableDeclarationFragment> fragments = ASTNodeUtil
-								.convertToTypedList(declStatement.fragments(), VariableDeclarationFragment.class);
-						Type type = declStatement.getType();
-
-						if (!involvesTypeVariables(type.resolveBinding()) && !declStatement.getType().isArrayType()
-								&& referencesName(declStatement, parameter)) {
-							if (fragments.size() == 1) {
-								/*
-								 * a map variable is found. store its name and
-								 * its initializer
-								 */
-								VariableDeclarationFragment fragment = fragments.get(0);
-								SimpleName fragmentName = fragment.getName();
-								Expression initializer = fragment.getInitializer();
-								mapVariableFound = true;
-								newForEachVarName = fragmentName;
-								parameterType = declStatement.getType();
-								mapExpression = initializer;
-
+						
+						// skip the variable declarations having an annotation
+						if(ASTNodeUtil.convertToTypedList(declStatement.modifiers(), Annotation.class).isEmpty()) {
+							List<VariableDeclarationFragment> fragments = ASTNodeUtil
+									.convertToTypedList(declStatement.fragments(), VariableDeclarationFragment.class);
+							Type type = declStatement.getType();
+							
+							if (!involvesTypeVariables(type.resolveBinding()) && !declStatement.getType().isArrayType()
+									&& referencesName(declStatement, parameter)) {
+								if (fragments.size() == 1) {
+									/*
+									 * a map variable is found. store its name and
+									 * its initializer
+									 */
+									VariableDeclarationFragment fragment = fragments.get(0);
+									SimpleName fragmentName = fragment.getName();
+									Expression initializer = fragment.getInitializer();
+									mapVariableFound = true;
+									newForEachVarName = fragmentName;
+									parameterType = declStatement.getType();
+									mapExpression = initializer;
+									
+									List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(declStatement.modifiers(), Modifier.class);
+									if(modifiers.size() == 1) {
+										this.modifier = modifiers.get(0);
+									}
+									
+								} else {
+									/*
+									 * if the parameter is not referenced, then just
+									 * store the declared name it will be checked for
+									 * references after the map variable is found.
+									 */
+									extractableStatements.add(statement);
+									for (VariableDeclarationFragment fragment : fragments) {
+										SimpleName fragmentName = fragment.getName();
+										declaredNames.add(fragmentName);
+									}
+								}
 							} else {
 								/*
-								 * only one fragment is allowed in the
-								 * declaration of the map variable. As an
-								 * improvement, the fragments can be split into
-								 * separate declarations.
+								 * store the declared name. It will be checked for
+								 * references after the map variable is found.
 								 */
-								clearParameters();
-								return;
-							}
-						} else {
-							/*
-							 * store the declared name. It will be checked for
-							 * references after the map variable is found.
-							 */
-							extractableStatements.add(statement);
-							for (VariableDeclarationFragment fragment : fragments) {
-								SimpleName fragmentName = fragment.getName();
-								declaredNames.add(fragmentName);
+								extractableStatements.add(statement);
+								for (VariableDeclarationFragment fragment : fragments) {
+									SimpleName fragmentName = fragment.getName();
+									declaredNames.add(fragmentName);
+								}
 							}
 						}
 					} else {
@@ -333,6 +358,10 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 			prepareRemainingBlock(ast);
 			prepareExtractableBlock(ast);
+		}
+
+		public Modifier getNewForEachParameterModifier() {
+			return this.modifier;
 		}
 
 		private void clearParameters() {

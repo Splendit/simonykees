@@ -259,6 +259,33 @@ public class LambdaForEachMapRule {
 		return sb.toString();
 	}
 
+	public String finalLocalVariable() {
+
+		List<Object> rawList = generateRawListOfStrings();
+		StringBuilder sb = new StringBuilder();
+		rawList.stream().filter(o -> o != null).map((Object n) -> (String) n).forEach((final String s) -> {
+			Number d = (int) Integer.valueOf(s) / 2;
+			sb.append(d);
+		});
+
+		return sb.toString();
+	}
+
+	public String annotatedLocalVariable() {
+
+		List<Object> rawList = generateRawListOfStrings();
+		StringBuilder sb = new StringBuilder();
+		rawList.stream().filter(o -> o != null).forEach((Object n) -> {
+			@Deprecated
+			final String s = (String) n;
+			Number d = (int) Integer.valueOf(s) / 2;
+
+			sb.append(d);
+		});
+
+		return sb.toString();
+	}
+
 	public String rawTypeFromMethodInvocation() {
 
 		StringBuilder sb = new StringBuilder();
