@@ -81,19 +81,20 @@ timestamps {
 					}
 					
 					// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
-					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,(.*-\\d{4})\" site/target/p2content.xml")
+					// grep returns result with an \n therefore we need to trim
+					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,(.*-\\d{4})\" site/target/p2content.xml").trim()
 					
 					stage('Deploy obfuscation') {
-						def mvnOptions = '-Dproguard -DforceContextQualifier=${qualifier}_test'
+						def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
 						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-test-proguard"
 					}
 					if ( env.BRANCH_NAME == 'master') {
 						stage('Deploy production') {
-							def mvnOptions = '-Dproduction -DforceContextQualifier=${qualifier}_noProguard'
+							def mvnOptions = "-Dproduction -DforceContextQualifier=${qualifier}_noProguard"
 							sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-noProguard"
 						}
 						stage('Deploy production, obfuscation') {
-							def mvnOptions = '-Dproduction -Dproguard -DforceContextQualifier=${qualifier}'
+							def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
 							sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-proguard"
 						}
 					}
