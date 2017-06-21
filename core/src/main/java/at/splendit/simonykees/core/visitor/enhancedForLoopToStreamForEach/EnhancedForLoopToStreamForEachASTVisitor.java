@@ -39,14 +39,17 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 		SingleVariableDeclaration parameter = enhancedForStatementNode.getParameter();
 		Expression expression = enhancedForStatementNode.getExpression();
 		Statement statement = enhancedForStatementNode.getBody();
+		SimpleName parameterName = parameter.getName();
+		ITypeBinding parameterTypeBinding = parameterName.resolveTypeBinding();
 
 		// expression must be of type java.util.Collection
 		ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
 		if (expressionTypeBinding != null
 				&& (ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST)
-						|| ClassRelationUtil.isContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST))) {
+						|| ClassRelationUtil.isContentOfTypes(expressionTypeBinding, TYPE_BINDING_CHECK_LIST))
+				&& isTypeSafe(parameterTypeBinding)) {
 
-			ASTNode approvedStatement = getApprovedStatement(statement, parameter.getName());
+			ASTNode approvedStatement = getApprovedStatement(statement, parameterName);
 
 			if (approvedStatement != null) {
 
@@ -67,7 +70,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 				 * of the enhanced for loop will be used for the corresponding
 				 * parts of the lambda expression.
 				 */
-				SimpleName parameterCopy = (SimpleName) astRewrite.createCopyTarget(parameter.getName());
+				SimpleName parameterCopy = (SimpleName) astRewrite.createCopyTarget(parameterName);
 				ASTNode statementCopy = astRewrite.createCopyTarget(approvedStatement);
 
 				LambdaExpression lambdaExpression = astRewrite.getAST().newLambdaExpression();
@@ -99,6 +102,36 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 				astRewrite.replace(enhancedForStatementNode, expressionStatement, null);
 			}
 		}
+	}
+
+	/**
+	 * Checks whether the type binding is a raw type, capture, wildcard or a
+	 * parameterized type having any of the above as a parameter.
+	 * 
+	 * @param typeBinding
+	 * @return {@code false} if any of the aforementioned types, or {@link true}
+	 *         otherwise.
+	 */
+	private boolean isTypeSafe(ITypeBinding typeBinding) {
+		if (typeBinding.isRawType()) {
+			return false;
+		}
+
+		if (typeBinding.isCapture()) {
+			return false;
+		}
+
+		if (typeBinding.isWildcardType()) {
+			return false;
+		}
+
+		if (typeBinding.isParameterizedType()) {
+			for (ITypeBinding argument : typeBinding.getTypeArguments()) {
+				return isTypeSafe(argument);
+			}
+		}
+
+		return true;
 	}
 
 	/**

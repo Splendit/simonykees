@@ -1,11 +1,17 @@
 package at.splendit.simonykees.sample.postRule.enhancedForLoopToStreamForEach;
 
 import java.io.FileNotFoundException;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import at.splendit.simonykees.sample.utilities.Person;
 
 /**
  * 
@@ -262,6 +268,35 @@ public class EnhancedForLoopToStreamForEachRule {
 
 		return "";
 	}
+	
+	public void rawIterator() {
+		List<Class> classes = stringList1.stream().map(String::getClass).collect(Collectors.toList());
+		for(Class clazz : classes) {
+			System.out.println(clazz);
+		}
+	}
+	
+	public void captureTypeIterator() {
+		List<List<? extends Person>> persons = new ArrayList<>();
+		for(List<? extends Person> clazz : persons) {
+			System.out.println(clazz);
+		}
+	}
+	
+	public void wildCardTypeIterator() {
+		List<List<? extends Person>> persons = new ArrayList<>();
+		for(Class clazz : getWildCardSet()) {
+			System.out.println(clazz);
+		}
+	}
+	
+	public Set<Class<?>> getWildCardSet() {
+		return null;
+	}
+	
+	private void useClass(Class<Object> c) {
+		
+	}
 
 	private class TestClass {
 		public int testIntField = 0;
@@ -274,5 +309,13 @@ public class EnhancedForLoopToStreamForEachRule {
 		public TestClass(int testIntField) throws FileNotFoundException {
 			throw new FileNotFoundException();
 		}
+	}
+	
+	private class Employee extends Person {
+
+		public Employee(String name, LocalDate birthday) {
+			super(name, birthday);
+		}
+		
 	}
 }
