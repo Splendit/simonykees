@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Logging
 Bundle-SymbolicName: jSparrow.logging
-Bundle-Version: 1.2.0.qualifier
+Bundle-Version: 2.0.1.qualifier
 Bundle-Activator: at.splendit.simonykees.logging.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

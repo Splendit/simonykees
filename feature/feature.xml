@@ -2,18 +2,18 @@
 <feature
       id="jSparrow.feature"
       label="jSparrow"
-      version="1.2.0.qualifier"
+      version="2.0.1.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
 
-   <description url="https://jsparrow.eu/description">
-      Tool for automated code improvement for java sources. A more detailed description can be found at https://jsparrow.eu/description
+   <description url="https://jsparrow.eu/knowledge-base/">
+      Tool for automated code improvement for java sources. A more detailed description can be found at https://jsparrow.eu/knowledge-base/
    </description>
 
-   <copyright url="https://jsparrow.eu/copyright">
+   <copyright url="https://jsparrow.eu/jsparrow-software-download-terms-conditions/">
       Copyright 2017 Splendit IT-Consulting GmbH and Co KG. All rights reserved. This software is protected by intellectual property rights and regulations of international treaties. Any unauthorized reproduction and/or unauthorized distribution will be prosecuted in accordance with criminal and civil law.
    </copyright>
 
-   <license url="https://jsparrow.eu/agreement/eula">
+   <license url="https://jsparrow.eu/eula">
       End user licence agreement
   
 Please read this EULA carefully, as it sets out the basis upon which we license the Software for use.
@@ -248,6 +248,20 @@ This product also includes libraries which are covered by the following licenses
 
    <plugin
          id="com.labs64.netlicensing.client"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.epp.logging.aeri.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.epp.logging.aeri.ide"
          download-size="0"
          install-size="0"
          version="0.0.0"
