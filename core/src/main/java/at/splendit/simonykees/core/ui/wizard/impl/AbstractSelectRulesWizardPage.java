@@ -305,6 +305,20 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 				Set<String> list = (Set<String>) inputElement;
 				return list.toArray();
 			}
+
+			/**
+			 * Needed here because of Eclipse Mars
+			 */
+			@Override
+			public void dispose() {
+			}
+
+			/**
+			 * Needed here because of Eclipse Mars
+			 */
+			@Override
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			}
 		});
 		tree.setLabelProvider(new TreeLabelProvider());
 		tree.setComparator(new JavaElementComparator());
