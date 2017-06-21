@@ -105,31 +105,32 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 	}
 
 	/**
-	 * Checks whether the type binding is a raw type, capture, wildcard 
-	 * or a parameterized type having any of the above as a parameter.
+	 * Checks whether the type binding is a raw type, capture, wildcard or a
+	 * parameterized type having any of the above as a parameter.
 	 * 
-	 * @param typeBinding 
-	 * @return {@code false} if any of the aforementioned types, or {@link true} otherwise.
+	 * @param typeBinding
+	 * @return {@code false} if any of the aforementioned types, or {@link true}
+	 *         otherwise.
 	 */
 	private boolean isTypeSafe(ITypeBinding typeBinding) {
-		if(typeBinding.isRawType()) {
+		if (typeBinding.isRawType()) {
 			return false;
 		}
-		
-		if(typeBinding.isCapture()) {
+
+		if (typeBinding.isCapture()) {
 			return false;
 		}
-		
-		if(typeBinding.isWildcardType()) {
+
+		if (typeBinding.isWildcardType()) {
 			return false;
 		}
-		
-		if(typeBinding.isParameterizedType()) {
-			for(ITypeBinding argument : typeBinding.getTypeArguments()) {
+
+		if (typeBinding.isParameterizedType()) {
+			for (ITypeBinding argument : typeBinding.getTypeArguments()) {
 				return isTypeSafe(argument);
 			}
 		}
-		
+
 		return true;
 	}
 
