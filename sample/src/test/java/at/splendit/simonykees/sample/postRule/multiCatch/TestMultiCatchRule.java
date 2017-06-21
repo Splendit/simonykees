@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.allRules;
+package at.splendit.simonykees.sample.postRule.multiCatch;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -16,8 +16,7 @@ public class TestMultiCatchRule {
 		// TODO meaningful Asserts?
 		try {
 			String.class.getConstructor(String.class).newInstance("aa");
-		} catch (SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException
-				| IllegalAccessException | InstantiationException e) {
+		} catch (SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException | InstantiationException e) {
 			log.trace(e.getLocalizedMessage(), e);
 		}
 	}
@@ -31,7 +30,7 @@ public class TestMultiCatchRule {
 		}
 		return i;
 	}
-
+	
 	/*
 	 * UnionType cornercase
 	 */
@@ -57,7 +56,7 @@ public class TestMultiCatchRule {
 		}
 		return i;
 	}
-
+	
 	/*
 	 * Same as cornerCaseDifferentExceptionNames but without reference to the
 	 * Exception variable in the Exception body
@@ -75,38 +74,35 @@ public class TestMultiCatchRule {
 		try {
 			throwSomething(i);
 		} catch (SecondException | FirstException e) {
-			i++; // A
+			i++; 						// A
 		} catch (ThirdException e) {
-			i += 10; // B
+			i += 10; 					// B
 		} catch (FifthException | FourthException e) {
-			i--; // C
+			i--; 						// C
 		} catch (SixthException e) {
-			i -= 10; // D
+			i -= 10; 					// D
 		}
 		return i;
 	}
-
+	
 	public int cornerCaseMixedCheckedUnchecked(int i) {
 		try {
 			throwSomethingMixedCheckedAndUnchecked(i);
-		} catch (ThirdUncheckedException | ThirdException | SecondtUncheckedException | SecondException
-				| FirstUncheckedException | FirstException e) {
+		} catch (ThirdUncheckedException | ThirdException | SecondtUncheckedException | SecondException | FirstUncheckedException | FirstException e) {
 			i++;
 		}
 		return i;
 	}
-
+	
 	public void movingTopExceptionToBottom(int i) {
-
+		
 		try {
-			if (i == 0) {
+			if(i == 0) {
 				throwSomethingWithInheritance(4);
-			} else {
-				throw new ThirdException();
-			}
-		} catch (ThirdException | SecondChildChildException e) {
+			} else throw new ThirdException();
+		} catch(ThirdException | SecondChildChildException e) {
 			log.warn(e.getMessage());
-		} catch (Exception e) {
+		} catch(Exception e) {
 			log.debug("Same as the most general exception");
 		}
 	}

@@ -40,7 +40,7 @@ public class TestCornerCasesTryWithResourceRule {
 			ObjectInput in = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()));
 			result = in.readObject();
 			in.close();
-		} catch (IOException | ClassNotFoundException e) {
+		} catch (ClassNotFoundException | IOException e) {
 			throw new RuntimeException(e);
 		}
 		return result;

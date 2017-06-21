@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.visitor.tryStatement;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,14 +36,20 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 				.collect(Collectors.toList());
 		while (!blockList.isEmpty()) {
 			boolean combined = false;
-			Block reference = blockList.remove(0);
+			// start from the last block because it could be the most general one.
+			Block reference = blockList.remove(blockList.size() - 1);
 			SingleVariableDeclaration referenceException = ((CatchClause) reference.getParent()).getException();
 			Type referenceExceptionType = referenceException.getType();
 
 			List<Type> allNewTypes = new ArrayList<>();
 			addTypesFromBlock(allNewTypes, referenceExceptionType);
-			for (Iterator<Block> blockIterator = blockList.iterator(); blockIterator.hasNext();) {
-				Block compareBlock = blockIterator.next();
+
+			/*
+			 * Iterate blocks in the reverse order as the bottom ones could be 
+			 * more generic then the above ones.
+			 */
+			for (int i = blockList.size() - 1; i >= 0; i--) {
+				Block compareBlock = blockList.get(i);
 				CatchClause compareCatch = (CatchClause) compareBlock.getParent();
 				SingleVariableDeclaration compareException = compareCatch.getException();
 				Type compareExceptionType = compareException.getType();
@@ -52,9 +59,10 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 					combined = true;
 					addTypesFromBlock(allNewTypes, compareExceptionType);
 					astRewrite.remove(compareCatch, null);
-					blockIterator.remove();
+					blockList.remove(i);
 				}
 			}
+
 			if (combined) {
 				UnionType uniontype = node.getAST().newUnionType();
 				removeSubTypes(allNewTypes);
