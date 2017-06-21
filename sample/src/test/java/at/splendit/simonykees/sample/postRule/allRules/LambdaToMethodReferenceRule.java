@@ -15,6 +15,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import at.splendit.simonykees.sample.utilities.Person;
+import at.splendit.simonykees.sample.utilities.TestModifier;
 
 /**
  * 
@@ -181,6 +182,10 @@ public class LambdaToMethodReferenceRule {
 	public void captureTypes(String input) {
 		List<? extends Person> persons = new ArrayList<>();
 		List<String> names = persons.stream().map(Person::getName).collect(Collectors.toList());
+	}
+
+	public void missingImports() {
+		Person.filter(TestModifier::isStatic);
 	}
 
 	public static <T, SOURCE extends Collection<T>, DEST extends Collection<T>> DEST transferElements(
