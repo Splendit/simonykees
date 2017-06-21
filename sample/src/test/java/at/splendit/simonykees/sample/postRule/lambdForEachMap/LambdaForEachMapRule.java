@@ -205,7 +205,8 @@ public class LambdaForEachMapRule {
 		numbers.add(4.5);
 		
 		StringBuilder sb = new StringBuilder();
-		numbers.stream().filter(n -> n.doubleValue() > 0).map((Number n) -> Arrays.asList(n)).forEach((List<Number> nums) -> {
+		numbers.stream().filter(n -> n.doubleValue() > 0).forEach((Number n) -> {
+			List<Number> nums = Arrays.asList(n);
 			Double d = (Double)nums.get(0);
 			String s = d.toString();
 			sb.append(nums.toString());
@@ -303,7 +304,40 @@ public class LambdaForEachMapRule {
 	
 	public <T> void mapToNestedType(List<Person> refs) {
 		List<List<String>> keys = new ArrayList<>();
-		refs.stream().map(ref -> Collections.singletonList(ref.getName())).forEach(testKey -> keys.add(testKey));
+		refs.stream().forEach(ref -> {
+			final List<String> testKey = Collections.singletonList(ref.getName());
+			keys.add(testKey);
+		});
+	}
+	
+	public void parameterizedMapMethod() {
+		StringBuilder sb = new StringBuilder();
+		List<Wrapper> wrappers = new ArrayList<>();
+		wrappers.stream().forEach(wrapp -> {
+			InnerClass innerClass = wrapp.getInnerClass();
+			useInnerClass(innerClass);
+			sb.append(innerClass.getName());
+		});
+	}
+	
+	interface Inner {
+		
+	}
+	
+	class InnerClass implements Inner {
+		public String getName() {
+			return this.getClass().getName();
+		}
+	}
+	
+	public void useInnerClass(InnerClass innerClass) {
+		
+	}
+	
+	class Wrapper {
+		public <I extends Inner> I getInnerClass() {
+			return null;
+		}
 	}
 	
 	public <T> void mapToTypeVariable(List<Person> refs) {

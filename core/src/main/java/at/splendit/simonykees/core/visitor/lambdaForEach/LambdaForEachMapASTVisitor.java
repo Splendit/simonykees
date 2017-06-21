@@ -306,7 +306,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 									.convertToTypedList(declStatement.fragments(), VariableDeclarationFragment.class);
 							Type type = declStatement.getType();
 							
-							if (!involvesTypeVariables(type.resolveBinding()) && !declStatement.getType().isArrayType()
+							if (!involvesUndefinedTypes(type.resolveBinding()) && !declStatement.getType().isArrayType()
 									&& referencesName(declStatement, parameter)) {
 								if (fragments.size() == 1) {
 									/*
@@ -316,14 +316,19 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 									VariableDeclarationFragment fragment = fragments.get(0);
 									SimpleName fragmentName = fragment.getName();
 									Expression initializer = fragment.getInitializer();
-									mapVariableFound = true;
-									newForEachVarName = fragmentName;
-									parameterType = declStatement.getType();
-									mapExpression = initializer;
-									
-									List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(declStatement.modifiers(), Modifier.class);
-									if(modifiers.size() == 1) {
-										this.modifier = modifiers.get(0);
+									/*
+									 * FIXME
+									 */
+									if(!isDerivableInitializerType(initializer)) {										
+										mapVariableFound = true;
+										newForEachVarName = fragmentName;
+										parameterType = declStatement.getType();
+										mapExpression = initializer;
+										
+										List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(declStatement.modifiers(), Modifier.class);
+										if(modifiers.size() == 1) {
+											this.modifier = modifiers.get(0);
+										}
 									}
 									
 								} else {
@@ -370,6 +375,27 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 			prepareRemainingBlock(ast);
 			prepareExtractableBlock(ast);
+		}
+
+		/**
+		 * Checks if the expression is a generic method invocation without type
+		 * arguments.
+		 * 
+		 * @param expression
+		 *            expression to be checked
+		 * @return {@code true} if expression is a method invocation without
+		 *         type arguments, {@code false} otherwise.
+		 */
+		private boolean isDerivableInitializerType(Expression expression) {
+			if (expression.getNodeType() == ASTNode.METHOD_INVOCATION) {
+				MethodInvocation methodInvocation = (MethodInvocation) expression;
+				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+				if (methodBinding.isParameterizedMethod() && methodInvocation.typeArguments().isEmpty()) {
+					return true;
+				}
+			}
+			
+			return false;
 		}
 
 		public Modifier getNewForEachParameterModifier() {
@@ -561,24 +587,30 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 	 * 
 	 * @return {@code true} if the type involves a type variable, or {@code false} otherwise.
 	 */
-	public boolean involvesTypeVariables(ITypeBinding type) {
+	public boolean involvesUndefinedTypes(ITypeBinding type) {
 		
-		if (type.isParameterizedType()) {
-			ITypeBinding[] arguments = type.getTypeArguments();
-			for (ITypeBinding argument : arguments) {
-				if(argument.isParameterizedType()) {
-					// recursive call
-					return involvesTypeVariables(argument);
+			
+			if (type.isParameterizedType()) {
+				ITypeBinding[] arguments = type.getTypeArguments();
+				for (ITypeBinding argument : arguments) {
+					if(argument.isParameterizedType()) {
+						// recursive call
+						return involvesUndefinedTypes(argument);
+					}
+					
+					ITypeBinding typeDeclaration = argument.getTypeDeclaration();
+					if (typeDeclaration.isTypeVariable()) {
+						return true;
+					}
+					
+					if(argument.isRawType() || argument.isWildcardType() || argument.isCapture()) {
+						return true;
+					}
 				}
-				
-				ITypeBinding typeDeclaration = argument.getTypeDeclaration();
-				if (typeDeclaration.isTypeVariable()) {
-					return true;
-				}
+			} else if(type.isTypeVariable() || type.isRawType() || type.isWildcardType() || type.isCapture()) {
+				return true;
 			}
-		} else if(type.isTypeVariable()) {
-			return true;
-		}
+		
 
 		return false;
 	}
