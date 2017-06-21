@@ -1,5 +1,7 @@
 package at.splendit.simonykees.sample.postRule.fieldNameConvention;
 
+
+import java.util.LinkedList;
 import java.util.Optional;
 
 @SuppressWarnings({"nls", "unused"})
@@ -41,6 +43,30 @@ public class FieldNameConventionRule {
 	
 	{
 		String insideInitializer = finalInstanceVariablesCanBeRenamed;
+	}
+	
+	
+	static final class InnerClassWithSameFieldName {
+		private int index;
+		
+		InnerClassWithSameFieldName(int i) {
+			this.index = i;
+		}
+		
+		public void setIndex(int i) {
+			this.index = i;
+		}
+		
+		@SuppressWarnings("serial")
+		private static final class NestedInnerClassWithSameFieldName extends LinkedList<String> {
+			private int index_;
+			InnerClassWithSameFieldName innerClaz = new InnerClassWithSameFieldName(0);
+			
+			public void setInnerAndOuterIndex(int i) {
+				this.index_ = i;
+				innerClaz.index = index_;
+			}
+		}
 	}
 	
 	protected int getInt() {
@@ -109,8 +135,8 @@ public class FieldNameConventionRule {
 	public class Foo {
 		
 //		private Integer Int;
-		private String iNt;
-		private String myval;
+		private String i_nt;
+		private String _myval;
 		private String canBeRenamed = "";
 		
 		public Foo () {
@@ -124,7 +150,7 @@ public class FieldNameConventionRule {
 		
 		public String getMyVal() {
 			canBeRenamed = "in_getMyVal";
-			return myval;
+			return _myval;
 		}
 		
 		public Integer getIntValue() {
