@@ -44,6 +44,10 @@ public abstract class OverrideAnnotationRule<T> {
 		return "Already annotated";
 	}
 
+	protected String qualifiedNameAnnotation() {
+		return "Already annotated";
+	}
+
 	private String iAmPrivate() {
 		return "I am a very private method";
 	}
@@ -121,6 +125,11 @@ class Foo extends OverrideAnnotationRule<String> implements IFoo {
 
 	@Override
 	protected String alreadyAnnotated() {
+		return "Already annotated";
+	}
+
+	@java.lang.Override
+	protected String qualifiedNameAnnotation() {
 		return "Already annotated";
 	}
 
