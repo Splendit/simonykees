@@ -73,7 +73,7 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
 		/**
-		 * Only private fields can be renamed, unless they are static final. 
+		 * Only private fields can be renamed, unless they are static final.
 		 */
 		if (ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isPrivate())
 				&& !(ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isStatic())
@@ -106,13 +106,19 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 										 * class can be directly accessed from
 										 * the outer class!
 										 */
-										ASTNode typeParent = type.getParent(); 	
+										ASTNode typeParent = type.getParent();
 										boolean collidingWithOuterTypeField = false;
-										if (typeParent != null && typeParent.getNodeType() == ASTNode.TYPE_DECLARATION) {
-											TypeDeclaration typeDeeclarationParent = (TypeDeclaration)typeParent;
-											// FIXME: SIM-511 - distinguish between fields of inner type from fields of outer type
-											collidingWithOuterTypeField = hasField(fragmentName, typeDeeclarationParent);
-											
+										if (typeParent != null
+												&& typeParent.getNodeType() == ASTNode.TYPE_DECLARATION) {
+											TypeDeclaration typeDeeclarationParent = (TypeDeclaration) typeParent;
+											/*
+											 * FIXME: SIM-511 - distinguish
+											 * between fields of inner type from
+											 * fields of outer type
+											 */
+											collidingWithOuterTypeField = hasField(fragmentName,
+													typeDeeclarationParent);
+
 											typeDeeclarationParent.accept(referencesVisitor);
 										}
 										// Find the references in the current
