@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -22,9 +23,11 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
  * converts lambda expressions to method references of the form
@@ -41,10 +44,10 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 	public boolean visit(LambdaExpression lambdaExpressionNode) {
 
 		Expression body = extractSingleBodyExpression(lambdaExpressionNode);
-		
+
 		// work only with expression lambdas
 		if (body != null) {
-			
+
 			List<VariableDeclaration> lambdaParams = ASTNodeUtil.convertToTypedList(lambdaExpressionNode.parameters(),
 					VariableDeclaration.class);
 
@@ -78,19 +81,30 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 						&& checkMethodParameters(lambdaParams, methodArguments)) {
 
 					ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
-					
+
 					boolean isReferenceExpressionSet = false;
 
 					// no expression present -> assume 'this'
 					if (methodInvocationExpression == null) {
-
+						
+						/*
+						 * Ensure that the lambda expression is enclosed in the 
+						 * same class as the method which is being referenced. 
+						 * We have to check this, because the method could be 
+						 * declared in the outer class. 
+						 */
 						IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+						ITypeBinding methodsDeclaringClass = methodBinding.getDeclaringClass();
+						AbstractTypeDeclaration lambdaEnclosing = ASTNodeUtil.getSpecificAncestor(lambdaExpressionNode,
+								AbstractTypeDeclaration.class);
+						ITypeBinding lambdaEnclosingType = lambdaEnclosing.resolveBinding();
+
 						if (Modifier.isStatic(methodBinding.getModifiers())) {
 							SimpleName staticClassName = astRewrite.getAST()
-									.newSimpleName(methodBinding.getDeclaringClass().getErasure().getName());
+									.newSimpleName(methodsDeclaringClass.getErasure().getName());
 							ref.setExpression(staticClassName);
 							isReferenceExpressionSet = true;
-						} else {
+						} else if (ClassRelationUtil.compareITypeBinding(methodsDeclaringClass, lambdaEnclosingType)) {
 							ThisExpression thisExpression = astRewrite.getAST().newThisExpression();
 							ref.setExpression(thisExpression);
 							isReferenceExpressionSet = true;
@@ -144,17 +158,17 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 								lambdaParams.subList(1, lambdaParams.size()), methodArguments)) {
 
 							String typeNameStr = findTypeOfSimpleName(methodInvocationExpressionName);
-							
-							if(typeNameStr != null && !typeNameStr.isEmpty()) {
-								
+
+							if (typeNameStr != null && !typeNameStr.isEmpty()) {
+
 								SimpleName typeName = astRewrite.getAST().newSimpleName(typeNameStr);
 								SimpleName methodName = (SimpleName) astRewrite
 										.createCopyTarget(methodInvocation.getName());
-								
+
 								ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
 								ref.setExpression(typeName);
 								ref.setName(methodName);
-								
+
 								astRewrite.replace(lambdaExpressionNode, ref, null);
 							}
 						}

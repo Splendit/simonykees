@@ -199,6 +199,20 @@ public class LambdaToMethodReferenceRule {
 		map.entrySet().stream().forEach(Entry::getValue);
 	}
 	
+	/*
+	 * SIM-523 corner cases
+	 */
+	public void consumeString(String s) {
+		
+	}
+	
+	class NestedClass {
+		public void referencingMethodInNestedClass() {
+			List<Person> persons = new ArrayList<>();
+			persons.stream().map(Person::getName).forEach(name -> consumeString(name));
+		}
+	}
+	
 	public void captureTypes(String input) {
 		List<? extends Person> persons = new ArrayList<>();
 		List<String> names = persons.stream().map(Person::getName).collect(Collectors.toList());
