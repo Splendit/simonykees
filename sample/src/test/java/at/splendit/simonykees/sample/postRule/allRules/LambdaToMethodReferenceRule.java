@@ -181,8 +181,28 @@ public class LambdaToMethodReferenceRule {
 	/*
 	 * SIM-523 corner cases
 	 */
-	public void consumeString(String s) {
+	public <T> void consumeString(T s) {
 
+	}
+
+	public void saveTypeArguments(String input) {
+		List<Person> persons = new ArrayList<>();
+		persons.stream().map(Person::getName).forEach(this::<String>consumeString);
+	}
+
+	public void missingTypeArguments3(String input) {
+		List<NestedClass> persons = new ArrayList<>();
+		persons.stream().map(NestedClass::<String>consumeObject);
+	}
+
+	public void missingTypeArguments2(String input) {
+		List<Person> persons = new ArrayList<>();
+		persons.stream().map(Employee<String>::new);
+	}
+
+	public void missingTypeArguments(String input) {
+		List<NestedClass> persons = new ArrayList<>();
+		persons.stream().map(NestedClass::consumeObject);
 	}
 
 	public void captureTypes(String input) {
@@ -215,6 +235,10 @@ public class LambdaToMethodReferenceRule {
 			List<Person> persons = new ArrayList<>();
 			persons.stream().map(Person::getName).forEach(name -> consumeString(name));
 		}
+
+		public <T> T consumeObject() {
+			return null;
+		}
 	}
 
 	class ComparisonProvider {
@@ -225,5 +249,16 @@ public class LambdaToMethodReferenceRule {
 		public int compareByAge(Person a, Person b) {
 			return a.getBirthday().compareTo(b.getBirthday());
 		}
+	}
+
+	class Employee<T> extends Person {
+		public Employee(String name, LocalDate birthday) {
+			super(name, birthday);
+		}
+
+		public Employee(Person p) {
+			super(p.getName(), p.getBirthday());
+		}
+
 	}
 }
