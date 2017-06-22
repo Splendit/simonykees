@@ -71,7 +71,7 @@ class FieldReferencesVisitor extends ASTVisitor {
 					// a 'field access' is an expression of the form:
 					// this.[field_name]
 					ITypeBinding expressionTypeBidnign = ((FieldAccess) parent).getExpression().resolveTypeBinding();
-					if (ClassRelationUtil.compareITypeBinding(parentTypeBinding, expressionTypeBidnign)) {
+					if (ClassRelationUtil.compareITypeBinding(parentTypeBinding.getErasure(), expressionTypeBidnign.getErasure())) {
 						isReference = true;
 					}
 				} else if (!declaredLocalVarName.contains(identifier)) {
