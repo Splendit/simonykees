@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -45,10 +44,10 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 	public boolean visit(LambdaExpression lambdaExpressionNode) {
 
 		Expression body = extractSingleBodyExpression(lambdaExpressionNode);
-
+		
 		// work only with expression lambdas
 		if (body != null) {
-
+			
 			List<VariableDeclaration> lambdaParams = ASTNodeUtil.convertToTypedList(lambdaExpressionNode.parameters(),
 					VariableDeclaration.class);
 
@@ -82,7 +81,6 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 						&& checkMethodParameters(lambdaParams, methodArguments)) {
 
 					ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
-
 					// save type arguments
 					saveTypeArguments(methodInvocation, ref);
 
@@ -167,12 +165,12 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 								SimpleName typeName = astRewrite.getAST().newSimpleName(typeNameStr);
 								SimpleName methodName = (SimpleName) astRewrite
 										.createCopyTarget(methodInvocation.getName());
-
+								
 								ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
 								saveTypeArguments(methodInvocation, ref);
 								ref.setExpression(typeName);
 								ref.setName(methodName);
-
+								
 								astRewrite.replace(lambdaExpressionNode, ref, null);
 							}
 						}
