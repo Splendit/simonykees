@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-@SuppressWarnings({ "nls", "unused", "rawtypes" })
+@SuppressWarnings({ "nls", "unused", "rawtypes", "unchecked" })
 public class TestWhileToForEachRule {
 
 	private List<String> generateList(String input) {
@@ -275,6 +275,32 @@ public class TestWhileToForEachRule {
 		return sb.toString();
 	}
 	
+	public String testWhileLoopsRawList(String input) {
+		List l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		Iterator<String> iterator = l.iterator();
+		String s;
+		String foo = "foo";
+		while(iterator.hasNext()) {
+			sb.append(iterator.next());
+		}
+		
+		return sb.toString();
+	}
+	
+	public String testQualifiedNameIterator(String input) {
+		Foo foo = new Foo();
+		foo.l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		for (String lIterator : foo.l) {
+			sb.append(lIterator);
+		}
+		
+		return sb.toString();
+	}
+	
 	public String testWhileLoopsCompoundCondition(String input) {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
@@ -441,5 +467,9 @@ public class TestWhileToForEachRule {
 				}
 			};
 		}
+	}
+	
+	class Foo {
+		public List<String> l;
 	}
 }
