@@ -196,12 +196,10 @@ public class RefactoringPreviewWizard extends Wizard {
 						Activator.setRunning(false);
 					} catch (RefactoringException e) {
 						synchronizeWithUIShowError(e);
-//						SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
 						Activator.setRunning(false);
 						return;
 					} catch (ReconcileException e) {
 						synchronizeWithUIShowError(e);
-//						SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
 						Activator.setRunning(false);
 					}
 				} else {
