@@ -1,6 +1,7 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -127,5 +128,13 @@ public class LambdaForEachCollectRule {
 
 	private void add(String string) {
 		listField.add(string);
+	}
+
+	public String collectRawList(String input) {
+		List raw = Arrays.asList(input);
+		List<Object> typedList = new ArrayList<>();
+		raw.stream().forEach(typedList::add);
+
+		return typedList.stream().map(Object::toString).collect(Collectors.joining());
 	}
 }
