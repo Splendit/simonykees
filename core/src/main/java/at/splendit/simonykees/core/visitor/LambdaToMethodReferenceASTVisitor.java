@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -23,8 +24,10 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
  * converts lambda expressions to method references of the form
@@ -79,18 +82,32 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 
 					ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
 
+					// save type arguments
+					saveTypeArguments(methodInvocation, ref);
+
 					boolean isReferenceExpressionSet = false;
 
 					// no expression present -> assume 'this'
 					if (methodInvocationExpression == null) {
 
+						/*
+						 * Ensure that the lambda expression is enclosed in the
+						 * same class as the method which is being referenced.
+						 * We have to check this, because the method could be
+						 * declared in the outer class.
+						 */
 						IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+						ITypeBinding methodsDeclaringClass = methodBinding.getDeclaringClass();
+						AbstractTypeDeclaration lambdaEnclosing = ASTNodeUtil.getSpecificAncestor(lambdaExpressionNode,
+								AbstractTypeDeclaration.class);
+						ITypeBinding lambdaEnclosingType = lambdaEnclosing.resolveBinding();
+
 						if (Modifier.isStatic(methodBinding.getModifiers())) {
 							SimpleName staticClassName = astRewrite.getAST()
-									.newSimpleName(methodBinding.getDeclaringClass().getErasure().getName());
+									.newSimpleName(methodsDeclaringClass.getErasure().getName());
 							ref.setExpression(staticClassName);
 							isReferenceExpressionSet = true;
-						} else {
+						} else if (ClassRelationUtil.compareITypeBinding(methodsDeclaringClass, lambdaEnclosingType)) {
 							ThisExpression thisExpression = astRewrite.getAST().newThisExpression();
 							ref.setExpression(thisExpression);
 							isReferenceExpressionSet = true;
@@ -117,7 +134,6 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 					}
 
 					if (isReferenceExpressionSet) {
-
 						SimpleName methodName = (SimpleName) astRewrite.createCopyTarget(methodInvocation.getName());
 						ref.setName(methodName);
 						astRewrite.replace(lambdaExpressionNode, ref, null);
@@ -152,6 +168,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 										.createCopyTarget(methodInvocation.getName());
 
 								ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
+								saveTypeArguments(methodInvocation, ref);
 								ref.setExpression(typeName);
 								ref.setName(methodName);
 
@@ -190,7 +207,6 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 					Type classInstanceCreationType = classInstanceCreation.getType();
 
 					CreationReference ref = astRewrite.getAST().newCreationReference();
-
 					if (ASTNode.PARAMETERIZED_TYPE == classInstanceCreationType.getNodeType()
 							&& ((ParameterizedType) classInstanceCreationType).typeArguments().size() == 0) {
 						ref.setType((Type) astRewrite
@@ -205,6 +221,22 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		}
 
 		return true;
+	}
+
+	/**
+	 * Inserts the existing type arguments to the method reference.
+	 * 
+	 * @param methodInvocation
+	 *            original method invocation with possibly nonempty list of type
+	 *            arguments
+	 * @param ref
+	 *            the new method reference
+	 */
+	private void saveTypeArguments(MethodInvocation methodInvocation, ExpressionMethodReference ref) {
+		List<Type> typeArguments = ASTNodeUtil.convertToTypedList(methodInvocation.typeArguments(), Type.class);
+		ListRewrite typeArgumentsRewrite = astRewrite.getListRewrite(ref,
+				ExpressionMethodReference.TYPE_ARGUMENTS_PROPERTY);
+		typeArguments.forEach(typeArgument -> typeArgumentsRewrite.insertLast(typeArgument, null));
 	}
 
 	/**
