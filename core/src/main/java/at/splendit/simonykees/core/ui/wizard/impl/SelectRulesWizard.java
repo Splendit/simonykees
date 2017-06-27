@@ -163,20 +163,21 @@ public class SelectRulesWizard extends Wizard {
 	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
 			Rectangle rectangle) {
 
-		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
-				this.javaElements.get(0).getJavaProject().getElementName()));
-		logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
-				javaElements.get(0).getJavaProject().getElementName(),
-				refactoringPipeline.getRules().stream()
-						.filter(rule -> null != refactoringPipeline.getChangesForRule(rule)
-								&& !refactoringPipeline.getChangesForRule(rule).isEmpty())
-						.map(RefactoringRule<? extends AbstractASTRewriteASTVisitor>::getName)
-						.collect(Collectors.joining("; ")))); //$NON-NLS-1$
-
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override
 			public void run() {
+				
+				logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
+						javaElements.get(0).getJavaProject().getElementName()));
+				logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
+						javaElements.get(0).getJavaProject().getElementName(),
+						refactoringPipeline.getRules().stream()
+								.filter(rule -> null != refactoringPipeline.getChangesForRule(rule)
+										&& !refactoringPipeline.getChangesForRule(rule).isEmpty())
+								.map(RefactoringRule<? extends AbstractASTRewriteASTVisitor>::getName)
+								.collect(Collectors.joining("; ")))); //$NON-NLS-1$
+
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactoringPipeline)) {
 
