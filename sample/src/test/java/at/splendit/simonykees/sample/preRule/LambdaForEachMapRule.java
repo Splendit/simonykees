@@ -322,6 +322,36 @@ public class LambdaForEachMapRule {
 		});
 	}
 	
+	public void parameterizedMapMethod() {
+		StringBuilder sb = new StringBuilder();
+		List<Wrapper> wrappers = new ArrayList<>();
+		wrappers.stream().forEach(wrapp -> {
+			InnerClass innerClass = wrapp.getInnerClass();
+			useInnerClass(innerClass);
+			sb.append(innerClass.getName());
+		});
+	}
+	
+	interface Inner {
+		
+	}
+	
+	class InnerClass implements Inner {
+		public String getName() {
+			return this.getClass().getName();
+		}
+	}
+	
+	public void useInnerClass(InnerClass innerClass) {
+		
+	}
+	
+	class Wrapper {
+		public <I extends Inner> I getInnerClass() {
+			return null;
+		}
+	}
+	
 	public <T> void mapToTypeVariable(List<Person> refs) {
 		List<T> keys = new ArrayList<>();
 		refs.stream().forEach(ref -> {
