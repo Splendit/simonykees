@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -95,13 +96,15 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 					Expression iterableExpression = nodeInitializer.getExpression();
 					ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
+					
+					boolean isRaw = iterableTypeBinding.isRawType();
 
 					String iterableFullyQualifiedName = Iterable.class.getName();
 					// check if iterable object is compatible with java Iterable
 					boolean isIterable = ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
 							Collections.singletonList(iterableFullyQualifiedName));
 
-					if (isIterable) {
+					if (isIterable && !isRaw) {
 						listName = (Name) iterableExpression;
 						return false;
 					}
@@ -210,7 +213,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 		if (null == singleVariableDeclaration) {
 			// Solution for Iteration over the same List without variables
-			String iteratorName = getListName().getFullyQualifiedName() + ReservedNames.CLASS_ITERATOR;
+			String iteratorName = createIteratorName();
 			if (null == multipleIteratorUse.get(iteratorName)) {
 				multipleIteratorUse.put(iteratorName, 2);
 			} else {
@@ -238,6 +241,28 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(loopStatement, newFor, null);
 
 		astRewrite.remove(getIteratorDeclaration(), null);
+	}
+
+	/**
+	 * Creates a string to be used as the new name of the new 
+	 * enhanced for loop variable. Makes use of {@link #getListName()} for 
+	 * getting the name of the iterable object. If the iterable object
+	 * is a qualified name, then only its qualifier is ignored. 
+	 * 
+	 * @return a string consisting of the name of the iterable object, followed
+	 * by {@value ReservedNames#CLASS_ITERATOR}.
+	 */
+	private String createIteratorName() {
+		Name name = listName = getListName();
+		String prefix = ""; //$NON-NLS-1$
+		if(ASTNode.SIMPLE_NAME == name.getNodeType()) {
+			prefix = ((SimpleName)name).getIdentifier();
+		} else if (ASTNode.QUALIFIED_NAME == name.getNodeType()) {
+			QualifiedName qualifiedName = ((QualifiedName)name);
+			prefix = qualifiedName.getName().getIdentifier();
+			
+		}
+		return prefix + ReservedNames.CLASS_ITERATOR;
 	}
 
 	/**

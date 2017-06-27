@@ -1,9 +1,12 @@
 package at.splendit.simonykees.core.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 
 /**
  * TODO SIM-103 add class description
@@ -147,6 +150,23 @@ public class ClassRelationUtil {
 		}
 
 		return ancesotrs;
+	}
+
+	/**
+	 * Finds the names of the non-private fields that are inherited from the
+	 * given type binding.
+	 * 
+	 * @param typeBinding
+	 *            a type binding
+	 * @return list of inherited field names
+	 */
+	public static List<String> findInheretedFields(ITypeBinding typeBinding) {
+		List<ITypeBinding> ancestors = findAncestors(typeBinding);
+
+		return ancestors.stream()
+				.flatMap(ancestor -> Arrays.asList(ancestor.getDeclaredFields()).stream()
+						.filter(field -> !Modifier.isPrivate(field.getModifiers())))
+				.map(varBinding -> varBinding.getName()).collect(Collectors.toList());
 	}
 
 }

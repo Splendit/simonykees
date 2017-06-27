@@ -1,5 +1,7 @@
 package at.splendit.simonykees.sample.preRule;
 
+import java.util.Date;
+
 @SuppressWarnings("nls")
 public class TestPrimitiveBoxedForStringWithObjectVariablesRule {
 
@@ -101,5 +103,10 @@ public class TestPrimitiveBoxedForStringWithObjectVariablesRule {
 
 	public String testDoubleIntegerValueOfToString(Integer input) {
 		return Double.valueOf(input).toString();
+	}
+	
+	//SIM-529
+	public String testDateLongValueOfToString(Long input) {
+		return new Date(input).toString();
 	}
 }

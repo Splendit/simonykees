@@ -12,7 +12,6 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -180,26 +179,27 @@ public class RefactoringPreviewWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 
-		Arrays.asList(getPages()).stream().forEach(page -> {
-			if (!((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
-				recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
-			}
-		});
-
-		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
+		IRunnableWithProgress job = new IRunnableWithProgress() {
 
 			@Override
-			public void run() {
+			public void run(IProgressMonitor monitor) {
+
+				Arrays.asList(getPages()).stream().forEach(page -> {
+					if (!((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
+						recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
+					}
+				});
+
 				if (LicenseUtil.getInstance().isValid()) {
 					try {
 						refactoringPipeline.commitRefactoring();
 						Activator.setRunning(false);
 					} catch (RefactoringException e) {
-						SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+						synchronizeWithUIShowError(e);
 						Activator.setRunning(false);
 						return;
 					} catch (ReconcileException e) {
-						SimonykeesMessageDialog.openErrorMessageDialog(getShell(), e);
+						synchronizeWithUIShowError(e);
 						Activator.setRunning(false);
 					}
 				} else {
@@ -208,7 +208,15 @@ public class RefactoringPreviewWizard extends Wizard {
 				}
 				return;
 			}
-		});
+		};
+
+		try {
+			getContainer().run(true, true, job);
+		} catch (InvocationTargetException | InterruptedException e) {
+			SimonykeesMessageDialog.openMessageDialog(shell,
+					Messages.RefactoringPreviewWizard_err_runnableWithProgress, MessageDialog.ERROR);
+			Activator.setRunning(false);
+		}
 
 		return true;
 	}
