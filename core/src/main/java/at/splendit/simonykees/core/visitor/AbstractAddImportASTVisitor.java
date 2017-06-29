@@ -1,12 +1,20 @@
 package at.splendit.simonykees.core.visitor;
 
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTMatcher;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+
+import at.splendit.simonykees.core.util.ASTNodeUtil;
 
 /**
  * Extended {@link AbstractASTRewriteASTVisitor} where a list of java classes
@@ -18,6 +26,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	protected static final String JAVA_LANG_PACKAGE = "java.lang"; //$NON-NLS-1$
+	protected static final String DOT = "."; //$NON-NLS-1$
 
 	protected Set<String> addImports;
 
@@ -45,5 +54,69 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 				}
 			}
 		}
+	}
+
+	/**
+	 * from a given list of fully qualified class names, this method filters out
+	 * all imports, which are in the same package or file as the given
+	 * {@link CompilationUnit}.
+	 * 
+	 * @param cu
+	 *            current compilation unit
+	 * @param newImports
+	 *            list of fully qualified names, which are about to be imported
+	 * @return list of fully qualified names, where the names contained in the
+	 *         current package are filtered out
+	 */
+	protected List<String> filterNewImportsByExcludingCurrentPackage(CompilationUnit cu, Set<String> newImports) {
+		PackageDeclaration cuPackage = cu.getPackage();
+		String packageQualifiedName;
+		if (cuPackage != null) {
+			Name packageName = cuPackage.getName();
+			packageQualifiedName = packageName.getFullyQualifiedName();
+		} else {
+			packageQualifiedName = ""; //$NON-NLS-1$
+		}
+		List<AbstractTypeDeclaration> cuDeclaredTypes = ASTNodeUtil.convertToTypedList(cu.types(),
+				AbstractTypeDeclaration.class);
+
+		List<String> toBeAdded = newImports.stream()
+				.filter(newImport -> !isInSamePackage(newImport, packageQualifiedName, cuDeclaredTypes))
+				.collect(Collectors.toList());
+
+		return toBeAdded;
+	}
+
+	/**
+	 * Checks whether the new import points to a class in the same package or in
+	 * the same file as the compilation unit.
+	 * 
+	 * @param newImport
+	 *            qualified name of the new import
+	 * @param cuPackageQualifiedName
+	 *            qualified name of the compilation unit's package
+	 * @param cuDeclaredTypes
+	 *            types declared in the compilation unit.
+	 * @return true if the new import points to a type in the same package as
+	 *         the compilation unit or to a type declared inside the compilation
+	 *         unit.
+	 */
+	protected boolean isInSamePackage(String newImport, String cuPackageQualifiedName,
+			List<AbstractTypeDeclaration> cuDeclaredTypes) {
+		boolean isInSamePackage = false;
+
+		if (newImport.startsWith(cuPackageQualifiedName)) {
+			int dotLastIndex = newImport.lastIndexOf(DOT);
+			String suffix = newImport.substring(dotLastIndex);
+			List<String> suffixComponents = Arrays.asList(suffix.split(DOT));
+			if (suffixComponents.size() > 1) {
+				isInSamePackage = cuDeclaredTypes.stream().map(type -> type.getName().getIdentifier())
+						.filter(name -> name.equals(suffixComponents.get(0))).findAny().isPresent();
+			} else {
+				isInSamePackage = true;
+			}
+		}
+
+		return isInSamePackage;
 	}
 }
