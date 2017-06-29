@@ -191,9 +191,12 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 			 */
 			else if (ASTNode.CLASS_INSTANCE_CREATION == body.getNodeType()) {
 				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) body;
+				List<Expression> classInstanceCreationArguments = ASTNodeUtil
+						.convertToTypedList(classInstanceCreation.arguments(), Expression.class);
 
 				AnonymousClassDeclaration annonymousClass = classInstanceCreation.getAnonymousClassDeclaration();
-				if (annonymousClass == null && lambdaParams.size() == classInstanceCreation.arguments().size()) {
+				if (annonymousClass == null && lambdaParams.size() == classInstanceCreation.arguments().size()
+						&& checkMethodParameters(lambdaParams, classInstanceCreationArguments)) {
 					Type classInstanceCreationType = classInstanceCreation.getType();
 
 					CreationReference ref = astRewrite.getAST().newCreationReference();
