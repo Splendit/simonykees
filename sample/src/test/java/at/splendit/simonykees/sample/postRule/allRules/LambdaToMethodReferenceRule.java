@@ -158,6 +158,11 @@ public class LambdaToMethodReferenceRule {
 		list.stream().map((Integer iterator) -> new java.awt.geom.Ellipse2D.Double(iterator, 2.0, 4.0, 4.0));
 
 		list.stream().map(Double::valueOf);
+
+		/*
+		 * SIM-532 bugfix
+		 */
+		personList.stream().map(p -> new Person(p.getName(), p.getBirthday())).forEach(Person::getBirthday);
 	}
 
 	/*
