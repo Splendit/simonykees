@@ -480,6 +480,14 @@ public class TestForToForEachListIteratingIndexRule {
 		});
 	}
 
+	public <T extends Foo> void captureOfTypeArguments() {
+		List<? extends T> elements = new ArrayList<>();
+		elements.stream().forEach((foo) -> {
+			foo.toString();
+			foo.isFoo();
+		});
+	}
+
 	public <T extends MyCollection<String>> void listOfParameterizedTypeArguments() {
 		List<T> elements = new ArrayList<>();
 		elements.stream().forEach((foo) -> {
