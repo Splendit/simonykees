@@ -248,4 +248,23 @@ public class TestWhileToForEachListRule {
 		
 		return sb.toString();
 	}
+	
+	public <T extends Foo> void listOfTypeArguments() {
+		List<T> elements = new ArrayList<>();
+		for (T foo : elements) {
+			foo.toString();
+			foo.isFoo();
+		}
+	}
+	
+	class Foo {
+		@Override
+		public String toString() {
+			return "foo"; //$NON-NLS-1$
+		}
+		
+		public boolean isFoo() {
+			return true;
+		}
+	}
 }
