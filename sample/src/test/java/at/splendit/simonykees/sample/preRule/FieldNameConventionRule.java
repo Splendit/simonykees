@@ -132,7 +132,7 @@ public class FieldNameConventionRule {
 		String t = foo.Can_be_renamed;
 	}
 	
-	public class Foo {
+	public class Foo extends FooParent {
 		
 //		private Integer Int;
 		private String i_nt;
@@ -163,7 +163,13 @@ public class FieldNameConventionRule {
 			return Can_be_renamed;
 		}
 		
+		void setProtectedField(int i) {
+			ProtectedField = i;
+		}
+		
 		public class InnerFoo {
+			private int PrivateField;
+			private int ProtectedField;
 			private String innerInnerFooString;
 			public InnerFoo() {
 				String aFinalIncanceVariable = FINAL_INSTANCE_VARIABLES_CAN_BE_RENAMED;
@@ -173,6 +179,25 @@ public class FieldNameConventionRule {
 			
 			class EndlessInnerFoo {
 				
+			}
+		}
+	}
+	
+	class FooParent {
+		private int PrivateField;
+		protected int ProtectedField;
+		public int PublicField;
+		int PackageProtectedField;
+	}
+	
+	class GenericFoo<T> {
+		private int Field;
+		private GenericFoo<T> GenericFoo;
+		
+		void updateField(int i) {
+			this.Field = i;
+			if(GenericFoo != null) {
+				GenericFoo.Field = 0;
 			}
 		}
 	}

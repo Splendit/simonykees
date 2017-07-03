@@ -252,6 +252,11 @@ public class LambdaToMethodReferenceRule {
 		List<? extends Person> persons = new ArrayList<>();
 		List<String> names = persons.stream().map(p -> p.getName()).collect(Collectors.toList());
 	}
+	
+	public void captureOfParameterizedTypes(String input) {
+		List<? extends Employee<String>> persons = new ArrayList<>();
+		List<String> names = persons.stream().map(e -> e.getName()).collect(Collectors.toList());
+	}
 
 	public void missingImports() {
 		Person.filter(modifier -> modifier.isStatic());
@@ -296,6 +301,11 @@ public class LambdaToMethodReferenceRule {
 		
 		public Employee(Person p) {
 			super(p.getName(), p.getBirthday());
+		}
+		
+		@Override
+		public String getName() {
+			return "e:" + super.getName();
 		}
 		
 	}

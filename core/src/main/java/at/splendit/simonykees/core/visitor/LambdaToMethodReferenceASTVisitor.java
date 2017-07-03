@@ -270,8 +270,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			ITypeBinding erasure = binding.getErasure();
 			typeNameStr = erasure.getName();
 		} else if (binding.isCapture()) {
-			typeNameStr = Arrays.asList(binding.getTypeBounds()).stream().findFirst().map(ITypeBinding::getName)
-					.orElse(""); //$NON-NLS-1$
+			typeNameStr = Arrays.asList(binding.getTypeBounds()).stream().findFirst().map(ITypeBinding::getErasure)
+					.map(ITypeBinding::getName).orElse(""); //$NON-NLS-1$
 		} else {
 			typeNameStr = binding.getName();
 		}

@@ -93,7 +93,11 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			ITypeBinding[] typeArguments = iterableTypeBinding.getTypeArguments();
 			if (typeArguments.length == 1) {
 				iteratorTypeBinding = typeArguments[0];
-				if (iteratorTypeBinding != null && iteratorTypeBinding.getTypeBounds().length > 0) {
+				if (iteratorTypeBinding == null) {
+					return null;
+				}
+
+				if (!iteratorTypeBinding.isTypeVariable() && iteratorTypeBinding.getTypeBounds().length > 0) {
 					iteratorTypeBinding = iteratorTypeBinding.getTypeBounds()[0];
 				}
 			}
