@@ -2,13 +2,16 @@ package at.splendit.simonykees.core.visitor;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.CreationReference;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionMethodReference;
@@ -38,7 +41,15 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * @since 1.2
  *
  */
-public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisitor {
+public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisitor {
+
+	private Set<String> newImports = new HashSet<>();
+
+	@Override
+	public void endVisit(CompilationUnit cu) {
+		this.addImports.addAll(filterNewImportsByExcludingCurrentPackage(cu, newImports));
+		super.endVisit(cu);
+	}
 
 	@Override
 	public boolean visit(LambdaExpression lambdaExpressionNode) {
@@ -81,6 +92,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 						&& checkMethodParameters(lambdaParams, methodArguments)) {
 
 					ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
+
 					// save type arguments
 					saveTypeArguments(methodInvocation, ref);
 
@@ -172,6 +184,17 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractASTRewriteASTVisi
 								ref.setName(methodName);
 
 								astRewrite.replace(lambdaExpressionNode, ref, null);
+
+								/*
+								 * SIM-514 bugfix missing import
+								 */
+								ITypeBinding typeBinding = methodInvocationExpressionName.resolveTypeBinding();
+								if (typeBinding != null) {
+									String qualifiedName = typeBinding.getErasure().getQualifiedName();
+									if (qualifiedName != null && !qualifiedName.equals("")) { //$NON-NLS-1$
+										newImports.add(qualifiedName);
+									}
+								}
 							}
 						}
 					}

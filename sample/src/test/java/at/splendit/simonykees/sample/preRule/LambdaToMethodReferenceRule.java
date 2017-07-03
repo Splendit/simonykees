@@ -258,6 +258,10 @@ public class LambdaToMethodReferenceRule {
 		List<String> names = persons.stream().map(e -> e.getName()).collect(Collectors.toList());
 	}
 
+	public void missingImports() {
+		Person.filter(modifier -> modifier.isStatic());
+	}
+
 	class ComparisonProvider {
 		public int compareByName(Person a, Person b) {
 			return a.getName().compareTo(b.getName());

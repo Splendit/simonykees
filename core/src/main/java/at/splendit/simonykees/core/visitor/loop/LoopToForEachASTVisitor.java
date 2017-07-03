@@ -1,6 +1,5 @@
 package at.splendit.simonykees.core.visitor.loop;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,7 +11,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -21,7 +19,6 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -57,7 +54,6 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	protected static final String LENGTH = "length"; //$NON-NLS-1$
 	protected static final String DEFAULT_ITERATOR_NAME = "iterator"; //$NON-NLS-1$
 	protected static final String KEY_SEPARATOR = "->"; //$NON-NLS-1$
-	protected static final String DOT = "."; //$NON-NLS-1$
 
 	private CompilationUnit compilationUnit;
 	private Map<String, String> tempIntroducedNames;
@@ -75,21 +71,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 	@Override
 	public void endVisit(CompilationUnit cu) {
-		PackageDeclaration cuPackage = cu.getPackage();
-		String packageQualifiedName;
-		if(cuPackage != null) {
-			Name packageName = cuPackage.getName();
-			packageQualifiedName = packageName.getFullyQualifiedName();
-		} else {
-			packageQualifiedName = ""; //$NON-NLS-1$
-		}
-		List<AbstractTypeDeclaration> cuDeclaredTypes = ASTNodeUtil.convertToTypedList(compilationUnit.types(),
-				AbstractTypeDeclaration.class);
-
-		List<String> toBeAdded = newImports.stream()
-				.filter(newImport -> !isInSamePackage(newImport, packageQualifiedName, cuDeclaredTypes))
-				.collect(Collectors.toList());
-		super.addImports.addAll(toBeAdded);
+		super.addImports.addAll(filterNewImportsByExcludingCurrentPackage(this.compilationUnit, newImports));
 		super.endVisit(cu);
 	}
 
@@ -220,39 +202,6 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		String key = generateTempIteratorKey(node);
 		tempIntroducedNames.put(key, newIteratorIdentifier);
 
-	}
-
-	/**
-	 * Checks whether the new import points to a class in the same package or in
-	 * the same file as the compilation unit.
-	 * 
-	 * @param newImport
-	 *            qualified name of the new import
-	 * @param cuPackageQualifiedName
-	 *            qualified name of the compilation unit's package
-	 * @param cuDeclaredTypes
-	 *            types declared in the compilation unit.
-	 * @return true if the new import points to a type in the same package as
-	 *         the compilation unit or to a type declared inside the compilation
-	 *         unit.
-	 */
-	private boolean isInSamePackage(String newImport, String cuPackageQualifiedName,
-			List<AbstractTypeDeclaration> cuDeclaredTypes) {
-		boolean isInSamePackage = false;
-
-		if (newImport.startsWith(cuPackageQualifiedName)) {
-			int dotLastIndex = newImport.lastIndexOf(DOT);
-			String suffix = newImport.substring(dotLastIndex);
-			List<String> suffixComponents = Arrays.asList(suffix.split(DOT));
-			if (suffixComponents.size() > 1) {
-				isInSamePackage = cuDeclaredTypes.stream().map(type -> type.getName().getIdentifier())
-						.filter(name -> name.equals(suffixComponents.get(0))).findAny().isPresent();
-			} else {
-				isInSamePackage = true;
-			}
-		}
-
-		return isInSamePackage;
 	}
 
 	/**
@@ -426,13 +375,21 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	}
 
 	/**
-	 * Makes use of {@link IteratingIndexVisitorFactory} to construct an instance of {@link LoopIteratingIndexASTVisitor}.
+	 * Makes use of {@link IteratingIndexVisitorFactory} to construct an
+	 * instance of {@link LoopIteratingIndexASTVisitor}.
 	 * 
-	 * @param index a simple name representing the iterating index of the loop
-	 * @param iterable a simple name representing the object that the loop iterates through
-	 * @param node a node representing the whole loop
-	 * @param outerBlock the outer block of the loop
-	 * @param factory a pointer to the constructor of a {@link LoopIteratingIndexASTVisitor}
+	 * @param index
+	 *            a simple name representing the iterating index of the loop
+	 * @param iterable
+	 *            a simple name representing the object that the loop iterates
+	 *            through
+	 * @param node
+	 *            a node representing the whole loop
+	 * @param outerBlock
+	 *            the outer block of the loop
+	 * @param factory
+	 *            a pointer to the constructor of a
+	 *            {@link LoopIteratingIndexASTVisitor}
 	 * 
 	 * @return an instance of {@link LoopIteratingIndexASTVisitor}
 	 */
