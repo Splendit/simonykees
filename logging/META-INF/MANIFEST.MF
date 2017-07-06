@@ -16,3 +16,4 @@ Bundle-ClassPath: lib/slf4j-api.jar,
  lib/logback-classic.jar,
  lib/jul-to-slf4j.jar,
  .
+Bundle-Vendor: Splendit IT-Consulting GmbH
