@@ -3,12 +3,10 @@
    <feature url="features/jSparrow.feature_0.0.0.jar" id="jSparrow.feature" version="0.0.0">
       <category name="splendit"/>
    </feature>
-   <feature url="features/jSparrow.3rd.party.feature_2.0.1.qualifier.jar" id="jSparrow.3rd.party.feature" version="2.0.1.qualifier"/>
+   <feature url="features/jSparrow.3rd.party.feature_0.0.0.jar" id="jSparrow.3rd.party.feature" version="0.0.0"/>
    <category-def name="splendit" label="splendit">
       <description>
          Eclipse plugins by splendit
       </description>
    </category-def>
-   <!-- not supported by tycho https://bugs.eclipse.org/bugs/show_bug.cgi?id=453708 -->
-   <!-- <repository-reference location="http://download.eclipse.org/technology/epp/logging/stable/" enabled="true" /> -->
 </site>
