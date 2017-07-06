@@ -128,8 +128,8 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 					}
 				}
 			}
-			
-			if(qualifiedNameNeeded(loop, iteratorTypeBinding)) {
+
+			if (qualifiedNameNeeded(loop, iteratorTypeBinding)) {
 				iteratorType = convertToQualifiedName(iteratorType, iteratorTypeBinding);
 			}
 		}
