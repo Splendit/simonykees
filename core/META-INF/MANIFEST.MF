@@ -28,3 +28,4 @@ Require-Bundle: jSparrow.logging,
  org.eclipse.epp.logging.aeri.ide;bundle-version="[2.0.0,3.0.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Vendor: Splendit IT-Consulting GmbH
