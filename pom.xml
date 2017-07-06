@@ -283,10 +283,10 @@
 				<artifactId>maven-jarsigner-plugin</artifactId>
 				<version>1.4</version>
 				<configuration>
-					<keystore>${keystore.directory}/eclipse-signing.keystore</keystore>
-					<storepass>PASSWORD</storepass>
-					<alias>jsparrow_test_keystore</alias>
-					<keypass>splendit</keypass>
+					<keystore>${keystore.directory}/jarsigner.keystore</keystore>
+					<storepass>FZHr9ba3fRtRQ5NcNjDUGK7</storepass>
+					<alias>jSparrow_selfsigned_keystore</alias>
+					<keypass>XwVBE3B7B2VHYnJguHBYnKK</keypass>
 				</configuration>
 				<executions>
 					<execution>
