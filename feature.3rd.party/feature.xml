@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="jSparrow.3rd.party.feature"
+      label="jSprrow Third-party Dependencies"
+      version="2.0.1.qualifier"
+      provider-name="Splendit IT-Consulting GmbH">
+
+   <description url="https://jsparrow.eu/knowledge-base/">
+Third-party dependencies used by jSparrow Bundles.
+Do not install this feature manually.
+   </description>
+
+   <copyright url="https://jsparrow.eu/jsparrow-software-download-terms-conditions/">
+Copyright 2017 Splendit IT-Consulting GmbH and Co KG. All rights reserved. This software is protected by intellectual property rights and regulations of international treaties. Any unauthorized reproduction and/or unauthorized distribution will be prosecuted in accordance with criminal and civil law.
+   </copyright>
+
+   <license url="https://jsparrow.eu/eula">
+      Todo
+   </license>
+
+   <url>
+      <update label="jSparrow Update Site" url="http://update.jsparrow.eu"/>
+   </url>
+
+   <plugin
+         id="org.eclipse.epp.logging.aeri.ide"
+         download-size="0"
+         install-size="0"
+         version="2.0.4.v20170307-1435"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.epp.logging.aeri.core"
+         download-size="0"
+         install-size="0"
+         version="2.0.4.v20170307-1435"
+         unpack="false"/>
+
+   <plugin
+         id="com.github.oshi.core"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="com.labs64.netlicensing.client"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
