@@ -178,6 +178,33 @@ public class LambdaToMethodReferenceRule {
 		map.entrySet().stream().forEach(Entry::getValue);
 	}
 
+	/*
+	 * SIM-523 corner cases
+	 */
+	public <T> void consumeString(T s) {
+
+	}
+
+	public void saveTypeArguments(String input) {
+		List<Person> persons = new ArrayList<>();
+		persons.stream().map(Person::getName).forEach(this::<String>consumeString);
+	}
+
+	public void missingTypeArguments3(String input) {
+		List<NestedClass> persons = new ArrayList<>();
+		persons.stream().map(NestedClass::<String>consumeObject);
+	}
+
+	public void missingTypeArguments2(String input) {
+		List<Person> persons = new ArrayList<>();
+		persons.stream().map(Employee<String>::new);
+	}
+
+	public void missingTypeArguments(String input) {
+		List<NestedClass> persons = new ArrayList<>();
+		persons.stream().map(NestedClass::consumeObject);
+	}
+
 	public void captureTypes(String input) {
 		List<? extends Person> persons = new ArrayList<>();
 		List<String> names = persons.stream().map(Person::getName).collect(Collectors.toList());
@@ -203,6 +230,17 @@ public class LambdaToMethodReferenceRule {
 		return new Person("Random Person", LocalDate.of(1995, 8, 1));
 	}
 
+	class NestedClass {
+		public void referencingMethodInNestedClass() {
+			List<Person> persons = new ArrayList<>();
+			persons.stream().map(Person::getName).forEach(name -> consumeString(name));
+		}
+
+		public <T> T consumeObject() {
+			return null;
+		}
+	}
+
 	class ComparisonProvider {
 		public int compareByName(Person a, Person b) {
 			return a.getName().compareTo(b.getName());
@@ -211,5 +249,16 @@ public class LambdaToMethodReferenceRule {
 		public int compareByAge(Person a, Person b) {
 			return a.getBirthday().compareTo(b.getBirthday());
 		}
+	}
+
+	class Employee<T> extends Person {
+		public Employee(String name, LocalDate birthday) {
+			super(name, birthday);
+		}
+
+		public Employee(Person p) {
+			super(p.getName(), p.getBirthday());
+		}
+
 	}
 }

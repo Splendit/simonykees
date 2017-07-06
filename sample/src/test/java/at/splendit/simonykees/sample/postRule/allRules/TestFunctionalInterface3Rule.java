@@ -36,7 +36,7 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	{
-		Runnable r = this::getClass;
+		Runnable r = () -> getClass();
 		r.run();
 	}
 
@@ -68,7 +68,7 @@ public abstract class TestFunctionalInterface3Rule {
 	}
 
 	public Runnable getRunnable() {
-		return this::getClass;
+		return () -> getClass();
 	}
 
 }
