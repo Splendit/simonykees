@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -165,7 +166,9 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 				.flatMap(fieldDecl -> ASTNodeUtil
 						.convertToTypedList(fieldDecl.fragments(), VariableDeclarationFragment.class).stream()
 						.map(VariableDeclarationFragment::getName).map(SimpleName::getIdentifier))
-				.filter(identifier -> identifier.equals(fragmentName.getIdentifier())).findAny().isPresent();
+				.filter(identifier -> identifier.equals(fragmentName.getIdentifier())).findAny().isPresent()
+				|| ClassRelationUtil.findInheretedFields(typeDeclaration.resolveBinding())
+						.contains(fragmentName.getIdentifier());
 	}
 
 	private boolean isComplyingWithConventions(String identifier) {

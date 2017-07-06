@@ -283,4 +283,52 @@ public class TestWhileToForEachListRule {
 		
 		return sb.toString();
 	}
+	
+	public <T extends Foo> void listOfTypeArguments() {
+		List<T> elements = new ArrayList<>();
+		int i = 0;
+		while (i<elements.size()) {
+			T foo = elements.get(i);
+			foo.toString();
+			foo.isFoo();
+			i++;
+		}
+	}
+	
+	public String qualifiedNameType() {
+		List<java.lang.Boolean> javaLangBooleans = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		while( i<javaLangBooleans.size()) {
+			sb.append(javaLangBooleans.get(i));
+			i++;
+		}
+		return sb.toString();
+	}
+	
+	public String unQualifiedNameType() {
+		List<Boolean> myBooleans = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		while( i<myBooleans.size()) {
+			sb.append(myBooleans.get(i));
+			i++;
+		}
+		return sb.toString();
+	}
+	
+	class Foo {
+		@Override
+		public String toString() {
+			return "foo"; //$NON-NLS-1$
+		}
+		
+		public boolean isFoo() {
+			return true;
+		}
+	}
+	
+	class Boolean {
+		boolean val = false;
+	}
 }

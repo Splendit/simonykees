@@ -190,6 +190,11 @@ public class LambdaToMethodReferenceRule {
 		list.stream().map((Integer iterator) -> new java.awt.geom.Ellipse2D.Double(iterator, 2.0, 4.0, 4.0));
 
 		list.stream().map((Integer iterator) -> new Double(iterator));
+
+		/*
+		 * SIM-532 bugfix
+		 */
+		personList.stream().map(p -> new Person(p.getName(), p.getBirthday())).forEach(p -> p.getBirthday());
 	}
 
 	/*
@@ -252,6 +257,15 @@ public class LambdaToMethodReferenceRule {
 		List<? extends Person> persons = new ArrayList<>();
 		List<String> names = persons.stream().map(p -> p.getName()).collect(Collectors.toList());
 	}
+	
+	public void captureOfParameterizedTypes(String input) {
+		List<? extends Employee<String>> persons = new ArrayList<>();
+		List<String> names = persons.stream().map(e -> e.getName()).collect(Collectors.toList());
+	}
+
+	public void missingImports() {
+		Person.filter(modifier -> modifier.isStatic());
+	}
 
 	class ComparisonProvider {
 		public int compareByName(Person a, Person b) {
@@ -292,6 +306,11 @@ public class LambdaToMethodReferenceRule {
 		
 		public Employee(Person p) {
 			super(p.getName(), p.getBirthday());
+		}
+		
+		@Override
+		public String getName() {
+			return "e:" + super.getName();
 		}
 		
 	}

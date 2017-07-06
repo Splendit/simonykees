@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -82,7 +83,8 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 	public boolean visit(MethodInvocation methodInvocation) {
 
 		// if the method name matches with 'Stream::forEach' ...
-		if (isStreamForEachInvocation(methodInvocation)) {
+		if (isStreamForEachInvocation(methodInvocation) && !isRawMethodExpression(methodInvocation)) {
+
 			// and if the parameter of 'forEach' is a lambda expression ...
 			List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
 			if (arguments.size() == 1 && ASTNode.LAMBDA_EXPRESSION == arguments.get(0).getNodeType()) {
@@ -114,6 +116,23 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 		}
 
 		return true;
+	}
+
+	/**
+	 * Checks if the expression of the given method binding is a raw type.
+	 * @param methodInvocation method invocation to be checked
+	 * @return {@code true} if the method invocation has an expression which resolves
+	 * to a raw type, or {@code false} otherwise.
+	 */
+	private boolean isRawMethodExpression(MethodInvocation methodInvocation) {
+		Expression expression = methodInvocation.getExpression();
+		if(expression != null) {
+			ITypeBinding expressionBinding = expression.resolveTypeBinding();
+			if(expressionBinding != null && expressionBinding.isRawType()) {
+				return true;
+			}
+		}
+		return false; 
 	}
 
 	/**

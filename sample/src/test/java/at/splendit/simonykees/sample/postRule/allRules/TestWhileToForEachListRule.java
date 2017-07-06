@@ -255,4 +255,41 @@ public class TestWhileToForEachListRule {
 
 		return sb.toString();
 	}
+
+	public <T extends Foo> void listOfTypeArguments() {
+		List<T> elements = new ArrayList<>();
+		elements.stream().forEach((foo) -> {
+			foo.toString();
+			foo.isFoo();
+		});
+	}
+
+	public String qualifiedNameType() {
+		List<java.lang.Boolean> javaLangBooleans = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		javaLangBooleans.stream().forEach(sb::append);
+		return sb.toString();
+	}
+
+	public String unQualifiedNameType() {
+		List<Boolean> myBooleans = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		myBooleans.stream().forEach(sb::append);
+		return sb.toString();
+	}
+
+	class Foo {
+		@Override
+		public String toString() {
+			return "foo"; //$NON-NLS-1$
+		}
+
+		public boolean isFoo() {
+			return true;
+		}
+	}
+
+	class Boolean {
+		boolean val = false;
+	}
 }

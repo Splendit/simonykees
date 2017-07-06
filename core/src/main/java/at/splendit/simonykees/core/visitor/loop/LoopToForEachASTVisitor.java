@@ -1,6 +1,6 @@
 package at.splendit.simonykees.core.visitor.loop;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -21,9 +22,10 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
@@ -57,11 +59,12 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	protected static final String LENGTH = "length"; //$NON-NLS-1$
 	protected static final String DEFAULT_ITERATOR_NAME = "iterator"; //$NON-NLS-1$
 	protected static final String KEY_SEPARATOR = "->"; //$NON-NLS-1$
-	protected static final String DOT = "."; //$NON-NLS-1$
 
 	private CompilationUnit compilationUnit;
 	private Map<String, String> tempIntroducedNames;
 	private Set<String> newImports = new HashSet<>();
+	private Map<String, List<ITypeBinding>> innerTypesMap = new HashMap<>();
+	private List<ITypeBinding> topLevelTypes = new ArrayList<>();
 
 	protected LoopToForEachASTVisitor() {
 		this.tempIntroducedNames = new HashMap<>();
@@ -70,26 +73,16 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
+		DeclaredTypesASTVisitor declaredTypesVisitor = new DeclaredTypesASTVisitor();
+		compilationUnit.accept(declaredTypesVisitor);
+		innerTypesMap = declaredTypesVisitor.getDeclaredTypes();
+		topLevelTypes = declaredTypesVisitor.getTopLevelTypes();
 		return true;
 	}
 
 	@Override
 	public void endVisit(CompilationUnit cu) {
-		PackageDeclaration cuPackage = cu.getPackage();
-		String packageQualifiedName;
-		if(cuPackage != null) {
-			Name packageName = cuPackage.getName();
-			packageQualifiedName = packageName.getFullyQualifiedName();
-		} else {
-			packageQualifiedName = ""; //$NON-NLS-1$
-		}
-		List<AbstractTypeDeclaration> cuDeclaredTypes = ASTNodeUtil.convertToTypedList(compilationUnit.types(),
-				AbstractTypeDeclaration.class);
-
-		List<String> toBeAdded = newImports.stream()
-				.filter(newImport -> !isInSamePackage(newImport, packageQualifiedName, cuDeclaredTypes))
-				.collect(Collectors.toList());
-		super.addImports.addAll(toBeAdded);
+		super.addImports.addAll(filterNewImportsByExcludingCurrentPackage(this.compilationUnit, newImports));
 		super.endVisit(cu);
 	}
 
@@ -103,7 +96,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	 *            node expected to represent a parameterized type object
 	 * @return type binding of the iterator
 	 */
-	protected Type findIteratorType(ITypeBinding iterableTypeBinding) {
+	protected Type findIteratorType(Statement loop, ITypeBinding iterableTypeBinding) {
 		Type iteratorType = null;
 		ITypeBinding iteratorTypeBinding = null;
 		if (iterableTypeBinding.isParameterizedType()) {
@@ -111,7 +104,11 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			ITypeBinding[] typeArguments = iterableTypeBinding.getTypeArguments();
 			if (typeArguments.length == 1) {
 				iteratorTypeBinding = typeArguments[0];
-				if (iteratorTypeBinding != null && iteratorTypeBinding.getTypeBounds().length > 0) {
+				if (iteratorTypeBinding == null) {
+					return null;
+				}
+
+				if (!iteratorTypeBinding.isTypeVariable() && iteratorTypeBinding.getTypeBounds().length > 0) {
 					iteratorTypeBinding = iteratorTypeBinding.getTypeBounds()[0];
 				}
 			}
@@ -131,9 +128,46 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 					}
 				}
 			}
+
+			if (qualifiedNameNeeded(loop, iteratorTypeBinding)) {
+				iteratorType = convertToQualifiedName(iteratorType, iteratorTypeBinding);
+			}
 		}
 
 		return iteratorType;
+	}
+
+	/**
+	 * Converts the {@link SimpleType}s, the {@link ArrayType}s and the
+	 * {@link ParameterizedType}s to types with qualified name.
+	 * 
+	 * @param type
+	 *            original type to be converted.
+	 * @param typeBinding
+	 *            a type binding to get the qualified name from.
+	 * 
+	 * @return the given type binding having a qualified name property.
+	 */
+	private Type convertToQualifiedName(Type type, ITypeBinding typeBinding) {
+		AST ast = type.getAST();
+		Name qualifiedName = ast.newName(typeBinding.getQualifiedName());
+		if (type.isArrayType()) {
+			ArrayType arrayType = (ArrayType) type;
+			SimpleType simpleType = ast.newSimpleType(ast.newName(typeBinding.getQualifiedName()));
+			arrayType.setStructuralProperty(ArrayType.ELEMENT_TYPE_PROPERTY, simpleType);
+			return arrayType;
+		} else if (type.isSimpleType()) {
+			SimpleType simpleType = (SimpleType) type;
+			simpleType.setName(qualifiedName);
+			return simpleType;
+		} else if (type.isParameterizedType()) {
+			ParameterizedType parameterizedType = (ParameterizedType) type;
+			SimpleType simpleType = ast.newSimpleType(qualifiedName);
+			parameterizedType.setStructuralProperty(ParameterizedType.TYPE_PROPERTY, simpleType);
+			return parameterizedType;
+		}
+
+		return type;
 	}
 
 	/**
@@ -219,39 +253,6 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	}
 
 	/**
-	 * Checks whether the new import points to a class in the same package or in
-	 * the same file as the compilation unit.
-	 * 
-	 * @param newImport
-	 *            qualified name of the new import
-	 * @param cuPackageQualifiedName
-	 *            qualified name of the compilation unit's package
-	 * @param cuDeclaredTypes
-	 *            types declared in the compilation unit.
-	 * @return true if the new import points to a type in the same package as
-	 *         the compilation unit or to a type declared inside the compilation
-	 *         unit.
-	 */
-	private boolean isInSamePackage(String newImport, String cuPackageQualifiedName,
-			List<AbstractTypeDeclaration> cuDeclaredTypes) {
-		boolean isInSamePackage = false;
-
-		if (newImport.startsWith(cuPackageQualifiedName)) {
-			int dotLastIndex = newImport.lastIndexOf(DOT);
-			String suffix = newImport.substring(dotLastIndex);
-			List<String> suffixComponents = Arrays.asList(suffix.split(DOT));
-			if (suffixComponents.size() > 1) {
-				isInSamePackage = cuDeclaredTypes.stream().map(type -> type.getName().getIdentifier())
-						.filter(name -> name.equals(suffixComponents.get(0))).findAny().isPresent();
-			} else {
-				isInSamePackage = true;
-			}
-		}
-
-		return isInSamePackage;
-	}
-
-	/**
 	 * Performs the replacements of a loop (either {@link ForStatement} or
 	 * {@link WhileStatement}) with an {@link EnhancedForStatement}. Removes the
 	 * redundant nodes.
@@ -317,6 +318,52 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		astRewrite.replace(loop, newFor, null);
 	}
 
+	/**
+	 * Checks whether a qualified name is needed for the declaration of a
+	 * variable of the given type in the given statement (in this case, is
+	 * expected to be a loop).
+	 * 
+	 * @param loopStatement
+	 *            a node representing a loop statement.
+	 * @param iteratorType
+	 *            the type binding of the iterating object.
+	 * @return {@code true} if qualified name is needed for the iterator
+	 *         declaration or {@code false} otherwise.
+	 */
+	private boolean qualifiedNameNeeded(Statement loopStatement, ITypeBinding iteratorType) {
+		// the type wrapping the loop statement.
+		AbstractTypeDeclaration currentClass = ASTNodeUtil.getSpecificAncestor(loopStatement,
+				AbstractTypeDeclaration.class);
+
+		/*
+		 * used for collecting the types that are visible in the given
+		 * loopStatement
+		 */
+		List<ITypeBinding> types = new ArrayList<>();
+		types.addAll(this.innerTypesMap.get(currentClass.resolveBinding().getQualifiedName()));
+		ASTNode parent = currentClass.getParent();
+
+		if (parent == this.compilationUnit) {
+			// the wrapping type is a top level type.
+			types.addAll(topLevelTypes);
+		} else if (parent != null) {
+			// the wrapping type is an inner type
+			ITypeBinding parentBinding = ((AbstractTypeDeclaration) parent).resolveBinding();
+			if (parentBinding != null) {
+				types.addAll(this.innerTypesMap.get(parentBinding.getQualifiedName()));
+			}
+		}
+
+		return
+		// iterator type is not an inner type
+		types.stream().map(type -> type.getQualifiedName())
+				.noneMatch(qualifiedName -> qualifiedName.equals(iteratorType.getQualifiedName())) &&
+		// iterator type clashes with an inner type
+				types.stream().map(type -> type.getName()).filter(name -> name.equals(iteratorType.getName())).findAny()
+						.isPresent();
+
+	}
+
 	private String generateTempIteratorKey(Statement node) {
 		return node.getStartPosition() + KEY_SEPARATOR + node.getLength();
 	}
@@ -359,7 +406,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 				outerBlock.accept(indexVisitor);
 
 				if (indexVisitor.checkTransformPrecondition()) {
-					Type iteratorType = findIteratorType(iterableTypeBinding);
+					Type iteratorType = findIteratorType(loop, iterableTypeBinding);
 					if (iteratorType != null) {
 						replaceWithEnhancedFor(loop, body, iterableNode, indexVisitor, iteratorType);
 					}
@@ -412,7 +459,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 				outerBlock.accept(indexVisitor);
 
 				if (indexVisitor.checkTransformPrecondition()) {
-					Type iteratorType = findIteratorType(iterableTypeBinding);
+					Type iteratorType = findIteratorType(loop, iterableTypeBinding);
 					if (iteratorType != null) {
 						replaceWithEnhancedFor(loop, body, iterableNode, indexVisitor, iteratorType);
 					}
@@ -422,13 +469,21 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	}
 
 	/**
-	 * Makes use of {@link IteratingIndexVisitorFactory} to construct an instance of {@link LoopIteratingIndexASTVisitor}.
+	 * Makes use of {@link IteratingIndexVisitorFactory} to construct an
+	 * instance of {@link LoopIteratingIndexASTVisitor}.
 	 * 
-	 * @param index a simple name representing the iterating index of the loop
-	 * @param iterable a simple name representing the object that the loop iterates through
-	 * @param node a node representing the whole loop
-	 * @param outerBlock the outer block of the loop
-	 * @param factory a pointer to the constructor of a {@link LoopIteratingIndexASTVisitor}
+	 * @param index
+	 *            a simple name representing the iterating index of the loop
+	 * @param iterable
+	 *            a simple name representing the object that the loop iterates
+	 *            through
+	 * @param node
+	 *            a node representing the whole loop
+	 * @param outerBlock
+	 *            the outer block of the loop
+	 * @param factory
+	 *            a pointer to the constructor of a
+	 *            {@link LoopIteratingIndexASTVisitor}
 	 * 
 	 * @return an instance of {@link LoopIteratingIndexASTVisitor}
 	 */

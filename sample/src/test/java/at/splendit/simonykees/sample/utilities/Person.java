@@ -1,8 +1,7 @@
 package at.splendit.simonykees.sample.utilities;
 
 import java.time.LocalDate;
-
-import at.splendit.simonykees.sample.preRule.LambdaToMethodReferenceRule;
+import java.util.function.Predicate;
 
 /**
  * class is just for test purposes for {@link LambdaToMethodReferenceRule}
@@ -60,5 +59,9 @@ public class Person {
 
 	public void doSomething(Person p) {
 
+	}
+
+	public static boolean filter(Predicate<? extends TestModifier> predicate) {
+		return true;
 	}
 }

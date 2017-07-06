@@ -55,11 +55,14 @@ class FieldReferencesVisitor extends ASTVisitor {
 					// the simpleName is part of a qualified name
 					QualifiedName qualifiedName = ((QualifiedName) parent);
 					if (simpleName == qualifiedName.getName()) {
-						// if the simpleName stands at the tail of the
-						// qualifedName
+						/*
+						 * if the simpleName stands at the tail of the
+						 * qualifedName
+						 */
 						ITypeBinding qualifierTypeBinding = ((QualifiedName) parent).getQualifier()
 								.resolveTypeBinding();
-						if (ClassRelationUtil.compareITypeBinding(parentTypeBinding, qualifierTypeBinding)) {
+						if (qualifierTypeBinding != null &&
+								ClassRelationUtil.compareITypeBinding(parentTypeBinding.getErasure(), qualifierTypeBinding.getErasure())) {
 							isReference = true;
 						}
 					} else if (!declaredLocalVarName.contains(identifier)) {
@@ -68,10 +71,13 @@ class FieldReferencesVisitor extends ASTVisitor {
 					}
 
 				} else if (parent.getNodeType() == ASTNode.FIELD_ACCESS) {
-					// a 'field access' is an expression of the form:
-					// this.[field_name]
-					ITypeBinding expressionTypeBidnign = ((FieldAccess) parent).getExpression().resolveTypeBinding();
-					if (ClassRelationUtil.compareITypeBinding(parentTypeBinding, expressionTypeBidnign)) {
+					/*
+					 * a 'field access' is an expression of the form:
+					 * this.[field_name]
+					 */
+					ITypeBinding expressionTypeBinding = ((FieldAccess) parent).getExpression().resolveTypeBinding();
+					if (expressionTypeBinding != null &&
+							ClassRelationUtil.compareITypeBinding(parentTypeBinding.getErasure(), expressionTypeBinding.getErasure())) {
 						isReference = true;
 					}
 				} else if (!declaredLocalVarName.contains(identifier)) {

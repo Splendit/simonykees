@@ -503,6 +503,50 @@ public class TestForToForEachListIteratingIndexRule {
 		return sb.toString();
 	}
 	
+	public <T extends Foo> void listOfTypeArguments() {
+		List<T> elements = new ArrayList<>();
+		for (T foo : elements) {
+			foo.toString();
+			foo.isFoo();
+		}
+	}
+	
+	public <T extends Foo> void captureOfTypeArguments() {
+		List<? extends T> elements = new ArrayList<>();
+		for (T foo : elements) {
+			foo.toString();
+			foo.isFoo();
+		}
+	}
+	
+	public <T extends MyCollection<String>> void listOfParameterizedTypeArguments() {
+		List<T> elements = new ArrayList<>();
+		for (T foo : elements) {
+			foo.toString();
+			foo.hasNext();
+		}
+	}
+	
+	public String qualifiedNameType() {
+		List<java.lang.Boolean> javaLangBooleans = Arrays.asList(true, true, false);
+		StringBuilder sb = new StringBuilder();
+		for (java.lang.Boolean iterator : javaLangBooleans) {
+			sb.append(iterator);
+		}
+		return sb.toString();
+	}
+	
+	class Foo {
+		@Override
+		public String toString() {
+			return "foo";
+		}
+		
+		public boolean isFoo() {
+			return true;
+		}
+	}
+	
 	/**
 	 * This collection is not subtype of {@code Iterable}.
 	 */
@@ -521,6 +565,10 @@ public class TestForToForEachListIteratingIndexRule {
 		public T get(int i) {
 			return null;
 		}
+	}
+	
+	private class Boolean {
+		public boolean val = false;
 	}
 
 }

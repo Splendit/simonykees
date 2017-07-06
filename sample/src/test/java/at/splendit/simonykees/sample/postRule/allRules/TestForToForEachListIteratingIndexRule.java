@@ -472,6 +472,37 @@ public class TestForToForEachListIteratingIndexRule {
 		return sb.toString();
 	}
 
+	public <T extends Foo> void listOfTypeArguments() {
+		List<T> elements = new ArrayList<>();
+		elements.stream().forEach((foo) -> {
+			foo.toString();
+			foo.isFoo();
+		});
+	}
+
+	public <T extends Foo> void captureOfTypeArguments() {
+		List<? extends T> elements = new ArrayList<>();
+		elements.stream().forEach((foo) -> {
+			foo.toString();
+			foo.isFoo();
+		});
+	}
+
+	public <T extends MyCollection<String>> void listOfParameterizedTypeArguments() {
+		List<T> elements = new ArrayList<>();
+		elements.stream().forEach((foo) -> {
+			foo.toString();
+			foo.hasNext();
+		});
+	}
+
+	public String qualifiedNameType() {
+		List<java.lang.Boolean> javaLangBooleans = Arrays.asList(true, true, false);
+		StringBuilder sb = new StringBuilder();
+		javaLangBooleans.stream().forEach(sb::append);
+		return sb.toString();
+	}
+
 	@interface MyFooAnnotation {
 		String iterator = "";
 		Runnable r = () -> {
@@ -480,6 +511,17 @@ public class TestForToForEachListIteratingIndexRule {
 			StringBuilder sb = new StringBuilder();
 			fInterfaceRule.stream().forEach(sb::append);
 		};
+	}
+
+	class Foo {
+		@Override
+		public String toString() {
+			return "foo";
+		}
+
+		public boolean isFoo() {
+			return true;
+		}
 	}
 
 	/**
@@ -500,6 +542,10 @@ public class TestForToForEachListIteratingIndexRule {
 		public T get(int i) {
 			return null;
 		}
+	}
+
+	private class Boolean {
+		public boolean val = false;
 	}
 
 }
