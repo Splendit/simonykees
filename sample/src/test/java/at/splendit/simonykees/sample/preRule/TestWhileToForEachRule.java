@@ -186,9 +186,10 @@ public class TestWhileToForEachRule {
 	
 	public String testNestedWhileLoopsSingleBodyStatement(String input) {
 		List<String> l = generateList(input);
+		List<String> innerList = generateList(input);
 		StringBuilder sb = new StringBuilder();
 		
-		Iterator<String> innerIt = l.iterator();
+		Iterator<String> innerIt = innerList.iterator();
 		Iterator<String> iterator = l.iterator();
 		
 		while(iterator.hasNext()) 

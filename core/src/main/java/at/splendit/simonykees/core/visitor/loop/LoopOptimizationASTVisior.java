@@ -49,10 +49,18 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 	private ASTNode iteratorDeclaration = null;
 	private MethodInvocation iteratorNextCall = null;
 	private boolean outsideWhile = true;
+	private boolean isForLoop = false;
+	private boolean isWhileLoop = false;
 
 	public LoopOptimizationASTVisior(SimpleName iteratorName, Statement loopStatement) {
 		this.iteratorName = iteratorName;
 		this.loopStatement = loopStatement;
+		
+		if(ASTNode.FOR_STATEMENT == loopStatement.getNodeType()) {
+			isForLoop = true;
+		} else if (ASTNode.WHILE_STATEMENT == loopStatement.getNodeType()) {
+			isWhileLoop = true;
+		}
 	}
 
 	@Override
@@ -159,6 +167,16 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 						setNodesToNull();
 						return false;
 					}
+					
+					/*
+					 * if 'next()' is called in a nested loop, the transformation cannot be done
+					 */
+					Statement eclosingLoopStatement = findEnclosingLoopStatement(node);
+					if(eclosingLoopStatement != loopStatement) {
+						setNodesToNull();
+						return false;
+					}
+					
 					iteratorNextCall = methodInvocation;
 					return true;
 				} else if (ReservedNames.MI_HAS_NEXT.equals(methodInvocation.getName().getFullyQualifiedName())
@@ -177,6 +195,29 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Finds if any the enclosing loop statement for the given node.
+	 * 
+	 * @param node
+	 *            a simple name in the body of a loop
+	 * @return the closest enclosing loop
+	 */
+	private Statement findEnclosingLoopStatement(ASTNode node) {
+
+		if (node == null) {
+			return null;
+		}
+
+		ASTNode parent = node.getParent();
+
+		if (ForStatement.class.isInstance(parent) || WhileStatement.class.isInstance(parent)
+				|| EnhancedForStatement.class.isInstance(parent)) {
+			return (Statement) node.getParent();
+		} else {
+			return findEnclosingLoopStatement(parent);
+		}
 	}
 
 	public void replaceLoop(Statement loopStatement, Statement loopBody, Map<String, Integer> multipleIteratorUse) {
