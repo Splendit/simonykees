@@ -101,6 +101,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 				}
 			}
 			if (refactorCandidateTypeBinding != null && node.arguments().isEmpty()
+					&& isPrimitiveNumberClass(refactorPrimitiveType.getIdentifier())
 					&& isPrimitiveNumberClass(refactorCandidateTypeBinding.getName())) {
 				
 				Expression moveTargetArgument = (Expression) astRewrite.createMoveTarget(refactorCandidateExpression);

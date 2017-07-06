@@ -7,10 +7,10 @@
 		<groupId>at.splendit.jSparrow</groupId>
 		<version>2.0.2-SNAPSHOT</version>
 	</parent>
-	<artifactId>jSparrow.feature</artifactId>
+	<artifactId>jSparrow.3rd.party.feature</artifactId>
 	<packaging>eclipse-feature</packaging>
-	<name>jSparrow :: feature</name>
-	<description>jSparrow Feature</description>
+	<name>jSparrow :: 3rd party feature</name>
+	<description>jSparrow 3rd Party Feature</description>
 
 	<scm>
 		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/feature</url>

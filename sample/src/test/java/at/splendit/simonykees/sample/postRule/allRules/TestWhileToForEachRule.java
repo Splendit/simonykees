@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({ "nls", "unused", "rawtypes" })
+@SuppressWarnings({ "nls", "unused", "rawtypes", "unchecked" })
 public class TestWhileToForEachRule {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestWhileToForEachRule.class);
@@ -168,6 +168,39 @@ public class TestWhileToForEachRule {
 		return sb.toString();
 	}
 
+	public String testNestedWhileLoopsSingleBodyStatement(String input) {
+		List<String> l = generateList(input);
+		List<String> innerList = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		Iterator<String> innerIt = innerList.iterator();
+		Iterator<String> iterator = l.iterator();
+
+		while (iterator.hasNext()) {
+			while (innerIt.hasNext()) {
+				sb.append(innerIt.next() + iterator.next());
+			}
+		}
+
+		return sb.toString();
+	}
+
+	public String testNestedWhileLoopsSingleBodyStatement2(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		Iterator<String> innerIt = l.iterator();
+		Iterator<String> iterator = l.iterator();
+
+		l.stream().forEach((outerKey) -> {
+			while (innerIt.hasNext()) {
+				sb.append(innerIt.next() + outerKey);
+			}
+		});
+
+		return sb.toString();
+	}
+
 	public String testCascadedWhilesToFor(String input) {
 		List<String> l = generateList(input);
 		List<String> k = generateList(input);
@@ -254,6 +287,30 @@ public class TestWhileToForEachRule {
 		String s;
 		String foo = "foo";
 		l.stream().forEach(sb::append);
+
+		return sb.toString();
+	}
+
+	public String testWhileLoopsRawList(String input) {
+		List l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		Iterator<String> iterator = l.iterator();
+		String s;
+		String foo = "foo";
+		while (iterator.hasNext()) {
+			sb.append(iterator.next());
+		}
+
+		return sb.toString();
+	}
+
+	public String testQualifiedNameIterator(String input) {
+		Foo foo = new Foo();
+		foo.l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		foo.l.stream().forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -418,5 +475,9 @@ public class TestWhileToForEachRule {
 				}
 			};
 		}
+	}
+
+	class Foo {
+		public List<String> l;
 	}
 }

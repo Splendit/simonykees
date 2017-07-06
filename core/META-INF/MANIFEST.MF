@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Core
 Bundle-SymbolicName: jSparrow.core;singleton:=true
-Bundle-Version: 2.0.1.qualifier
+Bundle-Version: 2.0.2.qualifier
 Bundle-Activator: at.splendit.simonykees.core.Activator
 Require-Bundle: jSparrow.logging, 
  jSparrow.i18n,
@@ -28,3 +28,4 @@ Require-Bundle: jSparrow.logging,
  org.eclipse.epp.logging.aeri.ide;bundle-version="[2.0.0,3.0.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-Vendor: Splendit IT-Consulting GmbH

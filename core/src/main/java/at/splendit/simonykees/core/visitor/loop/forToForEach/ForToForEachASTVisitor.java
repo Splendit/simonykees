@@ -35,7 +35,9 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 
 	@Override
 	public boolean visit(ForStatement node) {
-
+		if(isSingleStatementBodyOfOuterLoop(node)) {
+			return true;
+		}
 		SimpleName iteratorName = ASTNodeUtil.replaceableIteratorCondition(node.getExpression());
 		if (iteratorName != null) {
 			// Defined updaters are not allowed

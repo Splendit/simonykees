@@ -77,18 +77,23 @@ To just clean the project, tycho can be deactivated (this results in in an almos
 	
 ## Building versions with Test or Productive license attributes ##
 
-Since Netlicensing distinguishes between test and productive versions of the plugin, based on the different Product Number and Product Module Numbers, a different version of the plugin has to be built for the test and productive environments respectively. This is done by using the Maven profiles **test** and **production**. E.g.
+Since Netlicensing distinguishes between test and productive versions of the plugin, based on the different Product Number and Product Module Numbers, a different version of the plugin has to be built for the test and productive environments respectively. This is done by using the Maven profiles **test** and **production**. E.g. for a test deployment we use
+ 
+	mvn clean verify
 
-	mvn -ptest clean verify
-
-or
+as _test_ is the default profile. A productive version can be built with
 	
 	mvn -Dproduction clean verify
-
-This would result in
 	
-1. The class containing the relevant information for the Test or Production environment, **LicenseProperties** , to be copied into the project. Previous information will be overwritten during this step.
+**Note:** We always want to activate profiles with a property ("-D") because that way we can use profile activation and deactivation (search for "!production" or "!proguard" to get the picture). 
+
+**Note:** Internally, a productive deployment requires also a system property **production** to be set. This is done during the build when the **production** profile is used. If only the property is set and no profile is used, the Build will not be in a consistent state!
+
+This usage of profiles would result in
+	
+1. The class containing the relevant information for the Test or Production environment, **LicenseProperties**, to be copied into the project. Previous information will be overwritten during this step.
 2. A flag file, **prod-license.properties** or **test-license.properties** being copied into the _target/classes_ directory of the  _license.netlicensing_ module. This file will be subsequently packaged in the JAR file and will serve to help immediately identify the version of the build.
+3. In the case of the profile production, a system property with the name **production** to be additionally set. 
 	 
 **Notes:**
 - Copying of the class file is done in the POM of the **license.netlicensing module**.

@@ -143,7 +143,7 @@ public class FieldNameConventionRule {
 		}
 	}
 
-	public class Foo {
+	public class Foo extends FooParent {
 
 		// private Integer Int;
 		private String i_nt;
@@ -174,7 +174,13 @@ public class FieldNameConventionRule {
 			return canBeRenamed;
 		}
 
+		void setProtectedField(int i) {
+			ProtectedField = i;
+		}
+
 		public class InnerFoo {
+			private int privateField;
+			private int ProtectedField;
 			private String innerInnerFooString;
 
 			public InnerFoo() {
@@ -185,6 +191,25 @@ public class FieldNameConventionRule {
 
 			class EndlessInnerFoo {
 
+			}
+		}
+	}
+
+	class FooParent {
+		private int privateField;
+		protected int ProtectedField;
+		public int PublicField;
+		int PackageProtectedField;
+	}
+
+	class GenericFoo<T> {
+		private int field;
+		private GenericFoo<T> genericFoo;
+
+		void updateField(int i) {
+			this.field = i;
+			if (genericFoo != null) {
+				genericFoo.field = 0;
 			}
 		}
 	}

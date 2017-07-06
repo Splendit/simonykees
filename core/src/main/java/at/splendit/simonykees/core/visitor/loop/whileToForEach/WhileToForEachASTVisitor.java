@@ -38,6 +38,9 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 
 	@Override
 	public boolean visit(WhileStatement node) {
+		if(isSingleStatementBodyOfOuterLoop(node)) {
+			return true;
+		}
 		SimpleName iteratorName = ASTNodeUtil.replaceableIteratorCondition(node.getExpression());
 		Expression loopCondition = node.getExpression();
 		if (iteratorName != null) {

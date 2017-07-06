@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
-@SuppressWarnings({ "nls", "unused", "rawtypes" })
+@SuppressWarnings({ "nls", "unused", "rawtypes", "unchecked" })
 public class TestWhileToForEachRule {
 
 	private List<String> generateList(String input) {
@@ -184,6 +184,35 @@ public class TestWhileToForEachRule {
 		return sb.toString();
 	}
 	
+	public String testNestedWhileLoopsSingleBodyStatement(String input) {
+		List<String> l = generateList(input);
+		List<String> innerList = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		Iterator<String> innerIt = innerList.iterator();
+		Iterator<String> iterator = l.iterator();
+		
+		while(iterator.hasNext()) 
+			while(innerIt.hasNext())
+				sb.append(innerIt.next() + iterator.next());
+		
+		return sb.toString();
+	}
+	
+	public String testNestedWhileLoopsSingleBodyStatement2(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		Iterator<String> innerIt = l.iterator();
+		Iterator<String> iterator = l.iterator();
+		
+		for(String outerKey : l) 
+			while(innerIt.hasNext())
+				sb.append(innerIt.next() + outerKey);
+		
+		return sb.toString();
+	}
+	
 	public String testCascadedWhilesToFor(String input) {
 		List<String> l = generateList(input);
 		List<String> k = generateList(input);
@@ -301,6 +330,33 @@ public class TestWhileToForEachRule {
 		Iterator<String> iterator = l.iterator();
 		String s;
 		String foo = "foo";
+		while(iterator.hasNext()) {
+			sb.append(iterator.next());
+		}
+		
+		return sb.toString();
+	}
+	
+	public String testWhileLoopsRawList(String input) {
+		List l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		Iterator<String> iterator = l.iterator();
+		String s;
+		String foo = "foo";
+		while(iterator.hasNext()) {
+			sb.append(iterator.next());
+		}
+		
+		return sb.toString();
+	}
+	
+	public String testQualifiedNameIterator(String input) {
+		Foo foo = new Foo();
+		foo.l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		
+		Iterator<String> iterator = foo.l.iterator();
 		while(iterator.hasNext()) {
 			sb.append(iterator.next());
 		}
@@ -482,5 +538,9 @@ public class TestWhileToForEachRule {
 				}
 			};
 		}
+	}
+	
+	class Foo {
+		public List<String> l;
 	}
 }
