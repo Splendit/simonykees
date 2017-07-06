@@ -9,4 +9,6 @@
          Eclipse plugins by splendit
       </description>
    </category-def>
+   <!-- not supported by tycho https://bugs.eclipse.org/bugs/show_bug.cgi?id=453708 -->
+   <!-- <repository-reference location="http://download.eclipse.org/technology/epp/logging/stable/" enabled="true" /> -->
 </site>
