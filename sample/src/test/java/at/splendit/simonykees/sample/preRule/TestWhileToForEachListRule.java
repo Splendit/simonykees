@@ -295,6 +295,28 @@ public class TestWhileToForEachListRule {
 		}
 	}
 	
+	public String qualifiedNameType() {
+		List<java.lang.Boolean> javaLangBooleans = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		while( i<javaLangBooleans.size()) {
+			sb.append(javaLangBooleans.get(i));
+			i++;
+		}
+		return sb.toString();
+	}
+	
+	public String unQualifiedNameType() {
+		List<Boolean> myBooleans = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		while( i<myBooleans.size()) {
+			sb.append(myBooleans.get(i));
+			i++;
+		}
+		return sb.toString();
+	}
+	
 	class Foo {
 		@Override
 		public String toString() {
@@ -304,5 +326,9 @@ public class TestWhileToForEachListRule {
 		public boolean isFoo() {
 			return true;
 		}
+	}
+	
+	class Boolean {
+		boolean val = false;
 	}
 }

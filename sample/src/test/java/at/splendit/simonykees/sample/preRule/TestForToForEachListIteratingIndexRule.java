@@ -557,6 +557,15 @@ public class TestForToForEachListIteratingIndexRule {
 		}
 	}
 	
+	public String qualifiedNameType() {
+		List<java.lang.Boolean> javaLangBooleans = Arrays.asList(true, true, false);
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i<javaLangBooleans.size(); i++) {
+			sb.append(javaLangBooleans.get(i));
+		}
+		return sb.toString();
+	}
+	
 	class Foo {
 		@Override
 		public String toString() {
@@ -586,6 +595,10 @@ public class TestForToForEachListIteratingIndexRule {
 		public T get(int i) {
 			return null;
 		}
+	}
+	
+	private class Boolean {
+		public boolean val = false;
 	}
 
 }

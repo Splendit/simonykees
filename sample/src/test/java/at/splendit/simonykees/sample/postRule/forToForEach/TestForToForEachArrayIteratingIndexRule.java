@@ -328,6 +328,24 @@ public class TestForToForEachArrayIteratingIndexRule {
         }
         return false;
     }
+    
+	public String qualifiedNameType() {
+		java.lang.Boolean[] javaLangBooleans = {true, true, false};
+		StringBuilder sb = new StringBuilder();
+		for (java.lang.Boolean iterator : javaLangBooleans) {
+			sb.append(iterator);
+		}
+		return sb.toString();
+	}
+	
+	public String unQualifiedNameType() {
+		Boolean[] javaLangBooleans = {};
+		StringBuilder sb = new StringBuilder();
+		for (Boolean iterator : javaLangBooleans) {
+			sb.append(iterator);
+		}
+		return sb.toString();
+	}
 
 	/**
 	 * This collection is not subtype of {@code Iterable}.
@@ -353,6 +371,30 @@ public class TestForToForEachArrayIteratingIndexRule {
 					return null;
 				}
 			};
+		}
+	}
+	
+	class Boolean {
+		public final Boolean FALSE = this.valueOf(false);
+		public final Boolean TRUE = this.valueOf(true);
+		// my boolean wrapper
+		public boolean value;
+
+		public Boolean(boolean val) {
+			this.value = val;
+		}
+
+		@Override
+		public String toString() {
+			return java.lang.Boolean.toString(this.value);
+		}
+
+		public Boolean valueOf(boolean value) {
+			if (value) {
+				return TRUE;
+			} else {
+				return FALSE;
+			}
 		}
 	}
 }
