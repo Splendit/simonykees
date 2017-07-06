@@ -192,9 +192,13 @@ public class FieldNameConventionRule {
 	
 	class GenericFoo<T> {
 		private int Field;
+		private GenericFoo<T> GenericFoo;
 		
 		void updateField(int i) {
 			this.Field = i;
+			if(GenericFoo != null) {
+				GenericFoo.Field = 0;
+			}
 		}
 	}
 	
