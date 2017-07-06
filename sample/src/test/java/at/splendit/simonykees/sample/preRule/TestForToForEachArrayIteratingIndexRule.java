@@ -161,6 +161,32 @@ public class TestForToForEachArrayIteratingIndexRule {
 		return sb.toString();
 	}
 	
+	public String singleBodyStatementNestedLoops(String input) {
+
+		List<String> foo = generateList(input);
+		String[] ms = (String[]) foo.toArray();
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		for (i = 0; i < ms.length; i = i + 1)
+			for(int j = 0; j<ms.length; j++)
+				sb.append(ms[j] + ms[i]);
+
+		return sb.toString();
+	}
+	
+	public String singleBodyStatementNestedLoops2(String input) {
+
+		List<String> foo = generateList(input);
+		String[] ms = (String[]) foo.toArray();
+		StringBuilder sb = new StringBuilder();
+		
+		for (String iterator : ms)
+			for(int j = 0; j<ms.length; j++)
+				sb.append(ms[j] + iterator);
+
+		return sb.toString();
+	}
+	
 	public String customArrayType(String input) {
 
 		List<String> foo = generateList(input);

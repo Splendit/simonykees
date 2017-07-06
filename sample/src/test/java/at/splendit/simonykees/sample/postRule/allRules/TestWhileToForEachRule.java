@@ -168,6 +168,36 @@ public class TestWhileToForEachRule {
 		return sb.toString();
 	}
 
+	public String testNestedWhileLoopsSingleBodyStatement(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		Iterator<String> innerIt = l.iterator();
+		l.stream().forEach((lIterator) -> {
+			while (innerIt.hasNext()) {
+				sb.append(innerIt.next() + lIterator);
+			}
+		});
+
+		return sb.toString();
+	}
+
+	public String testNestedWhileLoopsSingleBodyStatement2(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		Iterator<String> innerIt = l.iterator();
+		Iterator<String> iterator = l.iterator();
+
+		l.stream().forEach((outerKey) -> {
+			while (innerIt.hasNext()) {
+				sb.append(innerIt.next() + outerKey);
+			}
+		});
+
+		return sb.toString();
+	}
+
 	public String testCascadedWhilesToFor(String input) {
 		List<String> l = generateList(input);
 		List<String> k = generateList(input);
