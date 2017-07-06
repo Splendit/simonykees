@@ -16,3 +16,4 @@ Require-Bundle: jSparrow.license.api,
 Service-Component: OSGI-INF/at.splendit.simonykees.license.netlicensing.NetLicensingLicenseValidationService.xml
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: at.splendit.simonykees.license.netlicensing.Activator
+Bundle-Vendor: Splendit IT-Consulting GmbH
