@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>at.splendit.jSparrow</groupId>
@@ -149,6 +151,9 @@
 
 		<basedir>/simonykees</basedir>
 
+		<!-- returns a valid parent directory path for all (child) modules -->
+		<keystore.directory>${project.basedir}/..</keystore.directory>
+
 		<jsparrow.qualifier.quotes></jsparrow.qualifier.quotes>
 		<jsparrow.qualifier.noProguard></jsparrow.qualifier.noProguard>
 		<jsparrow.qualifier.production></jsparrow.qualifier.production>
@@ -278,6 +283,26 @@
 				<configuration>
 					<locales>en</locales>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jarsigner-plugin</artifactId>
+				<version>1.4</version>
+				<configuration>
+					<keystore>${keystore.directory}/jarsigner.keystore</keystore>
+					<storepass>FZHr9ba3fRtRQ5NcNjDUGK7</storepass>
+					<alias>jSparrow_selfsigned_keystore</alias>
+					<keypass>XwVBE3B7B2VHYnJguHBYnKK</keypass>
+				</configuration>
+				<executions>
+					<execution>
+						<id>sign</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 		<pluginManagement>
