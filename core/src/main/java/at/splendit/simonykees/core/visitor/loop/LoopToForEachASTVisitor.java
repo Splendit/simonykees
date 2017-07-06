@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
@@ -490,5 +491,23 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	private LoopIteratingIndexASTVisitor createIteratingIndexVisitor(SimpleName index, SimpleName iterable, T node,
 			Block outerBlock, IteratingIndexVisitorFactory<T> factory) {
 		return factory.create(index, iterable, node, outerBlock);
+	}
+
+	/**
+	 * Checks if the given node is the body property of a while loop or for
+	 * loop.
+	 * 
+	 * @param node
+	 *            node to be checked.
+	 * @return {@code true} if the node represents the body of an outer loop or
+	 *         {@code false} otherwise.
+	 */
+	protected boolean isSingleStatementBodyOfOuterLoop(T node) {
+		StructuralPropertyDescriptor locationProperty = node.getLocationInParent();
+		if (ForStatement.BODY_PROPERTY == locationProperty || WhileStatement.BODY_PROPERTY == locationProperty) {
+			return true;
+		}
+
+		return false;
 	}
 }

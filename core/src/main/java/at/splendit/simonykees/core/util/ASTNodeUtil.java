@@ -46,7 +46,7 @@ public class ASTNodeUtil {
 		if (node == null) {
 			return null;
 		}
-		;
+		
 		if (nodeType.isInstance(node.getParent())) {
 			return (T) node.getParent();
 		} else {
