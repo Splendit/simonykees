@@ -111,8 +111,6 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 						ITypeBinding methodsDeclaringClass = methodBinding.getDeclaringClass();
 						AbstractTypeDeclaration lambdaEnclosing = ASTNodeUtil.getSpecificAncestor(lambdaExpressionNode,
 								AbstractTypeDeclaration.class);
-						ClassInstanceCreation enclosingAnonymousInnerClass = ASTNodeUtil
-								.getSpecificAncestor(lambdaExpressionNode, ClassInstanceCreation.class);
 						ITypeBinding lambdaEnclosingType = lambdaEnclosing.resolveBinding();
 
 						if (Modifier.isStatic(methodBinding.getModifiers())) {
@@ -121,6 +119,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 							ref.setExpression(staticClassName);
 							isReferenceExpressionSet = true;
 						} else if (ClassRelationUtil.compareITypeBinding(methodsDeclaringClass, lambdaEnclosingType)) {
+							ClassInstanceCreation enclosingAnonymousInnerClass = ASTNodeUtil
+									.getSpecificAncestor(lambdaExpressionNode, ClassInstanceCreation.class);
 							if (enclosingAnonymousInnerClass == null) {
 								ThisExpression thisExpression = astRewrite.getAST().newThisExpression();
 								ref.setExpression(thisExpression);
