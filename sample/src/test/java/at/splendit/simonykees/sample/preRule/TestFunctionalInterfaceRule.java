@@ -14,7 +14,7 @@ public class TestFunctionalInterfaceRule {
 	private final String FINAL_STRING_FIELD;
 	
 	public TestFunctionalInterfaceRule() {
-		
+
 		AFunctionalInterface foo = new AFunctionalInterface() {
 			
 			@Override
@@ -23,8 +23,17 @@ public class TestFunctionalInterfaceRule {
 				
 			}
 		};
-		
 		FINAL_STRING_FIELD = "irritating";
+		
+		AFunctionalInterface foo2 = new AFunctionalInterface() {
+			
+			@Override
+			public void method(int a) {
+				String sthToLog = a + FINAL_STRING_FIELD;
+				
+			}
+		};
+		
 	}
 
 	@Test

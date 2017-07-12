@@ -3,6 +3,7 @@ package at.splendit.simonykees.core.visitor.functionalInterface;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
@@ -29,6 +30,14 @@ class MethodBlockASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
+		IMethodBinding methodBinding = node.resolveBinding();
+		if(methodBinding == null || methodBinding.isParameterizedMethod() || methodBinding.isGenericMethod() || methodBinding.isRawMethod()) {
+			/*
+			 * Parameterized methods cannot be converted to a lambda expression 
+			 * because the type information gets lost.
+			 */
+			return false;
+		}
 		if (!node.parameters().isEmpty()) {
 			/**
 			 * node.parameters() ensures that the List contains only

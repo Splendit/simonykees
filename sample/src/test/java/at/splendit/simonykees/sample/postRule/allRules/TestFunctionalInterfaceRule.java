@@ -34,8 +34,13 @@ public class TestFunctionalInterfaceRule {
 
 			}
 		};
-
 		finalStringField = "irritating";
+
+		AFunctionalInterface foo2 = (int a) -> {
+			String sthToLog = a + finalStringField;
+
+		};
+
 	}
 
 	@Test
