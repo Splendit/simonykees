@@ -21,11 +21,11 @@ public class TestStandardLoggerRule {
 	}
 
 	public void replaceSystemErrPrint(String input) {
-		logger1.info(input);
+		logger1.error(input);
 	}
 
 	public void replaceSystemErrPrintln(String input) {
-		logger1.info(input);
+		logger1.error(input);
 	}
 
 	public void replacePrintStackTrace(String input) {
@@ -83,7 +83,7 @@ class TopLevelClass {
 	}
 
 	public void replaceSystemErrPrintln(String input) {
-		logger.info(input);
+		logger.error(input);
 	}
 
 	public void replacePrintStackTrace(String input) {

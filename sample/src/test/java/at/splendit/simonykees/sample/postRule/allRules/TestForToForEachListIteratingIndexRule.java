@@ -46,16 +46,16 @@ public class TestForToForEachListIteratingIndexRule {
 	public String testIeratingThroughListOfLists(String input) {
 		List<List<String>> nestedList = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
-		nestedList.stream().forEach((List<String> val) -> val.stream().forEach(sb::append));
+		nestedList.stream().forEach((val) -> val.stream().forEach(sb::append));
 		return "";
 	}
 
 	public String testDublicateIteratorName(String input) {
 		List<String> fooList = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
-		fooList.stream().forEach((String iterator) -> {
+		fooList.stream().forEach((iterator) -> {
 			sb.append(iterator);
-			fooList.stream().forEach((String iterator1) -> sb.append(iterator + input + iterator1));
+			fooList.stream().forEach((iterator1) -> sb.append(iterator + input + iterator1));
 		});
 		return "";
 	}
@@ -64,7 +64,7 @@ public class TestForToForEachListIteratingIndexRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		foo.stream().forEach((String s) -> {
+		foo.stream().forEach((s) -> {
 			sb.append(s);
 			sb.append(s);
 		});
@@ -86,7 +86,7 @@ public class TestForToForEachListIteratingIndexRule {
 		StringBuilder sb = new StringBuilder();
 		int j;
 
-		foo.stream().forEach((String iterator) -> {
+		foo.stream().forEach((iterator) -> {
 			// i want my comments here
 			if (foo.size() > 0) {
 				String s = iterator;
@@ -156,7 +156,7 @@ public class TestForToForEachListIteratingIndexRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		foo.stream().forEach((String iterator) -> {
+		foo.stream().forEach((iterator) -> {
 			int i = 0;
 			int k = 0;
 			String it = foo.get(i);
@@ -204,7 +204,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		foo.stream().forEach((String s) -> {
+		foo.stream().forEach((s) -> {
 			s += ";";
 			sb.append(s);
 			secondFoo.stream().forEach(sb::append);
@@ -238,7 +238,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		foo.stream().forEach((String s) -> {
+		foo.stream().forEach((s) -> {
 			s += ";";
 			sb.append(s);
 			foo.stream().forEach(sb::append);
@@ -274,12 +274,12 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		foo.stream().forEach((String it) -> {
+		foo.stream().forEach((it) -> {
 			String someConstant = "const";
 			sb.append(it + someConstant);
 		});
 
-		foo.stream().forEach((String it) -> {
+		foo.stream().forEach((it) -> {
 			String someConstant = "const";
 			sb.append(it + someConstant);
 		});
@@ -292,7 +292,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 		if (foo != null) {
-			foo.stream().forEach((String it) -> {
+			foo.stream().forEach((it) -> {
 				String someConstant = "const";
 				sb.append(it + someConstant);
 			});
@@ -307,7 +307,7 @@ public class TestForToForEachListIteratingIndexRule {
 		StringBuilder sb = new StringBuilder();
 		try {
 			if (foo != null) {
-				foo.stream().forEach((String s) -> {
+				foo.stream().forEach((s) -> {
 					String someConstant = "const";
 					try {
 						sb.append(s + someConstant);
@@ -374,7 +374,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		foo.stream().forEach((Number s) -> sb.append(s.toString()));
+		foo.stream().forEach((s) -> sb.append(s.toString()));
 
 		return sb.toString();
 	}
@@ -458,6 +458,51 @@ public class TestForToForEachListIteratingIndexRule {
 		return false;
 	}
 
+	public String rawIteratingObject(String input) {
+		List<List<String>> listOfLists = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < listOfLists.size(); i++) {
+			List rawIterator = listOfLists.get(i);
+			// Incorrect casting to double
+			Double d = (Double) rawIterator.get(0);
+			sb.append(d);
+		}
+
+		return sb.toString();
+	}
+
+	public <T extends Foo> void listOfTypeArguments() {
+		List<T> elements = new ArrayList<>();
+		elements.stream().forEach((foo) -> {
+			foo.toString();
+			foo.isFoo();
+		});
+	}
+
+	public <T extends Foo> void captureOfTypeArguments() {
+		List<? extends T> elements = new ArrayList<>();
+		elements.stream().forEach((foo) -> {
+			foo.toString();
+			foo.isFoo();
+		});
+	}
+
+	public <T extends MyCollection<String>> void listOfParameterizedTypeArguments() {
+		List<T> elements = new ArrayList<>();
+		elements.stream().forEach((foo) -> {
+			foo.toString();
+			foo.hasNext();
+		});
+	}
+
+	public String qualifiedNameType() {
+		List<java.lang.Boolean> javaLangBooleans = Arrays.asList(true, true, false);
+		StringBuilder sb = new StringBuilder();
+		javaLangBooleans.stream().forEach(sb::append);
+		return sb.toString();
+	}
+
 	@interface MyFooAnnotation {
 		String iterator = "";
 		Runnable r = () -> {
@@ -466,6 +511,17 @@ public class TestForToForEachListIteratingIndexRule {
 			StringBuilder sb = new StringBuilder();
 			fInterfaceRule.stream().forEach(sb::append);
 		};
+	}
+
+	class Foo {
+		@Override
+		public String toString() {
+			return "foo";
+		}
+
+		public boolean isFoo() {
+			return true;
+		}
 	}
 
 	/**
@@ -486,6 +542,10 @@ public class TestForToForEachListIteratingIndexRule {
 		public T get(int i) {
 			return null;
 		}
+	}
+
+	private class Boolean {
+		public boolean val = false;
 	}
 
 }

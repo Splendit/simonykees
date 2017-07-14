@@ -309,7 +309,8 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		
 		@Override
 		public boolean visit(SimpleName simpleName) {
-			if(simpleName.resolveBinding().getKind() == IBinding.VARIABLE) {
+			IBinding binding = simpleName.resolveBinding();
+			if(binding != null && binding.getKind() == IBinding.VARIABLE) {
 				if(simpleName == targetName) {
 					reachedTargetName = true;
 					ASTNode parent = simpleName.getParent();

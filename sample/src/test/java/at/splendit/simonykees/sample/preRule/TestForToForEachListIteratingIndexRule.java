@@ -515,6 +515,67 @@ public class TestForToForEachListIteratingIndexRule {
         }
         return false;
     }
+    
+	public String rawIteratingObject(String input) {
+		List<List<String>> listOfLists = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		
+		for(int i = 0; i < listOfLists.size(); i++) {
+			List rawIterator = listOfLists.get(i);
+			// Incorrect casting to double
+			Double d = (Double) rawIterator.get(0);
+			sb.append(d);
+		}
+		
+		return sb.toString();
+	}
+	
+	public <T extends Foo> void listOfTypeArguments() {
+		List<T> elements = new ArrayList<>();
+		for(int i = 0; i<elements.size(); i++) {
+			T foo = elements.get(i);
+			foo.toString();
+			foo.isFoo();
+		}
+	}
+	
+	public <T extends Foo> void captureOfTypeArguments() {
+		List<? extends T> elements = new ArrayList<>();
+		for(int i = 0; i<elements.size(); i++) {
+			T foo = elements.get(i);
+			foo.toString();
+			foo.isFoo();
+		}
+	}
+	
+	public <T extends MyCollection<String>> void listOfParameterizedTypeArguments() {
+		List<T> elements = new ArrayList<>();
+		for(int i = 0; i<elements.size(); i++) {
+			T foo = elements.get(i);
+			foo.toString();
+			foo.hasNext();
+		}
+	}
+	
+	public String qualifiedNameType() {
+		List<java.lang.Boolean> javaLangBooleans = Arrays.asList(true, true, false);
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i<javaLangBooleans.size(); i++) {
+			sb.append(javaLangBooleans.get(i));
+		}
+		return sb.toString();
+	}
+	
+	class Foo {
+		@Override
+		public String toString() {
+			return "foo";
+		}
+		
+		public boolean isFoo() {
+			return true;
+		}
+	}
 	
 	/**
 	 * This collection is not subtype of {@code Iterable}.
@@ -534,6 +595,10 @@ public class TestForToForEachListIteratingIndexRule {
 		public T get(int i) {
 			return null;
 		}
+	}
+	
+	private class Boolean {
+		public boolean val = false;
 	}
 
 }

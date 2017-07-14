@@ -1,12 +1,13 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({ "unused", "rawtypes" })
 public class TestWhileToForEachListRule {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestWhileToForEachListRule.class);
@@ -18,7 +19,7 @@ public class TestWhileToForEachListRule {
 	public String loopingOverLists(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((String t) -> {
+		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
@@ -28,7 +29,7 @@ public class TestWhileToForEachListRule {
 	public String nestedLoops(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((String t) -> {
+		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 			list.stream().forEach(sb::append);
@@ -39,12 +40,12 @@ public class TestWhileToForEachListRule {
 	public String tripleNestedLoops(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((String t) -> {
+		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
-			list.stream().forEach((String iterator) -> {
+			list.stream().forEach((iterator) -> {
 				sb.append(iterator);
-				list.stream().forEach((String iterator1) -> {
+				list.stream().forEach((iterator1) -> {
 					sb.append(iterator1);
 					logger.info(iterator1);
 				});
@@ -58,12 +59,12 @@ public class TestWhileToForEachListRule {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
 		List<String> list2 = generateList(input);
-		list.stream().forEach((String t) -> {
+		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
 
-		list2.stream().forEach((String s) -> {
+		list2.stream().forEach((s) -> {
 			logger.info(s);
 			sb.append(s);
 		});
@@ -116,7 +117,7 @@ public class TestWhileToForEachListRule {
 	public String prefixIndexUpdate(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((String t) -> {
+		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
@@ -126,7 +127,7 @@ public class TestWhileToForEachListRule {
 	public String infixIndexUpdate(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((String t) -> {
+		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
@@ -136,7 +137,7 @@ public class TestWhileToForEachListRule {
 	public String assignmentIndexUpdate(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((String t) -> {
+		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
@@ -219,7 +220,7 @@ public class TestWhileToForEachListRule {
 	public String confusingIteratorName(String iterator) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(iterator);
-		list.stream().forEach((String iterator1) -> {
+		list.stream().forEach((iterator1) -> {
 			logger.info(iterator1);
 			sb.append(iterator1);
 		});
@@ -237,5 +238,58 @@ public class TestWhileToForEachListRule {
 		}
 
 		return sb.toString();
+	}
+
+	public String rawIteratingObject(String input) {
+		List<List<String>> listOfLists = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+
+		int i = 0;
+		while (i < listOfLists.size()) {
+			List rawIterator = listOfLists.get(i);
+			// Incorrect casting to double
+			Double d = (Double) rawIterator.get(0);
+			sb.append(d);
+			i++;
+		}
+
+		return sb.toString();
+	}
+
+	public <T extends Foo> void listOfTypeArguments() {
+		List<T> elements = new ArrayList<>();
+		elements.stream().forEach((foo) -> {
+			foo.toString();
+			foo.isFoo();
+		});
+	}
+
+	public String qualifiedNameType() {
+		List<java.lang.Boolean> javaLangBooleans = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		javaLangBooleans.stream().forEach(sb::append);
+		return sb.toString();
+	}
+
+	public String unQualifiedNameType() {
+		List<Boolean> myBooleans = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		myBooleans.stream().forEach(sb::append);
+		return sb.toString();
+	}
+
+	class Foo {
+		@Override
+		public String toString() {
+			return "foo"; //$NON-NLS-1$
+		}
+
+		public boolean isFoo() {
+			return true;
+		}
+	}
+
+	class Boolean {
+		boolean val = false;
 	}
 }

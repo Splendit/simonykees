@@ -16,8 +16,8 @@ public class TestMultiCatchRule {
 		// TODO meaningful Asserts?
 		try {
 			String.class.getConstructor(String.class).newInstance("aa");
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {
+		} catch (SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException
+				| IllegalAccessException | InstantiationException e) {
 			log.trace(e.getLocalizedMessage(), e);
 		}
 	}
@@ -25,7 +25,7 @@ public class TestMultiCatchRule {
 	public int cornerCaseInheritance(int i) {
 		try {
 			throwSomethingWithInheritance(i);
-		} catch (FirstException | SecondException e) {
+		} catch (SecondException | FirstException e) {
 			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		}
@@ -38,7 +38,7 @@ public class TestMultiCatchRule {
 	public int unionTypeCornerCaseInheritance(int i) {
 		try {
 			throwSomethingWithInheritance(i);
-		} catch (FirstException | SecondException e) {
+		} catch (SecondException | FirstException e) {
 			log.trace(e.getLocalizedMessage(), e);
 			i++;
 		}
@@ -51,8 +51,8 @@ public class TestMultiCatchRule {
 	public int cornerCaseDifferentExceptionNames(int i) {
 		try {
 			throwSomethingWithInheritance(i);
-		} catch (FirstException | SecondException e) {
-			log.trace(e.getLocalizedMessage(), e);
+		} catch (SecondException | FirstException e5) {
+			log.trace(e5.getLocalizedMessage(), e5);
 			i++;
 		}
 		return i;
@@ -65,7 +65,7 @@ public class TestMultiCatchRule {
 	public int cornerCaseDifferentExceptionNamesNoReferenceInBody(int i) {
 		try {
 			throwSomethingWithInheritance(i);
-		} catch (FirstException | SecondException e) {
+		} catch (SecondException | FirstException e5) {
 			i++;
 		}
 		return i;
@@ -74,11 +74,11 @@ public class TestMultiCatchRule {
 	public int cornerCaseDifferentBodies(int i) {
 		try {
 			throwSomething(i);
-		} catch (FirstException | SecondException e) {
+		} catch (SecondException | FirstException e) {
 			i++; // A
 		} catch (ThirdException e) {
 			i += 10; // B
-		} catch (FourthException | FifthException e) {
+		} catch (FifthException | FourthException e) {
 			i--; // C
 		} catch (SixthException e) {
 			i -= 10; // D
@@ -89,11 +89,26 @@ public class TestMultiCatchRule {
 	public int cornerCaseMixedCheckedUnchecked(int i) {
 		try {
 			throwSomethingMixedCheckedAndUnchecked(i);
-		} catch (FirstException | FirstUncheckedException | SecondException | SecondtUncheckedException | ThirdException
-				| ThirdUncheckedException e) {
+		} catch (ThirdUncheckedException | ThirdException | SecondtUncheckedException | SecondException
+				| FirstUncheckedException | FirstException e) {
 			i++;
 		}
 		return i;
+	}
+
+	public void movingTopExceptionToBottom(int i) {
+
+		try {
+			if (i == 0) {
+				throwSomethingWithInheritance(4);
+			} else {
+				throw new ThirdException();
+			}
+		} catch (ThirdException | SecondChildChildException e) {
+			log.warn(e.getMessage());
+		} catch (Exception e) {
+			log.debug("Same as the most general exception");
+		}
 	}
 
 	private void throwSomething(int i)

@@ -124,6 +124,14 @@ public class LambdaForEachIfWrapperToFilterRule {
 			}
 		});
 	}
+	
+	public void ifWithExpressionStatementBody(String input) {
+		StringBuilder sb = new StringBuilder();
+		list.stream().forEach(s -> {
+			if(!s.isEmpty()) 
+				sb.append(s);
+		});
+	}
 
 	private int getRandomNuber() {
 		return 0;

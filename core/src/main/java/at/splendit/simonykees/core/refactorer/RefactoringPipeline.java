@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
@@ -48,6 +49,8 @@ public class RefactoringPipeline {
 	 * List of selected rules.
 	 */
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
+
+	private boolean multipleProjects = false;
 
 	/**
 	 * Constructor without parameters, used to create RefactoringPipeline before
@@ -192,8 +195,27 @@ public class RefactoringPipeline {
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(compilationUnits.size());
 				subMonitor.setTaskName(""); //$NON-NLS-1$
 
+				IJavaProject javaProjekt = compilationUnits.get(0).getJavaProject();
+
 				for (ICompilationUnit compilationUnit : compilationUnits) {
 					subMonitor.subTask(compilationUnit.getElementName());
+
+					/*
+					 * Check if more than one project is selected. If it is,
+					 * show message to select only one project files. Temporary
+					 * workaround for Package explorer. There is filter for
+					 * Project explorer when selected project is not Java
+					 * project to not show the jSparrow, but solution for
+					 * multiple project selection is not done.
+					 * 
+					 * See SIM-496
+					 */
+					if (!compilationUnit.getJavaProject().equals(javaProjekt)) {
+						subMonitor.setCanceled(true);
+						multipleProjects = true;
+						return null;
+					}
+
 					if (RefactoringUtil.checkForSyntaxErrors(compilationUnit)) {
 						containingErrorList.add(compilationUnit);
 					} else {
@@ -228,6 +250,10 @@ public class RefactoringPipeline {
 			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
 					ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e);
 		}
+	}
+
+	public boolean isMultipleProjects() {
+		return multipleProjects;
 	}
 
 	/**

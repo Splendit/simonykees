@@ -142,6 +142,10 @@ public class DiamondOperatorRule {
 		concatTypedList(new ArrayList<String>(), 1, new HashMap<String, List<String>>());
 	}
 	
+	public void collectionArgumentInConstructor(String input) {
+		ArrayList<String> ndCollection = new ArrayList<String>(new ArrayList<String>(1));
+	}
+	
 	public String anonymousGenericInstatiation(String input) {
 		Foo<String> foo = new Foo<String>(input){};
 		return foo.getValue();

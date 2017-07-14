@@ -3,6 +3,7 @@ package at.splendit.simonykees.sample.postRule.allRules;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +78,11 @@ public class LambdaForEachIfWrapperToFilterRule {
 		intList.stream().filter((i) -> i < 0).forEach(System.out::println);
 
 		intList.stream().filter((i) -> i < 0).forEach(System.out::println);
+	}
+
+	public void ifWithExpressionStatementBody(String input) {
+		StringBuilder sb = new StringBuilder();
+		list.stream().filter((s) -> !StringUtils.isEmpty(s)).forEach(sb::append);
 	}
 
 	private int getRandomNuber() {

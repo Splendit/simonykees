@@ -1,6 +1,7 @@
 package at.splendit.simonykees.sample.preRule;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -134,5 +135,28 @@ public class LambdaForEachCollectRule {
 		});
 		
 		return listField.stream().collect(Collectors.joining(","));
+	}
+	
+	public String thisAddInvocation(String input) {
+		List<String> objectList = new ArrayList<>();
+		String s = "";
+		objectList.stream().filter(oString -> oString.equals(s)).map(o -> o.substring(0))
+		.forEach((String oString) -> {
+			add(oString);
+		});
+		
+		return listField.stream().collect(Collectors.joining(","));
+	}
+	
+	private void add(String string) {
+		listField.add(string);
+	}
+	
+	public String collectRawList(String input) {
+		List raw = Arrays.asList(input);
+		List<Object> typedList = new ArrayList<>();
+		raw.stream().forEach(oString -> typedList.add(oString));
+		
+		return typedList.stream().map(o -> o.toString()).collect(Collectors.joining());
 	}
 }

@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -41,20 +42,48 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	protected SimpleName newIteratorName;
 	protected VariableDeclarationFragment preferredNameFragment;
 	private List<ASTNode> nodesToBeRemoved;
+	private boolean isParameterizedIteratorType = false;
 	
 	protected boolean insideLoop = false;
 	protected boolean beforeLoop = true;
 	protected boolean afterLoop = false;
-	protected boolean hasEmptyStatement = false;
+	private boolean hasEmptyStatement = false;
+	private boolean hasRawTypeIterator = false;
 	
 	private List<ASTNode> iteratingObjectInitializers;
-	protected boolean indexReferencedOutsideLoop = false;
-	protected boolean indexReferencedInsideLoop = false;
+	private boolean indexReferencedOutsideLoop = false;
+	private boolean indexReferencedInsideLoop = false;
 	
 	protected LoopIteratingIndexASTVisitor(SimpleName iterableNode) {
 		this.iterableName = iterableNode;
+		isParameterizedIteratorType = isIterableWithParameterizedElements(iterableNode);
 		this.nodesToBeRemoved = new ArrayList<>();
 		this.iteratingObjectInitializers = new ArrayList<>();
+	}
+
+	/**
+	 * Checks whether the given name represents a parameterized object having
+	 * only one type argument which is also a parameterized type.
+	 * 
+	 * @param iterableNode
+	 *            a node representing the name of an object.
+	 * 
+	 * @return {@code true} if the type argument is a parameterized type, or
+	 *         {@code false} otherwise.
+	 */
+	private boolean isIterableWithParameterizedElements(SimpleName iterableNode) {
+		ITypeBinding type = iterableNode.resolveTypeBinding();
+		if (type.isParameterizedType()) {
+			ITypeBinding[] typeArguments = type.getTypeArguments();
+			if (typeArguments.length == 1) {
+				ITypeBinding iteratorTypeBinding = typeArguments[0];
+				if (iteratorTypeBinding.isParameterizedType()) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -355,6 +384,16 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 						return;
 					}
 					
+					if(isParameterizedIteratorType() && isAssignmentOfRawType(methodInvocation)) {
+						/*
+						 * it is not safe to use a raw object as iterator, because it 
+						 * could be casted to wrong types and therefore producing 
+						 * compile errors after transformation...
+						 */
+						setHasAssignmentToRawType();
+						return;
+					}
+					
 					/*
 					 * simpleName is the parameter of the get() method in the iterable object. 
 					 */
@@ -381,12 +420,52 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 		}
 	}
 	
+	private void setHasAssignmentToRawType() {
+		this.hasRawTypeIterator = true;		
+	}
+
+	/**
+	 * Checks whether the result of the method invocation is used for assigning 
+	 * a raw collection. Considers the right hand side of an assignment expression
+	 * and the initializer of a variable declaration fragment.
+	 * 
+	 * @param methodInvocation method invocation to check for.
+	 * 
+	 * @return {@code true} if the result of the method invocation is stored 
+	 * in a raw collection. 
+	 */
+	private boolean isAssignmentOfRawType(MethodInvocation methodInvocation) {
+		Expression lhs = null;
+		if(methodInvocation.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			Assignment parent = (Assignment)methodInvocation.getParent();
+			lhs = parent.getLeftHandSide();
+		} else if (methodInvocation.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			VariableDeclarationFragment parent = (VariableDeclarationFragment) methodInvocation.getParent();
+			lhs = parent.getName();
+		}
+		
+		if(lhs != null) {
+			ITypeBinding type = lhs.resolveTypeBinding();
+			if(type != null && type.isRawType()) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	private boolean isParameterizedIteratorType() {
+		return this.isParameterizedIteratorType;
+	}
+
 	protected abstract boolean isNameOfIteratingIndex(SimpleName simpleName);
 	
 	protected abstract boolean isLoopProperty(SimpleName simpleName);
 	
 	protected abstract void analyseBeforeLoopOccurrence(SimpleName simpleName);
 	
-	public abstract boolean checkTransformPrecondition();
+	public boolean checkTransformPrecondition() {
+		return !hasEmptyStatement && !hasRawTypeIterator && !indexReferencedInsideLoop && !indexReferencedOutsideLoop;
+	}
 
 }

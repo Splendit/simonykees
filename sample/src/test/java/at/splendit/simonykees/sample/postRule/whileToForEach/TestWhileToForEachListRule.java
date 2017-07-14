@@ -1,9 +1,10 @@
 package at.splendit.simonykees.sample.postRule.whileToForEach;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "rawtypes"})
 public class TestWhileToForEachListRule {
 	
 	private List<String> generateList(String input) {
@@ -230,5 +231,62 @@ public class TestWhileToForEachListRule {
 		}
 		
 		return sb.toString();
+	}
+	
+	public String rawIteratingObject(String input) {
+		List<List<String>> listOfLists = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		
+		int i = 0;
+		while( i < listOfLists.size()) {
+			List rawIterator = listOfLists.get(i);
+			// Incorrect casting to double
+			Double d = (Double) rawIterator.get(0);
+			sb.append(d);
+			i++;
+		}
+		
+		return sb.toString();
+	}
+	
+	public <T extends Foo> void listOfTypeArguments() {
+		List<T> elements = new ArrayList<>();
+		for (T foo : elements) {
+			foo.toString();
+			foo.isFoo();
+		}
+	}
+	
+	public String qualifiedNameType() {
+		List<java.lang.Boolean> javaLangBooleans = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		for (java.lang.Boolean iterator : javaLangBooleans) {
+			sb.append(iterator);
+		}
+		return sb.toString();
+	}
+	
+	public String unQualifiedNameType() {
+		List<Boolean> myBooleans = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		for (Boolean iterator : myBooleans) {
+			sb.append(iterator);
+		}
+		return sb.toString();
+	}
+	
+	class Foo {
+		@Override
+		public String toString() {
+			return "foo"; //$NON-NLS-1$
+		}
+		
+		public boolean isFoo() {
+			return true;
+		}
+	}
+	
+	class Boolean {
+		boolean val = false;
 	}
 }

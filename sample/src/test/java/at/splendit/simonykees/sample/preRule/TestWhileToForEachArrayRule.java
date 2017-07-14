@@ -273,4 +273,30 @@ public class TestWhileToForEachArrayRule {
         }
         return false;
     }
+    
+	public String qualifiedNameType() {
+		java.lang.Boolean[] javaLangBooleans = {true, true, false};
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		while( i<javaLangBooleans.length) {
+			sb.append(javaLangBooleans[i]);
+			i++;
+		}
+		return sb.toString();
+	}
+	
+	public String unQualifiedNameType() {
+		Boolean[] myBooleans = {};
+		StringBuilder sb = new StringBuilder();
+		int i = 0;
+		while(i<myBooleans.length) {
+			sb.append(myBooleans[i]);
+			i++;
+		}
+		return sb.toString();
+	}
+	
+	class Boolean {
+		boolean val = false;
+	}
 }

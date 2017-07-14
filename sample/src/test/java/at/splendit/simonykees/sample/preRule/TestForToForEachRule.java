@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"nls", "unused", "unchecked"})
+@SuppressWarnings({"nls", "unused", "unchecked", "rawtypes"})
 public class TestForToForEachRule {
 
 	private List<String> generateList(String input) {
@@ -204,6 +204,17 @@ public class TestForToForEachRule {
 			// do nothing
 		}
 		return false;
+	}
+	
+	public String rawIterable(String input) {
+		List foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		for (Iterator<String> iterator = foo.iterator(); iterator.hasNext();) {
+			String s = iterator.next();
+			sb.append(s);
+		}
+		return sb.toString();
 	}
 
 	private class Point {

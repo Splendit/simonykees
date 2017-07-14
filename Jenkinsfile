@@ -64,16 +64,38 @@ timestamps {
 			// master and develop builds get deployed to packagedrone (see pom.xml) and tagged (see tag-deployment.sh)
 			if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
 				if ( currentBuild.result == 'SUCCESS' ) {
+					// skipping tests, because integration tests have passed already
+					// -B batch mode for clean output (otherwise upload status will spam the console)
+					def mvnCommand = 'clean deploy -DskipTests -B'
+				
+				
 					stage('Deploy and Tag') {
-						// skipping tests, because integration tests have passed already
-						// -B batch mode for clean output (otherwise upload status will spam the console)
-						def mvnCommand = 'clean deploy -DskipTests -B'
-						sh "'${mvnHome}/bin/mvn' ${mvnCommand}"	
+						sh "'${mvnHome}/bin/mvn' ${mvnCommand} -P${env.BRANCH_NAME}-test-noProguard"	
+						
 						// tag build in repository
 						sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
 							// first parameter is the dir, second parameter is the subdirectory and optional
 							sh("./tag-deployment.sh $env.BRANCH_NAME main")
 							sh("git push $backupOrigin --tags")
+						}
+					}
+					
+					// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
+					// grep returns result with an \n therefore we need to trim
+					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
+					
+					stage('Deploy obfuscation') {
+						def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
+						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-test-proguard"
+					}
+					if ( env.BRANCH_NAME == 'master') {
+						stage('Deploy production') {
+							def mvnOptions = "-Dproduction -DforceContextQualifier=${qualifier}_noProguard"
+							sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-noProguard"
+						}
+						stage('Deploy production, obfuscation') {
+							def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
+							sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-proguard"
 						}
 					}
 				}

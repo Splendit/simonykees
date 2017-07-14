@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
@@ -96,13 +97,11 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 									 * create lambda expression for the filter()
 									 * method
 									 */
-									Expression ifStatementExpressionCopy = (Expression) astRewrite
-											.createCopyTarget(ifStatementExpression);
 									VariableDeclaration variableDeclarationCopy = (VariableDeclaration) ASTNode
 											.copySubtree(astRewrite.getAST(), variableDeclaration);
 
 									LambdaExpression filterLambda = createLambdaExpression(variableDeclarationCopy,
-											ifStatementExpressionCopy);
+											ifStatementExpression);
 
 									/*
 									 * create filter() method invocation with
@@ -119,22 +118,22 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 									 * create lambda expression for the new
 									 * forEach() method
 									 */
-									Statement thenStatementCopy = (Statement) astRewrite
-											.createCopyTarget(ifStatement.getThenStatement());
 
 									LambdaExpression forEachLambda = createLambdaExpression(variableDeclarationCopy,
-											thenStatementCopy);
+											ifStatement.getThenStatement());
 
-									/*
-									 * create new forEach() method with forEach
-									 * lambda as argument
-									 */
-									SimpleName forEachMethodName = astRewrite.getAST().newSimpleName("forEach"); //$NON-NLS-1$
-									MethodInvocation forEachMethodInvocation = createMethodInvocation(
-											filterMethodInvocation, forEachMethodName, forEachLambda);
-
-									// rewrite the AST
-									astRewrite.replace(methodInvocationNode, forEachMethodInvocation, null);
+									if(forEachLambda != null) {
+										/*
+										 * create new forEach() method with forEach
+										 * lambda as argument
+										 */
+										SimpleName forEachMethodName = astRewrite.getAST().newSimpleName("forEach"); //$NON-NLS-1$
+										MethodInvocation forEachMethodInvocation = createMethodInvocation(
+												filterMethodInvocation, forEachMethodName, forEachLambda);
+										
+										// rewrite the AST
+										astRewrite.replace(methodInvocationNode, forEachMethodInvocation, null);
+									}
 								}
 							}
 						}
@@ -156,17 +155,24 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 	 *            the body of the new lambda expression, which must either be an
 	 *            {@link Expression} or a {@link Block}
 	 * @return the newly created {@link LambdaExpression} or null, if the body
-	 *         is not of type {@link Expression} or {@link Block}
+	 *         is not of type {@link Expression},  {@link ExpressionStatement} or {@link Block}.
 	 */
 	private LambdaExpression createLambdaExpression(VariableDeclaration parameter, ASTNode body) {
-		if (body instanceof Expression || body instanceof Block) {
-			LambdaExpression lambda = astRewrite.getAST().newLambdaExpression();
-
-			ListRewrite lambdaParamsListRewrite = astRewrite.getListRewrite(lambda,
-					LambdaExpression.PARAMETERS_PROPERTY);
-			lambdaParamsListRewrite.insertFirst(parameter, null);
-			lambda.setBody(body);
-
+		
+		LambdaExpression lambda = astRewrite.getAST().newLambdaExpression();
+		
+		ListRewrite lambdaParamsListRewrite = astRewrite.getListRewrite(lambda,
+				LambdaExpression.PARAMETERS_PROPERTY);
+		lambdaParamsListRewrite.insertFirst(parameter, null);
+		if (body.getNodeType() == ASTNode.BLOCK) {
+			lambda.setBody((Block)astRewrite.createCopyTarget(body));
+			return lambda;
+		} else if (body.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+			Expression expression = ((ExpressionStatement)body).getExpression();
+			lambda.setBody((Expression)astRewrite.createCopyTarget(expression));
+			return lambda;
+		} else if (body instanceof Expression) {
+			lambda.setBody((Expression)astRewrite.createCopyTarget(body));
 			return lambda;
 		}
 

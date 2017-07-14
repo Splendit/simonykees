@@ -1,5 +1,7 @@
 package at.splendit.simonykees.sample.postRule.fieldNameConvention;
 
+
+import java.util.LinkedList;
 import java.util.Optional;
 
 @SuppressWarnings({"nls", "unused"})
@@ -41,6 +43,30 @@ public class FieldNameConventionRule {
 	
 	{
 		String insideInitializer = finalInstanceVariablesCanBeRenamed;
+	}
+	
+	
+	static final class InnerClassWithSameFieldName {
+		private int index;
+		
+		InnerClassWithSameFieldName(int i) {
+			this.index = i;
+		}
+		
+		public void setIndex(int i) {
+			this.index = i;
+		}
+		
+		@SuppressWarnings("serial")
+		private static final class NestedInnerClassWithSameFieldName extends LinkedList<String> {
+			private int index_;
+			InnerClassWithSameFieldName innerClaz = new InnerClassWithSameFieldName(0);
+			
+			public void setInnerAndOuterIndex(int i) {
+				this.index_ = i;
+				innerClaz.index = index_;
+			}
+		}
 	}
 	
 	protected int getInt() {
@@ -106,11 +132,11 @@ public class FieldNameConventionRule {
 		String t = foo.canBeRenamed;
 	}
 	
-	public class Foo {
+	public class Foo extends FooParent {
 		
 //		private Integer Int;
-		private String iNt;
-		private String myval;
+		private String i_nt;
+		private String _myval;
 		private String canBeRenamed = "";
 		
 		public Foo () {
@@ -124,7 +150,7 @@ public class FieldNameConventionRule {
 		
 		public String getMyVal() {
 			canBeRenamed = "in_getMyVal";
-			return myval;
+			return _myval;
 		}
 		
 		public Integer getIntValue() {
@@ -137,7 +163,13 @@ public class FieldNameConventionRule {
 			return canBeRenamed;
 		}
 		
+		void setProtectedField(int i) {
+			ProtectedField = i;
+		}
+		
 		public class InnerFoo {
+			private int privateField;
+			private int ProtectedField;
 			private String innerInnerFooString;
 			public InnerFoo() {
 				String aFinalIncanceVariable = finalInstanceVariablesCanBeRenamed;
@@ -147,6 +179,25 @@ public class FieldNameConventionRule {
 			
 			class EndlessInnerFoo {
 				
+			}
+		}
+	}
+	
+	class FooParent {
+		private int privateField;
+		protected int ProtectedField;
+		public int PublicField;
+		int PackageProtectedField;
+	}
+	
+	class GenericFoo<T> {
+		private int field;
+		private GenericFoo<T> genericFoo;
+		
+		void updateField(int i) {
+			this.field = i;
+			if(genericFoo != null) {
+				genericFoo.field = 0;
 			}
 		}
 	}

@@ -32,7 +32,7 @@ import at.splendit.simonykees.i18n.Messages;
 public class SimonykeesMessageDialog extends MessageDialog {
 
 	private static final Logger logger = LoggerFactory.getLogger(SimonykeesMessageDialog.class);
-	
+
 	private static final String MAIL_BUGREPORT = Messages.SimonykeesMessageDialog_bugreport_email;
 	private static final String dialogTitle = Messages.aa_codename;
 	private static final Image dialogTitleImage = null;
@@ -55,16 +55,16 @@ public class SimonykeesMessageDialog extends MessageDialog {
 		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, dialogImage,
 				defaultIndex, dialogButtonLabels).open() == 0;
 	}
-	
+
 	public static boolean openConfirmDialog(Shell parentShell, String message) {
 		messageText = message;
-		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, MessageDialog.CONFIRM,
-				defaultIndex, new String[] { Messages.ui_cancel, Messages.ui_ok }).open() == 1;
+		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText,
+				MessageDialog.CONFIRM, defaultIndex, new String[] { Messages.ui_cancel, Messages.ui_ok }).open() == 1;
 	}
 
 	public static boolean openErrorMessageDialog(Shell parentShell, SimonykeesException simonykeesException) {
 		messageText = ((simonykeesException != null) ? simonykeesException.getUiMessage() : dialogErrorMessage)
-				+ System.lineSeparator() + "<a>" + MAIL_BUGREPORT + "</a>"; //$NON-NLS-1$ //$NON-NLS-2$
+				+ System.lineSeparator() + MAIL_BUGREPORT;
 		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, MessageDialog.ERROR,
 				defaultIndex, dialogButtonLabels).open() == 0;
 	}

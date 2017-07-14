@@ -2,9 +2,12 @@ package at.splendit.simonykees.sample.postRule.allRules;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+
+import at.splendit.simonykees.sample.utilities.Person;
 
 @SuppressWarnings({ "nls", "unused", "rawtypes", "unchecked" })
 public class LambdaForEachMapRule {
@@ -207,7 +210,8 @@ public class LambdaForEachMapRule {
 		numbers.add(4.5);
 
 		StringBuilder sb = new StringBuilder();
-		numbers.stream().filter(n -> n.doubleValue() > 0).map(Arrays::asList).forEach((List<Number> nums) -> {
+		numbers.stream().filter(n -> n.doubleValue() > 0).forEach((Number n) -> {
+			List<Number> nums = Arrays.asList(n);
 			Double d = (Double) nums.get(0);
 			String s = d.toString();
 			sb.append(nums.toString());
@@ -256,6 +260,33 @@ public class LambdaForEachMapRule {
 		return sb.toString();
 	}
 
+	public String finalLocalVariable() {
+
+		List<Object> rawList = generateRawListOfStrings();
+		StringBuilder sb = new StringBuilder();
+		rawList.stream().filter(o -> o != null).map((Object n) -> (String) n).forEach((final String s) -> {
+			Number d = (int) Integer.valueOf(s) / 2;
+			sb.append(d);
+		});
+
+		return sb.toString();
+	}
+
+	public String annotatedLocalVariable() {
+
+		List<Object> rawList = generateRawListOfStrings();
+		StringBuilder sb = new StringBuilder();
+		rawList.stream().filter(o -> o != null).forEach((Object n) -> {
+			@Deprecated
+			final String s = (String) n;
+			Number d = (int) Integer.valueOf(s) / 2;
+
+			sb.append(d);
+		});
+
+		return sb.toString();
+	}
+
 	public String rawTypeFromMethodInvocation() {
 
 		StringBuilder sb = new StringBuilder();
@@ -268,8 +299,70 @@ public class LambdaForEachMapRule {
 		return sb.toString();
 	}
 
+	public <T> void mapToGenericType(List<Person> refs) {
+		List<List<T>> keys = new ArrayList<>();
+		refs.stream().forEach(ref -> {
+			final List<T> testKey = refToKey(ref);
+			keys.add(testKey);
+		});
+	}
+
+	public <T> void mapToNestedType(List<Person> refs) {
+		List<List<String>> keys = new ArrayList<>();
+		refs.stream().forEach(ref -> {
+			final List<String> testKey = Collections.singletonList(ref.getName());
+			keys.add(testKey);
+		});
+	}
+
+	public void parameterizedMapMethod() {
+		StringBuilder sb = new StringBuilder();
+		List<Wrapper> wrappers = new ArrayList<>();
+		wrappers.stream().forEach(wrapp -> {
+			InnerClass innerClass = wrapp.getInnerClass();
+			useInnerClass(innerClass);
+			sb.append(innerClass.getName());
+		});
+	}
+
+	public void useInnerClass(InnerClass innerClass) {
+
+	}
+
+	public <T> void mapToTypeVariable(List<Person> refs) {
+		List<T> keys = new ArrayList<>();
+		refs.stream().forEach(ref -> {
+			final T testKey = refToKeyT(ref);
+			keys.add(testKey);
+		});
+	}
+
+	private <T> T refToKeyT(Person ref) {
+		return null;
+	}
+
+	private <T> List<T> refToKey(Person ref) {
+		return new ArrayList<>();
+	}
+
 	private List generateRawListOfStrings() {
 		List rawList = Arrays.asList("2.3", "4.5");
 		return rawList;
+	}
+
+	interface Inner {
+
+	}
+
+	class InnerClass implements Inner {
+		public String getName() {
+			return this.getClass().getName();
+		}
+	}
+
+	class Wrapper {
+		public <I extends Inner> I getInnerClass() {
+			return null;
+		}
 	}
 }

@@ -94,6 +94,11 @@ public class LambdaForEachIfWrapperToFilterRule {
 			System.out.println(i);
 		});
 	}
+	
+	public void ifWithExpressionStatementBody(String input) {
+		StringBuilder sb = new StringBuilder();
+		list.stream().filter((s) -> !s.isEmpty()).forEach((s) -> sb.append(s));
+	}
 
 	private int getRandomNuber() {
 		return 0;

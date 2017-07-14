@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
-import at.splendit.simonykees.core.visitor.loop.IteratingIndexVisitorFactory;
 import at.splendit.simonykees.core.visitor.loop.LoopOptimizationASTVisior;
 import at.splendit.simonykees.core.visitor.loop.LoopToForEachASTVisitor;
 
@@ -36,7 +35,9 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 
 	@Override
 	public boolean visit(ForStatement node) {
-
+		if(isSingleStatementBodyOfOuterLoop(node)) {
+			return true;
+		}
 		SimpleName iteratorName = ASTNodeUtil.replaceableIteratorCondition(node.getExpression());
 		if (iteratorName != null) {
 			// Defined updaters are not allowed
@@ -77,15 +78,13 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 
 				if (ASTNode.METHOD_INVOCATION == rhs.getNodeType()) {
 					// iterating over Lists
-					IteratingIndexVisitorFactory<ForStatement> visitorCreator = ForLoopOverListsASTVisitor::new;
 					MethodInvocation condition = (MethodInvocation) rhs;
-					analyzeLoopOverList(node, node.getBody(), condition, index, visitorCreator);
+					analyzeLoopOverList(node, node.getBody(), condition, index, ForLoopOverListsASTVisitor::new);
 
 				} else if (ASTNode.QUALIFIED_NAME == rhs.getNodeType()) {
 					// iterating over arrays
-					IteratingIndexVisitorFactory<ForStatement> visitorCreator = ForLoopOverArraysASTVisitor::new;
 					QualifiedName condition = (QualifiedName) rhs;
-					analyzeLoopOverArray(node, node.getBody(), condition, index, visitorCreator);
+					analyzeLoopOverArray(node, node.getBody(), condition, index, ForLoopOverArraysASTVisitor::new);
 				}
 			}
 		}

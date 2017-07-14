@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -73,7 +74,7 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
 		/**
-		 * Only private fields can be renamed, unless they are static final. 
+		 * Only private fields can be renamed, unless they are static final.
 		 */
 		if (ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isPrivate())
 				&& !(ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isStatic())
@@ -106,8 +107,20 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 										 * class can be directly accessed from
 										 * the outer class!
 										 */
-										if (type.getParent().getNodeType() == ASTNode.TYPE_DECLARATION) {
-											type.getParent().accept(referencesVisitor);
+										ASTNode typeParent = type.getParent();
+										boolean collidingWithOuterTypeField = false;
+										if (typeParent != null
+												&& typeParent.getNodeType() == ASTNode.TYPE_DECLARATION) {
+											TypeDeclaration typeDeeclarationParent = (TypeDeclaration) typeParent;
+											/*
+											 * FIXME: SIM-511 - distinguish
+											 * between fields of inner type from
+											 * fields of outer type
+											 */
+											collidingWithOuterTypeField = hasField(fragmentName,
+													typeDeeclarationParent);
+
+											typeDeeclarationParent.accept(referencesVisitor);
 										}
 										// Find the references in the current
 										// class.
@@ -118,7 +131,7 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 										 * It is risky to introduce a field name
 										 * coinciding with a local variable name
 										 */
-										if (!allLocalVarNames.contains(newName)) {
+										if (!allLocalVarNames.contains(newName) && !collidingWithOuterTypeField) {
 											List<SimpleName> references = referencesVisitor.getReferences();
 											declaredFieldNames.add(newName);
 											// rename the declaration and all
@@ -135,6 +148,27 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 
 		return true;
+	}
+
+	/**
+	 * Checks if the type declaration has a field named the same as the given
+	 * name.
+	 * 
+	 * @param fragmentName
+	 *            the name to look for
+	 * @param typeDeclaration
+	 *            a type declaration
+	 * @return {@code true} if such a field is found, or {@code false} otherwise
+	 */
+	private boolean hasField(SimpleName fragmentName, TypeDeclaration typeDeclaration) {
+
+		return ASTNodeUtil.convertToTypedList(typeDeclaration.bodyDeclarations(), FieldDeclaration.class).stream()
+				.flatMap(fieldDecl -> ASTNodeUtil
+						.convertToTypedList(fieldDecl.fragments(), VariableDeclarationFragment.class).stream()
+						.map(VariableDeclarationFragment::getName).map(SimpleName::getIdentifier))
+				.filter(identifier -> identifier.equals(fragmentName.getIdentifier())).findAny().isPresent()
+				|| ClassRelationUtil.findInheretedFields(typeDeclaration.resolveBinding())
+						.contains(fragmentName.getIdentifier());
 	}
 
 	private boolean isComplyingWithConventions(String identifier) {
