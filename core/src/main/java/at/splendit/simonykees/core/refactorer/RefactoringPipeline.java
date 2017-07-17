@@ -3,6 +3,7 @@ package at.splendit.simonykees.core.refactorer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,7 +33,7 @@ import at.splendit.simonykees.i18n.ExceptionMessages;
  * {@link IJavaElement}s and offers functionality to apply the first to the
  * latter.
  * 
- * @author Ludwig Werzowa, Andreja Sambolec
+ * @author Ludwig Werzowa, Andreja Sambolec, Matthias Webhofer
  * @since 1.2
  */
 public class RefactoringPipeline {
@@ -451,7 +452,7 @@ public class RefactoringPipeline {
 			logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
 			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found);
 		}
-		List<String> refactoringStatesNotCommited = new ArrayList<>();
+		List<RefactoringStateNotCommited> refactoringStatesNotCommited = new LinkedList<>();
 		for (Iterator<RefactoringState> iterator = refactoringStates.iterator(); iterator.hasNext();) {
 			RefactoringState refactoringState = (RefactoringState) iterator.next();
 			try {
@@ -459,11 +460,13 @@ public class RefactoringPipeline {
 				iterator.remove();
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
-				refactoringStatesNotCommited.add(refactoringState.getWorkingCopy().getPath().toString());
+				refactoringStatesNotCommited.add(
+						new RefactoringStateNotCommited(refactoringState.getWorkingCopy().getPath().toString(), e));
 			}
 		}
 		if (!refactoringStatesNotCommited.isEmpty()) {
-			String notWorkingRulesCollected = refactoringStatesNotCommited.stream().collect(Collectors.joining("\n")); //$NON-NLS-1$
+			String notWorkingRulesCollected = refactoringStatesNotCommited.stream().map(Object::toString)
+					.collect(Collectors.joining("\n")); //$NON-NLS-1$
 			throw new ReconcileException(
 					NLS.bind(ExceptionMessages.RefactoringPipeline_reconcile_failed, notWorkingRulesCollected),
 					NLS.bind(ExceptionMessages.RefactoringPipeline_user_reconcile_failed, notWorkingRulesCollected));
