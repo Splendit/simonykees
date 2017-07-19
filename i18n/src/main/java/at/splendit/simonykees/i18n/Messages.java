@@ -29,6 +29,8 @@ public class Messages extends NLS {
 	public static String ArithmethicAssignmentRule_name;
 	public static String BracketsToControlRule_description;
 	public static String BracketsToControlRule_name;
+	public static String BrowserDialog_dontShowIntroText;
+	public static String BrowserDialog_introTitle;
 	public static String CodeFormatterRule_description;
 	public static String CodeFormatterRule_name;
 	public static String CollectionRemoveAllRule_description;
@@ -166,6 +168,7 @@ public class Messages extends NLS {
 	public static String SimonykeesMessageDialog_open_browser_error_message;
 	public static String SimonykeesPreferenceManager_builtIn;
 	public static String SimonykeesPreferencePage_editProfileButtonLabel;
+	public static String SimonykeesPreferencePage_enableIntroText;
 	public static String SimonykeesPreferencePage_newProfileButtonLabel;
 	public static String SimonykeesPreferencePage_removeProfileButtonLabel;
 	public static String SimonykeesPreferencePage_rules;

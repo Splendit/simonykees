@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -71,6 +72,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 		createProfilesTableView(composite);
 
+		addField(
+				new BooleanFieldEditor(SimonykeesPreferenceConstants.ENABLE_INTRO, Messages.SimonykeesPreferencePage_enableIntroText, composite));//getFieldEditorParent()));
+		
 		initializeView();
 	}
 
