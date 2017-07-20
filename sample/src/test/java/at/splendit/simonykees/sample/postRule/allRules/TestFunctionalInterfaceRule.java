@@ -59,16 +59,6 @@ public class TestFunctionalInterfaceRule {
 		};
 		finalStringField = "irritating";
 
-		if (foo != null) {
-			notInitializedField = "";
-			AFunctionalInterface inNestedBlock = (int a) -> {
-				String sthToLog = a + notInitializedField;
-
-			};
-		} else {
-			notInitializedField = "notInitalized";
-		}
-
 		AFunctionalInterface foo2 = (int a) -> {
 			String sthToLog = a + finalStringField;
 
@@ -77,27 +67,6 @@ public class TestFunctionalInterfaceRule {
 		AFunctionalInterface foo3 = (int a) -> {
 			String t = declaredfterConstructor;
 
-		};
-
-	}
-
-	public TestFunctionalInterfaceRule(String nonDefaultCtor) {
-		AFunctionalInterface foo = new AFunctionalInterface() {
-
-			@Override
-			public void method(int a) {
-				String sthToLog = a + finalStringField;
-
-			}
-		};
-		finalStringField = "irritating";
-
-		AFunctionalInterface foo2 = (int a) -> {
-			String sthToLog = a + nonDefaultCtor;
-		};
-
-		AFunctionalInterface foo3 = (int a) -> {
-			String sthToLog = a + finalStringField;
 		};
 
 		if (foo3 != null) {
@@ -116,7 +85,16 @@ public class TestFunctionalInterfaceRule {
 			};
 		}
 
-		notInitializedField = "";
+		if (foo != null) {
+			notInitializedField = "";
+			AFunctionalInterface inNestedBlock = (int a) -> {
+				String sthToLog = a + notInitializedField;
+
+			};
+		} else {
+			notInitializedField = "";
+		}
+
 	}
 
 	public void usingUnassignedFieldInMethod() {

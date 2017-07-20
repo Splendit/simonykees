@@ -51,20 +51,6 @@ public class TestFunctionalInterfaceRule {
 		};
 		FINAL_STRING_FIELD = "irritating";
 		
-		if(foo != null) {
-			NOT_INITIALIZED_FIELD = "";
-			AFunctionalInterface inNestedBlock = new AFunctionalInterface() {
-				
-				@Override
-				public void method(int a) {
-					String sthToLog = a + NOT_INITIALIZED_FIELD;
-					
-				}
-			};
-		} else {
-			NOT_INITIALIZED_FIELD = "notInitalized";
-		}
-		
 		AFunctionalInterface foo2 = new AFunctionalInterface() {
 			
 			@Override
@@ -79,33 +65,6 @@ public class TestFunctionalInterfaceRule {
 			public void method(int a) {
 				String t = declaredfterConstructor;
 				
-			}
-		};
-		
-	}
-	
-	public TestFunctionalInterfaceRule(String nonDefaultCtor) {
-		AFunctionalInterface foo = new AFunctionalInterface() {
-			
-			@Override
-			public void method(int a) {
-				String sthToLog = a + FINAL_STRING_FIELD;
-				
-			}
-		};
-		FINAL_STRING_FIELD = "irritating";
-		
-		AFunctionalInterface foo2 = new AFunctionalInterface() {
-			@Override
-			public void method(int a) {
-				String sthToLog = a + nonDefaultCtor;
-			}
-		};
-		
-		AFunctionalInterface foo3 = new AFunctionalInterface() {
-			@Override
-			public void method(int a) {
-				String sthToLog = a + FINAL_STRING_FIELD;
 			}
 		};
 		
@@ -125,7 +84,20 @@ public class TestFunctionalInterfaceRule {
 			};
 		}
 		
-		NOT_INITIALIZED_FIELD = "";
+		if(foo != null) {
+			NOT_INITIALIZED_FIELD = "";
+			AFunctionalInterface inNestedBlock = new AFunctionalInterface() {
+				
+				@Override
+				public void method(int a) {
+					String sthToLog = a + NOT_INITIALIZED_FIELD;
+					
+				}
+			};
+		} else {
+			NOT_INITIALIZED_FIELD = "";
+		}
+		
 	}
 	
 	private final String declaredfterConstructor = "declaredAfterCtor"; 
