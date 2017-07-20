@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
  * A visitor for finding references of variables that are not local variables
- * and are not assigned in the node which is being visited.
+ * and are <em>NOT</em> assigned <em>inside</em> the node which is being visited.
  * 
  * @author Ardit Ymeri
  * @since 2.0
@@ -61,8 +61,8 @@ public class PublicVarialbeReferencesASTVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Checks whether a simple name matches with the names of the public
-	 * variable references that are stored so far.
+	 * Checks whether a simple name matches with any of the names of the public
+	 * variables referenced so far.
 	 * 
 	 * @param simpleName
 	 *            a {@link SimpleName} to check for

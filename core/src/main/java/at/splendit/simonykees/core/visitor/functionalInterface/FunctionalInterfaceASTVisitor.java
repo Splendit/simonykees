@@ -173,8 +173,11 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						}
 
 						if (ASTNode.TYPE_DECLARATION == scopeNodeType || ASTNode.ENUM_DECLARATION == scopeNodeType) {
-							// the anonymous class is occurring as an
-							// initializer of a field
+							/*
+							 * the anonymous class is occurring as an
+							 * initializer of a field
+							 */
+							
 							PublicVarialbeReferencesASTVisitor fieldReferencesVisitor = new PublicVarialbeReferencesASTVisitor();
 							node.accept(fieldReferencesVisitor);
 							List<SimpleName> unAssignedReferences = fieldReferencesVisitor
@@ -198,7 +201,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 								 * the occurrence of the anonymous class.
 								 */
 								List<SimpleName> assignedVariables = findAssignedVariablesTillNodeOccurrence(
-										methodDeclaration, node);
+										methodDeclaration, relevantBlocks, node);
 								PublicVarialbeReferencesASTVisitor fieldReferencesVisitor = new PublicVarialbeReferencesASTVisitor();
 								node.accept(fieldReferencesVisitor);
 								/*
@@ -283,7 +286,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	 *         converted to a lambda expression.
 	 */
 	private List<SimpleName> findAssignedVariablesTillNodeOccurrence(MethodDeclaration methodDeclaration,
-			AnonymousClassDeclaration node) {
+			List<ASTNode> relevantBlocks, AnonymousClassDeclaration node) {
 
 		List<FieldDeclaration> fields = new ArrayList<>();
 		ASTNode parent = methodDeclaration.getParent();
@@ -308,8 +311,9 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 				.addAll(ASTNodeUtil.convertToTypedList(methodDeclaration.parameters(), SingleVariableDeclaration.class)
 						.stream().map(SingleVariableDeclaration::getName).collect(Collectors.toList()));
 
-		Block body = methodDeclaration.getBody();
-		List<Statement> statements = ASTNodeUtil.convertToTypedList(body.statements(), Statement.class);
+		List<Statement> statements = ASTNodeUtil.convertToTypedList(relevantBlocks, Block.class).stream()
+				.flatMap(block -> ASTNodeUtil.convertToTypedList(block.statements(), Statement.class).stream())
+				.collect(Collectors.toList());
 		for (Statement statement : statements) {
 			AnonymousClassNodeWrapperVisitor visitor = new AnonymousClassNodeWrapperVisitor(node);
 			statement.accept(visitor);
@@ -339,6 +343,16 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		return initializedFields;
 	}
 
+	/**
+	 * Makes use of {@link #safeToUseFields} to check if reference represented 
+	 * by the given simple name, can be used in the body of a lambda expression
+	 * which is used as an initializer in a field declaration. 
+	 * 
+	 * @param fieldReference a {@link SimpleName} representing a reference of a field.
+	 * 
+	 * @return {@code true} if the reference can be used in the body of a lambda expression
+	 * serving as initializer in a field declaration or {@code false} otherwise.
+	 */
 	private boolean isSafeFieldReference(SimpleName fieldReference) {
 		String referenceIdentifier = fieldReference.getIdentifier();
 		return safeToUseFields.stream().map(SimpleName::getIdentifier).anyMatch(referenceIdentifier::equals);
