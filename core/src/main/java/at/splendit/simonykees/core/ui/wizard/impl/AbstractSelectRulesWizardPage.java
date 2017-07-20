@@ -49,7 +49,8 @@ import at.splendit.simonykees.i18n.Messages;
  * rule. From version 1.3 checkboxes are replaced with windows for filtering and
  * adding selection
  * 
- * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter, Andreja Sambolec
+ * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter, Andreja Sambolec,
+ *         Matthias Webhofer
  * @since 0.9 refactored in 1.3
  */
 @SuppressWarnings("restriction") // StatusInfo is internal
@@ -566,7 +567,10 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 	protected abstract void doStatusUpdate();
 
 	protected void doStatusUpdate(IStatus additionalStatus) {
-		if (model.getSelectionAsList().isEmpty()) {
+		if (!model.getUnapplicableRules().isEmpty()) {
+			((StatusInfo) fSelectionStatus)
+					.setWarning(Messages.AbstractSelectRulesWizardPage_warning_RulesInProfileNotApplicable);
+		} else if (model.getSelectionAsList().isEmpty()) {
 			((StatusInfo) fSelectionStatus).setError(Messages.AbstractSelectRulesWizardPage_error_NoRulesSelected);
 		} else {
 			fSelectionStatus = new StatusInfo();
@@ -586,7 +590,7 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 		 */
 		updateStatus(status);
 	}
-	
+
 	/**
 	 * Open help dialog
 	 */
