@@ -12,6 +12,32 @@ public class TestFunctionalInterfaceRule {
 	private static Logger log = LoggerFactory.getLogger(TestFunctionalInterfaceRule.class);
 	
 	private final String FINAL_STRING_FIELD;
+	private final String NOT_INITIALIZED_FIELD;
+	
+	private AFunctionalInterface usingUnDeclaredField = new AFunctionalInterface() {
+		@Override
+		public void method(int a) {
+			String s = FINAL_INITIALIZED_STRING_FIELD;
+		}
+	};
+	
+	private final String FINAL_INITIALIZED_STRING_FIELD = "initialized";
+	
+	private AFunctionalInterface usingUnInitializedField = new AFunctionalInterface() {
+		@Override
+		public void method(int a) {
+			String s = FINAL_STRING_FIELD;
+		}
+	};
+	
+	private AFunctionalInterface usingInitializedField =  new AFunctionalInterface() {
+
+		@Override
+		public void method(int a) {
+			String s = FINAL_INITIALIZED_STRING_FIELD;
+		}
+		
+	};
 	
 	public TestFunctionalInterfaceRule() {
 
@@ -25,6 +51,20 @@ public class TestFunctionalInterfaceRule {
 		};
 		FINAL_STRING_FIELD = "irritating";
 		
+		if(foo != null) {
+			NOT_INITIALIZED_FIELD = "";
+			AFunctionalInterface inNestedBlock = new AFunctionalInterface() {
+				
+				@Override
+				public void method(int a) {
+					String sthToLog = a + NOT_INITIALIZED_FIELD;
+					
+				}
+			};
+		} else {
+			NOT_INITIALIZED_FIELD = "notInitalized";
+		}
+		
 		AFunctionalInterface foo2 = new AFunctionalInterface() {
 			
 			@Override
@@ -34,6 +74,71 @@ public class TestFunctionalInterfaceRule {
 			}
 		};
 		
+		AFunctionalInterface foo3 = new AFunctionalInterface() {
+			@Override
+			public void method(int a) {
+				String t = declaredfterConstructor;
+				
+			}
+		};
+		
+	}
+	
+	public TestFunctionalInterfaceRule(String nonDefaultCtor) {
+		AFunctionalInterface foo = new AFunctionalInterface() {
+			
+			@Override
+			public void method(int a) {
+				String sthToLog = a + FINAL_STRING_FIELD;
+				
+			}
+		};
+		FINAL_STRING_FIELD = "irritating";
+		
+		AFunctionalInterface foo2 = new AFunctionalInterface() {
+			@Override
+			public void method(int a) {
+				String sthToLog = a + nonDefaultCtor;
+			}
+		};
+		
+		AFunctionalInterface foo3 = new AFunctionalInterface() {
+			@Override
+			public void method(int a) {
+				String sthToLog = a + FINAL_STRING_FIELD;
+			}
+		};
+		
+		if(foo3 != null) {
+			AFunctionalInterface foo4 = new AFunctionalInterface() {
+				@Override
+				public void method(int a) {
+					String sthToLog = a + NOT_INITIALIZED_FIELD;
+				}
+			};
+		} else {
+			AFunctionalInterface foo5 = new AFunctionalInterface() {
+				@Override
+				public void method(int a) {
+					String sthToLog = a + NOT_INITIALIZED_FIELD;
+				}
+			};
+		}
+		
+		NOT_INITIALIZED_FIELD = "";
+	}
+	
+	private final String declaredfterConstructor = "declaredAfterCtor"; 
+	
+	public void usingUnassignedFieldInMethod() {
+		AFunctionalInterface foo2 = new AFunctionalInterface() {
+			
+			@Override
+			public void method(int a) {
+				String sthToLog = a + FINAL_STRING_FIELD;
+				
+			}
+		};
 	}
 
 	@Test
