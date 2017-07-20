@@ -19,7 +19,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -70,9 +69,14 @@ public class WizardHandlerUtil {
 	}
 
 	/**
+	 * Wraps the {@link IJavaElement} from the given editor into a list if is an
+	 * instance of {@link ICompilationUnit}.
 	 * 
 	 * @param editorPart
-	 * @return
+	 *            active editor
+	 * @return a singleton list of {@link IJavaElement} if the java element is
+	 *         an instance of {@link ICompilationUnit} or an empty list
+	 *         otherwise.
 	 */
 	private static List<IJavaElement> getFromEditor(IEditorPart editorPart) {
 		final IEditorInput editorInput = editorPart.getEditorInput();
@@ -87,9 +91,14 @@ public class WizardHandlerUtil {
 	}
 
 	/**
+	 * Returns the list of {@link IJavaElement} from the selected compilation unit, 
+	 * package or project. 
 	 * 
-	 * @param iStructuredSelection
+	 * @param iStructuredSelection active selection
 	 * @return
+	 * list of {@link IJavaElement}s if the selected structure is a either 
+	 * of: {@link ICompilationUnit}, {@link IPackageFragment}, {@link IPackageFragmentRoot}, {@link IJavaProject}
+	 * or {@link IProject}. Otherwise an empty list.
 	 */
 	private static List<IJavaElement> getFromExplorer(IStructuredSelection iStructuredSelection) {
 		final List<IJavaElement> javaElements = new ArrayList<>();
@@ -132,8 +141,11 @@ public class WizardHandlerUtil {
 	/**
 	 * 
 	 * @param project
+	 *            an {@link IProject} to be checked
 	 * @param natureId
-	 * @return
+	 *            a string representing a nature id of the project.
+	 * @return {@code true} if the given {@link IProject} has the given nature
+	 *         id or {@code false} otherwise.
 	 */
 	private static boolean hasNature(IProject project, String natureId) {
 		try {

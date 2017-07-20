@@ -49,18 +49,10 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 	private ASTNode iteratorDeclaration = null;
 	private MethodInvocation iteratorNextCall = null;
 	private boolean outsideWhile = true;
-	private boolean isForLoop = false;
-	private boolean isWhileLoop = false;
 
 	public LoopOptimizationASTVisior(SimpleName iteratorName, Statement loopStatement) {
 		this.iteratorName = iteratorName;
 		this.loopStatement = loopStatement;
-		
-		if(ASTNode.FOR_STATEMENT == loopStatement.getNodeType()) {
-			isForLoop = true;
-		} else if (ASTNode.WHILE_STATEMENT == loopStatement.getNodeType()) {
-			isWhileLoop = true;
-		}
 	}
 
 	@Override
