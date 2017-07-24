@@ -1,6 +1,6 @@
 package at.splendit.simonykees.sample.postRule.rearrangeClassMembers;
 
-//TODO: be careful when you write comments! 
+//be careful when you write comments! 
 
 /*
  * Comments are such a pain. 

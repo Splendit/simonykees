@@ -10,7 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import at.splendit.simonykees.core.util.RulesTestUtil;
-import at.splendit.simonykees.core.util.SimonykeesUtil;
+import at.splendit.simonykees.core.util.RefactoringUtil;
 
 /**
  * TestSuite to check if a {@link ICompilationUnit} got Error markers in the
@@ -49,7 +49,7 @@ public class SyntaxErrorCheckTest {
 				+ System.lineSeparator() + "}" + System.lineSeparator();
 		ICompilationUnit testfile = packageFragment.createCompilationUnit("SyntaxErrorCheckTest2.java", source, true,
 				null);
-		Assert.assertFalse(SimonykeesUtil.checkForSyntaxErrors(testfile));
+		Assert.assertFalse(RefactoringUtil.checkForSyntaxErrors(testfile));
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class SyntaxErrorCheckTest {
 				+ System.lineSeparator() + "" + System.lineSeparator() + "}" + System.lineSeparator();
 		ICompilationUnit testfile = packageFragment.createCompilationUnit("SyntaxErrorCheckTest2.java", source, true,
 				null);
-		Assert.assertFalse(SimonykeesUtil.checkForSyntaxErrors(testfile));
+		Assert.assertFalse(RefactoringUtil.checkForSyntaxErrors(testfile));
 	}
 
 }

@@ -26,10 +26,9 @@ public interface LicenseValidationService {
 
 	/**
 	 * updates the license key
-	 * 
-	 * @param licenseKey
-	 * @param licenseName
-	 * @return ?
+	 * @param licenseKey new licensee key.
+	 * @param licenseName new licensee name.
+	 * @return status of update
 	 */
 	boolean updateLicenseeNumber(String licenseKey, String licenseName);
 

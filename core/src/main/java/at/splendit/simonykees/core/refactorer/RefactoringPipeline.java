@@ -23,7 +23,7 @@ import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.exception.model.NotWorkingRuleModel;
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.util.SimonykeesUtil;
+import at.splendit.simonykees.core.util.RefactoringUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.ExceptionMessages;
 
@@ -165,7 +165,7 @@ public class RefactoringPipeline {
 	 * 
 	 * @since 0.9
 	 * 
-	 * @see SimonykeesUtil#collectICompilationUnits(List, List)
+	 * @see RefactoringUtil#collectICompilationUnits(List, List)
 	 */
 	public List<ICompilationUnit> prepareRefactoring(List<IJavaElement> javaElements, IProgressMonitor monitor)
 			throws RefactoringException {
@@ -174,7 +174,7 @@ public class RefactoringPipeline {
 		List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 		try {
-			SimonykeesUtil.collectICompilationUnits(compilationUnits, javaElements, monitor);
+			RefactoringUtil.collectICompilationUnits(compilationUnits, javaElements, monitor);
 			if (compilationUnits.isEmpty()) {
 				logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found);
 				throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found,
@@ -216,7 +216,7 @@ public class RefactoringPipeline {
 						return null;
 					}
 
-					if (SimonykeesUtil.checkForSyntaxErrors(compilationUnit)) {
+					if (RefactoringUtil.checkForSyntaxErrors(compilationUnit)) {
 						containingErrorList.add(compilationUnit);
 					} else {
 						refactoringStates

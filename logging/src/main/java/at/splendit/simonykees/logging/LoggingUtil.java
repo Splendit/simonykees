@@ -58,8 +58,8 @@ public class LoggingUtil {
 	 * Triggers the logging configuration for plug in tests
 	 * 
 	 * @return true, if the configuration was successful, false otherwise
-	 * @throws JoranException
-	 * @throws IOException
+	 * @throws JoranException from {@link #configureLogback(Bundle)}
+	 * @throws IOException from {@link #configureLogback(Bundle)}
 	 */
 	public static boolean configureLoggerForTesting() throws JoranException, IOException {
 		if (bundle != null) {
@@ -75,8 +75,8 @@ public class LoggingUtil {
 	 * Triggers the standard logging configuration
 	 * 
 	 * @return true, if the configuration was successful, false otherwise
-	 * @throws JoranException
-	 * @throws IOException
+	 * @throws JoranException from {@link #configureLogback(Bundle)}
+	 * @throws IOException from {@link #configureLogback(Bundle)}
 	 */
 	public static boolean configureLogger() throws JoranException, IOException {
 		if (bundle != null) {
@@ -94,8 +94,8 @@ public class LoggingUtil {
 	 * 
 	 * @param bundle
 	 *            current Bundle
-	 * @throws JoranException
-	 * @throws IOException
+	 * @throws JoranException thrown by {@link JoranConfigurator#doConfigure(java.io.InputStream)}
+	 * @throws IOException - if an I/O error occurs during openStream
 	 */
 	private static void configureLogback(Bundle bundle) throws JoranException, IOException {
 		if (!isLogbackConfigured) {

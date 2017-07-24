@@ -16,7 +16,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.util.SimonykeesUtil;
+import at.splendit.simonykees.core.util.RefactoringUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -59,7 +59,7 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 	private DocumentChange applyOrganising(ICompilationUnit workingCopy)
 			throws OperationCanceledException, CoreException {
 
-		final CompilationUnit astRoot = SimonykeesUtil.parse(workingCopy);
+		final CompilationUnit astRoot = RefactoringUtil.parse(workingCopy);
 		final boolean hasAmbiguity[] = new boolean[] { false };
 		IChooseImportQuery query = new IChooseImportQuery() {
 			@Override
@@ -78,7 +78,7 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 		if (!hasAmbiguity[0] && importsOperation.getParseError() == null && edit != null
 				&& !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
 			Document document = new Document(workingCopy.getSource());
-			documentChange = SimonykeesUtil.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document,
+			documentChange = RefactoringUtil.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document,
 					edit.copy());
 
 			workingCopy.applyTextEdit(edit, null);
