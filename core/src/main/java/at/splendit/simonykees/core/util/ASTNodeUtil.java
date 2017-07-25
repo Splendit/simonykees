@@ -259,7 +259,6 @@ public class ASTNodeUtil {
 	 */
 	@SuppressWarnings("rawtypes")
 	public static boolean hasModifier(List modifiers, Predicate<? super Modifier> predicate) {
-		return ASTNodeUtil.convertToTypedList(modifiers, Modifier.class).stream().filter(predicate).findAny()
-				.isPresent();
+		return ASTNodeUtil.convertToTypedList(modifiers, Modifier.class).stream().anyMatch(predicate);
 	}
 }

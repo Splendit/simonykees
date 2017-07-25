@@ -166,7 +166,7 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 				.flatMap(fieldDecl -> ASTNodeUtil
 						.convertToTypedList(fieldDecl.fragments(), VariableDeclarationFragment.class).stream()
 						.map(VariableDeclarationFragment::getName).map(SimpleName::getIdentifier))
-				.filter(identifier -> identifier.equals(fragmentName.getIdentifier())).findAny().isPresent()
+				.anyMatch(identifier -> identifier.equals(fragmentName.getIdentifier()))
 				|| ClassRelationUtil.findInheretedFields(typeDeclaration.resolveBinding())
 						.contains(fragmentName.getIdentifier());
 	}
