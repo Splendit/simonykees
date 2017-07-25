@@ -375,6 +375,16 @@ public class TestForToForEachArrayIteratingIndexRule {
 		return sb.toString();
 	}
 
+	public String arrayOfInnerTypesFromOtherClasses(String input) {
+		Wrapper.Foo[] foos = { Wrapper.createFoo(input) };
+		StringBuilder sb = new StringBuilder();
+		for (Wrapper.Foo foo : foos) {
+			sb.append(foo.toString());
+		}
+
+		return sb.toString();
+	}
+
 	/**
 	 * This collection is not subtype of {@code Iterable}.
 	 */
@@ -423,6 +433,29 @@ public class TestForToForEachArrayIteratingIndexRule {
 			} else {
 				return FALSE;
 			}
+		}
+	}
+}
+
+class Wrapper {
+	public static Foo createFoo(String input) {
+		return new Wrapper().new Foo(input);
+	}
+
+	class Foo {
+		private String foo;
+
+		public Foo(String foo) {
+			this.foo = foo;
+		}
+
+		@Override
+		public String toString() {
+			return this.foo;
+		}
+
+		public boolean isFoo() {
+			return true;
 		}
 	}
 }
