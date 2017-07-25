@@ -27,6 +27,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 
 	protected static final String JAVA_LANG_PACKAGE = "java.lang"; //$NON-NLS-1$
 	protected static final String DOT = "."; //$NON-NLS-1$
+	protected static final String DOT_REGEX = "\\" + DOT; //$NON-NLS-1$
 
 	protected Set<String> addImports;
 
@@ -105,13 +106,19 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			List<AbstractTypeDeclaration> cuDeclaredTypes) {
 		boolean isInSamePackage = false;
 
-		if (newImport.startsWith(cuPackageQualifiedName)) {
-			int dotLastIndex = newImport.lastIndexOf(DOT);
-			String suffix = newImport.substring(dotLastIndex);
-			List<String> suffixComponents = Arrays.asList(suffix.split(DOT));
+		if (newImport.startsWith(cuPackageQualifiedName + DOT)) {
+			int packageNameEndIndex = cuPackageQualifiedName.length() + 1;
+			String suffix = newImport.substring(packageNameEndIndex);
+			List<String> suffixComponents = Arrays.asList(suffix.split(DOT_REGEX));
 			if (suffixComponents.size() > 1) {
+				/*
+				 * It can be the case that the new import candidate points to an
+				 * inner class declared in the same compilation unit.
+				 * Otherwise, the import points either to a type declared in an inner package
+				 * or to an inner class which is not declared in the same compilation unit. 
+				 */
 				isInSamePackage = cuDeclaredTypes.stream().map(type -> type.getName().getIdentifier())
-						.filter(name -> name.equals(suffixComponents.get(0))).findAny().isPresent();
+						.anyMatch(name -> name.equals(suffixComponents.get(0)));
 			} else {
 				isInSamePackage = true;
 			}
