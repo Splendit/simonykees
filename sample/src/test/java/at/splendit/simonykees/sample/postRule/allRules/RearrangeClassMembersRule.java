@@ -2,7 +2,7 @@ package at.splendit.simonykees.sample.postRule.allRules;
 
 import org.apache.commons.lang3.StringUtils;
 
-//TODO: be careful when you write comments! 
+//be careful when you write comments! 
 
 /*
  * Comments are such a pain. 

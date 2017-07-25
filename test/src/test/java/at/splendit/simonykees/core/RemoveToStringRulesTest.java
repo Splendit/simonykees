@@ -13,7 +13,7 @@ import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.RemoveToStringOnStringASTVisitor;
 
 /**
- * TODO Tests the Simonykees-Rule {@link RemoveToStringOnStringRule}
+ * Tests the Simonykees-Rule {@link RemoveToStringOnStringRule}
  * 
  * @author Martin Huter
  * @since 0.9.2
