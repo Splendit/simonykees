@@ -111,8 +111,8 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 	private boolean isCommentFree(ASTNode node) {
 		int startPos = node.getStartPosition();
 		int endPos = startPos + node.getLength();
-		boolean hasComment = comments.stream().filter(comment -> (comment.getStartPosition() > startPos)
-				&& ((comment.getStartPosition() + comment.getLength()) < endPos)).findAny().isPresent();
+		boolean hasComment = comments.stream().anyMatch(comment -> (comment.getStartPosition() > startPos)
+				&& ((comment.getStartPosition() + comment.getLength()) < endPos));
 		return !hasComment;
 
 	}

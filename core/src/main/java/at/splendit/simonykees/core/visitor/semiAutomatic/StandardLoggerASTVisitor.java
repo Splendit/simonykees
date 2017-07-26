@@ -140,7 +140,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class).stream()
 				.filter(importDecl -> !importDecl.isOnDemand()).map(ImportDeclaration::getName)
 				.filter(Name::isQualifiedName).map(name -> ((QualifiedName) name).getName())
-				.map(SimpleName::getIdentifier).filter(LOGGER_CLASS_NAME::equals).findAny().isPresent();
+				.map(SimpleName::getIdentifier).anyMatch(LOGGER_CLASS_NAME::equals);
 
 		return noClashingTypes && !exisitngLoggerImported && super.visit(compilationUnit);
 	}

@@ -318,12 +318,12 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 			List<Comment> allComments = ASTNodeUtil.returnTypedList(compilationUnit.getCommentList(), Comment.class);
 
-			boolean hasComments = allComments.stream().filter(comment -> {
+			boolean hasComments = allComments.stream().anyMatch(comment -> {
 				int commentStartPos = comment.getStartPosition();
 				int commentLastPOs = commentStartPos + comment.getLength();
 				return (commentStartPos > nodeStartPos && commentLastPOs < blockStartPos)
 						|| (commentStartPos > blockEndPos && commentLastPOs < nodeLastPos);
-			}).findAny().isPresent();
+			});
 
 			commentFree = !hasComments;
 		}

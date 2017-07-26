@@ -188,8 +188,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	protected boolean hasParameterizedArguments(ClassInstanceCreation node) {
 		List<Expression> arguments = ASTNodeUtil.returnTypedList(node.arguments(), Expression.class);
-		return arguments.stream().map(Expression::resolveTypeBinding).filter(ITypeBinding::isParameterizedType)
-				.findAny().isPresent();
+		return arguments.stream().map(Expression::resolveTypeBinding).anyMatch(ITypeBinding::isParameterizedType);
 	}
 
 	/**
