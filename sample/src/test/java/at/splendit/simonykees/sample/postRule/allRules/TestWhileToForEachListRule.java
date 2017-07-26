@@ -43,11 +43,11 @@ public class TestWhileToForEachListRule {
 		list.stream().forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
-			list.stream().forEach((iterator) -> {
-				sb.append(iterator);
-				list.stream().forEach((iterator1) -> {
-					sb.append(iterator1);
-					logger.info(iterator1);
+			list.stream().forEach((aList) -> {
+				sb.append(aList);
+				list.stream().forEach((aList1) -> {
+					sb.append(aList1);
+					logger.info(aList1);
 				});
 			});
 		});
@@ -220,9 +220,9 @@ public class TestWhileToForEachListRule {
 	public String confusingIteratorName(String iterator) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(iterator);
-		list.stream().forEach((iterator1) -> {
-			logger.info(iterator1);
-			sb.append(iterator1);
+		list.stream().forEach((aList) -> {
+			logger.info(aList);
+			sb.append(aList);
 		});
 		return sb.toString();
 	}
