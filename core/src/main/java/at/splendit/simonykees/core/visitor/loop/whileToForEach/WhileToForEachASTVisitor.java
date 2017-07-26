@@ -98,7 +98,9 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 		// Do the replacement
 		if (replaceInformationASTVisitorList.containsKey(node)) {
 			LoopOptimizationASTVisior iteratorDefinitionAstVisior = replaceInformationASTVisitorList.remove(node);
-			iteratorDefinitionAstVisior.replaceLoop(node, node.getBody(), multipleIteratorUse);
+			Map<String, Boolean> newNameMap = generateNewIteratorName(null, node, iteratorDefinitionAstVisior.getListName());
+			String newName = newNameMap.keySet().iterator().next();
+			iteratorDefinitionAstVisior.replaceLoop(node, node.getBody(), multipleIteratorUse, newName);
 
 			// clear the variableIterator if no other loop is present
 			if (replaceInformationASTVisitorList.isEmpty()) {
