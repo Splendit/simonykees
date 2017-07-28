@@ -72,9 +72,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 		createProfilesTableView(composite);
 
-		addField(
-				new BooleanFieldEditor(SimonykeesPreferenceConstants.ENABLE_INTRO, Messages.SimonykeesPreferencePage_enableIntroText, composite));//getFieldEditorParent()));
-		
+		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.ENABLE_INTRO,
+				Messages.SimonykeesPreferencePage_enableIntroText, composite));
+
 		initializeView();
 	}
 
