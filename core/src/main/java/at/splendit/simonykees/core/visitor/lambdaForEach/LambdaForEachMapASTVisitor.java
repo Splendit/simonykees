@@ -304,19 +304,19 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 						 * map variable
 						 */
 						VariableDeclarationStatement declStatement = (VariableDeclarationStatement) statement;
-						
+
 						// skip the variable declarations having an annotation
-						if(ASTNodeUtil.convertToTypedList(declStatement.modifiers(), Annotation.class).isEmpty()) {
+						if (ASTNodeUtil.convertToTypedList(declStatement.modifiers(), Annotation.class).isEmpty()) {
 							List<VariableDeclarationFragment> fragments = ASTNodeUtil
 									.convertToTypedList(declStatement.fragments(), VariableDeclarationFragment.class);
 							Type type = declStatement.getType();
-							
+
 							if (!involvesUndefinedTypes(type.resolveBinding()) && !declStatement.getType().isArrayType()
 									&& referencesName(declStatement, parameter)) {
 								if (fragments.size() == 1) {
 									/*
-									 * a map variable is found. store its name and
-									 * its initializer
+									 * a map variable is found. store its name
+									 * and its initializer
 									 */
 									VariableDeclarationFragment fragment = fragments.get(0);
 									SimpleName fragmentName = fragment.getName();
@@ -324,29 +324,31 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 									/*
 									 * FIXME: SIM-521
 									 */
-									if(!isDerivableInitializerType(initializer)) {
+									if (!isDerivableInitializerType(initializer)) {
 										ITypeBinding mappingVarBinding = type.resolveBinding();
-										if(mappingVarBinding != null && mappingVarBinding.isPrimitive()) {
+										if (mappingVarBinding != null && mappingVarBinding.isPrimitive()) {
 											this.primitiveTarget = true;
 											this.mappingMethodName = calcMappingMethodName(mappingVarBinding);
-											
+
 										}
 										mapVariableFound = true;
 										newForEachVarName = fragmentName;
 										parameterType = declStatement.getType();
 										mapExpression = initializer;
-										
-										List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(declStatement.modifiers(), Modifier.class);
-										if(modifiers.size() == 1) {
+
+										List<Modifier> modifiers = ASTNodeUtil
+												.convertToTypedList(declStatement.modifiers(), Modifier.class);
+										if (modifiers.size() == 1) {
 											this.modifier = modifiers.get(0);
 										}
 									}
-									
+
 								} else {
 									/*
 									 * if the parameter is not referenced, then
-									 * store the declared name it will be checked for
-									 * references after the map variable is found.
+									 * store the declared name it will be
+									 * checked for references after the map
+									 * variable is found.
 									 */
 									extractableStatements.add(statement);
 									for (VariableDeclarationFragment fragment : fragments) {
@@ -356,8 +358,9 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 								}
 							} else {
 								/*
-								 * store the declared name. It will be checked for
-								 * references after the map variable is found.
+								 * store the declared name. It will be checked
+								 * for references after the map variable is
+								 * found.
 								 */
 								extractableStatements.add(statement);
 								for (VariableDeclarationFragment fragment : fragments) {
@@ -397,14 +400,12 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		 * @param initializerBinding
 		 *            type binding of the resulting stream type.
 		 * 
-		 * @return {@value #STREAM_MAP_METHOD_NAME} if
-		 *         the given type is not any of the aforementioned types, or any
-		 *         of the following:
+		 * @return {@value #STREAM_MAP_METHOD_NAME} if the given type is not any
+		 *         of the aforementioned types, or any of the following:
 		 *         {@value #STREAM_MAP_TO_INT_METHOD_NAME},
-		 *         {@value #STREAM_MAP_TO_DOUBLE_METHOD_NAME}
-		 *         or
-		 *         {@value #STREAM_MAP_TO_LONG_METHOD_NAME}
-		 *         respectively for  {@code int}, {@code double} or {@code long} primitves. 
+		 *         {@value #STREAM_MAP_TO_DOUBLE_METHOD_NAME} or
+		 *         {@value #STREAM_MAP_TO_LONG_METHOD_NAME} respectively for
+		 *         {@code int}, {@code double} or {@code long} primitves.
 		 */
 		private String calcMappingMethodName(ITypeBinding initializerBinding) {
 			if (initializerBinding.isPrimitive()) {
@@ -440,7 +441,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 					return true;
 				}
 			}
-			
+
 			return false;
 		}
 
@@ -564,11 +565,11 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			node.accept(visitor);
 			return !visitor.getUsages().isEmpty();
 		}
-		
+
 		public boolean isPrimitiveTarget() {
 			return this.primitiveTarget;
 		}
-		
+
 		public String getMappingMethodName() {
 			return mappingMethodName;
 		}
@@ -633,38 +634,37 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 	}
 
 	/**
-	 * Checks if the given type is a type variable or involves a type 
-	 * variable as a parameter.
+	 * Checks if the given type is a type variable or involves a type variable
+	 * as a parameter.
 	 * 
 	 * @param type
 	 *            a type to be checked
 	 * 
-	 * @return {@code true} if the type involves a type variable, or {@code false} otherwise.
+	 * @return {@code true} if the type involves a type variable, or
+	 *         {@code false} otherwise.
 	 */
 	public boolean involvesUndefinedTypes(ITypeBinding type) {
-		
-			
-			if (type.isParameterizedType()) {
-				ITypeBinding[] arguments = type.getTypeArguments();
-				for (ITypeBinding argument : arguments) {
-					if(argument.isParameterizedType()) {
-						// recursive call
-						return involvesUndefinedTypes(argument);
-					}
-					
-					ITypeBinding typeDeclaration = argument.getTypeDeclaration();
-					if (typeDeclaration.isTypeVariable()) {
-						return true;
-					}
-					
-					if(argument.isRawType() || argument.isWildcardType() || argument.isCapture()) {
-						return true;
-					}
+
+		if (type.isParameterizedType()) {
+			ITypeBinding[] arguments = type.getTypeArguments();
+			for (ITypeBinding argument : arguments) {
+				if (argument.isParameterizedType()) {
+					// recursive call
+					return involvesUndefinedTypes(argument);
 				}
-			} else if(type.isTypeVariable() || type.isRawType() || type.isWildcardType() || type.isCapture()) {
-				return true;
+
+				ITypeBinding typeDeclaration = argument.getTypeDeclaration();
+				if (typeDeclaration.isTypeVariable()) {
+					return true;
+				}
+
+				if (argument.isRawType() || argument.isWildcardType() || argument.isCapture()) {
+					return true;
+				}
 			}
-		
+		} else if (type.isTypeVariable() || type.isRawType() || type.isWildcardType() || type.isCapture()) {
+			return true;
+		}
 
 		return false;
 	}
