@@ -22,6 +22,33 @@ public class LambdaForEachMapRule {
 		
 		return sb.toString();
 	}
+	
+	public String longTypedStream(String input) {
+		List<Long> list = Arrays.asList(5L, 3L, 2L);
+		StringBuilder sb = new StringBuilder();
+		
+		list.stream().filter(l -> l > 0 ).mapToLong(l -> 100L/l).forEach(longVal -> sb.append(longVal));
+		
+		return sb.toString();
+	}
+	
+	public String doubleTypedStream(String input) {
+		List<Double> list = Arrays.asList(5D, 3D, 2D);
+		StringBuilder sb = new StringBuilder();
+		
+		list.stream().filter(d -> d > 0 ).mapToDouble(d -> 100D/d).forEach(longVal -> sb.append(longVal));
+		
+		return sb.toString();
+	}
+	
+	public String intTypedStream(String input) {
+		List<Integer> list = Arrays.asList(5, 3, 2);
+		StringBuilder sb = new StringBuilder();
+		
+		list.stream().filter(i -> i > 0).mapToInt(i -> 100 - i).forEach(longVal -> sb.append(longVal));
+		
+		return sb.toString();
+	}
 
 	public String unwrapMultipleExpressions(String input) {
 		List<String> list = generateList(input);
@@ -86,7 +113,7 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 		
-		list.stream().filter(s -> !s.isEmpty()).map(s -> {
+		list.stream().filter(s -> !s.isEmpty()).mapToInt(s -> {
 			int offset = 10;
 			return s.indexOf("i") + offset;
 		}).forEach(pos -> sb.append(Integer.toString(pos)));
@@ -97,7 +124,7 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 		
-		list.stream().filter(s -> !s.isEmpty()).map(s -> s.indexOf("i") + 10).forEach(pos -> sb.append(Integer.toString(pos)));
+		list.stream().filter(s -> !s.isEmpty()).mapToInt(s -> s.indexOf("i") + 10).forEach(pos -> sb.append(Integer.toString(pos)));
 		return sb.toString();
 	}
 	
@@ -106,7 +133,7 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 		
 		int offset = 10;
-		list.stream().filter(s -> !s.isEmpty()).map(s -> {
+		list.stream().filter(s -> !s.isEmpty()).mapToInt(s -> {
 			sb.append(s);
 			sb.append("c");
 			return s.indexOf("i") + 10;
@@ -124,7 +151,7 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 		
 		int offset = 10;
-		list.stream().filter(s -> !s.isEmpty()).map(s -> {
+		list.stream().filter(s -> !s.isEmpty()).mapToInt(s -> {
 			if(offset > 0) {
 				sb.append(s);
 			}
@@ -141,7 +168,7 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 		
 		int offset = 10;
-		list.stream().filter(s -> !s.isEmpty()).map(s -> {
+		list.stream().filter(s -> !s.isEmpty()).mapToInt(s -> {
 			// I may be necessary here
 			if(offset > 0) {
 				sb.append(s);
@@ -160,7 +187,7 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 		
 		int offset = 10;
-		list.stream().filter(s -> !s.isEmpty()).map(s -> {
+		list.stream().filter(s -> !s.isEmpty()).mapToInt(s -> {
 			int i;// not important
 			// not used
 			int j;
@@ -237,7 +264,7 @@ public class LambdaForEachMapRule {
 		numbers.add(4.5);
 		
 		StringBuilder sb = new StringBuilder();
-		numbers.stream().filter(n -> n.doubleValue() > 0).map((Number n) -> (int)n/2).forEach((d) -> sb.append(d));
+		numbers.stream().filter(n -> n.doubleValue() > 0).mapToInt((Number n) -> (int)n/2).forEach((d) -> sb.append(d));
 		
 		return sb.toString();
 	}

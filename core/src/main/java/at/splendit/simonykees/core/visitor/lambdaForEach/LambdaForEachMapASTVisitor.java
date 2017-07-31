@@ -71,6 +71,9 @@ import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
 public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor {
 
 	private static final String STREAM_MAP_METHOD_NAME = "map"; //$NON-NLS-1$
+	private static final String STREAM_MAP_TO_INT_METHOD_NAME = "mapToInt"; //$NON-NLS-1$
+	private static final String STREAM_MAP_TO_LONG_METHOD_NAME = "mapToLong"; //$NON-NLS-1$
+	private static final String STREAM_MAP_TO_DOUBLE_METHOD_NAME = "mapToDouble"; //$NON-NLS-1$
 	private static final String COLLECTION_FULLY_QUALIFIED_NAME = java.util.Collection.class.getName();
 	private static final String STREAM_METHOD_NAME = "stream"; //$NON-NLS-1$
 	private static final String PARALLEL_STREAM_METHOD_NAME = "parallelStream"; //$NON-NLS-1$
@@ -99,7 +102,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 						Expression streamExpression = methodInvocation.getExpression();
 						AST ast = methodInvocation.getAST();
 						MethodInvocation mapInvocation = ast.newMethodInvocation();
-						mapInvocation.setName(ast.newSimpleName(STREAM_MAP_METHOD_NAME));
+						mapInvocation.setName(ast.newSimpleName(analyzer.getMappingMethodName()));
 						mapInvocation.setExpression((Expression) astRewrite.createCopyTarget(streamExpression));
 
 						ListRewrite argumentsPropertyRewriter = astRewrite.getListRewrite(mapInvocation,
@@ -282,6 +285,8 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		private SimpleName newForEachVarName = null;
 		private Type parameterType = null;
 		private Modifier modifier;
+		private boolean primitiveTarget = false;
+		private String mappingMethodName = STREAM_MAP_METHOD_NAME;
 
 		public ForEachBodyAnalyzer(SimpleName parameter, Block block) {
 			List<Statement> statements = ASTNodeUtil.returnTypedList(block.statements(), Statement.class);
@@ -319,7 +324,13 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 									/*
 									 * FIXME: SIM-521
 									 */
-									if(!isDerivableInitializerType(initializer)) {										
+									if(!isDerivableInitializerType(initializer)) {
+										ITypeBinding mappingVarBinding = type.resolveBinding();
+										if(mappingVarBinding != null && mappingVarBinding.isPrimitive()) {
+											this.primitiveTarget = true;
+											this.mappingMethodName = calcMappingMethodName(mappingVarBinding);
+											
+										}
 										mapVariableFound = true;
 										newForEachVarName = fragmentName;
 										parameterType = declStatement.getType();
@@ -375,6 +386,41 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 			prepareRemainingBlock(ast);
 			prepareExtractableBlock(ast);
+		}
+
+		/**
+		 * Checks if the given type binding corresponds to either of the
+		 * primitives: {@code int}, {@code long} or {@code double}, and if yes
+		 * returns the corresponding method name which returns the respective
+		 * stream type.
+		 * 
+		 * @param initializerBinding
+		 *            type binding of the resulting stream type.
+		 * 
+		 * @return {@value #STREAM_MAP_METHOD_NAME} if
+		 *         the given type is not any of the aforementioned types, or any
+		 *         of the following:
+		 *         {@value #STREAM_MAP_TO_INT_METHOD_NAME},
+		 *         {@value #STREAM_MAP_TO_DOUBLE_METHOD_NAME}
+		 *         or
+		 *         {@value #STREAM_MAP_TO_LONG_METHOD_NAME}
+		 *         respectively for  {@code int}, {@code double} or {@code long} primitves. 
+		 */
+		private String calcMappingMethodName(ITypeBinding initializerBinding) {
+			if (initializerBinding.isPrimitive()) {
+				String typeName = initializerBinding.getQualifiedName();
+				switch (typeName) {
+				case "int": //$NON-NLS-1$
+					return STREAM_MAP_TO_INT_METHOD_NAME;
+				case "double": //$NON-NLS-1$
+					return STREAM_MAP_TO_DOUBLE_METHOD_NAME;
+				case "long": //$NON-NLS-1$
+					return STREAM_MAP_TO_LONG_METHOD_NAME;
+				default:
+					return STREAM_MAP_METHOD_NAME;
+				}
+			}
+			return STREAM_MAP_METHOD_NAME;
 		}
 
 		/**
@@ -517,6 +563,14 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(simpleName);
 			node.accept(visitor);
 			return !visitor.getUsages().isEmpty();
+		}
+		
+		public boolean isPrimitiveTarget() {
+			return this.primitiveTarget;
+		}
+		
+		public String getMappingMethodName() {
+			return mappingMethodName;
 		}
 	}
 
