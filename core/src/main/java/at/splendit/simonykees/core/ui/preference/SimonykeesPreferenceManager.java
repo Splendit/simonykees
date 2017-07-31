@@ -199,6 +199,8 @@ public class SimonykeesPreferenceManager {
 		store.setValue(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT,
 				store.getDefaultString(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT));
 
+		store.setValue(SimonykeesPreferenceConstants.ENABLE_INTRO, true);
+		
 		profiles.clear();
 		defaultProfile = new DefaultProfile();
 		loadProfilesFromStore();
