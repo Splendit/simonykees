@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.ui.JavaElementComparator;
-import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.Bullet;
 import org.eclipse.swt.custom.StyleRange;
@@ -54,7 +55,7 @@ import at.splendit.simonykees.i18n.Messages;
  * @since 0.9 refactored in 1.3
  */
 @SuppressWarnings("restriction") // StatusInfo is internal
-public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage {
+public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	protected AbstractSelectRulesWizardModel model;
 	protected AbstractSelectRulesWizardControler controler;
@@ -598,4 +599,28 @@ public abstract class AbstractSelectRulesWizardPage extends NewElementWizardPage
 	public void performHelp() {
 		SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
 	}
+
+	/**
+	 * Updates the status line and the OK button according to the given status
+	 *
+	 * @param status
+	 *            status to apply
+	 */
+	protected void updateStatus(IStatus status) {
+		StatusUtil.applyToStatusLine(this, status);
+	}
+
+	/**
+	 * Updates the status line and the OK button according to the status
+	 * evaluate from an array of status. The most severe error is taken. In case
+	 * that two status with the same severity exists, the status with lower
+	 * index is taken.
+	 *
+	 * @param status
+	 *            the array of status
+	 */
+	protected void updateStatus(IStatus[] status) {
+		updateStatus(StatusUtil.getMostSevere(status));
+	}
+
 }

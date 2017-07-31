@@ -301,9 +301,9 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	public void selectFromProfile(final String profileId) {
 		currentProfileId = profileId;
 		moveAllToLeft();
+		unapplicableRules.clear();
 		if (!currentProfileId.equals(Messages.SelectRulesWizardPage_EmptyProfileLabel) && !currentProfileId.isEmpty()) {
 			Set<Object> currentPosibilities = new HashSet<>();
-			unapplicableRules.clear();
 			currentPosibilities.addAll(posibilities);
 			for (Object posibility : currentPosibilities) {
 				if (SimonykeesPreferenceManager.getProfileFromName(currentProfileId).containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
