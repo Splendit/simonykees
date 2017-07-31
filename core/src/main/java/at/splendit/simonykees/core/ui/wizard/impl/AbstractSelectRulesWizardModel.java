@@ -21,7 +21,7 @@ import at.splendit.simonykees.i18n.Messages;
  * Model that is storing all the data required for
  * {@link AbstractSelectRulesWizardPage}
  * 
- * @author Andreja Sambolec
+ * @author Andreja Sambolec, Matthias Webhofer
  * @since 1.3
  */
 public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel {
@@ -30,6 +30,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 
 	private Set<Object> posibilities = new HashSet<>();
 	private Set<Object> selection = new HashSet<>();
+	private Set<Object> unapplicableRules = new HashSet<>();
 
 	private Set<Object> recentlyMoved = new HashSet<>();
 
@@ -281,6 +282,10 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		return recentlyMoved;
 	}
 
+	public Set<Object> getUnapplicableRules() {
+		return unapplicableRules;
+	}
+
 	public abstract String getNameFilter();
 
 	public abstract Set<Object> filterPosibilitiesByName();
@@ -296,6 +301,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	public void selectFromProfile(final String profileId) {
 		currentProfileId = profileId;
 		moveAllToLeft();
+		unapplicableRules.clear();
 		if (!currentProfileId.equals(Messages.SelectRulesWizardPage_EmptyProfileLabel) && !currentProfileId.isEmpty()) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
@@ -306,6 +312,8 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 					if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
 						selection.add(posibility);
 						posibilities.remove(posibility);
+					} else {
+						unapplicableRules.add(posibility);
 					}
 				}
 			}
@@ -313,7 +321,6 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 
 		setChanged(true);
 		notifyListeners();
-
 	}
 
 	public void removeAlreadySelected() {
