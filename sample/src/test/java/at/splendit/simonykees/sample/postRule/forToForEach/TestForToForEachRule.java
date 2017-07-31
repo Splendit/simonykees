@@ -31,6 +31,18 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 	
+	public String emptyLoopCondition(String input) {
+		StringBuilder sb = new StringBuilder();
+		List<String> foo = generateList(input);
+		for (Iterator<String> iterator = foo.iterator(); ;) {
+			if(!iterator.hasNext()) {
+				break;
+			}
+			sb.append(iterator.next());
+		}
+		return sb.toString();
+	}
+	
 	public String testConvertIteratorToForEachTemp(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();

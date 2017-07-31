@@ -41,8 +41,15 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 		if(isSingleStatementBodyOfOuterLoop(node)) {
 			return true;
 		}
-		SimpleName iteratorName = ASTNodeUtil.replaceableIteratorCondition(node.getExpression());
+		
+		// skip loops with empty condition
 		Expression loopCondition = node.getExpression();
+		if(loopCondition == null) {
+			return true;
+		}
+		
+		SimpleName iteratorName = ASTNodeUtil.replaceableIteratorCondition(loopCondition);
+
 		if (iteratorName != null) {
 			if (ClassRelationUtil.isContentOfTypes(iteratorName.resolveTypeBinding(),
 					generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
