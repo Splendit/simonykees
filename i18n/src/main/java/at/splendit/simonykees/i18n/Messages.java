@@ -29,6 +29,17 @@ public class Messages extends NLS {
 	public static String ArithmethicAssignmentRule_name;
 	public static String BracketsToControlRule_description;
 	public static String BracketsToControlRule_name;
+	public static String BuyLicenseDialog_feedbackLabel;
+	public static String BuyLicenseDialog_opinionLabel;
+	public static String BuyLicenseDialog_purchaseLinkLabel;
+	public static String BuyLicenseDialog_rateUsLabel;
+	public static String BuyLicenseDialog_reasoneFive;
+	public static String BuyLicenseDialog_reasoneFour;
+	public static String BuyLicenseDialog_reasoneOne;
+	public static String BuyLicenseDialog_reasoneSix;
+	public static String BuyLicenseDialog_reasoneThree;
+	public static String BuyLicenseDialog_reasoneTwo;
+	public static String BuyLicenseDialog_reasonsLabel;
 	public static String CodeFormatterRule_description;
 	public static String CodeFormatterRule_name;
 	public static String CollectionRemoveAllRule_description;
