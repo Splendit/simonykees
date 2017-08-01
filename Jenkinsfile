@@ -150,7 +150,7 @@ def notifyBuild(String buildStatus) {
 }
 
 def copyMappingFiles(String buildNumber, String mappingFilesDirectory) {
-	def statusCode = sh(returnStatus: true, script: "./copyMappingFiles.sh ${buildNumber} ./ ${mappingFilesDirectory}")
+	def statusCode = sh(returnStdout: true, returnStatus: true, script: "./copyMappingFiles.sh ${buildNumber} ./ ${mappingFilesDirectory}")
 	if (statusCode != 0) {
 		currentBuild.result = "FAILURE"
 	}
