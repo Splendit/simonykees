@@ -62,6 +62,19 @@ timestamps {
 				}
 			}
 			
+			// TODO: remove after testing!!!!
+			if(currentBuild.result == "SUCCESS") {
+				stage('Deploy obfuscation test') {
+						def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
+                                        def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
+
+                                                def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
+                                                sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-test-proguard"
+                                                copyMappingFiles("${buildNumber}_test", externalMappingFilesDirectory)
+                                        }
+
+			}
+			
 			// master and develop builds get deployed to packagedrone (see pom.xml) and tagged (see tag-deployment.sh)
 			if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
 				if ( currentBuild.result == 'SUCCESS' ) {
@@ -150,11 +163,13 @@ def notifyBuild(String buildStatus) {
 }
 
 def copyMappingFiles(String buildNumber, String mappingFilesDirectory) {
-	def statusCode = sh(returnStdout: true, returnStatus: true, script: "./copyMappingFiles.sh ${buildNumber} ./ ${mappingFilesDirectory}")
+	def statusCode = sh(returnStatus: true, script: "./copyMappingFiles.sh ${buildNumber} ./ ${mappingFilesDirectory}")
 	if (statusCode != 0) {
+		println("copying mapping files FAILED! Error Code: ${statusCode}")
 		currentBuild.result = "FAILURE"
 	}
 	else {
+		println("copying mapping files SUCCEEDED!")
 		currentBuild.result = "SUCCESS"
 	}
 }
