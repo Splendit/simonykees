@@ -13,7 +13,8 @@ timestamps {
 			def backupOrigin = 'git@github.com:Splendit/simonykees.git'
 			// jenkins git ssh credentials
 			def sshCredentials = '7f15bb8a-a1db-4cdf-978f-3ae5983400b6'
-			
+			// directory path to which all generated mapping files should be copied
+			def externalMappingFilesDirecotry = "/var/services/mappingfiles"			
 			
 			stage('Preparation') { // for display purposes
 				checkout scm
@@ -83,10 +84,11 @@ timestamps {
 					// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
 					// grep returns result with an \n therefore we need to trim
 					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
-					
+					def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
 					stage('Deploy obfuscation') {
 						def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
 						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-test-proguard"
+						copyMappingFiles("${buildNumber}_test", externalMappingFilesDirectory)
 					}
 					if ( env.BRANCH_NAME == 'master') {
 						stage('Deploy production') {
@@ -96,6 +98,7 @@ timestamps {
 						stage('Deploy production, obfuscation') {
 							def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
 							sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-proguard"
+							copyMappingFiles(buildNumber, externalMappingFilesDirectory)
 						}
 					}
 				}
@@ -146,3 +149,12 @@ def notifyBuild(String buildStatus) {
 	}
 }
 
+def copyMappingFiles(String buildNumber, String mappingFilesDirectory) {
+	def statusCode = sh(returnStatus: true, script: "./copyMappingFiles.sh ${buildNumber} ./ ${mappingFilesDirectory}")
+	if (statusCode != 0) {
+		currentBuild.result = "FAILURE"
+	}
+	else {
+		currentBuild.result = "SUCCESS"
+	}
+}
