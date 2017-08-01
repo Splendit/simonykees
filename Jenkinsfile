@@ -72,7 +72,7 @@ timestamps {
                                                 sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions}"
 
                                         def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
-                                                copyMappingFiles("${buildNumber}_test", ${externalMappingFilesDirectory})
+                                                copyMappingFiles("${buildNumber}_test", externalMappingFilesDirectory)
 
                                         }
 
