@@ -65,11 +65,12 @@ timestamps {
 			// TODO: remove after testing!!!!
 			if(currentBuild.result == "SUCCESS") {
 				stage('Deploy obfuscation test') {
+						def mvnCommand = "clean install -DskipTests -B"
+                                                def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
+                                                sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions}"
+
 						def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
                                         def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
-						def mvnCommand = "clean -DskipTests -B"
-                                                def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
-                                                sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-test-proguard"
                                                 copyMappingFiles("${buildNumber}_test", externalMappingFilesDirectory)
                                         }
 
