@@ -14,7 +14,7 @@ timestamps {
 			// jenkins git ssh credentials
 			def sshCredentials = '7f15bb8a-a1db-4cdf-978f-3ae5983400b6'
 			// directory path to which all generated mapping files should be copied
-			def externalMappingFilesDirecotry = "/var/services/mappingfiles"			
+			def externalMappingFilesDirectory = "/var/services/mappingfiles"			
 			
 			stage('Preparation') { // for display purposes
 				checkout scm
@@ -72,7 +72,8 @@ timestamps {
                                                 sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions}"
 
                                         def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
-                                                copyMappingFiles("${buildNumber}_test", externalMappingFilesDirectory)
+                                                copyMappingFiles("${buildNumber}_test", ${externalMappingFilesDirectory})
+
                                         }
 
 			}
