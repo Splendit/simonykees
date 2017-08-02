@@ -86,7 +86,8 @@
 		
 		
 		<module>releng</module>
-		
+
+		<module>ui</module>
 	</modules>
 
 	<scm>
