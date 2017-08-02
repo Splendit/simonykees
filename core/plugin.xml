@@ -64,19 +64,19 @@
 	<extension point="org.eclipse.core.runtime.preferences">
 		<initializer class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceInitializer"/>
 	</extension>
-	<extension point="org.eclipse.epp.logging.aeri.ide.servers">
-		<server class="org.eclipse.epp.internal.logging.aeri.ide.server.mars.ServerConnection" 
-			description="Help improve jSparrow by sending error reports to us." 
-			icon16="icons/jSparrow_active_icon_100.png" 
-			icon32="icons/jSparrow_active_icon_100.png" 
-			id="at.splendit.jsparrow" 
-			name="jSparrow">
-			<link href="https://jsparrow.eu" 
-				rel="provider" 
-				title="jSparrow"/>
-			<link href="https://aer.ctrlflow.com/jsparrow/community/discovery" 
-				rel="discovery" 
-				title="Discovery URL"/>
-		</server>
-	</extension>
+	<extension
+         id="application"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="singleton-global"
+            thread="main"
+            visible="true">
+         <run
+               class="at.splendit.simonykees.core.equinoxapp.Application">
+         </run>
+      </application>
+   </extension>
+	<extension point="org.eclipse.ui.startup">
+     	<startup class="at.splendit.simonykees.core.startup.Startup"/>
+    </extension>
 </plugin>

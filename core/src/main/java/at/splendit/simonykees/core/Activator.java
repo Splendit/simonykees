@@ -1,17 +1,34 @@
 package at.splendit.simonykees.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
@@ -20,6 +37,11 @@ import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.splendit.simonykees.core.exception.ReconcileException;
+import at.splendit.simonykees.core.exception.RefactoringException;
+import at.splendit.simonykees.core.exception.RuleException;
+import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
+import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.license.api.LicenseValidationService;
 
@@ -30,7 +52,7 @@ import at.splendit.simonykees.license.api.LicenseValidationService;
  *         Matthias Webhofer
  * @since 0.9
  */
-public class Activator extends AbstractUIPlugin {
+public class Activator extends AbstractUIPlugin implements BundleActivator {
 
 	private static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
@@ -53,14 +75,16 @@ public class Activator extends AbstractUIPlugin {
 	private static BundleContext bundleContext;
 	private static IEclipseContext eclipseContext;
 
-	@Inject
-	private LicenseValidationService licenseValidationService;
+//	@Inject
+//	private LicenseValidationService licenseValidationService;
 
 	/**
 	 * The constructor
 	 */
 	public Activator() {
 	}
+
+	private MyThread myThread;
 
 	/*
 	 * (non-Javadoc)
@@ -69,45 +93,57 @@ public class Activator extends AbstractUIPlugin {
 	 * BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		plugin = this;
-		bundleContext = context;
+		System.out.println("Hello World!!");
 
-		eclipseContext = EclipseContextFactory.getServiceContext(context);
-		ContextInjectionFactory.inject(this, eclipseContext);
+		// PREPARE RULES
+		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 
-		// start jSparrow logging bundle
-		for (Bundle bundle : context.getBundles()) {
-			if (bundle.getSymbolicName().equals("jSparrow.logging") //$NON-NLS-1$
-					/*
-					 * name of the logging api bundle
-					 */
-					&& bundle.getState() != Bundle.ACTIVE) {
-				bundle.start();
-				loggingBundleID = bundle.getBundleId();
-				break;
-			}
-		}
+		// TODO collect compilation units from defined path
+		// List<IJavaElement> selectedJavaElements = new ArrayList<>();
+		ICompilationUnit compUnits = getUnit();
+		List<ICompilationUnit> compilationUnits = new ArrayList<>();
+		compilationUnits.add((ICompilationUnit) compUnits);
+		refactoringPipeline.createRefactoringStates(compilationUnits);
+		refactoringPipeline.setRules(RulesContainer.getAllRules());
 
-		// load pseudo-activator from test fragment and execute its start method
+		// IJavaProject selectedJavaProjekt = compUnits.;
+		//
+		// try {
+		NullProgressMonitor monitor = new NullProgressMonitor();
+		// refactoringPipeline.prepareRefactoring(selectedJavaElements,
+		// monitor);
+		//
+		// final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>>
+		// rules = RulesContainer
+		// .getRulesForProject(selectedJavaProjekt);
+		//
+		// refactoringPipeline.setRules(rules);
+		//
+		// } catch (RefactoringException e) {
+		// return;
+		// }
+
 		try {
-			Class<? extends BundleActivator> fragmentActivatorClass = Class
-					.forName("at.splendit.simonykees.core.TestFragmentActivator").asSubclass(BundleActivator.class); //$NON-NLS-1$
-			testFragmentActivator = fragmentActivatorClass.newInstance();
-			testFragmentActivator.start(context);
-		} catch (ClassNotFoundException e) {
-			/*
-			 * Ignore! Exception is thrown, if the test fragment is not
-			 * available.
-			 * 
-			 * Note: The test fragment is always available, except in the
-			 * deployed version. We do not want to have any log message at all
-			 * in that case because customers should not know about test
-			 * fragments.
-			 */
+			refactoringPipeline.doRefactoring(monitor);
+		} catch (RefactoringException e) {
+			return;
+		} catch (RuleException e) {
+			return;
+
 		}
 
-		logger.info(Messages.Activator_start);
+		try {
+			refactoringPipeline.commitRefactoring();
+
+		} catch (RefactoringException e) {
+			// TODO exception
+			return;
+		} catch (ReconcileException e) {
+			// TODO exception
+			return;
+		}
+
+		System.out.println(compilationUnits.get(0).getSource());
 	}
 
 	/*
@@ -119,47 +155,135 @@ public class Activator extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 
 		running = false;
-
-		// FIXME (see SIM-331) figure out better logging configuration
-		logger.info(Messages.Activator_stop);
-
-		plugin = null;
-		bundleContext = null;
-
-		synchronized (jobs) {
-			jobs.forEach(job -> job.cancel());
-			jobs.clear();
-		}
-
-		// stop test fragment pseudo-activator
-		if (testFragmentActivator != null) {
-			testFragmentActivator.stop(context);
-		}
-
-		// stop jSparrow.logging
-		Bundle loggingBundle = context.getBundle(loggingBundleID);
-		if (loggingBundle.getState() == Bundle.ACTIVE) {
-			loggingBundle.stop();
-		}
-
+//
+//		// FIXME (see SIM-331) figure out better logging configuration
+//		logger.info(Messages.Activator_stop);
+//
+//		plugin = null;
+//		bundleContext = null;
+//
+//		synchronized (jobs) {
+//			jobs.forEach(job -> job.cancel());
+//			jobs.clear();
+//		}
+//
+//		// stop test fragment pseudo-activator
+//		if (testFragmentActivator != null) {
+//			testFragmentActivator.stop(context);
+//		}
+//
+//		// stop jSparrow.logging
+//		Bundle loggingBundle = context.getBundle(loggingBundleID);
+//		if (loggingBundle.getState() == Bundle.ACTIVE) {
+//			loggingBundle.stop();
+//		}
+//
+////		System.out.println("Stopping com.vogella.osgi.firstbundle");
+////		myThread.stopThread();
+////		myThread.join();
+//
+		System.out.println("Stop ACTIVATOR");
 		super.stop(context);
 	}
 
-	/**
-	 * starts the license validation service after it has been injected
-	 */
-	@PostConstruct
-	private void startValidation() {
-		licenseValidationService.startValidation();
+	public org.eclipse.jdt.core.ICompilationUnit getCompUnit() {
+		ASTParser parser = ASTParser.newParser(AST.JLS8);
+		parser.setSource(
+				"public class A { int i = 9;  \n int j; \n ArrayList<Integer> al = new ArrayList<Integer>();j=1000; }"
+						.toCharArray());
+		// parser.setSource("/*abc*/".toCharArray());
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		// ASTNode node = parser.createAST(null);
+
+		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+
+		cu.accept(new ASTVisitor() {
+
+			Set names = new HashSet();
+
+			public boolean visit(VariableDeclarationFragment node) {
+				SimpleName name = node.getName();
+				this.names.add(name.getIdentifier());
+				System.out.println("Declaration of '" + name + "' at line" + cu.getLineNumber(name.getStartPosition()));
+				return false; // do not continue to avoid usage info
+			}
+
+			public boolean visit(SimpleName node) {
+				if (this.names.contains(node.getIdentifier())) {
+					System.out.println("Usage of '" + node + "' at line " + cu.getLineNumber(node.getStartPosition()));
+				}
+				return true;
+			}
+
+		});
+
+		return (ICompilationUnit) cu.getJavaElement();
 	}
 
-	/**
-	 * stops the license validation service before it gets uninjected
-	 */
-	@PreDestroy
-	private void stopValidation() {
-		licenseValidationService.stopValidation();
+	public ICompilationUnit getUnit() {
+//		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+//		IWorkspaceRoot root = workspace.getRoot();
+//		// Get all projects in the workspace
+//		IProject[] projects = root.getProjects();
+//		IProject firstProject = projects[0];
+//		try {
+//			firstProject.open(null);
+//		} catch (CoreException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//
+		List<IPackageFragment> packages = new ArrayList<>();
+		List<ICompilationUnit> units = new ArrayList<>();
+		
+		TestStandalone test = new TestStandalone();
+		try {
+			//TODO open the project first
+//			packages = JavaCore.create(firstProject).getPackageFragments();
+			packages = Arrays.asList(test.getTestproject().getPackageFragments());
+
+			for (IPackageFragment mypackage : packages) {
+				if (mypackage.containsJavaResources() && 0 != mypackage.getCompilationUnits().length) {
+					mypackage.open(null);
+					// IPackageFragment mypackage = packages[0]; // implement
+					// your own
+					// logic to select
+					// package
+					units = Arrays.asList(mypackage.getCompilationUnits());
+				}
+			}
+
+		units.get(0).open(null);
+		} catch (JavaModelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return units.get(0);
+
+		// ASTParser parser = ASTParser.newParser(AST.JLS3);
+		// parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		// parser.setSource(units);
+		// parser.setResolveBindings(true);
+		// CompilationUnit cUnit = parser.createAST(null);
+
 	}
+
+//	/**
+//	 * starts the license validation service after it has been injected
+//	 */
+//	@PostConstruct
+//	private void startValidation() {
+//		licenseValidationService.startValidation();
+//	}
+//
+//	/**
+//	 * stops the license validation service before it gets uninjected
+//	 */
+//	@PreDestroy
+//	private void stopValidation() {
+//		licenseValidationService.stopValidation();
+//	}
 
 	/**
 	 * Returns the shared instance
@@ -209,4 +333,24 @@ public class Activator extends AbstractUIPlugin {
 	public static IEclipseContext getEclipseContext() {
 		return eclipseContext;
 	}
+}
+
+class MyThread extends Thread {
+	private volatile boolean active = true;
+
+	public void run() {
+		while (active) {
+			System.out.println("Hello OSGi console");
+			try {
+				Thread.sleep(5000);
+			} catch (Exception e) {
+				System.out.println("Thread interrupted " + e.getMessage());
+			}
+		}
+	}
+
+	public void stopThread() {
+		active = false;
+	}
+
 }

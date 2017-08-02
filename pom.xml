@@ -66,6 +66,8 @@
 	</prerequisites>
 
 	<modules>
+		<!-- release engineering -->
+		
 		<!-- plug-in functionality -->
 		<module>logging</module>
 		<module>i18n</module>
@@ -81,6 +83,10 @@
 		<module>feature.3rd.party</module>
 		<module>feature</module>
 		<module>site</module>
+		
+		
+		<module>releng</module>
+		
 	</modules>
 
 	<scm>
