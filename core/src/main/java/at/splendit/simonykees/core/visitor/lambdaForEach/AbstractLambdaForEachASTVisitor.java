@@ -29,6 +29,7 @@ public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor
 
 	protected static final String JAVA_UTIL_STREAM_STREAM = java.util.stream.Stream.class.getName();
 	protected static final String JAVA_UTIL_COLLECTION = java.util.Collection.class.getName();
+	protected static final String JAVA_LANG_ITERABLE = java.lang.Iterable.class.getName();
 	protected static final String FOR_EACH = "forEach"; //$NON-NLS-1$
 	protected static final String VALUE_OF = "valueOf"; //$NON-NLS-1$
 	protected static final String MAP = "map"; //$NON-NLS-1$
@@ -49,13 +50,24 @@ public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor
 	 *         {@link Stream#forEach(Consumer)} or {@code false} otherwise.
 	 */
 	protected boolean isStreamForEachInvocation(MethodInvocation methodInvocation) {
+		return isForEachInvocationOf(methodInvocation, JAVA_UTIL_STREAM_STREAM);
+	}
+	
+	protected boolean isIterableForEachInvocation(MethodInvocation methodInvocation) {
+		return isForEachInvocationOf(methodInvocation, JAVA_LANG_ITERABLE);
+	}
+	
+	private boolean isForEachInvocationOf(MethodInvocation methodInvocation, String qualifiedName) {
 		SimpleName methodName = methodInvocation.getName();
 		boolean isForEachInvocation = false;
 		if (FOR_EACH.equals(methodName.getIdentifier())
 				&& ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent().getNodeType()) {
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-			if (methodBinding != null && ClassRelationUtil.isContentOfTypes(methodBinding.getDeclaringClass(),
-					Collections.singletonList(JAVA_UTIL_STREAM_STREAM))) {
+
+			if (methodBinding != null && (ClassRelationUtil.isContentOfTypes(methodBinding.getDeclaringClass(),
+					Collections.singletonList(qualifiedName))
+					|| ClassRelationUtil.isInheritingContentOfTypes(methodBinding.getDeclaringClass(),
+							Collections.singletonList(qualifiedName)))) {
 
 				isForEachInvocation = true;
 			}

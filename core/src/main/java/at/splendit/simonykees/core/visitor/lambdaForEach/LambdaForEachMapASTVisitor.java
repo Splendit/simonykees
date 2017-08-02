@@ -72,75 +72,88 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		if (isStreamForEachInvocation(methodInvocation) && !isStreamOfRawList(methodInvocation)) {
-			List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-			if (arguments.size() == 1 && ASTNode.LAMBDA_EXPRESSION == arguments.get(0).getNodeType()) {
-				LambdaExpression lambdaExpression = (LambdaExpression) arguments.get(0);
-				SimpleName parameter = extractSingleParameter(lambdaExpression);
-				Block body = extractLambdaExpressionBlockBody(lambdaExpression);
-				if (body != null) {
-					/*
-					 * use the analyzer for checking for extractable part in the
-					 * forEach
-					 */
-					ForEachBodyAnalyzer analyzer = new ForEachBodyAnalyzer(parameter, body);
-					if (analyzer.foundExtractableMapStatement()) {
-						// get the extractable information from analyzer
-						ASTNode extractableBlock = analyzer.getExtractableBlock();
-						ASTNode remainingBlock = analyzer.getRemainingBlock();
-						SimpleName newForEachParamName = analyzer.getNewForEachParameterName();
+		boolean toStreamNeeded = false;
+		if(isIterableForEachInvocation(methodInvocation)) {
+			toStreamNeeded = true;
+		} else if(!isStreamForEachInvocation(methodInvocation) || isStreamOfRawList(methodInvocation)) {
+			return true;
+		}
+		
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+		if (arguments.size() == 1 && ASTNode.LAMBDA_EXPRESSION == arguments.get(0).getNodeType()) {
+			LambdaExpression lambdaExpression = (LambdaExpression) arguments.get(0);
+			SimpleName parameter = extractSingleParameter(lambdaExpression);
+			Block body = extractLambdaExpressionBlockBody(lambdaExpression);
+			if (body != null) {
+				/*
+				 * use the analyzer for checking for extractable part in the
+				 * forEach
+				 */
+				ForEachBodyAnalyzer analyzer = new ForEachBodyAnalyzer(parameter, body);
+				if (analyzer.foundExtractableMapStatement()) {
+					// get the extractable information from analyzer
+					ASTNode extractableBlock = analyzer.getExtractableBlock();
+					ASTNode remainingBlock = analyzer.getRemainingBlock();
+					SimpleName newForEachParamName = analyzer.getNewForEachParameterName();
 
-						// introduce a Stream::map
-						Expression streamExpression = methodInvocation.getExpression();
-						AST ast = methodInvocation.getAST();
-						MethodInvocation mapInvocation = ast.newMethodInvocation();
-						mapInvocation.setName(ast.newSimpleName(analyzer.getMappingMethodName()));
+					// introduce a Stream::map
+					Expression streamExpression = methodInvocation.getExpression();
+					AST ast = methodInvocation.getAST();
+					MethodInvocation mapInvocation = ast.newMethodInvocation();
+					mapInvocation.setName(ast.newSimpleName(analyzer.getMappingMethodName()));
+					if (toStreamNeeded) {
+						MethodInvocation streamInvocation = ast.newMethodInvocation();
+						streamInvocation.setName(ast.newSimpleName(STREAM));
+						streamInvocation.setExpression((Expression) astRewrite.createCopyTarget(streamExpression));
+						mapInvocation.setExpression(streamInvocation);
+					} else {						
 						mapInvocation.setExpression((Expression) astRewrite.createCopyTarget(streamExpression));
+					}
 
-						ListRewrite argumentsPropertyRewriter = astRewrite.getListRewrite(mapInvocation,
-								MethodInvocation.ARGUMENTS_PROPERTY);
-						LambdaExpression mapExpression = genereateLambdaExpression(ast, parameter, extractableBlock,
-								lambdaExpression);
-						argumentsPropertyRewriter.insertFirst(mapExpression, null);
+					ListRewrite argumentsPropertyRewriter = astRewrite.getListRewrite(mapInvocation,
+							MethodInvocation.ARGUMENTS_PROPERTY);
+					LambdaExpression mapExpression = genereateLambdaExpression(ast, parameter, extractableBlock,
+							lambdaExpression);
+					argumentsPropertyRewriter.insertFirst(mapExpression, null);
 
-						/*
-						 * replace the existing stream expression with the new
-						 * one having the introduced map method in the tail
-						 */
-						astRewrite.replace(streamExpression, mapInvocation, null);
+					/*
+					 * replace the existing stream expression with the new
+					 * one having the introduced map method in the tail
+					 */
+					astRewrite.replace(streamExpression, mapInvocation, null);
 
-						// replace the body of the forEach with the new body
-						astRewrite.replace(body, remainingBlock, null);
+					// replace the body of the forEach with the new body
+					astRewrite.replace(body, remainingBlock, null);
 
-						/*
-						 * replace the parameter of the forEach lambda
-						 * expression
-						 */
-						astRewrite.replace(parameter, newForEachParamName, null);
+					/*
+					 * replace the parameter of the forEach lambda
+					 * expression
+					 */
+					astRewrite.replace(parameter, newForEachParamName, null);
 
-						/*
-						 * Replace the type of the parameter if any
-						 */
-						Type type = extractSingleParameterType(lambdaExpression);
-						if (type != null) {
-							Type newType = analyzer.getNewForEachParameterType();
-							if (newType.isPrimitiveType()) {
-								/*
-								 * implicit boxing! primitives are not allowed
-								 * in forEach
-								 */
-								astRewrite.replace((ASTNode) lambdaExpression.parameters().get(0), newForEachParamName,
-										null);
-							} else {
-								astRewrite.replace(type, newType, null);
-								Modifier modifier = analyzer.getNewForEachParameterModifier();
-								insertModifier(lambdaExpression, modifier);
-							}
+					/*
+					 * Replace the type of the parameter if any
+					 */
+					Type type = extractSingleParameterType(lambdaExpression);
+					if (type != null) {
+						Type newType = analyzer.getNewForEachParameterType();
+						if (newType.isPrimitiveType()) {
+							/*
+							 * implicit boxing! primitives are not allowed
+							 * in forEach
+							 */
+							astRewrite.replace((ASTNode) lambdaExpression.parameters().get(0), newForEachParamName,
+									null);
+						} else {
+							astRewrite.replace(type, newType, null);
+							Modifier modifier = analyzer.getNewForEachParameterModifier();
+							insertModifier(lambdaExpression, modifier);
 						}
 					}
 				}
 			}
 		}
+		
 		return true;
 	}
 
@@ -397,7 +410,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		 *         {@value #MAP_TO_INT},
 		 *         {@value #MAP_TO_DOUBLE} or
 		 *         {@value #MAP_TO_LONG} respectively for
-		 *         {@code int}, {@code double} or {@code long} primitves.
+		 *         {@code int}, {@code double} or {@code long} primitives.
 		 */
 		private String calcMappingMethodName(ITypeBinding initializerBinding) {
 			if (initializerBinding.isPrimitive()) {

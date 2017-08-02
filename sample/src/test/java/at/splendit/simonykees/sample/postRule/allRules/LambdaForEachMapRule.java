@@ -16,6 +16,15 @@ public class LambdaForEachMapRule {
 		return Arrays.asList(input.split(";"));
 	}
 
+	public String unwrapFromCollection(String input) {
+		List<String> list = Arrays.asList(input + "non", "non-empty");
+		StringBuilder sb = new StringBuilder();
+
+		list.stream().map(s -> StringUtils.substring(s, 1)).forEach(sb::append);
+
+		return sb.toString();
+	}
+
 	public String unwrapOneExpression(String input) {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();

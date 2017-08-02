@@ -13,6 +13,18 @@ public class LambdaForEachMapRule {
 	private List<String> generateList(String input) {
 		return Arrays.asList(input.split(";"));
 	}
+	
+	public String unwrapFromCollection(String input) {
+		List<String> list = Arrays.asList(input + "non", "non-empty");
+		StringBuilder sb = new StringBuilder();
+		
+		list.forEach(s -> {
+			String subString = s.substring(1);
+			sb.append(subString);
+		});
+		
+		return sb.toString();
+	}
 
 	public String unwrapOneExpression(String input) {
 		List<String> list = generateList(input);
