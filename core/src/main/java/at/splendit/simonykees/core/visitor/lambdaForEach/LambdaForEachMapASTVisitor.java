@@ -70,14 +70,6 @@ import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
  */
 public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor {
 
-	private static final String STREAM_MAP_METHOD_NAME = "map"; //$NON-NLS-1$
-	private static final String STREAM_MAP_TO_INT_METHOD_NAME = "mapToInt"; //$NON-NLS-1$
-	private static final String STREAM_MAP_TO_LONG_METHOD_NAME = "mapToLong"; //$NON-NLS-1$
-	private static final String STREAM_MAP_TO_DOUBLE_METHOD_NAME = "mapToDouble"; //$NON-NLS-1$
-	private static final String COLLECTION_FULLY_QUALIFIED_NAME = java.util.Collection.class.getName();
-	private static final String STREAM_METHOD_NAME = "stream"; //$NON-NLS-1$
-	private static final String PARALLEL_STREAM_METHOD_NAME = "parallelStream"; //$NON-NLS-1$
-
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		if (isStreamForEachInvocation(methodInvocation) && !isStreamOfRawList(methodInvocation)) {
@@ -286,7 +278,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		private Type parameterType = null;
 		private Modifier modifier;
 		private boolean primitiveTarget = false;
-		private String mappingMethodName = STREAM_MAP_METHOD_NAME;
+		private String mappingMethodName = MAP;
 
 		public ForEachBodyAnalyzer(SimpleName parameter, Block block) {
 			List<Statement> statements = ASTNodeUtil.returnTypedList(block.statements(), Statement.class);
@@ -400,11 +392,11 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		 * @param initializerBinding
 		 *            type binding of the resulting stream type.
 		 * 
-		 * @return {@value #STREAM_MAP_METHOD_NAME} if the given type is not any
+		 * @return {@value #MAP} if the given type is not any
 		 *         of the aforementioned types, or any of the following:
-		 *         {@value #STREAM_MAP_TO_INT_METHOD_NAME},
-		 *         {@value #STREAM_MAP_TO_DOUBLE_METHOD_NAME} or
-		 *         {@value #STREAM_MAP_TO_LONG_METHOD_NAME} respectively for
+		 *         {@value #MAP_TO_INT},
+		 *         {@value #MAP_TO_DOUBLE} or
+		 *         {@value #MAP_TO_LONG} respectively for
 		 *         {@code int}, {@code double} or {@code long} primitves.
 		 */
 		private String calcMappingMethodName(ITypeBinding initializerBinding) {
@@ -412,16 +404,16 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 				String typeName = initializerBinding.getQualifiedName();
 				switch (typeName) {
 				case "int": //$NON-NLS-1$
-					return STREAM_MAP_TO_INT_METHOD_NAME;
+					return MAP_TO_INT;
 				case "double": //$NON-NLS-1$
-					return STREAM_MAP_TO_DOUBLE_METHOD_NAME;
+					return MAP_TO_DOUBLE;
 				case "long": //$NON-NLS-1$
-					return STREAM_MAP_TO_LONG_METHOD_NAME;
+					return MAP_TO_LONG;
 				default:
-					return STREAM_MAP_METHOD_NAME;
+					return MAP;
 				}
 			}
-			return STREAM_MAP_METHOD_NAME;
+			return MAP;
 		}
 
 		/**
@@ -616,11 +608,11 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 		@Override
 		public boolean visit(MethodInvocation methodInvocation) {
-			if (methodInvocation.getName().getIdentifier().equals(STREAM_METHOD_NAME)
-					|| methodInvocation.getName().getIdentifier().equals(PARALLEL_STREAM_METHOD_NAME)) {
+			if (methodInvocation.getName().getIdentifier().equals(STREAM)
+					|| methodInvocation.getName().getIdentifier().equals(PARALLEL_STREAM)) {
 				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 				if (ClassRelationUtil.isContentOfTypes(methodBinding.getDeclaringClass(),
-						Collections.singletonList(COLLECTION_FULLY_QUALIFIED_NAME))) {
+						Collections.singletonList(JAVA_UTIL_COLLECTION))) {
 					streamInvocation = methodInvocation;
 				}
 			}

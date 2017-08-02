@@ -32,7 +32,7 @@ public class TestWhileToForEachRule {
 	public String loopingOverLists(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((t) -> {
+		list.forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
@@ -43,7 +43,7 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		l.stream().forEach(sb::append);
+		l.forEach(sb::append);
 		return sb.toString();
 	}
 
@@ -159,10 +159,10 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		l.stream().forEach((outerVal) -> {
+		l.forEach((outerVal) -> {
 			sb.append(outerVal);
 
-			l.stream().forEach(sb::append);
+			l.forEach(sb::append);
 		});
 
 		return sb.toString();
@@ -192,7 +192,7 @@ public class TestWhileToForEachRule {
 		Iterator<String> innerIt = l.iterator();
 		Iterator<String> iterator = l.iterator();
 
-		l.stream().forEach((outerKey) -> {
+		l.forEach((outerKey) -> {
 			while (innerIt.hasNext()) {
 				sb.append(innerIt.next() + outerKey);
 			}
@@ -206,9 +206,9 @@ public class TestWhileToForEachRule {
 		List<String> k = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		l.stream().forEach(sb::append);
+		l.forEach(sb::append);
 
-		k.stream().forEach(sb::append);
+		k.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -219,10 +219,10 @@ public class TestWhileToForEachRule {
 		List<String> m = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		l.stream().forEach((outerVal) -> {
+		l.forEach((outerVal) -> {
 			sb.append(outerVal);
 
-			k.stream().forEach(sb::append);
+			k.forEach(sb::append);
 		});
 
 		return sb.toString();
@@ -234,7 +234,7 @@ public class TestWhileToForEachRule {
 		List<String> m = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		l.stream().forEach((outerVal) -> {
+		l.forEach((outerVal) -> {
 			sb.append(outerVal);
 
 			Iterator<String> kIterator = k.iterator();
@@ -242,7 +242,7 @@ public class TestWhileToForEachRule {
 			if ((kVal = kIterator.next()) != null) {
 				sb.append(kVal);
 
-				m.stream().forEach(sb::append);
+				m.forEach(sb::append);
 			}
 		});
 
@@ -253,7 +253,7 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		l.stream().forEach((m) -> {
+		l.forEach((m) -> {
 			String n = "nothing";
 			Integer i = 1;
 			String o = "-";
@@ -272,7 +272,7 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		l.stream().forEach((lIterator) -> {
+		l.forEach((lIterator) -> {
 			String p = "foo";
 			sb.append(p);
 		});
@@ -286,7 +286,7 @@ public class TestWhileToForEachRule {
 
 		String s;
 		String foo = "foo";
-		l.stream().forEach(sb::append);
+		l.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -310,7 +310,7 @@ public class TestWhileToForEachRule {
 		foo.l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		foo.l.stream().forEach(sb::append);
+		foo.l.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -406,7 +406,7 @@ public class TestWhileToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		numbers.stream().forEach((s) -> {
+		numbers.forEach((s) -> {
 			String foo = "foo";
 			sb.append(s);
 		});

@@ -34,8 +34,6 @@ import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
  */
 public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForEachASTVisitor {
 
-	private static final String STREAM_QUALIFIED_NAME = java.util.stream.Stream.class.getName();
-
 	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
 
@@ -49,9 +47,9 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 			ITypeBinding streamTypeBinding = methodInvocationNode.getExpression().resolveTypeBinding();
 
 			if (streamTypeBinding != null && (ClassRelationUtil.isContentOfTypes(streamTypeBinding.getErasure(),
-					Collections.singletonList(STREAM_QUALIFIED_NAME))
+					Collections.singletonList(JAVA_UTIL_STREAM_STREAM))
 					|| ClassRelationUtil.isInheritingContentOfTypes(streamTypeBinding,
-							Collections.singletonList(STREAM_QUALIFIED_NAME)))) {
+							Collections.singletonList(JAVA_UTIL_STREAM_STREAM)))) {
 
 				// get arguments from forEach method, check for size and type
 				List<Expression> methodArgs = ASTNodeUtil.convertToTypedList(methodInvocationNode.arguments(),

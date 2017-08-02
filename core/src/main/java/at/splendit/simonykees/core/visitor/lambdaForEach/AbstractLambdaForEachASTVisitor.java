@@ -27,8 +27,16 @@ import at.splendit.simonykees.core.visitor.AbstractAddImportASTVisitor;
  */
 public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor {
 
-	private static final String FOR_EACH_METHOD_NAME = "forEach"; //$NON-NLS-1$
-	private static final String JAVA_UTIL_STREAM = java.util.stream.Stream.class.getName();
+	protected static final String JAVA_UTIL_STREAM_STREAM = java.util.stream.Stream.class.getName();
+	protected static final String JAVA_UTIL_COLLECTION = java.util.Collection.class.getName();
+	protected static final String FOR_EACH = "forEach"; //$NON-NLS-1$
+	protected static final String VALUE_OF = "valueOf"; //$NON-NLS-1$
+	protected static final String MAP = "map"; //$NON-NLS-1$
+	protected static final String MAP_TO_INT = "mapToInt"; //$NON-NLS-1$
+	protected static final String MAP_TO_LONG = "mapToLong"; //$NON-NLS-1$
+	protected static final String MAP_TO_DOUBLE = "mapToDouble"; //$NON-NLS-1$
+	protected static final String STREAM = "stream"; //$NON-NLS-1$
+	protected static final String PARALLEL_STREAM = "parallelStream"; //$NON-NLS-1$
 
 	/**
 	 * Checks whether a {@link MethodInvocation} node, is an invocation of
@@ -43,11 +51,11 @@ public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor
 	protected boolean isStreamForEachInvocation(MethodInvocation methodInvocation) {
 		SimpleName methodName = methodInvocation.getName();
 		boolean isForEachInvocation = false;
-		if (FOR_EACH_METHOD_NAME.equals(methodName.getIdentifier())
+		if (FOR_EACH.equals(methodName.getIdentifier())
 				&& ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent().getNodeType()) {
 			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 			if (methodBinding != null && ClassRelationUtil.isContentOfTypes(methodBinding.getDeclaringClass(),
-					Collections.singletonList(JAVA_UTIL_STREAM))) {
+					Collections.singletonList(JAVA_UTIL_STREAM_STREAM))) {
 
 				isForEachInvocation = true;
 			}

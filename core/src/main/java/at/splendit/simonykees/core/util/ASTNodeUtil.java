@@ -33,6 +33,11 @@ import org.eclipse.jdt.core.dom.WildcardType;
  * @since 0.9.2
  */
 public class ASTNodeUtil {
+	
+	private static final String STREAM_MAP_METHOD_NAME = "map"; //$NON-NLS-1$
+	private static final String STREAM_MAP_TO_INT_METHOD_NAME = "mapToInt"; //$NON-NLS-1$
+	private static final String STREAM_MAP_TO_LONG_METHOD_NAME = "mapToLong"; //$NON-NLS-1$
+	private static final String STREAM_MAP_TO_DOUBLE_METHOD_NAME = "mapToDouble"; //$NON-NLS-1$
 
 	/**
 	 * Finds the surrounding Block node if there is one, otherwise returns null
@@ -260,5 +265,38 @@ public class ASTNodeUtil {
 	@SuppressWarnings("rawtypes")
 	public static boolean hasModifier(List modifiers, Predicate<? super Modifier> predicate) {
 		return ASTNodeUtil.convertToTypedList(modifiers, Modifier.class).stream().anyMatch(predicate);
+	}
+	
+	/**
+	 * Checks if the given type binding corresponds to either of the
+	 * primitives: {@code int}, {@code long} or {@code double}, and if yes
+	 * returns the corresponding method name which returns the respective
+	 * stream type.
+	 * 
+	 * @param initializerBinding
+	 *            type binding of the resulting stream type.
+	 * 
+	 * @return {@value #STREAM_MAP_METHOD_NAME} if the given type is not any
+	 *         of the aforementioned types, or any of the following:
+	 *         {@value #STREAM_MAP_TO_INT_METHOD_NAME},
+	 *         {@value #STREAM_MAP_TO_DOUBLE_METHOD_NAME} or
+	 *         {@value #STREAM_MAP_TO_LONG_METHOD_NAME} respectively for
+	 *         {@code int}, {@code double} or {@code long} primitves.
+	 */
+	public static String calcMappingMethodName(ITypeBinding initializerBinding) {
+		if (initializerBinding.isPrimitive()) {
+			String typeName = initializerBinding.getQualifiedName();
+			switch (typeName) {
+			case "int": //$NON-NLS-1$
+				return STREAM_MAP_TO_INT_METHOD_NAME;
+			case "double": //$NON-NLS-1$
+				return STREAM_MAP_TO_DOUBLE_METHOD_NAME;
+			case "long": //$NON-NLS-1$
+				return STREAM_MAP_TO_LONG_METHOD_NAME;
+			default:
+				return STREAM_MAP_METHOD_NAME;
+			}
+		}
+		return STREAM_MAP_METHOD_NAME;
 	}
 }
