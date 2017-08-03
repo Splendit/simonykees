@@ -73,7 +73,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		boolean toStreamNeeded = false;
-		if(isIterableForEachInvocation(methodInvocation)) {
+		if(isCollectionForEachInvocation(methodInvocation)) {
 			toStreamNeeded = true;
 		} else if(!isStreamForEachInvocation(methodInvocation) || isStreamOfRawList(methodInvocation)) {
 			return true;

@@ -1,11 +1,14 @@
 package at.splendit.simonykees.core.visitor.lambdaForEach;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -53,27 +56,55 @@ public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor
 		return isForEachInvocationOf(methodInvocation, JAVA_UTIL_STREAM_STREAM);
 	}
 	
-	protected boolean isIterableForEachInvocation(MethodInvocation methodInvocation) {
-		return isForEachInvocationOf(methodInvocation, JAVA_LANG_ITERABLE);
+	/**
+	 * Checks whether a {@link MethodInvocation} node, is an invocation of
+	 * {@link Collection#forEach(Consumer)} method.
+	 * 
+	 * @param methodInvocation
+	 *            a node representing a method invocation
+	 * 
+	 * @return {@code true} if the the given node is represents an invocation of
+	 *         {@link Collection#forEach(Consumer)} or {@code false} otherwise.
+	 */
+	protected boolean isCollectionForEachInvocation(MethodInvocation methodInvocation) {
+		return isForEachInvocationOf(methodInvocation, JAVA_UTIL_COLLECTION);
 	}
 	
+	/**
+	 * Checks if the expression of the given method invocation is a (sub)type of
+	 * the given qualified name.
+	 * 
+	 * @param methodInvocation
+	 *            a method invocation to be checked
+	 * @param qualifiedName
+	 *            the qualified name of the expected type.
+	 * @return {@code true} if the aforementioned condition is met, or
+	 *         {@code false} otherwise.
+	 */
 	private boolean isForEachInvocationOf(MethodInvocation methodInvocation, String qualifiedName) {
 		SimpleName methodName = methodInvocation.getName();
-		boolean isForEachInvocation = false;
+
 		if (FOR_EACH.equals(methodName.getIdentifier())
 				&& ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent().getNodeType()) {
-			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+			Expression expression = methodInvocation.getExpression();
+			if (expression == null) {
+				return false;
+			}
 
-			if (methodBinding != null && (ClassRelationUtil.isContentOfTypes(methodBinding.getDeclaringClass(),
-					Collections.singletonList(qualifiedName))
-					|| ClassRelationUtil.isInheritingContentOfTypes(methodBinding.getDeclaringClass(),
-							Collections.singletonList(qualifiedName)))) {
+			ITypeBinding expressionBinding = expression.resolveTypeBinding();
+			if (expressionBinding == null) {
+				return false;
+			}
 
-				isForEachInvocation = true;
+			List<String> qualifiedNameList = Collections.singletonList(qualifiedName);
+			ITypeBinding expressionErasure = expressionBinding.getErasure();
+			if (ClassRelationUtil.isInheritingContentOfTypes(expressionErasure, qualifiedNameList)
+					|| ClassRelationUtil.isContentOfTypes(expressionErasure, qualifiedNameList)) {
+				return true;
 			}
 		}
 
-		return isForEachInvocation;
+		return false;
 	}
 
 	/**

@@ -36,7 +36,7 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 		boolean toStreamNeeded = false;
 		
 		// only forEach method is interesting
-		if(isIterableForEachInvocation(methodInvocationNode)) {
+		if(isCollectionForEachInvocation(methodInvocationNode)) {
 			toStreamNeeded = true;
 		} else if (!isStreamForEachInvocation(methodInvocationNode)) {
 			return true;
