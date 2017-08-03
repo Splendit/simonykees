@@ -132,6 +132,22 @@ public class LambdaToMethodReferenceRule {
 			}
 
 		});
+
+		new Iterator<Object>() {
+
+			@Override
+			public boolean hasNext() {
+				personList.stream().forEach((person) -> doSomething(person));
+				return false;
+			}
+
+			@Override
+			public Object next() {
+				personList.stream().forEach((person) -> doSomething(person));
+				return null;
+			}
+
+		};
 	}
 
 	public void referenceToInstanceMethodOfArbitraryType() {

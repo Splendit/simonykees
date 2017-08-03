@@ -157,6 +157,26 @@ public class LambdaToMethodReferenceRule {
 			}
 			
 		});
+		
+		new Iterator<Object>() {
+
+			@Override
+			public boolean hasNext() {
+				for (Person person : personList) {
+					doSomething(person);
+				}
+				return false;
+			}
+
+			@Override
+			public Object next() {
+				for (Person person : personList) {
+					doSomething(person);
+				}
+				return null;
+			}
+			
+		};
 	}
 
 	public void referenceToInstanceMethodOfArbitraryType() {
