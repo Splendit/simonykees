@@ -1,0 +1,185 @@
+package at.splendit.simonykees.standalone;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaModelException;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import at.splendit.simonykees.core.exception.ReconcileException;
+import at.splendit.simonykees.core.exception.RefactoringException;
+import at.splendit.simonykees.core.exception.RuleException;
+import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
+import at.splendit.simonykees.core.rule.RulesContainer;
+//import at.splendit.simonykees.i18n.Messages;
+
+/**
+ * The activator class controls the plug-in life cycle
+ * 
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
+ *         Matthias Webhofer
+ * @since 0.9
+ */
+//@SuppressWarnings("restriction")
+public class Activator implements BundleActivator {
+
+	private static final Logger logger = LoggerFactory.getLogger(Activator.class);
+
+	// The plug-in ID
+	public static final String PLUGIN_ID = "jSparrow.standalone"; //$NON-NLS-1$
+
+	// The shared instance
+	private static Activator plugin;
+
+	private static List<Job> jobs = Collections.synchronizedList(new ArrayList<>());
+
+	private long loggingBundleID = 0;
+
+	// Flag is jSparrow is already running
+	private static boolean running = false;
+
+	private static BundleContext bundleContext;
+
+	/**
+	 * The constructor
+	 */
+	public Activator() {
+	}
+
+	@Override
+	public void start(BundleContext context) throws Exception {
+		System.out.println("Hello World!!");
+
+		// PREPARE RULES
+		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
+
+		ICompilationUnit compUnits = getUnit();
+		List<ICompilationUnit> compilationUnits = new ArrayList<>();
+		compilationUnits.add((ICompilationUnit) compUnits);
+		refactoringPipeline.createRefactoringStates(compilationUnits);
+		refactoringPipeline.setRules(RulesContainer.getAllRules());
+
+		NullProgressMonitor monitor = new NullProgressMonitor();
+
+		try {
+			refactoringPipeline.doRefactoring(monitor);
+		} catch (RefactoringException e) {
+			return;
+		} catch (RuleException e) {
+			return;
+
+		}
+
+		try {
+			refactoringPipeline.commitRefactoring();
+
+		} catch (RefactoringException e) {
+			// TODO exception
+			return;
+		} catch (ReconcileException e) {
+			// TODO exception
+			return;
+		}
+
+		System.out.println(compilationUnits.get(0).getSource());
+	}
+
+	@Override
+	public void stop(BundleContext context) throws Exception {
+
+		running = false;
+
+		// FIXME (see SIM-331) figure out better logging configuration
+//		logger.info(Messages.Activator_stop);
+
+		plugin = null;
+		bundleContext = null;
+
+//		synchronized (jobs) {
+//			jobs.forEach(job -> job.cancel());
+//			jobs.clear();
+//		}
+//
+//		// stop test fragment pseudo-activator
+//		if (testFragmentActivator != null) {
+//			testFragmentActivator.stop(context);
+//		}
+//
+		// stop jSparrow.logging
+		Bundle loggingBundle = context.getBundle(loggingBundleID);
+		if (loggingBundle.getState() == Bundle.ACTIVE) {
+			loggingBundle.stop();
+		}
+
+		System.out.println("Stop ACTIVATOR");
+	}
+
+	public ICompilationUnit getUnit() {
+		List<IPackageFragment> packages = new ArrayList<>();
+		List<ICompilationUnit> units = new ArrayList<>();
+		
+		TestStandalone test = new TestStandalone();
+		try {
+			packages = Arrays.asList(test.getTestproject().getPackageFragments());
+
+			for (IPackageFragment mypackage : packages) {
+				if (mypackage.containsJavaResources() && 0 != mypackage.getCompilationUnits().length) {
+					mypackage.open(null);
+
+					units = Arrays.asList(mypackage.getCompilationUnits());
+				}
+			}
+
+		units.get(0).open(null);
+		} catch (JavaModelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return units.get(0);
+
+	}
+
+	/**
+	 * Returns the shared instance
+	 *
+	 * @return the shared instance
+	 */
+	public static Activator getDefault() {
+		return plugin;
+	}
+
+	public static void registerJob(Job job) {
+		synchronized (jobs) {
+			jobs.add(job);
+		}
+	}
+
+	public static void unregisterJob(Job job) {
+		synchronized (jobs) {
+			jobs.remove(job);
+		}
+	}
+
+	public static boolean isRunning() {
+		return running;
+	}
+
+	public static void setRunning(boolean isRunning) {
+		running = isRunning;
+	}
+
+	public static BundleContext getBundleContext() {
+		return bundleContext;
+	}
+}

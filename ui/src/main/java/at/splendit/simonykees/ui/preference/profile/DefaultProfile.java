@@ -1,0 +1,51 @@
+package at.splendit.simonykees.ui.preference.profile;
+
+import java.util.Arrays;
+import java.util.List;
+
+import at.splendit.simonykees.core.rule.impl.ArithmethicAssignmentRule;
+import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
+
+/**
+ * Default profile.
+ * 
+ * @author Ludwig Werzowa, Hannes Schweighofer
+ * @since 0.9.2
+ */
+public class DefaultProfile implements SimonykeesProfile {
+
+	private List<String> enabledRulesIds;
+
+	boolean isBuiltInProfile = true;
+
+	public DefaultProfile() {
+		enabledRulesIds = Arrays.asList(new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class).getId());
+	}
+
+	@Override
+	public String getProfileName() {
+		return Messages.Profile_DefaultProfile_profileName;
+	}
+
+	@Override
+	public boolean isBuiltInProfile() {
+		return isBuiltInProfile;
+	}
+
+	@Override
+	public void setEnabledRulesIds(List<String> enabledRulesIds) {
+		this.enabledRulesIds = enabledRulesIds;
+	}
+	
+	@Override
+	public List<String> getEnabledRuleIds() {
+		return enabledRulesIds;
+	}
+
+	@Override
+	public boolean containsRule(String id) {
+		return getEnabledRuleIds().contains(id);
+	}
+
+}

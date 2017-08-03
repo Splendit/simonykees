@@ -87,8 +87,8 @@
 		
 		<module>releng</module>
 
-		<module>ui</module>
 		<module>standalone</module>
+		<module>ui</module>
 	</modules>
 
 	<scm>
@@ -228,6 +228,16 @@
 			<dependency>
 				<groupId>at.splendit.jSparrow</groupId>
 				<artifactId>jSparrow.sample</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit.jSparrow</groupId>
+				<artifactId>jSparrow.standalone</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit.jSparrow</groupId>
+				<artifactId>jSparrow.ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

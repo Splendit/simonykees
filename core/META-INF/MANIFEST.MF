@@ -1,13 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Core
-Bundle-SymbolicName: jSparrow.core;singleton:=true
+Bundle-SymbolicName: jSparrow.core
 Bundle-Version: 2.0.3.qualifier
 Bundle-Activator: at.splendit.simonykees.core.Activator
 Require-Bundle: jSparrow.logging,
  jSparrow.i18n,
  jSparrow.license.api,
- org.eclipse.ui;bundle-version="[3.107.0,4.0.0)",
  org.eclipse.compare;bundle-version="[3.5.600,4.0.0)",
  org.eclipse.core.runtime;bundle-version="[3.11.0,4.0.0)",
  org.eclipse.core.resources;bundle-version="[3.10.0,4.0.0)",
@@ -29,3 +28,11 @@ Require-Bundle: jSparrow.logging,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH
+Export-Package: at.splendit.simonykees.core.exception,
+ at.splendit.simonykees.core.refactorer,
+ at.splendit.simonykees.core.rule,
+ at.splendit.simonykees.core.rule.impl,
+ at.splendit.simonykees.core.rule.impl.standardLogger,
+ at.splendit.simonykees.core.visitor,
+ at.splendit.simonykees.core.visitor.arithmetic,
+ at.splendit.simonykees.core.visitor.semiAutomatic
