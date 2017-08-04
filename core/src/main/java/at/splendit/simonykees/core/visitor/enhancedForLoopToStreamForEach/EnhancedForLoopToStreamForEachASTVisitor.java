@@ -17,7 +17,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.util.ClassRelationUtil;
-import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.core.visitor.lambdaForEach.AbstractLambdaForEachASTVisitor;
 
 /**
  * this rule visits all enhanced for loops and checks if the corresponding loop
@@ -29,7 +29,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * @author Matthias Webhofer
  * @since 1.2
  */
-public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewriteASTVisitor {
+public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractLambdaForEachASTVisitor {
 
 	private static final String COLLECTION_QUALIFIED_NAME = java.util.Collection.class.getName();
 	private static final List<String> TYPE_BINDING_CHECK_LIST = Collections.singletonList(COLLECTION_QUALIFIED_NAME);
@@ -112,7 +112,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 	 * @return {@code false} if any of the aforementioned types, or {@link true}
 	 *         otherwise.
 	 */
-	private boolean isTypeSafe(ITypeBinding typeBinding) {
+	protected boolean isTypeSafe(ITypeBinding typeBinding) {
 		if (typeBinding.isRawType()) {
 			return false;
 		}
@@ -166,7 +166,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 	 * @param parameter
 	 * @return
 	 */
-	private boolean isStatementValid(Statement statement, SimpleName parameter) {
+	protected boolean isStatementValid(Statement statement, SimpleName parameter) {
 		StreamForEachCheckValidStatementASTVisitor statementVisitor = new StreamForEachCheckValidStatementASTVisitor(
 				parameter);
 		statement.accept(statementVisitor);
@@ -184,7 +184,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 	 * @return a copy target of the given expression, or a parenthesized
 	 *         expression (if expression is of type CastExpression.
 	 */
-	private Expression createExpressionForStreamMethodInvocation(Expression expression) {
+	protected Expression createExpressionForStreamMethodInvocation(Expression expression) {
 		Expression expressionCopy = (Expression) astRewrite.createCopyTarget(expression);
 		if (expression.getNodeType() == ASTNode.CAST_EXPRESSION) {
 			ParenthesizedExpression parenthesizedExpression = astRewrite.getAST().newParenthesizedExpression();
