@@ -1,14 +1,9 @@
 package at.splendit.simonykees.ui;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -42,8 +37,6 @@ public class Activator extends AbstractUIPlugin {
 
 	// is used for configuring the test fragment
 	private static BundleActivator testFragmentActivator;
-
-	private static List<Job> jobs = Collections.synchronizedList(new ArrayList<>());
 
 	private long loggingBundleID = 0;
 
@@ -105,6 +98,7 @@ public class Activator extends AbstractUIPlugin {
 			 * in that case because customers should not know about test
 			 * fragments.
 			 */
+			System.out.println("Error catching"); //$NON-NLS-1$
 		}
 
 		logger.info(Messages.Activator_start);
@@ -125,11 +119,6 @@ public class Activator extends AbstractUIPlugin {
 
 		plugin = null;
 		bundleContext = null;
-
-		synchronized (jobs) {
-			jobs.forEach(job -> job.cancel());
-			jobs.clear();
-		}
 
 		// stop test fragment pseudo-activator
 		if (testFragmentActivator != null) {
@@ -180,18 +169,6 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
-	}
-
-	public static void registerJob(Job job) {
-		synchronized (jobs) {
-			jobs.add(job);
-		}
-	}
-
-	public static void unregisterJob(Job job) {
-		synchronized (jobs) {
-			jobs.remove(job);
-		}
 	}
 
 	public static boolean isRunning() {

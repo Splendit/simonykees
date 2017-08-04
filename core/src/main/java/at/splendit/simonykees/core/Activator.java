@@ -1,6 +1,10 @@
 package at.splendit.simonykees.core;
 
-import org.osgi.framework.Bundle;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -12,6 +16,8 @@ public class Activator implements BundleActivator {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "jSparrow.core"; //$NON-NLS-1$
+
+	private static List<Job> jobs = Collections.synchronizedList(new ArrayList<>());
 
 	// The shared instance
 	private static Activator plugin;
@@ -25,39 +31,16 @@ public class Activator implements BundleActivator {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		plugin = this;
-
-		// start jSparrow logging bundle
-		for (Bundle bundle : context.getBundles()) {
-			if (bundle.getSymbolicName().equals("jSparrow.logging") //$NON-NLS-1$
-					&& bundle.getState() != Bundle.ACTIVE) {
-				bundle.start();
-				break;
-			}
-		}
-//
-//		// load pseudo-activator from test fragment and execute its start method
-//		try {
-//			Class<? extends BundleActivator> frgActClass = Class
-//					.forName("at.splendit.simonykees.license.netlicensing.TestFragmentActivator") //$NON-NLS-1$
-//					.asSubclass(BundleActivator.class);
-//			testFragmentActivator = frgActClass.newInstance();
-//			testFragmentActivator.start(context);
-//		} catch (ClassNotFoundException e) {
-//			/*
-//			 * Ignore! Exception is thrown, if the test fragment is not
-//			 * available.
-//			 * 
-//			 * Note: The test fragment is always available, except in the
-//			 * deployed version. We do not want to have any log message at all
-//			 * in that case because customers should not know about test
-//			 * fragments.
-//			 */
-//		}
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
+
+		synchronized (jobs) {
+			jobs.forEach(job -> job.cancel());
+			jobs.clear();
+		}
 	}
 
 	/**
@@ -68,4 +51,18 @@ public class Activator implements BundleActivator {
 	public static Activator getDefault() {
 		return plugin;
 	}
+	
+
+	public static void registerJob(Job job) {
+		synchronized (jobs) {
+			jobs.add(job);
+		}
+	}
+
+	public static void unregisterJob(Job job) {
+		synchronized (jobs) {
+			jobs.remove(job);
+		}
+	}
+
 }

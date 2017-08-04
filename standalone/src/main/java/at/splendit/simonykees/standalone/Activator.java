@@ -12,7 +12,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +60,15 @@ public class Activator extends Plugin {
 	public void start(BundleContext context) throws Exception {
 		System.out.println("Hello World!!");
 
+		// start jSparrow logging bundle
+		for (Bundle bundle : context.getBundles()) {
+			if (bundle.getSymbolicName().equals("jSparrow.logging") //$NON-NLS-1$
+					&& bundle.getState() != Bundle.ACTIVE) {
+				bundle.start();
+				break;
+			}
+		}
+		
 		// PREPARE RULES
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 

@@ -3,6 +3,8 @@ package at.splendit.simonykees.core.job;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
+import at.splendit.simonykees.core.Activator;
+
 //import at.splendit.simonykees.core.Activator;
 
 /**
@@ -19,8 +21,8 @@ public class FullRefactoringJob extends AbstractRefactoringJob {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-//		Activator.registerJob(this);
-//		Activator.unregisterJob(this);
+		Activator.registerJob(this);
+		Activator.unregisterJob(this);
 		return null;
 	}
 
