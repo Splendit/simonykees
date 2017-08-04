@@ -33,7 +33,7 @@
 
    <features>
       <feature id="jSparrow.3rd.party.feature"/>
-      <feature id="jSparrow.feature"/>
+      <feature id="jSparrow.standalone.feature"/>
       <feature id="org.eclipse.e4.rcp" version="1.5.3.v20170228-0512"/>
       <feature id="org.eclipse.emf.ecore"/>
       <feature id="org.eclipse.emf.common"/>

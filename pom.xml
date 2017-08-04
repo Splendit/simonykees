@@ -81,6 +81,7 @@
 		<module>test</module>
 		<!-- OSGi feature + site deployment -->
 		<module>feature.3rd.party</module>
+		<module>feature.standalone</module>
 		<module>feature</module>
 		<module>site</module>
 		
@@ -218,6 +219,11 @@
 			<dependency>
 				<groupId>at.splendit.jSparrow</groupId>
 				<artifactId>jSparrow.feature</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit.jSparrow</groupId>
+				<artifactId>jSparrow.standalone.feature</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
