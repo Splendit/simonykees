@@ -27,7 +27,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
@@ -260,8 +259,6 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	}
 
 	private void updateWarningInformation(boolean updated) {
-		Device device = Display.getCurrent();
-
 		if (!updated) {
 			updatedLabel.setText(Messages.SimonykeesUpdateLicenseDialog_invalid_license_key);
 			updatedLabel.setImage(scaledCloseRedIconImage);
