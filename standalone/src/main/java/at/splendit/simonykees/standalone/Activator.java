@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -31,7 +32,7 @@ import at.splendit.simonykees.core.rule.RulesContainer;
  * @since 0.9
  */
 //@SuppressWarnings("restriction")
-public class Activator implements BundleActivator {
+public class Activator extends Plugin {
 
 	private static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
@@ -105,16 +106,6 @@ public class Activator implements BundleActivator {
 		plugin = null;
 		bundleContext = null;
 
-//		synchronized (jobs) {
-//			jobs.forEach(job -> job.cancel());
-//			jobs.clear();
-//		}
-//
-//		// stop test fragment pseudo-activator
-//		if (testFragmentActivator != null) {
-//			testFragmentActivator.stop(context);
-//		}
-//
 		// stop jSparrow.logging
 		Bundle loggingBundle = context.getBundle(loggingBundleID);
 		if (loggingBundle.getState() == Bundle.ACTIVE) {
