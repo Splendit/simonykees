@@ -67,7 +67,7 @@ public class LicenseUtil {
 		if (isLicenseValidationServiceAvailable) {
 			String userMessage = licenseValidationService.getLicenseStautsUserMessage();
 
-			if (licenseValidationService.getLicenseStautsUserMessage().contains("expired")) {
+			if (licenseValidationService.isExpired()) {
 				BuyLicenseDialog dialog = new BuyLicenseDialog(shell, userMessage);
 				dialog.open();
 			} else {
