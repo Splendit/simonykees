@@ -44,7 +44,7 @@ public class PersistenceManager {
 	/**
 	 * Time period (in seconds) of valid license without internet connection. 
 	 */
-	private static final long OFFLINE_EXPIRATION_TIME_PERIOD = 3;
+	private static final long OFFLINE_EXPIRATION_TIME_PERIOD = 3600;
 
 	private PersistenceManager() {
 		
