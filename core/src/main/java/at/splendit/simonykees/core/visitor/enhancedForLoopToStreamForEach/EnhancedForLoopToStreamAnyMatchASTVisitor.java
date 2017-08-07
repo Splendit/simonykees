@@ -98,7 +98,6 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
 public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedForLoopToStreamASTVisitor {
 
 	private static final String ANY_MATCH = "anyMatch"; //$NON-NLS-1$
-	private static final String STREAM = "stream"; //$NON-NLS-1$
 
 	@Override
 	public boolean visit(EnhancedForStatement enhancedForStatement) {
