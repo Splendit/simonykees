@@ -3,21 +3,27 @@ package at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.util.ClassRelationUtil;
-import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.core.visitor.lambdaForEach.AbstractLambdaForEachASTVisitor;
 
 /**
  * this rule visits all enhanced for loops and checks if the corresponding loop
@@ -26,17 +32,25 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * loop body is checked separately by the
  * {@link StreamForEachCheckValidStatementASTVisitor}
  * 
- * @author Matthias Webhofer
+ * @author Matthias Webhofer, Ardit Ymeri
  * @since 1.2
  */
-public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewriteASTVisitor {
+public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractLambdaForEachASTVisitor {
 
-	private static final String COLLECTION_QUALIFIED_NAME = java.util.Collection.class.getName();
-	private static final List<String> TYPE_BINDING_CHECK_LIST = Collections.singletonList(COLLECTION_QUALIFIED_NAME);
+	private static final List<String> TYPE_BINDING_CHECK_LIST = Collections.singletonList(JAVA_UTIL_COLLECTION);
+	
+	private CompilationUnit compilationUnit;
+	
+	@Override
+	public boolean visit(CompilationUnit compilationUnit) {
+		this.compilationUnit = compilationUnit;
+		return true;
+	}
 
 	@Override
 	public void endVisit(EnhancedForStatement enhancedForStatementNode) {
 		SingleVariableDeclaration parameter = enhancedForStatementNode.getParameter();
+		Type parameterType = parameter.getType();
 		Expression expression = enhancedForStatementNode.getExpression();
 		Statement statement = enhancedForStatementNode.getBody();
 		SimpleName parameterName = parameter.getName();
@@ -58,11 +72,13 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 				 * expression of the enhanced for loop with no parameters
 				 */
 				Expression expressionCopy = createExpressionForStreamMethodInvocation(expression);
-				SimpleName streamMethodName = astRewrite.getAST().newSimpleName("stream"); //$NON-NLS-1$
-
-				MethodInvocation streamMethodInvocation = astRewrite.getAST().newMethodInvocation();
-				streamMethodInvocation.setExpression(expressionCopy);
-				streamMethodInvocation.setName(streamMethodName);
+				
+				if(parameterType.isPrimitiveType()) {
+					MethodInvocation mapToPrimitive = calcMappingMethod((PrimitiveType)parameterType, expressionCopy);
+					if(mapToPrimitive != null) {
+						expressionCopy = mapToPrimitive;
+					}
+				}
 
 				/*
 				 * create lambda expression, which will be used as the only
@@ -87,7 +103,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 				SimpleName forEachMethodName = astRewrite.getAST().newSimpleName("forEach"); //$NON-NLS-1$
 
 				MethodInvocation forEachMethodInvocation = astRewrite.getAST().newMethodInvocation();
-				forEachMethodInvocation.setExpression(streamMethodInvocation);
+				forEachMethodInvocation.setExpression(expressionCopy);
 				forEachMethodInvocation.setName(forEachMethodName);
 				ListRewrite forEachMethodInvocationArgumentsListRewrite = astRewrite
 						.getListRewrite(forEachMethodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
@@ -101,6 +117,99 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractASTRewrite
 						.newExpressionStatement(forEachMethodInvocation);
 				astRewrite.replace(enhancedForStatementNode, expressionStatement, null);
 			}
+		}
+	}
+
+	/**
+	 * Creates a method invocation for mapping to any of the predefined streams:
+	 * 
+	 * <ul>
+	 * <li>{@link java.util.stream.IntStream}</li>
+	 * <li>{@link java.util.stream.LongStream}</li>
+	 * <li>{@link java.util.stream.DoubleStream}</li>
+	 * </ul>
+	 * 
+	 * if the given primitive type is either an {@code int}, {@code long} or
+	 * {@code double}.
+	 * 
+	 * @param parameterType
+	 *            represents the type of iterating index of the loop.
+	 * @param expression
+	 *            represents the collection which is being iterated.
+	 * 
+	 * @return {@code expression.stream().mapToInt/Long/Doulbe(Integer/Long/Doulbe::valueOf)}
+	 *         or {@code null} if the given type is neither {@code int},
+	 *         {@code long} nor {@code double}.
+	 */
+	private MethodInvocation calcMappingMethod(PrimitiveType parameterType, Expression expression) {
+		ITypeBinding binding = parameterType.resolveBinding();
+		MethodInvocation methodInvocation = null;
+		ExpressionMethodReference expMethodReference = null;
+
+		if (binding == null) {
+			return null;
+		}
+
+		String methodName = ""; //$NON-NLS-1$
+		String primitiveName = binding.getName();
+		String expMethRefName = VALUE_OF;
+		Class<? extends Number> boxedClass = null;
+
+		switch (primitiveName) {
+		case "int": //$NON-NLS-1$
+			methodName = MAP_TO_INT;
+			boxedClass = Integer.class;
+			break;
+		case "long": //$NON-NLS-1$
+			methodName = MAP_TO_LONG;
+			boxedClass = Long.class;
+			break;
+		case "double": //$NON-NLS-1$
+			methodName = MAP_TO_DOUBLE;
+			boxedClass = Double.class;
+			break;
+		}
+
+		if (methodName.isEmpty() || boxedClass == null) {
+			return null;
+		}
+
+		AST ast = astRewrite.getAST();
+
+		MethodInvocation streamMethodInvocation = astRewrite.getAST().newMethodInvocation();
+		streamMethodInvocation.setName(ast.newSimpleName(STREAM));
+		streamMethodInvocation.setExpression(expression);
+
+		methodInvocation = ast.newMethodInvocation();
+		methodInvocation.setName(ast.newSimpleName(methodName));
+		methodInvocation.setExpression(streamMethodInvocation);
+
+		expMethodReference = ast.newExpressionMethodReference();
+		expMethodReference.setName(ast.newSimpleName(expMethRefName));
+		expMethodReference.setExpression(ast.newSimpleName(boxedClass.getSimpleName()));
+
+		addImport(boxedClass.getName());
+
+		ListRewrite miRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
+		miRewrite.insertFirst(expMethodReference, null);
+
+		return methodInvocation;
+	}
+
+	/**
+	 * Makes use of {@link ImportRewrite} to check whether an import statement
+	 * is needed for the given qualified name, and if yes, stores it to the
+	 * {@link #addImports}.
+	 * 
+	 * @param qualifiedName
+	 *            a string representing a qualified name.
+	 */
+	private void addImport(String qualifiedName) {
+		ImportRewrite importRewrite = ImportRewrite.create(compilationUnit, true);
+		importRewrite.addImport(qualifiedName);
+		String[] addedImpots = importRewrite.getAddedImports();
+		for (String addedImport : addedImpots) {
+			this.addImports.add(addedImport);
 		}
 	}
 

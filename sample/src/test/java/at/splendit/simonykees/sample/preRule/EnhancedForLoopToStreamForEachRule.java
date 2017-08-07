@@ -301,6 +301,39 @@ public class EnhancedForLoopToStreamForEachRule {
 	private void useClass(Class<Object> c) {
 		
 	}
+	
+	private void collectionOfDoubles() {
+		List<Double> doubles = new ArrayList<>();
+		
+		for(double d : doubles) {
+			double halfD = d / 2;
+			System.out.println(halfD + d);
+		}
+	}
+	
+	private void collectionOfInts() {
+		List<Integer> doubles = new ArrayList<>();
+		for(int i : doubles) {
+			int plusTwo = i + 2;
+			System.out.println(plusTwo + i);
+		}
+	}
+	
+	private void collectionOfLongs() {
+		List<Long> longs = new ArrayList<>();
+		for(long l : longs) {
+			long minusTwo = l - 2;
+			System.out.println(minusTwo + l);
+		}
+	}
+	
+	private void boxedIteratingVariable() {
+		List<Double> doubles = new ArrayList<>();
+		for(Double d : doubles) {
+			double halfD = d / 2;
+			System.out.println(halfD + d);
+		}
+	}
 
 	private class TestClass {
 		public int testIntField = 0;

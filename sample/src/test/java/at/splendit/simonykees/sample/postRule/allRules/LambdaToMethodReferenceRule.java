@@ -262,7 +262,7 @@ public class LambdaToMethodReferenceRule {
 			SOURCE sourceCollection, Supplier<DEST> collectionFactory) {
 
 		DEST result = collectionFactory.get();
-		sourceCollection.stream().forEach(result::add);
+		sourceCollection.forEach(result::add);
 		return result;
 	}
 
