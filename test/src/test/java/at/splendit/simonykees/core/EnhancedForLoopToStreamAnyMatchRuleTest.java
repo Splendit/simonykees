@@ -12,6 +12,13 @@ import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamAnyMatchRule
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamAnyMatchASTVisitor;
 
+/**
+ * Testing {@link EnhancedForLoopToStreamAnyMatchRule}.
+ * 
+ * @author Ardit Ymeri
+ * @since 2.0.2
+ *
+ */
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
 public class EnhancedForLoopToStreamAnyMatchRuleTest extends AbstractRulesTest {

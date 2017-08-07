@@ -167,6 +167,15 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 		}
 	}
 
+	public void loopWithSingleBodyStatement(List<String> strings) {
+		String emptyString = "";
+		boolean containsEmpty = strings.stream().anyMatch(emptyString::equals);
+	}
+
+	/*
+	 * Testing loops with return statement
+	 */
+
 	public boolean loopWithReturnStatement(List<String> strings) {
 		String emptyString = "";
 		return strings.stream().anyMatch(emptyString::equals);
@@ -181,5 +190,89 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 			}
 		}
 		return false;
+	}
+
+	public boolean statementsBetweenLoopAndReturnStatement(List<String> strings) {
+		String emptyString = "";
+		for (String value : strings) {
+			if (emptyString.equals(value)) {
+				return true;
+			}
+		}
+		String nonEmptyString = "I dont let you convert to anyMatch";
+		return false;
+	}
+
+	public boolean mixedReturnValues(List<String> strings) {
+		String emptyString = "";
+		for (String value : strings) {
+			if (emptyString.equals(value)) {
+				return false;
+			}
+		}
+		return false;
+	}
+
+	public boolean mixedReturnValues2(List<String> strings) {
+		String emptyString = "";
+		for (String value : strings) {
+			if (emptyString.equals(value)) {
+				return true;
+			}
+		}
+		return true;
+	}
+
+	public boolean mixedReturnValues3(List<String> strings) {
+		String emptyString = "";
+		for (String value : strings) {
+			if (emptyString.equals(value)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean irrelevantStatementsBeforeLoop(List<String> strings) {
+		String emptyString = "";
+		String nonEmpty = "I dont stop you from converting to anyMatch";
+		return strings.stream().anyMatch(emptyString::equals);
+	}
+
+	public boolean noIfWrapperAroundReturn(List<String> strings) {
+		String emptyString = "";
+		for (String value : strings) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean noReturnStatementInsideIf(List<String> strings) {
+		String emptyString = "";
+		strings.stream().filter((value) -> !emptyString.equals(value))
+				.map((value) -> StringUtils.substring(value, 0, 1)).forEach((prefix) -> {
+				});
+		return false;
+	}
+
+	public boolean multipleStatementsInsideIf(List<String> strings) {
+		String emptyString = "";
+		for (String value : strings) {
+			if (!emptyString.equals(value)) {
+				String prefix = StringUtils.substring(value, 0, 1);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean ifWithSingleBodyStatement(List<String> strings) {
+		String emptyString = "";
+		return strings.stream().anyMatch(emptyString::equals);
+	}
+
+	public boolean singleBodyStatementEverywhere(List<String> strings) {
+		String emptyString = "";
+		return strings.stream().anyMatch(emptyString::equals);
 	}
 }
