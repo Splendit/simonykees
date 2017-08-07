@@ -12,8 +12,6 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
- * TODO: Martin please check if this description is correct.
- * 
  * Finds all instantiations of {@link String} with no input parameter (new
  * String()) and all instantiations of {@link String} with a {@link String}
  * parameter (new String("foo")) and replaces those occurrences empty String
@@ -29,7 +27,7 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTV
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
-		if (ClassRelationUtil.isContentOfTypes(node.getType().resolveBinding(), 
+		if (ClassRelationUtil.isContentOfTypes(node.getType().resolveBinding(),
 				generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
 				&& !(ASTNode.EXPRESSION_STATEMENT == node.getParent().getNodeType())) {
 
@@ -59,14 +57,14 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTV
 					 */
 					Expression argument = arguments.get(0);
 					arguments = null;
-					if (argument instanceof StringLiteral || ClassRelationUtil
-							.isContentOfTypes(argument.resolveTypeBinding(), generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
+					if (argument instanceof StringLiteral
+							|| ClassRelationUtil.isContentOfTypes(argument.resolveTypeBinding(),
+									generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 						if (argument instanceof ParenthesizedExpression) {
 							argument = ASTNodeUtil.unwrapParenthesizedExpression(argument);
 						}
-						if (ASTNode.CLASS_INSTANCE_CREATION == argument.getNodeType()
-								&& ClassRelationUtil.isContentOfTypes(
-										((ClassInstanceCreation) argument).getType().resolveBinding(),
+						if (ASTNode.CLASS_INSTANCE_CREATION == argument.getNodeType() && ClassRelationUtil
+								.isContentOfTypes(((ClassInstanceCreation) argument).getType().resolveBinding(),
 										generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 							arguments = (List<Expression>) ((ClassInstanceCreation) argument).arguments();
 						}

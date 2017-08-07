@@ -1,6 +1,6 @@
 package at.splendit.simonykees.sample.preRule;
 
-//TODO: be careful when you write comments! 
+//be careful when you write comments! 
 
 /*
  * Comments are such a pain. 

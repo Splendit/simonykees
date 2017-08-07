@@ -33,7 +33,7 @@ import at.splendit.simonykees.i18n.Messages;
  * @author Hannes Schweighofer, Andreja Sambolec
  * @since 0.9
  */
-public final class SimonykeesUtil {
+public final class RefactoringUtil {
 
 	private static final String BACKSLASH_N = "\n"; //$NON-NLS-1$
 	private static final String LINE_SEPARATOR_PROPERTY = "line.separator"; //$NON-NLS-1$
@@ -49,7 +49,7 @@ public final class SimonykeesUtil {
 	/**
 	 * Constructor should never be called
 	 */
-	private SimonykeesUtil() {
+	private RefactoringUtil() {
 		// no constructor for a utility class
 	}
 

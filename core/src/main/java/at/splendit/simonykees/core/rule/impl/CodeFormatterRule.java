@@ -12,7 +12,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.util.SimonykeesUtil;
+import at.splendit.simonykees.core.util.RefactoringUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -65,13 +65,13 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 		int formatingKind = CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS
 				| CodeFormatter.K_UNKNOWN;
 		TextEdit edit = formatter.format(formatingKind, workingCopy.getSource(), sourceRange.getOffset(),
-				sourceRange.getLength(), 0, SimonykeesUtil.LINE_SEPARATOR);
+				sourceRange.getLength(), 0, RefactoringUtil.LINE_SEPARATOR);
 
 		DocumentChange documentChange = null;
 
 		if (edit.hasChildren()) {
 			Document document = new Document(workingCopy.getSource());
-			documentChange = SimonykeesUtil.generateDocumentChange(CodeFormatterRule.class.getSimpleName(), document,
+			documentChange = RefactoringUtil.generateDocumentChange(CodeFormatterRule.class.getSimpleName(), document,
 					edit.copy());
 
 			workingCopy.applyTextEdit(edit, null);

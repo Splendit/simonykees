@@ -5,7 +5,8 @@ import org.eclipse.osgi.util.NLS;
 /**
  * TODO SIM-103 add class description
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
+ *         Matthias Webhofer
  * @since 0.9
  */
 public class Messages extends NLS {
@@ -20,6 +21,7 @@ public class Messages extends NLS {
 	public static String AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
 	public static String AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 	public static String AbstractSelectRulesWizardPage_error_NoRulesSelected;
+	public static String AbstractSelectRulesWizardPage_warning_RulesInProfileNotApplicable;
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;

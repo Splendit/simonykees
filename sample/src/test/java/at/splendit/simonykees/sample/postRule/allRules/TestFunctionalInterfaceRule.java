@@ -12,6 +12,29 @@ public class TestFunctionalInterfaceRule {
 	private static Logger log = LoggerFactory.getLogger(TestFunctionalInterfaceRule.class);
 
 	private final String finalStringField;
+	private final String notInitializedField;
+
+	private AFunctionalInterface usingUnDeclaredField = new AFunctionalInterface() {
+		@Override
+		public void method(int a) {
+			String s = finalInitializedStringField;
+		}
+	};
+
+	private final String finalInitializedStringField = "initialized";
+
+	private AFunctionalInterface usingUnInitializedField = new AFunctionalInterface() {
+		@Override
+		public void method(int a) {
+			String s = finalStringField;
+		}
+	};
+
+	private AFunctionalInterface usingInitializedField = (int a) -> {
+		String s = finalInitializedStringField;
+	};
+
+	private final String declaredfterConstructor = "declaredAfterCtor";
 
 	int a;
 
@@ -34,8 +57,51 @@ public class TestFunctionalInterfaceRule {
 
 			}
 		};
-
 		finalStringField = "irritating";
+
+		AFunctionalInterface foo2 = (int a) -> {
+			String sthToLog = a + finalStringField;
+
+		};
+
+		AFunctionalInterface foo3 = (int a) -> {
+			String t = declaredfterConstructor;
+
+		};
+
+		if (foo3 != null) {
+			AFunctionalInterface foo4 = new AFunctionalInterface() {
+				@Override
+				public void method(int a) {
+					String sthToLog = a + notInitializedField;
+				}
+			};
+		} else {
+			AFunctionalInterface foo5 = new AFunctionalInterface() {
+				@Override
+				public void method(int a) {
+					String sthToLog = a + notInitializedField;
+				}
+			};
+		}
+
+		if (foo != null) {
+			notInitializedField = "";
+			AFunctionalInterface inNestedBlock = (int a) -> {
+				String sthToLog = a + notInitializedField;
+
+			};
+		} else {
+			notInitializedField = "";
+		}
+
+	}
+
+	public void usingUnassignedFieldInMethod() {
+		AFunctionalInterface foo2 = (int a) -> {
+			String sthToLog = a + finalStringField;
+
+		};
 	}
 
 	@Test
@@ -218,7 +284,7 @@ public class TestFunctionalInterfaceRule {
 				String toString = "toString";
 			}
 
-			// TODO: some important comment. shall not be removed!
+			// some important comment. shall not be removed!
 		};
 
 		AFunctionalInterface fooComments3 = (int fooComments1) -> {

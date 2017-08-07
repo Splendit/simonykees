@@ -113,9 +113,8 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	private boolean isOverrideAnnotated(MethodDeclaration method) {
 
 		return ASTNodeUtil.convertToTypedList(method.modifiers(), MarkerAnnotation.class).stream()
-				.map(MarkerAnnotation::getTypeName).filter(typeName -> OVERRIDE_SIMPLE_NAME.equals(typeName.getFullyQualifiedName())
-						|| JAVA_LANG_OVERRIDE.equals(typeName.getFullyQualifiedName()))
-				.findAny().isPresent();
+				.map(MarkerAnnotation::getTypeName).anyMatch(typeName -> OVERRIDE_SIMPLE_NAME.equals(typeName.getFullyQualifiedName())
+						|| JAVA_LANG_OVERRIDE.equals(typeName.getFullyQualifiedName()));
 	}
 
 	/**

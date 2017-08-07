@@ -537,9 +537,15 @@ public class TestForToForEachListIteratingIndexRule {
 	}
 	
 	class Foo {
+		private String foo;
+		
+		public Foo(String foo) {
+			this.foo = foo;
+		}
+		
 		@Override
 		public String toString() {
-			return "foo";
+			return this.foo;
 		}
 		
 		public boolean isFoo() {
@@ -571,4 +577,7 @@ public class TestForToForEachListIteratingIndexRule {
 		public boolean val = false;
 	}
 
+	public static Foo createFoo(String input) {
+		return new TestForToForEachListIteratingIndexRule().new Foo(input);
+	}
 }
