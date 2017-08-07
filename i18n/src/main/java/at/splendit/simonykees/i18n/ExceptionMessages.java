@@ -28,6 +28,7 @@ public class ExceptionMessages extends NLS {
 	public static String RefactoringPipeline_warn_working_copies_already_generated;
 	public static String RefactoringState_no_changes_found;
 	public static String RefactoringState_warning_workingcopy_already_present;
+	public static String LicenseUtil_error_moreInformaion;
 	public static String LicenseUtil_license_service_unavailable;
 	public static String PersistenceManager_decryption_error;
 	public static String PersistenceManager_encryption_error;
