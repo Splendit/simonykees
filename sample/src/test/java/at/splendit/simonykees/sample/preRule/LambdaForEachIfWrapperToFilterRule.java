@@ -125,6 +125,15 @@ public class LambdaForEachIfWrapperToFilterRule {
 		});
 	}
 	
+	public void forEachOnCollection() {
+		list.forEach(s -> {
+			if (s.length() > 3) {
+				System.out.println(s);
+				System.out.println(s + s);
+			}
+		});
+	}
+	
 	public void ifWithExpressionStatementBody(String input) {
 		StringBuilder sb = new StringBuilder();
 		list.stream().forEach(s -> {

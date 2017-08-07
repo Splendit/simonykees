@@ -119,9 +119,13 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 							ref.setExpression(staticClassName);
 							isReferenceExpressionSet = true;
 						} else if (ClassRelationUtil.compareITypeBinding(methodsDeclaringClass, lambdaEnclosingType)) {
-							ThisExpression thisExpression = astRewrite.getAST().newThisExpression();
-							ref.setExpression(thisExpression);
-							isReferenceExpressionSet = true;
+							ClassInstanceCreation enclosingAnonymousInnerClass = ASTNodeUtil
+									.getSpecificAncestor(lambdaExpressionNode, ClassInstanceCreation.class);
+							if (enclosingAnonymousInnerClass == null) {
+								ThisExpression thisExpression = astRewrite.getAST().newThisExpression();
+								ref.setExpression(thisExpression);
+								isReferenceExpressionSet = true;
+							}
 						}
 
 					}
