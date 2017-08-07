@@ -178,7 +178,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends EnhancedForLoopTo
 	}
 
 	/**
-	 * Checks whether a reference to a non effectively final variable is made on
+	 * Checks whether a reference of a non effectively final variable is made on
 	 * the code represented by the given node. Makes use of
 	 * {@link EffectivelyFinalVisitor}.
 	 * 
@@ -268,7 +268,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends EnhancedForLoopTo
 	}
 
 	/**
-	 * Checks whether the body of a then statement consists of a block of
+	 * Checks whether the body of a <em>then statement</em> consists of a block of
 	 * exactly two statements where the first one is an assignment to
 	 * {@code true} of a boolean variable and the second one is a
 	 * {@link BreakStatement}.
@@ -360,7 +360,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends EnhancedForLoopTo
 					if (ASTNode.BOOLEAN_LITERAL == returnedExpression.getNodeType()) {
 						BooleanLiteral booleanLiteral = (BooleanLiteral) returnedExpression;
 						if (booleanLiteral.booleanValue()) {
-							return findReturnStatementFollowingNode(forNode);
+							return findFollowingReturnStatement(forNode);
 
 						}
 					}
@@ -371,12 +371,20 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends EnhancedForLoopTo
 	}
 
 	/**
-	 * Finds the {@link }
+	 * Finds the {@link ReturnStatement} which is placed immediately after the
+	 * given {@link EnhancedForStatement} and which returns a {@code false}
+	 * value.
 	 * 
 	 * @param forNode
-	 * @return
+	 *            represents an enhanced for loop which is expected to be
+	 *            followed by a {@code return false;} statement.
+	 * 
+	 * @return the return statement following the given
+	 *         {@link EnhancedForStatement} or {@code null} if the loop is not
+	 *         followed by a return statement or the returned value is not
+	 *         {@code false}
 	 */
-	private ReturnStatement findReturnStatementFollowingNode(EnhancedForStatement forNode) {
+	private ReturnStatement findFollowingReturnStatement(EnhancedForStatement forNode) {
 		ASTNode forNodeParent = forNode.getParent();
 		if (ASTNode.BLOCK == forNodeParent.getNodeType()) {
 			Block parentBlock = (Block) forNodeParent;
@@ -400,8 +408,26 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends EnhancedForLoopTo
 	}
 
 	/**
+	 * A visitor for analyzing an {@link EnhancedForStatement} whether it 
+	 * consists of the shape:
+	 * 
+	 * <pre>
+	 * <code>
+	 * 	boolean boolVarName = false;
+	 * 	for(Object val : values) {
+	 * 		if(condition(val)) {
+	 * 			boolVarName = true;
+	 * 			break;
+	 * 		}
+	 * 	}
+	 * </code>
+	 * </pre>
+	 * 
+	 * Furthermore, it finds the declaration fragment of the assigned boolean variable
+	 * and checks whether it initial value is {@code false}.
 	 * 
 	 * @author Ardit Ymeri
+	 * @since 2.0.2
 	 *
 	 */
 	private class LoopWithBreakStatementAnalyzeVisitor extends ASTVisitor {
