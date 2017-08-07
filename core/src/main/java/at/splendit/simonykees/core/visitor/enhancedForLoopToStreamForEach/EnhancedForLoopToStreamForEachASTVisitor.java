@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -35,9 +36,9 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
 public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedForLoopToStreamASTVisitor {
 
 	private static final List<String> TYPE_BINDING_CHECK_LIST = Collections.singletonList(JAVA_UTIL_COLLECTION);
-	
+
 	private CompilationUnit compilationUnit;
-	
+
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
@@ -69,10 +70,10 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				 * expression of the enhanced for loop with no parameters
 				 */
 				Expression expressionCopy = createExpressionForStreamMethodInvocation(expression);
-				
-				if(parameterType.isPrimitiveType()) {
-					MethodInvocation mapToPrimitive = calcMappingMethod((PrimitiveType)parameterType, expressionCopy);
-					if(mapToPrimitive != null) {
+
+				if (parameterType.isPrimitiveType()) {
+					MethodInvocation mapToPrimitive = calcMappingMethod((PrimitiveType) parameterType, expressionCopy);
+					if (mapToPrimitive != null) {
 						expressionCopy = mapToPrimitive;
 					}
 				}
@@ -140,6 +141,99 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 		}
 
 		return null;
+	}
+
+	/**
+	 * Creates a method invocation for mapping to any of the predefined streams:
+	 * 
+	 * <ul>
+	 * <li>{@link java.util.stream.IntStream}</li>
+	 * <li>{@link java.util.stream.LongStream}</li>
+	 * <li>{@link java.util.stream.DoubleStream}</li>
+	 * </ul>
+	 * 
+	 * if the given primitive type is either an {@code int}, {@code long} or
+	 * {@code double}.
+	 * 
+	 * @param parameterType
+	 *            represents the type of iterating index of the loop.
+	 * @param expression
+	 *            represents the collection which is being iterated.
+	 * 
+	 * @return {@code expression.stream().mapToInt/Long/Doulbe(Integer/Long/Doulbe::valueOf)}
+	 *         or {@code null} if the given type is neither {@code int},
+	 *         {@code long} nor {@code double}.
+	 */
+	private MethodInvocation calcMappingMethod(PrimitiveType parameterType, Expression expression) {
+		ITypeBinding binding = parameterType.resolveBinding();
+		MethodInvocation methodInvocation = null;
+		ExpressionMethodReference expMethodReference = null;
+
+		if (binding == null) {
+			return null;
+		}
+
+		String methodName = ""; //$NON-NLS-1$
+		String primitiveName = binding.getName();
+		String expMethRefName = VALUE_OF;
+		Class<? extends Number> boxedClass = null;
+
+		switch (primitiveName) {
+		case "int": //$NON-NLS-1$
+			methodName = MAP_TO_INT;
+			boxedClass = Integer.class;
+			break;
+		case "long": //$NON-NLS-1$
+			methodName = MAP_TO_LONG;
+			boxedClass = Long.class;
+			break;
+		case "double": //$NON-NLS-1$
+			methodName = MAP_TO_DOUBLE;
+			boxedClass = Double.class;
+			break;
+		}
+
+		if (methodName.isEmpty() || boxedClass == null) {
+			return null;
+		}
+
+		AST ast = astRewrite.getAST();
+
+		MethodInvocation streamMethodInvocation = astRewrite.getAST().newMethodInvocation();
+		streamMethodInvocation.setName(ast.newSimpleName(STREAM));
+		streamMethodInvocation.setExpression(expression);
+
+		methodInvocation = ast.newMethodInvocation();
+		methodInvocation.setName(ast.newSimpleName(methodName));
+		methodInvocation.setExpression(streamMethodInvocation);
+
+		expMethodReference = ast.newExpressionMethodReference();
+		expMethodReference.setName(ast.newSimpleName(expMethRefName));
+		expMethodReference.setExpression(ast.newSimpleName(boxedClass.getSimpleName()));
+
+		addImport(boxedClass.getName());
+
+		ListRewrite miRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
+		miRewrite.insertFirst(expMethodReference, null);
+
+		return methodInvocation;
+	}
+
+	/**
+	 * Makes use of {@link ImportRewrite} to check whether an import statement
+	 * is needed for the given qualified name, and if yes, stores it to the
+	 * {@link #addImports}.
+	 * 
+	 * @param qualifiedName
+	 *            a string representing a qualified name.
+	 */
+	private void addImport(String qualifiedName) {
+		ImportRewrite importRewrite = ImportRewrite.create(compilationUnit, true);
+		importRewrite.addImport(qualifiedName);
+		String[] addedImpots = importRewrite.getAddedImports();
+		for (String addedImport : addedImpots) {
+			this.addImports.add(addedImport);
+		}
 	}
 
 	/**
