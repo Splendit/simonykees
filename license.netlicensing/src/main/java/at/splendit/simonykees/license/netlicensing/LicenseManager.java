@@ -66,7 +66,7 @@ public class LicenseManager {
 	/**
 	 * Validation interval in seconds. 10 * 60s = 10 minutes
 	 */
-	private final long VALIDATE_INTERVAL_IN_SECONDS = 30;
+	private final long VALIDATE_INTERVAL_IN_SECONDS = 600;
 	/**
 	 * Delay of the first validation of the scheduler
 	 */
