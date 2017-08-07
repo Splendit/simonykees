@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -117,14 +118,21 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends EnhancedForLoopTo
 		if (!isTypeSafe(parameterTypeBinding)) {
 			return true;
 		}
+		
+		List<Statement> bodyStatements = new ArrayList<>();
 
-		// the body of the loop should be a block
+		/*
+		 *  the body of the loop should either be a block or a single if statement
+		 */
 		Statement body = enhancedForStatement.getBody();
-		if (ASTNode.BLOCK != body.getNodeType()) {
+		if (ASTNode.BLOCK == body.getNodeType()) {
+			bodyStatements = ASTNodeUtil.returnTypedList(((Block) body).statements(), Statement.class);
+		} else if(ASTNode.IF_STATEMENT == body.getNodeType()) {
+			bodyStatements.add(body);
+		} else {
 			return true;
 		}
 
-		List<Statement> bodyStatements = ASTNodeUtil.returnTypedList(((Block) body).statements(), Statement.class);
 
 		// the loop body should consist of only one 'if' statement.
 		if (bodyStatements.size() != 1) {
@@ -349,24 +357,30 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends EnhancedForLoopTo
 	 * is not followed by a return statement or if the transformation is not possible. 
 	 */
 	private ReturnStatement isAssignmentAndReturnBlock(Statement thenStatement, EnhancedForStatement forNode) {
+		List<Statement> thenBody = new ArrayList<>();
+		
 		if (ASTNode.BLOCK == thenStatement.getNodeType()) {
-			List<Statement> thenBody = ASTNodeUtil.convertToTypedList(((Block) thenStatement).statements(),
-					Statement.class);
-			if (thenBody.size() == 1) {
-				Statement stStatement = thenBody.get(0);
-				if (ASTNode.RETURN_STATEMENT == stStatement.getNodeType()) {
-					ReturnStatement returnStatement = (ReturnStatement) stStatement;
-					Expression returnedExpression = returnStatement.getExpression();
-					if (ASTNode.BOOLEAN_LITERAL == returnedExpression.getNodeType()) {
-						BooleanLiteral booleanLiteral = (BooleanLiteral) returnedExpression;
-						if (booleanLiteral.booleanValue()) {
-							return findFollowingReturnStatement(forNode);
+			thenBody = ASTNodeUtil.convertToTypedList(((Block) thenStatement).statements(),
+					Statement.class); 
+		} else if(ASTNode.RETURN_STATEMENT == thenStatement.getNodeType()) {
+			thenBody.add(thenStatement);
+		}
+		
+		if (thenBody.size() == 1) {
+			Statement stStatement = thenBody.get(0);
+			if (ASTNode.RETURN_STATEMENT == stStatement.getNodeType()) {
+				ReturnStatement returnStatement = (ReturnStatement) stStatement;
+				Expression returnedExpression = returnStatement.getExpression();
+				if (ASTNode.BOOLEAN_LITERAL == returnedExpression.getNodeType()) {
+					BooleanLiteral booleanLiteral = (BooleanLiteral) returnedExpression;
+					if (booleanLiteral.booleanValue()) {
+						return findFollowingReturnStatement(forNode);
 
-						}
 					}
 				}
 			}
 		}
+		
 		return null;
 	}
 
