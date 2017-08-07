@@ -134,7 +134,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 	 * @param parameter
 	 * @return
 	 */
-	protected boolean isStatementValid(Statement statement, SimpleName parameter) {
+	private boolean isStatementValid(Statement statement, SimpleName parameter) {
 		StreamForEachCheckValidStatementASTVisitor statementVisitor = new StreamForEachCheckValidStatementASTVisitor(
 				parameter);
 		statement.accept(statementVisitor);
