@@ -6,16 +6,14 @@ import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.i18n.ExceptionMessages;
-import at.splendit.simonykees.i18n.Messages;
-import at.splendit.simonykees.license.api.LicenseValidationService;
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
+import at.splendit.simonykees.i18n.ExceptionMessages;
+import at.splendit.simonykees.license.api.LicenseValidationService;
 
 /**
  * GUI related convenience class to check the validity of the license and
@@ -66,8 +64,7 @@ public class LicenseUtil {
 		if (isLicenseValidationServiceAvailable) {
 			String userMessage = licenseValidationService.getLicenseStautsUserMessage();
 
-			SimonykeesMessageDialog.openMessageDialog(shell,
-					NLS.bind(Messages.LicenseHelper_licenseProblem, userMessage), MessageDialog.ERROR);
+			SimonykeesMessageDialog.openMessageDialog(shell, userMessage, MessageDialog.ERROR);
 		} else {
 			// TODO: proper error handling
 			logger.error(ExceptionMessages.LicenseUtil_license_service_unavailable);
