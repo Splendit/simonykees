@@ -95,7 +95,7 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * @since 2.0.2
  *
  */
-public class EnhancedForLoopToStreamAnyMatchASTVisitor extends EnhancedForLoopToStreamForEachASTVisitor {
+public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedForLoopToStreamASTVisitor {
 
 	private static final String ANY_MATCH = "anyMatch"; //$NON-NLS-1$
 	private static final String STREAM = "stream"; //$NON-NLS-1$
@@ -153,12 +153,14 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends EnhancedForLoopTo
 
 		/*
 		 * the condition expression should not contain non effectively final
-		 * variables
+		 * variables and should not throw any exception
 		 */
 		Expression ifCondition = ifStatement.getExpression();
-		if (containsNonEffectivelyFinalVariable(ifCondition)) {
+		if (containsNonEffectivelyFinalVariable(ifCondition) || throwsException(ifCondition)) {
 			return true;
 		}
+		
+		
 
 		Statement thenStatement = ifStatement.getThenStatement();
 		VariableDeclarationFragment booleanDeclFragment;
@@ -183,6 +185,12 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends EnhancedForLoopTo
 		}
 
 		return true;
+	}
+
+	private boolean throwsException(Expression ifCondition) {
+		UnhandledExceptionVisitor visitor = new UnhandledExceptionVisitor();
+		ifCondition.accept(visitor);
+		return visitor.throwsException();
 	}
 
 	/**
@@ -371,7 +379,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends EnhancedForLoopTo
 			if (ASTNode.RETURN_STATEMENT == stStatement.getNodeType()) {
 				ReturnStatement returnStatement = (ReturnStatement) stStatement;
 				Expression returnedExpression = returnStatement.getExpression();
-				if (ASTNode.BOOLEAN_LITERAL == returnedExpression.getNodeType()) {
+				if (returnedExpression != null && ASTNode.BOOLEAN_LITERAL == returnedExpression.getNodeType()) {
 					BooleanLiteral booleanLiteral = (BooleanLiteral) returnedExpression;
 					if (booleanLiteral.booleanValue()) {
 						return findFollowingReturnStatement(forNode);
@@ -410,7 +418,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends EnhancedForLoopTo
 					if (ASTNode.RETURN_STATEMENT == nextStatement.getNodeType()) {
 						ReturnStatement followingReturnSt = (ReturnStatement) nextStatement;
 						Expression returnedExpression = followingReturnSt.getExpression();
-						if (ASTNode.BOOLEAN_LITERAL == returnedExpression.getNodeType()
+						if (returnedExpression != null && ASTNode.BOOLEAN_LITERAL == returnedExpression.getNodeType()
 								&& !((BooleanLiteral) returnedExpression).booleanValue()) {
 							return followingReturnSt;
 						}

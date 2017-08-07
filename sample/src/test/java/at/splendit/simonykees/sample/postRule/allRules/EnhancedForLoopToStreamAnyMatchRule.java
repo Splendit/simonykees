@@ -275,4 +275,34 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 		String emptyString = "";
 		return strings.stream().anyMatch(emptyString::equals);
 	}
+
+	public void emptyReturnStatements(List<String> strings) {
+		String emptyString = "";
+		for (String value : strings) {
+			if (emptyString.equals(value)) {
+				return;
+			}
+		}
+
+		return;
+	}
+
+	public boolean unhandledException(List<String> strings) throws Exception {
+		String emptyString = "";
+		for (String value : strings) {
+			if (compareEquals(emptyString, value)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean compareEquals(String value1, String value2) throws Exception {
+		if (value1 == null || value2 == null) {
+			throw new Exception();
+		}
+
+		return value1.equals(value2);
+	}
 }

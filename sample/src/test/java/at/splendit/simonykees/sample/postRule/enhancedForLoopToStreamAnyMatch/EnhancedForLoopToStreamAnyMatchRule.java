@@ -247,11 +247,11 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	
 	public boolean noReturnStatementInsideIf(List<String> strings) {
 		String emptyString = "";
-	    strings.stream().forEach((value) -> {
+	    for(String value : strings) {
 	        if(!emptyString.equals(value)) {
 	        	String prefix = value.substring(0, 1);
 	        }
-	    });
+	    }
 	    return false;
 	}
 	
@@ -274,5 +274,35 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	public boolean singleBodyStatementEverywhere(List<String> strings) {
 		String emptyString = "";
 	    return strings.stream().anyMatch(value -> emptyString.equals(value));
+	}
+	
+	public void emptyReturnStatements(List<String> strings) {
+		String emptyString = "";
+	    for(String value : strings) {
+	        if(emptyString.equals(value)) {	        	
+	        	return;
+	        }
+	    }
+	    
+	    return;
+	}
+	
+	public boolean unhandledException(List<String> strings) throws Exception {
+		String emptyString = "";
+	    for(String value : strings) {
+	        if(compareEquals(emptyString, value)) {	        	
+	        	return true;
+	        }
+	    }
+	    
+	    return false;
+	}
+
+	private boolean compareEquals(String value1, String value2) throws Exception {
+		if(value1 == null || value2 == null ) {
+			throw new Exception();
+		}
+		
+		return value1.equals(value2);
 	}
 }
