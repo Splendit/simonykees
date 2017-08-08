@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.visitor;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,21 +12,99 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
+ * transforms calls to {@link String#indexOf(String)} and
+ * {@link Collection#indexOf(Object)} into calls to
+ * {@link String#contains(CharSequence)} and {@link Collection#contains(Object)}
+ * respectively.
+ * 
+ * The transformation will only take place, if the return value is checked and
+ * according to the following tables. If the method invocation to indexOf is on
+ * the left of the {@link InfixExpression} (i.e. s.indexOf("l") == -1):
+ * <table border="1">
+ * <th>
+ * <td>Operator</td>
+ * <td>Return Value</td>
+ * <td>Transformation</td></th>
+ * <tr>
+ * <td>==</td>
+ * <td>-1</td>
+ * <td>!contains</td>
+ * </tr>
+ * <tr>
+ * <td>!=</td>
+ * <td>-1</td>
+ * <td>contains</td>
+ * </tr>
+ * <tr>
+ * <td>&gt;</td>
+ * <td>-1</td>
+ * <td>contains</td>
+ * </tr>
+ * <tr>
+ * <td>&gt;=</td>
+ * <td>0</td>
+ * <td>contains</td>
+ * </tr>
+ * <tr>
+ * <td>&lt;</td>
+ * <td>0</td>
+ * <td>!contains</td>
+ * </tr>
+ * <tr>
+ * <td>&lt;=</td>
+ * <td>-1</td>
+ * <td>!contains</td>
+ * </tr>
+ * </table>
+ * 
+ * If it is on the right (i.e. -1 == s.indexOf("l")):
+ * <table border="1">
+ * <th>
+ * <td>Operator</td>
+ * <td>Return Value</td>
+ * <td>Transformation</td></th>
+ * <tr>
+ * <td>==</td>
+ * <td>-1</td>
+ * <td>!contains</td>
+ * </tr>
+ * <tr>
+ * <td>!=</td>
+ * <td>-1</td>
+ * <td>contains</td>
+ * </tr>
+ * <tr>
+ * <td>&gt;</td>
+ * <td>0</td>
+ * <td>!contains</td>
+ * </tr>
+ * <tr>
+ * <td>&gt;=</td>
+ * <td>-1</td>
+ * <td>!contains</td>
+ * </tr>
+ * <tr>
+ * <td>&lt;</td>
+ * <td>-1</td>
+ * <td>contains</td>
+ * </tr>
+ * <tr>
+ * <td>&lt;=</td>
+ * <td>0</td>
+ * <td>contains</td>
+ * </tr>
+ * </table>
  * 
  * @author Matthias Webhofer
  * @since 2.0.4
  *
  */
 public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
-
-	private static final Logger logger = LoggerFactory.getLogger(IndexOfToContainsASTVisitor.class);
 
 	private static final String PRIMITIVE_INT_QUALIFIED_NAME = "int"; //$NON-NLS-1$
 	private static final String INTEGER_QUALIFIED_NAME = java.lang.Integer.class.getName();
@@ -73,6 +152,14 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 		return true;
 	}
 
+	/**
+	 * prepares the transformation from indexOf to contains
+	 * 
+	 * @param methodInvocationNode
+	 * @param type
+	 *            {@link TransformationType#STRING} or
+	 *            {@link TransformationType#COLLECTION}
+	 */
 	private void convertToContains(MethodInvocation methodInvocationNode, TransformationType type) {
 		ASTNode parentNode = methodInvocationNode.getParent();
 		if (parentNode.getNodeType() == ASTNode.INFIX_EXPRESSION) {
@@ -87,6 +174,11 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 						Expression methodArgumentExpression = methodArguments.get(0);
 						boolean doTransformation = true;
 
+						/*
+						 * for strings, the argument of the contains method must
+						 * be a string itself. char-Variables or char literals
+						 * will be ignored.
+						 */
 						if (type == TransformationType.STRING && !isStringType(methodArgumentExpression)) {
 							doTransformation = false;
 						}
@@ -101,6 +193,17 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 	}
 
+	/**
+	 * evaluates whether the method call to indexOf will be replaced by contains
+	 * or !contains or if it will be ignored.
+	 * 
+	 * @param parent
+	 * @param position
+	 *            {@link #getPosition(InfixExpression)}
+	 * @return {@link TransformationOption#CONTAINS},
+	 *         {@link TransformationOption#NOT_CONTAINS} or null, if the
+	 *         transformation will be ignored.
+	 */
 	private TransformationOption getTransformationOption(InfixExpression parent, IndexOfMethodPosition position) {
 		TransformationOption option = null;
 
@@ -156,6 +259,22 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 		return option;
 	}
 
+	/**
+	 * this method does the actual transformation in the AST, as soon as the
+	 * preparation is done and there have not been any errors
+	 * 
+	 * @param leftExpression
+	 *            the expression on the left side of the method invocation to
+	 *            indexOf
+	 * @param methodArgument
+	 *            the single argument of the method
+	 * @param infixExpression
+	 *            the parent infix expression
+	 * @param option
+	 *            {@link TransformationOption#CONTAINS} or
+	 *            {@link TransformationOption#NOT_CONTAINS}
+	 */
+	@SuppressWarnings("unchecked")
 	private void transform(Expression leftExpression, Expression methodArgument, InfixExpression infixExpression,
 			TransformationOption option) {
 		if (methodArgument != null && infixExpression != null && option != null) {
@@ -181,13 +300,23 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 	}
 
+	/**
+	 * evaluates the position of the method invocation to indexOf within the
+	 * parent {@link InfixExpression}.
+	 * 
+	 * @param infixExpression
+	 *            parent
+	 * @return {@link IndexOfMethodPosition#LEFT} or
+	 *         {@link IndexOfMethodPosition#RIGHT} according to the position in
+	 *         the parent. null, if the position could not been determined.
+	 */
 	private IndexOfMethodPosition getPosition(InfixExpression infixExpression) {
 		IndexOfMethodPosition position = null;
 
 		Expression leftOperand = infixExpression.getLeftOperand();
 		Expression rightOperand = infixExpression.getRightOperand();
-		
-		if(leftOperand.getNodeType() == ASTNode.METHOD_INVOCATION) {
+
+		if (leftOperand.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			leftOperand = ((MethodInvocation) leftOperand).getExpression();
 			if ((isStringType(leftOperand) || isCollectionType(leftOperand)) && isIntegerType(rightOperand)) {
 				position = IndexOfMethodPosition.LEFT;
@@ -198,13 +327,18 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 				position = IndexOfMethodPosition.RIGHT;
 			}
 		}
-		
-		
-		
 
 		return position;
 	}
 
+	/**
+	 * checks if the type binding of the given expression is of type
+	 * {@link Collection}
+	 * 
+	 * @param expression
+	 * @return true, if the expression is of type {@link Collection}, false
+	 *         otherwise (and if the expression is null).
+	 */
 	private boolean isCollectionType(Expression expression) {
 		boolean result = false;
 
@@ -222,6 +356,14 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 		return result;
 	}
 
+	/**
+	 * checks if the type binding of the given expression is of type
+	 * {@link String}
+	 * 
+	 * @param expression
+	 * @return true, if the expression is of type {@link String}, false
+	 *         otherwise (and if the expression is null).
+	 */
 	private boolean isStringType(Expression expression) {
 		boolean result = false;
 
@@ -239,6 +381,14 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 		return result;
 	}
 
+	/**
+	 * checks if the type binding of the given expression is of type
+	 * {@link Integer}
+	 * 
+	 * @param expression
+	 * @return true, if the expression is of type {@link Integer}, false
+	 *         otherwise (and if the expression is null).
+	 */
 	private boolean isIntegerType(Expression expression) {
 		boolean result = false;
 

@@ -6,12 +6,18 @@ import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.IndexOfToContainsASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
+/**
+ * 
+ * @author Matthias Webhofer
+ * @since 2.0.4
+ *
+ */
 public class IndexOfToContainsRule extends RefactoringRule<IndexOfToContainsASTVisitor> {
 
 	public IndexOfToContainsRule(Class<IndexOfToContainsASTVisitor> visitor) {
 		super(visitor);
-		this.name = "IndexOfToContainsRule";
-		this.description = "IndexOfToContainsRule";
+		this.name = Messages.IndexOfToContainsRule_name;
+		this.description = Messages.IndexOfToContainsRule_description;
 	}
 
 	@Override
