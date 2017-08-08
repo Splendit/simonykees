@@ -16,11 +16,47 @@ public class LambdaForEachMapRule {
 		return Arrays.asList(input.split(";"));
 	}
 
+	public String unwrapFromCollection(String input) {
+		List<String> list = Arrays.asList(input + "non", "non-empty");
+		StringBuilder sb = new StringBuilder();
+
+		list.stream().map(s -> StringUtils.substring(s, 1)).forEach(sb::append);
+
+		return sb.toString();
+	}
+
 	public String unwrapOneExpression(String input) {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
 		list.stream().filter(s -> !StringUtils.isEmpty(s)).map(s -> StringUtils.substring(s, 1)).forEach(sb::append);
+
+		return sb.toString();
+	}
+
+	public String longTypedStream(String input) {
+		List<Long> list = Arrays.asList(5L, 3L, 2L);
+		StringBuilder sb = new StringBuilder();
+
+		list.stream().filter(l -> l > 0).mapToLong(l -> 100L / l).forEach(sb::append);
+
+		return sb.toString();
+	}
+
+	public String doubleTypedStream(String input) {
+		List<Double> list = Arrays.asList(5D, 3D, 2D);
+		StringBuilder sb = new StringBuilder();
+
+		list.stream().filter(d -> d > 0).mapToDouble(d -> 100D / d).forEach(sb::append);
+
+		return sb.toString();
+	}
+
+	public String intTypedStream(String input) {
+		List<Integer> list = Arrays.asList(5, 3, 2);
+		StringBuilder sb = new StringBuilder();
+
+		list.stream().filter(i -> i > 0).mapToInt(i -> 100 - i).forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -88,7 +124,7 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).map(s -> {
+		list.stream().filter(s -> !StringUtils.isEmpty(s)).mapToInt(s -> {
 			int offset = 10;
 			return StringUtils.indexOf(s, "i") + offset;
 		}).forEach(pos -> sb.append(Integer.toString(pos)));
@@ -99,7 +135,7 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).map(s -> StringUtils.indexOf(s, "i") + 10)
+		list.stream().filter(s -> !StringUtils.isEmpty(s)).mapToInt(s -> StringUtils.indexOf(s, "i") + 10)
 				.forEach(pos -> sb.append(Integer.toString(pos)));
 		return sb.toString();
 	}
@@ -109,7 +145,7 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 
 		int offset = 10;
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).map(s -> {
+		list.stream().filter(s -> !StringUtils.isEmpty(s)).mapToInt(s -> {
 			sb.append(s);
 			sb.append("c");
 			return StringUtils.indexOf(s, "i") + 10;
@@ -127,7 +163,7 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 
 		int offset = 10;
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).map(s -> {
+		list.stream().filter(s -> !StringUtils.isEmpty(s)).mapToInt(s -> {
 			if (offset > 0) {
 				sb.append(s);
 			}
@@ -144,7 +180,7 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 
 		int offset = 10;
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).map(s -> {
+		list.stream().filter(s -> !StringUtils.isEmpty(s)).mapToInt(s -> {
 			// I may be necessary here
 			if (offset > 0) {
 				sb.append(s);
@@ -163,7 +199,7 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 
 		int offset = 10;
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).map(s -> {
+		list.stream().filter(s -> !StringUtils.isEmpty(s)).mapToInt(s -> {
 			int i;// not important
 			// not used
 			int j;
@@ -179,7 +215,7 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).map(s -> {
+		list.stream().filter(s -> !StringUtils.isEmpty(s)).mapToInt(s -> {
 			sb.append(s);
 			return StringUtils.indexOf(s, "i");
 		}).forEach(pos -> {
@@ -242,7 +278,7 @@ public class LambdaForEachMapRule {
 		numbers.add(4.5);
 
 		StringBuilder sb = new StringBuilder();
-		numbers.stream().filter(n -> n.doubleValue() > 0).map((Number n) -> (int) n / 2).forEach(sb::append);
+		numbers.stream().filter(n -> n.doubleValue() > 0).mapToInt((Number n) -> (int) n / 2).forEach(sb::append);
 
 		return sb.toString();
 	}

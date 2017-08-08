@@ -15,6 +15,16 @@ public class TestWhileToForEachRule {
 		return Arrays.asList(input.split(";")); //$NON-NLS-1$
 	}
 	
+	public String unsafeIteratorName(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		String aL = "I am here to confuse you!";
+		for (String aL1 : l) {
+			sb.append(aL1);
+		}
+		return sb.toString();
+	}
+	
 	public String loopingOverArrays(String input) {
 		StringBuilder sb = new StringBuilder();
 		String []array = {"-", input, "."};
@@ -91,9 +101,9 @@ public class TestWhileToForEachRule {
 		StringBuilder sb = new StringBuilder();
 
 		String s;
-		for (String lIterator : l) {
+		for (String aL : l) {
 			Object k;
-			s = lIterator;
+			s = aL;
 			sb.append(s);
 		}
 		return sb.toString();
@@ -105,9 +115,9 @@ public class TestWhileToForEachRule {
 
 		String s;
 		s = "lalelu";
-		for (String lIterator : l) {
+		for (String aL : l) {
 			Object k;
-			s = lIterator;
+			s = aL;
 			sb.append(s);
 		}
 		return sb.toString();
@@ -118,9 +128,9 @@ public class TestWhileToForEachRule {
 		StringBuilder sb = new StringBuilder();
 
 		String s;
-		for (String lIterator : l) {
+		for (String aL : l) {
 			Object k;
-			s = lIterator;
+			s = aL;
 			sb.append(s);
 		}
 		s = "lalelu";
@@ -132,9 +142,9 @@ public class TestWhileToForEachRule {
 		StringBuilder sb = new StringBuilder();
 
 		String s = "";
-		for (String lIterator : l) {
+		for (String aL : l) {
 			Object k;
-			s = lIterator;
+			s = aL;
 			sb.append(s);
 		}
 		sb.append(s);
@@ -190,8 +200,8 @@ public class TestWhileToForEachRule {
 		Iterator<String> iterator = l.iterator();
 		
 		for(String outerKey : l)
-			for (String lIterator : l)
-				sb.append(lIterator + outerKey);
+			for (String aL : l)
+				sb.append(aL + outerKey);
 		
 		return sb.toString();
 	}
@@ -282,7 +292,7 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 		
-		for (String lIterator : l) {
+		for (String aL : l) {
 			String p = "foo";
 			sb.append(p);
 		}
@@ -296,8 +306,8 @@ public class TestWhileToForEachRule {
 		
 		String s;
 		String foo = "foo";
-		for (String lIterator : l) {
-			sb.append(lIterator);
+		for (String aL : l) {
+			sb.append(aL);
 		}
 		
 		return sb.toString();
@@ -322,8 +332,8 @@ public class TestWhileToForEachRule {
 		foo.l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 		
-		for (String lIterator : foo.l) {
-			sb.append(lIterator);
+		for (String aL : foo.l) {
+			sb.append(aL);
 		}
 		
 		return sb.toString();
@@ -379,10 +389,10 @@ public class TestWhileToForEachRule {
 		String foo = "foo";
 		String suffix = "";
 		String prefix = "";
-		for (String lIterator : l) {
+		for (String aL : l) {
 			try {
 				if(l.size() > 0) {
-					s = lIterator;
+					s = aL;
 					prefix = s;
 				}
 			} catch (Exception e) {

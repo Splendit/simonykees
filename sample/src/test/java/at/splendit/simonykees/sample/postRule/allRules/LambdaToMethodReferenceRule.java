@@ -137,13 +137,13 @@ public class LambdaToMethodReferenceRule {
 
 			@Override
 			public boolean hasNext() {
-				personList.stream().forEach((person) -> doSomething(person));
+				personList.forEach((person) -> doSomething(person));
 				return false;
 			}
 
 			@Override
 			public Object next() {
-				personList.stream().forEach((person) -> doSomething(person));
+				personList.forEach((person) -> doSomething(person));
 				return null;
 			}
 
@@ -262,7 +262,7 @@ public class LambdaToMethodReferenceRule {
 			SOURCE sourceCollection, Supplier<DEST> collectionFactory) {
 
 		DEST result = collectionFactory.get();
-		sourceCollection.stream().forEach(result::add);
+		sourceCollection.forEach(result::add);
 		return result;
 	}
 

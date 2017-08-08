@@ -1,6 +1,6 @@
 #!/usr/bin/groovy
 
-//IMPORTANT NOTE: is duplicated to Jenkinsfile.groovy to allow the change of the file in the jenkins config. delete if this process happend
+//IMPORTANT NOTE: is duplicated from Jenkinsfile to allow the change of the file in the jenkins config. will be the new executed file in the build on the CI
 
 // if this script is changed expand the documentation on confluence!
 // url: https://confluence.splendit.loc/display/SIM/Jenkins+Pipeline+Description
