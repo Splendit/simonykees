@@ -11,11 +11,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.i18n.ExceptionMessages;
-import at.splendit.simonykees.i18n.Messages;
-import at.splendit.simonykees.license.api.LicenseValidationService;
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
+import at.splendit.simonykees.i18n.ExceptionMessages;
+import at.splendit.simonykees.license.api.LicenseValidationService;
 
 /**
  * GUI related convenience class to check the validity of the license and
@@ -67,7 +66,7 @@ public class LicenseUtil {
 			String userMessage = licenseValidationService.getLicenseStautsUserMessage();
 
 			SimonykeesMessageDialog.openMessageDialog(shell,
-					NLS.bind(Messages.LicenseHelper_licenseProblem, userMessage), MessageDialog.ERROR);
+					NLS.bind(ExceptionMessages.LicenseUtil_error_moreInformation, userMessage), MessageDialog.ERROR);
 		} else {
 			// TODO: proper error handling
 			logger.error(ExceptionMessages.LicenseUtil_license_service_unavailable);
