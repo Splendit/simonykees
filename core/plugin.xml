@@ -79,4 +79,7 @@
 				title="Discovery URL"/>
 		</server>
 	</extension>
+	<extension point="org.eclipse.ui.startup">
+     	<startup class="at.splendit.simonykees.core.startup.Startup"/>
+    </extension>
 </plugin>
