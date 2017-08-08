@@ -27,8 +27,8 @@ public class TestWhileToForEachListRule {
 		for (String t : list) {
 			System.out.println(t);
 			sb.append(t);
-			for (String iterator : list) {
-				sb.append(iterator);
+			for (String aList : list) {
+				sb.append(aList);
 			}
 		}
 		return sb.toString();
@@ -40,11 +40,11 @@ public class TestWhileToForEachListRule {
 		for (String t : list) {
 			System.out.println(t);
 			sb.append(t);
-			for (String iterator : list) {
-				sb.append(iterator);
-				for (String iterator1 : list) {
-					sb.append(iterator1);
-					System.out.print(iterator1);
+			for (String aList : list) {
+				sb.append(aList);
+				for (String aList1 : list) {
+					sb.append(aList1);
+					System.out.print(aList1);
 				}
 			}
 		}
@@ -213,9 +213,9 @@ public class TestWhileToForEachListRule {
 	public String confusingIteratorName(String iterator) {
 		StringBuilder sb = new StringBuilder();
 		List<String>list = generateList(iterator);
-		for (String iterator1 : list) {
-			System.out.println(iterator1);
-			sb.append(iterator1);
+		for (String aList : list) {
+			System.out.println(aList);
+			sb.append(aList);
 		}
 		return sb.toString();
 	}
@@ -260,8 +260,8 @@ public class TestWhileToForEachListRule {
 	public String qualifiedNameType() {
 		List<java.lang.Boolean> javaLangBooleans = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
-		for (java.lang.Boolean iterator : javaLangBooleans) {
-			sb.append(iterator);
+		for (java.lang.Boolean javaLangBoolean : javaLangBooleans) {
+			sb.append(javaLangBoolean);
 		}
 		return sb.toString();
 	}
@@ -269,8 +269,8 @@ public class TestWhileToForEachListRule {
 	public String unQualifiedNameType() {
 		List<Boolean> myBooleans = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
-		for (Boolean iterator : myBooleans) {
-			sb.append(iterator);
+		for (Boolean myBoolean : myBooleans) {
+			sb.append(myBoolean);
 		}
 		return sb.toString();
 	}

@@ -53,9 +53,9 @@ public class TestForToForEachListIteratingIndexRule {
 	public String testDublicateIteratorName(String input) {
 		List<String> fooList = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
-		fooList.forEach((iterator) -> {
-			sb.append(iterator);
-			fooList.forEach((iterator1) -> sb.append(iterator + input + iterator1));
+		fooList.forEach((aFooList) -> {
+			sb.append(aFooList);
+			fooList.forEach((aFooList1) -> sb.append(aFooList + input + aFooList1));
 		});
 		return "";
 	}
@@ -86,16 +86,16 @@ public class TestForToForEachListIteratingIndexRule {
 		StringBuilder sb = new StringBuilder();
 		int j;
 
-		foo.forEach((iterator) -> {
+		foo.forEach((aFoo) -> {
 			// i want my comments here
 			if (foo.size() > 0) {
-				String s = iterator;
-				"".equals(iterator);
+				String s = aFoo;
+				"".equals(aFoo);
 				sb.append(s);
 			} else {
-				String s = iterator;
+				String s = aFoo;
 				String d;
-				"".equals(iterator);
+				"".equals(aFoo);
 				sb.append(s);
 			}
 
@@ -156,7 +156,7 @@ public class TestForToForEachListIteratingIndexRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		foo.forEach((iterator) -> {
+		foo.forEach((aFoo) -> {
 			int i = 0;
 			int k = 0;
 			String it = foo.get(i);
@@ -219,12 +219,12 @@ public class TestForToForEachListIteratingIndexRule {
 		StringBuilder sb = new StringBuilder();
 		String s;
 		String t;
-		for (String fooIterator2 : foo) {
-			s = fooIterator2;
+		for (String aFoo2 : foo) {
+			s = aFoo2;
 			s += ";";
 			sb.append(s);
-			for (String fooIterator : foo) {
-				t = fooIterator;
+			for (String aFoo : foo) {
+				t = aFoo;
 				sb.append(t);
 			}
 		}

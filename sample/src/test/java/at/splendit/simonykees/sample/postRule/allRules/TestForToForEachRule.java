@@ -23,6 +23,26 @@ public class TestForToForEachRule {
 		return fooHashCodes;
 	}
 
+	public String unsafeIteratorName(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		String aL = "I am here to confuse you ~_^ ";
+		l.forEach(sb::append);
+		return sb.toString();
+	}
+
+	public String emptyLoopCondition(String input) {
+		StringBuilder sb = new StringBuilder();
+		List<String> foo = generateList(input);
+		for (Iterator<String> iterator = foo.iterator();;) {
+			if (!iterator.hasNext()) {
+				break;
+			}
+			sb.append(iterator.next());
+		}
+		return sb.toString();
+	}
+
 	public String testConvertIteratorToForEachTemp(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
@@ -117,7 +137,7 @@ public class TestForToForEachRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		foo.forEach((fooIterator) -> {
+		foo.forEach((aFoo) -> {
 			String anotherString = "foo";
 			sb.append(anotherString);
 		});
