@@ -13,6 +13,18 @@ public class LambdaForEachMapRule {
 	private List<String> generateList(String input) {
 		return Arrays.asList(input.split(";"));
 	}
+	
+	public String unwrapFromCollection(String input) {
+		List<String> list = Arrays.asList(input + "non", "non-empty");
+		StringBuilder sb = new StringBuilder();
+		
+		list.forEach(s -> {
+			String subString = s.substring(1);
+			sb.append(subString);
+		});
+		
+		return sb.toString();
+	}
 
 	public String unwrapOneExpression(String input) {
 		List<String> list = generateList(input);
@@ -21,6 +33,42 @@ public class LambdaForEachMapRule {
 		list.stream().filter(s -> !s.isEmpty()).forEach(s -> {
 			String subString = s.substring(1);
 			sb.append(subString);
+		});
+		
+		return sb.toString();
+	}
+	
+	public String longTypedStream(String input) {
+		List<Long> list = Arrays.asList(5L, 3L, 2L);
+		StringBuilder sb = new StringBuilder();
+		
+		list.stream().filter(l -> l > 0 ).forEach(l -> {
+			long longVal = 100L/l;
+			sb.append(longVal);
+		});
+		
+		return sb.toString();
+	}
+	
+	public String doubleTypedStream(String input) {
+		List<Double> list = Arrays.asList(5D, 3D, 2D);
+		StringBuilder sb = new StringBuilder();
+		
+		list.stream().filter(d -> d > 0 ).forEach(d -> {
+			double longVal = 100D/d;
+			sb.append(longVal);
+		});
+		
+		return sb.toString();
+	}
+	
+	public String intTypedStream(String input) {
+		List<Integer> list = Arrays.asList(5, 3, 2);
+		StringBuilder sb = new StringBuilder();
+		
+		list.stream().filter(i -> i > 0).forEach(i -> {
+			int longVal = 100 - i;
+			sb.append(longVal);
 		});
 		
 		return sb.toString();

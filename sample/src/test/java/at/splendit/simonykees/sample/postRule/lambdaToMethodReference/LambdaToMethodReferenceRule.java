@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -131,6 +132,42 @@ public class LambdaToMethodReferenceRule {
 		personList.forEach((Person person) -> this.getRandomPerson().doSomething(person));
 
 		personList.forEach(person -> this.getRandomPerson().doSomething(person));
+
+		setIterator(new Iterator() {
+
+			@Override
+			public boolean hasNext() {
+				personList.forEach(person -> doSomething(person));
+				return false;
+			}
+
+			@Override
+			public Object next() {
+				personList.forEach((Person person) -> doSomething(person));
+				return null;
+			}
+			
+		});
+		
+		new Iterator<Object>() {
+
+			@Override
+			public boolean hasNext() {
+				for (Person person : personList) {
+					doSomething(person);
+				}
+				return false;
+			}
+
+			@Override
+			public Object next() {
+				for (Person person : personList) {
+					doSomething(person);
+				}
+				return null;
+			}
+			
+		};
 	}
 
 	public void referenceToInstanceMethodOfArbitraryType() {
@@ -289,7 +326,11 @@ public class LambdaToMethodReferenceRule {
 	private Person getRandomPerson() {
 		return new Person("Random Person", LocalDate.of(1995, 8, 1));
 	}
-	
+
+	private void setIterator(Iterator iterator) {
+
+	}
+
 	class Employee<T> extends Person {
 		public Employee(String name, LocalDate birthday) {
 			super(name, birthday);
