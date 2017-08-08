@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.i18n.ExceptionMessages;
-import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.license.api.LicenseValidationService;
 
 /**
@@ -67,7 +66,7 @@ public class LicenseUtil {
 			String userMessage = licenseValidationService.getLicenseStautsUserMessage();
 
 			SimonykeesMessageDialog.openMessageDialog(shell,
-					NLS.bind(ExceptionMessages.LicenseUtil_error_moreInformaion, userMessage), MessageDialog.ERROR);
+					NLS.bind(ExceptionMessages.LicenseUtil_error_moreInformation, userMessage), MessageDialog.ERROR);
 		} else {
 			// TODO: proper error handling
 			logger.error(ExceptionMessages.LicenseUtil_license_service_unavailable);
