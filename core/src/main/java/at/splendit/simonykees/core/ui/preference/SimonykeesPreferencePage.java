@@ -33,7 +33,6 @@ import at.splendit.simonykees.i18n.Messages;
 public class SimonykeesPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
 	private RadioGroupFieldEditor useProfileOptionRadioGroup;
-	// private String currentProfileId;
 	private int currentProfileSelection = 0;
 
 	private Table profilesTable;
@@ -222,9 +221,10 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	public void handleButtonClickedListener(String profileId) {
 		final WizardDialog dialog = new WizardDialog(getShell(), new ConfigureProfileWizard(profileId)) {
-			// Removed unnecessary empty space on the bottom of
-			// the wizard intended for ProgressMonitor that is
-			// not used
+			/*
+			 * Removed unnecessary empty space on the bottom of the wizard
+			 * intended for ProgressMonitor that is not used
+			 */
 			@Override
 			protected Control createDialogArea(Composite parent) {
 				Control ctrl = super.createDialogArea(parent);
