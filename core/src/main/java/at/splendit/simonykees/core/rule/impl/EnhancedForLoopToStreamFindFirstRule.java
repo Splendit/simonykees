@@ -4,6 +4,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamFindFirstASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * @see EnhancedForLoopToStreamFindFirstASTVisitor
@@ -16,8 +17,8 @@ public class EnhancedForLoopToStreamFindFirstRule extends RefactoringRule<Enhanc
 
 	public EnhancedForLoopToStreamFindFirstRule(Class<EnhancedForLoopToStreamFindFirstASTVisitor> visitor) {
 		super(visitor);
-		this.name = "Enhanced For-Loop to Stream::findFirst";
-		this.description = "Transforms enhanced for-loops which are only used for assigining a variable to a Stream::findFirst";
+		this.name = Messages.EnhancedForLoopToStreamFindFirstRule_name;
+		this.description = Messages.EnhancedForLoopToStreamFindFirstRule_description;
 	}
 
 	@Override

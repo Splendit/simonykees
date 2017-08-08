@@ -1,17 +1,11 @@
 package at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -23,9 +17,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-
-import at.splendit.simonykees.core.util.ASTNodeUtil;
-import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
  * 
@@ -40,64 +31,16 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 	
 	@Override
 	public boolean visit(EnhancedForStatement forLoop) {
-		//FIXME: extract the duplicated code in one place
+		
 		Expression loopExpression = forLoop.getExpression();
 		SingleVariableDeclaration loopParameter = forLoop.getParameter();
-		ITypeBinding expressionBinding = loopExpression.resolveTypeBinding();
-		List<String> expressionBindingList = Collections.singletonList(Collection.class.getName());
-		// the expression of the loop should be a subtype of a collection
-		if (expressionBinding == null
-				|| (!ClassRelationUtil.isInheritingContentOfTypes(expressionBinding, expressionBindingList)
-						&& !ClassRelationUtil.isContentOfTypes(expressionBinding, expressionBindingList))) {
-			return true;
-		}
-
-		ITypeBinding parameterTypeBinding = loopParameter.getType().resolveBinding();
-		if (!isTypeSafe(parameterTypeBinding)) {
+		
+		IfStatement ifStatement = isConvertableInterruptedLoop(forLoop, loopExpression, loopParameter);	
+		if(ifStatement == null) {
 			return true;
 		}
 		
-		List<Statement> bodyStatements = new ArrayList<>();
-
-		/*
-		 *  the body of the loop should either be a block or a single if statement
-		 */
-		Statement body = forLoop.getBody();
-		if (ASTNode.BLOCK == body.getNodeType()) {
-			bodyStatements = ASTNodeUtil.returnTypedList(((Block) body).statements(), Statement.class);
-		} else if(ASTNode.IF_STATEMENT == body.getNodeType()) {
-			bodyStatements.add(body);
-		} else {
-			return true;
-		}
-
-
-		// the loop body should consist of only one 'if' statement.
-		if (bodyStatements.size() != 1) {
-			return true;
-		}
-
-		Statement statement = bodyStatements.get(0);
-		if (ASTNode.IF_STATEMENT != statement.getNodeType()) {
-			return true;
-		}
-
-		IfStatement ifStatement = (IfStatement) statement;
-
-		// the if statement should have no else branch
-		if (ifStatement.getElseStatement() != null) {
-			return true;
-		}
-		
-		/*
-		 * the condition expression should not contain non effectively final
-		 * variables and should not throw any exception
-		 */
 		Expression ifCondition = ifStatement.getExpression();
-		if (containsNonEffectivelyFinalVariable(ifCondition) || throwsException(ifCondition)) {
-			return true;
-		}
-		
 		Statement thenStatement = ifStatement.getThenStatement();
 		VariableDeclarationFragment varDeclFragment;
 		ReturnStatement returnStatement;

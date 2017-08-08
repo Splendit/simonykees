@@ -1,9 +1,5 @@
 package at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -14,7 +10,6 @@ import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -25,9 +20,6 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-
-import at.splendit.simonykees.core.util.ASTNodeUtil;
-import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
  * Analyzes the occurrences of {@link EnhancedForStatement}s the check whether a
@@ -98,61 +90,13 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 
 		SingleVariableDeclaration enhancedForParameter = enhancedForStatement.getParameter();
 		Expression enhancedForExp = enhancedForStatement.getExpression();
-		ITypeBinding expressionBinding = enhancedForExp.resolveTypeBinding();
-		List<String> expressionBindingList = Collections.singletonList(Collection.class.getName());
-		// the expression of the loop should be a subtype of a collection
-		if (expressionBinding == null
-				|| (!ClassRelationUtil.isInheritingContentOfTypes(expressionBinding, expressionBindingList)
-						&& !ClassRelationUtil.isContentOfTypes(expressionBinding, expressionBindingList))) {
+
+		IfStatement ifStatement = isConvertableInterruptedLoop(enhancedForStatement, enhancedForExp, enhancedForParameter);
+		if(ifStatement == null) {
 			return true;
 		}
 
-		ITypeBinding parameterTypeBinding = enhancedForParameter.getType().resolveBinding();
-		if (!isTypeSafe(parameterTypeBinding)) {
-			return true;
-		}
-
-		List<Statement> bodyStatements = new ArrayList<>();
-
-		/*
-		 * the body of the loop should either be a block or a single if
-		 * statement
-		 */
-		Statement body = enhancedForStatement.getBody();
-		if (ASTNode.BLOCK == body.getNodeType()) {
-			bodyStatements = ASTNodeUtil.returnTypedList(((Block) body).statements(), Statement.class);
-		} else if (ASTNode.IF_STATEMENT == body.getNodeType()) {
-			bodyStatements.add(body);
-		} else {
-			return true;
-		}
-
-		// the loop body should consist of only one 'if' statement.
-		if (bodyStatements.size() != 1) {
-			return true;
-		}
-
-		Statement statement = bodyStatements.get(0);
-		if (ASTNode.IF_STATEMENT != statement.getNodeType()) {
-			return true;
-		}
-
-		IfStatement ifStatement = (IfStatement) statement;
-
-		// the if statement should have no else branch
-		if (ifStatement.getElseStatement() != null) {
-			return true;
-		}
-
-		/*
-		 * the condition expression should not contain non effectively final
-		 * variables and should not throw any exception
-		 */
 		Expression ifCondition = ifStatement.getExpression();
-		if (containsNonEffectivelyFinalVariable(ifCondition) || throwsException(ifCondition)) {
-			return true;
-		}
-
 		Statement thenStatement = ifStatement.getThenStatement();
 		VariableDeclarationFragment booleanDeclFragment;
 		ReturnStatement returnStatement;
@@ -241,7 +185,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 	private VariableDeclarationFragment isAssignmentAndBreakBlock(Statement thenStatement,
 			EnhancedForStatement forNode) {
 
-		Assignment assignment = super.findAssignmentAfterBreakExpression(forNode);
+		Assignment assignment = super.findAssignmentAfterBreakExpression(thenStatement);
 		if (assignment != null) {
 			Expression lhs = assignment.getLeftHandSide();
 			Expression rhs = assignment.getRightHandSide();
@@ -348,7 +292,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 			}
 
 		}
-
+		
 		return null;
 	}
 }

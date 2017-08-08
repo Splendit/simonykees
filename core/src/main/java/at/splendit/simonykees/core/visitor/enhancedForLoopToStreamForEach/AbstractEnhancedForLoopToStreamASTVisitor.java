@@ -1,6 +1,8 @@
 package at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -11,26 +13,29 @@ import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.lambdaForEach.AbstractLambdaForEachASTVisitor;
 
 /**
- * An abstract class to be extended by the visitors that convert
- * an {@link EnhancedForStatement} to a stream. 
+ * An abstract class to be extended by the visitors that convert an
+ * {@link EnhancedForStatement} to a stream.
  * 
  * @author Matthias Webhofer, Ardit Ymeri
  * @since 2.0.2
  *
  */
 public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends AbstractLambdaForEachASTVisitor {
-	
+
 	/**
 	 * Checks whether the type binding is a raw type, capture, wildcard or a
 	 * parameterized type having any of the above as a parameter.
@@ -60,7 +65,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 
 		return true;
 	}
-	
+
 	/**
 	 * creates a copy target for the expression on the left of the stream()
 	 * method invocation. if the expression itself is a cast expression, then it
@@ -103,7 +108,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		astNode.accept(analyzer);
 		return analyzer.containsNonEffectivelyFinalVariable();
 	}
-	
+
 	/**
 	 * Replaces an {@link EnhancedForStatement} with a
 	 * {@link VariableDeclarationStatement} containing a single
@@ -117,7 +122,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 	 *            the fragment of the declaration statement to be used as a
 	 *            replacer.
 	 * @param type
-	 * 			the type of the declaration fragment
+	 *            the type of the declaration fragment
 	 */
 	protected void replaceLoopWithFragment(EnhancedForStatement enhancedForStatement,
 			VariableDeclarationFragment declFragment, Type type) {
@@ -137,17 +142,16 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 			}
 		}
 	}
-	
+
 	protected ReturnStatement isReturnBlock(Statement thenStatement) {
 		List<Statement> thenBody = new ArrayList<>();
-		
+
 		if (ASTNode.BLOCK == thenStatement.getNodeType()) {
-			thenBody = ASTNodeUtil.convertToTypedList(((Block) thenStatement).statements(),
-					Statement.class); 
-		} else if(ASTNode.RETURN_STATEMENT == thenStatement.getNodeType()) {
+			thenBody = ASTNodeUtil.convertToTypedList(((Block) thenStatement).statements(), Statement.class);
+		} else if (ASTNode.RETURN_STATEMENT == thenStatement.getNodeType()) {
 			thenBody.add(thenStatement);
 		}
-		
+
 		if (thenBody.size() == 1) {
 			Statement stStatement = thenBody.get(0);
 			if (ASTNode.RETURN_STATEMENT == stStatement.getNodeType()) {
@@ -156,7 +160,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		}
 		return null;
 	}
-	
+
 	protected ReturnStatement findFollowingReturnStatement(EnhancedForStatement forLoop) {
 		ASTNode forNodeParent = forLoop.getParent();
 		if (ASTNode.BLOCK == forNodeParent.getNodeType()) {
@@ -174,7 +178,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		}
 		return null;
 	}
-	
+
 	protected Assignment findAssignmentAfterBreakExpression(Statement thenStatement) {
 		if (ASTNode.BLOCK == thenStatement.getNodeType()) {
 			List<Statement> thenBody = ASTNodeUtil.convertToTypedList(((Block) thenStatement).statements(),
@@ -192,5 +196,65 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 			}
 		}
 		return null;
+	}
+
+	protected IfStatement isConvertableInterruptedLoop(EnhancedForStatement forLoop, Expression loopExpression,
+			SingleVariableDeclaration loopParameter) {
+		ITypeBinding expressionBinding = loopExpression.resolveTypeBinding();
+		List<String> expressionBindingList = Collections.singletonList(Collection.class.getName());
+		// the expression of the loop should be a subtype of a collection
+		if (expressionBinding == null
+				|| (!ClassRelationUtil.isInheritingContentOfTypes(expressionBinding, expressionBindingList)
+						&& !ClassRelationUtil.isContentOfTypes(expressionBinding, expressionBindingList))) {
+			return null;
+		}
+
+		ITypeBinding parameterTypeBinding = loopParameter.getType().resolveBinding();
+		if (!isTypeSafe(parameterTypeBinding)) {
+			return null;
+		}
+
+		List<Statement> bodyStatements = new ArrayList<>();
+
+		/*
+		 * the body of the loop should either be a block or a single if
+		 * statement
+		 */
+		Statement body = forLoop.getBody();
+		if (ASTNode.BLOCK == body.getNodeType()) {
+			bodyStatements = ASTNodeUtil.returnTypedList(((Block) body).statements(), Statement.class);
+		} else if (ASTNode.IF_STATEMENT == body.getNodeType()) {
+			bodyStatements.add(body);
+		} else {
+			return null;
+		}
+
+		// the loop body should consist of only one 'if' statement.
+		if (bodyStatements.size() != 1) {
+			return null;
+		}
+
+		Statement statement = bodyStatements.get(0);
+		if (ASTNode.IF_STATEMENT != statement.getNodeType()) {
+			return null;
+		}
+
+		IfStatement ifStatement = (IfStatement) statement;
+
+		// the if statement should have no else branch
+		if (ifStatement.getElseStatement() != null) {
+			return null;
+		}
+
+		/*
+		 * the condition expression should not contain non effectively final
+		 * variables and should not throw any exception
+		 */
+		Expression condition = ifStatement.getExpression();
+		if (containsNonEffectivelyFinalVariable(condition) || throwsException(condition)) {
+			return null;
+		}
+
+		return ifStatement;
 	}
 }
