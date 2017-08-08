@@ -70,82 +70,90 @@ import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
  */
 public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor {
 
-	private static final String STREAM_MAP_METHOD_NAME = "map"; //$NON-NLS-1$
-	private static final String COLLECTION_FULLY_QUALIFIED_NAME = java.util.Collection.class.getName();
-	private static final String STREAM_METHOD_NAME = "stream"; //$NON-NLS-1$
-	private static final String PARALLEL_STREAM_METHOD_NAME = "parallelStream"; //$NON-NLS-1$
-
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		if (isStreamForEachInvocation(methodInvocation) && !isStreamOfRawList(methodInvocation)) {
-			List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-			if (arguments.size() == 1 && ASTNode.LAMBDA_EXPRESSION == arguments.get(0).getNodeType()) {
-				LambdaExpression lambdaExpression = (LambdaExpression) arguments.get(0);
-				SimpleName parameter = extractSingleParameter(lambdaExpression);
-				Block body = extractLambdaExpressionBlockBody(lambdaExpression);
-				if (body != null) {
-					/*
-					 * use the analyzer for checking for extractable part in the
-					 * forEach
-					 */
-					ForEachBodyAnalyzer analyzer = new ForEachBodyAnalyzer(parameter, body);
-					if (analyzer.foundExtractableMapStatement()) {
-						// get the extractable information from analyzer
-						ASTNode extractableBlock = analyzer.getExtractableBlock();
-						ASTNode remainingBlock = analyzer.getRemainingBlock();
-						SimpleName newForEachParamName = analyzer.getNewForEachParameterName();
+		boolean toStreamNeeded = false;
+		if(isCollectionForEachInvocation(methodInvocation)) {
+			toStreamNeeded = true;
+		} else if(!isStreamForEachInvocation(methodInvocation) || isStreamOfRawList(methodInvocation)) {
+			return true;
+		}
+		
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+		if (arguments.size() == 1 && ASTNode.LAMBDA_EXPRESSION == arguments.get(0).getNodeType()) {
+			LambdaExpression lambdaExpression = (LambdaExpression) arguments.get(0);
+			SimpleName parameter = extractSingleParameter(lambdaExpression);
+			Block body = extractLambdaExpressionBlockBody(lambdaExpression);
+			if (body != null) {
+				/*
+				 * use the analyzer for checking for extractable part in the
+				 * forEach
+				 */
+				ForEachBodyAnalyzer analyzer = new ForEachBodyAnalyzer(parameter, body);
+				if (analyzer.foundExtractableMapStatement()) {
+					// get the extractable information from analyzer
+					ASTNode extractableBlock = analyzer.getExtractableBlock();
+					ASTNode remainingBlock = analyzer.getRemainingBlock();
+					SimpleName newForEachParamName = analyzer.getNewForEachParameterName();
 
-						// introduce a Stream::map
-						Expression streamExpression = methodInvocation.getExpression();
-						AST ast = methodInvocation.getAST();
-						MethodInvocation mapInvocation = ast.newMethodInvocation();
-						mapInvocation.setName(ast.newSimpleName(STREAM_MAP_METHOD_NAME));
+					// introduce a Stream::map
+					Expression streamExpression = methodInvocation.getExpression();
+					AST ast = methodInvocation.getAST();
+					MethodInvocation mapInvocation = ast.newMethodInvocation();
+					mapInvocation.setName(ast.newSimpleName(analyzer.getMappingMethodName()));
+					if (toStreamNeeded) {
+						MethodInvocation streamInvocation = ast.newMethodInvocation();
+						streamInvocation.setName(ast.newSimpleName(STREAM));
+						streamInvocation.setExpression((Expression) astRewrite.createCopyTarget(streamExpression));
+						mapInvocation.setExpression(streamInvocation);
+					} else {						
 						mapInvocation.setExpression((Expression) astRewrite.createCopyTarget(streamExpression));
+					}
 
-						ListRewrite argumentsPropertyRewriter = astRewrite.getListRewrite(mapInvocation,
-								MethodInvocation.ARGUMENTS_PROPERTY);
-						LambdaExpression mapExpression = genereateLambdaExpression(ast, parameter, extractableBlock,
-								lambdaExpression);
-						argumentsPropertyRewriter.insertFirst(mapExpression, null);
+					ListRewrite argumentsPropertyRewriter = astRewrite.getListRewrite(mapInvocation,
+							MethodInvocation.ARGUMENTS_PROPERTY);
+					LambdaExpression mapExpression = genereateLambdaExpression(ast, parameter, extractableBlock,
+							lambdaExpression);
+					argumentsPropertyRewriter.insertFirst(mapExpression, null);
 
-						/*
-						 * replace the existing stream expression with the new
-						 * one having the introduced map method in the tail
-						 */
-						astRewrite.replace(streamExpression, mapInvocation, null);
+					/*
+					 * replace the existing stream expression with the new
+					 * one having the introduced map method in the tail
+					 */
+					astRewrite.replace(streamExpression, mapInvocation, null);
 
-						// replace the body of the forEach with the new body
-						astRewrite.replace(body, remainingBlock, null);
+					// replace the body of the forEach with the new body
+					astRewrite.replace(body, remainingBlock, null);
 
-						/*
-						 * replace the parameter of the forEach lambda
-						 * expression
-						 */
-						astRewrite.replace(parameter, newForEachParamName, null);
+					/*
+					 * replace the parameter of the forEach lambda
+					 * expression
+					 */
+					astRewrite.replace(parameter, newForEachParamName, null);
 
-						/*
-						 * Replace the type of the parameter if any
-						 */
-						Type type = extractSingleParameterType(lambdaExpression);
-						if (type != null) {
-							Type newType = analyzer.getNewForEachParameterType();
-							if (newType.isPrimitiveType()) {
-								/*
-								 * implicit boxing! primitives are not allowed
-								 * in forEach
-								 */
-								astRewrite.replace((ASTNode) lambdaExpression.parameters().get(0), newForEachParamName,
-										null);
-							} else {
-								astRewrite.replace(type, newType, null);
-								Modifier modifier = analyzer.getNewForEachParameterModifier();
-								insertModifier(lambdaExpression, modifier);
-							}
+					/*
+					 * Replace the type of the parameter if any
+					 */
+					Type type = extractSingleParameterType(lambdaExpression);
+					if (type != null) {
+						Type newType = analyzer.getNewForEachParameterType();
+						if (newType.isPrimitiveType()) {
+							/*
+							 * implicit boxing! primitives are not allowed
+							 * in forEach
+							 */
+							astRewrite.replace((ASTNode) lambdaExpression.parameters().get(0), newForEachParamName,
+									null);
+						} else {
+							astRewrite.replace(type, newType, null);
+							Modifier modifier = analyzer.getNewForEachParameterModifier();
+							insertModifier(lambdaExpression, modifier);
 						}
 					}
 				}
 			}
 		}
+		
 		return true;
 	}
 
@@ -282,6 +290,8 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		private SimpleName newForEachVarName = null;
 		private Type parameterType = null;
 		private Modifier modifier;
+		private boolean primitiveTarget = false;
+		private String mappingMethodName = MAP;
 
 		public ForEachBodyAnalyzer(SimpleName parameter, Block block) {
 			List<Statement> statements = ASTNodeUtil.returnTypedList(block.statements(), Statement.class);
@@ -299,19 +309,19 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 						 * map variable
 						 */
 						VariableDeclarationStatement declStatement = (VariableDeclarationStatement) statement;
-						
+
 						// skip the variable declarations having an annotation
-						if(ASTNodeUtil.convertToTypedList(declStatement.modifiers(), Annotation.class).isEmpty()) {
+						if (ASTNodeUtil.convertToTypedList(declStatement.modifiers(), Annotation.class).isEmpty()) {
 							List<VariableDeclarationFragment> fragments = ASTNodeUtil
 									.convertToTypedList(declStatement.fragments(), VariableDeclarationFragment.class);
 							Type type = declStatement.getType();
-							
+
 							if (!involvesUndefinedTypes(type.resolveBinding()) && !declStatement.getType().isArrayType()
 									&& referencesName(declStatement, parameter)) {
 								if (fragments.size() == 1) {
 									/*
-									 * a map variable is found. store its name and
-									 * its initializer
+									 * a map variable is found. store its name
+									 * and its initializer
 									 */
 									VariableDeclarationFragment fragment = fragments.get(0);
 									SimpleName fragmentName = fragment.getName();
@@ -319,23 +329,31 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 									/*
 									 * FIXME: SIM-521
 									 */
-									if(!isDerivableInitializerType(initializer)) {										
+									if (!isDerivableInitializerType(initializer)) {
+										ITypeBinding mappingVarBinding = type.resolveBinding();
+										if (mappingVarBinding != null && mappingVarBinding.isPrimitive()) {
+											this.primitiveTarget = true;
+											this.mappingMethodName = calcMappingMethodName(mappingVarBinding);
+
+										}
 										mapVariableFound = true;
 										newForEachVarName = fragmentName;
 										parameterType = declStatement.getType();
 										mapExpression = initializer;
-										
-										List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(declStatement.modifiers(), Modifier.class);
-										if(modifiers.size() == 1) {
+
+										List<Modifier> modifiers = ASTNodeUtil
+												.convertToTypedList(declStatement.modifiers(), Modifier.class);
+										if (modifiers.size() == 1) {
 											this.modifier = modifiers.get(0);
 										}
 									}
-									
+
 								} else {
 									/*
 									 * if the parameter is not referenced, then
-									 * store the declared name it will be checked for
-									 * references after the map variable is found.
+									 * store the declared name it will be
+									 * checked for references after the map
+									 * variable is found.
 									 */
 									extractableStatements.add(statement);
 									for (VariableDeclarationFragment fragment : fragments) {
@@ -345,8 +363,9 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 								}
 							} else {
 								/*
-								 * store the declared name. It will be checked for
-								 * references after the map variable is found.
+								 * store the declared name. It will be checked
+								 * for references after the map variable is
+								 * found.
 								 */
 								extractableStatements.add(statement);
 								for (VariableDeclarationFragment fragment : fragments) {
@@ -378,6 +397,39 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		}
 
 		/**
+		 * Checks if the given type binding corresponds to either of the
+		 * primitives: {@code int}, {@code long} or {@code double}, and if yes
+		 * returns the corresponding method name which returns the respective
+		 * stream type.
+		 * 
+		 * @param initializerBinding
+		 *            type binding of the resulting stream type.
+		 * 
+		 * @return {@value #MAP} if the given type is not any
+		 *         of the aforementioned types, or any of the following:
+		 *         {@value #MAP_TO_INT},
+		 *         {@value #MAP_TO_DOUBLE} or
+		 *         {@value #MAP_TO_LONG} respectively for
+		 *         {@code int}, {@code double} or {@code long} primitives.
+		 */
+		private String calcMappingMethodName(ITypeBinding initializerBinding) {
+			if (initializerBinding.isPrimitive()) {
+				String typeName = initializerBinding.getQualifiedName();
+				switch (typeName) {
+				case "int": //$NON-NLS-1$
+					return MAP_TO_INT;
+				case "double": //$NON-NLS-1$
+					return MAP_TO_DOUBLE;
+				case "long": //$NON-NLS-1$
+					return MAP_TO_LONG;
+				default:
+					return MAP;
+				}
+			}
+			return MAP;
+		}
+
+		/**
 		 * Checks if the expression is a generic method invocation without type
 		 * arguments.
 		 * 
@@ -394,7 +446,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 					return true;
 				}
 			}
-			
+
 			return false;
 		}
 
@@ -518,6 +570,14 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			node.accept(visitor);
 			return !visitor.getUsages().isEmpty();
 		}
+
+		public boolean isPrimitiveTarget() {
+			return this.primitiveTarget;
+		}
+
+		public String getMappingMethodName() {
+			return mappingMethodName;
+		}
 	}
 
 	/**
@@ -561,11 +621,11 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 		@Override
 		public boolean visit(MethodInvocation methodInvocation) {
-			if (methodInvocation.getName().getIdentifier().equals(STREAM_METHOD_NAME)
-					|| methodInvocation.getName().getIdentifier().equals(PARALLEL_STREAM_METHOD_NAME)) {
+			if (methodInvocation.getName().getIdentifier().equals(STREAM)
+					|| methodInvocation.getName().getIdentifier().equals(PARALLEL_STREAM)) {
 				IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 				if (ClassRelationUtil.isContentOfTypes(methodBinding.getDeclaringClass(),
-						Collections.singletonList(COLLECTION_FULLY_QUALIFIED_NAME))) {
+						Collections.singletonList(JAVA_UTIL_COLLECTION))) {
 					streamInvocation = methodInvocation;
 				}
 			}
@@ -579,38 +639,37 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 	}
 
 	/**
-	 * Checks if the given type is a type variable or involves a type 
-	 * variable as a parameter.
+	 * Checks if the given type is a type variable or involves a type variable
+	 * as a parameter.
 	 * 
 	 * @param type
 	 *            a type to be checked
 	 * 
-	 * @return {@code true} if the type involves a type variable, or {@code false} otherwise.
+	 * @return {@code true} if the type involves a type variable, or
+	 *         {@code false} otherwise.
 	 */
 	public boolean involvesUndefinedTypes(ITypeBinding type) {
-		
-			
-			if (type.isParameterizedType()) {
-				ITypeBinding[] arguments = type.getTypeArguments();
-				for (ITypeBinding argument : arguments) {
-					if(argument.isParameterizedType()) {
-						// recursive call
-						return involvesUndefinedTypes(argument);
-					}
-					
-					ITypeBinding typeDeclaration = argument.getTypeDeclaration();
-					if (typeDeclaration.isTypeVariable()) {
-						return true;
-					}
-					
-					if(argument.isRawType() || argument.isWildcardType() || argument.isCapture()) {
-						return true;
-					}
+
+		if (type.isParameterizedType()) {
+			ITypeBinding[] arguments = type.getTypeArguments();
+			for (ITypeBinding argument : arguments) {
+				if (argument.isParameterizedType()) {
+					// recursive call
+					return involvesUndefinedTypes(argument);
 				}
-			} else if(type.isTypeVariable() || type.isRawType() || type.isWildcardType() || type.isCapture()) {
-				return true;
+
+				ITypeBinding typeDeclaration = argument.getTypeDeclaration();
+				if (typeDeclaration.isTypeVariable()) {
+					return true;
+				}
+
+				if (argument.isRawType() || argument.isWildcardType() || argument.isCapture()) {
+					return true;
+				}
 			}
-		
+		} else if (type.isTypeVariable() || type.isRawType() || type.isWildcardType() || type.isCapture()) {
+			return true;
+		}
 
 		return false;
 	}

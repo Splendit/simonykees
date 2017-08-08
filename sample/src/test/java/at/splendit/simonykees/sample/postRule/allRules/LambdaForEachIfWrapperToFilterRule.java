@@ -30,11 +30,7 @@ public class LambdaForEachIfWrapperToFilterRule {
 
 		list.parallelStream().filter((s) -> "asdf".equals(s)).forEach(logger::info);
 
-		list.forEach(s -> {
-			if (s.length() > 3) {
-				logger.info(s);
-			}
-		});
+		list.stream().filter((s) -> s.length() > 3).forEach(logger::info);
 
 		intList.stream().filter((i) -> i < 5).forEach((i) -> {
 			System.out.println(i);
@@ -78,6 +74,13 @@ public class LambdaForEachIfWrapperToFilterRule {
 		intList.stream().filter((i) -> i < 0).forEach(System.out::println);
 
 		intList.stream().filter((i) -> i < 0).forEach(System.out::println);
+	}
+
+	public void forEachOnCollection() {
+		list.stream().filter((s) -> s.length() > 3).forEach((s) -> {
+			logger.info(s);
+			logger.info(s + s);
+		});
 	}
 
 	public void ifWithExpressionStatementBody(String input) {

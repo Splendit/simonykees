@@ -19,7 +19,7 @@ public class TestWhileToForEachListRule {
 	public String loopingOverLists(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((t) -> {
+		list.forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
@@ -29,10 +29,10 @@ public class TestWhileToForEachListRule {
 	public String nestedLoops(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((t) -> {
+		list.forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
-			list.stream().forEach(sb::append);
+			list.forEach(sb::append);
 		});
 		return sb.toString();
 	}
@@ -40,12 +40,12 @@ public class TestWhileToForEachListRule {
 	public String tripleNestedLoops(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((t) -> {
+		list.forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
-			list.stream().forEach((aList) -> {
+			list.forEach((aList) -> {
 				sb.append(aList);
-				list.stream().forEach((aList1) -> {
+				list.forEach((aList1) -> {
 					sb.append(aList1);
 					logger.info(aList1);
 				});
@@ -59,12 +59,12 @@ public class TestWhileToForEachListRule {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
 		List<String> list2 = generateList(input);
-		list.stream().forEach((t) -> {
+		list.forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
 
-		list2.stream().forEach((s) -> {
+		list2.forEach((s) -> {
 			logger.info(s);
 			sb.append(s);
 		});
@@ -117,7 +117,7 @@ public class TestWhileToForEachListRule {
 	public String prefixIndexUpdate(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((t) -> {
+		list.forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
@@ -127,7 +127,7 @@ public class TestWhileToForEachListRule {
 	public String infixIndexUpdate(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((t) -> {
+		list.forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
@@ -137,7 +137,7 @@ public class TestWhileToForEachListRule {
 	public String assignmentIndexUpdate(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.stream().forEach((t) -> {
+		list.forEach((t) -> {
 			logger.info(t);
 			sb.append(t);
 		});
@@ -220,7 +220,7 @@ public class TestWhileToForEachListRule {
 	public String confusingIteratorName(String iterator) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(iterator);
-		list.stream().forEach((aList) -> {
+		list.forEach((aList) -> {
 			logger.info(aList);
 			sb.append(aList);
 		});
@@ -258,7 +258,7 @@ public class TestWhileToForEachListRule {
 
 	public <T extends Foo> void listOfTypeArguments() {
 		List<T> elements = new ArrayList<>();
-		elements.stream().forEach((foo) -> {
+		elements.forEach((foo) -> {
 			foo.toString();
 			foo.isFoo();
 		});
@@ -267,14 +267,14 @@ public class TestWhileToForEachListRule {
 	public String qualifiedNameType() {
 		List<java.lang.Boolean> javaLangBooleans = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
-		javaLangBooleans.stream().forEach(sb::append);
+		javaLangBooleans.forEach(sb::append);
 		return sb.toString();
 	}
 
 	public String unQualifiedNameType() {
 		List<Boolean> myBooleans = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
-		myBooleans.stream().forEach(sb::append);
+		myBooleans.forEach(sb::append);
 		return sb.toString();
 	}
 
