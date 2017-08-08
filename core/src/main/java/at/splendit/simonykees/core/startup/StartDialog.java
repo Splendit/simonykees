@@ -187,12 +187,14 @@ public class StartDialog extends Dialog {
 		Label quickStartLabel = new Label(parent, SWT.NONE);
 		gridData = new GridData();
 		gridData.verticalIndent = 8;
+		gridData.widthHint = 470;
 		quickStartLabel.setLayoutData(gridData);
 		quickStartLabel.setText(Messages.StartDialog_quickStartLabel);
 
 		Label quickStartGoToLabel = new Label(parent, SWT.NONE);
 		gridData = new GridData();
 		gridData.verticalIndent = 4;
+		gridData.widthHint = 470;
 		quickStartGoToLabel.setLayoutData(gridData);
 		quickStartGoToLabel.setText(Messages.StartDialog_quickStartGoToLabel);
 
@@ -229,6 +231,7 @@ public class StartDialog extends Dialog {
 		Label quickStartClickLabel = new Label(parent, SWT.NONE);
 		gridData = new GridData();
 		gridData.verticalIndent = 4;
+		gridData.widthHint = 470;
 		quickStartClickLabel.setLayoutData(gridData);
 		quickStartClickLabel.setText(Messages.StartDialog_quickStartClickLabel);
 
@@ -241,6 +244,7 @@ public class StartDialog extends Dialog {
 		Label goodToKnowLabel = new Label(parent, SWT.NONE);
 		gridData = new GridData();
 		gridData.verticalIndent = 12;
+		gridData.widthHint = 470;
 		goodToKnowLabel.setLayoutData(gridData);
 		goodToKnowLabel.setText(Messages.StartDialog_goodToKnowLabel);
 
