@@ -1,11 +1,24 @@
 package at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.visitor.lambdaForEach.AbstractLambdaForEachASTVisitor;
 
 /**
@@ -67,5 +80,117 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 			return parenthesizedExpression;
 		}
 		return expressionCopy;
+	}
+
+	protected boolean throwsException(Expression ifCondition) {
+		UnhandledExceptionVisitor visitor = new UnhandledExceptionVisitor();
+		ifCondition.accept(visitor);
+		return visitor.throwsException();
+	}
+
+	/**
+	 * Checks whether a reference of a non effectively final variable is made on
+	 * the code represented by the given node. Makes use of
+	 * {@link EffectivelyFinalVisitor}.
+	 * 
+	 * @param astNode
+	 *            a node representing a code snippet.
+	 * @return {@code true} if the code references an non effectively final
+	 *         variable or {@code false} otherwise.
+	 */
+	protected boolean containsNonEffectivelyFinalVariable(ASTNode astNode) {
+		EffectivelyFinalVisitor analyzer = new EffectivelyFinalVisitor();
+		astNode.accept(analyzer);
+		return analyzer.containsNonEffectivelyFinalVariable();
+	}
+	
+	/**
+	 * Replaces an {@link EnhancedForStatement} with a
+	 * {@link VariableDeclarationStatement} containing a single
+	 * {@link VariableDeclarationFragment}. The rest of the declaration
+	 * fragments which may occur in the same statement as the given declaration
+	 * fragment, are not changed.
+	 * 
+	 * @param enhancedForStatement
+	 *            the statement to be replaced
+	 * @param declFragment
+	 *            the fragment of the declaration statement to be used as a
+	 *            replacer.
+	 * @param type
+	 * 			the type of the declaration fragment
+	 */
+	protected void replaceLoopWithFragment(EnhancedForStatement enhancedForStatement,
+			VariableDeclarationFragment declFragment, Type type) {
+		ASTNode fragmentParent = declFragment.getParent();
+		if (ASTNode.VARIABLE_DECLARATION_STATEMENT == fragmentParent.getNodeType()) {
+			VariableDeclarationStatement declStatement = (VariableDeclarationStatement) fragmentParent;
+			List<VariableDeclarationFragment> fragments = ASTNodeUtil.returnTypedList(declStatement.fragments(),
+					VariableDeclarationFragment.class);
+			if (fragments.size() == 1) {
+				astRewrite.replace(enhancedForStatement, astRewrite.createMoveTarget(declStatement), null);
+			} else {
+				AST ast = astRewrite.getAST();
+				VariableDeclarationStatement newDeclStatement = ast.newVariableDeclarationStatement(
+						(VariableDeclarationFragment) astRewrite.createMoveTarget(declFragment));
+				newDeclStatement.setType(type);
+				astRewrite.replace(enhancedForStatement, newDeclStatement, null);
+			}
+		}
+	}
+	
+	protected ReturnStatement isReturnBlock(Statement thenStatement) {
+		List<Statement> thenBody = new ArrayList<>();
+		
+		if (ASTNode.BLOCK == thenStatement.getNodeType()) {
+			thenBody = ASTNodeUtil.convertToTypedList(((Block) thenStatement).statements(),
+					Statement.class); 
+		} else if(ASTNode.RETURN_STATEMENT == thenStatement.getNodeType()) {
+			thenBody.add(thenStatement);
+		}
+		
+		if (thenBody.size() == 1) {
+			Statement stStatement = thenBody.get(0);
+			if (ASTNode.RETURN_STATEMENT == stStatement.getNodeType()) {
+				return (ReturnStatement) stStatement;
+			}
+		}
+		return null;
+	}
+	
+	protected ReturnStatement findFollowingReturnStatement(EnhancedForStatement forLoop) {
+		ASTNode forNodeParent = forLoop.getParent();
+		if (ASTNode.BLOCK == forNodeParent.getNodeType()) {
+			Block parentBlock = (Block) forNodeParent;
+			List<Statement> statements = ASTNodeUtil.returnTypedList(parentBlock.statements(), Statement.class);
+			for (int i = 0; i < statements.size(); i++) {
+				Statement statement = statements.get(i);
+				if (statement == forLoop && i + 1 < statements.size()) {
+					Statement nextStatement = statements.get(i + 1);
+					if (ASTNode.RETURN_STATEMENT == nextStatement.getNodeType()) {
+						return (ReturnStatement) nextStatement;
+					}
+				}
+			}
+		}
+		return null;
+	}
+	
+	protected Assignment findAssignmentAfterBreakExpression(Statement thenStatement) {
+		if (ASTNode.BLOCK == thenStatement.getNodeType()) {
+			List<Statement> thenBody = ASTNodeUtil.convertToTypedList(((Block) thenStatement).statements(),
+					Statement.class);
+			if (thenBody.size() == 2) {
+				Statement stStatement = thenBody.get(0);
+				Statement ndStatement = thenBody.get(1);
+				if (ASTNode.BREAK_STATEMENT == ndStatement.getNodeType()
+						&& ASTNode.EXPRESSION_STATEMENT == stStatement.getNodeType()) {
+					ExpressionStatement expressionStatement = (ExpressionStatement) stStatement;
+					if (ASTNode.ASSIGNMENT == expressionStatement.getExpression().getNodeType()) {
+						return (Assignment) expressionStatement.getExpression();
+					}
+				}
+			}
+		}
+		return null;
 	}
 }
