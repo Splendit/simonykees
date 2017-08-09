@@ -106,8 +106,8 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 	}
 
 	/**
-	 * Checks whether a reference of a non effectively final variable is made on
-	 * the code represented by the given node. Makes use of
+	 * Checks whether a reference of a non-final or non-effectively final
+	 * variable is made on the code represented by the given node. Makes use of
 	 * {@link EffectivelyFinalVisitor}.
 	 * 
 	 * @param astNode

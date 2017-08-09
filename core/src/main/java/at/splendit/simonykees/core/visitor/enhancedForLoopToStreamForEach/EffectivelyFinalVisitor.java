@@ -4,10 +4,11 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 /**
- * A visitor that checks for occurrences of variables that are not
+ * A visitor that checks for occurrences of variables that are neither final nor
  * effectively final.
  * 
  * @author Ardit Ymeri
@@ -26,7 +27,7 @@ class EffectivelyFinalVisitor extends ASTVisitor {
 	/**
 	 * 
 	 * @return if the the visitor has found an occurrence of a variable
-	 *         which is NOT effectively final.
+	 *         which is neither final NOR effectively final.
 	 */
 	public boolean containsNonEffectivelyFinalVariable() {
 		return this.containsNonfinalVar;
@@ -35,9 +36,11 @@ class EffectivelyFinalVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(SimpleName simpleName) {
 		IBinding binding = simpleName.resolveBinding();
-		if (IBinding.VARIABLE == binding.getKind() && binding instanceof IVariableBinding
-				&& !((IVariableBinding) binding).isEffectivelyFinal()) {
-			this.containsNonfinalVar = true;
+		if (IBinding.VARIABLE == binding.getKind() && binding instanceof IVariableBinding) {
+			IVariableBinding variableBinding = (IVariableBinding) binding;
+			if (!Modifier.isFinal(variableBinding.getModifiers()) && !variableBinding.isEffectivelyFinal()) {
+				this.containsNonfinalVar = true;
+			}
 		}
 
 		return true;

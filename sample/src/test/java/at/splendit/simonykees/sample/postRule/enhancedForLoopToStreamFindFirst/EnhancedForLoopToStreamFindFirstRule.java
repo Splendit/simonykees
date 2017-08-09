@@ -182,6 +182,14 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		return localKey;
 	}
 	
+	public String referencingFinalVariable(String input) {
+		List<String> values = generateList(input);
+		final String key = "key";
+		String localKey = values.stream().filter(value -> value.equals(key)).findFirst().orElse("localKey");
+		
+		return localKey;
+	}
+	
 	public String throwException(String input) throws Exception {
 		List<String> values = generateList(input);
 		String localKey = "localKey";
