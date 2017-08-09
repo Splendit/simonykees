@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -87,9 +88,20 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		return expressionCopy;
 	}
 
-	protected boolean throwsException(Expression ifCondition) {
+	/**
+	 * Checks whether the given expression contains a method invocation which
+	 * throws an unchecked exception. Makes use of
+	 * {@link UnhandledExceptionVisitor}.
+	 * 
+	 * @param expression
+	 *            the expression to be checked
+	 * 
+	 * @return {@code true} if an invocation which throws an exception is found,
+	 *         or {@code false} otherwise.
+	 */
+	protected boolean throwsException(Expression expression) {
 		UnhandledExceptionVisitor visitor = new UnhandledExceptionVisitor();
-		ifCondition.accept(visitor);
+		expression.accept(visitor);
 		return visitor.throwsException();
 	}
 
@@ -125,7 +137,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 	 *            the type of the declaration fragment
 	 */
 	protected void replaceLoopWithFragment(EnhancedForStatement enhancedForStatement,
-			VariableDeclarationFragment declFragment, Type type) {
+			VariableDeclarationFragment declFragment) {
 		ASTNode fragmentParent = declFragment.getParent();
 		if (ASTNode.VARIABLE_DECLARATION_STATEMENT == fragmentParent.getNodeType()) {
 			VariableDeclarationStatement declStatement = (VariableDeclarationStatement) fragmentParent;
@@ -137,12 +149,22 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 				AST ast = astRewrite.getAST();
 				VariableDeclarationStatement newDeclStatement = ast.newVariableDeclarationStatement(
 						(VariableDeclarationFragment) astRewrite.createMoveTarget(declFragment));
-				newDeclStatement.setType(type);
+				newDeclStatement.setType((Type) astRewrite.createCopyTarget(declStatement.getType()));
 				astRewrite.replace(enhancedForStatement, newDeclStatement, null);
 			}
 		}
 	}
 
+	/**
+	 * Checks whether the given statement is either a block consisting of a
+	 * single {@link ReturnStatement} or is a {@link ReturnStatement} itself.
+	 * 
+	 * @param thenStatement
+	 *            the statement to be checked.
+	 * 
+	 * @return the found {@link ReturnStatement} or {@code null} if the given
+	 *         statement doesn't match with afrementioned description.
+	 */
 	protected ReturnStatement isReturnBlock(Statement thenStatement) {
 		List<Statement> thenBody = new ArrayList<>();
 
@@ -161,7 +183,15 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		return null;
 	}
 
-	protected ReturnStatement findFollowingReturnStatement(EnhancedForStatement forLoop) {
+	/**
+	 * Checks whether the given {@link EnhancedForStatement} is immediately
+	 * followed by a {@link ReturnStatement}.
+	 * 
+	 * @param forLoop
+	 *            the loop to be checked
+	 * @return the found {@link ReturnStatement} or {@code null} otherwise.
+	 */
+	protected ReturnStatement isFollowedByReturnStatement(EnhancedForStatement forLoop) {
 		ASTNode forNodeParent = forLoop.getParent();
 		if (ASTNode.BLOCK == forNodeParent.getNodeType()) {
 			Block parentBlock = (Block) forNodeParent;
@@ -179,7 +209,16 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		return null;
 	}
 
-	protected Assignment findAssignmentAfterBreakExpression(Statement thenStatement) {
+	/**
+	 * Checks whether the given statement is a {@link Block} consisting exactly
+	 * of an {@link Assignment} and a {@link BreakStatement}.
+	 * 
+	 * @param thenStatement
+	 *            the statement to be checked.
+	 * 
+	 * @return the found {@link Assignment} or {@code null} otherwise.
+	 */
+	protected Assignment isAssignmentAndBreak(Statement thenStatement) {
 		if (ASTNode.BLOCK == thenStatement.getNodeType()) {
 			List<Statement> thenBody = ASTNodeUtil.convertToTypedList(((Block) thenStatement).statements(),
 					Statement.class);
@@ -198,8 +237,22 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		return null;
 	}
 
-	protected IfStatement isConvertableInterruptedLoop(EnhancedForStatement forLoop, Expression loopExpression,
-			SingleVariableDeclaration loopParameter) {
+	/**
+	 * Checks whether the given {@link EnhancedForStatement} is only used for
+	 * computing a value after a certain condition is met, and then it is
+	 * interrupted.
+	 * 
+	 * @param forLoop
+	 *            loop to be analyzed
+	 * 
+	 * @return the {@link IfStatement} that represents the condition which has
+	 *         to be met before computing the value and interrupting the loop,
+	 *         or {@code null} if the loop does not comply with the
+	 *         aforementioned description.
+	 */
+	protected IfStatement isConvertableInterruptedLoop(EnhancedForStatement forLoop) {
+		Expression loopExpression = forLoop.getExpression();
+		SingleVariableDeclaration loopParameter = forLoop.getParameter();
 		ITypeBinding expressionBinding = loopExpression.resolveTypeBinding();
 		List<String> expressionBindingList = Collections.singletonList(Collection.class.getName());
 		// the expression of the loop should be a subtype of a collection

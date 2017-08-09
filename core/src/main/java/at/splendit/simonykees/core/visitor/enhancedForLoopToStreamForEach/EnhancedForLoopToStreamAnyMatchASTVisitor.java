@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -22,7 +21,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 /**
- * Analyzes the occurrences of {@link EnhancedForStatement}s the check whether a
+ * Analyzes the occurrences of {@link EnhancedForStatement}s and checks whether a
  * transformation to {@link Stream#anyMatch(java.util.function.Predicate)} is
  * possible. Considers two cases:
  * 
@@ -91,7 +90,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 		SingleVariableDeclaration enhancedForParameter = enhancedForStatement.getParameter();
 		Expression enhancedForExp = enhancedForStatement.getExpression();
 
-		IfStatement ifStatement = isConvertableInterruptedLoop(enhancedForStatement, enhancedForExp, enhancedForParameter);
+		IfStatement ifStatement = isConvertableInterruptedLoop(enhancedForStatement);
 		if(ifStatement == null) {
 			return true;
 		}
@@ -109,8 +108,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 			MethodInvocation methodInvocation = createStreamAnymatchInitalizer(enhancedForExp, ifCondition,
 					enhancedForParameter);
 			astRewrite.replace(booleanDeclFragment.getInitializer(), methodInvocation, null);
-			replaceLoopWithFragment(enhancedForStatement, booleanDeclFragment,
-					enhancedForStatement.getAST().newPrimitiveType(PrimitiveType.BOOLEAN));
+			replaceLoopWithFragment(enhancedForStatement, booleanDeclFragment);
 
 		} else if ((returnStatement = isReturnBlock(thenStatement, enhancedForStatement)) != null) {
 			// replace the return statement with a Stream::AnyMatch
@@ -185,7 +183,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 	private VariableDeclarationFragment isAssignmentAndBreakBlock(Statement thenStatement,
 			EnhancedForStatement forNode) {
 
-		Assignment assignment = super.findAssignmentAfterBreakExpression(thenStatement);
+		Assignment assignment = super.isAssignmentAndBreak(thenStatement);
 		if (assignment != null) {
 			Expression lhs = assignment.getLeftHandSide();
 			Expression rhs = assignment.getRightHandSide();
@@ -257,7 +255,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 			if (returnedExpression != null && ASTNode.BOOLEAN_LITERAL == returnedExpression.getNodeType()) {
 				BooleanLiteral booleanLiteral = (BooleanLiteral) returnedExpression;
 				if (booleanLiteral.booleanValue()) {
-					return findFollowingReturnStatement(forNode);
+					return isFollowedByReturnStatement(forNode);
 
 				}
 			}
@@ -282,8 +280,8 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 	 *         {@code false}
 	 */
 	@Override
-	protected ReturnStatement findFollowingReturnStatement(EnhancedForStatement forNode) {
-		ReturnStatement followingReturnSt = super.findFollowingReturnStatement(forNode);
+	protected ReturnStatement isFollowedByReturnStatement(EnhancedForStatement forNode) {
+		ReturnStatement followingReturnSt = super.isFollowedByReturnStatement(forNode);
 		if (followingReturnSt != null) {
 			Expression returnedExpression = followingReturnSt.getExpression();
 			if (returnedExpression != null && ASTNode.BOOLEAN_LITERAL == returnedExpression.getNodeType()
