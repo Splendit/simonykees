@@ -23,13 +23,29 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		return sb.toString();
 	}
 	
+	public String focingTailingMap(String input) {
+		StringBuilder sb = new StringBuilder();
+		List<String> values = generateList(input);
+		String key = values.stream().filter(value -> value.length() > 4).findFirst().map(value -> value + " sth to force a tailing map").orElse("");
+		sb.append(key);
+		
+		return sb.toString();
+	}
+	
+	public String methodInvocationAsInitializer(String input) {
+		List<String> values = generateList(input);
+		String key = values.stream().filter(value -> value.length() > 4).findFirst().orElse(values.get(0));
+		
+		return key;
+	}
+	
 	public String irrelevantAssignment(String input) {
 		StringBuilder sb = new StringBuilder();
 		String key = "";
 		List<String> values = generateList(input);
 		for(String value : values) {
 		    if(value.length() > 4) {
-		    	key = value + " - sth just to stop the rule";
+		    	key = "sth irrelevant";
 		        break;
 		    }
 		}
@@ -201,7 +217,13 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		return values.stream().filter(value -> value.length() > 4).findFirst().orElse("");
 	}
 	
-	public String returningIrelevantValue(String input) {
+	public String forcingTailingMap(String input) {
+		List<String> values = generateList(input);
+		return values.stream().filter(value -> value.length() > 4).findFirst().map(value -> value + "sth to force a tailing map")
+				.orElse("nothing long was found");
+	}
+	
+	public String returningIrrelevantValue(String input) {
 		List<String> values = generateList(input);
 		for(String value : values) {
 		    if(value.length() > 4) {
@@ -234,6 +256,11 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		}
 		
 		return localKey;
+	}
+	
+	public String methodInvocationAsReturnExpression(String input) {
+		List<String> values = generateList(input);
+		return values.stream().filter(value -> value.length() > 4).findFirst().orElse(values.get(0));
 	}
 
 	private List<String> generateList(String input) {

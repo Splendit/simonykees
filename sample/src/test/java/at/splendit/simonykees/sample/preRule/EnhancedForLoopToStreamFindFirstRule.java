@@ -29,13 +29,41 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		return sb.toString();
 	}
 	
+	public String focingTailingMap(String input) {
+		StringBuilder sb = new StringBuilder();
+		String key = "";
+		List<String> values = generateList(input);
+		for(String value : values) {
+		    if(value.length() > 4) {
+		    	key = value + " sth to force a tailing map";
+		        break;
+		    }
+		}
+		sb.append(key);
+		
+		return sb.toString();
+	}
+	
+	public String methodInvocationAsInitializer(String input) {
+		List<String> values = generateList(input);
+		String key = values.get(0);
+		for(String value : values) {
+		    if(value.length() > 4) {
+		    	key = value;
+		        break;
+		    }
+		}
+		
+		return key;
+	}
+	
 	public String irrelevantAssignment(String input) {
 		StringBuilder sb = new StringBuilder();
 		String key = "";
 		List<String> values = generateList(input);
 		for(String value : values) {
 		    if(value.length() > 4) {
-		    	key = value + " - sth just to stop the rule";
+		    	key = "sth irrelevant";
 		        break;
 		    }
 		}
@@ -227,7 +255,18 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		return "";
 	}
 	
-	public String returningIrelevantValue(String input) {
+	public String forcingTailingMap(String input) {
+		List<String> values = generateList(input);
+		for(String value : values) {
+		    if(value.length() > 4) {
+		    	return value + "sth to force a tailing map";
+		    }
+		}
+		
+		return "nothing long was found";
+	}
+	
+	public String returningIrrelevantValue(String input) {
 		List<String> values = generateList(input);
 		for(String value : values) {
 		    if(value.length() > 4) {
@@ -260,6 +299,17 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		}
 		
 		return localKey;
+	}
+	
+	public String methodInvocationAsReturnExpression(String input) {
+		List<String> values = generateList(input);
+		for(String value : values) {
+		    if(value.length() > 4) {
+		    	return value;
+		    }
+		}
+		
+		return values.get(0);
 	}
 
 	private List<String> generateList(String input) {
