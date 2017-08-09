@@ -35,12 +35,12 @@ public class Messages extends NLS {
 	public static String BuyLicenseDialog_opinionLabel;
 	public static String BuyLicenseDialog_purchaseLinkLabel;
 	public static String BuyLicenseDialog_rateUsLabel;
-	public static String BuyLicenseDialog_reasoneFive;
-	public static String BuyLicenseDialog_reasoneFour;
-	public static String BuyLicenseDialog_reasoneOne;
-	public static String BuyLicenseDialog_reasoneSix;
-	public static String BuyLicenseDialog_reasoneThree;
-	public static String BuyLicenseDialog_reasoneTwo;
+	public static String BuyLicenseDialog_reason1;
+	public static String BuyLicenseDialog_reason2;
+	public static String BuyLicenseDialog_reason3;
+	public static String BuyLicenseDialog_reason4;
+	public static String BuyLicenseDialog_reason5;
+	public static String BuyLicenseDialog_reason6;
 	public static String BuyLicenseDialog_reasonsLabel;
 	public static String StartDialog_alwaysShowIntroText;
 	public static String StartDialog_appreciationLabel;

@@ -312,12 +312,12 @@ public class BuyLicenseDialog extends Dialog {
 	}
 
 	private void populateFileView() {
-		viewer.add(Messages.BuyLicenseDialog_reasoneOne);
-		viewer.add(Messages.BuyLicenseDialog_reasoneTwo);
-		viewer.add(Messages.BuyLicenseDialog_reasoneThree);
-		viewer.add(Messages.BuyLicenseDialog_reasoneFour);
-		viewer.add(Messages.BuyLicenseDialog_reasoneFive);
-		viewer.add(Messages.BuyLicenseDialog_reasoneSix);
+		viewer.add(Messages.BuyLicenseDialog_reason1);
+		viewer.add(Messages.BuyLicenseDialog_reason2);
+		viewer.add(Messages.BuyLicenseDialog_reason3);
+		viewer.add(Messages.BuyLicenseDialog_reason4);
+		viewer.add(Messages.BuyLicenseDialog_reason5);
+		viewer.add(Messages.BuyLicenseDialog_reason6);
 	}
 
 	/**
