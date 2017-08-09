@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -19,8 +20,6 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-
-import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
 
 /**
  * Analyzes the occurrences of {@link EnhancedForStatement}s and checks whether
@@ -148,10 +147,11 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 	 */
 	private VariableDeclarationFragment isConvertibleWithBreak(Statement thenStatement, EnhancedForStatement forLoop,
 			SimpleName loopParameterName, List<Expression> tailingMap) {
-		Assignment assignmentAfterBreak = super.isAssignmentAndBreak(thenStatement);
+		Assignment assignmentAfterBreak = isAssignmentAndBreak(thenStatement);
 		if (assignmentAfterBreak != null) {
 			Expression rhs = assignmentAfterBreak.getRightHandSide();
-			if (isReferencingParameter(rhs, loopParameterName, tailingMap)) {
+			if(ASTNode.NULL_LITERAL != rhs.getNodeType()) {
+				tailingMap.addAll(isReferencingParameter(rhs, loopParameterName));
 				Expression lhs = assignmentAfterBreak.getLeftHandSide();
 				if (ASTNode.SIMPLE_NAME == lhs.getNodeType()) {
 					return findDeclarationFragment(forLoop, (SimpleName) lhs);
@@ -208,7 +208,8 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 		ReturnStatement returnStatement = isReturnBlock(thenStatement);
 		if (returnStatement != null) {
 			Expression returnedExpression = returnStatement.getExpression();
-			if (returnedExpression != null && isReferencingParameter(returnedExpression, parameter, tailingMap)) {
+			if (returnedExpression != null && ASTNode.NULL_LITERAL != returnedExpression.getNodeType()) {
+				tailingMap.addAll(isReferencingParameter(returnedExpression, parameter));
 				ReturnStatement followingReturnStatement = isFollowedByReturnStatement(forLoop);
 				if (followingReturnStatement != null && followingReturnStatement.getExpression() != null) {
 					return followingReturnStatement;
@@ -219,36 +220,24 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 	}
 
 	/**
-	 * Checks if the given expression has a reference to the variable with the
-	 * given name. If the expression is a simple name itself, then its
-	 * identifier is compared with the identifier of the given name. Otherwise,
-	 * an instance of the {@link LocalVariableUsagesASTVisitor} is used for
-	 * searching for references, and if one is found, the expression is added to
-	 * the given list.
+	 * Checks if the given expression is identical with the given parameter.
+	 * Otherwise wraps the expression in a list and returns it.
 	 * 
 	 * @param expression
-	 *            to be searched for references.
+	 *            the expression to be checked.
 	 * @param parameter
-	 *            the name of the variable to check the references for.
-	 * @param tailingMap
-	 *            an empty list used for adding the expression if a reference is
-	 *            found.
-	 * @return {@code true} if a reference is found or {@code false} otherwise.
+	 *            a simple name to compare the expression to.
+	 * @return a list of a single expression if the given expression is not
+	 *         identical with the given simple name, or an empty list otherwise.
 	 */
-	private boolean isReferencingParameter(Expression expression, SimpleName parameter, List<Expression> tailingMap) {
-		if (ASTNode.SIMPLE_NAME == expression.getNodeType()) {
-			SimpleName expressionName = (SimpleName) expression;
-			return expressionName.getIdentifier().equals(parameter.getIdentifier());
-		} else {
-			LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(parameter);
-			expression.accept(visitor);
-			if (!visitor.getUsages().isEmpty()) {
-				tailingMap.add(expression);
-				return true;
-			}
+	private List<Expression> isReferencingParameter(Expression expression, SimpleName parameter) {
+		List<Expression> tailingMapExpressions = new ArrayList<>();
+		if (ASTNode.SIMPLE_NAME != expression.getNodeType()
+				|| !((SimpleName) expression).getIdentifier().equals(parameter.getIdentifier())) {
+			tailingMapExpressions.add(expression);
 		}
 
-		return false;
+		return tailingMapExpressions;
 	}
 
 	/**

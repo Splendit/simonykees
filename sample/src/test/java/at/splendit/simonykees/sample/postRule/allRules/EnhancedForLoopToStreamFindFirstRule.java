@@ -46,14 +46,9 @@ public class EnhancedForLoopToStreamFindFirstRule {
 
 	public String irrelevantAssignment(String input) {
 		StringBuilder sb = new StringBuilder();
-		String key = "";
 		List<String> values = generateList(input);
-		for (String value : values) {
-			if (value.length() > 4) {
-				key = "sth irrelevant";
-				break;
-			}
-		}
+		String key = values.stream().filter(value -> value.length() > 4).findFirst().map(value -> "sth irrelevant")
+				.orElse("");
 		sb.append(key);
 
 		return sb.toString();
@@ -209,6 +204,20 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		return localKey;
 	}
 
+	public String assigningNullValue(String input) {
+		List<String> values = generateList(input);
+		String localKey = "localKey";
+		final String key = "key";
+		for (String value : values) {
+			if (value.equals(key)) {
+				localKey = null;
+				break;
+			}
+		}
+
+		return localKey;
+	}
+
 	/*
 	 * Loops with return statement
 	 */
@@ -237,13 +246,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 
 	public String returningIrrelevantValue(String input) {
 		List<String> values = generateList(input);
-		for (String value : values) {
-			if (value.length() > 4) {
-				return "nothingToDo with 'value'";
-			}
-		}
-
-		return "";
+		return values.stream().filter(value -> value.length() > 4).findFirst().map(value -> "nothingToDo with 'value'")
+				.orElse("");
 	}
 
 	public String missingReturnValue(String input) {
@@ -271,6 +275,17 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	public String methodInvocationAsReturnExpression(String input) {
 		List<String> values = generateList(input);
 		return values.stream().filter(value -> value.length() > 4).findFirst().orElse(values.get(0));
+	}
+
+	public String returningNullValue(String input) {
+		List<String> values = generateList(input);
+		for (String value : values) {
+			if (value.length() > 4) {
+				return null;
+			}
+		}
+
+		return values.get(0);
 	}
 
 	private List<String> generateList(String input) {

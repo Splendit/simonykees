@@ -233,6 +233,19 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		return localKey;
 	}
 	
+	public String assigningNullValue(String input) {
+		List<String> values = generateList(input);
+		String localKey = "localKey";
+		final String key = "key";
+		for(String value : values) {
+		    if(value.equals(key)) {
+		    	localKey = null;
+		    	break;
+		    }
+		}
+		
+		return localKey;
+	}
 
 	/*
 	 * Loops with return statement
@@ -320,6 +333,17 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		for(String value : values) {
 		    if(value.length() > 4) {
 		    	return value;
+		    }
+		}
+		
+		return values.get(0);
+	}
+	
+	public String returningNullValue(String input) {
+		List<String> values = generateList(input);
+		for(String value : values) {
+		    if(value.length() > 4) {
+		    	return null;
 		    }
 		}
 		

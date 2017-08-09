@@ -263,7 +263,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		}
 
 		ITypeBinding parameterTypeBinding = loopParameter.getType().resolveBinding();
-		if (!isTypeSafe(parameterTypeBinding)) {
+		if (!isTypeSafe(parameterTypeBinding) || !isTypeSafe(expressionBinding)) {
 			return null;
 		}
 
