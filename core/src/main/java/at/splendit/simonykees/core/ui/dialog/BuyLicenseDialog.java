@@ -318,6 +318,7 @@ public class BuyLicenseDialog extends Dialog {
 		viewer.add(Messages.BuyLicenseDialog_reason4);
 		viewer.add(Messages.BuyLicenseDialog_reason5);
 		viewer.add(Messages.BuyLicenseDialog_reason6);
+		viewer.add(Messages.BuyLicenseDialog_reason7);
 	}
 
 	/**

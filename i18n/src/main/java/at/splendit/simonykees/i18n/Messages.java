@@ -41,6 +41,7 @@ public class Messages extends NLS {
 	public static String BuyLicenseDialog_reason4;
 	public static String BuyLicenseDialog_reason5;
 	public static String BuyLicenseDialog_reason6;
+	public static String BuyLicenseDialog_reason7;
 	public static String BuyLicenseDialog_reasonsLabel;
 	public static String StartDialog_alwaysShowIntroText;
 	public static String StartDialog_appreciationLabel;
