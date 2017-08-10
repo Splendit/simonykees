@@ -524,7 +524,16 @@
 				</repository>
 			</distributionManagement>
 		</profile>
-
+		<profile>
+			<id>releaseCandidate</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/76310b5f-bf75-4782-bd20-c44376584fc5</url>
+				</repository>
+			</distributionManagement>
+		</profile>
+		
 	</profiles>
 
 	<reporting>
