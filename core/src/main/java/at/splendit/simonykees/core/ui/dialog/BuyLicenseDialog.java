@@ -51,6 +51,22 @@ import org.slf4j.LoggerFactory;
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.i18n.Messages;
 
+/**
+ * This dialog is displayed when a user tries to start jSparrow with an expired
+ * license. The dialog provides a link to buy a license and has an area for user
+ * feedback. The feedback includes:
+ * <ul>
+ * <li>Smileys ranging from sad to happy to rate jSparrow.</li>
+ * <li>Checkboxes to provide reasons why the customer does not want to buy a
+ * license.</li>
+ * <li>A text area for additional feedback.</li>
+ * </ul>
+ * The feedback is sent to a Google forms survey when the OK button is pressed.
+ * 
+ * @author Andreja Sambolec, Ludwig Werzowa
+ * @since 2.0.3
+ * 
+ */
 public class BuyLicenseDialog extends Dialog {
 
 	private static final Logger logger = LoggerFactory.getLogger(BuyLicenseDialog.class);
