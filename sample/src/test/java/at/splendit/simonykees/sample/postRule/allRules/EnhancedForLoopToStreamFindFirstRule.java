@@ -1,5 +1,6 @@
 package at.splendit.simonykees.sample.postRule.allRules;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -218,8 +219,56 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		return localKey;
 	}
 
+	public double implicitBreakCasting00(String input) {
+		List<Integer> values = new ArrayList<>();
+		int defaultIndex = values.stream().filter(value -> value > 4).findFirst().orElse(-1);
+
+		return defaultIndex;
+	}
+
+	public double implicitBreakCasting01(String input) {
+		List<String> values = generateList(input);
+		int defaultIndex = values.stream().filter(value -> value.length() > 4).findFirst().map(String::length)
+				.orElse(-1);
+
+		return defaultIndex;
+	}
+
+	public double implicitBreakCasting20(String input) {
+		double defaultValue = -1.0;
+		List<Integer> values = new ArrayList<>();
+		double defaultIndex = values.stream().filter(value -> value > 4).findFirst().map(Double::valueOf)
+				.orElse(defaultValue);
+
+		return defaultIndex;
+	}
+
+	public double implicitBreakCasting21(String input) {
+		double defaultValue = -1.0;
+		List<Integer> values = new ArrayList<>();
+		double defaultIndex = values.stream().filter(value -> value > 4).findFirst()
+				.map(value -> Double.valueOf(value + 1)).orElse(defaultValue);
+
+		return defaultIndex;
+	}
+
+	public double implicitBreakCasting30(String input) {
+		double defaultValue = -1.0;
+		double defaultIndex = defaultValue;
+		List<Double> values = new ArrayList<>();
+		return values.stream().filter(value -> value > 4).findFirst().orElse(defaultIndex);
+	}
+
+	public double implicitBreakCasting31(String input) {
+		double defaultValue = -1.0;
+		List<Double> values = new ArrayList<>();
+		double defaultIndex = values.stream().filter(value -> value > 4).findFirst().map(value -> value * 2)
+				.orElse(defaultValue);
+		return defaultIndex;
+	}
+
 	/*
-	 * Loops with return statement
+	 * ************* Loops with return statement ***************
 	 */
 
 	public String convertToFindFirstReturn(String input) {
@@ -286,6 +335,56 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		}
 
 		return values.get(0);
+	}
+
+	public double implicitReturnCasting00(String input) {
+		int defaultIndex = -1;
+		List<Integer> values = new ArrayList<>();
+		return values.stream().filter(value -> value > 4).findFirst().orElse(defaultIndex);
+	}
+
+	public double implicitReturnCasting01(String input) {
+		int defaultIndex = -1;
+		List<String> values = generateList(input);
+		return values.stream().filter(value -> value.length() > 4).findFirst().map(String::length).orElse(defaultIndex);
+	}
+
+	public double implicitReturnCasting10(String input) {
+		int defaultIndex = -1;
+		List<Double> values = new ArrayList<>();
+		return values.stream().filter(value -> value > 4).findFirst().orElse(Double.valueOf(defaultIndex));
+	}
+
+	public double implicitReturnCasting11(String input) {
+		int defaultIndex = -1;
+		List<Double> values = new ArrayList<>();
+		return values.stream().filter(value -> value > 4).findFirst().map(value -> value * 2)
+				.orElse(Double.valueOf(defaultIndex));
+	}
+
+	public double implicitReturnCasting20(String input) {
+		double defaultIndex = -1;
+		List<Integer> values = new ArrayList<>();
+		return values.stream().filter(value -> value > 4).findFirst().map(Double::valueOf).orElse(defaultIndex);
+	}
+
+	public double implicitReturnCasting21(String input) {
+		double defaultIndex = -1;
+		List<Integer> values = new ArrayList<>();
+		return values.stream().filter(value -> value > 4).findFirst().map(value -> Double.valueOf(value + 1))
+				.orElse(defaultIndex);
+	}
+
+	public double implicitReturnCasting30(String input) {
+		double defaultIndex = -1;
+		List<Double> values = new ArrayList<>();
+		return values.stream().filter(value -> value > 4).findFirst().orElse(defaultIndex);
+	}
+
+	public double implicitReturnCasting31(String input) {
+		double defaultIndex = -1;
+		List<Double> values = new ArrayList<>();
+		return values.stream().filter(value -> value > 4).findFirst().map(value -> value * 2).orElse(defaultIndex);
 	}
 
 	private List<String> generateList(String input) {

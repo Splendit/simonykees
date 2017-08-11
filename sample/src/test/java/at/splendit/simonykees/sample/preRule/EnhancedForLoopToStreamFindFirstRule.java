@@ -1,5 +1,6 @@
 package at.splendit.simonykees.sample.preRule;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
 public class EnhancedForLoopToStreamFindFirstRule {
 	
 	private String globalKey = "";
-
+	
 	public String convertToFindFirstBreak(String input) {
 		StringBuilder sb = new StringBuilder();
 		String key = "";
@@ -246,9 +247,90 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		
 		return localKey;
 	}
+	
+	public double implicitBreakCasting00(String input) {
+		int defaultIndex = -1;
+		List<Integer> values = new ArrayList<>();
+		for(int value : values) {
+		    if(value > 4) {
+		    	defaultIndex = value;
+		    	break;
+		    }
+		}
+		
+		return defaultIndex;
+	}
+	
+	public double implicitBreakCasting01(String input) {
+		int defaultIndex = -1;
+		List<String> values = generateList(input);
+		for(String value : values) {
+		    if(value.length() > 4) {
+		    	defaultIndex = value.length();
+		    	break;
+		    }
+		}
+		
+		return defaultIndex;
+	}
+	
+	public double implicitBreakCasting20(String input) {
+		double defaultValue = -1.0;
+		double defaultIndex = defaultValue;
+		List<Integer> values = new ArrayList<>();
+		for(int value : values) {
+		    if(value > 4) {
+		    	defaultIndex = value;
+		    	break;
+		    }
+		}
+		
+		return defaultIndex;
+	}
+	
+	public double implicitBreakCasting21(String input) {
+		double defaultValue = -1.0;
+		double defaultIndex = defaultValue;
+		List<Integer> values = new ArrayList<>();
+		for(int value : values) {
+		    if(value > 4) {
+		    	defaultIndex = value + 1;
+		    	break;
+		    }
+		}
+		
+		return defaultIndex;
+	}
+	
+	public double implicitBreakCasting30(String input) {
+		double defaultValue = -1.0;
+		double defaultIndex = defaultValue;
+		List<Double> values = new ArrayList<>();
+		for(double value : values) {
+		    if(value > 4) {
+		    	return value;
+		    }
+		}
+		return defaultIndex;
+	}
+	
+	public double implicitBreakCasting31(String input) {
+		double defaultValue = -1.0;
+		double defaultIndex = defaultValue;
+		List<Double> values = new ArrayList<>();
+		for(double value : values) {
+		    if(value > 4) {
+		    	defaultIndex = value * 2;
+		    	break;
+		    }
+		}
+		return defaultIndex;
+	}
+
+
 
 	/*
-	 * Loops with return statement
+	 * ************* Loops with return statement ***************
 	 */
 	
 	public String convertToFindFirstReturn(String input) {
@@ -348,6 +430,98 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		}
 		
 		return values.get(0);
+	}
+	
+	public double implicitReturnCasting00(String input) {
+		int defaultIndex = -1;
+		List<Integer> values = new ArrayList<>();
+		for(int value : values) {
+		    if(value > 4) {
+		    	return value;
+		    }
+		}
+		
+		return defaultIndex;
+	}
+	
+	public double implicitReturnCasting01(String input) {
+		int defaultIndex = -1;
+		List<String> values = generateList(input);
+		for(String value : values) {
+		    if(value.length() > 4) {
+		    	return value.length();
+		    }
+		}
+		
+		return defaultIndex;
+	}
+	
+	public double implicitReturnCasting10(String input) {
+		int defaultIndex = -1;
+		List<Double> values = new ArrayList<>();
+		for(double value : values) {
+		    if(value > 4) {
+		    	return value;
+		    }
+		}
+		return defaultIndex;
+	}
+	
+	public double implicitReturnCasting11(String input) {
+		int defaultIndex = -1;
+		List<Double> values = new ArrayList<>();
+		for(double value : values) {
+		    if(value > 4) {
+		    	return value * 2;
+		    }
+		}
+		return defaultIndex;
+	}
+	
+	public double implicitReturnCasting20(String input) {
+		double defaultIndex = -1;
+		List<Integer> values = new ArrayList<>();
+		for(int value : values) {
+		    if(value > 4) {
+		    	return value;
+		    }
+		}
+		
+		return defaultIndex;
+	}
+	
+	public double implicitReturnCasting21(String input) {
+		double defaultIndex = -1;
+		List<Integer> values = new ArrayList<>();
+		for(int value : values) {
+		    if(value > 4) {
+		    	return value + 1;
+		    }
+		}
+		
+		return defaultIndex;
+	}
+	
+	public double implicitReturnCasting30(String input) {
+		double defaultIndex = -1;
+		List<Double> values = new ArrayList<>();
+		for(double value : values) {
+		    if(value > 4) {
+		    	return value;
+		    }
+		}
+		return defaultIndex;
+	}
+	
+	public double implicitReturnCasting31(String input) {
+		double defaultIndex = -1;
+		List<Double> values = new ArrayList<>();
+		for(double value : values) {
+		    if(value > 4) {
+		    	return value * 2;
+		    }
+		}
+		return defaultIndex;
 	}
 
 	private List<String> generateList(String input) {

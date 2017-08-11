@@ -36,7 +36,7 @@ class EffectivelyFinalVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(SimpleName simpleName) {
 		IBinding binding = simpleName.resolveBinding();
-		if (IBinding.VARIABLE == binding.getKind() && binding instanceof IVariableBinding) {
+		if (binding != null && IBinding.VARIABLE == binding.getKind() && binding instanceof IVariableBinding) {
 			IVariableBinding variableBinding = (IVariableBinding) binding;
 			if (!Modifier.isFinal(variableBinding.getModifiers()) && !variableBinding.isEffectivelyFinal()) {
 				this.containsNonfinalVar = true;

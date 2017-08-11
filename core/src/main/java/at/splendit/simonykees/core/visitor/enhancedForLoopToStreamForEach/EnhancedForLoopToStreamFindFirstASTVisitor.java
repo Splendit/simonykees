@@ -3,6 +3,7 @@ package at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -11,8 +12,12 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.LambdaExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -111,21 +116,200 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			/*
 			 * replace the initializer with a Stream::findFirst
 			 */
+			if(containsNonEffectiveVariable(tailingMap)) {
+				return true;
+			}
+			List<Expression>boxingExpresions = new ArrayList<>();
+			Expression orElseExpression = boxInitializerIfPrimitive(varDeclFragment, tailingMap, boxingExpresions, loopExpression);
+			List<Expression> mapCopyTargets = tailingMap.stream().map(e -> (Expression)astRewrite.createCopyTarget(e)).collect(Collectors.toList());
+			mapCopyTargets.addAll(boxingExpresions);
+			
 			MethodInvocation methodInvocation = createStreamFindFirstInitalizer(loopExpression, ifCondition,
-					loopParameter, varDeclFragment.getInitializer(), tailingMap);
+					loopParameter, orElseExpression, mapCopyTargets);
+			
 			astRewrite.replace(varDeclFragment.getInitializer(), methodInvocation, null);
 			replaceLoopWithFragment(forLoop, varDeclFragment);
 
 		} else if ((returnStatement = isConvertableWithReturn(thenStatement, forLoop, loopParameter.getName(),
 				tailingMap)) != null) {
-			// replace the return statement with a Stream::findFirst
+			if(containsNonEffectiveVariable(tailingMap)) {
+				return true;
+			}
+			List<Expression>boxingExpresions = new ArrayList<>();
+			Expression orElseExpression = boxReturnExpressionIfPrimitive(returnStatement, tailingMap, boxingExpresions, loopExpression);
+			List<Expression> mapCopyTargets = tailingMap.stream().map(e -> (Expression)astRewrite.createCopyTarget(e)).collect(Collectors.toList());
+			mapCopyTargets.addAll(boxingExpresions);
 			MethodInvocation methodInvocation = createStreamFindFirstInitalizer(loopExpression, ifCondition,
-					loopParameter, returnStatement.getExpression(), tailingMap);
+					loopParameter, orElseExpression, mapCopyTargets);
 			astRewrite.replace(returnStatement.getExpression(), methodInvocation, null);
 			astRewrite.remove(forLoop, null);
 		}
 
 		return true;
+	}
+
+	private boolean containsNonEffectiveVariable(List<Expression> tailingMap) {
+		return tailingMap.stream().anyMatch(this::containsNonEffectivelyFinalVariable);
+	}
+
+	/**
+	 * Boxes the expression if its type is a primitive type. Creates a copy
+	 * target of the given expression. The expression to be boxed should be
+	 * part of the ast. 
+	 *   
+	 * @param expression an expression to be boxed
+	 * @param expectedType the type to be boxed to
+	 * @return the new boxed expression if its original type is primitve, 
+	 * or the unchanged expression otherwise. 
+	 */
+	private Expression boxIfPrimitive(Expression expression, ITypeBinding expectedType) {
+		if (expectedType != null && expectedType.isPrimitive()) {
+			String primitiveTypeName = expectedType.getName();
+			AST ast = expression.getAST();
+			MethodInvocation methodInvocation = ast.newMethodInvocation();
+			methodInvocation.setName(ast.newSimpleName(VALUE_OF));
+			ListRewrite miRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
+			miRewrite.insertFirst((Expression)astRewrite.createCopyTarget(expression), null);
+			String expressionName = findBoxedTypeOfPrimitive(primitiveTypeName);
+
+			if (!expressionName.isEmpty()) {
+				methodInvocation.setExpression(ast.newSimpleName(expressionName));
+				return methodInvocation;
+			}
+		}
+
+		return expression;
+	}
+
+	/**
+	 * Returns the name of the corresponding boxed type for the given primitive
+	 * type.
+	 * 
+	 * @param primitiveTypeName
+	 *            the name of a primitive
+	 * 
+	 * @return the simple name of the corresponding boxed type, or the the
+	 *         unchanged value if it does not represent any of the java
+	 *         primitives.
+	 */
+	private String findBoxedTypeOfPrimitive(String primitiveTypeName) {
+		String expressionName;
+		switch (primitiveTypeName) {
+
+		case "int":
+			expressionName = Integer.class.getSimpleName();
+			break;
+		case "double":
+			expressionName = Double.class.getSimpleName();
+			break;
+		case "float":
+			expressionName = Float.class.getSimpleName();
+			break;
+		case "long":
+			expressionName = Long.class.getSimpleName();
+			break;
+		case "short":
+			expressionName = Short.class.getSimpleName();
+			break;
+		case "boolean":
+			expressionName = Boolean.class.getSimpleName();
+		case "byte":
+			expressionName = Byte.class.getSimpleName();
+			break;
+		case "char":
+			expressionName = Character.class.getSimpleName();
+			break;
+		default:
+			expressionName = primitiveTypeName;
+			break;
+		}
+
+		return expressionName;
+	}
+	
+	private Expression boxInitializerIfPrimitive(VariableDeclarationFragment declarationFragment,
+			List<Expression> tailingMap, List<Expression> boxingExpression, Expression loopExpression) {
+		Expression initializer = declarationFragment.getInitializer();
+		ITypeBinding expectedType = declarationFragment.getName().resolveTypeBinding();
+		return checkImplicitCasting(tailingMap, boxingExpression, loopExpression, initializer, expectedType);
+	}
+
+	private Expression boxReturnExpressionIfPrimitive(ReturnStatement returnStatement, List<Expression> tailingMap,
+			List<Expression> boxingExpression, Expression loopExpression) {
+		Expression orElseCandidate = returnStatement.getExpression();
+		ITypeBinding expectedOrElseType = findExpectedReturnType(returnStatement);
+		
+		return checkImplicitCasting(tailingMap, boxingExpression, loopExpression, orElseCandidate,
+				expectedOrElseType);
+	}
+
+	private Expression checkImplicitCasting(List<Expression> tailingMap, List<Expression> boxingExpression,
+			Expression loopExpression, Expression orElseCandidate, ITypeBinding expectedOrElseType) {
+		ITypeBinding orElseType = orElseCandidate.resolveTypeBinding();
+		String orElseTypeBoxed = findBoxedTypeOfPrimitive(orElseType.getName());
+		ITypeBinding streamType;
+		String streamTypeBoxed;
+		if (tailingMap.isEmpty()) {
+			streamType = (loopExpression.resolveTypeBinding()).getTypeArguments()[0];
+		} else {
+			streamType = tailingMap.get(tailingMap.size() - 1).resolveTypeBinding();
+		}
+		streamTypeBoxed = findBoxedTypeOfPrimitive(streamType.getName());
+
+		if (!streamTypeBoxed.equals(orElseTypeBoxed)) {
+			String expectedReturnTypeBoxed = findBoxedTypeOfPrimitive(expectedOrElseType.getName());
+			if (!expectedReturnTypeBoxed.equals(orElseTypeBoxed)) {
+				orElseCandidate = boxIfPrimitive(orElseCandidate, expectedOrElseType);
+			}
+
+			if (!expectedReturnTypeBoxed.equals(streamTypeBoxed)) {
+				if (tailingMap.isEmpty()) {
+					AST ast = orElseCandidate.getAST();
+					ExpressionMethodReference castingMethod = ast.newExpressionMethodReference();
+					castingMethod.setExpression(ast.newSimpleName(expectedReturnTypeBoxed));
+					castingMethod.setName(ast.newSimpleName(VALUE_OF));
+					boxingExpression.add(castingMethod);
+				} else {
+					Expression exp = tailingMap.remove(tailingMap.size() - 1);
+					boxingExpression.add(boxIfPrimitive(exp, expectedOrElseType));
+				}
+			}
+		}
+		return orElseCandidate;
+	}
+
+	/**
+	 * Searches for the method signature or the type of the lambda expression
+	 * wrapping the given return statement, and from there derives the expected
+	 * return type. Note that sometimes the type of the returned expression can
+	 * be a subtype of the expected return type, or can be implicitly casted to
+	 * the expected return type.
+	 * 
+	 * @param returnStatement
+	 *            return statement to be checked
+	 * @return the expected return type if the method signature or the lambda expression
+	 * wrapping the return statement can be found, or the type of the expression of the
+	 * return statement otherwise. 
+	 */
+	private ITypeBinding findExpectedReturnType(ReturnStatement returnStatement) {
+		ASTNode parent = returnStatement.getParent();
+		Expression returnExpression = returnStatement.getExpression();
+		ITypeBinding returnExpBinding = returnExpression.resolveTypeBinding();
+
+		do {
+			if (ASTNode.METHOD_DECLARATION == parent.getNodeType()) {
+				MethodDeclaration methodDecl = (MethodDeclaration) parent;
+				IMethodBinding methodBinding = methodDecl.resolveBinding();
+				return methodBinding.getReturnType();
+			} else if (ASTNode.LAMBDA_EXPRESSION == parent.getNodeType()) {
+				LambdaExpression lambdaExpression = (LambdaExpression) parent;
+				IMethodBinding methodBinding = lambdaExpression.resolveMethodBinding();
+				return methodBinding.getReturnType();
+			}
+			parent = parent.getParent();
+		} while (parent != null);
+
+		return returnExpBinding;
 	}
 
 	/**
@@ -151,7 +335,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 		if (assignmentAfterBreak != null) {
 			Expression rhs = assignmentAfterBreak.getRightHandSide();
 			if(ASTNode.NULL_LITERAL != rhs.getNodeType()) {
-				tailingMap.addAll(isReferencingParameter(rhs, loopParameterName));
+				tailingMap.addAll(wrapNonIdentical(rhs, loopParameterName));
 				Expression lhs = assignmentAfterBreak.getLeftHandSide();
 				if (ASTNode.SIMPLE_NAME == lhs.getNodeType()) {
 					return findDeclarationFragment(forLoop, (SimpleName) lhs);
@@ -209,7 +393,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 		if (returnStatement != null) {
 			Expression returnedExpression = returnStatement.getExpression();
 			if (returnedExpression != null && ASTNode.NULL_LITERAL != returnedExpression.getNodeType()) {
-				tailingMap.addAll(isReferencingParameter(returnedExpression, parameter));
+				tailingMap.addAll(wrapNonIdentical(returnedExpression, parameter));
 				ReturnStatement followingReturnStatement = isFollowedByReturnStatement(forLoop);
 				if (followingReturnStatement != null && followingReturnStatement.getExpression() != null) {
 					return followingReturnStatement;
@@ -230,7 +414,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 	 * @return a list of a single expression if the given expression is not
 	 *         identical with the given simple name, or an empty list otherwise.
 	 */
-	private List<Expression> isReferencingParameter(Expression expression, SimpleName parameter) {
+	private List<Expression> wrapNonIdentical(Expression expression, SimpleName parameter) {
 		List<Expression> tailingMapExpressions = new ArrayList<>();
 		if (ASTNode.SIMPLE_NAME != expression.getNodeType()
 				|| !((SimpleName) expression).getIdentifier().equals(parameter.getIdentifier())) {
@@ -321,17 +505,23 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			map.setName(ast.newSimpleName(MAP));
 			map.setExpression(optionalExpression);
 			optionalExpression = map;
+			Expression mapParameter;
 
-			LambdaExpression mapLambdaExpression = ast.newLambdaExpression();
-			mapLambdaExpression.setBody(astRewrite.createCopyTarget(mapExpression));
-			mapLambdaExpression.setParentheses(false);
-			lambdaRewrite = astRewrite.getListRewrite(mapLambdaExpression, LambdaExpression.PARAMETERS_PROPERTY);
-			VariableDeclarationFragment mapDeclFragment = ast.newVariableDeclarationFragment();
-			mapDeclFragment.setName((SimpleName) astRewrite.createCopyTarget(loopParameter.getName()));
-			lambdaRewrite.insertFirst(mapDeclFragment, null);
-
+			if(ASTNode.EXPRESSION_METHOD_REFERENCE == mapExpression.getNodeType()) {
+				mapParameter = mapExpression;
+			} else {
+				LambdaExpression mapLambdaExpression = ast.newLambdaExpression();
+				mapLambdaExpression.setBody(mapExpression);
+				mapLambdaExpression.setParentheses(false);
+				lambdaRewrite = astRewrite.getListRewrite(mapLambdaExpression, LambdaExpression.PARAMETERS_PROPERTY);
+				VariableDeclarationFragment mapDeclFragment = ast.newVariableDeclarationFragment();
+				mapDeclFragment.setName((SimpleName) astRewrite.createCopyTarget(loopParameter.getName()));
+				lambdaRewrite.insertFirst(mapDeclFragment, null);
+				mapParameter = mapLambdaExpression;
+			}
+			
 			ListRewrite tailingMapRewrite = astRewrite.getListRewrite(map, MethodInvocation.ARGUMENTS_PROPERTY);
-			tailingMapRewrite.insertFirst(mapLambdaExpression, null);
+			tailingMapRewrite.insertFirst(mapParameter, null);
 		}
 
 		/*

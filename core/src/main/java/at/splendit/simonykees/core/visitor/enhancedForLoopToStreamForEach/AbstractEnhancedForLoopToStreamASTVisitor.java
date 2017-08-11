@@ -99,7 +99,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 	 * @return {@code true} if an invocation which throws an exception is found,
 	 *         or {@code false} otherwise.
 	 */
-	protected boolean throwsException(Expression expression) {
+	protected boolean throwsException(ASTNode expression) {
 		UnhandledExceptionVisitor visitor = new UnhandledExceptionVisitor();
 		expression.accept(visitor);
 		return visitor.throwsException();
@@ -300,11 +300,10 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		}
 
 		/*
-		 * the condition expression should not contain non effectively final
+		 * the if statement should not contain non effectively final
 		 * variables and should not throw any exception
 		 */
-		Expression condition = ifStatement.getExpression();
-		if (containsNonEffectivelyFinalVariable(condition) || throwsException(condition)) {
+		if (containsNonEffectivelyFinalVariable(ifStatement.getExpression()) || throwsException(ifStatement)) {
 			return null;
 		}
 
