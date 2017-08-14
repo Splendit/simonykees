@@ -315,12 +315,12 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	}
 	
 	public double implicitBreakCasting31(String input) {
-		double defaultValue = -1.0;
+		int defaultValue = -1;
 		double defaultIndex = defaultValue;
 		List<Double> values = new ArrayList<>();
 		for(double value : values) {
 		    if(value > 4) {
-		    	defaultIndex = value * 2;
+		    	defaultIndex = value * 3.1;
 		    	break;
 		    }
 		}
