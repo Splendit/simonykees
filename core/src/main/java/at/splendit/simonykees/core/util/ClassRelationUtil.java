@@ -35,7 +35,7 @@ public class ClassRelationUtil {
 		}
 
 		return findAncestors(iTypeBinding).stream().map(ITypeBinding::getErasure).map(ITypeBinding::getQualifiedName)
-				.filter(fullyQuallifiedTargetnames::contains).findAny().isPresent();
+				.anyMatch(fullyQuallifiedTargetnames::contains);
 
 	}
 

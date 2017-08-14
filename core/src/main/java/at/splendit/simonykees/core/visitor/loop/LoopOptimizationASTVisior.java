@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -49,18 +48,10 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 	private ASTNode iteratorDeclaration = null;
 	private MethodInvocation iteratorNextCall = null;
 	private boolean outsideWhile = true;
-	private boolean isForLoop = false;
-	private boolean isWhileLoop = false;
 
 	public LoopOptimizationASTVisior(SimpleName iteratorName, Statement loopStatement) {
 		this.iteratorName = iteratorName;
 		this.loopStatement = loopStatement;
-		
-		if(ASTNode.FOR_STATEMENT == loopStatement.getNodeType()) {
-			isForLoop = true;
-		} else if (ASTNode.WHILE_STATEMENT == loopStatement.getNodeType()) {
-			isWhileLoop = true;
-		}
 	}
 
 	@Override
@@ -220,7 +211,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		}
 	}
 
-	public void replaceLoop(Statement loopStatement, Statement loopBody, Map<String, Integer> multipleIteratorUse) {
+	public void replaceLoop(Statement loopStatement, Statement loopBody, Map<String, Integer> multipleIteratorUse, String iteratorName) {
 		Type iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 
 		/*
@@ -254,7 +245,6 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 		if (null == singleVariableDeclaration) {
 			// Solution for Iteration over the same List without variables
-			String iteratorName = createIteratorName();
 			if (null == multipleIteratorUse.get(iteratorName)) {
 				multipleIteratorUse.put(iteratorName, 2);
 			} else {
@@ -282,28 +272,6 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(loopStatement, newFor, null);
 
 		astRewrite.remove(getIteratorDeclaration(), null);
-	}
-
-	/**
-	 * Creates a string to be used as the new name of the new 
-	 * enhanced for loop variable. Makes use of {@link #getListName()} for 
-	 * getting the name of the iterable object. If the iterable object
-	 * is a qualified name, then only its qualifier is ignored. 
-	 * 
-	 * @return a string consisting of the name of the iterable object, followed
-	 * by {@value ReservedNames#CLASS_ITERATOR}.
-	 */
-	private String createIteratorName() {
-		Name name = listName = getListName();
-		String prefix = ""; //$NON-NLS-1$
-		if(ASTNode.SIMPLE_NAME == name.getNodeType()) {
-			prefix = ((SimpleName)name).getIdentifier();
-		} else if (ASTNode.QUALIFIED_NAME == name.getNodeType()) {
-			QualifiedName qualifiedName = ((QualifiedName)name);
-			prefix = qualifiedName.getName().getIdentifier();
-			
-		}
-		return prefix + ReservedNames.CLASS_ITERATOR;
 	}
 
 	/**

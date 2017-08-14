@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.visitor.loop;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -117,25 +118,69 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			iteratorTypeBinding = iterableTypeBinding.getComponentType();
 		}
 
-		if (iteratorTypeBinding != null && !iteratorTypeBinding.getName().isEmpty()) {
-			ASTRewrite astRewrite = getAstRewrite();
-			ImportRewrite importRewrite = ImportRewrite.create(compilationUnit, true);
-			iteratorType = importRewrite.addImport(iteratorTypeBinding, astRewrite.getAST());
-			if (!iteratorTypeBinding.isMember()) {
-				String[] addedImports = importRewrite.getAddedImports();
-				for (String addedImport : addedImports) {
-					if (!addedImport.startsWith(JAVA_LANG_PACKAGE)) {
-						newImports.add(addedImport);
-					}
-				}
-			}
+		if (iteratorTypeBinding == null || iteratorTypeBinding.getName().isEmpty()) {
+			return null;
+		}
 
-			if (qualifiedNameNeeded(loop, iteratorTypeBinding)) {
-				iteratorType = convertToQualifiedName(iteratorType, iteratorTypeBinding);
-			}
+		ASTRewrite astRewrite = getAstRewrite();
+		ImportRewrite importRewrite = ImportRewrite.create(compilationUnit, true);
+		String[] addedImports;
+
+		if (iteratorTypeBinding.isMember() && !enclosedInSameType(loop, iteratorTypeBinding)) {
+			/*
+			 * the type of the iterator is an inner type which is not 
+			 * declared in the same class enclosing the loop node.
+			 */
+			ITypeBinding outerType = iteratorTypeBinding.getDeclaringClass();
+			importRewrite.addImport(outerType, astRewrite.getAST());
+			addedImports = importRewrite.getAddedImports();
+			String fullyQualifiedName = iteratorTypeBinding.getQualifiedName();
+			int outerTypeStartingIndex = fullyQualifiedName.lastIndexOf(outerType.getName());
+			Name qualifiedName = astRewrite.getAST().newName(fullyQualifiedName.substring(outerTypeStartingIndex));
+			iteratorType = convertToQualifiedName(importRewrite.addImport(iteratorTypeBinding, astRewrite.getAST()),
+					qualifiedName);
+		} else {
+			/*
+			 * ImportRewrite::addImport is a work around for creating a Type
+			 * from an ITypeBinding
+			 */
+			iteratorType = importRewrite.addImport(iteratorTypeBinding, astRewrite.getAST());
+			addedImports = importRewrite.getAddedImports();
+		}
+
+		Arrays.stream(addedImports).filter(addedImport -> !addedImport.startsWith(JAVA_LANG_PACKAGE))
+				.forEach(newImports::add);
+
+		if (qualifiedNameNeeded(loop, iteratorTypeBinding)) {
+			iteratorType = convertToQualifiedName(iteratorType, iteratorTypeBinding);
 		}
 
 		return iteratorType;
+	}
+
+	/**
+	 * Checks whether the loop statement and the declaration of the given type
+	 * are enclosed in the same class.
+	 * 
+	 * @param loop
+	 *            a node expected to represent a loop statement.
+	 * @param iteratorTypeBinding
+	 *            a type binding expected to represent the type of the elements
+	 *            where the loop iterates through.
+	 * @return {@code true} if the loop and the type declaration are wrapped by
+	 *         the same class or {@code false} otherwise.
+	 */
+	private boolean enclosedInSameType(Statement loop, ITypeBinding iteratorTypeBinding) {
+		AbstractTypeDeclaration enclosingType = ASTNodeUtil.getSpecificAncestor(loop, AbstractTypeDeclaration.class);
+		if (enclosingType != null && iteratorTypeBinding != null) {
+			ITypeBinding enclosingTypeBinding = enclosingType.resolveBinding();
+			if (enclosingTypeBinding != null
+					&& ClassRelationUtil.compareITypeBinding(enclosingTypeBinding, iteratorTypeBinding.getDeclaringClass())) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -152,9 +197,27 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	private Type convertToQualifiedName(Type type, ITypeBinding typeBinding) {
 		AST ast = type.getAST();
 		Name qualifiedName = ast.newName(typeBinding.getQualifiedName());
+		return convertToQualifiedName(type, qualifiedName);
+	}
+	
+	/**
+	 * Sets the given name as the type property of the given {@link Type} node.
+	 * Considers {@link SimpleType}s, {@link ArrayType}s and
+	 * {@link ParameterizedType}s.
+	 * 
+	 * @param type
+	 *            the type to be modified
+	 * @param qualifiedName
+	 *            new name of the type.
+	 * 
+	 * @return the type node having the new name property or the unmodified type
+	 *         node if it doesn't fall in any of the aforementioned types.
+	 */
+	private Type convertToQualifiedName(Type type, Name qualifiedName) {
+		AST ast = type.getAST();
 		if (type.isArrayType()) {
 			ArrayType arrayType = (ArrayType) type;
-			SimpleType simpleType = ast.newSimpleType(ast.newName(typeBinding.getQualifiedName()));
+			SimpleType simpleType = ast.newSimpleType(qualifiedName);
 			arrayType.setStructuralProperty(ArrayType.ELEMENT_TYPE_PROPERTY, simpleType);
 			return arrayType;
 		} else if (type.isSimpleType()) {
@@ -183,7 +246,8 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	 *            the body of the loop
 	 * @return a new name for the iterator.
 	 */
-	protected Map<String, Boolean> generateNewIteratorName(SimpleName preferedName, Statement loopBody) {
+	protected Map<String, Boolean> generateNewIteratorName(SimpleName preferedName, Statement loopBody,
+			Name iterableName) {
 		VariableDeclarationsVisitor loopBodyDeclarationsVisitor = new VariableDeclarationsVisitor();
 		loopBody.accept(loopBodyDeclarationsVisitor);
 		List<SimpleName> loobBodyDeclarations = loopBodyDeclarationsVisitor.getVariableDeclarationNames();
@@ -193,7 +257,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		String newName;
 		Boolean allowedPreferedName;
 		if (preferedName == null || declaredNames.contains(preferedName.getIdentifier())
-				|| tempIntroducedNames.containsValue(preferedName)) {
+				|| tempIntroducedNames.containsValue(preferedName.getIdentifier())) {
 			allowedPreferedName = false;
 			int counter = 0;
 			String suffix = ""; //$NON-NLS-1$
@@ -201,14 +265,14 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			VariableDeclarationsVisitor loopScopeVisitor = new VariableDeclarationsVisitor();
 			scope.accept(loopScopeVisitor);
 			List<SimpleName> scopeDeclaredNames = loopScopeVisitor.getVariableDeclarationNames();
-
+			String defaultIteratorName = createDefaultIteratorName(iterableName);
 			declaredNames = scopeDeclaredNames.stream().map(SimpleName::getIdentifier).collect(Collectors.toList());
-			while (declaredNames.contains(DEFAULT_ITERATOR_NAME + suffix)
-					|| tempIntroducedNames.containsValue(DEFAULT_ITERATOR_NAME + suffix)) {
+			while (declaredNames.contains(defaultIteratorName + suffix)
+					|| tempIntroducedNames.containsValue(defaultIteratorName + suffix)) {
 				counter++;
 				suffix = Integer.toString(counter);
 			}
-			newName = DEFAULT_ITERATOR_NAME + suffix;
+			newName = defaultIteratorName + suffix;
 		} else {
 			allowedPreferedName = true;
 			newName = preferedName.getIdentifier();
@@ -218,6 +282,72 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		nameMap.put(newName, allowedPreferedName);
 
 		return nameMap;
+	}
+
+	/**
+	 * Constructs the default name of the iterator object. If the iterable name
+	 * ends with an {@code s}, the constructed name is created by removing the
+	 * ending {@code s}. Otherwise, either the prefix {@code a} or {@code an} is
+	 * added to the iterable name depending on whether it starts with a vowel or
+	 * not.
+	 * 
+	 * @param iterableName
+	 *            the name of the iterable object
+	 * 
+	 * @return the new name for the iterating object.
+	 */
+	private String createDefaultIteratorName(Name iterableName) {
+		SimpleName simpleName;
+		if (iterableName.isQualifiedName()) {
+			simpleName = ((QualifiedName) iterableName).getName();
+		} else {
+			simpleName = (SimpleName) iterableName;
+		}
+
+		String identifier = simpleName.getIdentifier();
+		if (identifier.endsWith("s")) { //$NON-NLS-1$
+			return identifier.substring(0, identifier.length() - 1);
+		} else {
+			return addSingularPrefix(identifier);
+		}
+	}
+
+	/**
+	 * Adds the prefix {@code a} or {@code an} depending on whether the
+	 * identifier starts with a vowel or not.
+	 * 
+	 * @param identifier
+	 *            a string representing a variable name.
+	 * 
+	 * @return {@code a}/{@code an} + {@code identifier} converted to camel
+	 *         cased.
+	 */
+	private String addSingularPrefix(String identifier) {
+
+		String firstLetter = identifier.substring(0, 1);
+		String remaining = identifier.substring(1);
+		String prefix;
+		if (isVowel(identifier.charAt(0))) {
+			prefix = "an"; //$NON-NLS-1$
+		} else {
+			prefix = "a"; //$NON-NLS-1$
+		}
+		return prefix + firstLetter.toUpperCase() + remaining;
+	}
+
+	/**
+	 * Checks if a character is a vowel.
+	 * 
+	 * @param c
+	 *            character to be checked
+	 * @return {@code true} if the character is a vowel or {@code false}
+	 *         otherwise.
+	 */
+	private boolean isVowel(char c) {
+		if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' || c == 'y') {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -280,7 +410,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		SimpleName preferredIteratorName = indexVisitor.getIteratorName();
 
 		// generate a safe iterator name
-		Map<String, Boolean> nameMap = generateNewIteratorName(preferredIteratorName, loopBody);
+		Map<String, Boolean> nameMap = generateNewIteratorName(preferredIteratorName, loopBody, iterableNode);
 		String newIteratorIdentifier = nameMap.keySet().iterator().next();
 		storeTempName(loop, newIteratorIdentifier);
 		boolean eligiblePreferredName = nameMap.get(newIteratorIdentifier);
@@ -360,8 +490,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		types.stream().map(type -> type.getQualifiedName())
 				.noneMatch(qualifiedName -> qualifiedName.equals(iteratorType.getQualifiedName())) &&
 		// iterator type clashes with an inner type
-				types.stream().map(type -> type.getName()).filter(name -> name.equals(iteratorType.getName())).findAny()
-						.isPresent();
+				types.stream().map(type -> type.getName()).anyMatch(name -> name.equals(iteratorType.getName()));
 
 	}
 

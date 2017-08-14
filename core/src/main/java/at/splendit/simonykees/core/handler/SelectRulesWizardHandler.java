@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.handler;
 
 import java.util.List;
 
+import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,6 +33,7 @@ import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.dialog.CompilationErrorsMessageDialog;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.wizard.impl.SelectRulesWizard;
+import at.splendit.simonykees.core.util.WizardHandlerUtil;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
@@ -40,7 +42,7 @@ import at.splendit.simonykees.i18n.Messages;
  * @author Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec
  * @since 0.9
  */
-public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
+public class SelectRulesWizardHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -51,7 +53,7 @@ public class SelectRulesWizardHandler extends AbstractSimonykeesHandler {
 		} else {
 			Activator.setRunning(true);
 			if (LicenseUtil.getInstance().isValid()) {
-				List<IJavaElement> selectedJavaElements = getSelectedJavaElements(event);
+				List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
 				if (!selectedJavaElements.isEmpty()) {
 					IJavaProject selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
 

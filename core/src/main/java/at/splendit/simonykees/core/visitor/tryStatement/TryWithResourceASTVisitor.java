@@ -276,9 +276,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 					referencedByInitializer
 					.stream()
 					.map(SimpleName::getIdentifier)
-					.filter(proceedingsNames::contains)
-					.findAny()
-					.isPresent();
+					.anyMatch(proceedingsNames::contains);
 			
 			return isDirty;
 		}

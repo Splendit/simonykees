@@ -23,13 +23,19 @@ public interface LicenseValidationService {
 	 * @return true, if a valid license is present, false otherwise
 	 */
 	boolean isValid();
+	
+	/**
+	 * checks, if license is expired
+	 * 
+	 * @return true, if a license is expired, false otherwise
+	 */
+	boolean isExpired();
 
 	/**
 	 * updates the license key
-	 * 
-	 * @param licenseKey
-	 * @param licenseName
-	 * @return ?
+	 * @param licenseKey new licensee key.
+	 * @param licenseName new licensee name.
+	 * @return status of update
 	 */
 	boolean updateLicenseeNumber(String licenseKey, String licenseName);
 

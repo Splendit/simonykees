@@ -5,7 +5,8 @@ import org.eclipse.osgi.util.NLS;
 /**
  * TODO SIM-103 add class description
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
+ *         Matthias Webhofer
  * @since 0.9
  */
 public class Messages extends NLS {
@@ -20,6 +21,7 @@ public class Messages extends NLS {
 	public static String AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
 	public static String AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
 	public static String AbstractSelectRulesWizardPage_error_NoRulesSelected;
+	public static String AbstractSelectRulesWizardPage_warning_RulesInProfileNotApplicable;
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
@@ -29,6 +31,38 @@ public class Messages extends NLS {
 	public static String ArithmethicAssignmentRule_name;
 	public static String BracketsToControlRule_description;
 	public static String BracketsToControlRule_name;
+	public static String BuyLicenseDialog_feedbackLabel;
+	public static String BuyLicenseDialog_opinionLabel;
+	public static String BuyLicenseDialog_purchaseLinkLabel;
+	public static String BuyLicenseDialog_rateUsLabel;
+	public static String BuyLicenseDialog_reason1;
+	public static String BuyLicenseDialog_reason2;
+	public static String BuyLicenseDialog_reason3;
+	public static String BuyLicenseDialog_reason4;
+	public static String BuyLicenseDialog_reason5;
+	public static String BuyLicenseDialog_reason6;
+	public static String BuyLicenseDialog_reason7;
+	public static String BuyLicenseDialog_reasonsLabel;
+	public static String StartDialog_alwaysShowIntroText;
+	public static String StartDialog_appreciationLabel;
+	public static String StartDialog_buyLicenseLabel;
+	public static String StartDialog_changesLabel;
+	public static String StartDialog_customizeLabel;
+	public static String StartDialog_feedbackLabel;
+	public static String StartDialog_goodToKnowLabel;
+	public static String StartDialog_guidlinesLinkLabel;
+	public static String StartDialog_licenseLinkLabel;
+	public static String StartDialog_likeItLabel;
+	public static String StartDialog_marketplaceLinkLabel;
+	public static String StartDialog_quickStartClickLabel;
+	public static String StartDialog_quickStartGoToLabel;
+	public static String StartDialog_quickStartLabel;
+	public static String StartDialog_rateUsLabel;
+	public static String StartDialog_thankyouLabel;
+	public static String StartDialog_titleLabel;
+	public static String StartDialog_wantMoreLabel;
+	public static String StartDialog_welcomeLabel;
+	public static String BrowserDialog_introTitle;
 	public static String CodeFormatterRule_description;
 	public static String CodeFormatterRule_name;
 	public static String CollectionRemoveAllRule_description;
@@ -166,6 +200,7 @@ public class Messages extends NLS {
 	public static String SimonykeesMessageDialog_open_browser_error_message;
 	public static String SimonykeesPreferenceManager_builtIn;
 	public static String SimonykeesPreferencePage_editProfileButtonLabel;
+	public static String SimonykeesPreferencePage_enableIntroText;
 	public static String SimonykeesPreferencePage_newProfileButtonLabel;
 	public static String SimonykeesPreferencePage_removeProfileButtonLabel;
 	public static String SimonykeesPreferencePage_rules;

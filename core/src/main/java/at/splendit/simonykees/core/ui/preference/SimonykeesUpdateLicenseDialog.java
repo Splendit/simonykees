@@ -18,6 +18,7 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.HelpEvent;
@@ -26,7 +27,6 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Device;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
@@ -45,10 +45,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.Activator;
+import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.i18n.ExceptionMessages;
 import at.splendit.simonykees.i18n.Messages;
 import at.splendit.simonykees.license.api.LicenseValidationService;
-import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 
 /**
  * Dialog for updating license key.
@@ -65,14 +65,18 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	private Text licenseKeyText;
 	private String licenseKey = ""; //$NON-NLS-1$
 	private Button updateButton;
-	private Label updatedLabel;
+	private CLabel updatedLabel;
 	private Label updatedIconLabel;
 
 	private Image scaledJSparrowImageActive;
 	private Image scaledJSparrowImageInactive;
+	private Image scaledTickmarkGreenIconImage;
+	private Image scaledCloseRedIconImage;
 
 	private static final String LOGO_ACTIVE_LICENSE_PATH = "icons/jSparrow_active_icon_100.png"; //$NON-NLS-1$
 	private static final String LOGO_INACTIVE_LICENSE_PATH = "icons/jSparrow_inactive_icon_100.png"; //$NON-NLS-1$
+	private static final String TICKMARK_GREEN_ICON_PATH = "icons/if_Tick_Mark_20px.png"; //$NON-NLS-1$
+	private static final String CLOSE_RED_ICON_PATH = "icons/if_Close_Icon_20px.png"; //$NON-NLS-1$
 
 	@Inject
 	private LicenseValidationService licenseValidationService;
@@ -187,6 +191,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		updatedIconLabel.setLayoutData(gridData);
 
 		Bundle bundle = Platform.getBundle(Activator.PLUGIN_ID);
+
 		IPath iPathActive = new Path(LOGO_ACTIVE_LICENSE_PATH);
 		URL urlActive = FileLocator.find(bundle, iPathActive, new HashMap<>());
 		ImageDescriptor imageDescActive = ImageDescriptor.createFromURL(urlActive);
@@ -201,14 +206,37 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		ImageData imageDataInactive = jSparrowImageInactive.getImageData();
 		scaledJSparrowImageInactive = new Image(container.getDisplay(), imageDataInactive);
 
-		updatedIconLabel.setImage(scaledJSparrowImageActive);
-		updatedIconLabel.setVisible(false);
+		if (isLicenseValidationServiceAvailable) {
+			if (licenseValidationService.isValid())
+				updatedIconLabel.setImage(scaledJSparrowImageActive);
+			else
+				updatedIconLabel.setImage(scaledJSparrowImageInactive);
+			updatedIconLabel.setVisible(true);
+		} else {
+			updatedIconLabel.setVisible(false);
+		}
 
-		updatedLabel = new Label(container, SWT.NONE);
+		updatedLabel = new CLabel(container, SWT.NONE);
 		gridData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
 		gridData.verticalIndent = 5;
 		gridData.horizontalIndent = 10;
 		updatedLabel.setLayoutData(gridData);
+
+		IPath iPathTickMarkGreen = new Path(TICKMARK_GREEN_ICON_PATH);
+		URL urlTickMarkGreen = FileLocator.find(bundle, iPathTickMarkGreen, new HashMap<>());
+		ImageDescriptor imageDescTickMarkGreen = ImageDescriptor.createFromURL(urlTickMarkGreen);
+		Image tickmarkGreenIconImage = imageDescTickMarkGreen.createImage();
+		ImageData imageDataTickmarkGreen = tickmarkGreenIconImage.getImageData();
+		scaledTickmarkGreenIconImage = new Image(container.getDisplay(), imageDataTickmarkGreen);
+
+		IPath iPathCloseRed = new Path(CLOSE_RED_ICON_PATH);
+		URL urlCloseRed = FileLocator.find(bundle, iPathCloseRed, new HashMap<>());
+		ImageDescriptor imageDescCloseRed = ImageDescriptor.createFromURL(urlCloseRed);
+		Image closeRedIconImage = imageDescCloseRed.createImage();
+		ImageData imageDataCloseRed = closeRedIconImage.getImageData();
+		scaledCloseRedIconImage = new Image(container.getDisplay(), imageDataCloseRed);
+
+		updatedLabel.setImage(scaledTickmarkGreenIconImage);
 		updatedLabel.setText(Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
 		updatedLabel.setVisible(false);
 
@@ -222,6 +250,8 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 			public void widgetDisposed(DisposeEvent e) {
 				scaledJSparrowImageActive.dispose();
 				scaledJSparrowImageInactive.dispose();
+				scaledTickmarkGreenIconImage.dispose();
+				scaledCloseRedIconImage.dispose();
 			}
 		});
 
@@ -229,19 +259,17 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	}
 
 	private void updateWarningInformation(boolean updated) {
-		Device device = Display.getCurrent();
 
 		if (!updated) {
 			updatedLabel.setText(Messages.SimonykeesUpdateLicenseDialog_invalid_license_key);
-			updatedLabel.setForeground(device.getSystemColor(SWT.COLOR_DARK_RED));
+			updatedLabel.setImage(scaledCloseRedIconImage);
 			updatedLabel.setVisible(true);
 
 			updatedIconLabel.setImage(scaledJSparrowImageInactive);
 			updatedIconLabel.setVisible(true);
-
 		} else {
 			updatedLabel.setText(Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
-			updatedLabel.setForeground(device.getSystemColor(SWT.COLOR_GREEN));
+			updatedLabel.setImage(scaledTickmarkGreenIconImage);
 			updatedLabel.setVisible(true);
 
 			updatedIconLabel.setImage(scaledJSparrowImageActive);
@@ -258,7 +286,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
 	@Override
 	protected Point getInitialSize() {
-		return new Point(450, 300);
+		return new Point(550, 350);
 	}
 
 	@Override

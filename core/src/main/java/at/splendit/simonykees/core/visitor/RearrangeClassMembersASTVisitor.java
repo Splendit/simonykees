@@ -301,9 +301,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 			 return 
 					 ASTNodeUtil.convertToTypedList(member.modifiers(), Modifier.class)
 					 .stream()
-					 .filter(modifier -> modifier.getKeyword().toFlagValue() == modifierFlag)
-					 .findAny()
-					 .isPresent();
+					 .anyMatch(modifier -> modifier.getKeyword().toFlagValue() == modifierFlag);
 		};*/
 		
 		return applyFilter(members, member -> ASTNodeUtil.hasModifier(member.modifiers(), modifierPredicate));
