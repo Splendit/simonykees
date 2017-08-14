@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import at.splendit.simonykees.core.util.ClassRelationUtil;
+
 /**
  * Analyzes the occurrences of {@link EnhancedForStatement}s and checks whether
  * a transformation to {@link Stream#findFirst()} is possible. Considers two
@@ -119,8 +121,16 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			if(containsNonEffectiveVariable(tailingMap)) {
 				return true;
 			}
+			
+			/*
+			 * if the type of the stream proceeding findFirst() does
+			 * not match with the type of the orElse() expression, then
+			 * an explicit casting should be add by using a findFirst().map()
+			 * The boxingExpresions list, is used for storing the mapping
+			 * expressions in such cases.
+			 */
 			List<Expression>boxingExpresions = new ArrayList<>();
-			Expression orElseExpression = boxInitializerIfPrimitive(varDeclFragment, tailingMap, boxingExpresions, loopExpression);
+			Expression orElseExpression = checkInitializerImlicitCasting(varDeclFragment, tailingMap, boxingExpresions, loopExpression);
 			List<Expression> mapCopyTargets = tailingMap.stream().map(e -> (Expression)astRewrite.createCopyTarget(e)).collect(Collectors.toList());
 			mapCopyTargets.addAll(boxingExpresions);
 			
@@ -163,90 +173,114 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 	 * or the unchanged expression otherwise. 
 	 */
 	private Expression boxIfPrimitive(Expression expression, ITypeBinding expectedType) {
-		if (expectedType != null && expectedType.isPrimitive()) {
-			String primitiveTypeName = expectedType.getName();
-			AST ast = expression.getAST();
-			MethodInvocation methodInvocation = ast.newMethodInvocation();
-			methodInvocation.setName(ast.newSimpleName(VALUE_OF));
-			ListRewrite miRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
-			miRewrite.insertFirst((Expression)astRewrite.createCopyTarget(expression), null);
-			String expressionName = findBoxedTypeOfPrimitive(primitiveTypeName);
-
-			if (!expressionName.isEmpty()) {
-				methodInvocation.setExpression(ast.newSimpleName(expressionName));
-				return methodInvocation;
-			}
+		if(expectedType == null || !expectedType.isPrimitive()) {
+			return expression;
 		}
-
-		return expression;
+		
+		AST ast = expression.getAST();
+		MethodInvocation methodInvocation = ast.newMethodInvocation();
+		methodInvocation.setName(ast.newSimpleName(VALUE_OF));
+		ListRewrite miRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
+		miRewrite.insertFirst((Expression)astRewrite.createCopyTarget(expression), null);
+		String expressionName = ClassRelationUtil.findBoxedTypeOfPrimitive(expectedType);
+		methodInvocation.setExpression(ast.newSimpleName(expressionName));
+		
+		return methodInvocation;
 	}
 
 	/**
-	 * Returns the name of the corresponding boxed type for the given primitive
-	 * type.
+	 * Checks for type compatibility between initializer of the declaration
+	 * fragment, the expression in the taliningMap (if any) and the type of the
+	 * elements of the loop expression. Adds a casting expression to the
+	 * boxingExpression if the tailingMap is empty and the type of the elements
+	 * of the loop expression is not compatible with the initializer of the
+	 * declaration fragment.
 	 * 
-	 * @param primitiveTypeName
-	 *            the name of a primitive
-	 * 
-	 * @return the simple name of the corresponding boxed type, or the the
-	 *         unchanged value if it does not represent any of the java
-	 *         primitives.
+	 * @param declarationFragment
+	 *            the declaration fragment of the variable being assigned in the
+	 *            loop body
+	 * @param tailingMap
+	 *            list of mapping expressions
+	 * @param boxingExpression
+	 *            empty list.
+	 * @param loopExpression
+	 *            the expression representing the object which is being iterated
+	 *            in the loop.
+	 * @return the initializer of the declaration fragment wrapped in a boxing
+	 *         expression if necessary.
 	 */
-	private String findBoxedTypeOfPrimitive(String primitiveTypeName) {
-		String expressionName;
-		switch (primitiveTypeName) {
-
-		case "int":
-			expressionName = Integer.class.getSimpleName();
-			break;
-		case "double":
-			expressionName = Double.class.getSimpleName();
-			break;
-		case "float":
-			expressionName = Float.class.getSimpleName();
-			break;
-		case "long":
-			expressionName = Long.class.getSimpleName();
-			break;
-		case "short":
-			expressionName = Short.class.getSimpleName();
-			break;
-		case "boolean":
-			expressionName = Boolean.class.getSimpleName();
-		case "byte":
-			expressionName = Byte.class.getSimpleName();
-			break;
-		case "char":
-			expressionName = Character.class.getSimpleName();
-			break;
-		default:
-			expressionName = primitiveTypeName;
-			break;
-		}
-
-		return expressionName;
-	}
-	
-	private Expression boxInitializerIfPrimitive(VariableDeclarationFragment declarationFragment,
+	private Expression checkInitializerImlicitCasting(VariableDeclarationFragment declarationFragment,
 			List<Expression> tailingMap, List<Expression> boxingExpression, Expression loopExpression) {
 		Expression initializer = declarationFragment.getInitializer();
 		ITypeBinding expectedType = declarationFragment.getName().resolveTypeBinding();
 		return checkImplicitCasting(tailingMap, boxingExpression, loopExpression, initializer, expectedType);
 	}
 
+	/**
+	 * Checks for type compatibility between the expression of the give return
+	 * statement, the expression in the taliningMap (if any) and the type of the
+	 * elements of the loop expression. Adds a casting expression to the
+	 * boxingExpression if the tailingMap is empty and the type of the elements
+	 * of the loop expression is not compatible with the initializer of the
+	 * declaration fragment.
+	 * 
+	 * @param returnStatement
+	 *            the return statement following the loop
+	 * @param tailingMap
+	 *            list of mapping expressions
+	 * @param boxingExpression
+	 *            empty list.
+	 * @param loopExpression
+	 *            the expression representing the object which is being iterated
+	 *            in the loop.
+	 * @return the expression of the return statement wrapped in a boxing
+	 *         expression if necessary.
+	 */
 	private Expression boxReturnExpressionIfPrimitive(ReturnStatement returnStatement, List<Expression> tailingMap,
 			List<Expression> boxingExpression, Expression loopExpression) {
 		Expression orElseCandidate = returnStatement.getExpression();
 		ITypeBinding expectedOrElseType = findExpectedReturnType(returnStatement);
-		
-		return checkImplicitCasting(tailingMap, boxingExpression, loopExpression, orElseCandidate,
-				expectedOrElseType);
+
+		return checkImplicitCasting(tailingMap, boxingExpression, loopExpression, orElseCandidate, expectedOrElseType);
 	}
 
+	/**
+	 * Checks whether a boxing is needed for the expression of the tailingMap or
+	 * the orElse candidate. Considers three cases:
+	 * <ul>
+	 * <li>the stream type has the same type as the orElse candidate. In this
+	 * case no boxing is added</li>
+	 * <li>the stream type has the same type as the expected orElse type, but is
+	 * different from the actual orElse type. In this case a boxing of the
+	 * actual orElse type is needed</li>
+	 * <li>the actual orElse type has the same type as the expected orElse, but
+	 * is different form the stream type. In this case either the expression in
+	 * the tailingMap is boxed, or if the tailing map is empty, a new boxing
+	 * expression is created and added to the boxing expression list.</li>
+	 * </ul>
+	 * 
+	 * @param tailingMap
+	 *            (possibly empty) list of tailing map expression
+	 * @param boxingExpression
+	 *            an empty list
+	 * @param loopExpression
+	 *            the expression representing the object beining iterated by the
+	 *            loop
+	 * @param orElseCandidate
+	 *            the expression to be put as a parameter in the orElse
+	 *            invocation
+	 * @param expectedOrElseType
+	 *            the expected return type of the orElse. It can be different
+	 *            from the type of the current orElse candidate. For Example,
+	 *            the expected type can be {@code double} but the actual type
+	 *            can be {@code int}.
+	 * 
+	 * @return the orElse candidate wrapped into a boxing expression if needed.
+	 */
 	private Expression checkImplicitCasting(List<Expression> tailingMap, List<Expression> boxingExpression,
 			Expression loopExpression, Expression orElseCandidate, ITypeBinding expectedOrElseType) {
 		ITypeBinding orElseType = orElseCandidate.resolveTypeBinding();
-		String orElseTypeBoxed = findBoxedTypeOfPrimitive(orElseType.getName());
+		String orElseTypeBoxed = ClassRelationUtil.findBoxedTypeOfPrimitive(orElseType);
 		ITypeBinding streamType;
 		String streamTypeBoxed;
 		if (tailingMap.isEmpty()) {
@@ -254,10 +288,10 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 		} else {
 			streamType = tailingMap.get(tailingMap.size() - 1).resolveTypeBinding();
 		}
-		streamTypeBoxed = findBoxedTypeOfPrimitive(streamType.getName());
+		streamTypeBoxed = ClassRelationUtil.findBoxedTypeOfPrimitive(streamType);
 
 		if (!streamTypeBoxed.equals(orElseTypeBoxed)) {
-			String expectedReturnTypeBoxed = findBoxedTypeOfPrimitive(expectedOrElseType.getName());
+			String expectedReturnTypeBoxed = ClassRelationUtil.findBoxedTypeOfPrimitive(expectedOrElseType);
 			if (!expectedReturnTypeBoxed.equals(orElseTypeBoxed)) {
 				orElseCandidate = boxIfPrimitive(orElseCandidate, expectedOrElseType);
 			}
@@ -281,15 +315,17 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 	/**
 	 * Searches for the method signature or the type of the lambda expression
 	 * wrapping the given return statement, and from there derives the expected
-	 * return type. Note that sometimes the type of the returned expression can
-	 * be a subtype of the expected return type, or can be implicitly casted to
-	 * the expected return type.
+	 * return type.
+	 * 
+	 * Note that sometimes the type of the returned expression can be a subtype
+	 * of the expected return type, or can be implicitly casted to the expected
+	 * return type.
 	 * 
 	 * @param returnStatement
 	 *            return statement to be checked
-	 * @return the expected return type if the method signature or the lambda expression
-	 * wrapping the return statement can be found, or the type of the expression of the
-	 * return statement otherwise. 
+	 * @return the expected return type if the method signature or the lambda
+	 *         expression wrapping the return statement can be found, or the
+	 *         type of the expression of the return statement otherwise.
 	 */
 	private ITypeBinding findExpectedReturnType(ReturnStatement returnStatement) {
 		ASTNode parent = returnStatement.getParent();
@@ -314,7 +350,9 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 
 	/**
 	 * Checks whether a loop using a break statement is convertible to a
-	 * {@link Stream#findFirst()} expression.
+	 * {@link Stream#findFirst()} expression. Furthermore, adds the 
+	 * right-hand-side of the of the assignment expression to the tailingMap
+	 * list, if the return expression does not exactly match the loop variable. 
 	 * 
 	 * @param thenStatement
 	 *            the body of the if statement occurring in the loop
@@ -372,24 +410,26 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 
 	/**
 	 * Checks whether a loop using a return statement is convertible to a
-	 * {@link Stream#findFirst()} expression.
+	 * {@link Stream#findFirst()} expression. Furthermore, adds the expression
+	 * of the return statement to the tailingMap list, if the return 
+	 * expression does not exactly match the loop variable. 
 	 * 
-	 * @param thenStatement
+	 * @param statement
 	 *            the body of the if statement occurring in the loop
 	 * @param forLoop
 	 *            the loop being analyzed
-	 * @param loopParameterName
+	 * @param parameter
 	 *            a node representing the name of the loop variable
 	 * @param tailingMap
-	 *            an empty list
+	 *            an empty list. 
 	 * 
 	 * @return the declaration of the variable which is being assigned in the
 	 *         body of the loop, or {@code null} if the transformation is not
 	 *         possible.
 	 */
-	private ReturnStatement isConvertableWithReturn(Statement thenStatement, EnhancedForStatement forLoop,
+	private ReturnStatement isConvertableWithReturn(Statement statement, EnhancedForStatement forLoop,
 			SimpleName parameter, List<Expression> tailingMap) {
-		ReturnStatement returnStatement = isReturnBlock(thenStatement);
+		ReturnStatement returnStatement = isReturnBlock(statement);
 		if (returnStatement != null) {
 			Expression returnedExpression = returnStatement.getExpression();
 			if (returnedExpression != null && ASTNode.NULL_LITERAL != returnedExpression.getNodeType()) {

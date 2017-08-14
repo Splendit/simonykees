@@ -11,10 +11,20 @@ import org.eclipse.jdt.core.dom.Modifier;
 /**
  * TODO SIM-103 add class description
  * 
- * @author Martin Huter
+ * @author Martin Huter, Ardit Ymeri
  * @since 0.9.2
  */
 public class ClassRelationUtil {
+	
+	private static final String INT = "int"; //$NON-NLS-1$
+	private static final String DOUBLE = "double"; //$NON-NLS-1$
+	private static final String FLOAT = "float"; //$NON-NLS-1$
+	private static final String LONG = "long"; //$NON-NLS-1$
+	private static final String SHORT = "short"; //$NON-NLS-1$
+	private static final String BOOLEAN = "boolean"; //$NON-NLS-1$
+	private static final String BYTE = "byte"; //$NON-NLS-1$
+	private static final String CHAR = "char"; //$NON-NLS-1$
+	
 	/**
 	 * Checks whether the given type binding is a subtype of any of the types
 	 * having the qualified name in the given list.
@@ -167,6 +177,65 @@ public class ClassRelationUtil {
 				.flatMap(ancestor -> Arrays.asList(ancestor.getDeclaredFields()).stream()
 						.filter(field -> !Modifier.isPrivate(field.getModifiers())))
 				.map(varBinding -> varBinding.getName()).collect(Collectors.toList());
+	}
+
+	/**
+	 * Returns the name of the corresponding boxed type for the given primitive
+	 * type.
+	 * 
+	 * @param primitiveType
+	 *            the binding of a primitive type the name of a primitive
+	 * 
+	 * @return
+	 *         <ul>
+	 *         <li>the name of the corresponding boxed type if the given type is
+	 *         primitive</li>
+	 *         <li>the type name it is not a primitive</li>
+	 *         <li>or an empty string if the given type is {@code null}</li>
+	 *         </ul>
+	 */
+	public static String findBoxedTypeOfPrimitive(ITypeBinding primitiveType) {
+
+		if (primitiveType == null) {
+			return ""; //$NON-NLS-1$
+		}
+
+		String primitiveTypeName = primitiveType.getName();
+		if (!primitiveType.isPrimitive()) {
+			return primitiveTypeName;
+		}
+
+		String expressionName;
+		switch (primitiveTypeName) {
+		case INT:
+			expressionName = Integer.class.getSimpleName();
+			break;
+		case DOUBLE:
+			expressionName = Double.class.getSimpleName();
+			break;
+		case FLOAT:
+			expressionName = Float.class.getSimpleName();
+			break;
+		case LONG:
+			expressionName = Long.class.getSimpleName();
+			break;
+		case SHORT:
+			expressionName = Short.class.getSimpleName();
+			break;
+		case BOOLEAN:
+			expressionName = Boolean.class.getSimpleName();
+		case BYTE:
+			expressionName = Byte.class.getSimpleName();
+			break;
+		case CHAR:
+			expressionName = Character.class.getSimpleName();
+			break;
+		default:
+			expressionName = primitiveTypeName;
+			break;
+		}
+
+		return expressionName;
 	}
 
 }
