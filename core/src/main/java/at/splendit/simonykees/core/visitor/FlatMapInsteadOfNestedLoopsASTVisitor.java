@@ -24,6 +24,8 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	private static final String STREAM_METHOD_NAME = "stream"; //$NON-NLS-1$
 	private static final String FLAT_MAP_NAME = "flatMap"; //$NON-NLS-1$
 
+	private MethodInvocation outerMostMethodInvocatonNode = null;
+
 	private enum MethodInvocationType {
 		COLLECTION,
 		STREAM,
@@ -31,83 +33,129 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
-
 		if (FOR_EACH_METHOD_NAME.equals(methodInvocationNode.getName().getIdentifier())
 				&& methodInvocationNode.arguments() != null && methodInvocationNode.arguments().size() == 1) {
+
+			if (outerMostMethodInvocatonNode == null) {
+				outerMostMethodInvocatonNode = methodInvocationNode;
+			}
+
 			Expression methodArgumentExpression = (Expression) methodInvocationNode.arguments().get(0);
 			if (methodArgumentExpression != null
 					&& ASTNode.LAMBDA_EXPRESSION == methodArgumentExpression.getNodeType()) {
 				LambdaExpression methodArgumentLambda = (LambdaExpression) methodArgumentExpression;
+
 				MethodInvocation innerMethodInvocation = getSingleMethodInvocationFromLambda(methodArgumentLambda);
 
-				this.transform(methodInvocationNode, methodArgumentLambda, innerMethodInvocation);
+				if (innerMethodInvocation != null) {
+					if (methodArgumentLambda != null && methodArgumentLambda.parameters() != null
+							&& methodArgumentLambda.parameters().size() == 1) {
+						LambdaExpression flatMapLambda = createFlatMapLambda(methodArgumentLambda);
+						if (flatMapLambda != null) {
+							Expression newOuterExpression = addStreamMethodInvocation(methodInvocationNode);
+							if (newOuterExpression != null) {
+								MethodInvocation newOuter = createNewOuterMethodInvocation(newOuterExpression,
+										flatMapLambda);
+
+								if (newOuter != null) {
+									replaceMethodInvocation(methodInvocationNode, innerMethodInvocation,
+											innerMethodInvocation.getExpression(), newOuter);
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 
 		return true;
 	}
 
-	private void transform(MethodInvocation outerMethodInvocation, LambdaExpression outerLambda,
-			MethodInvocation innerMethodInvocation) {
-		if (outerMethodInvocation == null || innerMethodInvocation == null) {
-			return;
-		}
-		if (outerLambda == null || outerLambda.parameters() == null && outerLambda.parameters().size() == 1) {
-			return;
+	private MethodInvocation createNewOuterMethodInvocation(Expression newOuterExpression,
+			LambdaExpression flatMapLambda) {
+		if (newOuterExpression != null && flatMapLambda != null) {
+			SimpleName flatMapName = astRewrite.getAST().newSimpleName(FLAT_MAP_NAME);
+			MethodInvocation newOuter = astRewrite.getAST().newMethodInvocation();
+			newOuter.setExpression(newOuterExpression);
+			newOuter.setName(flatMapName);
+			ListRewrite newOuterListRewrite = astRewrite.getListRewrite(newOuter, MethodInvocation.ARGUMENTS_PROPERTY);
+			newOuterListRewrite.insertFirst(flatMapLambda, null);
+
+			return newOuter;
 		}
 
-		Expression outerExpression = outerMethodInvocation.getExpression();
-		Expression outerExpressionCopy = (Expression) astRewrite.createMoveTarget(outerExpression);
-		Expression newOuterExpression = null;
+		return null;
+	}
 
-		MethodInvocationType outerMethodInvocationType = this.getMethodInvocationType(outerMethodInvocation);
-		if (MethodInvocationType.COLLECTION == outerMethodInvocationType) {
+	private LambdaExpression createFlatMapLambda(LambdaExpression outerLambda) {
+		if (outerLambda != null) {
+			VariableDeclaration outerForEachlambdaParam = (VariableDeclaration) outerLambda.parameters().get(0);
+			VariableDeclaration flatMapLambdaParamCopy = (VariableDeclaration) astRewrite
+					.createCopyTarget(outerForEachlambdaParam);
+			SimpleName flatMapLambdaParamNameCopy = (SimpleName) astRewrite
+					.createCopyTarget(outerForEachlambdaParam.getName());
+
 			SimpleName methodInvocationName = astRewrite.getAST().newSimpleName(STREAM_METHOD_NAME);
 
-			MethodInvocation streamMethodInvocation = astRewrite.getAST().newMethodInvocation();
-			streamMethodInvocation.setExpression(outerExpressionCopy);
-			streamMethodInvocation.setName(methodInvocationName);
+			MethodInvocation flatMapLambdaBody = astRewrite.getAST().newMethodInvocation();
+			flatMapLambdaBody.setExpression(flatMapLambdaParamNameCopy);
+			flatMapLambdaBody.setName(methodInvocationName);
 
-			newOuterExpression = streamMethodInvocation;
-		} else if (MethodInvocationType.STREAM == outerMethodInvocationType) {
-			newOuterExpression = outerExpressionCopy;
-		} else {
-			return;
+			LambdaExpression flatMapLambda = astRewrite.getAST().newLambdaExpression();
+			flatMapLambda.setBody(flatMapLambdaBody);
+			ListRewrite flatMapLambdaListRewrite = astRewrite.getListRewrite(flatMapLambda,
+					LambdaExpression.PARAMETERS_PROPERTY);
+			flatMapLambdaListRewrite.insertFirst(flatMapLambdaParamCopy, null);
+
+			return flatMapLambda;
+		}
+		return null;
+	}
+
+	private Expression addStreamMethodInvocation(MethodInvocation outerMethodInvocation) {
+		if (outerMethodInvocation != null) {
+			Expression outerExpression = outerMethodInvocation.getExpression();
+			Expression outerExpressionCopy = (Expression) astRewrite.createCopyTarget(outerExpression);
+			Expression newOuterExpression = null;
+
+			MethodInvocationType outerMethodInvocationType = this.getMethodInvocationType(outerMethodInvocation);
+			if (MethodInvocationType.COLLECTION == outerMethodInvocationType) {
+				SimpleName methodInvocationName = astRewrite.getAST().newSimpleName(STREAM_METHOD_NAME);
+
+				MethodInvocation streamMethodInvocation = astRewrite.getAST().newMethodInvocation();
+				streamMethodInvocation.setExpression(outerExpressionCopy);
+				streamMethodInvocation.setName(methodInvocationName);
+
+				newOuterExpression = streamMethodInvocation;
+			} else if (MethodInvocationType.STREAM == outerMethodInvocationType) {
+				newOuterExpression = outerExpressionCopy;
+			}
+
+			return newOuterExpression;
+		}
+		return null;
+	}
+
+	private void replaceMethodInvocation(MethodInvocation outer, MethodInvocation inner, Expression innerExpression,
+			MethodInvocation newOuter) {
+		boolean transform = false;
+		if (innerExpression != null) {
+			if (ASTNode.METHOD_INVOCATION == innerExpression.getNodeType()) {
+				MethodInvocation methodInvocationExpression = (MethodInvocation) innerExpression;
+				if (STREAM_METHOD_NAME.equals(methodInvocationExpression.getName().getIdentifier())) {
+					transform = true;
+				} else {
+					replaceMethodInvocation(outer, inner, methodInvocationExpression.getExpression(), newOuter);
+				}
+			} else if (ASTNode.SIMPLE_NAME == innerExpression.getNodeType()) {
+				transform = true;
+			}
 		}
 
-		VariableDeclaration outerForEachlambdaParam = (VariableDeclaration) outerLambda.parameters().get(0);
-		VariableDeclaration flatMapLambdaParamCopy = (VariableDeclaration) astRewrite
-				.createCopyTarget(outerForEachlambdaParam);
-		SimpleName flatMapLambdaParamNameCopy = (SimpleName) astRewrite
-				.createCopyTarget(outerForEachlambdaParam.getName());
-
-		SimpleName methodInvocationName = astRewrite.getAST().newSimpleName(STREAM_METHOD_NAME);
-
-		MethodInvocation flatMapLambdaBody = astRewrite.getAST().newMethodInvocation();
-		flatMapLambdaBody.setExpression(flatMapLambdaParamNameCopy);
-		flatMapLambdaBody.setName(methodInvocationName);
-
-		LambdaExpression flatMapLambda = astRewrite.getAST().newLambdaExpression();
-		flatMapLambda.setBody(flatMapLambdaBody);
-		ListRewrite flatMapLambdaListRewrite = astRewrite.getListRewrite(flatMapLambda,
-				LambdaExpression.PARAMETERS_PROPERTY);
-		flatMapLambdaListRewrite.insertFirst(flatMapLambdaParamCopy, null);
-		//flatMapLambda.parameters().add(flatMapLambdaParamCopy);
-
-		SimpleName flatMapName = astRewrite.getAST().newSimpleName(FLAT_MAP_NAME);
-
-		MethodInvocation newOuter = astRewrite.getAST().newMethodInvocation();
-		newOuter.setExpression(newOuterExpression);
-		newOuter.setName(flatMapName);
-		ListRewrite newOuterListRewrite = astRewrite.getListRewrite(newOuter, MethodInvocation.ARGUMENTS_PROPERTY);
-		newOuterListRewrite.insertFirst(flatMapLambda, null);
-//		newOuter.arguments().add(flatMapLambda);
-
-		MethodInvocation newInner = (MethodInvocation) astRewrite.createCopyTarget(innerMethodInvocation);
-//		MethodInvocation newInner = (MethodInvocation) ASTNode.copySubtree(astRewrite.getAST(), innerMethodInvocation);
-		newInner.setExpression(newOuter);
-
-		astRewrite.replace(outerMethodInvocation, flatMapLambda, null);
+		if (transform) {
+			astRewrite.replace(innerExpression, newOuter, null);
+			astRewrite.replace(outer, astRewrite.createCopyTarget(inner), null);
+		}
 	}
 
 	private MethodInvocationType getMethodInvocationType(MethodInvocation methodInvocation) {
@@ -150,4 +198,5 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 		return methodInvocation;
 	}
+
 }
