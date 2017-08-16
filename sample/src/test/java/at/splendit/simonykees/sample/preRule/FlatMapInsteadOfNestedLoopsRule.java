@@ -32,6 +32,13 @@ public class FlatMapInsteadOfNestedLoopsRule {
 		});
 
 		matrix.forEach(row -> {
+			row.stream().filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1))
+				.forEach(element -> {
+					System.out.print(element);
+				});
+		});
+
+		matrix.stream().filter(row -> !row.isEmpty()).forEach(row -> {
 			row.forEach(element -> {
 				System.out.print(element);
 			});
@@ -42,6 +49,38 @@ public class FlatMapInsteadOfNestedLoopsRule {
 				System.out.print(element);
 			}
 		}
-	}
 
+		matrix.forEach(row -> {
+			row.forEach(element -> {
+				System.out.print(element);
+			});
+		});
+
+		matrix.stream().forEach(row -> {
+			row.stream().forEach(element -> {
+				System.out.print(element);
+			});
+		});
+
+		matrix.stream().forEach(row -> {
+			row.forEach(element -> {
+				System.out.print(element);
+			});
+		});
+
+		matrix.forEach(row -> {
+			row.stream().forEach(element -> {
+				System.out.print(element);
+			});
+		});
+
+		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
+		matrix2.stream().filter(row -> !row.isEmpty()).forEach(row -> {
+			row.stream().filter(col -> !col.isEmpty()).forEach(col -> {
+				col.stream().filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
+					System.out.print(element);
+				});
+			});
+		});
+	}
 }
