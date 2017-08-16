@@ -9,13 +9,13 @@ import java.util.Map;
 /**
  * Corner cases for StringLiteralEqualityCheckRule.
  * 
- * @author Martin Huter
+ * @author Hans-Jörg Schrödl
  * @since 2.0.3
  */
 @SuppressWarnings({ "nls", "unused" })
 public class UseIsEmptyRule {
 
-	public void test1() {
+	public void withDefaultInteger() {
 		Map<String, String> m = new HashMap<>();
 		if (m.size() == 0) {
 		}
@@ -27,14 +27,29 @@ public class UseIsEmptyRule {
 		String s = "";
 		if (s.length() == 0) {
 		}
-
 	}
 
-	public void test2() {
+	public void withSwitchedOperands() {
+		Map<String, String> m = new HashMap<>();
+		if (0 == m.size()) {
+		}
 
+		Collection<String> l = new ArrayList<>();
+		if (0 == l.size()) {
+		}
+
+		String s = "";
+		if (0 == s.length()) {
+		}
 	}
 
-	public void test3() {
-
+	public void withOddNumbers() {
+		String s = "";
+		if (s.length() == -0) {
+		}
+		if (s.length() == 0.0f) {
+		}
+		if (s.length() == 0.0d) {
+		}
 	}
 }

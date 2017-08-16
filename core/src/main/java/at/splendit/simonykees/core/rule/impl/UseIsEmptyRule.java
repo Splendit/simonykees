@@ -16,8 +16,8 @@ public class UseIsEmptyRule extends RefactoringRule<UseIsEmptyRuleASTVisitor> {
 
 	public UseIsEmptyRule(Class<UseIsEmptyRuleASTVisitor> visitor) {
 		super(visitor);
-		this.name = "Use isEmpty() instead of equals relation to zero";
-		this.description = Messages.RemoveToStringOnStringRule_description;
+		this.name = Messages.UseIsEmptyRule_name;
+		this.description = Messages.UseIsEmptyRule_description;
 	}
 	
 	@Override
