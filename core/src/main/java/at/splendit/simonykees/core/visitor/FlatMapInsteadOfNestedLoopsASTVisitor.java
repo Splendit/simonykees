@@ -1,5 +1,8 @@
 package at.splendit.simonykees.core.visitor;
 
+import java.util.Collection;
+import java.util.stream.Stream;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
@@ -24,8 +27,6 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	private static final String STREAM_METHOD_NAME = "stream"; //$NON-NLS-1$
 	private static final String FLAT_MAP_NAME = "flatMap"; //$NON-NLS-1$
 
-	private MethodInvocation outerMostMethodInvocatonNode = null;
-
 	private enum MethodInvocationType {
 		COLLECTION,
 		STREAM,
@@ -35,10 +36,6 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	public boolean visit(MethodInvocation methodInvocationNode) {
 		if (FOR_EACH_METHOD_NAME.equals(methodInvocationNode.getName().getIdentifier())
 				&& methodInvocationNode.arguments() != null && methodInvocationNode.arguments().size() == 1) {
-
-			if (outerMostMethodInvocatonNode == null) {
-				outerMostMethodInvocatonNode = methodInvocationNode;
-			}
 
 			Expression methodArgumentExpression = (Expression) methodInvocationNode.arguments().get(0);
 			if (methodArgumentExpression != null
@@ -71,6 +68,67 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		return true;
 	}
 
+	/**
+	 * this method replaces the nested loop with a call to
+	 * {@link Stream#flatMap}. it is executed recursively, in order to keep all
+	 * existing stream operations. it replaces the {@link SimpleName}
+	 * representing a {@link Collection} or a call to {@link# Collection#stream}
+	 * from the inner loop with the whole {@link Stream} operations of the
+	 * converted outer loop.
+	 * 
+	 * @param outer
+	 *            The old outer loop, which has to be replaced
+	 * @param inner
+	 *            The inner loop already converted to a stream
+	 * @param innerExpression
+	 *            The expression of the inner loop
+	 *            {@link Stream#forEach(java.util.function.Consumer)} method
+	 *            invocation. This is the recursive parameter. If it is null,
+	 *            the recursion will be aborted. If it is a call to
+	 *            {@link Collection#stream()}, or a {@link SimpleName} the
+	 *            changes will be written to the AST. In any other case, the
+	 *            recursion takes place.
+	 * @param newOuter
+	 *            The newly created
+	 *            {@link Stream#flatMap(java.util.function.Function)}
+	 *            invocation, which will be used as the {@link Expression} of
+	 *            the inner {@link Stream#forEach(java.util.function.Consumer)}
+	 *            method invocation.
+	 */
+	private void replaceMethodInvocation(MethodInvocation outer, MethodInvocation inner, Expression innerExpression,
+			MethodInvocation newOuter) {
+		boolean transform = false;
+		if (innerExpression != null) {
+			if (ASTNode.METHOD_INVOCATION == innerExpression.getNodeType()) {
+				MethodInvocation methodInvocationExpression = (MethodInvocation) innerExpression;
+				if (STREAM_METHOD_NAME.equals(methodInvocationExpression.getName().getIdentifier())) {
+					transform = true;
+				} else {
+					replaceMethodInvocation(outer, inner, methodInvocationExpression.getExpression(), newOuter);
+				}
+			} else if (ASTNode.SIMPLE_NAME == innerExpression.getNodeType()) {
+				transform = true;
+			}
+		}
+
+		if (transform) {
+			astRewrite.replace(innerExpression, newOuter, null);
+			MethodInvocation innerCopy = (MethodInvocation) astRewrite.createCopyTarget(inner);
+			astRewrite.replace(outer, innerCopy, null);
+		}
+	}
+
+	/**
+	 * creates the call to {@link Stream#flatMap(java.util.function.Function)}
+	 * 
+	 * @param newOuterExpression
+	 *            {@link Expression} of the new {@link MethodInvocation}
+	 * @param flatMapLambda
+	 *            {@link LambdaExpression} for the first and only argument of
+	 *            the new {@link MethodInvocation}
+	 * @return The newly created flatMap {@link MethodInvocation} or null, if
+	 *         one of the parameters is empty.
+	 */
 	private MethodInvocation createNewOuterMethodInvocation(Expression newOuterExpression,
 			LambdaExpression flatMapLambda) {
 		if (newOuterExpression != null && flatMapLambda != null) {
@@ -87,6 +145,18 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		return null;
 	}
 
+	/**
+	 * creates the {@link LambdaExpression}, which is used as the argument of
+	 * {@link Stream#flatMap(java.util.function.Function)}
+	 * 
+	 * @param outerLambda
+	 *            the {@link LambdaExpression} of the outer
+	 *            {@link Stream#forEach(java.util.function.Consumer)} method
+	 *            invocation. The parameter of the new {@link LambdaExpression}
+	 *            will be extracted from here.
+	 * @return the newly created {@link LambdaExpression} for the flatMap method
+	 *         or null if the method argument is null.
+	 */
 	private LambdaExpression createFlatMapLambda(LambdaExpression outerLambda) {
 		if (outerLambda != null) {
 			VariableDeclaration outerForEachlambdaParam = (VariableDeclaration) outerLambda.parameters().get(0);
@@ -112,52 +182,49 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		return null;
 	}
 
-	private Expression addStreamMethodInvocation(MethodInvocation outerMethodInvocation) {
-		if (outerMethodInvocation != null) {
-			Expression outerExpression = outerMethodInvocation.getExpression();
-			Expression outerExpressionCopy = (Expression) astRewrite.createCopyTarget(outerExpression);
-			Expression newOuterExpression = null;
+	/**
+	 * checks, if the given {@link MethodInvocation} is a {@link Collection} or
+	 * {@link Stream}. If it is a {@link Collection}, a call to
+	 * {@link Collection#stream()} will be added.
+	 * 
+	 * @param methodInvocation
+	 *            {@link MethodInvocation} to check
+	 * @return The given {@link MethodInvocation} with a call to
+	 *         {@link Collection#stream()} added or null, if the given parameter
+	 *         is null.
+	 */
+	private Expression addStreamMethodInvocation(MethodInvocation methodInvocation) {
+		if (methodInvocation != null) {
+			Expression expression = methodInvocation.getExpression();
+			Expression expressionCopy = (Expression) astRewrite.createCopyTarget(expression);
+			Expression newExpression = null;
 
-			MethodInvocationType outerMethodInvocationType = this.getMethodInvocationType(outerMethodInvocation);
-			if (MethodInvocationType.COLLECTION == outerMethodInvocationType) {
+			MethodInvocationType methodInvocationType = this.getMethodInvocationType(methodInvocation);
+			if (MethodInvocationType.COLLECTION == methodInvocationType) {
 				SimpleName methodInvocationName = astRewrite.getAST().newSimpleName(STREAM_METHOD_NAME);
 
 				MethodInvocation streamMethodInvocation = astRewrite.getAST().newMethodInvocation();
-				streamMethodInvocation.setExpression(outerExpressionCopy);
+				streamMethodInvocation.setExpression(expressionCopy);
 				streamMethodInvocation.setName(methodInvocationName);
 
-				newOuterExpression = streamMethodInvocation;
-			} else if (MethodInvocationType.STREAM == outerMethodInvocationType) {
-				newOuterExpression = outerExpressionCopy;
+				newExpression = streamMethodInvocation;
+			} else if (MethodInvocationType.STREAM == methodInvocationType) {
+				newExpression = expressionCopy;
 			}
 
-			return newOuterExpression;
+			return newExpression;
 		}
 		return null;
 	}
 
-	private void replaceMethodInvocation(MethodInvocation outer, MethodInvocation inner, Expression innerExpression,
-			MethodInvocation newOuter) {
-		boolean transform = false;
-		if (innerExpression != null) {
-			if (ASTNode.METHOD_INVOCATION == innerExpression.getNodeType()) {
-				MethodInvocation methodInvocationExpression = (MethodInvocation) innerExpression;
-				if (STREAM_METHOD_NAME.equals(methodInvocationExpression.getName().getIdentifier())) {
-					transform = true;
-				} else {
-					replaceMethodInvocation(outer, inner, methodInvocationExpression.getExpression(), newOuter);
-				}
-			} else if (ASTNode.SIMPLE_NAME == innerExpression.getNodeType()) {
-				transform = true;
-			}
-		}
-
-		if (transform) {
-			astRewrite.replace(innerExpression, newOuter, null);
-			astRewrite.replace(outer, astRewrite.createCopyTarget(inner), null);
-		}
-	}
-
+	/**
+	 * evaluates the type of the given {@link MethodInvocation}
+	 * 
+	 * @param methodInvocation
+	 * @return {@link MethodInvocationType#COLLECTION},
+	 *         {@link MethodInvocationType#STREAM} or null, if it is neither a
+	 *         {@link Collection} nor a {@link Stream}
+	 */
 	private MethodInvocationType getMethodInvocationType(MethodInvocation methodInvocation) {
 		MethodInvocationType type = null;
 
@@ -170,6 +237,15 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		return type;
 	}
 
+	/**
+	 * retrieves a single {@link MethodInvocation} from a
+	 * {@link LambdaExpression}.
+	 * 
+	 * @param lambdaExpression
+	 * @return the only {@link MethodInvocation} present in the
+	 *         {@link LambdaExpression} or null if there are more
+	 *         {@link MethodInvocation}s or in case of another error.
+	 */
 	private MethodInvocation getSingleMethodInvocationFromLambda(LambdaExpression lambdaExpression) {
 		MethodInvocation methodInvocation = null;
 		ASTNode lambdaBody = lambdaExpression.getBody();
