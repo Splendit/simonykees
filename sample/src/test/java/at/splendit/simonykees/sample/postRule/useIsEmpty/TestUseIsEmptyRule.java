@@ -1,8 +1,9 @@
-package at.splendit.simonykees.sample.postRule.allRules;
+package at.splendit.simonykees.sample.postRule.useIsEmpty;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Map;
  * @since 2.0.3
  */
 @SuppressWarnings({ "nls", "unused" })
-public class UseIsEmptyRule {
+public class TestUseIsEmptyRule {
 
 	public void withDefaultInteger() {
 		Map<String, String> m = new HashMap<>();
@@ -49,6 +50,23 @@ public class UseIsEmptyRule {
 		if (s.isEmpty()) {
 		}
 		if (s.isEmpty()) {
+		}
+		if (s.isEmpty()) {
+		}
+		if (s.isEmpty()) {
+		}
+		if (s.isEmpty()) {
+		}
+	}
+
+	public void withOthersShouldNotChange() {
+		String s = "";
+		int i = 0;
+		if (s.length() == i) {
+		}
+		if (s.length() == 0.1d) {
+		}
+		if (s.length() == -0.1f) {
 		}
 	}
 }

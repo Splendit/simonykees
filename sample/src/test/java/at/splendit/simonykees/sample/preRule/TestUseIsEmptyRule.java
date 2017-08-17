@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.useIsEmpty;
+package at.splendit.simonykees.sample.preRule;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,43 +13,60 @@ import java.util.Map;
  * @since 2.0.3
  */
 @SuppressWarnings({ "nls", "unused" })
-public class UseIsEmptyRule {
+public class TestUseIsEmptyRule {
 
 	public void withDefaultInteger() {
 		Map<String, String> m = new HashMap<>();
-		if (m.isEmpty()) {
+		if (m.size() == 0) {
 		}
 
 		Collection<String> l = new ArrayList<>();
-		if (l.isEmpty()) {
+		if (l.size() == 0) {
 		}
 
 		String s = "";
-		if (s.isEmpty()) {
+		if (s.length() == 0) {
 		}
 	}
 
 	public void withSwitchedOperands() {
 		Map<String, String> m = new HashMap<>();
-		if (m.isEmpty()) {
+		if (0 == m.size()) {
 		}
 
 		Collection<String> l = new ArrayList<>();
-		if (l.isEmpty()) {
+		if (0 == l.size()) {
 		}
 
 		String s = "";
-		if (s.isEmpty()) {
+		if (0 == s.length()) {
 		}
 	}
 
 	public void withOddNumbers() {
 		String s = "";
-		if (s.isEmpty()) {
+		if (s.length() == -0) {
 		}
-		if (s.isEmpty()) {
+		if (s.length() == +0) {
 		}
-		if (s.isEmpty()) {
+		if (s.length() == 0.0f) {
+		}
+		if (s.length() == -0.0f) {
+		}
+		if (s.length() == 0.0d) {
+		}
+		if (s.length() == -0.0d) {
+		}
+	}
+
+	public void withOthersShouldNotChange() {
+		String s = "";
+		int i = 0;
+		if (s.length() == i) {
+		}
+		if (s.length() == 0.1d) {
+		}
+		if (s.length() == -0.1f) {
 		}
 	}
 }
