@@ -25,6 +25,7 @@ import at.splendit.simonykees.core.rule.impl.MultiVariableDeclarationLineRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
 import at.splendit.simonykees.core.rule.impl.OverrideAnnotationRule;
 import at.splendit.simonykees.core.rule.impl.PrimitiveBoxedForStringRule;
+import at.splendit.simonykees.core.rule.impl.PublicFieldsRenamingRule;
 import at.splendit.simonykees.core.rule.impl.RearrangeClassMembersRule;
 import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
@@ -37,6 +38,7 @@ import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
 import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
+import at.splendit.simonykees.core.visitor.renaming.PublicFieldsRenamingASTVisitor;
 
 /**
  * Tags for our rules.
@@ -115,6 +117,12 @@ public class TagUtil {
 
 		} else if (PrimitiveBoxedForStringRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE);
+			
+		} else if (PublicFieldsRenamingRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY);
+			
+		} else if (PublicFieldsRenamingASTVisitor.RenameRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY);
 
 		} else if (RearrangeClassMembersRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY);
