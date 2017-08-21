@@ -9,13 +9,16 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 
 /**
- * TODO SIM-103 add class description
+ * A utility class for computing information related with the ancestors of a
+ * type. Makes use of {@link ITypeBinding} for finding finding super types and
+ * their properties. Furthermore, finds the corresponding boxed types for each
+ * java primitive type.
  * 
  * @author Martin Huter, Ardit Ymeri
  * @since 0.9.2
  */
 public class ClassRelationUtil {
-	
+
 	private static final String INT = "int"; //$NON-NLS-1$
 	private static final String DOUBLE = "double"; //$NON-NLS-1$
 	private static final String FLOAT = "float"; //$NON-NLS-1$
@@ -24,7 +27,7 @@ public class ClassRelationUtil {
 	private static final String BOOLEAN = "boolean"; //$NON-NLS-1$
 	private static final String BYTE = "byte"; //$NON-NLS-1$
 	private static final String CHAR = "char"; //$NON-NLS-1$
-	
+
 	/**
 	 * Checks whether the given type binding is a subtype of any of the types
 	 * having the qualified name in the given list.

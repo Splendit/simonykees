@@ -27,9 +27,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
 /**
- * TODO SIM-103 add class description
+ * A utility class for computing different properties of {@link ASTNode}s. 
  * 
- * @author Martin Huter
+ * @author Martin Huter, Ardit Ymeri
  * @since 0.9.2
  */
 public class ASTNodeUtil {
