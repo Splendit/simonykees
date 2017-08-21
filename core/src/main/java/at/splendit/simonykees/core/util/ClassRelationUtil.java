@@ -224,6 +224,7 @@ public class ClassRelationUtil {
 			break;
 		case BOOLEAN:
 			expressionName = Boolean.class.getSimpleName();
+			break;
 		case BYTE:
 			expressionName = Byte.class.getSimpleName();
 			break;
