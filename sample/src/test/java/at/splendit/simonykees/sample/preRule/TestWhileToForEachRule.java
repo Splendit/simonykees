@@ -15,6 +15,17 @@ public class TestWhileToForEachRule {
 		return Arrays.asList(input.split(";")); //$NON-NLS-1$
 	}
 	
+	public String unsafeIteratorName(String input) {
+		List<String> l = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		String aL = "I am here to confuse you!";
+		Iterator<String> iterator = l.iterator();
+		while (iterator.hasNext()) {
+			sb.append(iterator.next());
+		}
+		return sb.toString();
+	}
+	
 	public String loopingOverArrays(String input) {
 		StringBuilder sb = new StringBuilder();
 		String []array = {"-", input, "."};

@@ -39,6 +39,14 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 	}
 
 	@Override
+	public boolean isExpired() {
+		LicenseStatus licenseStatus = LicenseManager.getInstance().getValidationData().getLicenseStatus();
+		return (licenseStatus.equals(LicenseStatus.FLOATING_EXPIRED)
+				|| licenseStatus.equals(LicenseStatus.NODE_LOCKED_EXPIRED)
+				|| licenseStatus.equals(LicenseStatus.TRIAL_EXPIRED));
+	}
+
+	@Override
 	public boolean updateLicenseeNumber(String licenseKey, String licenseName) {
 		return LicenseManager.getInstance().updateLicenseeNumber(licenseKey.trim(), licenseName);
 	}
