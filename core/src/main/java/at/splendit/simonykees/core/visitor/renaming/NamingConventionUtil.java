@@ -5,6 +5,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+
+import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
+
 public class NamingConventionUtil {
 
 	public static boolean isComplyingWithConventions(String identifier) {
@@ -61,6 +69,40 @@ public class NamingConventionUtil {
 		}
 	
 		return Optional.ofNullable(newName).filter(s -> !s.isEmpty());
+	}
+
+	/**
+	 * Checks if the type declaration has a field named the same as the given
+	 * name.
+	 * @param typeDeclaration
+	 *            a type declaration
+	 * @param fragmentName
+	 *            the name to look for
+	 * 
+	 * @return {@code true} if such a field is found, or {@code false} otherwise
+	 */
+	public static boolean hasField(TypeDeclaration typeDeclaration, SimpleName fragmentName) {
+		return hasField(typeDeclaration, fragmentName.getIdentifier());
+	}
+	
+	/**
+	 * Checks if the type declaration has a field named the same as the given
+	 * identifier.
+	 * 
+	 * @param typeDeclaration
+	 *            a type declaration
+	 * @param targetIdentifier
+	 *            the name to look for
+	 * @return {@code true} if such a field is found, or {@code false} otherwise
+	 */
+	public static boolean hasField(TypeDeclaration typeDeclaration, String targetIdentifier) {
+		return ASTNodeUtil.convertToTypedList(typeDeclaration.bodyDeclarations(), FieldDeclaration.class).stream()
+				.flatMap(fieldDecl -> ASTNodeUtil
+						.convertToTypedList(fieldDecl.fragments(), VariableDeclarationFragment.class).stream()
+						.map(VariableDeclarationFragment::getName).map(SimpleName::getIdentifier))
+				.anyMatch(identifier -> identifier.equals(targetIdentifier))
+				|| ClassRelationUtil.findInheretedFields(typeDeclaration.resolveBinding())
+						.contains(targetIdentifier);
 	}
 
 }

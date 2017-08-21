@@ -1,9 +1,11 @@
 package at.splendit.simonykees.core.rule.impl;
 
+import java.util.List;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.visitor.renaming.FieldDeclarationMetadata;
+import at.splendit.simonykees.core.visitor.renaming.FieldMetadata;
 import at.splendit.simonykees.core.visitor.renaming.PublicFieldsRenamingASTVisitor;
 
 /**
@@ -14,10 +16,10 @@ import at.splendit.simonykees.core.visitor.renaming.PublicFieldsRenamingASTVisit
  */
 public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenamingASTVisitor> {
 
-	private FieldDeclarationMetadata metaData;
+	private List<FieldMetadata> metaData;
 	
 	public PublicFieldsRenamingRule(Class<PublicFieldsRenamingASTVisitor> visitor,
-			FieldDeclarationMetadata metaData) {
+			List<FieldMetadata> metaData) {
 		super(visitor);
 		this.metaData = metaData;
 		this.name = "Rename public fields";

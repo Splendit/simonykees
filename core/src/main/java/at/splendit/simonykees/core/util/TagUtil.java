@@ -120,9 +120,6 @@ public class TagUtil {
 			
 		} else if (PublicFieldsRenamingRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY);
-			
-		} else if (PublicFieldsRenamingASTVisitor.RenameRule.class == clazz) {
-			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY);
 
 		} else if (RearrangeClassMembersRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY);

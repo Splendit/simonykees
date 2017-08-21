@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.text.edits.TextEditGroup;
 
 /**
  * 
@@ -12,13 +12,35 @@ import org.eclipse.jdt.core.search.SearchMatch;
  * @since 2.1.0
  *
  */
-public interface FieldDeclarationMetadata {
+public interface FieldMetadata {
 
+	/**
+	 * 
+	 * @return
+	 */
 	CompilationUnit getCompilationUnit();
 
+	/**
+	 * 
+	 * @return
+	 */
 	VariableDeclarationFragment getFieldDeclaration();
 
-	List<SearchMatch> getReferences();
+	/**
+	 * 
+	 * @return
+	 */
+	List<ReferenceSearchMatch> getReferences();
 
+	/**
+	 * 
+	 * @return
+	 */
 	String getNewIdentifier();
+	
+	/**
+	 * 
+	 * @return
+	 */
+	TextEditGroup getTextEditGroup();
 }
