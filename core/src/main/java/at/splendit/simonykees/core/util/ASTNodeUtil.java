@@ -125,7 +125,7 @@ public class ASTNodeUtil {
 	 *         {@link MethodInvocation#getExpression()}
 	 */
 	public static SimpleName replaceableIteratorCondition(Expression node) {
-		if (node instanceof MethodInvocation) {
+		if (ASTNode.METHOD_INVOCATION == node.getNodeType()) {
 			MethodInvocation methodInvocation = (MethodInvocation) node;
 			// check for hasNext operation on Iterator
 			if (StringUtils.equals("hasNext", methodInvocation.getName().getFullyQualifiedName()) //$NON-NLS-1$

@@ -38,7 +38,14 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 		if(isSingleStatementBodyOfOuterLoop(node)) {
 			return true;
 		}
-		SimpleName iteratorName = ASTNodeUtil.replaceableIteratorCondition(node.getExpression());
+		
+		// skip loops with empty condition
+		Expression nodeExpression = node.getExpression();
+		if(nodeExpression == null) {
+			return true;
+		}
+		
+		SimpleName iteratorName = ASTNodeUtil.replaceableIteratorCondition(nodeExpression);
 		if (iteratorName != null) {
 			// Defined updaters are not allowed
 			if (!node.updaters().isEmpty()) {
@@ -65,9 +72,9 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 				}
 			}
 
-		} else if (node.getExpression() != null && ASTNode.INFIX_EXPRESSION == node.getExpression().getNodeType()) {
+		} else if (ASTNode.INFIX_EXPRESSION == nodeExpression.getNodeType()) {
 			// if the condition of the for loop is an infix expression....
-			InfixExpression infixExpression = (InfixExpression) node.getExpression();
+			InfixExpression infixExpression = (InfixExpression) nodeExpression;
 			Expression rhs = infixExpression.getRightOperand();
 			Expression lhs = infixExpression.getLeftOperand();
 
@@ -96,7 +103,9 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 		// Do the replacement
 		if (replaceInformationASTVisitorList.containsKey(node)) {
 			LoopOptimizationASTVisior iteratorDefinitionAstVisior = replaceInformationASTVisitorList.remove(node);
-			iteratorDefinitionAstVisior.replaceLoop(node, node.getBody(), multipleIteratorUse);
+			Map<String, Boolean> newNameMap = generateNewIteratorName(null, node, iteratorDefinitionAstVisior.getListName());
+			String newName = newNameMap.keySet().iterator().next();
+			iteratorDefinitionAstVisior.replaceLoop(node, node.getBody(), multipleIteratorUse, newName);
 
 			// clear the variableIterator if no other loop is present
 			if (replaceInformationASTVisitorList.isEmpty()) {

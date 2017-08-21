@@ -14,13 +14,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * 
  * <pre>
  * <code>
- * 	boolean boolVarName = false;
- * 	for(Object val : values) {
- * 		if(condition(val)) {
- * 			boolVarName = true;
- * 			break;
- * 		}
- * 	}
+ * boolean boolVarName = false;
+ * for (Object val : values) {
+ *     if (condition(val)) {
+ *         boolVarName = true;
+ *         break;
+ *     }
+ * }
  * </code>
  * </pre>
  * 
@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * and checks whether it initial value is {@code false}.
  * 
  * @author Ardit Ymeri
- * @since 2.0.2
+ * @since 2.1.1
  *
  */
 class LoopWithBreakStatementVisitor extends ASTVisitor {

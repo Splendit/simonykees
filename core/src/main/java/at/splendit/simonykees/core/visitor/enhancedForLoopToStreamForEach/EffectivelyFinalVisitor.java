@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
  * effectively final.
  * 
  * @author Ardit Ymeri
- * @since 2.0.2
+ * @since 2.1.1
  *
  */
 class EffectivelyFinalVisitor extends ASTVisitor {
@@ -26,8 +26,8 @@ class EffectivelyFinalVisitor extends ASTVisitor {
 
 	/**
 	 * 
-	 * @return if the the visitor has found an occurrence of a variable
-	 *         which is neither final NOR effectively final.
+	 * @return if the the visitor has found an occurrence of a variable which is
+	 *         neither final NOR effectively final.
 	 */
 	public boolean containsNonEffectivelyFinalVariable() {
 		return this.containsNonfinalVar;

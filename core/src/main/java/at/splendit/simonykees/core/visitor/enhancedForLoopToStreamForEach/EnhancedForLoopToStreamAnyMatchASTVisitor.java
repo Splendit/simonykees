@@ -31,21 +31,22 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
  * 
  * <pre>
  * <code>
- * 		boolean containsEmpty = false;
- *		for(String value : strings) {
- *			if(value.isEmpty()) {
- *				containsEmpty = true;
- *				break;
- *			}
- *		}
+ * boolean containsEmpty = false;
+ * for (String value : strings) {
+ *     if(value.isEmpty()) {
+ *         containsEmpty = true;
+ *         break;
+ *     }
+ * }
  * </code>
  * </pre>
  * 
  * is transformed into:
  * 
  * <pre>
- * <code>
- * 	boolean containsEmpty = strings.stream().anyMatch(value -> value.isEmpty());
+ * <code>{@code
+ * boolean containsEmpty = strings.stream().anyMatch(value -> value.isEmpty());
+ * }
  * </code>
  * </pre>
  * 
@@ -55,29 +56,29 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
  * 
  * <pre>
  * <code>
- *		for(String value : strings) {
- *			if(value.isEmpty()) {
- *				return true;
- *			}
- *		}
- *		return false;
+ * for(String value : strings) {
+ *     if(value.isEmpty()) {
+ *         return true;
+ *     }
+ * }
+ * return false;
  * </code>
  * </pre>
  * 
  * is transformed into:
  * 
  * <pre>
- * <code>
- * 	return strings.stream().anyMatch(value -> value.isEmpty());
+ * <code>{@code
+ * return strings.stream().anyMatch(value -> value.isEmpty());
+ * }
  * </code>
  * </pre>
  * 
  * </li>
- * 
  * </ul>
  * 
  * @author Ardit Ymeri
- * @since 2.0.2
+ * @since 2.1.1
  *
  */
 public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedForLoopToStreamASTVisitor {
