@@ -23,6 +23,13 @@ public interface LicenseValidationService {
 	 * @return true, if a valid license is present, false otherwise
 	 */
 	boolean isValid();
+	
+	/**
+	 * checks, if license is expired
+	 * 
+	 * @return true, if a license is expired, false otherwise
+	 */
+	boolean isExpired();
 
 	/**
 	 * updates the license key
