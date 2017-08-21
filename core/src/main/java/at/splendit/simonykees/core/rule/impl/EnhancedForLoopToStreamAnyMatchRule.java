@@ -10,7 +10,7 @@ import at.splendit.simonykees.i18n.Messages;
  * @see EnhancedForLoopToStreamAnyMatchASTVisitor
  * 
  * @author Ardit Ymeri
- * @since 2.0.2
+ * @since 2.1.1
  *
  */
 public class EnhancedForLoopToStreamAnyMatchRule extends RefactoringRule<EnhancedForLoopToStreamAnyMatchASTVisitor> {

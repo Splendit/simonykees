@@ -13,7 +13,7 @@ import at.splendit.simonykees.core.visitor.lambdaForEach.AbstractLambdaForEachAS
  * an {@link EnhancedForStatement} to a stream. 
  * 
  * @author Matthias Webhofer, Ardit Ymeri
- * @since 2.0.2
+ * @since 2.1.1
  *
  */
 public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends AbstractLambdaForEachASTVisitor {

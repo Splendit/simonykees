@@ -22,7 +22,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * is thrown. 
  * 
  * @author Matthias Webhofer, Ardit Ymeri
- * @since 2.0.2
+ * @since 2.1.1
  *
  */
 public class UnhandledExceptionVisitor extends AbstractASTRewriteASTVisitor {
