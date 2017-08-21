@@ -20,7 +20,7 @@ import at.splendit.simonykees.core.rule.impl.PublicFieldsRenamingRule;
 import at.splendit.simonykees.core.util.RefactoringUtil;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.renaming.FieldDeclarationASTVisitor;
-import at.splendit.simonykees.core.visitor.renaming.FieldDeclarationMetadata;
+import at.splendit.simonykees.core.visitor.renaming.FieldMetadata;
 import at.splendit.simonykees.core.visitor.renaming.PublicFieldsRenamingASTVisitor;
 
 /**
@@ -56,13 +56,10 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 			FieldDeclarationASTVisitor referencesVisitor = new FieldDeclarationASTVisitor();
 			compilationUnit.accept(referencesVisitor);
 			
-			List<FieldDeclarationMetadata> metaData = referencesVisitor.getFieldMetadata();
+			List<FieldMetadata> metaData = referencesVisitor.getFieldMetadata();
 			
-			metaData.forEach(data -> {
-				//FIXME: this will not work if there is more than one file name
-				this.fileName = data.getCompilationUnit().getJavaElement().getPath().lastSegment();
-				rulesList.add(new  PublicFieldsRenamingRule(PublicFieldsRenamingASTVisitor.class, data));	
-			});
+			//FIXME: this will not work if there is more than one file name
+			rulesList.add(new  PublicFieldsRenamingRule(PublicFieldsRenamingASTVisitor.class, metaData));
 			
 		} catch (JavaModelException | IOException e) {
 			// TODO Auto-generated catch block
