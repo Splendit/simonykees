@@ -10,7 +10,7 @@ import at.splendit.simonykees.i18n.Messages;
  * @see EnhancedForLoopToStreamFindFirstASTVisitor
  * 
  * @author Ardit Ymeri
- * @since 2.1.0
+ * @since 2.1.1
  *
  */
 public class EnhancedForLoopToStreamFindFirstRule extends RefactoringRule<EnhancedForLoopToStreamFindFirstASTVisitor> {

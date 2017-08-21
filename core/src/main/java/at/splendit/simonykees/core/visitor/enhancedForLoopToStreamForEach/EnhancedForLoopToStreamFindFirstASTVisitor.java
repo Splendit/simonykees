@@ -88,7 +88,7 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * 
  * 
  * @author Ardit Ymeri
- * @since 2.1.0
+ * @since 2.1.1
  *
  */
 public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhancedForLoopToStreamASTVisitor {

@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
  * effectively final.
  * 
  * @author Ardit Ymeri
- * @since 2.0.2
+ * @since 2.1.1
  *
  */
 class EffectivelyFinalVisitor extends ASTVisitor {

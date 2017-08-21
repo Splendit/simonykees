@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 /**
  * 
  * @author Ardit Ymeri
- * @since 2.1.0
+ * @since 2.1.1
  *
  */
 @SuppressWarnings({ "nls" })

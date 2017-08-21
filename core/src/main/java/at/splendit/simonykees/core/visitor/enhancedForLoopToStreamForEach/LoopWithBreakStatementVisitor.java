@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * and checks whether it initial value is {@code false}.
  * 
  * @author Ardit Ymeri
- * @since 2.0.2
+ * @since 2.1.1
  *
  */
 class LoopWithBreakStatementVisitor extends ASTVisitor {
