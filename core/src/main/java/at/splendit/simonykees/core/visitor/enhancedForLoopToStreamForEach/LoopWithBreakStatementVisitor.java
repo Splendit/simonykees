@@ -14,13 +14,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * 
  * <pre>
  * <code>
- * 	boolean boolVarName = false;
- * 	for(Object val : values) {
- * 		if(condition(val)) {
- * 			boolVarName = true;
- * 			break;
- * 		}
- * 	}
+ * boolean boolVarName = false;
+ * for (Object val : values) {
+ *     if (condition(val)) {
+ *         boolVarName = true;
+ *         break;
+ *     }
+ * }
  * </code>
  * </pre>
  * 
