@@ -117,21 +117,21 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 		if (!isTypeSafe(parameterTypeBinding)) {
 			return true;
 		}
-		
+
 		List<Statement> bodyStatements = new ArrayList<>();
 
 		/*
-		 *  the body of the loop should either be a block or a single if statement
+		 * the body of the loop should either be a block or a single if
+		 * statement
 		 */
 		Statement body = enhancedForStatement.getBody();
 		if (ASTNode.BLOCK == body.getNodeType()) {
 			bodyStatements = ASTNodeUtil.returnTypedList(((Block) body).statements(), Statement.class);
-		} else if(ASTNode.IF_STATEMENT == body.getNodeType()) {
+		} else if (ASTNode.IF_STATEMENT == body.getNodeType()) {
 			bodyStatements.add(body);
 		} else {
 			return true;
 		}
-
 
 		// the loop body should consist of only one 'if' statement.
 		if (bodyStatements.size() != 1) {
@@ -158,8 +158,6 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 		if (containsNonEffectivelyFinalVariable(ifCondition) || throwsException(ifCondition)) {
 			return true;
 		}
-		
-		
 
 		Statement thenStatement = ifStatement.getThenStatement();
 		VariableDeclarationFragment booleanDeclFragment;
@@ -283,8 +281,8 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 	}
 
 	/**
-	 * Checks whether the body of a <em>then statement</em> consists of a block of
-	 * exactly two statements where the first one is an assignment to
+	 * Checks whether the body of a <em>then statement</em> consists of a block
+	 * of exactly two statements where the first one is an assignment to
 	 * {@code true} of a boolean variable and the second one is a
 	 * {@link BreakStatement}.
 	 * 
@@ -354,25 +352,30 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 	}
 
 	/**
-	 * Checks whether the given thenStatement consists of a single {@link ReturnStatement} which 
-	 * returns a boolean {@code true} value  and whether the given enhanced for-loop is followed 
-	 * by a {@link ReturnStatement} which returns a boolean {@code false} value. 
+	 * Checks whether the given thenStatement consists of a single
+	 * {@link ReturnStatement} which returns a boolean {@code true} value and
+	 * whether the given enhanced for-loop is followed by a
+	 * {@link ReturnStatement} which returns a boolean {@code false} value.
 	 * 
-	 * @param thenStatement a node representing the 'then statement' of a {@link IfStatement}.
-	 * @param forNode a loop having the aforementioned if statement as the only statement in the body.
-	 * @return the {@link ReturnStatement} following the the given loop, or {@code null} if the loop 
-	 * is not followed by a return statement or if the transformation is not possible. 
+	 * @param thenStatement
+	 *            a node representing the 'then statement' of a
+	 *            {@link IfStatement}.
+	 * @param forNode
+	 *            a loop having the aforementioned if statement as the only
+	 *            statement in the body.
+	 * @return the {@link ReturnStatement} following the the given loop, or
+	 *         {@code null} if the loop is not followed by a return statement or
+	 *         if the transformation is not possible.
 	 */
 	private ReturnStatement isAssignmentAndReturnBlock(Statement thenStatement, EnhancedForStatement forNode) {
 		List<Statement> thenBody = new ArrayList<>();
-		
+
 		if (ASTNode.BLOCK == thenStatement.getNodeType()) {
-			thenBody = ASTNodeUtil.convertToTypedList(((Block) thenStatement).statements(),
-					Statement.class); 
-		} else if(ASTNode.RETURN_STATEMENT == thenStatement.getNodeType()) {
+			thenBody = ASTNodeUtil.convertToTypedList(((Block) thenStatement).statements(), Statement.class);
+		} else if (ASTNode.RETURN_STATEMENT == thenStatement.getNodeType()) {
 			thenBody.add(thenStatement);
 		}
-		
+
 		if (thenBody.size() == 1) {
 			Statement stStatement = thenBody.get(0);
 			if (ASTNode.RETURN_STATEMENT == stStatement.getNodeType()) {
@@ -387,7 +390,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 				}
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -429,7 +432,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 	}
 
 	/**
-	 * A visitor for analyzing an {@link EnhancedForStatement} whether it 
+	 * A visitor for analyzing an {@link EnhancedForStatement} whether it
 	 * consists of the shape:
 	 * 
 	 * <pre>
@@ -444,8 +447,8 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 	 * </code>
 	 * </pre>
 	 * 
-	 * Furthermore, it finds the declaration fragment of the assigned boolean variable
-	 * and checks whether it initial value is {@code false}.
+	 * Furthermore, it finds the declaration fragment of the assigned boolean
+	 * variable and checks whether it initial value is {@code false}.
 	 * 
 	 * @author Ardit Ymeri
 	 * @since 2.0.2
