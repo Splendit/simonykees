@@ -118,36 +118,40 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			/*
 			 * replace the initializer with a Stream::findFirst
 			 */
-			if(containsNonEffectiveVariable(tailingMap)) {
+			if (containsNonEffectiveVariable(tailingMap)) {
 				return true;
 			}
-			
+
 			/*
-			 * if the type of the stream proceeding findFirst() does
-			 * not match with the type of the orElse() expression, then
-			 * an explicit casting should be add by using a findFirst().map()
-			 * The boxingExpresions list, is used for storing the mapping
+			 * if the type of the stream proceeding findFirst() does not match
+			 * with the type of the orElse() expression, then an explicit
+			 * casting should be add by using a findFirst().map() The
+			 * boxingExpresions list, is used for storing the mapping
 			 * expressions in such cases.
 			 */
-			List<Expression>boxingExpresions = new ArrayList<>();
-			Expression orElseExpression = checkInitializerImlicitCasting(varDeclFragment, tailingMap, boxingExpresions, loopExpression);
-			List<Expression> mapCopyTargets = tailingMap.stream().map(e -> (Expression)astRewrite.createCopyTarget(e)).collect(Collectors.toList());
+			List<Expression> boxingExpresions = new ArrayList<>();
+			Expression orElseExpression = checkInitializerImlicitCasting(varDeclFragment, tailingMap, boxingExpresions,
+					loopExpression);
+			List<Expression> mapCopyTargets = tailingMap.stream().map(e -> (Expression) astRewrite.createCopyTarget(e))
+					.collect(Collectors.toList());
 			mapCopyTargets.addAll(boxingExpresions);
-			
+
 			MethodInvocation methodInvocation = createStreamFindFirstInitalizer(loopExpression, ifCondition,
 					loopParameter, orElseExpression, mapCopyTargets);
-			
+
 			astRewrite.replace(varDeclFragment.getInitializer(), methodInvocation, null);
 			replaceLoopWithFragment(forLoop, varDeclFragment);
 
 		} else if ((returnStatement = isConvertableWithReturn(thenStatement, forLoop, loopParameter.getName(),
 				tailingMap)) != null) {
-			if(containsNonEffectiveVariable(tailingMap)) {
+			if (containsNonEffectiveVariable(tailingMap)) {
 				return true;
 			}
-			List<Expression>boxingExpresions = new ArrayList<>();
-			Expression orElseExpression = boxReturnExpressionIfPrimitive(returnStatement, tailingMap, boxingExpresions, loopExpression);
-			List<Expression> mapCopyTargets = tailingMap.stream().map(e -> (Expression)astRewrite.createCopyTarget(e)).collect(Collectors.toList());
+			List<Expression> boxingExpresions = new ArrayList<>();
+			Expression orElseExpression = boxReturnExpressionIfPrimitive(returnStatement, tailingMap, boxingExpresions,
+					loopExpression);
+			List<Expression> mapCopyTargets = tailingMap.stream().map(e -> (Expression) astRewrite.createCopyTarget(e))
+					.collect(Collectors.toList());
 			mapCopyTargets.addAll(boxingExpresions);
 			MethodInvocation methodInvocation = createStreamFindFirstInitalizer(loopExpression, ifCondition,
 					loopParameter, orElseExpression, mapCopyTargets);
@@ -164,27 +168,29 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 
 	/**
 	 * Boxes the expression if its type is a primitive type. Creates a copy
-	 * target of the given expression. The expression to be boxed should be
-	 * part of the ast. 
-	 *   
-	 * @param expression an expression to be boxed
-	 * @param expectedType the type to be boxed to
-	 * @return the new boxed expression if its original type is primitve, 
-	 * or the unchanged expression otherwise. 
+	 * target of the given expression. The expression to be boxed should be part
+	 * of the ast.
+	 * 
+	 * @param expression
+	 *            an expression to be boxed
+	 * @param expectedType
+	 *            the type to be boxed to
+	 * @return the new boxed expression if its original type is primitve, or the
+	 *         unchanged expression otherwise.
 	 */
 	private Expression boxIfPrimitive(Expression expression, ITypeBinding expectedType) {
-		if(expectedType == null || !expectedType.isPrimitive()) {
+		if (expectedType == null || !expectedType.isPrimitive()) {
 			return expression;
 		}
-		
+
 		AST ast = expression.getAST();
 		MethodInvocation methodInvocation = ast.newMethodInvocation();
 		methodInvocation.setName(ast.newSimpleName(VALUE_OF));
 		ListRewrite miRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
-		miRewrite.insertFirst((Expression)astRewrite.createCopyTarget(expression), null);
+		miRewrite.insertFirst((Expression) astRewrite.createCopyTarget(expression), null);
 		String expressionName = ClassRelationUtil.findBoxedTypeOfPrimitive(expectedType);
 		methodInvocation.setExpression(ast.newSimpleName(expressionName));
-		
+
 		return methodInvocation;
 	}
 
@@ -350,9 +356,9 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 
 	/**
 	 * Checks whether a loop using a break statement is convertible to a
-	 * {@link Stream#findFirst()} expression. Furthermore, adds the 
+	 * {@link Stream#findFirst()} expression. Furthermore, adds the
 	 * right-hand-side of the of the assignment expression to the tailingMap
-	 * list, if the return expression does not exactly match the loop variable. 
+	 * list, if the return expression does not exactly match the loop variable.
 	 * 
 	 * @param thenStatement
 	 *            the body of the if statement occurring in the loop
@@ -372,7 +378,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 		Assignment assignmentAfterBreak = isAssignmentAndBreak(thenStatement);
 		if (assignmentAfterBreak != null) {
 			Expression rhs = assignmentAfterBreak.getRightHandSide();
-			if(ASTNode.NULL_LITERAL != rhs.getNodeType()) {
+			if (ASTNode.NULL_LITERAL != rhs.getNodeType()) {
 				tailingMap.addAll(wrapNonIdentical(rhs, loopParameterName));
 				Expression lhs = assignmentAfterBreak.getLeftHandSide();
 				if (ASTNode.SIMPLE_NAME == lhs.getNodeType()) {
@@ -411,8 +417,8 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 	/**
 	 * Checks whether a loop using a return statement is convertible to a
 	 * {@link Stream#findFirst()} expression. Furthermore, adds the expression
-	 * of the return statement to the tailingMap list, if the return 
-	 * expression does not exactly match the loop variable. 
+	 * of the return statement to the tailingMap list, if the return expression
+	 * does not exactly match the loop variable.
 	 * 
 	 * @param statement
 	 *            the body of the if statement occurring in the loop
@@ -421,7 +427,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 	 * @param parameter
 	 *            a node representing the name of the loop variable
 	 * @param tailingMap
-	 *            an empty list. 
+	 *            an empty list.
 	 * 
 	 * @return the declaration of the variable which is being assigned in the
 	 *         body of the loop, or {@code null} if the transformation is not
@@ -547,7 +553,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			optionalExpression = map;
 			Expression mapParameter;
 
-			if(ASTNode.EXPRESSION_METHOD_REFERENCE == mapExpression.getNodeType()) {
+			if (ASTNode.EXPRESSION_METHOD_REFERENCE == mapExpression.getNodeType()) {
 				mapParameter = mapExpression;
 			} else {
 				LambdaExpression mapLambdaExpression = ast.newLambdaExpression();
@@ -559,7 +565,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 				lambdaRewrite.insertFirst(mapDeclFragment, null);
 				mapParameter = mapLambdaExpression;
 			}
-			
+
 			ListRewrite tailingMapRewrite = astRewrite.getListRewrite(map, MethodInvocation.ARGUMENTS_PROPERTY);
 			tailingMapRewrite.insertFirst(mapParameter, null);
 		}

@@ -26,8 +26,8 @@ class EffectivelyFinalVisitor extends ASTVisitor {
 
 	/**
 	 * 
-	 * @return if the the visitor has found an occurrence of a variable
-	 *         which is neither final NOR effectively final.
+	 * @return if the the visitor has found an occurrence of a variable which is
+	 *         neither final NOR effectively final.
 	 */
 	public boolean containsNonEffectivelyFinalVariable() {
 		return this.containsNonfinalVar;
