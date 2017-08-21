@@ -45,23 +45,23 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * 
  * <pre>
  * <code>
- * 		boolean containsEmpty = false;
- *		for(String value : strings) {
- *			if(value.isEmpty()) {
- *				containsEmpty = true;
- *				break;
- *			}
- *		}
+ * boolean containsEmpty = false;
+ * for (String value : strings) {
+ *     if(value.isEmpty()) {
+ *         containsEmpty = true;
+ *         break;
+ *     }
+ * }
  * </code>
  * </pre>
  * 
  * is transformed into:
  * 
  * <pre>
- * {
- * 	&#64;code
- * 	boolean containsEmpty = strings.stream().anyMatch(value -> value.isEmpty());
+ * <code>{@code
+ * boolean containsEmpty = strings.stream().anyMatch(value -> value.isEmpty());
  * }
+ * </code>
  * </pre>
  * 
  * </li>
@@ -70,25 +70,25 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * 
  * <pre>
  * <code>
- *		for(String value : strings) {
- *			if(value.isEmpty()) {
- *				return true;
- *			}
- *		}
- *		return false;
+ * for(String value : strings) {
+ *     if(value.isEmpty()) {
+ *         return true;
+ *     }
+ * }
+ * return false;
  * </code>
  * </pre>
  * 
  * is transformed into:
  * 
  * <pre>
- * {@code
- * 	return strings.stream().anyMatch(value -> value.isEmpty());
+ * <code>{@code
+ * return strings.stream().anyMatch(value -> value.isEmpty());
  * }
+ * </code>
  * </pre>
  * 
  * </li>
- * 
  * </ul>
  * 
  * @author Ardit Ymeri
