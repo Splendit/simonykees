@@ -111,12 +111,12 @@ public class RulesContainer {
 				new MultiVariableDeclarationLineRule(MultiVariableDeclarationLineASTVisitor.class),
 				new WhileToForEachRule(WhileToForEachASTVisitor.class),
 				new ForToForEachRule(ForToForEachASTVisitor.class),
-				new FlatMapInsteadOfNestedLoopsRule(FlatMapInsteadOfNestedLoopsASTVisitor.class),
 				new EnhancedForLoopToStreamForEachRule(EnhancedForLoopToStreamForEachASTVisitor.class),
 				new LambdaForEachIfWrapperToFilterRule(LambdaForEachIfWrapperToFilterASTVisitor.class),
 				new StatementLambdaToExpressionRule(StatementLambdaToExpressionASTVisitor.class),
 				new LambdaForEachCollectRule(LambdaForEachCollectASTVisitor.class),
 				new LambdaForEachMapRule(LambdaForEachMapASTVisitor.class),
+				new FlatMapInsteadOfNestedLoopsRule(FlatMapInsteadOfNestedLoopsASTVisitor.class),
 				new LambdaToMethodReferenceRule(LambdaToMethodReferenceASTVisitor.class),
 
 				/*
