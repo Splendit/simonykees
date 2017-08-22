@@ -3,7 +3,6 @@ package at.splendit.simonykees.core.visitor;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -11,21 +10,23 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 
 import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
- * Finds all instantiations of {@link String} with no input parameter (new
- * String()) and all instantiations of {@link String} with a {@link String}
- * parameter (new String("foo")) and replaces those occurrences empty String
- * ("") or a String literal ("foo") respectively.
+ * Looks for Collections, Maps and String length operation that are compared to
+ * 0.
+ * <p>
+ * Those accesses can be replaced with an isEmpty() clause.
+ * <ul>
+ * <li>Collection: since 1.2, ex.: myCollection.size() == 0 -> myCollection.isEmpty()</li>
+ * <li>Map: since 1.2, ex.: myMap.size() == 0 -> myMap.isEmpty()</li>
+ * <li>Collection: since 1.6, ex.: myString.length() == 0 -> myString.isEmpty()</li>
+ * </ul>
  * 
  * @author Martin Huter, Hans-Jörg Schrödl
- * @since 0.9.2
+ * @since 2.1.0
  */
 public class UseIsEmptyRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 
@@ -34,7 +35,6 @@ public class UseIsEmptyRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String MAP_FULLY_QUALLIFIED_NAME = java.util.Map.class.getName();
 	private static final String LENGTH = "length";
 	private static final String SIZE = "size";
-	private static final String ZERO = "0";
 
 	public boolean visit(MethodInvocation methodInvocation) {
 		if (!methodInvocation.arguments().isEmpty()
@@ -53,10 +53,10 @@ public class UseIsEmptyRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 		Expression varExpression = methodInvocation.getExpression();
 		Expression otherOperand = getOtherOperand(methodInvocation, parent);
 		NumberLiteral nl = tryParseOtherOperand(otherOperand);
-		if (nl == null){
+		if (nl == null) {
 			return false;
 		}
-		
+
 		if (!isZero(nl)) {
 			return false;
 		}
@@ -73,21 +73,21 @@ public class UseIsEmptyRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 			return (NumberLiteral) otherOperand;
 		}
 		// If its a prefix throw away the prefix
-		else if (isPrefixNumber(otherOperand)){
+		else if (isPrefixNumber(otherOperand)) {
 			return (NumberLiteral) ((PrefixExpression) otherOperand).getOperand();
 		}
 		return null;
 	}
-	
-	private boolean isNumber(Expression otherOperand){
-		if(otherOperand.getNodeType() == ASTNode.NUMBER_LITERAL){
+
+	private boolean isNumber(Expression otherOperand) {
+		if (otherOperand.getNodeType() == ASTNode.NUMBER_LITERAL) {
 			return true;
 		}
 		return false;
 	}
-	
-	private boolean isPrefixNumber(Expression otherOperand){
-		if(otherOperand.getNodeType() == ASTNode.PREFIX_EXPRESSION){
+
+	private boolean isPrefixNumber(Expression otherOperand) {
+		if (otherOperand.getNodeType() == ASTNode.PREFIX_EXPRESSION) {
 			PrefixExpression prefix = (PrefixExpression) otherOperand;
 			Expression prefixExpression = prefix.getOperand();
 			return isNumber(prefixExpression);
