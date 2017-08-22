@@ -88,6 +88,8 @@ public class Messages extends NLS {
 	public static String MultiCatchRule_name;
 	public static String FieldNameConventionRule_description;
 	public static String FieldNameConventionRule_name;
+	public static String FlatMapInsteadOfNestedLoopsRule_description;
+	public static String FlatMapInsteadOfNestedLoopsRule_name;
 	public static String ForToForEachRule_description;
 	public static String ForToForEachRule_name;
 	public static String FunctionalInterfaceRule_description;

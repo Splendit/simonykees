@@ -4,6 +4,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.FlatMapInsteadOfNestedLoopsASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * 
@@ -13,8 +14,8 @@ import at.splendit.simonykees.core.visitor.FlatMapInsteadOfNestedLoopsASTVisitor
 public class FlatMapInsteadOfNestedLoopsRule extends RefactoringRule<FlatMapInsteadOfNestedLoopsASTVisitor> {
 	public FlatMapInsteadOfNestedLoopsRule(Class<FlatMapInsteadOfNestedLoopsASTVisitor> visitor) {
 		super(visitor);
-		this.name = "FlatMapInsteadOfNestedLoopsASTVisitor";
-		this.description = "FlatMapInsteadOfNestedLoopsASTVisitor";
+		this.name = Messages.FlatMapInsteadOfNestedLoopsRule_name;
+		this.description = Messages.FlatMapInsteadOfNestedLoopsRule_description;
 	}
 
 	@Override
