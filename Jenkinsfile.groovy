@@ -67,6 +67,13 @@ timestamps {
 			// master and develop builds get deployed to packagedrone (see pom.xml) and tagged (see tag-deployment.sh)
 			if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
 				if ( currentBuild.result == 'SUCCESS' ) {
+					// run sonarqube analysis, server configuration takes place in jenkins config
+					stage('SonarQube analysis') {
+						withSonarQubeEnv('SonarQube Server'){
+      						sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar'
+						}
+  					}
+  					
 					// skipping tests, because integration tests have passed already
 					// -B batch mode for clean output (otherwise upload status will spam the console)
 					def mvnCommand = 'clean deploy -DskipTests -B'
