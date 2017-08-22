@@ -83,6 +83,22 @@ public class SimonykeesPreferenceManager {
 	}
 
 	/**
+	 * Returns the current selection for enabling intro on startup.
+	 * 
+	 * @return the boolean value if intro should be enabled
+	 */
+	public static boolean getEnableIntro() {
+		return store.getBoolean(SimonykeesPreferenceConstants.ENABLE_INTRO);
+	}
+
+	/**
+	 * Sets the current selection for enabling intro on startup.
+	 */
+	public static void setEnableIntro(boolean enabled) {
+		store.setValue(SimonykeesPreferenceConstants.ENABLE_INTRO, enabled);
+	}
+
+	/**
 	 * Get the ids of all profiles.
 	 * 
 	 * @return a list of all {@link SimonykeesProfile#getProfileId()}
@@ -183,6 +199,8 @@ public class SimonykeesPreferenceManager {
 		store.setValue(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT,
 				store.getDefaultString(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT));
 
+		store.setValue(SimonykeesPreferenceConstants.ENABLE_INTRO, true);
+		
 		profiles.clear();
 		defaultProfile = new DefaultProfile();
 		loadProfilesFromStore();
