@@ -104,13 +104,19 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 					MethodInvocation methodInvocation = innerExpression.getAST().newMethodInvocation();
 					methodInvocation.setName(innerExpression.getAST()
 							.newSimpleName(methodInvocationExpression.getName().getIdentifier()));
-					Expression arg = (Expression) astRewrite
-							.createCopyTarget((Expression) methodInvocationExpression.arguments().get(0));
-					ListRewrite args = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
-					args.insertFirst(arg, null);
-					methodInvocation
-							.setExpression(createExpressionForInnerLoop(methodInvocationExpression.getExpression()));
-					return methodInvocation;
+
+					Expression arg = (Expression) methodInvocationExpression.arguments().get(0);
+					if (arg != null) {
+						Expression argCopy = (Expression) astRewrite.createCopyTarget(arg);
+						ListRewrite args = astRewrite.getListRewrite(methodInvocation,
+								MethodInvocation.ARGUMENTS_PROPERTY);
+						args.insertFirst(argCopy, null);
+
+						methodInvocation.setExpression(
+								createExpressionForInnerLoop(methodInvocationExpression.getExpression()));
+
+						return methodInvocation;
+					}
 				}
 			}
 		}
