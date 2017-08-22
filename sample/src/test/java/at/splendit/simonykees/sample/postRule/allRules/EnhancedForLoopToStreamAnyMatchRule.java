@@ -121,33 +121,18 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	}
 
 	public void swappedBooleanValues(List<String> strings) {
-		boolean containsNonEmpty = true;
-		for (String value : strings) {
-			if (StringUtils.isEmpty(value)) {
-				containsNonEmpty = false;
-				break;
-			}
-		}
+		boolean containsNonEmpty = strings.stream().filter(StringUtils::isEmpty).findFirst().map(value -> false)
+				.orElse(true);
 	}
 
 	public void sameBooleanValues1(List<String> strings) {
-		boolean containsNonEmpty = true;
-		for (String value : strings) {
-			if (StringUtils.isEmpty(value)) {
-				containsNonEmpty = true;
-				break;
-			}
-		}
+		boolean containsNonEmpty = strings.stream().filter(StringUtils::isEmpty).findFirst().map(value -> true)
+				.orElse(true);
 	}
 
 	public void sameBooleanValues2(List<String> strings) {
-		boolean containsNonEmpty = false;
-		for (String value : strings) {
-			if (StringUtils.isEmpty(value)) {
-				containsNonEmpty = false;
-				break;
-			}
-		}
+		boolean containsNonEmpty = strings.stream().filter(StringUtils::isEmpty).findFirst().map(value -> false)
+				.orElse(false);
 	}
 
 	public void compoundCondition(List<String> strings) {
@@ -205,32 +190,17 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 
 	public boolean mixedReturnValues(List<String> strings) {
 		String emptyString = "";
-		for (String value : strings) {
-			if (emptyString.equals(value)) {
-				return false;
-			}
-		}
-		return false;
+		return strings.stream().filter(emptyString::equals).findFirst().map(value -> false).orElse(false);
 	}
 
 	public boolean mixedReturnValues2(List<String> strings) {
 		String emptyString = "";
-		for (String value : strings) {
-			if (emptyString.equals(value)) {
-				return true;
-			}
-		}
-		return true;
+		return strings.stream().filter(emptyString::equals).findFirst().map(value -> true).orElse(true);
 	}
 
 	public boolean mixedReturnValues3(List<String> strings) {
 		String emptyString = "";
-		for (String value : strings) {
-			if (emptyString.equals(value)) {
-				return false;
-			}
-		}
-		return true;
+		return strings.stream().filter(emptyString::equals).findFirst().map(value -> false).orElse(true);
 	}
 
 	public boolean irrelevantStatementsBeforeLoop(List<String> strings) {
