@@ -17,7 +17,7 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
- * transforms calls to {@link String#indexOf(String)} and
+ * Transforms calls to {@link String#indexOf(String)} and
  * {@link Collection#indexOf(Object)} into calls to
  * {@link String#contains(CharSequence)} and {@link Collection#contains(Object)}
  * respectively.
@@ -25,11 +25,11 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * The transformation will only take place, if the return value is checked and
  * according to the following tables. If the method invocation to indexOf is on
  * the left of the {@link InfixExpression} (i.e. s.indexOf("l") == -1):
+ * 
  * <table border="1">
- * <th>
- * <td>Operator</td>
- * <td>Return Value</td>
- * <td>Transformation</td></th>
+ * <th>Operator</th>
+ * <th>Return Value</th>
+ * <th>Transformation</th>
  * <tr>
  * <td>==</td>
  * <td>-1</td>
@@ -63,11 +63,11 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * </table>
  * 
  * If it is on the right (i.e. -1 == s.indexOf("l")):
+ * 
  * <table border="1">
- * <th>
- * <td>Operator</td>
- * <td>Return Value</td>
- * <td>Transformation</td></th>
+ * <th>Operator</th>
+ * <th>Return Value</th>
+ * <th>Transformation</th>
  * <tr>
  * <td>==</td>
  * <td>-1</td>
