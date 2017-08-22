@@ -4,7 +4,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.InfixExpression;
 
 /**
- * TODO SIM-103 add class description
+ * A utility class for expressions containing arithmetic operations and assignments. 
  * 
  * @author Martin Huter
  * @since 0.9

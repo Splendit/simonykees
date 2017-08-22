@@ -13,7 +13,6 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -23,7 +22,6 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.util.ClassRelationUtil;
-import at.splendit.simonykees.core.visitor.lambdaForEach.AbstractLambdaForEachASTVisitor;
 
 /**
  * this rule visits all enhanced for loops and checks if the corresponding loop
@@ -35,12 +33,12 @@ import at.splendit.simonykees.core.visitor.lambdaForEach.AbstractLambdaForEachAS
  * @author Matthias Webhofer, Ardit Ymeri
  * @since 1.2
  */
-public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractLambdaForEachASTVisitor {
+public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedForLoopToStreamASTVisitor {
 
 	private static final List<String> TYPE_BINDING_CHECK_LIST = Collections.singletonList(JAVA_UTIL_COLLECTION);
-	
+
 	private CompilationUnit compilationUnit;
-	
+
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
@@ -72,10 +70,10 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractLambdaForE
 				 * expression of the enhanced for loop with no parameters
 				 */
 				Expression expressionCopy = createExpressionForStreamMethodInvocation(expression);
-				
-				if(parameterType.isPrimitiveType()) {
-					MethodInvocation mapToPrimitive = calcMappingMethod((PrimitiveType)parameterType, expressionCopy);
-					if(mapToPrimitive != null) {
+
+				if (parameterType.isPrimitiveType()) {
+					MethodInvocation mapToPrimitive = calcMappingMethod((PrimitiveType) parameterType, expressionCopy);
+					if (mapToPrimitive != null) {
 						expressionCopy = mapToPrimitive;
 					}
 				}
@@ -118,6 +116,31 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractLambdaForE
 				astRewrite.replace(enhancedForStatementNode, expressionStatement, null);
 			}
 		}
+	}
+
+	/**
+	 * this method starts an instance of
+	 * {@link StreamForEachCheckValidStatementASTVisitor} on the loop block and
+	 * checks its validity.
+	 * 
+	 * @param statement
+	 *            the body of the enhanced for loop
+	 * @param parameter
+	 *            the parameter of the enhanced for loop
+	 * @return an {@link ASTNode} if the block is valid, null otherwise
+	 */
+	private ASTNode getApprovedStatement(Statement statement, SimpleName parameter) {
+		if (ASTNode.BLOCK == statement.getNodeType()) {
+			if (isStatementValid(statement, parameter)) {
+				return statement;
+			}
+		} else if (ASTNode.EXPRESSION_STATEMENT == statement.getNodeType()) {
+			if (isStatementValid(statement, parameter)) {
+				return ((ExpressionStatement) statement).getExpression();
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -214,61 +237,6 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractLambdaForE
 	}
 
 	/**
-	 * Checks whether the type binding is a raw type, capture, wildcard or a
-	 * parameterized type having any of the above as a parameter.
-	 * 
-	 * @param typeBinding
-	 * @return {@code false} if any of the aforementioned types, or {@link true}
-	 *         otherwise.
-	 */
-	private boolean isTypeSafe(ITypeBinding typeBinding) {
-		if (typeBinding.isRawType()) {
-			return false;
-		}
-
-		if (typeBinding.isCapture()) {
-			return false;
-		}
-
-		if (typeBinding.isWildcardType()) {
-			return false;
-		}
-
-		if (typeBinding.isParameterizedType()) {
-			for (ITypeBinding argument : typeBinding.getTypeArguments()) {
-				return isTypeSafe(argument);
-			}
-		}
-
-		return true;
-	}
-
-	/**
-	 * this method starts an instance of
-	 * {@link StreamForEachCheckValidStatementASTVisitor} on the loop block and
-	 * checks its validity.
-	 * 
-	 * @param statement
-	 *            the body of the enhanced for loop
-	 * @param parameter
-	 *            the parameter of the enhanced for loop
-	 * @return an {@link ASTNode} if the block is valid, null otherwise
-	 */
-	private ASTNode getApprovedStatement(Statement statement, SimpleName parameter) {
-		if (ASTNode.BLOCK == statement.getNodeType()) {
-			if (isStatementValid(statement, parameter)) {
-				return statement;
-			}
-		} else if (ASTNode.EXPRESSION_STATEMENT == statement.getNodeType()) {
-			if (isStatementValid(statement, parameter)) {
-				return ((ExpressionStatement) statement).getExpression();
-			}
-		}
-
-		return null;
-	}
-
-	/**
 	 * @see {@link EnhancedForLoopToStreamForEachASTVisitor#getApprovedStatement(Statement, SimpleName)}
 	 * 
 	 * @param statement
@@ -280,26 +248,5 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractLambdaForE
 				parameter);
 		statement.accept(statementVisitor);
 		return statementVisitor.isStatementsValid();
-	}
-
-	/**
-	 * creates a copy target for the expression on the left of the stream()
-	 * method invocation. if the expression itself is a cast expression, then it
-	 * will be wrapped in a parenthesized expression.
-	 * 
-	 * @param expression
-	 *            the expression, which will be on the left of the stream method
-	 *            invocation
-	 * @return a copy target of the given expression, or a parenthesized
-	 *         expression (if expression is of type CastExpression.
-	 */
-	private Expression createExpressionForStreamMethodInvocation(Expression expression) {
-		Expression expressionCopy = (Expression) astRewrite.createCopyTarget(expression);
-		if (expression.getNodeType() == ASTNode.CAST_EXPRESSION) {
-			ParenthesizedExpression parenthesizedExpression = astRewrite.getAST().newParenthesizedExpression();
-			parenthesizedExpression.setExpression(expressionCopy);
-			return parenthesizedExpression;
-		}
-		return expressionCopy;
 	}
 }
