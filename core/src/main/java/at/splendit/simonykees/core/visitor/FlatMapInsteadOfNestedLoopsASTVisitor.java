@@ -1,13 +1,16 @@
 package at.splendit.simonykees.core.visitor;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -15,9 +18,21 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import at.splendit.simonykees.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
+import at.splendit.simonykees.core.rule.impl.LambdaForEachMapRule;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.lambdaForEach.AbstractLambdaForEachASTVisitor;
 
 /**
+ * This rule transforms a nested for loop to a
+ * {@link Stream#flatMap(java.util.function.Function)} call. This is only done,
+ * when the for loop has already been transformed to a call to
+ * {@link Stream#forEach(java.util.function.Consumer)} or
+ * {@link Collection#forEach(java.util.function.Consumer)}. No statement is
+ * allowed between the outer and the inner loop. IF there is one, use for
+ * example the {@link LambdaForEachIfWrapperToFilterRule} or
+ * {@link LambdaForEachMapRule} to eliminate it. The depth of the nested loops
+ * is not relevant.
  * 
  * @author Matthias Webhofer
  * @since 2.0.4
@@ -37,6 +52,11 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		STREAM,
 	}
 
+	/**
+	 * work is only done for
+	 * {@link Collection#forEach(java.util.function.Consumer)} or
+	 * {@link Stream#forEach(java.util.function.Consumer)} method calls.
+	 */
 	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
 		if (FOR_EACH_METHOD_NAME.equals(methodInvocationNode.getName().getIdentifier())
@@ -48,15 +68,15 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 			if (methodArgumentExpression != null
 					&& ASTNode.LAMBDA_EXPRESSION == methodArgumentExpression.getNodeType()) {
 				LambdaExpression methodArgumentLambda = (LambdaExpression) methodArgumentExpression;
-
 				MethodInvocation innerMethodInvocation = getSingleMethodInvocationFromLambda(methodArgumentLambda);
 
 				if (innerMethodInvocation != null) {
+
 					if (methodArgumentLambda != null && methodArgumentLambda.parameters() != null
 							&& methodArgumentLambda.parameters().size() == 1) {
+
 						LambdaExpression flatMapLambda = createFlatMapLambda(methodArgumentLambda);
 						if (flatMapLambda != null) {
-
 							boolean addFlatMap = true;
 							if (depthCount <= 1) {
 								Expression newOuterExpression = addStreamMethodInvocation(methodInvocationNode);
@@ -80,11 +100,8 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 									methodInvocationExpressionList.add(flatMapMethodInvocation);
 								}
 								methodInvocationExpressionList.add(expression);
-
 							}
-
 							innerMostMethodInvocation = innerMethodInvocation;
-
 						}
 					}
 				}
@@ -95,9 +112,17 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 	}
 
+	/**
+	 * creates the {@link Expression} for the {@link MethodInvocation} of the
+	 * inner loop by recursively walking the {@link Expression}s of the given
+	 * {@link MethodInvocation} until a call to {@link Collection#stream()} is
+	 * reached and simultaneously creating a whole new {@link MethodInvocation}.
+	 * 
+	 * @param innerExpression
+	 * @return
+	 */
 	private MethodInvocation createExpressionForInnerLoop(Expression innerExpression) {
 		if (innerExpression != null) {
-
 			if (ASTNode.METHOD_INVOCATION == innerExpression.getNodeType()) {
 				MethodInvocation methodInvocationExpression = (MethodInvocation) innerExpression;
 				if (!STREAM_METHOD_NAME.equals(methodInvocationExpression.getName().getIdentifier())) {
@@ -124,6 +149,15 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		return null;
 	}
 
+	/**
+	 * creates a whole new {@link MethodInvocation} by reducing the
+	 * {@link #methodInvocationExpressionList} with the help of
+	 * {@link #joinMethodInvocations(MethodInvocation, MethodInvocation)}. This
+	 * assembles all {@link Expression}s, which have been collected in the
+	 * {@link #visit(org.eclipse.jdt.core.dom.MethodDeclaration)}, together with
+	 * the {@link #innerMostMethodInvocation} to a new {@link MethodInvocation}
+	 * which then replaces the old nested loop.
+	 */
 	@Override
 	public void endVisit(MethodInvocation methodInvocationNode) {
 		if (FOR_EACH_METHOD_NAME.equals(methodInvocationNode.getName().getIdentifier())) {
@@ -150,6 +184,19 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		}
 	}
 
+	/**
+	 * helper method for
+	 * {@link Stream#reduce(java.util.function.BinaryOperator)}, which assembles
+	 * the elements of {@link #methodInvocationExpressionList} to a new
+	 * {@link MethodInvocation}.
+	 * 
+	 * @param m1
+	 *            left {@link MethodInvocation}, used as {@link Expression} for
+	 *            m2
+	 * @param m2
+	 *            right {@link MethodInvocation}
+	 * @return {@link MethodInvocation} m2, with m1 as new {@link Expression}
+	 */
 	private MethodInvocation joinMethodInvocations(MethodInvocation m1, MethodInvocation m2) {
 		MethodInvocation current = m2;
 
@@ -166,11 +213,10 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 				} else {
 					workToDo = false;
 				}
-
 			}
-
 			current.setExpression(m1);
 		}
+
 		return m2;
 	}
 
@@ -178,19 +224,17 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	 * creates the call to {@link Stream#flatMap(java.util.function.Function)}
 	 * 
 	 * @param newOuterExpression
-	 *            {@link Expression} of the new {@link MethodInvocation}
+	 *            {@link Expression} of the new {@link MethodInvocation} or
+	 *            null, if there shouldn't be an {@link Expression} for the
+	 *            flatMap() {@link MethodInvocation}.
 	 * @param flatMapLambda
 	 *            {@link LambdaExpression} for the first and only argument of
 	 *            the new {@link MethodInvocation}
 	 * @return The newly created flatMap {@link MethodInvocation} or null, if
-	 *         one of the parameters is empty.
+	 *         the flatMapLamda parameter is null.
 	 */
-	// private MethodInvocation createNewOuterMethodInvocation(Expression
-	// newOuterExpression,
-	// LambdaExpression flatMapLambda) {
 	private MethodInvocation createFlatMapMethodInvocation(Expression newOuterExpression,
 			LambdaExpression flatMapLambda) {
-		// if (newOuterExpression != null && flatMapLambda != null) {
 		if (flatMapLambda != null) {
 			SimpleName flatMapName = astRewrite.getAST().newSimpleName(FLAT_MAP_NAME);
 			MethodInvocation newOuter = astRewrite.getAST().newMethodInvocation();
@@ -207,7 +251,8 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 	/**
 	 * creates the {@link LambdaExpression}, which is used as the argument of
-	 * {@link Stream#flatMap(java.util.function.Function)}
+	 * {@link Stream#flatMap(java.util.function.Function)}. This is always a
+	 * call to {@link Collection#stream()}.
 	 * 
 	 * @param outerLambda
 	 *            the {@link LambdaExpression} of the outer
@@ -281,18 +326,6 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 						newExpression = streamMethodInvocation;
 					}
-
-					// Expression expressionCopy = (Expression)
-					// astRewrite.createCopyTarget(expression);
-					// SimpleName methodInvocationName =
-					// astRewrite.getAST().newSimpleName(STREAM_METHOD_NAME);
-					//
-					// MethodInvocation streamMethodInvocation =
-					// astRewrite.getAST().newMethodInvocation();
-					// streamMethodInvocation.setExpression(expressionCopy);
-					// streamMethodInvocation.setName(methodInvocationName);
-					//
-					// newExpression = streamMethodInvocation;
 				} else if (MethodInvocationType.STREAM == methodInvocationType) {
 					Expression expressionCopy = (Expression) astRewrite.createCopyTarget(expression);
 					newExpression = expressionCopy;
@@ -301,6 +334,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 				return newExpression;
 			}
 		}
+
 		return null;
 	}
 
@@ -325,8 +359,8 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	}
 
 	/**
-	 * retrieves a single {@link MethodInvocation} from a
-	 * {@link LambdaExpression}.
+	 * retrieves a single {@link Stream#forEach(java.util.function.Consumer)}
+	 * {@link MethodInvocation} from a {@link LambdaExpression}.
 	 * 
 	 * @param lambdaExpression
 	 * @return the only {@link MethodInvocation} present in the
@@ -361,5 +395,4 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 		return methodInvocation;
 	}
-
 }
