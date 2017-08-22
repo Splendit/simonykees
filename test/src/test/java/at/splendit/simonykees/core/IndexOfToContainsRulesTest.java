@@ -16,7 +16,7 @@ import at.splendit.simonykees.core.visitor.IndexOfToContainsASTVisitor;
 /**
  * 
  * @author Matthias Webhofer
- * @since 2.0.4
+ * @since 2.1.1
  */
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)

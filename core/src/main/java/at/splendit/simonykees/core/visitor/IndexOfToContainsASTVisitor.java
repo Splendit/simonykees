@@ -101,7 +101,7 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * </table>
  * 
  * @author Matthias Webhofer
- * @since 2.0.4
+ * @since 2.1.1
  *
  */
 public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
