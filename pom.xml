@@ -59,6 +59,11 @@
 			<name>Ali Kardoush</name>
 			<email>ali.kardoush@splendit.at </email>
 		</developer>
+		<developer>
+			<id>hans-joerg.schroedl</id>
+			<name>Hans-Jörg Schrödl</name>
+			<email>hans-joerg.schroedl@splendit.at </email>
+		</developer>
 	</developers>
 
 	<prerequisites>
@@ -221,6 +226,11 @@
 				<groupId>at.splendit.jSparrow</groupId>
 				<artifactId>jSparrow.sample</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.2</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -534,6 +544,15 @@
 			</distributionManagement>
 		</profile>
 		
+		<profile>
+			<id>sonar</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<sonar.language>java</sonar.language>
+			</properties>
+		</profile>
 	</profiles>
 
 	<reporting>
