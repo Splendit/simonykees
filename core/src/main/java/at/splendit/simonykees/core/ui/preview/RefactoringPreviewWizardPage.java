@@ -246,7 +246,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				/*
 				 * When compilation unit is unselected for rule that is shown,
 				 * change preview viewer should show no change. For that
-				 * generate document change is called with empty edit.
+				 * generate document change is called with empty edit to create
+				 * document change with text type java but with no changes.
 				 */
 				TextEdit edit = new MultiTextEdit();
 				return RefactoringUtil.generateDocumentChange(currentCompilationUnit.getElementName(),
