@@ -220,25 +220,33 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	private LambdaExpression createFlatMapLambda(LambdaExpression outerLambda) {
 		if (outerLambda != null) {
 			VariableDeclaration outerForEachlambdaParam = (VariableDeclaration) outerLambda.parameters().get(0);
-			VariableDeclaration flatMapLambdaParamCopy = (VariableDeclaration) astRewrite
-					.createCopyTarget(outerForEachlambdaParam);
-			SimpleName flatMapLambdaParamNameCopy = (SimpleName) astRewrite
-					.createCopyTarget(outerForEachlambdaParam.getName());
+			List<String> collectionTypeList = Collections.singletonList(JAVA_UTIL_COLLECTION);
 
-			SimpleName methodInvocationName = astRewrite.getAST().newSimpleName(STREAM_METHOD_NAME);
+			ITypeBinding outerParamTypeBinding = outerForEachlambdaParam.resolveBinding().getType();
+			if (ClassRelationUtil.isContentOfTypes(outerParamTypeBinding, collectionTypeList)
+					|| ClassRelationUtil.isInheritingContentOfTypes(outerParamTypeBinding, collectionTypeList)) {
 
-			MethodInvocation flatMapLambdaBody = astRewrite.getAST().newMethodInvocation();
-			flatMapLambdaBody.setExpression(flatMapLambdaParamNameCopy);
-			flatMapLambdaBody.setName(methodInvocationName);
+				VariableDeclaration flatMapLambdaParamCopy = (VariableDeclaration) astRewrite
+						.createCopyTarget(outerForEachlambdaParam);
+				SimpleName flatMapLambdaParamNameCopy = (SimpleName) astRewrite
+						.createCopyTarget(outerForEachlambdaParam.getName());
 
-			LambdaExpression flatMapLambda = astRewrite.getAST().newLambdaExpression();
-			flatMapLambda.setBody(flatMapLambdaBody);
-			ListRewrite flatMapLambdaListRewrite = astRewrite.getListRewrite(flatMapLambda,
-					LambdaExpression.PARAMETERS_PROPERTY);
-			flatMapLambdaListRewrite.insertFirst(flatMapLambdaParamCopy, null);
+				SimpleName methodInvocationName = astRewrite.getAST().newSimpleName(STREAM_METHOD_NAME);
 
-			return flatMapLambda;
+				MethodInvocation flatMapLambdaBody = astRewrite.getAST().newMethodInvocation();
+				flatMapLambdaBody.setExpression(flatMapLambdaParamNameCopy);
+				flatMapLambdaBody.setName(methodInvocationName);
+
+				LambdaExpression flatMapLambda = astRewrite.getAST().newLambdaExpression();
+				flatMapLambda.setBody(flatMapLambdaBody);
+				ListRewrite flatMapLambdaListRewrite = astRewrite.getListRewrite(flatMapLambda,
+						LambdaExpression.PARAMETERS_PROPERTY);
+				flatMapLambdaListRewrite.insertFirst(flatMapLambdaParamCopy, null);
+
+				return flatMapLambda;
+			}
 		}
+
 		return null;
 	}
 
