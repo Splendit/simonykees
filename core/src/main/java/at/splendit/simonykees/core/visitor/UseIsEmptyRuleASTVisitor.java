@@ -33,8 +33,8 @@ public class UseIsEmptyRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
 	private static final String COLLECTION_FULLY_QUALLIFIED_NAME = java.util.Collection.class.getName();
 	private static final String MAP_FULLY_QUALLIFIED_NAME = java.util.Map.class.getName();
-	private static final String LENGTH = "length";
-	private static final String SIZE = "size";
+	private static final String LENGTH = "length"; //$NON-NLS-1$
+	private static final String SIZE = "size"; //$NON-NLS-1$
 
 	public boolean visit(MethodInvocation methodInvocation) {
 		if (!methodInvocation.arguments().isEmpty()
@@ -61,7 +61,7 @@ public class UseIsEmptyRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 			return false;
 		}
 
-		SimpleName isEmptyMethod = methodInvocation.getAST().newSimpleName("isEmpty");
+		SimpleName isEmptyMethod = methodInvocation.getAST().newSimpleName("isEmpty"); //$NON-NLS-1$
 		MethodInvocation replaceNode = NodeBuilder.newMethodInvocation(methodInvocation.getAST(),
 				(Expression) astRewrite.createMoveTarget(varExpression), isEmptyMethod);
 		astRewrite.replace(parent, replaceNode, null);
