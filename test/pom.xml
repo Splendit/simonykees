@@ -22,4 +22,17 @@
 	<scm>
 		<url>https://bitbucket.splendit.loc/projects/LM/repos/simonykees/browse/test</url>
 	</scm>
+	
+	<build>
+    <plugins>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.plugin.version}</version>
+        <configuration>
+          <destFile>${project.basedir}/../target/jacoco-it.exec</destFile>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
