@@ -2,12 +2,16 @@ package at.splendit.simonykees.core.visitor.renaming;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -47,10 +51,22 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	private List<FieldMetadata> fieldsMetaData = new ArrayList<>();
 	private Map<ASTNode, List<SimpleName>> declaredNamesPerNode = new HashMap<>();
 	private List<String> newNamesPerType = new ArrayList<>();
+	private Set<IPath> targetResources = new HashSet<>();
+	private IJavaProject iJavaProject;
+	private IJavaElement[] iPackageFragment;
+	
+	
+	public FieldDeclarationASTVisitor(IJavaElement[] scope) {
+		this.iPackageFragment = scope;
+	}
 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
+		if(iJavaProject == null) {
+			iJavaProject = compilationUnit.getJavaElement().getJavaProject();
+			
+		}
 		return true;
 	}
 
@@ -203,10 +219,11 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	private List<ReferenceSearchMatch> findFieldReferences(VariableDeclarationFragment fragment) {
 		IJavaElement iVariableBinding = fragment.resolveBinding().getJavaElement();
-
+		
 		IField iField = (IField) iVariableBinding;
 		SearchPattern searchPattern = SearchPattern.createPattern(iField, IJavaSearchConstants.REFERENCES);
-		IJavaSearchScope scope = SearchEngine.createWorkspaceScope();
+		IJavaElement[] projectScope = iPackageFragment;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(projectScope);
 		List<ReferenceSearchMatch> references = new ArrayList<>();
 		String fragmentIdentifier = fragment.getName().getIdentifier();
 
@@ -216,6 +233,8 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 			public void acceptSearchMatch(SearchMatch match) {
 				ReferenceSearchMatch reference = new ReferenceSearchMatch(match, fragmentIdentifier);
 				references.add(reference);
+				IPath path = match.getResource().getFullPath();
+				storePath(path);
 			}
 		};
 
@@ -229,6 +248,14 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return references;
+	}
+	
+	private void storePath(IPath path) {
+		this.targetResources.add(path);
+	}
+	
+	public Set<IPath> getTargetCompilationUnitPaths() {
+		return this.targetResources;
 	}
 
 	/**

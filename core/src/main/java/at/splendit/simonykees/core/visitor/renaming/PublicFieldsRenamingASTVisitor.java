@@ -10,7 +10,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -45,16 +44,13 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	
 	@Override
 	public boolean visit(SimpleName simpleName) {
-		IBinding binding = simpleName.resolveBinding();
-		if (IBinding.VARIABLE == binding.getKind()) {
-			findReplacement(simpleName).ifPresent(metaData -> {
-				AST ast = astRewrite.getAST();
-				String newIdentifier = metaData.getNewIdentifier();
-				SimpleName newName = ast.newSimpleName(newIdentifier);
-				TextEditGroup editGroup = metaData.getTextEditGroup();
-				astRewrite.replace(simpleName, newName, editGroup);
-			});			
-		}
+		findReplacement(simpleName).ifPresent(metaData -> {
+			AST ast = astRewrite.getAST();
+			String newIdentifier = metaData.getNewIdentifier();
+			SimpleName newName = ast.newSimpleName(newIdentifier);
+			TextEditGroup editGroup = metaData.getTextEditGroup();
+			astRewrite.replace(simpleName, newName, editGroup);
+		});
 
 		return true;
 	}
@@ -97,15 +93,16 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 */
 	private Map<String, FieldMetadata> findCuRelatedData(CompilationUnit cu) {
 		IResource cuResource = cu.getJavaElement().getResource();
-		List<ReferenceSearchMatch> relatedcuReferences = metaData.stream().flatMap(metaData -> metaData.getReferences().stream()).
-				filter(match -> isMatchingResource(cuResource, match)).collect(Collectors.toList());
+		List<ReferenceSearchMatch> relatedcuReferences = metaData.stream()
+				.flatMap(metaData -> metaData.getReferences().stream())
+				.filter(match -> isMatchingResource(cuResource, match)).collect(Collectors.toList());
 		Map<String, FieldMetadata> oldToNewKeys = new HashMap<>();
 		relatedcuReferences.forEach(match -> {
 			FieldMetadata relatedMatchData = match.getMetadata();
 			String oldName = match.getMatchedName();
 			oldToNewKeys.put(calcIdentifier(oldName, match.getOffset()), relatedMatchData);
 		});
-		
+
 		return oldToNewKeys;
 	}
 

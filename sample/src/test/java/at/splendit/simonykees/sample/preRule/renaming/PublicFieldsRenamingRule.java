@@ -1,6 +1,6 @@
-package at.splendit.simonykees.sample.preRule;
+package at.splendit.simonykees.sample.preRule.renaming;
 
-@SuppressWarnings("nls")
+@SuppressWarnings({"nls", "unused"})
 public class PublicFieldsRenamingRule {
 	
 	public String a_public_field_sample = "bad name";
@@ -22,6 +22,11 @@ public class PublicFieldsRenamingRule {
 	
 	public String referenceFieldWithDollarSign() {
 		return this.remove$dollar$sign;
+	}
+	
+	public void referenceAsObjectProperty() {
+		PublicFieldsRenamingRule rule = new PublicFieldsRenamingRule();
+		rule.a_public_field_sample = "";
 	}
 	
 	private void referenceImplicitClashes() {
