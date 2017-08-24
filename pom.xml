@@ -190,7 +190,7 @@
 		</repository>
 	</repositories>
 
-	<!-- don't manage simoneykees.samples -->
+	<!-- don't manage simonykees.samples -->
 	<dependencyManagement>
 		<dependencies>
 			<!-- jSparrow -->
