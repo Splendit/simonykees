@@ -3,8 +3,22 @@ package at.splendit.simonykees.core.ui.preference.profile;
 import java.util.Arrays;
 import java.util.List;
 
-import at.splendit.simonykees.core.rule.impl.ArithmethicAssignmentRule;
-import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
+import at.splendit.simonykees.core.rule.impl.CodeFormatterRule;
+import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
+import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamForEachRule;
+import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
+import at.splendit.simonykees.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
+import at.splendit.simonykees.core.rule.impl.MultiCatchRule;
+import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
+import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
+import at.splendit.simonykees.core.visitor.DiamondOperatorASTVisitor;
+import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachIfWrapperToFilterASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.forToForEach.ForToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.loop.whileToForEach.WhileToForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.tryStatement.MultiCatchASTVisitor;
+import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
@@ -20,7 +34,15 @@ public class DefaultProfile implements SimonykeesProfile {
 	boolean isBuiltInProfile = true;
 
 	public DefaultProfile() {
-		enabledRulesIds = Arrays.asList(new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class).getId());
+		enabledRulesIds = Arrays.asList(
+				new TryWithResourceRule(TryWithResourceASTVisitor.class).getId(),
+				new MultiCatchRule(MultiCatchASTVisitor.class).getId(),
+				new DiamondOperatorRule(DiamondOperatorASTVisitor.class).getId(),
+				new WhileToForEachRule(WhileToForEachASTVisitor.class).getId(),
+				new ForToForEachRule(ForToForEachASTVisitor.class).getId(),
+				new EnhancedForLoopToStreamForEachRule(EnhancedForLoopToStreamForEachASTVisitor.class).getId(),
+				new LambdaForEachIfWrapperToFilterRule(LambdaForEachIfWrapperToFilterASTVisitor.class).getId(),
+				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class).getId());
 	}
 
 	@Override
