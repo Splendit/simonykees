@@ -136,7 +136,6 @@
 		<maven.jxr.version>2.5</maven.jxr.version>
 		<maven.surefire.version>2.20</maven.surefire.version>
 		<maven.pmd.version>3.8</maven.pmd.version>
-		<maven.cobertura.version>2.7</maven.cobertura.version>
 		<maven.findbugs.version>3.0.5</maven.findbugs.version>
 		<maven.changelog.version>2.3</maven.changelog.version>
 		<maven.versions.version>2.4</maven.versions.version>

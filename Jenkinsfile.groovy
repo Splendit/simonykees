@@ -42,7 +42,7 @@ timestamps {
 			// wrap([$class: 'Xvfb']) {
 				stage('Integration-Tests') {
 					// Run the maven build
-					def mvnCommand = 'clean install -fae -Dsurefire.rerunFailingTestsCount=2 -Dcoverage'
+					def mvnCommand = 'clean install -fae -Dsurefire.rerunFailingTestsCount=2 -Pcoverage'
 			
 					// def mvnCommand = 'surefire:test -fae -Dsurefire.rerunFailingTestsCount=2'
 					def statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${mvnCommand}")
