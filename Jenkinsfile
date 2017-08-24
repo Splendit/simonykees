@@ -42,7 +42,7 @@ timestamps {
 			// wrap([$class: 'Xvfb']) {
 				stage('Integration-Tests') {
 					// Run the maven build
-					def mvnCommand = 'clean install -fae -Dsurefire.rerunFailingTestsCount=2'
+					def mvnCommand = 'clean install -fae -Dsurefire.rerunFailingTestsCount=2 -Pcoverage'
 			
 					// def mvnCommand = 'surefire:test -fae -Dsurefire.rerunFailingTestsCount=2'
 					def statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${mvnCommand}")
@@ -70,7 +70,7 @@ timestamps {
 					// run sonarqube analysis, server configuration takes place in jenkins config
 					stage('SonarQube analysis') {
 						withSonarQubeEnv('SonarQube Server'){
-      						sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar'
+      						sh 'mvn sonar:sonar'
 						}
   					}
 
