@@ -42,6 +42,7 @@ public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor
 	protected static final String MAP_TO_DOUBLE = "mapToDouble"; //$NON-NLS-1$
 	protected static final String STREAM = "stream"; //$NON-NLS-1$
 	protected static final String PARALLEL_STREAM = "parallelStream"; //$NON-NLS-1$
+	protected static final String FLAT_MAP = "flatMap"; //$NON-NLS-1$
 
 	/**
 	 * Checks whether a {@link MethodInvocation} node, is an invocation of
