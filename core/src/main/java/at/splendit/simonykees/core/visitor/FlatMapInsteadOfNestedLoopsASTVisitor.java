@@ -22,6 +22,7 @@ import at.splendit.simonykees.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
 import at.splendit.simonykees.core.rule.impl.LambdaForEachMapRule;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.lambdaForEach.AbstractLambdaForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
 
 /**
  * This rule transforms a nested for loop to a
@@ -320,7 +321,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	private MethodInvocation createFlatMapMethodInvocation(Expression newOuterExpression,
 			LambdaExpression flatMapLambda) {
 		if (flatMapLambda != null) {
-			SimpleName flatMapName = astRewrite.getAST().newSimpleName(FLAT_MAP_NAME);
+			SimpleName flatMapName = astRewrite.getAST().newSimpleName(FLAT_MAP);
 			MethodInvocation newOuter = astRewrite.getAST().newMethodInvocation();
 			newOuter.setExpression(newOuterExpression);
 			newOuter.setName(flatMapName);
@@ -346,33 +347,35 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	 * @return the newly created {@link LambdaExpression} for the flatMap method
 	 *         or null if the method argument is null.
 	 */
-	private LambdaExpression createFlatMapLambda(LambdaExpression outerLambda) {
+	private LambdaExpression createFlatMapLambda(LambdaExpression outerLambda, SimpleName leftMostInnerExpressionName) {
 		if (outerLambda != null) {
 			VariableDeclaration outerForEachlambdaParam = (VariableDeclaration) outerLambda.parameters().get(0);
-			List<String> collectionTypeList = Collections.singletonList(JAVA_UTIL_COLLECTION);
+			if (outerForEachlambdaParam.getName().getIdentifier().equals(leftMostInnerExpressionName.getIdentifier())) {
+				List<String> collectionTypeList = Collections.singletonList(JAVA_UTIL_COLLECTION);
 
-			ITypeBinding outerParamTypeBinding = outerForEachlambdaParam.resolveBinding().getType();
-			if (ClassRelationUtil.isContentOfTypes(outerParamTypeBinding, collectionTypeList)
-					|| ClassRelationUtil.isInheritingContentOfTypes(outerParamTypeBinding, collectionTypeList)) {
+				ITypeBinding outerParamTypeBinding = outerForEachlambdaParam.resolveBinding().getType();
+				if (ClassRelationUtil.isContentOfTypes(outerParamTypeBinding, collectionTypeList)
+						|| ClassRelationUtil.isInheritingContentOfTypes(outerParamTypeBinding, collectionTypeList)) {
 
-				VariableDeclaration flatMapLambdaParamCopy = (VariableDeclaration) astRewrite
-						.createCopyTarget(outerForEachlambdaParam);
-				SimpleName flatMapLambdaParamNameCopy = (SimpleName) astRewrite
-						.createCopyTarget(outerForEachlambdaParam.getName());
+					VariableDeclaration flatMapLambdaParamCopy = (VariableDeclaration) astRewrite
+							.createCopyTarget(outerForEachlambdaParam);
+					SimpleName flatMapLambdaParamNameCopy = (SimpleName) astRewrite
+							.createCopyTarget(outerForEachlambdaParam.getName());
 
-				SimpleName methodInvocationName = astRewrite.getAST().newSimpleName(STREAM_METHOD_NAME);
+					SimpleName methodInvocationName = astRewrite.getAST().newSimpleName(STREAM);
 
-				MethodInvocation flatMapLambdaBody = astRewrite.getAST().newMethodInvocation();
-				flatMapLambdaBody.setExpression(flatMapLambdaParamNameCopy);
-				flatMapLambdaBody.setName(methodInvocationName);
+					MethodInvocation flatMapLambdaBody = astRewrite.getAST().newMethodInvocation();
+					flatMapLambdaBody.setExpression(flatMapLambdaParamNameCopy);
+					flatMapLambdaBody.setName(methodInvocationName);
 
-				LambdaExpression flatMapLambda = astRewrite.getAST().newLambdaExpression();
-				flatMapLambda.setBody(flatMapLambdaBody);
-				ListRewrite flatMapLambdaListRewrite = astRewrite.getListRewrite(flatMapLambda,
-						LambdaExpression.PARAMETERS_PROPERTY);
-				flatMapLambdaListRewrite.insertFirst(flatMapLambdaParamCopy, null);
+					LambdaExpression flatMapLambda = astRewrite.getAST().newLambdaExpression();
+					flatMapLambda.setBody(flatMapLambdaBody);
+					ListRewrite flatMapLambdaListRewrite = astRewrite.getListRewrite(flatMapLambda,
+							LambdaExpression.PARAMETERS_PROPERTY);
+					flatMapLambdaListRewrite.insertFirst(flatMapLambdaParamCopy, null);
 
-				return flatMapLambda;
+					return flatMapLambda;
+				}
 			}
 		}
 
@@ -399,17 +402,14 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 				MethodInvocationType methodInvocationType = this.getMethodInvocationType(methodInvocation);
 				if (MethodInvocationType.COLLECTION == methodInvocationType) {
-					if (ASTNode.SIMPLE_NAME == expression.getNodeType()) {
-						SimpleName collectionSimpleName = astRewrite.getAST()
-								.newSimpleName(((SimpleName) expression).getIdentifier());
-						SimpleName methodInvocationName = astRewrite.getAST().newSimpleName(STREAM_METHOD_NAME);
+					Expression collectionExpressionCopy = (Expression) astRewrite.createCopyTarget(expression);
+					SimpleName methodInvocationName = astRewrite.getAST().newSimpleName(STREAM);
 
-						MethodInvocation streamMethodInvocation = astRewrite.getAST().newMethodInvocation();
-						streamMethodInvocation.setExpression(collectionSimpleName);
-						streamMethodInvocation.setName(methodInvocationName);
+					MethodInvocation streamMethodInvocation = astRewrite.getAST().newMethodInvocation();
+					streamMethodInvocation.setExpression(collectionExpressionCopy);
+					streamMethodInvocation.setName(methodInvocationName);
 
-						newExpression = streamMethodInvocation;
-					}
+					newExpression = streamMethodInvocation;
 				} else if (MethodInvocationType.STREAM == methodInvocationType) {
 					Expression expressionCopy = (Expression) astRewrite.createCopyTarget(expression);
 					newExpression = expressionCopy;
@@ -471,7 +471,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 			if (tempExpression != null && ASTNode.METHOD_INVOCATION == tempExpression.getNodeType()) {
 				MethodInvocation forEachMethodInvocatoin = (MethodInvocation) tempExpression;
-				if (FOR_EACH_METHOD_NAME.equals(forEachMethodInvocatoin.getName().getIdentifier())) {
+				if (FOR_EACH.equals(forEachMethodInvocatoin.getName().getIdentifier())) {
 					methodInvocation = forEachMethodInvocatoin;
 				}
 			}
