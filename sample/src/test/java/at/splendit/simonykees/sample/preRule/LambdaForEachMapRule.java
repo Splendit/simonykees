@@ -393,6 +393,17 @@ public class LambdaForEachMapRule {
 		});
 	}
 	
+	public void unusedVariablesInitializedWithGenericMethod() {
+		StringBuilder sb = new StringBuilder();
+		List<Wrapper> wrappers = new ArrayList<>();
+		wrappers.forEach(wrapp -> {
+			InnerClass innerClass = wrapp.getInnerClass();
+			String strInnerClass = innerClass.toString();
+			String toString = wrapp.toString() + strInnerClass;
+			sb.append(toString);
+		});
+	}
+	
 	interface Inner {
 		
 	}
