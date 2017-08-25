@@ -108,6 +108,40 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 	}
 
+	private boolean isInnerLoopTransformable(Expression innerExpression) {
+		if (innerExpression != null) {
+			if (ASTNode.METHOD_INVOCATION == innerExpression.getNodeType()) {
+				MethodInvocation methodInvocationExpression = (MethodInvocation) innerExpression;
+
+				ITypeBinding methodInvocationExpressionType = methodInvocationExpression.resolveTypeBinding();
+				List<String> streamTypeList = Collections.singletonList(JAVA_UTIL_STREAM_STREAM);
+
+				if (!STREAM.equals(methodInvocationExpression.getName().getIdentifier())) {
+					if ((ClassRelationUtil.isContentOfTypes(methodInvocationExpressionType, streamTypeList)
+							|| ClassRelationUtil.isInheritingContentOfTypes(methodInvocationExpressionType,
+									streamTypeList))
+							&& !STREAM.equals(methodInvocationExpression.getName().getIdentifier())) {
+						return true && this.isInnerLoopTransformable(methodInvocationExpression.getExpression());
+					}
+				} else {
+					return true;
+				}
+			} else {
+				ITypeBinding innerExpressionTypeBinding = innerExpression.resolveTypeBinding();
+				List<String> collectionTypeList = Collections.singletonList(JAVA_UTIL_COLLECTION);
+
+				if (ClassRelationUtil.isContentOfTypes(innerExpressionTypeBinding, collectionTypeList)
+						|| ClassRelationUtil.isInheritingContentOfTypes(innerExpressionTypeBinding,
+								collectionTypeList)) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+
+	}
+
 	/**
 	 * creates the {@link Expression} for the {@link MethodInvocation} of the
 	 * inner loop by recursively walking the {@link Expression}s of the given
