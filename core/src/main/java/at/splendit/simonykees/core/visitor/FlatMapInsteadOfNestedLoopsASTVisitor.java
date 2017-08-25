@@ -155,23 +155,31 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		if (innerExpression != null) {
 			if (ASTNode.METHOD_INVOCATION == innerExpression.getNodeType()) {
 				MethodInvocation methodInvocationExpression = (MethodInvocation) innerExpression;
-				if (!STREAM_METHOD_NAME.equals(methodInvocationExpression.getName().getIdentifier())) {
+
+				ITypeBinding methodInvocationExpressionType = methodInvocationExpression.resolveTypeBinding();
+				List<String> streamTypeList = Collections.singletonList(JAVA_UTIL_STREAM_STREAM);
+
+				if ((ClassRelationUtil.isContentOfTypes(methodInvocationExpressionType, streamTypeList)
+						|| ClassRelationUtil.isInheritingContentOfTypes(methodInvocationExpressionType, streamTypeList))
+						&& !STREAM.equals(methodInvocationExpression.getName().getIdentifier())) {
 					MethodInvocation methodInvocation = innerExpression.getAST().newMethodInvocation();
 					methodInvocation.setName(innerExpression.getAST()
 							.newSimpleName(methodInvocationExpression.getName().getIdentifier()));
 
-					Expression arg = (Expression) methodInvocationExpression.arguments().get(0);
-					if (arg != null) {
-						Expression argCopy = (Expression) astRewrite.createCopyTarget(arg);
-						ListRewrite args = astRewrite.getListRewrite(methodInvocation,
-								MethodInvocation.ARGUMENTS_PROPERTY);
-						args.insertFirst(argCopy, null);
-
-						methodInvocation.setExpression(
-								createExpressionForInnerLoop(methodInvocationExpression.getExpression()));
-
-						return methodInvocation;
+					for (int i = 0; i < methodInvocationExpression.arguments().size(); i++) {
+						Expression arg = (Expression) methodInvocationExpression.arguments().get(i);
+						if (arg != null) {
+							Expression argCopy = (Expression) astRewrite.createCopyTarget(arg);
+							ListRewrite args = astRewrite.getListRewrite(methodInvocation,
+									MethodInvocation.ARGUMENTS_PROPERTY);
+							args.insertLast(argCopy, null);
+						}
 					}
+
+					methodInvocation
+							.setExpression(createExpressionForInnerLoop(methodInvocationExpression.getExpression()));
+
+					return methodInvocation;
 				}
 			}
 		}
