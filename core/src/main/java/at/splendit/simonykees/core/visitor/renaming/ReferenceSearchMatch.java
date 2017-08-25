@@ -4,6 +4,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.SearchMatch;
 
 /**
+ * A type for encapsulating a search match, the value of the 
+ * name being matched and the metadata related with the field 
+ * which is being searched for references. 
  * 
  * @author Ardit Ymeri
  * @since 2.1.0
@@ -27,6 +30,10 @@ public class ReferenceSearchMatch extends SearchMatch {
 		this.matchedName = matchedName;
 	}
 	
+	/**
+	 * 
+	 * @return the identifier of the field being search for. 
+	 */
 	public String getMatchedName() {
 		return this.matchedName;
 	}
@@ -35,6 +42,10 @@ public class ReferenceSearchMatch extends SearchMatch {
 		this.metaData = metaData;
 	}
 	
+	/**
+	 * 
+	 * @return the meta data related to the field
+	 */
 	public FieldMetadata getMetadata() {
 		return this.metaData;
 	}

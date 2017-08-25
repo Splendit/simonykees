@@ -13,8 +13,25 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
+/**
+ * A utility class containing functionalities that check/generates identifiers
+ * according to the java conventions for variable names. 
+ * 
+ * @author Ardit Ymeri
+ * @since 2.1.0
+ *
+ */
 public class NamingConventionUtil {
 
+	/**
+	 * Uses the regular expression {@code ^[a-z][a-zA-Z0-9]*$} for checking
+	 * whether an identifier complies with the java conventions for variable
+	 * names.
+	 * 
+	 * @param identifier
+	 *            identifier to be checked.
+	 * @return whether the identifier complies with java conventions.
+	 */
 	public static boolean isComplyingWithConventions(String identifier) {
 		// the following regex is taken from sonarqube
 		return identifier.matches("^[a-z][a-zA-Z0-9]*$"); //$NON-NLS-1$
