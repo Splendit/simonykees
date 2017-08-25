@@ -118,6 +118,18 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 	}
 
+	/**
+	 * this method evaluates if the given expression is transformable into a
+	 * stream. This is done by recursively checking if the method type binding
+	 * is of type {@link Stream}. The recursion ends either if a call to
+	 * {@link Collection#stream()} is found or if the left {@link Expression} of
+	 * the current {@link MethodInvocation} is NOT of type
+	 * {@link MethodInvocation}
+	 * 
+	 * @param innerExpression
+	 *            expression to check
+	 * @return true, if the expression is transformable, false otherwise.
+	 */
 	private boolean isInnerLoopTransformable(Expression innerExpression) {
 		if (innerExpression != null) {
 			if (ASTNode.METHOD_INVOCATION == innerExpression.getNodeType()) {
@@ -273,6 +285,22 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		return m2;
 	}
 
+	/**
+	 * This method checks, if the parameter of the {@link LambdaExpression}
+	 * (parameter of {@link Stream#forEach(java.util.function.Consumer)} method
+	 * call) is used within a statement, where it couldn't be used anymore after
+	 * transformation.
+	 * 
+	 * @param lambdaExpression
+	 *            the {@link LambdaExpression} of a
+	 *            {@link Stream#forEach(java.util.function.Consumer)} method
+	 *            call.
+	 * @param methodInvocation
+	 *            the whole inner
+	 *            {@link Stream#forEach(java.util.function.Consumer)} method
+	 *            invocation of the nested loop.
+	 * @return true, if the transformation can take place, false otherwise.
+	 */
 	private boolean checkParamUsage(LambdaExpression lambdaExpression, MethodInvocation methodInvocation) {
 		if (lambdaExpression != null && lambdaExpression.parameters().size() == 1 && methodInvocation != null
 				&& methodInvocation.arguments().size() == 1) {
@@ -288,6 +316,14 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		return false;
 	}
 
+	/**
+	 * This method extracts the left most {@link Expression} of a
+	 * {@link MethodInvocation} by recursively walking the
+	 * {@link MethodInvocation}.
+	 * 
+	 * @param methodInvocation
+	 * @return the left most expression of the given {@link MethodInvocation}
+	 */
 	private Expression getLeftMostExpressionOfMethodInvocation(MethodInvocation methodInvocation) {
 		Expression result = null;
 		if (methodInvocation != null) {
