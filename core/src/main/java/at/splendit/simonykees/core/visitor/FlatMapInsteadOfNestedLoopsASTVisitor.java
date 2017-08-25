@@ -39,10 +39,6 @@ import at.splendit.simonykees.core.visitor.lambdaForEach.AbstractLambdaForEachAS
  */
 public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEachASTVisitor {
 
-	private static final String FOR_EACH_METHOD_NAME = "forEach"; //$NON-NLS-1$
-	private static final String STREAM_METHOD_NAME = "stream"; //$NON-NLS-1$
-	private static final String FLAT_MAP_NAME = "flatMap"; //$NON-NLS-1$
-
 	private int depthCount = 0;
 	LinkedList<MethodInvocation> methodInvocationExpressionList = new LinkedList<>();
 	MethodInvocation innerMostMethodInvocation = null;
