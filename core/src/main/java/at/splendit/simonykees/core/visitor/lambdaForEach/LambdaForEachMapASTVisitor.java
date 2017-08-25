@@ -346,6 +346,8 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 										if (modifiers.size() == 1) {
 											this.modifier = modifiers.get(0);
 										}
+									} else {
+										storeDeclaredName(statement, fragments);
 									}
 
 								} else {
@@ -355,11 +357,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 									 * checked for references after the map
 									 * variable is found.
 									 */
-									extractableStatements.add(statement);
-									for (VariableDeclarationFragment fragment : fragments) {
-										SimpleName fragmentName = fragment.getName();
-										declaredNames.add(fragmentName);
-									}
+									storeDeclaredName(statement, fragments);
 								}
 							} else {
 								/*
@@ -367,11 +365,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 								 * for references after the map variable is
 								 * found.
 								 */
-								extractableStatements.add(statement);
-								for (VariableDeclarationFragment fragment : fragments) {
-									SimpleName fragmentName = fragment.getName();
-									declaredNames.add(fragmentName);
-								}
+								storeDeclaredName(statement, fragments);
 							}
 						}
 					} else {
@@ -394,6 +388,21 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 			prepareRemainingBlock(ast);
 			prepareExtractableBlock(ast);
+		}
+		
+		/**
+		 * Store the statement and the name of the declaration fragment so that the 
+		 * it is possible to check for references in the rest of the statements of the body. 
+		 * 
+		 * @param statement the whole statement representing a variable declaration. 
+		 * @param fragments fragments of the declaration statement. 
+		 */
+		private void storeDeclaredName(Statement statement, List<VariableDeclarationFragment> fragments) {
+			extractableStatements.add(statement);
+			for (VariableDeclarationFragment fragment : fragments) {
+				SimpleName fragmentName = fragment.getName();
+				declaredNames.add(fragmentName);
+			}
 		}
 
 		/**

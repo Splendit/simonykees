@@ -361,6 +361,19 @@ public class LambdaForEachMapRule {
 		});
 	}
 
+	public void multipleVariablesInitializedWithGenericMethod() {
+		/*
+		 * Similar to corner case in SIM-728
+		 */
+		StringBuilder sb = new StringBuilder();
+		List<Wrapper> wrappers = new ArrayList<>();
+		wrappers.forEach(wrapp -> {
+			InnerClass innerClass = wrapp.getInnerClass();
+			String toString = wrapp.toString();
+			sb.append(innerClass.getName() + toString);
+		});
+	}
+
 	public void useInnerClass(InnerClass innerClass) {
 
 	}
