@@ -272,6 +272,21 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		return m2;
 	}
 
+	private boolean checkParamUsage(LambdaExpression lambdaExpression, MethodInvocation methodInvocation) {
+		if (lambdaExpression != null && lambdaExpression.parameters().size() == 1 && methodInvocation != null
+				&& methodInvocation.arguments().size() == 1) {
+			VariableDeclaration lambdaParam = (VariableDeclaration) lambdaExpression.parameters().get(0);
+			Expression methodArg = (Expression) methodInvocation.arguments().get(0);
+			LocalVariableUsagesASTVisitor localVariableVisitor = new LocalVariableUsagesASTVisitor(
+					lambdaParam.getName());
+			methodArg.accept(localVariableVisitor);
+			List<SimpleName> usages = localVariableVisitor.getUsages();
+			return usages.isEmpty();
+		}
+
+		return false;
+	}
+
 	/**
 	 * creates the call to {@link Stream#flatMap(java.util.function.Function)}
 	 * 
