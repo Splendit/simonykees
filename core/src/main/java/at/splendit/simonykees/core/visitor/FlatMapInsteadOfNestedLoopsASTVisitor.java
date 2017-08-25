@@ -55,8 +55,8 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	 */
 	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
-		if (FOR_EACH_METHOD_NAME.equals(methodInvocationNode.getName().getIdentifier())
-				&& methodInvocationNode.arguments() != null && methodInvocationNode.arguments().size() == 1) {
+		if (FOR_EACH.equals(methodInvocationNode.getName().getIdentifier()) && methodInvocationNode.arguments() != null
+				&& methodInvocationNode.arguments().size() == 1) {
 
 			depthCount++;
 
@@ -68,36 +68,45 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 				if (innerMethodInvocation != null) {
 
-					if (methodArgumentLambda != null && methodArgumentLambda.parameters() != null
-							&& methodArgumentLambda.parameters().size() == 1) {
+					if (isInnerLoopTransformable(innerMethodInvocation.getExpression())) {
+						if (methodArgumentLambda != null && methodArgumentLambda.parameters() != null
+								&& methodArgumentLambda.parameters().size() == 1) {
 
-						LambdaExpression flatMapLambda = createFlatMapLambda(methodArgumentLambda);
-						if (flatMapLambda != null) {
-							boolean addFlatMap = true;
-							if (depthCount <= 1) {
-								Expression newOuterExpression = addStreamMethodInvocation(methodInvocationNode);
-								if (newOuterExpression != null) {
-									MethodInvocation newOuter = createFlatMapMethodInvocation(newOuterExpression,
-											flatMapLambda);
-									if (newOuter != null) {
-										methodInvocationExpressionList.add(newOuter);
-										addFlatMap = false;
+							Expression leftMostExpression = this
+									.getLeftMostExpressionOfMethodInvocation(innerMethodInvocation);
+							if (leftMostExpression != null && ASTNode.SIMPLE_NAME == leftMostExpression.getNodeType()) {
+
+								if (checkParamUsage(methodArgumentLambda, innerMethodInvocation)) {
+
+									LambdaExpression flatMapLambda = createFlatMapLambda(methodArgumentLambda,
+											(SimpleName) leftMostExpression);
+									if (flatMapLambda != null) {
+										if (depthCount <= 1) {
+											Expression newOuterExpression = addStreamMethodInvocation(
+													methodInvocationNode);
+											if (newOuterExpression != null) {
+												if (ASTNode.METHOD_INVOCATION == newOuterExpression.getNodeType()) {
+													methodInvocationExpressionList
+															.add((MethodInvocation) newOuterExpression);
+												}
+											}
+										}
+
+										MethodInvocation flatMapMethodInvocation = createFlatMapMethodInvocation(null,
+												flatMapLambda);
+										methodInvocationExpressionList.add(flatMapMethodInvocation);
+
+										MethodInvocation expression = createExpressionForInnerLoop(
+												innerMethodInvocation.getExpression());
+
+										if (expression != null) {
+											methodInvocationExpressionList.add(expression);
+										}
+
+										innerMostMethodInvocation = innerMethodInvocation;
 									}
 								}
 							}
-
-							MethodInvocation expression = createExpressionForInnerLoop(
-									innerMethodInvocation.getExpression());
-
-							if (expression != null) {
-								if (addFlatMap) {
-									MethodInvocation flatMapMethodInvocation = createFlatMapMethodInvocation(null,
-											flatMapLambda);
-									methodInvocationExpressionList.add(flatMapMethodInvocation);
-								}
-								methodInvocationExpressionList.add(expression);
-							}
-							innerMostMethodInvocation = innerMethodInvocation;
 						}
 					}
 				}
