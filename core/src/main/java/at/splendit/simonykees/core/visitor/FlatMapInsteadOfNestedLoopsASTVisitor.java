@@ -207,26 +207,31 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	 */
 	@Override
 	public void endVisit(MethodInvocation methodInvocationNode) {
-		if (FOR_EACH_METHOD_NAME.equals(methodInvocationNode.getName().getIdentifier())) {
+		if (FOR_EACH.equals(methodInvocationNode.getName().getIdentifier())) {
 			depthCount--;
 
 			if (depthCount == 0 && innerMostMethodInvocation != null) {
-				MethodInvocation newMethodInvocation = astRewrite.getAST().newMethodInvocation();
-				MethodInvocation expression = methodInvocationExpressionList.stream().reduce(null,
-						this::joinMethodInvocations);
-				newMethodInvocation.setExpression(expression);
-				newMethodInvocation.setName(
-						astRewrite.getAST().newSimpleName(innerMostMethodInvocation.getName().getIdentifier()));
-				ASTNode arg = ASTNode.copySubtree(astRewrite.getAST(),
-						(Expression) innerMostMethodInvocation.arguments().get(0));
-				ListRewrite argsListRewrite = astRewrite.getListRewrite(newMethodInvocation,
-						MethodInvocation.ARGUMENTS_PROPERTY);
-				argsListRewrite.insertFirst(arg, null);
 
-				astRewrite.replace(methodInvocationNode, newMethodInvocation, null);
+				if (innerMostMethodInvocation.arguments() != null && innerMostMethodInvocation.arguments().size() == 1
+						&& !methodInvocationExpressionList.isEmpty()) {
+					MethodInvocation newMethodInvocation = astRewrite.getAST().newMethodInvocation();
+					MethodInvocation expression = methodInvocationExpressionList.stream().reduce(null,
+							this::joinMethodInvocations);
+					newMethodInvocation.setExpression(expression);
+					newMethodInvocation.setName(
+							astRewrite.getAST().newSimpleName(innerMostMethodInvocation.getName().getIdentifier()));
 
-				innerMostMethodInvocation = null;
-				methodInvocationExpressionList.clear();
+					ASTNode arg = ASTNode.copySubtree(astRewrite.getAST(),
+							(Expression) innerMostMethodInvocation.arguments().get(0));
+					ListRewrite argsListRewrite = astRewrite.getListRewrite(newMethodInvocation,
+							MethodInvocation.ARGUMENTS_PROPERTY);
+					argsListRewrite.insertFirst(arg, null);
+
+					astRewrite.replace(methodInvocationNode, newMethodInvocation, null);
+
+					innerMostMethodInvocation = null;
+					methodInvocationExpressionList.clear();
+				}
 			}
 		}
 	}
