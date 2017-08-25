@@ -287,6 +287,23 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		return false;
 	}
 
+	private Expression getLeftMostExpressionOfMethodInvocation(MethodInvocation methodInvocation) {
+		Expression result = null;
+		if (methodInvocation != null) {
+			Expression expression = methodInvocation.getExpression();
+			if (expression != null) {
+				if (ASTNode.METHOD_INVOCATION == expression.getNodeType()) {
+					MethodInvocation methodInvocationExpression = (MethodInvocation) expression;
+					result = this.getLeftMostExpressionOfMethodInvocation(methodInvocationExpression);
+				} else if (ASTNode.SIMPLE_NAME == expression.getNodeType()) {
+					return expression;
+				}
+			}
+		}
+
+		return result;
+	}
+
 	/**
 	 * creates the call to {@link Stream#flatMap(java.util.function.Function)}
 	 * 
