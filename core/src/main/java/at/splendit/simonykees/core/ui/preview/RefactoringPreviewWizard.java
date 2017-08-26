@@ -63,23 +63,26 @@ public class RefactoringPreviewWizard extends Wizard {
 				addPage(new RefactoringPreviewWizardPage(changes, rule));
 			}
 		});
+		addPage(new RefactoringSummaryWizardPage(refactoringPipeline));
 	}
 
 	@Override
 	public IWizardPage getPreviousPage(IWizardPage page) {
 
-		if (!((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
-			/*
-			 * if there are changes in refactoring page, it means that Back
-			 * button was pressed and recalculation is needed
-			 */
-			startRecalculationRunnable((RefactoringPreviewWizardPage) page);
-		} else {
-			/*
-			 * if there are no changes in refactoring page, just populate the
-			 * view with current updated values
-			 */
-			((RefactoringPreviewWizardPage) page).populateViews();
+		if (page instanceof RefactoringPreviewWizardPage) {
+			if (!((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
+				/*
+				 * if there are changes in refactoring page, it means that Back
+				 * button was pressed and recalculation is needed
+				 */
+				startRecalculationRunnable((RefactoringPreviewWizardPage) page);
+			} else {
+				/*
+				 * if there are no changes in refactoring page, just populate
+				 * the view with current updated values
+				 */
+				((RefactoringPreviewWizardPage) page).populateViews();
+			}
 		}
 
 		return super.getPreviousPage(page);
@@ -88,18 +91,20 @@ public class RefactoringPreviewWizard extends Wizard {
 	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
 
-		if (!((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
-			/*
-			 * if there are changes in refactoring page, it means that Next
-			 * button was pressed and recalculation is needed
-			 */
-			startRecalculationRunnable((RefactoringPreviewWizardPage) page);
-		} else {
-			/*
-			 * if there are no changes in refactoring page, just populate the
-			 * view with current updated values
-			 */
-			((RefactoringPreviewWizardPage) page).populateViews();
+		if (page instanceof RefactoringPreviewWizardPage) {
+			if (!((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
+				/*
+				 * if there are changes in refactoring page, it means that Next
+				 * button was pressed and recalculation is needed
+				 */
+				startRecalculationRunnable((RefactoringPreviewWizardPage) page);
+			} else {
+				/*
+				 * if there are no changes in refactoring page, just populate
+				 * the view with current updated values
+				 */
+				((RefactoringPreviewWizardPage) page).populateViews();
+			}
 		}
 
 		return super.getNextPage(page);
@@ -213,8 +218,8 @@ public class RefactoringPreviewWizard extends Wizard {
 		try {
 			getContainer().run(true, true, job);
 		} catch (InvocationTargetException | InterruptedException e) {
-			SimonykeesMessageDialog.openMessageDialog(shell,
-					Messages.RefactoringPreviewWizard_err_runnableWithProgress, MessageDialog.ERROR);
+			SimonykeesMessageDialog.openMessageDialog(shell, Messages.RefactoringPreviewWizard_err_runnableWithProgress,
+					MessageDialog.ERROR);
 			Activator.setRunning(false);
 		}
 
