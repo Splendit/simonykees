@@ -9,7 +9,7 @@ import at.splendit.simonykees.i18n.Messages;
 /**
  * 
  * @author Matthias Webhofer
- * @since 2.0.4
+ * @since 2.1.1
  */
 public class FlatMapInsteadOfNestedLoopsRule extends RefactoringRule<FlatMapInsteadOfNestedLoopsASTVisitor> {
 	public FlatMapInsteadOfNestedLoopsRule(Class<FlatMapInsteadOfNestedLoopsASTVisitor> visitor) {

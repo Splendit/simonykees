@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * 
  * @author Matthias Webhofer
- * @since 2.0.4
+ * @since 2.1.1
  */
 @SuppressWarnings("nls")
 public class FlatMapInsteadOfNestedLoopsRule {

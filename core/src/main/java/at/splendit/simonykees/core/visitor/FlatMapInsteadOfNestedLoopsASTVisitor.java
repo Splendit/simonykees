@@ -36,7 +36,7 @@ import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
  * is not relevant.
  * 
  * @author Matthias Webhofer
- * @since 2.0.4
+ * @since 2.1.1
  */
 public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEachASTVisitor {
 
