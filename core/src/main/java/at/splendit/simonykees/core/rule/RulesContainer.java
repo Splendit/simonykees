@@ -17,6 +17,7 @@ import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
+import at.splendit.simonykees.core.rule.impl.IndexOfToContainsRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
 import at.splendit.simonykees.core.rule.impl.LambdaForEachCollectRule;
 import at.splendit.simonykees.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
@@ -37,11 +38,13 @@ import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
 import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
 import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
+import at.splendit.simonykees.core.rule.impl.UseIsEmptyRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 import at.splendit.simonykees.core.visitor.DiamondOperatorASTVisitor;
+import at.splendit.simonykees.core.visitor.IndexOfToContainsASTVisitor;
 import at.splendit.simonykees.core.visitor.FlatMapInsteadOfNestedLoopsASTVisitor;
 import at.splendit.simonykees.core.visitor.InefficientConstructorASTVisitor;
 import at.splendit.simonykees.core.visitor.LambdaToMethodReferenceASTVisitor;
@@ -57,6 +60,7 @@ import at.splendit.simonykees.core.visitor.StringConcatToPlusASTVisitor;
 import at.splendit.simonykees.core.visitor.StringFormatLineSeparatorASTVisitor;
 import at.splendit.simonykees.core.visitor.StringLiteralEqualityCheckASTVisitor;
 import at.splendit.simonykees.core.visitor.StringUtilsASTVisitor;
+import at.splendit.simonykees.core.visitor.UseIsEmptyRuleASTVisitor;
 import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamAnyMatchASTVisitor;
 import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamFindFirstASTVisitor;
@@ -95,11 +99,13 @@ public class RulesContainer {
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules() {
 		return Arrays.asList(new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
 				new TryWithResourceRule(TryWithResourceASTVisitor.class),
+				new IndexOfToContainsRule(IndexOfToContainsASTVisitor.class),
 				new StringUtilsRule(StringUtilsASTVisitor.class),
 				new MultiCatchRule(MultiCatchASTVisitor.class),
 				new BracketsToControlRule(BracketsToControlASTVisitor.class),
 				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class),
 				new CollectionRemoveAllRule(CollectionRemoveAllASTVisitor.class),
+				new UseIsEmptyRule(UseIsEmptyRuleASTVisitor.class),
 				new SerialVersionUidRule(SerialVersionUidASTVisitor.class),
 				new StringFormatLineSeparatorRule(StringFormatLineSeparatorASTVisitor.class),
 				new RemoveToStringOnStringRule(RemoveToStringOnStringASTVisitor.class),
@@ -113,6 +119,7 @@ public class RulesContainer {
 				new StringLiteralEqualityCheckRule(StringLiteralEqualityCheckASTVisitor.class),
 				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
 				new MultiVariableDeclarationLineRule(MultiVariableDeclarationLineASTVisitor.class),
+				
 				new WhileToForEachRule(WhileToForEachASTVisitor.class),
 				new ForToForEachRule(ForToForEachASTVisitor.class),
 				new EnhancedForLoopToStreamForEachRule(EnhancedForLoopToStreamForEachASTVisitor.class),

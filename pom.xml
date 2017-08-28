@@ -135,7 +135,6 @@
 		<maven.jxr.version>2.5</maven.jxr.version>
 		<maven.surefire.version>2.20</maven.surefire.version>
 		<maven.pmd.version>3.8</maven.pmd.version>
-		<maven.cobertura.version>2.7</maven.cobertura.version>
 		<maven.findbugs.version>3.0.5</maven.findbugs.version>
 		<maven.changelog.version>2.3</maven.changelog.version>
 		<maven.versions.version>2.4</maven.versions.version>
@@ -148,6 +147,7 @@
 		<maven.release.version>2.5.3</maven.release.version>
 		<maven.resources.version>3.0.2</maven.resources.version>
 		<proguard.plugin.version>2.0.14</proguard.plugin.version>
+		<jacoco.plugin.version>0.7.9</jacoco.plugin.version>
 
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 
@@ -163,6 +163,12 @@
 		<jsparrow.qualifier.noProguard></jsparrow.qualifier.noProguard>
 		<jsparrow.qualifier.production></jsparrow.qualifier.production>
 		<jsparrow.qualifier.tycho>${jsparrow.qualifier.quotes}${jsparrow.qualifier.noProguard}${jsparrow.qualifier.production}${jsparrow.qualifier.quotes}</jsparrow.qualifier.tycho>
+		<sonar.language>java</sonar.language>
+		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
+		<sonar.junit.reportPaths>${project.basedir}/target/surefire-reports</sonar.junit.reportPaths>
+
+		<!-- Workaround for surefire-argline bug. Required to make Jacoco work -->
+		<argLine>${tycho.test.jvmArgs} -Dfile.encoding=UTF-8</argLine>
 	</properties>
 
 	<repositories>
@@ -183,7 +189,7 @@
 		</repository>
 	</repositories>
 
-	<!-- don't manage simoneykees.samples dependencies -->
+	<!-- don't manage simonykees.samples -->
 	<dependencyManagement>
 		<dependencies>
 			<!-- jSparrow -->
@@ -226,11 +232,6 @@
 				<groupId>at.splendit.jSparrow</groupId>
 				<artifactId>jSparrow.sample</artifactId>
 				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.sonarsource.scanner.maven</groupId>
-				<artifactId>sonar-maven-plugin</artifactId>
-				<version>3.2</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -418,7 +419,6 @@
 					<version>${tycho.version}</version>
 					<configuration>
 						<useUIHarness>false</useUIHarness>
-						<argLine>${tycho.test.jvmArgs} -Dfile.encoding=UTF-8</argLine>
 						<!-- kill test JVM if tests take more than 5 minutes (300 seconds) 
 							to finish -->
 						<forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
@@ -543,16 +543,56 @@
 				</repository>
 			</distributionManagement>
 		</profile>
-		
+
+
 		<profile>
-			<id>sonar</id>
+			<id>coverage</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
-			<properties>
-				<sonar.language>java</sonar.language>
-			</properties>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.jacoco</groupId>
+							<artifactId>jacoco-maven-plugin</artifactId>
+							<version>${jacoco.plugin.version}</version>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<configuration>
+							<append>true</append>
+						</configuration>
+						<executions>
+							<execution>
+								<id>agent-for-ut</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>agent-for-it</id>
+								<goals>
+									<goal>prepare-agent-integration</goal>
+								</goals>
+							</execution>
+							<execution>
+								<id>jacoco-site</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>report</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
+
 	</profiles>
 
 	<reporting>

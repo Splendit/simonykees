@@ -147,6 +147,8 @@ public class Messages extends NLS {
 	public static String LoggerRuleWizardPageModel_warn_blankLoggingType;
 	public static String LoggerRuleWizardPageModel_warn_errSeverity;
 	public static String LoggerRuleWizardPageModel_warn_stackTraceSeverity;
+	public static String IndexOfToContainsRule_description;
+	public static String IndexOfToContainsRule_name;
 	public static String InefficientConstructorRule_description;
 	public static String InefficientConstructorRule_name;
 	public static String MultiVariableDeclarationLineRule_name;
@@ -240,6 +242,8 @@ public class Messages extends NLS {
 	public static String StringUtilsRule_name;
 	public static String TryWithResourceRule_description;
 	public static String TryWithResourceRule_name;
+	public static String UseIsEmptyRule_description;
+	public static String UseIsEmptyRule_name;
 	public static String ValidateExecutor_shutting_down_validation_scheduler;
 	public static String ValidateExecutor_validation_scheduler_started;
 	public static String WhileToForEachRule_description;

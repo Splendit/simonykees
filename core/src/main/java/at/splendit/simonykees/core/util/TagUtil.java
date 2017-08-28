@@ -18,6 +18,7 @@ import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
+import at.splendit.simonykees.core.rule.impl.IndexOfToContainsRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
 import at.splendit.simonykees.core.rule.impl.LambdaForEachCollectRule;
 import at.splendit.simonykees.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
@@ -38,6 +39,7 @@ import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
 import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
 import at.splendit.simonykees.core.rule.impl.StringUtilsRule;
 import at.splendit.simonykees.core.rule.impl.TryWithResourceRule;
+import at.splendit.simonykees.core.rule.impl.UseIsEmptyRule;
 import at.splendit.simonykees.core.rule.impl.WhileToForEachRule;
 import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 
@@ -162,6 +164,12 @@ public class TagUtil {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.LOGGING, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS);
 		} else if (FlatMapInsteadOfNestedLoopsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
+			
+		} else if (UseIsEmptyRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_6, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS, Tag.READABILITY);
+		
+		} else if (IndexOfToContainsRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_5, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY);
 		}
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["
