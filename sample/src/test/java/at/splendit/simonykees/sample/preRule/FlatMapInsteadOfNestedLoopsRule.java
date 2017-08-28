@@ -94,5 +94,32 @@ public class FlatMapInsteadOfNestedLoopsRule {
 				System.out.print(element);
 			});
 		});
+
+		matrix.stream().forEach(row -> {
+			matrix.get(row.size()).stream().forEach(element -> {
+				System.out.println(element);
+			});
+		});
+
+		matrix.stream().forEach(row -> {
+			row.stream().filter(element -> !element.isEmpty()).forEach(element -> {
+				System.out.println(row + element);
+			});
+		});
+
+		class TestObject {
+			List<String> testList = Arrays.asList("asdf", "jkl");
+
+			public List<String> getTestList() {
+				return testList;
+			}
+		}
+
+		List<TestObject> matrix4 = Arrays.asList(new TestObject(), new TestObject());
+		matrix4.forEach(t -> {
+			t.getTestList().forEach(element -> {
+				System.out.println(element);
+			});
+		});
 	}
 }
