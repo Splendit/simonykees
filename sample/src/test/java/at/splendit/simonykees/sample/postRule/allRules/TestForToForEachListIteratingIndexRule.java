@@ -517,6 +517,18 @@ public class TestForToForEachListIteratingIndexRule {
 		};
 	}
 
+	private class GenericClassSample<T> {
+		class InnerType {
+
+			public void useInnerCollection(List<InnerType> myInnerCList) {
+				int size = 0;
+				for (GenericClassSample<T>.InnerType innerCObje : myInnerCList) {
+					size++;
+				}
+			}
+		}
+	}
+
 	class Foo {
 		private String foo;
 
