@@ -77,7 +77,7 @@ import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisito
  * {@link RulesContainer} is a HelperClass that holds a static list of all
  * implemented rules.
  * 
- * @author Ludwig Werzowa, Martin Huter, Hannes Schweighofer
+ * @author Ludwig Werzowa, Martin Huter, Hannes Schweighofer, Ardit Ymeri
  * @since 0.9
  */
 public class RulesContainer {
@@ -95,29 +95,40 @@ public class RulesContainer {
 	 *         returned.
 	 */
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules() {
-		return Arrays.asList(new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
+		return Arrays.asList(
+				/*
+				 * Coding conventions
+				 */
 				new TryWithResourceRule(TryWithResourceASTVisitor.class),
-				new IndexOfToContainsRule(IndexOfToContainsASTVisitor.class),
-				new StringUtilsRule(StringUtilsASTVisitor.class),
 				new MultiCatchRule(MultiCatchASTVisitor.class),
-				new BracketsToControlRule(BracketsToControlASTVisitor.class),
 				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class),
 				new CollectionRemoveAllRule(CollectionRemoveAllASTVisitor.class),
-				new UseIsEmptyRule(UseIsEmptyRuleASTVisitor.class),
-				new SerialVersionUidRule(SerialVersionUidASTVisitor.class),
-				new StringFormatLineSeparatorRule(StringFormatLineSeparatorASTVisitor.class),
-				new RemoveToStringOnStringRule(RemoveToStringOnStringASTVisitor.class),
-				new RemoveNewStringConstructorRule(RemoveNewStringConstructorASTVisitor.class),
-				new StringConcatToPlusRule(StringConcatToPlusASTVisitor.class),
-				new PrimitiveBoxedForStringRule(PrimitiveBoxedForStringASTVisitor.class),
-				new InefficientConstructorRule(InefficientConstructorASTVisitor.class),
 				new DiamondOperatorRule(DiamondOperatorASTVisitor.class),
-				new RearrangeClassMembersRule(RearrangeClassMembersASTVisitor.class),
 				new OverrideAnnotationRule(OverrideAnnotationRuleASTVisitor.class),
-				new StringLiteralEqualityCheckRule(StringLiteralEqualityCheckASTVisitor.class),
+				new SerialVersionUidRule(SerialVersionUidASTVisitor.class),
+				new RearrangeClassMembersRule(RearrangeClassMembersASTVisitor.class),
+				new BracketsToControlRule(BracketsToControlASTVisitor.class),
 				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
 				new MultiVariableDeclarationLineRule(MultiVariableDeclarationLineASTVisitor.class),
-				
+
+				/*
+				 * String manipulations and arithmetic expressions
+				 */
+				new RemoveNewStringConstructorRule(RemoveNewStringConstructorASTVisitor.class),
+				new InefficientConstructorRule(InefficientConstructorASTVisitor.class),
+				new PrimitiveBoxedForStringRule(PrimitiveBoxedForStringASTVisitor.class),
+				new StringFormatLineSeparatorRule(StringFormatLineSeparatorASTVisitor.class),
+				new IndexOfToContainsRule(IndexOfToContainsASTVisitor.class),
+				new RemoveToStringOnStringRule(RemoveToStringOnStringASTVisitor.class),
+				new StringUtilsRule(StringUtilsASTVisitor.class),
+				new StringLiteralEqualityCheckRule(StringLiteralEqualityCheckASTVisitor.class),
+				new StringConcatToPlusRule(StringConcatToPlusASTVisitor.class),
+				new UseIsEmptyRule(UseIsEmptyRuleASTVisitor.class),
+				new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
+
+				/*
+				 * Loops and streams
+				 */
 				new WhileToForEachRule(WhileToForEachASTVisitor.class),
 				new ForToForEachRule(ForToForEachASTVisitor.class),
 				new EnhancedForLoopToStreamForEachRule(EnhancedForLoopToStreamForEachASTVisitor.class),
@@ -134,11 +145,11 @@ public class RulesContainer {
 				 * last.
 				 */
 				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
-				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class)
-				);
+				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class));
 	}
 
-	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getRulesForProject(IJavaProject selectedJavaProjekt) {
+	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getRulesForProject(
+			IJavaProject selectedJavaProjekt) {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result = getAllRules();
 		result.stream().forEach(rule -> rule.calculateEnabledForProject(selectedJavaProjekt));
 		return result;
