@@ -33,6 +33,7 @@ import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
 import at.splendit.simonykees.core.rule.impl.StatementLambdaToExpressionRule;
+import at.splendit.simonykees.core.rule.impl.StringBufferToBuilderRule;
 import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
 import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
@@ -83,7 +84,7 @@ public class TagUtil {
 
 		} else if (EnhancedForLoopToStreamAnyMatchRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
-			
+
 		} else if (EnhancedForLoopToStreamFindFirstRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
 
@@ -161,12 +162,15 @@ public class TagUtil {
 
 		} else if (StandardLoggerRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.LOGGING, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS);
-			
+
 		} else if (UseIsEmptyRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_6, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS, Tag.READABILITY);
-		
+
 		} else if (IndexOfToContainsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY);
+
+		} else if (StringBufferToBuilderRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE, Tag.STRING_MANIPULATION);
 		}
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["
