@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.osgi.framework.Bundle;
@@ -20,8 +21,6 @@ import at.splendit.simonykees.core.exception.ReconcileException;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
-import at.splendit.simonykees.core.rule.RulesContainer;
-//import at.splendit.simonykees.i18n.Messages;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -30,7 +29,7 @@ import at.splendit.simonykees.core.rule.RulesContainer;
  *         Matthias Webhofer
  * @since 0.9
  */
-//@SuppressWarnings("restriction")
+// @SuppressWarnings("restriction")
 public class Activator extends Plugin {
 
 	private static final Logger logger = LoggerFactory.getLogger(Activator.class);
@@ -68,15 +67,13 @@ public class Activator extends Plugin {
 				break;
 			}
 		}
-		
+
 		// PREPARE RULES
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 
-		ICompilationUnit compUnits = getUnit();
-		List<ICompilationUnit> compilationUnits = new ArrayList<>();
-		compilationUnits.add((ICompilationUnit) compUnits);
-		refactoringPipeline.createRefactoringStates(compilationUnits);
-		refactoringPipeline.setRules(RulesContainer.getAllRules());
+		TestStandalone test = new TestStandalone();
+		List<ICompilationUnit> compUnits = test.getCompUnits();
+		refactoringPipeline.createRefactoringStates(compUnits);
 
 		NullProgressMonitor monitor = new NullProgressMonitor();
 
@@ -100,7 +97,7 @@ public class Activator extends Plugin {
 			return;
 		}
 
-		System.out.println(compilationUnits.get(0).getSource());
+		System.out.println(compUnits.get(0).getSource());
 	}
 
 	@Override
@@ -109,7 +106,7 @@ public class Activator extends Plugin {
 		running = false;
 
 		// FIXME (see SIM-331) figure out better logging configuration
-//		logger.info(Messages.Activator_stop);
+		// logger.info(Messages.Activator_stop);
 
 		plugin = null;
 		bundleContext = null;
@@ -123,31 +120,6 @@ public class Activator extends Plugin {
 		System.out.println("Stop ACTIVATOR");
 	}
 
-	public ICompilationUnit getUnit() {
-		List<IPackageFragment> packages = new ArrayList<>();
-		List<ICompilationUnit> units = new ArrayList<>();
-		
-		TestStandalone test = new TestStandalone();
-		try {
-			packages = Arrays.asList(test.getTestproject().getPackageFragments());
-
-			for (IPackageFragment mypackage : packages) {
-				if (mypackage.containsJavaResources() && 0 != mypackage.getCompilationUnits().length) {
-					mypackage.open(null);
-
-					units = Arrays.asList(mypackage.getCompilationUnits());
-				}
-			}
-
-		units.get(0).open(null);
-		} catch (JavaModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return units.get(0);
-
-	}
 
 	/**
 	 * Returns the shared instance
@@ -181,4 +153,10 @@ public class Activator extends Plugin {
 	public static BundleContext getBundleContext() {
 		return bundleContext;
 	}
+
+//	public static void main(String[] args) {
+//		List<ICompilationUnit> compUnits = getUnit();
+//
+//		System.out.println(compUnits.get(0));
+//	}
 }

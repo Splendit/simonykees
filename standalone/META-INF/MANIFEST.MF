@@ -14,5 +14,6 @@ Require-Bundle: org.eclipse.equinox.registry,
  jSparrow.logging,
  jSparrow.i18n,
  jSparrow.core,
- org.apache.commons.lang3
+ org.apache.commons.lang3,
+ org.apache.commons.io
 Bundle-Vendor: Splendit IT-Consulting GmbH
