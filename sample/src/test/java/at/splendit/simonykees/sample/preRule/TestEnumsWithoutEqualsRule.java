@@ -12,6 +12,18 @@ public class TestEnumsWithoutEqualsRule {
 		if (RoundingMode.UP.equals(roundingMode)) {
 			return;
 		}
+		if (!roundingMode.equals(RoundingMode.UP)) {
+			return;
+		}
+		if (!RoundingMode.UP.equals(roundingMode)) {
+			return;
+		}
+		if (roundingMode.equals(RoundingMode.UP) && true) {
+			return;
+		}
+		if (RoundingMode.UP.equals(roundingMode) && true) {
+			return;
+		}
 	}
 
 	public void noEnumsShouldNotBeReplaced(String item) {

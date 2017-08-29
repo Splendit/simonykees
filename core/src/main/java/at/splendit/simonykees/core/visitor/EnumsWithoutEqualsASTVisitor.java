@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
@@ -54,6 +55,10 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
 		Expression right = (Expression) astRewrite.createMoveTarget(argument);
 		Expression replacementNode = NodeBuilder.newInfixExpression(methodInvocation.getAST(), InfixExpression.Operator.EQUALS,
 				left, right);
+		if(methodInvocation.getParent().getNodeType() == ASTNode.PREFIX_EXPRESSION){
+			replacementNode = NodeBuilder.newParenthesizedExpression(methodInvocation.getAST(), replacementNode);
+		}
+		
 		astRewrite.replace(methodInvocation, replacementNode, null);
 		return false;
 	}
