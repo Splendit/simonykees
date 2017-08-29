@@ -8,6 +8,8 @@
 // add timestaps to the "Console Output" of Jenkins
 timestamps {
 	node {
+		step([$class: 'StashNotifier']) // Notifies the Stash Instance of an INPROGRESS build
+		
 		try {
 			// variable for maven home
 			def mvnHome = tool 'mvn system'
@@ -153,6 +155,8 @@ timestamps {
 			// Success or failure, always send notifications
 			notifyBuild(currentBuild.result)
 		}
+		
+		step([$class: 'StashNotifier'])         // Notifies the Stash Instance of the build result
 	}
 }
 	
