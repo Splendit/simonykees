@@ -23,9 +23,7 @@ public class EnumsWithoutEqualsRule extends RefactoringRule<EnumsWithoutEqualsAS
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
-		// Enums exist since 1.5, 
+		// Enums exist since 1.5
 		return JavaVersion.JAVA_1_5;
 	}
-
-	
 }

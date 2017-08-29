@@ -8,14 +8,16 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import at.splendit.simonykees.core.rule.impl.EnumsWithoutEqualsRule;
 import at.splendit.simonykees.core.rule.impl.UseIsEmptyRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
+import at.splendit.simonykees.core.visitor.EnumsWithoutEqualsASTVisitor;
 import at.splendit.simonykees.core.visitor.UseIsEmptyRuleASTVisitor;
 
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
 public class EnumsWithoutEqualsRuleTest extends AbstractRulesTest {
-	
+
 	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.enumsWithoutEquals";
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/enumsWithoutEquals";
 
@@ -27,7 +29,7 @@ public class EnumsWithoutEqualsRuleTest extends AbstractRulesTest {
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
-		rulesList.add(new UseIsEmptyRule(UseIsEmptyRuleASTVisitor.class));
+		rulesList.add(new EnumsWithoutEqualsRule(EnumsWithoutEqualsASTVisitor.class));
 	}
 
 	@Parameters(name = "{index}: test file[{0}]")
