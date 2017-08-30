@@ -82,6 +82,8 @@ public class Messages extends NLS {
 	public static String EnhancedForLoopToStreamFindFirstRule_name;
 	public static String EnhancedForLoopToStreamForEachRule_description;
 	public static String EnhancedForLoopToStreamForEachRule_name;
+	public static String EnhancedForLoopToStreamSumRule_description;
+	public static String EnhancedForLoopToStreamSumRule_name;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;
