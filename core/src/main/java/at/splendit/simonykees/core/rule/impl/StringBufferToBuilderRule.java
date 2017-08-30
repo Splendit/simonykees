@@ -4,6 +4,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.StringBufferToBuilderASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * 
@@ -14,8 +15,8 @@ public class StringBufferToBuilderRule extends RefactoringRule<StringBufferToBui
 
 	public StringBufferToBuilderRule(Class<StringBufferToBuilderASTVisitor> visitor) {
 		super(visitor);
-		this.name = "StringBufferToBuilderRule";
-		this.description = "StringBufferToBuilderRule";
+		this.name = Messages.StringBufferToBuilderRule_name;
+		this.description = Messages.StringBufferToBuilderRule_description;
 	}
 
 	@Override
