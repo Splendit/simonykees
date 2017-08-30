@@ -8,6 +8,8 @@
 // add timestaps to the "Console Output" of Jenkins
 timestamps {
 	node {
+		step([$class: 'StashNotifier']) // Notifies the Stash Instance of an INPROGRESS build
+		
 		try {
 			// variable for maven home
 			def mvnHome = tool 'mvn system'
@@ -42,7 +44,7 @@ timestamps {
 			// wrap([$class: 'Xvfb']) {
 				stage('Integration-Tests') {
 					// Run the maven build
-					def mvnCommand = 'clean install -fae -Dsurefire.rerunFailingTestsCount=2 -Pcoverage'
+					def mvnCommand = 'clean install -fae -Dsurefire.rerunFailingTestsCount=2'
 			
 					// def mvnCommand = 'surefire:test -fae -Dsurefire.rerunFailingTestsCount=2'
 					def statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${mvnCommand}")
@@ -153,6 +155,8 @@ timestamps {
 			// Success or failure, always send notifications
 			notifyBuild(currentBuild.result)
 		}
+		
+		step([$class: 'StashNotifier'])         // Notifies the Stash Instance of the build result
 	}
 }
 	

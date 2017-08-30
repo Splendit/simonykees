@@ -46,7 +46,7 @@ public class TestForToForEachListIteratingIndexRule {
 	public String testIeratingThroughListOfLists(String input) {
 		List<List<String>> nestedList = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
-		nestedList.forEach((val) -> val.forEach(sb::append));
+		nestedList.stream().flatMap(List::stream).forEach(sb::append);
 		return "";
 	}
 
