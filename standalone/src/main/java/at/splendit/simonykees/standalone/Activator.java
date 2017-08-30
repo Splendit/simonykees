@@ -21,6 +21,9 @@ import at.splendit.simonykees.core.exception.ReconcileException;
 import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.RuleException;
 import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
+import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.rule.RulesContainer;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -69,16 +72,28 @@ public class Activator extends Plugin {
 		}
 
 		// PREPARE RULES
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
+		
+		//CREATE REFACTORING PIPELINE AND SET RULES
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
+		refactoringPipeline.setRules(rules);
 
 		TestStandalone test = new TestStandalone();
+		
+		logger.debug("Getting compilation units");
+		System.out.println("Getting compilation units");
 		List<ICompilationUnit> compUnits = test.getCompUnits();
+
+		logger.debug("Creating refactoring states");
+		System.out.println("Creating refactoring states");
 		refactoringPipeline.createRefactoringStates(compUnits);
 
 		NullProgressMonitor monitor = new NullProgressMonitor();
 
 		try {
-			refactoringPipeline.doRefactoring(monitor);
+			logger.debug("Starting refactoring proccess");
+			System.out.println("Starting refactoring proccess");
+			refactoringPipeline.doRefactoring(new NullProgressMonitor());
 		} catch (RefactoringException e) {
 			return;
 		} catch (RuleException e) {
@@ -87,8 +102,9 @@ public class Activator extends Plugin {
 		}
 
 		try {
+			logger.debug("Commiting refactoring changes to compilation units");
+			System.out.println("Commiting refactoring changes to compilation units");
 			refactoringPipeline.commitRefactoring();
-
 		} catch (RefactoringException e) {
 			// TODO exception
 			return;
@@ -97,7 +113,6 @@ public class Activator extends Plugin {
 			return;
 		}
 
-		System.out.println(compUnits.get(0).getSource());
 	}
 
 	@Override

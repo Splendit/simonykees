@@ -9,7 +9,7 @@
         thread="main"
         visible="true">
      <run
-           class="package.Application">
+           class="at.splendit.simonykees.standalone.Activator">
      </run>
   </application>
 </extension>
