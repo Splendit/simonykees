@@ -113,6 +113,14 @@ public class StringBufferToBuilderRule {
 		return stringBufferArg;
 	}
 
+	private void test7() {
+		StringBuffer localStringBuffer1 = new StringBuffer();
+		StringBuffer localStringBuffer2 = new StringBuffer();
+
+		test6(localStringBuffer2);
+		localStringBuffer1.append("asdf");
+	}
+
 	public StringBuffer getStringBuffer1() {
 		return stringBuffer1;
 	}
