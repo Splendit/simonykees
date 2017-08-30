@@ -307,7 +307,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		}
 
 		String identifier = simpleName.getIdentifier();
-		if (identifier.endsWith("s")) { //$NON-NLS-1$
+		if (identifier.length() > 1 && identifier.endsWith("s")) { //$NON-NLS-1$
 			return identifier.substring(0, identifier.length() - 1);
 		} else {
 			return addSingularPrefix(identifier);

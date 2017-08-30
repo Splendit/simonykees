@@ -503,6 +503,13 @@ public class TestForToForEachListIteratingIndexRule {
 		return sb.toString();
 	}
 
+	public String testSName(String input) {
+		List<String> s = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		s.forEach(sb::append);
+		return sb.toString();
+	}
+
 	public static Foo createFoo(String input) {
 		return new TestForToForEachListIteratingIndexRule().new Foo(input);
 	}

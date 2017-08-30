@@ -536,6 +536,15 @@ public class TestForToForEachListIteratingIndexRule {
 		return sb.toString();
 	}
 	
+	public String testSName(String input) {
+		List<String> s = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		for (String aS : s) {
+			sb.append(aS);
+		}
+		return sb.toString();
+	}
+	
 	private class GenericClassSample<T> {
 		class InnerType {
 			
