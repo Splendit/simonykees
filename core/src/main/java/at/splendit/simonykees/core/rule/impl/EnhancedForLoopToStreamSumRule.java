@@ -4,18 +4,20 @@ import org.apache.commons.lang3.JavaVersion;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamSumASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
-/***
+/**
+ * @see EnhancedForLoopToStreamSumASTVisitor
  * 
  * @author Ardit Ymeri
- *
+ * @since 2.1.1
  */
 public class EnhancedForLoopToStreamSumRule extends RefactoringRule<EnhancedForLoopToStreamSumASTVisitor> {
 
 	public EnhancedForLoopToStreamSumRule(Class<EnhancedForLoopToStreamSumASTVisitor> visitor) {
 		super(visitor);
-		this.name = "";
-		this.description = "";
+		this.name = Messages.EnhancedForLoopToStreamSumRule_name;
+		this.description = Messages.EnhancedForLoopToStreamSumRule_description;
 	}
 
 	@Override
