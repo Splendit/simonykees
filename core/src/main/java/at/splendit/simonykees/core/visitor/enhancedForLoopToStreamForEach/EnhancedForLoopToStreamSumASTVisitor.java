@@ -43,11 +43,17 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 	private static final String JAVA_LANG_DOUBLE = java.lang.Double.class.getName();
 	private static final String JAVA_LANG_INTEGER = java.lang.Integer.class.getName();
 	private static final String JAVA_LANG_LONG = java.lang.Long.class.getName();
+	private static final String JAVA_LANG_SHORT = java.lang.Short.class.getName();
+	private static final String JAVA_LANG_FLOAT = java.lang.Float.class.getName();
+	private static final String JAVA_LANG_BYTE = java.lang.Byte.class.getName();
 	private static final String DOUBLE_VALUE = "doubleValue"; //$NON-NLS-1$
 	private static final String INT_VALUE = "intValue"; //$NON-NLS-1$
 	private static final String LONG_VALUE = "longValue"; //$NON-NLS-1$
 	private static final String SUM = "sum"; //$NON-NLS-1$
 	private static final String ZERO_TOKEN = "0"; //$NON-NLS-1$
+	private static final String ZERO_LONG_TOKEN = "0L"; //$NON-NLS-1$
+	private static final String ZERO_DOUBLE_TOKEN = "0D"; //$NON-NLS-1$
+	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
 	@Override
 	public boolean visit(EnhancedForStatement loopNode) {
@@ -67,7 +73,7 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 			return true;
 		}
 
-		MethodInvocation mapToStreamInvocation = findCorrespondingNumberStream(expression).orElse(null);
+		MethodInvocation mapToStreamInvocation = findCorrespondingNumberStream(expression, sumVariableName).orElse(null);
 		if (mapToStreamInvocation == null) {
 			return true;
 		}
@@ -262,22 +268,54 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 	 * @param expression
 	 * @return
 	 */
-	private Optional<MethodInvocation> findCorrespondingNumberStream(Expression expression) {
+	private Optional<MethodInvocation> findCorrespondingNumberStream(Expression expression, SimpleName sumVarName) {
 		ITypeBinding expressionType = expression.resolveTypeBinding();
 		if (expressionType.isParameterizedType()) {
 			ITypeBinding[] typeArguments = expressionType.getTypeArguments();
 			if (typeArguments.length == 1) {
 				ITypeBinding argumentType = typeArguments[0];
+
 				String argumentTypeName = argumentType.getQualifiedName();
 
-				if (JAVA_LANG_DOUBLE.equals(argumentTypeName)) {
-					return Optional
-							.of(createNumberStreamMapInvocation(MAP_TO_DOUBLE, Double.class.getSimpleName(), DOUBLE_VALUE));
-				} else if (JAVA_LANG_INTEGER.equals(argumentTypeName)) {
-					return Optional.of(createNumberStreamMapInvocation(MAP_TO_INT, Integer.class.getSimpleName(), INT_VALUE));
-				} else if (JAVA_LANG_LONG.equals(argumentTypeName)) {
-					return Optional.of(createNumberStreamMapInvocation(MAP_TO_LONG, Long.class.getSimpleName(), LONG_VALUE));
+				String mapMethodname = EMPTY_STRING;
+				String methodRefName = EMPTY_STRING;
+				String boxedType = ClassRelationUtil.findBoxedTypeOfPrimitive(sumVarName.resolveTypeBinding());
+
+				switch (boxedType) {
+				case "Integer": //$NON-NLS-1$
+					mapMethodname = MAP_TO_INT;
+					methodRefName = INT_VALUE;
+					break;
+				case "Double": //$NON-NLS-1$
+					mapMethodname = MAP_TO_DOUBLE;
+					methodRefName = DOUBLE_VALUE;
+					break;
+				case "Long": //$NON-NLS-1$
+					mapMethodname = MAP_TO_LONG;
+					methodRefName = LONG_VALUE;
+					break;
+				default:
+					return Optional.empty();
 				}
+
+				String methodRefExpression = EMPTY_STRING;
+				if (JAVA_LANG_DOUBLE.equals(argumentTypeName)) {
+					methodRefExpression = Double.class.getSimpleName();
+				} else if (JAVA_LANG_INTEGER.equals(argumentTypeName)) {
+					methodRefExpression = Integer.class.getSimpleName();
+				} else if (JAVA_LANG_LONG.equals(argumentTypeName)) {
+					methodRefExpression = Long.class.getSimpleName();
+				} else if (JAVA_LANG_SHORT.equals(argumentTypeName)) {
+					methodRefExpression = Short.class.getSimpleName();
+				} else if (JAVA_LANG_FLOAT.equals(argumentTypeName)) {
+					methodRefExpression = Float.class.getSimpleName();
+				} else if (JAVA_LANG_BYTE.equals(argumentTypeName)) {
+					methodRefExpression = Byte.class.getSimpleName();
+				} else {
+					return Optional.empty();
+				}
+
+				return Optional.of(createNumberStreamMapInvocation(mapMethodname, methodRefExpression, methodRefName));
 			}
 		}
 
@@ -381,8 +419,10 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 				if (initializer != null) {
 					if (ASTNode.NUMBER_LITERAL == initializer.getNodeType()) {
 						NumberLiteral numberLiteral = (NumberLiteral) initializer;
+						
 						String token = numberLiteral.getToken();
-						if (token.equals(ZERO_TOKEN)) {
+						
+						if (isZero(token, fragment.getName())) {
 							this.declarationFragment = fragment;
 						} else {
 							missingZeroInitialization = true;
@@ -396,6 +436,25 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 
 			}
 			return true;
+		}
+
+		private boolean isZero(String token, SimpleName name) {
+			if(ZERO_TOKEN.equals(token) || ZERO_LONG_TOKEN.equals(token) || ZERO_DOUBLE_TOKEN.equals(token)) {
+				return true;
+			}
+			
+			ITypeBinding nameTypeBinding = name.resolveTypeBinding();
+			if(JAVA_LANG_INTEGER.equals(nameTypeBinding.getQualifiedName())) {
+				int intValue = Integer.parseInt(token);
+				return intValue == 0;
+			} else if (JAVA_LANG_DOUBLE.equals(nameTypeBinding.getQualifiedName())) {
+				Double doubleValue = Double.parseDouble(token);
+				return doubleValue == 0;
+			} else if (JAVA_LANG_LONG.equals(nameTypeBinding.getQualifiedName())) {
+				Long doubleValue = Long.parseLong(token);
+				return doubleValue == 0;
+			}
+			return false;
 		}
 
 		@Override

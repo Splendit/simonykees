@@ -3,6 +3,7 @@ package at.splendit.simonykees.sample.postRule.allRules;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class EnhancedForLoopToStreamSumRule {
 
 	public int forToStreamSum(String input) {
@@ -83,6 +84,59 @@ public class EnhancedForLoopToStreamSumRule {
 		return sum;
 	}
 
+	/*
+	 * Boxed sum variable
+	 */
+
+	public double boxedIntegerSum(String input) {
+		List<Integer> numbers = generateIntList(input);
+		Integer sum = 0;
+		for (int n : numbers) {
+			sum += n;
+		}
+		return sum;
+	}
+
+	public long boxedLongSum(String input) {
+		List<Long> numbers = generateLongList(input);
+		Long sum = 0L;
+		for (long n : numbers) {
+			sum += n;
+		}
+		return sum;
+	}
+
+	public double boxedDoubleSum(String input) {
+		List<Double> numbers = generateDoubleList(input);
+		Double sum = 0D;
+		for (double n : numbers) {
+			sum += n;
+		}
+		return sum;
+	}
+
+	public double zeroDotZeroLiteral(String input) {
+		List<Double> numbers = generateDoubleList(input);
+		Double sum = 0.0;
+		for (double n : numbers) {
+			sum += n;
+		}
+		return sum;
+	}
+
+	public double zeroDotZeroZeroLiteral(String input) {
+		List<Double> numbers = generateDoubleList(input);
+		Double sum = 0.00;
+		for (double n : numbers) {
+			sum += n;
+		}
+		return sum;
+	}
+
+	/*
+	 * various types of collections
+	 */
+
 	public double sumListOfDoubles(String input) {
 		List<Double> numbers = generateDoubleList(input);
 		double sum = 0;
@@ -96,6 +150,104 @@ public class EnhancedForLoopToStreamSumRule {
 		List<Long> numbers = generateLongList(input);
 		long sum = 0;
 		for (double n : numbers) {
+			sum += n;
+		}
+		return sum;
+	}
+
+	public int sumListOfShorts(String input) {
+		List<Short> numbers = new ArrayList<>();
+		int sum = 0;
+		for (short s : numbers) {
+			sum += s;
+		}
+		return sum;
+	}
+
+	public double sumListOfFloats(String input) {
+		List<Float> numbers = new ArrayList<>();
+		double sum = 0;
+		for (double s : numbers) {
+			sum += s;
+		}
+		return sum;
+	}
+
+	public double sumListOfBytes(String input) {
+		List<Byte> numbers = new ArrayList<>();
+		double sum = 0;
+		for (double s : numbers) {
+			sum += s;
+		}
+		return sum;
+	}
+
+	/**
+	 * unsupported sum type
+	 */
+	public short unSupportedType(String input) {
+		List<Short> numbers = new ArrayList<>();
+		short sum = 0;
+		for (short s : numbers) {
+			sum += s;
+		}
+		return sum;
+	}
+
+	/*
+	 * Summing values of different types. The sum variable could have different
+	 * type from the elements of the collection. i.e. adding apples to pears...
+	 */
+
+	public int incompatibleTypes(String input) {
+		List<Double> numbers = generateDoubleList(input);
+		int sum = 0;
+		for (double n : numbers) {
+			sum += n;
+		}
+		return sum;
+	}
+
+	public int incompatibleTypes2(String input) {
+		List<Integer> numbers = generateIntList(input);
+		int sum = 0;
+		for (double n : numbers) {
+			sum += n;
+		}
+		return sum;
+	}
+
+	public double incompatibleTypes3(String input) {
+		List<Integer> numbers = generateIntList(input);
+		double sum = 0;
+		for (int n : numbers) {
+			sum += n;
+		}
+		return sum;
+	}
+
+	public double incompatibleTypes4(String input) {
+		List<Long> numbers = generateLongList(input);
+		double sum = 0;
+		for (long n : numbers) {
+			sum += n;
+		}
+		return sum;
+	}
+
+	public long incompatibleTypes5(String input) {
+		List<Double> numbers = generateDoubleList(input);
+		long sum = 0;
+		for (double n : numbers) {
+			sum += n;
+		}
+		return sum;
+	}
+
+	public long incompatibleTypes6(String input) {
+		List<Integer> numbers = generateIntList(input);
+		long sum = 0;
+		for (int n : numbers) {
 			sum += n;
 		}
 		return sum;
