@@ -1,8 +1,8 @@
 #!/bin/sh
-#author: Matthias Webhofer
+#author: Matthias Webhofer, Hans-Jörg Schrödl
 
 exitPrintUsage() {
-	echo "Usage: $0 <buildNumber> <buildDirectory> <mappingFilesDirectory>"
+	echo "Usage: $0 <originDirectory> <destinationRoot> <buildNumber>"
 	exit 1
 }
 
@@ -26,35 +26,41 @@ if [ "$#" -ne "3" ]; then
 	exitPrintUsage
 fi
 
-build_directory=$2
+origin_dir=$1
 
 # remove last '/' of the path, if there is any
-build_number_dir=${3%/}
+destination_root_dir=${2%/}
+build_nr_dir=$3
 
 # check if the directory, in which all build numbers are stored
-# (as directories themselves), exists. exit on failure
-if [ -d "$build_number_dir" ] && [ -d "$build_directory" ]; then
+# (as directories themselves), exists. exit on failure 
+if [ -d "$origin_dir" ]; then
 	
-	mapping_files_dir="${build_number_dir}/$1/"
-	
-	# create the mapping files directory, if it doesn't exist yet
-	if [ ! -d "$mapping_files_dir" ]; then
-		mkdir "$mapping_files_dir"
+
+	# create a temporary directory, if it doesn't exist yet
+	if [ ! -d "$build_nr_dir" ]; then
+		mkdir "$build_nr_dir"
 		if [ $? -gt 0 ]; then
 			exitDirectoryCreationError
 		fi
 	fi
 
+	# first: copy all files to temp directory
 	# find: find all files ending with *.out recursively from the given directory
 	# xargs: takes the stdout of find and applies cp to each entry of the list
 	# {} is the placeholder for the list items
-	find "$build_directory" -name "*.out" | xargs -i cp {} "$mapping_files_dir"
+	find "$origin_dir" -name "*.out" | xargs -i cp {} "$build_nr_dir"
+	
+	# then: copy all files from temp to remote
+	scp -r -i ~/.ssh/slave_rsa "$build_nr_dir" "jenkins.splendit.loc:$destination_root_dir"
 
 	if [ $? -gt 0 ]; then
 		exitCopyError
 	fi
+	
+	rm -rf "$mapping_files_dest_dir"
 
-	echo "mapping files copied successfully from \"$build_directory\" to \"$mapping_files_dir\""
+	echo "mapping files copied successfully from \"$origin_dir\" to remote \"$destination_root_dir\""
 else
 	exitDirectoryNotExisting
 fi
