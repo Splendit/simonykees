@@ -12,10 +12,10 @@ public class TestEnumsWithoutEqualsRule {
 		if (RoundingMode.UP == roundingMode) {
 			return;
 		}
-		if (!(roundingMode == RoundingMode.UP)) {
+		if (roundingMode != RoundingMode.UP) {
 			return;
 		}
-		if (!(RoundingMode.UP == roundingMode)) {
+		if (RoundingMode.UP != roundingMode) {
 			return;
 		}
 		if (roundingMode == RoundingMode.UP && true) {
