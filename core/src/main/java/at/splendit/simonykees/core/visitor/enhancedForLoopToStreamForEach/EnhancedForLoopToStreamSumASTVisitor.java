@@ -334,7 +334,7 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 	 */
 	private boolean isSumOfOperands(InfixExpression expression, SimpleName sumVariableName, SimpleName parameterName) {
 		InfixExpression.Operator operator = expression.getOperator();
-		if (InfixExpression.Operator.PLUS.equals(operator)) {
+		if (expression.extendedOperands().isEmpty() && InfixExpression.Operator.PLUS.equals(operator)) {
 			Expression lefOperand = expression.getLeftOperand();
 			Expression rightOperand = expression.getRightOperand();
 			if ((matches(lefOperand, sumVariableName) && matches(rightOperand, parameterName))
