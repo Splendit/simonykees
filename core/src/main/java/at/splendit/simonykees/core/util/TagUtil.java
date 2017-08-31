@@ -14,6 +14,7 @@ import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamAnyMatchRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamFindFirstRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamForEachRule;
+import at.splendit.simonykees.core.rule.impl.EnumsWithoutEqualsRule;
 import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
@@ -172,6 +173,8 @@ public class TagUtil {
 
 		} else if (IndexOfToContainsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY);
+		} else if (EnumsWithoutEqualsRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS);
 
 		} else if (ReImplementingInterfaceRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS);

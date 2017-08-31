@@ -6,11 +6,12 @@ import org.eclipse.osgi.util.NLS;
  * TODO SIM-103 add class description
  * 
  * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
- *         Matthias Webhofer
+ *         Matthias Webhofer, Hans-Jörg Schrödl 
  * @since 0.9
  */
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "at.splendit.simonykees.i18n.messages"; //$NON-NLS-1$
+
 	public static String aa_codename;
 	public static String ui_ok;
 	public static String ui_cancel;
@@ -82,6 +83,8 @@ public class Messages extends NLS {
 	public static String EnhancedForLoopToStreamFindFirstRule_name;
 	public static String EnhancedForLoopToStreamForEachRule_description;
 	public static String EnhancedForLoopToStreamForEachRule_name;
+	public static String EnumsWithoutEqualsRule_name;
+	public static String EnumsWithoutEqualsRule_description;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;
@@ -248,6 +251,7 @@ public class Messages extends NLS {
 	public static String ValidateExecutor_validation_scheduler_started;
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
