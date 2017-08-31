@@ -58,7 +58,7 @@ if [ -d "$origin_dir" ]; then
 		exitCopyError
 	fi
 	
-	rm -rf "$mapping_files_dest_dir"
+	rm -rf "$build_nr_dir"
 
 	echo "mapping files copied successfully from \"$origin_dir\" to remote \"$destination_root_dir\""
 else

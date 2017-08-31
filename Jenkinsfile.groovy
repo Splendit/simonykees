@@ -66,6 +66,10 @@ timestamps {
 				}
 			}
 			
+			//Do a fake deploy for testing purposes!
+			def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
+			copyMappingFiles(buildNumber, externalMappingFilesDirectory)
+			
 			// master and develop builds get deployed to packagedrone (see pom.xml) and tagged (see tag-deployment.sh)
 			if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
 				if ( currentBuild.result == 'SUCCESS' ) {
@@ -95,7 +99,6 @@ timestamps {
 					// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
 					// grep returns result with an \n therefore we need to trim
 					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
-					def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
 					stage('Deploy obfuscation') {
 						def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
 						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-test-proguard"
@@ -130,7 +133,7 @@ timestamps {
 					// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
 					// grep returns result with an \n therefore we need to trim
 					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
-					def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
+					buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
 		
 					stage('Deploy obfuscation') {
 						def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
