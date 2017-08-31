@@ -4,6 +4,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.ReImplementingInterfaceASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * 
@@ -14,8 +15,8 @@ public class ReImplementingInterfaceRule extends RefactoringRule<ReImplementingI
 
 	public ReImplementingInterfaceRule(Class<ReImplementingInterfaceASTVisitor> visitor) {
 		super(visitor);
-		this.name = "ReImplementingInterfaceRule";
-		this.description = "ReImplementingInterfaceRule";
+		this.name = Messages.ReImplementingInterfaceRule_name;
+		this.description = Messages.ReImplementingInterfaceRule_description;
 	}
 
 	@Override
