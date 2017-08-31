@@ -1,6 +1,6 @@
 package at.splendit.simonykees.logging;
 
-import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -9,7 +9,7 @@ import org.osgi.framework.BundleContext;
  * @author Matthias Webhofer
  * @since 1.2
  */
-public class Activator extends AbstractUIPlugin {
+public class Activator extends Plugin {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "jSparrow.logging"; //$NON-NLS-1$
