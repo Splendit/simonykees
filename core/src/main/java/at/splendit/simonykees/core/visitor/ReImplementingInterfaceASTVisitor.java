@@ -13,6 +13,12 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
+ * This rule visits all super classes of the current {@link TypeDeclaration} and
+ * checks if one of them already implements an interface, which is also
+ * implemented by the current {@link TypeDeclaration}. If duplicates are found,
+ * they are removed, so that only the super class implements the interface. The
+ * current {@link TypeDeclaration} inherits the interfaces anyway. Overridden
+ * methods don't change at all
  * 
  * @author Matthias Webhofer
  * @since 2.1.1
@@ -47,6 +53,19 @@ public class ReImplementingInterfaceASTVisitor extends AbstractASTRewriteASTVisi
 		return false;
 	}
 
+	/**
+	 * this method visits all super classes, checks their interfaces and finds
+	 * duplicates
+	 * 
+	 * @param superclass
+	 *            {@link ITypeBinding} from the super class, where the search
+	 *            should start
+	 * @param interfaces
+	 *            a list of interfaces (of type {@link Type}) which the current
+	 *            class implements
+	 * @return a list of type {@link Type} with all the duplicate interface
+	 *         implementations.
+	 */
 	private List<Type> getDuplicateInterfaces(ITypeBinding superclass, List<Type> interfaces) {
 		if (superclass != null && interfaces != null && !interfaces.isEmpty()) {
 
