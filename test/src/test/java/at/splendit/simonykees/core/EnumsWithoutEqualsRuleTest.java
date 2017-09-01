@@ -9,10 +9,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.rule.impl.EnumsWithoutEqualsRule;
-import at.splendit.simonykees.core.rule.impl.UseIsEmptyRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.EnumsWithoutEqualsASTVisitor;
-import at.splendit.simonykees.core.visitor.UseIsEmptyRuleASTVisitor;
 
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
