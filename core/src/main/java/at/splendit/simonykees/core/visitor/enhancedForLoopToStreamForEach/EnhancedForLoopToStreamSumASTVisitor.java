@@ -153,26 +153,6 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 	}
 
 	/**
-	 * Removes the given declaration fragment. If it is the only fragment of the
-	 * declaration, then it removes the whole declaration statement.
-	 * 
-	 * @param declStatement
-	 *            the statement containing the declaration fragment.
-	 * @param fragment
-	 *            the declaration fragment to be removed
-	 */
-	private void removeOldSumDeclaration(VariableDeclarationStatement declStatement,
-			VariableDeclarationFragment fragment) {
-		List<VariableDeclarationFragment> fragmetns = ASTNodeUtil.convertToTypedList(declStatement.fragments(),
-				VariableDeclarationFragment.class);
-		if (fragmetns.size() == 1) {
-			astRewrite.remove(declStatement, null);
-		} else {
-			astRewrite.remove(fragment, null);
-		}
-	}
-
-	/**
 	 * Creates a variable declaration statement having only one fragment
 	 * declaring the same variable as the one declared in the given fragment,
 	 * but using the given method invocation as an initializer.

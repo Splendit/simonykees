@@ -1,7 +1,9 @@
 package at.splendit.simonykees.core.visitor;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.JavaVersion;
@@ -17,9 +19,12 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -47,10 +52,22 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 	private static final String APPEND = "append"; //$NON-NLS-1$
 	private static final String STRING_BUILDER_CORE_IDENTIFIER = "Sb"; //$NON-NLS-1$
 	
+	private List<String> generatedIdsPerMethod = new ArrayList<>();
+	
 	private JavaVersion javaVersion;
 	
 	public StringBuildingLoopASTVisitor(JavaVersion javaVersion) {
 		this.javaVersion = javaVersion;
+	}
+	
+	@Override
+	public void endVisit(MethodDeclaration methodDeclaration) {
+		generatedIdsPerMethod.clear();
+	}
+	
+	@Override
+	public void endVisit(Initializer initializer) {
+		generatedIdsPerMethod.clear();
 	}
 
 	@Override
@@ -93,8 +110,12 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 			
 			collect.setExpression(streamExpression);
 			ASTNode newStatement;
-			if(isReassignable(resultVariable, loopNode)) {
+			Optional<VariableDeclarationFragment> optFragment = isReassignable(resultVariable, loopNode);
+			if(optFragment.isPresent()) {
 				newStatement = assignCollectToResult(collect, resultVariable);
+				VariableDeclarationFragment fragment = optFragment.get();
+				VariableDeclarationStatement oldDeclStatement = (VariableDeclarationStatement)fragment.getParent();
+				removeOldSumDeclaration(oldDeclStatement, fragment);
 			} else {
 				newStatement = concatCollectToResult(collect, resultVariable);
 			}
@@ -110,8 +131,13 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 			blockRewrite.insertBefore(sbDeclaration, loopNode, null);
 			replaceByStringBuilderAppend(singleBodyStatement, loopParameter.getName(), stringBuilderId);
 			Statement expressionStatement;
-			if(isReassignable(resultVariable, loopNode)) {
+			Optional<VariableDeclarationFragment> optFragment = isReassignable(resultVariable, loopNode);
+			if(optFragment.isPresent()) {
+				VariableDeclarationFragment fragment = optFragment.get();
 				expressionStatement = assignStringBuilderToResult(stringBuilderId, resultVariable);
+				VariableDeclarationStatement oldDeclStatement = (VariableDeclarationStatement)fragment.getParent();
+				removeOldSumDeclaration(oldDeclStatement, fragment);
+				
 			} else {
 				expressionStatement = concatStringBuilderToResult(stringBuilderId, resultVariable);
 			}
@@ -123,34 +149,45 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		return true;
 	}
 
-	private ExpressionStatement assignStringBuilderToResult(String stringBuilderId, SimpleName resultVariable) {
+	private VariableDeclarationStatement assignStringBuilderToResult(String stringBuilderId, SimpleName resultVariable) {
 		AST ast = astRewrite.getAST();
-		Assignment assignment = ast.newAssignment();
-		assignment.setOperator(Assignment.Operator.ASSIGN);
-		assignment.setLeftHandSide((SimpleName)astRewrite.createCopyTarget(resultVariable));
 		
 		MethodInvocation sbToString = ast.newMethodInvocation();
 		sbToString.setName(ast.newSimpleName(TO_STRING));
 		sbToString.setExpression(ast.newSimpleName(stringBuilderId));
-		assignment.setRightHandSide(sbToString);
 		
-		return ast.newExpressionStatement(assignment);
+		VariableDeclarationFragment newDeclFragment = ast.newVariableDeclarationFragment();
+		newDeclFragment.setName((SimpleName)astRewrite.createCopyTarget(resultVariable));
+		newDeclFragment.setInitializer(sbToString);
+		
+		VariableDeclarationStatement newDecl = ast.newVariableDeclarationStatement(newDeclFragment);
+		ITypeBinding resultType = resultVariable.resolveTypeBinding();
+		SimpleType type = ast.newSimpleType(ast.newSimpleName(resultType.getName()));
+		newDecl.setType(type);
+		
+		return newDecl;
 	}
 
-	private ExpressionStatement assignCollectToResult(MethodInvocation collect2, SimpleName resultVariable) {
+	private VariableDeclarationStatement assignCollectToResult(MethodInvocation collect2, SimpleName resultVariable) {
 		AST ast = astRewrite.getAST();
-		Assignment assignment = ast.newAssignment();
-		assignment.setOperator(Assignment.Operator.ASSIGN);
-		assignment.setLeftHandSide((SimpleName)astRewrite.createCopyTarget(resultVariable));
-		assignment.setRightHandSide(collect2);
-		return ast.newExpressionStatement(assignment);
+
+		VariableDeclarationFragment newDeclFragment = ast.newVariableDeclarationFragment();
+		newDeclFragment.setName((SimpleName)astRewrite.createCopyTarget(resultVariable));
+		newDeclFragment.setInitializer(collect2);
+		
+		VariableDeclarationStatement newDecl = ast.newVariableDeclarationStatement(newDeclFragment);
+		ITypeBinding resultType = resultVariable.resolveTypeBinding();
+		SimpleType type = ast.newSimpleType(ast.newSimpleName(resultType.getName()));
+		newDecl.setType(type);
+		
+		return newDecl;
 	}
 
-	private boolean isReassignable(SimpleName resultVariable, EnhancedForStatement loopNode) {
+	private Optional<VariableDeclarationFragment> isReassignable(SimpleName resultVariable, EnhancedForStatement loopNode) {
 		Block block = ASTNodeUtil.getSpecificAncestor(loopNode, Block.class);
 		ReassignableResultVisitor analyzer = new ReassignableResultVisitor(block, loopNode, resultVariable);
 		block.accept(analyzer);
-		return analyzer.isReassignable();
+		return Optional.ofNullable(analyzer.getDeclarationFragment());
 	}
 
 	private String generateStringBuilderIdentifier(EnhancedForStatement loopNode, String prefix) {
@@ -163,10 +200,12 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		String defaultIdentifier = prefix + STRING_BUILDER_CORE_IDENTIFIER;
 		String sbIdentifier = defaultIdentifier;
 
-		while (declaredIds.contains(sbIdentifier)) {
+		while (declaredIds.contains(sbIdentifier) || generatedIdsPerMethod.contains(sbIdentifier)) {
 			count++;
 			sbIdentifier = defaultIdentifier + count;
 		}
+		
+		generatedIdsPerMethod.add(sbIdentifier);
 
 		return sbIdentifier;
 	}
@@ -281,10 +320,10 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		private EnhancedForStatement loop;
 		private SimpleName resultName;
 		
+		private boolean beforeDeclaration = true;
 		private boolean beforeLoop = true;
-		private boolean initToEmpty = false;
 		private boolean keepSearching = true;
-		private boolean isReferenced = false;
+		private VariableDeclarationFragment fragment;
 		
 		public ReassignableResultVisitor(Block block, EnhancedForStatement loop, SimpleName resultName) {
 			this.block = block;
@@ -309,7 +348,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 					 * a reference of the variable is found
 					 */
 					keepSearching = false;
-					isReferenced = true;
+					fragment = null;
 				}
 			}
 			return true;
@@ -323,7 +362,8 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 				if(ASTNode.STRING_LITERAL == initializer.getNodeType()) {
 					StringLiteral stringLiteral = (StringLiteral)initializer;
 					if(stringLiteral.getLiteralValue().isEmpty()) {
-						initToEmpty = true;
+						this.fragment = fragment;
+						beforeDeclaration = false;
 					} else {
 						keepSearching = false;
 					}
@@ -343,11 +383,11 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		
 		@Override
 		public boolean visit(Block block) {
-			return this.block == block;
+			return this.block == block || !beforeDeclaration;
 		}
 		
-		public boolean isReassignable() {
-			return initToEmpty && !isReferenced;
+		public VariableDeclarationFragment getDeclarationFragment() {
+			return this.fragment;
 		}
 	}
 }

@@ -3,17 +3,267 @@ package at.splendit.simonykees.sample.postRule.stringBuildingLoopJ5;
 import java.util.Arrays;
 import java.util.List;
 
-@SuppressWarnings("nls")
+@SuppressWarnings({"nls", "unused"})
 public class StringBuildingLoopRule {
+	
+	String result = "";
 	
 	public String collectionOfStrings(String input) {
 		List<String> collectionOfStrings = generateStringList(input);
-		String result = "";
 		StringBuilder resultSb = new StringBuilder();
 		for(String val : collectionOfStrings) {
 			resultSb.append(val);
 		}
-		result = resultSb.toString();
+		String result = resultSb.toString();
+		return result;
+	}
+	
+	public String missingCurlyBrackets(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		StringBuilder resultSb = new StringBuilder();
+		for(String val : collectionOfStrings)
+			resultSb.append(val);
+		String result = resultSb.toString();
+		
+		return result;
+	}
+	
+	public String statementsBetweenDecAndLoop(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		String anotherDecl = "";
+		if(collectionOfStrings.isEmpty()) {
+			collectionOfStrings.add(anotherDecl);
+		}
+		StringBuilder resultSb = new StringBuilder();
+		for(String val : collectionOfStrings) {
+			resultSb.append(val);
+		}
+		String result = resultSb.toString();
+		return result;
+	}
+	
+	public String multipleFragments(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		String anotherDecl = "";
+		if(collectionOfStrings.isEmpty()) {
+			collectionOfStrings.add(anotherDecl);
+		}
+		StringBuilder resultSb = new StringBuilder();
+		for(String val : collectionOfStrings) {
+			resultSb.append(val);
+		}
+		String result = resultSb.toString();
+		return result;
+	}
+	
+	public String modifiedResultVariable(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		String result = "", anotherDecl = "";
+		if(collectionOfStrings.isEmpty()) {
+			collectionOfStrings.add(anotherDecl);
+			result = "-";
+		}
+		StringBuilder resultSb = new StringBuilder();
+		for(String val : collectionOfStrings) {
+			resultSb.append(val);
+		}
+		result += resultSb.toString();
+		return result;
+	}
+	
+	public String nonemptyInitialization(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		String result = "-";
+		StringBuilder resultSb = new StringBuilder();
+		for(String val : collectionOfStrings) {
+			resultSb.append(val);
+		}
+		result += resultSb.toString();
+		return result;
+	}
+	
+	public String parentBlockDeclaration(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		/*
+		 * The result variable is not declared in the same block
+		 * with the loop. 
+		 */
+		String result = "", anotherDecl = "";
+		if(collectionOfStrings.isEmpty()) {
+			collectionOfStrings.add(anotherDecl);
+
+			StringBuilder resultSb = new StringBuilder();
+			for(String val : collectionOfStrings) {
+				resultSb.append(val);
+			}
+			result += resultSb.toString();
+		}
+		return result;
+	}
+	
+	public String irrelevantDelaration(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		/*
+		 * Another result variable is declared in a nested block
+		 * which is not visible in the scope of the loop. 
+		 */
+		
+		if(collectionOfStrings.isEmpty()) {
+			String result = "-";
+			collectionOfStrings.add(result);
+		}
+		StringBuilder resultSb = new StringBuilder();
+		for(String val : collectionOfStrings) {
+			resultSb.append(val);
+		}
+		String result = resultSb.toString();
+
+		return result;
+	}
+	
+	public String collectingToAField(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		/*
+		 * The result variable is not declared in the same block
+		 * with the loop. 
+		 */
+		String anotherDecl = "";
+
+		collectionOfStrings.add(anotherDecl);
+
+		StringBuilder resultSb = new StringBuilder();
+		for(String val : collectionOfStrings) {
+			resultSb.append(val);
+		}
+		result += resultSb.toString();
+
+		return result;
+	}
+	
+	public String plusEqualsOperator(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		StringBuilder resultSb = new StringBuilder();
+		for(String val : collectionOfStrings) {
+			resultSb.append(val);
+		}
+		String result = resultSb.toString();
+
+		return result;
+	}
+	
+	public String collectingArrayOfStrings(String input) {
+		String[] arrayOfStrings = generateArray(input);
+		StringBuilder resultSb = new StringBuilder();
+		for(String val : arrayOfStrings) {
+			resultSb.append(val);
+		}
+		String result = resultSb.toString();
+		return result;
+	}
+	
+	/*
+	 * Testing the generated string builder name
+	 */
+	
+	public String newStringBuilderName(String input) {
+		String[] arrayOfStrings = generateArray(input);
+		String resultSb = "";
+		String resultSb1 = "";
+		StringBuilder resultSb2 = new StringBuilder();
+		for(String val : arrayOfStrings) {
+			resultSb2.append(val);
+		}
+		String result = resultSb2.toString();
+		return result;
+	}
+	
+	public String newStringBuilderName2(String input) {
+		String[] arrayOfStrings = generateArray(input);
+		String resultSb = "";
+		if(resultSb.isEmpty()) {			
+			String resultSb1 = "";
+		}
+		StringBuilder resultSb2 = new StringBuilder();
+		for(String val : arrayOfStrings) {
+			resultSb2.append(val);
+		}
+		String result = resultSb2.toString();
+		return result;
+	}
+	
+	public String cascadedLoops(String input) {
+		String[] arrayOfStrings = generateArray(input);
+		List<String> listOfStrings = generateStringList(input);
+		String resultSb = "";
+		String resultSb1 = "";
+		StringBuilder resultSb2 = new StringBuilder();
+		for(String val : arrayOfStrings) {
+			resultSb2.append(val);
+		}
+		String result = resultSb2.toString();
+		
+		String anotherResult = "";
+		StringBuilder resultSb3 = new StringBuilder();
+		for(String val : listOfStrings) {
+			resultSb3.append(val);
+		}
+		result += resultSb3.toString();
+		
+		return result + anotherResult;
+	}
+	
+	public String clashWithParameterName(String resultSb) {
+		String[] arrayOfStrings = generateArray(resultSb);
+		List<String> listOfStrings = generateStringList(resultSb);
+		StringBuilder resultSb1 = new StringBuilder();
+		for(String val : arrayOfStrings) {
+			resultSb1.append(val);
+		}
+		String result = resultSb1.toString();
+		
+		return result;
+	}
+	
+	/*
+	 * The following are negative test cases
+	 */
+	
+	public String multipleStatementsInBody(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		String result = "";
+		for(String val : collectionOfStrings) {
+			result = result + val;
+			if(val.isEmpty()) {
+				result += "-";
+			}
+		}
+		return result;
+	}
+	
+	public String ignoringLoopVariable(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		String result = "", anotherVal = "-";
+		for(String val : collectionOfStrings) {
+			result = result + anotherVal;
+		}
+		return result;
+	}
+	
+	public String ignoringTheCollectedResult(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		String result = "", anotherVal = "-";
+		for(String val : collectionOfStrings) {
+			result = anotherVal + val;
+		}
+		return result;
+	}
+	
+	public String ignoringTheCollectedResult2(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		String result = "", anotherVal = "-";
+		for(String val : collectionOfStrings) {
+			anotherVal = result + val;
+		}
 		return result;
 	}
 	
@@ -27,6 +277,10 @@ public class StringBuildingLoopRule {
 	}
 
 	private List<String> generateStringList(String input) {
-		return Arrays.asList(input.split(","));
+		return Arrays.asList(generateArray(input));
+	}
+	
+	private String[] generateArray(String input) {
+		return input.split(",");
 	}
 }

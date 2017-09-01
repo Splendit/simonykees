@@ -447,4 +447,24 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		}
 		return false;
 	}
+	
+	/**
+	 * Removes the given declaration fragment. If it is the only fragment of the
+	 * declaration, then it removes the whole declaration statement.
+	 * 
+	 * @param declStatement
+	 *            the statement containing the declaration fragment.
+	 * @param fragment
+	 *            the declaration fragment to be removed
+	 */
+	protected void removeOldSumDeclaration(VariableDeclarationStatement declStatement,
+			VariableDeclarationFragment fragment) {
+		List<VariableDeclarationFragment> fragmetns = ASTNodeUtil.convertToTypedList(declStatement.fragments(),
+				VariableDeclarationFragment.class);
+		if (fragmetns.size() == 1) {
+			astRewrite.remove(declStatement, null);
+		} else {
+			astRewrite.remove(fragment, null);
+		}
+	}
 }
