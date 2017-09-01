@@ -13,6 +13,7 @@ import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamAnyMatchRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamFindFirstRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamForEachRule;
+import at.splendit.simonykees.core.rule.impl.EnumsWithoutEqualsRule;
 import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
@@ -44,6 +45,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.BracketsToControlASTVisitor;
 import at.splendit.simonykees.core.visitor.CollectionRemoveAllASTVisitor;
 import at.splendit.simonykees.core.visitor.DiamondOperatorASTVisitor;
+import at.splendit.simonykees.core.visitor.EnumsWithoutEqualsASTVisitor;
 import at.splendit.simonykees.core.visitor.IndexOfToContainsASTVisitor;
 import at.splendit.simonykees.core.visitor.FlatMapInsteadOfNestedLoopsASTVisitor;
 import at.splendit.simonykees.core.visitor.InefficientConstructorASTVisitor;
@@ -79,7 +81,8 @@ import at.splendit.simonykees.core.visitor.tryStatement.TryWithResourceASTVisito
  * {@link RulesContainer} is a HelperClass that holds a static list of all
  * implemented rules.
  * 
- * @author Ludwig Werzowa, Martin Huter, Hannes Schweighofer, Ardit Ymeri
+ * @author Ludwig Werzowa, Martin Huter, Hannes Schweighofer, Ardit Ymeri,
+ *         Hans-Jörg Schrödl
  * @since 0.9
  */
 public class RulesContainer {
@@ -112,7 +115,7 @@ public class RulesContainer {
 				new BracketsToControlRule(BracketsToControlASTVisitor.class),
 				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
 				new MultiVariableDeclarationLineRule(MultiVariableDeclarationLineASTVisitor.class),
-
+				new EnumsWithoutEqualsRule(EnumsWithoutEqualsASTVisitor.class),
 				/*
 				 * String manipulations and arithmetic expressions
 				 */
