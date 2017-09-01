@@ -63,13 +63,13 @@ public class Activator extends Plugin {
 		System.out.println("Hello World!!");
 
 		// start jSparrow logging bundle
-		for (Bundle bundle : context.getBundles()) {
-			if (bundle.getSymbolicName().equals("jSparrow.logging") //$NON-NLS-1$
-					&& bundle.getState() != Bundle.ACTIVE) {
-				bundle.start();
-				break;
-			}
-		}
+//		for (Bundle bundle : context.getBundles()) {
+//			if (bundle.getSymbolicName().equals("jSparrow.logging") //$NON-NLS-1$
+//					&& bundle.getState() != Bundle.ACTIVE) {
+//				bundle.start();
+//				break;
+//			}
+//		}
 
 		// PREPARE RULES
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
