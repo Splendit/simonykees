@@ -19,6 +19,7 @@ import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
+import at.splendit.simonykees.core.rule.impl.ImmutableStaticFinalCollectionsRule;
 import at.splendit.simonykees.core.rule.impl.IndexOfToContainsRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
 import at.splendit.simonykees.core.rule.impl.LambdaForEachCollectRule;
@@ -172,8 +173,13 @@ public class TagUtil {
 
 		} else if (IndexOfToContainsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY);
+			
 		} else if (EnumsWithoutEqualsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS);
+			
+		} else if (ImmutableStaticFinalCollectionsRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_2, Tag.CODING_CONVENTIONS);
+			
 		}
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["

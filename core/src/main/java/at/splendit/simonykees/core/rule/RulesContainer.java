@@ -18,6 +18,7 @@ import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
+import at.splendit.simonykees.core.rule.impl.ImmutableStaticFinalCollectionsRule;
 import at.splendit.simonykees.core.rule.impl.IndexOfToContainsRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
 import at.splendit.simonykees.core.rule.impl.LambdaForEachCollectRule;
@@ -48,6 +49,7 @@ import at.splendit.simonykees.core.visitor.DiamondOperatorASTVisitor;
 import at.splendit.simonykees.core.visitor.EnumsWithoutEqualsASTVisitor;
 import at.splendit.simonykees.core.visitor.IndexOfToContainsASTVisitor;
 import at.splendit.simonykees.core.visitor.FlatMapInsteadOfNestedLoopsASTVisitor;
+import at.splendit.simonykees.core.visitor.ImmutableStaticFinalCollectionsASTVisitor;
 import at.splendit.simonykees.core.visitor.InefficientConstructorASTVisitor;
 import at.splendit.simonykees.core.visitor.LambdaToMethodReferenceASTVisitor;
 import at.splendit.simonykees.core.visitor.MultiVariableDeclarationLineASTVisitor;
@@ -116,6 +118,7 @@ public class RulesContainer {
 				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
 				new MultiVariableDeclarationLineRule(MultiVariableDeclarationLineASTVisitor.class),
 				new EnumsWithoutEqualsRule(EnumsWithoutEqualsASTVisitor.class),
+				new ImmutableStaticFinalCollectionsRule(ImmutableStaticFinalCollectionsASTVisitor.class),
 				/*
 				 * String manipulations and arithmetic expressions
 				 */
