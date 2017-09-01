@@ -276,4 +276,26 @@ public class EnhancedForLoopToStreamSumRule {
 		
 		return intList;
 	}
+	
+	/*
+	 * Multiple operands
+	 */
+	
+	public int multipleOperands(String input) {
+		List<Integer> numbers = generateIntList(input);
+		int sum = 0;
+		for(int n : numbers) {
+			sum = sum + n + 2;
+		}
+		return sum;
+	}
+	
+	public int multipleOperandsAssignmentExp(String input) {
+		List<Integer> numbers = generateIntList(input);
+		int sum = 0;
+		for(int n : numbers) {
+			sum += n + 2;
+		}
+		return sum;
+	}
 }

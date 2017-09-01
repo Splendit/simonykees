@@ -76,7 +76,6 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 	private static final String ZERO_TOKEN = "0"; //$NON-NLS-1$
 	private static final String ZERO_LONG_TOKEN = "0L"; //$NON-NLS-1$
 	private static final String ZERO_DOUBLE_TOKEN = "0D"; //$NON-NLS-1$
-	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
 	@Override
 	public boolean visit(EnhancedForStatement loopNode) {
@@ -288,8 +287,8 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 
 				String argumentTypeName = argumentType.getQualifiedName();
 
-				String mapMethodname = EMPTY_STRING;
-				String methodRefName = EMPTY_STRING;
+				String mapMethodname;
+				String methodRefName;
 				String boxedType = ClassRelationUtil.findBoxedTypeOfPrimitive(sumVarName.resolveTypeBinding());
 
 				switch (boxedType) {
@@ -309,7 +308,7 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 					return Optional.empty();
 				}
 
-				String methodRefExpression = EMPTY_STRING;
+				String methodRefExpression;
 				if (JAVA_LANG_DOUBLE.equals(argumentTypeName)) {
 					methodRefExpression = Double.class.getSimpleName();
 				} else if (JAVA_LANG_INTEGER.equals(argumentTypeName)) {
@@ -372,12 +371,10 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 	private boolean isCollection(Expression expression) {
 		ITypeBinding expressionBinding = expression.resolveTypeBinding();
 		List<String> expressionBindingList = Collections.singletonList(java.util.Collection.class.getName());
-		if (expressionBinding != null
+
+		return expressionBinding != null
 				&& (ClassRelationUtil.isInheritingContentOfTypes(expressionBinding, expressionBindingList)
-						|| ClassRelationUtil.isContentOfTypes(expressionBinding, expressionBindingList))) {
-			return true;
-		}
-		return false;
+						|| ClassRelationUtil.isContentOfTypes(expressionBinding, expressionBindingList));
 	}
 
 	/**
@@ -482,11 +479,7 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 			if (this.block == block) {
 				return true;
 			}
-			if (beforeLoop) {
-				return false;
-			} else {
-				return true;
-			}
+			return !beforeLoop;
 		}
 
 		@Override
