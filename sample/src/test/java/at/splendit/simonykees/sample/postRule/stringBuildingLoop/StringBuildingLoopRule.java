@@ -10,7 +10,7 @@ public class StringBuildingLoopRule {
 	public String collectionOfStrings(String input) {
 		List<String> collectionOfStrings = generateStringList(input);
 		String result = "";
-		result += collectionOfStrings.stream().collect(Collectors.joining());
+		result = collectionOfStrings.stream().collect(Collectors.joining());
 		return result;
 	}
 	

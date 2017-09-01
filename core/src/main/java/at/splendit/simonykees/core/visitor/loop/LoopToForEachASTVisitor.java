@@ -261,7 +261,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			allowedPreferedName = false;
 			int counter = 0;
 			String suffix = ""; //$NON-NLS-1$
-			ASTNode scope = findScopeOfLoop(loopBody);
+			ASTNode scope = ASTNodeUtil.findScope(loopBody);
 			VariableDeclarationsVisitor loopScopeVisitor = new VariableDeclarationsVisitor();
 			scope.accept(loopScopeVisitor);
 			List<SimpleName> scopeDeclaredNames = loopScopeVisitor.getVariableDeclarationNames();
@@ -348,33 +348,6 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			return true;
 		}
 		return false;
-	}
-
-	/**
-	 * Finds the scope where the statement belongs to. A scope is either the
-	 * body of:
-	 * <ul>
-	 * <li>a method</li>
-	 * <li>an initializer</li>
-	 * <li>a class/interface</li>
-	 * <li>an enumeration</li>
-	 * <li>an annotation declaration</li>
-	 * </ul>
-	 * 
-	 * @param statement
-	 *            a statement to look for the scope where it falls into.
-	 * @return an {@link ASTNode} representing either of the above
-	 */
-	private ASTNode findScopeOfLoop(Statement statement) {
-		ASTNode parent = statement.getParent();
-		while (parent != null && parent.getNodeType() != ASTNode.METHOD_DECLARATION
-				&& parent.getNodeType() != ASTNode.INITIALIZER && parent.getNodeType() != ASTNode.TYPE_DECLARATION
-				&& parent.getNodeType() != ASTNode.ENUM_DECLARATION
-				&& parent.getNodeType() != ASTNode.ANNOTATION_TYPE_DECLARATION) {
-
-			parent = parent.getParent();
-		}
-		return parent;
 	}
 
 	protected void storeTempName(Statement node, String newIteratorIdentifier) {

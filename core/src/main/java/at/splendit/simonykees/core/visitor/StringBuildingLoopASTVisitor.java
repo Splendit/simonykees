@@ -1,26 +1,37 @@
 package at.splendit.simonykees.core.visitor;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.AbstractEnhancedForLoopToStreamASTVisitor;
+import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
  * 
@@ -34,6 +45,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 	private static final String JOINING = "joining"; //$NON-NLS-1$
 	private static final String TO_STRING = "toString"; //$NON-NLS-1$
 	private static final String APPEND = "append"; //$NON-NLS-1$
+	private static final String STRING_BUILDER_CORE_IDENTIFIER = "Sb"; //$NON-NLS-1$
 	
 	private JavaVersion javaVersion;
 	
@@ -80,9 +92,12 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 			}
 			
 			collect.setExpression(streamExpression);
-			ASTNode newStatement = concatCollectToResult(collect, resultVariable);
-			//TODO: write a similar method to assign the collect to result
-			//TODO: distinguish between assign and concat depending on where is the result var declared and used *
+			ASTNode newStatement;
+			if(isReassignable(resultVariable, loopNode)) {
+				newStatement = assignCollectToResult(collect, resultVariable);
+			} else {
+				newStatement = concatCollectToResult(collect, resultVariable);
+			}
 			
 			astRewrite.replace(loopNode, newStatement, null);
 			
@@ -94,9 +109,13 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 			ListRewrite blockRewrite = astRewrite.getListRewrite(parentBlock, Block.STATEMENTS_PROPERTY);
 			blockRewrite.insertBefore(sbDeclaration, loopNode, null);
 			replaceByStringBuilderAppend(singleBodyStatement, loopParameter.getName(), stringBuilderId);
-			ExpressionStatement expressionStatement = assignStringBuilderToResult(stringBuilderId, resultVariable);
-			//TODO: write a similar method to assign the collect to result
-			//TODO: distinguish between assign and concat depending on where is the result var declared and used *
+			Statement expressionStatement;
+			if(isReassignable(resultVariable, loopNode)) {
+				expressionStatement = assignStringBuilderToResult(stringBuilderId, resultVariable);
+			} else {
+				expressionStatement = concatStringBuilderToResult(stringBuilderId, resultVariable);
+			}
+
 			
 			blockRewrite.insertAfter(expressionStatement, loopNode, null);
 		}
@@ -104,11 +123,52 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		return true;
 	}
 
+	private ExpressionStatement assignStringBuilderToResult(String stringBuilderId, SimpleName resultVariable) {
+		AST ast = astRewrite.getAST();
+		Assignment assignment = ast.newAssignment();
+		assignment.setOperator(Assignment.Operator.ASSIGN);
+		assignment.setLeftHandSide((SimpleName)astRewrite.createCopyTarget(resultVariable));
+		
+		MethodInvocation sbToString = ast.newMethodInvocation();
+		sbToString.setName(ast.newSimpleName(TO_STRING));
+		sbToString.setExpression(ast.newSimpleName(stringBuilderId));
+		assignment.setRightHandSide(sbToString);
+		
+		return ast.newExpressionStatement(assignment);
+	}
+
+	private ExpressionStatement assignCollectToResult(MethodInvocation collect2, SimpleName resultVariable) {
+		AST ast = astRewrite.getAST();
+		Assignment assignment = ast.newAssignment();
+		assignment.setOperator(Assignment.Operator.ASSIGN);
+		assignment.setLeftHandSide((SimpleName)astRewrite.createCopyTarget(resultVariable));
+		assignment.setRightHandSide(collect2);
+		return ast.newExpressionStatement(assignment);
+	}
+
+	private boolean isReassignable(SimpleName resultVariable, EnhancedForStatement loopNode) {
+		Block block = ASTNodeUtil.getSpecificAncestor(loopNode, Block.class);
+		ReassignableResultVisitor analyzer = new ReassignableResultVisitor(block, loopNode, resultVariable);
+		block.accept(analyzer);
+		return analyzer.isReassignable();
+	}
+
 	private String generateStringBuilderIdentifier(EnhancedForStatement loopNode, String prefix) {
-		// TODO: find all declared names in the scope (list of parent blocks untill reaching cu)
-		// TODO: check if prefix + sb occurs in the list of declared names
-		// 			add a suffix until it doesn't
-		return prefix + "Sb";
+		ASTNode scope = ASTNodeUtil.findScope(loopNode);
+		VariableDeclarationsVisitor declVisitor = new VariableDeclarationsVisitor();
+		scope.accept(declVisitor);
+		List<String> declaredIds = declVisitor.getVariableDeclarationNames().stream().map(SimpleName::getIdentifier)
+				.collect(Collectors.toList());
+		int count = 0;
+		String defaultIdentifier = prefix + STRING_BUILDER_CORE_IDENTIFIER;
+		String sbIdentifier = defaultIdentifier;
+
+		while (declaredIds.contains(sbIdentifier)) {
+			count++;
+			sbIdentifier = defaultIdentifier + count;
+		}
+
+		return sbIdentifier;
 	}
 
 	private ASTNode concatCollectToResult(MethodInvocation collect, SimpleName resultVariable) {
@@ -156,7 +216,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		return collect;
 	}
 
-	private ExpressionStatement assignStringBuilderToResult(String sbName, SimpleName resultVariable) {
+	private ExpressionStatement concatStringBuilderToResult(String sbName, SimpleName resultVariable) {
 		AST ast = astRewrite.getAST();
 		Assignment assignment = ast.newAssignment();
 		assignment.setOperator(Assignment.Operator.PLUS_ASSIGN);
@@ -191,7 +251,9 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		VariableDeclarationFragment fragment = ast.newVariableDeclarationFragment();
 		fragment.setName(ast.newSimpleName(identifier));
 		fragment.setInitializer(initializer);
-		return ast.newVariableDeclarationStatement(fragment);
+		VariableDeclarationStatement varDeclStatement = ast.newVariableDeclarationStatement(fragment);
+		varDeclStatement.setType(ast.newSimpleType(ast.newSimpleName(StringBuilder.class.getSimpleName())));
+		return varDeclStatement;
 	}
 
 	private boolean isCollectionOfStrings(Expression loopExpression) {
@@ -212,5 +274,80 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 			return ClassRelationUtil.isContentOfTypes(componentType, Collections.singletonList(String.class.getName()));
 		}
 		return false;
+	}
+	
+	private class ReassignableResultVisitor extends ASTVisitor {
+		private Block block;
+		private EnhancedForStatement loop;
+		private SimpleName resultName;
+		
+		private boolean beforeLoop = true;
+		private boolean initToEmpty = false;
+		private boolean keepSearching = true;
+		private boolean isReferenced = false;
+		
+		public ReassignableResultVisitor(Block block, EnhancedForStatement loop, SimpleName resultName) {
+			this.block = block;
+			this.loop = loop;
+			this.resultName = resultName;
+		}
+		
+		@Override
+		public boolean preVisit2(ASTNode node) {
+			return keepSearching;
+		}
+		
+		@Override
+		public boolean visit(SimpleName simpleName) {
+			if (simpleName.getIdentifier().equals(this.resultName.getIdentifier())
+					&& VariableDeclarationFragment.NAME_PROPERTY != simpleName.getLocationInParent()) {
+				IBinding binding = simpleName.resolveBinding();
+				StructuralPropertyDescriptor propertyDescriptor = simpleName.getLocationInParent();
+				if (IBinding.VARIABLE == binding.getKind() && FieldAccess.NAME_PROPERTY != propertyDescriptor
+						&& QualifiedName.NAME_PROPERTY != propertyDescriptor) {
+					/*
+					 * a reference of the variable is found
+					 */
+					keepSearching = false;
+					isReferenced = true;
+				}
+			}
+			return true;
+		}
+		
+		@Override
+		public boolean visit(VariableDeclarationFragment fragment) {
+			SimpleName fragmentName = fragment.getName();
+			if(fragmentName.getIdentifier().equals(resultName.getIdentifier())) {
+				Expression initializer = fragment.getInitializer();
+				if(ASTNode.STRING_LITERAL == initializer.getNodeType()) {
+					StringLiteral stringLiteral = (StringLiteral)initializer;
+					if(stringLiteral.getLiteralValue().isEmpty()) {
+						initToEmpty = true;
+					} else {
+						keepSearching = false;
+					}
+				}
+			}
+			return true;
+		}
+
+		@Override
+		public boolean visit(EnhancedForStatement loop) {
+			if(this.loop == loop) {
+				beforeLoop = false;
+				keepSearching = false;
+			}
+			return beforeLoop;
+		}
+		
+		@Override
+		public boolean visit(Block block) {
+			return this.block == block;
+		}
+		
+		public boolean isReassignable() {
+			return initToEmpty && !isReferenced;
+		}
 	}
 }
