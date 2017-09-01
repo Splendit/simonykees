@@ -4,6 +4,7 @@ import org.apache.commons.lang3.JavaVersion;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.ImmutableStaticFinalCollectionsASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * 
@@ -14,8 +15,8 @@ public class ImmutableStaticFinalCollectionsRule extends RefactoringRule<Immutab
 
 	public ImmutableStaticFinalCollectionsRule(Class<ImmutableStaticFinalCollectionsASTVisitor> visitor) {
 		super(visitor);
-		this.name = "ImmutableStaticFinalCollectionsRule";
-		this.description = "ImmutableStaticFinalCollectionsRule";
+		this.name = Messages.ImmutableStaticFinalCollectionsRule_name;
+		this.description = Messages.ImmutableStaticFinalCollectionsRule_description;
 	}
 
 	@Override
