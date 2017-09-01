@@ -214,6 +214,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 				SimonykeesPreferenceManager
 						.removeProfile(SimonykeesPreferenceManager.getAllProfileIds().get(currentProfileSelection));
 				currentProfileSelection = 0;
+				removeProfileButton.setEnabled(false);
 				updateView();
 			}
 		});
