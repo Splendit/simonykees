@@ -237,6 +237,10 @@ public class Messages extends NLS {
 	public static String StandardLoggerRule_name;
 	public static String StatementLambdaToExpressionRule_description;
 	public static String StatementLambdaToExpressionRule_name;
+	public static String StringBuildingLoopRule_description;
+
+	public static String StringBuildingLoopRule_name;
+
 	public static String StringFormatLineSeparatorRule_description;
 	public static String StringFormatLineSeparatorRule_name;
 	public static String StringConcatToPlusRule_description;

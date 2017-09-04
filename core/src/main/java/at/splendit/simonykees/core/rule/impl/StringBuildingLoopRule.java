@@ -6,8 +6,10 @@ import org.eclipse.jdt.core.JavaCore;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.StringBuildingLoopASTVisitor;
+import at.splendit.simonykees.i18n.Messages;
 
 /**
+ * @see StringBuildingLoopASTVisitor
  * 
  * @author Ardit Ymeri
  * @since 2.1.1
@@ -19,8 +21,8 @@ public class StringBuildingLoopRule extends RefactoringRule<StringBuildingLoopAS
 	
 	public StringBuildingLoopRule(Class<StringBuildingLoopASTVisitor> visitor) {
 		super(visitor);
-		this.name = "StringBuildingLoop";
-		this.description = "Transforms loops used for concatenating a string to a Stream::collect(Collectors.joining())";
+		this.name = Messages.StringBuildingLoopRule_name;
+		this.description = Messages.StringBuildingLoopRule_description;
 	}
 	
 	/**
