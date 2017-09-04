@@ -164,6 +164,10 @@ public class Messages extends NLS {
 	public static String OverrideAnnotationRule_name;
 	public static String PrimitiveBoxedForStringRule_description;
 	public static String PrimitiveBoxedForStringRule_name;
+	public static String PrimitiveObjectUseEqualsRule_description;
+
+	public static String PrimitiveObjectUseEqualsRule_name;
+
 	public static String Profile_DefaultProfile_profileName;
 	public static String Profile_Java8Profile_profileName;
 	public static String ProgressMonitor_SelectRulesWizard_performFinish_jobName;

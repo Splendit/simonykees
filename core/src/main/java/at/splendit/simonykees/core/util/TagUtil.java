@@ -1,7 +1,10 @@
 package at.splendit.simonykees.core.util;
 
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
@@ -30,6 +33,7 @@ import at.splendit.simonykees.core.rule.impl.MultiVariableDeclarationLineRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
 import at.splendit.simonykees.core.rule.impl.OverrideAnnotationRule;
 import at.splendit.simonykees.core.rule.impl.PrimitiveBoxedForStringRule;
+import at.splendit.simonykees.core.rule.impl.PrimitiveObjectUseEqualsRule;
 import at.splendit.simonykees.core.rule.impl.RearrangeClassMembersRule;
 import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
@@ -64,7 +68,6 @@ public class TagUtil {
 	 */
 	@SuppressWarnings({ "rawtypes", "nls" })
 	public static List<Tag> getTagsForRule(Class<? extends RefactoringRule> clazz) {
-
 		if (ArithmethicAssignmentRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_4, Tag.READABILITY, Tag.CODING_CONVENTIONS);
 
@@ -172,8 +175,12 @@ public class TagUtil {
 
 		} else if (IndexOfToContainsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY);
+
 		} else if (EnumsWithoutEqualsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS);
+
+		} else if (PrimitiveObjectUseEqualsRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.STRING_MANIPULATION);
 		}
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["
