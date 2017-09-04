@@ -1,5 +1,6 @@
 package at.splendit.simonykees.sample.postRule.stringBuildingLoop;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -119,6 +120,29 @@ public class StringBuildingLoopRule {
 		return result;
 	}
 	
+	public String collectingArrayOfNumbers(String input) {
+		Double[] arrayOfStrings = {2.1, 3.5};
+		String result = "";
+		for(Double val : arrayOfStrings) {
+			result = result + val;
+		}
+		return result;
+	}
+	
+	public String savingAnnotationOverArray(String input) {
+		String[] arrayOfStrings = generateArray(input);
+		@Deprecated
+		String result = Arrays.stream(arrayOfStrings).collect(Collectors.joining());
+		return result;
+	}
+	
+	public String savingAnnotationsOverCollection(String input) {
+		List<String> listOfStrings = generateStringList(input);
+		@Deprecated
+		String result = listOfStrings.stream().collect(Collectors.joining());
+		return result;
+	}
+	
 	/*
 	 * Testing the generated string builder name
 	 */
@@ -159,6 +183,22 @@ public class StringBuildingLoopRule {
 		List<String> listOfStrings = generateStringList(resultSb);
 		String result = Arrays.stream(arrayOfStrings).collect(Collectors.joining());
 		
+		return result;
+	}
+	
+	/*
+	 * Using collect over stream of numbers
+	 */
+	
+	public String colectionOfIntegers(String input) {
+		List<Integer> collectionOfints = new ArrayList<>();
+		String result = collectionOfints.stream().map(Object::toString).collect(Collectors.joining());
+		return result;
+	}
+	
+	public String colectionOfDoubles(String input) {
+		List<Double> collectionOfints = new ArrayList<>();
+		String result = collectionOfints.stream().map(Object::toString).collect(Collectors.joining());
 		return result;
 	}
 	
@@ -211,6 +251,31 @@ public class StringBuildingLoopRule {
 		for(String val : collectionOfStrings) {
 			result = result + "," + val;
 		}
+		return result;
+	}
+	
+	public int distinguishBetweenMathPlusAndConcat(String input) {
+		List<Integer> collectionOfints = new ArrayList<>();
+		/*
+		 * The operator in the loop is not concatenation,
+		 * but is a normal arithmetic operation
+		 */
+		int result = 0;
+		for(int val : collectionOfints) {
+			result = result + val;
+		}
+		return result;
+	}
+	
+	public String loopAsSingleBodyStatement(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		String result = "";
+		/*
+		 * Transformation possible only for java 8 and above
+		 */
+		
+		if(collectionOfStrings.isEmpty())
+			result += collectionOfStrings.stream().collect(Collectors.joining());
 		return result;
 	}
 

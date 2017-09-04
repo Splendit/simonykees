@@ -10,11 +10,13 @@ import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -22,6 +24,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -76,55 +79,69 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		Expression loopExpression = loopNode.getExpression();
 		SingleVariableDeclaration loopParameter = loopNode.getParameter();
 		ASTNode loopParent = loopNode.getParent();
-		Block parentBlock;
-		if(ASTNode.BLOCK == loopParent.getNodeType()) {
-			parentBlock = (Block)loopParent;
-		} else {
-			return true;
-		}
 
 		ExpressionStatement singleBodyStatement = getSingleBodyStatement(loopNode).orElse(null);
 		if (singleBodyStatement == null) {
 			return true;
 		}
 
-		SimpleName resultVariable = findSumVariableName(loopParameter, singleBodyStatement).orElse(null);
+		SimpleName resultVariable = findResultVariableName(loopParameter, singleBodyStatement).orElse(null);
 		if (resultVariable == null) {
 			return true;
 		}
-		
-		
-		if(this.javaVersion.atLeast(JavaVersion.JAVA_1_8)) {
+
+		if (!ClassRelationUtil.isContentOfTypes(resultVariable.resolveTypeBinding(),
+				Collections.singletonList(java.lang.String.class.getName()))) {
+			// the result variable has to be a string
+			return true;
+		}
+
+		if (this.javaVersion.atLeast(JavaVersion.JAVA_1_8)) {
 			// create the collection statement
 			MethodInvocation collect = createCollectInvocation();
 			MethodInvocation streamExpression;
-			if(isCollectionOfStrings(loopExpression)) {
+			ITypeBinding loopExpressionTypeBinding = loopExpression.resolveTypeBinding();
+			if (isCollectionOfStrings(loopExpressionTypeBinding)) {
 				// expression.stream()
-				streamExpression = createStreamFromCollection(loopExpression);
-			} else if(isArrayOfStrings(loopExpression)) {
+				streamExpression = createStreamFromStringsCollection(loopExpression);
+			} else if (isArrayOfStrings(loopExpressionTypeBinding)) {
 				// Arrays.stream(expression)
 				streamExpression = createStreamFromArray(loopExpression);
+			} else if (isCollectionOfNumbers(loopExpressionTypeBinding)) {
+				// expression.stream().map(Object::toString)
+				streamExpression = createStreamFromNumbersCollection(loopExpression);
 			} else {
 				return true;
 			}
-			
+
 			collect.setExpression(streamExpression);
 			ASTNode newStatement;
 			Optional<VariableDeclarationFragment> optFragment = isReassignable(resultVariable, loopNode);
-			if(optFragment.isPresent()) {
-				newStatement = assignCollectToResult(collect, resultVariable);
+			if (ASTNode.BLOCK == loopNode.getParent().getNodeType() && optFragment.isPresent()) {
 				VariableDeclarationFragment fragment = optFragment.get();
-				VariableDeclarationStatement oldDeclStatement = (VariableDeclarationStatement)fragment.getParent();
+				VariableDeclarationStatement oldDeclStatement = (VariableDeclarationStatement) fragment.getParent();
+				newStatement = assignCollectToResult(collect, resultVariable, oldDeclStatement);
 				removeOldSumDeclaration(oldDeclStatement, fragment);
 			} else {
 				newStatement = concatCollectToResult(collect, resultVariable);
 			}
-			
+
 			astRewrite.replace(loopNode, newStatement, null);
+
+		} else if (this.javaVersion.atLeast(JavaVersion.JAVA_1_5)) {
+			// create the stringBuilder
 			
+			Block parentBlock;
+			if (ASTNode.BLOCK == loopParent.getNodeType()) {
+				/*
+				 * If the parent is not a block, there is no room
+				 * for creating the StringBuilder.
+				 */
+				parentBlock = (Block) loopParent;
+			} else {
+				return true;
+			}
 			
-		} else if(this.javaVersion.atLeast(JavaVersion.JAVA_1_5)) {
-			// create the stringBuilder 
 			String stringBuilderId = generateStringBuilderIdentifier(loopNode, resultVariable.getIdentifier());
 			VariableDeclarationStatement sbDeclaration = introduceStringBuilder(stringBuilderId);
 			ListRewrite blockRewrite = astRewrite.getListRewrite(parentBlock, Block.STATEMENTS_PROPERTY);
@@ -132,24 +149,23 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 			replaceByStringBuilderAppend(singleBodyStatement, loopParameter.getName(), stringBuilderId);
 			Statement expressionStatement;
 			Optional<VariableDeclarationFragment> optFragment = isReassignable(resultVariable, loopNode);
-			if(optFragment.isPresent()) {
+			if (optFragment.isPresent()) {
 				VariableDeclarationFragment fragment = optFragment.get();
-				expressionStatement = assignStringBuilderToResult(stringBuilderId, resultVariable);
-				VariableDeclarationStatement oldDeclStatement = (VariableDeclarationStatement)fragment.getParent();
+				VariableDeclarationStatement oldDeclStatement = (VariableDeclarationStatement) fragment.getParent();
+				expressionStatement = assignStringBuilderToResult(stringBuilderId, resultVariable, oldDeclStatement);
 				removeOldSumDeclaration(oldDeclStatement, fragment);
-				
 			} else {
 				expressionStatement = concatStringBuilderToResult(stringBuilderId, resultVariable);
 			}
 
-			
 			blockRewrite.insertAfter(expressionStatement, loopNode, null);
 		}
 
 		return true;
 	}
 
-	private VariableDeclarationStatement assignStringBuilderToResult(String stringBuilderId, SimpleName resultVariable) {
+	private VariableDeclarationStatement assignStringBuilderToResult(String stringBuilderId, SimpleName resultVariable,
+			VariableDeclarationStatement oldDeclaration) {
 		AST ast = astRewrite.getAST();
 		
 		MethodInvocation sbToString = ast.newMethodInvocation();
@@ -165,10 +181,24 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		SimpleType type = ast.newSimpleType(ast.newSimpleName(resultType.getName()));
 		newDecl.setType(type);
 		
+		/*
+		 * Save the modifiers 
+		 */
+		copyModifiers(oldDeclaration, newDecl);
+		
 		return newDecl;
 	}
 
-	private VariableDeclarationStatement assignCollectToResult(MethodInvocation collect2, SimpleName resultVariable) {
+	private void copyModifiers(VariableDeclarationStatement oldDeclaration, VariableDeclarationStatement newDecl) {
+		ListRewrite modifiersRewriter = astRewrite.getListRewrite(newDecl, VariableDeclarationStatement.MODIFIERS2_PROPERTY);
+		List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(oldDeclaration.modifiers(), Modifier.class);
+		modifiers.forEach(modifier -> modifiersRewriter.insertLast((Modifier)astRewrite.createCopyTarget(modifier), null));
+		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(oldDeclaration.modifiers(), Annotation.class);
+		annotations.forEach(annotation -> modifiersRewriter.insertLast((Annotation)astRewrite.createCopyTarget(annotation), null));
+	}
+
+	private VariableDeclarationStatement assignCollectToResult(MethodInvocation collect2, SimpleName resultVariable, 
+			VariableDeclarationStatement oldDeclaration) {
 		AST ast = astRewrite.getAST();
 
 		VariableDeclarationFragment newDeclFragment = ast.newVariableDeclarationFragment();
@@ -179,6 +209,8 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		ITypeBinding resultType = resultVariable.resolveTypeBinding();
 		SimpleType type = ast.newSimpleType(ast.newSimpleName(resultType.getName()));
 		newDecl.setType(type);
+		
+		copyModifiers(oldDeclaration, newDecl);
 		
 		return newDecl;
 	}
@@ -230,7 +262,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		return stream;
 	}
 
-	private MethodInvocation createStreamFromCollection(Expression loopExpression) {
+	private MethodInvocation createStreamFromStringsCollection(Expression loopExpression) {
 		Expression collectionExpression = createExpressionForStreamMethodInvocation(loopExpression);
 		AST ast = astRewrite.getAST();
 		MethodInvocation stream = ast.newMethodInvocation();
@@ -294,9 +326,35 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		varDeclStatement.setType(ast.newSimpleType(ast.newSimpleName(StringBuilder.class.getSimpleName())));
 		return varDeclStatement;
 	}
+	
+	private boolean isCollectionOfNumbers(ITypeBinding expressionBinding) {
+		if(expressionBinding != null && expressionBinding.isParameterizedType()) {
+			ITypeBinding[] typeArguments = expressionBinding.getTypeArguments();
+			if(typeArguments.length == 1) {
+				return ClassRelationUtil.isInheritingContentOfTypes(typeArguments[0], Collections.singletonList(Number.class.getName()));
+			}
+		}
+		return false;
+	}
 
-	private boolean isCollectionOfStrings(Expression loopExpression) {
-		ITypeBinding expressionBinding = loopExpression.resolveTypeBinding();
+	private MethodInvocation createStreamFromNumbersCollection(Expression loopExpression) {
+		AST ast = astRewrite.getAST();
+		MethodInvocation stream = createStreamFromStringsCollection(loopExpression);
+		MethodInvocation mapToString = ast.newMethodInvocation();
+		mapToString.setName(ast.newSimpleName(MAP));
+		mapToString.setExpression(stream);
+		
+		ExpressionMethodReference methodReference = ast.newExpressionMethodReference();
+		methodReference.setExpression(ast.newSimpleName(Object.class.getSimpleName()));
+		methodReference.setName(ast.newSimpleName(TO_STRING));
+		
+		ListRewrite argRewriter = astRewrite.getListRewrite(mapToString, MethodInvocation.ARGUMENTS_PROPERTY);
+		argRewriter.insertFirst(methodReference, null);
+		
+		return mapToString;
+	}
+
+	private boolean isCollectionOfStrings(ITypeBinding expressionBinding) {
 		if(expressionBinding != null && expressionBinding.isParameterizedType()) {
 			ITypeBinding[] typeArguments = expressionBinding.getTypeArguments();
 			if(typeArguments.length == 1) {
@@ -306,9 +364,8 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		return false;
 	}
 	
-	private boolean isArrayOfStrings(Expression loopExpression) {
-		ITypeBinding expressionBinding = loopExpression.resolveTypeBinding();
-		if(expressionBinding.isArray()) {
+	private boolean isArrayOfStrings(ITypeBinding expressionBinding) {
+		if(expressionBinding != null && expressionBinding.isArray()) {
 			ITypeBinding componentType = expressionBinding.getComponentType();
 			return ClassRelationUtil.isContentOfTypes(componentType, Collections.singletonList(String.class.getName()));
 		}

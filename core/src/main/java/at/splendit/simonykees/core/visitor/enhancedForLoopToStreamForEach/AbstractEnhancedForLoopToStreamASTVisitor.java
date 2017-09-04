@@ -357,7 +357,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 	 *         if the expression has the described form, or an empty optional
 	 *         otherwise.
 	 */
-	protected Optional<SimpleName> findSumVariableName(SingleVariableDeclaration parameter,
+	protected Optional<SimpleName> findResultVariableName(SingleVariableDeclaration parameter,
 			ExpressionStatement expressionStatement) {
 		Expression expression = expressionStatement.getExpression();
 		if (ASTNode.ASSIGNMENT == expression.getNodeType()) {

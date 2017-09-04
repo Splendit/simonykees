@@ -1,7 +1,9 @@
 package at.splendit.simonykees.sample.postRule.stringBuildingLoopJ5;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressWarnings({"nls", "unused"})
 public class StringBuildingLoopRule {
@@ -161,6 +163,38 @@ public class StringBuildingLoopRule {
 		return result;
 	}
 	
+	public String collectingArrayOfNumbers(String input) {
+		Double[] arrayOfStrings = {2.1, 3.5};
+		StringBuilder resultSb = new StringBuilder();
+		for(Double val : arrayOfStrings) {
+			resultSb.append(val);
+		}
+		String result = resultSb.toString();
+		return result;
+	}
+	
+	public String savingAnnotationOverArray(String input) {
+		String[] arrayOfStrings = generateArray(input);
+		StringBuilder resultSb = new StringBuilder();
+		for(String val : arrayOfStrings) {
+			resultSb.append(val);
+		}
+		@Deprecated
+		String result = resultSb.toString();
+		return result;
+	}
+	
+	public String savingAnnotationsOverCollection(String input) {
+		List<String> listOfStrings = generateStringList(input);
+		StringBuilder resultSb = new StringBuilder();
+		for(String val : listOfStrings) {
+			resultSb.append(val);
+		}
+		@Deprecated
+		String result = resultSb.toString();
+		return result;
+	}
+	
 	/*
 	 * Testing the generated string builder name
 	 */
@@ -225,6 +259,30 @@ public class StringBuildingLoopRule {
 	}
 	
 	/*
+	 * Using collect over stream of numbers
+	 */
+	
+	public String colectionOfIntegers(String input) {
+		List<Integer> collectionOfints = new ArrayList<>();
+		StringBuilder resultSb = new StringBuilder();
+		for(int val : collectionOfints) {
+			resultSb.append(val);
+		}
+		String result = resultSb.toString();
+		return result;
+	}
+	
+	public String colectionOfDoubles(String input) {
+		List<Double> collectionOfints = new ArrayList<>();
+		StringBuilder resultSb = new StringBuilder();
+		for(double val : collectionOfints) {
+			resultSb.append(val);
+		}
+		String result = resultSb.toString();
+		return result;
+	}
+	
+	/*
 	 * The following are negative test cases
 	 */
 	
@@ -273,6 +331,33 @@ public class StringBuildingLoopRule {
 		for(String val : collectionOfStrings) {
 			result = result + "," + val;
 		}
+		return result;
+	}
+	
+	public int distinguishBetweenMathPlusAndConcat(String input) {
+		List<Integer> collectionOfints = new ArrayList<>();
+		/*
+		 * The operator in the loop is not concatenation,
+		 * but is a normal arithmetic operation
+		 */
+		int result = 0;
+		for(int val : collectionOfints) {
+			result = result + val;
+		}
+		return result;
+	}
+	
+	public String loopAsSingleBodyStatement(String input) {
+		List<String> collectionOfStrings = generateStringList(input);
+		String result = "";
+		/*
+		 * Transformation possible only for java 8 and above
+		 */
+		
+		if(collectionOfStrings.isEmpty())
+			for(String val : collectionOfStrings) {
+				result = result + val;
+			}
 		return result;
 	}
 

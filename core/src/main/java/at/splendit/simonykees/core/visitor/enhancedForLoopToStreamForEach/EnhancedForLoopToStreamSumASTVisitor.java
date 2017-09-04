@@ -100,7 +100,7 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 		 * The expression statement must be an addition operation of the loop
 		 * variable and a variable for keeping the result.
 		 */
-		SimpleName sumVariableName = findSumVariableName(loopNode.getParameter(), expressionStatement).orElse(null);
+		SimpleName sumVariableName = findResultVariableName(loopNode.getParameter(), expressionStatement).orElse(null);
 		if (sumVariableName == null) {
 			return true;
 		}
