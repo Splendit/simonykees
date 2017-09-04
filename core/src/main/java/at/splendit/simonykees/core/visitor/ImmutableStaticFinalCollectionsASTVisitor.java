@@ -1,16 +1,29 @@
 package at.splendit.simonykees.core.visitor;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -57,6 +70,9 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	private static final String JAVA_UTIL_COLLECTIONS_SIMPLENAME = java.util.Collections.class.getSimpleName();
 	private static final String JAVA_UTIL_COLLECTIONS = java.util.Collections.class.getName();
 
+	private static final String JAVA_LANG_UNSUPPORTED_OPERATION_EXCEPTION = java.lang.UnsupportedOperationException.class
+			.getName();
+
 	/*** TYPE LISTS ***/
 
 	private static final List<String> COLLECTION_TYPE_LIST = Collections.singletonList(JAVA_UTIL_COLLECTION);
@@ -67,6 +83,29 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	private static final List<String> SET_TYPE_LIST = Collections.singletonList(JAVA_UTIL_SET);
 	private static final List<String> SORTED_MAP_TYPE_LIST = Collections.singletonList(JAVA_UTIL_SORTED_MAP);
 	private static final List<String> SORTED_SET_TYPE_LIST = Collections.singletonList(JAVA_UTIL_SORTED_SET);
+
+	private static final List<String> UNSUPPORTED_OPERATION_EXCEPTION_TYPE_LIST = Collections
+			.singletonList(JAVA_LANG_UNSUPPORTED_OPERATION_EXCEPTION);
+
+	/*** HELPER FIELDS ***/
+
+	private Set<String> modifiedCollectionsInStaticInitializer = new HashSet<>();
+	private Map<String, ASTNode> initializersToReplace = new HashMap<>();
+	private Map<String, MethodInvocation> newMethodInvocations = new HashMap<>();
+	private List<String> excludedNames = new LinkedList<>();
+	
+	private List<String> collectionModifingMethods = Arrays.asList(
+				// interface Collection
+				"add",
+				"remove",
+				"addAll",
+				"removeAll",
+				"removeIf",
+				"retainAll",
+				"clear"
+			);
+
+	/*** VISITORS ***/
 
 	@Override
 	public boolean visit(VariableDeclarationFragment fragmentNode) {
@@ -94,22 +133,13 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 							if (methodNameString != null) {
 								this.addImports.add(JAVA_UTIL_COLLECTIONS);
 
-								SimpleName collectionsClassName = astRewrite.getAST()
-										.newSimpleName(JAVA_UTIL_COLLECTIONS_SIMPLENAME);
-								SimpleName methodName = astRewrite.getAST().newSimpleName(methodNameString);
+								MethodInvocation newMI = createNewMethodInvocation(initializer, methodNameString);
 
-								MethodInvocation newMI = astRewrite.getAST().newMethodInvocation();
-								newMI.setExpression(collectionsClassName);
-								newMI.setName(methodName);
+								String fieldName = fragmentNode.getName().getIdentifier();
+								initializersToReplace.put(fieldName, initializer);
+								newMethodInvocations.put(fieldName, newMI);
 
-								ClassInstanceCreation cicCopy = (ClassInstanceCreation) astRewrite
-										.createCopyTarget(initializer);
-
-								ListRewrite newMIArgs = astRewrite.getListRewrite(newMI,
-										MethodInvocation.ARGUMENTS_PROPERTY);
-								newMIArgs.insertFirst(cicCopy, null);
-
-								astRewrite.replace(initializer, newMI, null);
+								// astRewrite.replace(initializer, newMI, null);
 							}
 						}
 					}
@@ -119,6 +149,84 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 		}
 
 		return false;
+	}
+
+	@Override
+	public boolean visit(MethodInvocation methodInvocationNode) {
+		Expression expression = methodInvocationNode.getExpression();
+		if (expression != null && ASTNode.SIMPLE_NAME == expression.getNodeType()) {
+			String expressionName = ((SimpleName) expression).getIdentifier();
+			
+			IMethodBinding miMethodBinding = methodInvocationNode.resolveMethodBinding();
+			
+			if (miMethodBinding != null) {
+				List<ITypeBinding> exceptions = Arrays.asList(miMethodBinding.getExceptionTypes());
+				boolean isModifingMethod = exceptions.stream().anyMatch(exception -> ClassRelationUtil
+						.isContentOfTypes(exception, UNSUPPORTED_OPERATION_EXCEPTION_TYPE_LIST));
+				
+				if(isModifingMethod) {
+					excludedNames.add(expressionName);
+				}
+			}
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean visit(Initializer initializerNode) {
+		if (ASTNodeUtil.hasModifier(initializerNode.modifiers(), Modifier::isStatic)) {
+			Block block = initializerNode.getBody();
+			if (block != null && block.statements() != null && !block.statements().isEmpty()) {
+				List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
+				modifiedCollectionsInStaticInitializer = statements.stream()
+						.filter(ExpressionStatement.class::isInstance).map(ExpressionStatement.class::cast)
+						.map(ExpressionStatement::getExpression).filter(MethodInvocation.class::isInstance)
+						.map(MethodInvocation.class::cast).map(ASTNodeUtil::getLeftMostExpressionOfMethodInvocation)
+						.filter(SimpleName.class::isInstance).map(SimpleName.class::cast).map(SimpleName::getIdentifier)
+						.collect(Collectors.toSet());
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public void endVisit(CompilationUnit compilationUnitNode) {
+		newMethodInvocations.keySet().forEach(key -> {
+			boolean isMethodInvocationReplaceable = false;
+			if (!modifiedCollectionsInStaticInitializer.contains(key)) {
+				if (initializersToReplace.keySet().contains(key)) {
+					this.addImports.add(JAVA_UTIL_COLLECTIONS);
+					astRewrite.replace(initializersToReplace.get(key), newMethodInvocations.get(key), null);
+					isMethodInvocationReplaceable = true;
+				}
+			}
+
+			if (!isMethodInvocationReplaceable) {
+				newMethodInvocations.get(key).delete();
+			}
+		});
+
+		super.endVisit(compilationUnitNode);
+	}
+
+	/*** PRIVATE HELPER METHODS ***/
+
+	private MethodInvocation createNewMethodInvocation(Expression initializer, String methodNameString) {
+		SimpleName collectionsClassName = astRewrite.getAST().newSimpleName(JAVA_UTIL_COLLECTIONS_SIMPLENAME);
+		SimpleName methodName = astRewrite.getAST().newSimpleName(methodNameString);
+
+		MethodInvocation newMI = astRewrite.getAST().newMethodInvocation();
+		newMI.setExpression(collectionsClassName);
+		newMI.setName(methodName);
+
+		ClassInstanceCreation cicCopy = (ClassInstanceCreation) astRewrite.createCopyTarget(initializer);
+
+		ListRewrite newMIArgs = astRewrite.getListRewrite(newMI, MethodInvocation.ARGUMENTS_PROPERTY);
+		newMIArgs.insertFirst(cicCopy, null);
+
+		return newMI;
 	}
 
 	/**
