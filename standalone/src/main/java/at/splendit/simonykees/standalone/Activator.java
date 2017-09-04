@@ -1,18 +1,14 @@
 package at.splendit.simonykees.standalone;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +29,7 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
  * @since 0.9
  */
 // @SuppressWarnings("restriction")
-public class Activator extends Plugin {
+public class Activator implements BundleActivator {
 
 	private static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
@@ -63,23 +59,23 @@ public class Activator extends Plugin {
 		System.out.println("Hello World!!");
 
 		// start jSparrow logging bundle
-//		for (Bundle bundle : context.getBundles()) {
-//			if (bundle.getSymbolicName().equals("jSparrow.logging") //$NON-NLS-1$
-//					&& bundle.getState() != Bundle.ACTIVE) {
-//				bundle.start();
-//				break;
-//			}
-//		}
+		// for (Bundle bundle : context.getBundles()) {
+		// if (bundle.getSymbolicName().equals("jSparrow.logging") //$NON-NLS-1$
+		// && bundle.getState() != Bundle.ACTIVE) {
+		// bundle.start();
+		// break;
+		// }
+		// }
 
 		// PREPARE RULES
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
-		
-		//CREATE REFACTORING PIPELINE AND SET RULES
+
+		// CREATE REFACTORING PIPELINE AND SET RULES
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 		refactoringPipeline.setRules(rules);
 
 		TestStandalone test = new TestStandalone();
-		
+
 		logger.debug("Getting compilation units");
 		System.out.println("Getting compilation units");
 		List<ICompilationUnit> compUnits = test.getCompUnits();
@@ -135,7 +131,6 @@ public class Activator extends Plugin {
 		System.out.println("Stop ACTIVATOR");
 	}
 
-
 	/**
 	 * Returns the shared instance
 	 *
@@ -169,9 +164,13 @@ public class Activator extends Plugin {
 		return bundleContext;
 	}
 
-//	public static void main(String[] args) {
-//		List<ICompilationUnit> compUnits = getUnit();
-//
-//		System.out.println(compUnits.get(0));
-//	}
+	public static void main(String[] args) {
+		TestStandalone test = new TestStandalone();
+
+		logger.debug("Getting compilation units");
+		System.out.println("Getting compilation units");
+		List<ICompilationUnit> compUnits = test.getCompUnits();
+
+		System.out.println(compUnits.get(0));
+	}
 }

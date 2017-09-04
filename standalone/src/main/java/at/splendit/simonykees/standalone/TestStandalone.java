@@ -4,19 +4,26 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.swing.ProgressMonitor;
+
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
+import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -40,9 +47,9 @@ public class TestStandalone {
 	IJavaProject testproject = null;
 	IPackageFragment packageFragment = null;
 	// IFolder target = null;
-	IWorkspace workspace;
-	List<ICompilationUnit> compUnits = new ArrayList<>();
-	IProjectDescription description;
+	static IWorkspace workspace;
+	static List<ICompilationUnit> compUnits = new ArrayList<>();
+	static IProjectDescription description;
 
 	public IJavaProject getTestproject() {
 		return testproject;
@@ -52,7 +59,7 @@ public class TestStandalone {
 		return compUnits;
 	}
 
-	public void setUpReal() throws CoreException {
+	public static void setUpReal() throws CoreException, IllegalStateException, IOException {
 		BufferedReader br = null;
 		FileReader fr = null;
 
@@ -82,24 +89,33 @@ public class TestStandalone {
 			}
 		}
 
-		workspace = ResourcesPlugin.getWorkspace();
+		String file = System.getProperty("user.home");
+		File directory = new File(file + "/temp").getAbsoluteFile();
+		if (directory.exists() || directory.mkdirs()) {
+			System.setProperty("user.dir", directory.getAbsolutePath());
+			System.out.println("Set user.dir to " + directory.getAbsolutePath());
+		}
 
-		System.out.println("Created workspace");
+		workspace = ResourcesPlugin.getWorkspace();
+		// org.eclipse.ui.internal.ide.actions.OpenWorkspaceAction.restart
+
+		System.out.println("Created workspace in " + workspace.getRoot().getFullPath());
 
 		IPath pathProj = new Path("/home/andreja/workspaces/runtime-jSparrow/jfreechart-fse/");
 
 		description = workspace
 				.loadProjectDescription(new Path("/home/andreja/workspaces/runtime-jSparrow/jfreechart-fse/.project")); // (path)); //$NON-NLS-1$
+
 		System.out.println("Project description: " + description.getName()); //$NON-NLS-1$
 
 		final IProject javaProject = workspace.getRoot().getProject(description.getName());
+		System.out.println("Project description: " + description.getName()); //$NON-NLS-1$
+
 		javaProject.create(description, new NullProgressMonitor());
+		System.out.println("Create project from description: " + description.getName()); //$NON-NLS-1$
 
-//		copyAll(description.getName(), workspace.getRoot().getLocation());
 		javaProject.open(new NullProgressMonitor());
-//		javaProject.setDescription(description, new NullProgressMonitor());
-
-		System.out.println("Project IProject: " + javaProject.getName());
+		System.out.println("Open java project."); //$NON-NLS-1$
 
 		System.out.println(workspace.getRoot().getProjects());
 
@@ -108,16 +124,7 @@ public class TestStandalone {
 		System.out.println("Created project");
 	}
 
-//	private void copyAll(String projectName, IPath iPath) {
-//		File source = new File("/home/andreja/workspaces/runtime-jSparrow/jfreechart-fse");
-//		try {
-//			FileUtils.copyDirectory(source, iPath.append(projectName).toFile());
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	}
-
-	public List<ICompilationUnit> getUnit(IProject javaProject) {
+	public static List<ICompilationUnit> getUnit(IProject javaProject) {
 		List<IPackageFragment> packages = new ArrayList<>();
 		List<ICompilationUnit> units = new ArrayList<>();
 
@@ -141,8 +148,8 @@ public class TestStandalone {
 					mypackage.open(new NullProgressMonitor());
 
 					units.addAll(Arrays.asList(mypackage.getCompilationUnits()));
-					
-					//USED TO AVOID OutOfMemory
+
+					// USED TO AVOID OutOfMemory
 					units.stream().forEach(unit -> {
 						try {
 							unit.open(new NullProgressMonitor());
