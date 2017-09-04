@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import at.splendit.simonykees.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
 import at.splendit.simonykees.core.rule.impl.LambdaForEachMapRule;
+import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 import at.splendit.simonykees.core.visitor.lambdaForEach.AbstractLambdaForEachASTVisitor;
 import at.splendit.simonykees.core.visitor.sub.LocalVariableUsagesASTVisitor;
@@ -73,7 +74,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 						if (methodArgumentLambda != null && methodArgumentLambda.parameters() != null
 								&& methodArgumentLambda.parameters().size() == 1) {
 
-							Expression leftMostExpression = this
+							Expression leftMostExpression = ASTNodeUtil
 									.getLeftMostExpressionOfMethodInvocation(innerMethodInvocation);
 							if (leftMostExpression != null && ASTNode.SIMPLE_NAME == leftMostExpression.getNodeType()) {
 
@@ -314,31 +315,6 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		}
 
 		return false;
-	}
-
-	/**
-	 * This method extracts the left most {@link Expression} of a
-	 * {@link MethodInvocation} by recursively walking the
-	 * {@link MethodInvocation}.
-	 * 
-	 * @param methodInvocation
-	 * @return the left most expression of the given {@link MethodInvocation}
-	 */
-	private Expression getLeftMostExpressionOfMethodInvocation(MethodInvocation methodInvocation) {
-		Expression result = null;
-		if (methodInvocation != null) {
-			Expression expression = methodInvocation.getExpression();
-			if (expression != null) {
-				if (ASTNode.METHOD_INVOCATION == expression.getNodeType()) {
-					MethodInvocation methodInvocationExpression = (MethodInvocation) expression;
-					result = this.getLeftMostExpressionOfMethodInvocation(methodInvocationExpression);
-				} else if (ASTNode.SIMPLE_NAME == expression.getNodeType()) {
-					return expression;
-				}
-			}
-		}
-
-		return result;
 	}
 
 	/**
