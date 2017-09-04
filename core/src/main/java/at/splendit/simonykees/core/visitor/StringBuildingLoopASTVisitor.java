@@ -1,10 +1,14 @@
 package at.splendit.simonykees.core.visitor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.dom.AST;
@@ -42,6 +46,67 @@ import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.Abstra
 import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
+ * Analyzes the occurrences of the {@link EnhancedForStatement}s and checks whether they 
+ * are only used for concatenating the strings of a collection or array. It considers 
+ * two cases:
+ * 
+ * <ul>
+ *  <li>If the compliance level of the java project is set to @{@link JavaVersion#JAVA_1_8} or later, 
+ *  then the whole loop is replaced with an invocation of {@link Stream#collect(Collector)} for joining the strings.
+ *  For example, the following code:
+ *  
+ *  <pre>
+ *  <code>
+ *  	List<String> collectionOfStrings = generateStringList(input);
+ *		String result = "";
+ *		for(String val : collectionOfStrings) {
+ *			result = result + val;
+ *		}
+ *  </code>
+ *  
+ *  is replaced with: 
+ *  <pre>
+ *  <code>
+		List<String> collectionOfStrings = generateStringList(input);
+		String result = collectionOfStrings.stream().collect(Collectors.joining());
+ *  </code>
+ *  
+ *  A collection, is converted into a stream by invoking the {@link Collection#stream()}
+ *  whereas, an array is converted into a stream by invoking {@link Arrays#stream(Object[])}. 
+ *  </li>
+ *  <li>Otherwise, if the compliance level is set to {@link JavaVersion#JAVA_1_5} or later, 
+ *  then a {@link StringBuilder} is used for the concatenation, thus avoiding the direct
+ *  string concatenations inside the loop. For example, the following code:
+ *  
+ *  <pre>
+ *  <code>
+ *  	List<String> collectionOfStrings = generateStringList(input);
+ *		String result = "";
+ *		for(String val : collectionOfStrings) {
+ *			result = result + val;
+ *		}
+ *  </code>
+ *  
+ *  is converted to:
+ *  
+ *  <pre>
+ *  <code>
+ *  	List<String> collectionOfStrings = generateStringList(input);
+ *		StringBuilder resultSb = new StringBuilder();
+ *		for(String val : collectionOfStrings) {
+ *			resultSb.append(val);
+ *		}
+ *		String result = resultSb.toString();
+ *  </code>
+ *  
+ *  A new {@link StringBuilder} is introduced just before the occurrence of the 
+ *  loop, and each element of the collection/array is appended to it.
+ *  Afterwards, the result of the StringBuilder is assigned to the original
+ *  variable. 
+ *  </li>
+ * </ul>
+ * 
+ * Only the collections/arrays of {@link String}s or {@link Number}s are supported, in both cases.
  * 
  * @author Ardit Ymeri
  * @since 2.1.1
@@ -55,6 +120,10 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 	private static final String APPEND = "append"; //$NON-NLS-1$
 	private static final String STRING_BUILDER_CORE_IDENTIFIER = "Sb"; //$NON-NLS-1$
 	
+	/**
+	 * Stores the identifiers of the {@link StringBuilder}s generated
+	 * inside one method. 
+	 */
 	private List<String> generatedIdsPerMethod = new ArrayList<>();
 	
 	private JavaVersion javaVersion;
@@ -130,7 +199,6 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 		} else if (this.javaVersion.atLeast(JavaVersion.JAVA_1_5)) {
 			// create the stringBuilder
-			
 			Block parentBlock;
 			if (ASTNode.BLOCK == loopParent.getNodeType()) {
 				/*
@@ -164,64 +232,128 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		return true;
 	}
 
+	/**
+	 * Creates a new variable declaration statement and initializes the declared
+	 * variable with the content of the {@link StringBuilder} with the given
+	 * identifier. Keeps the modifiers of the old declaration statement.
+	 * 
+	 * @param stringBuilderId
+	 *            the identifier of the {@link StringBuilder}
+	 * @param resultVariable
+	 *            the name of the variable to create a new declaration for.
+	 * @param oldDeclaration
+	 *            the old declaration of the variable.
+	 * @return the created declaration statement.
+	 */
 	private VariableDeclarationStatement assignStringBuilderToResult(String stringBuilderId, SimpleName resultVariable,
 			VariableDeclarationStatement oldDeclaration) {
 		AST ast = astRewrite.getAST();
-		
+
 		MethodInvocation sbToString = ast.newMethodInvocation();
 		sbToString.setName(ast.newSimpleName(TO_STRING));
 		sbToString.setExpression(ast.newSimpleName(stringBuilderId));
-		
+
 		VariableDeclarationFragment newDeclFragment = ast.newVariableDeclarationFragment();
-		newDeclFragment.setName((SimpleName)astRewrite.createCopyTarget(resultVariable));
+		newDeclFragment.setName((SimpleName) astRewrite.createCopyTarget(resultVariable));
 		newDeclFragment.setInitializer(sbToString);
-		
+
 		VariableDeclarationStatement newDecl = ast.newVariableDeclarationStatement(newDeclFragment);
 		ITypeBinding resultType = resultVariable.resolveTypeBinding();
 		SimpleType type = ast.newSimpleType(ast.newSimpleName(resultType.getName()));
 		newDecl.setType(type);
-		
+
 		/*
-		 * Save the modifiers 
+		 * Save the modifiers
 		 */
 		copyModifiers(oldDeclaration, newDecl);
-		
+
 		return newDecl;
 	}
 
+	/**
+	 * Copies the modifiers and the annotations from the old declaration to the
+	 * new declaration statement.
+	 * 
+	 * @param oldDeclaration
+	 *            a declaration statement representing an existing declaration
+	 * @param newDecl
+	 *            the target declaration statement to put the copied modifiers
+	 *            to.
+	 */
 	private void copyModifiers(VariableDeclarationStatement oldDeclaration, VariableDeclarationStatement newDecl) {
-		ListRewrite modifiersRewriter = astRewrite.getListRewrite(newDecl, VariableDeclarationStatement.MODIFIERS2_PROPERTY);
+		ListRewrite modifiersRewriter = astRewrite.getListRewrite(newDecl,
+				VariableDeclarationStatement.MODIFIERS2_PROPERTY);
 		List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(oldDeclaration.modifiers(), Modifier.class);
-		modifiers.forEach(modifier -> modifiersRewriter.insertLast((Modifier)astRewrite.createCopyTarget(modifier), null));
+		modifiers.forEach(
+				modifier -> modifiersRewriter.insertLast((Modifier) astRewrite.createCopyTarget(modifier), null));
 		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(oldDeclaration.modifiers(), Annotation.class);
-		annotations.forEach(annotation -> modifiersRewriter.insertLast((Annotation)astRewrite.createCopyTarget(annotation), null));
+		annotations.forEach(
+				annotation -> modifiersRewriter.insertLast((Annotation) astRewrite.createCopyTarget(annotation), null));
 	}
 
-	private VariableDeclarationStatement assignCollectToResult(MethodInvocation collect2, SimpleName resultVariable, 
+	/**
+	 * Creates a new variable declaration statement and initializes the declared
+	 * variable with the given method invocation. Keeps the modifiers of the old
+	 * declaration statement.
+	 * 
+	 * @param collect2
+	 *            method invocation to be used as initializer
+	 * @param resultVariable
+	 *            the name of the variable to create a new declaration for.
+	 * @param oldDeclaration
+	 *            the old declaration of the variable.
+	 * @return the created declaration statement.
+	 */
+	private VariableDeclarationStatement assignCollectToResult(MethodInvocation collect2, SimpleName resultVariable,
 			VariableDeclarationStatement oldDeclaration) {
 		AST ast = astRewrite.getAST();
 
 		VariableDeclarationFragment newDeclFragment = ast.newVariableDeclarationFragment();
-		newDeclFragment.setName((SimpleName)astRewrite.createCopyTarget(resultVariable));
+		newDeclFragment.setName((SimpleName) astRewrite.createCopyTarget(resultVariable));
 		newDeclFragment.setInitializer(collect2);
-		
+
 		VariableDeclarationStatement newDecl = ast.newVariableDeclarationStatement(newDeclFragment);
 		ITypeBinding resultType = resultVariable.resolveTypeBinding();
 		SimpleType type = ast.newSimpleType(ast.newSimpleName(resultType.getName()));
 		newDecl.setType(type);
-		
+
 		copyModifiers(oldDeclaration, newDecl);
-		
+
 		return newDecl;
 	}
 
-	private Optional<VariableDeclarationFragment> isReassignable(SimpleName resultVariable, EnhancedForStatement loopNode) {
+	/**
+	 * Checks whether the variable storing the result of the computation
+	 * performed by the loop, is declared in the same block with the loop, is
+	 * initialized to empty string and is not referenced between its declaration
+	 * and the loop occurrence.
+	 * 
+	 * @param resultVariable
+	 *            the name of the variable storing the result of the computation
+	 *            of the loop.
+	 * @param loopNode
+	 *            the loop performing the computation.
+	 * @return an optional of the declaration fragment of the variable
+	 */
+	private Optional<VariableDeclarationFragment> isReassignable(SimpleName resultVariable,
+			EnhancedForStatement loopNode) {
 		Block block = ASTNodeUtil.getSpecificAncestor(loopNode, Block.class);
 		ReassignableResultVisitor analyzer = new ReassignableResultVisitor(block, loopNode, resultVariable);
 		block.accept(analyzer);
 		return Optional.ofNullable(analyzer.getDeclarationFragment());
 	}
 
+	/**
+	 * Generates the identifier for the {@link StringBuilder} to be introduced.
+	 * Checks for clashing names with the existing variables visible in the
+	 * scope and the recently introduced identifiers.
+	 * 
+	 * @param loopNode
+	 *            the node where the string builder will be used.
+	 * @param prefix
+	 *            the prefix of the string builder identifier.
+	 * @return the generated identifier.
+	 */
 	private String generateStringBuilderIdentifier(EnhancedForStatement loopNode, String prefix) {
 		ASTNode scope = ASTNodeUtil.findScope(loopNode);
 		VariableDeclarationsVisitor declVisitor = new VariableDeclarationsVisitor();
@@ -236,21 +368,40 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 			count++;
 			sbIdentifier = defaultIdentifier + count;
 		}
-		
+
 		generatedIdsPerMethod.add(sbIdentifier);
 
 		return sbIdentifier;
 	}
 
+	/**
+	 * Creates an expression statement which concatenates the result of the
+	 * given method invocation with the variable represented by the given name.
+	 * 
+	 * @param collect
+	 *            a method invocation computing the value to be concatenated
+	 * @param resultVariable
+	 *            the name of the variable to be concatenated
+	 * @return an {@link ExpressionStatement} representing the concatenation.
+	 */
 	private ASTNode concatCollectToResult(MethodInvocation collect, SimpleName resultVariable) {
 		AST ast = astRewrite.getAST();
 		Assignment assignment = ast.newAssignment();
 		assignment.setOperator(Assignment.Operator.PLUS_ASSIGN);
-		assignment.setLeftHandSide((SimpleName)astRewrite.createCopyTarget(resultVariable));
+		assignment.setLeftHandSide((SimpleName) astRewrite.createCopyTarget(resultVariable));
 		assignment.setRightHandSide(collect);
 		return ast.newExpressionStatement(assignment);
 	}
 
+	/**
+	 * Creates a node representing an invocation of
+	 * {@link Arrays#stream(Object[])} and feeds the given expression as a
+	 * parameter.
+	 * 
+	 * @param loopExpression
+	 *            a node representing an array
+	 * @return an expression of the form {@code Arrays.stream(loopExpression)}.
+	 */
 	private MethodInvocation createStreamFromArray(Expression loopExpression) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation stream = ast.newMethodInvocation();
@@ -262,6 +413,15 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		return stream;
 	}
 
+	/**
+	 * Creates a node representing an invocation of
+	 * {@link Collection#stream()} and plugs the given expression to the 
+	 * expression of the method invocation.
+	 * 
+	 * @param loopExpression
+	 *            a node representing a collection
+	 * @return an expression of the form {@code loopExpression.stream()}.
+	 */
 	private MethodInvocation createStreamFromStringsCollection(Expression loopExpression) {
 		Expression collectionExpression = createExpressionForStreamMethodInvocation(loopExpression);
 		AST ast = astRewrite.getAST();
@@ -271,6 +431,10 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		return stream;
 	}
 
+	/**
+	 * 
+	 * @return a node representing the invocation of {@link Collectors#joining()}.
+	 */
 	private MethodInvocation createCollectInvocation() {
 		AST ast = astRewrite.getAST();
 		MethodInvocation collect = ast.newMethodInvocation();
@@ -287,36 +451,71 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		return collect;
 	}
 
+	/**
+	 * Creates an expression statement which concatenates the contents of the
+	 * string builder represented by the given identifier of the with the
+	 * variable represented by the given name.
+	 * 
+	 * @param sbName
+	 *            the identifier of the string builder whose content will be
+	 *            concatenated
+	 * @param resultVariable
+	 *            the name of the variable to be concatenated
+	 * @return an {@link ExpressionStatement} representing the concatenation.
+	 */
 	private ExpressionStatement concatStringBuilderToResult(String sbName, SimpleName resultVariable) {
 		AST ast = astRewrite.getAST();
 		Assignment assignment = ast.newAssignment();
 		assignment.setOperator(Assignment.Operator.PLUS_ASSIGN);
-		assignment.setLeftHandSide((SimpleName)astRewrite.createCopyTarget(resultVariable));
-		
+		assignment.setLeftHandSide((SimpleName) astRewrite.createCopyTarget(resultVariable));
+
 		MethodInvocation sbToString = ast.newMethodInvocation();
 		sbToString.setName(ast.newSimpleName(TO_STRING));
 		sbToString.setExpression(ast.newSimpleName(sbName));
 		assignment.setRightHandSide(sbToString);
-		
+
 		return ast.newExpressionStatement(assignment);
 	}
 
-	private void replaceByStringBuilderAppend(ExpressionStatement singleBodyStatement, SimpleName loopParameter, String sbName) {
+	/**
+	 * Replaces the given expression statement with a new statement of the form
+	 * {@code sbName.append(loopParameter)}, which appends the value of the variable
+	 * represented by the given name, to the {@link StringBuilder} with the given 
+	 * identifier. 
+	 * 
+	 * @param singleBodyStatement
+	 *            statement to be replaced
+	 * @param loopParameter
+	 *            the name of the variable to be appended to the
+	 *            {@link StringBuilder}
+	 * @param sbName
+	 *            the identifier of the {@link StringBuilder}
+	 */
+	private void replaceByStringBuilderAppend(ExpressionStatement singleBodyStatement, SimpleName loopParameter,
+			String sbName) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation append = ast.newMethodInvocation();
 		append.setName(ast.newSimpleName(APPEND));
 		append.setExpression(ast.newSimpleName(sbName));
-		
+
 		ListRewrite argRewriter = astRewrite.getListRewrite(append, MethodInvocation.ARGUMENTS_PROPERTY);
-		argRewriter.insertFirst((SimpleName)astRewrite.createCopyTarget(loopParameter), null);
-		
+		argRewriter.insertFirst((SimpleName) astRewrite.createCopyTarget(loopParameter), null);
+
 		ExpressionStatement expressionStatement = ast.newExpressionStatement(append);
 		astRewrite.replace(singleBodyStatement, expressionStatement, null);
 	}
 
+	/**
+	 * Creates a {@link VariableDeclarationStatement} for declaring a new
+	 * {@link StringBuilder}.
+	 * 
+	 * @param identifier
+	 *            identifier of the {@link StringBuilder} to be introduced.
+	 * @return a declaration statement for the new {@link StringBuilder}
+	 */
 	private VariableDeclarationStatement introduceStringBuilder(String identifier) {
 		AST ast = astRewrite.getAST();
-		
+
 		ClassInstanceCreation initializer = ast.newClassInstanceCreation();
 		initializer.setType(ast.newSimpleType(ast.newSimpleName(StringBuilder.class.getSimpleName())));
 		VariableDeclarationFragment fragment = ast.newVariableDeclarationFragment();
@@ -327,72 +526,121 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		return varDeclStatement;
 	}
 	
-	private boolean isCollectionOfNumbers(ITypeBinding expressionBinding) {
-		if(expressionBinding != null && expressionBinding.isParameterizedType()) {
-			ITypeBinding[] typeArguments = expressionBinding.getTypeArguments();
-			if(typeArguments.length == 1) {
-				return ClassRelationUtil.isInheritingContentOfTypes(typeArguments[0], Collections.singletonList(Number.class.getName()));
-			}
-		}
-		return false;
-	}
-
+	/**
+	 * 
+	 * @param loopExpression
+	 *            a node representing a collection
+	 * @return an expression of the form
+	 *         {@code [loopExpression].stream().map(Object::toString)}
+	 */
 	private MethodInvocation createStreamFromNumbersCollection(Expression loopExpression) {
 		AST ast = astRewrite.getAST();
 		MethodInvocation stream = createStreamFromStringsCollection(loopExpression);
 		MethodInvocation mapToString = ast.newMethodInvocation();
 		mapToString.setName(ast.newSimpleName(MAP));
 		mapToString.setExpression(stream);
-		
+
 		ExpressionMethodReference methodReference = ast.newExpressionMethodReference();
 		methodReference.setExpression(ast.newSimpleName(Object.class.getSimpleName()));
 		methodReference.setName(ast.newSimpleName(TO_STRING));
-		
+
 		ListRewrite argRewriter = astRewrite.getListRewrite(mapToString, MethodInvocation.ARGUMENTS_PROPERTY);
 		argRewriter.insertFirst(methodReference, null);
-		
+
 		return mapToString;
 	}
-
-	private boolean isCollectionOfStrings(ITypeBinding expressionBinding) {
-		if(expressionBinding != null && expressionBinding.isParameterizedType()) {
+	
+	/**
+	 * Checks whether the given {@link ITypeBinding} represents a collection of
+	 * {@link Number}s.
+	 * 
+	 * @param expressionBinding
+	 *            type binding to be checked
+	 * 
+	 * @return {@code true} if the type binding is a collection of
+	 *         {@code Number}s or {@code false} otherwise.
+	 */
+	private boolean isCollectionOfNumbers(ITypeBinding expressionBinding) {
+		if (expressionBinding != null && expressionBinding.isParameterizedType()) {
 			ITypeBinding[] typeArguments = expressionBinding.getTypeArguments();
-			if(typeArguments.length == 1) {
-				return ClassRelationUtil.isContentOfTypes(typeArguments[0], Collections.singletonList(String.class.getName()));
+			if (typeArguments.length == 1) {
+				return ClassRelationUtil.isInheritingContentOfTypes(typeArguments[0],
+						Collections.singletonList(Number.class.getName()));
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Checks whether the given {@link ITypeBinding} represents a collection of
+	 * {@link String}s.
+	 * 
+	 * @param expressionBinding
+	 *            type binding to be checked
+	 * 
+	 * @return {@code true} if the type binding is a collection of
+	 *         {@code String}s or {@code false} otherwise.
+	 */
+	private boolean isCollectionOfStrings(ITypeBinding expressionBinding) {
+		if (expressionBinding != null && expressionBinding.isParameterizedType()) {
+			ITypeBinding[] typeArguments = expressionBinding.getTypeArguments();
+			if (typeArguments.length == 1) {
+				return ClassRelationUtil.isContentOfTypes(typeArguments[0],
+						Collections.singletonList(String.class.getName()));
 			}
 		}
 		return false;
 	}
 	
+	/**
+	 * Checks whether the given {@link ITypeBinding} represents an array of
+	 * {@link String}s.
+	 * 
+	 * @param expressionBinding
+	 *            type binding to be checked
+	 * 
+	 * @return {@code true} if the type binding is an array of {@code String}s
+	 *         or {@code false} otherwise.
+	 */
 	private boolean isArrayOfStrings(ITypeBinding expressionBinding) {
-		if(expressionBinding != null && expressionBinding.isArray()) {
+		if (expressionBinding != null && expressionBinding.isArray()) {
 			ITypeBinding componentType = expressionBinding.getComponentType();
 			return ClassRelationUtil.isContentOfTypes(componentType, Collections.singletonList(String.class.getName()));
 		}
 		return false;
 	}
 	
+	/**
+	 * A visitor for checking whether a variable storing the result of the
+	 * concatenation is declared in the same block as the loop, is initialized
+	 * to empty string and is not referenced between its declaration and the
+	 * loop occurrence.
+	 * 
+	 * @author Ardit Ymeri
+	 * @since 2.1.1
+	 *
+	 */
 	private class ReassignableResultVisitor extends ASTVisitor {
 		private Block block;
 		private EnhancedForStatement loop;
 		private SimpleName resultName;
-		
+
 		private boolean beforeDeclaration = true;
 		private boolean beforeLoop = true;
 		private boolean keepSearching = true;
 		private VariableDeclarationFragment fragment;
-		
+
 		public ReassignableResultVisitor(Block block, EnhancedForStatement loop, SimpleName resultName) {
 			this.block = block;
 			this.loop = loop;
 			this.resultName = resultName;
 		}
-		
+
 		@Override
 		public boolean preVisit2(ASTNode node) {
 			return keepSearching;
 		}
-		
+
 		@Override
 		public boolean visit(SimpleName simpleName) {
 			if (simpleName.getIdentifier().equals(this.resultName.getIdentifier())
@@ -410,15 +658,15 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 			}
 			return true;
 		}
-		
+
 		@Override
 		public boolean visit(VariableDeclarationFragment fragment) {
 			SimpleName fragmentName = fragment.getName();
-			if(fragmentName.getIdentifier().equals(resultName.getIdentifier())) {
+			if (fragmentName.getIdentifier().equals(resultName.getIdentifier())) {
 				Expression initializer = fragment.getInitializer();
-				if(ASTNode.STRING_LITERAL == initializer.getNodeType()) {
-					StringLiteral stringLiteral = (StringLiteral)initializer;
-					if(stringLiteral.getLiteralValue().isEmpty()) {
+				if (ASTNode.STRING_LITERAL == initializer.getNodeType()) {
+					StringLiteral stringLiteral = (StringLiteral) initializer;
+					if (stringLiteral.getLiteralValue().isEmpty()) {
 						this.fragment = fragment;
 						beforeDeclaration = false;
 					} else {
@@ -431,18 +679,18 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 		@Override
 		public boolean visit(EnhancedForStatement loop) {
-			if(this.loop == loop) {
+			if (this.loop == loop) {
 				beforeLoop = false;
 				keepSearching = false;
 			}
 			return beforeLoop;
 		}
-		
+
 		@Override
 		public boolean visit(Block block) {
 			return this.block == block || !beforeDeclaration;
 		}
-		
+
 		public VariableDeclarationFragment getDeclarationFragment() {
 			return this.fragment;
 		}
