@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
@@ -69,11 +70,18 @@ public class ImmutableStaticFinalCollectionsRule {
 		}
 	});
 
-	public static final SortedSet<String> CONSTANT_SORT_SET = Collections.unmodifiableSortedSet(new TreeSet<String>() {
+	public static final SortedSet<String> CONSTANT_SORT_SET = Collections.unmodifiableSortedSet(new TreeSet<>() {
 		{
 			add("foo");
 			add("bar");
 		}
 	});
 
+	public static final List<String> CONSTANT_LIST_2 = new LinkedList<String>();
+
+	static {
+		CONSTANT_LIST_2.add("foo");
+		CONSTANT_LIST_2.add("bar");
+		CONSTANT_LIST_2.add(CONSTANT_LIST.get(0));
+	}
 }
