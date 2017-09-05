@@ -4,30 +4,20 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.ProgressMonitor;
-
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -62,10 +52,17 @@ public class TestStandalone {
 	public static void setUpReal() throws CoreException, IllegalStateException, IOException {
 		BufferedReader br = null;
 		FileReader fr = null;
+		
+		String userHome = System.getProperty("user.home");
+		File directory = new File(userHome + "/temp").getAbsoluteFile();
+		if (directory.exists() || directory.mkdirs()) {
+			System.setProperty("user.dir", directory.getAbsolutePath());
+			System.out.println("Set user.dir to " + directory.getAbsolutePath());
+		}
 
 		String path = "";
 		try {
-			String file = System.getProperty("user.home") + File.separator + "path.txt";
+			String file = System.getProperty("user.dir") + File.separator + "path.txt";
 			System.out.println("file: " + file);
 
 			fr = new FileReader(file);
@@ -89,22 +86,12 @@ public class TestStandalone {
 			}
 		}
 
-		String file = System.getProperty("user.home");
-		File directory = new File(file + "/temp").getAbsoluteFile();
-		if (directory.exists() || directory.mkdirs()) {
-			System.setProperty("user.dir", directory.getAbsolutePath());
-			System.out.println("Set user.dir to " + directory.getAbsolutePath());
-		}
-
 		workspace = ResourcesPlugin.getWorkspace();
 		// org.eclipse.ui.internal.ide.actions.OpenWorkspaceAction.restart
 
 		System.out.println("Created workspace in " + workspace.getRoot().getFullPath());
 
-		IPath pathProj = new Path("/home/andreja/workspaces/runtime-jSparrow/jfreechart-fse/");
-
-		description = workspace
-				.loadProjectDescription(new Path("/home/andreja/workspaces/runtime-jSparrow/jfreechart-fse/.project")); // (path)); //$NON-NLS-1$
+		description = workspace.loadProjectDescription(new Path(path + File.separator + ".project")); //$NON-NLS-1$
 
 		System.out.println("Project description: " + description.getName()); //$NON-NLS-1$
 

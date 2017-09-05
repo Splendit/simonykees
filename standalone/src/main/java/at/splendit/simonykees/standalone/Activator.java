@@ -7,7 +7,6 @@ import java.util.List;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -41,8 +40,6 @@ public class Activator implements BundleActivator {
 
 	private static List<Job> jobs = Collections.synchronizedList(new ArrayList<>());
 
-	private long loggingBundleID = 0;
-
 	// Flag is jSparrow is already running
 	private static boolean running = false;
 
@@ -57,15 +54,6 @@ public class Activator implements BundleActivator {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		System.out.println("Hello World!!");
-
-		// start jSparrow logging bundle
-		// for (Bundle bundle : context.getBundles()) {
-		// if (bundle.getSymbolicName().equals("jSparrow.logging") //$NON-NLS-1$
-		// && bundle.getState() != Bundle.ACTIVE) {
-		// bundle.start();
-		// break;
-		// }
-		// }
 
 		// PREPARE RULES
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
@@ -83,8 +71,6 @@ public class Activator implements BundleActivator {
 		logger.debug("Creating refactoring states");
 		System.out.println("Creating refactoring states");
 		refactoringPipeline.createRefactoringStates(compUnits);
-
-		NullProgressMonitor monitor = new NullProgressMonitor();
 
 		try {
 			logger.debug("Starting refactoring proccess");
@@ -122,12 +108,6 @@ public class Activator implements BundleActivator {
 		plugin = null;
 		bundleContext = null;
 
-		// stop jSparrow.logging
-		Bundle loggingBundle = context.getBundle(loggingBundleID);
-		if (loggingBundle.getState() == Bundle.ACTIVE) {
-			loggingBundle.stop();
-		}
-
 		System.out.println("Stop ACTIVATOR");
 	}
 
@@ -162,15 +142,5 @@ public class Activator implements BundleActivator {
 
 	public static BundleContext getBundleContext() {
 		return bundleContext;
-	}
-
-	public static void main(String[] args) {
-		TestStandalone test = new TestStandalone();
-
-		logger.debug("Getting compilation units");
-		System.out.println("Getting compilation units");
-		List<ICompilationUnit> compUnits = test.getCompUnits();
-
-		System.out.println(compUnits.get(0));
 	}
 }
