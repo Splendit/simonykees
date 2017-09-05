@@ -1,4 +1,3 @@
-
 package at.splendit.simonykees.core;
 
 import java.nio.file.Path;
@@ -9,8 +8,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import at.splendit.simonykees.core.rule.impl.EnumsWithoutEqualsRule;
 import at.splendit.simonykees.core.rule.impl.PrimitiveObjectUseEqualsRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
+import at.splendit.simonykees.core.visitor.EnumsWithoutEqualsASTVisitor;
 import at.splendit.simonykees.core.visitor.PrimitiveObjectUseEqualsASTVisitor;
 
 @SuppressWarnings("nls")
@@ -40,4 +41,5 @@ public class PrimitiveObjectUseEqualsRuleTest extends AbstractRulesTest {
 	public void testTransformation() throws Exception {
 		super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
 	}
+
 }

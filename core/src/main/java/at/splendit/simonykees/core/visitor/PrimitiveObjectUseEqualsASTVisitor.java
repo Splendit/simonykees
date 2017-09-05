@@ -1,8 +1,16 @@
 package at.splendit.simonykees.core.visitor;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import at.splendit.simonykees.core.rule.impl.PrimitiveObjectUseEqualsRule;
+import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
  * /** Looks for occurrences of ==, != comparing two primitive objects, such as
@@ -11,7 +19,7 @@ import at.splendit.simonykees.core.rule.impl.PrimitiveObjectUseEqualsRule;
  * "https://en.wikibooks.org/wiki/Java_Programming/Primitive_Types">here</a>.
  * 
  * Those occurrences should be replaced by equals(). Using == compares object
- * references, which is often not what you want and can lead to bugs. 
+ * references, which is often not what you want and can lead to bugs.
  * 
  * Used in PrimitiveObjectUseEqualsRule.
  * 
@@ -20,11 +28,67 @@ import at.splendit.simonykees.core.rule.impl.PrimitiveObjectUseEqualsRule;
  * @since 2.1.1
  */
 public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
-	
+
+	private static final String BYTE_FULLY_QUALLIFIED_NAME = java.lang.Byte.class.getName();
+	private static final String CHAR_FULLY_QUALLIFIED_NAME = java.lang.Character.class.getName();
+	private static final String SHORT_FULLY_QUALLIFIED_NAME = java.lang.Short.class.getName();
+	private static final String INTEGER_FULLY_QUALIFIED_NAME = java.lang.Integer.class.getName();
+	private static final String LONG_FULLY_QUALIFIED_NAME = java.lang.Long.class.getName();
+	private static final String FLOAT_FULLY_QUALIFIED_NAME = java.lang.Float.class.getName();
+	private static final String DOUBLE_FULLY_QUALIFIED_NAME = java.lang.Double.class.getName();
+	private static final String BOOLEAN_FULLY_QUALIFIED_NAME = java.lang.Boolean.class.getName();
+	private static final String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
+
+	private static final String EQUALS = "equals"; //$NON-NLS-1$
+
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		return true;
+		if (!methodInvocation.arguments().isEmpty()
+				|| ASTNode.INFIX_EXPRESSION != methodInvocation.getParent().getNodeType()
+				|| methodInvocation.getExpression() == null) {
+			return false;
+		}
+		InfixExpression infixExpression = (InfixExpression) methodInvocation.getParent();
+		boolean isEqualsOrNotEqualsInfix = InfixExpression.Operator.EQUALS == infixExpression.getOperator()
+				|| InfixExpression.Operator.NOT_EQUALS != infixExpression.getOperator();
+		if (!isEqualsOrNotEqualsInfix) {
+			return false;
+		}
+		if (!infixExpression.extendedOperands().isEmpty()) {
+			return false;
+		}
 
+		if (!onPrimitiveObjects(infixExpression)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	private boolean onPrimitiveObjects(InfixExpression infixExpression) {
+		Expression leftOperand = infixExpression.getLeftOperand();
+		Expression rightOperand = infixExpression.getRightOperand();
+
+		List<String> allowedTypes = Arrays.asList(BYTE_FULLY_QUALLIFIED_NAME, CHAR_FULLY_QUALLIFIED_NAME,
+				SHORT_FULLY_QUALLIFIED_NAME, INTEGER_FULLY_QUALIFIED_NAME, LONG_FULLY_QUALIFIED_NAME,
+				FLOAT_FULLY_QUALIFIED_NAME, DOUBLE_FULLY_QUALIFIED_NAME, BOOLEAN_FULLY_QUALIFIED_NAME,
+				STRING_FULLY_QUALLIFIED_NAME);
+
+		ITypeBinding leftOperandType = leftOperand.resolveTypeBinding();
+		ITypeBinding rightOperandType = rightOperand.resolveTypeBinding();
+
+		boolean isValidType = ClassRelationUtil.isContentOfTypes(leftOperandType, allowedTypes)
+				&& ClassRelationUtil.isContentOfTypes(rightOperandType, allowedTypes);
+		if (!isValidType) {
+			return false;
+		}
+
+		// Do not refactor if these literals are involved, 'c'.equals('d')
+		// doesn't work
+		List<Integer> forbiddenNodeTypes = Arrays.asList(ASTNode.NUMBER_LITERAL, ASTNode.BOOLEAN_LITERAL,
+				ASTNode.CHARACTER_LITERAL);
+		return !forbiddenNodeTypes.stream()
+				.anyMatch(x -> x == leftOperand.getNodeType() || x == rightOperand.getNodeType());
 	}
 
 }
