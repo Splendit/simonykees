@@ -177,12 +177,14 @@ public class TagUtil {
 
 		} else if (IndexOfToContainsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY);
-		
-		} else if (EnumsWithoutEqualsRule.class == clazz) {
-			return Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS);
-		
+<<<<<<< HEAD
+
 		} else if (StringBufferToBuilderRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE, Tag.STRING_MANIPULATION);
+=======
+		} else if (EnumsWithoutEqualsRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS);
+>>>>>>> develop
 		}
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["
