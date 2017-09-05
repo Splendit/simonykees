@@ -20,72 +20,72 @@ import java.util.TreeSet;
  * @author Matthias Webhofer
  * @since 2.1.1
  */
-@SuppressWarnings({ "serial", "nls", "unchecked", "rawtypes" })
+@SuppressWarnings({ "serial", "nls", "unchecked", "rawtypes", "unused" })
 public class ImmutableStaticFinalCollectionsRule {
 	
-	public static final List<String> CONSTANT_LIST = new ArrayList<String>() {
+	private static final List<String> CONSTANT_LIST = new ArrayList<String>() {
 		{
 			add("foo");
 			add("bar");
 		}
 	};
 
-	public static final Collection<String> CONSTANT_COLLECTION = new ArrayList<String>() {
+	private static final Collection<String> CONSTANT_COLLECTION = new ArrayList<String>() {
 		{
 			add("foo");
 			add("bar");
 		}
 	};
 
-	public static final Map<String, String> CONSTANT_MAP = new HashMap() {
+	private static final Map<String, String> CONSTANT_MAP = new HashMap() {
 		{
 			put("foo", "bar");
 		}
 	};
 
-	public static final Set<String> CONSTANT_SET = new HashSet() {
+	private static final Set<String> CONSTANT_SET = new HashSet() {
 		{
 			add("foo");
 			add("bar");
 		}
 	};
 
-	public static final NavigableMap<String, String> CONSTANT_NAV_MAP = new TreeMap<String, String>() {
+	private static final NavigableMap<String, String> CONSTANT_NAV_MAP = new TreeMap<String, String>() {
 		{
 			put("foo", "bar");
 		}
 	};
 
-	public static final NavigableSet<String> CONSTANT_NAV_SET = new TreeSet<String>() {
+	private static final NavigableSet<String> CONSTANT_NAV_SET = new TreeSet<String>() {
 		{
 			add("foo");
 			add("bar");
 		}
 	};
 
-	public static final SortedMap<String, String> CONSTANT_SORT_MAP = new TreeMap<String, String>() {
+	private static final SortedMap<String, String> CONSTANT_SORT_MAP = new TreeMap<String, String>() {
 		{
 			put("foo", "bar");
 		}
 	};
 
-	public static final SortedSet<String> CONSTANT_SORT_SET = new TreeSet<String>() {
+	private static final SortedSet<String> CONSTANT_SORT_SET = new TreeSet<String>() {
 		{
 			add("foo");
 			add("bar");
 		}
 	};
 
-	public static final List<String> CONSTANT_LIST_2 = new LinkedList<String>();
+	private static final List<String> CONSTANT_LIST_2 = new LinkedList<String>();
 
 	static {
 		CONSTANT_LIST_2.add("foo");
 		CONSTANT_LIST_2.add("bar");
 		CONSTANT_LIST_2.add(CONSTANT_LIST.get(0));
 	}
-	
+
 	private static final List<String> CONSTANT_LIST_3 = new LinkedList<>();
-	
+
 	public void test() {
 		CONSTANT_LIST_3.add("foo");
 		CONSTANT_LIST_3.add("bar");
