@@ -1,5 +1,6 @@
 package at.splendit.simonykees.sample.preRule;
 
+@SuppressWarnings({ "nls", "unused" })
 public class TestPrimitiveObjectUseEqualsRule {
 
 	public void testIntegerShouldRefactor() {
@@ -78,7 +79,9 @@ public class TestPrimitiveObjectUseEqualsRule {
 	}
 
 	public void testActualPrimitivesShouldNotRefactor() {
-		if (1 == 2) {
+		int a = 1;
+		int b = 2;
+		if (a == b) {
 		}
 
 		if (new Integer(1) == 2) {
@@ -97,6 +100,23 @@ public class TestPrimitiveObjectUseEqualsRule {
 		}
 
 		if (true == false) {
+		}
+	}
+
+	public void testOtherInfixShouldNotRefactor() {
+		Integer a = new Integer(1);
+		Integer b = new Integer(2);
+
+		if (a >= b) {
+		}
+
+		if (a <= b) {
+		}
+
+		if (a < b) {
+		}
+
+		if (a > b) {
 		}
 	}
 }

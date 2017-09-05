@@ -7,22 +7,22 @@ public class TestPrimitiveObjectUseEqualsRule {
 		Integer a = new Integer(1);
 		Integer b = new Integer(2);
 
-		if (a == b) {
+		if (a.equals(b)) {
 		}
 
-		if (a != b) {
+		if (!a.equals(b)) {
 		}
 
-		if (!(a == b)) {
+		if (!(a.equals(b))) {
 		}
 
-		if (!(a != b)) {
+		if (!(!a.equals(b))) {
 		}
 
-		if (new Integer(1) == new Integer(2)) {
+		if (new Integer(1).equals(new Integer(2))) {
 		}
 
-		if (new Integer(1) != new Integer(2)) {
+		if (!new Integer(1).equals(new Integer(2))) {
 		}
 	}
 
@@ -30,56 +30,58 @@ public class TestPrimitiveObjectUseEqualsRule {
 		String a = new String("a");
 		String b = new String("b");
 
-		if (a == b) {
+		if (a.equals(b)) {
 		}
 
-		if (a != b) {
+		if (!a.equals(b)) {
 		}
 
-		if (!(a == b)) {
+		if (!(a.equals(b))) {
 		}
 
-		if (!(a != b)) {
+		if (!(!a.equals(b))) {
 		}
 
-		if ("a" == "b") {
+		if ("a".equals("b")) {
 		}
 
-		if ("a" != "b") {
+		if (!"a".equals("b")) {
 		}
 
-		if (new String("a") == new String("b")) {
+		if (new String("a").equals(new String("b"))) {
 		}
 
-		if (new String("a") != new String("b")) {
+		if (!new String("a").equals(new String("b"))) {
 		}
 	}
 
 	public void testOtherPrimitivesShouldRefactor() {
-		if (new Byte("1") == new Byte("2")) {
+		if (new Byte("1").equals(new Byte("2"))) {
 		}
 
-		if (new Character('a') == new Character('b')) {
+		if (new Character('a').equals(new Character('b'))) {
 		}
 
-		if (new Short("1") == new Short("2")) {
+		if (new Short("1").equals(new Short("2"))) {
 		}
 
-		if (new Long(1) == new Long(2)) {
+		if (new Long(1).equals(new Long(2))) {
 		}
 
-		if (new Float(1) == new Float(2)) {
+		if (new Float(1).equals(new Float(2))) {
 		}
 
-		if (new Double(1) == new Double(2)) {
+		if (new Double(1).equals(new Double(2))) {
 		}
 
-		if (new Boolean(true) == new Boolean(false)) {
+		if (new Boolean(true).equals(new Boolean(false))) {
 		}
 	}
 
 	public void testActualPrimitivesShouldNotRefactor() {
-		if (1 == 2) {
+		int a = 1;
+		int b = 2;
+		if (a == b) {
 		}
 
 		if (new Integer(1) == 2) {
@@ -98,6 +100,23 @@ public class TestPrimitiveObjectUseEqualsRule {
 		}
 
 		if (true == false) {
+		}
+	}
+
+	public void testOtherInfixShouldNotRefactor() {
+		Integer a = new Integer(1);
+		Integer b = new Integer(2);
+
+		if (a >= b) {
+		}
+
+		if (a <= b) {
+		}
+
+		if (a < b) {
+		}
+
+		if (a > b) {
 		}
 	}
 }

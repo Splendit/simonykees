@@ -7,8 +7,10 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.SimpleName;
 
+import at.splendit.simonykees.core.builder.NodeBuilder;
 import at.splendit.simonykees.core.rule.impl.PrimitiveObjectUseEqualsRule;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
@@ -42,15 +44,9 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 	private static final String EQUALS = "equals"; //$NON-NLS-1$
 
 	@Override
-	public boolean visit(MethodInvocation methodInvocation) {
-		if (!methodInvocation.arguments().isEmpty()
-				|| ASTNode.INFIX_EXPRESSION != methodInvocation.getParent().getNodeType()
-				|| methodInvocation.getExpression() == null) {
-			return false;
-		}
-		InfixExpression infixExpression = (InfixExpression) methodInvocation.getParent();
+	public boolean visit(InfixExpression infixExpression) {
 		boolean isEqualsOrNotEqualsInfix = InfixExpression.Operator.EQUALS == infixExpression.getOperator()
-				|| InfixExpression.Operator.NOT_EQUALS != infixExpression.getOperator();
+				|| InfixExpression.Operator.NOT_EQUALS == infixExpression.getOperator();
 		if (!isEqualsOrNotEqualsInfix) {
 			return false;
 		}
@@ -62,7 +58,24 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 			return false;
 		}
 
+		
+		Expression replaceNode = createReplacementNode(infixExpression);
+		astRewrite.replace(infixExpression, replaceNode, null);
+
 		return true;
+	}
+	
+	private Expression createReplacementNode(InfixExpression infixExpression){
+		Expression left = (Expression) astRewrite.createMoveTarget(infixExpression.getLeftOperand());
+		Expression right = (Expression) astRewrite.createMoveTarget(infixExpression.getRightOperand());
+		SimpleName simpleName = NodeBuilder.newSimpleName(infixExpression.getAST(), EQUALS);
+		Expression replacementNode = NodeBuilder.newMethodInvocation(infixExpression.getAST(), left, simpleName,
+				Arrays.asList(right));
+		if(infixExpression.getOperator() == InfixExpression.Operator.NOT_EQUALS){
+			replacementNode = NodeBuilder.newPrefixExpression(infixExpression.getAST(), PrefixExpression.Operator.NOT, replacementNode);
+		}
+		
+		return replacementNode;
 	}
 
 	private boolean onPrimitiveObjects(InfixExpression infixExpression) {

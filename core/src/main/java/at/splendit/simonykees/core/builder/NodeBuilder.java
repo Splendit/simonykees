@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -234,9 +235,27 @@ public class NodeBuilder {
 	}
 
 	/**
+	 * @param ast
+	 *            The AbstractSyntaxTree that is the target of the node
+	 * @param operator
+	 *            {@link PrefixExpression.Operator} of the
+	 *            {@link PrefixExpression}
+	 * @param expression
+	 *            {@link Expression} for the operand
+	 * @return {@link PrefixExpression} with the given operator and operands
+	 */
+	public static PrefixExpression newPrefixExpression(AST ast, PrefixExpression.Operator operator,
+			Expression expression) {
+		PrefixExpression result = ast.newPrefixExpression();
+		result.setOperator(operator);
+		result.setOperand(expression);
+		return result;
+	}
+
+	/**
 	 * 
 	 * @param ast
-	 *            the AbastractSyntaxTree thats the target of the node
+	 *            the AbstractSyntaxTree thats the target of the node
 	 * @param operator
 	 *            {@link InfixExpression.Operator} of the
 	 *            {@link InfixExpression}
@@ -270,11 +289,13 @@ public class NodeBuilder {
 		return result;
 	}
 
-	/** Creates a {@link MarkerAnnotation} for the given {@link Name}
+	/**
+	 * Creates a {@link MarkerAnnotation} for the given {@link Name}
 	 * 
 	 * @param ast
 	 *            the AbastractSyntaxTree thats the target of the node
-	 * @param name name of the annotation
+	 * @param name
+	 *            name of the annotation
 	 * @return an {@link MarkerAnnotation}
 	 */
 	public static MarkerAnnotation newMarkerAnnotation(AST ast, Name name) {
