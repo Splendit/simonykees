@@ -1,10 +1,7 @@
 package at.splendit.simonykees.core.util;
 
 import java.util.Arrays;
-import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
