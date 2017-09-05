@@ -124,11 +124,7 @@ public class StringBuildingLoopRule {
 
 	public String collectingArrayOfNumbers(String input) {
 		Double[] arrayOfStrings = { 2.1, 3.5 };
-		StringBuilder resultSb = new StringBuilder();
-		for (Double val : arrayOfStrings) {
-			resultSb.append(val);
-		}
-		String result = resultSb.toString();
+		String result = Arrays.stream(arrayOfStrings).map(Object::toString).collect(Collectors.joining());
 		return result;
 	}
 

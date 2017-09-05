@@ -177,6 +177,10 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 				// Arrays.stream(expression)
 				streamExpression = createStreamFromArray(loopExpression);
 				concatUsingCollectorsJoining(loopNode, resultVariable, streamExpression);
+			} else if (isArrayOfNumbers(loopExpressionTypeBinding)) {
+				// Arrays.stream(expression)).map(Object::toString)
+				streamExpression = createStreamFromNumnbersArray(loopExpression);
+				concatUsingCollectorsJoining(loopNode, resultVariable, streamExpression);
 			} else if (isCollectionOfNumbers(loopExpressionTypeBinding)) {
 				// expression.stream().map(Object::toString)
 				streamExpression = createStreamFromNumbersCollection(loopExpression);
@@ -196,6 +200,13 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		return false;
 	}
 
+	/**
+	 * Replaces the loop with a stream expression which computes the concatenation
+	 * result by invoking {@code collect(Collectors.joining())}. 
+	 * @param loopNode the original loop
+	 * @param resultVariable the variable for storing the result
+	 * @param streamExpression the expression providing the stream for {@code collect(Collectors.joining())}.
+	 */
 	private void concatUsingCollectorsJoining(EnhancedForStatement loopNode, SimpleName resultVariable,
 			MethodInvocation streamExpression) {
 		MethodInvocation collect = createCollectInvocation();
@@ -214,6 +225,19 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		astRewrite.replace(loopNode, newStatement, null);
 	}
 
+	/**
+	 * Introduces a {@link StringBuilder} to be used for storing the value of
+	 * the loop variable instead of concatenation expression.
+	 * 
+	 * @param loopNode
+	 *            the original loop
+	 * @param loopParameter
+	 *            the loop variable
+	 * @param singleBodyStatement
+	 *            the single statement in the loop
+	 * @param resultVariable
+	 *            the variable for storing the result of the concatenation
+	 */
 	private void concatUsingStringBuilder(EnhancedForStatement loopNode, SingleVariableDeclaration loopParameter,
 			ExpressionStatement singleBodyStatement, SimpleName resultVariable) {
 		// create the stringBuilder
@@ -221,8 +245,8 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		Block parentBlock;
 		if (ASTNode.BLOCK == loopParent.getNodeType()) {
 			/*
-			 * If the parent is not a block, there is no room
-			 * for creating the StringBuilder.
+			 * If the parent is not a block, there is no room for creating the
+			 * StringBuilder.
 			 */
 			parentBlock = (Block) loopParent;
 			String stringBuilderId = generateStringBuilderIdentifier(loopNode, resultVariable.getIdentifier());
@@ -425,6 +449,25 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		argRewriter.insertFirst(loopExpression, null);
 		return stream;
 	}
+	
+	private MethodInvocation createStreamFromNumnbersArray(Expression loopExpression) {
+		AST ast = astRewrite.getAST();
+		
+		
+		MethodInvocation stream = createStreamFromArray(loopExpression);
+		MethodInvocation mapToString = ast.newMethodInvocation();
+		mapToString.setName(ast.newSimpleName(MAP));
+		mapToString.setExpression(stream);
+
+		ExpressionMethodReference methodReference = ast.newExpressionMethodReference();
+		methodReference.setExpression(ast.newSimpleName(Object.class.getSimpleName()));
+		methodReference.setName(ast.newSimpleName(TO_STRING));
+
+		ListRewrite argRewriter = astRewrite.getListRewrite(mapToString, MethodInvocation.ARGUMENTS_PROPERTY);
+		argRewriter.insertFirst(methodReference, null);
+		
+		return mapToString;
+	}
 
 	/**
 	 * Creates a node representing an invocation of
@@ -619,6 +662,24 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		if (expressionBinding != null && expressionBinding.isArray()) {
 			ITypeBinding componentType = expressionBinding.getComponentType();
 			return ClassRelationUtil.isContentOfTypes(componentType, Collections.singletonList(String.class.getName()));
+		}
+		return false;
+	}
+	
+	/**
+	 * Checks whether the given {@link ITypeBinding} represents an array of
+	 * {@link Number}s.
+	 * 
+	 * @param expressionBinding
+	 *            type binding to be checked
+	 * 
+	 * @return {@code true} if the type binding is an array of {@code Number}s
+	 *         or {@code false} otherwise.
+	 */
+	private boolean isArrayOfNumbers(ITypeBinding expressionBinding) {
+		if (expressionBinding != null && expressionBinding.isArray()) {
+			ITypeBinding componentType = expressionBinding.getComponentType();
+			return ClassRelationUtil.isInheritingContentOfTypes(componentType, Collections.singletonList(Number.class.getName()));
 		}
 		return false;
 	}
