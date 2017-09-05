@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,7 +16,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -70,9 +68,6 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	private static final String JAVA_UTIL_COLLECTIONS_SIMPLENAME = java.util.Collections.class.getSimpleName();
 	private static final String JAVA_UTIL_COLLECTIONS = java.util.Collections.class.getName();
 
-	private static final String JAVA_LANG_UNSUPPORTED_OPERATION_EXCEPTION = java.lang.UnsupportedOperationException.class
-			.getName();
-
 	/*** TYPE LISTS ***/
 
 	private static final List<String> COLLECTION_TYPE_LIST = Collections.singletonList(JAVA_UTIL_COLLECTION);
@@ -84,26 +79,46 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	private static final List<String> SORTED_MAP_TYPE_LIST = Collections.singletonList(JAVA_UTIL_SORTED_MAP);
 	private static final List<String> SORTED_SET_TYPE_LIST = Collections.singletonList(JAVA_UTIL_SORTED_SET);
 
-	private static final List<String> UNSUPPORTED_OPERATION_EXCEPTION_TYPE_LIST = Collections
-			.singletonList(JAVA_LANG_UNSUPPORTED_OPERATION_EXCEPTION);
-
 	/*** HELPER FIELDS ***/
 
-	private Set<String> modifiedCollectionsInStaticInitializer = new HashSet<>();
-	private Map<String, ASTNode> initializersToReplace = new HashMap<>();
-	private Map<String, MethodInvocation> newMethodInvocations = new HashMap<>();
-	private List<String> excludedNames = new LinkedList<>();
-	
-	private List<String> collectionModifingMethods = Arrays.asList(
-				// interface Collection
-				"add",
-				"remove",
-				"addAll",
-				"removeAll",
-				"removeIf",
-				"retainAll",
-				"clear"
-			);
+	private Set<String> excludedNames = new HashSet<>();
+	private Map<String, String> methodNames = new HashMap<>();
+	private Map<String, Expression> initializersToReplace = new HashMap<>();
+
+	// allowed method names
+	@SuppressWarnings("nls")
+	private List<String> collectionNonModifingMethods = Arrays.asList(
+			// Collection
+
+			"contains", "containsAll", "equals", "hashCode", "isEmpty", "iterator", "parallelStream", "size",
+			"spliteraotr", "stream", "toArray",
+
+			// List
+
+			"get", "indexOf", "isEmpty", "lastIndexOf", "listIterator", "subList",
+
+			// Map
+
+			"containsKey", "containsValue", "entrySet", "forEach", "getOrDefault", "keySet", "values",
+
+			// NavigableMap
+
+			"ceilingEntry", "ceilingKey", "descendingKeySet", "descendingMap", "firstEntry", "floorEntry", "floorKey",
+			"headMap", "higherEntry", "higherKey", "lastEntry", "lowerEntry", "lowerKey", "navigableKeySet", "subMap",
+			"tailMap",
+
+			// NavigableSet
+
+			"ceiling", "descendingIterator", "descendingSet", "floor", "headSet", "higher", "lower", "subSet",
+			"tailSet",
+
+			// SortedMap
+
+			"comparator", "firstKey", "lastKey",
+
+			// SortedSet
+
+			"first", "last");
 
 	/*** VISITORS ***/
 
@@ -116,7 +131,8 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 			if (parentTypeBinding != null) {
 
 				if (ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isStatic)
-						&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isFinal)) {
+						&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isFinal)
+						&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isPrivate)) {
 
 					Expression initializer = fragmentNode.getInitializer();
 					if (initializer != null && ASTNode.CLASS_INSTANCE_CREATION == initializer.getNodeType()) {
@@ -133,13 +149,9 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 							if (methodNameString != null) {
 								this.addImports.add(JAVA_UTIL_COLLECTIONS);
 
-								MethodInvocation newMI = createNewMethodInvocation(initializer, methodNameString);
-
 								String fieldName = fragmentNode.getName().getIdentifier();
 								initializersToReplace.put(fieldName, initializer);
-								newMethodInvocations.put(fieldName, newMI);
-
-								// astRewrite.replace(initializer, newMI, null);
+								methodNames.put(fieldName, methodNameString);
 							}
 						}
 					}
@@ -155,18 +167,32 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	public boolean visit(MethodInvocation methodInvocationNode) {
 		Expression expression = methodInvocationNode.getExpression();
 		if (expression != null && ASTNode.SIMPLE_NAME == expression.getNodeType()) {
-			String expressionName = ((SimpleName) expression).getIdentifier();
-			
-			IMethodBinding miMethodBinding = methodInvocationNode.resolveMethodBinding();
-			
-			if (miMethodBinding != null) {
-				List<ITypeBinding> exceptions = Arrays.asList(miMethodBinding.getExceptionTypes());
-				boolean isModifingMethod = exceptions.stream().anyMatch(exception -> ClassRelationUtil
-						.isContentOfTypes(exception, UNSUPPORTED_OPERATION_EXCEPTION_TYPE_LIST));
-				
-				if(isModifingMethod) {
+			ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
+			if (ClassRelationUtil.isContentOfTypes(expressionTypeBinding, COLLECTION_TYPE_LIST)
+					|| ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, COLLECTION_TYPE_LIST)
+					|| ClassRelationUtil.isContentOfTypes(expressionTypeBinding, MAP_TYPE_LIST)
+					|| ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, MAP_TYPE_LIST)) {
+
+				String expressionName = ((SimpleName) expression).getIdentifier();
+				String methodName = methodInvocationNode.getName().getIdentifier();
+
+				if (!collectionNonModifingMethods.contains(methodName)) {
 					excludedNames.add(expressionName);
 				}
+			} else if (methodInvocationNode.arguments() != null && !methodInvocationNode.arguments().isEmpty()) {
+				List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocationNode.arguments(),
+						Expression.class);
+				arguments.forEach(argument -> {
+					ITypeBinding argumentTypeBinding = argument.resolveTypeBinding();
+					if (ClassRelationUtil.isContentOfTypes(argumentTypeBinding, COLLECTION_TYPE_LIST)
+							|| ClassRelationUtil.isInheritingContentOfTypes(argumentTypeBinding, COLLECTION_TYPE_LIST)
+							|| ClassRelationUtil.isContentOfTypes(argumentTypeBinding, MAP_TYPE_LIST)
+							|| ClassRelationUtil.isInheritingContentOfTypes(argumentTypeBinding, MAP_TYPE_LIST)) {
+						if (ASTNode.SIMPLE_NAME == argument.getNodeType()) {
+							excludedNames.add(((SimpleName) argument).getIdentifier());
+						}
+					}
+				});
 			}
 		}
 
@@ -179,32 +205,25 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 			Block block = initializerNode.getBody();
 			if (block != null && block.statements() != null && !block.statements().isEmpty()) {
 				List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
-				modifiedCollectionsInStaticInitializer = statements.stream()
-						.filter(ExpressionStatement.class::isInstance).map(ExpressionStatement.class::cast)
-						.map(ExpressionStatement::getExpression).filter(MethodInvocation.class::isInstance)
-						.map(MethodInvocation.class::cast).map(ASTNodeUtil::getLeftMostExpressionOfMethodInvocation)
-						.filter(SimpleName.class::isInstance).map(SimpleName.class::cast).map(SimpleName::getIdentifier)
-						.collect(Collectors.toSet());
+				excludedNames.addAll(statements.stream().filter(ExpressionStatement.class::isInstance)
+						.map(ExpressionStatement.class::cast).map(ExpressionStatement::getExpression)
+						.filter(MethodInvocation.class::isInstance).map(MethodInvocation.class::cast)
+						.map(ASTNodeUtil::getLeftMostExpressionOfMethodInvocation).filter(SimpleName.class::isInstance)
+						.map(SimpleName.class::cast).map(SimpleName::getIdentifier).collect(Collectors.toSet()));
 			}
 		}
 
-		return false;
+		return true;
 	}
 
 	@Override
 	public void endVisit(CompilationUnit compilationUnitNode) {
-		newMethodInvocations.keySet().forEach(key -> {
-			boolean isMethodInvocationReplaceable = false;
-			if (!modifiedCollectionsInStaticInitializer.contains(key)) {
-				if (initializersToReplace.keySet().contains(key)) {
-					this.addImports.add(JAVA_UTIL_COLLECTIONS);
-					astRewrite.replace(initializersToReplace.get(key), newMethodInvocations.get(key), null);
-					isMethodInvocationReplaceable = true;
-				}
-			}
-
-			if (!isMethodInvocationReplaceable) {
-				newMethodInvocations.get(key).delete();
+		methodNames.keySet().forEach(key -> {
+			if (initializersToReplace.keySet().contains(key) && !excludedNames.contains(key)) {
+				this.addImports.add(JAVA_UTIL_COLLECTIONS);
+				MethodInvocation newMI = createNewMethodInvocation(initializersToReplace.get(key),
+						methodNames.get(key));
+				astRewrite.replace(initializersToReplace.get(key), newMI, null);
 			}
 		});
 
@@ -213,6 +232,14 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 
 	/*** PRIVATE HELPER METHODS ***/
 
+	/**
+	 * creates the new {@link MethodInvocation} with the given name and the
+	 * given initializer as an argument
+	 * 
+	 * @param initializer
+	 * @param methodNameString
+	 * @return new {@link MethodInvocation}
+	 */
 	private MethodInvocation createNewMethodInvocation(Expression initializer, String methodNameString) {
 		SimpleName collectionsClassName = astRewrite.getAST().newSimpleName(JAVA_UTIL_COLLECTIONS_SIMPLENAME);
 		SimpleName methodName = astRewrite.getAST().newSimpleName(methodNameString);
