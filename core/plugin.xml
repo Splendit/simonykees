@@ -21,6 +21,9 @@
 				<command commandId="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
 					style="push"/>
+				<command commandId="at.splendit.simonykees.simonykees.core.RenameFieldsRuleWizardHandler" 
+					label="%command.label.rename_fields_rule_wizard" 
+					style="push"/>
 			</menu>
 		</menuContribution>
 		<menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=org.eclipse.jdt.ui.refactoring.menu">
@@ -30,6 +33,9 @@
 					style="push"/>
 				<command commandId="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
+					style="push"/>
+				<command commandId="at.splendit.simonykees.simonykees.core.RenameFieldsRuleWizardHandler" 
+					label="%command.label.rename_fields_rule_wizard" 
 					style="push"/>
 			</menu>
 		</menuContribution>
@@ -41,6 +47,9 @@
 				<command commandId="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
 					style="push"/>
+				<command commandId="at.splendit.simonykees.simonykees.core.RenameFieldsRuleWizardHandler" 
+					label="%command.label.rename_fields_rule_wizard" 
+					style="push"/>
 			</menu>
 		</menuContribution>
 	</extension>
@@ -51,6 +60,9 @@
 		<command defaultHandler="at.splendit.simonykees.core.handler.LoggerRuleWizardHandler" 
 			id="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
 			name="%command.name.logger_rule_wizard_handler"/>
+		<command defaultHandler="at.splendit.simonykees.core.handler.RenameFieldsRuleWizardHandler" 
+			id="at.splendit.simonykees.simonykees.core.RenameFieldsRuleWizardHandler" 
+			name="%command.label.rename_fields_rule_wizard"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferencePage" 
