@@ -122,10 +122,11 @@ public class StringBuildingLoopRule {
 	
 	public String collectingArrayOfNumbers(String input) {
 		Double[] arrayOfStrings = {2.1, 3.5};
-		String result = "";
+		StringBuilder resultSb = new StringBuilder();
 		for(Double val : arrayOfStrings) {
-			result = result + val;
+			resultSb.append(val);
 		}
+		String result = resultSb.toString();
 		return result;
 	}
 	
@@ -141,6 +142,15 @@ public class StringBuildingLoopRule {
 		@Deprecated
 		String result = listOfStrings.stream().collect(Collectors.joining());
 		return result;
+	}
+	
+	public String handleText(char[] txt, int position) {
+		StringBuilder textSb = new StringBuilder();
+		for (char aTxt : txt) {
+			textSb.append(aTxt);
+		}
+		String text = textSb.toString();
+		return text += "\n";
 	}
 	
 	/*

@@ -147,7 +147,6 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 		Expression loopExpression = loopNode.getExpression();
 		SingleVariableDeclaration loopParameter = loopNode.getParameter();
-		ASTNode loopParent = loopNode.getParent();
 
 		ExpressionStatement singleBodyStatement = getSingleBodyStatement(loopNode).orElse(null);
 		if (singleBodyStatement == null) {
@@ -167,49 +166,65 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 		if (this.javaVersion.atLeast(JavaVersion.JAVA_1_8)) {
 			// create the collection statement
-			MethodInvocation collect = createCollectInvocation();
+			
 			MethodInvocation streamExpression;
 			ITypeBinding loopExpressionTypeBinding = loopExpression.resolveTypeBinding();
 			if (isCollectionOfStrings(loopExpressionTypeBinding)) {
 				// expression.stream()
 				streamExpression = createStreamFromStringsCollection(loopExpression);
+				concatUsingCollectorsJoining(loopNode, resultVariable, streamExpression);
 			} else if (isArrayOfStrings(loopExpressionTypeBinding)) {
 				// Arrays.stream(expression)
 				streamExpression = createStreamFromArray(loopExpression);
+				concatUsingCollectorsJoining(loopNode, resultVariable, streamExpression);
 			} else if (isCollectionOfNumbers(loopExpressionTypeBinding)) {
 				// expression.stream().map(Object::toString)
 				streamExpression = createStreamFromNumbersCollection(loopExpression);
+				concatUsingCollectorsJoining(loopNode, resultVariable, streamExpression);
 			} else {
-				return true;
+				/*
+				 * the loop expression cannot be converted to a stream,
+				 * but using a StringBuilder may still be possible.
+				 */
+				concatUsingStringBuilder(loopNode, loopParameter, singleBodyStatement, resultVariable);
 			}
-
-			collect.setExpression(streamExpression);
-			ASTNode newStatement;
-			Optional<VariableDeclarationFragment> optFragment = isReassignable(resultVariable, loopNode);
-			if (ASTNode.BLOCK == loopNode.getParent().getNodeType() && optFragment.isPresent()) {
-				VariableDeclarationFragment fragment = optFragment.get();
-				VariableDeclarationStatement oldDeclStatement = (VariableDeclarationStatement) fragment.getParent();
-				newStatement = assignCollectToResult(collect, resultVariable, oldDeclStatement);
-				removeOldSumDeclaration(oldDeclStatement, fragment);
-			} else {
-				newStatement = concatCollectToResult(collect, resultVariable);
-			}
-
-			astRewrite.replace(loopNode, newStatement, null);
 
 		} else if (this.javaVersion.atLeast(JavaVersion.JAVA_1_5)) {
-			// create the stringBuilder
-			Block parentBlock;
-			if (ASTNode.BLOCK == loopParent.getNodeType()) {
-				/*
-				 * If the parent is not a block, there is no room
-				 * for creating the StringBuilder.
-				 */
-				parentBlock = (Block) loopParent;
-			} else {
-				return true;
-			}
-			
+			concatUsingStringBuilder(loopNode, loopParameter, singleBodyStatement, resultVariable);
+		}
+
+		return false;
+	}
+
+	private void concatUsingCollectorsJoining(EnhancedForStatement loopNode, SimpleName resultVariable,
+			MethodInvocation streamExpression) {
+		MethodInvocation collect = createCollectInvocation();
+		collect.setExpression(streamExpression);
+		ASTNode newStatement;
+		Optional<VariableDeclarationFragment> optFragment = isReassignable(resultVariable, loopNode);
+		if (ASTNode.BLOCK == loopNode.getParent().getNodeType() && optFragment.isPresent()) {
+			VariableDeclarationFragment fragment = optFragment.get();
+			VariableDeclarationStatement oldDeclStatement = (VariableDeclarationStatement) fragment.getParent();
+			newStatement = assignCollectToResult(collect, resultVariable, oldDeclStatement);
+			removeOldSumDeclaration(oldDeclStatement, fragment);
+		} else {
+			newStatement = concatCollectToResult(collect, resultVariable);
+		}
+
+		astRewrite.replace(loopNode, newStatement, null);
+	}
+
+	private void concatUsingStringBuilder(EnhancedForStatement loopNode, SingleVariableDeclaration loopParameter,
+			ExpressionStatement singleBodyStatement, SimpleName resultVariable) {
+		// create the stringBuilder
+		ASTNode loopParent = loopNode.getParent();
+		Block parentBlock;
+		if (ASTNode.BLOCK == loopParent.getNodeType()) {
+			/*
+			 * If the parent is not a block, there is no room
+			 * for creating the StringBuilder.
+			 */
+			parentBlock = (Block) loopParent;
 			String stringBuilderId = generateStringBuilderIdentifier(loopNode, resultVariable.getIdentifier());
 			VariableDeclarationStatement sbDeclaration = introduceStringBuilder(stringBuilderId);
 			ListRewrite blockRewrite = astRewrite.getListRewrite(parentBlock, Block.STATEMENTS_PROPERTY);
@@ -228,8 +243,6 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 			blockRewrite.insertAfter(expressionStatement, loopNode, null);
 		}
-
-		return true;
 	}
 
 	/**

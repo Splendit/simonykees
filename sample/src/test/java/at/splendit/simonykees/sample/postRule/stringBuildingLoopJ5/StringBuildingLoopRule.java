@@ -195,6 +195,15 @@ public class StringBuildingLoopRule {
 		return result;
 	}
 	
+	public String handleText(char[] txt, int position) {
+		StringBuilder textSb = new StringBuilder();
+		for (char aTxt : txt) {
+			textSb.append(aTxt);
+		}
+		String text = textSb.toString();
+		return text += "\n";
+	}
+	
 	/*
 	 * Testing the generated string builder name
 	 */

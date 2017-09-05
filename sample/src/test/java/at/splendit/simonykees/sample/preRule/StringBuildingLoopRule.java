@@ -178,6 +178,18 @@ public class StringBuildingLoopRule {
 		return result;
 	}
 	
+	public String handleText(char[] txt, int position) {
+		/*
+		 * corner case in cc.mallet.pipe.CharSequenceRemoveHTML.java
+		 * Using StringBuilder if conversion to stream is not possible
+		 */
+		String text = "";
+		for (char aTxt : txt) {
+			text += aTxt;
+		}
+		return text += "\n";
+	}
+	
 	/*
 	 * Testing the generated string builder name
 	 */
