@@ -36,22 +36,22 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  * the following code:
  * 
  * <pre>
- * <code>
- * 		List<Integer> numbers = generateIntList(input);
- *		int sum = 0;
- *		for(int n : numbers) {
- *			sum += n;
- *		}
+ * <code>{@code
+ * List<Integer> numbers = generateIntList(input);}
+ * int sum = 0;
+ * for(int n : numbers) {
+ * 	sum += n;
+ * }
  * </code>
  * </pre>
  * 
  * will be converted to:
  * 
  * <pre>
- * <code>
- * 		List<Integer> numbers = generateIntList(input);
- * 		int sum = numbers.stream().mapToInt(Integer::intValue).sum();
- * </code>
+ * <code>{@code
+ * List<Integer> numbers = generateIntList(input);
+ * int sum = numbers.stream().mapToInt(Integer::intValue).sum();
+ * }</code>
  * </pre>
  * 
  * Considers only the cases where the loop variable is either an {@code int},
