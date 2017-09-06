@@ -14,6 +14,7 @@ import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamAnyMatchRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamFindFirstRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamForEachRule;
+import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamSumRule;
 import at.splendit.simonykees.core.rule.impl.EnumsWithoutEqualsRule;
 import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
@@ -36,6 +37,7 @@ import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
 import at.splendit.simonykees.core.rule.impl.StatementLambdaToExpressionRule;
+import at.splendit.simonykees.core.rule.impl.StringBufferToBuilderRule;
 import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
 import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
@@ -88,6 +90,9 @@ public class TagUtil {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
 
 		} else if (EnhancedForLoopToStreamFindFirstRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
+			
+		} else if (EnhancedForLoopToStreamSumRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
 
 		} else if (FieldNameConventionRule.class == clazz) {
@@ -173,8 +178,12 @@ public class TagUtil {
 
 		} else if (IndexOfToContainsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY);
+		
 		} else if (EnumsWithoutEqualsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS);
+		
+		} else if (StringBufferToBuilderRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE, Tag.STRING_MANIPULATION);
 
 		} else if (ReImplementingInterfaceRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS);

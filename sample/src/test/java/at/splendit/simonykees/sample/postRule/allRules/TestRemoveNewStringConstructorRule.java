@@ -76,7 +76,7 @@ public class TestRemoveNewStringConstructorRule {
 	}
 
 	public String testStringBuffer(String input) {
-		StringBuffer buffer = new StringBuffer(input);
+		StringBuilder buffer = new StringBuilder(input);
 		return new String(buffer);
 	}
 

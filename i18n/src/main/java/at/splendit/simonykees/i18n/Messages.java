@@ -85,6 +85,8 @@ public class Messages extends NLS {
 	public static String EnhancedForLoopToStreamForEachRule_name;
 	public static String EnumsWithoutEqualsRule_name;
 	public static String EnumsWithoutEqualsRule_description;
+	public static String EnhancedForLoopToStreamSumRule_description;
+	public static String EnhancedForLoopToStreamSumRule_name;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;
@@ -239,6 +241,8 @@ public class Messages extends NLS {
 	public static String StandardLoggerRule_name;
 	public static String StatementLambdaToExpressionRule_description;
 	public static String StatementLambdaToExpressionRule_name;
+	public static String StringBufferToBuilderRule_description;
+	public static String StringBufferToBuilderRule_name;
 	public static String StringFormatLineSeparatorRule_description;
 	public static String StringFormatLineSeparatorRule_name;
 	public static String StringConcatToPlusRule_description;

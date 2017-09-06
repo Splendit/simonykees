@@ -13,6 +13,7 @@ import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamAnyMatchRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamFindFirstRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamForEachRule;
+import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamSumRule;
 import at.splendit.simonykees.core.rule.impl.EnumsWithoutEqualsRule;
 import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
@@ -35,6 +36,7 @@ import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
 import at.splendit.simonykees.core.rule.impl.StatementLambdaToExpressionRule;
+import at.splendit.simonykees.core.rule.impl.StringBufferToBuilderRule;
 import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
 import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
@@ -60,6 +62,7 @@ import at.splendit.simonykees.core.visitor.RemoveNewStringConstructorASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveToStringOnStringASTVisitor;
 import at.splendit.simonykees.core.visitor.SerialVersionUidASTVisitor;
 import at.splendit.simonykees.core.visitor.StatementLambdaToExpressionASTVisitor;
+import at.splendit.simonykees.core.visitor.StringBufferToBuilderASTVisitor;
 import at.splendit.simonykees.core.visitor.StringConcatToPlusASTVisitor;
 import at.splendit.simonykees.core.visitor.StringFormatLineSeparatorASTVisitor;
 import at.splendit.simonykees.core.visitor.StringLiteralEqualityCheckASTVisitor;
@@ -69,6 +72,7 @@ import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVi
 import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamAnyMatchASTVisitor;
 import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamFindFirstASTVisitor;
 import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamForEachASTVisitor;
+import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamSumASTVisitor;
 import at.splendit.simonykees.core.visitor.functionalInterface.FunctionalInterfaceASTVisitor;
 import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachCollectASTVisitor;
 import at.splendit.simonykees.core.visitor.lambdaForEach.LambdaForEachIfWrapperToFilterASTVisitor;
@@ -134,6 +138,7 @@ public class RulesContainer {
 				new StringConcatToPlusRule(StringConcatToPlusASTVisitor.class),
 				new UseIsEmptyRule(UseIsEmptyRuleASTVisitor.class),
 				new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
+				new StringBufferToBuilderRule(StringBufferToBuilderASTVisitor.class),
 
 				/*
 				 * Loops and streams
@@ -148,6 +153,7 @@ public class RulesContainer {
 				new FlatMapInsteadOfNestedLoopsRule(FlatMapInsteadOfNestedLoopsASTVisitor.class),
 				new EnhancedForLoopToStreamAnyMatchRule(EnhancedForLoopToStreamAnyMatchASTVisitor.class),
 				new EnhancedForLoopToStreamFindFirstRule(EnhancedForLoopToStreamFindFirstASTVisitor.class),
+				new EnhancedForLoopToStreamSumRule(EnhancedForLoopToStreamSumASTVisitor.class),
 				new LambdaToMethodReferenceRule(LambdaToMethodReferenceASTVisitor.class),
 
 				/*
