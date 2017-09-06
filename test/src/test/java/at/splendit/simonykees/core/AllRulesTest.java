@@ -20,7 +20,7 @@ import at.splendit.simonykees.core.visitor.semiAutomatic.StandardLoggerASTVisito
 /**
  * TODO SIM-103 add class description
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Ardit Ymeri
  * @since 0.9
  */
 @SuppressWarnings("nls")
@@ -34,7 +34,6 @@ public class AllRulesTest extends AbstractRulesTest {
 	private Path preRule, postRule;
 
 	public AllRulesTest(String fileName, Path preRule, Path postRule) {
-		super();
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
@@ -42,6 +41,7 @@ public class AllRulesTest extends AbstractRulesTest {
 		StandardLoggerRule standardLoggerRule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
 		standardLoggerRule.activateDefaultOptions();
 		rulesList.add(standardLoggerRule);
+		
 		rulesList.addAll(RulesContainer.getAllRules());
 	}
 

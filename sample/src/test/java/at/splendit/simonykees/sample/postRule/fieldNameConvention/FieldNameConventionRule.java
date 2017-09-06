@@ -108,7 +108,7 @@ public class FieldNameConventionRule {
 	public String methodImplementigAnAnonymousClass() {
 		String _myval = Optional.ofNullable(this.myval).orElse("");
 		FooInterface fooInterface = new FooInterface() {
-			int _myval = 0;
+			private int _myval = 0;
 			
 			@Override
 			public WeekDays getTomorrow() {

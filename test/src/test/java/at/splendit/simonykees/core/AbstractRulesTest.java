@@ -98,7 +98,14 @@ public abstract class AbstractRulesTest {
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) throws Exception {
 
 		String packageString = "at.splendit.simonykees.sample.preRule"; //$NON-NLS-1$
-		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
+		return processFile(fileName, content, packageString, rules);
+	}
+	
+	
+	protected String processFile(String fileName, String content, String prerulePackage,
+			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) throws Exception {
+
+		IPackageFragment packageFragment = root.createPackageFragment(prerulePackage, true, null);
 
 		ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);
 
