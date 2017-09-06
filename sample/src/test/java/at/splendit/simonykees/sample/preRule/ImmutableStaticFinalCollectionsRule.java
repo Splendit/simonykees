@@ -78,6 +78,12 @@ public class ImmutableStaticFinalCollectionsRule {
 
 	private static final List<String> CONSTANT_LIST_2 = new LinkedList<String>();
 
+	public static final List<String> CONSTANT_LIST_4 = new LinkedList<>();
+
+	private static List<String> CONSTANT_LIST_5 = new LinkedList<>();
+
+	private final List<String> CONSTANT_LIST_6 = new LinkedList<>();
+
 	static {
 		CONSTANT_LIST_2.add("foo");
 		CONSTANT_LIST_2.add("bar");
