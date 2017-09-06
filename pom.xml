@@ -4,8 +4,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>at.splendit.jSparrow</groupId>
-	<artifactId>jSparrow</artifactId>
+	<groupId>at.splendit</groupId>
+	<artifactId>eu.jSparrow</artifactId>
 	<version>2.1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>jSparrow :: parent</name>
@@ -194,43 +194,43 @@
 		<dependencies>
 			<!-- jSparrow -->
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.logging</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jSparrow.logging</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.i18n</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jSparrow.i18n</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.license.api</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jSparrow.license.api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.core</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jSparrow.core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.test</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jSparrow.test</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.feature</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jSparrow.feature</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.site</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jSparrow.site</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.sample</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jSparrow.sample</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

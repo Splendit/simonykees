@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
-		<artifactId>jSparrow</artifactId>
-		<groupId>at.splendit.jSparrow</groupId>
+		<artifactId>eu.jSparrow</artifactId>
+		<groupId>at.splendit</groupId>
 		<version>2.1.1-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>jSparrow.sample</artifactId>
+	<artifactId>eu.jSparrow.sample</artifactId>
 	<packaging>jar</packaging>
 	<name>jSparrow :: sample</name>
 	<description>jSparrow Samples</description>

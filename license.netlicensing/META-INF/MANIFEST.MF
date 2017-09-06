@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Licensing
-Bundle-SymbolicName: jSparrow.license.netlicensing
+Bundle-SymbolicName: eu.jSparrow.license.netlicensing
 Bundle-Version: 2.1.1.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: jSparrow.license.api,
- jSparrow.i18n,
- jSparrow.logging,
+Require-Bundle: eu.jSparrow.license.api,
+ eu.jSparrow.i18n,
+ eu.jSparrow.logging,
  com.labs64.netlicensing.client;bundle-version="2.3.4",
  com.github.oshi.core;bundle-version="3.4.2",
  org.eclipse.equinox.ds;bundle-version="[1.4.300,2.0.0)",
