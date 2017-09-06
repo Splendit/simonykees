@@ -156,7 +156,7 @@ timestamps {
 			notifyBuild(currentBuild.result)
 		}
 		
-		step([$class: 'StashNotifier'])         // Notifies the Stash Instance of the build result
+		step([$class: 'StashNotifier']) // Notifies the Stash Instance of the build result
 	}
 }
 	
@@ -196,7 +196,7 @@ def notifyBuild(String buildStatus) {
 }
 
 def copyMappingFiles(String buildNumber, String mappingFilesDirectory) {
-	def statusCode = sh(returnStatus: true, script: "./copyMappingFiles.sh ${buildNumber} ./ ${mappingFilesDirectory}")
+	def statusCode = sh(returnStatus: true, script: "./copyMappingFiles.sh ./ ${mappingFilesDirectory} ${buildNumber}")
 	if (statusCode != 0) {
 		println("copying mapping files FAILED! Error Code: ${statusCode}")
 		currentBuild.result = "UNSTABLE"

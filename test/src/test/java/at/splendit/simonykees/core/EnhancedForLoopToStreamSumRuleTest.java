@@ -8,26 +8,31 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import at.splendit.simonykees.core.rule.impl.EnumsWithoutEqualsRule;
+import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamSumRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
-import at.splendit.simonykees.core.visitor.EnumsWithoutEqualsASTVisitor;
+import at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamSumASTVisitor;
 
+/**
+ * Testing {@link EnhancedForLoopToStreamSumRule}
+ * 
+ * @author Ardit Ymeri
+ * @since 2.1.1
+ */
 @SuppressWarnings("nls")
 @RunWith(Parameterized.class)
-public class EnumsWithoutEqualsRuleTest extends AbstractRulesTest {
+public class EnhancedForLoopToStreamSumRuleTest extends AbstractRulesTest {
 
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.enumsWithoutEquals";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/enumsWithoutEquals";
-
+	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.enhancedForLooptToStreamSum";
+	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/enhancedForLooptToStreamSum";
+	
 	private String fileName;
 	private Path preRule, postRule;
 
-	public EnumsWithoutEqualsRuleTest(String fileName, Path preRule, Path postRule) {
-		super();
+	public EnhancedForLoopToStreamSumRuleTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
-		rulesList.add(new EnumsWithoutEqualsRule(EnumsWithoutEqualsASTVisitor.class));
+		rulesList.add(new EnhancedForLoopToStreamSumRule(EnhancedForLoopToStreamSumASTVisitor.class));
 	}
 
 	@Parameters(name = "{index}: test file[{0}]")
@@ -39,5 +44,4 @@ public class EnumsWithoutEqualsRuleTest extends AbstractRulesTest {
 	public void testTransformation() throws Exception {
 		super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
 	}
-
 }
