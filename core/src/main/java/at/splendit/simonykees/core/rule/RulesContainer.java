@@ -36,6 +36,7 @@ import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
 import at.splendit.simonykees.core.rule.impl.StatementLambdaToExpressionRule;
+import at.splendit.simonykees.core.rule.impl.StringBufferToBuilderRule;
 import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
 import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
@@ -61,6 +62,7 @@ import at.splendit.simonykees.core.visitor.RemoveNewStringConstructorASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveToStringOnStringASTVisitor;
 import at.splendit.simonykees.core.visitor.SerialVersionUidASTVisitor;
 import at.splendit.simonykees.core.visitor.StatementLambdaToExpressionASTVisitor;
+import at.splendit.simonykees.core.visitor.StringBufferToBuilderASTVisitor;
 import at.splendit.simonykees.core.visitor.StringConcatToPlusASTVisitor;
 import at.splendit.simonykees.core.visitor.StringFormatLineSeparatorASTVisitor;
 import at.splendit.simonykees.core.visitor.StringLiteralEqualityCheckASTVisitor;
@@ -134,6 +136,7 @@ public class RulesContainer {
 				new StringConcatToPlusRule(StringConcatToPlusASTVisitor.class),
 				new UseIsEmptyRule(UseIsEmptyRuleASTVisitor.class),
 				new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
+				new StringBufferToBuilderRule(StringBufferToBuilderASTVisitor.class),
 				new PrimitiveObjectUseEqualsRule(PrimitiveObjectUseEqualsASTVisitor.class),
 				/*
 				 * Loops and streams
