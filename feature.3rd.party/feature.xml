@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="eu.jSparrow.3rd.party.feature"
+      id="eu.jsparrow.3rd.party.feature"
       label="jSparrow Third-party Dependencies"
       version="2.1.1.qualifier"
       provider-name="Splendit IT-Consulting GmbH">

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/jSparrow.feature_0.0.0.jar" id="eu.jSparrow.feature" version="0.0.0">
+   <feature url="features/jsparrow.feature_0.0.0.jar" id="eu.jsparrow.feature" version="0.0.0">
       <category name="splendit"/>
    </feature>
-   <feature url="features/jSparrow.3rd.party.feature_0.0.0.jar" id="eu.jSparrow.3rd.party.feature" version="0.0.0"/>
+   <feature url="features/jsparrow.3rd.party.feature_0.0.0.jar" id="eu.jsparrow.3rd.party.feature" version="0.0.0"/>
    <category-def name="splendit" label="splendit">
       <description>
          Eclipse plugins by Splendit IT-Consulting GmbH

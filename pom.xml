@@ -5,7 +5,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>at.splendit</groupId>
-	<artifactId>eu.jSparrow</artifactId>
+	<artifactId>eu.jsparrow</artifactId>
 	<version>2.1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>jSparrow :: parent</name>
@@ -195,42 +195,42 @@
 			<!-- jSparrow -->
 			<dependency>
 				<groupId>at.splendit</groupId>
-				<artifactId>eu.jSparrow.logging</artifactId>
+				<artifactId>eu.jsparrow.logging</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>at.splendit</groupId>
-				<artifactId>eu.jSparrow.i18n</artifactId>
+				<artifactId>eu.jsparrow.i18n</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>at.splendit</groupId>
-				<artifactId>eu.jSparrow.license.api</artifactId>
+				<artifactId>eu.jsparrow.license.api</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>at.splendit</groupId>
-				<artifactId>eu.jSparrow.core</artifactId>
+				<artifactId>eu.jsparrow.core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>at.splendit</groupId>
-				<artifactId>eu.jSparrow.test</artifactId>
+				<artifactId>eu.jsparrow.test</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>at.splendit</groupId>
-				<artifactId>eu.jSparrow.feature</artifactId>
+				<artifactId>eu.jsparrow.feature</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>at.splendit</groupId>
-				<artifactId>eu.jSparrow.site</artifactId>
+				<artifactId>eu.jsparrow.site</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>at.splendit</groupId>
-				<artifactId>eu.jSparrow.sample</artifactId>
+				<artifactId>eu.jsparrow.sample</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>

@@ -108,8 +108,6 @@ public class Activator extends AbstractUIPlugin {
 		}
 
 		logger.info(Messages.Activator_start);
-		
-		throw new RuntimeException();
 	}
 
 	/*

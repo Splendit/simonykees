@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
-		<artifactId>eu.jSparrow</artifactId>
+		<artifactId>eu.jsparrow</artifactId>
 		<groupId>at.splendit</groupId>
 		<version>2.1.1-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>eu.jSparrow.test</artifactId>
+	<artifactId>eu.jsparrow.test</artifactId>
 	<packaging>eclipse-test-plugin</packaging>
 	<name>jSparrow :: test core</name>
 	<description>jSparrow Test Plugin</description>
@@ -15,7 +15,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>at.splendit</groupId>
-			<artifactId>eu.jSparrow.sample</artifactId>
+			<artifactId>eu.jsparrow.sample</artifactId>
 		</dependency>
 	</dependencies>
 	

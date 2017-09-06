@@ -3,11 +3,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<artifactId>eu.jSparrow</artifactId>
+		<artifactId>eu.jsparrow</artifactId>
 		<groupId>at.splendit</groupId>
 		<version>2.1.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>eu.jSparrow.feature</artifactId>
+	<artifactId>eu.jsparrow.feature</artifactId>
 	<packaging>eclipse-feature</packaging>
 	<name>jSparrow :: feature</name>
 	<description>jSparrow Feature</description>
