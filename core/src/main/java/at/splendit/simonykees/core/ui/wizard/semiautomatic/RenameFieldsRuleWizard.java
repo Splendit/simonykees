@@ -14,7 +14,6 @@ import at.splendit.simonykees.i18n.Messages;
 
 public class RenameFieldsRuleWizard extends Wizard {
 
-
 	private static final Logger logger = LoggerFactory.getLogger(RenameFieldsRuleWizard.class);
 
 	private RenameFieldsRuleWizardPage page;
@@ -22,7 +21,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 	private RenameFieldsRuleWizardPageControler controler;
 
 	private IJavaProject selectedJavaProjekt;
-	//TODO change to RenameFieldsRule
+	// TODO change to RenameFieldsRule
 	private final StandardLoggerRule rule;
 
 	private RefactoringPipeline refactoringPipeline;
@@ -57,8 +56,11 @@ public class RenameFieldsRuleWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		// TODO add conditions
-		return true;
+		if (model.getFieldTypes().isEmpty()) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	@Override
