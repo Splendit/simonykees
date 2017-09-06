@@ -26,7 +26,6 @@ import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
@@ -178,7 +177,7 @@ public final class RefactoringUtil {
 		astParser.setCompilerOptions(options);
 		return (CompilationUnit) astParser.createAST(null);
 	}
-	
+
 	/**
 	 * Generate a {@code DocumentChange} from a {@code Document} and a
 	 * {@code TextEdit}
@@ -199,12 +198,14 @@ public final class RefactoringUtil {
 		documentChange.setTextType("java"); //$NON-NLS-1$
 		return documentChange;
 	}
-	
+
 	/**
-	 * Checks if the {@link ICompilationUnit} has any errors in the current configuration it is loaded.
-	 * If no IMarker of severity error is present it passes.
+	 * Checks if the {@link ICompilationUnit} has any errors in the current
+	 * configuration it is loaded. If no IMarker of severity error is present it
+	 * passes.
 	 * 
-	 * @param iCompilationUnit file to check
+	 * @param iCompilationUnit
+	 *            file to check
 	 * @return returns true if no error exists, otherwise false
 	 * @since 1.2
 	 * 
@@ -212,9 +213,22 @@ public final class RefactoringUtil {
 	public static boolean checkForSyntaxErrors(ICompilationUnit iCompilationUnit) {
 		try {
 			/**
-			 * findMaxProblemSeverity returns the SEVERITY-Level of the highest order.
+			 * findMaxProblemSeverity returns the SEVERITY-Level of the highest
+			 * order.
 			 */
-			return IMarker.SEVERITY_ERROR == iCompilationUnit.getResource().findMaxProblemSeverity(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
+			
+			boolean foundProblems = IMarker.SEVERITY_ERROR == iCompilationUnit.getResource().findMaxProblemSeverity(
+					IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
+			if(foundProblems){
+				List<IMarker> markers = Arrays.asList(
+						iCompilationUnit.getResource().findMarkers(IMarker.PROBLEM, false, IResource.DEPTH_INFINITE));
+				for (IMarker marker : markers) {
+					String message = String.format("Found marker on line %s, with message: %s", //$NON-NLS-1$
+							marker.getAttribute(IMarker.LOCATION), marker.getAttribute(IMarker.MESSAGE));
+					logger.info(message);
+				}
+			}
+			return foundProblems;
 		} catch (CoreException e) {
 			logger.error(e.getMessage(), e);
 			return false;
