@@ -220,8 +220,9 @@ public final class RefactoringUtil {
 			boolean foundProblems = IMarker.SEVERITY_ERROR == iCompilationUnit.getResource().findMaxProblemSeverity(
 					IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
 			if(foundProblems){
+				logger.info("Check markers");
 				List<IMarker> markers = Arrays.asList(
-						iCompilationUnit.getResource().findMarkers(IMarker.PROBLEM, false, IResource.DEPTH_INFINITE));
+						iCompilationUnit.getResource().findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE));
 				for (IMarker marker : markers) {
 					String message = String.format("Found marker on line %s, with message: %s", //$NON-NLS-1$
 							marker.getAttribute(IMarker.LOCATION), marker.getAttribute(IMarker.MESSAGE));

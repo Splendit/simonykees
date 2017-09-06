@@ -218,6 +218,7 @@ public class RefactoringPipeline {
 					}
 
 					if (RefactoringUtil.checkForSyntaxErrors(compilationUnit)) {
+						logger.info("Adding compilation unit to errorList: " + compilationUnit.getElementName());
 						containingErrorList.add(compilationUnit);
 					} else {
 						refactoringStates
