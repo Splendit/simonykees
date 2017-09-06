@@ -20,20 +20,24 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-//import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
  * Utility class for Simonykees
  * 
- * @author Hannes Schweighofer, Andreja Sambolec
+ * @author Hannes Schweighofer, Andreja Sambolec, Hans-Jörg Schrödl
  * @since 0.9
  */
 public final class RefactoringUtil {
+
+	private static final Logger logger = LoggerFactory.getLogger(RefactoringUtil.class);
 
 	private static final String BACKSLASH_N = "\n"; //$NON-NLS-1$
 	private static final String LINE_SEPARATOR_PROPERTY = "line.separator"; //$NON-NLS-1$
@@ -212,6 +216,7 @@ public final class RefactoringUtil {
 			 */
 			return IMarker.SEVERITY_ERROR == iCompilationUnit.getResource().findMaxProblemSeverity(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
 		} catch (CoreException e) {
+			logger.error(e.getMessage(), e);
 			return false;
 		}
 	}
