@@ -43,7 +43,7 @@ public abstract class AbstractRulesTest {
 	protected static String javaVersion = JavaCore.VERSION_1_8;
 
 	@BeforeClass
-	public static void setUp() throws Exception {
+	public static void classSetUp() throws Exception {
 		if (root == null) {
 			root = RulesTestUtil.getPackageFragementRoot(javaVersion);
 			String packageString = "at.splendit.simonykees.sample.utilities"; //$NON-NLS-1$
@@ -57,7 +57,7 @@ public abstract class AbstractRulesTest {
 	}
 
 	@AfterClass
-	public static void tearDown() throws Exception {
+	public static void classTearDown() throws Exception {
 		root = null;
 		javaVersion = JavaCore.VERSION_1_8;
 	}
