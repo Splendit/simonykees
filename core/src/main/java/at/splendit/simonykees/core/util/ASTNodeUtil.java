@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -297,6 +298,33 @@ public class ASTNodeUtil {
 			}
 		}
 		return STREAM_MAP_METHOD_NAME;
+	}
+
+	/**
+	 * Finds the scope where the statement belongs to. A scope is either the
+	 * body of:
+	 * <ul>
+	 * <li>a method</li>
+	 * <li>an initializer</li>
+	 * <li>a class/interface</li>
+	 * <li>an enumeration</li>
+	 * <li>an annotation declaration</li>
+	 * </ul>
+	 * 
+	 * @param statement
+	 *            a statement to look for the scope where it falls into.
+	 * @return an {@link ASTNode} representing either of the above
+	 */
+	public static ASTNode findScope(Statement statement) {
+		ASTNode parent = statement.getParent();
+		while (parent != null && parent.getNodeType() != ASTNode.METHOD_DECLARATION
+				&& parent.getNodeType() != ASTNode.INITIALIZER && parent.getNodeType() != ASTNode.TYPE_DECLARATION
+				&& parent.getNodeType() != ASTNode.ENUM_DECLARATION
+				&& parent.getNodeType() != ASTNode.ANNOTATION_TYPE_DECLARATION) {
+	
+			parent = parent.getParent();
+		}
+		return parent;
 	}
 
 	/**
