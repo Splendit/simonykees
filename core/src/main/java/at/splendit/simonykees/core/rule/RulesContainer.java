@@ -30,6 +30,7 @@ import at.splendit.simonykees.core.rule.impl.MultiVariableDeclarationLineRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
 import at.splendit.simonykees.core.rule.impl.OverrideAnnotationRule;
 import at.splendit.simonykees.core.rule.impl.PrimitiveBoxedForStringRule;
+import at.splendit.simonykees.core.rule.impl.PrimitiveObjectUseEqualsRule;
 import at.splendit.simonykees.core.rule.impl.ReImplementingInterfaceRule;
 import at.splendit.simonykees.core.rule.impl.RearrangeClassMembersRule;
 import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
@@ -56,6 +57,7 @@ import at.splendit.simonykees.core.visitor.LambdaToMethodReferenceASTVisitor;
 import at.splendit.simonykees.core.visitor.MultiVariableDeclarationLineASTVisitor;
 import at.splendit.simonykees.core.visitor.OverrideAnnotationRuleASTVisitor;
 import at.splendit.simonykees.core.visitor.PrimitiveBoxedForStringASTVisitor;
+import at.splendit.simonykees.core.visitor.PrimitiveObjectUseEqualsASTVisitor;
 import at.splendit.simonykees.core.visitor.ReImplementingInterfaceASTVisitor;
 import at.splendit.simonykees.core.visitor.RearrangeClassMembersASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveNewStringConstructorASTVisitor;
@@ -139,7 +141,7 @@ public class RulesContainer {
 				new UseIsEmptyRule(UseIsEmptyRuleASTVisitor.class),
 				new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
 				new StringBufferToBuilderRule(StringBufferToBuilderASTVisitor.class),
-
+				new PrimitiveObjectUseEqualsRule(PrimitiveObjectUseEqualsASTVisitor.class),
 				/*
 				 * Loops and streams
 				 */

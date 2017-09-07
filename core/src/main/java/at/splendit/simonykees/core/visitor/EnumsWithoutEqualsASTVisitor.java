@@ -26,6 +26,7 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final String EQUALS = "equals"; //$NON-NLS-1$
 
+	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		if (methodInvocation.arguments().size() != 1 || methodInvocation.getExpression() == null) {
 			return false;
