@@ -35,7 +35,7 @@ timestamps {
 			}
 			
 			stage('Maven Compile') {
-				def mvnCommand = 'clean compile'
+				def mvnCommand = 'clean verify -DskipTests'
 				sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
 			}
 			
@@ -44,7 +44,7 @@ timestamps {
 			// wrap([$class: 'Xvfb']) {
 				stage('Integration-Tests') {
 					// Run the maven build
-					def mvnCommand = 'clean install -fae -Dsurefire.rerunFailingTestsCount=2'
+					def mvnCommand = 'clean verify -fae -Dsurefire.rerunFailingTestsCount=2'
 			
 					// def mvnCommand = 'surefire:test -fae -Dsurefire.rerunFailingTestsCount=2'
 					def statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${mvnCommand}")
