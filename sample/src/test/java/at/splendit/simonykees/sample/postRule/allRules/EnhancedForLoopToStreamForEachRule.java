@@ -194,7 +194,7 @@ public class EnhancedForLoopToStreamForEachRule {
 		rule.testClassField.testIntField = 1;
 		rule = null;
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		stringList1.forEach((s) -> {
 			sb.append(s);
 			stringList2.forEach((n) -> {

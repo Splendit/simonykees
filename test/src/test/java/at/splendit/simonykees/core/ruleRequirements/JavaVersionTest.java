@@ -22,9 +22,9 @@ import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * Tests how many rules are active for each java version.
- * First parameter is a JavaCore Version that is active
- * Second parameter is the number of rules that should be active
+ * Tests how many rules are active for each java version. First parameter is a
+ * JavaCore Version that is active Second parameter is the number of rules that
+ * should be active
  * 
  * The second parameter needs to be adopted if the rule set size increases.
  * 
@@ -50,9 +50,9 @@ public class JavaVersionTest {
 
 	@Parameters(name = "{index}: test java version[{0}]")
 	public static Collection<Object[]> data() {
-		return Arrays.asList(new Object[][] { { JavaCore.VERSION_1_1, 11 }, { JavaCore.VERSION_1_2, 12 },
-				{ JavaCore.VERSION_1_3, 12 }, { JavaCore.VERSION_1_4, 13 }, { JavaCore.VERSION_1_5, 21 },
-				{ JavaCore.VERSION_1_6, 23 }, { JavaCore.VERSION_1_7, 26 }, { JavaCore.VERSION_1_8, 37 } });
+		return Arrays.asList(new Object[][] { { JavaCore.VERSION_1_1, 12 }, { JavaCore.VERSION_1_2, 13 },
+				{ JavaCore.VERSION_1_3, 13 }, { JavaCore.VERSION_1_4, 14 }, { JavaCore.VERSION_1_5, 23 },
+				{ JavaCore.VERSION_1_6, 25 }, { JavaCore.VERSION_1_7, 28 }, { JavaCore.VERSION_1_8, 39 } });
 	}
 
 	private String javaVersion;
