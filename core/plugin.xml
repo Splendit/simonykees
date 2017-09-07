@@ -15,30 +15,30 @@
 		            </iterate>
 		           </with>
          		</visibleWhen>
-				<command commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler" 
+				<command commandId="eu.jsparrow.core.SelectRulesWizardHandler" 
 					label="%command.label.select_rules_wizard" 
 					style="push"/>
-				<command commandId="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
+				<command commandId="eu.jsparrow.core.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
 					style="push"/>
 			</menu>
 		</menuContribution>
 		<menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=org.eclipse.jdt.ui.refactoring.menu">
 			<menu label="%menu.label">
-				<command commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler" 
+				<command commandId="eu.jsparrow.core.SelectRulesWizardHandler" 
 					label="%command.label.select_rules_wizard" 
 					style="push"/>
-				<command commandId="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
+				<command commandId="eu.jsparrow.core.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
 					style="push"/>
 			</menu>
 		</menuContribution>
 		<menuContribution locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.refactoring.menu">
 			<menu label="%menu.label">
-				<command commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler" 
+				<command commandId="eu.jsparrow.core.SelectRulesWizardHandler" 
 					label="%command.label.select_rules_wizard" 
 					style="push"/>
-				<command commandId="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
+				<command commandId="eu.jsparrow.core.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
 					style="push"/>
 			</menu>
@@ -46,19 +46,19 @@
 	</extension>
 	<extension point="org.eclipse.ui.commands">
 		<command defaultHandler="eu.jsparrow.core.handler.SelectRulesWizardHandler" 
-			id="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler" 
+			id="eu.jsparrow.core.SelectRulesWizardHandler" 
 			name="%command.name.select_rules_wizard_handler"/>
 		<command defaultHandler="eu.jsparrow.core.handler.LoggerRuleWizardHandler" 
-			id="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
+			id="eu.jsparrow.core.LoggerRuleWizardHandler" 
 			name="%command.name.logger_rule_wizard_handler"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page class="eu.jsparrow.core.ui.preference.SimonykeesPreferencePage" 
-			id="at.splendit.simonykees.core.ui.preference.ProfilePreferencePage" 
+			id="eu.jsparrow.core.ui.preference.ProfilePreferencePage" 
 			name="%preferencePage.name"/>
-		<page category="at.splendit.simonykees.core.ui.preference.ProfilePreferencePage" 
+		<page category="eu.jsparrow.core.ui.preference.ProfilePreferencePage" 
 			class="eu.jsparrow.core.ui.preference.SimonykeesPreferencePageLicense" 
-			id="at.splendit.simonykees.core.ui.preference.ProfilePreferencePageLicense" 
+			id="eu.jsparrow.core.ui.preference.ProfilePreferencePageLicense" 
 			name="%preferencePageLicense.name"/>
 	</extension>
 	<extension point="org.eclipse.core.runtime.preferences">

@@ -46,11 +46,11 @@ public class RulesTestUtil {
 	private static final Path[] EMPTY_PATHS = new Path[0];
 	public static final String RULE_SUFFIX = "*Rule.java";
 
-	public static final String BASE_PACKAGE = "package at.splendit.simonykees.sample";
-	public static final String PRERULE_PACKAGE = "package at.splendit.simonykees.sample.preRule";
-	public static final String BASE_DIRECTORY = SAMPLE_MODULE_PATH + "src/test/java/at/splendit/simonykees/sample";
+	public static final String BASE_PACKAGE = "package eu.jsparrow.sample";
+	public static final String PRERULE_PACKAGE = "package eu.jsparrow.sample.preRule";
+	public static final String BASE_DIRECTORY = SAMPLE_MODULE_PATH + "src/test/java/eu/jsparrow/sample";
 	public static final String PRERULE_DIRECTORY = SAMPLE_MODULE_PATH
-			+ "src/test/java/at/splendit/simonykees/sample/preRule";
+			+ "src/test/java/eu/jsparrow/sample/preRule";
 
 	private RulesTestUtil() {
 		// hiding

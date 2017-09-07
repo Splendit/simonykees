@@ -46,7 +46,7 @@ public abstract class AbstractRulesTest {
 	public static void setUp() throws Exception {
 		if (root == null) {
 			root = RulesTestUtil.getPackageFragementRoot(javaVersion);
-			String packageString = "at.splendit.simonykees.sample.utilities"; //$NON-NLS-1$
+			String packageString = "eu.jsparrow.sample.utilities"; //$NON-NLS-1$
 			IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
 			for (Path utilityPath : loadUtilityClasses(UTILITY_DIRECTORY)) {
 				String utilityClassName = utilityPath.getFileName().toString();
@@ -97,7 +97,7 @@ public abstract class AbstractRulesTest {
 	protected String processFile(String fileName, String content,
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) throws Exception {
 
-		String packageString = "at.splendit.simonykees.sample.preRule"; //$NON-NLS-1$
+		String packageString = "eu.jsparrow.sample.preRule"; //$NON-NLS-1$
 		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
 
 		ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);

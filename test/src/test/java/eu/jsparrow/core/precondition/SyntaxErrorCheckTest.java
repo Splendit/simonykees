@@ -32,7 +32,7 @@ public class SyntaxErrorCheckTest {
 
 		RulesTestUtil.addToClasspath(testproject, RulesTestUtil.getClassPathEntries(root));
 
-		packageFragment = root.createPackageFragment("at.splendit.simonykees", true, null);
+		packageFragment = root.createPackageFragment("eu.jsparrow", true, null);
 	}
 
 	@After
