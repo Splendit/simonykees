@@ -31,6 +31,7 @@ import at.splendit.simonykees.core.rule.impl.MultiVariableDeclarationLineRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
 import at.splendit.simonykees.core.rule.impl.OverrideAnnotationRule;
 import at.splendit.simonykees.core.rule.impl.PrimitiveBoxedForStringRule;
+import at.splendit.simonykees.core.rule.impl.PrimitiveObjectUseEqualsRule;
 import at.splendit.simonykees.core.rule.impl.ReImplementingInterfaceRule;
 import at.splendit.simonykees.core.rule.impl.RearrangeClassMembersRule;
 import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
@@ -68,7 +69,6 @@ public class TagUtil {
 	 */
 	@SuppressWarnings({ "rawtypes", "nls" })
 	public static List<Tag> getTagsForRule(Class<? extends RefactoringRule> clazz) {
-
 		if (ArithmethicAssignmentRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_4, Tag.READABILITY, Tag.CODING_CONVENTIONS);
 
@@ -192,6 +192,9 @@ public class TagUtil {
 		} else if (ReImplementingInterfaceRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS);
 
+
+		} else if (PrimitiveObjectUseEqualsRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.STRING_MANIPULATION);
 		}
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["
