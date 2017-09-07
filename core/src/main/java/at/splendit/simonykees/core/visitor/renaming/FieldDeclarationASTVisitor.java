@@ -58,6 +58,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	private Map<ASTNode, List<SimpleName>> declaredNamesPerNode = new HashMap<>();
 	private List<String> newNamesPerType = new ArrayList<>();
 	private Set<IPath> targetResources = new HashSet<>();
+	private Set<IJavaElement> targetIJavaElements = new HashSet<>();
 	private IJavaProject iJavaProject;
 	private IJavaElement[] searchScope;
 
@@ -264,6 +265,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 				ReferenceSearchMatch reference = new ReferenceSearchMatch(match, fragmentIdentifier);
 				references.add(reference);
 				IPath path = match.getResource().getFullPath();
+				storeIJavaElement((IJavaElement) match.getElement());
 				storePath(path);
 			}
 		};
@@ -292,6 +294,10 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	private void storePath(IPath path) {
 		this.targetResources.add(path);
 	}
+	
+	private void storeIJavaElement(IJavaElement iJavaElement) {
+		this.targetIJavaElements.add(iJavaElement);
+	}
 
 	/**
 	 * 
@@ -300,6 +306,16 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	public Set<IPath> getTargetCompilationUnitPaths() {
 		return this.targetResources;
+	}
+	
+
+	/**
+	 * 
+	 * @return the set of the {@link IJavaElement}s containing a reference to a 
+	 * field being renamed.
+	 */
+	public Set<IJavaElement> getTargetIJavaElements() {
+		return this.targetIJavaElements;
 	}
 
 	/**

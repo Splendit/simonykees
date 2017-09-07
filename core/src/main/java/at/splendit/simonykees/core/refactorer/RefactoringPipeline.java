@@ -528,5 +528,9 @@ public class RefactoringPipeline {
 			}
 		}
 	}
+	
+	public void setRefactoringStates(List<RefactoringState> refactoringStates) {
+		this.refactoringStates = refactoringStates;
+	}
 
 }

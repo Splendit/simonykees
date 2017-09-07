@@ -5,14 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import at.splendit.simonykees.core.rule.RefactoringRule;
-import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
-import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 public class RenameFieldsRuleWizardPageModel {
-
-	private StandardLoggerRule rule;
 
 	Set<IValueChangeListener> listeners = new HashSet<>();
 	
@@ -22,8 +17,7 @@ public class RenameFieldsRuleWizardPageModel {
 	private String dollarReplacementOption;
 	private boolean addTodoComments;
 
-	public RenameFieldsRuleWizardPageModel(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
-		this.rule = (StandardLoggerRule) rule;
+	public RenameFieldsRuleWizardPageModel() {
 	}
 
 	/**

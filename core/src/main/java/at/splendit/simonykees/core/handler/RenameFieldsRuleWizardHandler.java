@@ -9,10 +9,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -25,16 +22,11 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.exception.SimonykeesException;
-import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
-import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerRule;
 import at.splendit.simonykees.core.ui.LicenseUtil;
-import at.splendit.simonykees.core.ui.dialog.CompilationErrorsMessageDialog;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.wizard.semiautomatic.RenameFieldsRuleWizard;
 import at.splendit.simonykees.core.util.WizardHandlerUtil;
-import at.splendit.simonykees.core.visitor.semiAutomatic.StandardLoggerASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
@@ -58,48 +50,13 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 			if (LicenseUtil.getInstance().isValid()) {
 				List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
 				if (!selectedJavaElements.isEmpty()) {
-					IJavaProject selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
-
-					// Change to renameFieldsRule
-					 StandardLoggerRule renameFieldsRule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
-
-					RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 
 					Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
 
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 
-							try {
-								List<ICompilationUnit> containingErrorList = refactoringPipeline
-										.prepareRefactoring(selectedJavaElements, monitor);
-								if (monitor.isCanceled()) {
-									/*
-									 * Workaround that prevents selection of
-									 * multiple projects in the Package
-									 * Explorer.
-									 * 
-									 * See SIM-496
-									 */
-									if (refactoringPipeline.isMultipleProjects()) {
-										synchronizeWithUIShowMultiprojectMessage();
-									}
-									refactoringPipeline.clearStates();
-									Activator.setRunning(false);
-									return Status.CANCEL_STATUS;
-								} else if (null != containingErrorList && !containingErrorList.isEmpty()) {
-									synchronizeWithUIShowCompilationErrorMessage(containingErrorList, event,
-											refactoringPipeline, selectedJavaElements, renameFieldsRule, selectedJavaProjekt);
-								} else {
-									synchronizeWithUIShowRenameFieldsRuleWizard(event, refactoringPipeline,
-											selectedJavaElements, renameFieldsRule, selectedJavaProjekt);
-								}
-
-							} catch (RefactoringException e) {
-								synchronizeWithUIShowInfo(e);
-								return Status.CANCEL_STATUS;
-							}
-
+							synchronizeWithUIShowRenameFieldsRuleWizard(selectedJavaElements);
 							return Status.OK_STATUS;
 						}
 					};
@@ -108,6 +65,8 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 					job.schedule();
 
 					return true;
+				} else {
+					synchronizeWithUIShowWarningNoComlipationUnitDialog();
 				}
 			} else {
 				/*
@@ -122,22 +81,17 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 
 	}
 
-	
-
 	/**
 	 * Method used to open SelectRulesWizard from non UI thread
 	 */
-	//TODO change parameter rule to RenameFieldsRule
-	private void synchronizeWithUIShowRenameFieldsRuleWizard(ExecutionEvent event, RefactoringPipeline refactoringPipeline,
-			List<IJavaElement> selectedJavaElements, StandardLoggerRule loggerRule, IJavaProject selectedJavaProjekt) {
+	private void synchronizeWithUIShowRenameFieldsRuleWizard(List<IJavaElement> selectedJavaElements) {
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				// HandlerUtil.getActiveShell(event)
 				final WizardDialog dialog = new WizardDialog(shell,
-						new RenameFieldsRuleWizard(selectedJavaProjekt, loggerRule, refactoringPipeline)) {
+						new RenameFieldsRuleWizard(selectedJavaElements)) {
 					/*
 					 * Removed unnecessary empty space on the bottom of the
 					 * wizard intended for ProgressMonitor that is not
@@ -165,37 +119,6 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 				};
 
 				dialog.open();
-			}
-		});
-	}
-
-	/**
-	 * Method used to open CompilationErrorsMessageDialog from non UI thread to
-	 * list all Java files that will be skipped because they contain compilation
-	 * errors.
-	 */
-	private void synchronizeWithUIShowCompilationErrorMessage(List<ICompilationUnit> containingErrorList,
-			ExecutionEvent event, RefactoringPipeline refactoringPipeline, List<IJavaElement> selectedJavaElements,
-			StandardLoggerRule loggerRule, IJavaProject selectedJavaProjekt) {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				CompilationErrorsMessageDialog dialog = new CompilationErrorsMessageDialog(shell);
-				dialog.create();
-				dialog.setTableViewerInput(containingErrorList);
-				dialog.open();
-				if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
-					if (refactoringPipeline.hasRefactoringStates()) {
-						synchronizeWithUIShowRenameFieldsRuleWizard(event, refactoringPipeline, selectedJavaElements,
-								loggerRule, selectedJavaProjekt);
-					} else {
-						synchronizeWithUIShowWarningNoComlipationUnitDialog();
-					}
-				} else {
-					Activator.setRunning(false);
-				}
 			}
 		});
 	}
@@ -235,18 +158,6 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 				Activator.setRunning(false);
 			}
 
-		});
-	}
-
-	private void synchronizeWithUIShowMultiprojectMessage() {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell,
-						Messages.SelectRulesWizardHandler_multipleProjectsWarning, MessageDialog.WARNING);
-			}
 		});
 	}
 }
