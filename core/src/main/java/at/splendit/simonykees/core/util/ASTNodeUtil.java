@@ -28,13 +28,13 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
 /**
- * A utility class for computing different properties of {@link ASTNode}s. 
+ * A utility class for computing different properties of {@link ASTNode}s.
  * 
- * @author Martin Huter, Ardit Ymeri
+ * @author Martin Huter, Ardit Ymeri, Matthias Webhofer
  * @since 0.9.2
  */
 public class ASTNodeUtil {
-	
+
 	private static final String STREAM_MAP_METHOD_NAME = "map"; //$NON-NLS-1$
 	private static final String STREAM_MAP_TO_INT_METHOD_NAME = "mapToInt"; //$NON-NLS-1$
 	private static final String STREAM_MAP_TO_LONG_METHOD_NAME = "mapToLong"; //$NON-NLS-1$
@@ -52,7 +52,7 @@ public class ASTNodeUtil {
 		if (node == null) {
 			return null;
 		}
-		
+
 		if (nodeType.isInstance(node.getParent())) {
 			return (T) node.getParent();
 		} else {
@@ -240,45 +240,44 @@ public class ASTNodeUtil {
 	}
 
 	/**
-	 * Converts the raw list to a typed list.
-	 * Filters out the elements that are not instances of the given type.
+	 * Converts the raw list to a typed list. Filters out the elements that are
+	 * not instances of the given type.
 	 * 
 	 * @param rawlist
 	 * @param type
-	 * @return list of the given type. 
+	 * @return list of the given type.
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> List<T> convertToTypedList(@SuppressWarnings("rawtypes") List rawlist, Class<T>type) {
-		return
-			((List<Object>)rawlist)
-			.stream()
-			.filter(type::isInstance)
-			.map(type::cast)
-			.collect(Collectors.toList());
+	public static <T> List<T> convertToTypedList(@SuppressWarnings("rawtypes") List rawlist, Class<T> type) {
+		return ((List<Object>) rawlist).stream().filter(type::isInstance).map(type::cast).collect(Collectors.toList());
 	}
-	
-	/** Filters a list of modifiers if specific modifiers are present defined by the predicate
+
+	/**
+	 * Filters a list of modifiers if specific modifiers are present defined by
+	 * the predicate
 	 * 
-	 * @param modifiers List of Assuming to be modifiers, can't use type because JDT doesn't support those
-	 * @param predicate is definition which modifiers have to be present
+	 * @param modifiers
+	 *            List of Assuming to be modifiers, can't use type because JDT
+	 *            doesn't support those
+	 * @param predicate
+	 *            is definition which modifiers have to be present
 	 * @return
 	 */
 	@SuppressWarnings("rawtypes")
 	public static boolean hasModifier(List modifiers, Predicate<? super Modifier> predicate) {
 		return ASTNodeUtil.convertToTypedList(modifiers, Modifier.class).stream().anyMatch(predicate);
 	}
-	
+
 	/**
-	 * Checks if the given type binding corresponds to either of the
-	 * primitives: {@code int}, {@code long} or {@code double}, and if yes
-	 * returns the corresponding method name which returns the respective
-	 * stream type.
+	 * Checks if the given type binding corresponds to either of the primitives:
+	 * {@code int}, {@code long} or {@code double}, and if yes returns the
+	 * corresponding method name which returns the respective stream type.
 	 * 
 	 * @param initializerBinding
 	 *            type binding of the resulting stream type.
 	 * 
-	 * @return {@value #STREAM_MAP_METHOD_NAME} if the given type is not any
-	 *         of the aforementioned types, or any of the following:
+	 * @return {@value #STREAM_MAP_METHOD_NAME} if the given type is not any of
+	 *         the aforementioned types, or any of the following:
 	 *         {@value #STREAM_MAP_TO_INT_METHOD_NAME},
 	 *         {@value #STREAM_MAP_TO_DOUBLE_METHOD_NAME} or
 	 *         {@value #STREAM_MAP_TO_LONG_METHOD_NAME} respectively for
@@ -326,5 +325,30 @@ public class ASTNodeUtil {
 			parent = parent.getParent();
 		}
 		return parent;
+	}
+
+	/**
+	 * This method extracts the left most {@link Expression} of a
+	 * {@link MethodInvocation} by recursively walking the
+	 * {@link MethodInvocation}.
+	 * 
+	 * @param methodInvocation
+	 * @return the left most expression of the given {@link MethodInvocation}
+	 */
+	public static Expression getLeftMostExpressionOfMethodInvocation(MethodInvocation methodInvocation) {
+		Expression result = null;
+		if (methodInvocation != null) {
+			Expression expression = methodInvocation.getExpression();
+			if (expression != null) {
+				if (ASTNode.METHOD_INVOCATION == expression.getNodeType()) {
+					MethodInvocation methodInvocationExpression = (MethodInvocation) expression;
+					result = getLeftMostExpressionOfMethodInvocation(methodInvocationExpression);
+				} else if (ASTNode.SIMPLE_NAME == expression.getNodeType()) {
+					return expression;
+				}
+			}
+		}
+
+		return result;
 	}
 }

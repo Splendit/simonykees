@@ -152,6 +152,8 @@ public class Messages extends NLS {
 	public static String LoggerRuleWizardPageModel_warn_blankLoggingType;
 	public static String LoggerRuleWizardPageModel_warn_errSeverity;
 	public static String LoggerRuleWizardPageModel_warn_stackTraceSeverity;
+	public static String ImmutableStaticFinalCollectionsRule_description;
+	public static String ImmutableStaticFinalCollectionsRule_name;
 	public static String IndexOfToContainsRule_description;
 	public static String IndexOfToContainsRule_name;
 	public static String InefficientConstructorRule_description;
