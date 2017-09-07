@@ -303,8 +303,8 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		}
 
 		/*
-		 * the if statement should not contain non effectively final
-		 * variables and should not throw any exception
+		 * the if statement should not contain non effectively final variables
+		 * and should not throw any exception
 		 */
 		if (containsNonEffectivelyFinalVariable(ifStatement.getExpression()) || throwsException(ifStatement)) {
 			return null;
@@ -408,9 +408,10 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 	 * @return {@code true} if the expression is an addition of the given
 	 *         operands or {@code false} otherwise.
 	 */
-	protected boolean isSumOfOperands(InfixExpression expression, SimpleName sumVariableName, SimpleName parameterName) {
+	protected boolean isSumOfOperands(InfixExpression expression, SimpleName sumVariableName,
+			SimpleName parameterName) {
 		InfixExpression.Operator operator = expression.getOperator();
-		if(!expression.extendedOperands().isEmpty()) {
+		if (!expression.extendedOperands().isEmpty()) {
 			/*
 			 * There are more than two operands
 			 */
@@ -419,7 +420,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		if (InfixExpression.Operator.PLUS.equals(operator)) {
 			Expression lefOperand = expression.getLeftOperand();
 			Expression rightOperand = expression.getRightOperand();
-			
+
 			if ((matches(lefOperand, sumVariableName) && matches(rightOperand, parameterName))
 					|| (matches(rightOperand, sumVariableName) && matches(lefOperand, parameterName))) {
 				return true;
@@ -447,7 +448,7 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Removes the given declaration fragment. If it is the only fragment of the
 	 * declaration, then it removes the whole declaration statement.
