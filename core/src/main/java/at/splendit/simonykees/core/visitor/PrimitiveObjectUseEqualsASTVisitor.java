@@ -15,7 +15,7 @@ import at.splendit.simonykees.core.rule.impl.PrimitiveObjectUseEqualsRule;
 import at.splendit.simonykees.core.util.ClassRelationUtil;
 
 /**
- * /** Looks for occurrences of ==, != comparing two primitive objects, such as
+ * Looks for occurrences of ==, != comparing two primitive objects, such as
  * java.lang.Integer or java.lang.Boolean. The full list of primitives can be
  * found <a href=
  * "https://en.wikibooks.org/wiki/Java_Programming/Primitive_Types">here</a>.
