@@ -178,6 +178,8 @@ public class Messages extends NLS {
 	public static String RefactoringRule_applying_rule_to_workingcopy;
 	public static String RefactoringRule_default_description;
 	public static String RefactoringRule_default_name;
+	public static String ReImplementingInterfaceRule_description;
+	public static String ReImplementingInterfaceRule_name;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
