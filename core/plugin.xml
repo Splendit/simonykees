@@ -45,24 +45,24 @@
 		</menuContribution>
 	</extension>
 	<extension point="org.eclipse.ui.commands">
-		<command defaultHandler="at.splendit.simonykees.core.handler.SelectRulesWizardHandler" 
+		<command defaultHandler="eu.jsparrow.core.handler.SelectRulesWizardHandler" 
 			id="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler" 
 			name="%command.name.select_rules_wizard_handler"/>
-		<command defaultHandler="at.splendit.simonykees.core.handler.LoggerRuleWizardHandler" 
+		<command defaultHandler="eu.jsparrow.core.handler.LoggerRuleWizardHandler" 
 			id="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
 			name="%command.name.logger_rule_wizard_handler"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
-		<page class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferencePage" 
+		<page class="eu.jsparrow.core.ui.preference.SimonykeesPreferencePage" 
 			id="at.splendit.simonykees.core.ui.preference.ProfilePreferencePage" 
 			name="%preferencePage.name"/>
 		<page category="at.splendit.simonykees.core.ui.preference.ProfilePreferencePage" 
-			class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferencePageLicense" 
+			class="eu.jsparrow.core.ui.preference.SimonykeesPreferencePageLicense" 
 			id="at.splendit.simonykees.core.ui.preference.ProfilePreferencePageLicense" 
 			name="%preferencePageLicense.name"/>
 	</extension>
 	<extension point="org.eclipse.core.runtime.preferences">
-		<initializer class="at.splendit.simonykees.core.ui.preference.SimonykeesPreferenceInitializer"/>
+		<initializer class="eu.jsparrow.core.ui.preference.SimonykeesPreferenceInitializer"/>
 	</extension>
 	<extension point="org.eclipse.epp.logging.aeri.ide.servers">
 		<server class="org.eclipse.epp.internal.logging.aeri.ide.server.mars.ServerConnection" 
@@ -80,6 +80,6 @@
 		</server>
 	</extension>
 	<extension point="org.eclipse.ui.startup">
-     	<startup class="at.splendit.simonykees.core.startup.Startup"/>
+     	<startup class="eu.jsparrow.core.startup.Startup"/>
     </extension>
 </plugin>

@@ -3,13 +3,13 @@ Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Logging
 Bundle-SymbolicName: eu.jsparrow.logging
 Bundle-Version: 2.1.1.qualifier
-Bundle-Activator: at.splendit.simonykees.logging.Activator
+Bundle-Activator: eu.jsparrow.logging.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: at.splendit.simonykees.logging,
+Export-Package: eu.jsparrow.logging,
  org.slf4j
 Bundle-ClassPath: lib/slf4j-api.jar,
  lib/logback-core.jar,
