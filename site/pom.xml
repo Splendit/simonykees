@@ -7,7 +7,7 @@
 		<groupId>at.splendit</groupId>
 		<version>2.1.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>jSparrow.site</artifactId>
+	<artifactId>jsparrow.site</artifactId>
 	<packaging>eclipse-repository</packaging>
 	<name>jSparrow :: update site</name>
 	<description>jSparrow Update Site</description>
