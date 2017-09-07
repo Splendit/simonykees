@@ -16,6 +16,20 @@
    <url>
       <update label="jSparrow Update Site" url="http://update.jsparrow.eu"/>
    </url>
+   
+   <plugin
+         id="org.eclipse.epp.logging.aeri.ide"
+         download-size="0"
+         install-size="0"
+         version="2.0.4.v20170307-1435"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.epp.logging.aeri.core"
+         download-size="0"
+         install-size="0"
+         version="2.0.4.v20170307-1435"
+         unpack="false"/>
 
    <plugin
          id="com.github.oshi.core"
@@ -37,12 +51,4 @@
          install-size="0"
          version="0.0.0"
          unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.lang"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
 </feature>
