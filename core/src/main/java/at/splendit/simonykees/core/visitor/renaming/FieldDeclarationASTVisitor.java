@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -31,6 +33,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
+import org.eclipse.jdt.internal.core.ResolvedSourceMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -265,7 +268,10 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 				ReferenceSearchMatch reference = new ReferenceSearchMatch(match, fragmentIdentifier);
 				references.add(reference);
 				IPath path = match.getResource().getFullPath();
-				storeIJavaElement((IJavaElement) match.getElement());
+				IJavaElement icu = (IJavaElement) match.getElement();
+				ResolvedSourceMethod rsm = (ResolvedSourceMethod)icu;
+				ICompilationUnit castedICU = rsm.getCompilationUnit();
+				storeIJavaElement(castedICU);
 				storePath(path);
 			}
 		};
