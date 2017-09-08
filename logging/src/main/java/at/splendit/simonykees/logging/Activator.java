@@ -30,7 +30,6 @@ public class Activator implements BundleActivator {
 	 * BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
-//		super.start(context);
 		plugin = this;
 		LoggingUtil.setBundle(context.getBundle());
 		LoggingUtil.configureLogger();
@@ -44,7 +43,6 @@ public class Activator implements BundleActivator {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
-//		super.stop(context);
 	}
 
 	/**

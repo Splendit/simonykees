@@ -5,8 +5,6 @@ import org.eclipse.core.runtime.IStatus;
 
 import at.splendit.simonykees.core.Activator;
 
-//import at.splendit.simonykees.core.Activator;
-
 /**
  * TODO SIM-103 add class description
  * 

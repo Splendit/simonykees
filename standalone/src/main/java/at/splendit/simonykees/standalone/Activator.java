@@ -23,9 +23,8 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 /**
  * The activator class controls the plug-in life cycle
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
- *         Matthias Webhofer
- * @since 0.9
+ * @author Andreja Sambolec
+ * @since 2.1.1
  */
 // @SuppressWarnings("restriction")
 public class Activator implements BundleActivator {

@@ -21,6 +21,12 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+/**
+ * TODO SIM-103 add class description
+ * 
+ * @author Andreja Sambolec
+ * @since 2.1.1
+ */
 public class TestStandalone {
 
 	public TestStandalone() {

@@ -32,8 +32,8 @@ import org.w3c.dom.NodeList;
 /**
  * TODO SIM-103 add class description
  * 
- * @author Martin Huter, Hannes Schweighofer
- * @since 0.9
+ * @author Andreja Sambolec
+ * @since 2.1.1
  */
 @SuppressWarnings("nls")
 public class RulesTestUtil {
