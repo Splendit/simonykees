@@ -6,7 +6,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import at.splendit.simonykees.ui.Activator;
 
 /**
- * Default values for the plug-in preference page. 
+ * Default values for the plug-in preference page.
  * 
  * @author Ludwig Werzowa, Hannes Schweighofer
  * @since 0.9.2
@@ -16,12 +16,14 @@ public class SimonykeesPreferenceInitializer extends AbstractPreferenceInitializ
 	@Override
 	public void initializeDefaultPreferences() {
 		IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
-		
-		preferenceStore.setDefault(SimonykeesPreferenceConstants.PROFILE_LIST, SimonykeesPreferenceManager.getDefaultProfileList());
+
+		preferenceStore.setDefault(SimonykeesPreferenceConstants.PROFILE_LIST,
+				SimonykeesPreferenceManager.getDefaultProfileList());
 
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT,
 				SimonykeesPreferenceManager.getDefaultProfileName());
 
+		preferenceStore.setDefault(SimonykeesPreferenceConstants.ENABLE_INTRO, true);
 	}
 
 }

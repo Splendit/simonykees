@@ -52,8 +52,14 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 		return super.getImage(element);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Color getForeground(Object element) {
+		if (element instanceof RefactoringRule<?>) {
+			if (!((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) element).isEnabled()) {
+				return Display.getDefault().getSystemColor(SWT.COLOR_TITLE_INACTIVE_FOREGROUND);
+			}
+		}
 		return null;
 	}
 

@@ -23,7 +23,7 @@ public class TestBracketsToControlRule {
 		for (int i = 1; i < 2; i++) {
 			;
 		}
-		Arrays.asList(1, 2, 3).stream().forEach(System.out::println);
+		Arrays.asList(1, 2, 3).forEach(System.out::println);
 	}
 
 	public static void thestWhileLoop() {
@@ -39,12 +39,12 @@ public class TestBracketsToControlRule {
 	public static void testIf() {
 		String s = "a";
 		String t = "bb";
-		if (s == "a") {
-			if (t == "b") {
+		if (s.equals("a")) {
+			if (t.equals("b")) {
 				do {
 					;
 				} while (t != null);
-			} else if (s == "aaa") {
+			} else if (s.equals("aaa")) {
 				logger.info("aa");
 			} else {
 				logger.info("bbb");

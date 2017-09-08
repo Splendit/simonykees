@@ -28,8 +28,8 @@ public class TestWhileToForEachArrayRule {
 		for (String t : array) {
 			logger.info(t);
 			sb.append(t);
-			for (String iterator : array) {
-				sb.append(iterator);
+			for (String anArray : array) {
+				sb.append(anArray);
 			}
 		}
 		return sb.toString();
@@ -41,11 +41,11 @@ public class TestWhileToForEachArrayRule {
 		for (String t : array) {
 			logger.info(t);
 			sb.append(t);
-			for (String iterator : array) {
-				sb.append(iterator);
-				for (String iterator1 : array) {
-					sb.append(iterator1);
-					logger.info(iterator1);
+			for (String anArray : array) {
+				sb.append(anArray);
+				for (String anArray1 : array) {
+					sb.append(anArray1);
+					logger.info(anArray1);
 				}
 			}
 		}
@@ -218,9 +218,9 @@ public class TestWhileToForEachArrayRule {
 	public String confusingIteratorName(String iterator) {
 		StringBuilder sb = new StringBuilder();
 		String[] array = generateList(iterator);
-		for (String iterator1 : array) {
-			logger.info(iterator1);
-			sb.append(iterator1);
+		for (String anArray : array) {
+			logger.info(anArray);
+			sb.append(anArray);
 		}
 		return sb.toString();
 	}
@@ -248,8 +248,8 @@ public class TestWhileToForEachArrayRule {
 	public String qualifiedNameType() {
 		java.lang.Boolean[] javaLangBooleans = { true, true, false };
 		StringBuilder sb = new StringBuilder();
-		for (java.lang.Boolean iterator : javaLangBooleans) {
-			sb.append(iterator);
+		for (java.lang.Boolean javaLangBoolean : javaLangBooleans) {
+			sb.append(javaLangBoolean);
 		}
 		return sb.toString();
 	}
@@ -257,8 +257,8 @@ public class TestWhileToForEachArrayRule {
 	public String unQualifiedNameType() {
 		Boolean[] myBooleans = {};
 		StringBuilder sb = new StringBuilder();
-		for (Boolean iterator : myBooleans) {
-			sb.append(iterator);
+		for (Boolean myBoolean : myBooleans) {
+			sb.append(myBoolean);
 		}
 		return sb.toString();
 	}

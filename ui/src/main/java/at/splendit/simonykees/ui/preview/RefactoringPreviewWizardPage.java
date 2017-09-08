@@ -19,7 +19,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
 import org.eclipse.swt.SWT;
@@ -27,10 +26,13 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
+import at.splendit.simonykees.core.util.RefactoringUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.ui.dialog.SimonykeesMessageDialog;
 
@@ -239,15 +241,21 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 	private DocumentChange getCurrentDocumentChange() {
 		if (null == changesForRule.get(currentCompilationUnit)) {
-			Document document;
-			TextChange textChange = null;
+			DocumentChange documentChange = null;
 			try {
-				document = new Document(currentCompilationUnit.getSource());
-				textChange = new DocumentChange(currentCompilationUnit.getElementName(), document);
+				/*
+				 * When compilation unit is unselected for rule that is shown,
+				 * change preview viewer should show no change. For that
+				 * generate document change is called with empty edit to create
+				 * document change with text type java but with no changes.
+				 */
+				TextEdit edit = new MultiTextEdit();
+				return RefactoringUtil.generateDocumentChange(currentCompilationUnit.getElementName(),
+						new Document(currentCompilationUnit.getSource()), edit);
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
 			}
-			return (DocumentChange) textChange;
+			return documentChange;
 		} else {
 			return changesForRule.get(currentCompilationUnit);
 		}

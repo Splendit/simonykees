@@ -29,10 +29,8 @@ public class LambdaForEachIfWrapperToFilterRule {
 			System.out.println(s);
 		});
 
-		list.forEach(s -> {
-			if (s.length() > 3) {
-				System.out.println(s);
-			}
+		list.stream().filter((s) -> s.length() > 3).forEach((s) -> {
+			System.out.println(s);
 		});
 
 		intList.stream().filter((i) -> i < 5).forEach((i) -> {
@@ -92,6 +90,13 @@ public class LambdaForEachIfWrapperToFilterRule {
 
 		intList.stream().filter((i) -> i < 0).forEach((i) -> {
 			System.out.println(i);
+		});
+	}
+	
+	public void forEachOnCollection() {
+		list.stream().filter((s) -> s.length() > 3).forEach((s) -> {
+			System.out.println(s);
+			System.out.println(s + s);
 		});
 	}
 	

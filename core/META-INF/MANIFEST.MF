@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Core
 Bundle-SymbolicName: jSparrow.core
-Bundle-Version: 2.0.3.qualifier
+Bundle-Version: 2.1.1.qualifier
 Bundle-Activator: at.splendit.simonykees.core.Activator
 Require-Bundle: jSparrow.logging,
  jSparrow.i18n,
@@ -22,6 +22,12 @@ Export-Package: at.splendit.simonykees.core,
  at.splendit.simonykees.core.rule,
  at.splendit.simonykees.core.rule.impl,
  at.splendit.simonykees.core.rule.impl.standardLogger,
+ at.splendit.simonykees.core.util,
  at.splendit.simonykees.core.visitor,
  at.splendit.simonykees.core.visitor.arithmetic,
- at.splendit.simonykees.core.visitor.semiAutomatic
+ at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach,
+ at.splendit.simonykees.core.visitor.lambdaForEach,
+ at.splendit.simonykees.core.visitor.loop.forToForEach,
+ at.splendit.simonykees.core.visitor.loop.whileToForEach,
+ at.splendit.simonykees.core.visitor.semiAutomatic,
+ at.splendit.simonykees.core.visitor.tryStatement

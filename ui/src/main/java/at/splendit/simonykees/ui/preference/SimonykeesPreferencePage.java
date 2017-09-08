@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -32,7 +33,6 @@ import at.splendit.simonykees.ui.Activator;
 public class SimonykeesPreferencePage extends FieldEditorPreferencePage implements IWorkbenchPreferencePage {
 
 	private RadioGroupFieldEditor useProfileOptionRadioGroup;
-	// private String currentProfileId;
 	private int currentProfileSelection = 0;
 
 	private Table profilesTable;
@@ -70,6 +70,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		addField(useProfileOptionRadioGroup);
 
 		createProfilesTableView(composite);
+
+		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.ENABLE_INTRO,
+				Messages.SimonykeesPreferencePage_enableIntroText, composite));
 
 		initializeView();
 	}
@@ -211,6 +214,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 				SimonykeesPreferenceManager
 						.removeProfile(SimonykeesPreferenceManager.getAllProfileIds().get(currentProfileSelection));
 				currentProfileSelection = 0;
+				removeProfileButton.setEnabled(false);
 				updateView();
 			}
 		});
@@ -218,9 +222,10 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	public void handleButtonClickedListener(String profileId) {
 		final WizardDialog dialog = new WizardDialog(getShell(), new ConfigureProfileWizard(profileId)) {
-			// Removed unnecessary empty space on the bottom of
-			// the wizard intended for ProgressMonitor that is
-			// not used
+			/*
+			 * Removed unnecessary empty space on the bottom of the wizard
+			 * intended for ProgressMonitor that is not used
+			 */
 			@Override
 			protected Control createDialogArea(Composite parent) {
 				Control ctrl = super.createDialogArea(parent);

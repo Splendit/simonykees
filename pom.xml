@@ -6,7 +6,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>at.splendit.jSparrow</groupId>
 	<artifactId>jSparrow</artifactId>
-	<version>2.0.3-SNAPSHOT</version>
+	<version>2.1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>jSparrow :: parent</name>
 	<description>jSparrow Parent</description>
@@ -58,6 +58,11 @@
 			<id>ali.kardoush</id>
 			<name>Ali Kardoush</name>
 			<email>ali.kardoush@splendit.at </email>
+		</developer>
+		<developer>
+			<id>hans-joerg.schroedl</id>
+			<name>Hans-Jörg Schrödl</name>
+			<email>hans-joerg.schroedl@splendit.at </email>
 		</developer>
 	</developers>
 
@@ -139,7 +144,6 @@
 		<maven.jxr.version>2.5</maven.jxr.version>
 		<maven.surefire.version>2.20</maven.surefire.version>
 		<maven.pmd.version>3.8</maven.pmd.version>
-		<maven.cobertura.version>2.7</maven.cobertura.version>
 		<maven.findbugs.version>3.0.5</maven.findbugs.version>
 		<maven.changelog.version>2.3</maven.changelog.version>
 		<maven.versions.version>2.4</maven.versions.version>
@@ -152,6 +156,7 @@
 		<maven.release.version>2.5.3</maven.release.version>
 		<maven.resources.version>3.0.2</maven.resources.version>
 		<proguard.plugin.version>2.0.14</proguard.plugin.version>
+		<jacoco.plugin.version>0.7.9</jacoco.plugin.version>
 
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 
@@ -167,6 +172,12 @@
 		<jsparrow.qualifier.noProguard></jsparrow.qualifier.noProguard>
 		<jsparrow.qualifier.production></jsparrow.qualifier.production>
 		<jsparrow.qualifier.tycho>${jsparrow.qualifier.quotes}${jsparrow.qualifier.noProguard}${jsparrow.qualifier.production}${jsparrow.qualifier.quotes}</jsparrow.qualifier.tycho>
+		<sonar.language>java</sonar.language>
+		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
+		<sonar.junit.reportPaths>${project.basedir}/target/surefire-reports</sonar.junit.reportPaths>
+
+		<!-- Workaround for surefire-argline bug. Required to make Jacoco work -->
+		<test-argline>${tycho.test.jvmArgs} -Dfile.encoding=UTF-8</test-argline>
 	</properties>
 
 	<repositories>
@@ -187,7 +198,7 @@
 		</repository>
 	</repositories>
 
-	<!-- don't manage simoneykees.samples dependencies -->
+	<!-- don't manage simonykees.samples -->
 	<dependencyManagement>
 		<dependencies>
 			<!-- jSparrow -->
@@ -328,6 +339,11 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacoco.plugin.version}</version>
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -432,11 +448,39 @@
 					<version>${tycho.version}</version>
 					<configuration>
 						<useUIHarness>false</useUIHarness>
-						<argLine>${tycho.test.jvmArgs} -Dfile.encoding=UTF-8</argLine>
+						<argLine>${tycho.testArgLine} ${test-argline}</argLine>
 						<!-- kill test JVM if tests take more than 5 minutes (300 seconds) 
 							to finish -->
 						<forkedProcessTimeoutInSeconds>300</forkedProcessTimeoutInSeconds>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<configuration>
+						<append>true</append>
+					</configuration>
+					<executions>
+						<execution>
+							<id>agent-for-ut</id>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>agent-for-it</id>
+							<goals>
+								<goal>prepare-agent-integration</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>jacoco-site</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>report</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -548,7 +592,15 @@
 				</repository>
 			</distributionManagement>
 		</profile>
-
+		<profile>
+			<id>releaseCandidate</id>
+			<distributionManagement>
+				<repository>
+					<id>pdrone</id>
+					<url>http://packagedrone-vm-01.splendit.loc:8080/maven/76310b5f-bf75-4782-bd20-c44376584fc5</url>
+				</repository>
+			</distributionManagement>
+		</profile>
 	</profiles>
 
 	<reporting>

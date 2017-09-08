@@ -246,7 +246,8 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	 *            the body of the loop
 	 * @return a new name for the iterator.
 	 */
-	protected Map<String, Boolean> generateNewIteratorName(SimpleName preferedName, Statement loopBody) {
+	protected Map<String, Boolean> generateNewIteratorName(SimpleName preferedName, Statement loopBody,
+			Name iterableName) {
 		VariableDeclarationsVisitor loopBodyDeclarationsVisitor = new VariableDeclarationsVisitor();
 		loopBody.accept(loopBodyDeclarationsVisitor);
 		List<SimpleName> loobBodyDeclarations = loopBodyDeclarationsVisitor.getVariableDeclarationNames();
@@ -256,22 +257,22 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		String newName;
 		Boolean allowedPreferedName;
 		if (preferedName == null || declaredNames.contains(preferedName.getIdentifier())
-				|| tempIntroducedNames.containsValue(preferedName)) {
+				|| tempIntroducedNames.containsValue(preferedName.getIdentifier())) {
 			allowedPreferedName = false;
 			int counter = 0;
 			String suffix = ""; //$NON-NLS-1$
-			ASTNode scope = findScopeOfLoop(loopBody);
+			ASTNode scope = ASTNodeUtil.findScope(loopBody);
 			VariableDeclarationsVisitor loopScopeVisitor = new VariableDeclarationsVisitor();
 			scope.accept(loopScopeVisitor);
 			List<SimpleName> scopeDeclaredNames = loopScopeVisitor.getVariableDeclarationNames();
-
+			String defaultIteratorName = createDefaultIteratorName(iterableName);
 			declaredNames = scopeDeclaredNames.stream().map(SimpleName::getIdentifier).collect(Collectors.toList());
-			while (declaredNames.contains(DEFAULT_ITERATOR_NAME + suffix)
-					|| tempIntroducedNames.containsValue(DEFAULT_ITERATOR_NAME + suffix)) {
+			while (declaredNames.contains(defaultIteratorName + suffix)
+					|| tempIntroducedNames.containsValue(defaultIteratorName + suffix)) {
 				counter++;
 				suffix = Integer.toString(counter);
 			}
-			newName = DEFAULT_ITERATOR_NAME + suffix;
+			newName = defaultIteratorName + suffix;
 		} else {
 			allowedPreferedName = true;
 			newName = preferedName.getIdentifier();
@@ -284,30 +285,69 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	}
 
 	/**
-	 * Finds the scope where the statement belongs to. A scope is either the
-	 * body of:
-	 * <ul>
-	 * <li>a method</li>
-	 * <li>an initializer</li>
-	 * <li>a class/interface</li>
-	 * <li>an enumeration</li>
-	 * <li>an annotation declaration</li>
-	 * </ul>
+	 * Constructs the default name of the iterator object. If the iterable name
+	 * ends with an {@code s}, the constructed name is created by removing the
+	 * ending {@code s}. Otherwise, either the prefix {@code a} or {@code an} is
+	 * added to the iterable name depending on whether it starts with a vowel or
+	 * not.
 	 * 
-	 * @param statement
-	 *            a statement to look for the scope where it falls into.
-	 * @return an {@link ASTNode} representing either of the above
+	 * @param iterableName
+	 *            the name of the iterable object
+	 * 
+	 * @return the new name for the iterating object.
 	 */
-	private ASTNode findScopeOfLoop(Statement statement) {
-		ASTNode parent = statement.getParent();
-		while (parent != null && parent.getNodeType() != ASTNode.METHOD_DECLARATION
-				&& parent.getNodeType() != ASTNode.INITIALIZER && parent.getNodeType() != ASTNode.TYPE_DECLARATION
-				&& parent.getNodeType() != ASTNode.ENUM_DECLARATION
-				&& parent.getNodeType() != ASTNode.ANNOTATION_TYPE_DECLARATION) {
-
-			parent = parent.getParent();
+	private String createDefaultIteratorName(Name iterableName) {
+		SimpleName simpleName;
+		if (iterableName.isQualifiedName()) {
+			simpleName = ((QualifiedName) iterableName).getName();
+		} else {
+			simpleName = (SimpleName) iterableName;
 		}
-		return parent;
+
+		String identifier = simpleName.getIdentifier();
+		if (identifier.length() > 1 && identifier.endsWith("s")) { //$NON-NLS-1$
+			return identifier.substring(0, identifier.length() - 1);
+		} else {
+			return addSingularPrefix(identifier);
+		}
+	}
+
+	/**
+	 * Adds the prefix {@code a} or {@code an} depending on whether the
+	 * identifier starts with a vowel or not.
+	 * 
+	 * @param identifier
+	 *            a string representing a variable name.
+	 * 
+	 * @return {@code a}/{@code an} + {@code identifier} converted to camel
+	 *         cased.
+	 */
+	private String addSingularPrefix(String identifier) {
+
+		String firstLetter = identifier.substring(0, 1);
+		String remaining = identifier.substring(1);
+		String prefix;
+		if (isVowel(identifier.charAt(0))) {
+			prefix = "an"; //$NON-NLS-1$
+		} else {
+			prefix = "a"; //$NON-NLS-1$
+		}
+		return prefix + firstLetter.toUpperCase() + remaining;
+	}
+
+	/**
+	 * Checks if a character is a vowel.
+	 * 
+	 * @param c
+	 *            character to be checked
+	 * @return {@code true} if the character is a vowel or {@code false}
+	 *         otherwise.
+	 */
+	private boolean isVowel(char c) {
+		if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' || c == 'y') {
+			return true;
+		}
+		return false;
 	}
 
 	protected void storeTempName(Statement node, String newIteratorIdentifier) {
@@ -343,7 +383,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		SimpleName preferredIteratorName = indexVisitor.getIteratorName();
 
 		// generate a safe iterator name
-		Map<String, Boolean> nameMap = generateNewIteratorName(preferredIteratorName, loopBody);
+		Map<String, Boolean> nameMap = generateNewIteratorName(preferredIteratorName, loopBody, iterableNode);
 		String newIteratorIdentifier = nameMap.keySet().iterator().next();
 		storeTempName(loop, newIteratorIdentifier);
 		boolean eligiblePreferredName = nameMap.get(newIteratorIdentifier);

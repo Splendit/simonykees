@@ -114,7 +114,7 @@ public class TestToStringOnStringRule {
 		String result = "";
 		if (!StringUtils.isEmpty(input)) {
 			result = "nonEmpty:" + input;
-			for (int i = 0; sampleMethod(input).length() == 0 || i < sampleMethod(input).length(); i++) {
+			for (int i = 0; sampleMethod(input).isEmpty() || i < sampleMethod(input).length(); i++) {
 				result = "empty:" + input;
 			}
 		}
@@ -125,7 +125,7 @@ public class TestToStringOnStringRule {
 		String result = "";
 		if (!StringUtils.isEmpty(input)) {
 			result = "nonEmpty:" + input;
-			while (input.length() == 0) {
+			while (input.isEmpty()) {
 				result = "empty:" + input;
 			}
 		}
