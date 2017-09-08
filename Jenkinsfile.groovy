@@ -8,7 +8,7 @@
 // add timestaps to the "Console Output" of Jenkins
 timestamps {
 	node {
-		step([$class: 'StashNotifier'])         // Notifies the Stash Instance of an INPROGRESS build
+		step([$class: 'StashNotifier']) // Notifies the Stash Instance of an INPROGRESS build
 		
 		try {
 			// variable for maven home
@@ -35,7 +35,7 @@ timestamps {
 			}
 			
 			stage('Maven Compile') {
-				def mvnCommand = 'clean compile'
+				def mvnCommand = 'clean verify -DskipTests'
 				sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
 			}
 			
@@ -44,7 +44,7 @@ timestamps {
 			// wrap([$class: 'Xvfb']) {
 				stage('Integration-Tests') {
 					// Run the maven build
-					def mvnCommand = 'clean install -fae -Dsurefire.rerunFailingTestsCount=2'
+					def mvnCommand = 'clean verify -fae -Dsurefire.rerunFailingTestsCount=2'
 			
 					// def mvnCommand = 'surefire:test -fae -Dsurefire.rerunFailingTestsCount=2'
 					def statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${mvnCommand}")
@@ -53,7 +53,7 @@ timestamps {
 					int i = 0
 					int repeats = 1		
 					while (statusCode != 0 && i < repeats) {
-						def rerunTests = 'verify -fae'
+						def rerunTests = 'clean verify -fae'
 						statusCode = sh(returnStatus: true, script: "'${mvnHome}/bin/mvn' ${rerunTests}")
 						i = i + 1
 					}
@@ -68,49 +68,44 @@ timestamps {
 			
 			// master and develop builds get deployed to packagedrone (see pom.xml) and tagged (see tag-deployment.sh)
 			if ( env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop' ) {
-				if ( currentBuild.result == 'SUCCESS' ) {
-					// run sonarqube analysis, server configuration takes place in jenkins config
-					stage('SonarQube analysis') {
-						withSonarQubeEnv('SonarQube Server'){
-      						sh 'mvn sonar:sonar'
-						}
-  					}
-  					
-					// skipping tests, because integration tests have passed already
-					// -B batch mode for clean output (otherwise upload status will spam the console)
-					def mvnCommand = 'clean deploy -DskipTests -B'
-				
-				
-					stage('Deploy and Tag') {
-						sh "'${mvnHome}/bin/mvn' ${mvnCommand} -P${env.BRANCH_NAME}-test-noProguard"	
-						
-						// tag build in repository
-						sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
-							// first parameter is the dir, second parameter is the subdirectory and optional
-							sh("./tag-deployment.sh $env.BRANCH_NAME main")
-							sh("git push $backupOrigin --tags")
-						}
+				// run sonarqube analysis, server configuration takes place in jenkins config
+				stage('SonarQube analysis') {
+					withSonarQubeEnv('SonarQube Server'){
+     						sh 'mvn sonar:sonar'
 					}
+  				}
+				// skipping tests, because integration tests have passed already
+				// -B batch mode for clean output (otherwise upload status will spam the console)
+				def mvnCommand = 'clean deploy -DskipTests -B'
+				stage('Deploy and Tag') {
+					sh "'${mvnHome}/bin/mvn' ${mvnCommand} -P${env.BRANCH_NAME}-test-noProguard"	
 					
-					// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
-					// grep returns result with an \n therefore we need to trim
-					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
-					def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
-					stage('Deploy obfuscation') {
-						def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
-						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-test-proguard"
-						copyMappingFiles("${buildNumber}_test", externalMappingFilesDirectory)
+					// tag build in repository
+					sshagent([sshCredentials]) { //key id of ssh-rsa key in remote repository within jenkins
+							// first parameter is the dir, second parameter is the subdirectory and optional
+						sh("./tag-deployment.sh $env.BRANCH_NAME main")
+						sh("git push $backupOrigin --tags")
 					}
-					if ( env.BRANCH_NAME == 'master') {
+				}
+					
+				// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
+				// grep returns result with an \n therefore we need to trim
+				def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
+				def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
+				stage('Deploy obfuscation') {
+						def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
+					sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-test-proguard"
+					copyMappingFiles("${buildNumber}_test", externalMappingFilesDirectory)
+				}
+				if ( env.BRANCH_NAME == 'master') {
 						stage('Deploy production') {
-							def mvnOptions = "-Dproduction -DforceContextQualifier=${qualifier}_noProguard"
-							sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-noProguard"
-						}
-						stage('Deploy production, obfuscation') {
+						def mvnOptions = "-Dproduction -DforceContextQualifier=${qualifier}_noProguard"
+						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-noProguard"
+					}
+					stage('Deploy production, obfuscation') {
 							def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
-							sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-proguard"
-							copyMappingFiles(buildNumber, externalMappingFilesDirectory)
-						}
+						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-production-proguard"
+						copyMappingFiles(buildNumber, externalMappingFilesDirectory)
 					}
 				}
 			} else if ( env.BRANCH_NAME.startsWith('release') ) {
@@ -118,36 +113,33 @@ timestamps {
 			// for release branches ("release candidates") we make a lot of the same steps we do for master branches
 			// we do not tag them and we do not push to github though
 
-				if ( currentBuild.result == 'SUCCESS' ) {
-					// skipping tests, because integration tests have passed already
-					// -B batch mode for clean output (otherwise upload status will spam the console)
-					def mvnCommand = 'clean deploy -DskipTests -B'
+				// skipping tests, because integration tests have passed already
+				// -B batch mode for clean output (otherwise upload status will spam the console)
+				def mvnCommand = 'clean deploy -DskipTests -B'
 
-					stage('Deploy test') {
+				stage('Deploy test') {
 						sh "'${mvnHome}/bin/mvn' ${mvnCommand} -PreleaseCandidate"
-					}
-
-					// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
-					// grep returns result with an \n therefore we need to trim
-					def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
-					def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
-		
-					stage('Deploy obfuscation') {
-						def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
-						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -PreleaseCandidate"
-					}
-		
-					stage('Deploy production') {
-						def mvnOptions = "-Dproduction -DforceContextQualifier=${qualifier}_noProguard"
-						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -PreleaseCandidate"
-					}
-		
-					stage('Deploy production, obfuscation') {
-						def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
-						sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -PreleaseCandidate"
-					}
 				}
-
+				
+				// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
+				// grep returns result with an \n therefore we need to trim
+				def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
+				def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='jSparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
+	
+				stage('Deploy obfuscation') {
+					def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
+					sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -PreleaseCandidate"
+				}
+	
+				stage('Deploy production') {
+					def mvnOptions = "-Dproduction -DforceContextQualifier=${qualifier}_noProguard"
+					sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -PreleaseCandidate"
+				}
+	
+				stage('Deploy production, obfuscation') {
+					def mvnOptions = "-Dproduction -Dproguard -DforceContextQualifier=${qualifier}"
+					sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -PreleaseCandidate"
+				}
 			}
 		} catch (e) {
 			// If there was an exception thrown, the build failed
