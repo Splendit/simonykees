@@ -6,7 +6,7 @@ import org.eclipse.osgi.util.NLS;
  * TODO SIM-103 add class description
  * 
  * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
- *         Matthias Webhofer, Hans-Jörg Schrödl 
+ *         Matthias Webhofer, Hans-Jörg Schrödl
  * @since 0.9
  */
 public class Messages extends NLS {
@@ -152,6 +152,8 @@ public class Messages extends NLS {
 	public static String LoggerRuleWizardPageModel_warn_blankLoggingType;
 	public static String LoggerRuleWizardPageModel_warn_errSeverity;
 	public static String LoggerRuleWizardPageModel_warn_stackTraceSeverity;
+	public static String ImmutableStaticFinalCollectionsRule_description;
+	public static String ImmutableStaticFinalCollectionsRule_name;
 	public static String IndexOfToContainsRule_description;
 	public static String IndexOfToContainsRule_name;
 	public static String InefficientConstructorRule_description;
@@ -166,6 +168,8 @@ public class Messages extends NLS {
 	public static String OverrideAnnotationRule_name;
 	public static String PrimitiveBoxedForStringRule_description;
 	public static String PrimitiveBoxedForStringRule_name;
+	public static String PrimitiveObjectUseEqualsRule_description;
+	public static String PrimitiveObjectUseEqualsRule_name;
 	public static String Profile_DefaultProfile_profileName;
 	public static String Profile_Java8Profile_profileName;
 	public static String ProgressMonitor_SelectRulesWizard_performFinish_jobName;
@@ -178,6 +182,8 @@ public class Messages extends NLS {
 	public static String RefactoringRule_applying_rule_to_workingcopy;
 	public static String RefactoringRule_default_description;
 	public static String RefactoringRule_default_name;
+	public static String ReImplementingInterfaceRule_description;
+	public static String ReImplementingInterfaceRule_name;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
@@ -239,6 +245,8 @@ public class Messages extends NLS {
 	public static String StatementLambdaToExpressionRule_name;
 	public static String StringBufferToBuilderRule_description;
 	public static String StringBufferToBuilderRule_name;
+	public static String StringBuildingLoopRule_description;
+	public static String StringBuildingLoopRule_name;
 	public static String StringFormatLineSeparatorRule_description;
 	public static String StringFormatLineSeparatorRule_name;
 	public static String StringConcatToPlusRule_description;

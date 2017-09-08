@@ -67,7 +67,7 @@ The channel can be used as update site in Eclipse with the following URL:
 
 ## faster builds ##
 
-To avoid fetching indexes, the --offline flag can be used (avoids checking timestamps for cached p2 artifacts and metadata files):
+To avoid fetching indexes, the --offline (-o) flag can be used (avoids checking timestamps for cached p2 artifacts and metadata files):
 	
 	mvn clean verify -o
 	

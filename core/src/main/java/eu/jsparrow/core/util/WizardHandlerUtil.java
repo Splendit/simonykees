@@ -155,5 +155,4 @@ public class WizardHandlerUtil {
 			throw new RuntimeException(e.getCause());
 		}
 	}
-
 }

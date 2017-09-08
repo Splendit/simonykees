@@ -252,6 +252,21 @@ public class RefactoringPipeline {
 					ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e);
 		}
 	}
+	
+	public void createRefactoringStates(List<ICompilationUnit> compilationUnits) {
+		for (ICompilationUnit compilationUnit : compilationUnits) {
+
+				try {
+					refactoringStates
+							.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
+				} catch (JavaModelException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+		}
+
+	}
 
 	public boolean isMultipleProjects() {
 		return multipleProjects;

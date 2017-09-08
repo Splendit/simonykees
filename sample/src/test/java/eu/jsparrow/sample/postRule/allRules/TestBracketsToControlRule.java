@@ -39,12 +39,12 @@ public class TestBracketsToControlRule {
 	public static void testIf() {
 		String s = "a";
 		String t = "bb";
-		if (s == "a") {
-			if (t == "b") {
+		if (s.equals("a")) {
+			if (t.equals("b")) {
 				do {
 					;
 				} while (t != null);
-			} else if (s == "aaa") {
+			} else if (s.equals("aaa")) {
 				logger.info("aa");
 			} else {
 				logger.info("bbb");

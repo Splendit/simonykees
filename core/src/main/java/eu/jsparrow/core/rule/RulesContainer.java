@@ -19,6 +19,7 @@ import eu.jsparrow.core.rule.impl.FieldNameConventionRule;
 import eu.jsparrow.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import eu.jsparrow.core.rule.impl.ForToForEachRule;
 import eu.jsparrow.core.rule.impl.FunctionalInterfaceRule;
+import eu.jsparrow.core.rule.impl.ImmutableStaticFinalCollectionsRule;
 import eu.jsparrow.core.rule.impl.IndexOfToContainsRule;
 import eu.jsparrow.core.rule.impl.InefficientConstructorRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachCollectRule;
@@ -30,12 +31,15 @@ import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
 import eu.jsparrow.core.rule.impl.OrganiseImportsRule;
 import eu.jsparrow.core.rule.impl.OverrideAnnotationRule;
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
+import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
+import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
 import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
 import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
 import eu.jsparrow.core.rule.impl.StringBufferToBuilderRule;
+import eu.jsparrow.core.rule.impl.StringBuildingLoopRule;
 import eu.jsparrow.core.rule.impl.StringConcatToPlusRule;
 import eu.jsparrow.core.rule.impl.StringFormatLineSeparatorRule;
 import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
@@ -49,18 +53,22 @@ import eu.jsparrow.core.visitor.CollectionRemoveAllASTVisitor;
 import eu.jsparrow.core.visitor.DiamondOperatorASTVisitor;
 import eu.jsparrow.core.visitor.EnumsWithoutEqualsASTVisitor;
 import eu.jsparrow.core.visitor.FlatMapInsteadOfNestedLoopsASTVisitor;
+import eu.jsparrow.core.visitor.ImmutableStaticFinalCollectionsASTVisitor;
 import eu.jsparrow.core.visitor.IndexOfToContainsASTVisitor;
 import eu.jsparrow.core.visitor.InefficientConstructorASTVisitor;
 import eu.jsparrow.core.visitor.LambdaToMethodReferenceASTVisitor;
 import eu.jsparrow.core.visitor.MultiVariableDeclarationLineASTVisitor;
 import eu.jsparrow.core.visitor.OverrideAnnotationRuleASTVisitor;
 import eu.jsparrow.core.visitor.PrimitiveBoxedForStringASTVisitor;
+import eu.jsparrow.core.visitor.PrimitiveObjectUseEqualsASTVisitor;
+import eu.jsparrow.core.visitor.ReImplementingInterfaceASTVisitor;
 import eu.jsparrow.core.visitor.RearrangeClassMembersASTVisitor;
 import eu.jsparrow.core.visitor.RemoveNewStringConstructorASTVisitor;
 import eu.jsparrow.core.visitor.RemoveToStringOnStringASTVisitor;
 import eu.jsparrow.core.visitor.SerialVersionUidASTVisitor;
 import eu.jsparrow.core.visitor.StatementLambdaToExpressionASTVisitor;
 import eu.jsparrow.core.visitor.StringBufferToBuilderASTVisitor;
+import eu.jsparrow.core.visitor.StringBuildingLoopASTVisitor;
 import eu.jsparrow.core.visitor.StringConcatToPlusASTVisitor;
 import eu.jsparrow.core.visitor.StringFormatLineSeparatorASTVisitor;
 import eu.jsparrow.core.visitor.StringLiteralEqualityCheckASTVisitor;
@@ -120,6 +128,9 @@ public class RulesContainer {
 				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
 				new MultiVariableDeclarationLineRule(MultiVariableDeclarationLineASTVisitor.class),
 				new EnumsWithoutEqualsRule(EnumsWithoutEqualsASTVisitor.class),
+				new ReImplementingInterfaceRule(ReImplementingInterfaceASTVisitor.class),
+
+				new ImmutableStaticFinalCollectionsRule(ImmutableStaticFinalCollectionsASTVisitor.class),
 				/*
 				 * String manipulations and arithmetic expressions
 				 */
@@ -135,7 +146,7 @@ public class RulesContainer {
 				new UseIsEmptyRule(UseIsEmptyRuleASTVisitor.class),
 				new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
 				new StringBufferToBuilderRule(StringBufferToBuilderASTVisitor.class),
-
+				new PrimitiveObjectUseEqualsRule(PrimitiveObjectUseEqualsASTVisitor.class),
 				/*
 				 * Loops and streams
 				 */
@@ -150,6 +161,7 @@ public class RulesContainer {
 				new EnhancedForLoopToStreamAnyMatchRule(EnhancedForLoopToStreamAnyMatchASTVisitor.class),
 				new EnhancedForLoopToStreamFindFirstRule(EnhancedForLoopToStreamFindFirstASTVisitor.class),
 				new EnhancedForLoopToStreamSumRule(EnhancedForLoopToStreamSumASTVisitor.class),
+				new StringBuildingLoopRule(StringBuildingLoopASTVisitor.class),
 				new LambdaToMethodReferenceRule(LambdaToMethodReferenceASTVisitor.class),
 
 				/*

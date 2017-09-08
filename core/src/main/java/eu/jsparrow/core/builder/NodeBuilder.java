@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -39,8 +40,8 @@ public class NodeBuilder {
 	 * Creates an method invocation on an expression with
 	 * 
 	 * @param ast
-	 *            the AbastractSyntaxTree thats the target of the node
-	 * @param optinoalExpression
+	 *            the AbstractSyntaxTree thats the target of the node
+	 * @param optionalExpression
 	 *            target of the invocation
 	 * @param name
 	 *            is the name of the invoked method
@@ -49,9 +50,9 @@ public class NodeBuilder {
 	 * @return returns a new method with fills with the parameters
 	 */
 	@SuppressWarnings("unchecked")
-	public static MethodInvocation newMethodInvocation(AST ast, Expression optinoalExpression, SimpleName name,
+	public static MethodInvocation newMethodInvocation(AST ast, Expression optionalExpression, SimpleName name,
 			Expression argument) {
-		MethodInvocation resultMI = newMethodInvocation(ast, optinoalExpression, name);
+		MethodInvocation resultMI = newMethodInvocation(ast, optionalExpression, name);
 		resultMI.arguments().add(argument);
 		return resultMI;
 	}
@@ -60,8 +61,8 @@ public class NodeBuilder {
 	 * Creates an method invocation on an expression with
 	 * 
 	 * @param ast
-	 *            the AbastractSyntaxTree thats the target of the node
-	 * @param optinoalExpression
+	 *            the AbstractSyntaxTree thats the target of the node
+	 * @param optionalExpression
 	 *            target of the invocation
 	 * @param name
 	 *            is the name of the invoked method
@@ -70,9 +71,9 @@ public class NodeBuilder {
 	 * @return returns a new method with fills with the parameters
 	 */
 	@SuppressWarnings("unchecked")
-	public static MethodInvocation newMethodInvocation(AST ast, Expression optinoalExpression, SimpleName name,
+	public static MethodInvocation newMethodInvocation(AST ast, Expression optionalExpression, SimpleName name,
 			List<Expression> arguments) {
-		MethodInvocation resultMI = newMethodInvocation(ast, optinoalExpression, name);
+		MethodInvocation resultMI = newMethodInvocation(ast, optionalExpression, name);
 		resultMI.arguments().addAll(arguments);
 		return resultMI;
 	}
@@ -81,16 +82,16 @@ public class NodeBuilder {
 	 * Creates an method invocation on an expression with
 	 * 
 	 * @param ast
-	 *            the AbastractSyntaxTree thats the target of the node
-	 * @param optinoalExpression
+	 *            the AbstractSyntaxTree thats the target of the node
+	 * @param optionalExpression
 	 *            target of the invocation
 	 * @param name
 	 *            is the name of the invoked method
 	 * @return returns a new method with fills with the parameters
 	 */
-	public static MethodInvocation newMethodInvocation(AST ast, Expression optinoalExpression, SimpleName name) {
+	public static MethodInvocation newMethodInvocation(AST ast, Expression optionalExpression, SimpleName name) {
 		MethodInvocation resultMI = ast.newMethodInvocation();
-		resultMI.setExpression(optinoalExpression);
+		resultMI.setExpression(optionalExpression);
 		resultMI.setName(name);
 		return resultMI;
 	}
@@ -98,10 +99,10 @@ public class NodeBuilder {
 	/**
 	 * 
 	 * @param ast
-	 *            the AbastractSyntaxTree thats the target of the node
+	 *            the AbstractSyntaxTree thats the target of the node
 	 * @param identifier
 	 *            name that is used for the SimpleName
-	 * @return an {@link SimpleName} that capsules the identifier
+	 * @return an {@link SimpleName} that encapsulates the identifier
 	 */
 	public static SimpleName newSimpleName(AST ast, String identifier) {
 		return ast.newSimpleName(identifier);
@@ -118,7 +119,7 @@ public class NodeBuilder {
 	 *            parameters: for([expression]:[parameter]{[block]}
 	 * 
 	 * @param ast
-	 *            the AbastractSyntaxTree thats the target of the node
+	 *            the AbstractSyntaxTree thats the target of the node
 	 * @param body
 	 *            are the statements in of the for loop
 	 * @param expression
@@ -140,7 +141,7 @@ public class NodeBuilder {
 	/**
 	 * 
 	 * @param ast
-	 *            the AbastractSyntaxTree thats the target of the node
+	 *            the AbstractSyntaxTree thats the target of the node
 	 * @param name
 	 *            is the name of the generated variable
 	 * @param variableType
@@ -168,7 +169,7 @@ public class NodeBuilder {
 	 * Creates an {@link StringLiteral} from an escaped string value
 	 * 
 	 * @param ast
-	 *            the AbastractSyntaxTree thats the target of the node
+	 *            the AbstractSyntaxTree thats the target of the node
 	 * @param escapedString
 	 *            is the value of the resulting {@link StringLiteral}
 	 * @return the wrapped string value
@@ -182,7 +183,7 @@ public class NodeBuilder {
 	/**
 	 * 
 	 * @param ast
-	 *            the AbastractSyntaxTree thats the target of the node
+	 *            the AbstractSyntaxTree thats the target of the node
 	 * @param typeBinding
 	 *            is a type binding of a variable that is resolved to its Type
 	 * @return {@link Type} of the given {@link ITypeBinding}
@@ -202,8 +203,7 @@ public class NodeBuilder {
 			WildcardType capType = ast.newWildcardType();
 			ITypeBinding bound = wildCard.getBound();
 			if (bound != null) {
-				capType.setBound(typeFromBinding(ast, bound));// ),
-				// wildCard.isUpperbound());
+				capType.setBound(typeFromBinding(ast, bound));
 			}
 			return capType;
 		}
@@ -234,9 +234,27 @@ public class NodeBuilder {
 	}
 
 	/**
+	 * @param ast
+	 *            The AbstractSyntaxTree that is the target of the node
+	 * @param operator
+	 *            {@link PrefixExpression.Operator} of the
+	 *            {@link PrefixExpression}
+	 * @param expression
+	 *            {@link Expression} for the operand
+	 * @return {@link PrefixExpression} with the given operator and operands
+	 */
+	public static PrefixExpression newPrefixExpression(AST ast, PrefixExpression.Operator operator,
+			Expression expression) {
+		PrefixExpression result = ast.newPrefixExpression();
+		result.setOperator(operator);
+		result.setOperand(expression);
+		return result;
+	}
+
+	/**
 	 * 
 	 * @param ast
-	 *            the AbastractSyntaxTree thats the target of the node
+	 *            the AbstractSyntaxTree thats the target of the node
 	 * @param operator
 	 *            {@link InfixExpression.Operator} of the
 	 *            {@link InfixExpression}
@@ -258,7 +276,7 @@ public class NodeBuilder {
 	/**
 	 * 
 	 * @param ast
-	 *            the AbastractSyntaxTree thats the target of the node
+	 *            the AbstractSyntaxTree thats the target of the node
 	 * @param expression
 	 *            {@link Expression} that is wrapped by the new
 	 *            {@link ParenthesizedExpression}
@@ -270,11 +288,13 @@ public class NodeBuilder {
 		return result;
 	}
 
-	/** Creates a {@link MarkerAnnotation} for the given {@link Name}
+	/**
+	 * Creates a {@link MarkerAnnotation} for the given {@link Name}
 	 * 
 	 * @param ast
-	 *            the AbastractSyntaxTree thats the target of the node
-	 * @param name name of the annotation
+	 *            the AbstractSyntaxTree thats the target of the node
+	 * @param name
+	 *            name of the annotation
 	 * @return an {@link MarkerAnnotation}
 	 */
 	public static MarkerAnnotation newMarkerAnnotation(AST ast, Name name) {

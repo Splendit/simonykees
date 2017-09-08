@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -15,8 +16,10 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
@@ -300,13 +303,169 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 		}
 
 		/*
-		 * the if statement should not contain non effectively final
-		 * variables and should not throw any exception
+		 * the if statement should not contain non effectively final variables
+		 * and should not throw any exception
 		 */
 		if (containsNonEffectivelyFinalVariable(ifStatement.getExpression()) || throwsException(ifStatement)) {
 			return null;
 		}
 
 		return ifStatement;
+	}
+
+	/**
+	 * Checks whether the body of the given loop consists of a single statement.
+	 * Considers the case where the body is a block with a single statement or a
+	 * single body statement which is not being enclosed in curly brackets.
+	 * 
+	 * @param loopNode
+	 *            the loop to be checked
+	 * @return an optional of the single body statement or an empty optional if
+	 *         the body doesn't consist of a single statement.
+	 */
+	protected Optional<ExpressionStatement> getSingleBodyStatement(EnhancedForStatement loopNode) {
+		Statement loopBody = loopNode.getBody();
+		if (ASTNode.BLOCK == loopBody.getNodeType()) {
+			Block blockBody = (Block) loopBody;
+			List<Statement> statemetns = ASTNodeUtil.convertToTypedList(blockBody.statements(), Statement.class);
+			if (statemetns.size() == 1) {
+				Statement singleStatement = statemetns.get(0);
+				if (singleStatement.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
+					return Optional.of((ExpressionStatement) singleStatement);
+				}
+			}
+		} else if (ASTNode.EXPRESSION_STATEMENT == loopBody.getNodeType()) {
+			return Optional.of((ExpressionStatement) loopBody);
+		}
+		return Optional.empty();
+	}
+
+	/**
+	 * Checks whether the given expression statement represents an expression of
+	 * either of the forms:
+	 * 
+	 * <ul>
+	 * <li>{@code sum = sum + parameter;}</li>
+	 * <li>or {@code sum += parameter;}</li>
+	 * </ul>
+	 * 
+	 * @param parameter
+	 *            a node representing one operand
+	 * @param expressionStatement
+	 *            the statement to be checked
+	 * @return an optional of the name of the variable which stores the result
+	 *         if the expression has the described form, or an empty optional
+	 *         otherwise.
+	 */
+	protected Optional<SimpleName> findResultVariableName(SingleVariableDeclaration parameter,
+			ExpressionStatement expressionStatement) {
+		Expression expression = expressionStatement.getExpression();
+		if (ASTNode.ASSIGNMENT == expression.getNodeType()) {
+			Assignment assignment = (Assignment) expression;
+			Expression lhs = assignment.getLeftHandSide();
+			if (ASTNode.SIMPLE_NAME == lhs.getNodeType()) {
+				SimpleName parameterName = parameter.getName();
+				SimpleName sumVariableName = (SimpleName) lhs;
+				Assignment.Operator assignmetnOperator = assignment.getOperator();
+				if (Assignment.Operator.PLUS_ASSIGN.equals(assignmetnOperator)) {
+					/*
+					 * sum += parameter
+					 */
+					Expression rhs = assignment.getRightHandSide();
+					if (ASTNode.SIMPLE_NAME == rhs.getNodeType()) {
+						String rhsIdentifier = ((SimpleName) rhs).getIdentifier();
+						if (rhsIdentifier.equals(parameterName.getIdentifier())) {
+							return Optional.of(sumVariableName);
+						}
+					}
+				} else if (Assignment.Operator.ASSIGN.equals(assignmetnOperator)) {
+					/*
+					 * sum = sum + parameter
+					 */
+					Expression rhs = assignment.getRightHandSide();
+					if (ASTNode.INFIX_EXPRESSION == rhs.getNodeType()
+							&& isSumOfOperands((InfixExpression) rhs, sumVariableName, parameterName)) {
+						return Optional.of(sumVariableName);
+					}
+				}
+			}
+		}
+		return Optional.empty();
+	}
+
+	/**
+	 * Checks whether the given expression represents an addition operation of
+	 * the given simple names. Considers both cases
+	 * {@code sumVariableName + parameterName} and
+	 * {@code parameterName + sumVariableName}.
+	 * 
+	 * @param expression
+	 *            the expression to be checked
+	 * @param sumVariableName
+	 *            expected operand
+	 * @param parameterName
+	 *            expected operand
+	 * @return {@code true} if the expression is an addition of the given
+	 *         operands or {@code false} otherwise.
+	 */
+	protected boolean isSumOfOperands(InfixExpression expression, SimpleName sumVariableName,
+			SimpleName parameterName) {
+		InfixExpression.Operator operator = expression.getOperator();
+		if (!expression.extendedOperands().isEmpty()) {
+			/*
+			 * There are more than two operands
+			 */
+			return false;
+		}
+		if (InfixExpression.Operator.PLUS.equals(operator)) {
+			Expression lefOperand = expression.getLeftOperand();
+			Expression rightOperand = expression.getRightOperand();
+
+			if ((matches(lefOperand, sumVariableName) && matches(rightOperand, parameterName))
+					|| (matches(rightOperand, sumVariableName) && matches(lefOperand, parameterName))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Checks whether the given expression is a simple having the same
+	 * identifier as the given simple name.
+	 * 
+	 * @param expression
+	 *            expression to be checked
+	 * @param variableName
+	 *            the name to be compared to
+	 * @return {@code true} if the identifiers match or {@code false} otherwise
+	 */
+	protected boolean matches(Expression expression, SimpleName variableName) {
+		if (ASTNode.SIMPLE_NAME == expression.getNodeType()) {
+			SimpleName operandName = (SimpleName) expression;
+			String operandIdentifier = operandName.getIdentifier();
+			String variableIdentifier = variableName.getIdentifier();
+			return operandIdentifier.equals(variableIdentifier);
+		}
+		return false;
+	}
+
+	/**
+	 * Removes the given declaration fragment. If it is the only fragment of the
+	 * declaration, then it removes the whole declaration statement.
+	 * 
+	 * @param declStatement
+	 *            the statement containing the declaration fragment.
+	 * @param fragment
+	 *            the declaration fragment to be removed
+	 */
+	protected void removeOldSumDeclaration(VariableDeclarationStatement declStatement,
+			VariableDeclarationFragment fragment) {
+		List<VariableDeclarationFragment> fragmetns = ASTNodeUtil.convertToTypedList(declStatement.fragments(),
+				VariableDeclarationFragment.class);
+		if (fragmetns.size() == 1) {
+			astRewrite.remove(declStatement, null);
+		} else {
+			astRewrite.remove(fragment, null);
+		}
 	}
 }

@@ -22,10 +22,9 @@
    </url>
 
    <requires>
-      <import plugin="org.eclipse.epp.logging.aeri.core" version="2.0.0" match="compatible"/>
-      <import plugin="org.eclipse.epp.logging.aeri.ide" version="2.0.0" match="compatible"/>
       <import plugin="com.labs64.netlicensing.client" version="2.3.4" match="compatible"/>
       <import plugin="com.github.oshi.core" version="3.4.2" match="compatible"/>
+      <import plugin="org.apache.commons.lang3" version="3.0.0" match="compatible"/>
    </requires>
 
    <plugin
@@ -58,6 +57,13 @@
 
    <plugin
          id="eu.jsparrow.i18n"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="jSparrow.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"

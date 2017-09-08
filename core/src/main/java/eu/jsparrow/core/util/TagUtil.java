@@ -20,6 +20,7 @@ import eu.jsparrow.core.rule.impl.FieldNameConventionRule;
 import eu.jsparrow.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import eu.jsparrow.core.rule.impl.ForToForEachRule;
 import eu.jsparrow.core.rule.impl.FunctionalInterfaceRule;
+import eu.jsparrow.core.rule.impl.ImmutableStaticFinalCollectionsRule;
 import eu.jsparrow.core.rule.impl.IndexOfToContainsRule;
 import eu.jsparrow.core.rule.impl.InefficientConstructorRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachCollectRule;
@@ -31,12 +32,15 @@ import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
 import eu.jsparrow.core.rule.impl.OrganiseImportsRule;
 import eu.jsparrow.core.rule.impl.OverrideAnnotationRule;
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
+import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
+import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
 import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
 import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
 import eu.jsparrow.core.rule.impl.StringBufferToBuilderRule;
+import eu.jsparrow.core.rule.impl.StringBuildingLoopRule;
 import eu.jsparrow.core.rule.impl.StringConcatToPlusRule;
 import eu.jsparrow.core.rule.impl.StringFormatLineSeparatorRule;
 import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
@@ -66,7 +70,6 @@ public class TagUtil {
 	 */
 	@SuppressWarnings({ "rawtypes", "nls" })
 	public static List<Tag> getTagsForRule(Class<? extends RefactoringRule> clazz) {
-
 		if (ArithmethicAssignmentRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_4, Tag.READABILITY, Tag.CODING_CONVENTIONS);
 
@@ -171,7 +174,10 @@ public class TagUtil {
 
 		} else if (FlatMapInsteadOfNestedLoopsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
-
+			
+		} else if (StringBuildingLoopRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_5, Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
+			
 		} else if (UseIsEmptyRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_6, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS, Tag.READABILITY);
 
@@ -183,6 +189,16 @@ public class TagUtil {
 		
 		} else if (StringBufferToBuilderRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE, Tag.STRING_MANIPULATION);
+
+		} else if (ReImplementingInterfaceRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS);
+
+		} else if (PrimitiveObjectUseEqualsRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.STRING_MANIPULATION);
+			
+		} else if (ImmutableStaticFinalCollectionsRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_2, Tag.CODING_CONVENTIONS);
+			
 		}
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["
