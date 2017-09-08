@@ -9,8 +9,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -56,6 +54,16 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final Logger logger = LoggerFactory.getLogger(FieldDeclarationASTVisitor.class);
 
+	private static final String RENAME_PUBLIC_FIELDS = "public"; //$NON-NLS-1$
+	private static final String RENAME_PRIVATE_FIELDS = "private"; //$NON-NLS-1$
+	private static final String RENAME_PROTECTED_FIELDS = "protected"; //$NON-NLS-1$
+	private static final String RENAME_PACKAGE_PROTECTED_FIELDS = "package-protected"; //$NON-NLS-1$
+	private static final String UPPERCASE_FOLLOWING_DOLLAR_SIGN = "uppercase-after-dollar"; //$NON-NLS-1$
+	private static final String UPPERCASE_FOLLOWING_UNDERSCORE = "uppercase-after-underscore"; //$NON-NLS-1$
+	private static final String ADD_TODO = "add-todo"; //$NON-NLS-1$
+	
+	private Map<String, Boolean> modifierOptions = new HashMap<>();
+	
 	private CompilationUnit compilationUnit;
 	private List<FieldMetadata> fieldsMetaData = new ArrayList<>();
 	private Map<ASTNode, List<SimpleName>> declaredNamesPerNode = new HashMap<>();
@@ -67,6 +75,19 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	public FieldDeclarationASTVisitor(IJavaElement[] scope) {
 		this.searchScope = scope;
+		setDefaultOptions();
+	}
+
+	public void setDefaultOptions() {
+		modifierOptions.clear();
+		modifierOptions.put(RENAME_PUBLIC_FIELDS, true);
+		modifierOptions.put(RENAME_PACKAGE_PROTECTED_FIELDS, true);
+		modifierOptions.put(RENAME_PROTECTED_FIELDS, true);
+		modifierOptions.put(RENAME_PRIVATE_FIELDS, false);
+		modifierOptions.put(UPPERCASE_FOLLOWING_DOLLAR_SIGN, true);
+		modifierOptions.put(UPPERCASE_FOLLOWING_UNDERSCORE, true);
+		modifierOptions.put(ADD_TODO, true);
+		
 	}
 
 	@Override
@@ -102,11 +123,23 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 			return true;
 		}
 
-		if (ASTNodeUtil.hasModifier(modifiers, Modifier::isPrivate)) {
+		if (ASTNodeUtil.hasModifier(modifiers, Modifier::isPrivate) && !getRenamePrivateField()) {
 			/**
 			 * private fields are handled in
 			 * {@link FieldNameConventionASTVisitor}.
 			 */
+			return true;
+		}
+
+		if (ASTNodeUtil.hasModifier(modifiers, Modifier::isProtected) && !getRenameProtectedField()) {
+			return true;
+		}
+
+		if (ASTNodeUtil.hasModifier(modifiers, Modifier::isPublic) && !getRenamePublicField()) {
+			return true;
+		}
+
+		if (modifiers.isEmpty() && !getRenamePackageProtectedField()) {
 			return true;
 		}
 
@@ -117,13 +150,10 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 			if (!NamingConventionUtil.isComplyingWithConventions(fragmentName.getIdentifier())) {
 				NamingConventionUtil.generateNewIdetifier(fragmentName.getIdentifier())
 						.filter(newIdentifier -> !isConflictingIdentifier(newIdentifier, fieldDeclaration))
-						.ifPresent(newIdentifier -> {
-							findFieldReferences(fragment).ifPresent(references -> {
-								fieldsMetaData.add(new FieldMetadata(compilationUnit, references, fragment, newIdentifier));
-								newNamesPerType.add(newIdentifier);
-							});
-
-						});
+						.ifPresent(newIdentifier -> findFieldReferences(fragment).ifPresent(references -> {
+							fieldsMetaData.add(new FieldMetadata(compilationUnit, references, fragment, newIdentifier));
+							newNamesPerType.add(newIdentifier);
+						}));
 			}
 		}
 
@@ -179,17 +209,9 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		 */
 		List<ImportDeclaration> imports = ASTNodeUtil.returnTypedList(compilationUnit.imports(),
 				ImportDeclaration.class);
-		boolean collidesWithstaticImports = imports.stream().filter(ImportDeclaration::isStatic)
+		return imports.stream().filter(ImportDeclaration::isStatic)
 				.map(ImportDeclaration::getName).filter(Name::isSimpleName)
 				.anyMatch(name -> ((SimpleName) name).getIdentifier().equals(newIdentifier));
-		if (collidesWithstaticImports) {
-			return true;
-		}
-
-		/*
-		 * Otherwise, the name does not cause any clashing.
-		 */
-		return false;
 	}
 
 	/**
@@ -342,5 +364,61 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	public List<FieldMetadata> getFieldMetadata() {
 		return this.fieldsMetaData;
+	}
+	
+	public void setRenamePublicField(boolean value) {
+		this.modifierOptions.put(RENAME_PUBLIC_FIELDS, value);
+	}
+	
+	public void setRenameProtectedField(boolean value) {
+		this.modifierOptions.put(RENAME_PROTECTED_FIELDS, value);
+	}
+	
+	public void setRenamePackageProtectedField(boolean value) {
+		this.modifierOptions.put(RENAME_PACKAGE_PROTECTED_FIELDS, value);
+	}
+	
+	public void setRenamePrivateField(boolean value) {
+		this.modifierOptions.put(RENAME_PRIVATE_FIELDS, value);
+	}
+	
+	public void setUppercaseAfterDollar(boolean value) {
+		this.modifierOptions.put(UPPERCASE_FOLLOWING_DOLLAR_SIGN, value);
+	}
+	
+	public void setUppercaseAfterUnderscore(boolean value) {
+		this.modifierOptions.put(UPPERCASE_FOLLOWING_UNDERSCORE, value);
+	}
+	
+	public void setAddTodo(boolean value) {
+		this.modifierOptions.put(ADD_TODO, value);
+	}
+	
+	private boolean getRenamePublicField() {
+		return modifierOptions.containsKey(RENAME_PUBLIC_FIELDS) && modifierOptions.get(RENAME_PUBLIC_FIELDS);
+	}
+	
+	private boolean getRenamePackageProtectedField() {
+		return modifierOptions.containsKey(RENAME_PACKAGE_PROTECTED_FIELDS) && modifierOptions.get(RENAME_PACKAGE_PROTECTED_FIELDS);
+	}
+	
+	private boolean getRenameProtectedField() {
+		return modifierOptions.containsKey(RENAME_PROTECTED_FIELDS) && modifierOptions.get(RENAME_PROTECTED_FIELDS);
+	}
+	
+	private boolean getRenamePrivateField() {
+		return modifierOptions.containsKey(RENAME_PRIVATE_FIELDS) && modifierOptions.get(RENAME_PRIVATE_FIELDS);
+	}
+	
+	private boolean getUppercaseAfterDollar() {
+		return modifierOptions.containsKey(UPPERCASE_FOLLOWING_DOLLAR_SIGN) && modifierOptions.get(UPPERCASE_FOLLOWING_DOLLAR_SIGN);
+	}
+	
+	private boolean getUppercaseAfterUnderscore() {
+		return modifierOptions.containsKey(UPPERCASE_FOLLOWING_UNDERSCORE) && modifierOptions.get(UPPERCASE_FOLLOWING_UNDERSCORE);
+	}
+	
+	private boolean getAddTodo() {
+		return modifierOptions.containsKey(ADD_TODO) && modifierOptions.get(ADD_TODO);
 	}
 }
