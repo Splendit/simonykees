@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
@@ -62,15 +62,13 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 		for (ICompilationUnit iCompilationUnit : targetCompilationUnits) {
 			TextEditGroup editGroup = metaData.getTextEditGroup(iCompilationUnit);
 			if (!editGroup.isEmpty()) {
-				TextEdit[] textEdits = editGroup.getTextEdits();
 				Document document = new Document(iCompilationUnit.getSource());
 				DocumentChange documentChange = new DocumentChange(metaData.getNewIdentifier(), document);
-				for (TextEdit textEdit : textEdits) {
-					documentChange.addEdit(textEdit);
-				}
+				documentChange.setEdit(new MultiTextEdit());
+				documentChange.addTextEditGroup(editGroup);
+				
 				documentChanges.add(documentChange);
 			}
-
 		}
 
 		return documentChanges;
