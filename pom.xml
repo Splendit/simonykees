@@ -71,14 +71,13 @@
 	</prerequisites>
 
 	<modules>
-		<!-- release engineering -->
-		
 		<!-- plug-in functionality -->
 		<module>logging</module>
 		<module>i18n</module>
 		<module>license.api</module>
 		<module>license.netlicensing</module>
 		<module>core</module>
+		<module>ui</module>
 		<!-- test-data -->
 		<module>sample</module>
 		<!-- all integration test modules -->
@@ -89,12 +88,10 @@
 		<module>feature.standalone</module>
 		<module>feature</module>
 		<module>site</module>
-		
-		
+		<!-- release engineering -->
 		<module>releng</module>
-
+		<!-- standalone -->
 		<module>standalone</module>
-		<module>ui</module>
 	</modules>
 
 	<scm>
