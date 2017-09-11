@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.visitor.renaming;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,8 +12,13 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -37,11 +43,16 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	private static final String DASH = "-"; //$NON-NLS-1$
 
 	private Map<String, FieldMetadata> cuRelatedReplacements;
+	private Map<String, List<String>> cuRelatedUnmodifiable;
 	private List<FieldMetadata> metaData;
 	private ICompilationUnit iCompilationUnit;
+	private List<FieldMetadata> unmodifiableFields;
+	private Map<ICompilationUnit, TextEditGroup> todosEditGroups;
 
-	public PublicFieldsRenamingASTVisitor(List<FieldMetadata> metaData) {
+	public PublicFieldsRenamingASTVisitor(List<FieldMetadata> metaData, List<FieldMetadata> unmodifiableFields) {
 		this.metaData = metaData;
+		this.unmodifiableFields = unmodifiableFields;
+		todosEditGroups = new HashMap<>();
 	}
 
 	@Override
@@ -49,16 +60,60 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 		this.iCompilationUnit = (ICompilationUnit) compilationUnit.getJavaElement();
 		this.cuRelatedReplacements = findCuRelatedData(compilationUnit);
 		this.cuRelatedReplacements.putAll(findRelatedCuDeclarationFragments(compilationUnit));
+		
+		this.cuRelatedUnmodifiable = findCuRelatedUnmodifiable(compilationUnit);
+		
 		return true;
 	}
 
 	@Override
+	public boolean visit(FieldDeclaration fieldDeclaration) {
+		String fieldKeyId = calcFieldIdentifier(fieldDeclaration);
+		if(cuRelatedUnmodifiable.containsKey(fieldKeyId)) {
+			List<String> identifiers = cuRelatedUnmodifiable.get(fieldKeyId);
+			insertJavadocNode(fieldDeclaration, identifiers);
+			
+		}
+		return true;
+	}
+
+	private void insertJavadocNode(FieldDeclaration fielDecl, List<String> identifiers) {
+		
+		String fragmentNames = identifiers.stream().collect(Collectors.joining(", "));
+		Javadoc javaDoc = fielDecl.getAST().newJavadoc();
+
+		TagElement tagElement = fielDecl.getAST().newTagElement();
+		TextElement textElement = fielDecl.getAST().newTextElement();
+		textElement.setText("Rename " + fragmentNames + " to comply with naming conventions.");
+		ListRewrite commentRewriter = astRewrite.getListRewrite(tagElement, TagElement.FRAGMENTS_PROPERTY);
+
+		TextEditGroup editGroup = findTodosEditGroup();
+		commentRewriter.insertFirst(textElement, editGroup);
+		tagElement.setTagName("TODO");
+
+		ListRewrite javaDocRewrite = astRewrite.getListRewrite(javaDoc, Javadoc.TAGS_PROPERTY);
+		javaDocRewrite.insertFirst(tagElement, editGroup);
+		astRewrite.set(fielDecl, FieldDeclaration.JAVADOC_PROPERTY, javaDoc, editGroup);
+	}
+
+	private TextEditGroup findTodosEditGroup() {
+		TextEditGroup group;
+		if(this.todosEditGroups.containsKey(this.iCompilationUnit)) {
+			group = todosEditGroups.get(this.iCompilationUnit);
+		} else {
+			group = new TextEditGroup(this.iCompilationUnit.getResource().getName());
+			todosEditGroups.put(this.iCompilationUnit, group);
+		}
+		return group;
+	}
+
+	@Override
 	public boolean visit(SimpleName simpleName) {
-		findReplacement(simpleName).ifPresent(metaData -> {
+		findReplacement(simpleName).ifPresent(mData -> {
 			AST ast = astRewrite.getAST();
-			String newIdentifier = metaData.getNewIdentifier();
+			String newIdentifier = mData.getNewIdentifier();
 			SimpleName newName = ast.newSimpleName(newIdentifier);
-			TextEditGroup editGroup = metaData.getTextEditGroup(iCompilationUnit);
+			TextEditGroup editGroup = mData.getTextEditGroup(iCompilationUnit);
 			astRewrite.replace(simpleName, newName, editGroup);
 		});
 
@@ -81,14 +136,14 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	private Map<String, FieldMetadata> findRelatedCuDeclarationFragments(CompilationUnit compilationUnit) {
 
 		Map<String, FieldMetadata> declarations = new HashMap<>();
-		metaData.stream().filter(metaData -> {
-			IPath originDeclarationPath = metaData.getCompilationUnit().getJavaElement().getPath();
+		metaData.stream().filter(mData -> {
+			IPath originDeclarationPath = mData.getCompilationUnit().getJavaElement().getPath();
 			IPath path = compilationUnit.getJavaElement().getPath();
 			return matchingIPaths(originDeclarationPath, path);
-		}).forEach(metaData -> {
-			VariableDeclarationFragment fragment = metaData.getFieldDeclaration();
+		}).forEach(mData -> {
+			VariableDeclarationFragment fragment = mData.getFieldDeclaration();
 			SimpleName oldName = fragment.getName();
-			declarations.put(calcIdentifier(oldName), metaData);
+			declarations.put(calcIdentifier(oldName), mData);
 		});
 
 		return declarations;
@@ -121,7 +176,7 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	private Map<String, FieldMetadata> findCuRelatedData(CompilationUnit cu) {
 		IResource cuResource = cu.getJavaElement().getResource();
 		List<ReferenceSearchMatch> relatedcuReferences = metaData.stream()
-				.flatMap(metaData -> metaData.getReferences().stream())
+				.flatMap(mData -> mData.getReferences().stream())
 				.filter(match -> isMatchingResource(cuResource, match)).collect(Collectors.toList());
 		Map<String, FieldMetadata> oldToNewKeys = new HashMap<>();
 		relatedcuReferences.forEach(match -> {
@@ -131,6 +186,29 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 		});
 
 		return oldToNewKeys;
+	}
+	
+	private Map<String, List<String>> findCuRelatedUnmodifiable(CompilationUnit compilationUnit) {
+		IPath currentPath = compilationUnit.getJavaElement().getPath();
+		Map<String, List<String>> data = new HashMap<>();
+
+		unmodifiableFields.stream().filter(mData -> {
+			CompilationUnit cu = mData.getCompilationUnit();
+			return matchingIPaths(cu.getJavaElement().getPath(), currentPath);
+		}).forEach(mData -> {
+			FieldDeclaration field = (FieldDeclaration) mData.getFieldDeclaration().getParent();
+			String key = calcFieldIdentifier(field);
+			if (data.containsKey(key)) {
+				List<String> fragmentNames = data.get(key);
+				fragmentNames.add(mData.getNewIdentifier());
+			} else {
+				List<String> fragmentNames = new ArrayList<>();
+				fragmentNames.add(mData.getNewIdentifier());
+				data.put(key, fragmentNames);
+			}
+		});
+
+		return data;
 	}
 
 	/**
@@ -190,5 +268,13 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 */
 	private String calcIdentifier(String identifier, int startingPosition) {
 		return identifier + DASH + startingPosition;
+	}
+	
+	private String calcFieldIdentifier(int startingPosition) {
+		return "field_at:" + startingPosition;
+	}
+	
+	private String calcFieldIdentifier(FieldDeclaration field) {
+		return calcFieldIdentifier(field.getStartPosition());
 	}
 }

@@ -61,6 +61,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 
 	private RefactoringPipeline refactoringPipeline;
 	private List<FieldMetadata> metadata;
+	private List<FieldMetadata> todosMetadata;
 	private PublicFieldsRenamingRule renameFieldsRule;
 
 	public RenameFieldsRuleWizard(List<IJavaElement> selectedJavaElements) {
@@ -136,6 +137,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 				}
 
 				metadata = visitor.getFieldMetadata();
+				todosMetadata = visitor.getUnmodifiableFieldMetadata();
 
 				// TODO find out how to get ICompilationUnits from IJavaElements, or what type it is
 				Set<IJavaElement> targetJavaElements = visitor.getTargetIJavaElements();
@@ -149,7 +151,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 					e1.printStackTrace();
 				}
 
-				renameFieldsRule = new PublicFieldsRenamingRule(PublicFieldsRenamingASTVisitor.class, metadata);
+				renameFieldsRule = new PublicFieldsRenamingRule(PublicFieldsRenamingASTVisitor.class, metadata, todosMetadata);
 				final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays
 						.asList(renameFieldsRule);
 

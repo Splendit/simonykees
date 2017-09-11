@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.visitor.renaming;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -60,7 +61,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String RENAME_PACKAGE_PROTECTED_FIELDS = "package-protected"; //$NON-NLS-1$
 	private static final String UPPERCASE_FOLLOWING_DOLLAR_SIGN = "uppercase-after-dollar"; //$NON-NLS-1$
 	private static final String UPPERCASE_FOLLOWING_UNDERSCORE = "uppercase-after-underscore"; //$NON-NLS-1$
-	private static final String ADD_TODO = "add-todo"; //$NON-NLS-1$
+	private static final String ADD_COMMENT = "add-todo"; //$NON-NLS-1$
 	
 	private Map<String, Boolean> modifierOptions = new HashMap<>();
 	
@@ -72,13 +73,26 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	private Set<IJavaElement> targetIJavaElements = new HashSet<>();
 	private IJavaProject iJavaProject;
 	private IJavaElement[] searchScope;
+	private List<FieldMetadata> unmodifiableFields = new ArrayList<>();
 
 	public FieldDeclarationASTVisitor(IJavaElement[] scope) {
 		this.searchScope = scope;
-		setDefaultOptions();
+		activateDefaultOptions();
 	}
 
-	public void setDefaultOptions() {
+	/**
+	 * Activates the following options for the renaming:
+	 * <ul>
+	 * <li>{@link #RENAME_PUBLIC_FIELDS} = {@code true}</li>
+	 * <li>{@link #RENAME_PACKAGE_PROTECTED_FIELDS} = {@code true}</li>
+	 * <li>{@link #RENAME_PROTECTED_FIELDS} = {@code true}</li>
+	 * <li>{@link #RENAME_PRIVATE_FIELDS} = {@code false}</li>
+	 * <li>{@link #UPPERCASE_FOLLOWING_DOLLAR_SIGN} = {@code true}</li>
+	 * <li>{@link #UPPERCASE_FOLLOWING_UNDERSCORE} = {@code true}</li>
+	 * <li>{@link #ADD_COMMENT} = {@code false}</li>
+	 * </ul>
+	 */
+	public void activateDefaultOptions() {
 		modifierOptions.clear();
 		modifierOptions.put(RENAME_PUBLIC_FIELDS, true);
 		modifierOptions.put(RENAME_PACKAGE_PROTECTED_FIELDS, true);
@@ -86,7 +100,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		modifierOptions.put(RENAME_PRIVATE_FIELDS, false);
 		modifierOptions.put(UPPERCASE_FOLLOWING_DOLLAR_SIGN, true);
 		modifierOptions.put(UPPERCASE_FOLLOWING_UNDERSCORE, true);
-		modifierOptions.put(ADD_TODO, true);
+		modifierOptions.put(ADD_COMMENT, false);
 		
 	}
 
@@ -118,7 +132,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (ASTNodeUtil.hasModifier(modifiers, Modifier::isStatic)
 				&& ASTNodeUtil.hasModifier(modifiers, Modifier::isFinal)) {
 			/*
-			 * This visitor is only concerned on non static final fields
+			 * Static final fields are not in the scope of this visitor
 			 */
 			return true;
 		}
@@ -148,12 +162,24 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		for (VariableDeclarationFragment fragment : fragments) {
 			SimpleName fragmentName = fragment.getName();
 			if (!NamingConventionUtil.isComplyingWithConventions(fragmentName.getIdentifier())) {
-				NamingConventionUtil.generateNewIdetifier(fragmentName.getIdentifier())
-						.filter(newIdentifier -> !isConflictingIdentifier(newIdentifier, fieldDeclaration))
-						.ifPresent(newIdentifier -> findFieldReferences(fragment).ifPresent(references -> {
-							fieldsMetaData.add(new FieldMetadata(compilationUnit, references, fragment, newIdentifier));
-							newNamesPerType.add(newIdentifier);
-						}));
+				boolean upperCaseAfterDollar = getUppercaseAfterDollar();
+				boolean upperCaseAfterUnderscore = getUppercaseAfterUnderscore();
+				Optional<String> optNewIdentifier = NamingConventionUtil.generateNewIdetifier(
+						fragmentName.getIdentifier(), upperCaseAfterDollar, upperCaseAfterUnderscore);
+				if (optNewIdentifier.isPresent()
+						&& !isConflictingIdentifier(optNewIdentifier.get(), fieldDeclaration)) {
+					String newIdentifier = optNewIdentifier.get();
+					findFieldReferences(fragment).ifPresent(references -> {
+						fieldsMetaData.add(new FieldMetadata(compilationUnit, references, fragment, newIdentifier));
+						newNamesPerType.add(newIdentifier);
+					});
+
+				} else if (getAddTodo()) {
+					FieldMetadata unmodifiableFieldDdata = new FieldMetadata(compilationUnit, Collections.emptyList(),
+							fragment, fragment.getName().getIdentifier());
+					unmodifiableFields.add(unmodifiableFieldDdata);
+				}
+
 			}
 		}
 
@@ -360,10 +386,21 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	
 	/**
 	 * 
-	 * @return the list of the {@link FieldMetadata} resulting from the search process. 
+	 * @return the list of the {@link FieldMetadata} corresponding to 
+	 * the fields to be that are found from the search process. 
 	 */
 	public List<FieldMetadata> getFieldMetadata() {
 		return this.fieldsMetaData;
+	}
+	
+	/**
+	 * 
+	 * @return the list of the {@link FieldMetadata} corresponding to 
+	 * the fields that cannot be renamed due to unfeasibility of 
+	 * automatic generation of a new legal identifier.
+	 */
+	public List<FieldMetadata> getUnmodifiableFieldMetadata() {
+		return this.unmodifiableFields;
 	}
 	
 	public void setRenamePublicField(boolean value) {
@@ -391,7 +428,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 	
 	public void setAddTodo(boolean value) {
-		this.modifierOptions.put(ADD_TODO, value);
+		this.modifierOptions.put(ADD_COMMENT, value);
 	}
 	
 	private boolean getRenamePublicField() {
@@ -419,6 +456,6 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 	
 	private boolean getAddTodo() {
-		return modifierOptions.containsKey(ADD_TODO) && modifierOptions.get(ADD_TODO);
+		return modifierOptions.containsKey(ADD_COMMENT) && modifierOptions.get(ADD_COMMENT);
 	}
 }

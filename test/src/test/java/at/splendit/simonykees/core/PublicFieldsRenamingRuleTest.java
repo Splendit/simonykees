@@ -49,10 +49,11 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 
 	private Path path;
 	private static List<FieldMetadata> metaData;
+	private static List<FieldMetadata> todosMetaData;
 
 	public PublicFieldsRenamingRuleTest(Path preRule) {
 		this.path = preRule;
-		rulesList.add(new PublicFieldsRenamingRule(PublicFieldsRenamingASTVisitor.class, metaData));
+		rulesList.add(new PublicFieldsRenamingRule(PublicFieldsRenamingASTVisitor.class, metaData, todosMetaData));
 	}
 
 	public static List<Object[]> loadCompilationUnits() throws JavaModelException, IOException {
@@ -85,6 +86,7 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 		 * having at least one declaration/reference to be renamed. 
 		 */
 		metaData = referencesVisitor.getFieldMetadata();
+		todosMetaData = referencesVisitor.getUnmodifiableFieldMetadata();
 		Set<IPath> iPaths = referencesVisitor.getTargetCompilationUnitPaths();
 		
 		return iPaths.stream().map(iPath -> new Path[] { Paths.get(iPath.toFile().getPath()) }).collect(Collectors.toList());

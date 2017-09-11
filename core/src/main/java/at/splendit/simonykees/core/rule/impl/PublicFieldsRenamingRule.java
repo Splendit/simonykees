@@ -26,11 +26,13 @@ import at.splendit.simonykees.i18n.Messages;
 public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenamingASTVisitor> {
 
 	private List<FieldMetadata> metaData;
+	private List<FieldMetadata> todosMetaData;
 	
 	public PublicFieldsRenamingRule(Class<PublicFieldsRenamingASTVisitor> visitor,
-			List<FieldMetadata> metaData) {
+			List<FieldMetadata> metaData, List<FieldMetadata> todosMetaData) {
 		super(visitor);
 		this.metaData = metaData;
+		this.todosMetaData = todosMetaData;
 		this.name = Messages.PublicFieldsRenamingRule_name;
 		this.description = Messages.PublicFieldsRenamingRule_description;
 	}
@@ -42,7 +44,7 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 
 	@Override
 	public PublicFieldsRenamingASTVisitor visitorFactory() {
-		return new PublicFieldsRenamingASTVisitor(metaData);
+		return new PublicFieldsRenamingASTVisitor(metaData, todosMetaData);
 	}
 	
 	/**
