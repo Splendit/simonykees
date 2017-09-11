@@ -23,6 +23,12 @@ import at.splendit.simonykees.core.util.ClassRelationUtil;
  */
 public class NamingConventionUtil {
 
+	private NamingConventionUtil() {
+		/*
+		 * Hiding the default public constructor.
+		 */
+	}
+	
 	/**
 	 * Uses the regular expression {@code ^[a-z][a-zA-Z0-9]*$} for checking
 	 * whether an identifier complies with the java conventions for variable
@@ -86,6 +92,18 @@ public class NamingConventionUtil {
 		}
 	
 		return Optional.ofNullable(newName).filter(s -> !s.isEmpty());
+	}
+	
+	public static Optional<String> generateNewIdetifier(String identifier, boolean upperCaseAfterDollar, boolean upperCaseAfterUScore) {
+		String charFreeId = identifier;
+		if(!upperCaseAfterDollar) {
+			charFreeId = charFreeId.replace("$", "");  //$NON-NLS-1$//$NON-NLS-2$
+		}
+		
+		if(!upperCaseAfterUScore) {
+			charFreeId = charFreeId.replace("_", "");  //$NON-NLS-1$//$NON-NLS-2$
+		}
+		return generateNewIdetifier(charFreeId);
 	}
 
 	/**
