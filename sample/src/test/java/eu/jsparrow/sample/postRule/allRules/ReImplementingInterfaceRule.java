@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.allRules;
+package eu.jsparrow.sample.postRule.allRules;
 
 import java.util.ArrayList;
 import java.util.Observable;

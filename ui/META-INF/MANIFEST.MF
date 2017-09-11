@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: jSparrow.ui
-Bundle-SymbolicName: jsparrow.ui;singleton:=true
+Bundle-Name: jSparrow UI
+Bundle-SymbolicName: eu.jsparrow.ui;singleton:=true
 Bundle-Version: 2.1.1.qualifier
 Bundle-Activator: eu.jsparrow.ui.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8

@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.immutableStaticFinalCollections;
+package eu.jsparrow.sample.postRule.immutableStaticFinalCollections;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.stringBuildingLoopJ5;
+package eu.jsparrow.sample.postRule.stringBuildingLoopJ5;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.primitiveObjectUseEquals;
+package eu.jsparrow.sample.postRule.primitiveObjectUseEquals;
 
 @SuppressWarnings({ "nls", "unused" })
 public class TestPrimitiveObjectUseEqualsRule {

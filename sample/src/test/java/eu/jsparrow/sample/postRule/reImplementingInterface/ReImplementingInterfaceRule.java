@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.reImplementingInterface;
+package eu.jsparrow.sample.postRule.reImplementingInterface;
 
 import java.util.ArrayList;
 import java.util.List;
