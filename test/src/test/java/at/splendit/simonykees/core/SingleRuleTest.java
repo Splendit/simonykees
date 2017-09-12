@@ -27,7 +27,7 @@ public abstract class SingleRuleTest {
 
 	protected static IPackageFragmentRoot root;
 
-	protected IJavaProject testproject;
+	protected IJavaProject testProject;
 	
 	private static final String POSTRULE_BASE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule."; //$NON-NLS-1$
 	
@@ -48,7 +48,7 @@ public abstract class SingleRuleTest {
 
 		List<IJavaElement> javaElements = new ArrayList<>();
 		javaElements.add(compilationUnit);
-
+		
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(Arrays.asList(rule));
 		IProgressMonitor monitor = new NullProgressMonitor();
 

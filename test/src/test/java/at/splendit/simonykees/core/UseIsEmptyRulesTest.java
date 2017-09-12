@@ -22,41 +22,39 @@ public class UseIsEmptyRulesTest extends SingleRuleTest {
 	private static final String SAMPLE_FILE = "TestUseIsEmptyRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "useIsEmpty";
 
-	private Path preRule, postRule;
-
 	private UseIsEmptyRule rule;
 
 	@Before
 	public void setUp() throws Exception {
 		rule = new UseIsEmptyRule(UseIsEmptyRuleASTVisitor.class);
-		testproject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
+		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
 	@Test
 	public void testTransformationWithDefaultFile() throws Exception {
-		preRule = getPreRuleFile(SAMPLE_FILE);
-		postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
-		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
-
+		Path preRule = getPreRuleFile(SAMPLE_FILE);
+		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
+		
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
 
 	@Test
 	public void calculateEnabledForProjectShouldBeEnabled() {
-		testproject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
 
-		rule.calculateEnabledForProject(testproject);
+		rule.calculateEnabledForProject(testProject);
 
 		assertTrue(rule.isEnabled());
 	}
 
 	@Test
 	public void calculateEnabledforProjectShouldBeDisabled() {
-		testproject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
 
-		rule.calculateEnabledForProject(testproject);
+		rule.calculateEnabledForProject(testProject);
 
 		assertFalse(rule.isEnabled());
 	}
