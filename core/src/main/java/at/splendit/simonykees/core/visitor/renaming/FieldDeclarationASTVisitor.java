@@ -40,6 +40,8 @@ import at.splendit.simonykees.core.util.ASTNodeUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
 
+import static at.splendit.simonykees.core.util.ASTNodeUtil.hasModifier;
+
 /**
  * A visitor that searches for fields that do not comply with the naming
  * conventions. Makes use of {@link SearchEngine} for finding references of a
@@ -128,32 +130,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
 
-		List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(fieldDeclaration.modifiers(), Modifier.class);
-		if (ASTNodeUtil.hasModifier(modifiers, Modifier::isStatic)
-				&& ASTNodeUtil.hasModifier(modifiers, Modifier::isFinal)) {
-			/*
-			 * Static final fields are not in the scope of this visitor
-			 */
-			return true;
-		}
-
-		if (ASTNodeUtil.hasModifier(modifiers, Modifier::isPrivate) && !getRenamePrivateField()) {
-			/**
-			 * private fields are handled in
-			 * {@link FieldNameConventionASTVisitor}.
-			 */
-			return true;
-		}
-
-		if (ASTNodeUtil.hasModifier(modifiers, Modifier::isProtected) && !getRenameProtectedField()) {
-			return true;
-		}
-
-		if (ASTNodeUtil.hasModifier(modifiers, Modifier::isPublic) && !getRenamePublicField()) {
-			return true;
-		}
-
-		if (modifiers.isEmpty() && !getRenamePackageProtectedField()) {
+		if(hasToBeSkippedModifier(fieldDeclaration)) {
 			return true;
 		}
 
@@ -184,6 +161,21 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return true;
+	}
+
+	/**
+	 * 
+	 * @param fieldDeclaration
+	 * @return
+	 */
+	private boolean hasToBeSkippedModifier(FieldDeclaration fieldDeclaration) {
+		List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(fieldDeclaration.modifiers(), Modifier.class);
+		return (modifiers.isEmpty() && !getRenamePackageProtectedField())
+				|| (hasModifier(modifiers, Modifier::isPublic) && !getRenamePublicField())
+				|| (hasModifier(modifiers, Modifier::isProtected) && !getRenameProtectedField())
+				|| (hasModifier(modifiers, Modifier::isPrivate) && !getRenamePrivateField())
+				|| (hasModifier(modifiers, Modifier::isStatic)
+						&& hasModifier(modifiers, Modifier::isFinal));
 	}
 
 	/**

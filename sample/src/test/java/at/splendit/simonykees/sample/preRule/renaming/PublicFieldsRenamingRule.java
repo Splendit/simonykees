@@ -10,6 +10,7 @@ public class PublicFieldsRenamingRule {
 	public String remove$dollar$sign = "expected new name: removeDollarSign";
 	public String avoid_implicit_clashes = "shall be renamed";
 	public String avoid_implicitClashes = "shall not be renamed";
+	public int _int, Int, i_nt, $int, int_;
 	
 	public String usePublicFieldSomewhere(String input) {
 		a_public_field_sample = "a second reference";

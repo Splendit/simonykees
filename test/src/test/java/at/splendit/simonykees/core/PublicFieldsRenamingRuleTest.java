@@ -76,6 +76,7 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 		 */
 		FieldDeclarationASTVisitor referencesVisitor = new FieldDeclarationASTVisitor(
 				new IJavaElement[] { packageFragment });
+		referencesVisitor.setAddTodo(true);
 		for (ICompilationUnit iCompilationUnit : iCompilationUnits) {
 			CompilationUnit compilationUnit = RefactoringUtil.parse(iCompilationUnit);
 			compilationUnit.accept(referencesVisitor);

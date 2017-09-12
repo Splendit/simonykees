@@ -11,6 +11,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.BlockComment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -41,6 +42,9 @@ import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final String DASH = "-"; //$NON-NLS-1$
+	private static final String COMMENT_TEMPLLATE = "Rename %s to comply with naming conventions."; //$NON-NLS-1$
+	private static final String TODO_TAG = "TODO"; //$NON-NLS-1$
+	private static final String STARTIGN_POSITION = "field-starting-position"; //$NON-NLS-1$
 
 	private Map<String, FieldMetadata> cuRelatedReplacements;
 	private Map<String, List<String>> cuRelatedUnmodifiable;
@@ -60,8 +64,7 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 		this.iCompilationUnit = (ICompilationUnit) compilationUnit.getJavaElement();
 		this.cuRelatedReplacements = findCuRelatedData(compilationUnit);
 		this.cuRelatedReplacements.putAll(findRelatedCuDeclarationFragments(compilationUnit));
-		
-		this.cuRelatedUnmodifiable = findCuRelatedUnmodifiable(compilationUnit);
+		this.cuRelatedUnmodifiable = findCuRelatedUnmodifiable(iCompilationUnit);
 		
 		return true;
 	}
@@ -71,34 +74,51 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 		String fieldKeyId = calcFieldIdentifier(fieldDeclaration);
 		if(cuRelatedUnmodifiable.containsKey(fieldKeyId)) {
 			List<String> identifiers = cuRelatedUnmodifiable.get(fieldKeyId);
-			insertJavadocNode(fieldDeclaration, identifiers);
-			
+			insertJavadocNode(fieldDeclaration, identifiers);			
 		}
 		return true;
 	}
 
-	private void insertJavadocNode(FieldDeclaration fielDecl, List<String> identifiers) {
-		
-		String fragmentNames = identifiers.stream().collect(Collectors.joining(", "));
-		Javadoc javaDoc = fielDecl.getAST().newJavadoc();
+	/**
+	 * Insert a {@link Javadoc} node to the given field declaration. The content
+	 * of the node is obtained by using the template {@link #COMMENT_TEMPLLATE}
+	 * and the given list of identifiers.
+	 * 
+	 * @param fieldDecl
+	 *            field to add the javadoc
+	 * @param identifiers
+	 *            list of identifiers to be mentioned int the javadoc.
+	 */
+	private void insertJavadocNode(FieldDeclaration fieldDecl, List<String> identifiers) {
 
-		TagElement tagElement = fielDecl.getAST().newTagElement();
-		TextElement textElement = fielDecl.getAST().newTextElement();
-		textElement.setText("Rename " + fragmentNames + " to comply with naming conventions.");
+		String fragmentNames = identifiers.stream().collect(Collectors.joining(", ")); //$NON-NLS-1$
+		Javadoc javaDoc = fieldDecl.getAST().newJavadoc();
+
+		TagElement tagElement = fieldDecl.getAST().newTagElement();
+		TextElement textElement = fieldDecl.getAST().newTextElement();
+		textElement.setText(String.format(COMMENT_TEMPLLATE, fragmentNames));
 		ListRewrite commentRewriter = astRewrite.getListRewrite(tagElement, TagElement.FRAGMENTS_PROPERTY);
 
-		TextEditGroup editGroup = findTodosEditGroup();
+		TextEditGroup editGroup = findTodoEditGroup();
 		commentRewriter.insertFirst(textElement, editGroup);
-		tagElement.setTagName("TODO");
+		tagElement.setTagName(TODO_TAG);
 
 		ListRewrite javaDocRewrite = astRewrite.getListRewrite(javaDoc, Javadoc.TAGS_PROPERTY);
 		javaDocRewrite.insertFirst(tagElement, editGroup);
-		astRewrite.set(fielDecl, FieldDeclaration.JAVADOC_PROPERTY, javaDoc, editGroup);
+
+		astRewrite.set(fieldDecl, FieldDeclaration.JAVADOC_PROPERTY, javaDoc, editGroup);
 	}
 
-	private TextEditGroup findTodosEditGroup() {
+	/**
+	 * Creates or finds the {@link TextEditGroup} storing the comments to be
+	 * added in this current compilation unit. If the {@code TextEditGroup} is
+	 * newly created, then it is also stored in the {@link #todosEditGroups}
+	 * 
+	 * @return the found/created TextEditGroup.
+	 */
+	private TextEditGroup findTodoEditGroup() {
 		TextEditGroup group;
-		if(this.todosEditGroups.containsKey(this.iCompilationUnit)) {
+		if (this.todosEditGroups.containsKey(this.iCompilationUnit)) {
 			group = todosEditGroups.get(this.iCompilationUnit);
 		} else {
 			group = new TextEditGroup(this.iCompilationUnit.getResource().getName());
@@ -188,8 +208,18 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 		return oldToNewKeys;
 	}
 	
-	private Map<String, List<String>> findCuRelatedUnmodifiable(CompilationUnit compilationUnit) {
-		IPath currentPath = compilationUnit.getJavaElement().getPath();
+	/**
+	 * Finds the list of the fields that declared in the given compilation unit
+	 * that where a java doc node have to be added to.
+	 * 
+	 * @param compilationUnit
+	 *            the compilation unit to find the fields from
+	 * @return a map of the starting position of the field declaration and the
+	 *         list of the identifiers from the field declaration that need to
+	 *         be mentioned in the javadoc.
+	 */
+	private Map<String, List<String>> findCuRelatedUnmodifiable(ICompilationUnit compilationUnit) {
+		IPath currentPath = compilationUnit.getPath();
 		Map<String, List<String>> data = new HashMap<>();
 
 		unmodifiableFields.stream().filter(mData -> {
@@ -271,7 +301,7 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	}
 	
 	private String calcFieldIdentifier(int startingPosition) {
-		return "field_at:" + startingPosition;
+		return  STARTIGN_POSITION + ":" + startingPosition; //$NON-NLS-1$
 	}
 	
 	private String calcFieldIdentifier(FieldDeclaration field) {

@@ -2,6 +2,7 @@ package at.splendit.simonykees.core.rule.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -56,7 +57,7 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 	 *            renamed.
 	 * @return the list of document changes for all complation units that are
 	 *         affected by the renaming of the field.
-	 * @throws JavaModelException
+	 * @throws JavaModelException if an exception occurs while accessing the resource of a {@link ICompilationUnit}.
 	 */
 	public List<DocumentChange> computeDocumentChangesPerFiled(FieldMetadata metaData) throws JavaModelException {
 		List<ICompilationUnit> targetCompilationUnits = metaData.getTargetICompilationUnits();
@@ -87,5 +88,30 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 			TextEditGroup editGroup = metaData.getTextEditGroup(iCompilationUnit);
 			editGroup.clearTextEdits();
 		}
+	}
+	
+	/**
+	 * 
+	 * @param todosEditGroups
+	 * @return
+	 * @throws JavaModelException
+	 */
+	public List<DocumentChange> computeTodosDocumentChanges(Map<ICompilationUnit, TextEditGroup> todosEditGroups) throws JavaModelException {
+		List<DocumentChange> documentChanges = new ArrayList<>();
+		
+		for(Map.Entry<ICompilationUnit, TextEditGroup> entry : todosEditGroups.entrySet()) {
+			ICompilationUnit iCompilationUnit = entry.getKey();
+			TextEditGroup editGroup = entry.getValue();
+			if (!editGroup.isEmpty()) {
+				Document document = new Document(iCompilationUnit.getSource());
+				DocumentChange documentChange = new DocumentChange(editGroup.getName(), document);
+				documentChange.setEdit(new MultiTextEdit());
+				documentChange.addTextEditGroup(editGroup);
+				
+				documentChanges.add(documentChange);
+			}
+		}
+		
+		return documentChanges;
 	}
 }

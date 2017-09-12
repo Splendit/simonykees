@@ -4,12 +4,25 @@ package at.splendit.simonykees.sample.postRule.publicFieldRenaming.renaming;
 public class PublicFieldsRenamingRule {
 	
 	public String aPublicFieldSample = "bad name";
+	/**
+	 * TODO Rename to_not_be_shadowed to comply with naming conventions.
+	 */
 	public String to_not_be_shadowed = "";
+	/**
+	 * TODO Rename avoid_clashes to comply with naming conventions.
+	 */
 	public String avoid_clashes;
 	private String avoidClashes;
 	public String removeDollarSign = "expected new name: removeDollarSign";
 	public String avoidImplicitClashes = "shall be renamed";
+	/**
+	 * TODO Rename avoid_implicitClashes to comply with naming conventions.
+	 */
 	public String avoid_implicitClashes = "shall not be renamed";
+	/**
+	 * TODO Rename _int, Int, $int, int_ to comply with naming conventions.
+	 */
+	public int _int, Int, iNt, $int, int_;
 	
 	public String usePublicFieldSomewhere(String input) {
 		aPublicFieldSample = "a second reference";
@@ -35,6 +48,9 @@ public class PublicFieldsRenamingRule {
 	}
 	
 	class InnerClass {
+		/**
+		 * TODO Rename avoidImplicit_clashes to comply with naming conventions.
+		 */
 		public String avoidImplicit_clashes;
 		public String clashFreeFieldInInnerType;
 		
