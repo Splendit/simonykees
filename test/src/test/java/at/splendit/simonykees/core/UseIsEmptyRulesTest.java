@@ -1,12 +1,13 @@
 package at.splendit.simonykees.core;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,16 +17,14 @@ import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.UseIsEmptyRuleASTVisitor;
 
 @SuppressWarnings("nls")
-public class UseIsEmptyRulesTest extends AbstractRulesTest {
+public class UseIsEmptyRulesTest extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE = "TestUseIsEmptyRule.java";
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.useIsEmpty";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/useIsEmpty";
+	private static final String POSTRULE_SUBDIRECTORY = "useIsEmpty";
 
-	private String fileName;
 	private Path preRule, postRule;
+
 	private UseIsEmptyRule rule;
-	private IJavaProject testproject;
 
 	@Before
 	public void setUp() throws Exception {
@@ -35,12 +34,13 @@ public class UseIsEmptyRulesTest extends AbstractRulesTest {
 
 	@Test
 	public void testTransformationWithDefaultFile() throws Exception {
-		preRule = Paths.get(RulesTestUtil.PRERULE_DIRECTORY, SAMPLE_FILE);
-		postRule = Paths.get(POSTRULE_DIRECTORY, SAMPLE_FILE);
-		fileName = preRule.getFileName().toString();
-		rulesList.add(rule);
+		preRule = getPreRuleFile(SAMPLE_FILE);
+		postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 
-		super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -60,5 +60,4 @@ public class UseIsEmptyRulesTest extends AbstractRulesTest {
 
 		assertFalse(rule.isEnabled());
 	}
-
 }

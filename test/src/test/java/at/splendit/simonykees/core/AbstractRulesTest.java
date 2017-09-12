@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -41,6 +42,8 @@ public abstract class AbstractRulesTest {
 	protected static IPackageFragmentRoot root = null;
 	
 	protected static String javaVersion = JavaCore.VERSION_1_8;
+
+	protected IJavaProject testproject;
 
 	@BeforeClass
 	public static void classSetUp() throws Exception {
