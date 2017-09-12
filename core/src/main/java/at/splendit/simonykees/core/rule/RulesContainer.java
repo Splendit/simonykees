@@ -19,6 +19,7 @@ import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
 import at.splendit.simonykees.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
+import at.splendit.simonykees.core.rule.impl.ImmutableStaticFinalCollectionsRule;
 import at.splendit.simonykees.core.rule.impl.IndexOfToContainsRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
 import at.splendit.simonykees.core.rule.impl.LambdaForEachCollectRule;
@@ -30,12 +31,15 @@ import at.splendit.simonykees.core.rule.impl.MultiVariableDeclarationLineRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
 import at.splendit.simonykees.core.rule.impl.OverrideAnnotationRule;
 import at.splendit.simonykees.core.rule.impl.PrimitiveBoxedForStringRule;
+import at.splendit.simonykees.core.rule.impl.PrimitiveObjectUseEqualsRule;
+import at.splendit.simonykees.core.rule.impl.ReImplementingInterfaceRule;
 import at.splendit.simonykees.core.rule.impl.RearrangeClassMembersRule;
 import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
 import at.splendit.simonykees.core.rule.impl.StatementLambdaToExpressionRule;
 import at.splendit.simonykees.core.rule.impl.StringBufferToBuilderRule;
+import at.splendit.simonykees.core.rule.impl.StringBuildingLoopRule;
 import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
 import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
@@ -50,17 +54,21 @@ import at.splendit.simonykees.core.visitor.DiamondOperatorASTVisitor;
 import at.splendit.simonykees.core.visitor.EnumsWithoutEqualsASTVisitor;
 import at.splendit.simonykees.core.visitor.IndexOfToContainsASTVisitor;
 import at.splendit.simonykees.core.visitor.FlatMapInsteadOfNestedLoopsASTVisitor;
+import at.splendit.simonykees.core.visitor.ImmutableStaticFinalCollectionsASTVisitor;
 import at.splendit.simonykees.core.visitor.InefficientConstructorASTVisitor;
 import at.splendit.simonykees.core.visitor.LambdaToMethodReferenceASTVisitor;
 import at.splendit.simonykees.core.visitor.MultiVariableDeclarationLineASTVisitor;
 import at.splendit.simonykees.core.visitor.OverrideAnnotationRuleASTVisitor;
 import at.splendit.simonykees.core.visitor.PrimitiveBoxedForStringASTVisitor;
+import at.splendit.simonykees.core.visitor.PrimitiveObjectUseEqualsASTVisitor;
+import at.splendit.simonykees.core.visitor.ReImplementingInterfaceASTVisitor;
 import at.splendit.simonykees.core.visitor.RearrangeClassMembersASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveNewStringConstructorASTVisitor;
 import at.splendit.simonykees.core.visitor.RemoveToStringOnStringASTVisitor;
 import at.splendit.simonykees.core.visitor.SerialVersionUidASTVisitor;
 import at.splendit.simonykees.core.visitor.StatementLambdaToExpressionASTVisitor;
 import at.splendit.simonykees.core.visitor.StringBufferToBuilderASTVisitor;
+import at.splendit.simonykees.core.visitor.StringBuildingLoopASTVisitor;
 import at.splendit.simonykees.core.visitor.StringConcatToPlusASTVisitor;
 import at.splendit.simonykees.core.visitor.StringFormatLineSeparatorASTVisitor;
 import at.splendit.simonykees.core.visitor.StringLiteralEqualityCheckASTVisitor;
@@ -120,6 +128,9 @@ public class RulesContainer {
 				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
 				new MultiVariableDeclarationLineRule(MultiVariableDeclarationLineASTVisitor.class),
 				new EnumsWithoutEqualsRule(EnumsWithoutEqualsASTVisitor.class),
+				new ReImplementingInterfaceRule(ReImplementingInterfaceASTVisitor.class),
+
+				new ImmutableStaticFinalCollectionsRule(ImmutableStaticFinalCollectionsASTVisitor.class),
 				/*
 				 * String manipulations and arithmetic expressions
 				 */
@@ -135,7 +146,7 @@ public class RulesContainer {
 				new UseIsEmptyRule(UseIsEmptyRuleASTVisitor.class),
 				new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
 				new StringBufferToBuilderRule(StringBufferToBuilderASTVisitor.class),
-
+				new PrimitiveObjectUseEqualsRule(PrimitiveObjectUseEqualsASTVisitor.class),
 				/*
 				 * Loops and streams
 				 */
@@ -150,6 +161,7 @@ public class RulesContainer {
 				new EnhancedForLoopToStreamAnyMatchRule(EnhancedForLoopToStreamAnyMatchASTVisitor.class),
 				new EnhancedForLoopToStreamFindFirstRule(EnhancedForLoopToStreamFindFirstASTVisitor.class),
 				new EnhancedForLoopToStreamSumRule(EnhancedForLoopToStreamSumASTVisitor.class),
+				new StringBuildingLoopRule(StringBuildingLoopASTVisitor.class),
 				new LambdaToMethodReferenceRule(LambdaToMethodReferenceASTVisitor.class),
 
 				/*
