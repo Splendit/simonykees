@@ -41,6 +41,7 @@ public abstract class SingleRuleTest {
 	protected String applyRefactoring(RefactoringRule<?> rule, Path preFile) throws Exception {
 		String packageString = "at.splendit.simonykees.sample.preRule"; //$NON-NLS-1$
 		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
+	
 		String fileName = preFile.getFileName().toString();
 		String content = new String(Files.readAllBytes(preFile), StandardCharsets.UTF_8);
 

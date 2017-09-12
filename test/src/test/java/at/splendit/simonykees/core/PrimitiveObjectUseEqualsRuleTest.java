@@ -1,8 +1,15 @@
 package at.splendit.simonykees.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 
+import org.eclipse.jdt.core.JavaCore;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -10,36 +17,44 @@ import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.rule.impl.EnumsWithoutEqualsRule;
 import at.splendit.simonykees.core.rule.impl.PrimitiveObjectUseEqualsRule;
+import at.splendit.simonykees.core.rule.impl.RearrangeClassMembersRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.EnumsWithoutEqualsASTVisitor;
 import at.splendit.simonykees.core.visitor.PrimitiveObjectUseEqualsASTVisitor;
+import at.splendit.simonykees.core.visitor.RearrangeClassMembersASTVisitor;
 
 @SuppressWarnings("nls")
-@RunWith(Parameterized.class)
-public class PrimitiveObjectUseEqualsRuleTest extends AbstractRulesTest {
+public class PrimitiveObjectUseEqualsRuleTest extends SingleRuleTest {
 
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.primitiveObjectUseEquals";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/primitiveObjectUseEquals";
+	private static final String SAMPLE_FILE = "TestPrimitiveObjectUseEqualsRule.java";
+	private static final String POSTRULE_SUBDIRECTORY = "primitiveObjectUseEquals";
 
-	private String fileName;
-	private Path preRule, postRule;
+	private PrimitiveObjectUseEqualsRule rule;
 
-	public PrimitiveObjectUseEqualsRuleTest(String fileName, Path preRule, Path postRule) {
-		super();
-		this.fileName = fileName;
-		this.preRule = preRule;
-		this.postRule = postRule;
-		rulesList.add(new PrimitiveObjectUseEqualsRule(PrimitiveObjectUseEqualsASTVisitor.class));
-	}
-
-	@Parameters(name = "{index}: test file[{0}]")
-	public static Collection<Object[]> data() throws Exception {
-		return AbstractRulesTest.load(POSTRULE_DIRECTORY);
+	@Before
+	public void setUp() throws Exception {
+		rule = new PrimitiveObjectUseEqualsRule(PrimitiveObjectUseEqualsASTVisitor.class);
+		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
 	@Test
-	public void testTransformation() throws Exception {
-		super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
-	}
+	public void testTransformationWithDefaultFile() throws Exception {
+		Path preRule = getPreRuleFile(SAMPLE_FILE);
+		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
+		
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void calculateEnabledForProjectShouldBeEnabled() {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_1);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertTrue(rule.isEnabled());
+	}
+	
 }
