@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,9 +29,9 @@ public abstract class SingleRuleTest {
 	protected static IPackageFragmentRoot root;
 
 	protected IJavaProject testProject;
-	
+
 	private static final String POSTRULE_BASE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule."; //$NON-NLS-1$
-	
+
 	private static final String POSTRULE_BASE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/"; //$NON-NLS-1$
 
 	@BeforeClass
@@ -41,7 +42,7 @@ public abstract class SingleRuleTest {
 	protected String applyRefactoring(RefactoringRule<?> rule, Path preFile) throws Exception {
 		String packageString = "at.splendit.simonykees.sample.preRule"; //$NON-NLS-1$
 		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
-	
+
 		String fileName = preFile.getFileName().toString();
 		String content = new String(Files.readAllBytes(preFile), StandardCharsets.UTF_8);
 
@@ -49,7 +50,7 @@ public abstract class SingleRuleTest {
 
 		List<IJavaElement> javaElements = new ArrayList<>();
 		javaElements.add(compilationUnit);
-		
+
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(Arrays.asList(rule));
 		IProgressMonitor monitor = new NullProgressMonitor();
 
@@ -60,28 +61,44 @@ public abstract class SingleRuleTest {
 		return compilationUnit.getSource();
 	}
 
+	protected void loadUtilities() throws Exception {
+		String packageString = "at.splendit.simonykees.sample.utilities"; //$NON-NLS-1$
+		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
+		for (Path utilityPath : loadUtilityClasses(RulesTestUtil.BASE_DIRECTORY + "/utilities")) { //$NON-NLS-1$
+			String utilityClassName = utilityPath.getFileName().toString();
+			String utilitySource = new String(Files.readAllBytes(utilityPath), StandardCharsets.UTF_8);
+			packageFragment.createCompilationUnit(utilityClassName, utilitySource, true, null);
+		}
+	}
+
+	private static List<Path> loadUtilityClasses(String utilityDirectory) throws IOException {
+		List<Path> data = new ArrayList<>();
+		for (Path utilityPath : Files.newDirectoryStream(Paths.get(utilityDirectory), "*.java")) { //$NON-NLS-1$
+			data.add(utilityPath);
+		}
+		return data;
+	}
+
 	protected String replacePackageName(String compilationUnitSource, String postRulePackage) {
 		return compilationUnitSource = StringUtils.replace(compilationUnitSource, RulesTestUtil.PRERULE_PACKAGE,
 				postRulePackage);
 	}
-	
-	protected Path getPreRuleFile(String fileName){
+
+	protected Path getPreRuleFile(String fileName) {
 		return Paths.get(RulesTestUtil.PRERULE_DIRECTORY, fileName);
 	}
-	
-	protected Path getPostRuleFile(String fileName){
+
+	protected Path getPostRuleFile(String fileName) {
 		return getPostRuleFile(fileName, POSTRULE_BASE_DIRECTORY);
 	}
-	
-	protected Path getPostRuleFile(String fileName, String subdirectory){
-		String postruleDirectory = RulesTestUtil.BASE_DIRECTORY + "/postRule/"+subdirectory; //$NON-NLS-1$
+
+	protected Path getPostRuleFile(String fileName, String subdirectory) {
+		String postruleDirectory = RulesTestUtil.BASE_DIRECTORY + "/postRule/" + subdirectory; //$NON-NLS-1$
 		return Paths.get(postruleDirectory, fileName);
 	}
-	
-	protected String getPostRulePackage(String postRulePackage){
+
+	protected String getPostRulePackage(String postRulePackage) {
 		return POSTRULE_BASE_PACKAGE + postRulePackage;
 	}
-	
-	
 
 }

@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.functinalInterface;
+package at.splendit.simonykees.sample.postRule.functionalInterface;
 
 import java.util.List;
 

@@ -1,55 +1,65 @@
 package at.splendit.simonykees.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 
 import org.eclipse.jdt.core.JavaCore;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
 import at.splendit.simonykees.core.util.RulesTestUtil;
 import at.splendit.simonykees.core.visitor.DiamondOperatorASTVisitor;
 
-/**
- * Testing diamond operator rule.
- * 
- * @author Ardit Ymeri
- * @since 1.0
- *
- */
-@RunWith(Parameterized.class)
 @SuppressWarnings("nls")
-public class DiamondRulesJ7Test extends AbstractRulesTest {
+public class DiamondRulesJ7Test extends SingleRuleTest {
 	
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.diamondOperatorJ7";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/diamondOperatorJ7";
+	private static final String SAMPLE_FILE = "DiamondOperatorRule.java";
+	private static final String POSTRULE_SUBDIRECTORY = "diamondOperatorJ7";
 
-	private String fileName;
-	private Path preRule;
-	private Path postRule;
-	
-	static {		
-		javaVersion = JavaCore.VERSION_1_7;
-	}
-	
-	public DiamondRulesJ7Test(String fileName, Path preRule, Path postRule) {
-		this.fileName = fileName;
-		this.preRule = preRule;
-		this.postRule = postRule;
-		rulesList.add(new DiamondOperatorRule(DiamondOperatorASTVisitor.class));
-		
-	}
-	
-	@Parameters(name = "{index}: test file[{0}]")
-	public static Collection<Object[]> data() throws Exception {
-		return AbstractRulesTest.load(POSTRULE_DIRECTORY);
+	private DiamondOperatorRule rule;
+
+	@Before
+	public void setUp() throws Exception {
+		rule = new DiamondOperatorRule(DiamondOperatorASTVisitor.class);
+		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
 	@Test
-	public void testTransformation() throws Exception {
-		super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
+	public void testTransformationWithDefaultFile() throws Exception {
+		//This rule depends on compiler compliance, need to set it beforehand
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
+		rule.ruleSpecificImplementation(testProject);
+		
+		Path preRule = getPreRuleFile(SAMPLE_FILE);
+		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
+		
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+	
+	@Test
+	public void calculateEnabledForProjectShouldBeEnabled() {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertTrue(rule.isEnabled());
+	}
+
+	@Test
+	public void calculateEnabledforProjectShouldBeDisabled() {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertFalse(rule.isEnabled());
 	}
 }

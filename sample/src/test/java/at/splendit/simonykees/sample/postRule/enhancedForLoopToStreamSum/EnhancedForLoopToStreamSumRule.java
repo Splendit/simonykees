@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.enhancedForLooptToStreamSum;
+package at.splendit.simonykees.sample.postRule.enhancedForLoopToStreamSum;
 
 import java.util.ArrayList;
 import java.util.List;

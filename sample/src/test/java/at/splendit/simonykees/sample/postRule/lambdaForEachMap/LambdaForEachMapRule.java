@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.lambdForEachMap;
+package at.splendit.simonykees.sample.postRule.lambdaForEachMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;

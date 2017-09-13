@@ -1,4 +1,4 @@
-package at.splendit.simonykees.sample.postRule.functinalInterface;
+package at.splendit.simonykees.sample.postRule.functionalInterface;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
