@@ -1,5 +1,7 @@
 package at.splendit.simonykees.core.visitor.renaming;
 
+import static at.splendit.simonykees.core.util.ASTNodeUtil.hasModifier;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,11 +38,11 @@ import org.eclipse.jdt.internal.core.ResolvedSourceMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import at.splendit.simonykees.core.exception.runtime.FileWithCompilationErrorException;
 import at.splendit.simonykees.core.util.ASTNodeUtil;
+import at.splendit.simonykees.core.util.RefactoringUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.core.visitor.sub.VariableDeclarationsVisitor;
-
-import static at.splendit.simonykees.core.util.ASTNodeUtil.hasModifier;
 
 /**
  * A visitor that searches for fields that do not comply with the naming
@@ -64,6 +66,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String UPPERCASE_FOLLOWING_DOLLAR_SIGN = "uppercase-after-dollar"; //$NON-NLS-1$
 	private static final String UPPERCASE_FOLLOWING_UNDERSCORE = "uppercase-after-underscore"; //$NON-NLS-1$
 	private static final String ADD_COMMENT = "add-todo"; //$NON-NLS-1$
+	private static final String FILE_WITH_COMPILATION_ERROR_EXCEPTION_MESSAGE = "A reference was found in a CompilationUnit with compilation errors."; //$NON-NLS-1$
 	
 	private Map<String, Boolean> modifierOptions = new HashMap<>();
 	
@@ -297,6 +300,8 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		 */
 		List<ReferenceSearchMatch> references = new ArrayList<>();
 		String fragmentIdentifier = fragment.getName().getIdentifier();
+		
+		boolean referencesInCuWithCompilationErros;
 
 		/*
 		 * The object that stores the search result.
@@ -311,6 +316,10 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 				IJavaElement icu = (IJavaElement) match.getElement();
 				ResolvedSourceMethod rsm = (ResolvedSourceMethod)icu;
 				ICompilationUnit castedICU = rsm.getCompilationUnit();
+				if(RefactoringUtil.checkForSyntaxErrors(castedICU)) {
+					references.clear();
+					throw new FileWithCompilationErrorException(FILE_WITH_COMPILATION_ERROR_EXCEPTION_MESSAGE);
+				}
 				storeIJavaElement(castedICU);
 				storePath(path);
 			}
@@ -324,7 +333,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		try {
 			searchEngine.search(searchPattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() },
 					scope, requestor, null);
-		} catch (CoreException e) {
+		} catch (CoreException | FileWithCompilationErrorException e) {
 			logger.error(e.getMessage());
 			return Optional.empty();
 		}
