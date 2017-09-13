@@ -4,11 +4,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.compare.internal.ComparePreferencePage;
+import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -25,6 +28,7 @@ import at.splendit.simonykees.core.refactorer.RefactoringState;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.preview.dialog.CompareInput;
+import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
@@ -34,6 +38,7 @@ import at.splendit.simonykees.i18n.Messages;
  * @author Andreja Sambolec
  * @since 2.1
  */
+@SuppressWarnings("restriction")
 public class RefactoringSummaryWizardPage extends WizardPage {
 
 	private RefactoringPipeline refactoringPipeline;
@@ -42,6 +47,9 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 	private RefactoringState currentRefactoringState;
 	private TableViewer viewer;
+
+	private Control compareControl;
+	private Composite changeContainer;
 
 	public RefactoringSummaryWizardPage(RefactoringPipeline refactoringPipeline) {
 		super(Messages.RefactoringSummaryWizardPage_title);
@@ -142,7 +150,12 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		}
 		// adding all elements in table and checking appropriately
 		initialSource.keySet().stream().forEach(entry -> {
-			viewer.add(entry);
+			for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : refactoringPipeline.getRules()) {
+				if (!entry.getIgnoredRules().contains(rule) && null != entry.getChangeIfPresent(rule)) {
+					viewer.add(entry);
+					break;
+				}
+			}
 		});
 	}
 
@@ -168,9 +181,6 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		return temp.startsWith("/") ? temp.substring(1) : temp; //$NON-NLS-1$
 	}
 
-	Control compareControl;
-	Composite changeContainer;
-
 	private void createPreviewViewer(Composite parent) {
 
 		parent.setLayout(new GridLayout());
@@ -179,6 +189,9 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		changeContainer = new Composite(parent, SWT.NONE);
 		changeContainer.setLayout(new GridLayout());
 		changeContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+		CompareUIPlugin.getDefault().getPreferenceStore().setValue(ComparePreferencePage.OPEN_STRUCTURE_COMPARE,
+				Boolean.FALSE);
 
 	}
 
@@ -191,6 +204,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		if (visible) {
 			setFinalChanges();
 			populatePreviewViewer();
+			viewer.setSelection(new StructuredSelection(currentRefactoringState));
 		}
 		super.setVisible(visible);
 	}
@@ -227,7 +241,6 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		} catch (InvocationTargetException | InterruptedException e) {
 			e.printStackTrace();
 		}
-		input.getCompareResult();
 		final Control c = input.createContents(container);
 		c.setLayoutData(new GridData(GridData.FILL_BOTH));
 		return c;
