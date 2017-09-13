@@ -53,7 +53,7 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 
 	@Override
 	public String getDisplayableLicenseInformation() {
-		StringBuffer displayableLicenseInformation = new StringBuffer();
+		StringBuilder displayableLicenseInformation = new StringBuilder();
 
 		LicenseManager licenseManger = LicenseManager.getInstance();
 		LicenseChecker licenseData = licenseManger.getValidationData();
@@ -95,8 +95,6 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 	private String extractDateFormat(ZonedDateTime date) {
 
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
-		String strDate = date.format(formatter);
-
-		return strDate;
+		return date.format(formatter);
 	}
 }

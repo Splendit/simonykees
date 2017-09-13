@@ -45,8 +45,7 @@ public class ResponseParser implements LicenseChecker {
 		setValidationAction(validationAction);
 		extractValidationData(validationResult);
 		setLicenseeName(licenseeName);
-		LicenseStatus licenseStatus = calcLicenseStatus();
-		setLicenseStatus(licenseStatus);
+		setLicenseStatus(calcLicenseStatus());
 	}
 
 	private void extractValidationData(ValidationResult validationResult) {
@@ -83,7 +82,7 @@ public class ResponseParser implements LicenseChecker {
 	private void extractValidationData(ValidationResult validationResult, LicenseType licenseType) {
 		Map<String, Composition> validations = validationResult.getValidations();
 		
-		String NODE_LOCKED_FEATURE_KEY = extractNodeLockedFeatureKey(validationResult);
+		String nodeLockedFeatureKey = extractNodeLockedFeatureKey(validationResult);
 		
 		validations.forEach((compKey, composition)-> {
 			
@@ -92,16 +91,16 @@ public class ResponseParser implements LicenseChecker {
 			LicenseType receivedType = LicenseType.fromString(receivedTypeStr);
 
 			if(licenseType.equals(receivedType)) {
-				String productModuleNumber = compKey;
+				String pmNumber = compKey;
 				setLicenseType(licenseType);
-				setProductModuleNumber(productModuleNumber);
+				setProductModuleNumber(pmNumber);
 				properties.forEach((key, value) -> {
 					
 					boolean valid;
 					if(key.equals(VALID_KEY)) {
 						valid = Boolean.valueOf(value.getValue());
 						seLicenseModelStatus(valid);
-					} else if (key.equals(NODE_LOCKED_FEATURE_KEY)) {
+					} else if (key.equals(nodeLockedFeatureKey)) {
 						Map<String, Composition> featureKeyValues = value.getProperties();
 						Composition featureStatus = featureKeyValues.get(VALID_KEY);
 						valid = Boolean.valueOf(featureStatus.getValue());
@@ -111,11 +110,11 @@ public class ResponseParser implements LicenseChecker {
 					} else if (key.equals(PRODUCT_MODULE_NUMBER_KEY)) {
 						setProductModuleNumber(value.getValue());
 					} else if (key.equals(EXPIRATION_TIME_STAMP_KEY)) {
-						ZonedDateTime expirationTimeStamp = ZonedDateTime.parse(value.getValue());
-						setExpirationTimeStamp(expirationTimeStamp);
+						ZonedDateTime date = ZonedDateTime.parse(value.getValue());
+						setExpirationTimeStamp(date);
 					} else if (key.equals(EVALUATION_EXPIRES_DATE_KEY)) {
-						ZonedDateTime evaluationExpiresDate = ZonedDateTime.parse(value.getValue());
-						setEvaluationExpiresDate(evaluationExpiresDate);
+						ZonedDateTime date = ZonedDateTime.parse(value.getValue());
+						setEvaluationExpiresDate(date);
 					}
 					
 				});
@@ -173,12 +172,12 @@ public class ResponseParser implements LicenseChecker {
 
 					switch (key) {
 					case VALID_KEY:
-						boolean valid = Boolean.valueOf(value.getValue());
+						boolean valid = Boolean.parseBoolean(value.getValue());
 						setSubscriptionStatus(valid);
 						break;
 					case SUBSCRIPTION_EXPIRES_KEY:
-						ZonedDateTime subscriptionExpiresDate = ZonedDateTime.parse(value.getValue());
-						setSubscriptionExpiresDate(subscriptionExpiresDate);
+						ZonedDateTime date = ZonedDateTime.parse(value.getValue());
+						setSubscriptionExpiresDate(date);
 						break;
 					}
 					

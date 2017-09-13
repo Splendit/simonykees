@@ -34,8 +34,9 @@ public enum ValidationAction {
 	}
 
 	@SuppressWarnings("nls")
+	@Override
 	public String toString() {
-		String action = "none";
+		String action;
 		switch (this) {
 		case CHECK_IN:
 			action = "check-in";
@@ -45,6 +46,7 @@ public enum ValidationAction {
 			break;
 		case NONE:
 			action = "none";
+			break;
 		default:
 			action = "none";
 			break;

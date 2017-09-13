@@ -1,6 +1,6 @@
 package at.splendit.simonykees.license.netlicensing;
 
-import at.splendit.simonykees.i18n.Messages; //TODO: add i18n support
+import at.splendit.simonykees.i18n.Messages;
 
 /**
  * Enumeration for indicating the reason why the license is or is not valid.
@@ -63,6 +63,8 @@ public enum LicenseStatus {
 			case "floating-checked-in": //$NON-NLS-1$
 				status = LicenseStatus.FLOATING_CHECKED_IN;
 				break;
+			default:
+				status = NONE;
 			}
 		}
 

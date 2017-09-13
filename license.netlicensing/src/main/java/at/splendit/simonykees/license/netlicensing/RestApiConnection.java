@@ -23,7 +23,7 @@ public class RestApiConnection {
 
 	}
 
-	public synchronized static RestApiConnection getAPIRestConnection() {
+	public static synchronized RestApiConnection getAPIRestConnection() {
 
 		if (instance == null) {
 			instance = new RestApiConnection();

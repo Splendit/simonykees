@@ -34,6 +34,8 @@ public enum LicenseType {
 			case "subscription":
 				licenseType = SUBSCRIPTION;
 				break;
+			default: 
+				licenseType = TRY_AND_BUY;
 			}
 		}
 		
@@ -41,6 +43,7 @@ public enum LicenseType {
 	}
 	
 	@SuppressWarnings("nls")
+	@Override
 	public String toString() {
 		switch (this) {
 		case TRY_AND_BUY:

@@ -70,7 +70,7 @@ public class ValidationResultCache {
 		return action;
 	}
 
-	public synchronized static ValidationResultCache getInstance() {
+	public static synchronized ValidationResultCache getInstance() {
 		if (instance == null) {
 			instance = new ValidationResultCache();
 		}

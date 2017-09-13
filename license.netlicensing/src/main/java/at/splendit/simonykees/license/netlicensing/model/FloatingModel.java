@@ -16,10 +16,10 @@ import at.splendit.simonykees.license.netlicensing.LicenseType;
  */
 public class FloatingModel extends LicenseModel {
 
-	private final String SESSION_ID_KEY = "sessionId"; //$NON-NLS-1$
-	private final String ACTION_KEY = "action"; //$NON-NLS-1$
-	private final String ACTION_CHECK_OUT_VAL = "checkOut"; //$NON-NLS-1$
-	private final String ACTION_CHECK_IN_VAL = "checkIn"; //$NON-NLS-1$
+	private static final String SESSION_ID_KEY = "sessionId"; //$NON-NLS-1$
+	private static final String ACTION_KEY = "action"; //$NON-NLS-1$
+	private static final String ACTION_CHECK_OUT_VAL = "checkOut"; //$NON-NLS-1$
+	private static final String ACTION_CHECK_IN_VAL = "checkIn"; //$NON-NLS-1$
 
 	private String sessionId;
 	private String productModuleNumber;
@@ -46,10 +46,10 @@ public class FloatingModel extends LicenseModel {
 		params.put(SESSION_ID_KEY, getSessionId());
 		params.put(ACTION_KEY, ACTION_CHECK_OUT_VAL);
 
-		String productModuleNumber = getProductModuleNumber();
+		String pmNumber = getProductModuleNumber();
 
 		ValidationParameters validationParams = new ValidationParameters();
-		validationParams.setProductModuleValidationParameters(productModuleNumber, params);
+		validationParams.setProductModuleValidationParameters(pmNumber, params);
 
 		return validationParams;
 	}
@@ -59,10 +59,10 @@ public class FloatingModel extends LicenseModel {
 		params.put(SESSION_ID_KEY, getSessionId());
 		params.put(ACTION_KEY, ACTION_CHECK_IN_VAL);
 
-		String productModuleNumber = getProductModuleNumber();
+		String pmNumber = getProductModuleNumber();
 
 		ValidationParameters validationParams = new ValidationParameters();
-		validationParams.setProductModuleValidationParameters(productModuleNumber, params);
+		validationParams.setProductModuleValidationParameters(pmNumber, params);
 
 		return validationParams;
 	}

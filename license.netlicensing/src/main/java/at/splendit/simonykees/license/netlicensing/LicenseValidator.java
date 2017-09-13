@@ -23,6 +23,11 @@ import at.splendit.simonykees.license.netlicensing.model.LicenseeModel;
  */
 public class LicenseValidator {
 
+	private LicenseValidator() {
+		/*
+		 * Hiding public constructor
+		 */
+	}
 	private static final Logger logger = LoggerFactory.getLogger(LicenseValidator.class);
 	
 	public static void doValidate(LicenseeModel licensee) {
