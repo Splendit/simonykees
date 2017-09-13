@@ -197,7 +197,7 @@ public class RefactoringPreviewWizard extends Wizard {
 			public void run(IProgressMonitor monitor) {
 
 				Arrays.asList(getPages()).stream().forEach(page -> {
-					if (!((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
+					if ((page instanceof RefactoringPreviewWizardPage) && !((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
 						recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
 					}
 				});

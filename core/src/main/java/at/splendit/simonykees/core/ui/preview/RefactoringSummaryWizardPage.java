@@ -88,7 +88,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	}
 
 	private void createFileView(Composite parent) {
-		viewer = new TableViewer(parent, SWT.NONE);
+		viewer = new TableViewer(parent, SWT.SINGLE);
 
 		/*
 		 * label provider that sets the text displayed in CompilationUnits table
