@@ -91,15 +91,21 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 	}
 	
 	/**
+	 * Computes the list of the document changes related to the comment nodes
+	 * inserted above the fields that could not be renamed.
 	 * 
 	 * @param todosEditGroups
-	 * @return
+	 *            edit groups for each compilation unit.
+	 * @return list of document changes containing the inserted comments.
 	 * @throws JavaModelException
+	 *             if an exception occurs when reading the resource of an
+	 *             {@link ICompilationUnit}
 	 */
-	public List<DocumentChange> computeTodosDocumentChanges(Map<ICompilationUnit, TextEditGroup> todosEditGroups) throws JavaModelException {
+	public List<DocumentChange> computeTodosDocumentChanges(Map<ICompilationUnit, TextEditGroup> todosEditGroups)
+			throws JavaModelException {
 		List<DocumentChange> documentChanges = new ArrayList<>();
-		
-		for(Map.Entry<ICompilationUnit, TextEditGroup> entry : todosEditGroups.entrySet()) {
+
+		for (Map.Entry<ICompilationUnit, TextEditGroup> entry : todosEditGroups.entrySet()) {
 			ICompilationUnit iCompilationUnit = entry.getKey();
 			TextEditGroup editGroup = entry.getValue();
 			if (!editGroup.isEmpty()) {
@@ -107,11 +113,11 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 				DocumentChange documentChange = new DocumentChange(editGroup.getName(), document);
 				documentChange.setEdit(new MultiTextEdit());
 				documentChange.addTextEditGroup(editGroup);
-				
+
 				documentChanges.add(documentChange);
 			}
 		}
-		
+
 		return documentChanges;
 	}
 }

@@ -11,7 +11,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.BlockComment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -26,9 +25,9 @@ import org.eclipse.text.edits.TextEditGroup;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * A visitor for renaming the name of a field and its references. Requires a list of
- * {@link FieldMetadata} for providing information about the fields to be
- * renamed and the compilation units containing references of it.
+ * A visitor for renaming the name of a field and its references. Requires a
+ * list of {@link FieldMetadata} for providing information about the fields to
+ * be renamed and the compilation units containing references of it.
  * <p/>
  * Creates a {@link TextEditGroup} for storing the all the updates related to
  * one field on a compilation unit. Therefore, the overall changes related to
@@ -53,10 +52,20 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	private List<FieldMetadata> unmodifiableFields;
 	private Map<ICompilationUnit, TextEditGroup> todosEditGroups;
 
+	/**
+	 * Creates an instance of a visitor for renaming fields and inserting
+	 * comment nodes above the fields that cannot be renamed due to naming
+	 * conflicts or illegal identifier names.
+	 * 
+	 * @param metaData
+	 *            metadata for the fields to be renamed
+	 * @param unmodifiableFields
+	 *            metadata for the fields to insert comments to
+	 */
 	public PublicFieldsRenamingASTVisitor(List<FieldMetadata> metaData, List<FieldMetadata> unmodifiableFields) {
 		this.metaData = metaData;
 		this.unmodifiableFields = unmodifiableFields;
-		todosEditGroups = new HashMap<>();
+		this.todosEditGroups = new HashMap<>();
 	}
 
 	@Override
@@ -65,16 +74,28 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 		this.cuRelatedReplacements = findCuRelatedData(compilationUnit);
 		this.cuRelatedReplacements.putAll(findRelatedCuDeclarationFragments(compilationUnit));
 		this.cuRelatedUnmodifiable = findCuRelatedUnmodifiable(iCompilationUnit);
-		
+		return true;
+	}
+
+	@Override
+	public boolean visit(SimpleName simpleName) {
+		findReplacement(simpleName).ifPresent(mData -> {
+			AST ast = astRewrite.getAST();
+			String newIdentifier = mData.getNewIdentifier();
+			SimpleName newName = ast.newSimpleName(newIdentifier);
+			TextEditGroup editGroup = mData.getTextEditGroup(iCompilationUnit);
+			astRewrite.replace(simpleName, newName, editGroup);
+		});
+
 		return true;
 	}
 
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
 		String fieldKeyId = calcFieldIdentifier(fieldDeclaration);
-		if(cuRelatedUnmodifiable.containsKey(fieldKeyId)) {
+		if (cuRelatedUnmodifiable.containsKey(fieldKeyId)) {
 			List<String> identifiers = cuRelatedUnmodifiable.get(fieldKeyId);
-			insertJavadocNode(fieldDeclaration, identifiers);			
+			insertJavadocNode(fieldDeclaration, identifiers);
 		}
 		return true;
 	}
@@ -127,19 +148,6 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 		return group;
 	}
 
-	@Override
-	public boolean visit(SimpleName simpleName) {
-		findReplacement(simpleName).ifPresent(mData -> {
-			AST ast = astRewrite.getAST();
-			String newIdentifier = mData.getNewIdentifier();
-			SimpleName newName = ast.newSimpleName(newIdentifier);
-			TextEditGroup editGroup = mData.getTextEditGroup(iCompilationUnit);
-			astRewrite.replace(simpleName, newName, editGroup);
-		});
-
-		return true;
-	}
-
 	/**
 	 * Finds the metadata representing informations about the fields which are
 	 * declared in the given compilation unit. Compares the {@link IPath}s of
@@ -184,10 +192,11 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	}
 
 	/**
-	 * Finds the list of the metadata related to that contain a {@link ReferenceSearchMatch}
-	 * falling in the given compilation unit. 
+	 * Finds the list of the metadata related to that contain a
+	 * {@link ReferenceSearchMatch} falling in the given compilation unit.
 	 * 
-	 * @param cu compilation unit to search for.
+	 * @param cu
+	 *            compilation unit to search for.
 	 * @return a map representing the all the meta data that are related to the
 	 *         fields referenced in the given compilation unit. Makes use of
 	 *         {@link #calcIdentifier(SimpleName)} for computing a unique
@@ -196,8 +205,8 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	private Map<String, FieldMetadata> findCuRelatedData(CompilationUnit cu) {
 		IResource cuResource = cu.getJavaElement().getResource();
 		List<ReferenceSearchMatch> relatedcuReferences = metaData.stream()
-				.flatMap(mData -> mData.getReferences().stream())
-				.filter(match -> isMatchingResource(cuResource, match)).collect(Collectors.toList());
+				.flatMap(mData -> mData.getReferences().stream()).filter(match -> isMatchingResource(cuResource, match))
+				.collect(Collectors.toList());
 		Map<String, FieldMetadata> oldToNewKeys = new HashMap<>();
 		relatedcuReferences.forEach(match -> {
 			FieldMetadata relatedMatchData = match.getMetadata();
@@ -207,16 +216,16 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 
 		return oldToNewKeys;
 	}
-	
+
 	/**
-	 * Finds the list of the fields that declared in the given compilation unit
-	 * that where a java doc node have to be added to.
+	 * Finds the list of the fields that are declared in the given compilation
+	 * unit and a comment node have to be added to.
 	 * 
 	 * @param compilationUnit
 	 *            the compilation unit to find the fields from
-	 * @return a map of the starting position of the field declaration and the
-	 *         list of the identifiers from the field declaration that need to
-	 *         be mentioned in the javadoc.
+	 * @return a map of the starting position of the field declaration to the
+	 *         list of the declared identifiers that need to be mentioned in the
+	 *         comment node.
 	 */
 	private Map<String, List<String>> findCuRelatedUnmodifiable(ICompilationUnit compilationUnit) {
 		IPath currentPath = compilationUnit.getPath();
@@ -242,11 +251,15 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	}
 
 	/**
-	 * Checks whether the given {@link SearchMatch} falls into the given {@link IResource}. 
+	 * Checks whether the given {@link SearchMatch} falls into the given
+	 * {@link IResource}.
 	 * 
-	 * @param cuResource the resource to check for. 
-	 * @param match a search match
-	 * @return {@code true} if the match belongs to the given resource or {@code false} otherwise.
+	 * @param cuResource
+	 *            the resource to check for.
+	 * @param match
+	 *            a search match
+	 * @return {@code true} if the match belongs to the given resource or
+	 *         {@code false} otherwise.
 	 */
 	private boolean isMatchingResource(IResource cuResource, SearchMatch match) {
 		IResource resource = match.getResource();
@@ -275,10 +288,12 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	}
 
 	/**
-	 * Uses {@link #calcIdentifier(String, int)} for computing a unique key identifier 
-	 * for a given simple name. The identifier will be unique per compilation unit. 
+	 * Uses {@link #calcIdentifier(String, int)} for computing a unique key
+	 * identifier for a given simple name. The identifier will be unique per
+	 * compilation unit.
 	 * 
-	 * @param name a simple name to generate a key identifier for.
+	 * @param name
+	 *            a simple name to generate a key identifier for.
 	 * @return a key identifier
 	 */
 	private String calcIdentifier(SimpleName name) {
@@ -299,11 +314,11 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	private String calcIdentifier(String identifier, int startingPosition) {
 		return identifier + DASH + startingPosition;
 	}
-	
+
 	private String calcFieldIdentifier(int startingPosition) {
-		return  STARTIGN_POSITION + ":" + startingPosition; //$NON-NLS-1$
+		return STARTIGN_POSITION + ":" + startingPosition; //$NON-NLS-1$
 	}
-	
+
 	private String calcFieldIdentifier(FieldDeclaration field) {
 		return calcFieldIdentifier(field.getStartPosition());
 	}

@@ -395,6 +395,10 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		return this.unmodifiableFields;
 	}
 	
+	/*
+	 * Getters and setters for renaming options.
+	 */
+	
 	public void setRenamePublicField(boolean value) {
 		this.modifierOptions.put(RENAME_PUBLIC_FIELDS, value);
 	}

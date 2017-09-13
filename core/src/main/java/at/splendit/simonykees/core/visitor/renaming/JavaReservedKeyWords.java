@@ -11,6 +11,13 @@ import java.util.Arrays;
  *
  */
 class JavaReservedKeyWords {
+	
+	private JavaReservedKeyWords() {
+		/*
+		 * Hiding the default public constructor
+		 */
+	}
+	
 	@SuppressWarnings("nls")
 	static final String[] javaKeyWords = { "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char",
 			"class", "const",
