@@ -1,56 +1,56 @@
 package at.splendit.simonykees.core.ui.preview;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.compare.CompareViewerSwitchingPane;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
-import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 
 import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
+import at.splendit.simonykees.core.refactorer.RefactoringState;
+import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
-import at.splendit.simonykees.core.util.RefactoringUtil;
+import at.splendit.simonykees.core.ui.preview.dialog.CompareInput;
+import at.splendit.simonykees.i18n.Messages;
 
-@SuppressWarnings("restriction")
+/**
+ * Wizard page which collects all changes on all {@link ICompilationUnit}s made
+ * by all {@link RefactoringRule}s to show preview of all changes
+ * 
+ * @author Andreja Sambolec
+ * @since 2.1
+ */
 public class RefactoringSummaryWizardPage extends WizardPage {
 
-	private static final Logger logger = LoggerFactory.getLogger(RefactoringSummaryWizardPage.class);
-
 	private RefactoringPipeline refactoringPipeline;
-	Map<ICompilationUnit, DocumentChange> changes = new HashMap<>();
+	private Map<RefactoringState, String> initialSource = new HashMap<>();
+	private Map<RefactoringState, String> finalSource = new HashMap<>();
 
-	private ICompilationUnit currentCompilationUnit;
-	private IChangePreviewViewer currentPreviewViewer;
-	private CheckboxTableViewer viewer;
+	private RefactoringState currentRefactoringState;
+	private TableViewer viewer;
 
 	public RefactoringSummaryWizardPage(RefactoringPipeline refactoringPipeline) {
-		super("Summary");
-		setTitle("Summary");
-		setDescription("All changes made by all rules");
+		super(Messages.RefactoringSummaryWizardPage_title);
+		setTitle(Messages.RefactoringSummaryWizardPage_title);
+		setDescription(Messages.RefactoringSummaryWizardPage_description);
 
 		this.refactoringPipeline = refactoringPipeline;
-		setChanges();
-		this.currentCompilationUnit = changes.keySet().stream().findFirst().orElse(null);
+		setInitialChanges();
+		this.currentRefactoringState = initialSource.keySet().stream().findFirst().orElse(null);
 	}
 
 	/*
@@ -88,7 +88,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	}
 
 	private void createFileView(Composite parent) {
-		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI);
+		viewer = new TableViewer(parent, SWT.NONE);
 
 		/*
 		 * label provider that sets the text displayed in CompilationUnits table
@@ -97,7 +97,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		viewer.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				ICompilationUnit compUnit = (ICompilationUnit) element;
+				ICompilationUnit compUnit = ((RefactoringState) element).getWorkingCopy();
 				return String.format("%s - %s", getClassNameString(compUnit), getPathString(compUnit)); //$NON-NLS-1$
 			}
 		});
@@ -105,24 +105,34 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		viewer.addSelectionChangedListener(createSelectionChangedListener());
 
 		populateFileView();
-
 	}
 
-	public Map<ICompilationUnit, DocumentChange> setChanges() {
-		refactoringPipeline.getRules().forEach(rule -> {
-			Map<ICompilationUnit, DocumentChange> changesForRule = refactoringPipeline.getChangesForRule(rule);
-			if (!changesForRule.isEmpty()) {
-				for (ICompilationUnit unit : changesForRule.keySet()) {
-					if (changes.containsKey(unit)) {
-						// TODO handle when changes are overlapping
-						changes.get(unit).addEdit(changesForRule.get(unit).getEdit());
-					} else {
-						changes.put(unit, changesForRule.get(unit));
-					}
-				}
+	/**
+	 * Sets {@link Map} containing all {@link RefactoringState}s and their
+	 * original source code before any change by any rule was made
+	 */
+	public void setInitialChanges() {
+		initialSource.putAll(refactoringPipeline.getInitialSourceMap());
+	}
+
+	/**
+	 * Sets {@link Map} containing all {@link RefactoringState}s and their final
+	 * source code after all rules applied changes and user unselected unwanted
+	 * changes
+	 */
+	public void setFinalChanges() {
+		if (!finalSource.isEmpty()) {
+			finalSource.clear();
+		}
+		refactoringPipeline.setSourceMap(finalSource);
+		refactoringPipeline.getRefactoringStates().stream().forEach(state -> {
+			if (!state.hasChange()) {
+				initialSource.remove(state);
+				finalSource.remove(state);
 			}
 		});
-		return changes;
+		this.currentRefactoringState = initialSource.keySet().stream().findFirst().orElse(null);
+		populateFileView();
 	}
 
 	protected void populateFileView() {
@@ -131,7 +141,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 			viewer.getTable().removeAll();
 		}
 		// adding all elements in table and checking appropriately
-		changes.keySet().stream().forEach(entry -> {
+		initialSource.keySet().stream().forEach(entry -> {
 			viewer.add(entry);
 		});
 	}
@@ -158,17 +168,31 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		return temp.startsWith("/") ? temp.substring(1) : temp; //$NON-NLS-1$
 	}
 
+	Control compareControl;
+	Composite changeContainer;
+
 	private void createPreviewViewer(Composite parent) {
 
-		// GridData works with GridLayout
-		GridData gridData = new GridData(GridData.FILL_BOTH);
-		parent.setLayoutData(gridData);
+		parent.setLayout(new GridLayout());
+		parent.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		currentPreviewViewer = new TextEditChangePreviewViewer();
-		currentPreviewViewer.createControl(parent);
+		changeContainer = new Composite(parent, SWT.NONE);
+		changeContainer.setLayout(new GridLayout());
+		changeContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		populatePreviewViewer();
+	}
 
+	/**
+	 * When this page gets visible, final changes should be collected and stored
+	 * and preview viewer has to be set with content
+	 */
+	@Override
+	public void setVisible(boolean visible) {
+		if (visible) {
+			setFinalChanges();
+			populatePreviewViewer();
+		}
+		super.setVisible(visible);
 	}
 
 	private ISelectionChangedListener createSelectionChangedListener() {
@@ -178,9 +202,9 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 				IStructuredSelection sel = (IStructuredSelection) event.getSelection();
 
 				if (sel.size() == 1) {
-					ICompilationUnit newSelection = (ICompilationUnit) sel.getFirstElement();
-					if (!newSelection.equals(currentCompilationUnit)) {
-						currentCompilationUnit = newSelection;
+					RefactoringState newSelection = (RefactoringState) sel.getFirstElement();
+					if (!newSelection.equals(currentRefactoringState)) {
+						currentRefactoringState = newSelection;
 						populatePreviewViewer();
 					}
 				}
@@ -188,44 +212,41 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		};
 	}
 
-	private void populatePreviewViewer() {
-		currentPreviewViewer.setInput(TextEditChangePreviewViewer.createInput(getCurrentDocumentChange()));
-		((CompareViewerSwitchingPane) currentPreviewViewer.getControl())
-				.setTitleArgument(currentCompilationUnit.getElementName());
-	}
-
-	private DocumentChange getCurrentDocumentChange() {
-		if (null == changes.get(currentCompilationUnit)) {
-			DocumentChange documentChange = null;
-			try {
-				/*
-				 * When compilation unit is unselected for rule that is shown,
-				 * change preview viewer should show no change. For that
-				 * generate document change is called with empty edit to create
-				 * document change with text type java but with no changes.
-				 */
-				TextEdit edit = new MultiTextEdit();
-				return RefactoringUtil.generateDocumentChange(currentCompilationUnit.getElementName(),
-						new Document(currentCompilationUnit.getSource()), edit);
-			} catch (JavaModelException e) {
-				logger.error(e.getMessage(), e);
-			}
-			return documentChange;
-		} else {
-			return changes.get(currentCompilationUnit);
-		}
-	}
-
 	/**
-	 * Used to populate IChangePreviewViewer currentPreviewViewer and
-	 * CheckboxTableViewer viewer every time page gets displayed. Sets the
-	 * selection in file view part to match file whose changes are displayed in
-	 * changes view.
+	 * Method to create control for change preview viewer.
+	 * 
+	 * @param container
+	 *            parent in which change viewer will be displayed
+	 * @param input
+	 *            compare viewer input
+	 * @return control for change preview viewer
 	 */
-	public void populateViews() {
-		populateFileView();
-		populatePreviewViewer();
-		viewer.setSelection(new StructuredSelection(currentCompilationUnit));
+	private Control createInput(final Composite container, final CompareInput input) {
+		try {
+			PlatformUI.getWorkbench().getProgressService().run(true, true, input);
+		} catch (InvocationTargetException | InterruptedException e) {
+			e.printStackTrace();
+		}
+		input.getCompareResult();
+		final Control c = input.createContents(container);
+		c.setLayoutData(new GridData(GridData.FILL_BOTH));
+		return c;
+	}
+
+	private void populatePreviewViewer() {
+		disposeControl();
+
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				CompareInput ci;
+				ci = new CompareInput(currentRefactoringState.getWorkingCopyName(),
+						initialSource.get(currentRefactoringState), finalSource.get(currentRefactoringState));
+				compareControl = createInput(changeContainer, ci);
+				compareControl.getParent().layout();
+			}
+		});
+
 	}
 
 	/**
@@ -236,4 +257,12 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
 	}
 
+	/**
+	 * Manualy dispose chage preview viewer control
+	 */
+	public void disposeControl() {
+		if (null != compareControl) {
+			compareControl.dispose();
+		}
+	}
 }

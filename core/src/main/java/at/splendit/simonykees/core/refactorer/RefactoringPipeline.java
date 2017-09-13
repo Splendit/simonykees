@@ -51,6 +51,11 @@ public class RefactoringPipeline {
 	 */
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
+	/**
+	 * Holder map for original source code, used for summary page
+	 */
+	private Map<RefactoringState, String> initialSource = new HashMap<>();
+
 	private boolean multipleProjects = false;
 
 	/**
@@ -529,4 +534,38 @@ public class RefactoringPipeline {
 		}
 	}
 
+	/**
+	 * Method for creating Map with relation from {@link RefactoringState} to
+	 * current source code
+	 * 
+	 * @param sourceMap
+	 */
+	public void setSourceMap(Map<RefactoringState, String> sourceMap) {
+		refactoringStates.stream().forEach(refactoringState -> {
+			try {
+				sourceMap.put(refactoringState, refactoringState.getWorkingCopy().getSource());
+			} catch (JavaModelException e) {
+				logger.error(e.getMessage(), e);
+			}
+		});
+	}
+
+	/**
+	 * Getter for map with original source code for all refactoring states
+	 * 
+	 * @return
+	 */
+	public Map<RefactoringState, String> getInitialSourceMap() {
+		return initialSource;
+	}
+
+	/**
+	 * Getter for refactoring states, used to remove all files without any
+	 * change from summary page
+	 * 
+	 * @return
+	 */
+	public List<RefactoringState> getRefactoringStates() {
+		return refactoringStates;
+	}
 }

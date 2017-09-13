@@ -59,6 +59,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	 */
 	private Map<String, ICompilationUnit> unselected = new HashMap<>();
 
+	private Composite previewContainer;
 	/*
 	 * map that contains working copies that are unselected in one iteration
 	 * when this page is active
@@ -177,10 +178,14 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		GridData gridData = new GridData(GridData.FILL_BOTH);
 		parent.setLayoutData(gridData);
 
-		currentPreviewViewer = new TextEditChangePreviewViewer();
-		currentPreviewViewer.createControl(parent);
+		previewContainer = new Composite(parent, SWT.NONE);
+		previewContainer.setLayout(new GridLayout());
+		previewContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		populatePreviewViewer();
+		currentPreviewViewer = new TextEditChangePreviewViewer();
+		// currentPreviewViewer.createControl(previewContainer);
+
+		// populatePreviewViewer();
 
 	}
 
@@ -194,7 +199,9 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 					ICompilationUnit newSelection = (ICompilationUnit) sel.getFirstElement();
 					if (!newSelection.equals(currentCompilationUnit)) {
 						currentCompilationUnit = newSelection;
-						populatePreviewViewer();
+						if (isCurrentPage()) {
+							populatePreviewViewer();
+						}
 					}
 				}
 			}
@@ -229,14 +236,34 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		};
 	}
 
+	/**
+	 * Used to populate preview viewer only if this page gets visible
+	 */
+	@Override
+	public void setVisible(boolean visible) {
+		if (visible) {
+			populatePreviewViewer();
+		} else {
+			disposeControl();
+		}
+		super.setVisible(visible);
+	}
+
 	private void imediatelyUpdateForSelected(ICompilationUnit newSelection) {
 		((RefactoringPreviewWizard) getWizard()).imediatelyUpdateForSelected(newSelection, rule);
 	}
 
 	private void populatePreviewViewer() {
+		disposeControl();
+
+		currentPreviewViewer.createControl(previewContainer);
+		currentPreviewViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
+
 		currentPreviewViewer.setInput(TextEditChangePreviewViewer.createInput(getCurrentDocumentChange()));
 		((CompareViewerSwitchingPane) currentPreviewViewer.getControl())
 				.setTitleArgument(currentCompilationUnit.getElementName());
+
+		currentPreviewViewer.getControl().getParent().layout();
 	}
 
 	private DocumentChange getCurrentDocumentChange() {
@@ -301,11 +328,18 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	 * Used to populate IChangePreviewViewer currentPreviewViewer and
 	 * CheckboxTableViewer viewer every time page gets displayed. Sets the
 	 * selection in file view part to match file whose changes are displayed in
-	 * changes view.
+	 * changes view. If forcePreviewViewerUpdate is set to true preview viewer
+	 * is also populated. It is used only when this file is already visible
+	 * (when previously unselected file gets selected again).
+	 * 
+	 * @param forcePreviewViewerUpdate
+	 *            flag if preview viewer should be populated
 	 */
-	public void populateViews() {
+	public void populateViews(boolean forcePreviewViewerUpdate) {
 		populateFileView();
-		populatePreviewViewer();
+		if (forcePreviewViewerUpdate) {
+			populatePreviewViewer();
+		}
 		viewer.setSelection(new StructuredSelection(currentCompilationUnit));
 	}
 
@@ -315,5 +349,17 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	@Override
 	public void performHelp() {
 		SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
+	}
+
+	/**
+	 * Used to dispose control every time preview viewer content changes or page
+	 * gets invisible. New control is created when needed. This way conflicting
+	 * handers are avoided because there is no multiple viewers which would
+	 * register multiple handlers for same action.
+	 */
+	public void disposeControl() {
+		if (null != currentPreviewViewer.getControl()) {
+			currentPreviewViewer.getControl().dispose();
+		}
 	}
 }

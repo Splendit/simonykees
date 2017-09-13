@@ -57,13 +57,18 @@ public class RefactoringPreviewWizard extends Wizard {
 	 */
 	@Override
 	public void addPages() {
+		/*
+		 * First summary page is created to collect all initial source from
+		 * working copies
+		 */
+		RefactoringSummaryWizardPage summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline);
 		refactoringPipeline.getRules().forEach(rule -> {
 			Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
 			if (!changes.isEmpty()) {
 				addPage(new RefactoringPreviewWizardPage(changes, rule));
 			}
 		});
-		addPage(new RefactoringSummaryWizardPage(refactoringPipeline));
+		addPage(summaryPage);
 	}
 
 	@Override
@@ -81,7 +86,7 @@ public class RefactoringPreviewWizard extends Wizard {
 				 * if there are no changes in refactoring page, just populate
 				 * the view with current updated values
 				 */
-				((RefactoringPreviewWizardPage) page).populateViews();
+				((RefactoringPreviewWizardPage) page).populateViews(false);
 			}
 		}
 
@@ -103,7 +108,7 @@ public class RefactoringPreviewWizard extends Wizard {
 				 * if there are no changes in refactoring page, just populate
 				 * the view with current updated values
 				 */
-				((RefactoringPreviewWizardPage) page).populateViews();
+				((RefactoringPreviewWizardPage) page).populateViews(false);
 			}
 		}
 
@@ -171,8 +176,10 @@ public class RefactoringPreviewWizard extends Wizard {
 	 */
 	private void updateAllPages() {
 		for (IWizardPage page : getPages()) {
-			((RefactoringPreviewWizardPage) page)
-					.update(refactoringPipeline.getChangesForRule(((RefactoringPreviewWizardPage) page).getRule()));
+			if (page instanceof RefactoringPreviewWizardPage) {
+				((RefactoringPreviewWizardPage) page)
+						.update(refactoringPipeline.getChangesForRule(((RefactoringPreviewWizardPage) page).getRule()));
+			}
 		}
 	}
 
@@ -263,7 +270,7 @@ public class RefactoringPreviewWizard extends Wizard {
 		}
 
 		updateAllPages();
-		((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).populateViews();
+		((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).populateViews(true);
 	}
 
 	/**
@@ -283,22 +290,27 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	/**
 	 * Called from {@link WizardDialog} when Next button is pressed. Triggers
-	 * recalculation if needed, otherwise populating new view, with method
-	 * getNextPage
+	 * recalculation if needed. Disposes control from current page which wont be
+	 * visible any more
 	 */
 	public void pressedNext() {
 		if (null != getContainer()) {
+			((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
 			getNextPage(getContainer().getCurrentPage());
 		}
 	}
 
 	/**
-	 * Called from {@link WizardDialog} when Back button is pressed. Triggers
-	 * recalculation if needed, otherwise populating new view, with method
-	 * getPreviousPage
+	 * Called from {@link WizardDialog} when Back button is pressed. Disposes
+	 * all controls to be recalculated and created when needed
 	 */
 	public void pressedBack() {
 		if (null != getContainer()) {
+			if (getContainer().getCurrentPage() instanceof RefactoringPreviewWizardPage) {
+				((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
+			} else {
+				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeControl();
+			}
 			getPreviousPage(getContainer().getCurrentPage());
 		}
 	}
