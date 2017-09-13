@@ -33,7 +33,7 @@ public class CompareInput extends CompareEditorInput {
 	}
 
 	/**
-	 * Runs the compare operation and returns the compare result. 
+	 * Runs the compare operation and returns the compare result.
 	 */
 	@Override
 	protected Object prepareInput(final IProgressMonitor pm) {
@@ -52,6 +52,9 @@ public class CompareInput extends CompareEditorInput {
 		};
 
 		fRoot = d.findDifferences(false, pm, null, ancestor, left, right);
+		if (null == fRoot) {
+			return new DiffNode(null, Differencer.CONFLICTING, ancestor, left, right);
+		}
 		return fRoot;
 	}
 }
