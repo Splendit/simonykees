@@ -12,7 +12,7 @@ import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.core.visitor.loop.whileToForEach.WhileToForEachASTVisitor;
+import eu.jsparrow.core.visitor.loop.whiletoforeach.WhileToForEachASTVisitor;
 
 /**
  * TODO SIM-103 add class description

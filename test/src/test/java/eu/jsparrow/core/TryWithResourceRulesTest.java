@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.tryStatement.TryWithResourceASTVisitor;
+import eu.jsparrow.core.visitor.trycatch.TryWithResourceASTVisitor;
 
 /**
  * TODO SIM-103 add class description

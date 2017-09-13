@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import eu.jsparrow.core.rule.impl.LambdaForEachCollectRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.lambdaForEach.LambdaForEachCollectASTVisitor;
+import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachCollectASTVisitor;
 
 /**
  * Testing stream forEach to stream collect.

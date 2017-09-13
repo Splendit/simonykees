@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
-import eu.jsparrow.core.rule.impl.standardLogger.StandardLoggerConstants;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.wizard.IValueChangeListener;

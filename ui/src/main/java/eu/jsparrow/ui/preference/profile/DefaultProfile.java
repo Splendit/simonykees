@@ -13,12 +13,12 @@ import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.core.visitor.DiamondOperatorASTVisitor;
-import eu.jsparrow.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamForEachASTVisitor;
-import eu.jsparrow.core.visitor.lambdaForEach.LambdaForEachIfWrapperToFilterASTVisitor;
-import eu.jsparrow.core.visitor.loop.forToForEach.ForToForEachASTVisitor;
-import eu.jsparrow.core.visitor.loop.whileToForEach.WhileToForEachASTVisitor;
-import eu.jsparrow.core.visitor.tryStatement.MultiCatchASTVisitor;
-import eu.jsparrow.core.visitor.tryStatement.TryWithResourceASTVisitor;
+import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamForEachASTVisitor;
+import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachIfWrapperToFilterASTVisitor;
+import eu.jsparrow.core.visitor.loop.fortoforeach.ForToForEachASTVisitor;
+import eu.jsparrow.core.visitor.loop.whiletoforeach.WhileToForEachASTVisitor;
+import eu.jsparrow.core.visitor.trycatch.MultiCatchASTVisitor;
+import eu.jsparrow.core.visitor.trycatch.TryWithResourceASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**

@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import eu.jsparrow.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.lambdaForEach.LambdaForEachIfWrapperToFilterASTVisitor;
+import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachIfWrapperToFilterASTVisitor;
 
 @RunWith(Parameterized.class)
 public class LambdaForEachIfWrapperToFilterRulesTest extends AbstractRulesTest {

@@ -42,7 +42,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
-import eu.jsparrow.core.visitor.enhancedForLoopToStreamForEach.AbstractEnhancedForLoopToStreamASTVisitor;
+import eu.jsparrow.core.visitor.loop.stream.AbstractEnhancedForLoopToStreamASTVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**

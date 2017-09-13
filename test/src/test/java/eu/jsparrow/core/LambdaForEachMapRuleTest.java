@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.lambdaForEach.LambdaForEachMapASTVisitor;
+import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachMapASTVisitor;
 
 /**
  * Testing {@link LambdaForEachMapRule}

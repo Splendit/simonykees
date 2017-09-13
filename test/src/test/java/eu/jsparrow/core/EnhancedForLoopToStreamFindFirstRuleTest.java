@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamFindFirstRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamFindFirstASTVisitor;
+import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamFindFirstASTVisitor;
 
 /**
  * 

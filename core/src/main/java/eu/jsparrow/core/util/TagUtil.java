@@ -48,7 +48,7 @@ import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
-import eu.jsparrow.core.rule.impl.standardLogger.StandardLoggerRule;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 
 /**
  * Tags for our rules.

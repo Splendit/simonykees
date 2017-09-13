@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import eu.jsparrow.core.rule.impl.FunctionalInterfaceRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.functionalInterface.FunctionalInterfaceASTVisitor;
+import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
 
 /**
  * Testing functional interface rule.

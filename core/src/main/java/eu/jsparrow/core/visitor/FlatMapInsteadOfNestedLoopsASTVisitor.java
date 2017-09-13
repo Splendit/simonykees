@@ -22,7 +22,7 @@ import eu.jsparrow.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
-import eu.jsparrow.core.visitor.lambdaForEach.AbstractLambdaForEachASTVisitor;
+import eu.jsparrow.core.visitor.lambdaforeach.AbstractLambdaForEachASTVisitor;
 import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
 
 

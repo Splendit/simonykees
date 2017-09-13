@@ -7,7 +7,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.tryStatement.TryWithResourceASTVisitor;
+import eu.jsparrow.core.visitor.trycatch.TryWithResourceASTVisitor;
 import eu.jsparrow.i18n.Messages;
 /** 
  * @see TryWithResourceASTVisitor

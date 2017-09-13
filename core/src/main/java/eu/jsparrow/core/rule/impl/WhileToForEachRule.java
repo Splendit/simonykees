@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.loop.whileToForEach.WhileToForEachASTVisitor;
+import eu.jsparrow.core.visitor.loop.whiletoforeach.WhileToForEachASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**

@@ -75,19 +75,19 @@ import eu.jsparrow.core.visitor.StringLiteralEqualityCheckASTVisitor;
 import eu.jsparrow.core.visitor.StringUtilsASTVisitor;
 import eu.jsparrow.core.visitor.UseIsEmptyRuleASTVisitor;
 import eu.jsparrow.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
-import eu.jsparrow.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamAnyMatchASTVisitor;
-import eu.jsparrow.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamFindFirstASTVisitor;
-import eu.jsparrow.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamForEachASTVisitor;
-import eu.jsparrow.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamSumASTVisitor;
-import eu.jsparrow.core.visitor.functionalInterface.FunctionalInterfaceASTVisitor;
-import eu.jsparrow.core.visitor.lambdaForEach.LambdaForEachCollectASTVisitor;
-import eu.jsparrow.core.visitor.lambdaForEach.LambdaForEachIfWrapperToFilterASTVisitor;
-import eu.jsparrow.core.visitor.lambdaForEach.LambdaForEachMapASTVisitor;
-import eu.jsparrow.core.visitor.loop.forToForEach.ForToForEachASTVisitor;
-import eu.jsparrow.core.visitor.loop.whileToForEach.WhileToForEachASTVisitor;
+import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
+import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachCollectASTVisitor;
+import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachIfWrapperToFilterASTVisitor;
+import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachMapASTVisitor;
+import eu.jsparrow.core.visitor.loop.fortoforeach.ForToForEachASTVisitor;
+import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamAnyMatchASTVisitor;
+import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamFindFirstASTVisitor;
+import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamForEachASTVisitor;
+import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamSumASTVisitor;
+import eu.jsparrow.core.visitor.loop.whiletoforeach.WhileToForEachASTVisitor;
 import eu.jsparrow.core.visitor.renaming.FieldNameConventionASTVisitor;
-import eu.jsparrow.core.visitor.tryStatement.MultiCatchASTVisitor;
-import eu.jsparrow.core.visitor.tryStatement.TryWithResourceASTVisitor;
+import eu.jsparrow.core.visitor.trycatch.MultiCatchASTVisitor;
+import eu.jsparrow.core.visitor.trycatch.TryWithResourceASTVisitor;
 
 /**
  * {@link RulesContainer} is a HelperClass that holds a static list of all

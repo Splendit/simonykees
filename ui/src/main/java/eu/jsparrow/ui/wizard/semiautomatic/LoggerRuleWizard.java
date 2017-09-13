@@ -24,7 +24,7 @@ import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.impl.standardLogger.StandardLoggerRule;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;

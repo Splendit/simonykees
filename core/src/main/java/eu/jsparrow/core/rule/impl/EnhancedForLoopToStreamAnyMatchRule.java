@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.enhancedForLoopToStreamForEach.EnhancedForLoopToStreamAnyMatchASTVisitor;
+import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamAnyMatchASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**

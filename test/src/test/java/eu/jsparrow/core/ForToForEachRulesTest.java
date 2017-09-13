@@ -10,7 +10,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import eu.jsparrow.core.rule.impl.ForToForEachRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.loop.forToForEach.ForToForEachASTVisitor;
+import eu.jsparrow.core.visitor.loop.fortoforeach.ForToForEachASTVisitor;
 
 /**
  * TODO SIM-103 add class description

@@ -12,9 +12,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import eu.jsparrow.core.rule.impl.standardLogger.StandardLoggerRule;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.semiAutomatic.StandardLoggerASTVisitor;
+import eu.jsparrow.core.visitor.semiautomatic.StandardLoggerASTVisitor;
 
 /**
  * Testing standard logger rule.
