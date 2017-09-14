@@ -10,7 +10,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.WizardPage;
@@ -22,6 +21,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.core.refactorer.RefactoringState;
@@ -40,6 +41,8 @@ import at.splendit.simonykees.i18n.Messages;
  */
 @SuppressWarnings("restriction")
 public class RefactoringSummaryWizardPage extends WizardPage {
+
+	private static final Logger logger = LoggerFactory.getLogger(RefactoringSummaryWizardPage.class);
 
 	private RefactoringPipeline refactoringPipeline;
 	private Map<RefactoringState, String> initialSource = new HashMap<>();
@@ -88,8 +91,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		createPreviewViewer(sashForm);
 
 		/*
-		 * sets height relation between children to be 1:3 when it has two
-		 * children
+		 * sets height relation between children to be 1:3 when it has two children
 		 */
 		sashForm.setWeights(new int[] { 1, 3 });
 
@@ -99,8 +101,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		viewer = new TableViewer(parent, SWT.SINGLE);
 
 		/*
-		 * label provider that sets the text displayed in CompilationUnits table
-		 * to show the name of the CompilationUnit
+		 * label provider that sets the text displayed in CompilationUnits table to show
+		 * the name of the CompilationUnit
 		 */
 		viewer.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -116,8 +118,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Sets {@link Map} containing all {@link RefactoringState}s and their
-	 * original source code before any change by any rule was made
+	 * Sets {@link Map} containing all {@link RefactoringState}s and their original
+	 * source code before any change by any rule was made
 	 */
 	public void setInitialChanges() {
 		initialSource.putAll(refactoringPipeline.getInitialSourceMap());
@@ -170,8 +172,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Returns the path of an {@link ICompilationUnit} without leading slash
-	 * (the same as in the Externalize Strings refactoring view).
+	 * Returns the path of an {@link ICompilationUnit} without leading slash (the
+	 * same as in the Externalize Strings refactoring view).
 	 * 
 	 * @param compilationUnit
 	 * @return
@@ -196,8 +198,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	}
 
 	/**
-	 * When this page gets visible, final changes should be collected and stored
-	 * and preview viewer has to be set with content
+	 * When this page gets visible, final changes should be collected and stored and
+	 * preview viewer has to be set with content
 	 */
 	@Override
 	public void setVisible(boolean visible) {
@@ -210,17 +212,14 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	}
 
 	private ISelectionChangedListener createSelectionChangedListener() {
-		return new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection sel = (IStructuredSelection) event.getSelection();
+		return event -> {
+			IStructuredSelection sel = (IStructuredSelection) event.getSelection();
 
-				if (sel.size() == 1) {
-					RefactoringState newSelection = (RefactoringState) sel.getFirstElement();
-					if (!newSelection.equals(currentRefactoringState)) {
-						currentRefactoringState = newSelection;
-						populatePreviewViewer();
-					}
+			if (sel.size() == 1) {
+				RefactoringState newSelection = (RefactoringState) sel.getFirstElement();
+				if (!newSelection.equals(currentRefactoringState)) {
+					currentRefactoringState = newSelection;
+					populatePreviewViewer();
 				}
 			}
 		};
@@ -239,7 +238,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		try {
 			PlatformUI.getWorkbench().getProgressService().run(true, true, input);
 		} catch (InvocationTargetException | InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		final Control c = input.createContents(container);
 		c.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -249,15 +248,12 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	private void populatePreviewViewer() {
 		disposeControl();
 
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				CompareInput ci;
-				ci = new CompareInput(currentRefactoringState.getWorkingCopyName(),
-						initialSource.get(currentRefactoringState), finalSource.get(currentRefactoringState));
-				compareControl = createInput(changeContainer, ci);
-				compareControl.getParent().layout();
-			}
+		Display.getDefault().syncExec(() -> {
+			CompareInput ci;
+			ci = new CompareInput(currentRefactoringState.getWorkingCopyName(),
+					initialSource.get(currentRefactoringState), finalSource.get(currentRefactoringState));
+			compareControl = createInput(changeContainer, ci);
+			compareControl.getParent().layout();
 		});
 
 	}
