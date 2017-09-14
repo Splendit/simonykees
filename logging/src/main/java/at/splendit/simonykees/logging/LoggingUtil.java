@@ -7,14 +7,12 @@ import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 
-
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.osgi.framework.Bundle;
 import org.slf4j.LoggerFactory;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -42,6 +40,11 @@ import ch.qos.logback.core.util.FileSize;
  */
 public class LoggingUtil {
 
+	// sonar lint suggestion to hide the public default constructor
+	private LoggingUtil() {
+
+	}
+
 	private static final int ROLLING_POLICY_MIN_INDEX = 0;
 	private static final int ROLLING_POLICY_MAX_INDEX = 5;
 
@@ -49,6 +52,13 @@ public class LoggingUtil {
 
 	private static final String ROLLING_FILE_APPENDER_NAME = "at.splendit.simonykees.logging.rollingFile"; //$NON-NLS-1$
 	private static final String TEST_ROLLING_FILE_APPENDER_NAME = "at.splendit.simonykees.logging.test.rollingFile"; //$NON-NLS-1$
+	private static final String JUL_ROLLING_FILE_APPENDER_NAME = "at.splendit.simonykees.logging.jul.rollingFile"; //$NON-NLS-1$
+
+	private static final String ROOT_LOGGER_NAME = org.slf4j.Logger.ROOT_LOGGER_NAME;
+	private static final String JUL_LOGGER_NAME = "jul"; //$NON-NLS-1$
+
+	private static final String LOG_FILE_NAME = "jsparrow.log"; //$NON-NLS-1$
+	private static final String JUL_LOG_FILE_NAME = "jsparrow.jul.log"; //$NON-NLS-1$
 
 	private static Bundle bundle = null;
 
@@ -58,14 +68,20 @@ public class LoggingUtil {
 	 * Triggers the logging configuration for plug in tests
 	 * 
 	 * @return true, if the configuration was successful, false otherwise
-	 * @throws JoranException from {@link #configureLogback(Bundle)}
-	 * @throws IOException from {@link #configureLogback(Bundle)}
+	 * @throws JoranException
+	 *             from {@link #configureLogback(Bundle)}
+	 * @throws IOException
+	 *             from {@link #configureLogback(Bundle)}
 	 */
 	public static boolean configureLoggerForTesting() throws JoranException, IOException {
 		if (bundle != null) {
 			configureLogback(bundle);
 			removeAppenderFromRootLogger(ROLLING_FILE_APPENDER_NAME);
-			configureRollingFileAppender(TEST_ROLLING_FILE_APPENDER_NAME, getTestLogFilePath());
+			removeAppenderFromLogger(JUL_ROLLING_FILE_APPENDER_NAME, JUL_LOGGER_NAME);
+			configureRollingFileAppender(TEST_ROLLING_FILE_APPENDER_NAME, getTestLogFilePath(LOG_FILE_NAME),
+					ROOT_LOGGER_NAME);
+			configureRollingFileAppender(JUL_ROLLING_FILE_APPENDER_NAME, getTestLogFilePath(JUL_LOG_FILE_NAME),
+					JUL_LOGGER_NAME);
 			return true;
 		}
 		return false;
@@ -75,27 +91,35 @@ public class LoggingUtil {
 	 * Triggers the standard logging configuration
 	 * 
 	 * @return true, if the configuration was successful, false otherwise
-	 * @throws JoranException from {@link #configureLogback(Bundle)}
-	 * @throws IOException from {@link #configureLogback(Bundle)}
+	 * @throws JoranException
+	 *             from {@link #configureLogback(Bundle)}
+	 * @throws IOException
+	 *             from {@link #configureLogback(Bundle)}
 	 */
 	public static boolean configureLogger() throws JoranException, IOException {
 		if (bundle != null) {
 			configureLogback(bundle);
 			removeAppenderFromRootLogger(TEST_ROLLING_FILE_APPENDER_NAME);
-			configureRollingFileAppender(ROLLING_FILE_APPENDER_NAME, getLogFilePath());
+			removeAppenderFromLogger(JUL_ROLLING_FILE_APPENDER_NAME, JUL_LOGGER_NAME);
+			configureRollingFileAppender(ROLLING_FILE_APPENDER_NAME, getLogFilePath(LOG_FILE_NAME), ROOT_LOGGER_NAME);
+			configureRollingFileAppender(JUL_ROLLING_FILE_APPENDER_NAME, getLogFilePath(JUL_LOG_FILE_NAME),
+					JUL_LOGGER_NAME);
 			return true;
 		}
 		return false;
 	}
 
 	/**
-	 * Configures logback with the help of the logback-test.xml file (located in
-	 * the project root) and {@link JoranConfigurator}.
+	 * Configures logback with the help of the logback-test.xml file (located in the
+	 * project root) and {@link JoranConfigurator}.
 	 * 
 	 * @param bundle
 	 *            current Bundle
-	 * @throws JoranException thrown by {@link JoranConfigurator#doConfigure(java.io.InputStream)}
-	 * @throws IOException - if an I/O error occurs during openStream
+	 * @throws JoranException
+	 *             thrown by
+	 *             {@link JoranConfigurator#doConfigure(java.io.InputStream)}
+	 * @throws IOException
+	 *             - if an I/O error occurs during openStream
 	 */
 	private static void configureLogback(Bundle bundle) throws JoranException, IOException {
 		if (!isLogbackConfigured) {
@@ -122,25 +146,24 @@ public class LoggingUtil {
 	 */
 	private static void configureJulToSlf4jBridge() {
 		LogManager.getLogManager().reset();
-		SLF4JBridgeHandler.removeHandlersForRootLogger();
-		SLF4JBridgeHandler.install();
+		CustomSLF4JBridgeHandler.removeHandlersForRootLogger();
+		CustomSLF4JBridgeHandler.install();
 		java.util.logging.Logger.getLogger("global").setLevel(Level.FINEST); //$NON-NLS-1$
 	}
 
 	/**
-	 * Configures a rolling file appender where the roll over is done as soon as
-	 * the file size exceeds the value specified in
-	 * {@link #TRIGGER_MAX_FILE_SIZE}}}.
+	 * Configures a rolling file appender where the roll over is done as soon as the
+	 * file size exceeds the value specified in {@link #TRIGGER_MAX_FILE_SIZE}}}.
 	 * 
-	 * The minimum index is {@link #ROLLING_POLICY_MIN_INDEX}. The maximum index
-	 * is {@link #ROLLING_POLICY_MAX_INDEX}. The oldest log file will be deleted
-	 * as soon as the roll over takes place and there is no free index available
+	 * The minimum index is {@link #ROLLING_POLICY_MIN_INDEX}. The maximum index is
+	 * {@link #ROLLING_POLICY_MAX_INDEX}. The oldest log file will be deleted as
+	 * soon as the roll over takes place and there is no free index available
 	 * anymore.
 	 * 
 	 * @param fileAppenderName
 	 * @param filePath
 	 */
-	private static void configureRollingFileAppender(String fileAppenderName, String filePath) {
+	private static void configureRollingFileAppender(String fileAppenderName, String filePath, String loggerName) {
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 
 		PatternLayoutEncoder ple = new PatternLayoutEncoder();
@@ -171,17 +194,7 @@ public class LoggingUtil {
 		rollingFileAppender.setTriggeringPolicy(triggeringPolicy);
 		rollingFileAppender.start();
 
-		addAppenderToRootLogger(rollingFileAppender);
-	}
-
-	/**
-	 * adds the given appender to the root logger
-	 * 
-	 * @param appender
-	 */
-	private static void addAppenderToRootLogger(OutputStreamAppender<ILoggingEvent> appender) {
-		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-		rootLogger.addAppender(appender);
+		addAppenderToLogger(rollingFileAppender, loggerName);
 	}
 
 	/**
@@ -190,8 +203,29 @@ public class LoggingUtil {
 	 * @param appenderName
 	 */
 	private static void removeAppenderFromRootLogger(String appenderName) {
-		Logger rootLogger = (Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
-		rootLogger.detachAppender(appenderName);
+		removeAppenderFromLogger(appenderName, ROOT_LOGGER_NAME);
+	}
+
+	/**
+	 * adds the given appender to the logger with the given name
+	 * 
+	 * @param appender
+	 * @param loggerName
+	 */
+	private static void addAppenderToLogger(OutputStreamAppender<ILoggingEvent> appender, String loggerName) {
+		Logger logger = (Logger) LoggerFactory.getLogger(loggerName);
+		logger.addAppender(appender);
+	}
+
+	/**
+	 * removes the appender with the given name from the logger with the given name
+	 * 
+	 * @param appenderName
+	 * @param loggerName
+	 */
+	private static void removeAppenderFromLogger(String appenderName, String loggerName) {
+		Logger logger = (Logger) LoggerFactory.getLogger(loggerName);
+		logger.detachAppender(appenderName);
 	}
 
 	/**
@@ -199,9 +233,9 @@ public class LoggingUtil {
 	 * 
 	 * @return path to log file as string
 	 */
-	private static String getLogFilePath() {
+	private static String getLogFilePath(String fileName) {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		IPath logFilePath = workspace.getRoot().getLocation().append(".metadata").append("jSparrow.log"); //$NON-NLS-1$//$NON-NLS-2$
+		IPath logFilePath = workspace.getRoot().getLocation().append(".metadata").append(fileName); //$NON-NLS-1$
 		return logFilePath.toString();
 	}
 
@@ -210,7 +244,7 @@ public class LoggingUtil {
 	 * 
 	 * @return path to log file as string
 	 */
-	private static String getTestLogFilePath() {
+	private static String getTestLogFilePath(String fileName) {
 		String userHomeDir = System.getProperty("user.home"); //$NON-NLS-1$
 
 		Path logFilePath = Paths.get(userHomeDir, ".log"); //$NON-NLS-1$
@@ -220,7 +254,7 @@ public class LoggingUtil {
 			logFilePath.toFile().mkdirs();
 		}
 
-		logFilePath = Paths.get(logFilePath.toString(), "jSparrow.test.log"); //$NON-NLS-1$
+		logFilePath = Paths.get(logFilePath.toString(), fileName);
 		return logFilePath.toString();
 	}
 
@@ -232,7 +266,7 @@ public class LoggingUtil {
 	 * @return file name without extension
 	 */
 	private static String getFileNameFromPath(String path) {
-		int pos = path.lastIndexOf("."); //$NON-NLS-1$
+		int pos = path.lastIndexOf('.');
 		String fname = ""; //$NON-NLS-1$
 		if (pos > 0) {
 			fname = path.substring(0, pos);
