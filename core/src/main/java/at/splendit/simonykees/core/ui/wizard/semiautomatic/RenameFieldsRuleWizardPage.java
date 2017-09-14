@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
-import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.i18n.Messages;
 
 @SuppressWarnings("restriction")
@@ -29,8 +28,6 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 
 	private RenameFieldsRuleWizardPageModel model;
 	private RenameFieldsRuleWizardPageControler controler;
-
-	private Composite composite;
 
 	private Font boldFont;
 
@@ -49,7 +46,7 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		composite = new Composite(parent, SWT.NONE);
+		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 
 		setControl(composite);
@@ -62,13 +59,7 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 		createConfigureReplacementsPart(composite);
 		createTodoChoosingPart(composite);
 
-		model.addListener(new IValueChangeListener() {
-
-			@Override
-			public void valueChanged() {
-				updateView();
-			}
-		});
+		model.addListener(this::updateView);
 	}
 
 	private void createFieldTypeChoosingPart(Composite parent) {
@@ -85,13 +76,15 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 			item.setText(fieldType);
 			item.setChecked(true);
 		}
-		controler.fieldTypeSelectionChanged(Arrays.asList(table.getSelection()).stream().map(item -> item.getText()).collect(Collectors.toList()));
+		controler.fieldTypeSelectionChanged(
+				Arrays.asList(table.getSelection()).stream().map(TableItem::getText).collect(Collectors.toList()));
 
 		table.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.fieldTypeSelectionChanged(Arrays.asList(table.getSelection()).stream().map(item -> item.getText()).collect(Collectors.toList()));
+				controler.fieldTypeSelectionChanged(Arrays.asList(table.getSelection()).stream().map(TableItem::getText)
+						.collect(Collectors.toList()));
 			}
 		});
 	}
@@ -117,8 +110,8 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 				}
 			});
 		}
-		((Button)scopesGroup.getChildren()[0]).setSelection(true);
-		controler.searchScopeSelectionChanged(((Button)scopesGroup.getChildren()[0]).getText());
+		((Button) scopesGroup.getChildren()[0]).setSelection(true);
+		controler.searchScopeSelectionChanged(((Button) scopesGroup.getChildren()[0]).getText());
 	}
 
 	private void createConfigureReplacementsPart(Composite parent) {
@@ -142,8 +135,8 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 				}
 			});
 		}
-		((Button)underscoreGroup.getChildren()[0]).setSelection(true);
-		controler.underscoreReplacementSelectionChanged(((Button)underscoreGroup.getChildren()[0]).getText());
+		((Button) underscoreGroup.getChildren()[0]).setSelection(true);
+		controler.underscoreReplacementSelectionChanged(((Button) underscoreGroup.getChildren()[0]).getText());
 
 		Group dollarSingGroup = new Group(parent, SWT.NONE);
 		dollarSingGroup.setLayout(new GridLayout());
@@ -161,8 +154,8 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 				}
 			});
 		}
-		((Button)dollarSingGroup.getChildren()[0]).setSelection(true);
-		controler.dollarReplacementSelectionChanged(((Button)dollarSingGroup.getChildren()[0]).getText());
+		((Button) dollarSingGroup.getChildren()[0]).setSelection(true);
+		controler.dollarReplacementSelectionChanged(((Button) dollarSingGroup.getChildren()[0]).getText());
 	}
 
 	private void createTodoChoosingPart(Composite parent) {
@@ -185,7 +178,7 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 			}
 		});
 	}
-	
+
 	/**
 	 * Updates title status with status info every time something is changed in
 	 * model. If status has any message, warning will be shown, otherwise title
@@ -197,7 +190,7 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 		} else {
 			fSelectionStatus = new StatusInfo();
 		}
-		
+
 		// status of all used components
 		IStatus[] status;
 		status = new IStatus[] { fSelectionStatus };
@@ -208,7 +201,6 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 		 */
 		updateStatus(status);
 	}
-	
 
 	/**
 	 * Open help dialog

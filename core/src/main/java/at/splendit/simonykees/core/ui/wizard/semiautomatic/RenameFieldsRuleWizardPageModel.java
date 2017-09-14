@@ -18,9 +18,6 @@ public class RenameFieldsRuleWizardPageModel {
 	private String dollarReplacementOption;
 	private boolean addTodoComments;
 
-	public RenameFieldsRuleWizardPageModel() {
-	}
-
 	/**
 	 * Adds listener to model which notifies view to refresh data when ever
 	 * something in model changes
@@ -41,12 +38,12 @@ public class RenameFieldsRuleWizardPageModel {
 
 	// GETTERS useb by Wizard page
 	public List<String> getFieldTypeOptions() {
-		List<String> fieldTypes = new ArrayList<>();
-		fieldTypes.add(Messages.RenameFieldsRuleWizardPageModel_typeOption_privateFields);
-		fieldTypes.add(Messages.RenameFieldsRuleWizardPageModel_typeOption_protectedFields);
-		fieldTypes.add(Messages.RenameFieldsRuleWizardPageModel_typeOption_packageProtectedFields);
-		fieldTypes.add(Messages.RenameFieldsRuleWizardPageModel_typeOption_publicFields);
-		return fieldTypes;
+		List<String> fieldTypesOptions = new ArrayList<>();
+		fieldTypesOptions.add(Messages.RenameFieldsRuleWizardPageModel_typeOption_privateFields);
+		fieldTypesOptions.add(Messages.RenameFieldsRuleWizardPageModel_typeOption_protectedFields);
+		fieldTypesOptions.add(Messages.RenameFieldsRuleWizardPageModel_typeOption_packageProtectedFields);
+		fieldTypesOptions.add(Messages.RenameFieldsRuleWizardPageModel_typeOption_publicFields);
+		return fieldTypesOptions;
 	}
 	
 	public List<String> getSearchScopeOptions() {

@@ -43,9 +43,7 @@ public class LoggerRuleWizard extends Wizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoggerRuleWizard.class);
 
-	private LoggerRuleWizardPage page;
 	private LoggerRuleWizardPageModel model;
-	private LoggerRuleWizardPageControler controler;
 
 	private IJavaProject selectedJavaProjekt;
 	private final StandardLoggerRule rule;
@@ -69,8 +67,7 @@ public class LoggerRuleWizard extends Wizard {
 	@Override
 	public void addPages() {
 		model = new LoggerRuleWizardPageModel(rule);
-		controler = new LoggerRuleWizardPageControler(model);
-		page = new LoggerRuleWizardPage(model, controler);
+		LoggerRuleWizardPage page = new LoggerRuleWizardPage(model);
 		addPage(page);
 	}
 
@@ -82,11 +79,7 @@ public class LoggerRuleWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		if (model.getSelectionStatus().equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)) {
-			return false;
-		} else {
-			return true;
-		}
+		return (!model.getSelectionStatus().equals(Messages.LoggerRuleWizardPageModel_err_noTransformation));
 	}
 
 	@Override
@@ -97,8 +90,7 @@ public class LoggerRuleWizard extends Wizard {
 
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(rule);
 		refactoringPipeline.setRules(rules);
-		// AbstractRefactorer refactorer = new AbstractRefactorer(javaElements,
-		// rules);
+
 		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
 		rule.setSelectedOptions(model.getCurrentSelectionMap());
 
@@ -165,21 +157,16 @@ public class LoggerRuleWizard extends Wizard {
 
 		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
 				selectedJavaProjekt.getElementName()));
-		logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
-				selectedJavaProjekt.getElementName(), rule.getName()));
+		logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes, selectedJavaProjekt.getElementName(),
+				rule.getName()));
 
-		Display.getDefault().asyncExec(new Runnable() {
+		Display.getDefault().asyncExec(() -> {
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactorer));
 
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactorer));
-
-				// maximizes the RefactoringPreviewWizard
-				dialog.setPageSize(rectangle.width, rectangle.height);
-				dialog.open();
-			}
-
+			// maximizes the RefactoringPreviewWizard
+			dialog.setPageSize(rectangle.width, rectangle.height);
+			dialog.open();
 		});
 	}
 }

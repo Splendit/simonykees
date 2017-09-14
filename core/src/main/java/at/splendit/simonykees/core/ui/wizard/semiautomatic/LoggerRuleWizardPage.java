@@ -20,7 +20,6 @@ import org.eclipse.swt.widgets.Label;
 
 import at.splendit.simonykees.core.rule.impl.standardLogger.StandardLoggerConstants;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
-import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.i18n.Messages;
 
 /**
@@ -36,8 +35,6 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	private LoggerRuleWizardPageModel model;
 	private LoggerRuleWizardPageControler controler;
 
-	private Composite composite;
-
 	private Combo systemOutCombo;
 	private Combo systemErrCombo;
 	private Combo stackTraceCombo;
@@ -46,20 +43,20 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 	protected IStatus fSelectionStatus;
 
-	public LoggerRuleWizardPage(LoggerRuleWizardPageModel model, LoggerRuleWizardPageControler controler) {
+	public LoggerRuleWizardPage(LoggerRuleWizardPageModel model) {
 		super(Messages.LoggerRuleWizardPage_pageName);
 		setTitle(Messages.LoggerRuleWizard_title);
 		setDescription(Messages.LoggerRuleWizardPage_description);
 		
 		this.model = model;
-		this.controler = controler;
+		this.controler = new LoggerRuleWizardPageControler(model);
 	}
 
 	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		composite = new Composite(parent, SWT.NONE);
+		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 
 		setControl(composite);
@@ -71,13 +68,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		createSystemErrPart(composite);
 		createStackTracePart(composite);
 
-		model.addListener(new IValueChangeListener() {
-
-			@Override
-			public void valueChanged() {
-				doStatusUpdate();
-			}
-		});
+		model.addListener(this::doStatusUpdate);
 
 		initializeData();
 		doStatusUpdate();

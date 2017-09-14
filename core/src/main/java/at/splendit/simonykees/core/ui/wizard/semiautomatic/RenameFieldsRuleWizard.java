@@ -61,6 +61,8 @@ public class RenameFieldsRuleWizard extends Wizard {
 	private List<FieldMetadata> todosMetadata;
 	private PublicFieldsRenamingRule renameFieldsRule;
 
+	private boolean canRefactor = true;
+
 	public RenameFieldsRuleWizard(List<IJavaElement> selectedJavaElements) {
 		super();
 		this.selectedJavaElements = selectedJavaElements;
@@ -89,7 +91,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 	public boolean canFinish() {
 		if (model.getFieldTypes().isEmpty()) {
 			return false;
-		} 
+		}
 		return super.canFinish();
 	}
 
@@ -105,48 +107,12 @@ public class RenameFieldsRuleWizard extends Wizard {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				
-				// TODO get scope from model, if project leave as is, if
-				// workspace, get
-				// all projects
-				FieldDeclarationASTVisitor visitor;
-				if (Messages.RenameFieldsRuleWizardPageModel_scopeOption_project.equals(model.getSearchScope())) {
-					IJavaElement[] scope = { selectedJavaProjekt };
-					visitor = new FieldDeclarationASTVisitor(scope);
-				} else {
-					IWorkspace workspace = selectedJavaProjekt.getProject().getWorkspace();
-					IJavaElement[] scope = (IJavaElement[]) workspace.getRoot().getProjects();
-					visitor = new FieldDeclarationASTVisitor(scope);
-				}
-				visitor.setRenamePrivateField(model.getFieldTypes()
-						.contains(Messages.RenameFieldsRuleWizardPageModel_typeOption_privateFields));
-				visitor.setRenameProtectedField(model.getFieldTypes()
-						.contains(Messages.RenameFieldsRuleWizardPageModel_typeOption_protectedFields));
-				visitor.setRenamePackageProtectedField(model.getFieldTypes()
-						.contains(Messages.RenameFieldsRuleWizardPageModel_typeOption_packageProtectedFields));
-				visitor.setRenamePublicField(model.getFieldTypes()
-						.contains(Messages.RenameFieldsRuleWizardPageModel_typeOption_publicFields));
-				visitor.setUppercaseAfterUnderscore(model.setUpperCaseForUnderscoreReplacementOption());
-				visitor.setUppercaseAfterDollar(model.setUpperCaseForDollarReplacementOption());
-				visitor.setAddTodo(model.isAddTodoComments());
+
+				// TODO get scope from model
+				FieldDeclarationASTVisitor visitor = createVisitor();
 
 				List<ICompilationUnit> result = new ArrayList<>();
-
-				try {
-					RefactoringUtil.collectICompilationUnits(result, selectedJavaElements, monitor);
-					if (result.isEmpty()) {
-						logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found);
-						WizardMessageDialog.synchronizeWithUIShowInfo(new RefactoringException(
-								ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found,
-								ExceptionMessages.RefactoringPipeline_user_warn_no_compilation_units_found));
-						return Status.CANCEL_STATUS;
-
-					}
-				} catch (JavaModelException e) {
-					logger.error(e.getMessage(), e);
-					WizardMessageDialog.synchronizeWithUIShowInfo(new RefactoringException(
-							ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
-							ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
+				if (!getCompilationUnits(result, selectedJavaElements, monitor)) {
 					return Status.CANCEL_STATUS;
 				}
 
@@ -176,6 +142,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 
 				return Status.OK_STATUS;
 			}
+
 		};
 
 		job.setUser(true);
@@ -221,11 +188,9 @@ public class RenameFieldsRuleWizard extends Wizard {
 									if (refactoringPipeline.hasChanges()) {
 
 										// TODO create and show preview wizard
-										// for
-										// multi file changing rule
+										// for multi file changing rule
 										// TODO use this below to display
-										// changes on
-										// preview
+										// changes onpreview
 
 										for (FieldMetadata data : metadata) {
 
@@ -243,10 +208,13 @@ public class RenameFieldsRuleWizard extends Wizard {
 											}
 										}
 
-										// Rectangle rectangle =
-										// Display.getCurrent().getPrimaryMonitor().getBounds();
-										// synchronizeWithUIShowRefactoringPreviewWizard(refactoringPipeline,
-										// rectangle);
+										/*
+										 * Rectangle rectangle =
+										 * Display.getCurrent().
+										 * getPrimaryMonitor().getBounds();
+										 * synchronizeWithUIShowRefactoringPreviewWizard
+										 * (refactoringPipeline, rectangle);
+										 */
 
 										// when done without interruption
 										Activator.setRunning(false);
@@ -300,7 +268,53 @@ public class RenameFieldsRuleWizard extends Wizard {
 		});
 	}
 
-	boolean canRefactor = true;
+	private FieldDeclarationASTVisitor createVisitor() {
+		FieldDeclarationASTVisitor visitor;
+		if (Messages.RenameFieldsRuleWizardPageModel_scopeOption_project.equals(model.getSearchScope())) {
+			IJavaElement[] scope = { selectedJavaProjekt };
+			visitor = new FieldDeclarationASTVisitor(scope);
+		} else {
+			IWorkspace workspace = selectedJavaProjekt.getProject().getWorkspace();
+			IJavaElement[] scope = (IJavaElement[]) workspace.getRoot().getProjects();
+			visitor = new FieldDeclarationASTVisitor(scope);
+		}
+		visitor.setRenamePrivateField(
+				model.getFieldTypes().contains(Messages.RenameFieldsRuleWizardPageModel_typeOption_privateFields));
+		visitor.setRenameProtectedField(
+				model.getFieldTypes().contains(Messages.RenameFieldsRuleWizardPageModel_typeOption_protectedFields));
+		visitor.setRenamePackageProtectedField(model.getFieldTypes()
+				.contains(Messages.RenameFieldsRuleWizardPageModel_typeOption_packageProtectedFields));
+		visitor.setRenamePublicField(
+				model.getFieldTypes().contains(Messages.RenameFieldsRuleWizardPageModel_typeOption_publicFields));
+		visitor.setUppercaseAfterUnderscore(model.setUpperCaseForUnderscoreReplacementOption());
+		visitor.setUppercaseAfterDollar(model.setUpperCaseForDollarReplacementOption());
+		visitor.setAddTodo(model.isAddTodoComments());
+		return visitor;
+	}
+
+	private boolean getCompilationUnits(List<ICompilationUnit> resultCompilationUnitsList,
+			List<IJavaElement> sourceJavaElementsList, IProgressMonitor monitor) {
+
+		try {
+			RefactoringUtil.collectICompilationUnits(resultCompilationUnitsList, selectedJavaElements, monitor);
+			if (resultCompilationUnitsList.isEmpty()) {
+				logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found);
+				WizardMessageDialog.synchronizeWithUIShowInfo(
+						new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found,
+								ExceptionMessages.RefactoringPipeline_user_warn_no_compilation_units_found));
+				return false;
+
+			}
+		} catch (JavaModelException e) {
+			logger.error(e.getMessage(), e);
+			WizardMessageDialog.synchronizeWithUIShowInfo(
+					new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+							ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
+			return false;
+		}
+
+		return true;
+	}
 
 	private void searchScopeAndPrepareRefactoringStates(IProgressMonitor monitor, FieldDeclarationASTVisitor visitor) {
 
@@ -316,26 +330,12 @@ public class RenameFieldsRuleWizard extends Wizard {
 		metadata = visitor.getFieldMetadata();
 		todosMetadata = visitor.getUnmodifiableFieldMetadata();
 
-		try {
-			RefactoringUtil.collectICompilationUnits(targetCompilationUnits,
-					targetJavaElements.stream().collect(Collectors.toList()), monitor);
-			if (targetCompilationUnits.isEmpty()) {
-				logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found);
-				WizardMessageDialog.synchronizeWithUIShowInfo(
-						new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found,
-								ExceptionMessages.RefactoringPipeline_user_warn_no_compilation_units_found));
-				canRefactor = false;
-				return;
-			}
-		} catch (JavaModelException e) {
-			logger.error(e.getMessage(), e);
-			WizardMessageDialog.synchronizeWithUIShowInfo(
-					new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
-							ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
+		if (!getCompilationUnits(targetCompilationUnits,
+				targetJavaElements.stream().collect(Collectors.toList()), monitor)) {
 			canRefactor = false;
 			return;
 		}
-
+		
 		renameFieldsRule = new PublicFieldsRenamingRule(PublicFieldsRenamingASTVisitor.class, metadata, todosMetadata);
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(renameFieldsRule);
 
