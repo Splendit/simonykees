@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -139,7 +138,6 @@ public class RenameFieldsRuleWizard extends Wizard {
 				metadata = visitor.getFieldMetadata();
 				todosMetadata = visitor.getUnmodifiableFieldMetadata();
 
-				// TODO find out how to get ICompilationUnits from IJavaElements, or what type it is
 				Set<IJavaElement> targetJavaElements = visitor.getTargetIJavaElements();
 				List<ICompilationUnit> targetCompilationUnits = new ArrayList<>();
 
@@ -151,7 +149,8 @@ public class RenameFieldsRuleWizard extends Wizard {
 					e1.printStackTrace();
 				}
 
-				renameFieldsRule = new PublicFieldsRenamingRule(PublicFieldsRenamingASTVisitor.class, metadata, todosMetadata);
+				renameFieldsRule = new PublicFieldsRenamingRule(PublicFieldsRenamingASTVisitor.class, metadata,
+						todosMetadata);
 				final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays
 						.asList(renameFieldsRule);
 
@@ -182,81 +181,86 @@ public class RenameFieldsRuleWizard extends Wizard {
 			@Override
 			public void done(IJobChangeEvent event) {
 
-				Job refactorJob = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
+				if (event.getResult().isOK()) {
+					Job refactorJob = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
 
-					@Override
-					protected IStatus run(IProgressMonitor monitor) {
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
 
-						try {
-							refactoringPipeline.doRefactoring(monitor);
-							if (monitor.isCanceled()) {
-								refactoringPipeline.clearStates();
+							try {
+								refactoringPipeline.doRefactoring(monitor);
+								if (monitor.isCanceled()) {
+									refactoringPipeline.clearStates();
+									return Status.CANCEL_STATUS;
+								}
+							} catch (RefactoringException e) {
+								WizardMessageDialog.synchronizeWithUIShowInfo(e);
 								return Status.CANCEL_STATUS;
+							} catch (RuleException e) {
+								WizardMessageDialog.synchronizeWithUIShowError(e);
+								return Status.CANCEL_STATUS;
+
+							} finally {
+								monitor.done();
 							}
-						} catch (RefactoringException e) {
-							WizardMessageDialog.synchronizeWithUIShowInfo(e);
-							return Status.CANCEL_STATUS;
-						} catch (RuleException e) {
-							WizardMessageDialog.synchronizeWithUIShowError(e);
-							return Status.CANCEL_STATUS;
 
-						} finally {
-							monitor.done();
+							return Status.OK_STATUS;
 						}
+					};
 
-						return Status.OK_STATUS;
-					}
-				};
+					refactorJob.addJobChangeListener(new JobChangeAdapter() {
+						@Override
+						public void done(IJobChangeEvent event) {
 
-				refactorJob.addJobChangeListener(new JobChangeAdapter() {
-					@Override
-					public void done(IJobChangeEvent event) {
+							if (event.getResult().isOK()) {
+								if (LicenseUtil.getInstance().isValid()) {
+									if (refactoringPipeline.hasChanges()) {
 
-						if (event.getResult().isOK()) {
-							if (LicenseUtil.getInstance().isValid()) {
-								if (refactoringPipeline.hasChanges()) {
+										// TODO create and show preview wizard
+										// for
+										// multi file changing rule
+										// TODO use this below to display
+										// changes on
+										// preview
 
-									// TODO create and show preview wizard for
-									// multi file changing rule
-									// TODO use this below to display changes on
-									// preview
+										for (FieldMetadata data : metadata) {
 
-									for (FieldMetadata data : metadata) {
-
-										try {
-											String newIdentifier = data.getNewIdentifier();
-											SimpleName oldName = data.getFieldDeclaration().getName();
-											String oldIdentifier = oldName.getIdentifier();
-											data.getCompilationUnit().getJavaElement();
-											List<DocumentChange> docsChanges = renameFieldsRule
-													.computeDocumentChangesPerFiled(data);
-										} catch (JavaModelException e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
+											try {
+												String newIdentifier = data.getNewIdentifier();
+												SimpleName oldName = data.getFieldDeclaration().getName();
+												String oldIdentifier = oldName.getIdentifier();
+												data.getCompilationUnit().getJavaElement();
+												List<DocumentChange> docsChanges = renameFieldsRule
+														.computeDocumentChangesPerFiled(data);
+											} catch (JavaModelException e) {
+												// TODO Auto-generated catch
+												// block
+												e.printStackTrace();
+											}
 										}
-									}
 
-									// Rectangle rectangle =
-									// Display.getCurrent().getPrimaryMonitor().getBounds();
-									// synchronizeWithUIShowRefactoringPreviewWizard(refactoringPipeline,
-									// rectangle);
+										// Rectangle rectangle =
+										// Display.getCurrent().getPrimaryMonitor().getBounds();
+										// synchronizeWithUIShowRefactoringPreviewWizard(refactoringPipeline,
+										// rectangle);
+									} else {
+
+										WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
+									}
 								} else {
 
-									WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
+									WizardMessageDialog.synchronizeWithUIShowLicenseError();
 								}
 							} else {
-
-								WizardMessageDialog.synchronizeWithUIShowLicenseError();
+								// do nothing if status is canceled, close
+								Activator.setRunning(false);
 							}
-						} else {
-							// do nothing if status is canceled, close
-							Activator.setRunning(false);
 						}
-					}
-				});
+					});
 
-				refactorJob.setUser(true);
-				refactorJob.schedule();
+					refactorJob.setUser(true);
+					refactorJob.schedule();
+				}
 			}
 		});
 

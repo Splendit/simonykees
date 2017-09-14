@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -314,7 +315,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 				references.add(reference);
 				IPath path = match.getResource().getFullPath();
 				IJavaElement icu = (IJavaElement) match.getElement();
-				ResolvedSourceMethod rsm = (ResolvedSourceMethod)icu;
+				IMember rsm = (IMember)icu;
 				ICompilationUnit castedICU = rsm.getCompilationUnit();
 				if(RefactoringUtil.checkForSyntaxErrors(castedICU)) {
 					references.clear();

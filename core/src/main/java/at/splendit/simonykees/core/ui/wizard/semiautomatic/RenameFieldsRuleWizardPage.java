@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.TableItem;
 
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
+import at.splendit.simonykees.i18n.Messages;
 
 @SuppressWarnings("restriction")
 public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
@@ -37,9 +38,9 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 
 	public RenameFieldsRuleWizardPage(RenameFieldsRuleWizardPageModel model,
 			RenameFieldsRuleWizardPageControler controler) {
-		super("Rename public fields rule");
-		setTitle("Rename public fields rule");
-		setDescription("Configure rename public fields rule");
+		super(Messages.RenameFieldsRuleWizardPage_title);
+		setTitle(Messages.RenameFieldsRuleWizardPage_title);
+		setDescription(Messages.RenameFieldsRuleWizardPage_description);
 
 		this.model = model;
 		this.controler = controler;
@@ -73,7 +74,7 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 
 	private void createFieldTypeChoosingPart(Composite parent) {
 		Label partTitle = new Label(parent, SWT.NONE);
-		partTitle.setText("Apply on the following fields");
+		partTitle.setText(Messages.RenameFieldsRuleWizardPage_fieldTypeLabelText);
 		partTitle.setFont(boldFont);
 
 		Table table = new Table(parent, SWT.CHECK);
@@ -98,7 +99,7 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 
 	private void createSearchScopeChoosingPart(Composite parent) {
 		Label partTitle = new Label(parent, SWT.NONE);
-		partTitle.setText("Search scope for references");
+		partTitle.setText(Messages.RenameFieldsRuleWizardPage_searchScopeLabelText);
 		partTitle.setFont(boldFont);
 
 		Group scopesGroup = new Group(parent, SWT.NONE);
@@ -123,14 +124,14 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 
 	private void createConfigureReplacementsPart(Composite parent) {
 		Label partTitle = new Label(parent, SWT.NONE);
-		partTitle.setText("Configure replacements");
+		partTitle.setText(Messages.RenameFieldsRuleWizardPage_replacemenentsLabelText);
 		partTitle.setFont(boldFont);
 
 		Group underscoreGroup = new Group(parent, SWT.NONE);
 		underscoreGroup.setLayout(new GridLayout());
 		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		underscoreGroup.setLayoutData(gridData);
-		underscoreGroup.setText("How should the first character after an underscore be handled?");
+		underscoreGroup.setText(Messages.RenameFieldsRuleWizardPage_underscoreReplacementLabelText);
 		for (String underscoreReplacement : model.getUnderscoreReplacementOptions()) {
 			Button button = new Button(underscoreGroup, SWT.RADIO);
 			button.setText(underscoreReplacement);
@@ -149,7 +150,7 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 		dollarSingGroup.setLayout(new GridLayout());
 		gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		dollarSingGroup.setLayoutData(gridData);
-		dollarSingGroup.setText("How should the first character after a $ (dollar) sign be handled?");
+		dollarSingGroup.setText(Messages.RenameFieldsRuleWizardPage_dollarSignReplacementLabelText);
 		for (String dollarReplacement : model.getDolarSignReplacementOptions()) {
 			Button button = new Button(dollarSingGroup, SWT.RADIO);
 			button.setText(dollarReplacement);
@@ -167,7 +168,7 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 
 	private void createTodoChoosingPart(Composite parent) {
 		Label partTitle = new Label(parent, SWT.NONE);
-		partTitle.setText("Should TODO comments be added if renaming cannot be done?");
+		partTitle.setText(Messages.RenameFieldsRuleWizardPage_todoCommentsLabelText);
 		partTitle.setFont(boldFont);
 
 		Table table = new Table(parent, SWT.CHECK);
@@ -193,7 +194,7 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 	 */
 	private void updateView() {
 		if (model.getFieldTypes().isEmpty()) {
-			((StatusInfo) fSelectionStatus).setError("At least one field type has to be checked");
+			((StatusInfo) fSelectionStatus).setError(Messages.RenameFieldsRuleWizardPage_warning_noFieldSelected);
 		} else {
 			fSelectionStatus = new StatusInfo();
 		}

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
+import at.splendit.simonykees.i18n.Messages;
 
 public class RenameFieldsRuleWizardPageModel {
 
@@ -41,34 +42,34 @@ public class RenameFieldsRuleWizardPageModel {
 	// GETTERS useb by Wizard page
 	public List<String> getFieldTypeOptions() {
 		List<String> fieldTypes = new ArrayList<>();
-		fieldTypes.add("private fields");
-		fieldTypes.add("public fields");
+		fieldTypes.add(Messages.RenameFieldsRuleWizardPageModel_typeOption_privateFields);
+		fieldTypes.add(Messages.RenameFieldsRuleWizardPageModel_typeOption_publicFields);
 		return fieldTypes;
 	}
 	
 	public List<String> getSearchScopeOptions() {
 		List<String> searchScopes = new ArrayList<>();
-		searchScopes.add("Project (References will be searched for in the enclosing project.)");
-		searchScopes.add("Workspace (Search for references in the whole workspace. This is slower.)");
+		searchScopes.add(Messages.RenameFieldsRuleWizardPageModel_scopeOption_project);
+		searchScopes.add(Messages.RenameFieldsRuleWizardPageModel_scopeOption_workspace);
 		return searchScopes;
 	}
 	
 	public List<String> getUnderscoreReplacementOptions() {
 		List<String> underscoreReplacements = new ArrayList<>();
-		underscoreReplacements.add("Upper case (example \"variable_name\" to \"variableName\")");
-		underscoreReplacements.add("Leave case as is (example \"variable_name\" to \"variablename\")");
+		underscoreReplacements.add(Messages.RenameFieldsRuleWizardPageModel_underscoreReplacementOption_upperCase);
+		underscoreReplacements.add(Messages.RenameFieldsRuleWizardPageModel_underscoreReplacementOption_leaveAsIs);
 		return underscoreReplacements;
 	}
 	
 	public List<String> getDolarSignReplacementOptions() {
 		List<String> dolarSignReplacements = new ArrayList<>();
-		dolarSignReplacements.add("Upper case (example \"variable$name\" to \"variableName\")");
-		dolarSignReplacements.add("Leave case as is (example \"variable$name\" to \"variablename\")");
+		dolarSignReplacements.add(Messages.RenameFieldsRuleWizardPageModel_dollarSignReplacementOption_upperCase);
+		dolarSignReplacements.add(Messages.RenameFieldsRuleWizardPageModel_dollarSignReplacementOption_leaveAsIs);
 		return dolarSignReplacements;
 	}
 
 	public String getTodoOption() {
-		return "Add TODO comments";
+		return Messages.RenameFieldsRuleWizardPageModel_addTodoCommentsText;
 	}
 
 	// SETTERS used by controler
