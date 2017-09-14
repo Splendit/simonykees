@@ -43,6 +43,8 @@ public class RenameFieldsRuleWizardPageModel {
 	public List<String> getFieldTypeOptions() {
 		List<String> fieldTypes = new ArrayList<>();
 		fieldTypes.add(Messages.RenameFieldsRuleWizardPageModel_typeOption_privateFields);
+		fieldTypes.add(Messages.RenameFieldsRuleWizardPageModel_typeOption_protectedFields);
+		fieldTypes.add(Messages.RenameFieldsRuleWizardPageModel_typeOption_packageProtectedFields);
 		fieldTypes.add(Messages.RenameFieldsRuleWizardPageModel_typeOption_publicFields);
 		return fieldTypes;
 	}
@@ -107,12 +109,12 @@ public class RenameFieldsRuleWizardPageModel {
 		return searchScope;
 	}
 
-	public String getUnderscoreReplacementOption() {
-		return underscoreReplacementOption;
+	public boolean setUpperCaseForUnderscoreReplacementOption() {
+		return Messages.RenameFieldsRuleWizardPageModel_underscoreReplacementOption_upperCase.equals(underscoreReplacementOption);
 	}
 
-	public String getDollarReplacementOption() {
-		return dollarReplacementOption;
+	public boolean setUpperCaseForDollarReplacementOption() {
+		return Messages.RenameFieldsRuleWizardPageModel_dollarSignReplacementOption_upperCase.equals(dollarReplacementOption);
 	}
 
 	public boolean isAddTodoComments() {

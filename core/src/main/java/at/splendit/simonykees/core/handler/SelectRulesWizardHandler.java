@@ -26,13 +26,13 @@ import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.exception.RefactoringException;
-import at.splendit.simonykees.core.exception.SimonykeesException;
 import at.splendit.simonykees.core.refactorer.RefactoringPipeline;
 import at.splendit.simonykees.core.rule.RulesContainer;
 import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.dialog.CompilationErrorsMessageDialog;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.wizard.impl.SelectRulesWizard;
+import at.splendit.simonykees.core.ui.wizard.impl.WizardMessageDialog;
 import at.splendit.simonykees.core.util.WizardHandlerUtil;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -78,7 +78,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 										 * See SIM-496
 										 */
 										if (refactoringPipeline.isMultipleProjects()) {
-											synchronizeWithUIShowMultiprojectMessage();
+											WizardMessageDialog.synchronizeWithUIShowMultiprojectMessage();
 										}
 										refactoringPipeline.clearStates();
 										Activator.setRunning(false);
@@ -92,7 +92,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 									}
 
 								} catch (RefactoringException e) {
-									synchronizeWithUIShowInfo(e);
+									WizardMessageDialog.synchronizeWithUIShowInfo(e);
 									return Status.CANCEL_STATUS;
 								}
 
@@ -191,60 +191,11 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 						synchronizeWithUIShowSelectRulesWizard(event, refactoringPipeline, selectedJavaElements,
 								selectedJavaProjekt);
 					} else {
-						synchronizeWithUIShowWarningNoComlipationUnitDialog();
+						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitDialog();
 					}
 				} else {
 					Activator.setRunning(false);
 				}
-			}
-		});
-	}
-
-	/**
-	 * Method used to open InformationDialog from non UI thread
-	 * RefactoringException is thrown if java element does not exist or if an
-	 * exception occurs while accessing its corresponding resource, or if no
-	 * working copies were found to apply
-	 */
-	private void synchronizeWithUIShowInfo(SimonykeesException exception) {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
-
-				Activator.setRunning(false);
-			}
-		});
-	}
-
-	/**
-	 * Method used to open MessageDialog informing the user that selection
-	 * contains no Java files without compilation error from non UI thread
-	 */
-	private void synchronizeWithUIShowWarningNoComlipationUnitDialog() {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizardHandler_noFileWithoutError,
-						MessageDialog.INFORMATION);
-
-				Activator.setRunning(false);
-			}
-		});
-	}
-
-	private void synchronizeWithUIShowMultiprojectMessage() {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell,
-						Messages.SelectRulesWizardHandler_multipleProjectsWarning, MessageDialog.WARNING);
 			}
 		});
 	}

@@ -6,9 +6,6 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
@@ -22,9 +19,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import at.splendit.simonykees.core.Activator;
-import at.splendit.simonykees.core.exception.SimonykeesException;
 import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
+import at.splendit.simonykees.core.ui.wizard.impl.WizardMessageDialog;
 import at.splendit.simonykees.core.ui.wizard.semiautomatic.RenameFieldsRuleWizard;
 import at.splendit.simonykees.core.util.WizardHandlerUtil;
 import at.splendit.simonykees.i18n.Messages;
@@ -50,23 +47,10 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 			if (LicenseUtil.getInstance().isValid()) {
 				List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
 				if (!selectedJavaElements.isEmpty()) {
-
-					Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
-
-						@Override
-						protected IStatus run(IProgressMonitor monitor) {
-
-							synchronizeWithUIShowRenameFieldsRuleWizard(selectedJavaElements);
-							return Status.OK_STATUS;
-						}
-					};
-
-					job.setUser(true);
-					job.schedule();
-
+					synchronizeWithUIShowRenameFieldsRuleWizard(selectedJavaElements);
 					return true;
 				} else {
-					synchronizeWithUIShowWarningNoComlipationUnitDialog();
+					WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitDialog();
 				}
 			} else {
 				/*
@@ -90,8 +74,7 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 			@Override
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				final WizardDialog dialog = new WizardDialog(shell,
-						new RenameFieldsRuleWizard(selectedJavaElements)) {
+				final WizardDialog dialog = new WizardDialog(shell, new RenameFieldsRuleWizard(selectedJavaElements)) {
 					/*
 					 * Removed unnecessary empty space on the bottom of the
 					 * wizard intended for ProgressMonitor that is not
@@ -120,44 +103,6 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 
 				dialog.open();
 			}
-		});
-	}
-
-	/**
-	 * Method used to open InformationDialog from non UI thread
-	 * RefactoringException is thrown if java element does not exist or if an
-	 * exception occurs while accessing its corresponding resource, or if no
-	 * working copies were found to apply
-	 */
-	private void synchronizeWithUIShowInfo(SimonykeesException exception) {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
-
-				Activator.setRunning(false);
-			}
-		});
-	}
-
-	/**
-	 * Method used to open MessageDialog informing the user that selection
-	 * contains no Java files without compilation error from non UI thread
-	 */
-	private void synchronizeWithUIShowWarningNoComlipationUnitDialog() {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizardHandler_noFileWithoutError,
-						MessageDialog.INFORMATION);
-
-				Activator.setRunning(false);
-			}
-
 		});
 	}
 }

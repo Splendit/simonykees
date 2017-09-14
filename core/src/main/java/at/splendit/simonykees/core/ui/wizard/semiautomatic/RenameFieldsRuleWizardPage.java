@@ -36,14 +36,13 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 
 	protected IStatus fSelectionStatus;
 
-	public RenameFieldsRuleWizardPage(RenameFieldsRuleWizardPageModel model,
-			RenameFieldsRuleWizardPageControler controler) {
+	public RenameFieldsRuleWizardPage(RenameFieldsRuleWizardPageModel model) {
 		super(Messages.RenameFieldsRuleWizardPage_title);
 		setTitle(Messages.RenameFieldsRuleWizardPage_title);
 		setDescription(Messages.RenameFieldsRuleWizardPage_description);
 
 		this.model = model;
-		this.controler = controler;
+		this.controler = new RenameFieldsRuleWizardPageControler(model);
 	}
 
 	@Override
