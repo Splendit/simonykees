@@ -33,7 +33,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		String oldLicenseeNumber = licenseMng.getLicenseeNumber();
 		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
 		assertNotNull(checker.getLicenseeName());
-		assertTrue(oldLicenseeNumber.startsWith("demo", 0));
+		assertTrue(oldLicenseeNumber.startsWith("_demo", 0));
 		
 		licenseMng.checkIn();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);

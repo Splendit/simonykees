@@ -28,12 +28,12 @@ public abstract class LicenseCommonTest {
 	private static final Logger logger = LoggerFactory.getLogger(LicenseCommonTest.class);
 	
 	// the following values are hard copied from existing licensees on the net licensing server
-	protected static final String FLOATING_LICENSEE_NUMBER = "IAQ45SNQR";
-	protected static final String FLOATING_LICENSEE_NAME = "Ardit Test"; 
-	protected static final String NODE_LOCKED_LICENSEE_NUMBER = "IDVU36ETR";
-	protected static final String NODE_LOCKED_LICENSEE_NAME = "TestAndRemoveIt-licensee3";
-	protected static final String DEMO_EXPIRED_LICENSEE_NUMBER = "for-expired-demo"; 
-	protected static final String DEMO_EXPIRED_LICENSEE_NAME = "For expired demo";
+	protected static final String FLOATING_LICENSEE_NUMBER = "ICTN6694T";
+	protected static final String FLOATING_LICENSEE_NAME = "Floating Licensee for test"; 
+	protected static final String NODE_LOCKED_LICENSEE_NUMBER = "IXMCPWYRV";
+	protected static final String NODE_LOCKED_LICENSEE_NAME = "Node locked licensee for test";
+	protected static final String DEMO_EXPIRED_LICENSEE_NUMBER = "expired-demo-licensee"; 
+	protected static final String DEMO_EXPIRED_LICENSEE_NAME = "A demo licensee with expired license";
 	protected static final String DEMO_EXPIRED_LICENSEE_SECRET = "demo-expired-secret";
 	
 	// the following are used as test values for hw id and floating session id
@@ -63,7 +63,8 @@ public abstract class LicenseCommonTest {
 				ZonedDateTime.now().plusYears(1), 
 				true, 
 				Instant.now().minusSeconds(1), 
-				LicenseType.FLOATING);
+				LicenseType.FLOATING, 
+				LicenseManager.VERSION);
 		persistenceMng.setPersistenceModel(persistenceModel);
 		persistenceMng.persist();
 	}
@@ -84,7 +85,9 @@ public abstract class LicenseCommonTest {
 				ZonedDateTime.now().plusYears(1), 
 				true, 
 				Instant.now().minusSeconds(1), 
-				LicenseType.NODE_LOCKED);
+				LicenseType.NODE_LOCKED, 
+				LicenseManager.VERSION
+				);
 		persistenceMng.setPersistenceModel(persistenceModel);
 		persistenceMng.persist();
 	}
@@ -105,7 +108,8 @@ public abstract class LicenseCommonTest {
 				null, 
 				false, 
 				Instant.now().minusSeconds(1), 
-				LicenseType.TRY_AND_BUY);
+				LicenseType.TRY_AND_BUY, 
+				LicenseManager.VERSION);
 		persistenceMng.setPersistenceModel(persistenceModel);
 		persistenceMng.persist();
 	}
@@ -136,7 +140,7 @@ public abstract class LicenseCommonTest {
 				true, 
 				null, null, null, null, null, 
 				true,
-				null, null);
+				null, null, null);
 		persistenceMng.setPersistenceModel(persistenceModel);
 		persistenceMng.persist();
 	}
