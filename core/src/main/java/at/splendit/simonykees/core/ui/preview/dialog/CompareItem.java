@@ -17,18 +17,17 @@ import org.eclipse.swt.graphics.Image;
  *
  */
 public class CompareItem implements IEncodedStreamContentAccessor, ITypedElement {
-	private static final String ENCODING= "UTF-8";	//$NON-NLS-1$
+	private static final String ENCODING = "UTF-8"; //$NON-NLS-1$
 
 	private final String name;
-    private final String contents;
+	private final String contents;
 
-    public CompareItem(final String name,
-                final String contents) {
-        this.name = name;
-        this.contents = contents;
-    }
+	public CompareItem(final String name, final String contents) {
+		this.name = name;
+		this.contents = contents;
+	}
 
-    @Override
+	@Override
 	public InputStream getContents() throws CoreException {
 		try {
 			return new ByteArrayInputStream(contents.getBytes(ENCODING));
@@ -36,27 +35,28 @@ public class CompareItem implements IEncodedStreamContentAccessor, ITypedElement
 			return new ByteArrayInputStream(contents.getBytes());
 		}
 	}
+
 	@Override
 	public String getCharset() {
 		return ENCODING;
 	}
 
-    @Override
-    public Image getImage() {
-        return null;
-    }
+	@Override
+	public Image getImage() {
+		return null;
+	}
 
-    @Override
-    public String getName() {
-        return name;
-    }
+	@Override
+	public String getName() {
+		return name;
+	}
 
-    public String getString() {
-        return contents;
-    }
+	public String getString() {
+		return contents;
+	}
 
-    @Override
-    public String getType() {
-        return "JAVA"; //$NON-NLS-1$
-    }
+	@Override
+	public String getType() {
+		return "JAVA"; //$NON-NLS-1$
+	}
 }
