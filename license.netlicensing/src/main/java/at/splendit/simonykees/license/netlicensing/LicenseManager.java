@@ -39,24 +39,21 @@ import oshi.hardware.HardwareAbstractionLayer;
 public class LicenseManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(LicenseManager.class);
-	
+
 	private static final String DEFAULT_LICENSEE_NUMBER_PREFIX = LicenseProperties.DEFAULT_LICENSEE_NUMBER_PREFIX;
 	private static final String PRODUCT_NUMBER = LicenseProperties.LICENSE_PRODUCT_NUMBER;
 	public static final String VERSION = PRODUCT_NUMBER;
-		
+
 	/**
 	 * Rest API authentication token.
 	 */
 	static final String PASS_APIKEY = LicenseProperties.LICENSE_PASS_API_KEY;
-	
-	
+
 	/**
 	 * Product module number related to Floating licenses.
-	 */	
+	 */
 	private static final String PRODUCT_MODULE_NUMBER = LicenseProperties.LICENSE_PRODUCT_MODULE_NUMBER;
-	
-	
-	
+
 	/**
 	 * Waiting time in milliseconds for receiving and processing a validation
 	 * call.
@@ -94,7 +91,6 @@ public class LicenseManager {
 		}
 		return instance;
 	}
-
 
 	void initManager() {
 		schedulerEntity = new SchedulerModel(VALIDATE_INTERVAL_IN_SECONDS, INITIAL_VALIDATION_DELAY, DO_VALIDATE);
@@ -174,9 +170,8 @@ public class LicenseManager {
 		// to be used only during pre-validation, as a expiration date.
 		ZonedDateTime nowInOneYear = now.plusYears(1);
 		/*
-		 * pre-validation is done by using floating model
-		 * because it contains a superset of all other model's validation
-		 * parameters
+		 * pre-validation is done by using floating model because it contains a
+		 * superset of all other model's validation parameters
 		 */
 		String hwId = getUniqueNodeIdentifier();
 
@@ -492,15 +487,10 @@ public class LicenseManager {
 		this.licenseeName = licenseeName;
 	}
 
-	@Override
-	public Object clone() throws CloneNotSupportedException {
-		throw new CloneNotSupportedException();
-	}
-
 	static String getFloatingProductModuleNumber() {
 		return PRODUCT_MODULE_NUMBER;
 	}
-	
+
 	static String getProductNumber() {
 		return PRODUCT_NUMBER;
 	}

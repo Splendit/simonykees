@@ -10,18 +10,16 @@ import at.splendit.simonykees.i18n.Messages;
  *
  */
 public enum LicenseType {
-	
-	TRY_AND_BUY(Messages.LicenseType_try_and_buy),
-	FLOATING(Messages.LicenseType_floating),
-	NODE_LOCKED(Messages.LicenseType_node_locked), 
-	SUBSCRIPTION(Messages.LicenseType_subscription);
-	
+
+	TRY_AND_BUY(Messages.LicenseType_try_and_buy), FLOATING(Messages.LicenseType_floating), NODE_LOCKED(
+			Messages.LicenseType_node_locked), SUBSCRIPTION(Messages.LicenseType_subscription);
+
 	@SuppressWarnings("nls")
 	public static LicenseType fromString(String value) {
 		LicenseType licenseType = TRY_AND_BUY;
-		
-		if(value != null) {
-			switch(value.toLowerCase()) {
+
+		if (value != null) {
+			switch (value.toLowerCase()) {
 			case "tryandbuy":
 				licenseType = TRY_AND_BUY;
 				break;
@@ -34,14 +32,14 @@ public enum LicenseType {
 			case "subscription":
 				licenseType = SUBSCRIPTION;
 				break;
-			default: 
+			default:
 				licenseType = TRY_AND_BUY;
 			}
 		}
-		
+
 		return licenseType;
 	}
-	
+
 	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
@@ -59,13 +57,13 @@ public enum LicenseType {
 			return "";
 		}
 	}
-	
+
 	private LicenseType(String licenseName) {
 		this.licenseName = licenseName;
 	}
-	
+
 	private String licenseName;
-	
+
 	public String getLicenseName() {
 		return licenseName;
 	}

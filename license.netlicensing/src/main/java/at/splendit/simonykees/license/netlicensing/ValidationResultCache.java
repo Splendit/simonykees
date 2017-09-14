@@ -13,7 +13,7 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
  */
 public class ValidationResultCache {
 	private static ValidationResultCache instance;
-	
+
 	private ValidationResult validationResult;
 	private String licenseeName;
 	private String licenseeNumber;
@@ -22,11 +22,10 @@ public class ValidationResultCache {
 	private boolean isEmpty;
 	private String version;
 
-
 	private ValidationResultCache() {
 		isEmpty = true;
 	}
-	
+
 	public void reset() {
 		validationResult = null;
 		licenseeName = null;
@@ -36,8 +35,9 @@ public class ValidationResultCache {
 		isEmpty = true;
 		version = null;
 	}
-	
-	public void updateCachedResult(ValidationResult validationResult, String licenseeName, String licenseeNumber, Instant timestamp, ValidationAction action, String version) {
+
+	public void updateCachedResult(ValidationResult validationResult, String licenseeName, String licenseeNumber,
+			Instant timestamp, ValidationAction action, String version) {
 		this.validationResult = validationResult;
 		this.licenseeName = licenseeName;
 		this.licenseeNumber = licenseeNumber;
@@ -46,33 +46,31 @@ public class ValidationResultCache {
 		this.isEmpty = false;
 		this.version = version;
 	}
-	
+
 	public ValidationResult getCachedValidationResult() {
-		// TODO: throw an exception if cache is empty
 		return validationResult;
 	}
-	
+
 	public Instant getValidationTimestamp() {
-		// TODO: throw an exception if cache is empty
 		return timestamp;
 	}
-	
+
 	public Boolean isEmpty() {
 		return isEmpty;
 	}
-	
+
 	public String getLicenseName() {
 		return licenseeName;
 	}
-	
+
 	public String getLicenseeNumber() {
 		return licenseeNumber;
 	}
-	
+
 	public ValidationAction getValidatioAction() {
 		return action;
 	}
-	
+
 	public String getVersion() {
 		return this.version;
 	}
