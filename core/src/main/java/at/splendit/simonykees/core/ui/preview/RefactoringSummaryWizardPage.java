@@ -214,7 +214,6 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	private ISelectionChangedListener createSelectionChangedListener() {
 		return event -> {
 			IStructuredSelection sel = (IStructuredSelection) event.getSelection();
-
 			if (sel.size() == 1) {
 				RefactoringState newSelection = (RefactoringState) sel.getFirstElement();
 				if (!newSelection.equals(currentRefactoringState)) {
@@ -255,7 +254,6 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 			compareControl = createInput(changeContainer, ci);
 			compareControl.getParent().layout();
 		});
-
 	}
 
 	/**
@@ -267,7 +265,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Manualy dispose chage preview viewer control
+	 * Manually dispose change preview viewer control
 	 */
 	public void disposeControl() {
 		if (null != compareControl) {

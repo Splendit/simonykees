@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -73,7 +72,11 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	@Override
 	public IWizardPage getPreviousPage(IWizardPage page) {
+		updateViewsOnNavigation(page);
+		return super.getPreviousPage(page);
+	}
 
+	private void updateViewsOnNavigation(IWizardPage page) {
 		if (page instanceof RefactoringPreviewWizardPage) {
 			if (!((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
 				/*
@@ -89,29 +92,11 @@ public class RefactoringPreviewWizard extends Wizard {
 				((RefactoringPreviewWizardPage) page).populateViews(false);
 			}
 		}
-
-		return super.getPreviousPage(page);
 	}
 
 	@Override
 	public IWizardPage getNextPage(IWizardPage page) {
-
-		if (page instanceof RefactoringPreviewWizardPage) {
-			if (!((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
-				/*
-				 * if there are changes in refactoring page, it means that Next
-				 * button was pressed and recalculation is needed
-				 */
-				startRecalculationRunnable((RefactoringPreviewWizardPage) page);
-			} else {
-				/*
-				 * if there are no changes in refactoring page, just populate
-				 * the view with current updated values
-				 */
-				((RefactoringPreviewWizardPage) page).populateViews(false);
-			}
-		}
-
+		updateViewsOnNavigation(page);
 		return super.getNextPage(page);
 	}
 
@@ -146,29 +131,21 @@ public class RefactoringPreviewWizard extends Wizard {
 	 * @return new IRunnableWithProgress
 	 */
 	private IRunnableWithProgress recalculateRulesAndClearChanges(RefactoringPreviewWizardPage page) {
-
-		IRunnableWithProgress job = new IRunnableWithProgress() {
-
-			@Override
-			public void run(IProgressMonitor monitor) {
-
-				try {
-					refactoringPipeline.doAdditionalRefactoring(page.getUnselectedChange(), page.getRule(), monitor);
-					if (monitor.isCanceled()) {
-						refactoringPipeline.clearStates();
-					}
-				} catch (RuleException e) {
-					synchronizeWithUIShowError(e);
-				} finally {
-					monitor.done();
+		return monitor -> {
+			try {
+				refactoringPipeline.doAdditionalRefactoring(page.getUnselectedChange(), page.getRule(), monitor);
+				if (monitor.isCanceled()) {
+					refactoringPipeline.clearStates();
 				}
-
-				((RefactoringPreviewWizardPage) page).applyUnselectedChange();
-				updateAllPages();
+			} catch (RuleException e) {
+				synchronizeWithUIShowError(e);
+			} finally {
+				monitor.done();
 			}
+			page.applyUnselectedChange();
+			updateAllPages();
 		};
 
-		return job;
 	}
 
 	/**
@@ -191,35 +168,31 @@ public class RefactoringPreviewWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 
-		IRunnableWithProgress job = new IRunnableWithProgress() {
+		IRunnableWithProgress job = monitor -> {
+			Arrays.asList(getPages()).stream().forEach(page -> {
+				if ((page instanceof RefactoringPreviewWizardPage)
+						&& !((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
+					recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
+				}
+			});
 
-			@Override
-			public void run(IProgressMonitor monitor) {
-
-				Arrays.asList(getPages()).stream().forEach(page -> {
-					if ((page instanceof RefactoringPreviewWizardPage) && !((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
-						recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
-					}
-				});
-
-				if (LicenseUtil.getInstance().isValid()) {
-					try {
-						refactoringPipeline.commitRefactoring();
-						Activator.setRunning(false);
-					} catch (RefactoringException e) {
-						synchronizeWithUIShowError(e);
-						Activator.setRunning(false);
-						return;
-					} catch (ReconcileException e) {
-						synchronizeWithUIShowError(e);
-						Activator.setRunning(false);
-					}
-				} else {
-					LicenseUtil.getInstance().displayLicenseErrorDialog(getShell());
+			if (LicenseUtil.getInstance().isValid()) {
+				try {
+					refactoringPipeline.commitRefactoring();
+					Activator.setRunning(false);
+				} catch (RefactoringException e) {
+					synchronizeWithUIShowError(e);
+					Activator.setRunning(false);
+					return;
+				} catch (ReconcileException e) {
+					synchronizeWithUIShowError(e);
 					Activator.setRunning(false);
 				}
-				return;
+			} else {
+				LicenseUtil.getInstance().displayLicenseErrorDialog(getShell());
+				Activator.setRunning(false);
 			}
+			return;
 		};
 
 		try {
@@ -277,14 +250,10 @@ public class RefactoringPreviewWizard extends Wizard {
 	 * Method used to open ErrorDialog from non UI thread
 	 */
 	private void synchronizeWithUIShowError(SimonykeesException exception) {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openErrorMessageDialog(shell, exception);
-				Activator.setRunning(false);
-			}
+		Display.getDefault().asyncExec(() -> {
+			Shell workbenchShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			SimonykeesMessageDialog.openErrorMessageDialog(workbenchShell, exception);
+			Activator.setRunning(false);
 		});
 	}
 
@@ -314,11 +283,11 @@ public class RefactoringPreviewWizard extends Wizard {
 			getPreviousPage(getContainer().getCurrentPage());
 		}
 	}
-	
+
 	@Override
 	public boolean canFinish() {
 		if (LicenseUtil.getInstance().isTrial()) {
-			return false;
+			return true;
 		}
 		return super.canFinish();
 	}

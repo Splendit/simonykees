@@ -21,7 +21,6 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 	private static final String DATE_FORMAT_PATTERN = "MMMM dd, yyyy"; //$NON-NLS-1$
 
 	public NetLicensingLicenseValidationService() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public void startValidation() {
@@ -93,19 +92,13 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 	}
 
 	private String extractDateFormat(ZonedDateTime date) {
-
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
-		String strDate = date.format(formatter);
-
-		return strDate;
+		return date.format(formatter);
 	}
 
 	@Override
 	public boolean isDemoType() {
 		LicenseType licenseType = LicenseManager.getInstance().getValidationData().getType();
-		if (LicenseType.TRY_AND_BUY.equals(licenseType)) {
-			return true;
-		}
-		return false;
+		return LicenseType.TRY_AND_BUY.equals(licenseType);
 	}
 }
