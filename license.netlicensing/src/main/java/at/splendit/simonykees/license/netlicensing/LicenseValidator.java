@@ -46,7 +46,7 @@ public class LicenseValidator {
 
 			// caching and persisting the validation result...
 			ValidationResultCache cache = ValidationResultCache.getInstance();
-			cache.updateCachedResult(validationResult, licenseeName, licenseeNumber, timestamp, ValidationAction.CHECK_OUT);
+			cache.updateCachedResult(validationResult, licenseeName, licenseeNumber, timestamp, ValidationAction.CHECK_OUT, LicenseManager.VERSION);
 			PersistenceManager persistenceManager = PersistenceManager.getInstance();
 			persistenceManager.persistCachedData();
 			

@@ -20,6 +20,7 @@ public class ValidationResultCache {
 	private Instant timestamp;
 	private ValidationAction action;
 	private boolean isEmpty;
+	private String version;
 
 
 	private ValidationResultCache() {
@@ -33,15 +34,17 @@ public class ValidationResultCache {
 		timestamp = null;
 		action = null;
 		isEmpty = true;
+		version = null;
 	}
 	
-	public void updateCachedResult(ValidationResult validationResult, String licenseeName, String licenseeNumber, Instant timestamp, ValidationAction action) {
+	public void updateCachedResult(ValidationResult validationResult, String licenseeName, String licenseeNumber, Instant timestamp, ValidationAction action, String version) {
 		this.validationResult = validationResult;
 		this.licenseeName = licenseeName;
 		this.licenseeNumber = licenseeNumber;
 		this.timestamp = timestamp;
 		this.action = action;
 		this.isEmpty = false;
+		this.version = version;
 	}
 	
 	public ValidationResult getCachedValidationResult() {
@@ -68,6 +71,10 @@ public class ValidationResultCache {
 	
 	public ValidationAction getValidatioAction() {
 		return action;
+	}
+	
+	public String getVersion() {
+		return this.version;
 	}
 
 	public static synchronized ValidationResultCache getInstance() {
