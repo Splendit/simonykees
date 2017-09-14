@@ -51,7 +51,6 @@ public class LoggingUtil {
 	private static final String TRIGGER_MAX_FILE_SIZE = "5MB"; //$NON-NLS-1$
 
 	private static final String ROLLING_FILE_APPENDER_NAME = "at.splendit.simonykees.logging.rollingFile"; //$NON-NLS-1$
-	private static final String TEST_ROLLING_FILE_APPENDER_NAME = "at.splendit.simonykees.logging.test.rollingFile"; //$NON-NLS-1$
 	private static final String JUL_ROLLING_FILE_APPENDER_NAME = "at.splendit.simonykees.logging.jul.rollingFile"; //$NON-NLS-1$
 
 	private static final String ROOT_LOGGER_NAME = org.slf4j.Logger.ROOT_LOGGER_NAME;
@@ -74,17 +73,7 @@ public class LoggingUtil {
 	 *             from {@link #configureLogback(Bundle)}
 	 */
 	public static boolean configureLoggerForTesting() throws JoranException, IOException {
-		if (bundle != null) {
-			configureLogback(bundle);
-			removeAppenderFromRootLogger(ROLLING_FILE_APPENDER_NAME);
-			removeAppenderFromLogger(JUL_ROLLING_FILE_APPENDER_NAME, JUL_LOGGER_NAME);
-			configureRollingFileAppender(TEST_ROLLING_FILE_APPENDER_NAME, getTestLogFilePath(LOG_FILE_NAME),
-					ROOT_LOGGER_NAME);
-			configureRollingFileAppender(JUL_ROLLING_FILE_APPENDER_NAME, getTestLogFilePath(JUL_LOG_FILE_NAME),
-					JUL_LOGGER_NAME);
-			return true;
-		}
-		return false;
+		return initLogger(getTestLogFilePath(LOG_FILE_NAME), getTestLogFilePath(JUL_LOG_FILE_NAME));
 	}
 
 	/**
@@ -97,13 +86,26 @@ public class LoggingUtil {
 	 *             from {@link #configureLogback(Bundle)}
 	 */
 	public static boolean configureLogger() throws JoranException, IOException {
+		return initLogger(getLogFilePath(LOG_FILE_NAME), getLogFilePath(JUL_LOG_FILE_NAME));
+	}
+
+	/**
+	 * initialises the slf4j logger
+	 * 
+	 * @param mainLogFilePath
+	 * @param julLogFilePath
+	 * @return
+	 * @throws JoranException
+	 * @throws IOException
+	 */
+	private static boolean initLogger(String mainLogFilePath, String julLogFilePath)
+			throws JoranException, IOException {
 		if (bundle != null) {
 			configureLogback(bundle);
-			removeAppenderFromRootLogger(TEST_ROLLING_FILE_APPENDER_NAME);
+			removeAppenderFromRootLogger(ROLLING_FILE_APPENDER_NAME);
 			removeAppenderFromLogger(JUL_ROLLING_FILE_APPENDER_NAME, JUL_LOGGER_NAME);
-			configureRollingFileAppender(ROLLING_FILE_APPENDER_NAME, getLogFilePath(LOG_FILE_NAME), ROOT_LOGGER_NAME);
-			configureRollingFileAppender(JUL_ROLLING_FILE_APPENDER_NAME, getLogFilePath(JUL_LOG_FILE_NAME),
-					JUL_LOGGER_NAME);
+			configureRollingFileAppender(ROLLING_FILE_APPENDER_NAME, mainLogFilePath, ROOT_LOGGER_NAME);
+			configureRollingFileAppender(JUL_ROLLING_FILE_APPENDER_NAME, julLogFilePath, JUL_LOGGER_NAME);
 			return true;
 		}
 		return false;
