@@ -61,6 +61,13 @@ public class LicenseUtil {
 		return false;
 	}
 
+	public boolean isTrial() {
+		if (isLicenseValidationServiceAvailable) {
+			return licenseValidationService.isDemoType();
+		}
+		return false;
+	}
+
 	public void displayLicenseErrorDialog(Shell shell) {
 
 		if (isLicenseValidationServiceAvailable) {
@@ -71,7 +78,8 @@ public class LicenseUtil {
 				dialog.open();
 			} else {
 				SimonykeesMessageDialog.openMessageDialog(shell,
-						NLS.bind(ExceptionMessages.LicenseUtil_error_moreInformation, userMessage), MessageDialog.ERROR);
+						NLS.bind(ExceptionMessages.LicenseUtil_error_moreInformation, userMessage),
+						MessageDialog.ERROR);
 			}
 		} else {
 			// TODO: proper error handling

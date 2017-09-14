@@ -46,7 +46,7 @@ public class CompareInput extends CompareEditorInput {
 		
 		Differencer d = new Differencer();// {
 
-		fRoot = d.findDifferences(false, pm, null, null, left, right);
+		fRoot = d.findDifferences(false, pm, null, ancestor, left, right);
 		if (null == fRoot) {
 			return new DiffNode(null, Differencer.CONFLICTING, ancestor, left, right);
 		}

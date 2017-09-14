@@ -314,4 +314,12 @@ public class RefactoringPreviewWizard extends Wizard {
 			getPreviousPage(getContainer().getCurrentPage());
 		}
 	}
+	
+	@Override
+	public boolean canFinish() {
+		if (LicenseUtil.getInstance().isTrial()) {
+			return false;
+		}
+		return super.canFinish();
+	}
 }
