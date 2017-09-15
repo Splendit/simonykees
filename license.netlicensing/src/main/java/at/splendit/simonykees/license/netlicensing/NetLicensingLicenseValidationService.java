@@ -12,7 +12,7 @@ import at.splendit.simonykees.license.api.LicenseValidationService;
  * provides an implementation for the declarative service specified by the
  * {@link at.splendit.simonykees.license.api.LicenseValidationService} interface
  * 
- * @author Matthias Webhofer
+ * @author Matthias Webhofer, Andreja Sambolec
  * @since 1.2
  */
 @Component
@@ -21,7 +21,6 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 	private static final String DATE_FORMAT_PATTERN = "MMMM dd, yyyy"; //$NON-NLS-1$
 
 	public NetLicensingLicenseValidationService() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public void startValidation() {
@@ -93,10 +92,13 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 	}
 
 	private String extractDateFormat(ZonedDateTime date) {
-
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
-		String strDate = date.format(formatter);
+		return date.format(formatter);
+	}
 
-		return strDate;
+	@Override
+	public boolean isDemoType() {
+		LicenseType licenseType = LicenseManager.getInstance().getValidationData().getType();
+		return LicenseType.TRY_AND_BUY.equals(licenseType);
 	}
 }

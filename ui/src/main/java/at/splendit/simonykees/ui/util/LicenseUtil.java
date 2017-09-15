@@ -61,6 +61,13 @@ public class LicenseUtil {
 		return false;
 	}
 
+	public boolean isTrial() {
+		if (isLicenseValidationServiceAvailable) {
+			return licenseValidationService.isDemoType();
+		}
+		return false;
+	}
+
 	public void displayLicenseErrorDialog(Shell shell) {
 
 		if (isLicenseValidationServiceAvailable) {
