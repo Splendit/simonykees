@@ -385,6 +385,18 @@ public class TestForToForEachArrayIteratingIndexRule {
 		return sb.toString();
 	}
 
+	private class GenericClassSample<T> {
+		class InnerType {
+
+			public void useInnerCollection(InnerType[] myInnerCList) {
+				int size = 0;
+				for (GenericClassSample<T>.InnerType innerCObje : myInnerCList) {
+					size++;
+				}
+			}
+		}
+	}
+
 	/**
 	 * This collection is not subtype of {@code Iterable}.
 	 */
