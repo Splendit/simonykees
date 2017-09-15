@@ -10,6 +10,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -58,7 +59,6 @@ public class RenameFieldsRuleWizard extends Wizard {
 
 	private RefactoringPipeline refactoringPipeline;
 	private List<FieldMetadata> metadata;
-	private List<FieldMetadata> todosMetadata;
 	private PublicFieldsRenamingRule renameFieldsRule;
 
 	private boolean canRefactor = true;
@@ -111,8 +111,10 @@ public class RenameFieldsRuleWizard extends Wizard {
 				// TODO get scope from model
 				FieldDeclarationASTVisitor visitor = createVisitor();
 
+				SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+
 				List<ICompilationUnit> result = new ArrayList<>();
-				if (!getCompilationUnits(result, selectedJavaElements, monitor)) {
+				if (!getCompilationUnits(result, selectedJavaElements, subMonitor.split(10))) {
 					return Status.CANCEL_STATUS;
 				}
 
@@ -121,6 +123,10 @@ public class RenameFieldsRuleWizard extends Wizard {
 				 * should be excluded from scope
 				 */
 				List<ICompilationUnit> containingErrorList = new ArrayList<>();
+
+				SubMonitor child = subMonitor.split(40);
+				child.setWorkRemaining(result.size());
+				child.setTaskName("Collect compilation units");
 				for (ICompilationUnit compilationUnit : result) {
 					if (!compilationUnit.getJavaProject().equals(selectedJavaProjekt)) {
 						WizardMessageDialog.synchronizeWithUIShowMultiprojectMessage();
@@ -133,13 +139,27 @@ public class RenameFieldsRuleWizard extends Wizard {
 						CompilationUnit cu = RefactoringUtil.parse(compilationUnit);
 						cu.accept(visitor);
 					}
-				}
-				if (!containingErrorList.isEmpty()) {
-					synchronizeWithUIShowCompilationErrorMessage(containingErrorList, monitor, visitor);
-				} else {
-					searchScopeAndPrepareRefactoringStates(monitor, visitor);
+					if (child.isCanceled()) {
+						return Status.CANCEL_STATUS;
+					} else {
+						child.worked(1);
+					}
 				}
 
+				SubMonitor childSecondPart = subMonitor.split(50);
+				childSecondPart.setWorkRemaining(100);
+				if (!containingErrorList.isEmpty()) {
+					synchronizeWithUIShowCompilationErrorMessage(containingErrorList);
+				}
+				if (canRefactor) {
+					searchScopeAndPrepareRefactoringStates(childSecondPart, visitor);
+				} else {
+					return Status.CANCEL_STATUS;
+				}
+				if (childSecondPart.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
+				monitor.done();
 				return Status.OK_STATUS;
 			}
 
@@ -153,88 +173,13 @@ public class RenameFieldsRuleWizard extends Wizard {
 			public void done(IJobChangeEvent event) {
 
 				if (event.getResult().isOK() && canRefactor) {
-					Job refactorJob = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
-
-						@Override
-						protected IStatus run(IProgressMonitor monitor) {
-
-							try {
-								refactoringPipeline.doRefactoring(monitor);
-								if (monitor.isCanceled()) {
-									refactoringPipeline.clearStates();
-									return Status.CANCEL_STATUS;
-								}
-							} catch (RefactoringException e) {
-								WizardMessageDialog.synchronizeWithUIShowInfo(e);
-								return Status.CANCEL_STATUS;
-							} catch (RuleException e) {
-								WizardMessageDialog.synchronizeWithUIShowError(e);
-								return Status.CANCEL_STATUS;
-
-							} finally {
-								monitor.done();
-							}
-
-							return Status.OK_STATUS;
-						}
-					};
-
-					refactorJob.addJobChangeListener(new JobChangeAdapter() {
-						@Override
-						public void done(IJobChangeEvent event) {
-
-							if (event.getResult().isOK()) {
-								if (LicenseUtil.getInstance().isValid()) {
-									if (refactoringPipeline.hasChanges()) {
-
-										// TODO create and show preview wizard
-										// for multi file changing rule
-										// TODO use this below to display
-										// changes onpreview
-
-										for (FieldMetadata data : metadata) {
-
-											try {
-												String newIdentifier = data.getNewIdentifier();
-												SimpleName oldName = data.getFieldDeclaration().getName();
-												String oldIdentifier = oldName.getIdentifier();
-												data.getCompilationUnit().getJavaElement();
-												List<DocumentChange> docsChanges = renameFieldsRule
-														.computeDocumentChangesPerFiled(data);
-											} catch (JavaModelException e) {
-												// TODO Auto-generated catch
-												// block
-												e.printStackTrace();
-											}
-										}
-
-										/*
-										 * Rectangle rectangle =
-										 * Display.getCurrent().
-										 * getPrimaryMonitor().getBounds();
-										 * synchronizeWithUIShowRefactoringPreviewWizard
-										 * (refactoringPipeline, rectangle);
-										 */
-
-										// when done without interruption
-										Activator.setRunning(false);
-									} else {
-
-										WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
-									}
-								} else {
-
-									WizardMessageDialog.synchronizeWithUIShowLicenseError();
-								}
-							} else {
-								// do nothing if status is canceled, close
-								Activator.setRunning(false);
-							}
-						}
-					});
+					Job refactorJob = startRefactoringJob();
 
 					refactorJob.setUser(true);
 					refactorJob.schedule();
+				} else {
+					// do nothing if status is canceled, close
+					Activator.setRunning(false);
 				}
 			}
 		});
@@ -247,30 +192,77 @@ public class RenameFieldsRuleWizard extends Wizard {
 	 * list all Java files that will be skipped because they contain compilation
 	 * errors.
 	 */
-	private void synchronizeWithUIShowCompilationErrorMessage(List<ICompilationUnit> containingErrorList,
-			IProgressMonitor monitor, FieldDeclarationASTVisitor visitor) {
-		Display.getDefault().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				CompilationErrorsMessageDialog dialog = new CompilationErrorsMessageDialog(shell);
-				dialog.create();
-				dialog.setTableViewerInput(containingErrorList);
-				dialog.open();
-				if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
-					searchScopeAndPrepareRefactoringStates(monitor, visitor);
-				} else {
-					canRefactor = false;
-					Activator.setRunning(false);
-				}
+	private void synchronizeWithUIShowCompilationErrorMessage(List<ICompilationUnit> containingErrorList) {
+		Display.getDefault().syncExec(() -> {
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			CompilationErrorsMessageDialog dialog = new CompilationErrorsMessageDialog(shell);
+			dialog.create();
+			dialog.setTableViewerInput(containingErrorList);
+			dialog.open();
+			if (dialog.getReturnCode() != IDialogConstants.OK_ID) {
+				canRefactor = false;
+				Activator.setRunning(false);
 			}
 		});
 	}
 
+	private Job startRefactoringJob() {
+		Job refactorJob = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+
+				try {
+					refactoringPipeline.doRefactoring(monitor);
+					if (monitor.isCanceled()) {
+						refactoringPipeline.clearStates();
+						return Status.CANCEL_STATUS;
+					}
+				} catch (RefactoringException e) {
+					WizardMessageDialog.synchronizeWithUIShowInfo(e);
+					return Status.CANCEL_STATUS;
+				} catch (RuleException e) {
+					WizardMessageDialog.synchronizeWithUIShowError(e);
+					return Status.CANCEL_STATUS;
+
+				} finally {
+					monitor.done();
+				}
+
+				return Status.OK_STATUS;
+			}
+		};
+
+		refactorJob.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+
+				if (event.getResult().isOK()) {
+					if (LicenseUtil.getInstance().isValid()) {
+						if (refactoringPipeline.hasChanges()) {
+							createAndShowPreviewWizard();
+
+							// when done without interruption
+							Activator.setRunning(false);
+						} else {
+							WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
+						}
+					} else {
+						WizardMessageDialog.synchronizeWithUIShowLicenseError();
+					}
+				} else {
+					// do nothing if status is canceled, close
+					Activator.setRunning(false);
+				}
+			}
+
+		});
+		return refactorJob;
+	}
+
 	private FieldDeclarationASTVisitor createVisitor() {
 		FieldDeclarationASTVisitor visitor;
-		if (Messages.RenameFieldsRuleWizardPageModel_scopeOption_project.equals(model.getSearchScope())) {
+		if (RenameFieldsRuleWizardPageConstants.SCOPE_PROJECT.equals(model.getSearchScope())) {
 			IJavaElement[] scope = { selectedJavaProjekt };
 			visitor = new FieldDeclarationASTVisitor(scope);
 		} else {
@@ -278,14 +270,12 @@ public class RenameFieldsRuleWizard extends Wizard {
 			IJavaElement[] scope = (IJavaElement[]) workspace.getRoot().getProjects();
 			visitor = new FieldDeclarationASTVisitor(scope);
 		}
-		visitor.setRenamePrivateField(
-				model.getFieldTypes().contains(Messages.RenameFieldsRuleWizardPageModel_typeOption_privateFields));
+		visitor.setRenamePrivateField(model.getFieldTypes().contains(RenameFieldsRuleWizardPageConstants.TYPE_PRIVATE));
 		visitor.setRenameProtectedField(
-				model.getFieldTypes().contains(Messages.RenameFieldsRuleWizardPageModel_typeOption_protectedFields));
-		visitor.setRenamePackageProtectedField(model.getFieldTypes()
-				.contains(Messages.RenameFieldsRuleWizardPageModel_typeOption_packageProtectedFields));
-		visitor.setRenamePublicField(
-				model.getFieldTypes().contains(Messages.RenameFieldsRuleWizardPageModel_typeOption_publicFields));
+				model.getFieldTypes().contains(RenameFieldsRuleWizardPageConstants.TYPE_PROTECTED));
+		visitor.setRenamePackageProtectedField(
+				model.getFieldTypes().contains(RenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPROTECTED));
+		visitor.setRenamePublicField(model.getFieldTypes().contains(RenameFieldsRuleWizardPageConstants.TYPE_PUBLIC));
 		visitor.setUppercaseAfterUnderscore(model.setUpperCaseForUnderscoreReplacementOption());
 		visitor.setUppercaseAfterDollar(model.setUpperCaseForDollarReplacementOption());
 		visitor.setAddTodo(model.isAddTodoComments());
@@ -296,7 +286,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 			List<IJavaElement> sourceJavaElementsList, IProgressMonitor monitor) {
 
 		try {
-			RefactoringUtil.collectICompilationUnits(resultCompilationUnitsList, selectedJavaElements, monitor);
+			RefactoringUtil.collectICompilationUnits(resultCompilationUnitsList, sourceJavaElementsList, monitor);
 			if (resultCompilationUnitsList.isEmpty()) {
 				logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found);
 				WizardMessageDialog.synchronizeWithUIShowInfo(
@@ -316,7 +306,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 		return true;
 	}
 
-	private void searchScopeAndPrepareRefactoringStates(IProgressMonitor monitor, FieldDeclarationASTVisitor visitor) {
+	private void searchScopeAndPrepareRefactoringStates(SubMonitor subMonitor, FieldDeclarationASTVisitor visitor) {
 
 		Set<IJavaElement> targetJavaElements = visitor.getTargetIJavaElements();
 		if (targetJavaElements.isEmpty()) {
@@ -328,20 +318,26 @@ public class RenameFieldsRuleWizard extends Wizard {
 		List<ICompilationUnit> targetCompilationUnits = new ArrayList<>();
 
 		metadata = visitor.getFieldMetadata();
-		todosMetadata = visitor.getUnmodifiableFieldMetadata();
+		List<FieldMetadata> todosMetadata = visitor.getUnmodifiableFieldMetadata();
 
-		if (!getCompilationUnits(targetCompilationUnits,
-				targetJavaElements.stream().collect(Collectors.toList()), monitor)) {
+		if (!getCompilationUnits(targetCompilationUnits, targetJavaElements.stream().collect(Collectors.toList()),
+				subMonitor.split(20))) {
 			canRefactor = false;
 			return;
 		}
-		
+		if (subMonitor.isCanceled()) {
+			return;
+		}
+
 		renameFieldsRule = new PublicFieldsRenamingRule(PublicFieldsRenamingASTVisitor.class, metadata, todosMetadata);
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(renameFieldsRule);
 
 		refactoringPipeline = new RefactoringPipeline();
 		refactoringPipeline.setRules(rules);
 
+		SubMonitor child = subMonitor.split(80);
+		child.setWorkRemaining(targetCompilationUnits.size());
+		child.setTaskName("Collect compilation units");
 		List<RefactoringState> refactoringStates = new ArrayList<>();
 		for (ICompilationUnit compilationUnit : targetCompilationUnits) {
 			try {
@@ -354,8 +350,43 @@ public class RenameFieldsRuleWizard extends Wizard {
 				canRefactor = false;
 				return;
 			}
+			if (child.isCanceled()) {
+				return;
+			} else {
+				child.worked(1);
+			}
 		}
 
 		refactoringPipeline.setRefactoringStates(refactoringStates);
+	}
+
+	private void createAndShowPreviewWizard() {
+
+		// TODO create and show preview wizard
+		// for multi file changing rule
+		// TODO use this below to display
+		// changes onpreview
+
+		for (FieldMetadata data : metadata) {
+
+			try {
+				String newIdentifier = data.getNewIdentifier();
+				SimpleName oldName = data.getFieldDeclaration().getName();
+				String oldIdentifier = oldName.getIdentifier();
+				data.getCompilationUnit().getJavaElement();
+				List<DocumentChange> docsChanges = renameFieldsRule.computeDocumentChangesPerFiled(data);
+			} catch (JavaModelException e) {
+				// TODO Auto-generated catch
+				// block
+				e.printStackTrace();
+			}
+		}
+
+		/*
+		 * Rectangle rectangle = Display.getCurrent().
+		 * getPrimaryMonitor().getBounds();
+		 * synchronizeWithUIShowRefactoringPreviewWizard (refactoringPipeline,
+		 * rectangle);
+		 */
 	}
 }
