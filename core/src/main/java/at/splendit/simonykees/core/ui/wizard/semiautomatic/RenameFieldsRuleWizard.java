@@ -2,11 +2,16 @@ package at.splendit.simonykees.core.ui.wizard.semiautomatic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -17,6 +22,7 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -126,7 +132,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 
 				SubMonitor child = subMonitor.split(40);
 				child.setWorkRemaining(result.size());
-				child.setTaskName("Collect compilation units");
+				child.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
 				for (ICompilationUnit compilationUnit : result) {
 					if (!compilationUnit.getJavaProject().equals(selectedJavaProjekt)) {
 						WizardMessageDialog.synchronizeWithUIShowMultiprojectMessage();
@@ -266,8 +272,20 @@ public class RenameFieldsRuleWizard extends Wizard {
 			IJavaElement[] scope = { selectedJavaProjekt };
 			visitor = new FieldDeclarationASTVisitor(scope);
 		} else {
-			IWorkspace workspace = selectedJavaProjekt.getProject().getWorkspace();
-			IJavaElement[] scope = (IJavaElement[]) workspace.getRoot().getProjects();
+			List<IJavaProject> projectList = new LinkedList<>();
+			try {
+				IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+				IProject[] projects = workspaceRoot.getProjects();
+				for (int i = 0; i < projects.length; i++) {
+					IProject project = projects[i];
+					if (project.isOpen() && project.hasNature(JavaCore.NATURE_ID)) {
+						projectList.add(JavaCore.create(project));
+					}
+				}
+			} catch (CoreException ce) {
+				ce.printStackTrace();
+			}
+			IJavaElement[] scope = projectList.toArray(new IJavaElement[0]);
 			visitor = new FieldDeclarationASTVisitor(scope);
 		}
 		visitor.setRenamePrivateField(model.getFieldTypes().contains(RenameFieldsRuleWizardPageConstants.TYPE_PRIVATE));
@@ -337,7 +355,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 
 		SubMonitor child = subMonitor.split(80);
 		child.setWorkRemaining(targetCompilationUnits.size());
-		child.setTaskName("Collect compilation units");
+		child.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
 		List<RefactoringState> refactoringStates = new ArrayList<>();
 		for (ICompilationUnit compilationUnit : targetCompilationUnits) {
 			try {

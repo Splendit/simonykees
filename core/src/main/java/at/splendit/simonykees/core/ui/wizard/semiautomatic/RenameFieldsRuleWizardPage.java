@@ -76,15 +76,11 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 			item.setText(fieldType);
 			item.setChecked(true);
 		}
-		controler.fieldTypeSelectionChanged(
-				Arrays.asList(table.getSelection()).stream().map(TableItem::getText).collect(Collectors.toList()));
 
-		table.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				controler.fieldTypeSelectionChanged(Arrays.asList(table.getSelection()).stream().map(TableItem::getText)
-						.collect(Collectors.toList()));
+		table.addListener(SWT.Selection, event -> {
+			if (event.detail == SWT.CHECK) {
+				controler.fieldTypeSelectionChanged(Arrays.asList(table.getItems()).stream()
+						.filter(TableItem::getChecked).map(TableItem::getText).collect(Collectors.toList()));
 			}
 		});
 	}
@@ -169,11 +165,10 @@ public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
 		table.setLayoutData(gridData);
 		TableItem item = new TableItem(table, SWT.NONE);
 		item.setText(model.getTodoOption());
+		item.setChecked(true);
 
-		table.addSelectionListener(new SelectionAdapter() {
-
-			@Override
-			public void widgetSelected(SelectionEvent e) {
+		table.addListener(SWT.Selection, event -> {
+			if (event.detail == SWT.CHECK) {
 				controler.todoSelectionChanged(table.getItem(0).getChecked());
 			}
 		});

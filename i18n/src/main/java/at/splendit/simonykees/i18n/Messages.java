@@ -176,6 +176,14 @@ public class Messages extends NLS {
 	public static String PublicFieldsRenamingRule_name;
 	public static String RearrangeClassMembersRule_description;
 	public static String RearrangeClassMembersRule_name;
+	public static String RefactoringPipeline_java_element_resolution_failed;
+
+	public static String RefactoringPipeline_user_java_element_resolution_failed;
+
+	public static String RefactoringPipeline_user_warn_no_compilation_units_found;
+
+	public static String RefactoringPipeline_warn_no_compilation_units_found;
+
 	public static String RefactoringPreviewWizard_err_runnableWithProgress;
 	public static String RefactoringRule_applying_rule_to_workingcopy;
 	public static String RefactoringRule_default_description;
@@ -184,6 +192,8 @@ public class Messages extends NLS {
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
 	public static String RemoveNewStringConstructorRule_name;
+	public static String RenameFieldsRuleWizard_taskName_collectingUnits;
+
 	public static String RenameFieldsRuleWizardPage_description;
 
 	public static String RenameFieldsRuleWizardPage_dollarSignReplacementLabelText;
