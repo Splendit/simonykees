@@ -325,7 +325,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 							SimpleName fragmentName = fragment.getName();
 							Expression initializer = fragment.getInitializer();
 							/*
-							 * FIXME: SIM-521
+							 * FIXME: SIM-767
 							 */
 							if (!isDerivableInitializerType(initializer)) {
 								storeMethodNameForPrimitiveType(type);
