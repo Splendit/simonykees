@@ -14,9 +14,13 @@ import at.splendit.simonykees.core.rule.impl.DiamondOperatorRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamAnyMatchRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamFindFirstRule;
 import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamForEachRule;
+import at.splendit.simonykees.core.rule.impl.EnhancedForLoopToStreamSumRule;
+import at.splendit.simonykees.core.rule.impl.EnumsWithoutEqualsRule;
 import at.splendit.simonykees.core.rule.impl.FieldNameConventionRule;
+import at.splendit.simonykees.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import at.splendit.simonykees.core.rule.impl.ForToForEachRule;
 import at.splendit.simonykees.core.rule.impl.FunctionalInterfaceRule;
+import at.splendit.simonykees.core.rule.impl.ImmutableStaticFinalCollectionsRule;
 import at.splendit.simonykees.core.rule.impl.IndexOfToContainsRule;
 import at.splendit.simonykees.core.rule.impl.InefficientConstructorRule;
 import at.splendit.simonykees.core.rule.impl.LambdaForEachCollectRule;
@@ -28,11 +32,15 @@ import at.splendit.simonykees.core.rule.impl.MultiVariableDeclarationLineRule;
 import at.splendit.simonykees.core.rule.impl.OrganiseImportsRule;
 import at.splendit.simonykees.core.rule.impl.OverrideAnnotationRule;
 import at.splendit.simonykees.core.rule.impl.PrimitiveBoxedForStringRule;
+import at.splendit.simonykees.core.rule.impl.PrimitiveObjectUseEqualsRule;
+import at.splendit.simonykees.core.rule.impl.ReImplementingInterfaceRule;
 import at.splendit.simonykees.core.rule.impl.RearrangeClassMembersRule;
 import at.splendit.simonykees.core.rule.impl.RemoveNewStringConstructorRule;
 import at.splendit.simonykees.core.rule.impl.RemoveToStringOnStringRule;
 import at.splendit.simonykees.core.rule.impl.SerialVersionUidRule;
 import at.splendit.simonykees.core.rule.impl.StatementLambdaToExpressionRule;
+import at.splendit.simonykees.core.rule.impl.StringBufferToBuilderRule;
+import at.splendit.simonykees.core.rule.impl.StringBuildingLoopRule;
 import at.splendit.simonykees.core.rule.impl.StringConcatToPlusRule;
 import at.splendit.simonykees.core.rule.impl.StringFormatLineSeparatorRule;
 import at.splendit.simonykees.core.rule.impl.StringLiteralEqualityCheckRule;
@@ -62,7 +70,6 @@ public class TagUtil {
 	 */
 	@SuppressWarnings({ "rawtypes", "nls" })
 	public static List<Tag> getTagsForRule(Class<? extends RefactoringRule> clazz) {
-
 		if (ArithmethicAssignmentRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_4, Tag.READABILITY, Tag.CODING_CONVENTIONS);
 
@@ -83,8 +90,11 @@ public class TagUtil {
 
 		} else if (EnhancedForLoopToStreamAnyMatchRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
-			
+
 		} else if (EnhancedForLoopToStreamFindFirstRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
+			
+		} else if (EnhancedForLoopToStreamSumRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
 
 		} else if (FieldNameConventionRule.class == clazz) {
@@ -161,12 +171,34 @@ public class TagUtil {
 
 		} else if (StandardLoggerRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.LOGGING, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS);
+
+		} else if (FlatMapInsteadOfNestedLoopsRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
+			
+		} else if (StringBuildingLoopRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_5, Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
 			
 		} else if (UseIsEmptyRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_6, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS, Tag.READABILITY);
-		
+
 		} else if (IndexOfToContainsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.READABILITY);
+		
+		} else if (EnumsWithoutEqualsRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_5, Tag.CODING_CONVENTIONS);
+		
+		} else if (StringBufferToBuilderRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE, Tag.STRING_MANIPULATION);
+
+		} else if (ReImplementingInterfaceRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS);
+
+		} else if (PrimitiveObjectUseEqualsRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.STRING_MANIPULATION);
+			
+		} else if (ImmutableStaticFinalCollectionsRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_2, Tag.CODING_CONVENTIONS);
+			
 		}
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["

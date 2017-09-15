@@ -106,7 +106,7 @@ public class RefactoringPipeline {
 
 	public Map<ICompilationUnit, DocumentChange> getChangesForRule(
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
-		Map<ICompilationUnit, DocumentChange> currentChanges = new HashMap<ICompilationUnit, DocumentChange>();
+		Map<ICompilationUnit, DocumentChange> currentChanges = new HashMap<>();
 
 		for (RefactoringState refactoringState : refactoringStates) {
 			DocumentChange documentChange = refactoringState.getChangeIfPresent(rule);
@@ -148,11 +148,7 @@ public class RefactoringPipeline {
 	 * @return true if has at least one refactoring state, false otherwise
 	 */
 	public boolean hasRefactoringStates() {
-		if (!refactoringStates.isEmpty()) {
-			return true;
-		} else {
-			return false;
-		}
+		return !refactoringStates.isEmpty();
 	}
 
 	/**
@@ -257,6 +253,20 @@ public class RefactoringPipeline {
 					ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e);
 		}
 	}
+	
+	public void createRefactoringStates(List<ICompilationUnit> compilationUnits) {
+		for (ICompilationUnit compilationUnit : compilationUnits) {
+
+				try {
+					refactoringStates
+							.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
+				} catch (JavaModelException e) {
+					logger.error(e.getMessage(), e);
+				}
+
+		}
+
+	}
 
 	public boolean isMultipleProjects() {
 		return multipleProjects;
@@ -310,7 +320,7 @@ public class RefactoringPipeline {
 			 * 1 of rules size In method that part of progress bar is split to
 			 * number of compilation units
 			 */
-			applyRuleToAllStates(refactoringRule, true, subMonitor.newChild(1), notWorkingRules);
+			applyRuleToAllStates(refactoringRule, subMonitor.newChild(1), notWorkingRules);
 
 			/*
 			 * If cancel is pressed on progress monitor, abort all and return,
@@ -459,7 +469,7 @@ public class RefactoringPipeline {
 		}
 		List<RefactoringStateNotCommited> refactoringStatesNotCommited = new LinkedList<>();
 		for (Iterator<RefactoringState> iterator = refactoringStates.iterator(); iterator.hasNext();) {
-			RefactoringState refactoringState = (RefactoringState) iterator.next();
+			RefactoringState refactoringState = iterator.next();
 			try {
 				refactoringState.commitAndDiscardWorkingCopy();
 				iterator.remove();
@@ -484,7 +494,7 @@ public class RefactoringPipeline {
 	 * This method should be called when canceling or finishing refactorings.
 	 */
 	public void clearStates() {
-		refactoringStates.forEach(s -> s.discardWorkingCopy());
+		refactoringStates.forEach(RefactoringState::discardWorkingCopy);
 		refactoringStates.clear();
 	}
 
@@ -500,13 +510,12 @@ public class RefactoringPipeline {
 	 * @param rule
 	 *            {@link RefactoringRule} to apply to all
 	 *            {@link RefactoringState} instances
-	 * @param initialApply
 	 * @param subMonitor
 	 * @param returnListNotWorkingRules
 	 *            rules that throw an exception are added to this list
 	 */
 	private void applyRuleToAllStates(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
-			boolean initialApply, IProgressMonitor subMonitor, List<NotWorkingRuleModel> returnListNotWorkingRules) {
+			IProgressMonitor subMonitor, List<NotWorkingRuleModel> returnListNotWorkingRules) {
 
 		SubMonitor monitor = SubMonitor.convert(subMonitor).setWorkRemaining(refactoringStates.size());
 

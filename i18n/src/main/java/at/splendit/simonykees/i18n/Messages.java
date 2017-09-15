@@ -6,11 +6,12 @@ import org.eclipse.osgi.util.NLS;
  * TODO SIM-103 add class description
  * 
  * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
- *         Matthias Webhofer
+ *         Matthias Webhofer, Hans-Jörg Schrödl
  * @since 0.9
  */
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "at.splendit.simonykees.i18n.messages"; //$NON-NLS-1$
+
 	public static String aa_codename;
 	public static String ui_ok;
 	public static String ui_cancel;
@@ -85,12 +86,18 @@ public class Messages extends NLS {
 	public static String EnhancedForLoopToStreamFindFirstRule_name;
 	public static String EnhancedForLoopToStreamForEachRule_description;
 	public static String EnhancedForLoopToStreamForEachRule_name;
+	public static String EnumsWithoutEqualsRule_name;
+	public static String EnumsWithoutEqualsRule_description;
+	public static String EnhancedForLoopToStreamSumRule_description;
+	public static String EnhancedForLoopToStreamSumRule_name;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;
 	public static String MultiCatchRule_name;
 	public static String FieldNameConventionRule_description;
 	public static String FieldNameConventionRule_name;
+	public static String FlatMapInsteadOfNestedLoopsRule_description;
+	public static String FlatMapInsteadOfNestedLoopsRule_name;
 	public static String ForToForEachRule_description;
 	public static String ForToForEachRule_name;
 	public static String FunctionalInterfaceRule_description;
@@ -148,6 +155,8 @@ public class Messages extends NLS {
 	public static String LoggerRuleWizardPageModel_warn_blankLoggingType;
 	public static String LoggerRuleWizardPageModel_warn_errSeverity;
 	public static String LoggerRuleWizardPageModel_warn_stackTraceSeverity;
+	public static String ImmutableStaticFinalCollectionsRule_description;
+	public static String ImmutableStaticFinalCollectionsRule_name;
 	public static String IndexOfToContainsRule_description;
 	public static String IndexOfToContainsRule_name;
 	public static String InefficientConstructorRule_description;
@@ -162,6 +171,8 @@ public class Messages extends NLS {
 	public static String OverrideAnnotationRule_name;
 	public static String PrimitiveBoxedForStringRule_description;
 	public static String PrimitiveBoxedForStringRule_name;
+	public static String PrimitiveObjectUseEqualsRule_description;
+	public static String PrimitiveObjectUseEqualsRule_name;
 	public static String Profile_DefaultProfile_profileName;
 	public static String Profile_Java8Profile_profileName;
 	public static String ProgressMonitor_SelectRulesWizard_performFinish_jobName;
@@ -174,6 +185,8 @@ public class Messages extends NLS {
 	public static String RefactoringRule_applying_rule_to_workingcopy;
 	public static String RefactoringRule_default_description;
 	public static String RefactoringRule_default_name;
+	public static String ReImplementingInterfaceRule_description;
+	public static String ReImplementingInterfaceRule_name;
 	public static String RefactoringSummaryWizardPage_description;
 	public static String RefactoringSummaryWizardPage_title;
 	public static String RemoveToStringOnStringRule_description;
@@ -235,6 +248,10 @@ public class Messages extends NLS {
 	public static String StandardLoggerRule_name;
 	public static String StatementLambdaToExpressionRule_description;
 	public static String StatementLambdaToExpressionRule_name;
+	public static String StringBufferToBuilderRule_description;
+	public static String StringBufferToBuilderRule_name;
+	public static String StringBuildingLoopRule_description;
+	public static String StringBuildingLoopRule_name;
 	public static String StringFormatLineSeparatorRule_description;
 	public static String StringFormatLineSeparatorRule_name;
 	public static String StringConcatToPlusRule_description;
@@ -251,6 +268,7 @@ public class Messages extends NLS {
 	public static String ValidateExecutor_validation_scheduler_started;
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
