@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -114,7 +113,6 @@ public class RenameFieldsRuleWizard extends Wizard {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
-				// TODO get scope from model
 				FieldDeclarationASTVisitor visitor = createVisitor();
 
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
@@ -282,8 +280,8 @@ public class RenameFieldsRuleWizard extends Wizard {
 						projectList.add(JavaCore.create(project));
 					}
 				}
-			} catch (CoreException ce) {
-				ce.printStackTrace();
+			} catch (CoreException e) {
+				logger.error(e.getMessage(), e);
 			}
 			IJavaElement[] scope = projectList.toArray(new IJavaElement[0]);
 			visitor = new FieldDeclarationASTVisitor(scope);
