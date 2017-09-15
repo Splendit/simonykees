@@ -34,6 +34,7 @@ public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor
 	protected static final String JAVA_UTIL_COLLECTION = java.util.Collection.class.getName();
 	protected static final String JAVA_LANG_ITERABLE = java.lang.Iterable.class.getName();
 	protected static final String FOR_EACH = "forEach"; //$NON-NLS-1$
+	protected static final String FILTER = "filter"; //$NON-NLS-1$
 	protected static final String VALUE_OF = "valueOf"; //$NON-NLS-1$
 	protected static final String MAP = "map"; //$NON-NLS-1$
 	protected static final String MAP_TO_INT = "mapToInt"; //$NON-NLS-1$
@@ -41,6 +42,7 @@ public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor
 	protected static final String MAP_TO_DOUBLE = "mapToDouble"; //$NON-NLS-1$
 	protected static final String STREAM = "stream"; //$NON-NLS-1$
 	protected static final String PARALLEL_STREAM = "parallelStream"; //$NON-NLS-1$
+	protected static final String FLAT_MAP = "flatMap"; //$NON-NLS-1$
 
 	/**
 	 * Checks whether a {@link MethodInvocation} node, is an invocation of

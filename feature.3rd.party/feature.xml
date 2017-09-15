@@ -2,7 +2,7 @@
 <feature
       id="jSparrow.3rd.party.feature"
       label="jSparrow Third-party Dependencies"
-      version="2.1.0.qualifier"
+      version="2.1.1.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
 
    <description url="https://jsparrow.eu/knowledge-base/">
@@ -16,7 +16,7 @@
    <url>
       <update label="jSparrow Update Site" url="http://update.jsparrow.eu"/>
    </url>
-
+   
    <plugin
          id="org.eclipse.epp.logging.aeri.ide"
          download-size="0"
@@ -45,4 +45,10 @@
          version="0.0.0"
          unpack="false"/>
 
+   <plugin
+         id="org.apache.commons.lang3"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
 </feature>
