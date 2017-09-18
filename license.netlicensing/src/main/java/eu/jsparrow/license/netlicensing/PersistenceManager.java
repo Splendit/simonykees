@@ -67,6 +67,7 @@ public class PersistenceManager {
 		ValidationResult validationResult = cache.getCachedValidationResult();
 		String licenseeName = cache.getLicenseName();
 		String licenseeNumber = cache.getLicenseeNumber();
+		String version = cache.getVersion();
 		ResponseParser parser = new ResponseParser(validationResult, timestamp, licenseeName, cache.getValidatioAction());
 
 		ZonedDateTime demoExpirationDate = parser.getEvaluationExpiresDate();
@@ -102,7 +103,8 @@ public class PersistenceManager {
 				subscriptionExpirationDate, 
 				subscriptionStatus, 
 				lastSuccessTimestamp,
-				lastSuccessType);
+				lastSuccessType, 
+				version);
 		setPersistenceModel(persistence);
 		persist();
 	}
@@ -182,7 +184,8 @@ public class PersistenceManager {
 								null, // subscription expiration date
 								false, // last subscription status
 								null, // last successful timestamp
-								null // last successful type
+								null, // last successful type
+								null // last persisted version
 								));
 		return new OfflineLicenseChecker(persistence);
 	}
@@ -323,24 +326,6 @@ public class PersistenceManager {
 		
 	}
 
-	public Optional<String> getPersistedLicenseeName() {
-		String licenseeName =
-				readPersistedData()
-					.flatMap(PersistenceModel::getLicenseeName)
-					.orElse(EMPTY_STRING);
-		
-		return Optional.of(licenseeName).filter(s -> !s.isEmpty());
-	}
-
-	public Optional<String> getPersistedLicenseeNumber() {
-		String licenseeNumber =
-				readPersistedData()
-					.flatMap(PersistenceModel::getLicenseeNumber)
-					.orElse(EMPTY_STRING);
-		
-		return Optional.of(licenseeNumber).filter(s -> !s.isEmpty());
-	}
-
 	public void updateLicenseeData(String licenseeName, String licenseeNumber) {
 		PersistenceModel persistence = 
 				readPersistedData()
@@ -352,7 +337,7 @@ public class PersistenceManager {
 							licenseeName,
 							false,
 							null, null, null, null, null, 
-							false, null, null
+							false, null, null, null
 						));
 		persistence.updateLicenseeCredential(licenseeName, licenseeNumber);
 		setPersistenceModel(persistence);

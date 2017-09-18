@@ -8,9 +8,7 @@ package eu.jsparrow.license.netlicensing;
  *
  */
 public enum ValidationAction {
-	CHECK_IN,
-	CHECK_OUT,
-	NONE;
+	CHECK_IN, CHECK_OUT, NONE;
 
 	@SuppressWarnings("nls")
 	public static ValidationAction fromString(String action) {
