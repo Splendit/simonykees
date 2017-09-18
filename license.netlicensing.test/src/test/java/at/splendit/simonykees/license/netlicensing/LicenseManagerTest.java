@@ -87,25 +87,25 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		// having no licensee information stored
 		LicenseManager licenseManager = LicenseManager.getInstance();
 		licenseManager.setUniqueHwId("");
-		
-		
+
 		// when initiating the license manager
 		licenseManager.initManager();
-		
+
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
-		
+
 		// expecting a try and buy licensee to be created
 		LicenseeModel licensee = licenseManager.getLicensee();
 		LicenseChecker licenseChecker = licenseManager.getValidationData();
-		
+
 		assertEquals(LicenseType.TRY_AND_BUY, licenseChecker.getType());
-		assertTrue("Expecting licensee " + licensee.getLicenseeName() + " (" + licensee.getLicenseeNumber() + ") to have a valid demo license.", licenseChecker.isValid());
-		
+		assertTrue("Expecting licensee " + licensee.getLicenseeName() + " (" + licensee.getLicenseeNumber()
+				+ ") to have a valid demo license.", licenseChecker.isValid());
+
 		LicenseValidator.doValidate(licensee);
-		
+
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		licenseChecker = licenseManager.getValidationData();
-		
+
 		assertEquals(LicenseType.TRY_AND_BUY, licenseChecker.getType());
 		assertEquals(LicenseStatus.TRIAL_REGISTERED, licenseChecker.getLicenseStatus());
 		assertTrue(licenseChecker.isValid());
