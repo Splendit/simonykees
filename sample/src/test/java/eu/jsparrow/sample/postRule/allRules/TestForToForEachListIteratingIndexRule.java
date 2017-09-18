@@ -503,6 +503,13 @@ public class TestForToForEachListIteratingIndexRule {
 		return sb.toString();
 	}
 
+	public String testSName(String input) {
+		List<String> s = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		s.forEach(sb::append);
+		return sb.toString();
+	}
+
 	public static Foo createFoo(String input) {
 		return new TestForToForEachListIteratingIndexRule().new Foo(input);
 	}
@@ -515,6 +522,18 @@ public class TestForToForEachListIteratingIndexRule {
 			StringBuilder sb = new StringBuilder();
 			fInterfaceRule.forEach(sb::append);
 		};
+	}
+
+	private class GenericClassSample<T> {
+		class InnerType {
+
+			public void useInnerCollection(List<InnerType> myInnerCList) {
+				int size = 0;
+				for (GenericClassSample<T>.InnerType innerCObje : myInnerCList) {
+					size++;
+				}
+			}
+		}
 	}
 
 	class Foo {

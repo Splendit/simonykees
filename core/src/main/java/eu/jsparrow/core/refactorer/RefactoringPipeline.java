@@ -51,6 +51,11 @@ public class RefactoringPipeline {
 	 */
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
+	/**
+	 * Holder map for original source code, used for summary page
+	 */
+	private Map<RefactoringState, String> initialSource = new HashMap<>();
+
 	private boolean multipleProjects = false;
 
 	/**
@@ -101,7 +106,7 @@ public class RefactoringPipeline {
 
 	public Map<ICompilationUnit, DocumentChange> getChangesForRule(
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
-		Map<ICompilationUnit, DocumentChange> currentChanges = new HashMap<ICompilationUnit, DocumentChange>();
+		Map<ICompilationUnit, DocumentChange> currentChanges = new HashMap<>();
 
 		for (RefactoringState refactoringState : refactoringStates) {
 			DocumentChange documentChange = refactoringState.getChangeIfPresent(rule);
@@ -143,11 +148,7 @@ public class RefactoringPipeline {
 	 * @return true if has at least one refactoring state, false otherwise
 	 */
 	public boolean hasRefactoringStates() {
-		if (!refactoringStates.isEmpty()) {
-			return true;
-		} else {
-			return false;
-		}
+		return !refactoringStates.isEmpty();
 	}
 
 	/**
@@ -260,8 +261,7 @@ public class RefactoringPipeline {
 					refactoringStates
 							.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
 				} catch (JavaModelException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					logger.error(e.getMessage(), e);
 				}
 
 		}
@@ -320,7 +320,7 @@ public class RefactoringPipeline {
 			 * 1 of rules size In method that part of progress bar is split to
 			 * number of compilation units
 			 */
-			applyRuleToAllStates(refactoringRule, true, subMonitor.newChild(1), notWorkingRules);
+			applyRuleToAllStates(refactoringRule, subMonitor.newChild(1), notWorkingRules);
 
 			/*
 			 * If cancel is pressed on progress monitor, abort all and return,
@@ -469,7 +469,7 @@ public class RefactoringPipeline {
 		}
 		List<RefactoringStateNotCommited> refactoringStatesNotCommited = new LinkedList<>();
 		for (Iterator<RefactoringState> iterator = refactoringStates.iterator(); iterator.hasNext();) {
-			RefactoringState refactoringState = (RefactoringState) iterator.next();
+			RefactoringState refactoringState = iterator.next();
 			try {
 				refactoringState.commitAndDiscardWorkingCopy();
 				iterator.remove();
@@ -494,7 +494,7 @@ public class RefactoringPipeline {
 	 * This method should be called when canceling or finishing refactorings.
 	 */
 	public void clearStates() {
-		refactoringStates.forEach(s -> s.discardWorkingCopy());
+		refactoringStates.forEach(RefactoringState::discardWorkingCopy);
 		refactoringStates.clear();
 	}
 
@@ -510,13 +510,12 @@ public class RefactoringPipeline {
 	 * @param rule
 	 *            {@link RefactoringRule} to apply to all
 	 *            {@link RefactoringState} instances
-	 * @param initialApply
 	 * @param subMonitor
 	 * @param returnListNotWorkingRules
 	 *            rules that throw an exception are added to this list
 	 */
 	private void applyRuleToAllStates(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
-			boolean initialApply, IProgressMonitor subMonitor, List<NotWorkingRuleModel> returnListNotWorkingRules) {
+			IProgressMonitor subMonitor, List<NotWorkingRuleModel> returnListNotWorkingRules) {
 
 		SubMonitor monitor = SubMonitor.convert(subMonitor).setWorkRemaining(refactoringStates.size());
 
@@ -544,4 +543,38 @@ public class RefactoringPipeline {
 		}
 	}
 
+	/**
+	 * Method for creating Map with relation from {@link RefactoringState} to
+	 * current source code
+	 * 
+	 * @param sourceMap
+	 */
+	public void setSourceMap(Map<RefactoringState, String> sourceMap) {
+		refactoringStates.stream().forEach(refactoringState -> {
+			try {
+				sourceMap.put(refactoringState, refactoringState.getWorkingCopy().getSource());
+			} catch (JavaModelException e) {
+				logger.error(e.getMessage(), e);
+			}
+		});
+	}
+
+	/**
+	 * Getter for map with original source code for all refactoring states
+	 * 
+	 * @return
+	 */
+	public Map<RefactoringState, String> getInitialSourceMap() {
+		return initialSource;
+	}
+
+	/**
+	 * Getter for refactoring states, used to remove all files without any
+	 * change from summary page
+	 * 
+	 * @return
+	 */
+	public List<RefactoringState> getRefactoringStates() {
+		return refactoringStates;
+	}
 }

@@ -3,7 +3,7 @@ package eu.jsparrow.license.api;
 /**
  * provides a common interface for license validation as declarative service
  * 
- * @author Matthias Webhofer
+ * @author Matthias Webhofer, Andreja Sambolec
  * @since 1.2
  */
 public interface LicenseValidationService {
@@ -23,7 +23,7 @@ public interface LicenseValidationService {
 	 * @return true, if a valid license is present, false otherwise
 	 */
 	boolean isValid();
-	
+
 	/**
 	 * checks, if license is expired
 	 * 
@@ -33,8 +33,11 @@ public interface LicenseValidationService {
 
 	/**
 	 * updates the license key
-	 * @param licenseKey new licensee key.
-	 * @param licenseName new licensee name.
+	 * 
+	 * @param licenseKey
+	 *            new licensee key.
+	 * @param licenseName
+	 *            new licensee name.
 	 * @return status of update
 	 */
 	boolean updateLicenseeNumber(String licenseKey, String licenseName);
@@ -52,4 +55,11 @@ public interface LicenseValidationService {
 	 * @return human readable status information
 	 */
 	String getLicenseStautsUserMessage();
+
+	/**
+	 * checks if type is demo/trial
+	 * 
+	 * @return true if type is demo (trial), false otherwise
+	 */
+	boolean isDemoType();
 }

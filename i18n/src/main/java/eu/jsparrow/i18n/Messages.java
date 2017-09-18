@@ -68,6 +68,9 @@ public class Messages extends NLS {
 	public static String CodeFormatterRule_name;
 	public static String CollectionRemoveAllRule_description;
 	public static String CollectionRemoveAllRule_name;
+	public static String CompareInput_ancestorName;
+	public static String CompareInput_leftName;
+	public static String CompareInput_rightName;
 	public static String CompilationErrorsMessageDialog_compilationErrorDialogMessage;
 	public static String CompilationErrorsMessageDialog_compilationErrorDialogTitle;
 	public static String ConfigureProfileSelectRulesWizardPage_error_EmptyName;
@@ -184,6 +187,8 @@ public class Messages extends NLS {
 	public static String RefactoringRule_default_name;
 	public static String ReImplementingInterfaceRule_description;
 	public static String ReImplementingInterfaceRule_name;
+	public static String RefactoringSummaryWizardPage_description;
+	public static String RefactoringSummaryWizardPage_title;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
