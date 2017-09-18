@@ -162,7 +162,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 				 * note: if the size is too big, it will be reduced to the
 				 * maximum possible size.
 				 */
-				dialog.setPageSize(800, 700);
+				dialog.setPageSize(1200, 1200);
 
 				dialog.open();
 			}
