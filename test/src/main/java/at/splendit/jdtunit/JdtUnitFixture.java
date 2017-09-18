@@ -29,6 +29,13 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEdit;
 
+
+/**
+ * 
+ * 
+ * @author Hans-Jörg Schrödl
+ *
+ */
 @SuppressWarnings({ "nls", "unchecked" })
 public class JdtUnitFixture {
 
@@ -57,7 +64,7 @@ public class JdtUnitFixture {
 	private AST ast;
 
 	private MethodDeclaration methodDeclaration;
-
+	
 	public JdtUnitFixture() {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -93,7 +100,6 @@ public class JdtUnitFixture {
 		methodDeclaration = ast.newMethodDeclaration();
 		methodDeclaration.setName(ast.newSimpleName(METHOD_FIXTURE_NAME));
 		td.bodyDeclarations().add(methodDeclaration);
-
 	}
 
 	public void clear() throws Exception {
@@ -112,7 +118,7 @@ public class JdtUnitFixture {
 		im.setName(ast.newName(name));
 		astRoot.imports().add(im);
 	}
-
+	
 	public void addMethodBlock(String statements) {
 		ASTNode convertedAstNodeWithMethodBody = ASTNode.copySubtree(ast, createBlockFromString(statements));
 		Block block = (Block) convertedAstNodeWithMethodBody;
