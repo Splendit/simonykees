@@ -37,6 +37,7 @@ public class PersistenceModel implements Serializable {
 	private static final String SUBSCRIPTION_STATUS_KEY = "subscription-status"; //$NON-NLS-1$
 	private static final String LAST_SUCCESS_TIMESTAMP = "last-successful-timestamp"; //$NON-NLS-1$
 	private static final String LAST_SUCCESS_LICENSE_TYPE = "last-successful-model"; //$NON-NLS-1$
+	private static final String LAST_PERSISTED_VERSION = "last-persisted-version"; //$NON-NLS-1$
 
 	private String licenseeNumber;
 	private String licenseeName;
@@ -49,11 +50,13 @@ public class PersistenceModel implements Serializable {
 	private boolean subscriptionStatus;
 	private Instant lastSuccessTimestamp;
 	private LicenseType lastSuccessLicenseType;
+	private String lastPersistedVersion;
 
 	public PersistenceModel(String licenseeNumber, String licenseeName, boolean lastValidationStatus,
 			LicenseType licenseType, Instant lastValidationTimestamp, ZonedDateTime demoExpirationDate,
 			ZonedDateTime expirationTimeStamp, ZonedDateTime subscriptionExpirationDate, 
-			boolean subscriptionStatus, Instant lastSuccessTimestamp, LicenseType lastSuccessType) {
+			boolean subscriptionStatus, Instant lastSuccessTimestamp, LicenseType lastSuccessType, 
+			String version) {
 
 		setLicenseeName(licenseeName);
 		setLicenseeNumber(licenseeNumber);
@@ -66,6 +69,7 @@ public class PersistenceModel implements Serializable {
 		setExpirationTimeStamp(expirationTimeStamp);
 		setLastSuccessTimestamp(lastSuccessTimestamp);
 		setLastSuccessLicenseType(lastSuccessType);
+		setLastPersistedVersion(version);
 	}
 
 	public Optional<LicenseType> getLastSuccessLicenseType() {
@@ -156,6 +160,14 @@ public class PersistenceModel implements Serializable {
 		this.subscriptionStatus = subscriptionStatus;
 	}
 	
+	public Optional<String> getLastPersistedVersion() {
+		return Optional.ofNullable(lastPersistedVersion);
+	}
+	
+	private void setLastPersistedVersion(String version) {
+		this.lastPersistedVersion = version;
+	}
+	
 	public static PersistenceModel fromString(String strPersistenceModel) {
 		HashMap<String, String> data = new HashMap<>();
 		String[] splitedByComma = strPersistenceModel.split(SEPARATOR_REGEX);
@@ -180,6 +192,7 @@ public class PersistenceModel implements Serializable {
 		String strSubscriptionStatus = data.get(SUBSCRIPTION_STATUS_KEY);
 		String strLastSuccessTimestamp = data.get(LAST_SUCCESS_TIMESTAMP);
 		String strLastSuccessLicenseType = data.get(LAST_SUCCESS_LICENSE_TYPE);
+		String version = data.get(LAST_PERSISTED_VERSION);
 		
 		boolean lastVal = false;
 		if(lastValStr!=null && !lastValStr.isEmpty()) {
@@ -237,7 +250,8 @@ public class PersistenceModel implements Serializable {
 				subscriptionExpires, 
 				subscriptionStatus, 
 				lastSuccessTimestamp, 
-				lastSuccessType);
+				lastSuccessType, 
+				version);
 		
 		return persistenceModel;
 	}
@@ -292,10 +306,15 @@ public class PersistenceModel implements Serializable {
 		stringBuilder.append(LAST_SUCCESS_LICENSE_TYPE + KEY_VALUE_SEPARATOR);
 		getLastSuccessLicenseType()
 		.ifPresent(stringBuilder::append);
+		stringBuilder.append(SEPARATOR);
+		
+		stringBuilder.append(LAST_PERSISTED_VERSION + KEY_VALUE_SEPARATOR);
+		getLastPersistedVersion()
+		.ifPresent(stringBuilder::append);
 		
 		return stringBuilder.toString();
 	}
-	
+
 	public void updateLicenseeCredential(String licenseeName, String licenseeNumber) {
 		setLicenseeName(licenseeName);
 		setLicenseeNumber(licenseeNumber);

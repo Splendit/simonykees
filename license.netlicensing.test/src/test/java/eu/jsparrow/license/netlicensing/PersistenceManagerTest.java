@@ -48,7 +48,8 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 				subscriptionExpires, 
 				true,
 				nowMin35sec, 
-				LicenseType.NODE_LOCKED);
+				LicenseType.NODE_LOCKED,
+				"");
 		persistenceMng.setPersistenceModel(orgModel);
 		
 		// when persisting the data and reading it back...
@@ -85,7 +86,8 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 				null, 
 				true, 
 				null, 
-				null);
+				null,
+				"");
 		persistenceMng.setPersistenceModel(orgModel);
 		
 		// when persisting the data and reading it back...
@@ -124,8 +126,8 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 				subscriptionExpires, 
 				true, // last subscription status
 				nowMin35sec, // last success timestamp
-				LicenseType.NODE_LOCKED // last success type 
-				); 
+				LicenseType.NODE_LOCKED, // last success type 
+				""); 
 		persistenceMng.setPersistenceModel(orgModel);
 		persistenceMng.persist();
 		
@@ -160,7 +162,8 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 				subscriptionExpires, 
 				true, // last subscription status
 				nowMin35sec, 
-				LicenseType.FLOATING);
+				LicenseType.FLOATING,
+				"");
 		persistenceMng.setPersistenceModel(orgModel);
 		persistenceMng.persist();
 		
@@ -195,7 +198,8 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 				subscriptionExpires, 
 				true, // last subscription status
 				nowMin35sec, 
-				LicenseType.TRY_AND_BUY);
+				LicenseType.TRY_AND_BUY,
+				"");
 		persistenceMng.setPersistenceModel(orgModel);
 		persistenceMng.persist();
 		
@@ -230,7 +234,8 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 				subscriptionExpires, 
 				true, // last subscription status
 				nowMin1350sec, 
-				LicenseType.TRY_AND_BUY);
+				LicenseType.TRY_AND_BUY,
+				"");
 		persistenceMng.setPersistenceModel(orgModel);
 		persistenceMng.persist();
 		
@@ -265,7 +270,8 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 				subscriptionExpires, 
 				true, // last subscription status
 				nowMin3605sec, 
-				LicenseType.NODE_LOCKED);
+				LicenseType.NODE_LOCKED,
+				"");
 		persistenceMng.setPersistenceModel(orgModel);
 		persistenceMng.persist();
 		
@@ -300,7 +306,8 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 				subscriptionExpires, 
 				true, // last subscription status
 				nowMin1005sec, 
-				LicenseType.NODE_LOCKED);
+				LicenseType.NODE_LOCKED,
+				"");
 		persistenceMng.setPersistenceModel(orgModel);
 		persistenceMng.persist();
 		
