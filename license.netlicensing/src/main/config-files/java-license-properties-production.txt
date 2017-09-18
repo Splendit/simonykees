@@ -1,4 +1,4 @@
-package at.splendit.simonykees.license.netlicensing;
+package eu.jsparrow.license.netlicensing;
 
 /**
  * This class is added at compile time by Maven and contains parameters relevant
