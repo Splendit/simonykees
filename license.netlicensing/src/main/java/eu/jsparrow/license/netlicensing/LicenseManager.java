@@ -41,7 +41,7 @@ public class LicenseManager {
 	private static final Logger logger = LoggerFactory.getLogger(LicenseManager.class);
 	
 	private static final String DEFAULT_LICENSEE_NUMBER_PREFIX = LicenseProperties.DEFAULT_LICENSEE_NUMBER_PREFIX;
-	private static String PRODUCT_NUMBER = LicenseProperties.LICENSE_PRODUCT_NUMBER;
+	private static final String PRODUCT_NUMBER = LicenseProperties.LICENSE_PRODUCT_NUMBER;
 		
 	/**
 	 * Rest API authentication token.
@@ -52,7 +52,7 @@ public class LicenseManager {
 	/**
 	 * Product module number related to Floating licenses.
 	 */	
-	private static  String PRODUCT_MODULE_NUMBER = LicenseProperties.LICENSE_PRODUCT_MODULE_NUMBER;
+	private static final String PRODUCT_MODULE_NUMBER = LicenseProperties.LICENSE_PRODUCT_MODULE_NUMBER;
 	
 	
 	
@@ -62,15 +62,15 @@ public class LicenseManager {
 	 */
 	private static final long WAIT_FOR_VALIDATION_RESPONSE = 1000;
 
-	private final boolean DO_VALIDATE = true;
+	private static final boolean DO_VALIDATE = true;
 	/**
 	 * Validation interval in seconds. 10 * 60s = 10 minutes
 	 */
-	private final long VALIDATE_INTERVAL_IN_SECONDS = 600;
+	private static final long VALIDATE_INTERVAL_IN_SECONDS = 600;
 	/**
 	 * Delay of the first validation of the scheduler
 	 */
-	private final long INITIAL_VALIDATION_DELAY = 0;
+	private static final long INITIAL_VALIDATION_DELAY = 0;
 
 	private static LicenseManager instance;
 
@@ -87,7 +87,7 @@ public class LicenseManager {
 		initManager();
 	}
 
-	public synchronized static LicenseManager getInstance() {
+	public static synchronized LicenseManager getInstance() {
 		if (instance == null) {
 			instance = new LicenseManager();
 		}
@@ -104,21 +104,22 @@ public class LicenseManager {
 		LicenseType licenseType;
 		ZonedDateTime evaluationExpiresDate;
 		ZonedDateTime expirationTimeStamp;
-		String licenseeName = persistenceManager.getPersistedLicenseeName().orElse(calcDemoLicenseeName());
-		setLicenseeName(licenseeName);
-		String licenseeNumber = persistenceManager.getPersistedLicenseeNumber().orElse(calcDemoLicenseeNumber());
-		setLicenseeNumber(licenseeNumber);
+		String name = persistenceManager.getPersistedLicenseeName().orElse(calcDemoLicenseeName());
+		setLicenseeName(name);
+		String number = persistenceManager.getPersistedLicenseeNumber().orElse(calcDemoLicenseeNumber());
+		setLicenseeNumber(number);
 
 		try {
-			// make a pre-validate call to get the license model relevant
-			// information...
-			ValidationResult validationResult = preValidate(PRODUCT_NUMBER, PRODUCT_MODULE_NUMBER, licenseeNumber,
-					licenseeName);
-			ResponseParser parser = new ResponseParser(validationResult, now, licenseeName, ValidationAction.CHECK_OUT);
+			/*
+			 * make a pre-validate call to get the information for the relevant
+			 * license model
+			 */
+			ValidationResult validationResult = preValidate(PRODUCT_NUMBER, PRODUCT_MODULE_NUMBER, number, name);
+			ResponseParser parser = new ResponseParser(validationResult, now, name, ValidationAction.CHECK_OUT);
 
 			// cash and persist pre-validation...
 			ValidationResultCache cache = ValidationResultCache.getInstance();
-			cache.updateCachedResult(validationResult, licenseeName, licenseeNumber, now, ValidationAction.CHECK_OUT);
+			cache.updateCachedResult(validationResult, name, number, now, ValidationAction.CHECK_OUT);
 			persistenceManager.persistCachedData();
 
 			// extract pre-validation result
@@ -138,16 +139,16 @@ public class LicenseManager {
 		}
 
 		// construct a license model
-		LicenseModel licenseModel = constructLicenseModel(licenseType, evaluationExpiresDate, expirationTimeStamp,
+		LicenseModel model = constructLicenseModel(licenseType, evaluationExpiresDate, expirationTimeStamp,
 				PRODUCT_MODULE_NUMBER);
-		setLicenseModel(licenseModel);
+		setLicenseModel(model);
 
 		// construct a licensee object...
-		LicenseeModel licensee = new LicenseeModel(licenseeName, licenseeNumber, licenseModel, PRODUCT_NUMBER);
-		setLicensee(licensee);
+		LicenseeModel licensee1 = new LicenseeModel(name, number, model, PRODUCT_NUMBER);
+		setLicensee(licensee1);
 
 		// start validate scheduler
-		ValidateExecutor.startSchedule(schedulerEntity, licensee);
+		ValidateExecutor.startSchedule(schedulerEntity, licensee1);
 
 	}
 
@@ -168,16 +169,18 @@ public class LicenseManager {
 		ZonedDateTime now = ZonedDateTime.now();
 		// to be used only during pre-validation, as a expiration date.
 		ZonedDateTime nowInOneYear = now.plusYears(1);
-		// pre-validation is done by using floating model
-		// because it contains a superset of all other model's validation
-		// parameters
-		String uniqueHwId = getUniqueNodeIdentifier();
+		/*
+		 * pre-validation is done by using floating model
+		 * because it contains a superset of all other model's validation
+		 * parameters
+		 */
+		String hwId = getUniqueNodeIdentifier();
 
-		FloatingModel floatingModel = new FloatingModel(productModuleNumber, nowInOneYear, uniqueHwId);
+		FloatingModel floatingModel = new FloatingModel(productModuleNumber, nowInOneYear, hwId);
 
 		// pre-validation with floating license model...
-		LicenseeModel licensee = new LicenseeModel(licenseeName, licenseeNumber, floatingModel, productNumber);
-		ValidationParameters valParams = licensee.getValidationParams();
+		LicenseeModel licensee1 = new LicenseeModel(licenseeName, licenseeNumber, floatingModel, productNumber);
+		ValidationParameters valParams = licensee1.getValidationParams();
 		preValidationResult = LicenseeService.validate(context, licenseeNumber, valParams);
 
 		return preValidationResult;
@@ -189,11 +192,11 @@ public class LicenseManager {
 	 * {@link FloatingModel}.
 	 */
 	public void checkIn() {
-		LicenseModel licenseModel = getLicenseModel();
+		LicenseModel model = getLicenseModel();
 		PersistenceManager persistMng = PersistenceManager.getInstance();
-		if (licenseModel instanceof FloatingModel) {
+		if (model instanceof FloatingModel) {
 			Context context = RestApiConnection.getAPIRestConnection().getContext();
-			FloatingModel floatingModel = (FloatingModel) licenseModel;
+			FloatingModel floatingModel = (FloatingModel) model;
 			ValidationParameters checkingValParameters = floatingModel.getCheckInValidationParameters();
 			try {
 				Instant now = Instant.now();
@@ -219,27 +222,27 @@ public class LicenseManager {
 
 	private LicenseModel constructLicenseModel(LicenseType licenseType, ZonedDateTime expireDate,
 			ZonedDateTime expireTimeStamp, String productModulNumber) {
-		LicenseModel licenseModel;
+		LicenseModel model;
 
 		switch (licenseType) {
 		case FLOATING:
 			String sessionId = getUniqueNodeIdentifier();
-			licenseModel = new FloatingModel(productModulNumber, expireTimeStamp, sessionId);
+			model = new FloatingModel(productModulNumber, expireTimeStamp, sessionId);
 			break;
 		case TRY_AND_BUY:
 			String secret = getUniqueNodeIdentifier();
-			licenseModel = new TryAndBuyModel(expireDate, secret);
+			model = new TryAndBuyModel(expireDate, secret);
 			break;
 		case NODE_LOCKED:
 			String secretKey = getUniqueNodeIdentifier();
-			licenseModel = new NodeLockedModel(expireDate, secretKey);
+			model = new NodeLockedModel(expireDate, secretKey);
 			break;
 		default:
-			licenseModel = new TryAndBuyModel(expireDate, getUniqueNodeIdentifier());
+			model = new TryAndBuyModel(expireDate, getUniqueNodeIdentifier());
 			break;
 		}
 
-		return licenseModel;
+		return model;
 	}
 
 	void setUniqueHwId(String uniqueHwId) {
@@ -386,9 +389,7 @@ public class LicenseManager {
 		 * create an instance of LicenseChecker from the parser and last
 		 * successful info...
 		 */
-		LicenseChecker checker = new CheckerImpl(parser, lastSuccessTimestamp, lastSuccessType);
-
-		return checker;
+		return new CheckerImpl(parser, lastSuccessTimestamp, lastSuccessType);
 	}
 
 	LicenseModel getLicenseModel() {
@@ -486,6 +487,7 @@ public class LicenseManager {
 		this.licenseeName = licenseeName;
 	}
 
+	@Override
 	public Object clone() throws CloneNotSupportedException {
 		throw new CloneNotSupportedException();
 	}

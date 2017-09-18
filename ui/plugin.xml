@@ -15,54 +15,54 @@
 		            </iterate>
 		           </with>
          		</visibleWhen>
-				<command commandId="eu.jsparrow.core.SelectRulesWizardHandler" 
+				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler" 
 					label="%command.label.select_rules_wizard" 
 					style="push"/>
-				<command commandId="eu.jsparrow.core.LoggerRuleWizardHandler" 
+				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
 					style="push"/>
 			</menu>
 		</menuContribution>
 		<menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=org.eclipse.jdt.ui.refactoring.menu">
 			<menu label="%menu.label">
-				<command commandId="eu.jsparrow.core.SelectRulesWizardHandler" 
+				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler" 
 					label="%command.label.select_rules_wizard" 
 					style="push"/>
-				<command commandId="eu.jsparrow.core.LoggerRuleWizardHandler" 
+				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
 					style="push"/>
 			</menu>
 		</menuContribution>
 		<menuContribution locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.refactoring.menu">
 			<menu label="%menu.label">
-				<command commandId="eu.jsparrow.core.SelectRulesWizardHandler" 
+				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler" 
 					label="%command.label.select_rules_wizard" 
 					style="push"/>
-				<command commandId="eu.jsparrow.core.LoggerRuleWizardHandler" 
+				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
 					style="push"/>
 			</menu>
 		</menuContribution>
 	</extension>
 	<extension point="org.eclipse.ui.commands">
-		<command defaultHandler="eu.jsparrow.core.handler.SelectRulesWizardHandler" 
-			id="eu.jsparrow.core.SelectRulesWizardHandler" 
+		<command defaultHandler="eu.jsparrow.ui.handler.SelectRulesWizardHandler" 
+			id="eu.jsparrow.ui.SelectRulesWizardHandler" 
 			name="%command.name.select_rules_wizard_handler"/>
-		<command defaultHandler="eu.jsparrow.core.handler.LoggerRuleWizardHandler" 
-			id="eu.jsparrow.core.LoggerRuleWizardHandler" 
+		<command defaultHandler="eu.jsparrow.ui.handler.LoggerRuleWizardHandler" 
+			id="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 			name="%command.name.logger_rule_wizard_handler"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
-		<page class="eu.jsparrow.core.ui.preference.SimonykeesPreferencePage" 
-			id="eu.jsparrow.core.ui.preference.ProfilePreferencePage" 
+		<page class="eu.jsparrow.ui.preference.SimonykeesPreferencePage" 
+			id="eu.jsparrow.ui.preference.ProfilePreferencePage" 
 			name="%preferencePage.name"/>
-		<page category="eu.jsparrow.core.ui.preference.ProfilePreferencePage" 
-			class="eu.jsparrow.core.ui.preference.SimonykeesPreferencePageLicense" 
-			id="eu.jsparrow.core.ui.preference.ProfilePreferencePageLicense" 
+		<page category="eu.jsparrow.ui.preference.ProfilePreferencePage" 
+			class="eu.jsparrow.ui.preference.SimonykeesPreferencePageLicense" 
+			id="eu.jsparrow.ui.preference.ProfilePreferencePageLicense" 
 			name="%preferencePageLicense.name"/>
 	</extension>
 	<extension point="org.eclipse.core.runtime.preferences">
-		<initializer class="eu.jsparrow.core.ui.preference.SimonykeesPreferenceInitializer"/>
+		<initializer class="eu.jsparrow.ui.preference.SimonykeesPreferenceInitializer"/>
 	</extension>
 	<extension point="org.eclipse.epp.logging.aeri.ide.servers">
 		<server class="org.eclipse.epp.internal.logging.aeri.ide.server.mars.ServerConnection" 

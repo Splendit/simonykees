@@ -63,6 +63,8 @@ public enum LicenseStatus {
 			case "floating-checked-in": //$NON-NLS-1$
 				status = LicenseStatus.FLOATING_CHECKED_IN;
 				break;
+			default:
+				status = NONE;
 			}
 		}
 

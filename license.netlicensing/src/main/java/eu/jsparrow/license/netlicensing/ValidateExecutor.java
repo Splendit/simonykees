@@ -13,7 +13,7 @@ import eu.jsparrow.license.netlicensing.model.SchedulerModel;
 
 /**
  * Responsible for starting and shutting down the validate scheduler.
- *  
+ * 
  * @author Ardit Ymeri
  * @since 1.0
  *
@@ -21,32 +21,32 @@ import eu.jsparrow.license.netlicensing.model.SchedulerModel;
 public class ValidateExecutor {
 
 	private static final Logger logger = LoggerFactory.getLogger(ValidateExecutor.class);
-	
+
+	private ValidateExecutor() {
+		/*
+		 * Hiding public constructor
+		 */
+	}
+
 	private static ScheduledExecutorService scheduler;
 
-	protected synchronized static void startSchedule(SchedulerModel schedulingInfo, LicenseeModel licensee) {
+	protected static synchronized void startSchedule(SchedulerModel schedulingInfo, LicenseeModel licensee) {
 		final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
-		scheduledExecutor.scheduleWithFixedDelay(new Runnable() {
-			@Override
-			public void run() {
-				if (schedulingInfo.getDoValidate()) {
-					logger.info(Messages.ValidateExecutor_validation_scheduler_started);
-					LicenseValidator.doValidate(licensee);
-				} else {
-					logger.info(Messages.ValidateExecutor_shutting_down_validation_scheduler);
-					scheduledExecutor.shutdown();
-				}
+		scheduledExecutor.scheduleWithFixedDelay(() -> {
+			if (schedulingInfo.getDoValidate()) {
+				logger.info(Messages.ValidateExecutor_validation_scheduler_started);
+				LicenseValidator.doValidate(licensee);
+			} else {
+				logger.info(Messages.ValidateExecutor_shutting_down_validation_scheduler);
+				scheduledExecutor.shutdown();
 			}
-		}, 
-				schedulingInfo.getInitialDelay(), 
-				schedulingInfo.getValidateInterval(), 
-				TimeUnit.SECONDS);
+		}, schedulingInfo.getInitialDelay(), schedulingInfo.getValidateInterval(), TimeUnit.SECONDS);
 
 		scheduler = scheduledExecutor;
 	}
 
-	synchronized static void shutDownScheduler() {
+	static synchronized void shutDownScheduler() {
 		if (scheduler != null) {
 			logger.info(Messages.ValidateExecutor_shutting_down_validation_scheduler);
 			scheduler.shutdown();

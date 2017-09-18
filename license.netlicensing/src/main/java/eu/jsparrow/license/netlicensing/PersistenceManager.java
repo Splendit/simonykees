@@ -34,7 +34,7 @@ public class PersistenceManager {
 	private static final Logger logger = LoggerFactory.getLogger(PersistenceManager.class);
 	
 	private PersistenceModel persistenceModel;
-	private String LICENSEE_CREDENTIALS_NODE_KEY = "credentials"; //$NON-NLS-1$
+	private static final String LICENSEE_CREDENTIALS_NODE_KEY = "credentials"; //$NON-NLS-1$
 	private static final String SIMONYKEES_KEY = "simonykees"; //$NON-NLS-1$
 	private static PersistenceManager instance;
 	private static final String ALGORITHM = "AES"; //$NON-NLS-1$
@@ -50,7 +50,7 @@ public class PersistenceManager {
 		
 	}
 
-	public synchronized static PersistenceManager getInstance() {
+	public static synchronized PersistenceManager getInstance() {
 		if (instance == null) {
 			instance = new PersistenceManager();
 		}
@@ -78,7 +78,7 @@ public class PersistenceManager {
 		
 		Instant lastSuccessTimestamp;
 		LicenseType lastSuccessType;
-		if(lastValidationStatus == true) {
+		if(lastValidationStatus) {
 			lastSuccessTimestamp = timestamp;
 			lastSuccessType = licenseType;
 		} else {
@@ -91,7 +91,7 @@ public class PersistenceManager {
 					.orElse(null);
 		}
 		
-		PersistenceModel persistenceModel = new PersistenceModel(
+		PersistenceModel persistence = new PersistenceModel(
 				licenseeNumber,
 				licenseeName, 
 				lastValidationStatus,
@@ -103,7 +103,7 @@ public class PersistenceManager {
 				subscriptionStatus, 
 				lastSuccessTimestamp,
 				lastSuccessType);
-		setPersistenceModel(persistenceModel);
+		setPersistenceModel(persistence);
 		persist();
 	}
 
@@ -112,8 +112,8 @@ public class PersistenceManager {
 	 */
 	void persist() {
 		
-		PersistenceModel persistenceModel = getPersistenceModel();
-		String licenseModelData = persistenceModel.toString();
+		PersistenceModel persistence = getPersistenceModel();
+		String licenseModelData = persistence.toString();
 		
 		try {
 			ISecurePreferences iSecurePreferences = SecurePreferencesFactory.getDefault();
@@ -141,7 +141,7 @@ public class PersistenceManager {
 	 * @return An instance of {@link PersistenceModel}.
 	 */
 	public Optional<PersistenceModel> readPersistedData() {
-		PersistenceModel persistenceModel = null;
+		PersistenceModel persistence = null;
 		
 		try {
 		Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
@@ -154,13 +154,13 @@ public class PersistenceManager {
 		
 		byte[] outputBytes = cipher.doFinal(inputBytes);
 		String persistenceStr = new String(outputBytes);
-		persistenceModel = PersistenceModel.fromString(persistenceStr);
+		persistence = PersistenceModel.fromString(persistenceStr);
 		
 	} catch (Exception exception) {
 		logger.warn(ExceptionMessages.PersistenceManager_decryption_error, exception);
 	}
 		
-		return Optional.ofNullable(persistenceModel);
+		return Optional.ofNullable(persistence);
 	}
 
 	/**
@@ -168,7 +168,7 @@ public class PersistenceManager {
 	 * object.
 	 */
 	public LicenseChecker vlidateUsingPersistedData() {
-		PersistenceModel persistenceModel = readPersistedData()
+		PersistenceModel persistence = readPersistedData()
 				.orElse( 
 						// if persisted data is corrupted
 						new PersistenceModel(
@@ -184,7 +184,7 @@ public class PersistenceManager {
 								null, // last successful timestamp
 								null // last successful type
 								));
-		return new OfflineLicenseChecker(persistenceModel);
+		return new OfflineLicenseChecker(persistence);
 	}
 	
 	public PersistenceModel getPersistenceModel() {
@@ -234,15 +234,15 @@ public class PersistenceManager {
 		}
 		
 		private ZonedDateTime calcExpirationDate(PersistenceModel persistenceModel) {
-			ZonedDateTime expirationDate;
+			ZonedDateTime date;
 			
 			if(getType() != null && getType().equals(LicenseType.TRY_AND_BUY)) {
-				expirationDate = persistenceModel.getDemoExpirationDate().orElse(null);
+				date = persistenceModel.getDemoExpirationDate().orElse(null);
 			} else {
-				expirationDate = persistenceModel.getSubscriptionExpirationDate().orElse(null);
+				date = persistenceModel.getSubscriptionExpirationDate().orElse(null);
 			}
 			
-			return expirationDate;
+			return date;
 		}
 		
 		private boolean calcValidity(PersistenceModel persistence) {
@@ -271,8 +271,8 @@ public class PersistenceManager {
 				Optional<LicenseType> optLicenseType = persistence.getLicenseType();
 				if(optLicenseType.isPresent()) {
 					// license type was stored...
-					LicenseType licenseType = optLicenseType.get();
-					if(licenseType.equals(LicenseType.TRY_AND_BUY)) {
+					LicenseType type = optLicenseType.get();
+					if(LicenseType.TRY_AND_BUY.equals(type)) {
 						// the stored license type was TryAndBuy. A further check is needed for the expiration date.
 						Optional<ZonedDateTime> demoExpiration = persistence.getDemoExpirationDate();
 						if(demoExpiration.isPresent()
@@ -281,8 +281,8 @@ public class PersistenceManager {
 							status = true;
 						}
 						
-					} else if(licenseType.equals(LicenseType.FLOATING) 
-								|| licenseType.equals(LicenseType.NODE_LOCKED)) {
+					} else if(LicenseType.FLOATING.equals(type) 
+								|| LicenseType.NODE_LOCKED.equals(type)) {
 						/*  
 						 * the stored license type was either Floating or NodeLocked
 						 * a further check is needed for the subscription expiration
@@ -342,7 +342,7 @@ public class PersistenceManager {
 	}
 
 	public void updateLicenseeData(String licenseeName, String licenseeNumber) {
-		PersistenceModel persistenceModel = 
+		PersistenceModel persistence = 
 				readPersistedData()
 				.orElse(
 						// if persisted data is corrupted, keep licensee number
@@ -354,8 +354,8 @@ public class PersistenceManager {
 							null, null, null, null, null, 
 							false, null, null
 						));
-		persistenceModel.updateLicenseeCredential(licenseeName, licenseeNumber);
-		setPersistenceModel(persistenceModel);
+		persistence.updateLicenseeCredential(licenseeName, licenseeNumber);
+		setPersistenceModel(persistence);
 		persist();
 	}
 }

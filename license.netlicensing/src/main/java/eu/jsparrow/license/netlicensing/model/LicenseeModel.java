@@ -29,18 +29,18 @@ public class LicenseeModel {
 	}
 	
 	private void initValidationParameters(String licenseeName) {
-		LicenseModel licenseModel = getLicenseModel();
-		String productNumber = getProductNumber();
+		LicenseModel model = getLicenseModel();
+		String pNumber = getProductNumber();
 		
-		ValidationParameters validationParams = new ValidationParameters();
-		if(licenseModel != null) {
-			validationParams = licenseModel.getValidationParameters();
+		ValidationParameters params = new ValidationParameters();
+		if(model != null) {
+			params = model.getValidationParameters();
 		}
 		
-		validationParams.setLicenseeName(licenseeName);
-		validationParams.setProductNumber(productNumber);
+		params.setLicenseeName(licenseeName);
+		params.setProductNumber(pNumber);
 		
-		setValidationParameters(validationParams);
+		setValidationParameters(params);
 	}
 
 	private void setValidationParameters(ValidationParameters validationParams) {

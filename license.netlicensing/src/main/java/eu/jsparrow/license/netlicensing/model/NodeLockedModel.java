@@ -26,10 +26,10 @@ public class NodeLockedModel extends LicenseModel {
 	@Override
 	public ValidationParameters getValidationParameters() {
 		
-		String secretKey = getSecretKey();
+		String key = getSecretKey();
 		
 		ValidationParameters validationParams = new ValidationParameters();
-		validationParams.setLicenseeSecret(secretKey);
+		validationParams.setLicenseeSecret(key);
 		
 		return validationParams;
 	}
