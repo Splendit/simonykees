@@ -5,13 +5,16 @@
 		<target>System.out</target>
 		<encoder>
 			<Pattern>
-				%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+				%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} -
+				%msg%n
 			</Pattern>
 		</encoder>
 	</appender>
 
 	<logger name="jul" level="info" additivity="false">
-		<appender-ref ref="STDOUT" />
+		<!-- don't append to standard out, only logging from netlicencing -->
+		<!-- ignored for a clean maven build -->
+		<!-- <appender-ref ref="STDOUT" /> -->
 	</logger>
 
 	<root level="info">
