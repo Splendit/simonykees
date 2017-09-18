@@ -99,7 +99,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		LicenseChecker licenseChecker = licenseManager.getValidationData();
 		
 		assertEquals(LicenseType.TRY_AND_BUY, licenseChecker.getType());
-		assertTrue(licenseChecker.isValid());
+		assertTrue("Expecting licensee " + licensee.getLicenseeName() + " (" + licensee.getLicenseeNumber() + ") to have a valid demo license.", licenseChecker.isValid());
 		
 		LicenseValidator.doValidate(licensee);
 		
