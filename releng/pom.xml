@@ -5,7 +5,7 @@
     <artifactId>eu.jsparrow</artifactId>
     <version>2.1.1-SNAPSHOT</version>
   </parent>
-  <artifactId>releng</artifactId>
+  <artifactId>eu.jsparrow.releng</artifactId>
   	<packaging>pom</packaging>
   	<name>jSparrow :: releng</name>
 	<description>jSparrow Release Engeneereing Plugin</description>
