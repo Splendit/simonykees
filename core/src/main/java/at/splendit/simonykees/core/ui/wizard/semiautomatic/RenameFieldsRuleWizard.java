@@ -2,8 +2,10 @@ package at.splendit.simonykees.core.ui.wizard.semiautomatic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,6 +29,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
@@ -44,6 +47,7 @@ import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.rule.impl.PublicFieldsRenamingRule;
 import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.dialog.CompilationErrorsMessageDialog;
+import at.splendit.simonykees.core.ui.preview.RenamingRulePreviewWizard;
 import at.splendit.simonykees.core.ui.wizard.impl.WizardMessageDialog;
 import at.splendit.simonykees.core.util.RefactoringUtil;
 import at.splendit.simonykees.core.visitor.AbstractASTRewriteASTVisitor;
@@ -383,6 +387,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 		// TODO use this below to display
 		// changes onpreview
 
+		Map<String, List<DocumentChange>> changes = new HashMap<>();
 		for (FieldMetadata data : metadata) {
 
 			try {
@@ -391,6 +396,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 				String oldIdentifier = oldName.getIdentifier();
 				data.getCompilationUnit().getJavaElement();
 				List<DocumentChange> docsChanges = renameFieldsRule.computeDocumentChangesPerFiled(data);
+				changes.put(newIdentifier, docsChanges);
 			} catch (JavaModelException e) {
 				// TODO Auto-generated catch
 				// block
@@ -398,11 +404,28 @@ public class RenameFieldsRuleWizard extends Wizard {
 			}
 		}
 
-		/*
-		 * Rectangle rectangle = Display.getCurrent().
-		 * getPrimaryMonitor().getBounds();
-		 * synchronizeWithUIShowRefactoringPreviewWizard (refactoringPipeline,
-		 * rectangle);
-		 */
+//		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
+		synchronizeWithUIShowRefactoringPreviewWizard(changes);
+	}
+
+	private void synchronizeWithUIShowRefactoringPreviewWizard(
+			Map<String, List<DocumentChange>> changes) {
+
+		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
+				selectedJavaProjekt.getElementName()));
+		logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes, selectedJavaProjekt.getElementName(),
+				renameFieldsRule.getName()));
+
+		Display.getDefault().asyncExec(() -> {
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			final WizardDialog dialog = new WizardDialog(shell,
+					new RenamingRulePreviewWizard(changes, renameFieldsRule));
+
+			// maximizes the RefactoringPreviewWizard
+//			dialog.setPageSize(rectangle.width, rectangle.height);
+			dialog.setPageSize(1000, 800);
+			dialog.open();
+		});
+
 	}
 }

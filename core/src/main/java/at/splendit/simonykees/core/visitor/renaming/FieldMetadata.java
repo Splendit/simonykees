@@ -6,33 +6,37 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEditGroup;
 
 /**
- * A type for storing information about a field to be renamed 
- * and all its references. 
+ * A type for storing information about a field to be renamed and all its
+ * references.
  * 
  * @author Ardit Ymeri
  * @since 2.1.0
  *
  */
 public class FieldMetadata {
-	
+
 	private CompilationUnit compilationUnit;
 	private List<ReferenceSearchMatch> references;
 	private VariableDeclarationFragment declarationFragment;
 	private String newIdentifier;
 	private Map<ICompilationUnit, TextEditGroup> textEditGroups;
-	
-	public FieldMetadata(CompilationUnit cu, List<ReferenceSearchMatch> references, VariableDeclarationFragment fragment,
-			String newIdentifier) {
+	private Map<ICompilationUnit, Document> documentMap;
+
+	public FieldMetadata(CompilationUnit cu, List<ReferenceSearchMatch> references,
+			VariableDeclarationFragment fragment, String newIdentifier) {
 		this.compilationUnit = cu;
 		this.references = references;
 		this.declarationFragment = fragment;
 		this.newIdentifier = newIdentifier;
 		this.textEditGroups = new HashMap<>();
+		this.documentMap = new HashMap<>();
 		references.forEach(referece -> referece.setMetadata(this));
 	}
 
@@ -67,35 +71,59 @@ public class FieldMetadata {
 	public String getNewIdentifier() {
 		return newIdentifier;
 	}
-	
+
 	/**
 	 * 
-	 * @return a {@link TextEditGroup} for keeping the text changes related
-	 * to the field and all its references in the given compilation unit.
+	 * @return a {@link TextEditGroup} for keeping the text changes related to
+	 *         the field and all its references in the given compilation unit.
+	 * @throws JavaModelException
 	 */
 	public TextEditGroup getTextEditGroup(ICompilationUnit iCompilationUnit) {
 		if (!textEditGroups.containsKey(iCompilationUnit)) {
 			TextEditGroup textEditGroup = new TextEditGroup(newIdentifier);
 			textEditGroups.put(iCompilationUnit, textEditGroup);
+			try {
+				if (!documentMap.containsKey(iCompilationUnit)) {
+					createDocument(iCompilationUnit);
+				}
+			} catch (JavaModelException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return textEditGroup;
 		} else {
 			return textEditGroups.get(iCompilationUnit);
 		}
 	}
-	
+
+	private void createDocument(ICompilationUnit iCompilationUnit) throws JavaModelException {
+		Document document = new Document(iCompilationUnit.getSource());
+		documentMap.put(iCompilationUnit, document);
+	}
+
 	/**
 	 * 
-	 * @return the list of all {@link TextEditGroup} related to the changes
-	 * of the field. 
+	 * @return a {@link Document} before changes were applied to compilation
+	 *         unit.
+	 * @throws JavaModelException
+	 */
+	public Document getDocument(ICompilationUnit iCompilationUnit) {
+		return documentMap.get(iCompilationUnit);
+	}
+
+	/**
+	 * 
+	 * @return the list of all {@link TextEditGroup} related to the changes of
+	 *         the field.
 	 */
 	public List<TextEditGroup> getAllTexEditGroups() {
 		return new ArrayList<>(textEditGroups.values());
 	}
-	
+
 	/**
 	 * 
-	 * @return the list of the compilation unit having at least one reference
-	 * of the field being renamed.
+	 * @return the list of the compilation unit having at least one reference of
+	 *         the field being renamed.
 	 */
 	public List<ICompilationUnit> getTargetICompilationUnits() {
 		return new ArrayList<>(textEditGroups.keySet());

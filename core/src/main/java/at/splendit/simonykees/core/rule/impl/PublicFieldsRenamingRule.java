@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import at.splendit.simonykees.core.rule.RefactoringRule;
@@ -65,11 +66,11 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 		for (ICompilationUnit iCompilationUnit : targetCompilationUnits) {
 			TextEditGroup editGroup = metaData.getTextEditGroup(iCompilationUnit);
 			if (!editGroup.isEmpty()) {
-				Document document = new Document(iCompilationUnit.getSource());
-				DocumentChange documentChange = new DocumentChange(metaData.getNewIdentifier(), document);
-				documentChange.setEdit(new MultiTextEdit());
+				DocumentChange documentChange = new DocumentChange(metaData.getNewIdentifier(), metaData.getDocument(iCompilationUnit));
+				TextEdit rootEdit = editGroup.getTextEdits()[0].getRoot();
+				documentChange.setEdit(rootEdit);
 				documentChange.addTextEditGroup(editGroup);
-				
+				documentChange.setTextType("java"); //$NON-NLS-1$
 				documentChanges.add(documentChange);
 			}
 		}

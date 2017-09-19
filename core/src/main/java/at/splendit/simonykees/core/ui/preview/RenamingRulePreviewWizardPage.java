@@ -1,0 +1,137 @@
+package at.splendit.simonykees.core.ui.preview;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
+import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+
+import at.splendit.simonykees.core.rule.impl.PublicFieldsRenamingRule;
+
+@SuppressWarnings("restriction")
+public class RenamingRulePreviewWizardPage extends WizardPage {
+
+	Map<String, List<DocumentChange>> changes;
+
+	private CheckboxTreeViewer viewer;
+	private IChangePreviewViewer currentPreviewViewer;
+	
+	private List<DocumentChangeWrapper> changesWrapperList;
+
+	public RenamingRulePreviewWizardPage(Map<String, List<DocumentChange>> changes,
+			PublicFieldsRenamingRule rule) {
+		super(rule.getName());
+		setTitle(rule.getName());
+		setDescription(rule.getDescription());
+
+		this.changes = changes;
+
+		try {
+			convertChangesToDocumentChangeWrappers();
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	private void convertChangesToDocumentChangeWrappers() throws CoreException {
+		changesWrapperList = new ArrayList<>();
+		for (String declaration : changes.keySet()) {
+			List<DocumentChange> changesForField = changes.get(declaration);
+			DocumentChange parent = null;
+			DocumentChangeWrapper dcw = null;
+			for (DocumentChange document : changesForField) {
+				if (document.getCurrentContent(new NullProgressMonitor()).contains(declaration.toString())) {
+					parent = document;
+					dcw = new DocumentChangeWrapper(document, null);
+					break;
+				}
+			}
+			if (null == parent) {
+				continue;
+			}
+			for (DocumentChange document : changesForField) {
+				dcw.addChild(document);
+			}
+			changesWrapperList.add(dcw);
+		}
+	}
+
+	@Override
+	public void createControl(Composite parent) {
+		Composite container = new Composite(parent, SWT.NONE);
+
+		GridLayout layout = new GridLayout();
+
+		// margin from TextEditChangePreviewViewer to Composite
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+
+		// without setting the layout, nothing displays
+		container.setLayout(layout);
+
+		setControl(container);
+
+		SashForm sashForm = new SashForm(container, SWT.VERTICAL);
+
+		createFileView(sashForm);
+		createPreviewViewer(sashForm);
+
+		/*
+		 * sets height relation between children to be 1:3 when it has two
+		 * children
+		 */
+		sashForm.setWeights(new int[] { 1, 3 });
+	}
+
+	private void createFileView(SashForm parent) {
+		viewer = new CheckboxTreeViewer(parent);
+		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
+		viewer.setContentProvider(new ChangeElementContentProvider());
+		viewer.setLabelProvider(new ChangeElementLabelProvider());
+		viewer.setInput("root"); // pass a non-null that will be ignored
+
+		// When user checks a checkbox in the tree, check all its children
+		viewer.addCheckStateListener(event -> {
+			// If the item is checked . . .
+			if (event.getChecked()) {
+				// . . . check all its children
+				viewer.setSubtreeChecked(event.getElement(), true);
+			}
+		});
+		
+		populateFileView();
+	}
+
+	private void populateFileView() {
+		viewer.setInput(changesWrapperList.toArray(new DocumentChangeWrapper[]{}));
+	}
+
+	private void createPreviewViewer(SashForm parent) {
+
+		// GridData works with GridLayout
+		GridData gridData = new GridData(GridData.FILL_BOTH);
+		parent.setLayoutData(gridData);
+
+		currentPreviewViewer = new TextEditChangePreviewViewer();
+		currentPreviewViewer.createControl(parent);
+
+		populatePreviewViewer();
+	}
+
+	private void populatePreviewViewer() {
+		currentPreviewViewer.setInput(TextEditChangePreviewViewer.createInput(changesWrapperList.get(0).getDocumentChange()));
+	}
+
+}
