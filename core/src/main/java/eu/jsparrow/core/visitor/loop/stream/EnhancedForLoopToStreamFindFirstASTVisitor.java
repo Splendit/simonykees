@@ -180,7 +180,10 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 	 */
 	private Expression boxIfPrimitive(Expression expression, ITypeBinding expectedType) {
 		if (expectedType == null || !expectedType.isPrimitive()) {
-			return expression;
+			/*
+			 * The returned expression should be a new node.
+			 */
+			return (Expression)astRewrite.createCopyTarget(expression);
 		}
 
 		AST ast = expression.getAST();
