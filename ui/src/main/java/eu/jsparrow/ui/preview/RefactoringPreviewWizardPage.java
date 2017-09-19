@@ -15,6 +15,8 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
@@ -29,6 +31,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
@@ -124,6 +127,15 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			public String getText(Object element) {
 				ICompilationUnit compUnit = (ICompilationUnit) element;
 				return String.format("%s - %s", getClassNameString(compUnit), getPathString(compUnit)); //$NON-NLS-1$
+			}
+		});
+		
+		viewer.setComparator(new ViewerComparator() {
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				ICompilationUnit compUnitFirst = (ICompilationUnit) e1;
+				ICompilationUnit compUnitSecond = (ICompilationUnit) e2;
+				return getClassNameString(compUnitFirst).compareTo(getClassNameString(compUnitSecond));
 			}
 		});
 

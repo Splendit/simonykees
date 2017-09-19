@@ -12,6 +12,8 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -110,6 +112,15 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 			public String getText(Object element) {
 				ICompilationUnit compUnit = ((RefactoringState) element).getWorkingCopy();
 				return String.format("%s - %s", getClassNameString(compUnit), getPathString(compUnit)); //$NON-NLS-1$
+			}
+		});
+		
+		viewer.setComparator(new ViewerComparator() {
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				ICompilationUnit compUnitFirst = ((RefactoringState) e1).getWorkingCopy();
+				ICompilationUnit compUnitSecond = ((RefactoringState) e2).getWorkingCopy();
+				return getClassNameString(compUnitFirst).compareTo(getClassNameString(compUnitSecond));
 			}
 		});
 
