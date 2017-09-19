@@ -130,15 +130,6 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			}
 		});
 		
-		viewer.setComparator(new ViewerComparator() {
-			@Override
-			public int compare(Viewer viewer, Object e1, Object e2) {
-				ICompilationUnit compUnitFirst = (ICompilationUnit) e1;
-				ICompilationUnit compUnitSecond = (ICompilationUnit) e2;
-				return getClassNameString(compUnitFirst).compareTo(getClassNameString(compUnitSecond));
-			}
-		});
-
 		viewer.addSelectionChangedListener(createSelectionChangedListener());
 		viewer.addCheckStateListener(createCheckStateListener());
 
