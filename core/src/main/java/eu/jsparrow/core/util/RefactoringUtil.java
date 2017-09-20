@@ -1,5 +1,6 @@
 package eu.jsparrow.core.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +89,9 @@ public final class RefactoringUtil {
 				addCompilationUnit(result, compilationUnit);
 			} else if (javaElement instanceof IPackageFragment) {
 				IPackageFragment packageFragment = (IPackageFragment) javaElement;
+				if(packageFragment.hasSubpackages()) {
+					collectICompilationUnits(result,getSubPackages(packageFragment),subMonitor);
+				}
 				addCompilationUnit(result, packageFragment.getCompilationUnits());
 			} else if (javaElement instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot) javaElement;
@@ -109,6 +113,32 @@ public final class RefactoringUtil {
 				subMonitor.worked(1);
 			}
 		}
+	}
+	
+	/**
+	 *
+	 * @return List[PackageFragment]
+	 */
+	private static List<IJavaElement> getSubPackages(IPackageFragment p) {
+		List<IJavaElement> result = new ArrayList<>();
+		List<IJavaElement> packages;
+		if(p.getParent() != null && p.getParent() instanceof IPackageFragmentRoot) {
+			IPackageFragmentRoot fragmentRoot = (IPackageFragmentRoot) p.getParent();
+			try {
+				packages = Arrays.asList(fragmentRoot.getChildren());
+				for (IJavaElement packageElement : packages) {
+					if (packageElement.getElementName().startsWith(p.getElementName()) &&
+							!packageElement.getElementName().equals(p.getElementName())) {
+						result.add(packageElement);
+						logger.debug("Subpackage found:" + packageElement.getElementName());
+					}
+
+				}
+			} catch (JavaModelException e) {
+				logger.debug("java model exception",e);
+			}
+		}
+		return result;
 	}
 
 	/**
