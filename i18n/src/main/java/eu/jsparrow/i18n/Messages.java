@@ -189,6 +189,8 @@ public class Messages extends NLS {
 	public static String ReImplementingInterfaceRule_name;
 	public static String RefactoringSummaryWizardPage_description;
 	public static String RefactoringSummaryWizardPage_title;
+
+	public static String RefactoringSummaryWizardPage_warn_disableFinishWhenTrial;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
