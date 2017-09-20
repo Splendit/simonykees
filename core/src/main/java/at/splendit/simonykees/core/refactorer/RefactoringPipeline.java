@@ -39,10 +39,10 @@ import at.splendit.simonykees.i18n.ExceptionMessages;
 public class RefactoringPipeline {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringPipeline.class);
+	private boolean testmode = false;
 
 	/**
-	 * List of selected {@link IJavaElement}s wrapped as
-	 * {@link RefactoringState}s
+	 * List of selected {@link IJavaElement}s wrapped as {@link RefactoringState}s
 	 */
 	private List<RefactoringState> refactoringStates;
 
@@ -50,6 +50,11 @@ public class RefactoringPipeline {
 	 * List of selected rules.
 	 */
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
+	
+	/**
+	 * Holder map for original source code, used for summary page
+	 */
+	private Map<RefactoringState, String> initialSource = new HashMap<>();
 
 	private boolean multipleProjects = false;
 
@@ -65,18 +70,17 @@ public class RefactoringPipeline {
 	 * Stores the selected rules.
 	 * 
 	 * @param rules
-	 *            {@link List} of {@link RefactoringRule}s to apply to the
-	 *            selected {@link IJavaElement}s
+	 *            {@link List} of {@link RefactoringRule}s to apply to the selected
+	 *            {@link IJavaElement}s
 	 */
 	public RefactoringPipeline(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 
 		/*
-		 * Note: We cannot immediately call prepareRefactoring because we need
-		 * to call prepareRefactoring in the SelectRulesWizard when finishing
-		 * (in a Job) but we need the RefactoringPipeline instance outside of
-		 * the Job. Since the Job needs the pipeline to be
-		 * "final or effectively final", the constructor has to be called
-		 * outside of the Job. Plus we only know the list of rules when
+		 * Note: We cannot immediately call prepareRefactoring because we need to call
+		 * prepareRefactoring in the SelectRulesWizard when finishing (in a Job) but we
+		 * need the RefactoringPipeline instance outside of the Job. Since the Job needs
+		 * the pipeline to be "final or effectively final", the constructor has to be
+		 * called outside of the Job. Plus we only know the list of rules when
 		 * finishing.
 		 */
 
@@ -84,13 +88,24 @@ public class RefactoringPipeline {
 		this.refactoringStates = new ArrayList<>();
 	}
 
+	/**
+	 * FIXME added to suppress check for syntax errors on test mode
+	 * 
+	 * @param rules
+	 * @param testmode
+	 */
+	public RefactoringPipeline(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules, boolean testmode) {
+		this(rules);
+		this.testmode = testmode;
+	}
+
 	public List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getRules() {
 		return rules;
 	}
 
 	/**
-	 * Setter for rules when finish button is pressed in SelectRulesWizard to
-	 * store selected rules
+	 * Setter for rules when finish button is pressed in SelectRulesWizard to store
+	 * selected rules
 	 * 
 	 * @param rules
 	 *            selected rules
@@ -153,16 +168,16 @@ public class RefactoringPipeline {
 	/**
 	 * Prepare working copies for refactoring.
 	 * <p>
-	 * Takes a list of {@link IJavaElement}s and creates
-	 * {@link ICompilationUnit}s for them. Those {@link ICompilationUnit}s are
-	 * stored as working copies in a list of {@link RefactoringState}s.
+	 * Takes a list of {@link IJavaElement}s and creates {@link ICompilationUnit}s
+	 * for them. Those {@link ICompilationUnit}s are stored as working copies in a
+	 * list of {@link RefactoringState}s.
 	 * 
 	 * @param IProgressMonitor
 	 *            monitor used to show progress in UI
 	 * 
 	 * @throws RefactoringException
-	 *             if this element does not exist or if an exception occurs
-	 *             while accessing its corresponding resource.
+	 *             if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource.
 	 * 
 	 * @since 0.9
 	 * 
@@ -188,10 +203,10 @@ public class RefactoringPipeline {
 			} else {
 
 				/*
-				 * Converts the monitor to a SubMonitor and sets name of task on
-				 * progress monitor dialog. Size is set to number 100 and then
-				 * scaled to size of the compilationUnits list. Each compilation
-				 * unit increases worked amount for same size.
+				 * Converts the monitor to a SubMonitor and sets name of task on progress
+				 * monitor dialog. Size is set to number 100 and then scaled to size of the
+				 * compilationUnits list. Each compilation unit increases worked amount for same
+				 * size.
 				 */
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(compilationUnits.size());
 				subMonitor.setTaskName(""); //$NON-NLS-1$
@@ -202,12 +217,10 @@ public class RefactoringPipeline {
 					subMonitor.subTask(compilationUnit.getElementName());
 
 					/*
-					 * Check if more than one project is selected. If it is,
-					 * show message to select only one project files. Temporary
-					 * workaround for Package explorer. There is filter for
-					 * Project explorer when selected project is not Java
-					 * project to not show the jSparrow, but solution for
-					 * multiple project selection is not done.
+					 * Check if more than one project is selected. If it is, show message to select
+					 * only one project files. Temporary workaround for Package explorer. There is
+					 * filter for Project explorer when selected project is not Java project to not
+					 * show the jSparrow, but solution for multiple project selection is not done.
 					 * 
 					 * See SIM-496
 					 */
@@ -217,7 +230,8 @@ public class RefactoringPipeline {
 						return null;
 					}
 
-					if (RefactoringUtil.checkForSyntaxErrors(compilationUnit)) {
+					/** SIM-748 Test work around to don't apply syntax checks there */
+					if (!testmode && RefactoringUtil.checkForSyntaxErrors(compilationUnit)) {
 						logger.info("Adding compilation unit to errorList: " + compilationUnit.getElementName());
 						containingErrorList.add(compilationUnit);
 					} else {
@@ -226,8 +240,7 @@ public class RefactoringPipeline {
 					}
 
 					/*
-					 * If cancel is pressed on progress monitor, abort all and
-					 * return, else continue
+					 * If cancel is pressed on progress monitor, abort all and return, else continue
 					 */
 					if (subMonitor.isCanceled()) {
 						return containingErrorList;
@@ -237,8 +250,7 @@ public class RefactoringPipeline {
 				}
 
 				/**
-				 * if there are syntax errors within source files display it to
-				 * the user
+				 * if there are syntax errors within source files display it to the user
 				 */
 				if (!containingErrorList.isEmpty()) {
 					logger.info(NLS.bind(ExceptionMessages.RefactoringPipeline_syntax_errors_exist, containingErrorList
@@ -254,6 +266,19 @@ public class RefactoringPipeline {
 		}
 	}
 
+	public void createRefactoringStates(List<ICompilationUnit> compilationUnits) {
+		for (ICompilationUnit compilationUnit : compilationUnits) {
+
+			try {
+				refactoringStates.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
+			} catch (JavaModelException e) {
+				logger.error(e.getMessage(), e);
+			}
+
+		}
+
+	}
+
 	public boolean isMultipleProjects() {
 		return multipleProjects;
 	}
@@ -262,15 +287,15 @@ public class RefactoringPipeline {
 	 * Apply {@link RefactoringRule}s to the working copies of each
 	 * {@link RefactoringState}. Changes are <b>not</b> yet committed.
 	 * <p>
-	 * All rules that throw an exception are collected and thrown as a
-	 * RuleException at the end.
+	 * All rules that throw an exception are collected and thrown as a RuleException
+	 * at the end.
 	 * 
 	 * @param IProgressMonitor
 	 *            monitor used to show progress in UI
 	 * 
 	 * @throws RefactoringException
-	 *             if no working copies were found to apply
-	 *             {@link RefactoringRule}s to
+	 *             if no working copies were found to apply {@link RefactoringRule}s
+	 *             to
 	 * @throws RuleException
 	 *             if the {@link RefactoringRule} could no be initialised or not
 	 *             applied
@@ -288,10 +313,9 @@ public class RefactoringPipeline {
 		}
 
 		/*
-		 * Converts the monitor to a SubMonitor and sets name of task on
-		 * progress monitor dialog Size is set to number 100 and then scaled to
-		 * size of the rules list Each refactoring rule increases worked amount
-		 * for same size
+		 * Converts the monitor to a SubMonitor and sets name of task on progress
+		 * monitor dialog Size is set to number 100 and then scaled to size of the rules
+		 * list Each refactoring rule increases worked amount for same size
 		 */
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(rules.size());
 		subMonitor.setTaskName(""); //$NON-NLS-1$
@@ -302,15 +326,14 @@ public class RefactoringPipeline {
 			subMonitor.subTask(refactoringRule.getName());
 
 			/*
-			 * Sends new child of subMonitor which takes in progress bar size of
-			 * 1 of rules size In method that part of progress bar is split to
-			 * number of compilation units
+			 * Sends new child of subMonitor which takes in progress bar size of 1 of rules
+			 * size In method that part of progress bar is split to number of compilation
+			 * units
 			 */
 			applyRuleToAllStates(refactoringRule, true, subMonitor.newChild(1), notWorkingRules);
 
 			/*
-			 * If cancel is pressed on progress monitor, abort all and return,
-			 * else continue
+			 * If cancel is pressed on progress monitor, abort all and return, else continue
 			 */
 			if (subMonitor.isCanceled()) {
 				return;
@@ -326,8 +349,8 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * Apply {@link RefactoringRule}s to the working copies with changed check
-	 * state of each {@link RefactoringState}
+	 * Apply {@link RefactoringRule}s to the working copies with changed check state
+	 * of each {@link RefactoringState}
 	 * 
 	 * @param changedCompilationUnits
 	 *            unselected compilation units
@@ -341,10 +364,9 @@ public class RefactoringPipeline {
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
 
 		/*
-		 * Converts the monitor to a SubMonitor and sets name of task on
-		 * progress monitor dialog Size is set to number 100 and then scaled to
-		 * size of the rules list Each refactoring rule increases worked amount
-		 * for same size
+		 * Converts the monitor to a SubMonitor and sets name of task on progress
+		 * monitor dialog Size is set to number 100 and then scaled to size of the rules
+		 * list Each refactoring rule increases worked amount for same size
 		 */
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
 				.setWorkRemaining(rules.size() * changedCompilationUnits.size());
@@ -487,15 +509,15 @@ public class RefactoringPipeline {
 	/**
 	 * Adds a {@link RefactoringRule} to all {@link RefactoringState}s.
 	 * <p>
-	 * If an Exception occurs while applying a rule to a state, the combination
-	 * of rule and state is added to the "not working rules" list and the
-	 * refactoring continues.
+	 * If an Exception occurs while applying a rule to a state, the combination of
+	 * rule and state is added to the "not working rules" list and the refactoring
+	 * continues.
 	 * <p>
 	 * This functionality used to be in the {@link RefactoringRule}.
 	 * 
 	 * @param rule
-	 *            {@link RefactoringRule} to apply to all
-	 *            {@link RefactoringState} instances
+	 *            {@link RefactoringRule} to apply to all {@link RefactoringState}
+	 *            instances
 	 * @param initialApply
 	 * @param subMonitor
 	 * @param returnListNotWorkingRules
@@ -519,8 +541,7 @@ public class RefactoringPipeline {
 			}
 
 			/*
-			 * If cancel is pressed on progress monitor, abort all and return,
-			 * else continue
+			 * If cancel is pressed on progress monitor, abort all and return, else continue
 			 */
 			if (monitor.isCanceled()) {
 				return;
@@ -530,4 +551,38 @@ public class RefactoringPipeline {
 		}
 	}
 
+	/**
+	 * Method for creating Map with relation from {@link RefactoringState} to
+	 * current source code
+	 * 
+	 * @param sourceMap
+	 */
+	public void setSourceMap(Map<RefactoringState, String> sourceMap) {
+		refactoringStates.stream().forEach(refactoringState -> {
+			try {
+				sourceMap.put(refactoringState, refactoringState.getWorkingCopy().getSource());
+			} catch (JavaModelException e) {
+				logger.error(e.getMessage(), e);
+			}
+		});
+	}
+
+	/**
+	 * Getter for map with original source code for all refactoring states
+	 * 
+	 * @return
+	 */
+	public Map<RefactoringState, String> getInitialSourceMap() {
+		return initialSource;
+	}
+
+	/**
+	 * Getter for refactoring states, used to remove all files without any change
+	 * from summary page
+	 * 
+	 * @return
+	 */
+	public List<RefactoringState> getRefactoringStates() {
+		return refactoringStates;
+	}
 }
