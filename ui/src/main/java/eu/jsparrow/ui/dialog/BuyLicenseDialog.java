@@ -137,6 +137,10 @@ public class BuyLicenseDialog extends Dialog {
 		titleLabel.setText(message);
 
 		Link link = new Link(area, SWT.NONE);
+		gridData = new GridData();
+		gridData.verticalIndent = 12;
+		gridData.widthHint = 450;
+		link.setLayoutData(gridData);
 		link.setText(Messages.BuyLicenseDialog_purchaseLinkLabel);
 		link.addSelectionListener(new SelectionAdapter() {
 
