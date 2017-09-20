@@ -6,7 +6,10 @@ import java.util.Map;
 
 import org.eclipse.compare.internal.ComparePreferencePage;
 import org.eclipse.compare.internal.CompareUIPlugin;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -33,6 +36,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.dialog.CompareInput;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * Wizard page which collects all changes on all {@link ICompilationUnit}s made
@@ -56,6 +60,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	private Control compareControl;
 	private Composite changeContainer;
 
+	protected IStatus fSelectionStatus;
+
 	public RefactoringSummaryWizardPage(RefactoringPipeline refactoringPipeline) {
 		super(Messages.RefactoringSummaryWizardPage_title);
 		setTitle(Messages.RefactoringSummaryWizardPage_title);
@@ -64,6 +70,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		this.refactoringPipeline = refactoringPipeline;
 		setInitialChanges();
 		this.currentRefactoringState = initialSource.keySet().stream().findFirst().orElse(null);
+
+		fSelectionStatus = new StatusInfo();
 	}
 
 	/*
@@ -222,6 +230,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 			setFinalChanges();
 			populatePreviewViewer();
 			viewer.setSelection(new StructuredSelection(currentRefactoringState));
+			doStatusUpdate();
 		}
 		super.setVisible(visible);
 	}
@@ -287,4 +296,29 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 			compareControl.dispose();
 		}
 	}
+
+	protected void doStatusUpdate() {
+		if (LicenseUtil.getInstance().isTrial()) {
+			((StatusInfo) fSelectionStatus).setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenTrial);
+		} else {
+			fSelectionStatus = new StatusInfo();
+		}
+
+		/*
+		 * the mode severe status will be displayed and the OK button
+		 * enabled/disabled.
+		 */
+		updateStatus(fSelectionStatus);
+	}
+
+	/**
+	 * Updates the status line and the OK button according to the given status
+	 *
+	 * @param status
+	 *            status to apply
+	 */
+	protected void updateStatus(IStatus status) {
+		StatusUtil.applyToStatusLine(this, status);
+	}
+
 }
