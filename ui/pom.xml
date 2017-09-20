@@ -11,4 +11,41 @@
 		<version>2.1.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
+	<profiles>
+		<profile>
+			<id>proguard</id>
+			<activation>
+				<property>
+					<!-- With this profile active, obfuscation will happen -->
+					<name>proguard</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.wvengen</groupId>
+						<artifactId>proguard-maven-plugin</artifactId>
+						<configuration>
+							<options>
+								<option>
+									-libraryjars
+									${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar 
+								</option>
+								<option>
+									-libraryjars
+									${project.basedir}/../core/target/eu.jsparrow.core-${project.version}_proguard_base.jar
+								</option>
+								<option>-applymapping
+									${project.basedir}/../logging/target/logging.out</option>
+								<option>-applymapping
+									${project.basedir}/../core/target/core.out</option>
+								<option>-printmapping
+									${project.build.directory}/ui.out</option>
+							</options>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

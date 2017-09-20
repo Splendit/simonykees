@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="jsparrow.standalone.feature"
+      id="eu.jsparrow.standalone.feature"
       label="jSparrow"
       version="2.1.1.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
