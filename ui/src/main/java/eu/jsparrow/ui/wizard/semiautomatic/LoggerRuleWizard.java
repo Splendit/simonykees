@@ -29,7 +29,6 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
-import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -133,17 +132,12 @@ public class LoggerRuleWizard extends Wizard {
 			public void done(IJobChangeEvent event) {
 
 				if (event.getResult().isOK()) {
-					if (LicenseUtil.getInstance().isValid()) {
-						if (refactoringPipeline.hasChanges()) {
+					if (refactoringPipeline.hasChanges()) {
 
-							synchronizeWithUIShowRefactoringPreviewWizard(refactoringPipeline, rectangle);
-						} else {
-
-							WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
-						}
+						synchronizeWithUIShowRefactoringPreviewWizard(refactoringPipeline, rectangle);
 					} else {
 
-						WizardMessageDialog.synchronizeWithUIShowLicenseError();
+						WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
 					}
 				} else {
 					// do nothing if status is canceled, close
@@ -165,8 +159,8 @@ public class LoggerRuleWizard extends Wizard {
 
 		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
 				selectedJavaProjekt.getElementName()));
-		logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
-				selectedJavaProjekt.getElementName(), rule.getName()));
+		logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes, selectedJavaProjekt.getElementName(),
+				rule.getName()));
 
 		Display.getDefault().asyncExec(new Runnable() {
 

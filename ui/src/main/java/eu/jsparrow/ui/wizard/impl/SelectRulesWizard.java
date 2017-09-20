@@ -29,7 +29,6 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
-import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * {@link Wizard} holding the {@link AbstractSelectRulesWizardPage}, which
@@ -135,15 +134,10 @@ public class SelectRulesWizard extends Wizard {
 			public void done(IJobChangeEvent event) {
 
 				if (event.getResult().isOK()) {
-					if (LicenseUtil.getInstance().isValid()) {
-						if (refactoringPipeline.hasChanges()) {
-							synchronizeWithUIShowRefactoringPreviewWizard(refactoringPipeline, rectangle);
-						} else {
-							WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
-						}
+					if (refactoringPipeline.hasChanges()) {
+						synchronizeWithUIShowRefactoringPreviewWizard(refactoringPipeline, rectangle);
 					} else {
-
-						WizardMessageDialog.synchronizeWithUIShowLicenseError();
+						WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
 					}
 				} else {
 					// do nothing if status is canceled, close
@@ -168,7 +162,7 @@ public class SelectRulesWizard extends Wizard {
 
 			@Override
 			public void run() {
-				
+
 				logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
 						javaElements.get(0).getJavaProject().getElementName()));
 				logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
