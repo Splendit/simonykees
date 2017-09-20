@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.compare.internal.CompareDialog;
 import org.eclipse.compare.internal.ComparePreferencePage;
 import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.runtime.IStatus;
@@ -161,11 +162,14 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 				finalSource.remove(state);
 			}
 		});
-		if (!initialSource.keySet().isEmpty()) {
-			this.currentRefactoringState = (RefactoringState) viewer.getElementAt(0);
-		}
-
+	
 		populateFileView();
+		
+		if (viewer.getTable().getItemCount() > 0) {
+			this.currentRefactoringState = (RefactoringState) viewer.getElementAt(0);
+		} else {
+			this.currentRefactoringState = null;			
+		}
 	}
 
 	protected void populateFileView() {
@@ -229,7 +233,9 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		if (visible) {
 			setFinalChanges();
 			populatePreviewViewer();
-			viewer.setSelection(new StructuredSelection(currentRefactoringState));
+			if (null != currentRefactoringState) {
+				viewer.setSelection(new StructuredSelection(currentRefactoringState));
+			}
 			doStatusUpdate();
 		}
 		super.setVisible(visible);
@@ -273,8 +279,12 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 		Display.getDefault().syncExec(() -> {
 			CompareInput ci;
-			ci = new CompareInput(currentRefactoringState.getWorkingCopyName(),
-					initialSource.get(currentRefactoringState), finalSource.get(currentRefactoringState));
+			if (null != currentRefactoringState) {
+				ci = new CompareInput(currentRefactoringState.getWorkingCopyName(),
+						initialSource.get(currentRefactoringState), finalSource.get(currentRefactoringState));
+			} else {
+				ci = new CompareInput("", "", "");
+			}
 			compareControl = createInput(changeContainer, ci);
 			compareControl.getParent().layout();
 		});
@@ -299,7 +309,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 	protected void doStatusUpdate() {
 		if (LicenseUtil.getInstance().isTrial()) {
-			((StatusInfo) fSelectionStatus).setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenTrial);
+			((StatusInfo) fSelectionStatus)
+					.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenTrial);
 		} else {
 			fSelectionStatus = new StatusInfo();
 		}
