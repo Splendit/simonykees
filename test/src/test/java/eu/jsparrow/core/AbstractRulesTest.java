@@ -105,7 +105,7 @@ public abstract class AbstractRulesTest {
 		List<IJavaElement> javaElements = new ArrayList<>();
 		javaElements.add(compilationUnit);
 
-		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules);
+		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules, true);
 
 		/*
 		 * A default progress monitor implementation, used just for testing
