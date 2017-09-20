@@ -21,6 +21,7 @@ import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.exception.SimonykeesException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
@@ -67,7 +68,10 @@ public class RefactoringPreviewWizard extends Wizard {
 				addPage(new RefactoringPreviewWizardPage(changes, rule));
 			}
 		});
-		addPage(summaryPage);
+		if (!(refactoringPipeline.getRules().size() == 1
+				&& refactoringPipeline.getRules().get(0) instanceof StandardLoggerRule)) {
+			addPage(summaryPage);
+		}
 	}
 
 	@Override
