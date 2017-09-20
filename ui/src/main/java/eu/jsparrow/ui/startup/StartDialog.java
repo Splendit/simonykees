@@ -298,6 +298,10 @@ public class StartDialog extends Dialog {
 		buyLicenseLabel.setText(Messages.StartDialog_buyLicenseLabel);
 
 		Link licenseLinkLabel = new Link(parent, SWT.NONE);
+	    gridData = new GridData();
+	    gridData.verticalIndent = 12;
+	    gridData.widthHint = 320;
+	    licenseLinkLabel.setLayoutData(gridData);
 		licenseLinkLabel.setText(Messages.StartDialog_licenseLinkLabel);
 		addLinkSelectionListener(licenseLinkLabel);
 
