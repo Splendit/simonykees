@@ -12,6 +12,8 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -113,6 +115,15 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 			}
 		});
 
+		viewer.setComparator(new ViewerComparator() {
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				ICompilationUnit compUnitFirst = ((RefactoringState) e1).getWorkingCopy();
+				ICompilationUnit compUnitSecond = ((RefactoringState) e2).getWorkingCopy();
+				return getClassNameString(compUnitFirst).compareTo(getClassNameString(compUnitSecond));
+			}
+		});
+
 		viewer.addSelectionChangedListener(createSelectionChangedListener());
 
 		populateFileView();
@@ -142,7 +153,10 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 				finalSource.remove(state);
 			}
 		});
-		this.currentRefactoringState = initialSource.keySet().stream().findFirst().orElse(null);
+		if (!initialSource.keySet().isEmpty()) {
+			this.currentRefactoringState = (RefactoringState) viewer.getElementAt(0);
+		}
+
 		populateFileView();
 	}
 
