@@ -4,8 +4,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>at.splendit.jSparrow</groupId>
-	<artifactId>jSparrow</artifactId>
+	<groupId>at.splendit</groupId>
+	<artifactId>eu.jsparrow</artifactId>
 	<version>2.1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>jSparrow :: parent</name>
@@ -77,6 +77,7 @@
 		<module>license.api</module>
 		<module>license.netlicensing</module>
 		<module>core</module>
+		<module>ui</module>
 		<!-- test-data -->
 		<module>sample</module>
 		<!-- all integration test modules -->
@@ -84,8 +85,13 @@
 		<module>test</module>
 		<!-- OSGi feature + site deployment -->
 		<module>feature.3rd.party</module>
+		<module>feature.standalone</module>
 		<module>feature</module>
 		<module>site</module>
+		<!-- release engineering -->
+		<module>releng</module>
+		<!-- standalone -->
+		<module>standalone</module>
 	</modules>
 
 	<scm>
@@ -194,33 +200,38 @@
 		<dependencies>
 			<!-- jSparrow -->
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.logging</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.logging</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.i18n</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.license.api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.core</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.test</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.feature</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.i18n</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.license.api</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.core</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.test</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.feature</artifactId>
+				<artifactId>jSparrow.standalone.feature</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -229,8 +240,18 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.sample</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.sample</artifactId>
+				<artifactId>jSparrow.standalone</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>at.splendit.jSparrow</groupId>
+				<artifactId>jSparrow.ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
