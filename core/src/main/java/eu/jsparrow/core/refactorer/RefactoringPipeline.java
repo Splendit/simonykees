@@ -89,7 +89,7 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * FIXME added to suppress check for syntax errors on test mode
+	 * FIXME SIM-748 added to suppress check for syntax errors on test mode
 	 * 
 	 * @param rules
 	 * @param testmode
