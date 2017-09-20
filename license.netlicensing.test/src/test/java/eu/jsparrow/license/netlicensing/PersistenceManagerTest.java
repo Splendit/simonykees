@@ -24,7 +24,6 @@ import eu.jsparrow.license.netlicensing.model.PersistenceModel;
  * @since 1.0
  *
  */
-@Ignore
 @SuppressWarnings("nls")
 public class PersistenceManagerTest extends LicenseCommonTest {
 	
