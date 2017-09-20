@@ -5,8 +5,7 @@
 		<target>System.out</target>
 		<encoder>
 			<Pattern>
-				%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} -
-				%msg%n
+				%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
 			</Pattern>
 		</encoder>
 	</appender>
