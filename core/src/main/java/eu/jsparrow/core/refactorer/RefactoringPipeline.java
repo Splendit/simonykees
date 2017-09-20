@@ -512,14 +512,8 @@ public class RefactoringPipeline {
 	 * This functionality used to be in the {@link RefactoringRule}.
 	 * 
 	 * @param rule
-<<<<<<< HEAD:core/src/main/java/at/splendit/simonykees/core/refactorer/RefactoringPipeline.java
-	 *            {@link RefactoringRule} to apply to all {@link RefactoringState}
-	 *            instances
-	 * @param initialApply
-=======
 	 *            {@link RefactoringRule} to apply to all
 	 *            {@link RefactoringState} instances
->>>>>>> develop:core/src/main/java/eu/jsparrow/core/refactorer/RefactoringPipeline.java
 	 * @param subMonitor
 	 * @param returnListNotWorkingRules
 	 *            rules that throw an exception are added to this list
@@ -578,14 +572,8 @@ public class RefactoringPipeline {
 	}
 
 	/**
-<<<<<<< HEAD:core/src/main/java/at/splendit/simonykees/core/refactorer/RefactoringPipeline.java
 	 * Getter for refactoring states, used to remove all files without any change
 	 * from summary page
-=======
-	 * Getter for refactoring states, used to remove all files without any
-	 * change from summary page
->>>>>>> develop:core/src/main/java/eu/jsparrow/core/refactorer/RefactoringPipeline.java
-	 * 
 	 * @return
 	 */
 	public List<RefactoringState> getRefactoringStates() {
