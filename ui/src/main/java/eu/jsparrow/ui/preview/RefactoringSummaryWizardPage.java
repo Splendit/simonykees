@@ -114,7 +114,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 				return String.format("%s - %s", getClassNameString(compUnit), getPathString(compUnit)); //$NON-NLS-1$
 			}
 		});
-		
+
 		viewer.setComparator(new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
@@ -153,7 +153,10 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 				finalSource.remove(state);
 			}
 		});
-		this.currentRefactoringState = initialSource.keySet().stream().findFirst().orElse(null);
+		if (!initialSource.keySet().isEmpty()) {
+			this.currentRefactoringState = (RefactoringState) viewer.getElementAt(0);
+		}
+
 		populateFileView();
 	}
 
