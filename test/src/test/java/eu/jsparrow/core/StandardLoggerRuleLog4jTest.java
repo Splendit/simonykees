@@ -1,68 +1,86 @@
 package eu.jsparrow.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.semiautomatic.StandardLoggerASTVisitor;
 
-/**
- * Testing standard logger rule.
- * 
- * @author Ardit Ymeri
- * @since 1.2
- *
- */
-@RunWith(Parameterized.class)
 @SuppressWarnings("nls")
-public class StandardLoggerRuleLog4jTest extends AbstractRulesTest {
+public class StandardLoggerRuleLog4jTest extends SingleRuleTest {
 
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.standardLoggerLog4j";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/standardLoggerLog4j";
+	private static final String STANDARD_FILE = "TestStandardLoggerRule.java";
+	private static final String CONFLICT_FILE = "TestStandardLoggerConflictRule.java";
+	private static final String POSTRULE_SUBDIRECTORY = "standardLoggerLog4j";
 
-	private String fileName;
-	private Path preRule;
-	private Path postRule;
+	private StandardLoggerRule rule;
 
-	public StandardLoggerRuleLog4jTest(String fileName, Path preRule, Path postRule) {
-		this.fileName = fileName;
-		this.preRule = preRule;
-		this.postRule = postRule;
-
-		StandardLoggerRule standardLoggerRule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
-		standardLoggerRule.activateDefaultOptions();
-		rulesList.add(standardLoggerRule);
-		
-		try {
-			IJavaProject javaProject = RulesTestUtil.createJavaProject("allRulesTest", "bin");
-			root = RulesTestUtil.addSourceContainer(javaProject, "/allRulesTestRoot");
-
-			List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
-			entries.add(
-					RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
-			RulesTestUtil.addToClasspath(javaProject, entries);
-			RulesTestUtil.addToClasspath(javaProject, RulesTestUtil.getClassPathEntries(root));
-		} catch (Exception e) {
-		}
-	}
-
-	@Parameters(name = "{index}: test file[{0}]")
-	public static Collection<Object[]> data() throws Exception {
-		return AbstractRulesTest.load(POSTRULE_DIRECTORY);
+	@Before
+	public void setUp() throws Exception {
+		rule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+		rule.activateDefaultOptions();
+		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
 	@Test
-	public void testTransformation() throws Exception {
-		super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
+	public void testTransformationWithDefaultFile() throws Exception {
+		root = RulesTestUtil.addSourceContainer(testProject, "/allRulesTestRoot");
+
+		RulesTestUtil.addToClasspath(testProject, Arrays.asList(
+				RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7")));
+		RulesTestUtil.addToClasspath(testProject, RulesTestUtil.getClassPathEntries(root));
+		rule.calculateEnabledForProject(testProject);
+
+		Path preRule = getPreRuleFile(STANDARD_FILE);
+		Path postRule = getPostRuleFile(STANDARD_FILE, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testTransformationWithConflictFile() throws Exception {
+		Path preRule = getPreRuleFile(CONFLICT_FILE);
+		Path postRule = getPostRuleFile(CONFLICT_FILE, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void calculateEnabledForProjectShouldBeEnabled() throws Exception {
+		RulesTestUtil.addToClasspath(testProject, Arrays.asList(
+				RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7")));
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertTrue(rule.isEnabled());
+	}
+
+	@Test
+	public void calculateEnabledforProjectShouldBeDisabled() {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_1);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertFalse(rule.isEnabled());
 	}
 }

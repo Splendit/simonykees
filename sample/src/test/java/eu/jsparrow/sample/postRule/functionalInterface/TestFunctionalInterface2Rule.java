@@ -1,4 +1,4 @@
-package eu.jsparrow.sample.postRule.functinalInterface;
+package eu.jsparrow.sample.postRule.functionalInterface;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
