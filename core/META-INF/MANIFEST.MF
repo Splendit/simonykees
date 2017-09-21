@@ -1,11 +1,14 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Core
-Bundle-SymbolicName: jSparrow.core
+Bundle-SymbolicName: eu.jsparrow.core;singleton:=true
 Bundle-Version: 2.1.1.qualifier
-Bundle-Activator: at.splendit.simonykees.core.Activator
-Require-Bundle: jSparrow.logging,
- jSparrow.i18n,
+Bundle-Activator: eu.jsparrow.core.Activator
+Require-Bundle: eu.jsparrow.logging, 
+ eu.jsparrow.i18n,
+ eu.jsparrow.license.api,
+ org.eclipse.ui;bundle-version="[3.107.0,4.0.0)",
+ org.eclipse.compare;bundle-version="[3.5.600,4.0.0)",
  org.eclipse.core.runtime;bundle-version="[3.11.0,4.0.0)",
  org.eclipse.core.resources;bundle-version="[3.10.0,4.0.0)",
  org.eclipse.jdt.core;bundle-version="[3.11.0,4.0.0)",
@@ -17,18 +20,18 @@ Require-Bundle: jSparrow.logging,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH
-Export-Package: at.splendit.simonykees.core,
- at.splendit.simonykees.core.exception,
- at.splendit.simonykees.core.refactorer,
- at.splendit.simonykees.core.rule,
- at.splendit.simonykees.core.rule.impl,
- at.splendit.simonykees.core.rule.impl.standardLogger,
- at.splendit.simonykees.core.util,
- at.splendit.simonykees.core.visitor,
- at.splendit.simonykees.core.visitor.arithmetic,
- at.splendit.simonykees.core.visitor.enhancedForLoopToStreamForEach,
- at.splendit.simonykees.core.visitor.lambdaForEach,
- at.splendit.simonykees.core.visitor.loop.forToForEach,
- at.splendit.simonykees.core.visitor.loop.whileToForEach,
- at.splendit.simonykees.core.visitor.semiAutomatic,
- at.splendit.simonykees.core.visitor.tryStatement
+Export-Package: eu.jsparrow.core,
+ eu.jsparrow.core.exception,
+ eu.jsparrow.core.refactorer,
+ eu.jsparrow.core.rule,
+ eu.jsparrow.core.rule.impl,
+ eu.jsparrow.core.rule.impl.logger,
+ eu.jsparrow.core.util,
+ eu.jsparrow.core.visitor,
+ eu.jsparrow.core.visitor.arithmetic,
+ eu.jsparrow.core.visitor.loop.stream,
+ eu.jsparrow.core.visitor.lambdaforeach,
+ eu.jsparrow.core.visitor.loop.fortoforeach,
+ eu.jsparrow.core.visitor.loop.whiletoforeach,
+ eu.jsparrow.core.visitor.semiautomatic,
+ eu.jsparrow.core.visitor.trycatch

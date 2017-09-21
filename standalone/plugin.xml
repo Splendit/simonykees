@@ -9,7 +9,7 @@
         thread="main"
         visible="true">
      <run
-           class="at.splendit.simonykees.standalone.Activator">
+           class="eu.jsparrow.standalone.Activator">
      </run>
   </application>
 </extension>
