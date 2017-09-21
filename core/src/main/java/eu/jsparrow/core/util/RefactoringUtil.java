@@ -89,9 +89,6 @@ public final class RefactoringUtil {
 				addCompilationUnit(result, compilationUnit);
 			} else if (javaElement instanceof IPackageFragment) {
 				IPackageFragment packageFragment = (IPackageFragment) javaElement;
-				if (packageFragment.hasSubpackages()) {
-					collectICompilationUnits(result, getSubPackages(packageFragment), subMonitor);
-				}
 				addCompilationUnit(result, packageFragment.getCompilationUnits());
 			} else if (javaElement instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot) javaElement;
@@ -119,6 +116,7 @@ public final class RefactoringUtil {
 	 *
 	 * @return List[PackageFragment]
 	 */
+	@SuppressWarnings("unused")
 	private static List<IJavaElement> getSubPackages(IPackageFragment p) {
 		List<IJavaElement> result = new ArrayList<>();
 		List<IJavaElement> packages;
