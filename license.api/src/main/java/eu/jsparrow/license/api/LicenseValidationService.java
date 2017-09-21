@@ -62,4 +62,11 @@ public interface LicenseValidationService {
 	 * @return true if type is demo (trial), false otherwise
 	 */
 	boolean isDemoType();
+
+	/**
+	 * check if license is valid and type is NODE_LOCKED or FLOATING
+	 * 
+	 * @return true if both conditions are met, false otherwise
+	 */
+	boolean isFullValidLicense();
 }

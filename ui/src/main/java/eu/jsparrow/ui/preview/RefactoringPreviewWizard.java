@@ -304,7 +304,7 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		if (LicenseUtil.getInstance().isTrial()) {
+		if (!LicenseUtil.getInstance().isFullLicense()) {
 			return false;
 		}
 		return super.canFinish();
