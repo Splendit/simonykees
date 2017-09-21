@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="jSparrow.standalone.feature"
+      id="eu.jsparrow.standalone.feature"
       label="jSparrow"
       version="2.1.1.qualifier"
       provider-name="Splendit IT-Consulting GmbH">
@@ -28,28 +28,28 @@
    </requires>
 
    <plugin
-         id="jSparrow.core"
+         id="eu.jsparrow.core"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="jSparrow.logging"
+         id="eu.jsparrow.logging"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="jSparrow.i18n"
+         id="eu.jsparrow.i18n"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="jSparrow.standalone"
+         id="eu.jsparrow.standalone"
          download-size="0"
          install-size="0"
          version="0.0.0"

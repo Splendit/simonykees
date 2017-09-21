@@ -15,60 +15,60 @@
 		            </iterate>
 		           </with>
          		</visibleWhen>
-				<command commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler" 
+				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler" 
 					label="%command.label.select_rules_wizard" 
 					style="push"/>
-				<command commandId="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
+				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
 					style="push"/>
 			</menu>
 		</menuContribution>
 		<menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=org.eclipse.jdt.ui.refactoring.menu">
 			<menu label="%menu.label">
-				<command commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler" 
+				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler" 
 					label="%command.label.select_rules_wizard" 
 					style="push"/>
-				<command commandId="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
+				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
 					style="push"/>
 			</menu>
 		</menuContribution>
 		<menuContribution locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.refactoring.menu">
 			<menu label="%menu.label">
-				<command commandId="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler" 
+				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler" 
 					label="%command.label.select_rules_wizard" 
 					style="push"/>
-				<command commandId="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
+				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
 					style="push"/>
 			</menu>
 		</menuContribution>
 	</extension>
 	<extension point="org.eclipse.ui.commands">
-		<command defaultHandler="at.splendit.simonykees.ui.handler.SelectRulesWizardHandler" 
-			id="at.splendit.simonykees.simonykees.core.SelectRulesWizardHandler" 
+		<command defaultHandler="eu.jsparrow.ui.handler.SelectRulesWizardHandler" 
+			id="eu.jsparrow.ui.SelectRulesWizardHandler" 
 			name="%command.name.select_rules_wizard_handler"/>
-		<command defaultHandler="at.splendit.simonykees.ui.handler.LoggerRuleWizardHandler" 
-			id="at.splendit.simonykees.simonykees.core.LoggerRuleWizardHandler" 
+		<command defaultHandler="eu.jsparrow.ui.handler.LoggerRuleWizardHandler" 
+			id="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 			name="%command.name.logger_rule_wizard_handler"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
-		<page class="at.splendit.simonykees.ui.preference.SimonykeesPreferencePage" 
-			id="at.splendit.simonykees.core.ui.preference.ProfilePreferencePage" 
+		<page class="eu.jsparrow.ui.preference.SimonykeesPreferencePage" 
+			id="eu.jsparrow.ui.preference.ProfilePreferencePage" 
 			name="%preferencePage.name"/>
-		<page category="at.splendit.simonykees.core.ui.preference.ProfilePreferencePage" 
-			class="at.splendit.simonykees.ui.preference.SimonykeesPreferencePageLicense" 
-			id="at.splendit.simonykees.core.ui.preference.ProfilePreferencePageLicense" 
+		<page category="eu.jsparrow.ui.preference.ProfilePreferencePage" 
+			class="eu.jsparrow.ui.preference.SimonykeesPreferencePageLicense" 
+			id="eu.jsparrow.ui.preference.ProfilePreferencePageLicense" 
 			name="%preferencePageLicense.name"/>
 	</extension>
 	<extension point="org.eclipse.core.runtime.preferences">
-		<initializer class="at.splendit.simonykees.ui.preference.SimonykeesPreferenceInitializer"/>
+		<initializer class="eu.jsparrow.ui.preference.SimonykeesPreferenceInitializer"/>
 	</extension>
 	<extension point="org.eclipse.epp.logging.aeri.ide.servers">
 		<server class="org.eclipse.epp.internal.logging.aeri.ide.server.mars.ServerConnection" 
 			description="Help improve jSparrow by sending error reports to us." 
-			icon16="icons/jSparrow_active_icon_100.png" 
-			icon32="icons/jSparrow_active_icon_100.png" 
+			icon16="icons/jSparrow_active_icon_16.png" 
+			icon32="icons/jSparrow_active_icon_32.png" 
 			id="at.splendit.jsparrow" 
 			name="jSparrow">
 			<link href="https://jsparrow.eu/" 
@@ -80,6 +80,6 @@
 		</server>
 	</extension>
 	<extension point="org.eclipse.ui.startup">
-     	<startup class="at.splendit.simonykees.ui.startup.Startup"/>
+     	<startup class="eu.jsparrow.ui.startup.Startup"/>
     </extension>
 </plugin>
