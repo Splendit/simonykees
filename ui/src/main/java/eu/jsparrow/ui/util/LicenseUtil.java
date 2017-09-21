@@ -67,6 +67,13 @@ public class LicenseUtil {
 		}
 		return false;
 	}
+	
+	public boolean isFullLicense() {
+		if (isLicenseValidationServiceAvailable) {
+			return licenseValidationService.isFullValidLicense();
+		}
+		return false;
+	}
 
 	public boolean displayLicenseErrorDialog(Shell shell) {
 
