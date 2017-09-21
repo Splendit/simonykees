@@ -1,0 +1,98 @@
+package eu.jsparrow.ui.util;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.widgets.Shell;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import eu.jsparrow.i18n.ExceptionMessages;
+import eu.jsparrow.license.api.LicenseValidationService;
+import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.dialog.BuyLicenseDialog;
+import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+
+/**
+ * GUI related convenience class to check the validity of the license and
+ * display appropriate popups if not.
+ * 
+ * @author Ludwig Werzowa, Andreja Sambolec, Matthias Webhofer
+ * @since 1.0
+ */
+public class LicenseUtil {
+	private static final Logger logger = LoggerFactory.getLogger(LicenseUtil.class);
+
+	private static LicenseUtil instance;
+
+	@Inject
+	private LicenseValidationService licenseValidationService;
+	private boolean isLicenseValidationServiceAvailable = false;
+
+	private LicenseUtil() {
+		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
+	}
+
+	public static LicenseUtil getInstance() {
+		if (instance == null) {
+			instance = new LicenseUtil();
+		}
+		return instance;
+	}
+
+	@PostConstruct
+	private void postConstruct() {
+		if (licenseValidationService != null)
+			isLicenseValidationServiceAvailable = true;
+	}
+
+	@PreDestroy
+	private void preDestroy() {
+		isLicenseValidationServiceAvailable = false;
+	}
+
+	public boolean isValid() {
+		if (isLicenseValidationServiceAvailable)
+			return licenseValidationService.isValid();
+		return false;
+	}
+
+	public boolean isTrial() {
+		if (isLicenseValidationServiceAvailable) {
+			return licenseValidationService.isDemoType();
+		}
+		return false;
+	}
+	
+	public boolean isFullLicense() {
+		if (isLicenseValidationServiceAvailable) {
+			return licenseValidationService.isFullValidLicense();
+		}
+		return false;
+	}
+
+	public boolean displayLicenseErrorDialog(Shell shell) {
+
+		if (isLicenseValidationServiceAvailable) {
+			String userMessage = licenseValidationService.getLicenseStautsUserMessage();
+
+			if (licenseValidationService.isExpired()) {
+				BuyLicenseDialog dialog = new BuyLicenseDialog(shell, userMessage);
+				return dialog.open() == 0;
+			} else {
+				return SimonykeesMessageDialog.openMessageDialog(shell,
+						NLS.bind(ExceptionMessages.LicenseUtil_error_moreInformation, userMessage),
+						MessageDialog.ERROR);
+			}
+		} else {
+			// TODO: proper error handling
+			logger.error(ExceptionMessages.LicenseUtil_license_service_unavailable);
+			return false;
+		}
+	}
+
+}
