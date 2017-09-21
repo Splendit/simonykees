@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.visitor;
+package eu.jsparrow.core.visitor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -15,8 +15,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import at.splendit.jdtunit.JdtUnitFixture;
-import at.splendit.simonykees.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
+import eu.jsparrow.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
+import eu.jsparrow.jdtunit.JdtUnitFixture;
 
 public class ArithmeticAssignmentASTVisitorTest {
 

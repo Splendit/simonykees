@@ -1,4 +1,4 @@
-package at.splendit.simonykees.core.visitor;
+package eu.jsparrow.core.visitor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -18,7 +18,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import at.splendit.jdtunit.JdtUnitFixture;
+import eu.jsparrow.jdtunit.JdtUnitFixture;
 
 @SuppressWarnings({ "nls" }) 
 public class EnumsWithoutEqualsASTVisitorTest {

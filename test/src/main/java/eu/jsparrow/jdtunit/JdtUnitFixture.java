@@ -1,4 +1,4 @@
-package at.splendit.jdtunit;
+package eu.jsparrow.jdtunit;
 
 import java.util.HashMap;
 
