@@ -37,6 +37,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	}
 
 	@SuppressWarnings("unchecked")
+	@Override
 	public void endVisit(CompilationUnit node) {
 
 		/**
@@ -81,11 +82,9 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		List<AbstractTypeDeclaration> cuDeclaredTypes = ASTNodeUtil.convertToTypedList(cu.types(),
 				AbstractTypeDeclaration.class);
 
-		List<String> toBeAdded = newImports.stream()
+		return newImports.stream()
 				.filter(newImport -> !isInSamePackage(newImport, packageQualifiedName, cuDeclaredTypes))
 				.collect(Collectors.toList());
-
-		return toBeAdded;
 	}
 
 	/**
