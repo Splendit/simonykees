@@ -43,7 +43,7 @@ public class SerialVersionUidASTVisitor extends AbstractASTRewriteASTVisitor {
 
 			/*
 			 * only one variable is defined in this FieldDeclaration.
-			 * FieldDeclaration -> (Modifiers) (Type) (Fragments);
+			 * FieldDeclaration -> (Modifiers) (Type) (Fragments)
 			 */
 			if (1 == node.fragments().size()) {
 				ListRewrite modifieresRewrite = astRewrite.getListRewrite(node, FieldDeclaration.MODIFIERS2_PROPERTY);
@@ -67,7 +67,7 @@ public class SerialVersionUidASTVisitor extends AbstractASTRewriteASTVisitor {
 					}
 				}
 				checkSerialUidASTVisitor.getWantedKeyWords().stream()
-						.forEach((mk) -> newModifier.add(node.getAST().newModifier(mk)));
+						.forEach(mk -> newModifier.add(node.getAST().newModifier(mk)));
 				Type newType = (Type) astRewrite.createCopyTarget(node.getType());
 				FieldDeclaration newField = NodeBuilder.newFieldDeclaration(node.getAST(), newType, serialUidNode,
 						newModifier);
@@ -94,8 +94,7 @@ public class SerialVersionUidASTVisitor extends AbstractASTRewriteASTVisitor {
 		private VariableDeclarationFragment serialUidNode = null;
 
 		public CheckSerialUidASTVisitor() {
-			wantedKeyWords = new ArrayList<ModifierKeyword>();
-			// wantedKeyWords.add(ModifierKeyword.PRIVATE_KEYWORD);
+			wantedKeyWords = new ArrayList<>();
 			wantedKeyWords.add(ModifierKeyword.STATIC_KEYWORD);
 			wantedKeyWords.add(ModifierKeyword.FINAL_KEYWORD);
 		}

@@ -346,10 +346,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	 *         otherwise.
 	 */
 	private boolean isVowel(char c) {
-		if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' || c == 'y') {
-			return true;
-		}
-		return false;
+		return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' || c == 'y';
 	}
 
 	protected void storeTempName(Statement node, String newIteratorIdentifier) {
@@ -466,10 +463,10 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 		return
 		// iterator type is not an inner type
-		types.stream().map(ITypeBinding::getErasure).map(type -> type.getQualifiedName())
+		types.stream().map(ITypeBinding::getErasure).map(ITypeBinding::getQualifiedName)
 				.noneMatch(qualifiedName -> qualifiedName.equals(iteratorErasure.getQualifiedName())) &&
 		// iterator type clashes with an inner type
-				types.stream().map(type -> type.getName()).anyMatch(name -> name.equals(iteratorErasure.getName()));
+				types.stream().map(ITypeBinding::getName).anyMatch(name -> name.equals(iteratorErasure.getName()));
 
 	}
 
@@ -612,10 +609,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	 */
 	protected boolean isSingleStatementBodyOfOuterLoop(T node) {
 		StructuralPropertyDescriptor locationProperty = node.getLocationInParent();
-		if (ForStatement.BODY_PROPERTY == locationProperty || WhileStatement.BODY_PROPERTY == locationProperty) {
-			return true;
-		}
 
-		return false;
+		return ForStatement.BODY_PROPERTY == locationProperty || WhileStatement.BODY_PROPERTY == locationProperty;
 	}
 }

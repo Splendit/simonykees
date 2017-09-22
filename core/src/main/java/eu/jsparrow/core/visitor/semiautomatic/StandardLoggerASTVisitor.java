@@ -179,23 +179,21 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	public void endVisit(EnumDeclaration enumDeclaration) {
 		endVisitNewTypeDeclaration(enumDeclaration);
 	}
-	
+
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
 		/*
-		 * Since it is not possible to have a static field in a nested class, 
-		 * the introduced logger will be an instance field too. Therefore, 
-		 * it cannot be used in a static method. 
+		 * Since it is not possible to have a static field in a nested class, the
+		 * introduced logger will be an instance field too. Therefore, it cannot be used
+		 * in a static method.
 		 */
-		if(nestedTypeDeclarationLevel > 1 && ASTNodeUtil.hasModifier(methodDeclaration.modifiers(), modifier -> modifier.isStatic())) {
-			return false;
-		}
-		return true;
+		return !(nestedTypeDeclarationLevel > 1
+				&& ASTNodeUtil.hasModifier(methodDeclaration.modifiers(), Modifier::isStatic));
 	}
 
 	/**
-	 * Keeps track of the possibly nested types (classes or enums) declared
-	 * inside the compilation unit.
+	 * Keeps track of the possibly nested types (classes or enums) declared inside
+	 * the compilation unit.
 	 * 
 	 * @param abstractType
 	 *            node representing a type declaration.
@@ -209,8 +207,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	/**
-	 * Discard stored information related to the type after its corresponding
-	 * node is visited.
+	 * Discard stored information related to the type after its corresponding node
+	 * is visited.
 	 * 
 	 * @param typeDeclaration2
 	 *            end visit node
@@ -232,8 +230,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		if ((PRINT.equals(methodName.getIdentifier()) || PRINTLN.equals(methodName.getIdentifier()))
 				&& methodInvocation.arguments().size() == 1) {
 			/*
-			 * Looking for System.out/err.print/ln where System.out/err is a
-			 * qualified name expression of the print/ln method invocation.
+			 * Looking for System.out/err.print/ln where System.out/err is a qualified name
+			 * expression of the print/ln method invocation.
 			 */
 			Expression argument = (Expression) methodInvocation.arguments().get(0);
 			// ... and if the argument of the method invocation is a string
@@ -243,14 +241,14 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				if (expression != null && ASTNode.QUALIFIED_NAME == expression.getNodeType()) {
 					QualifiedName expressionQualifier = (QualifiedName) expression;
 					Name qualifier = expressionQualifier.getQualifier();
-					
-					if(ClassRelationUtil.isContentOfTypes(qualifier.resolveTypeBinding(),
+
+					if (ClassRelationUtil.isContentOfTypes(qualifier.resolveTypeBinding(),
 							Collections.singletonList(JAVA_LANG_SYSTEM))) {
 						SimpleName qualiferName = expressionQualifier.getName();
 						String systemOutOption = replacingOptions.get(StandardLoggerConstants.SYSTEM_OUT_PRINT);
 						String systemErrOption = replacingOptions.get(StandardLoggerConstants.SYSTEM_ERR_PRINT);
-						
-						if(OUT.equals(qualiferName.getIdentifier()) && !systemOutOption.isEmpty()) {
+
+						if (OUT.equals(qualiferName.getIdentifier()) && !systemOutOption.isEmpty()) {
 							// replace the System.out.println with a logger
 							replaceMethod(methodInvocation, systemOutOption);
 						} else if (ERR.equals(qualiferName.getIdentifier()) && !systemErrOption.isEmpty()) {
@@ -261,7 +259,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				}
 			}
 
-		} else if (PRINT_STACK_TRACE.equals(methodName.getIdentifier()) 
+		} else if (PRINT_STACK_TRACE.equals(methodName.getIdentifier())
 				&& !replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE).isEmpty()) {
 			/*
 			 * Looking for e.printStackTrace() where 'e' is a throwable object.
@@ -282,8 +280,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	/**
-	 * Replaces the method invocation with a logger method having one string as
-	 * a parameter
+	 * Replaces the method invocation with a logger method having one string as a
+	 * parameter
 	 * 
 	 * @param methodInvocation
 	 *            to be replaced
@@ -303,8 +301,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	/**
-	 * Replaces the given method invocation with a logger method having the
-	 * error message and the throwable object as parameters. For example:
+	 * Replaces the given method invocation with a logger method having the error
+	 * message and the throwable object as parameters. For example:
 	 * 
 	 * {@code e.printStackTrace();}
 	 * 
@@ -343,8 +341,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	/**
-	 * Creates a logger object as a final field and initializes it using a
-	 * proper factory. The field is inserted at the beginning of the class body.
+	 * Creates a logger object as a final field and initializes it using a proper
+	 * factory. The field is inserted at the beginning of the class body.
 	 */
 	private void addLogger() {
 		importsNeeded = true;
@@ -360,7 +358,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		loggerDeclaration.setType(loggerType);
 		ListRewrite loggerListRewirte = astRewrite.getListRewrite(loggerDeclaration,
 				FieldDeclaration.MODIFIERS2_PROPERTY);
-		if(!isInterface(typeDeclaration)) {			
+		if (!isInterface(typeDeclaration)) {
 			Modifier privateModifier = ast.newModifier(ModifierKeyword.PRIVATE_KEYWORD);
 			loggerListRewirte.insertLast(privateModifier, null);
 		}
@@ -376,10 +374,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	private boolean isInterface(AbstractTypeDeclaration typeDeclaration2) {
-		if(typeDeclaration2 instanceof TypeDeclaration && ((TypeDeclaration)typeDeclaration2).isInterface()) {
-			return true;
-		}
-		return false;
+		return typeDeclaration2 instanceof TypeDeclaration && ((TypeDeclaration) typeDeclaration2).isInterface();
 	}
 
 	private ChildListPropertyDescriptor getBodyDeclarationProperty() {
@@ -396,10 +391,11 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	/**
-	 * Stores the name of the logger for the current type declaration which is being visited. 
-	 * Generates a unique identification for it.
+	 * Stores the name of the logger for the current type declaration which is being
+	 * visited. Generates a unique identification for it.
 	 * 
-	 * @param loggerName name to be stored.
+	 * @param loggerName
+	 *            name to be stored.
 	 */
 	private void setCurrentLoggerName(String loggerName) {
 		loggerNames.put(generateUniqueTypeId(this.typeDeclaration), loggerName);
@@ -407,8 +403,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 	/**
 	 * Generates an initializer expression for the logger based on the qualified
-	 * name of the logger ({@value #typeDeclaration}). The initializer generated
-	 * for {@value StandardLoggerConstants#SLF4J_LOGGER} is:
+	 * name of the logger ({@value #typeDeclaration}). The initializer generated for
+	 * {@value StandardLoggerConstants#SLF4J_LOGGER} is:
 	 * 
 	 * {@code LoggerFactory.getLogger()}
 	 * 
@@ -449,11 +445,11 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	/**
-	 * Generates a name for the logger object. Avoids clashes with the rest of
-	 * the fields in the current class or in the outer classes in case the
-	 * logger is being introduced in a nested class. The default logger name is
-	 * {@value #DEFAULT_LOGGER_NAME}. A number is added as a suffix if the
-	 * default name is already taken by some other object within the scope.
+	 * Generates a name for the logger object. Avoids clashes with the rest of the
+	 * fields in the current class or in the outer classes in case the logger is
+	 * being introduced in a nested class. The default logger name is
+	 * {@value #DEFAULT_LOGGER_NAME}. A number is added as a suffix if the default
+	 * name is already taken by some other object within the scope.
 	 * 
 	 * @return a string representing the logger name.
 	 */
@@ -484,8 +480,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 * @param typeDeclaration
 	 *            a node representing a type declaration.
 	 * 
-	 * @return a mixture of the type name, its starting position in the
-	 *         compilation unit and its length.
+	 * @return a mixture of the type name, its starting position in the compilation
+	 *         unit and its length.
 	 */
 	private String generateUniqueTypeId(AbstractTypeDeclaration typeDeclaration) {
 		return typeDeclaration.getName().getIdentifier() + SEPARATOR + typeDeclaration.getStartPosition() + SEPARATOR
@@ -493,8 +489,9 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	/**
-	 * Checks for occurrences of {@link SimpleType}s with name {@value #LOGGER_CLASS_NAME}, {@value #SLF4J_LOGGER_FACTORY}
-	 * or {@value #SLF4J_LOGGER_FACTORY}.
+	 * Checks for occurrences of {@link SimpleType}s with name
+	 * {@value #LOGGER_CLASS_NAME}, {@value #SLF4J_LOGGER_FACTORY} or
+	 * {@value #SLF4J_LOGGER_FACTORY}.
 	 * 
 	 * @author Ardit Ymeri
 	 * @since 1.2
@@ -512,31 +509,26 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		@Override
 		public boolean visit(TypeDeclaration typeDeclaration) {
 			String typeIdentifier = typeDeclaration.getName().getIdentifier();
-			if(isClashingLoggerName(typeIdentifier)) {
+			if (isClashingLoggerName(typeIdentifier)) {
 				clashingFound = true;
 			}
 			return true;
 		}
-		
+
 		@Override
 		public boolean visit(SimpleType simpleType) {
 			Name typeName = simpleType.getName();
-			if(typeName.isSimpleName()) {
-				if(isClashingLoggerName(((SimpleName)typeName).getIdentifier())) {
-					clashingFound = true;
-				}
+			if (typeName.isSimpleName() && isClashingLoggerName(((SimpleName) typeName).getIdentifier())) {
+				clashingFound = true;
 			}
 			return true;
 		}
-		
+
 		private boolean isClashingLoggerName(String typeIdentifier) {
-			if (LOGGER_CLASS_NAME.equals(typeIdentifier) || LOG4J_LOGGER_MANAGER.equals(typeIdentifier)
-					|| SLF4J_LOGGER_FACTORY.equals(typeIdentifier)) {
-				return true;
-			}
-			return false;
+			return LOGGER_CLASS_NAME.equals(typeIdentifier) || LOG4J_LOGGER_MANAGER.equals(typeIdentifier)
+					|| SLF4J_LOGGER_FACTORY.equals(typeIdentifier);
 		}
-		
+
 		public boolean isLoggerFree() {
 			return !clashingFound;
 		}

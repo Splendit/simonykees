@@ -67,7 +67,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
-		boolean isFinal = ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isFinal());
+		boolean isFinal = ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), Modifier::isFinal);
 		safeToUseFields
 				.addAll(ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class)
 						.stream().filter(fragment -> !isFinal || fragment.getInitializer() != null)
@@ -164,7 +164,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 							modifiers = ((MethodDeclaration) scope).modifiers();
 						}
 
-						if (modifiers != null && ASTNodeUtil.hasModifier(modifiers, modifier -> modifier.isStatic())) {
+						if (modifiers != null && ASTNodeUtil.hasModifier(modifiers, Modifier::isStatic)) {
 							CheckNativeMethodInvocationASTVisitor visitor = new CheckNativeMethodInvocationASTVisitor();
 							node.accept(visitor);
 							if (visitor.objectMethodDeclarationInvocated()) {
@@ -300,7 +300,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		List<SimpleName> initializedFields = new ArrayList<>();
 
 		for (FieldDeclaration field : fields) {
-			boolean isFinal = ASTNodeUtil.hasModifier(field.modifiers(), modifier -> modifier.isFinal());
+			boolean isFinal = ASTNodeUtil.hasModifier(field.modifiers(), Modifier::isFinal);
 			initializedFields
 					.addAll(ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
 							.stream().filter(fragment -> !isFinal || fragment.getInitializer() != null)
@@ -365,7 +365,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 		// FIXME SIM-335: it is better to detected the uninitialized fields that
 		// are referenced in the body.
-		// boolean isConstructor = node.isConstructor();
+		// boolean isConstructor = node.isConstructor()
 
 		return true;
 	}
@@ -506,7 +506,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		List<String> varNames = scopeVariableNames.stream().map(SimpleName::getIdentifier).distinct()
 				.collect(Collectors.toList());
 
-		return parameters.stream().map(parameter -> parameter.getName())
+		return parameters.stream().map(SingleVariableDeclaration::getName)
 				.filter(parameter -> varNames.contains(parameter.getIdentifier())).collect(Collectors.toList());
 	}
 

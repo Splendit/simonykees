@@ -71,9 +71,7 @@ public class StreamForEachCheckValidStatementASTVisitor extends UnhandledExcepti
 
 	@Override
 	public boolean visit(EnhancedForStatement node) {
-		this.parameters.entrySet().stream().forEach(entry -> {
-			entry.setValue(entry.getValue() + 1);
-		});
+		this.parameters.entrySet().stream().forEach(entry -> entry.setValue(entry.getValue() + 1));
 		this.parameters.put(node.getParameter().getName(), 0);
 		return true;
 	}
@@ -81,17 +79,14 @@ public class StreamForEachCheckValidStatementASTVisitor extends UnhandledExcepti
 	@Override
 	public void endVisit(EnhancedForStatement node) {
 		this.parameters.remove(node.getParameter().getName());
-		this.parameters.entrySet().stream().forEach(entry -> {
-			entry.setValue(entry.getValue() - 1);
-		});
+		this.parameters.entrySet().stream().forEach(entry -> entry.setValue(entry.getValue() - 1));
 	}
 
 	@Override
 	public boolean visit(SimpleName simpleNameNode) {
 
 		/*
-		 * only local, final or effectively final variables or fields are
-		 * allowed.
+		 * only local, final or effectively final variables or fields are allowed.
 		 */
 		IBinding binding = simpleNameNode.resolveBinding();
 		if (binding instanceof IVariableBinding) {
@@ -103,9 +98,9 @@ public class StreamForEachCheckValidStatementASTVisitor extends UnhandledExcepti
 					.anyMatch(var -> var.getIdentifier().equals(simpleNameNode.getIdentifier()));
 
 			/*
-			 * if the value is 0, then the parameter is treated as a local
-			 * variable. a higher value indicates a nested loop where a separate
-			 * check for final or effectively final has to be done.
+			 * if the value is 0, then the parameter is treated as a local variable. a
+			 * higher value indicates a nested loop where a separate check for final or
+			 * effectively final has to be done.
 			 */
 			boolean isEnhancedForParameter = parameters.entrySet().stream().anyMatch(entry -> {
 				boolean result = false;
@@ -129,7 +124,7 @@ public class StreamForEachCheckValidStatementASTVisitor extends UnhandledExcepti
 		}
 		return false;
 	}
-	
+
 	public boolean isStatementsValid() {
 		return !containsBreakStatement && !containsContinueStatement && !containsReturnStatement
 				&& !containsCheckedException && !containsThrowStatement && invalidVariables.isEmpty();

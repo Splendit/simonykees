@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -76,9 +77,9 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 		/**
 		 * Only private fields can be renamed, unless they are static final.
 		 */
-		if (ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isPrivate())
-				&& !(ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isStatic())
-						&& ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isFinal()))) {
+		if (ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), Modifier::isPrivate)
+				&& !(ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), Modifier::isStatic)
+						&& ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), Modifier::isFinal))) {
 
 			ASTNode parent = fieldDeclaration.getParent();
 			if (parent != null && parent.getNodeType() == ASTNode.TYPE_DECLARATION) {

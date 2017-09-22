@@ -187,7 +187,7 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 		int expressionType = expression.getNodeType();
 	
 		if (ASTNode.POSTFIX_EXPRESSION == expressionType) {
-			// covers the case: operand++;
+			// covers the case: operand++
 			PostfixExpression postfixExpression = (PostfixExpression) expression;
 			Expression operand = postfixExpression.getOperand();
 			if (ASTNode.SIMPLE_NAME == operand.getNodeType()
@@ -204,31 +204,31 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 			if (ASTNode.SIMPLE_NAME == lhs.getNodeType()
 					&& ((SimpleName) lhs).getIdentifier().equals(operandName.getIdentifier())) {
 				if(ASTNode.INFIX_EXPRESSION == rhs.getNodeType()) {
-					// covers the case: operand = operand +1;
+					// covers the case: operand = operand +1
 	
 					InfixExpression infixExpression = (InfixExpression) rhs;
 					Expression leftOperand = infixExpression.getLeftOperand();
 					Expression rightOperand = infixExpression.getRightOperand();
 					/*
 					 * the form of the expression should either be:
-					 * 		operand = operand + 1;
+					 * 		operand = operand + 1
 					 * or
-					 * 		operand = 1 + operand; 
+					 * 		operand = 1 + operand
 					 * 
 					 */
 					if (InfixExpression.Operator.PLUS.equals(infixExpression.getOperator()) && ((ASTNode.SIMPLE_NAME == leftOperand.getNodeType()
 							&& ((SimpleName) leftOperand).getIdentifier().equals(operandName.getIdentifier())
 							&& ASTNode.NUMBER_LITERAL == rightOperand.getNodeType()
 							&& ONE.equals(((NumberLiteral) rightOperand).getToken()))
-							|| ((ASTNode.SIMPLE_NAME == rightOperand.getNodeType()
+							|| (ASTNode.SIMPLE_NAME == rightOperand.getNodeType()
 									&& ((SimpleName) rightOperand).getIdentifier().equals(operandName.getIdentifier())
 									&& ASTNode.NUMBER_LITERAL == leftOperand.getNodeType()
-									&& ONE.equals(((NumberLiteral) leftOperand).getToken()))))) {
+									&& ONE.equals(((NumberLiteral) leftOperand).getToken())))) {
 	
 						isIncrement = true;
 					}
 				} else if (ASTNode.NUMBER_LITERAL == rhs.getNodeType()) {
-					// covers the case: operand += 1;
+					// covers the case: operand += 1
 					String numLiteral = ((NumberLiteral)rhs).getToken();
 					if(ONE.equals(numLiteral) && Assignment.Operator.PLUS_ASSIGN.equals(assignmentExpression.getOperator())) {
 						isIncrement = true;

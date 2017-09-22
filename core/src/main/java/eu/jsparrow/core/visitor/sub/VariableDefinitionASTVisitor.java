@@ -38,6 +38,7 @@ public class VariableDefinitionASTVisitor extends AbstractASTRewriteASTVisitor {
 		
 	}
 	
+	@Override
 	public boolean preVisit2(ASTNode node) {
 		if(node==beforeThis){
 			endThis = false;

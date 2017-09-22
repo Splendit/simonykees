@@ -239,7 +239,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 	 * @return if it is a static body declaration.
 	 */
 	private <T extends BodyDeclaration> boolean isStaticMember(T member) {
-		return ASTNodeUtil.hasModifier(member.modifiers(), modifier -> modifier.isStatic());
+		return ASTNodeUtil.hasModifier(member.modifiers(), Modifier::isStatic);
 	}
 
 	/**
@@ -260,10 +260,10 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 	private <T extends BodyDeclaration> List<T> sortByAccessModifier(List<T> member) {
 		List<T> sortedDeclarations = new ArrayList<>();
 		
-		sortedDeclarations.addAll(filterByModifier(member, modifier -> modifier.isPublic()));
-		sortedDeclarations.addAll(filterByModifier(member, modifier -> modifier.isProtected()));
+		sortedDeclarations.addAll(filterByModifier(member, Modifier::isPublic));
+		sortedDeclarations.addAll(filterByModifier(member, Modifier::isProtected));
 		sortedDeclarations.addAll(filterByPackageProtectedModifier(member));
-		sortedDeclarations.addAll(filterByModifier(member, modifier -> modifier.isPrivate()));
+		sortedDeclarations.addAll(filterByModifier(member, Modifier::isPrivate));
 		
 		return sortedDeclarations;
 	}
@@ -296,14 +296,6 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 	 * @return list of body declarations having the given modifier.
 	 */
 	private <T extends BodyDeclaration> List<T> filterByModifier(List<T>members, Predicate<Modifier> modifierPredicate) {
-		/*Predicate<T> filter = member -> {
-			 
-			 return 
-					 ASTNodeUtil.convertToTypedList(member.modifiers(), Modifier.class)
-					 .stream()
-					 .anyMatch(modifier -> modifier.getKeyword().toFlagValue() == modifierFlag);
-		};*/
-		
 		return applyFilter(members, member -> ASTNodeUtil.hasModifier(member.modifiers(), modifierPredicate));
 	}
 	
