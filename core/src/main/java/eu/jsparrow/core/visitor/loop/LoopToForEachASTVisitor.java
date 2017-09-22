@@ -40,6 +40,7 @@ import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractAddImportASTVisitor;
+import eu.jsparrow.core.visitor.renaming.JavaReservedKeyWords;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
@@ -270,7 +271,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			String defaultIteratorName = createDefaultIteratorName(iterableName);
 			declaredNames = scopeDeclaredNames.stream().map(SimpleName::getIdentifier).collect(Collectors.toList());
 			while (declaredNames.contains(defaultIteratorName + suffix)
-					|| tempIntroducedNames.containsValue(defaultIteratorName + suffix)) {
+					|| tempIntroducedNames.containsValue(defaultIteratorName + suffix) || JavaReservedKeyWords.isKeyWord(defaultIteratorName + suffix)) {
 				counter++;
 				suffix = Integer.toString(counter);
 			}
@@ -307,11 +308,17 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		}
 
 		String identifier = simpleName.getIdentifier();
+		String defaultName;
 		if (identifier.length() > 1 && identifier.endsWith("s")) { //$NON-NLS-1$
-			return identifier.substring(0, identifier.length() - 1);
+			defaultName = identifier.substring(0, identifier.length() - 1);
+			if(JavaReservedKeyWords.isKeyWord(defaultName)) {
+				defaultName = addSingularPrefix(defaultName);
+			}
 		} else {
-			return addSingularPrefix(identifier);
+			defaultName = addSingularPrefix(identifier);
 		}
+		
+		return defaultName;
 	}
 
 	/**

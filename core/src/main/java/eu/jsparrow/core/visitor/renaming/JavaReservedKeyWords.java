@@ -10,7 +10,7 @@ import java.util.Arrays;
  * @since 1.2
  *
  */
-class JavaReservedKeyWords {
+public class JavaReservedKeyWords {
 	@SuppressWarnings("nls")
 	static final String[] javaKeyWords = { "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char",
 			"class", "const",
