@@ -39,7 +39,7 @@ import org.eclipse.text.edits.TextEdit;
 @SuppressWarnings({ "nls", "unchecked" })
 public class JdtUnitFixture {
 
-	private static final String PROJECT_FIXTURE_NAME = "FxitureProject";
+	private static final String PROJECT_FIXTURE_NAME = "FixtureProject";
 
 	private static final String PACKAGE_FIXTURE_NAME = "fixturepackage";
 
@@ -149,7 +149,8 @@ public class JdtUnitFixture {
 		return astRoot;
 	}
 
-	private void createJavaProject() throws CoreException, JavaModelException {
+	private void createJavaProject() throws CoreException {
+		
 		project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_FIXTURE_NAME);
 		project.create(null);
 		project.open(null);

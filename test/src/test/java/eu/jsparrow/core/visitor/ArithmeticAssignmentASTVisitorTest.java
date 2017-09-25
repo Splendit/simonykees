@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -11,6 +12,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.text.edits.TextEdit;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,6 +30,11 @@ public class ArithmeticAssignmentASTVisitorTest {
 	public static void setUpClass() throws Exception {
 		fixture = new JdtUnitFixture();
 		fixture.setUp();
+	}
+	
+	@AfterClass
+	public static void tearDownClass() throws CoreException {
+		fixture.tearDown();
 	}
 
 	@Before
