@@ -510,6 +510,20 @@ public class TestForToForEachListIteratingIndexRule {
 		return sb.toString();
 	}
 
+	public String packageKeyWord(String input) {
+		List<String> packages = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		packages.forEach(sb::append);
+		return sb.toString();
+	}
+
+	public String doubleKeyWord(String input) {
+		List<Double> doubles = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		doubles.forEach(sb::append);
+		return sb.toString();
+	}
+
 	public static Foo createFoo(String input) {
 		return new TestForToForEachListIteratingIndexRule().new Foo(input);
 	}
