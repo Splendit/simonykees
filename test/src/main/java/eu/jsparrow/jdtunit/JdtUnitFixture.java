@@ -12,10 +12,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -24,11 +24,11 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEdit;
-
 
 /**
  * 
@@ -63,8 +63,12 @@ public class JdtUnitFixture {
 
 	private AST ast;
 
+	private ASTRewrite astRewrite;
+
+	private boolean hasChanged = false;
+
 	private MethodDeclaration methodDeclaration;
-	
+
 	public JdtUnitFixture() {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
@@ -118,15 +122,16 @@ public class JdtUnitFixture {
 		im.setName(ast.newName(name));
 		astRoot.imports().add(im);
 	}
-	
-	public void addMethodBlock(String statements) {
+
+	public void addMethodBlock(String statements) throws Exception {
 		ASTNode convertedAstNodeWithMethodBody = ASTNode.copySubtree(ast, createBlockFromString(statements));
 		Block block = (Block) convertedAstNodeWithMethodBody;
 
 		methodDeclaration.setBody(block);
+		this.astRoot = this.saveChanges();
 	}
-	
-	public Block getMethodBlock(){
+
+	public Block getMethodBlock() {
 		return methodDeclaration.getBody();
 	}
 
@@ -140,6 +145,15 @@ public class JdtUnitFixture {
 		return astRoot;
 	}
 
+	public void accept(ASTVisitor visitor) throws Exception {
+		astRoot.accept(visitor);
+		TextEdit edit = astRewrite.rewriteAST();
+		if (edit.hasChildren()) {
+			hasChanged = true;
+		}
+		astRoot = saveChanges(edit);
+	}
+
 	public CompilationUnit saveChanges(TextEdit textEdit) throws Exception {
 		Document document = new Document(compilationUnit.getSource());
 		textEdit.apply(document);
@@ -150,7 +164,7 @@ public class JdtUnitFixture {
 	}
 
 	private void createJavaProject() throws CoreException {
-		
+
 		project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_FIXTURE_NAME);
 		project.create(null);
 		project.open(null);
@@ -185,6 +199,16 @@ public class JdtUnitFixture {
 		ast = astRoot.getAST();
 		TypeDeclaration typeDecl = (TypeDeclaration) astRoot.types().get(0);
 		methodDeclaration = typeDecl.getMethods()[0];
+		astRewrite = ASTRewrite.create(astRoot.getAST());
+		hasChanged = false;
+	}
+
+	public ASTRewrite getAstRewrite() {
+		return astRewrite;
+	}
+
+	public boolean hasChanged() {
+		return hasChanged;
 	}
 
 }
