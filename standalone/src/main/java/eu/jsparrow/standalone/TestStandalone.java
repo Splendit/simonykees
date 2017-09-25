@@ -1,9 +1,6 @@
 package eu.jsparrow.standalone;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +17,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * TODO SIM-103 add class description
@@ -29,111 +28,70 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public class TestStandalone {
 
-	public TestStandalone() {
+	private String path;
+
+	private static final Logger logger = LoggerFactory.getLogger(TestStandalone.class);
+
+	public TestStandalone(String path) {
 		try {
-			// setUp();
+			this.path = path;
 			setUpReal();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println(e.getMessage());
+			logger.error(e.getMessage(), e);
 		}
 	}
 
-	IJavaProject testproject = null;
+	IProjectDescription description = null;
+	IJavaProject testProject = null;
 	IPackageFragment packageFragment = null;
-	// IFolder target = null;
-	static IWorkspace workspace;
-	static List<ICompilationUnit> compUnits = new ArrayList<>();
-	static IProjectDescription description;
+	IProject javaProject = null;
 
-	public IJavaProject getTestproject() {
-		return testproject;
-	}
+	private List<ICompilationUnit> compUnits = new ArrayList<>();
 
 	public List<ICompilationUnit> getCompUnits() {
 		return compUnits;
 	}
 
-	public static void setUpReal() throws CoreException, IllegalStateException, IOException {
-		BufferedReader br = null;
-		FileReader fr = null;
-		
-		String userHome = System.getProperty("user.home");
-		File directory = new File(userHome + "/temp").getAbsoluteFile();
-		if (directory.exists() || directory.mkdirs()) {
-			System.setProperty("user.dir", directory.getAbsolutePath());
-			System.out.println("Set user.dir to " + directory.getAbsolutePath());
-		}
+	public void setUpReal() throws CoreException {
 
-		String path = "";
-		try {
-			String file = System.getProperty("user.dir") + File.separator + "path.txt";
-			System.out.println("file: " + file);
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		logger.info("Created workspace in " + workspace.getRoot().getFullPath()); //$NON-NLS-1$
 
-			fr = new FileReader(file);
-			br = new BufferedReader(fr);
+		description = workspace
+				.loadProjectDescription(new Path(path + File.separator + ".project")); //$NON-NLS-1$
+		logger.info("Project description: " + description.getName()); //$NON-NLS-1$
 
-			String sCurrentLine;
-			while ((sCurrentLine = br.readLine()) != null) {
-				System.out.println(sCurrentLine);
-				path += sCurrentLine;
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			try {
-				if (br != null)
-					br.close();
-				if (fr != null)
-					fr.close();
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
-
-		workspace = ResourcesPlugin.getWorkspace();
-		// org.eclipse.ui.internal.ide.actions.OpenWorkspaceAction.restart
-
-		System.out.println("Created workspace in " + workspace.getRoot().getFullPath());
-
-		description = workspace.loadProjectDescription(new Path(path + File.separator + ".project")); //$NON-NLS-1$
-
-		System.out.println("Project description: " + description.getName()); //$NON-NLS-1$
-
-		final IProject javaProject = workspace.getRoot().getProject(description.getName());
-		System.out.println("Project description: " + description.getName()); //$NON-NLS-1$
+		javaProject = workspace.getRoot().getProject(description.getName());
+		logger.info("Project description: " + description.getName()); //$NON-NLS-1$
 
 		javaProject.create(description, new NullProgressMonitor());
-		System.out.println("Create project from description: " + description.getName()); //$NON-NLS-1$
+		logger.info("Create project from description: " + description.getName()); //$NON-NLS-1$
 
 		javaProject.open(new NullProgressMonitor());
-		System.out.println("Open java project."); //$NON-NLS-1$
-
-		System.out.println(workspace.getRoot().getProjects());
+		logger.info("Open java project: " + javaProject.getName()); //$NON-NLS-1$
 
 		compUnits = getUnit(javaProject);
 
-		System.out.println("Created project");
+		logger.info("Created project"); //$NON-NLS-1$
 	}
 
-	public static List<ICompilationUnit> getUnit(IProject javaProject) {
+	public List<ICompilationUnit> getUnit(IProject javaProject) {
 		List<IPackageFragment> packages = new ArrayList<>();
 		List<ICompilationUnit> units = new ArrayList<>();
 
-		System.out.println("CREATING TEST PROJECT");
+		logger.info("CREATING TEST PROJECT");
 
 		try {
-			System.out.println("CATCHING PACKAGES");
-			IJavaProject testProject = JavaCore.create(javaProject);
-			System.out.println("TEST PROJECT: " + testProject);
+			logger.info("CATCHING PACKAGES");
+			testProject = JavaCore.create(javaProject);
+			logger.info("TEST PROJECT: " + testProject);
 			try {
 				testProject.open(null);
 			} catch (JavaModelException e) {
-				System.out.println(e.getMessage());
+				logger.error(e.getMessage(), e);
 				return new ArrayList<>();
 			}
-			System.out.println("TEST PROJECT PACKAGE FRAGMENTS: " + testProject.getPackageFragments());
+			logger.info("TEST PROJECT PACKAGE FRAGMENTS: " + testProject.getPackageFragments());
 			packages = Arrays.asList(testProject.getPackageFragments());
 
 			for (IPackageFragment mypackage : packages) {
@@ -147,8 +105,7 @@ public class TestStandalone {
 						try {
 							unit.open(new NullProgressMonitor());
 						} catch (JavaModelException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							logger.error(e.getMessage(), e);
 						}
 					});
 
@@ -156,19 +113,21 @@ public class TestStandalone {
 				}
 			}
 		} catch (JavaModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		units.stream().forEach(unit -> {
 			try {
 				unit.open(new NullProgressMonitor());
 			} catch (JavaModelException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 			}
 		});
 
 		return units;
-
+	}
+	
+	public void clear() throws CoreException {
+		javaProject.close(new NullProgressMonitor());
+		ResourcesPlugin.getWorkspace().getRoot().getProject(description.getName()).delete(true, new NullProgressMonitor());
 	}
 }

@@ -1,10 +1,17 @@
 package eu.jsparrow.standalone;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.osgi.framework.BundleActivator;
@@ -19,6 +26,7 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -32,7 +40,10 @@ public class Activator implements BundleActivator {
 	private static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "jSparrow.standalone"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "eu.jsparrow.standalone"; //$NON-NLS-1$
+
+	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
+	public static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Activator plugin;
@@ -44,15 +55,12 @@ public class Activator implements BundleActivator {
 
 	private static BundleContext bundleContext;
 
-	/**
-	 * The constructor
-	 */
-	public Activator() {
-	}
+	private File directory;
+	private TestStandalone test;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
-		System.out.println("Hello World!!");
+		logger.info("Start ACTIVATOR"); //$NON-NLS-1$
 
 		// PREPARE RULES
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
@@ -61,53 +69,86 @@ public class Activator implements BundleActivator {
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 		refactoringPipeline.setRules(rules);
 
-		TestStandalone test = new TestStandalone();
+		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
+		logger.info("PATH FROM CONTEXT: " + projectPath);
 
-		logger.debug("Getting compilation units");
-		System.out.println("Getting compilation units");
+		// Set working directory
+		String file = System.getProperty("java.io.tmpdir");
+		directory = new File(file + File.separator + "temp_jSparrow").getAbsoluteFile();
+		if (directory.exists() || directory.mkdirs()) {
+			System.setProperty(USER_DIR, directory.getAbsolutePath());
+			logger.info("Set user.dir to " + directory.getAbsolutePath());
+		}
+
+		test = new TestStandalone(projectPath);
+
+		logger.info("Getting compilation units");
 		List<ICompilationUnit> compUnits = test.getCompUnits();
 
-		logger.debug("Creating refactoring states");
-		System.out.println("Creating refactoring states");
+		logger.info("Creating refactoring states");
 		refactoringPipeline.createRefactoringStates(compUnits);
 
 		try {
-			logger.debug("Starting refactoring proccess");
-			System.out.println("Starting refactoring proccess");
+			logger.info("Starting refactoring proccess");
 			refactoringPipeline.doRefactoring(new NullProgressMonitor());
-		} catch (RefactoringException e) {
-			return;
-		} catch (RuleException e) {
-			return;
 
+			logger.info("Has changes: " + refactoringPipeline.hasChanges());
+		} catch (RefactoringException | RuleException e) {
+			logger.error(e.getMessage(), e);
+			return;
 		}
 
 		try {
-			logger.debug("Commiting refactoring changes to compilation units");
-			System.out.println("Commiting refactoring changes to compilation units");
+			logger.info("Commiting refactoring changes to compilation units");
 			refactoringPipeline.commitRefactoring();
-		} catch (RefactoringException e) {
-			// TODO exception
-			return;
-		} catch (ReconcileException e) {
-			// TODO exception
+		} catch (RefactoringException | ReconcileException e) {
+			logger.error(e.getMessage(), e);
 			return;
 		}
-
 	}
 
 	@Override
-	public void stop(BundleContext context) throws Exception {
+	public void stop(BundleContext context) {
 
 		running = false;
 
-		// FIXME (see SIM-331) figure out better logging configuration
-		// logger.info(Messages.Activator_stop);
+		try {
+			try {
+				test.clear();
+			} catch (CoreException e) {
+				logger.error(e.getMessage(), e);
+			}
 
-		plugin = null;
-		bundleContext = null;
+			/* Unregister as a save participant */
+			if (ResourcesPlugin.getWorkspace() != null) {
+				ResourcesPlugin.getWorkspace().forgetSavedTree(PLUGIN_ID);
+				ResourcesPlugin.getWorkspace().removeSaveParticipant(PLUGIN_ID);
+			}
+			
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			logger.info("Clean directory " + directory.getAbsolutePath());
+			try {
+				deleteChildren(new File(directory.getAbsolutePath() + File.separator + ".metadata"));
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+			plugin = null;
+			bundleContext = null;
+		}
 
-		System.out.println("Stop ACTIVATOR");
+		logger.info(Messages.Activator_stop);
+	}
+
+	private void deleteChildren(File parentDirectory) throws IOException {
+		for (String file : Arrays.asList(parentDirectory.list())) {
+			File currentFile = new File(parentDirectory.getAbsolutePath(), file);
+			if (currentFile.isDirectory()) {
+				deleteChildren(currentFile);
+			}
+			currentFile.delete();
+		}
 	}
 
 	/**

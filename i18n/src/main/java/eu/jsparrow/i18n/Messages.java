@@ -110,7 +110,6 @@ public class Messages extends NLS {
 	public static String LambdaForEachMapRule_name;
 	public static String LambdaToMethodReferenceRule_description;
 	public static String LambdaToMethodReferenceRule_name;
-	public static String LicenseHelper_licenseProblem;
 	public static String LicenseManager_cannot_reach_licensing_provider_on_checkin;
 	public static String LicenseManager_cannot_reach_licensing_provider_on_prevalidation;
 	public static String LicenseManager_cannot_read_hardware_information;
