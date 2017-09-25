@@ -213,13 +213,11 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 
 	@Override
 	public void endVisit(CompilationUnit compilationUnitNode) {
-		methodNames.keySet().forEach(key -> {
-			if (initializersToReplace.keySet().contains(key) && !excludedNames.contains(key)) {
-				this.addImports.add(JAVA_UTIL_COLLECTIONS);
-				MethodInvocation newMI = createNewMethodInvocation(initializersToReplace.get(key),
-						methodNames.get(key));
-				astRewrite.replace(initializersToReplace.get(key), newMI, null);
-			}
+		methodNames.keySet().stream().filter((key) -> initializersToReplace.keySet().contains(key) && !excludedNames.contains(key)).forEach((key) -> {
+			this.addImports.add(JAVA_UTIL_COLLECTIONS);
+			MethodInvocation newMI = createNewMethodInvocation(initializersToReplace.get(key),
+					methodNames.get(key));
+			astRewrite.replace(initializersToReplace.get(key), newMI, null);
 		});
 
 		super.endVisit(compilationUnitNode);

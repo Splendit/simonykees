@@ -118,7 +118,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			iteratorTypeBinding = iterableTypeBinding.getComponentType();
 		}
 
-		if (iteratorTypeBinding == null || iteratorTypeBinding.getName().isEmpty()) {
+		if (iteratorTypeBinding == null || StringUtils.isEmpty(iteratorTypeBinding.getName())) {
 			return null;
 		}
 
@@ -136,7 +136,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			addedImports = importRewrite.getAddedImports();
 			String fullyQualifiedName = iteratorTypeBinding.getErasure().getQualifiedName();
 			int outerTypeStartingIndex = fullyQualifiedName.lastIndexOf(outerType.getErasure().getName());
-			Name qualifiedName = astRewrite.getAST().newName(fullyQualifiedName.substring(outerTypeStartingIndex));
+			Name qualifiedName = astRewrite.getAST().newName(StringUtils.substring(fullyQualifiedName, outerTypeStartingIndex));
 			iteratorType = convertToQualifiedName(importRewrite.addImport(iteratorTypeBinding, astRewrite.getAST()),
 					qualifiedName);
 		} else {
@@ -152,7 +152,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			}
 		}
 
-		Arrays.stream(addedImports).filter(addedImport -> !addedImport.startsWith(JAVA_LANG_PACKAGE))
+		Arrays.stream(addedImports).filter(addedImport -> !StringUtils.startsWith(addedImport, JAVA_LANG_PACKAGE))
 				.forEach(newImports::add);
 
 		return iteratorType;
@@ -307,8 +307,8 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		}
 
 		String identifier = simpleName.getIdentifier();
-		if (identifier.length() > 1 && identifier.endsWith("s")) { //$NON-NLS-1$
-			return identifier.substring(0, identifier.length() - 1);
+		if (identifier.length() > 1 && StringUtils.endsWith(identifier, "s")) { //$NON-NLS-1$
+			return StringUtils.substring(identifier, 0, identifier.length() - 1);
 		} else {
 			return addSingularPrefix(identifier);
 		}
@@ -326,15 +326,15 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	 */
 	private String addSingularPrefix(String identifier) {
 
-		String firstLetter = identifier.substring(0, 1);
-		String remaining = identifier.substring(1);
+		String firstLetter = StringUtils.substring(identifier, 0, 1);
+		String remaining = StringUtils.substring(identifier, 1);
 		String prefix;
 		if (isVowel(identifier.charAt(0))) {
 			prefix = "an"; //$NON-NLS-1$
 		} else {
 			prefix = "a"; //$NON-NLS-1$
 		}
-		return prefix + firstLetter.toUpperCase() + remaining;
+		return prefix + StringUtils.upperCase(firstLetter) + remaining;
 	}
 
 	/**

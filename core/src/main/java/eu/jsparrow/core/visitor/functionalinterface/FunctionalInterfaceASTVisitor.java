@@ -251,9 +251,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 								}
 							}
 
-							for (SingleVariableDeclaration s : parameteres) {
-								newInitializer.parameters().add(astRewrite.createMoveTarget(s));
-							}
+							parameteres.forEach((s) -> newInitializer.parameters().add(astRewrite.createMoveTarget(s)));
 						}
 
 						newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
@@ -299,13 +297,13 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		List<SimpleName> initializedFields = new ArrayList<>();
 
-		for (FieldDeclaration field : fields) {
+		fields.forEach((field) -> {
 			boolean isFinal = ASTNodeUtil.hasModifier(field.modifiers(), Modifier::isFinal);
 			initializedFields
 					.addAll(ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
 							.stream().filter(fragment -> !isFinal || fragment.getInitializer() != null)
 							.map(VariableDeclarationFragment::getName).collect(Collectors.toList()));
-		}
+		});
 
 		initializedFields
 				.addAll(ASTNodeUtil.convertToTypedList(methodDeclaration.parameters(), SingleVariableDeclaration.class)
@@ -426,9 +424,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			node.accept(visitor);
 			String newName = calcNewName(scopeNames, conflictingName);
 			List<SimpleName> usages = visitor.getUsages();
-			for (SimpleName usage : usages) {
-				astRewrite.set(usage, SimpleName.IDENTIFIER_PROPERTY, newName, null);
-			}
+			usages.forEach((usage) -> astRewrite.set(usage, SimpleName.IDENTIFIER_PROPERTY, newName, null));
 		}
 	}
 

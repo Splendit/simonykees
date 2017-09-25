@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.loop.stream;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -192,7 +193,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 			boxedClass = null;
 		}
 
-		if (methodName.isEmpty() || boxedClass == null) {
+		if (StringUtils.isEmpty(methodName) || boxedClass == null) {
 			return null;
 		}
 

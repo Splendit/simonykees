@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -740,7 +741,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 				Expression initializer = fragment.getInitializer();
 				if (ASTNode.STRING_LITERAL == initializer.getNodeType()) {
 					StringLiteral stringLiteral = (StringLiteral) initializer;
-					if (stringLiteral.getLiteralValue().isEmpty()) {
+					if (StringUtils.isEmpty(stringLiteral.getLiteralValue())) {
 						this.fragment = fragment;
 						beforeDeclaration = false;
 					} else {

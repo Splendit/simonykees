@@ -31,7 +31,7 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(TryStatement node) {
 		List<CatchClause> catchClauses = (List<CatchClause>) node.catchClauses();
-		List<Block> blockList = catchClauses.stream().map(catchClase -> catchClase.getBody())
+		List<Block> blockList = catchClauses.stream().map(CatchClause::getBody)
 				.collect(Collectors.toList());
 		while (!blockList.isEmpty()) {
 			boolean combined = false;
@@ -65,9 +65,7 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 			if (combined) {
 				UnionType uniontype = node.getAST().newUnionType();
 				removeSubTypes(allNewTypes);
-				for (Type insertType : allNewTypes) {
-					uniontype.types().add(astRewrite.createMoveTarget(insertType));
-				}
+				allNewTypes.forEach((insertType) -> uniontype.types().add(astRewrite.createMoveTarget(insertType)));
 				astRewrite.replace(referenceExceptionType, uniontype, null);
 			}
 

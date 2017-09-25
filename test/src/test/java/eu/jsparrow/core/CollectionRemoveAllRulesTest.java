@@ -26,7 +26,8 @@ public class CollectionRemoveAllRulesTest extends AbstractRulesTest {
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/collectionRemoveAll";
 
 	private String fileName;
-	private Path preRule, postRule;
+	private Path preRule;
+	private Path postRule;
 
 	public CollectionRemoveAllRulesTest(String fileName, Path preRule, Path postRule) {
 		super();

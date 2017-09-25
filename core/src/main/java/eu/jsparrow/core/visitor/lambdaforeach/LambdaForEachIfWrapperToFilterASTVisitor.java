@@ -213,13 +213,7 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 				Block elseStatementBlock = (Block) elseStatement;
 				List<Statement> statements = ASTNodeUtil.convertToTypedList(elseStatementBlock.statements(),
 						Statement.class);
-				boolean onlyEmptyStatementsInBlock = true;
-				for (Statement statement : statements) {
-					if (!(statement instanceof EmptyStatement)) {
-						onlyEmptyStatementsInBlock = false;
-						break;
-					}
-				}
+				boolean onlyEmptyStatementsInBlock = statements.stream().filter(statement -> !(statement instanceof EmptyStatement)).findFirst().map(statement -> false).orElse(true);
 				return onlyEmptyStatementsInBlock;
 			} else if (elseStatement instanceof EmptyStatement) {
 				return true;

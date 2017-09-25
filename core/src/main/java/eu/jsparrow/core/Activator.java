@@ -45,7 +45,7 @@ public class Activator implements BundleActivator {
 		plugin = null;
 
 		synchronized (jobs) {
-			jobs.forEach(job -> job.cancel());
+			jobs.forEach(Job::cancel);
 			jobs.clear();
 		}
 	}

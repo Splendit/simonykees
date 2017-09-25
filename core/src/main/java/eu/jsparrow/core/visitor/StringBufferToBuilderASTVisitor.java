@@ -108,15 +108,12 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 		if (methodInvocationNode.arguments() != null && !methodInvocationNode.arguments().isEmpty()) {
 			List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocationNode.arguments(),
 					Expression.class);
-			for (Expression argument : arguments) {
-				if (ASTNode.SIMPLE_NAME == argument.getNodeType()) {
-					SimpleName argumentSimpleName = (SimpleName) argument;
-					ITypeBinding argumentTypeBinding = argumentSimpleName.resolveTypeBinding();
-					if (ClassRelationUtil.isContentOfTypes(argumentTypeBinding, STRINGBUFFER_TYPE_LIST)) {
-						stringBufferMethodInvocationArgs.add(argumentSimpleName.getIdentifier());
-					}
+			arguments.stream().filter((argument) -> ASTNode.SIMPLE_NAME == argument.getNodeType()).map((argument) -> (SimpleName) argument).forEach((argumentSimpleName) -> {
+				ITypeBinding argumentTypeBinding = argumentSimpleName.resolveTypeBinding();
+				if (ClassRelationUtil.isContentOfTypes(argumentTypeBinding, STRINGBUFFER_TYPE_LIST)) {
+					stringBufferMethodInvocationArgs.add(argumentSimpleName.getIdentifier());
 				}
-			}
+			});
 		}
 
 		return false;
@@ -127,14 +124,14 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 	 */
 	@Override
 	public void endVisit(MethodDeclaration node) {
-		for (VariableDeclarationStatement declaration : stringBufferDeclarations) {
+		stringBufferDeclarations.forEach((declaration) -> {
 			List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(declaration.fragments(),
 					VariableDeclarationFragment.class);
 			List<String> declarationFragmentNames = fragments.stream()
 					.map(fragment -> fragment.getName().getIdentifier()).collect(Collectors.toList());
 
 			List<String> occuringFragmentNames = declarationFragmentNames.stream()
-					.filter(fragmentName -> stringBufferMethodInvocationArgs.contains(fragmentName))
+					.filter(stringBufferMethodInvocationArgs::contains)
 					.collect(Collectors.toList());
 
 			if (occuringFragmentNames != null && occuringFragmentNames.isEmpty()) {
@@ -145,8 +142,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 
 					if (validAssignments.isPresent() && isFragmentsValid(fragments)) {
 
-						validAssignments.get().stream().filter(assignment -> ASTNode.CLASS_INSTANCE_CREATION == assignment.getRightHandSide().getNodeType()).forEach(assignment -> {
-							ClassInstanceCreation creation = (ClassInstanceCreation) assignment.getRightHandSide();
+						validAssignments.get().stream().filter(assignment -> ASTNode.CLASS_INSTANCE_CREATION == assignment.getRightHandSide().getNodeType()).map(assignment -> (ClassInstanceCreation) assignment.getRightHandSide()).forEach(creation -> {
 							ClassInstanceCreation newCreation = createClassInstanceCreation(creation);
 							astRewrite.replace(creation, newCreation, null);
 						});
@@ -157,7 +153,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 					}
 				}
 			}
-		}
+		});
 
 		stringBufferAssignmetns.clear();
 		stringBufferDeclarations.clear();
@@ -232,7 +228,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 	 */
 	private boolean isFragmentsValid(List<VariableDeclarationFragment> fragments) {
 		List<VariableDeclarationFragment> validFragments = new LinkedList<>();
-		for (VariableDeclarationFragment fragment : fragments) {
+		fragments.forEach((fragment) -> {
 			Expression initializer = fragment.getInitializer();
 			if (initializer != null) {
 				if (ASTNode.CLASS_INSTANCE_CREATION == initializer.getNodeType()
@@ -247,7 +243,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 			} else {
 				validFragments.add(fragment);
 			}
-		}
+		});
 
 		return validFragments.size() == fragments.size();
 	}
@@ -337,9 +333,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 		if (!oldCreation.arguments().isEmpty()) {
 			ListRewrite newCreationArguments = astRewrite.getListRewrite(newCreation,
 					ClassInstanceCreation.ARGUMENTS_PROPERTY);
-			for (Object argument : oldCreation.arguments()) {
-				newCreationArguments.insertLast(astRewrite.createCopyTarget((ASTNode) argument), null);
-			}
+			oldCreation.arguments().forEach((argument) -> newCreationArguments.insertLast(astRewrite.createCopyTarget((ASTNode) argument), null));
 		}
 
 		return newCreation;
