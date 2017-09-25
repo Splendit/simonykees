@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -248,10 +249,10 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 						String systemOutOption = replacingOptions.get(StandardLoggerConstants.SYSTEM_OUT_PRINT);
 						String systemErrOption = replacingOptions.get(StandardLoggerConstants.SYSTEM_ERR_PRINT);
 
-						if (OUT.equals(qualiferName.getIdentifier()) && !systemOutOption.isEmpty()) {
+						if (OUT.equals(qualiferName.getIdentifier()) && !StringUtils.isEmpty(systemOutOption)) {
 							// replace the System.out.println with a logger
 							replaceMethod(methodInvocation, systemOutOption);
-						} else if (ERR.equals(qualiferName.getIdentifier()) && !systemErrOption.isEmpty()) {
+						} else if (ERR.equals(qualiferName.getIdentifier()) && !StringUtils.isEmpty(systemErrOption)) {
 							// replace the System.err.println with a logger
 							replaceMethod(methodInvocation, systemErrOption);
 						}
@@ -260,7 +261,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 			}
 
 		} else if (PRINT_STACK_TRACE.equals(methodName.getIdentifier())
-				&& !replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE).isEmpty()) {
+				&& !StringUtils.isEmpty(replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE))) {
 			/*
 			 * Looking for e.printStackTrace() where 'e' is a throwable object.
 			 */

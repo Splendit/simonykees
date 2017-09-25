@@ -118,18 +118,6 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final List<String> COLLECTION_TYPE_BINDING_CHECK_LIST = Collections
 			.singletonList(COLLECTION_QUALIFIED_NAME);
 
-	private enum TransformationOption {
-		CONTAINS, NOT_CONTAINS,
-	}
-
-	private enum TransformationType {
-		STRING, COLLECTION,
-	}
-
-	private enum IndexOfMethodPosition {
-		LEFT, RIGHT,
-	}
-
 	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
 		if ("indexOf".equals(methodInvocationNode.getName().getIdentifier())) { //$NON-NLS-1$
@@ -394,5 +382,17 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return result;
+	}
+
+	private enum TransformationOption {
+		CONTAINS, NOT_CONTAINS,
+	}
+
+	private enum TransformationType {
+		STRING, COLLECTION,
+	}
+
+	private enum IndexOfMethodPosition {
+		LEFT, RIGHT,
 	}
 }

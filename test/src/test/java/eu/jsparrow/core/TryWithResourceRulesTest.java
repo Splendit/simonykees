@@ -26,7 +26,8 @@ public class TryWithResourceRulesTest extends AbstractRulesTest {
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/tryWResource";
 
 	private String fileName;
-	private Path preRule, postRule;
+	private Path preRule;
+	private Path postRule;
 
 	public TryWithResourceRulesTest(String fileName, Path preRule, Path postRule) {
 		super();

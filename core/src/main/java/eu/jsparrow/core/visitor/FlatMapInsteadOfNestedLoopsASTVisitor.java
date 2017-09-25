@@ -45,10 +45,6 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	LinkedList<MethodInvocation> methodInvocationExpressionList = new LinkedList<>();
 	MethodInvocation innerMostMethodInvocation = null;
 
-	private enum MethodInvocationType {
-		COLLECTION, STREAM,
-	}
-
 	/**
 	 * work is only done for {@link Collection#forEach(java.util.function.Consumer)}
 	 * or {@link Stream#forEach(java.util.function.Consumer)} method calls.
@@ -469,5 +465,9 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		}
 
 		return methodInvocation;
+	}
+
+	private enum MethodInvocationType {
+		COLLECTION, STREAM,
 	}
 }

@@ -234,13 +234,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		 */
 		@Override
 		public boolean visit(VariableDeclarationFragment node) {
-			for (VariableDeclarationFragment fragment : toBeMovedToResources) {
-				if (node == fragment) {
-					return false;
-				}
-			}
-
-			return true;
+			return toBeMovedToResources.stream().filter(fragment -> node == fragment).findFirst().map(fragment -> false).orElse(true);
 		}
 
 		public boolean safeToGo() {

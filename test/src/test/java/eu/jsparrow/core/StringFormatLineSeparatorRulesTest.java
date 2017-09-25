@@ -35,7 +35,8 @@ public class StringFormatLineSeparatorRulesTest extends AbstractRulesTest {
 	public static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/stringFormat";
 
 	private String fileName;
-	private Path preRule, postRule;
+	private Path preRule;
+	private Path postRule;
 
 	public StringFormatLineSeparatorRulesTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;

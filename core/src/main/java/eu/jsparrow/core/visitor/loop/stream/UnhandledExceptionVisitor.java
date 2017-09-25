@@ -8,7 +8,6 @@ import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -36,9 +35,8 @@ public class UnhandledExceptionVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(TryStatement tryStatementNode) {
-		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class).stream()
-				.forEach(catchClause -> {
-					IVariableBinding exceptionVariableBinding = catchClause.getException().resolveBinding();
+		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class).stream().map(catchClause -> catchClause.getException().resolveBinding())
+				.forEach(exceptionVariableBinding -> {
 					if (exceptionVariableBinding != null) {
 						currentHandledExceptionsTypes.add(exceptionVariableBinding.getType().getQualifiedName());
 					}
@@ -48,9 +46,8 @@ public class UnhandledExceptionVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public void endVisit(TryStatement tryStatementNode) {
-		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class).stream()
-				.forEach(catchClause -> {
-					IVariableBinding exceptionVariableBinding = catchClause.getException().resolveBinding();
+		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class).stream().map(catchClause -> catchClause.getException().resolveBinding())
+				.forEach(exceptionVariableBinding -> {
 					if (exceptionVariableBinding != null) {
 						currentHandledExceptionsTypes.remove(exceptionVariableBinding.getType().getQualifiedName());
 					}

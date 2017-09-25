@@ -47,7 +47,7 @@ public class StandardLoggerRuleLog4jTest extends AbstractRulesTest {
 			IJavaProject javaProject = RulesTestUtil.createJavaProject("allRulesTest", "bin");
 			root = RulesTestUtil.addSourceContainer(javaProject, "/allRulesTestRoot");
 
-			List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
+			List<IClasspathEntry> entries = new ArrayList<>();
 			entries.add(
 					RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
 			RulesTestUtil.addToClasspath(javaProject, entries);

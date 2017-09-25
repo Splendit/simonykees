@@ -123,10 +123,10 @@ public class SimonykeesPreferenceManager {
 		// ex. Profil1^rule1~rule2|profil 2^rule3~rule5~rule2
 		String[] profilesArray = parseString(getAllProfiles());
 		for (String profileInfo : profilesArray) {
-			String name = profileInfo.substring(0,
+			String name = StringUtils.substring(profileInfo, 0,
 					profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER));
 			List<String> rules = Arrays.asList(
-					profileInfo.substring(profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
+					StringUtils.substring(profileInfo, profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
 							.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
 			if (name.equals(Messages.Profile_DefaultProfile_profileName)) {
 				profiles.add(defaultProfile);
@@ -139,21 +139,13 @@ public class SimonykeesPreferenceManager {
 
 	public static String getStringFromProfiles() {
 		List<String> profilesAsString = new ArrayList<>();
-		for (SimonykeesProfile profile : profiles) {
-			String profileAsString = profile.getProfileName() + SimonykeesPreferenceConstants.NAME_RULES_DELIMITER
-					+ StringUtils.join(profile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER);
-			profilesAsString.add(profileAsString);
-		}
+		profiles.stream().map((profile) -> profile.getProfileName() + SimonykeesPreferenceConstants.NAME_RULES_DELIMITER
+				+ StringUtils.join(profile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER)).forEach(profilesAsString::add);
 		return flattenArray(profilesAsString);
 	}
 
 	public static SimonykeesProfile getProfileFromName(String name) {
-		for (SimonykeesProfile profile : profiles) {
-			if (profile.getProfileName().equals(name)) {
-				return profile;
-			}
-		}
-		return null;
+		return profiles.stream().filter(profile -> profile.getProfileName().equals(name)).findFirst().orElse(null);
 	}
 
 	/**

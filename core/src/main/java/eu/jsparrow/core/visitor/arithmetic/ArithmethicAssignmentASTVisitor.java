@@ -2,12 +2,11 @@ package eu.jsparrow.core.visitor.arithmetic;
 
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Assignment.Operator;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.util.ArithmeticUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
-
-import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.SimpleName;
 
 /**
  * This visitor is build for assignments of arithmetic expressions for base

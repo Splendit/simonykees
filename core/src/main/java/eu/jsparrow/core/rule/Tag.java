@@ -50,7 +50,7 @@ public enum Tag {
 	}
 
 	public static String[] getAllTags() {
-		return Arrays.stream(values()).map(t -> t.getTagNames()).flatMap(List::stream).collect(Collectors.toList())
+		return Arrays.stream(values()).map(Tag::getTagNames).flatMap(List::stream).collect(Collectors.toList())
 				.stream().toArray(String[]::new);
 	}
 

@@ -48,39 +48,21 @@ public class VariableDefinitionASTVisitor extends AbstractASTRewriteASTVisitor {
 	
 	@Override
 	public boolean visit(Block node) {
-		boolean inScope = false;
-		for(ASTNode block : relevantBlocks) {
-			if(block == node) {
-				inScope = true;
-				break;
-			}
-		}
+		boolean inScope = relevantBlocks.stream().anyMatch(block -> block == node);
 		
 		return inScope;
 	}
 	
 	@Override
 	public boolean visit(ForStatement node) {
-		boolean inScope = false;
-		for(ASTNode block : relevantBlocks) {
-			if(block == node) {
-				inScope = true;
-				break;
-			}
-		}
+		boolean inScope = relevantBlocks.stream().anyMatch(block -> block == node);
 		
 		return inScope;
 	}
 	
 	@Override
 	public boolean visit(MethodDeclaration node) {
-		boolean inScope = false;
-		for(ASTNode block : relevantBlocks) {
-			if(block == node) {
-				inScope = true;
-				break;
-			}
-		}
+		boolean inScope = relevantBlocks.stream().anyMatch(block -> block == node);
 		
 		return inScope;
 	}

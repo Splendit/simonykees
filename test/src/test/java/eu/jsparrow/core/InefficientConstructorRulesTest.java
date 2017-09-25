@@ -20,7 +20,8 @@ public class InefficientConstructorRulesTest extends AbstractRulesTest {
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/inefficientConstructor";
 
 	private String fileName;
-	private Path preRule, postRule;
+	private Path preRule;
+	private Path postRule;
 
 	public InefficientConstructorRulesTest(String fileName, Path preRule, Path postRule) {
 		super();

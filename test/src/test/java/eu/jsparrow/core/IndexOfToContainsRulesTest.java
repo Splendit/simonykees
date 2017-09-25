@@ -24,13 +24,13 @@ public class IndexOfToContainsRulesTest extends AbstractRulesTest {
 	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.indexOfToContains";
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/indexOfToContains";
 
-	private String fileName;
-	private Path preRule;
-	private Path postRule;
-
 	static {
 		javaVersion = JavaCore.VERSION_1_7;
 	}
+
+	private String fileName;
+	private Path preRule;
+	private Path postRule;
 
 	public IndexOfToContainsRulesTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;

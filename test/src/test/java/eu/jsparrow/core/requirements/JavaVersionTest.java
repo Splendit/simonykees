@@ -38,6 +38,15 @@ public class JavaVersionTest {
 
 	IJavaProject testproject = null;
 
+	private String javaVersion;
+
+	private long numberOfRules;
+
+	public JavaVersionTest(String javaVersion, long numberOfRules) {
+		this.javaVersion = javaVersion;
+		this.numberOfRules = numberOfRules;
+	}
+
 	@Before
 	public void setUp() throws Exception {
 		testproject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
@@ -55,15 +64,6 @@ public class JavaVersionTest {
 				{ JavaCore.VERSION_1_6, 27 }, { JavaCore.VERSION_1_7, 30 }, { JavaCore.VERSION_1_8, 41 } });
 	}
 
-	private String javaVersion;
-
-	private long numberOfRules;
-
-	public JavaVersionTest(String javaVersion, long numberOfRules) {
-		this.javaVersion = javaVersion;
-		this.numberOfRules = numberOfRules;
-	}
-
 	@Test
 	public void filterWithoutStringUtilsIsPresent() {
 		testproject.setOption(JavaCore.COMPILER_COMPLIANCE, javaVersion);
@@ -75,7 +75,7 @@ public class JavaVersionTest {
 	@Test
 	public void filterWithStringUtilsIsPresent() throws Exception {
 		testproject.setOption(JavaCore.COMPILER_COMPLIANCE, javaVersion);
-		List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
+		List<IClasspathEntry> entries = new ArrayList<>();
 		RulesTestUtil.addToClasspath(testproject, entries);
 		Assert.assertEquals(
 				String.format("Number of rules that support Java Version %s have changed. Check it!", javaVersion), //$NON-NLS-1$
@@ -85,6 +85,6 @@ public class JavaVersionTest {
 	private long numberOfActiveRulesForJavaVersion(String version) {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer
 				.getRulesForProject(testproject);
-		return rules.stream().filter(r -> r.isEnabled()).count();
+		return rules.stream().filter(RefactoringRule::isEnabled).count();
 	}
 }

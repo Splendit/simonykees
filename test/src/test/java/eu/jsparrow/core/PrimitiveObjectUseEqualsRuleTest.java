@@ -21,7 +21,8 @@ public class PrimitiveObjectUseEqualsRuleTest extends AbstractRulesTest {
 			+ "/postRule/primitiveObjectUseEquals";
 
 	private String fileName;
-	private Path preRule, postRule;
+	private Path preRule;
+	private Path postRule;
 
 	public PrimitiveObjectUseEqualsRuleTest(String fileName, Path preRule, Path postRule) {
 		super();

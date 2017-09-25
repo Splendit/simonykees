@@ -147,42 +147,38 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 	 */
 	private void synchronizeWithUIShowLoggerRuleWizard(ExecutionEvent event, RefactoringPipeline refactoringPipeline,
 			List<IJavaElement> selectedJavaElements, StandardLoggerRule loggerRule, IJavaProject selectedJavaProjekt) {
-		Display.getDefault().asyncExec(new Runnable() {
+		Display.getDefault().asyncExec(() -> {
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			// HandlerUtil.getActiveShell(event)
+			final WizardDialog dialog = new WizardDialog(shell,
+					new LoggerRuleWizard(selectedJavaProjekt, loggerRule, refactoringPipeline)) {
+				/*
+				 * Removed unnecessary empty space on the bottom of the
+				 * wizard intended for ProgressMonitor that is not
+				 * used(non-Javadoc)
+				 * 
+				 * @see org.eclipse.jface.wizard.WizardDialog#
+				 * createDialogArea(org.eclipse.swt.widgets. Composite)
+				 */
+				@Override
+				protected Control createDialogArea(Composite parent) {
+					Control ctrl = super.createDialogArea(parent);
+					getProgressMonitor();
+					return ctrl;
+				}
 
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				// HandlerUtil.getActiveShell(event)
-				final WizardDialog dialog = new WizardDialog(shell,
-						new LoggerRuleWizard(selectedJavaProjekt, loggerRule, refactoringPipeline)) {
-					/*
-					 * Removed unnecessary empty space on the bottom of the
-					 * wizard intended for ProgressMonitor that is not
-					 * used(non-Javadoc)
-					 * 
-					 * @see org.eclipse.jface.wizard.WizardDialog#
-					 * createDialogArea(org.eclipse.swt.widgets. Composite)
-					 */
-					@Override
-					protected Control createDialogArea(Composite parent) {
-						Control ctrl = super.createDialogArea(parent);
-						getProgressMonitor();
-						return ctrl;
-					}
+				@Override
+				protected IProgressMonitor getProgressMonitor() {
+					ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
+					GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+					gridData.heightHint = 0;
+					monitor.setLayoutData(gridData);
+					monitor.setVisible(false);
+					return monitor;
+				}
+			};
 
-					@Override
-					protected IProgressMonitor getProgressMonitor() {
-						ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
-						GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-						gridData.heightHint = 0;
-						monitor.setLayoutData(gridData);
-						monitor.setVisible(false);
-						return monitor;
-					}
-				};
-
-				dialog.open();
-			}
+			dialog.open();
 		});
 	}
 
@@ -194,25 +190,21 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 	private void synchronizeWithUIShowCompilationErrorMessage(List<ICompilationUnit> containingErrorList,
 			ExecutionEvent event, RefactoringPipeline refactoringPipeline, List<IJavaElement> selectedJavaElements,
 			StandardLoggerRule loggerRule, IJavaProject selectedJavaProjekt) {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				CompilationErrorsMessageDialog dialog = new CompilationErrorsMessageDialog(shell);
-				dialog.create();
-				dialog.setTableViewerInput(containingErrorList);
-				dialog.open();
-				if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
-					if (refactoringPipeline.hasRefactoringStates()) {
-						synchronizeWithUIShowLoggerRuleWizard(event, refactoringPipeline, selectedJavaElements,
-								loggerRule, selectedJavaProjekt);
-					} else {
-						synchronizeWithUIShowWarningNoComlipationUnitDialog();
-					}
+		Display.getDefault().asyncExec(() -> {
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			CompilationErrorsMessageDialog dialog = new CompilationErrorsMessageDialog(shell);
+			dialog.create();
+			dialog.setTableViewerInput(containingErrorList);
+			dialog.open();
+			if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
+				if (refactoringPipeline.hasRefactoringStates()) {
+					synchronizeWithUIShowLoggerRuleWizard(event, refactoringPipeline, selectedJavaElements,
+							loggerRule, selectedJavaProjekt);
 				} else {
-					Activator.setRunning(false);
+					synchronizeWithUIShowWarningNoComlipationUnitDialog();
 				}
+			} else {
+				Activator.setRunning(false);
 			}
 		});
 	}
@@ -224,15 +216,11 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 	 * working copies were found to apply
 	 */
 	private void synchronizeWithUIShowInfo(SimonykeesException exception) {
-		Display.getDefault().asyncExec(new Runnable() {
+		Display.getDefault().asyncExec(() -> {
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
 
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
-
-				Activator.setRunning(false);
-			}
+			Activator.setRunning(false);
 		});
 	}
 
@@ -241,29 +229,20 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 	 * contains no Java files without compilation error from non UI thread
 	 */
 	private void synchronizeWithUIShowWarningNoComlipationUnitDialog() {
-		Display.getDefault().asyncExec(new Runnable() {
+		Display.getDefault().asyncExec(() -> {
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizardHandler_noFileWithoutError,
+					MessageDialog.INFORMATION);
 
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizardHandler_noFileWithoutError,
-						MessageDialog.INFORMATION);
-
-				Activator.setRunning(false);
-			}
-
+			Activator.setRunning(false);
 		});
 	}
 
 	private void synchronizeWithUIShowMultiprojectMessage() {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell,
-						Messages.SelectRulesWizardHandler_multipleProjectsWarning, MessageDialog.WARNING);
-			}
+		Display.getDefault().asyncExec(() -> {
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			SimonykeesMessageDialog.openMessageDialog(shell,
+					Messages.SelectRulesWizardHandler_multipleProjectsWarning, MessageDialog.WARNING);
 		});
 	}
 }

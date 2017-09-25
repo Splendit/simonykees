@@ -190,9 +190,13 @@ public class NodeBuilder {
 	 */
 	public static Type typeFromBinding(AST ast, ITypeBinding typeBinding) {
 		if (ast == null)
+		 {
 			throw new NullPointerException("ast is null"); //$NON-NLS-1$
+		}
 		if (typeBinding == null)
+		 {
 			throw new NullPointerException("typeBinding is null"); //$NON-NLS-1$
+		}
 
 		if (typeBinding.isPrimitive()) {
 			return ast.newPrimitiveType(PrimitiveType.toCode(typeBinding.getName()));

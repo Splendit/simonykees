@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -203,7 +204,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 
 			String typeNameStr = findTypeOfSimpleName(methodInvocationExpressionName);
 
-			if (typeNameStr != null && !typeNameStr.isEmpty()) {
+			if (typeNameStr != null && !StringUtils.isEmpty(typeNameStr)) {
 
 				SimpleName typeName = astRewrite.getAST().newSimpleName(typeNameStr);
 				SimpleName methodName = (SimpleName) astRewrite.createCopyTarget(methodInvocation.getName());
@@ -221,7 +222,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 				ITypeBinding typeBinding = methodInvocationExpressionName.resolveTypeBinding();
 				if (typeBinding != null) {
 					String qualifiedName = typeBinding.getErasure().getQualifiedName();
-					if (qualifiedName != null && !qualifiedName.equals("")) { //$NON-NLS-1$
+					if (qualifiedName != null && !"".equals(qualifiedName)) { //$NON-NLS-1$
 						newImports.add(qualifiedName);
 					}
 				}

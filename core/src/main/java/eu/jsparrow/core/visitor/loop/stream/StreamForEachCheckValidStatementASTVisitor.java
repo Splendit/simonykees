@@ -119,8 +119,9 @@ public class StreamForEachCheckValidStatementASTVisitor extends UnhandledExcepti
 				return result;
 			});
 
-			if (!(isField || isFinal || isEffectivelyFinal || isLocalVariable || isEnhancedForParameter))
+			if (!(isField || isFinal || isEffectivelyFinal || isLocalVariable || isEnhancedForParameter)) {
 				invalidVariables.add(variableBinding);
+			}
 		}
 		return false;
 	}

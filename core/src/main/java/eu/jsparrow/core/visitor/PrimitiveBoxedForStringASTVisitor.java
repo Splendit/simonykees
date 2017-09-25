@@ -89,8 +89,8 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 					 * do not have this property
 					 */
 					Predicate<ITypeBinding> isDoubleVariable = 
-							binding -> (binding != null && (binding.getName().contains(ReservedNames.DOUBLE_PRIMITIVE)
-									|| (binding.getName().contains(ReservedNames.DOUBLE))));
+							binding -> (binding != null && (StringUtils.contains(binding.getName(), ReservedNames.DOUBLE_PRIMITIVE)
+									|| (StringUtils.contains(binding.getName(), ReservedNames.DOUBLE))));
 
 					if (ReservedNames.FLOAT.equals(refactorPrimitiveType.getIdentifier())
 							&& isDoubleVariable.test(refactorCandidateTypeBinding)) {

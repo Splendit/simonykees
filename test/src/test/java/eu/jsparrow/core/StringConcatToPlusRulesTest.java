@@ -20,7 +20,8 @@ public class StringConcatToPlusRulesTest extends AbstractRulesTest {
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/stringConcat";
 
 	private String fileName;
-	private Path preRule, postRule;
+	private Path preRule;
+	private Path postRule;
 
 	public StringConcatToPlusRulesTest(String fileName, Path preRule, Path postRule) {
 		super();

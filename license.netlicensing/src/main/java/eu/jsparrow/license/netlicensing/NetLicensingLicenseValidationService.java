@@ -23,6 +23,7 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 	public NetLicensingLicenseValidationService() {
 	}
 
+	@Override
 	public void startValidation() {
 		LicenseManager.getInstance();
 	}
@@ -40,9 +41,9 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 	@Override
 	public boolean isExpired() {
 		LicenseStatus licenseStatus = LicenseManager.getInstance().getValidationData().getLicenseStatus();
-		return (licenseStatus.equals(LicenseStatus.FLOATING_EXPIRED)
-				|| licenseStatus.equals(LicenseStatus.NODE_LOCKED_EXPIRED)
-				|| licenseStatus.equals(LicenseStatus.TRIAL_EXPIRED));
+		return (licenseStatus == LicenseStatus.FLOATING_EXPIRED
+				|| licenseStatus == LicenseStatus.NODE_LOCKED_EXPIRED
+				|| licenseStatus == LicenseStatus.TRIAL_EXPIRED);
 	}
 
 	@Override
@@ -64,7 +65,7 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 			displayableLicenseInformation.append(Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as);
 			displayableLicenseInformation.append(licenseType.getLicenseName());
 
-			if (!LicenseType.TRY_AND_BUY.equals(licenseType)) {
+			if (LicenseType.TRY_AND_BUY != licenseType) {
 				String licenseKey = licenseManger.getLicensee().getLicenseeNumber();
 
 				displayableLicenseInformation.append(" "); //$NON-NLS-1$
@@ -99,6 +100,6 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 	@Override
 	public boolean isDemoType() {
 		LicenseType licenseType = LicenseManager.getInstance().getValidationData().getType();
-		return LicenseType.TRY_AND_BUY.equals(licenseType);
+		return LicenseType.TRY_AND_BUY == licenseType;
 	}
 }

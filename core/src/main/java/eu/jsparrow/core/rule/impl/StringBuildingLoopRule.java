@@ -5,8 +5,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.core.visitor.StringBuildingLoopASTVisitor;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * @see StringBuildingLoopASTVisitor
