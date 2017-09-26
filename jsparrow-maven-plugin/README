@@ -1,0 +1,14 @@
+Steps to start:
+- in src/main/resources create file named "manifest.standalone"
+- in releng project open jSparrow.product and run Eclipse Product export wizard
+- from folder created by product export go to repository/plugins/ and copy all plugins to src/main/resources
+- run mvn install on jsparrow-maven-plugin project
+
+To run on project:
+- in pom of maven project add following lines in plugins:
+			<plugin>
+				<groupId>at.splendit</groupId>
+				<artifactId>jsparrow-maven-plugin</artifactId>
+				<version>2.2.1-SNAPSHOT</version>
+			</plugin>
+- run mvn jsparrow:refactor

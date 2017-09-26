@@ -113,12 +113,6 @@ public class Activator implements BundleActivator {
 		running = false;
 
 		try {
-			try {
-				test.clear();
-			} catch (CoreException e) {
-				logger.error(e.getMessage(), e);
-			}
-
 			/* Unregister as a save participant */
 			if (ResourcesPlugin.getWorkspace() != null) {
 				ResourcesPlugin.getWorkspace().forgetSavedTree(PLUGIN_ID);

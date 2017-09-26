@@ -101,15 +101,14 @@ public class TestStandalone {
 					units.addAll(Arrays.asList(mypackage.getCompilationUnits()));
 
 					// USED TO AVOID OutOfMemory
-					units.stream().forEach(unit -> {
-						try {
-							unit.open(new NullProgressMonitor());
-						} catch (JavaModelException e) {
-							logger.error(e.getMessage(), e);
-						}
-					});
-
-					return units;
+//					units.stream().forEach(unit -> {
+//						try {
+//							unit.open(new NullProgressMonitor());
+//						} catch (JavaModelException e) {
+//							logger.error(e.getMessage(), e);
+//						}
+//					});
+//					return units;
 				}
 			}
 		} catch (JavaModelException e) {
@@ -124,10 +123,5 @@ public class TestStandalone {
 		});
 
 		return units;
-	}
-	
-	public void clear() throws CoreException {
-		javaProject.close(new NullProgressMonitor());
-		ResourcesPlugin.getWorkspace().getRoot().getProject(description.getName()).delete(true, new NullProgressMonitor());
 	}
 }

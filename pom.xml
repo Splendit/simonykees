@@ -92,6 +92,8 @@
 		<module>releng</module>
 		<!-- standalone -->
 		<module>standalone</module>
+		
+		<module>jsparrow-maven-plugin</module>
 	</modules>
 
 	<scm>
