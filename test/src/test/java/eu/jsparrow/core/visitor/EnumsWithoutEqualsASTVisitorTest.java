@@ -1,29 +1,11 @@
 package eu.jsparrow.core.visitor;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 
-import java.util.Arrays;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.text.edits.TextEdit;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-
-import eu.jsparrow.jdtunit.JdtUnitFixture;
 
 @SuppressWarnings({ "nls" })
 public class EnumsWithoutEqualsASTVisitorTest extends AbstractASTVisitorTest {

@@ -31,7 +31,12 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEdit;
 
 /**
- * 
+ * <p>
+ * Fixture class that stubs a JDT compilation unit. Within that compilation unit
+ * ASTNodes can be inserted and deleted. In order to get working type bindings
+ * for any AST created within the stubbed compilation unit a full java project
+ * is created in code.
+ * </p>
  * 
  * @author Hans-Jörg Schrödl
  *
@@ -74,6 +79,17 @@ public class JdtUnitFixture {
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 	}
 
+	/**
+	 * Creates the fixture. Elements set up are:
+	 * <ul>
+	 * <li>A stub java project
+	 * <li>A stub package within that project
+	 * <li>A stub file within that package
+	 * <li>A class containing a single method within that file
+	 * </ul>
+	 * 
+	 * @throws Exception
+	 */
 	public void setUp() throws Exception {
 		createJavaProject();
 
@@ -106,6 +122,11 @@ public class JdtUnitFixture {
 		td.bodyDeclarations().add(methodDeclaration);
 	}
 
+	/**
+	 * Resets the Fixture to its default state
+	 * 
+	 * @throws Exception
+	 */
 	public void clear() throws Exception {
 		astRoot.imports().clear();
 		methodDeclaration.getBody().delete();
@@ -113,16 +134,36 @@ public class JdtUnitFixture {
 		saveChanges();
 	}
 
+	/**
+	 * Removes the fixture by deleting the stubbed elements.
+	 * 
+	 * @throws CoreException
+	 */
 	public void tearDown() throws CoreException {
 		project.delete(true, null);
 	}
 
-	public void addImport(String name) {
+	/**
+	 * Adds an import statement to the stub file.
+	 * 
+	 * @param name the import as fully qualified string, e.g. at.splendit.MyClass
+	 * @throws Exception 
+	 */
+	public void addImport(String name) throws Exception {
 		ImportDeclaration im = ast.newImportDeclaration();
 		im.setName(ast.newName(name));
 		astRoot.imports().add(im);
+		this.astRoot = this.saveChanges();
 	}
 
+	/**
+	 * Adds statements to the stub method and saves the compilation unit with
+	 * the changes.
+	 * 
+	 * @param statements
+	 *            the statements to add separated by semicolons
+	 * @throws Exception
+	 */
 	public void addMethodBlock(String statements) throws Exception {
 		ASTNode convertedAstNodeWithMethodBody = ASTNode.copySubtree(ast, createBlockFromString(statements));
 		Block block = (Block) convertedAstNodeWithMethodBody;
@@ -131,11 +172,16 @@ public class JdtUnitFixture {
 		this.astRoot = this.saveChanges();
 	}
 
+	/**
+	 * Returns the body of the stub method.
+	 * 
+	 * @return
+	 */
 	public Block getMethodBlock() {
 		return methodDeclaration.getBody();
 	}
 
-	public CompilationUnit saveChanges() throws Exception {
+	private CompilationUnit saveChanges() throws Exception {
 		Document document = new Document(compilationUnit.getSource());
 		TextEdit res = astRoot.rewrite(document, options);
 		res.apply(document);
@@ -145,6 +191,14 @@ public class JdtUnitFixture {
 		return astRoot;
 	}
 
+	/**
+	 * Accepts an ASTVisitor at the root of the stub file. If the visitor makes
+	 * changes to the AST these changes are saved.
+	 * 
+	 * @param visitor
+	 *            The visitor to accept
+	 * @throws Exception
+	 */
 	public void accept(ASTVisitor visitor) throws Exception {
 		astRoot.accept(visitor);
 		TextEdit edit = astRewrite.rewriteAST();
@@ -154,7 +208,7 @@ public class JdtUnitFixture {
 		astRoot = saveChanges(edit);
 	}
 
-	public CompilationUnit saveChanges(TextEdit textEdit) throws Exception {
+	private CompilationUnit saveChanges(TextEdit textEdit) throws Exception {
 		Document document = new Document(compilationUnit.getSource());
 		textEdit.apply(document);
 		compilationUnit.getBuffer().setContents(document.get());
@@ -203,10 +257,19 @@ public class JdtUnitFixture {
 		hasChanged = false;
 	}
 
+	/**
+	 * Getter for the ASTRewrite for the stub AST
+	 * 
+	 * @return
+	 */
 	public ASTRewrite getAstRewrite() {
 		return astRewrite;
 	}
 
+	/**
+	 * Convenience method to check if any edits happened on the stub AST. 
+	 * @return True if the AST was changed since setup, false otherwise
+	 */
 	public boolean hasChanged() {
 		return hasChanged;
 	}

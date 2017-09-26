@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Block;
@@ -26,6 +27,7 @@ public abstract class AbstractASTVisitorTest {
 	public static void tearDownClass() throws CoreException {
 		fixture.tearDown();
 	}
+	
 
 	@After
 	public void tearDown() throws Exception {
