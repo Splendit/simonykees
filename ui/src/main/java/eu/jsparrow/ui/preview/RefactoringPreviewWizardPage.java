@@ -325,8 +325,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	 */
 	public void update(Map<ICompilationUnit, DocumentChange> changesForRule) {
 		this.changesForRule = changesForRule;
-		changesForRule.keySet().stream().filter((unit) -> unit.getElementName().equals(currentCompilationUnit.getElementName())
-				&& !unit.equals(currentCompilationUnit)).forEach((unit) -> currentCompilationUnit = unit);
+		changesForRule.keySet().stream().filter(unit -> unit.getElementName().equals(currentCompilationUnit.getElementName())
+				&& !unit.equals(currentCompilationUnit)).forEach(unit -> currentCompilationUnit = unit);
 	}
 
 	/**

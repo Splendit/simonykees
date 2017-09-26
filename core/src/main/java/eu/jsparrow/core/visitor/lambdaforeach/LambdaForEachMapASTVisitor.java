@@ -527,7 +527,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 				Block block = ast.newBlock();
 				ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
 
-				this.extractableStatements.forEach((statement) -> listRewrite.insertLast((Statement) astRewrite.createCopyTarget(statement), null));
+				this.extractableStatements.forEach(statement -> listRewrite.insertLast((Statement) astRewrite.createCopyTarget(statement), null));
 
 				ReturnStatement returnStatement = ast.newReturnStatement();
 				returnStatement.setExpression((Expression) astRewrite.createCopyTarget(mapExpression));
@@ -557,7 +557,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			} else {
 				block = ast.newBlock();
 				ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-				this.remainingStatements.forEach((statement) -> listRewrite.insertLast(astRewrite.createCopyTarget(statement), null));
+				this.remainingStatements.forEach(statement -> listRewrite.insertLast(astRewrite.createCopyTarget(statement), null));
 			}
 
 			this.remainingBlock = block;

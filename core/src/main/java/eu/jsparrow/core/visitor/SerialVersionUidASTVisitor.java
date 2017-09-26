@@ -47,7 +47,7 @@ public class SerialVersionUidASTVisitor extends AbstractASTRewriteASTVisitor {
 			 */
 			if (1 == node.fragments().size()) {
 				ListRewrite modifieresRewrite = astRewrite.getListRewrite(node, FieldDeclaration.MODIFIERS2_PROPERTY);
-				checkSerialUidASTVisitor.getWantedKeyWords().forEach((modifierKeyword) -> modifieresRewrite.insertLast(node.getAST().newModifier(modifierKeyword), null));
+				checkSerialUidASTVisitor.getWantedKeyWords().forEach(modifierKeyword -> modifieresRewrite.insertLast(node.getAST().newModifier(modifierKeyword), null));
 			}
 			/*
 			 * if two or more variables are defined in one statement, we split

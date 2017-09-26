@@ -40,7 +40,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	@Override
 	public void endVisit(CompilationUnit node) {
 
-		addImports.stream().filter((iterator) -> !StringUtils.startsWith(iterator, JAVA_LANG_PACKAGE)).forEach((iterator) -> {
+		addImports.stream().filter(iterator -> !StringUtils.startsWith(iterator, JAVA_LANG_PACKAGE)).forEach(iterator -> {
 			ImportDeclaration newImport = node.getAST().newImportDeclaration();
 			newImport.setName(node.getAST().newName(iterator));
 			if (node.imports().stream().noneMatch(importDeclaration -> (new ASTMatcher())

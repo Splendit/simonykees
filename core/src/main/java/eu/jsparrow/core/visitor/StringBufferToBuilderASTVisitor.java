@@ -108,7 +108,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 		if (methodInvocationNode.arguments() != null && !methodInvocationNode.arguments().isEmpty()) {
 			List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocationNode.arguments(),
 					Expression.class);
-			arguments.stream().filter((argument) -> ASTNode.SIMPLE_NAME == argument.getNodeType()).map((argument) -> (SimpleName) argument).forEach((argumentSimpleName) -> {
+			arguments.stream().filter(argument -> ASTNode.SIMPLE_NAME == argument.getNodeType()).map(argument -> (SimpleName) argument).forEach(argumentSimpleName -> {
 				ITypeBinding argumentTypeBinding = argumentSimpleName.resolveTypeBinding();
 				if (ClassRelationUtil.isContentOfTypes(argumentTypeBinding, STRINGBUFFER_TYPE_LIST)) {
 					stringBufferMethodInvocationArgs.add(argumentSimpleName.getIdentifier());
@@ -124,7 +124,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 	 */
 	@Override
 	public void endVisit(MethodDeclaration node) {
-		stringBufferDeclarations.forEach((declaration) -> {
+		stringBufferDeclarations.forEach(declaration -> {
 			List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(declaration.fragments(),
 					VariableDeclarationFragment.class);
 			List<String> declarationFragmentNames = fragments.stream()
@@ -228,7 +228,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 	 */
 	private boolean isFragmentsValid(List<VariableDeclarationFragment> fragments) {
 		List<VariableDeclarationFragment> validFragments = new LinkedList<>();
-		fragments.forEach((fragment) -> {
+		fragments.forEach(fragment -> {
 			Expression initializer = fragment.getInitializer();
 			if (initializer != null) {
 				if (ASTNode.CLASS_INSTANCE_CREATION == initializer.getNodeType()

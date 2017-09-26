@@ -114,12 +114,14 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	@Override
 	@SuppressWarnings("unchecked")
 	public void moveToRight(IStructuredSelection selectedElements) {
-		selectedElements.toList().stream().filter((posibility) -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()).forEach((posibility) -> {
-			selection.add(posibility);
-			posibilities.remove(posibility);
-			recentlyMoved.add(posibility);
-			changed = true;
-		});
+		selectedElements.toList().stream().filter(
+				posibility -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled())
+				.forEach(posibility -> {
+					selection.add(posibility);
+					posibilities.remove(posibility);
+					recentlyMoved.add(posibility);
+					changed = true;
+				});
 		movedToRight = true;
 		notifyListeners();
 	}
@@ -132,13 +134,14 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	@Override
 	@SuppressWarnings("unchecked")
 	public void moveAllToRight() {
-		Set<Object> currentPosibilities = new HashSet<>();
-		currentPosibilities = filterPosibilitiesByName();
-		currentPosibilities.stream().filter((posibility) -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()).forEach((posibility) -> {
-			selection.add(posibility);
-			posibilities.remove(posibility);
-			changed = true;
-		});
+		Set<Object> currentPosibilities = filterPosibilitiesByName();
+		currentPosibilities.stream().filter(
+				posibility -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled())
+				.forEach(posibility -> {
+					selection.add(posibility);
+					posibilities.remove(posibility);
+					changed = true;
+				});
 		notifyListeners();
 	}
 
@@ -199,7 +202,9 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		if (removeDisabled) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
-			currentPosibilities.stream().filter((posibility) -> !((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()).forEach(applicable::remove);
+			currentPosibilities.stream().filter(
+					posibility -> !((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled())
+					.forEach(applicable::remove);
 		}
 	}
 
@@ -209,7 +214,9 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		if (doit) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
-			currentPosibilities.stream().filter((posibility) -> !((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()).forEach(posibilities::remove);
+			currentPosibilities.stream().filter(
+					posibility -> !((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled())
+					.forEach(posibilities::remove);
 		} else {
 			posibilities.clear();
 			posibilities.addAll(rules);
@@ -294,19 +301,22 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		currentProfileId = profileId;
 		moveAllToLeft();
 		unapplicableRules.clear();
-		if (!currentProfileId.equals(Messages.SelectRulesWizardPage_EmptyProfileLabel) && !StringUtils.isEmpty(currentProfileId)) {
+		if (!currentProfileId.equals(Messages.SelectRulesWizardPage_EmptyProfileLabel)
+				&& !StringUtils.isEmpty(currentProfileId)) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
-			currentPosibilities.stream().filter((posibility) -> SimonykeesPreferenceManager.getProfileFromName(currentProfileId).containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
-					// SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
-					((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getId())).forEach((posibility) -> {
-if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
-			selection.add(posibility);
-			posibilities.remove(posibility);
-} else {
-			unapplicableRules.add(posibility);
-}
-});
+			currentPosibilities.stream().filter(
+					posibility -> SimonykeesPreferenceManager.getProfileFromName(currentProfileId).containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
+							// SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
+							((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getId()))
+					.forEach(posibility -> {
+						if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
+							selection.add(posibility);
+							posibilities.remove(posibility);
+						} else {
+							unapplicableRules.add(posibility);
+						}
+					});
 		}
 
 		setChanged(true);

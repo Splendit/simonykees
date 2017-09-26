@@ -156,7 +156,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 			finalSource.clear();
 		}
 		refactoringPipeline.setSourceMap(finalSource);
-		refactoringPipeline.getRefactoringStates().stream().filter((state) -> !state.hasChange()).forEach((state) -> {
+		refactoringPipeline.getRefactoringStates().stream().filter(state -> !state.hasChange()).forEach(state -> {
 			initialSource.remove(state);
 			finalSource.remove(state);
 		});
