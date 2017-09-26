@@ -194,6 +194,25 @@ public class TestMultiCatchRule {
 			log.debug("Same as the most general exception");
 		}
 	}
+	
+	public void avoidOnlyClausesJumpingUnderSuperTypes(int i) {
+		
+		try {
+			if(i == 0) {
+				throwSomethingWithInheritance(4);
+			} else throw new ThirdException();
+		} catch(SecondChildChildException e) {
+			log.warn(e.getMessage());
+		} catch(ThirdException e) {
+			log.warn(e.getMessage());
+		} catch (SecondException e) {
+			log.trace(e.getMessage());
+		} catch (FirstException e) {
+			log.warn(e.getMessage());
+		} catch(Exception e) {
+			log.debug("Same as the most general exception");
+		}
+	}
 
 	private void throwSomething(int i)
 			throws FirstException, SecondException, ThirdException, FourthException, FifthException, SixthException {
