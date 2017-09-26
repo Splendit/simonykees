@@ -2,6 +2,7 @@ package eu.jsparrow.ui.wizard.semiautomatic;
 
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
@@ -21,7 +22,6 @@ import org.eclipse.swt.widgets.Label;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.wizard.IValueChangeListener;
 
 /**
  * Wizard page for configuring logger rule when applying to selected resources
@@ -71,13 +71,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		createSystemErrPart(composite);
 		createStackTracePart(composite);
 
-		model.addListener(new IValueChangeListener() {
-
-			@Override
-			public void valueChanged() {
-				doStatusUpdate();
-			}
-		});
+		model.addListener(this::doStatusUpdate);
 
 		initializeData();
 		doStatusUpdate();
@@ -206,9 +200,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 */
 	private void populateSystemOutCombo() {
 		Set<String> severityLevels = model.getSystemOutReplaceOptions();
-		for (String severityLevel : severityLevels) {
-			systemOutCombo.add(severityLevel);
-		}
+		severityLevels.forEach(systemOutCombo::add);
 	}
 
 	/**
@@ -216,9 +208,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 */
 	private void populateSystemErrCombo() {
 		Set<String> severityLevels = model.getSystemErrReplaceOptions();
-		for (String severityLevel : severityLevels) {
-			systemErrCombo.add(severityLevel);
-		}
+		severityLevels.forEach(systemErrCombo::add);
 	}
 
 	/**
@@ -226,9 +216,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 */
 	private void populateStackTraceCombo() {
 		Set<String> severityLevels = model.getPrintStackTraceReplaceOptions();
-		for (String severityLevel : severityLevels) {
-			stackTraceCombo.add(severityLevel);
-		}
+		severityLevels.forEach(stackTraceCombo::add);
 	}
 
 	private void initializeData() {
@@ -246,7 +234,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 * will be shown.
 	 */
 	protected void doStatusUpdate() {
-		if (model.getSelectionStatus().isEmpty()) {
+		if (StringUtils.isEmpty(model.getSelectionStatus())) {
 			fSelectionStatus = new StatusInfo();
 		} else if (model.getSelectionStatus().equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)) {
 			((StatusInfo) fSelectionStatus).setError(model.getSelectionStatus());

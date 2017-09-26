@@ -162,18 +162,13 @@ public class LoggerRuleWizard extends Wizard {
 		logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes, selectedJavaProjekt.getElementName(),
 				rule.getName()));
 
-		Display.getDefault().asyncExec(new Runnable() {
+		Display.getDefault().asyncExec(() -> {
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactorer));
 
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactorer));
-
-				// maximizes the RefactoringPreviewWizard
-				dialog.setPageSize(rectangle.width, rectangle.height);
-				dialog.open();
-			}
-
+			// maximizes the RefactoringPreviewWizard
+			dialog.setPageSize(rectangle.width, rectangle.height);
+			dialog.open();
 		});
 	}
 }
