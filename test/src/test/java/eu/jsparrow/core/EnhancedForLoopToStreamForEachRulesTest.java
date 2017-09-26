@@ -19,8 +19,7 @@ public class EnhancedForLoopToStreamForEachRulesTest extends AbstractRulesTest {
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/enhancedForLoopToStreamForEach";
 
 	private String fileName;
-	private Path preRule;
-	private Path postRule;
+	private Path preRule, postRule;
 
 	public EnhancedForLoopToStreamForEachRulesTest(String fileName, Path preRule, Path postRule) {
 		super();

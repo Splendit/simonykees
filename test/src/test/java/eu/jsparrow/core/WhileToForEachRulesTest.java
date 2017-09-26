@@ -28,8 +28,7 @@ public class WhileToForEachRulesTest extends AbstractRulesTest {
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/whileToForEach";
 
 	private String fileName;
-	private Path preRule;
-	private Path postRule;
+	private Path preRule, postRule;
 
 	public WhileToForEachRulesTest(String fileName, Path preRule, Path postRule) {
 		super();

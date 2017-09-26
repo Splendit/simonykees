@@ -26,8 +26,7 @@ public class MultiCatchRuleTest extends AbstractRulesTest {
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/multiCatch";
 
 	private String fileName;
-	private Path preRule;
-	private Path postRule;
+	private Path preRule, postRule;
 
 	public MultiCatchRuleTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;

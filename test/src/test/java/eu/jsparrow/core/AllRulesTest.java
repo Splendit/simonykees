@@ -31,8 +31,7 @@ public class AllRulesTest extends AbstractRulesTest {
 	public static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/allRules";
 
 	private String fileName;
-	private Path preRule;
-	private Path postRule;
+	private Path preRule, postRule;
 
 	public AllRulesTest(String fileName, Path preRule, Path postRule) {
 		super();

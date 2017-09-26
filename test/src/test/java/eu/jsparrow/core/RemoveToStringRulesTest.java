@@ -26,8 +26,7 @@ public class RemoveToStringRulesTest extends AbstractRulesTest {
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/toString";
 
 	private String fileName;
-	private Path preRule;
-	private Path postRule;
+	private Path preRule, postRule;
 
 	public RemoveToStringRulesTest(String fileName, Path preRule, Path postRule) {
 		super();

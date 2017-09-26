@@ -20,8 +20,7 @@ public class RemoveNewStringConstructorRulesTest extends AbstractRulesTest {
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/removeNewString";
 
 	private String fileName;
-	private Path preRule;
-	private Path postRule;
+	private Path preRule, postRule;
 
 	public RemoveNewStringConstructorRulesTest(String fileName, Path preRule, Path postRule) {
 		super();

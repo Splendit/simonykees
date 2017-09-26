@@ -8,8 +8,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import eu.jsparrow.core.rule.impl.ImmutableStaticFinalCollectionsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
+import eu.jsparrow.core.rule.impl.ImmutableStaticFinalCollectionsRule;
 import eu.jsparrow.core.visitor.ImmutableStaticFinalCollectionsASTVisitor;
 
 /**
@@ -26,8 +26,7 @@ public class ImmutableStaticFinalCollectionsRulesTest extends AbstractRulesTest 
 			+ "/postRule/immutableStaticFinalCollections";
 
 	private String fileName;
-	private Path preRule;
-	private Path postRule;
+	private Path preRule, postRule;
 
 	public ImmutableStaticFinalCollectionsRulesTest(String fileName, Path preRule, Path postRule) {
 		super();

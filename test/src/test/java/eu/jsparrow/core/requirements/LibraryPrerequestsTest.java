@@ -33,13 +33,6 @@ import eu.jsparrow.core.visitor.StringUtilsASTVisitor;
 public class LibraryPrerequestsTest {
 
 	IJavaProject testproject = null;
-	private List<IClasspathEntry> entries;
-	private boolean enabled;
-
-	public LibraryPrerequestsTest(List<IClasspathEntry> entries, boolean enabled) {
-		this.entries = entries;
-		this.enabled = enabled;
-	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -58,6 +51,14 @@ public class LibraryPrerequestsTest {
 						"commons-lang3", "3.1")), true },
 				{ Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.commons",
 						"commons-lang3", "3.2.1")), false } });
+	}
+
+	private List<IClasspathEntry> entries;
+	private boolean enabled;
+
+	public LibraryPrerequestsTest(List<IClasspathEntry> entries, boolean enabled) {
+		this.entries = entries;
+		this.enabled = enabled;
 	}
 
 	@Test

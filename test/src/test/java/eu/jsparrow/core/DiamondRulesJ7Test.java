@@ -27,14 +27,14 @@ public class DiamondRulesJ7Test extends AbstractRulesTest {
 	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.diamondOperatorJ7";
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/diamondOperatorJ7";
 
-	static {		
-		javaVersion = JavaCore.VERSION_1_7;
-	}
-
 	private String fileName;
 	private Path preRule;
 	private Path postRule;
-
+	
+	static {		
+		javaVersion = JavaCore.VERSION_1_7;
+	}
+	
 	public DiamondRulesJ7Test(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;
 		this.preRule = preRule;
@@ -42,7 +42,7 @@ public class DiamondRulesJ7Test extends AbstractRulesTest {
 		rulesList.add(new DiamondOperatorRule(DiamondOperatorASTVisitor.class));
 		
 	}
-
+	
 	@Parameters(name = "{index}: test file[{0}]")
 	public static Collection<Object[]> data() throws Exception {
 		return AbstractRulesTest.load(POSTRULE_DIRECTORY);

@@ -73,7 +73,7 @@ public class RulesTestUtil {
 	}
 
 	public static List<IClasspathEntry> getClassPathEntries(IPackageFragmentRoot root) throws Exception {
-		final List<IClasspathEntry> entries = new ArrayList<>();
+		final List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 		final IClasspathEntry srcEntry = JavaCore.newSourceEntry(root.getPath(), EMPTY_PATHS, EMPTY_PATHS, null);
 		final IClasspathEntry rtJarEntry = JavaCore.newLibraryEntry(getPathToRtJar(), null, null);
 		entries.add(srcEntry);
@@ -143,11 +143,16 @@ public class RulesTestUtil {
 	}
 
 	private static Node getNodeByNodeName(NodeList nodes, String nodeName) {
-		return asList(nodes).stream().filter(node -> nodeName.equals(node.getNodeName())).findFirst().orElse(null);
+		for (Node node : asList(nodes)) {
+			if (nodeName.equals(node.getNodeName())) {
+				return node;
+			}
+		}
+		return null;
 	}
 
 	private static List<Node> asList(NodeList nodeList) {
-		final List<Node> results = new ArrayList<>();
+		final List<Node> results = new ArrayList<Node>();
 		int length = nodeList.getLength();
 		for (int i = 0; i < length; i++) {
 			final Node item = nodeList.item(i);
@@ -160,14 +165,14 @@ public class RulesTestUtil {
 
 	private static IPath getPathToRtJar() {
 		final String classPath = System.getProperty("sun.boot.class.path");
-		final int idx = StringUtils.indexOf(classPath, "rt.jar");
+		final int idx = classPath.indexOf("rt.jar");
 		if (idx == -1) {
 			throw new RuntimeException("Could not find Java runtime library rt.jar");
 		}
 		final int end = idx + "rt.jar".length();
 		final int lastIdx = classPath.lastIndexOf(":", idx);
 		final int start = lastIdx != -1 ? lastIdx + 1 : 0;
-		return new Path(StringUtils.substring(classPath, start, end));
+		return new Path(classPath.substring(start, end));
 	}
 
 	public static IPackageFragmentRoot addSourceContainer(IJavaProject javaProject, String containerName)

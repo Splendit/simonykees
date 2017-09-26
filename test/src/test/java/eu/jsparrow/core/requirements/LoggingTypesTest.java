@@ -36,7 +36,7 @@ public class LoggingTypesTest {
 	@Before
 	public void setUp() throws Exception {
 		testproject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
-		entries = new ArrayList<>();
+		entries = new ArrayList<IClasspathEntry>();
 	}
 
 	@After
@@ -46,7 +46,7 @@ public class LoggingTypesTest {
 
 	@Test
 	public void allPresent() throws Exception {
-		List<IClasspathEntry> entries = new ArrayList<>();
+		List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25"));
 		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("ch.qos.logback", "logback-classic", "1.2.3"));
 		entries.add(
@@ -61,7 +61,7 @@ public class LoggingTypesTest {
 
 	@Test
 	public void slf4jLog4jPresent() throws Exception {
-		List<IClasspathEntry> entries = new ArrayList<>();
+		List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25"));
 		entries.add(
 				RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
@@ -75,7 +75,7 @@ public class LoggingTypesTest {
 
 	@Test
 	public void slf4jLogbackPresent() throws Exception {
-		List<IClasspathEntry> entries = new ArrayList<>();
+		List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25"));
 		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("ch.qos.logback", "logback-classic", "1.2.3"));
 		RulesTestUtil.addToClasspath(testproject, entries);
@@ -88,7 +88,7 @@ public class LoggingTypesTest {
 
 	@Test
 	public void slf4jPresent() throws Exception {
-		List<IClasspathEntry> entries = new ArrayList<>();
+		List<IClasspathEntry> entries = new ArrayList<IClasspathEntry>();
 		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 

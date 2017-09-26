@@ -27,8 +27,7 @@ public class EnhancedForLoopToStreamAnyMatchRuleTest extends AbstractRulesTest {
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/enhancedForLoopToStreamAnyMatch";
 
 	private String fileName;
-	private Path preRule;
-	private Path postRule;
+	private Path preRule, postRule;
 
 	public EnhancedForLoopToStreamAnyMatchRuleTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;

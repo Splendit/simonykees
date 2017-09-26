@@ -20,8 +20,7 @@ public class SerialVersionUidRulesTest extends AbstractRulesTest {
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/serial";
 
 	private String fileName;
-	private Path preRule;
-	private Path postRule;
+	private Path preRule, postRule;
 
 	public SerialVersionUidRulesTest(String fileName, Path preRule, Path postRule) {
 		super();

@@ -36,15 +36,11 @@ public abstract class AbstractRulesTest {
 
 	private static final String UTILITY_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/utilities"; //$NON-NLS-1$
 
-	protected static IPackageFragmentRoot root = null;
-
-	protected static String javaVersion = JavaCore.VERSION_1_8;
-
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
 
-	public AbstractRulesTest() {
-		super();
-	}
+	protected static IPackageFragmentRoot root = null;
+	
+	protected static String javaVersion = JavaCore.VERSION_1_8;
 
 	@BeforeClass
 	public static void setUp() throws Exception {
@@ -64,6 +60,10 @@ public abstract class AbstractRulesTest {
 	public static void tearDown() throws Exception {
 		root = null;
 		javaVersion = JavaCore.VERSION_1_8;
+	}
+
+	public AbstractRulesTest() {
+		super();
 	}
 
 	/**

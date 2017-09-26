@@ -25,8 +25,7 @@ public class FlatMapInsteadOfNestedLoopsRuleTest extends AbstractRulesTest {
 			+ "/postRule/flatMapInsteadOfNestedLoops";
 
 	private String fileName;
-	private Path preRule;
-	private Path postRule;
+	private Path preRule, postRule;
 
 	public FlatMapInsteadOfNestedLoopsRuleTest(String fileName, Path preRule, Path postRule) {
 		super();
