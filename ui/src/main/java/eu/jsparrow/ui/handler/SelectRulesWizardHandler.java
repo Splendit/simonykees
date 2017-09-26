@@ -52,70 +52,71 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 					Messages.SelectRulesWizardHandler_allready_running, MessageDialog.INFORMATION);
 		} else {
 			Activator.setRunning(true);
-			if (LicenseUtil.getInstance().isValid()) {
-				List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
-				if (!selectedJavaElements.isEmpty()) {
-					IJavaProject selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
-
-					if (null != selectedJavaProjekt) {
-
-						RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
-
-						Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
-
-							@Override
-							protected IStatus run(IProgressMonitor monitor) {
-
-								try {
-									List<ICompilationUnit> containingErrorList = refactoringPipeline
-											.prepareRefactoring(selectedJavaElements, monitor);
-									if (monitor.isCanceled()) {
-										/*
-										 * Workaround that prevents selection of
-										 * multiple projects in the Package
-										 * Explorer.
-										 * 
-										 * See SIM-496
-										 */
-										if (refactoringPipeline.isMultipleProjects()) {
-											synchronizeWithUIShowMultiprojectMessage();
-										}
-										refactoringPipeline.clearStates();
-										Activator.setRunning(false);
-										return Status.CANCEL_STATUS;
-									} else if (null != containingErrorList && !containingErrorList.isEmpty()) {
-										synchronizeWithUIShowCompilationErrorMessage(containingErrorList, event,
-												refactoringPipeline, selectedJavaElements, selectedJavaProjekt);
-									} else {
-										synchronizeWithUIShowSelectRulesWizard(event, refactoringPipeline,
-												selectedJavaElements, selectedJavaProjekt);
-									}
-
-								} catch (RefactoringException e) {
-									synchronizeWithUIShowInfo(e);
-									return Status.CANCEL_STATUS;
-								}
-
-								return Status.OK_STATUS;
-							}
-						};
-
-						job.setUser(true);
-						job.schedule();
-
-						return true;
-
-					}
-				}
-			} else {
+			if (!LicenseUtil.getInstance().isValid()) {
 				/*
 				 * do not display the SelectRulesWizard if the license is
 				 * invalid
 				 */
 				final Shell shell = HandlerUtil.getActiveShell(event);
-				LicenseUtil.getInstance().displayLicenseErrorDialog(shell);
-				Activator.setRunning(false);
+				if (!LicenseUtil.getInstance().displayLicenseErrorDialog(shell)) {
+					Activator.setRunning(false);
+					return null;
+				}
 			}
+			List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
+			if (!selectedJavaElements.isEmpty()) {
+				IJavaProject selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
+
+				if (null != selectedJavaProjekt) {
+
+					RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
+
+					Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
+
+						@Override
+						protected IStatus run(IProgressMonitor monitor) {
+
+							try {
+								List<ICompilationUnit> containingErrorList = refactoringPipeline
+										.prepareRefactoring(selectedJavaElements, monitor);
+								if (monitor.isCanceled()) {
+									/*
+									 * Workaround that prevents selection of
+									 * multiple projects in the Package
+									 * Explorer.
+									 * 
+									 * See SIM-496
+									 */
+									if (refactoringPipeline.isMultipleProjects()) {
+										synchronizeWithUIShowMultiprojectMessage();
+									}
+									refactoringPipeline.clearStates();
+									Activator.setRunning(false);
+									return Status.CANCEL_STATUS;
+								} else if (null != containingErrorList && !containingErrorList.isEmpty()) {
+									synchronizeWithUIShowCompilationErrorMessage(containingErrorList, event,
+											refactoringPipeline, selectedJavaElements, selectedJavaProjekt);
+								} else {
+									synchronizeWithUIShowSelectRulesWizard(event, refactoringPipeline,
+											selectedJavaElements, selectedJavaProjekt);
+								}
+
+							} catch (RefactoringException e) {
+								synchronizeWithUIShowInfo(e);
+								return Status.CANCEL_STATUS;
+							}
+
+							return Status.OK_STATUS;
+						}
+					};
+
+					job.setUser(true);
+					job.schedule();
+
+					return true;
+				}
+			}
+
 		}
 
 		return null;

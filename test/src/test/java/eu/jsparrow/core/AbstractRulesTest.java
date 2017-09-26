@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -42,8 +43,10 @@ public abstract class AbstractRulesTest {
 	
 	protected static String javaVersion = JavaCore.VERSION_1_8;
 
+	protected IJavaProject testproject;
+
 	@BeforeClass
-	public static void setUp() throws Exception {
+	public static void classSetUp() throws Exception {
 		if (root == null) {
 			root = RulesTestUtil.getPackageFragementRoot(javaVersion);
 			String packageString = "eu.jsparrow.sample.utilities"; //$NON-NLS-1$
@@ -57,7 +60,7 @@ public abstract class AbstractRulesTest {
 	}
 
 	@AfterClass
-	public static void tearDown() throws Exception {
+	public static void classTearDown() throws Exception {
 		root = null;
 		javaVersion = JavaCore.VERSION_1_8;
 	}
@@ -105,7 +108,7 @@ public abstract class AbstractRulesTest {
 		List<IJavaElement> javaElements = new ArrayList<>();
 		javaElements.add(compilationUnit);
 
-		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules);
+		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules, true);
 
 		/*
 		 * A default progress monitor implementation, used just for testing

@@ -45,7 +45,7 @@ import eu.jsparrow.ui.wizard.semiautomatic.LoggerRuleWizard;
  * @since 1.2
  *
  */
-public class LoggerRuleWizardHandler extends AbstractHandler  {
+public class LoggerRuleWizardHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -56,86 +56,87 @@ public class LoggerRuleWizardHandler extends AbstractHandler  {
 		} else {
 			Activator.setRunning(true);
 
-			if (LicenseUtil.getInstance().isValid()) {
-				List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
-				if (!selectedJavaElements.isEmpty()) {
-					IJavaProject selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
-					StandardLoggerRule loggerRule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
-
-					if (null != selectedJavaProjekt) {
-						loggerRule.calculateEnabledForProject(selectedJavaProjekt);
-						if (loggerRule.isEnabled()) {
-
-							if (SimonykeesMessageDialog.openConfirmDialog(HandlerUtil.getActiveShell(event),
-									NLS.bind(Messages.LoggerRuleWizardHandler_info_supportedFrameworkFound,
-											loggerRule.getAvailableLoggerType()))) {
-								RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
-
-								Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
-
-									@Override
-									protected IStatus run(IProgressMonitor monitor) {
-
-										try {
-											List<ICompilationUnit> containingErrorList = refactoringPipeline
-													.prepareRefactoring(selectedJavaElements, monitor);
-											if (monitor.isCanceled()) {
-												/*
-												 * Workaround that prevents
-												 * selection of multiple
-												 * projects in the Package
-												 * Explorer.
-												 * 
-												 * See SIM-496
-												 */
-												if (refactoringPipeline.isMultipleProjects()) {
-													synchronizeWithUIShowMultiprojectMessage();
-												}
-												refactoringPipeline.clearStates();
-												Activator.setRunning(false);
-												return Status.CANCEL_STATUS;
-											} else if (null != containingErrorList && !containingErrorList.isEmpty()) {
-												synchronizeWithUIShowCompilationErrorMessage(containingErrorList, event,
-														refactoringPipeline, selectedJavaElements, loggerRule,
-														selectedJavaProjekt);
-											} else {
-												synchronizeWithUIShowLoggerRuleWizard(event, refactoringPipeline,
-														selectedJavaElements, loggerRule, selectedJavaProjekt);
-											}
-
-										} catch (RefactoringException e) {
-											synchronizeWithUIShowInfo(e);
-											return Status.CANCEL_STATUS;
-										}
-
-										return Status.OK_STATUS;
-									}
-								};
-
-								job.setUser(true);
-								job.schedule();
-
-								return true;
-
-							} else {
-								Activator.setRunning(false);
-							}
-						} else {
-							SimonykeesMessageDialog.openMessageDialog(HandlerUtil.getActiveShell(event),
-									Messages.LoggerRuleWizardHandler_noLogger, MessageDialog.WARNING);
-							Activator.setRunning(false);
-						}
-
-					}
-				}
-			} else {
+			if (!LicenseUtil.getInstance().isValid()) {
 				/*
 				 * do not display the Wizard if the license is invalid
 				 */
 				final Shell shell = HandlerUtil.getActiveShell(event);
-				LicenseUtil.getInstance().displayLicenseErrorDialog(shell);
-				Activator.setRunning(false);
+				if (!LicenseUtil.getInstance().displayLicenseErrorDialog(shell)) {
+					Activator.setRunning(false);
+					return null;
+				}
 			}
+			List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
+			if (!selectedJavaElements.isEmpty()) {
+				IJavaProject selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
+				StandardLoggerRule loggerRule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+
+				if (null != selectedJavaProjekt) {
+					loggerRule.calculateEnabledForProject(selectedJavaProjekt);
+					if (loggerRule.isEnabled()) {
+
+						if (SimonykeesMessageDialog.openConfirmDialog(HandlerUtil.getActiveShell(event),
+								NLS.bind(Messages.LoggerRuleWizardHandler_info_supportedFrameworkFound,
+										loggerRule.getAvailableLoggerType()))) {
+							RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
+
+							Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
+
+								@Override
+								protected IStatus run(IProgressMonitor monitor) {
+
+									try {
+										List<ICompilationUnit> containingErrorList = refactoringPipeline
+												.prepareRefactoring(selectedJavaElements, monitor);
+										if (monitor.isCanceled()) {
+											/*
+											 * Workaround that prevents
+											 * selection of multiple projects in
+											 * the Package Explorer.
+											 * 
+											 * See SIM-496
+											 */
+											if (refactoringPipeline.isMultipleProjects()) {
+												synchronizeWithUIShowMultiprojectMessage();
+											}
+											refactoringPipeline.clearStates();
+											Activator.setRunning(false);
+											return Status.CANCEL_STATUS;
+										} else if (null != containingErrorList && !containingErrorList.isEmpty()) {
+											synchronizeWithUIShowCompilationErrorMessage(containingErrorList, event,
+													refactoringPipeline, selectedJavaElements, loggerRule,
+													selectedJavaProjekt);
+										} else {
+											synchronizeWithUIShowLoggerRuleWizard(event, refactoringPipeline,
+													selectedJavaElements, loggerRule, selectedJavaProjekt);
+										}
+
+									} catch (RefactoringException e) {
+										synchronizeWithUIShowInfo(e);
+										return Status.CANCEL_STATUS;
+									}
+
+									return Status.OK_STATUS;
+								}
+							};
+
+							job.setUser(true);
+							job.schedule();
+
+							return true;
+
+						} else {
+							Activator.setRunning(false);
+						}
+					} else {
+						SimonykeesMessageDialog.openMessageDialog(HandlerUtil.getActiveShell(event),
+								Messages.LoggerRuleWizardHandler_noLogger, MessageDialog.WARNING);
+						Activator.setRunning(false);
+					}
+
+				}
+			}
+
 		}
 		return null;
 

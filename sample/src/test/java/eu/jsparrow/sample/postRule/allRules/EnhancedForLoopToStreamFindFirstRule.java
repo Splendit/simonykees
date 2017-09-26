@@ -387,6 +387,15 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		return values.stream().filter(value -> value > 4).findFirst().map(value -> value * 2).orElse(defaultIndex);
 	}
 
+	public ReturnTypeSample returnSubtypeInstead(String input) {
+		/*
+		 * SIM-798
+		 */
+		List<String> values = generateList(input);
+		return values.stream().filter(value -> value.equals(input)).findFirst().map(ReturnTypeSampleChild::new)
+				.orElse(null);
+	}
+
 	private List<String> generateList(String input) {
 		return Arrays.asList(input.split(","));
 	}
@@ -396,5 +405,19 @@ public class EnhancedForLoopToStreamFindFirstRule {
 			throw new Exception();
 		}
 		return value.equals(key);
+	}
+
+	class ReturnTypeSample {
+		ReturnTypeSample(String value) {
+
+		}
+	}
+
+	class ReturnTypeSampleChild extends ReturnTypeSample {
+
+		ReturnTypeSampleChild(String value) {
+			super(value);
+		}
+
 	}
 }

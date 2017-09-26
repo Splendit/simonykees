@@ -21,6 +21,7 @@ import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.exception.SimonykeesException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
@@ -67,7 +68,10 @@ public class RefactoringPreviewWizard extends Wizard {
 				addPage(new RefactoringPreviewWizardPage(changes, rule));
 			}
 		});
-		addPage(summaryPage);
+		if (!(refactoringPipeline.getRules().size() == 1
+				&& refactoringPipeline.getRules().get(0) instanceof StandardLoggerRule)) {
+			addPage(summaryPage);
+		}
 	}
 
 	@Override
@@ -169,10 +173,24 @@ public class RefactoringPreviewWizard extends Wizard {
 	public boolean performFinish() {
 
 		IRunnableWithProgress job = monitor -> {
+			/*
+			 * Update all changes and unselected classes that were unselected in
+			 * the last page shown before finish was pressed
+			 */
 			Arrays.asList(getPages()).stream().forEach(page -> {
 				if ((page instanceof RefactoringPreviewWizardPage)
 						&& !((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
-					recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
+					try {
+						refactoringPipeline.doAdditionalRefactoring(
+								((RefactoringPreviewWizardPage) page).getUnselectedChange(),
+								((RefactoringPreviewWizardPage) page).getRule(), monitor);
+						if (monitor.isCanceled()) {
+							refactoringPipeline.clearStates();
+						}
+					} catch (RuleException e) {
+						synchronizeWithUIShowError(e);
+					}
+					((RefactoringPreviewWizardPage) page).applyUnselectedChange();
 				}
 			});
 
@@ -286,8 +304,8 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		if (LicenseUtil.getInstance().isTrial()) {
-			return true;
+		if (!LicenseUtil.getInstance().isFullLicense()) {
+			return false;
 		}
 		return super.canFinish();
 	}

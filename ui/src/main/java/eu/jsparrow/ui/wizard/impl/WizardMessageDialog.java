@@ -9,7 +9,6 @@ import eu.jsparrow.core.exception.SimonykeesException;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.util.LicenseUtil;
 
 public class WizardMessageDialog {
 
@@ -29,22 +28,6 @@ public class WizardMessageDialog {
 				Activator.setRunning(false);
 			}
 
-		});
-	}
-
-	/**
-	 * Method used to open License ErrorDialog from non UI thread
-	 */
-	public static void synchronizeWithUIShowLicenseError() {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				LicenseUtil.getInstance().displayLicenseErrorDialog(shell);
-
-				Activator.setRunning(false);
-			}
 		});
 	}
 

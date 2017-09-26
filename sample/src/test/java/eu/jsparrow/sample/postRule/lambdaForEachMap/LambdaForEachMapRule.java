@@ -1,4 +1,4 @@
-package eu.jsparrow.sample.postRule.lambdForEachMap;
+package eu.jsparrow.sample.postRule.lambdaForEachMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;

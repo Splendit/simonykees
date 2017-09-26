@@ -67,23 +67,31 @@ public class LicenseUtil {
 		}
 		return false;
 	}
+	
+	public boolean isFullLicense() {
+		if (isLicenseValidationServiceAvailable) {
+			return licenseValidationService.isFullValidLicense();
+		}
+		return false;
+	}
 
-	public void displayLicenseErrorDialog(Shell shell) {
+	public boolean displayLicenseErrorDialog(Shell shell) {
 
 		if (isLicenseValidationServiceAvailable) {
 			String userMessage = licenseValidationService.getLicenseStautsUserMessage();
 
 			if (licenseValidationService.isExpired()) {
 				BuyLicenseDialog dialog = new BuyLicenseDialog(shell, userMessage);
-				dialog.open();
+				return dialog.open() == 0;
 			} else {
-				SimonykeesMessageDialog.openMessageDialog(shell,
+				return SimonykeesMessageDialog.openMessageDialog(shell,
 						NLS.bind(ExceptionMessages.LicenseUtil_error_moreInformation, userMessage),
 						MessageDialog.ERROR);
 			}
 		} else {
 			// TODO: proper error handling
 			logger.error(ExceptionMessages.LicenseUtil_license_service_unavailable);
+			return false;
 		}
 	}
 

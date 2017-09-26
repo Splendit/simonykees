@@ -1,5 +1,6 @@
 package eu.jsparrow.core.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -20,20 +21,23 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-//import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 
 /**
  * Utility class for Simonykees
  * 
- * @author Hannes Schweighofer, Andreja Sambolec
+ * @author Hannes Schweighofer, Andreja Sambolec, Hans-Jörg Schrödl
  * @since 0.9
  */
 public final class RefactoringUtil {
+
+	private static final Logger logger = LoggerFactory.getLogger(RefactoringUtil.class);
 
 	private static final String BACKSLASH_N = "\n"; //$NON-NLS-1$
 	private static final String LINE_SEPARATOR_PROPERTY = "line.separator"; //$NON-NLS-1$
@@ -109,6 +113,33 @@ public final class RefactoringUtil {
 	}
 
 	/**
+	 *
+	 * @return List[PackageFragment]
+	 */
+	@SuppressWarnings("unused")
+	private static List<IJavaElement> getSubPackages(IPackageFragment p) {
+		List<IJavaElement> result = new ArrayList<>();
+		List<IJavaElement> packages;
+		if (p.getParent() != null && p.getParent() instanceof IPackageFragmentRoot) {
+			IPackageFragmentRoot fragmentRoot = (IPackageFragmentRoot) p.getParent();
+			try {
+				packages = Arrays.asList(fragmentRoot.getChildren());
+				for (IJavaElement packageElement : packages) {
+					if (packageElement.getElementName().startsWith(p.getElementName())
+							&& !packageElement.getElementName().equals(p.getElementName())) {
+						result.add(packageElement);
+						logger.debug("Subpackage found:" + packageElement.getElementName()); //$NON-NLS-1$
+					}
+
+				}
+			} catch (JavaModelException e) {
+				logger.debug("Java Model Exception", e); //$NON-NLS-1$
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * 
 	 * @param result
 	 *            List of {@link ICompilationUnit} where the
@@ -174,7 +205,7 @@ public final class RefactoringUtil {
 		astParser.setCompilerOptions(options);
 		return (CompilationUnit) astParser.createAST(null);
 	}
-	
+
 	/**
 	 * Generate a {@code DocumentChange} from a {@code Document} and a
 	 * {@code TextEdit}
@@ -195,12 +226,14 @@ public final class RefactoringUtil {
 		documentChange.setTextType("java"); //$NON-NLS-1$
 		return documentChange;
 	}
-	
+
 	/**
-	 * Checks if the {@link ICompilationUnit} has any errors in the current configuration it is loaded.
-	 * If no IMarker of severity error is present it passes.
+	 * Checks if the {@link ICompilationUnit} has any errors in the current
+	 * configuration it is loaded. If no IMarker of severity error is present it
+	 * passes.
 	 * 
-	 * @param iCompilationUnit file to check
+	 * @param iCompilationUnit
+	 *            file to check
 	 * @return returns true if no error exists, otherwise false
 	 * @since 1.2
 	 * 
@@ -208,10 +241,25 @@ public final class RefactoringUtil {
 	public static boolean checkForSyntaxErrors(ICompilationUnit iCompilationUnit) {
 		try {
 			/**
-			 * findMaxProblemSeverity returns the SEVERITY-Level of the highest order.
+			 * findMaxProblemSeverity returns the SEVERITY-Level of the highest
+			 * order.
 			 */
-			return IMarker.SEVERITY_ERROR == iCompilationUnit.getResource().findMaxProblemSeverity(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
+
+			boolean foundProblems = IMarker.SEVERITY_ERROR == iCompilationUnit.getResource().findMaxProblemSeverity(
+					IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
+			if (foundProblems) {
+				logger.info("Check markers"); //$NON-NLS-1$
+				List<IMarker> markers = Arrays.asList(iCompilationUnit.getResource()
+						.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE));
+				for (IMarker marker : markers) {
+					String message = String.format("Found marker on line %s, with message: %s", //$NON-NLS-1$
+							marker.getAttribute(IMarker.LOCATION), marker.getAttribute(IMarker.MESSAGE));
+					logger.info(message);
+				}
+			}
+			return foundProblems;
 		} catch (CoreException e) {
+			logger.error(e.getMessage(), e);
 			return false;
 		}
 	}

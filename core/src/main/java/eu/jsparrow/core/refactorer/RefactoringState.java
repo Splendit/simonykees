@@ -152,7 +152,9 @@ public class RefactoringState {
 	public void discardWorkingCopy() {
 		try {
 			workingCopy.discardWorkingCopy();
+			original.discardWorkingCopy();
 			workingCopy.close();
+			original.close();
 		} catch (JavaModelException e) {
 			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_discard_working_copy,
 					workingCopy.getPath().toString(), e.getMessage()), e);
