@@ -296,6 +296,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	private String findTypeOfSimpleName(SimpleName expression) {
 		String typeNameStr;
 		ITypeBinding binding = expression.resolveTypeBinding();
+		// FIXME: check binding for null
 		if (binding.isParameterizedType()) {
 			ITypeBinding erasure = binding.getErasure();
 			typeNameStr = erasure.getName();

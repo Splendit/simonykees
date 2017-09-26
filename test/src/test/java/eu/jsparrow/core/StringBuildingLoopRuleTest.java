@@ -8,8 +8,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.rule.impl.StringBuildingLoopRule;
+import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.StringBuildingLoopASTVisitor;
 
 /**
@@ -26,7 +26,8 @@ public class StringBuildingLoopRuleTest extends AbstractRulesTest {
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/stringBuildingLoop";
 	
 	private String fileName;
-	private Path preRule, postRule;
+	private Path preRule;
+	private Path postRule;
 
 	public StringBuildingLoopRuleTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;

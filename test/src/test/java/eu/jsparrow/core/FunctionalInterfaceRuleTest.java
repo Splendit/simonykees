@@ -26,7 +26,8 @@ public class FunctionalInterfaceRuleTest extends AbstractRulesTest {
 	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/functinalInterface";
 
 	private String fileName;
-	private Path preRule, postRule;
+	private Path preRule;
+	private Path postRule;
 
 	public FunctionalInterfaceRuleTest(String fileName, Path preRule, Path postRule) {
 		this.fileName = fileName;
