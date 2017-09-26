@@ -118,7 +118,7 @@ public class RefactoringPipeline {
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		Map<ICompilationUnit, DocumentChange> currentChanges = new HashMap<>();
 
-		refactoringStates.forEach((refactoringState) -> {
+		refactoringStates.forEach(refactoringState -> {
 			DocumentChange documentChange = refactoringState.getChangeIfPresent(rule);
 			if (null != documentChange) {
 				currentChanges.put(refactoringState.getWorkingCopy(), documentChange);
@@ -258,7 +258,7 @@ public class RefactoringPipeline {
 	}
 
 	public void createRefactoringStates(List<ICompilationUnit> compilationUnits) {
-		compilationUnits.forEach((compilationUnit) -> {
+		compilationUnits.forEach(compilationUnit -> {
 
 			try {
 				refactoringStates.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
@@ -363,7 +363,7 @@ public class RefactoringPipeline {
 				.setWorkRemaining(rules.size() * changedCompilationUnits.size());
 		subMonitor.setTaskName(""); //$NON-NLS-1$
 
-		refactoringStates.stream().filter((refactoringState) -> changedCompilationUnits.stream()
+		refactoringStates.stream().filter(refactoringState -> changedCompilationUnits.stream()
 				.anyMatch(unit -> unit.getElementName().equals(refactoringState.getWorkingCopyName()))).forEach(RefactoringState::resetWorkingCopy);
 
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {

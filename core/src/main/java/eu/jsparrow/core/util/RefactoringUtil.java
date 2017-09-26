@@ -125,8 +125,8 @@ public final class RefactoringUtil {
 			IPackageFragmentRoot fragmentRoot = (IPackageFragmentRoot) p.getParent();
 			try {
 				packages = Arrays.asList(fragmentRoot.getChildren());
-				packages.stream().filter((packageElement) -> StringUtils.startsWith(packageElement.getElementName(), p.getElementName())
-						&& !packageElement.getElementName().equals(p.getElementName())).forEach((packageElement) -> {
+				packages.stream().filter(packageElement -> StringUtils.startsWith(packageElement.getElementName(), p.getElementName())
+						&& !packageElement.getElementName().equals(p.getElementName())).forEach(packageElement -> {
 result.add(packageElement);
 logger.debug("Subpackage found:" + packageElement.getElementName()); //$NON-NLS-1$
 });
