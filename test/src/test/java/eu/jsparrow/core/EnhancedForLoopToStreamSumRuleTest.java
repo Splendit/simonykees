@@ -1,4 +1,4 @@
-
+package eu.jsparrow.core;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -19,12 +19,11 @@ import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamSumASTVisitor
 @SuppressWarnings("nls")
 public class EnhancedForLoopToStreamSumRuleTest extends SingleRuleTest {
 	
-	private String fileName;
-	private Path preRule, postRule;
-	
 	private static final String SAMPLE_FILE = "EnhancedForLoopToStreamSumRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "enhancedForLoopToStreamSum";
-
+	private String fileName;
+	private Path preRule;
+	private Path postRule;
 	private EnhancedForLoopToStreamSumRule rule;
 
 	@Before
@@ -52,7 +51,6 @@ public class EnhancedForLoopToStreamSumRuleTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-	
 
 	@Test
 	public void calculateEnabledForProjectShouldBeDisabled() {
