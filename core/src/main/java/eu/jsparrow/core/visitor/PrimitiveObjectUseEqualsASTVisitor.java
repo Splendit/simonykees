@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 
@@ -65,17 +66,29 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 	}
 
 	private Expression createReplacementNode(InfixExpression infixExpression) {
-		Expression left = (Expression) astRewrite.createMoveTarget(infixExpression.getLeftOperand());
-		Expression right = (Expression) astRewrite.createMoveTarget(infixExpression.getRightOperand());
+		Expression left = infixExpression.getLeftOperand();
+		Expression right = infixExpression.getRightOperand();
+		Expression newLeft = createOperand(infixExpression, left);
+		Expression newRight = createOperand(infixExpression, right);
 		SimpleName simpleName = NodeBuilder.newSimpleName(infixExpression.getAST(), EQUALS);
-		Expression replacementNode = NodeBuilder.newMethodInvocation(infixExpression.getAST(), left, simpleName,
-				Arrays.asList(right));
+		Expression replacementNode = NodeBuilder.newMethodInvocation(infixExpression.getAST(), newLeft, simpleName,
+				Arrays.asList(newRight));
 		if (infixExpression.getOperator() == InfixExpression.Operator.NOT_EQUALS) {
 			replacementNode = NodeBuilder.newPrefixExpression(infixExpression.getAST(), PrefixExpression.Operator.NOT,
 					replacementNode);
 		}
 
 		return replacementNode;
+	}
+
+	private Expression createOperand(InfixExpression infixExpression, Expression left) {
+		Expression newOperand = (Expression) astRewrite.createMoveTarget(left);
+		if (left.getNodeType() == ASTNode.CAST_EXPRESSION) {
+			ParenthesizedExpression para = infixExpression.getAST().newParenthesizedExpression();
+			para.setExpression(newOperand);
+			newOperand = para;
+		}
+		return newOperand;
 	}
 
 	private boolean onPrimitiveObjects(InfixExpression infixExpression) {
@@ -96,7 +109,7 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 			return false;
 		}
 
-		// Do not refactor if these literals are involved, for exampel
+		// Do not refactor if these literals are involved, for example
 		// 'c'.equals('d') doesn't work
 		List<Integer> forbiddenNodeTypes = Arrays.asList(ASTNode.NUMBER_LITERAL, ASTNode.BOOLEAN_LITERAL,
 				ASTNode.CHARACTER_LITERAL);

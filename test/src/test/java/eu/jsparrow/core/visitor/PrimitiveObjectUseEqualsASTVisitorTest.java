@@ -49,6 +49,17 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 		Block expected = createBlock(String.format(template, "new Integer(1).equals(new Integer(2))"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
+	
+	@Test
+	public void visit_onSTring_ShouldReplaceWithEquals() throws Exception {
+		fixture.addMethodBlock(String.format(template, "\"String1\" == \"String2\""));
+		visitor.setAstRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expected = createBlock(String.format(template, "\"String1\".equals(\"String2\")"));
+		assertMatch(expected, fixture.getMethodBlock());
+	}
 
 	@Test
 	public void visit_onOtherInfix_ShouldNotReplaceWithEquals() throws Exception {
@@ -60,8 +71,63 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 
 		assertFalse(fixture.hasChanged());
 	}
+	
+	@Test
+	public void visit_withExtendedOperands_ShouldNotReplace() throws Exception {
+		String statement = String.format(template, "a == b == new Integer(1) == new Integer(2)");
+		fixture.addMethodBlock(statement);
+		visitor.setAstRewrite(fixture.getAstRewrite());
 
-	// SIM-824
+		fixture.accept(visitor);
+
+		assertFalse(fixture.hasChanged());
+	}
+	
+	@Test
+	public void visit_onLiteralInt_ShouldNotReplace() throws Exception {
+		String statement = String.format(template, "a == 1");
+		fixture.addMethodBlock(statement);
+		visitor.setAstRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		assertFalse(fixture.hasChanged());
+	}
+	
+	@Test
+	public void visit_onLiteralIntSwitched_ShouldNotReplace() throws Exception {
+		String statement = String.format(template, "1 == a");
+		fixture.addMethodBlock(statement);
+		visitor.setAstRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		assertFalse(fixture.hasChanged());
+	}
+	
+	@Test
+	public void visit_onLiteralChar_ShouldNotReplace() throws Exception {
+		String statement = String.format(template, "a == 'c'");
+		fixture.addMethodBlock(statement);
+		visitor.setAstRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		assertFalse(fixture.hasChanged());
+	}
+	
+	@Test
+	public void visit_onLiteralBool_ShouldNotReplace() throws Exception {
+		String statement = String.format(template, "a == true");
+		fixture.addMethodBlock(statement);
+		visitor.setAstRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		assertFalse(fixture.hasChanged());
+	}
+
+	// Reproduces SIM-824
 	@Test
 	public void visit_infixWithTypecastOnInteger_ShouldReplaceWithEquals() throws Exception {
 		fixture.addMethodBlock(String.format(template, "(Integer)a == b"));
