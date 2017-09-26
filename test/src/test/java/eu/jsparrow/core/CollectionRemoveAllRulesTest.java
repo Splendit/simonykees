@@ -1,4 +1,4 @@
-package eu.jsparrow.core;
+
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,6 +24,8 @@ public class CollectionRemoveAllRulesTest extends SingleRuleTest {
 
 	private CollectionRemoveAllRule rule;
 
+	private String fileName;
+	private Path preRule, postRule;
 	@Before
 	public void setUp() throws Exception {
 		rule = new CollectionRemoveAllRule(CollectionRemoveAllASTVisitor.class);
