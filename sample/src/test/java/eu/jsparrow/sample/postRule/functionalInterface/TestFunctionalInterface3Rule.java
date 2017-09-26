@@ -1,4 +1,4 @@
-package eu.jsparrow.sample.postRule.functinalInterface;
+package eu.jsparrow.sample.postRule.functionalInterface;
 
 public abstract class TestFunctionalInterface3Rule {
 

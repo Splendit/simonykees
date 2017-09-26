@@ -96,6 +96,12 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
 		return date.format(formatter);
 	}
+	
+	@Override
+	public boolean isFullValidLicense() {
+		LicenseType licenseType = LicenseManager.getInstance().getValidationData().getType();
+		return isValid() && (LicenseType.NODE_LOCKED == licenseType || LicenseType.FLOATING == licenseType);
+	}
 
 	@Override
 	public boolean isDemoType() {

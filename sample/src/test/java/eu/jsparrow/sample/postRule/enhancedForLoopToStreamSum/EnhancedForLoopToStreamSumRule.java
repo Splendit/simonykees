@@ -1,4 +1,4 @@
-package eu.jsparrow.sample.postRule.enhancedForLooptToStreamSum;
+package eu.jsparrow.sample.postRule.enhancedForLoopToStreamSum;
 
 import java.util.ArrayList;
 import java.util.List;
