@@ -146,8 +146,9 @@ public class JdtUnitFixture {
 	/**
 	 * Adds an import statement to the stub file.
 	 * 
-	 * @param name the import as fully qualified string, e.g. at.splendit.MyClass
-	 * @throws Exception 
+	 * @param name
+	 *            the import as fully qualified string, e.g. at.splendit.MyClass
+	 * @throws Exception
 	 */
 	public void addImport(String name) throws Exception {
 		ImportDeclaration im = ast.newImportDeclaration();
@@ -236,11 +237,19 @@ public class JdtUnitFixture {
 		javaProject.setOptions(options);
 	}
 
-	private Block createBlockFromString(String string) {
+	private Block createBlockFromString(String string) throws JdtUnitException {
 		ASTParser astParser = ASTParser.newParser(AST.JLS8);
 		astParser.setSource(string.toCharArray());
 		astParser.setKind(ASTParser.K_STATEMENTS);
-		return (Block) astParser.createAST(null);
+		ASTNode result = astParser.createAST(null);
+		if ((result.getFlags() & ASTNode.MALFORMED) == ASTNode.MALFORMED) {
+			throw new JdtUnitException(String.format("Malformed statements. Failed to parse '%s'.", string));
+		}
+		Block block = (Block) result;
+		if (block.statements().isEmpty()) {
+			throw new JdtUnitException("Can not create an empty block. There might be syntax errors");
+		}
+		return block;
 	}
 
 	private void refreshFixtures() {
@@ -267,7 +276,8 @@ public class JdtUnitFixture {
 	}
 
 	/**
-	 * Convenience method to check if any edits happened on the stub AST. 
+	 * Convenience method to check if any edits happened on the stub AST.
+	 * 
 	 * @return True if the AST was changed since setup, false otherwise
 	 */
 	public boolean hasChanged() {

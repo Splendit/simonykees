@@ -48,33 +48,33 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 		boolean isEqualsOrNotEqualsInfix = InfixExpression.Operator.EQUALS == infixExpression.getOperator()
 				|| InfixExpression.Operator.NOT_EQUALS == infixExpression.getOperator();
 		if (!isEqualsOrNotEqualsInfix) {
-			return false;
+			return true;
 		}
 		if (!infixExpression.extendedOperands().isEmpty()) {
-			return false;
+			return true;
 		}
 
 		if (!onPrimitiveObjects(infixExpression)) {
-			return false;
+			return true;
 		}
 
-		
 		Expression replaceNode = createReplacementNode(infixExpression);
 		astRewrite.replace(infixExpression, replaceNode, null);
 
 		return true;
 	}
-	
-	private Expression createReplacementNode(InfixExpression infixExpression){
+
+	private Expression createReplacementNode(InfixExpression infixExpression) {
 		Expression left = (Expression) astRewrite.createMoveTarget(infixExpression.getLeftOperand());
 		Expression right = (Expression) astRewrite.createMoveTarget(infixExpression.getRightOperand());
 		SimpleName simpleName = NodeBuilder.newSimpleName(infixExpression.getAST(), EQUALS);
 		Expression replacementNode = NodeBuilder.newMethodInvocation(infixExpression.getAST(), left, simpleName,
 				Arrays.asList(right));
-		if(infixExpression.getOperator() == InfixExpression.Operator.NOT_EQUALS){
-			replacementNode = NodeBuilder.newPrefixExpression(infixExpression.getAST(), PrefixExpression.Operator.NOT, replacementNode);
+		if (infixExpression.getOperator() == InfixExpression.Operator.NOT_EQUALS) {
+			replacementNode = NodeBuilder.newPrefixExpression(infixExpression.getAST(), PrefixExpression.Operator.NOT,
+					replacementNode);
 		}
-		
+
 		return replacementNode;
 	}
 
@@ -96,8 +96,8 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 			return false;
 		}
 
-		// Do not refactor if these literals are involved, 'c'.equals('d')
-		// doesn't work
+		// Do not refactor if these literals are involved, for exampel
+		// 'c'.equals('d') doesn't work
 		List<Integer> forbiddenNodeTypes = Arrays.asList(ASTNode.NUMBER_LITERAL, ASTNode.BOOLEAN_LITERAL,
 				ASTNode.CHARACTER_LITERAL);
 		return !forbiddenNodeTypes.stream()
