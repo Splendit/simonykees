@@ -7,15 +7,13 @@ import static org.junit.Assert.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runners.Parameterized.Parameters;
 
-import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.rule.impl.StringBuildingLoopRule;
+import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.StringBuildingLoopASTVisitor;
 
 @SuppressWarnings("nls")
@@ -23,8 +21,12 @@ public class StringBuildingLoopRuleJ5Test extends SingleRuleTest {
 	
 	private static final String SAMPLE_FILE = "StringBuildingLoopRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "stringBuildingLoopJ5";
-
+	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.stringBuildingLoopJ5";
+	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/stringBuildingLoopJ5";
 	private StringBuildingLoopRule rule;
+	private String fileName;
+	private Path preRule;
+	private Path postRule;
 
 	@Before
 	public void setUp() throws Exception {
@@ -54,7 +56,6 @@ public class StringBuildingLoopRuleJ5Test extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-	
 
 	@Test
 	public void calculateEnabledForProjectShouldBeDisabled() {
@@ -64,11 +65,5 @@ public class StringBuildingLoopRuleJ5Test extends SingleRuleTest {
 
 		assertFalse(rule.isEnabled());
 	}
-	
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.stringBuildingLoopJ5";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/stringBuildingLoopJ5";
-	
-	private String fileName;
-	private Path preRule, postRule;
 	
 }

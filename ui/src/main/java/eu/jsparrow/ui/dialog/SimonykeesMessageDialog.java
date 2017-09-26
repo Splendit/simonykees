@@ -20,8 +20,8 @@ import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.core.exception.SimonykeesException;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * Simple help dialog that gets populated with default values
@@ -43,6 +43,13 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	private static final String splenditUrl = Messages.HelpMessageDialog_homepage_url;
 
 	private static String messageText;
+
+	private SimonykeesMessageDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage,
+			int dialogImageType, int defaultIndex, String... dialogButtonLabels) {
+		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels,
+				defaultIndex);
+		messageText = dialogMessage;
+	}
 
 	public static boolean openDefaultHelpMessageDialog(Shell parentShell) {
 		messageText = dialogInformationMessage + System.lineSeparator() + splenditUrl;
@@ -67,13 +74,6 @@ public class SimonykeesMessageDialog extends MessageDialog {
 				+ System.lineSeparator() + MAIL_BUGREPORT;
 		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, MessageDialog.ERROR,
 				defaultIndex, dialogButtonLabels).open() == 0;
-	}
-
-	private SimonykeesMessageDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage,
-			int dialogImageType, int defaultIndex, String... dialogButtonLabels) {
-		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels,
-				defaultIndex);
-		messageText = dialogMessage;
 	}
 
 	@Override

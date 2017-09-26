@@ -28,11 +28,11 @@ public abstract class SingleRuleTest {
 
 	protected static IPackageFragmentRoot root;
 
-	protected IJavaProject testProject;
-
 	private static final String POSTRULE_BASE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule."; //$NON-NLS-1$
 
 	private static final String POSTRULE_BASE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/"; //$NON-NLS-1$
+
+	protected IJavaProject testProject;
 
 	@BeforeClass
 	public static void classSetUp() throws Exception {

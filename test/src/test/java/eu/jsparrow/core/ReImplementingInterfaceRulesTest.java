@@ -11,8 +11,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
+import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.ReImplementingInterfaceASTVisitor;
 
 @SuppressWarnings("nls")

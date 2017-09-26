@@ -177,22 +177,20 @@ public class RefactoringPreviewWizard extends Wizard {
 			 * Update all changes and unselected classes that were unselected in
 			 * the last page shown before finish was pressed
 			 */
-			Arrays.asList(getPages()).stream().forEach(page -> {
-				if ((page instanceof RefactoringPreviewWizardPage)
-						&& !((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
-					try {
-						refactoringPipeline.doAdditionalRefactoring(
-								((RefactoringPreviewWizardPage) page).getUnselectedChange(),
-								((RefactoringPreviewWizardPage) page).getRule(), monitor);
-						if (monitor.isCanceled()) {
-							refactoringPipeline.clearStates();
-						}
-					} catch (RuleException e) {
-						synchronizeWithUIShowError(e);
-					}
-					((RefactoringPreviewWizardPage) page).applyUnselectedChange();
-				}
-			});
+			Arrays.asList(getPages()).stream().filter((page) -> (page instanceof RefactoringPreviewWizardPage)
+					&& !((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()).forEach((page) -> {
+try {
+			refactoringPipeline.doAdditionalRefactoring(
+					((RefactoringPreviewWizardPage) page).getUnselectedChange(),
+					((RefactoringPreviewWizardPage) page).getRule(), monitor);
+			if (monitor.isCanceled()) {
+				refactoringPipeline.clearStates();
+			}
+} catch (RuleException e) {
+			synchronizeWithUIShowError(e);
+}
+((RefactoringPreviewWizardPage) page).applyUnselectedChange();
+});
 
 			if (LicenseUtil.getInstance().isValid()) {
 				try {

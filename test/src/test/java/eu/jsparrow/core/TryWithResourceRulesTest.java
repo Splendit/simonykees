@@ -11,8 +11,6 @@ import java.nio.file.Path;
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.util.RulesTestUtil;
