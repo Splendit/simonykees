@@ -9,7 +9,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -21,6 +20,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -395,17 +395,24 @@ public class StartDialog extends Dialog {
 		gridData = new GridData(GridData.FILL_BOTH);
 		gridData.heightHint = 70;
 		feedback.setLayoutData(gridData);
-		feedback.addModifyListener((ModifyEvent e) -> feedbackText = ((Text) e.getSource()).getText());
-		Listener scrollBarListener = (Event event) -> {
-			Text t = (Text) event.widget;
-			Rectangle r1 = t.getClientArea();
-			Rectangle r2 = t.computeTrim(r1.x, r1.y, r1.width, r1.height);
-			Point p = t.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-			// t.getHorizontalBar().setVisible(r2.width <= p.x);
-			t.getVerticalBar().setVisible(r2.height <= p.y);
-			if (event.type == SWT.Modify) {
-				t.getParent().layout(true);
-				t.showSelection();
+		feedback.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				feedbackText = ((Text) e.getSource()).getText();
+			}
+		});
+		Listener scrollBarListener = new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				Text t = (Text) event.widget;
+				Rectangle r1 = t.getClientArea();
+				Rectangle r2 = t.computeTrim(r1.x, r1.y, r1.width, r1.height);
+				Point p = t.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+				// t.getHorizontalBar().setVisible(r2.width <= p.x);
+				t.getVerticalBar().setVisible(r2.height <= p.y);
+				if (event.type == SWT.Modify) {
+					t.getParent().layout(true);
+					t.showSelection();
+				}
 			}
 		};
 		feedback.addListener(SWT.Resize, scrollBarListener);
@@ -445,7 +452,7 @@ public class StartDialog extends Dialog {
 
 	@Override
 	protected void okPressed() {
-		if (!StringUtils.isEmpty(ratingText) || !StringUtils.isEmpty(feedbackText)) {
+		if (!ratingText.isEmpty() || !feedbackText.isEmpty()) {
 			try {
 				sendPost();
 			} catch (IOException e) {
@@ -472,11 +479,11 @@ public class StartDialog extends Dialog {
 		con.setRequestMethod("POST"); //$NON-NLS-1$
 
 		String urlParameters = ""; //$NON-NLS-1$
-		if (!StringUtils.isEmpty(ratingText)) {
+		if (!ratingText.isEmpty()) {
 			urlParameters += "entry.1293318463=" + ratingText; //$NON-NLS-1$
 		}
-		if (!StringUtils.isEmpty(feedbackText)) {
-			if (!StringUtils.isEmpty(ratingText)) {
+		if (!feedbackText.isEmpty()) {
+			if (!ratingText.isEmpty()) {
 				urlParameters += "&"; //$NON-NLS-1$
 			}
 			urlParameters += "entry.112902755=" + feedbackText; //$NON-NLS-1$
@@ -491,7 +498,7 @@ public class StartDialog extends Dialog {
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 		String inputLine;
-		StringBuilder response = new StringBuilder();
+		StringBuffer response = new StringBuffer();
 
 		while ((inputLine = in.readLine()) != null) {
 			response.append(inputLine);

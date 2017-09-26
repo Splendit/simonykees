@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.compare.CompareViewerSwitchingPane;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -54,24 +53,29 @@ import eu.jsparrow.ui.util.LicenseUtil;
 @SuppressWarnings("restriction")
 public class RefactoringPreviewWizardPage extends WizardPage {
 
-	private static final Logger logger = LoggerFactory.getLogger(RefactoringPreviewWizardPage.class);
 	private ICompilationUnit currentCompilationUnit;
 	private IChangePreviewViewer currentPreviewViewer;
 	private CheckboxTableViewer viewer;
+
 	private Map<ICompilationUnit, DocumentChange> changesForRule;
 	private RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule;
+
 	/*
 	 * map that contains all names of working copies and working copies that
 	 * were unselected for this page
 	 */
 	private Map<String, ICompilationUnit> unselected = new HashMap<>();
+
 	private Composite previewContainer;
 	/*
 	 * map that contains working copies that are unselected in one iteration
 	 * when this page is active
 	 */
 	private List<ICompilationUnit> unselectedChange = new ArrayList<>();
+
 	protected IStatus fSelectionStatus;
+
+	private static final Logger logger = LoggerFactory.getLogger(RefactoringPreviewWizardPage.class);
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule,
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
@@ -188,7 +192,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	 */
 	private String getPathString(ICompilationUnit compilationUnit) {
 		String temp = compilationUnit.getParent().getPath().toString();
-		return StringUtils.startsWith(temp, "/") ? StringUtils.substring(temp, 1) : temp; //$NON-NLS-1$
+		return temp.startsWith("/") ? temp.substring(1) : temp; //$NON-NLS-1$
 	}
 
 	private void createPreviewViewer(Composite parent) {
@@ -325,8 +329,12 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	 */
 	public void update(Map<ICompilationUnit, DocumentChange> changesForRule) {
 		this.changesForRule = changesForRule;
-		changesForRule.keySet().stream().filter((unit) -> unit.getElementName().equals(currentCompilationUnit.getElementName())
-				&& !unit.equals(currentCompilationUnit)).forEach((unit) -> currentCompilationUnit = unit);
+		changesForRule.keySet().stream().forEach(unit -> {
+			if (unit.getElementName().equals(currentCompilationUnit.getElementName())
+					&& !unit.equals(currentCompilationUnit)) {
+				currentCompilationUnit = unit;
+			}
+		});
 	}
 
 	/**

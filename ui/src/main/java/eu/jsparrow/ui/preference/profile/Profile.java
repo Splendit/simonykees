@@ -32,7 +32,6 @@ public class Profile implements SimonykeesProfile {
 		return profileName;
 	}
 
-	@Override
 	public void setEnabledRulesIds(List<String> enabledRulesIds) {
 		this.enabledRulesIds = enabledRulesIds;
 	}
@@ -42,7 +41,6 @@ public class Profile implements SimonykeesProfile {
 		return enabledRulesIds;
 	}
 	
-	@Override
 	public boolean containsRule(String ruleId) {
 		return enabledRulesIds.contains(ruleId);
 	}

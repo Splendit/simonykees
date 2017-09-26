@@ -3,7 +3,6 @@ package eu.jsparrow.ui.preference;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.wizard.Wizard;
 
 import eu.jsparrow.core.rule.RefactoringRule;
@@ -56,10 +55,10 @@ public class ConfigureProfileWizard extends Wizard {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ruleIds = model.getSelectionAsList();
 		if (index >= 0) {
 			SimonykeesPreferenceManager.updateProfile(index, name,
-					ruleIds.stream().map(RefactoringRule::getId).collect(Collectors.toList()));
+					ruleIds.stream().map(rule -> rule.getId()).collect(Collectors.toList()));
 		} else {
 			SimonykeesPreferenceManager.addProfile(name,
-					ruleIds.stream().map(RefactoringRule::getId).collect(Collectors.toList()));
+					ruleIds.stream().map(rule -> rule.getId()).collect(Collectors.toList()));
 		}
 		return true;
 	}
@@ -68,7 +67,7 @@ public class ConfigureProfileWizard extends Wizard {
 	public boolean canFinish() {
 		if (model.getSelectionAsList().isEmpty()) {
 			return false;
-		} else if (StringUtils.isEmpty(model.getName())) {
+		} else if (model.getName().isEmpty()) {
 			// if name already exists check is handled in page with status on
 			// field change
 			return false;

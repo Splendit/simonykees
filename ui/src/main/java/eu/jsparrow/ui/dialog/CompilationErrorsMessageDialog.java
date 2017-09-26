@@ -2,7 +2,6 @@ package eu.jsparrow.ui.dialog;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -12,6 +11,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.HelpEvent;
+import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -49,7 +49,12 @@ public class CompilationErrorsMessageDialog extends TitleAreaDialog {
 		 * Setting help listener to question mark help button Open default help
 		 * dialog
 		 */
-		area.addHelpListener((HelpEvent e) -> SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell()));
+		area.addHelpListener(new HelpListener() {
+			@Override
+			public void helpRequested(HelpEvent e) {
+				SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
+			}
+		});
 
 		tableViewer = new TableViewer(area, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
 
@@ -59,18 +64,15 @@ public class CompilationErrorsMessageDialog extends TitleAreaDialog {
 
 		tableViewer.setContentProvider(new IStructuredContentProvider() {
 
-			@Override
 			@SuppressWarnings("unchecked")
 			public Object[] getElements(Object inputElement) {
 				List<ICompilationUnit> list = (List<ICompilationUnit>) inputElement;
 				return list.toArray();
 			}
 
-			@Override
 			public void dispose() {
 			}
 
-			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			}
 
@@ -110,7 +112,7 @@ public class CompilationErrorsMessageDialog extends TitleAreaDialog {
 	 */
 	private String getPathString(ICompilationUnit compilationUnit) {
 		String temp = compilationUnit.getParent().getPath().toString();
-		return StringUtils.startsWith(temp, "/") ? StringUtils.substring(temp, 1) : temp; //$NON-NLS-1$
+		return temp.startsWith("/") ? temp.substring(1) : temp; //$NON-NLS-1$
 	}
 
 	/**

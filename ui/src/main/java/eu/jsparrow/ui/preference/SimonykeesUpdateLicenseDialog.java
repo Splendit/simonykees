@@ -20,8 +20,11 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.HelpEvent;
+import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -58,19 +61,23 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
 	private static final String DEFAULT_LICENSEE_NAME = ""; //$NON-NLS-1$
 	private static final Logger logger = LoggerFactory.getLogger(SimonykeesUpdateLicenseDialog.class);
-	private static final String LOGO_ACTIVE_LICENSE_PATH = "icons/jSparrow_active_icon_100.png"; //$NON-NLS-1$
-	private static final String LOGO_INACTIVE_LICENSE_PATH = "icons/jSparrow_inactive_icon_100.png"; //$NON-NLS-1$
-	private static final String TICKMARK_GREEN_ICON_PATH = "icons/if_Tick_Mark_20px.png"; //$NON-NLS-1$
-	private static final String CLOSE_RED_ICON_PATH = "icons/if_Close_Icon_20px.png"; //$NON-NLS-1$
+
 	private Text licenseKeyText;
 	private String licenseKey = ""; //$NON-NLS-1$
 	private Button updateButton;
 	private CLabel updatedLabel;
 	private Label updatedIconLabel;
+
 	private Image scaledJSparrowImageActive;
 	private Image scaledJSparrowImageInactive;
 	private Image scaledTickmarkGreenIconImage;
 	private Image scaledCloseRedIconImage;
+
+	private static final String LOGO_ACTIVE_LICENSE_PATH = "icons/jSparrow_active_icon_100.png"; //$NON-NLS-1$
+	private static final String LOGO_INACTIVE_LICENSE_PATH = "icons/jSparrow_inactive_icon_100.png"; //$NON-NLS-1$
+	private static final String TICKMARK_GREEN_ICON_PATH = "icons/if_Tick_Mark_20px.png"; //$NON-NLS-1$
+	private static final String CLOSE_RED_ICON_PATH = "icons/if_Close_Icon_20px.png"; //$NON-NLS-1$
+
 	@Inject
 	private LicenseValidationService licenseValidationService;
 	private boolean isLicenseValidationServiceAvailable = false;
@@ -82,9 +89,8 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
 	@PostConstruct
 	private void postConstruct() {
-		if (licenseValidationService != null) {
+		if (licenseValidationService != null)
 			isLicenseValidationServiceAvailable = true;
-		}
 	}
 
 	@PreDestroy
@@ -107,7 +113,12 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		 * Setting help listener to question mark help button Open default help
 		 * dialog
 		 */
-		area.addHelpListener((HelpEvent e) -> SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell()));
+		area.addHelpListener(new HelpListener() {
+			@Override
+			public void helpRequested(HelpEvent e) {
+				SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
+			}
+		});
 
 		Composite container = new Composite(area, SWT.NONE);
 		container.setLayoutData(new GridData(SWT.FILL, SWT.WRAP, true, true));
@@ -138,11 +149,15 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		groupGridData.horizontalIndent = 20;
 		licenseKeyText = new Text(newKeyGroup, SWT.BORDER);
 		licenseKeyText.setLayoutData(groupGridData);
-		licenseKeyText.addModifyListener((ModifyEvent event) -> {
-			updatedIconLabel.setVisible(false);
-			updatedLabel.setVisible(false);
-			Text textWidget = (Text) event.getSource();
-			licenseKey = textWidget.getText();
+		licenseKeyText.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent event) {
+				updatedIconLabel.setVisible(false);
+				updatedLabel.setVisible(false);
+				Text textWidget = (Text) event.getSource();
+				licenseKey = textWidget.getText();
+			}
 		});
 
 		groupGridData = new GridData(SWT.CENTER, SWT.FILL, false, false);
@@ -154,15 +169,17 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				BusyIndicator.showWhile(Display.getDefault(), () -> {
-					if (isLicenseValidationServiceAvailable) {
-						String licenseKey = getLicenseKey();
-						boolean updated = licenseValidationService.updateLicenseeNumber(licenseKey,
-								DEFAULT_LICENSEE_NAME);
-						updateWarningInformation(updated);
-					} else {
-						// TODO: proper error handling
-						logger.error(ExceptionMessages.SimonykeesUpdateLicenseDialog_license_service_unavailable);
+				BusyIndicator.showWhile(Display.getDefault(), new Runnable() {
+					public void run() {
+						if (isLicenseValidationServiceAvailable) {
+							String licenseKey = getLicenseKey();
+							boolean updated = licenseValidationService.updateLicenseeNumber(licenseKey,
+									DEFAULT_LICENSEE_NAME);
+							updateWarningInformation(updated);
+						} else {
+							// TODO: proper error handling
+							logger.error(ExceptionMessages.SimonykeesUpdateLicenseDialog_license_service_unavailable);
+						}
 					}
 				});
 			}
@@ -190,11 +207,10 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		scaledJSparrowImageInactive = new Image(container.getDisplay(), imageDataInactive);
 
 		if (isLicenseValidationServiceAvailable) {
-			if (licenseValidationService.isValid()) {
+			if (licenseValidationService.isValid())
 				updatedIconLabel.setImage(scaledJSparrowImageActive);
-			} else {
+			else
 				updatedIconLabel.setImage(scaledJSparrowImageInactive);
-			}
 			updatedIconLabel.setVisible(true);
 		} else {
 			updatedIconLabel.setVisible(false);
@@ -228,11 +244,15 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		 * Automatic release does not work for Image, so we do it manually when
 		 * container is disposed
 		 */
-		container.addDisposeListener((DisposeEvent e) -> {
-			scaledJSparrowImageActive.dispose();
-			scaledJSparrowImageInactive.dispose();
-			scaledTickmarkGreenIconImage.dispose();
-			scaledCloseRedIconImage.dispose();
+		container.addDisposeListener(new DisposeListener() {
+
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				scaledJSparrowImageActive.dispose();
+				scaledJSparrowImageInactive.dispose();
+				scaledTickmarkGreenIconImage.dispose();
+				scaledCloseRedIconImage.dispose();
+			}
 		});
 
 		return container;

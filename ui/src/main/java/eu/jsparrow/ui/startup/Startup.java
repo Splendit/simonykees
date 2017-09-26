@@ -20,12 +20,14 @@ public class Startup implements IStartup {
 	@Override
 	public void earlyStartup() {
 
-		PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
-			if (SimonykeesPreferenceManager.getEnableIntro()) {
-				Shell activeShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				new StartDialog(activeShell).open();
-			}
+		PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				if (SimonykeesPreferenceManager.getEnableIntro()) {
+					Shell activeShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+					new StartDialog(activeShell).open();
+				}
 
+			}
 		});
 	}
 }

@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
-
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.Tag;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
@@ -53,16 +51,14 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	 * 
 	 * @return Set containing searched string.
 	 */
-	@Override
 	@SuppressWarnings("unchecked")
 	public Set<Object> filterPosibilitiesByName() {
 		return super.getPosibilities().stream()
-				.filter(object -> StringUtils
-						.contains(((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).getName().toLowerCase(), nameFilter))
+				.filter(object -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).getName().toLowerCase()
+						.contains(nameFilter))
 				.collect(Collectors.toSet());
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
 	public void filterPosibilitiesByTags() {
 		if (!appliedTags.isEmpty()) {
@@ -81,7 +77,7 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 				if (object.getTags().contains(Tag.getTageForName(tag))) {
 					return true;
 				}
-			} else if (StringUtils.contains(object.getName().toLowerCase(), tag)) {
+			} else if (object.getName().toLowerCase().contains(tag)) {
 				return true;
 			}
 		}
@@ -109,7 +105,6 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	 * 
 	 * @return String for filter by name
 	 */
-	@Override
 	public String getNameFilter() {
 		return nameFilter;
 	}

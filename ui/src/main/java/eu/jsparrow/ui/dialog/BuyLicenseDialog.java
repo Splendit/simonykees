@@ -10,7 +10,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -24,6 +23,7 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
@@ -162,7 +162,7 @@ public class BuyLicenseDialog extends Dialog {
 
 	@Override
 	protected void okPressed() {
-		if (!StringUtils.isEmpty(ratingText) || !reasonForNotBuying.isEmpty() || !StringUtils.isEmpty(feedbackText)) {
+		if (!ratingText.isEmpty() || !reasonForNotBuying.isEmpty() || !feedbackText.isEmpty()) {
 			try {
 				sendPost();
 			} catch (IOException e) {
@@ -267,17 +267,24 @@ public class BuyLicenseDialog extends Dialog {
 		gridData = new GridData(GridData.FILL_BOTH);
 		gridData.heightHint = 70;
 		feedback.setLayoutData(gridData);
-		feedback.addModifyListener((ModifyEvent e) -> feedbackText = ((Text) e.getSource()).getText());
-		Listener scrollBarListener = (Event event) -> {
-			Text t = (Text) event.widget;
-			Rectangle r1 = t.getClientArea();
-			Rectangle r2 = t.computeTrim(r1.x, r1.y, r1.width, r1.height);
-			Point p = t.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
-			// t.getHorizontalBar().setVisible(r2.width <= p.x);
-			t.getVerticalBar().setVisible(r2.height <= p.y);
-			if (event.type == SWT.Modify) {
-				t.getParent().layout(true);
-				t.showSelection();
+		feedback.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				feedbackText = ((Text) e.getSource()).getText();
+			}
+		});
+		Listener scrollBarListener = new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				Text t = (Text) event.widget;
+				Rectangle r1 = t.getClientArea();
+				Rectangle r2 = t.computeTrim(r1.x, r1.y, r1.width, r1.height);
+				Point p = t.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
+				// t.getHorizontalBar().setVisible(r2.width <= p.x);
+				t.getVerticalBar().setVisible(r2.height <= p.y);
+				if (event.type == SWT.Modify) {
+					t.getParent().layout(true);
+					t.showSelection();
+				}
 			}
 		};
 		feedback.addListener(SWT.Resize, scrollBarListener);
@@ -307,15 +314,18 @@ public class BuyLicenseDialog extends Dialog {
 	}
 
 	private ICheckStateListener createCheckStateListener() {
-		return (CheckStateChangedEvent event) -> {
+		return new ICheckStateListener() {
 
-			String reason = (String) event.getElement();
-			if (event.getChecked()) {
-				reasonForNotBuying.add(reason);
-			} else {
-				// add in list with unselected classes
-				if (reasonForNotBuying.contains(reason)) {
-					reasonForNotBuying.remove(reason);
+			public void checkStateChanged(CheckStateChangedEvent event) {
+
+				String reason = (String) event.getElement();
+				if (event.getChecked()) {
+					reasonForNotBuying.add(reason);
+				} else {
+					// add in list with unselected classes
+					if (reasonForNotBuying.contains(reason)) {
+						reasonForNotBuying.remove(reason);
+					}
 				}
 			}
 		};
@@ -347,19 +357,19 @@ public class BuyLicenseDialog extends Dialog {
 		con.setRequestMethod("POST"); //$NON-NLS-1$
 
 		String urlParameters = ""; //$NON-NLS-1$
-		if (!StringUtils.isEmpty(ratingText)) {
+		if (!ratingText.isEmpty()) {
 			urlParameters += "entry.1585752170=" + ratingText; //$NON-NLS-1$
 		}
 		if (!reasonForNotBuying.isEmpty()) {
 			for (String reason : reasonForNotBuying) {
-				if (!StringUtils.isEmpty(urlParameters)) {
+				if (!urlParameters.isEmpty()) {
 					urlParameters += "&"; //$NON-NLS-1$
 				}
 				urlParameters += "entry.808545363=" + reason; //$NON-NLS-1$
 			}
 		}
-		if (!StringUtils.isEmpty(feedbackText)) {
-			if (!StringUtils.isEmpty(urlParameters)) {
+		if (!feedbackText.isEmpty()) {
+			if (!urlParameters.isEmpty()) {
 				urlParameters += "&"; //$NON-NLS-1$
 			}
 			urlParameters += "entry.1415953295=" + feedbackText; //$NON-NLS-1$
@@ -374,7 +384,7 @@ public class BuyLicenseDialog extends Dialog {
 
 		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
 		String inputLine;
-		StringBuilder response = new StringBuilder();
+		StringBuffer response = new StringBuffer();
 
 		while ((inputLine = in.readLine()) != null) {
 			response.append(inputLine);

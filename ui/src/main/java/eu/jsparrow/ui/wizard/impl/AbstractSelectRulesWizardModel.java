@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import eu.jsparrow.core.rule.RefactoringRule;
@@ -64,7 +63,6 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 * Adds listener to model which notifies view to refresh data when ever
 	 * something in model changes
 	 */
-	@Override
 	public void addListener(IValueChangeListener listener) {
 		listeners.add(listener);
 	}
@@ -111,15 +109,16 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 * are enabled from left to right and removes them from left view. Ignores
 	 * disabled elements.
 	 */
-	@Override
 	@SuppressWarnings("unchecked")
 	public void moveToRight(IStructuredSelection selectedElements) {
-		selectedElements.toList().stream().filter((posibility) -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()).forEach((posibility) -> {
-			selection.add(posibility);
-			posibilities.remove(posibility);
-			recentlyMoved.add(posibility);
-			changed = true;
-		});
+		for (Object posibility : selectedElements.toList()) {
+			if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
+				selection.add(posibility);
+				posibilities.remove(posibility);
+				recentlyMoved.add(posibility);
+				changed = true;
+			}
+		}
 		movedToRight = true;
 		notifyListeners();
 	}
@@ -129,16 +128,17 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 * enabled from left to right and removes them from left view. Ignores
 	 * disabled elements.
 	 */
-	@Override
 	@SuppressWarnings("unchecked")
 	public void moveAllToRight() {
 		Set<Object> currentPosibilities = new HashSet<>();
 		currentPosibilities = filterPosibilitiesByName();
-		currentPosibilities.stream().filter((posibility) -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()).forEach((posibility) -> {
-			selection.add(posibility);
-			posibilities.remove(posibility);
-			changed = true;
-		});
+		for (Object posibility : currentPosibilities) {
+			if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
+				selection.add(posibility);
+				posibilities.remove(posibility);
+				changed = true;
+			}
+		}
 		notifyListeners();
 	}
 
@@ -148,7 +148,6 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 * are enabled from right to left and removes them from right view. Ignores
 	 * disabled elements.
 	 */
-	@Override
 	@SuppressWarnings("unchecked")
 	public void moveToLeft(IStructuredSelection selectedElements) {
 
@@ -167,7 +166,6 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 * are enabled from right to left and removes them from right view. Ignores
 	 * disabled elements.
 	 */
-	@Override
 	public void moveAllToLeft() {
 
 		posibilities.addAll(selection);
@@ -183,7 +181,9 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	 * Notifies view to redraw all elements with new data.
 	 */
 	public void notifyListeners() {
-		listeners.forEach(IValueChangeListener::valueChanged);
+		for (IValueChangeListener listener : listeners) {
+			listener.valueChanged();
+		}
 	}
 
 	/**
@@ -199,7 +199,11 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		if (removeDisabled) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
-			currentPosibilities.stream().filter((posibility) -> !((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()).forEach(applicable::remove);
+			for (Object posibility : currentPosibilities) {
+				if (!((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
+					applicable.remove(posibility);
+				}
+			}
 		}
 	}
 
@@ -209,7 +213,11 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		if (doit) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
-			currentPosibilities.stream().filter((posibility) -> !((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()).forEach(posibilities::remove);
+			for (Object posibility : currentPosibilities) {
+				if (!((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
+					posibilities.remove(posibility);
+				}
+			}
 		} else {
 			posibilities.clear();
 			posibilities.addAll(rules);
@@ -294,19 +302,21 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		currentProfileId = profileId;
 		moveAllToLeft();
 		unapplicableRules.clear();
-		if (!currentProfileId.equals(Messages.SelectRulesWizardPage_EmptyProfileLabel) && !StringUtils.isEmpty(currentProfileId)) {
+		if (!currentProfileId.equals(Messages.SelectRulesWizardPage_EmptyProfileLabel) && !currentProfileId.isEmpty()) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
-			currentPosibilities.stream().filter((posibility) -> SimonykeesPreferenceManager.getProfileFromName(currentProfileId).containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
-					// SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
-					((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getId())).forEach((posibility) -> {
-if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
-			selection.add(posibility);
-			posibilities.remove(posibility);
-} else {
-			unapplicableRules.add(posibility);
-}
-});
+			for (Object posibility : currentPosibilities) {
+				if (SimonykeesPreferenceManager.getProfileFromName(currentProfileId).containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
+						// SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
+						((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getId())) {
+					if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
+						selection.add(posibility);
+						posibilities.remove(posibility);
+					} else {
+						unapplicableRules.add(posibility);
+					}
+				}
+			}
 		}
 
 		setChanged(true);
@@ -316,7 +326,11 @@ if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEna
 	public void removeAlreadySelected() {
 		Set<Object> currentPosibilities = new HashSet<>();
 		currentPosibilities.addAll(posibilities);
-		currentPosibilities.stream().filter(selection::contains).forEach(posibilities::remove);
+		for (Object posibility : currentPosibilities) {
+			if (selection.contains(posibility)) {
+				posibilities.remove(posibility);
+			}
+		}
 	}
 
 }

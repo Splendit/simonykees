@@ -279,7 +279,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	 */
 	private void updateView() {
 		profilesTable.removeAll();
-		buttons.forEach(Button::dispose);
+		for (Button button : buttons) {
+			button.dispose();
+		}
 		buttons.clear();
 		populateTable();
 		buttons.get(currentProfileSelection).setSelection(true);

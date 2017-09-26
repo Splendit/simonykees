@@ -45,7 +45,6 @@ public class SelectRulesWizard extends Wizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
 
-	
 	private AbstractSelectRulesWizardPage page;
 	private SelectRulesWizardPageControler controler;
 	private SelectRulesWizardPageModel model;
@@ -159,38 +158,43 @@ public class SelectRulesWizard extends Wizard {
 	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
 			Rectangle rectangle) {
 
-		Display.getDefault().asyncExec(() -> {
+		Display.getDefault().asyncExec(new Runnable() {
 
-			logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
-					javaElements.get(0).getJavaProject().getElementName()));
-			logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
-					javaElements.get(0).getJavaProject().getElementName(),
-					refactoringPipeline.getRules().stream()
-							.filter(rule -> null != refactoringPipeline.getChangesForRule(rule)
-									&& !refactoringPipeline.getChangesForRule(rule).isEmpty())
-							.map(RefactoringRule::getName)
-							.collect(Collectors.joining("; ")))); //$NON-NLS-1$
+			@Override
+			public void run() {
 
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactoringPipeline)) {
+				logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
+						javaElements.get(0).getJavaProject().getElementName()));
+				logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
+						javaElements.get(0).getJavaProject().getElementName(),
+						refactoringPipeline.getRules().stream()
+								.filter(rule -> null != refactoringPipeline.getChangesForRule(rule)
+										&& !refactoringPipeline.getChangesForRule(rule).isEmpty())
+								.map(RefactoringRule<? extends AbstractASTRewriteASTVisitor>::getName)
+								.collect(Collectors.joining("; ")))); //$NON-NLS-1$
 
-				@Override
-				protected void nextPressed() {
-					((RefactoringPreviewWizard) getWizard()).pressedNext();
-					super.nextPressed();
-				}
+				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactoringPipeline)) {
 
-				@Override
-				protected void backPressed() {
-					((RefactoringPreviewWizard) getWizard()).pressedBack();
-					super.backPressed();
-				}
+					@Override
+					protected void nextPressed() {
+						((RefactoringPreviewWizard) getWizard()).pressedNext();
+						super.nextPressed();
+					}
 
-			};
+					@Override
+					protected void backPressed() {
+						((RefactoringPreviewWizard) getWizard()).pressedBack();
+						super.backPressed();
+					}
 
-			// maximizes the RefactoringPreviewWizard
-			dialog.setPageSize(rectangle.width, rectangle.height);
-			dialog.open();
+				};
+
+				// maximizes the RefactoringPreviewWizard
+				dialog.setPageSize(rectangle.width, rectangle.height);
+				dialog.open();
+			}
+
 		});
 	}
 }

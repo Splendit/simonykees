@@ -173,8 +173,12 @@ public class RefactoringPreviewWizard extends Wizard {
 	public boolean performFinish() {
 
 		IRunnableWithProgress job = monitor -> {
-			Arrays.asList(getPages()).stream().filter((page) -> (page instanceof RefactoringPreviewWizardPage)
-					&& !((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()).forEach((page) -> recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page));
+			Arrays.asList(getPages()).stream().forEach(page -> {
+				if ((page instanceof RefactoringPreviewWizardPage)
+						&& !((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
+					recalculateRulesAndClearChanges((RefactoringPreviewWizardPage) page);
+				}
+			});
 
 			if (LicenseUtil.getInstance().isValid()) {
 				try {
