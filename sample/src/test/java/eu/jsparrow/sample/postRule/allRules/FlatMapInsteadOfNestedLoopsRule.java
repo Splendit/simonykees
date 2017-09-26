@@ -72,4 +72,19 @@ public class FlatMapInsteadOfNestedLoopsRule {
 		List<TestObject> matrix4 = Arrays.asList(new TestObject(), new TestObject());
 		matrix4.forEach(t -> t.getTestList().forEach(logger::info));
 	}
+	
+	public void testAvoidingOuterMostLoop() {
+		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
+		matrix2.stream().filter(row -> !row.isEmpty()).forEach(row -> {
+			/*
+			 * Some statement just to avoid transformation
+			 */
+			if (matrix2.size() == 2) {
+				return;
+			}
+			row.stream().filter(col -> !col.isEmpty()).flatMap(List::stream)
+					.filter(element -> !StringUtils.isEmpty(element))
+					.map(element -> StringUtils.substring(element, 0, 1)).forEach(logger::info);
+		});
+	}
 }

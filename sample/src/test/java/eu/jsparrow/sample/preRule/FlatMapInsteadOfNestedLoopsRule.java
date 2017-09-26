@@ -122,4 +122,21 @@ public class FlatMapInsteadOfNestedLoopsRule {
 			});
 		});
 	}
+	
+	public void testAvoidingOuterMostLoop() {
+		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
+		matrix2.stream().filter(row -> !row.isEmpty()).forEach(row -> {
+			/*
+			 * Some statement just to avoid transformation
+			 */
+			if(matrix2.size() == 2) {
+				return;
+			}
+			row.stream().filter(col -> !col.isEmpty()).forEach(col -> {
+				col.stream().filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
+					System.out.print(element);
+				});
+			});
+		});
+	}
 }
