@@ -95,8 +95,8 @@ public class FlatMapInsteadOfNestedLoopsRule {
 					if (matrix2.size() == 2) {
 						return;
 					}
-					second.stream().filter(third -> !third.isEmpty()).map(third -> third.substring(0, 1))
-							.forEach(logger::info);
+					second.stream().filter(third -> !StringUtils.isEmpty(third))
+							.map(third -> StringUtils.substring(third, 0, 1)).forEach(logger::info);
 				});
 	}
 
