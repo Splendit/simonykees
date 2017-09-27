@@ -125,6 +125,8 @@ public class TestPrimitiveObjectUseEqualsRule {
 		Integer d = new Integer(1);
 		if (((Integer) c).equals(d)) {
 		}
+		if (d.equals((Integer) c)) {
+		}
 		if (c == (Integer) d) {
 		}
 	}
