@@ -10,7 +10,7 @@ import java.util.List;
  */
 @SuppressWarnings("nls")
 public class FlatMapInsteadOfNestedLoopsRule {
-
+	
 	public void test() {
 		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
 		matrix2.stream().filter(row -> !row.isEmpty()).flatMap((row) -> row.stream()).filter(col -> !col.isEmpty()).flatMap((col) -> col.stream()).filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
@@ -111,7 +111,7 @@ public class FlatMapInsteadOfNestedLoopsRule {
 			});
 		});
 	}
-	
+
 	public void testAvoidInnerMostLoop() {
 		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
 		matrix2.stream().filter(first -> !first.isEmpty()).flatMap((first) -> first.stream()).filter(second -> !second.isEmpty()).forEach(second -> {
