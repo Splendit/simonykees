@@ -130,8 +130,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 			}
 		}
 
-		return true;
-
+		return toBeSkipped.isEmpty() || depthCount == 0;
 	}
 
 	/**

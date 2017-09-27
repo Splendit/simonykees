@@ -111,4 +111,28 @@ public class FlatMapInsteadOfNestedLoopsRule {
 			});
 		});
 	}
+	
+	public void testAvoidInnerMostLoop() {
+		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
+		matrix2.stream().filter(first -> !first.isEmpty()).flatMap((first) -> first.stream()).filter(second -> !second.isEmpty()).forEach(second -> {
+			if (matrix2.size() == 2) {
+				return;
+			}
+			second.stream().filter(third -> !third.isEmpty()).map(third -> third.substring(0, 1)).forEach(third -> {
+				System.out.print(third);
+			});
+		});
+	}
+	
+	public void testQuartedNestedStreams() {
+		List<List<List<List<String>>>> matrix3 = Arrays.asList(Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl"))));
+		matrix3.stream().flatMap((first) -> first.stream()).forEach(second -> {
+			int size = matrix3.size();
+			second.forEach(third -> {
+				third.forEach(fourth -> {
+					System.out.print(fourth);
+				});
+			});
+		});
+	}
 }
