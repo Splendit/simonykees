@@ -27,7 +27,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 		Block expected = createBlock(String.format(template, "a.equals(b)"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
-	
+
 	@Test
 	public void visit_onNotEqualsInfix_ShouldReplaceWithPrefixAndEquals() throws Exception {
 		fixture.addMethodBlock(String.format(template, "a != b"));
@@ -38,7 +38,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 		Block expected = createBlock(String.format(template, "!a.equals(b)"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
-	
+
 	@Test
 	public void visit_onNewInteger_ShouldReplaceWithEquals() throws Exception {
 		fixture.addMethodBlock(String.format(template, "new Integer(1) == new Integer(2)"));
@@ -49,7 +49,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 		Block expected = createBlock(String.format(template, "new Integer(1).equals(new Integer(2))"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
-	
+
 	@Test
 	public void visit_onSTring_ShouldReplaceWithEquals() throws Exception {
 		fixture.addMethodBlock(String.format(template, "\"String1\" == \"String2\""));
@@ -71,7 +71,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 
 		assertFalse(fixture.hasChanged());
 	}
-	
+
 	@Test
 	public void visit_withExtendedOperands_ShouldNotReplace() throws Exception {
 		String statement = String.format(template, "a == b == new Integer(1) == new Integer(2)");
@@ -82,7 +82,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 
 		assertFalse(fixture.hasChanged());
 	}
-	
+
 	@Test
 	public void visit_onLiteralInt_ShouldNotReplace() throws Exception {
 		String statement = String.format(template, "a == 1");
@@ -93,7 +93,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 
 		assertFalse(fixture.hasChanged());
 	}
-	
+
 	@Test
 	public void visit_onLiteralIntSwitched_ShouldNotReplace() throws Exception {
 		String statement = String.format(template, "1 == a");
@@ -104,7 +104,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 
 		assertFalse(fixture.hasChanged());
 	}
-	
+
 	@Test
 	public void visit_onLiteralChar_ShouldNotReplace() throws Exception {
 		String statement = String.format(template, "a == 'c'");
@@ -115,7 +115,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 
 		assertFalse(fixture.hasChanged());
 	}
-	
+
 	@Test
 	public void visit_onLiteralBool_ShouldNotReplace() throws Exception {
 		String statement = String.format(template, "a == true");
@@ -129,13 +129,24 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 
 	// Reproduces SIM-824
 	@Test
-	public void visit_infixWithTypecastOnInteger_ShouldReplaceWithEquals() throws Exception {
+	public void visit_infixWithTypecastOnInteger_ShouldReplaceWithEqualsAndInfix() throws Exception {
 		fixture.addMethodBlock(String.format(template, "(Integer)a == b"));
 		visitor.setAstRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 
 		Block expected = createBlock(String.format(template, "((Integer)a).equals(b)"));
+		assertMatch(expected, fixture.getMethodBlock());
+	}
+
+	@Test
+	public void visit_infixWithTypecastOnRightInteger_ShouldReplaceWithEquals() throws Exception {
+		fixture.addMethodBlock(String.format(template, "a == (Integer)b"));
+		visitor.setAstRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expected = createBlock(String.format(template, "a.equals((Integer)b)"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
 }

@@ -66,13 +66,11 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 	}
 
 	private Expression createReplacementNode(InfixExpression infixExpression) {
-		Expression left = infixExpression.getLeftOperand();
-		Expression right = infixExpression.getRightOperand();
-		Expression newLeft = createOperand(infixExpression, left);
-		Expression newRight = createOperand(infixExpression, right);
+		Expression left = createOperand(infixExpression, infixExpression.getLeftOperand());
+		Expression right = (Expression) astRewrite.createMoveTarget(infixExpression.getRightOperand());
 		SimpleName simpleName = NodeBuilder.newSimpleName(infixExpression.getAST(), EQUALS);
-		Expression replacementNode = NodeBuilder.newMethodInvocation(infixExpression.getAST(), newLeft, simpleName,
-				Arrays.asList(newRight));
+		Expression replacementNode = NodeBuilder.newMethodInvocation(infixExpression.getAST(), left, simpleName,
+				Arrays.asList(right));
 		if (infixExpression.getOperator() == InfixExpression.Operator.NOT_EQUALS) {
 			replacementNode = NodeBuilder.newPrefixExpression(infixExpression.getAST(), PrefixExpression.Operator.NOT,
 					replacementNode);
