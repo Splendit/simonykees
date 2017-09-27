@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.RearrangeClassMembersASTVisitor;
 
 @SuppressWarnings("nls")
 public class RearrangeClassMembersRulesTest extends SingleRuleTest {
@@ -26,7 +25,7 @@ public class RearrangeClassMembersRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new RearrangeClassMembersRule(RearrangeClassMembersASTVisitor.class);
+		rule = new RearrangeClassMembersRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

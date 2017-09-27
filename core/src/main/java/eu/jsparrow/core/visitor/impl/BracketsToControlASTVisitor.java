@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.function.Predicate;
 
@@ -10,6 +10,8 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
+
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * ASTVisitor that searches control statements for non-block bodies and wraps it

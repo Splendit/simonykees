@@ -14,8 +14,8 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public abstract class SemiAutomaticRefactoringRule<T extends AbstractASTRewriteASTVisitor> extends RefactoringRule<T> {
 
-	public SemiAutomaticRefactoringRule(Class<T> visitor) {
-		super(visitor);
+	public SemiAutomaticRefactoringRule() {
+		super();
 	}
 
 	/**

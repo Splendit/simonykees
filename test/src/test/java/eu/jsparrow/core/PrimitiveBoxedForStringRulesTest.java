@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.PrimitiveBoxedForStringASTVisitor;
 
 @SuppressWarnings("nls")
 public class PrimitiveBoxedForStringRulesTest extends SingleRuleTest {
@@ -29,7 +28,7 @@ public class PrimitiveBoxedForStringRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new PrimitiveBoxedForStringRule(PrimitiveBoxedForStringASTVisitor.class);
+		rule = new PrimitiveBoxedForStringRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

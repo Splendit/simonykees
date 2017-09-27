@@ -7,16 +7,13 @@ import static org.junit.Assert.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runners.Parameterized.Parameters;
 
-import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.rule.impl.StringBuildingLoopRule;
-import eu.jsparrow.core.visitor.StringBuildingLoopASTVisitor;
+import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class StringBuildingLoopRuleJ5Test extends SingleRuleTest {
@@ -28,7 +25,7 @@ public class StringBuildingLoopRuleJ5Test extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new StringBuildingLoopRule(StringBuildingLoopASTVisitor.class);
+		rule = new StringBuildingLoopRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
@@ -64,11 +61,5 @@ public class StringBuildingLoopRuleJ5Test extends SingleRuleTest {
 
 		assertFalse(rule.isEnabled());
 	}
-	
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.stringBuildingLoopJ5";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/stringBuildingLoopJ5";
-	
-	private String fileName;
-	private Path preRule, postRule;
 	
 }

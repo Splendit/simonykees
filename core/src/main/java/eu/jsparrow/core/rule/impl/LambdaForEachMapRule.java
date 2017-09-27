@@ -15,8 +15,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class LambdaForEachMapRule extends RefactoringRule<LambdaForEachMapASTVisitor> {
 
-	public LambdaForEachMapRule(Class<LambdaForEachMapASTVisitor> visitor) {
-		super(visitor);
+	public LambdaForEachMapRule() {
+		super();
+		this.visitor = LambdaForEachMapASTVisitor.class;
 		this.name = Messages.LambdaForEachMapRule_name;
 		this.description = Messages.LambdaForEachMapRule_description;
 	}

@@ -15,8 +15,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class FunctionalInterfaceRule extends RefactoringRule<FunctionalInterfaceASTVisitor> {
 
-	public FunctionalInterfaceRule(Class<FunctionalInterfaceASTVisitor> visitor) {
-		super(visitor);
+	public FunctionalInterfaceRule() {
+		super();
+		this.visitor = FunctionalInterfaceASTVisitor.class;
 		this.name = Messages.FunctionalInterfaceRule_name;
 		this.description = Messages.FunctionalInterfaceRule_description;
 	}
