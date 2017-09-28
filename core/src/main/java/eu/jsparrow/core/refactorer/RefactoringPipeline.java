@@ -222,7 +222,7 @@ public class RefactoringPipeline {
 					}
 
 					/** SIM-748 Test work around to don't apply syntax checks there */
-					if (!testmode && RefactoringUtil.checkForSyntaxErrors(compilationUnit)) {
+					if (RefactoringUtil.checkForSyntaxErrors(compilationUnit) && !testmode) {
 						logger.info("Adding compilation unit to errorList: " + compilationUnit.getElementName());
 						containingErrorList.add(compilationUnit);
 					} else {
@@ -445,8 +445,6 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * TODO adjust description
-	 * 
 	 * Commit the working copies to the underlying {@link ICompilationUnit}s
 	 * 
 	 * @throws RefactoringException

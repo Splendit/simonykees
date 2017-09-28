@@ -246,12 +246,11 @@ logger.debug("Subpackage found:" + packageElement.getElementName()); //$NON-NLS-
 			boolean foundProblems = IMarker.SEVERITY_ERROR == iCompilationUnit.getResource().findMaxProblemSeverity(
 					IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
 			if (foundProblems) {
-				logger.info("Check markers"); //$NON-NLS-1$
 				List<IMarker> markers = Arrays.asList(iCompilationUnit.getResource()
 						.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE));
 				for (IMarker marker : markers) {
 					String message = String.format("Found marker on line %s, with message: %s", //$NON-NLS-1$
-							marker.getAttribute(IMarker.LOCATION), marker.getAttribute(IMarker.MESSAGE));
+							marker.getAttribute(IMarker.LINE_NUMBER), marker.getAttribute(IMarker.MESSAGE));
 					logger.info(message);
 				}
 			}

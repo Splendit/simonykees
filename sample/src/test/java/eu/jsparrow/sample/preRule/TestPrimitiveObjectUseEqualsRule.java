@@ -119,4 +119,15 @@ public class TestPrimitiveObjectUseEqualsRule {
 		if (a > b) {
 		}
 	}
+
+	public void testCastedExpressionShouldNotRefactor() {
+		int c = 0;
+		Integer d = new Integer(1);
+		if ((Integer) c == d) {
+		}
+		if (d == (Integer) c) {
+		}
+		if (c == (Integer) d) {
+		}
+	}
 }
