@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -303,6 +304,12 @@ public class LambdaToMethodReferenceRule {
 	public void missingImports() {
 		Person.filter(modifier -> modifier.isStatic());
 	}
+	
+	/*
+	 * SIM-821 - the following should not be changed
+	 */
+	Function<Integer, String> toString = (Integer i) -> i.toString();
+	Function<Integer, String> toStringStatic = (Integer i) -> Integer.toString(i);
 
 	class ComparisonProvider {
 		public int compareByName(Person a, Person b) {

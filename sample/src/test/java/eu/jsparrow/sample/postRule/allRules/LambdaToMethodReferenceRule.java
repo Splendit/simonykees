@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,13 @@ public class LambdaToMethodReferenceRule {
 
 	List<Person> personList = Arrays.asList(new Person("asdf", LocalDate.of(1999, 1, 1)),
 			new Person("jkl", LocalDate.of(2009, 2, 2)), new Person("yxcv", LocalDate.of(1989, 1, 1)));
+
+	/*
+	 * SIM-821 - the following should not be changed
+	 */
+	Function<Integer, String> toString = (Integer i) -> i.toString();
+
+	Function<Integer, String> toStringStatic = (Integer i) -> Integer.toString(i);
 
 	public void referenceToStaticMethod() {
 		Collections.sort(personList, Person::compareByAge);

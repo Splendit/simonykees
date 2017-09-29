@@ -1,10 +1,12 @@
 package eu.jsparrow.core.visitor;
 
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -90,6 +92,15 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 				 */
 				if (methodArguments.size() == lambdaParams.size()
 						&& checkMethodParameters(lambdaParams, methodArguments)) {
+					
+					IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+					if(Modifier.isStatic(methodBinding.getModifiers())) {						
+						List<ITypeBinding> ambParams = methodArguments.stream().skip(1).map(Expression::resolveTypeBinding)
+								.collect(Collectors.toList());
+						if (isAmbiguousMethodReference(methodInvocation, ambParams)) {
+							return true;
+						}
+					}
 
 					ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
 
@@ -107,7 +118,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 						 * We have to check this, because the method could be
 						 * declared in the outer class.
 						 */
-						IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+//						IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 						ITypeBinding methodsDeclaringClass = methodBinding.getDeclaringClass();
 						AbstractTypeDeclaration lambdaEnclosing = ASTNodeUtil.getSpecificAncestor(lambdaExpressionNode,
 								AbstractTypeDeclaration.class);
@@ -175,8 +186,10 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 								lambdaParams.subList(1, lambdaParams.size()), methodArguments)) {
 
 							String typeNameStr = findTypeOfSimpleName(methodInvocationExpressionName);
-
-							if (typeNameStr != null && !typeNameStr.isEmpty()) {
+							List<ITypeBinding> ambTypes = lambdaParams.stream()
+									.map(var -> var.resolveBinding().getType()).collect(Collectors.toList());
+							if (typeNameStr != null && !typeNameStr.isEmpty()
+									&& !isAmbiguousMethodReference(methodInvocation, ambTypes)) {
 
 								SimpleName typeName = astRewrite.getAST().newSimpleName(typeNameStr);
 								SimpleName methodName = (SimpleName) astRewrite
@@ -242,6 +255,27 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 
 		return true;
 	}
+
+	private boolean isAmbiguousMethodReference(MethodInvocation methodInvocation, List<ITypeBinding> params) {
+		Expression expression = methodInvocation.getExpression();
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		ITypeBinding type;
+		List<IMethodBinding> methods = new ArrayList<>();
+		if (expression != null) {
+			type = expression.resolveTypeBinding();
+		} else {
+			type = methodBinding.getDeclaringClass();
+		}
+		methods.addAll(Arrays.asList(type.getDeclaredMethods()));
+		methods.addAll(ClassRelationUtil.findInheretedMethods(type));
+		String methodIdentifier = methodInvocation.getName().getIdentifier();
+
+		ITypeBinding[] paramsArray = params.stream().toArray(ITypeBinding[]::new);
+		return methods.stream().anyMatch(method -> methodIdentifier.equals(method.getName())
+				&& ClassRelationUtil.compareBoxedITypeBinding(method.getParameterTypes(), paramsArray));
+	}
+	
+	
 
 	/**
 	 * Inserts the existing type arguments to the method reference.
