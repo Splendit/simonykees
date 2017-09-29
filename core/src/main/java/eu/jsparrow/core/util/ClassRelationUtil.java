@@ -5,8 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 
 /**
@@ -245,9 +247,12 @@ public class ClassRelationUtil {
 	
 	/**
 	 * Checks if a method is overloaded on the i-th parameter (expected to be a
-	 * parameterized type). The search is based on the methods declared on the
-	 * same class as the given method binding and its parents.
+	 * parameterized type). The search is based on type of the expression of the
+	 * given method invocation, or in the type where the method is declared if 
+	 * the expression of the method invocation is {@code null}. 
 	 * 
+	 * @param methodInvocation
+	 * 			  a node representing the occurrence of the method invocation
 	 * @param methodBinding
 	 *            a method to be checked for overloading
 	 * @param i
@@ -255,9 +260,16 @@ public class ClassRelationUtil {
 	 * @return {@code true} if the method is overloaded based only on the i-th
 	 *         parameter and {@code false} otherwise.
 	 */
-	public static boolean isOverloadedWithParameterizedTypes(IMethodBinding methodBinding, int i) {
-		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
-		return isOverloadedWithParameterizedTypes(declaringClass, methodBinding, i);
+	public static boolean isOverloadedWithParameterizedTypes(MethodInvocation methodInvocation,
+			IMethodBinding methodBinding, int i) {
+		Expression expression = methodInvocation.getExpression();
+		ITypeBinding expressionBinding;
+		if (expression != null && (expressionBinding = expression.resolveTypeBinding()) != null) {
+			return isOverloadedWithParameterizedTypes(expressionBinding, methodBinding, i);
+		} else {
+			ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+			return isOverloadedWithParameterizedTypes(declaringClass, methodBinding, i);
+		}
 	}
 
 	/**

@@ -160,9 +160,6 @@ public class DiamondOperatorRule {
 			return t;
 		}
 
-		/**
-		 * SIM-820
-		 */
 		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar> typeVariable) {
 			return new ArrayList<>();
 		}
@@ -201,6 +198,23 @@ public class DiamondOperatorRule {
 			for (List<String> list = new ArrayList<>(); !list.isEmpty();) {
 				list.add("");
 			}
+		}
+
+		/**
+		 * SIM-820
+		 */
+		public void useOverloadedMethodOnParameterizedTypes(String input) {
+			/*
+			 * Should not be changed
+			 */
+			List<GenericSample> result = genericOverloaded(new ArrayList<GenericSample>());
+			List<GenericSample> result2 = genericOverloaded(new ArrayList<GenericSample>(), 0);
+
+			/*
+			 * Should be changed in java 8
+			 */
+			List<GenericSample> result3 = genericOverloaded(new ArrayList<>(), input);
+			List<GenericSample> result4 = genericOverloaded(new ArrayList<>(), input, 0);
 		}
 	}
 }

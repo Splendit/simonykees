@@ -125,14 +125,14 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 				} else if (ASTNode.METHOD_INVOCATION == parent.getNodeType() && isMethodArgumentsTypeInferable()
 						&& MethodInvocation.ARGUMENTS_PROPERTY == node.getLocationInParent()) {
-
+					MethodInvocation methodInvocation = (MethodInvocation)parent;
 					/*
 					 * Covers the case when diamond operator can be used on the
 					 * arguments of a method invocation. e.g: map.put("key", new
 					 * ArrayList<String>()). It can be replaced with:
 					 * map.put("key", new ArrayList<>())
 					 */
-					List<Expression> argumentList = ASTNodeUtil.returnTypedList(((MethodInvocation) parent).arguments(),
+					List<Expression> argumentList = ASTNodeUtil.returnTypedList(methodInvocation.arguments(),
 							Expression.class);
 
 					ITypeBinding[] parameterTypeArgs = null;
@@ -143,11 +143,11 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					 * resolve the typeBinding of the ClassInstanceCreation
 					 * position in MethodHead
 					 */
-					IMethodBinding methodBinding = ((MethodInvocation) parent).resolveMethodBinding();
+					IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 					if (-1 != i && methodBinding != null) {
 						ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
 						if (parameterTypes != null && parameterTypes.length > i
-								&& !ClassRelationUtil.isOverloadedWithParameterizedTypes(methodBinding, i)) {
+								&& !ClassRelationUtil.isOverloadedWithParameterizedTypes(methodInvocation, methodBinding, i)) {
 							ITypeBinding parameterType = parameterTypes[i];
 							parameterTypeArgs = parameterType.getTypeArguments();
 						}
