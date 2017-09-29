@@ -43,6 +43,41 @@ public class DiamondOperatorRule {
 			return t;
 		}
 		
+		/**
+		 * SIM-820
+		 */
+		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar>typeVariable) {
+			return new ArrayList<TypeVar>();
+		}
+		
+		public ArrayList<String> genericOverloaded(ArrayList<String>typeVariable) {
+			return new ArrayList<String>();
+		}
+		
+		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar>typeVariable, int i) {
+			return new ArrayList<TypeVar>(i);
+		}
+		
+		public ArrayList<String> genericOverloaded(ArrayList<String>typeVariable, int i) {
+			return new ArrayList<String>();
+		}
+		
+		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar>typeVariable, List<String> strings) {
+			return new ArrayList<>();
+		}
+		
+		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar>typeVariable, String string, int i) {
+			return new ArrayList<>(i);
+		}
+		
+		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar>typeVariable, String s) {
+			return new ArrayList<TypeVar>();
+		}
+		
+		public <TypeVar> List<TypeVar> genericOverloaded() {
+			return new ArrayList<TypeVar>();
+		}
+		
 		public void resetValue() {
 			this.field = new ArrayList<T>();
 			arrayList[0] = new ArrayList<String>();
@@ -149,5 +184,17 @@ public class DiamondOperatorRule {
 	public String anonymousGenericInstatiation(String input) {
 		Foo<String> foo = new Foo<String>(input){};
 		return foo.getValue();
+	}
+	
+	public void testOverloadWithTypeVariables_shouldNotChange(String input) {
+		Foo<String> foo = new Foo<String>(input){};
+		List<GenericSample> result = foo.genericOverloaded(new ArrayList<GenericSample>());
+		List<GenericSample> result2 = foo.genericOverloaded(new ArrayList<GenericSample>(), 0);
+	}
+	
+	public void testNormalOverloading_shouldChangeInJava8(String input) {
+		Foo<String> foo = new Foo<String>(input){};
+		List<GenericSample> result = foo.genericOverloaded(new ArrayList<GenericSample>(), input);
+		List<GenericSample> result2 = foo.genericOverloaded(new ArrayList<GenericSample>(), input, 0);
 	}
 }

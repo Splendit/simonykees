@@ -116,6 +116,20 @@ public class DiamondOperatorRule {
 		return foo.getValue();
 	}
 
+	public void testOverloadWithTypeVariables_shouldNotChange(String input) {
+		Foo<String> foo = new Foo<String>(input) {
+		};
+		List<GenericSample> result = foo.genericOverloaded(new ArrayList<GenericSample>());
+		List<GenericSample> result2 = foo.genericOverloaded(new ArrayList<GenericSample>(), 0);
+	}
+
+	public void testNormalOverloading_shouldChangeInJava8(String input) {
+		Foo<String> foo = new Foo<String>(input) {
+		};
+		List<GenericSample> result = foo.genericOverloaded(new ArrayList<>(), input);
+		List<GenericSample> result2 = foo.genericOverloaded(new ArrayList<>(), input, 0);
+	}
+
 	private class GenericSample<T> {
 		private T t;
 
@@ -144,6 +158,41 @@ public class DiamondOperatorRule {
 
 		public T getValue() {
 			return t;
+		}
+
+		/**
+		 * SIM-820
+		 */
+		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar> typeVariable) {
+			return new ArrayList<>();
+		}
+
+		public ArrayList<String> genericOverloaded(ArrayList<String> typeVariable) {
+			return new ArrayList<>();
+		}
+
+		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar> typeVariable, int i) {
+			return new ArrayList<>(i);
+		}
+
+		public ArrayList<String> genericOverloaded(ArrayList<String> typeVariable, int i) {
+			return new ArrayList<>();
+		}
+
+		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar> typeVariable, List<String> strings) {
+			return new ArrayList<>();
+		}
+
+		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar> typeVariable, String string, int i) {
+			return new ArrayList<>(i);
+		}
+
+		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar> typeVariable, String s) {
+			return new ArrayList<>();
+		}
+
+		public <TypeVar> List<TypeVar> genericOverloaded() {
+			return new ArrayList<>();
 		}
 
 		public void resetValue() {

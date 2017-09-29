@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 
@@ -240,6 +241,84 @@ public class ClassRelationUtil {
 		}
 
 		return expressionName;
+	}
+	
+	/**
+	 * Checks if a method is overloaded on the i-th parameter (expected to be a
+	 * parameterized type). The search is based on the methods declared on the
+	 * same class as the given method binding and its parents.
+	 * 
+	 * @param methodBinding
+	 *            a method to be checked for overloading
+	 * @param i
+	 *            the position of the parameterized type parameter
+	 * @return {@code true} if the method is overloaded based only on the i-th
+	 *         parameter and {@code false} otherwise.
+	 */
+	public static boolean isOverloadedWithParameterizedTypes(IMethodBinding methodBinding, int i) {
+		ITypeBinding declaringClass = methodBinding.getDeclaringClass();
+		return isOverloadedWithParameterizedTypes(declaringClass, methodBinding, i);
+	}
+
+	/**
+	 * Checks if a method is overloaded on the i-th parameter (expected to be a
+	 * parameterized type). The search is based on the methods declared on the
+	 * given {@link ITypeBinding} and its parents.
+	 * 
+	 * @param declaringClass
+	 *            a type to get the overloading candidates from.
+	 * @param methodBinding
+	 *            a method to be checked for overloading
+	 * @param i
+	 *            the position of the parameterized type parameter
+	 * @return {@code true} if the method is overloaded based only on the i-th
+	 *         parameter and {@code false} otherwise.
+	 */
+	public static boolean isOverloadedWithParameterizedTypes(ITypeBinding declaringClass, IMethodBinding methodBinding,
+			int i) {
+
+		List<IMethodBinding> methods = new ArrayList<>();
+		methods.addAll(Arrays.asList(declaringClass.getDeclaredMethods()));
+		List<ITypeBinding> ancestors = findAncestors(declaringClass);
+		methods.addAll(
+				ancestors.stream()
+						.flatMap(ancestor -> Arrays.stream(ancestor.getDeclaredMethods())
+								.filter(method -> !Modifier.isPrivate(method.getModifiers())))
+						.collect(Collectors.toList()));
+		return methods.stream().filter(method -> method.getName().equals(methodBinding.getName())
+				&& (method.getParameterTypes().length > i) && method.getParameterTypes()[i].isParameterizedType()
+				&& matchingNonParameterizedTypes(methodBinding.getParameterTypes(), method.getParameterTypes()))
+				.count() > 1;
+	}
+
+	/**
+	 * Checks if the given arrays of types are matching with each-other. The
+	 * parameterized types are excluded.
+	 * 
+	 * @param parameterTypes
+	 *            array of types
+	 * @param parameterTypes2
+	 *            array of types.
+	 * 
+	 * @return {@code true} if the length of the arrays are equal and all
+	 *         corresponding types except the parameterized ones are matching
+	 *         and {@code false} otherwise.
+	 */
+	private static boolean matchingNonParameterizedTypes(ITypeBinding[] parameterTypes,
+			ITypeBinding[] parameterTypes2) {
+		if (parameterTypes.length != parameterTypes2.length) {
+			return false;
+		}
+		boolean allButParamMatching = true;
+		for (int j = 0; j < parameterTypes.length; j++) {
+			ITypeBinding type1 = parameterTypes[j];
+			ITypeBinding type2 = parameterTypes2[j];
+			if (!type1.isParameterizedType() && !compareITypeBinding(type1, type2)) {
+				allButParamMatching = false;
+				break;
+			}
+		}
+		return allButParamMatching;
 	}
 
 }

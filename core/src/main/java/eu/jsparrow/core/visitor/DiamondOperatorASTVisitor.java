@@ -66,7 +66,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 				ASTNode parent = node.getParent();
 
 				/*
-				 * It is important that the type arguments in the initialization
+				 * It is important that the type arguments in the declaration
 				 * matches with the type arguments in initialization/assignment.
 				 * If the declaration is a raw type, we cannot replace the type
 				 * arguments with a diamond operator.
@@ -115,8 +115,8 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 						if (rhsTypeBinding != null) {
 							ITypeBinding[] rhsTypeBindingArguments = rhsTypeBinding.getTypeArguments();
 							/*
-							 * compare type arguments in new instance creation with 
-							 * the ones in declaration
+							 * compare type arguments in new instance creation
+							 * with the ones in declaration
 							 */
 							sameTypes = ClassRelationUtil.compareITypeBinding(lhsTypeBindingArguments,
 									rhsTypeBindingArguments);
@@ -128,10 +128,9 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 					/*
 					 * Covers the case when diamond operator can be used on the
-					 * arguments of a method invocation. e.g: <p> {@code
-					 * map.put("key", new ArrayList<String>());} <br/> can be
-					 * replaced with: <br/> {@code map.put("key", new
-					 * ArrayList<>());} <br/>
+					 * arguments of a method invocation. e.g: map.put("key", new
+					 * ArrayList<String>()). It can be replaced with:
+					 * map.put("key", new ArrayList<>())
 					 */
 					List<Expression> argumentList = ASTNodeUtil.returnTypedList(((MethodInvocation) parent).arguments(),
 							Expression.class);
@@ -147,7 +146,8 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					IMethodBinding methodBinding = ((MethodInvocation) parent).resolveMethodBinding();
 					if (-1 != i && methodBinding != null) {
 						ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
-						if (parameterTypes != null && parameterTypes.length > i) {
+						if (parameterTypes != null && parameterTypes.length > i
+								&& !ClassRelationUtil.isOverloadedWithParameterizedTypes(methodBinding, i)) {
 							ITypeBinding parameterType = parameterTypes[i];
 							parameterTypeArgs = parameterType.getTypeArguments();
 						}
