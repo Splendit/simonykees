@@ -39,7 +39,7 @@ import eu.jsparrow.core.util.ClassRelationUtil;
  * {@code <Expression>::<MethodName>}. statement lambdas have to be converted to
  * expression lambdas first, using {@link StatementLambdaToExpressionASTVisitor}
  * 
- * @author Matthias Webhofer
+ * @author Matthias Webhofer, Ardit Ymeri
  * @since 1.2
  *
  */
@@ -264,8 +264,11 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	 * the former is a static method and the latter is an instance method.
 	 * 
 	 * @param methodInvocation
+	 *            a node representing a method invocation
 	 * @param params
-	 * @return
+	 *            the type of the parameters that can cause ambiguity
+	 * @return {@code true} if an ambiguity is detected, and {@code false}
+	 *         otherwise.
 	 */
 	private boolean isAmbiguousMethodReference(MethodInvocation methodInvocation, List<ITypeBinding> params) {
 		Expression expression = methodInvocation.getExpression();
