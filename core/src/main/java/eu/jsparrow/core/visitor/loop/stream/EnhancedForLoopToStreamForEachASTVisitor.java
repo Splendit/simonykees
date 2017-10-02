@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -84,13 +85,17 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				 * of the enhanced for loop will be used for the corresponding
 				 * parts of the lambda expression.
 				 */
-				SimpleName parameterCopy = (SimpleName) astRewrite.createCopyTarget(parameterName);
+				SimpleName parameterNameCopy = (SimpleName) astRewrite.createCopyTarget(parameterName);
+				VariableDeclarationFragment lambdaParameter = astRewrite.getAST().newVariableDeclarationFragment();
+				lambdaParameter.setName(parameterNameCopy);
+				
 				ASTNode statementCopy = astRewrite.createCopyTarget(approvedStatement);
 
 				LambdaExpression lambdaExpression = astRewrite.getAST().newLambdaExpression();
+				lambdaExpression.setParentheses(false);
 				ListRewrite lambdaExpressionParameterListRewrite = astRewrite.getListRewrite(lambdaExpression,
 						LambdaExpression.PARAMETERS_PROPERTY);
-				lambdaExpressionParameterListRewrite.insertFirst(parameterCopy, null);
+				lambdaExpressionParameterListRewrite.insertFirst(lambdaParameter, null);
 				lambdaExpression.setBody(statementCopy);
 
 				/*

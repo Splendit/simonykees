@@ -30,7 +30,7 @@ public class EnhancedForLoopToStreamForEachRule {
 	public static List<String> stringList3;
 	static {
 		stringList3 = new LinkedList<>();
-		stringList1.forEach((s) -> stringList2.forEach((t) -> stringList3.add(s + t)));
+		stringList1.forEach(s -> stringList2.forEach(t -> stringList3.add(s + t)));
 	}
 
 	public List<List<String>> stringListList = Arrays.asList(stringList1, stringList2);
@@ -75,7 +75,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			logger.info(s);
 		}
 
-		stringList1.forEach((s) -> stringList2.forEach((t) -> logger.info(s + t)));
+		stringList1.forEach(s -> stringList2.forEach(t -> logger.info(s + t)));
 
 		for (List<String> list : stringListList) {
 			for (String s : list) {
@@ -90,9 +90,9 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		}
 
-		stringListList.forEach((list) -> {
+		stringListList.forEach(list -> {
 			stringList1.add(list.get(0));
-			list.forEach((s) -> stringList2.forEach((t) -> {
+			list.forEach(s -> stringList2.forEach(t -> {
 				if (t.equals(s)) {
 					logger.info(t);
 				}
@@ -106,7 +106,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			Class.forName(s);
 		}
 
-		stringList1.forEach((s) -> {
+		stringList1.forEach(s -> {
 			try {
 				Class.forName(s);
 			} catch (ClassNotFoundException cnfe) {
@@ -114,7 +114,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		});
 
-		stringList1.forEach((s) -> {
+		stringList1.forEach(s -> {
 			int length = 0;
 			if (s.length() < 2) {
 				length /= s.length();
@@ -127,7 +127,7 @@ public class EnhancedForLoopToStreamForEachRule {
 		}
 
 		final int length2 = 0;
-		stringList1.forEach((s) -> {
+		stringList1.forEach(s -> {
 			if (length2 > 0) {
 				System.out.println(length2);
 			}
@@ -164,30 +164,30 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		}
 
-		stringList1.forEach((s) -> this.intField++);
+		stringList1.forEach(s -> this.intField++);
 
-		stringList1.forEach((s) -> intField++);
+		stringList1.forEach(s -> intField++);
 
-		stringList1.forEach((s) -> testClassField.testIntField++);
+		stringList1.forEach(s -> testClassField.testIntField++);
 
-		stringList1.forEach((s) -> --testClassField.testIntField);
+		stringList1.forEach(s -> --testClassField.testIntField);
 
-		stringList1.forEach((s) -> testClassField.testIntField += s.length());
+		stringList1.forEach(s -> testClassField.testIntField += s.length());
 
 		TestClass testClassLocal = new TestClass();
 		EnhancedForLoopToStreamForEachRule rule = new EnhancedForLoopToStreamForEachRule();
 
-		stringList1.forEach((s) -> testClassLocal.testIntField++);
+		stringList1.forEach(s -> testClassLocal.testIntField++);
 
-		stringList1.forEach((s) -> --testClassLocal.testIntField);
+		stringList1.forEach(s -> --testClassLocal.testIntField);
 
-		stringList1.forEach((s) -> testClassLocal.testIntField += s.length());
+		stringList1.forEach(s -> testClassLocal.testIntField += s.length());
 
 		rule.intField = 12;
 		rule.testClassField.testIntField = 1;
 		for (Map.Entry<String, Map<String, String>> entry : validationConfigurations.entrySet()) {
 			Map<String, String> clone = new HashMap<>(entry.getValue().size());
-			entry.getValue().entrySet().forEach((entry2) -> clone.put(entry2.getKey(), entry2.getValue()));
+			entry.getValue().entrySet().forEach(entry2 -> clone.put(entry2.getKey(), entry2.getValue()));
 			rule.validationConfigurations.put(entry.getKey(), clone);
 		}
 		rule.intField = 12;
@@ -195,11 +195,11 @@ public class EnhancedForLoopToStreamForEachRule {
 		rule = null;
 
 		StringBuilder sb = new StringBuilder();
-		stringList1.forEach((s) -> {
+		stringList1.forEach(s -> {
 			sb.append(s);
-			stringList2.forEach((n) -> {
+			stringList2.forEach(n -> {
 				sb.append(n + ",");
-				stringList3.forEach((r) -> {
+				stringList3.forEach(r -> {
 					String t = s;
 					sb.append(r + t);
 				});
@@ -229,7 +229,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		}
 
-		stringList1.forEach((s) -> {
+		stringList1.forEach(s -> {
 			TestClass tc = new TestClass();
 		});
 
@@ -274,7 +274,7 @@ public class EnhancedForLoopToStreamForEachRule {
 	private void collectionOfDoubles() {
 		List<Double> doubles = new ArrayList<>();
 
-		doubles.stream().mapToDouble(Double::valueOf).forEach((d) -> {
+		doubles.stream().mapToDouble(Double::valueOf).forEach(d -> {
 			double halfD = d / 2;
 			System.out.println(halfD + d);
 		});
@@ -282,7 +282,7 @@ public class EnhancedForLoopToStreamForEachRule {
 
 	private void collectionOfInts() {
 		List<Integer> doubles = new ArrayList<>();
-		doubles.stream().mapToInt(Integer::valueOf).forEach((i) -> {
+		doubles.stream().mapToInt(Integer::valueOf).forEach(i -> {
 			int plusTwo = i + 2;
 			System.out.println(plusTwo + i);
 		});
@@ -290,7 +290,7 @@ public class EnhancedForLoopToStreamForEachRule {
 
 	private void collectionOfLongs() {
 		List<Long> longs = new ArrayList<>();
-		longs.stream().mapToLong(Long::valueOf).forEach((l) -> {
+		longs.stream().mapToLong(Long::valueOf).forEach(l -> {
 			long minusTwo = l - 2;
 			System.out.println(minusTwo + l);
 		});
@@ -298,7 +298,7 @@ public class EnhancedForLoopToStreamForEachRule {
 
 	private void boxedIteratingVariable() {
 		List<Double> doubles = new ArrayList<>();
-		doubles.forEach((d) -> {
+		doubles.forEach(d -> {
 			double halfD = d / 2;
 			System.out.println(halfD + d);
 		});
