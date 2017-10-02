@@ -2,11 +2,14 @@ package eu.jsparrow.sample.postRule.diamondOperator;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"unused", "unchecked", "rawtypes", "nls"})
@@ -210,5 +213,19 @@ public class DiamondOperatorRule {
 		Foo<String> foo = new Foo<String>(input){};
 		List<GenericSample> result = foo.genericOverloaded(new ArrayList<>(), input);
 		List<GenericSample> result2 = foo.genericOverloaded(new ArrayList<>(), input, 0);
+	}
+	
+	/**
+	 * SIM-820 - if a diamond operator is used, eclipse will not indicate a compile error but the code will not compile.  
+	 */
+	CtorExpectingLambdas<String> collection = new CtorExpectingLambdas<String>(ArrayList::new, IdentityHashMap::new);
+	
+	class CtorExpectingLambdas<E> {
+		Collection<E> collection;
+		IdentityHashMap<E, Integer> map;
+		public CtorExpectingLambdas (Supplier<List<E>> collectionFactory, Supplier<IdentityHashMap<E,Integer>> map) {
+			this.collection = collectionFactory.get();
+			this.map = map.get();
+		}
 	}
 }

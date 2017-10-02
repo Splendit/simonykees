@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Type;
@@ -73,7 +74,8 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 				 */
 
 				if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()
-						&& (!hasParameterizedArguments(node) || isMethodArgumentsTypeInferable())) {
+						&& (!hasParameterizedArguments(node) || isMethodArgumentsTypeInferable()) 
+						&& !hasMissingParameterizedLambdaParameters(node)) {
 
 					/*
 					 * Declaration and initialization occur in the same
@@ -96,7 +98,8 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					}
 
 				} else if (ASTNode.ASSIGNMENT == parent.getNodeType()
-						&& (!hasParameterizedArguments(node) || isMethodArgumentsTypeInferable())) {
+						&& (!hasParameterizedArguments(node) || isMethodArgumentsTypeInferable())
+						&& !hasMissingParameterizedLambdaParameters(node)) {
 
 					/*
 					 * Declaration and assignment occur on different statements:
@@ -176,6 +179,48 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return true;
+	}
+
+	private boolean hasMissingParameterizedLambdaParameters(ClassInstanceCreation node) {
+		List<Expression> arguments = ASTNodeUtil.returnTypedList(node.arguments(), Expression.class);
+		return arguments.stream().anyMatch(this::isLambdaWithMissingTypeArguments);
+	}
+	
+	/**
+	 * Checks if the given expression is a {@link MethodReference} invoked
+	 * without the required type arguments.
+	 * 
+	 * @param argument
+	 *            an expression representing an argument of a method invocation.
+	 * @return {@code true} if the above condition is met, or {@code false}
+	 *         otherwise.
+	 */
+	private boolean isLambdaWithMissingTypeArguments(Expression argument) {
+
+		if (argument instanceof MethodReference) {
+			MethodReference lambda = (MethodReference) argument;
+			ITypeBinding argBinding = argument.resolveTypeBinding();
+			if (argBinding == null) {
+				return false;
+			}
+			if (!argBinding.isParameterizedType()) {
+				return false;
+			}
+
+			ITypeBinding[] expectedReferenceTypes = argBinding.getTypeArguments();
+			if (expectedReferenceTypes.length != 1) {
+				return false;
+			}
+
+			ITypeBinding expectedReferenceType = expectedReferenceTypes[0];
+			if (!expectedReferenceType.isParameterizedType()) {
+				return false;
+			}
+			int numExpectedTypeArgs = expectedReferenceType.getTypeArguments().length;
+			return numExpectedTypeArgs > 1 && numExpectedTypeArgs > lambda.typeArguments().size();
+		}
+
+		return false;
 	}
 
 	/**
