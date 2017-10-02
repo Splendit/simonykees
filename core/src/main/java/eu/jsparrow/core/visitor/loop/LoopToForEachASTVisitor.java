@@ -40,6 +40,7 @@ import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractAddImportASTVisitor;
+import eu.jsparrow.core.visitor.renaming.JavaReservedKeyWords;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
@@ -128,8 +129,8 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 		if (iteratorTypeBinding.isMember() && !enclosedInSameType(loop, iteratorTypeBinding)) {
 			/*
-			 * the type of the iterator is an inner type which is not 
-			 * declared in the same class enclosing the loop node.
+			 * the type of the iterator is an inner type which is not declared
+			 * in the same class enclosing the loop node.
 			 */
 			ITypeBinding outerType = iteratorTypeBinding.getDeclaringClass();
 			importRewrite.addImport(outerType, astRewrite.getAST());
@@ -146,7 +147,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			 */
 			iteratorType = importRewrite.addImport(iteratorTypeBinding, astRewrite.getAST());
 			addedImports = importRewrite.getAddedImports();
-			
+
 			if (qualifiedNameNeeded(loop, iteratorTypeBinding)) {
 				iteratorType = convertToQualifiedName(iteratorType, iteratorTypeBinding.getErasure());
 			}
@@ -174,10 +175,10 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		AbstractTypeDeclaration enclosingType = ASTNodeUtil.getSpecificAncestor(loop, AbstractTypeDeclaration.class);
 		if (enclosingType != null && iteratorTypeBinding != null) {
 			ITypeBinding enclosingTypeBinding = enclosingType.resolveBinding();
-			if (enclosingTypeBinding != null
-					&& (ClassRelationUtil.compareITypeBinding(enclosingTypeBinding.getErasure(), iteratorTypeBinding.getErasure())
-							|| ClassRelationUtil.compareITypeBinding(enclosingTypeBinding.getErasure(),
-									iteratorTypeBinding.getDeclaringClass().getErasure()))) {
+			if (enclosingTypeBinding != null && (ClassRelationUtil
+					.compareITypeBinding(enclosingTypeBinding.getErasure(), iteratorTypeBinding.getErasure())
+					|| ClassRelationUtil.compareITypeBinding(enclosingTypeBinding.getErasure(),
+							iteratorTypeBinding.getDeclaringClass().getErasure()))) {
 				return true;
 			}
 		}
@@ -201,7 +202,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		Name qualifiedName = ast.newName(typeBinding.getQualifiedName());
 		return convertToQualifiedName(type, qualifiedName);
 	}
-	
+
 	/**
 	 * Sets the given name as the type property of the given {@link Type} node.
 	 * Considers {@link SimpleType}s, {@link ArrayType}s and
@@ -270,7 +271,8 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			String defaultIteratorName = createDefaultIteratorName(iterableName);
 			declaredNames = scopeDeclaredNames.stream().map(SimpleName::getIdentifier).collect(Collectors.toList());
 			while (declaredNames.contains(defaultIteratorName + suffix)
-					|| tempIntroducedNames.containsValue(defaultIteratorName + suffix)) {
+					|| tempIntroducedNames.containsValue(defaultIteratorName + suffix)
+					|| JavaReservedKeyWords.isKeyWord(defaultIteratorName + suffix)) {
 				counter++;
 				suffix = Integer.toString(counter);
 			}
@@ -307,11 +309,17 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		}
 
 		String identifier = simpleName.getIdentifier();
+		String defaultName;
 		if (identifier.length() > 1 && identifier.endsWith("s")) { //$NON-NLS-1$
-			return identifier.substring(0, identifier.length() - 1);
+			defaultName = identifier.substring(0, identifier.length() - 1);
+			if (JavaReservedKeyWords.isKeyWord(defaultName)) {
+				defaultName = addSingularPrefix(defaultName);
+			}
 		} else {
-			return addSingularPrefix(identifier);
+			defaultName = addSingularPrefix(identifier);
 		}
+
+		return defaultName;
 	}
 
 	/**
@@ -428,8 +436,8 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	 * Checks whether a qualified name is needed for the declaration of a
 	 * variable of the given type in the given statement (in this case, is
 	 * expected to be a loop). If the loop's variable type is an inner type
-	 * declared in another compilation unit, then a qualified name is 
-	 * needed for the declaration of the loop variable.  
+	 * declared in another compilation unit, then a qualified name is needed for
+	 * the declaration of the loop variable.
 	 * 
 	 * @param loopStatement
 	 *            a node representing a loop statement.
@@ -461,7 +469,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 				types.addAll(this.innerTypesMap.get(parentBinding.getQualifiedName()));
 			}
 		}
-		
+
 		ITypeBinding iteratorErasure = iteratorType.getErasure();
 
 		return
