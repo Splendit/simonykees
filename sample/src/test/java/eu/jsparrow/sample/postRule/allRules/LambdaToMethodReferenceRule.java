@@ -41,6 +41,10 @@ public class LambdaToMethodReferenceRule {
 
 	Function<Integer, String> toStringStatic = (Integer i) -> Integer.toString(i);
 
+	Function<AmbiguousMethods, String> testingAmb = (AmbiguousMethods i) -> AmbiguousMethods.testAmbiguity(i);
+
+	Function<AmbiguousMethods, String> testingAmb2 = (AmbiguousMethods i) -> i.testAmbiguity();
+
 	public void referenceToStaticMethod() {
 		Collections.sort(personList, Person::compareByAge);
 
@@ -325,5 +329,27 @@ public class LambdaToMethodReferenceRule {
 			return "e:" + super.getName();
 		}
 
+	}
+}
+
+/**
+ * SIM-821
+ */
+class AmbiguousMethods {
+
+	public String testAmbiguity() {
+		return "nonStaticMethod";
+	}
+
+	public String testAmbiguity(int i) {
+		return "nonStaticMethod";
+	}
+
+	public String testAmbiguity(String s, int i) {
+		return "nonStaticMethod";
+	}
+
+	public static String testAmbiguity(AmbiguousMethods i) {
+		return String.valueOf(i);
 	}
 }
