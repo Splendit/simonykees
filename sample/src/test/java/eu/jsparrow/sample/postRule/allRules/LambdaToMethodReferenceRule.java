@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import eu.jsparrow.sample.utilities.NumberUtils;
 import eu.jsparrow.sample.utilities.Person;
 import eu.jsparrow.sample.utilities.TestModifier;
 
@@ -260,6 +261,9 @@ public class LambdaToMethodReferenceRule {
 
 	public void usingQualifiedName() {
 		List<UsingApacheNumberUtils> numberUtils = new ArrayList<>();
+		/*
+		 * Expecting the transformation to use a fully qualified name.
+		 */
 		numberUtils.stream().map(UsingApacheNumberUtils::getNumber)
 				.map(org.apache.commons.lang3.math.NumberUtils::toString);
 	}
@@ -326,7 +330,12 @@ public class LambdaToMethodReferenceRule {
 	}
 
 	class UsingApacheNumberUtils {
-
+		/**
+		 * There is already an existing import of another NumberUtils class.
+		 * Namely {@link NumberUtils}. Therefore,
+		 * {@link org.apache.commons.lang3.math.NumberUtils} has to always use a
+		 * fully qualified name.
+		 */
 		public org.apache.commons.lang3.math.NumberUtils getNumber() {
 			return null;
 		}
