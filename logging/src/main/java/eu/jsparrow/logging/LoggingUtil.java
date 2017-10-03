@@ -73,7 +73,13 @@ public class LoggingUtil {
 	 *             from {@link #configureLogback(Bundle)}
 	 */
 	public static boolean configureLoggerForTesting() throws JoranException, IOException {
-		return initLogger(getTestLogFilePath(LOG_FILE_NAME), getTestLogFilePath(JUL_LOG_FILE_NAME));
+		boolean returnValue = initLogger(getTestLogFilePath(LOG_FILE_NAME), getTestLogFilePath(JUL_LOG_FILE_NAME));
+		/**
+		 * ignoring logging from eu.jsparrow.core for automated testing.
+		 */
+		Logger logger = (Logger) LoggerFactory.getLogger("eu.jsparrow.core");
+		logger.setLevel(ch.qos.logback.classic.Level.OFF);
+		return returnValue;
 	}
 
 	/**
