@@ -4,6 +4,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -18,10 +19,12 @@ import org.eclipse.jdt.core.dom.ExpressionMethodReference;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
@@ -44,7 +47,14 @@ import eu.jsparrow.core.util.ClassRelationUtil;
 public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisitor {
 
 	private Set<String> newImports = new HashSet<>();
+	private CompilationUnit compilationUnit;
 
+	@Override
+	public boolean visit(CompilationUnit cu) {
+		this.compilationUnit = cu;
+		return true;
+	}
+	
 	@Override
 	public void endVisit(CompilationUnit cu) {
 		this.addImports.addAll(filterNewImportsByExcludingCurrentPackage(cu, newImports));
@@ -178,7 +188,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 
 							if (typeNameStr != null && !typeNameStr.isEmpty()) {
 
-								SimpleName typeName = astRewrite.getAST().newSimpleName(typeNameStr);
+								Name typeName = astRewrite.getAST().newName(typeNameStr);
 								SimpleName methodName = (SimpleName) astRewrite
 										.createCopyTarget(methodInvocation.getName());
 
@@ -188,17 +198,6 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 								ref.setName(methodName);
 
 								astRewrite.replace(lambdaExpressionNode, ref, null);
-
-								/*
-								 * SIM-514 bugfix missing import
-								 */
-								ITypeBinding typeBinding = methodInvocationExpressionName.resolveTypeBinding();
-								if (typeBinding != null) {
-									String qualifiedName = typeBinding.getErasure().getQualifiedName();
-									if (qualifiedName != null && !qualifiedName.equals("")) { //$NON-NLS-1$
-										newImports.add(qualifiedName);
-									}
-								}
 							}
 						}
 					}
@@ -273,16 +272,47 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	private String findTypeOfSimpleName(SimpleName expression) {
 		String typeNameStr;
 		ITypeBinding binding = expression.resolveTypeBinding();
-		if (binding.isParameterizedType()) {
-			ITypeBinding erasure = binding.getErasure();
-			typeNameStr = erasure.getName();
-		} else if (binding.isCapture()) {
-			typeNameStr = Arrays.asList(binding.getTypeBounds()).stream().findFirst().map(ITypeBinding::getErasure)
-					.map(ITypeBinding::getName).orElse(""); //$NON-NLS-1$
-		} else {
-			typeNameStr = binding.getName();
+		
+		if(binding == null) {
+			return ""; //$NON-NLS-1$
 		}
+		
+		if (binding.isCapture()) {
+			Optional<ITypeBinding> optBinding = Arrays.asList(binding.getTypeBounds()).stream().findFirst()
+					.map(ITypeBinding::getErasure);
+			if (!optBinding.isPresent()) {
+				return ""; //$NON-NLS-1$
+			}
+			binding = optBinding.get();
+		}
+
+		if (binding.isMember() && !ASTNodeUtil.enclosedInSameType(expression, binding)) {
+
+			ITypeBinding declaringClass = binding.getDeclaringClass();
+			ITypeBinding declaringClassErasure = declaringClass.getErasure();
+			String outerTypeName = declaringClassErasure.getName();
+			String qualifiedName = binding.getErasure().getQualifiedName();
+			int outerTypeStartingIndex = qualifiedName.lastIndexOf(outerTypeName);
+			typeNameStr = qualifiedName.substring(outerTypeStartingIndex);
+			newImports.add(declaringClassErasure.getQualifiedName());
+		} else if (qualifiedNameNeeded(binding)) {
+			typeNameStr = binding.getErasure().getQualifiedName();
+		} else {
+			typeNameStr = binding.getErasure().getName();
+			newImports.add(binding.getErasure().getQualifiedName());
+		}
+
 		return typeNameStr;
+	}
+
+	private boolean qualifiedNameNeeded(ITypeBinding binding) {
+		String bindingName = binding.getName();
+		return ASTNodeUtil.returnTypedList(compilationUnit.imports(), ImportDeclaration.class).stream()
+				.map(ImportDeclaration::getName).filter(Name::isQualifiedName).anyMatch(name -> {
+					QualifiedName qualifiedImportName = (QualifiedName) name;
+					return qualifiedImportName.getName().getIdentifier().equals(bindingName)
+							&& !binding.getQualifiedName().equals(qualifiedImportName.toString());
+				});
 	}
 
 	/**

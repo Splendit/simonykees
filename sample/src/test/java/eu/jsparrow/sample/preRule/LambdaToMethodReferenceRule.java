@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import eu.jsparrow.sample.utilities.NumberUtils;
 import eu.jsparrow.sample.utilities.Person;
 
 /**
@@ -303,6 +304,11 @@ public class LambdaToMethodReferenceRule {
 	public void missingImports() {
 		Person.filter(modifier -> modifier.isStatic());
 	}
+	
+	public void usingQualifiedName() {
+		List<UsingApacheNumberUtils> numberUtils = new ArrayList<>();
+		numberUtils.stream().map(v -> v.getNumber()).map(num -> num.toString());
+	}
 
 	class ComparisonProvider {
 		public int compareByName(Person a, Person b) {
@@ -354,5 +360,12 @@ public class LambdaToMethodReferenceRule {
 			return "e:" + super.getName();
 		}
 		
+	}
+	
+	class UsingApacheNumberUtils {
+		
+		public org.apache.commons.lang3.math.NumberUtils getNumber() {
+			return null;
+		}
 	}
 }

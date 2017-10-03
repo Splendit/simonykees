@@ -206,11 +206,11 @@ public class LambdaToMethodReferenceRule {
 	public void referenceToParameterizedType() {
 		Map<String, String> map = new HashMap<>();
 
-		map.entrySet().stream().forEach(Entry::getValue);
+		map.entrySet().stream().forEach(Map.Entry::getValue);
 
-		map.entrySet().stream().forEach(Entry::getValue);
+		map.entrySet().stream().forEach(Map.Entry::getValue);
 
-		map.entrySet().stream().forEach(Entry::getValue);
+		map.entrySet().stream().forEach(Map.Entry::getValue);
 
 		map.entrySet().stream().forEach(Entry<String, String>::getValue);
 
@@ -256,6 +256,12 @@ public class LambdaToMethodReferenceRule {
 
 	public void missingImports() {
 		Person.filter(TestModifier::isStatic);
+	}
+
+	public void usingQualifiedName() {
+		List<UsingApacheNumberUtils> numberUtils = new ArrayList<>();
+		numberUtils.stream().map(UsingApacheNumberUtils::getNumber)
+				.map(org.apache.commons.lang3.math.NumberUtils::toString);
 	}
 
 	public static <T, SOURCE extends Collection<T>, DEST extends Collection<T>> DEST transferElements(
@@ -317,5 +323,12 @@ public class LambdaToMethodReferenceRule {
 			return "e:" + super.getName();
 		}
 
+	}
+
+	class UsingApacheNumberUtils {
+
+		public org.apache.commons.lang3.math.NumberUtils getNumber() {
+			return null;
+		}
 	}
 }
