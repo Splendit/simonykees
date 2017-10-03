@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.OverrideAnnotationRuleASTVisitor;
+import eu.jsparrow.core.visitor.impl.OverrideAnnotationRuleASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -19,8 +19,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class OverrideAnnotationRule extends RefactoringRule<OverrideAnnotationRuleASTVisitor> {
 
-	public OverrideAnnotationRule(Class<OverrideAnnotationRuleASTVisitor> visitor) {
-		super(visitor);
+	public OverrideAnnotationRule() {
+		super();
+		this.visitor = OverrideAnnotationRuleASTVisitor.class;
 		this.name = Messages.OverrideAnnotationRule_name;
 		this.description = Messages.OverrideAnnotationRule_description;
 	}

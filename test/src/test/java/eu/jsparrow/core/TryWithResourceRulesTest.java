@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.trycatch.TryWithResourceASTVisitor;
 
 @SuppressWarnings("nls")
 public class TryWithResourceRulesTest extends SingleRuleTest {
@@ -26,7 +25,7 @@ public class TryWithResourceRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new TryWithResourceRule(TryWithResourceASTVisitor.class);
+		rule = new TryWithResourceRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

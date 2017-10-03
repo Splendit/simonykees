@@ -15,8 +15,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class EnhancedForLoopToStreamFindFirstRule extends RefactoringRule<EnhancedForLoopToStreamFindFirstASTVisitor> {
 
-	public EnhancedForLoopToStreamFindFirstRule(Class<EnhancedForLoopToStreamFindFirstASTVisitor> visitor) {
-		super(visitor);
+	public EnhancedForLoopToStreamFindFirstRule() {
+		super();
+		this.visitor = EnhancedForLoopToStreamFindFirstASTVisitor.class;
 		this.name = Messages.EnhancedForLoopToStreamFindFirstRule_name;
 		this.description = Messages.EnhancedForLoopToStreamFindFirstRule_description;
 	}

@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.StatementLambdaToExpressionRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.StatementLambdaToExpressionASTVisitor;
 
 @SuppressWarnings("nls")
 public class StatementLambdaToExpressionRulesTest extends SingleRuleTest {
@@ -26,7 +25,7 @@ public class StatementLambdaToExpressionRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new StatementLambdaToExpressionRule(StatementLambdaToExpressionASTVisitor.class);
+		rule = new StatementLambdaToExpressionRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

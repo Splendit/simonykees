@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.ForToForEachRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.loop.fortoforeach.ForToForEachASTVisitor;
 
 @SuppressWarnings("nls")
 public class ForToForEachRulesTest extends SingleRuleTest {
@@ -28,7 +27,7 @@ public class ForToForEachRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new ForToForEachRule(ForToForEachASTVisitor.class);
+		rule = new ForToForEachRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

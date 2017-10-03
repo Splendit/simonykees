@@ -4,7 +4,7 @@ package eu.jsparrow.core.rule.impl;
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.PrimitiveObjectUseEqualsASTVisitor;
+import eu.jsparrow.core.visitor.impl.PrimitiveObjectUseEqualsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -17,8 +17,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class PrimitiveObjectUseEqualsRule extends RefactoringRule<PrimitiveObjectUseEqualsASTVisitor> {
 
-	public PrimitiveObjectUseEqualsRule(Class<PrimitiveObjectUseEqualsASTVisitor> visitor) {
-		super(visitor);
+	public PrimitiveObjectUseEqualsRule() {
+		super();
+		this.visitor = PrimitiveObjectUseEqualsASTVisitor.class;
 		this.name = Messages.PrimitiveObjectUseEqualsRule_name;
 		this.description = Messages.PrimitiveObjectUseEqualsRule_description;
 	}

@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.List;
 
@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.AbstractAddImportASTVisitor;
 
 /**
  * This ASTVisitor finds the usage of specified string operation and wraps it in

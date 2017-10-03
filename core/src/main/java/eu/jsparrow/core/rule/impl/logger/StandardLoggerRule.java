@@ -54,8 +54,9 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	private SupportedLogger supportedLoger = null;
 	private String loggerQualifiedName = null;
 
-	public StandardLoggerRule(Class<StandardLoggerASTVisitor> visitor) {
-		super(visitor);
+	public StandardLoggerRule() {
+		super();
+		this.visitor = StandardLoggerASTVisitor.class;
 		this.name = Messages.StandardLoggerRule_name;
 		this.description = Messages.StandardLoggerRule_description;
 	}

@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.CollectionRemoveAllRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.CollectionRemoveAllASTVisitor;
 
 @SuppressWarnings("nls")
 public class CollectionRemoveAllRulesTest extends SingleRuleTest {
@@ -29,7 +28,7 @@ public class CollectionRemoveAllRulesTest extends SingleRuleTest {
 	private Path postRule;
 	@Before
 	public void setUp() throws Exception {
-		rule = new CollectionRemoveAllRule(CollectionRemoveAllASTVisitor.class);
+		rule = new CollectionRemoveAllRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

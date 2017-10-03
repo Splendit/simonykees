@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.StringUtilsASTVisitor;
 
 @SuppressWarnings("nls")
 public class StringUtilsInnerClassRuleTest extends SingleRuleTest {
@@ -25,7 +24,7 @@ public class StringUtilsInnerClassRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new StringUtilsRule(StringUtilsASTVisitor.class);
+		rule = new StringUtilsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

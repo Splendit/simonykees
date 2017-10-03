@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.StringUtilsASTVisitor;
+import eu.jsparrow.core.visitor.impl.StringUtilsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -42,8 +42,9 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 	 */
 	private List<String> supportetVersion = new ArrayList<>();
 
-	public StringUtilsRule(Class<StringUtilsASTVisitor> visitor) {
-		super(visitor);
+	public StringUtilsRule() {
+		super();
+		this.visitor = StringUtilsASTVisitor.class;
 		this.name = Messages.StringUtilsRule_name;
 		this.description = Messages.StringUtilsRule_description;
 		this.supportetVersion.add(version31);

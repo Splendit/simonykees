@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamSumRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamSumASTVisitor;
 
 @SuppressWarnings("nls")
 public class EnhancedForLoopToStreamSumRuleTest extends SingleRuleTest {
@@ -28,7 +27,7 @@ public class EnhancedForLoopToStreamSumRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new EnhancedForLoopToStreamSumRule(EnhancedForLoopToStreamSumASTVisitor.class);
+		rule = new EnhancedForLoopToStreamSumRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

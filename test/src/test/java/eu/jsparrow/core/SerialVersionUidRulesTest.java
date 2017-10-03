@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.SerialVersionUidRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.SerialVersionUidASTVisitor;
 
 @SuppressWarnings("nls")
 public class SerialVersionUidRulesTest extends SingleRuleTest {
@@ -25,7 +24,7 @@ public class SerialVersionUidRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new SerialVersionUidRule(SerialVersionUidASTVisitor.class);
+		rule = new SerialVersionUidRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

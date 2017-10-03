@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.BracketsToControlASTVisitor;
+import eu.jsparrow.core.visitor.impl.BracketsToControlASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /** 
@@ -15,8 +15,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class BracketsToControlRule extends RefactoringRule<BracketsToControlASTVisitor> {
 
-	public BracketsToControlRule(Class<BracketsToControlASTVisitor> visitor) {
-		super(visitor);
+	public BracketsToControlRule() {
+		super();
+		this.visitor = BracketsToControlASTVisitor.class;
 		this.name = Messages.BracketsToControlRule_name;
 		this.description = Messages.BracketsToControlRule_description;
 	}

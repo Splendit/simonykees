@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.StringBuildingLoopRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.StringBuildingLoopASTVisitor;
 
 @SuppressWarnings("nls")
 public class StringBuildingLoopRuleTest extends SingleRuleTest {
@@ -26,7 +25,7 @@ public class StringBuildingLoopRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new StringBuildingLoopRule(StringBuildingLoopASTVisitor.class);
+		rule = new StringBuildingLoopRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

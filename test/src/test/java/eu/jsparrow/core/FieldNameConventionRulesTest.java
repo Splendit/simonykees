@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.FieldNameConventionRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.renaming.FieldNameConventionASTVisitor;
 
 @SuppressWarnings("nls")
 public class FieldNameConventionRulesTest extends SingleRuleTest {
@@ -25,7 +24,7 @@ public class FieldNameConventionRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new FieldNameConventionRule(FieldNameConventionASTVisitor.class);
+		rule = new FieldNameConventionRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

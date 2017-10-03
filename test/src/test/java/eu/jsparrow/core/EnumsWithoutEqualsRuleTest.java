@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.EnumsWithoutEqualsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.EnumsWithoutEqualsASTVisitor;
 
 @SuppressWarnings("nls")
 public class EnumsWithoutEqualsRuleTest extends SingleRuleTest {
@@ -26,7 +25,7 @@ public class EnumsWithoutEqualsRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new EnumsWithoutEqualsRule(EnumsWithoutEqualsASTVisitor.class);
+		rule = new EnumsWithoutEqualsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

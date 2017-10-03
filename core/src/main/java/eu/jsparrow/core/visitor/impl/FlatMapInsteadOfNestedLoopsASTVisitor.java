@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -356,6 +356,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 					flatMapLambdaBody.setName(methodInvocationName);
 
 					LambdaExpression flatMapLambda = astRewrite.getAST().newLambdaExpression();
+					flatMapLambda.setParentheses(false);
 					flatMapLambda.setBody(flatMapLambdaBody);
 					ListRewrite flatMapLambdaListRewrite = astRewrite.getListRewrite(flatMapLambda,
 							LambdaExpression.PARAMETERS_PROPERTY);

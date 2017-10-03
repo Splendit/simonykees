@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.List;
 
@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Every {@link String#format(String, Object...)} or

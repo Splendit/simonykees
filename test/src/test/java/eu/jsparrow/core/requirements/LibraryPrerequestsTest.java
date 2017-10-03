@@ -16,7 +16,6 @@ import org.junit.runners.Parameterized.Parameters;
 
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.StringUtilsASTVisitor;
 
 /**
  * Tests IJavaProject if a specific version of a library is present. The first
@@ -64,7 +63,7 @@ public class LibraryPrerequestsTest {
 	public void filterWithStringUtilsIsPresent() throws Exception {
 		RulesTestUtil.addToClasspath(testproject, entries);
 
-		StringUtilsRule sur = new StringUtilsRule(StringUtilsASTVisitor.class);
+		StringUtilsRule sur = new StringUtilsRule();
 		sur.calculateEnabledForProject(testproject);
 
 		Assert.assertEquals(enabled, sur.isEnabled());

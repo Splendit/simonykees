@@ -34,8 +34,9 @@ import eu.jsparrow.i18n.Messages;
 @SuppressWarnings("restriction")
 public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
 
-	public OrganiseImportsRule(Class<AbstractASTRewriteASTVisitor> visitor) {
-		super(visitor);
+	public OrganiseImportsRule() {
+		super();
+		this.visitor = AbstractASTRewriteASTVisitor.class;
 		this.name = Messages.OrganiseImportsRule_name;
 		this.description = Messages.OrganiseImportsRule_description;
 	}

@@ -137,13 +137,13 @@ public class LambdaToMethodReferenceRule {
 
 			@Override
 			public boolean hasNext() {
-				personList.forEach((person) -> doSomething(person));
+				personList.forEach(person -> doSomething(person));
 				return false;
 			}
 
 			@Override
 			public Object next() {
-				personList.forEach((person) -> doSomething(person));
+				personList.forEach(person -> doSomething(person));
 				return null;
 			}
 

@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.function.Predicate;
 
@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.constants.ReservedNames;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Primitives should not be boxed just for "String" conversion

@@ -29,7 +29,6 @@ import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.exception.SimonykeesException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
-import eu.jsparrow.core.visitor.semiautomatic.StandardLoggerASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
@@ -69,7 +68,7 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 			List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
 			if (!selectedJavaElements.isEmpty()) {
 				IJavaProject selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
-				StandardLoggerRule loggerRule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+				StandardLoggerRule loggerRule = new StandardLoggerRule();
 
 				if (null != selectedJavaProjekt) {
 					loggerRule.calculateEnabledForProject(selectedJavaProjekt);

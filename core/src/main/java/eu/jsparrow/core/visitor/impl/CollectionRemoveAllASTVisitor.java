@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * An Collection that removes it from itself is replaced with clear

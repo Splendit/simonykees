@@ -7,6 +7,8 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.Before;
 import org.junit.Test;
 
+import eu.jsparrow.core.visitor.impl.PrimitiveObjectUseEqualsASTVisitor;
+
 @SuppressWarnings({ "nls" })
 public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTest {
 
