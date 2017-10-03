@@ -75,7 +75,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 				if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()
 						&& (!hasParameterizedArguments(node) || isMethodArgumentsTypeInferable()) 
-						&& !hasMissingParameterizedLambdaParameters(node)) {
+						&& !hasMissingLambdaTypeArguments(node)) {
 
 					/*
 					 * Declaration and initialization occur in the same
@@ -99,7 +99,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 				} else if (ASTNode.ASSIGNMENT == parent.getNodeType()
 						&& (!hasParameterizedArguments(node) || isMethodArgumentsTypeInferable())
-						&& !hasMissingParameterizedLambdaParameters(node)) {
+						&& !hasMissingLambdaTypeArguments(node)) {
 
 					/*
 					 * Declaration and assignment occur on different statements:
@@ -181,9 +181,24 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		return true;
 	}
 
-	private boolean hasMissingParameterizedLambdaParameters(ClassInstanceCreation node) {
-		List<Expression> arguments = ASTNodeUtil.returnTypedList(node.arguments(), Expression.class);
-		return arguments.stream().anyMatch(this::isLambdaWithMissingTypeArguments);
+	/**
+	 * Checks whether the given {@link ClassInstanceCreation} node uses raw
+	 * method references as parameters (i.e. references to parameterized methods
+	 * without explicitly providing the type arguments).
+	 * 
+	 * @param node
+	 *            a node representing a parameterized constructor invocation
+	 * @return {@code true} if the number of the missing type arguments in a
+	 *         method reference is bigger than 1, or {@code false} otherwise.
+	 */
+	private boolean hasMissingLambdaTypeArguments(ClassInstanceCreation node) {
+		/*
+		 * in SIM-820 was discovered that a diamond operator cannot be used when
+		 * invoking a parameterized constructor which takes as parameters method
+		 * references having more than one missing type arguments.
+		 */
+		return ASTNodeUtil.returnTypedList(node.arguments(), Expression.class).stream()
+				.anyMatch(this::isLambdaWithMissingTypeArguments);
 	}
 	
 	/**
