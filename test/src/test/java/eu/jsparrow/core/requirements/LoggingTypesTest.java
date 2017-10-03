@@ -13,7 +13,6 @@ import org.junit.Test;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.rule.impl.logger.SupportedLogger;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.semiautomatic.StandardLoggerASTVisitor;
 
 /**
  * Tests for the LoggingTypes library check.
@@ -53,7 +52,7 @@ public class LoggingTypesTest {
 				RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 
-		StandardLoggerRule slr = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+		StandardLoggerRule slr = new StandardLoggerRule();
 		slr.calculateEnabledForProject(testproject);
 
 		Assert.assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
@@ -67,7 +66,7 @@ public class LoggingTypesTest {
 				RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 
-		StandardLoggerRule slr = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+		StandardLoggerRule slr = new StandardLoggerRule();
 		slr.calculateEnabledForProject(testproject);
 
 		Assert.assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
@@ -80,7 +79,7 @@ public class LoggingTypesTest {
 		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("ch.qos.logback", "logback-classic", "1.2.3"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 
-		StandardLoggerRule slr = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+		StandardLoggerRule slr = new StandardLoggerRule();
 		slr.calculateEnabledForProject(testproject);
 
 		Assert.assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
@@ -92,7 +91,7 @@ public class LoggingTypesTest {
 		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 
-		StandardLoggerRule slr = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+		StandardLoggerRule slr = new StandardLoggerRule();
 		slr.calculateEnabledForProject(testproject);
 
 		Assert.assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
@@ -105,7 +104,7 @@ public class LoggingTypesTest {
 				RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 
-		StandardLoggerRule slr = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+		StandardLoggerRule slr = new StandardLoggerRule();
 		slr.calculateEnabledForProject(testproject);
 
 		Assert.assertEquals(SupportedLogger.LOG4J, slr.getAvailableLoggerType());
@@ -115,7 +114,7 @@ public class LoggingTypesTest {
 	public void noLoggerPresent() throws Exception {
 		RulesTestUtil.addToClasspath(testproject, entries);
 
-		StandardLoggerRule slr = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+		StandardLoggerRule slr = new StandardLoggerRule();
 		slr.calculateEnabledForProject(testproject);
 
 		Assert.assertEquals(null, slr.getAvailableLoggerType());

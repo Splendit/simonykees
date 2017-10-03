@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Transforms calls to {@link String#indexOf(String)} and

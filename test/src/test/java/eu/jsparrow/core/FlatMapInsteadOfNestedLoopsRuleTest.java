@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.FlatMapInsteadOfNestedLoopsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.FlatMapInsteadOfNestedLoopsASTVisitor;
 
 @SuppressWarnings("nls")
 public class FlatMapInsteadOfNestedLoopsRuleTest extends SingleRuleTest {
@@ -26,7 +25,7 @@ public class FlatMapInsteadOfNestedLoopsRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new FlatMapInsteadOfNestedLoopsRule(FlatMapInsteadOfNestedLoopsASTVisitor.class);
+		rule = new FlatMapInsteadOfNestedLoopsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

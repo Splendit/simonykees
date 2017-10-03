@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.OrganiseImportsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 @SuppressWarnings("nls")
 public class StringUtilsClashingImportsRuleTest extends SingleRuleTest {
@@ -25,7 +24,7 @@ public class StringUtilsClashingImportsRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class);
+		rule = new OrganiseImportsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

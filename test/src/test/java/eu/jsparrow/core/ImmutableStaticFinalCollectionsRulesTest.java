@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.ImmutableStaticFinalCollectionsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.ImmutableStaticFinalCollectionsASTVisitor;
 
 @SuppressWarnings("nls")
 public class ImmutableStaticFinalCollectionsRulesTest extends SingleRuleTest {
@@ -26,7 +25,7 @@ public class ImmutableStaticFinalCollectionsRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new ImmutableStaticFinalCollectionsRule(ImmutableStaticFinalCollectionsASTVisitor.class);
+		rule = new ImmutableStaticFinalCollectionsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

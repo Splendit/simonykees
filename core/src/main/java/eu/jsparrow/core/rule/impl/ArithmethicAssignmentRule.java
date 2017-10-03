@@ -15,8 +15,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class ArithmethicAssignmentRule extends RefactoringRule<ArithmethicAssignmentASTVisitor> {
 
-	public ArithmethicAssignmentRule(Class<ArithmethicAssignmentASTVisitor> visitor) {
-		super(visitor);
+	public ArithmethicAssignmentRule() {
+		super();
+		this.visitor = ArithmethicAssignmentASTVisitor.class;
 		this.name = Messages.ArithmethicAssignmentRule_name;
 		this.description = Messages.ArithmethicAssignmentRule_description;
 	}

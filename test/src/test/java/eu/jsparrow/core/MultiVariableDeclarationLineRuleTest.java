@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.MultiVariableDeclarationLineASTVisitor;
 
 @SuppressWarnings("nls")
 public class MultiVariableDeclarationLineRuleTest extends SingleRuleTest {
@@ -25,7 +24,7 @@ public class MultiVariableDeclarationLineRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new MultiVariableDeclarationLineRule(MultiVariableDeclarationLineASTVisitor.class);
+		rule = new MultiVariableDeclarationLineRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
