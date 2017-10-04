@@ -89,9 +89,9 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 					 * primitives that are implicit cast-able to float. doubles
 					 * do not have this property
 					 */
-					Predicate<ITypeBinding> isDoubleVariable = (
-							binding) -> (binding != null && (binding.getName().contains(ReservedNames.DOUBLE_PRIMITIVE)
-									|| (binding.getName().contains(ReservedNames.DOUBLE))));
+					Predicate<ITypeBinding> isDoubleVariable = 
+							binding -> (binding != null && (StringUtils.contains(binding.getName(), ReservedNames.DOUBLE_PRIMITIVE)
+									|| (StringUtils.contains(binding.getName(), ReservedNames.DOUBLE))));
 
 					if (ReservedNames.FLOAT.equals(refactorPrimitiveType.getIdentifier())
 							&& isDoubleVariable.test(refactorCandidateTypeBinding)) {

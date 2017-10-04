@@ -3,6 +3,7 @@ package eu.jsparrow.ui.wizard.impl;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
@@ -11,7 +12,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -40,7 +40,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private Composite filterComposite;
 
-	private final String EMPTY_PROFIL = Messages.SelectRulesWizardPage_EmptyProfileLabel;
+	private final String emptyProfil = Messages.SelectRulesWizardPage_EmptyProfileLabel;
 
 	private Label selectProfileLabel;
 	private Combo selectProfileCombo;
@@ -67,6 +67,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 * 
 	 * @param parent
 	 */
+	@Override
 	protected void createFilteringPart(Composite parent) {
 		filterComposite = new Composite(parent, SWT.NONE);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -94,14 +95,10 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		gridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
 		gridData.widthHint = 180;
 		nameFilterText.setLayoutData(gridData);
-		nameFilterText.addModifyListener(new ModifyListener() {
-
-			@Override
-			public void modifyText(ModifyEvent e) {
-				Text source = (Text) e.getSource();
-				((SelectRulesWizardPageControler) controler)
-						.nameFilterTextChanged(source.getText().trim().toLowerCase());
-			}
+		nameFilterText.addModifyListener((ModifyEvent e) -> {
+			Text source = (Text) e.getSource();
+			((SelectRulesWizardPageControler) controler)
+					.nameFilterTextChanged(StringUtils.lowerCase(source.getText().trim()));
 		});
 		// following doesn't work under Windows7
 		nameFilterText.addSelectionListener(new SelectionAdapter() {
@@ -112,8 +109,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 					text.setText(Messages.SelectRulesWizardPage_emptyString);
 				} else if (e.detail == SWT.ICON_SEARCH) {
 					Text text = (Text) e.getSource();
-					String input = text.getText().trim().toLowerCase();
-					if (!input.isEmpty() && !((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
+					String input = StringUtils.lowerCase(text.getText().trim());
+					if (!StringUtils.isEmpty(input) && !((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
 						((SelectRulesWizardPageControler) controler).searchPressed(input);
 						addTagInComposite(input);
 						nameFilterText.setText(""); //$NON-NLS-1$
@@ -128,8 +125,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR) {
-					String input = ((Text) e.getSource()).getText().trim().toLowerCase();
-					if (!input.isEmpty() && !((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
+					String input = StringUtils.lowerCase(((Text) e.getSource()).getText().trim());
+					if (!StringUtils.isEmpty(input) && !((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
 						((SelectRulesWizardPageControler) controler).searchPressed(input);
 						addTagInComposite(input);
 						nameFilterText.setText(""); //$NON-NLS-1$
@@ -179,10 +176,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 */
 	private void populateGroupFilterCombo() {
 		List<String> profiles = SimonykeesPreferenceManager.getAllProfileIds();
-		selectProfileCombo.add(EMPTY_PROFIL);
-		for (String profile : profiles) {
-			selectProfileCombo.add(profile);
-		}
+		selectProfileCombo.add(emptyProfil);
+		profiles.forEach(selectProfileCombo::add);
 	}
 
 	/**
@@ -195,7 +190,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			((SelectRulesWizardPageControler) controler)
 					.profileChanged(SimonykeesPreferenceManager.getCurrentProfileId());
 		} else {
-			selectProfileCombo.select(selectProfileCombo.indexOf(EMPTY_PROFIL));
+			selectProfileCombo.select(selectProfileCombo.indexOf(emptyProfil));
 		}
 	}
 

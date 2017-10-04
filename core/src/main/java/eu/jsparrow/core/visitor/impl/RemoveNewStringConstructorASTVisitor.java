@@ -30,7 +30,7 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTV
 	public boolean visit(ClassInstanceCreation node) {
 		if (ClassRelationUtil.isContentOfTypes(node.getType().resolveBinding(),
 				generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
-				&& !(ASTNode.EXPRESSION_STATEMENT == node.getParent().getNodeType())) {
+				&& ASTNode.EXPRESSION_STATEMENT != node.getParent().getNodeType()) {
 
 			/**
 			 * node.arguments() javadoc shows that its elements are at least

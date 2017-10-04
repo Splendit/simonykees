@@ -25,8 +25,8 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
-	private static String LOCALE_FULLY_QUALLIFIED_NAME = java.util.Locale.class.getName();
+	private static String stringFullyQualifiedName = java.lang.String.class.getName();
+	private static String localeFullyQualifiedName = java.util.Locale.class.getName();
 
 	/**
 	 * checks every String.format invocation for a static format string and
@@ -36,12 +36,12 @@ public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVi
 	public boolean visit(MethodInvocation node) {
 		if (StringUtils.equals("format", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
 				&& node.getExpression() instanceof SimpleName && ClassRelationUtil.isContentOfTypes(
-						node.getExpression().resolveTypeBinding(), generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
+						node.getExpression().resolveTypeBinding(), generateFullyQuallifiedNameList(stringFullyQualifiedName))) {
 
 			@SuppressWarnings("rawtypes")
 			List arguments = node.arguments();
 			StringLiteral formatString = null;
-			if (arguments.size() >= 1 && arguments.get(0) instanceof StringLiteral) {
+			if (!arguments.isEmpty() && arguments.get(0) instanceof StringLiteral) {
 				formatString = (StringLiteral) arguments.get(0);
 			}
 			/*
@@ -50,7 +50,7 @@ public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVi
 			 */
 			else if (arguments.size() >= 2 && arguments.get(0) instanceof QualifiedName
 					&& ClassRelationUtil.isContentOfTypes(
-							((QualifiedName) arguments.get(0)).resolveTypeBinding(), generateFullyQuallifiedNameList(LOCALE_FULLY_QUALLIFIED_NAME))
+							((QualifiedName) arguments.get(0)).resolveTypeBinding(), generateFullyQuallifiedNameList(localeFullyQualifiedName))
 					&& arguments.get(1) instanceof StringLiteral) {
 				formatString = (StringLiteral) arguments.get(1);
 			}

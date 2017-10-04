@@ -272,6 +272,42 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 	}
 
 	/**
+	 * Checks if the given type is a type variable or involves a type variable
+	 * as a parameter.
+	 * 
+	 * @param type
+	 *            a type to be checked
+	 * 
+	 * @return {@code true} if the type involves a type variable, or
+	 *         {@code false} otherwise.
+	 */
+	public boolean involvesUndefinedTypes(ITypeBinding type) {
+
+		if (type.isParameterizedType()) {
+			ITypeBinding[] arguments = type.getTypeArguments();
+			for (ITypeBinding argument : arguments) {
+				if (argument.isParameterizedType()) {
+					// recursive call
+					return involvesUndefinedTypes(argument);
+				}
+
+				ITypeBinding typeDeclaration = argument.getTypeDeclaration();
+				if (typeDeclaration.isTypeVariable()) {
+					return true;
+				}
+
+				if (argument.isRawType() || argument.isWildcardType() || argument.isCapture()) {
+					return true;
+				}
+			}
+		} else if (type.isTypeVariable() || type.isRawType() || type.isWildcardType() || type.isCapture()) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * A helper class for analyzing the block body of a lambda expression.
 	 * 
 	 * @author Ardit Ymeri
@@ -392,10 +428,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		 */
 		private void storeDeclaredName(Statement statement, List<VariableDeclarationFragment> fragments) {
 			extractableStatements.add(statement);
-			for (VariableDeclarationFragment fragment : fragments) {
-				SimpleName fragmentName = fragment.getName();
-				declaredNames.add(fragmentName);
-			}
+			fragments.stream().map(VariableDeclarationFragment::getName).forEach(declaredNames::add);
 		}
 
 		/**
@@ -494,9 +527,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 				Block block = ast.newBlock();
 				ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
 
-				for (Statement statement : this.extractableStatements) {
-					listRewrite.insertLast((Statement) astRewrite.createCopyTarget(statement), null);
-				}
+				this.extractableStatements.forEach(statement -> listRewrite.insertLast((Statement) astRewrite.createCopyTarget(statement), null));
 
 				ReturnStatement returnStatement = ast.newReturnStatement();
 				returnStatement.setExpression((Expression) astRewrite.createCopyTarget(mapExpression));
@@ -526,9 +557,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			} else {
 				block = ast.newBlock();
 				ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-				for (Statement statement : this.remainingStatements) {
-					listRewrite.insertLast(astRewrite.createCopyTarget(statement), null);
-				}
+				this.remainingStatements.forEach(statement -> listRewrite.insertLast(astRewrite.createCopyTarget(statement), null));
 			}
 
 			this.remainingBlock = block;
@@ -547,12 +576,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		}
 
 		private boolean referencesNames(Statement statement, List<SimpleName> declaredNames2) {
-			for (SimpleName simpleName : declaredNames2) {
-				if (referencesName(statement, simpleName)) {
-					return true;
-				}
-			}
-			return false;
+			return declaredNames2.stream().anyMatch(simpleName -> referencesName(statement, simpleName));
 		}
 
 		/**
@@ -638,41 +662,5 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		public MethodInvocation getStreamInvocation() {
 			return streamInvocation;
 		}
-	}
-
-	/**
-	 * Checks if the given type is a type variable or involves a type variable
-	 * as a parameter.
-	 * 
-	 * @param type
-	 *            a type to be checked
-	 * 
-	 * @return {@code true} if the type involves a type variable, or
-	 *         {@code false} otherwise.
-	 */
-	public boolean involvesUndefinedTypes(ITypeBinding type) {
-
-		if (type.isParameterizedType()) {
-			ITypeBinding[] arguments = type.getTypeArguments();
-			for (ITypeBinding argument : arguments) {
-				if (argument.isParameterizedType()) {
-					// recursive call
-					return involvesUndefinedTypes(argument);
-				}
-
-				ITypeBinding typeDeclaration = argument.getTypeDeclaration();
-				if (typeDeclaration.isTypeVariable()) {
-					return true;
-				}
-
-				if (argument.isRawType() || argument.isWildcardType() || argument.isCapture()) {
-					return true;
-				}
-			}
-		} else if (type.isTypeVariable() || type.isRawType() || type.isWildcardType() || type.isCapture()) {
-			return true;
-		}
-
-		return false;
 	}
 }

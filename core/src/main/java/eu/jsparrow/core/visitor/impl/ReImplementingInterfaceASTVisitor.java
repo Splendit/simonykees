@@ -28,24 +28,22 @@ public class ReImplementingInterfaceASTVisitor extends AbstractASTRewriteASTVisi
 
 	@Override
 	public boolean visit(TypeDeclaration typeDeclarationNode) {
-		if (!typeDeclarationNode.isInterface()) {
-			if (!typeDeclarationNode.superInterfaceTypes().isEmpty()) {
-				Type superclass = typeDeclarationNode.getSuperclassType();
-				if (superclass != null) {
-					List<Type> interfaces = ASTNodeUtil.convertToTypedList(typeDeclarationNode.superInterfaceTypes(),
-							Type.class);
+		if (!typeDeclarationNode.isInterface() && !typeDeclarationNode.superInterfaceTypes().isEmpty()) {
+			Type superclass = typeDeclarationNode.getSuperclassType();
+			if (superclass != null) {
+				List<Type> interfaces = ASTNodeUtil.convertToTypedList(typeDeclarationNode.superInterfaceTypes(),
+						Type.class);
 
-					ITypeBinding superclassTypeBinding = superclass.resolveBinding();
-					if (superclassTypeBinding != null) {
-						List<Type> duplicateInterfaces = getDuplicateInterfaces(superclassTypeBinding, interfaces);
+				ITypeBinding superclassTypeBinding = superclass.resolveBinding();
+				if (superclassTypeBinding != null) {
+					List<Type> duplicateInterfaces = getDuplicateInterfaces(superclassTypeBinding, interfaces);
 
-						if (duplicateInterfaces != null) {
-							ListRewrite interfacesListRewrite = astRewrite.getListRewrite(typeDeclarationNode,
-									TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY);
+					if (!duplicateInterfaces.isEmpty()) {
+						ListRewrite interfacesListRewrite = astRewrite.getListRewrite(typeDeclarationNode,
+								TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY);
 
-							duplicateInterfaces.forEach(
-									duplicateInterface -> interfacesListRewrite.remove(duplicateInterface, null));
-						}
+						duplicateInterfaces
+								.forEach(duplicateInterface -> interfacesListRewrite.remove(duplicateInterface, null));
 					}
 				}
 			}
@@ -59,8 +57,8 @@ public class ReImplementingInterfaceASTVisitor extends AbstractASTRewriteASTVisi
 	 * duplicates
 	 * 
 	 * @param superclass
-	 *            {@link ITypeBinding} from the super class, where the search
-	 *            should start
+	 *            {@link ITypeBinding} from the super class, where the search should
+	 *            start
 	 * @param interfaces
 	 *            a list of interfaces (of type {@link Type}) which the current
 	 *            class implements
@@ -68,29 +66,28 @@ public class ReImplementingInterfaceASTVisitor extends AbstractASTRewriteASTVisi
 	 *         implementations.
 	 */
 	private List<Type> getDuplicateInterfaces(ITypeBinding superclass, List<Type> interfaces) {
+		List<Type> duplicateInterfaces = new LinkedList<>();
+		
 		if (superclass != null && interfaces != null && !interfaces.isEmpty()) {
+			ITypeBinding superclassTypeBinding = superclass;
+			
+			while (superclassTypeBinding != null) {
+				ITypeBinding[] superclassInterfaces = superclassTypeBinding.getInterfaces();
 
-			List<Type> duplicateInterfaces = new LinkedList<>();
-
-			while (superclass != null) {
-				ITypeBinding[] superclassInterfaces = superclass.getInterfaces();
-
-				Arrays.stream(superclassInterfaces).forEach(superClassInterface -> {
+				Arrays.stream(superclassInterfaces).forEach(superClassInterface ->
 					interfaces.stream().filter(currentInterface -> !duplicateInterfaces.contains(currentInterface))
 							.forEach(currentInterface -> {
 								ITypeBinding interfaceTypeBinding = currentInterface.resolveBinding();
 								if (ClassRelationUtil.compareITypeBinding(superClassInterface, interfaceTypeBinding)) {
 									duplicateInterfaces.add(currentInterface);
 								}
-							});
-				});
+							})
+				);
 
-				superclass = superclass.getSuperclass();
+				superclassTypeBinding = superclassTypeBinding.getSuperclass();
 			}
-
-			return duplicateInterfaces;
 		}
 
-		return null;
+		return duplicateInterfaces;
 	}
 }

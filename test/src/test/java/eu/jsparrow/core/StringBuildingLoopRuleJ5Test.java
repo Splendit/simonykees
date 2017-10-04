@@ -20,8 +20,12 @@ public class StringBuildingLoopRuleJ5Test extends SingleRuleTest {
 	
 	private static final String SAMPLE_FILE = "StringBuildingLoopRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "stringBuildingLoopJ5";
-
+	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.stringBuildingLoopJ5";
+	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/stringBuildingLoopJ5";
 	private StringBuildingLoopRule rule;
+	private String fileName;
+	private Path preRule;
+	private Path postRule;
 
 	@Before
 	public void setUp() throws Exception {
@@ -51,7 +55,6 @@ public class StringBuildingLoopRuleJ5Test extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-	
 
 	@Test
 	public void calculateEnabledForProjectShouldBeDisabled() {

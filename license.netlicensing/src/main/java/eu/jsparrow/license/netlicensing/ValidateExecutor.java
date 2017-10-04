@@ -21,14 +21,13 @@ import eu.jsparrow.license.netlicensing.model.SchedulerModel;
 public class ValidateExecutor {
 
 	private static final Logger logger = LoggerFactory.getLogger(ValidateExecutor.class);
+	private static ScheduledExecutorService scheduler;
 
 	private ValidateExecutor() {
 		/*
 		 * Hiding public constructor
 		 */
 	}
-
-	private static ScheduledExecutorService scheduler;
 
 	protected static synchronized void startSchedule(SchedulerModel schedulingInfo, LicenseeModel licensee) {
 		final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();

@@ -23,6 +23,9 @@ public class CollectionRemoveAllRulesTest extends SingleRuleTest {
 
 	private CollectionRemoveAllRule rule;
 
+	private String fileName;
+	private Path preRule;
+	private Path postRule;
 	@Before
 	public void setUp() throws Exception {
 		rule = new CollectionRemoveAllRule();

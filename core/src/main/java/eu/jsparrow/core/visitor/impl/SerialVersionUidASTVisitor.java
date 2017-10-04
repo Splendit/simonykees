@@ -44,13 +44,11 @@ public class SerialVersionUidASTVisitor extends AbstractASTRewriteASTVisitor {
 
 			/*
 			 * only one variable is defined in this FieldDeclaration.
-			 * FieldDeclaration -> (Modifiers) (Type) (Fragments);
+			 * FieldDeclaration -> (Modifiers) (Type) (Fragments)
 			 */
 			if (1 == node.fragments().size()) {
 				ListRewrite modifieresRewrite = astRewrite.getListRewrite(node, FieldDeclaration.MODIFIERS2_PROPERTY);
-				for (ModifierKeyword modifierKeyword : checkSerialUidASTVisitor.getWantedKeyWords()) {
-					modifieresRewrite.insertLast(node.getAST().newModifier(modifierKeyword), null);
-				}
+				checkSerialUidASTVisitor.getWantedKeyWords().forEach(modifierKeyword -> modifieresRewrite.insertLast(node.getAST().newModifier(modifierKeyword), null));
 			}
 			/*
 			 * if two or more variables are defined in one statement, we split
@@ -62,13 +60,9 @@ public class SerialVersionUidASTVisitor extends AbstractASTRewriteASTVisitor {
 				VariableDeclarationFragment serialUidNode = (VariableDeclarationFragment) astRewrite
 						.createMoveTarget(checkSerialUidASTVisitor.getSerialUidNode());
 				List<ASTNode> newModifier = new ArrayList<>();
-				for (Object m : node.modifiers()) {
-					if (m instanceof ASTNode) {
-						newModifier.add(astRewrite.createCopyTarget((ASTNode) m));
-					}
-				}
+				node.modifiers().stream().filter((m) -> m instanceof ASTNode).forEach((m) -> newModifier.add(astRewrite.createCopyTarget((ASTNode) m)));
 				checkSerialUidASTVisitor.getWantedKeyWords().stream()
-						.forEach((mk) -> newModifier.add(node.getAST().newModifier(mk)));
+						.forEach(mk -> newModifier.add(node.getAST().newModifier(mk)));
 				Type newType = (Type) astRewrite.createCopyTarget(node.getType());
 				FieldDeclaration newField = NodeBuilder.newFieldDeclaration(node.getAST(), newType, serialUidNode,
 						newModifier);
@@ -95,8 +89,7 @@ public class SerialVersionUidASTVisitor extends AbstractASTRewriteASTVisitor {
 		private VariableDeclarationFragment serialUidNode = null;
 
 		public CheckSerialUidASTVisitor() {
-			wantedKeyWords = new ArrayList<ModifierKeyword>();
-			// wantedKeyWords.add(ModifierKeyword.PRIVATE_KEYWORD);
+			wantedKeyWords = new ArrayList<>();
 			wantedKeyWords.add(ModifierKeyword.STATIC_KEYWORD);
 			wantedKeyWords.add(ModifierKeyword.FINAL_KEYWORD);
 		}

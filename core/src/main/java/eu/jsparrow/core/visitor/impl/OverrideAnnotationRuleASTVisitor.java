@@ -80,7 +80,7 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 		for (MethodDeclaration method : methods) {
 			// skip constructors, private methods and methods that have the @Override annotation 
 			if (!method.isConstructor()
-					&& !ASTNodeUtil.hasModifier(method.modifiers(), modifier -> modifier.isPrivate())
+					&& !ASTNodeUtil.hasModifier(method.modifiers(), Modifier::isPrivate)
 					&& !isOverrideAnnotated(method)) {
 
 				IMethodBinding methodBinding = method.resolveBinding();

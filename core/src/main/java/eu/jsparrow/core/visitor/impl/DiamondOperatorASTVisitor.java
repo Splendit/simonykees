@@ -80,7 +80,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					 * Declaration and initialization occur in the same
 					 * statement. For example: List<String> names = new
 					 * ArrayList<String>(); should be replaced with:
-					 * List<String> names = new ArrayList<>();
+					 * List<String> names = new ArrayList<>()
 					 */
 					ASTNode declarationStatement = parent.getParent();
 					Type lhsType = null;
@@ -102,10 +102,10 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					/*
 					 * Declaration and assignment occur on different statements:
 					 * For example: List<String> names; names = new
-					 * ArrayList<String>();
+					 * ArrayList<String>()
 					 * 
 					 * should be replaced with: List<String> names; names = new
-					 * ArrayList<>();
+					 * ArrayList<>()
 					 */
 					Assignment assignmentNode = ((Assignment) parent);
 					Expression lhsNode = assignmentNode.getLeftHandSide();
@@ -223,7 +223,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private boolean areParameterizedTypeEqual(ParameterizedType parameterizedType, List<Type> referenceGenerics) {
-		List<Type> returnTypeArgumetns = ASTNodeUtil.returnTypedList(((ParameterizedType) parameterizedType).typeArguments(), Type.class);
+		List<Type> returnTypeArgumetns = ASTNodeUtil.returnTypedList(parameterizedType.typeArguments(), Type.class);
 
 		ASTMatcher matcher = new ASTMatcher();
 		return matcher.safeSubtreeListMatch(returnTypeArgumetns, referenceGenerics);
