@@ -14,11 +14,10 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.LambdaForEachCollectRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachCollectASTVisitor;
 
 @SuppressWarnings("nls")
 public class LambdaForEachCollectRuleTest extends SingleRuleTest {
-	
+
 	private static final String SAMPLE_FILE = "LambdaForEachCollectRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "lambdaForEachCollect";
 
@@ -26,7 +25,7 @@ public class LambdaForEachCollectRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new  LambdaForEachCollectRule(LambdaForEachCollectASTVisitor.class);
+		rule = new LambdaForEachCollectRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

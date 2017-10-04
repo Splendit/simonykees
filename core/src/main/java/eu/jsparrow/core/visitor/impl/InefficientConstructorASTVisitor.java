@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.function.Predicate;
 
@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.constants.ReservedNames;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Primitives should not use the constructor for construction of new Variables.
@@ -33,9 +34,8 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 		/*
 		 * Boolean.valueOf(true); -> true, Boolean.valueOf("true"); -> true
 		 * Boolean.valueOf(false); -> false, Boolean.valueOf("false"); -> false
-		 * Boolean.valueOf("anyOtherString"); -> false Boolean/boolean b = ...;
-		 * Boolean.valueOf(b); -> b String s = ...; Boolean.valueOf(s); ->
-		 * ignore
+		 * Boolean.valueOf("anyOtherString"); -> false Boolean/boolean b = ...
+		 * Boolean.valueOf(b); -> b String s = ...; Boolean.valueOf(s); -> ignore
 		 */
 		if (node.getExpression() == null) {
 			return true;
@@ -54,16 +54,15 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 
 			Expression replaceParameter;
 
-			if (null != refactorPrimitiveTypeBinding && isBooleanClass(refactorPrimitiveTypeBinding.getName())) {
-				if (ASTNode.STRING_LITERAL == refactorCandidateParameter.getNodeType()) {
-					StringLiteral stringParameter = (StringLiteral) refactorCandidateParameter;
-					if (ReservedNames.BOOLEAN_TRUE.equals(stringParameter.getLiteralValue())) {
-						replaceParameter = node.getAST().newBooleanLiteral(true);
-					} else {
-						replaceParameter = node.getAST().newBooleanLiteral(false);
-					}
-					astRewrite.replace(refactorCandidateParameter, replaceParameter, null);
+			if (null != refactorPrimitiveTypeBinding && isBooleanClass(refactorPrimitiveTypeBinding.getName())
+					&& ASTNode.STRING_LITERAL == refactorCandidateParameter.getNodeType()) {
+				StringLiteral stringParameter = (StringLiteral) refactorCandidateParameter;
+				if (ReservedNames.BOOLEAN_TRUE.equals(stringParameter.getLiteralValue())) {
+					replaceParameter = node.getAST().newBooleanLiteral(true);
+				} else {
+					replaceParameter = node.getAST().newBooleanLiteral(false);
 				}
+				astRewrite.replace(refactorCandidateParameter, replaceParameter, null);
 			}
 		}
 		return true;
@@ -88,14 +87,14 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 			 * boolean case
 			 */
 			if (isBooleanClass(refactorPrimitiveTypeBinding.getName())) {
-				// boolean wrapIfParentMethodInvocation = false;
+				// boolean wrapIfParentMethodInvocation = false
 
 				/*
 				 * all string-literals transformed to its boolean counterpart
 				 */
 				if (ASTNode.STRING_LITERAL == refactorCandidateParameter.getNodeType()) {
 					StringLiteral stringParameter = (StringLiteral) refactorCandidateParameter;
-					// wrapIfParentMethodInvocation = true;
+					// wrapIfParentMethodInvocation = true
 					if (ReservedNames.BOOLEAN_TRUE.equals(stringParameter.getLiteralValue())) {
 						replacement = node.getAST().newBooleanLiteral(true);
 					} else {
@@ -127,13 +126,13 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 			else if (isPrimitiveTypeClass(refactorPrimitiveTypeBinding.getName())) {
 
 				/*
-				 * new Float(4D) is not transformable to Float.valueOf(4D)
-				 * because valueOf only allows primitives that are implicit
-				 * cast-able to float. doubles do not have this property
+				 * new Float(4D) is not transformable to Float.valueOf(4D) because valueOf only
+				 * allows primitives that are implicit cast-able to float. doubles do not have
+				 * this property
 				 */
-				Predicate<ITypeBinding> isDoubleVariable = (
-						binding) -> (binding != null && (binding.getName().contains(ReservedNames.DOUBLE_PRIMITIVE)
-								|| (binding.getName().contains(ReservedNames.DOUBLE))));
+				Predicate<ITypeBinding> isDoubleVariable = binding -> (binding != null
+						&& (StringUtils.contains(binding.getName(), ReservedNames.DOUBLE_PRIMITIVE)
+								|| (StringUtils.contains(binding.getName(), ReservedNames.DOUBLE))));
 
 				if (ReservedNames.FLOAT.equals(refactorPrimitiveType.getIdentifier())
 						&& isDoubleVariable.test(refactorCandidateTypeBinding)) {
@@ -141,10 +140,10 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 				}
 
 				/*
-				 * wrapping string and primitive input parameter into
-				 * PrimitiveType.valueOf(...)
+				 * wrapping string and primitive input parameter into PrimitiveType.valueOf(...)
 				 */
-				if (ClassRelationUtil.isContentOfTypes(refactorCandidateTypeBinding, generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
+				if (ClassRelationUtil.isContentOfTypes(refactorCandidateTypeBinding,
+						generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
 						|| isPrimitiveTypeClass(refactorCandidateTypeBinding.getName())) {
 					SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(), ReservedNames.MI_VALUE_OF);
 					replacement = NodeBuilder.newMethodInvocation(node.getAST(),

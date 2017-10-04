@@ -33,9 +33,9 @@ public class RefactoringState {
 
 	private ICompilationUnit workingCopy;
 
-	private Map<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> initialChanges = new HashMap<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange>();
+	private Map<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> initialChanges = new HashMap<>();
 
-	private Map<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> changes = new HashMap<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange>();
+	private Map<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> changes = new HashMap<>();
 
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ignoredRules = new ArrayList<>();
 

@@ -73,9 +73,7 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 			if (combined) {
 				UnionType uniontype = node.getAST().newUnionType();
 				removeSubTypes(allNewTypes);
-				for (Type insertType : allNewTypes) {
-					uniontype.types().add(astRewrite.createMoveTarget(insertType));
-				}
+				allNewTypes.forEach(insertType -> uniontype.types().add(astRewrite.createMoveTarget(insertType)));
 				astRewrite.replace(referenceExceptionType, uniontype, null);
 			}
 

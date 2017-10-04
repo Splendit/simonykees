@@ -18,8 +18,9 @@ public class WhileToForEachRule extends RefactoringRule<WhileToForEachASTVisitor
 	
 	Logger logger = LoggerFactory.getLogger(WhileToForEachASTVisitor.class);
 
-	public WhileToForEachRule(Class<WhileToForEachASTVisitor> visitor) {
-		super(visitor);
+	public WhileToForEachRule() {
+		super();
+		this.visitor = WhileToForEachASTVisitor.class;
 		this.name = Messages.WhileToForEachRule_name;
 		this.description = Messages.WhileToForEachRule_description;
 	}

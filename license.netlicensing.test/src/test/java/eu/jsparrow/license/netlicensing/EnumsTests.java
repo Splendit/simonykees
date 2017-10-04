@@ -1,12 +1,8 @@
 package eu.jsparrow.license.netlicensing;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-
-import eu.jsparrow.license.netlicensing.LicenseStatus;
-import eu.jsparrow.license.netlicensing.LicenseType;
-import eu.jsparrow.license.netlicensing.ValidationAction;
 
 /**
  * Test cases for converting enumerations from/to string.

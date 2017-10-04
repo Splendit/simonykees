@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.StringBufferToBuilderRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.StringBufferToBuilderASTVisitor;
 
 @SuppressWarnings("nls")
 public class StringBufferToBuilderRulesTest extends SingleRuleTest {
@@ -26,7 +25,7 @@ public class StringBufferToBuilderRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new StringBufferToBuilderRule(StringBufferToBuilderASTVisitor.class);
+		rule = new StringBufferToBuilderRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

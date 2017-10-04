@@ -219,8 +219,8 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 
 	public boolean noReturnStatementInsideIf(List<String> strings) {
 		String emptyString = "";
-		strings.stream().filter((value) -> !emptyString.equals(value))
-				.map((value) -> StringUtils.substring(value, 0, 1)).forEach((prefix) -> {
+		strings.stream().filter(value -> !emptyString.equals(value)).map(value -> StringUtils.substring(value, 0, 1))
+				.forEach(prefix -> {
 				});
 		return false;
 	}

@@ -31,10 +31,10 @@ public class FlatMapInsteadOfNestedLoopsRule {
 				.forEach(logger::info);
 
 		List<List<String>> matrix = Arrays.asList(Arrays.asList("asdf", "jkl"));
-		matrix.stream().filter((row) -> !row.isEmpty()).forEach((row) -> {
+		matrix.stream().filter(row -> !row.isEmpty()).forEach(row -> {
 			System.out.print(row);
-			row.stream().filter((element) -> !StringUtils.isEmpty(element))
-					.map((element) -> StringUtils.substring(element, 0, 1)).forEach(logger::info);
+			row.stream().filter(element -> !StringUtils.isEmpty(element))
+					.map(element -> StringUtils.substring(element, 0, 1)).forEach(logger::info);
 		});
 
 		matrix.stream().filter(row -> !row.isEmpty()).flatMap(List::stream)

@@ -7,6 +7,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
@@ -36,7 +38,7 @@ public class LoggerRuleWizardPageModel {
 
 	private String selectionStatus = ""; //$NON-NLS-1$
 
-	private final String NO_SEVERITY_LEVEL = Messages.LoggerRuleWizardPageModel_noSeverityLevel;
+	private final String noSeverityLevel = Messages.LoggerRuleWizardPageModel_noSeverityLevel;
 
 	public LoggerRuleWizardPageModel(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		this.rule = (StandardLoggerRule) rule;
@@ -71,9 +73,7 @@ public class LoggerRuleWizardPageModel {
 	 * Notifies view to redraw all elements with new data.
 	 */
 	public void notifyListeners() {
-		for (IValueChangeListener listener : listeners) {
-			listener.valueChanged();
-		}
+		listeners.forEach(IValueChangeListener::valueChanged);
 	}
 
 	/**
@@ -87,7 +87,7 @@ public class LoggerRuleWizardPageModel {
 	 *            new value of selected field
 	 */
 	public void setNewSelection(String source, String selection) {
-		if (selection.equals(NO_SEVERITY_LEVEL)) {
+		if (selection.equals(noSeverityLevel)) {
 			selection = ""; //$NON-NLS-1$
 		}
 		currentSelectionMap.put(source, selection);
@@ -106,11 +106,11 @@ public class LoggerRuleWizardPageModel {
 		String sysErrCurr = currentSelectionMap.get(StandardLoggerConstants.SYSTEM_ERR_PRINT);
 		String stackTraceCurr = currentSelectionMap.get(StandardLoggerConstants.PRINT_STACKTRACE);
 
-		int sysOutCurrSeverityLevel = (NO_SEVERITY_LEVEL.equals(sysOutCurr) || sysOutCurr.isEmpty()) ? 0
+		int sysOutCurrSeverityLevel = (noSeverityLevel.equals(sysOutCurr) || StringUtils.isEmpty(sysOutCurr)) ? 0
 				: rule.getSystemOutReplaceOptions().get(sysOutCurr);
-		int sysErrCurrSeverityLevel = (NO_SEVERITY_LEVEL.equalsIgnoreCase(sysErrCurr) || sysErrCurr.isEmpty()) ? 0
+		int sysErrCurrSeverityLevel = (StringUtils.equalsIgnoreCase(noSeverityLevel, sysErrCurr) || StringUtils.isEmpty(sysErrCurr)) ? 0
 				: rule.getSystemErrReplaceOptions().get(sysErrCurr);
-		int stackTraceCurrSeverityLevel = (NO_SEVERITY_LEVEL.equals(stackTraceCurr) || stackTraceCurr.isEmpty()) ? 0
+		int stackTraceCurrSeverityLevel = (noSeverityLevel.equals(stackTraceCurr) || StringUtils.isEmpty(stackTraceCurr)) ? 0
 				: rule.getPrintStackTraceReplaceOptions().get(stackTraceCurr);
 
 		if (sysOutCurrSeverityLevel == 0 && sysErrCurrSeverityLevel == 0 && stackTraceCurrSeverityLevel == 0) {
@@ -138,7 +138,7 @@ public class LoggerRuleWizardPageModel {
 	 */
 	public Set<String> getSystemOutReplaceOptions() {
 		Set<String> systemOutReplaceOptionsSet = new LinkedHashSet<>();
-		systemOutReplaceOptionsSet.add(NO_SEVERITY_LEVEL);
+		systemOutReplaceOptionsSet.add(noSeverityLevel);
 		systemOutReplaceOptionsSet.addAll(systemOutReplaceOptions.keySet());
 		return systemOutReplaceOptionsSet;
 	}
@@ -150,7 +150,7 @@ public class LoggerRuleWizardPageModel {
 	 */
 	public Set<String> getSystemErrReplaceOptions() {
 		Set<String> systemErrReplaceOptionsSet = new LinkedHashSet<>();
-		systemErrReplaceOptionsSet.add(NO_SEVERITY_LEVEL);
+		systemErrReplaceOptionsSet.add(noSeverityLevel);
 		systemErrReplaceOptionsSet.addAll(systemErrReplaceOptions.keySet());
 		return systemErrReplaceOptionsSet;
 	}
@@ -162,7 +162,7 @@ public class LoggerRuleWizardPageModel {
 	 */
 	public Set<String> getPrintStackTraceReplaceOptions() {
 		Set<String> printStackTraceReplaceOptionsSet = new LinkedHashSet<>();
-		printStackTraceReplaceOptionsSet.add(NO_SEVERITY_LEVEL);
+		printStackTraceReplaceOptionsSet.add(noSeverityLevel);
 		printStackTraceReplaceOptionsSet.addAll(printStackTraceReplaceOptions.keySet());
 		return printStackTraceReplaceOptionsSet;
 	}

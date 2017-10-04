@@ -16,7 +16,6 @@ import org.junit.runners.Parameterized.Parameters;
 
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.StringUtilsASTVisitor;
 
 /**
  * Tests IJavaProject if a specific version of a library is present. The first
@@ -33,6 +32,13 @@ import eu.jsparrow.core.visitor.StringUtilsASTVisitor;
 public class LibraryPrerequestsTest {
 
 	IJavaProject testproject = null;
+	private List<IClasspathEntry> entries;
+	private boolean enabled;
+
+	public LibraryPrerequestsTest(List<IClasspathEntry> entries, boolean enabled) {
+		this.entries = entries;
+		this.enabled = enabled;
+	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -53,19 +59,11 @@ public class LibraryPrerequestsTest {
 						"commons-lang3", "3.2.1")), false } });
 	}
 
-	private List<IClasspathEntry> entries;
-	private boolean enabled;
-
-	public LibraryPrerequestsTest(List<IClasspathEntry> entries, boolean enabled) {
-		this.entries = entries;
-		this.enabled = enabled;
-	}
-
 	@Test
 	public void filterWithStringUtilsIsPresent() throws Exception {
 		RulesTestUtil.addToClasspath(testproject, entries);
 
-		StringUtilsRule sur = new StringUtilsRule(StringUtilsASTVisitor.class);
+		StringUtilsRule sur = new StringUtilsRule();
 		sur.calculateEnabledForProject(testproject);
 
 		Assert.assertEquals(enabled, sur.isEnabled());

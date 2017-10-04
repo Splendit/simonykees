@@ -442,7 +442,7 @@ public class LicenseManager {
 				setLicenseeNumber(existingLicenseeNumber);
 				setLicenseeName(existingLicenseeName);
 				if (checker != null
-						&& checker.getLicenseStatus().equals(LicenseStatus.CONNECTION_FAILURE_UNREGISTERED)) {
+						&& checker.getLicenseStatus() == LicenseStatus.CONNECTION_FAILURE_UNREGISTERED) {
 					existingLicenseeNumber = ""; //$NON-NLS-1$
 					existingLicenseeName = ""; //$NON-NLS-1$
 				}
@@ -461,9 +461,9 @@ public class LicenseManager {
 	private boolean isValidUpdate(LicenseChecker checker) {
 		boolean valid = false;
 
-		if (checker != null && !checker.getLicenseStatus().equals(LicenseStatus.CONNECTION_FAILURE)
-				&& !checker.getLicenseStatus().equals(LicenseStatus.CONNECTION_FAILURE_UNREGISTERED)
-				&& checker.getType() != null && !checker.getType().equals(LicenseType.TRY_AND_BUY)
+		if (checker != null && checker.getLicenseStatus() != LicenseStatus.CONNECTION_FAILURE
+				&& checker.getLicenseStatus() != LicenseStatus.CONNECTION_FAILURE_UNREGISTERED
+				&& checker.getType() != null && checker.getType() != LicenseType.TRY_AND_BUY
 				&& checker.isValid()) {
 			valid = true;
 		}
@@ -493,6 +493,14 @@ public class LicenseManager {
 
 	static String getProductNumber() {
 		return PRODUCT_NUMBER;
+	}
+
+	private void overwritePersistedData(String licenseeNumber, String licenseeName) {
+		PersistenceModel persistenceModel = new PersistenceModel(licenseeNumber, licenseeName, false, null, null, null,
+				null, null, false, null, null, null);
+		PersistenceManager persistence = PersistenceManager.getInstance();
+		persistence.setPersistenceModel(persistenceModel);
+		persistence.persist();
 	}
 
 	private class CheckerImpl implements LicenseChecker {
@@ -548,14 +556,14 @@ public class LicenseManager {
 				 * id does not match
 				 */
 				if (lastSuccessLicenseType != null && lastSuccessTimestamp != null
-						&& lastSuccessLicenseType.equals(LicenseType.NODE_LOCKED) && parsedExpirationDate != null
+						&& lastSuccessLicenseType == LicenseType.NODE_LOCKED && parsedExpirationDate != null
 						&& Instant.now().isBefore(parsedExpirationDate.toInstant())) {
 
 					this.licenseStatus = LicenseStatus.NODE_LOCKED_HW_ID_FAILURE;
 					this.licenseType = LicenseType.NODE_LOCKED;
 
 				} else if (this.parsedLicenseType != null && this.demoExpireation != null
-						&& parsedLicenseType.equals(LicenseType.TRY_AND_BUY)
+						&& parsedLicenseType == LicenseType.TRY_AND_BUY
 						&& Instant.now().isBefore(demoExpireation.toInstant())) {
 
 					this.licenseStatus = LicenseStatus.TRIAL_HW_ID_FAILURE;
@@ -571,7 +579,7 @@ public class LicenseManager {
 		public ZonedDateTime calcExpireDate(ResponseParser parser) {
 			LicenseType type = getType();
 			ZonedDateTime expireDate = null;
-			if (LicenseType.TRY_AND_BUY.equals(type)) {
+			if (LicenseType.TRY_AND_BUY == type) {
 				expireDate = parser.getEvaluationExpiresDate();
 			} else {
 				expireDate = parser.getExpirationDate();
@@ -613,14 +621,6 @@ public class LicenseManager {
 			return expirationDate;
 		}
 
-	}
-
-	private void overwritePersistedData(String licenseeNumber, String licenseeName) {
-		PersistenceModel persistenceModel = new PersistenceModel(licenseeNumber, licenseeName, false, null, null, null,
-				null, null, false, null, null, null);
-		PersistenceManager persistence = PersistenceManager.getInstance();
-		persistence.setPersistenceModel(persistenceModel);
-		persistence.persist();
 	}
 
 }

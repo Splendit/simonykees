@@ -15,7 +15,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.semiautomatic.StandardLoggerASTVisitor;
 
 @SuppressWarnings("nls")
 public class StandardLoggerRuleSlf4jTest extends SingleRuleTest {
@@ -28,7 +27,7 @@ public class StandardLoggerRuleSlf4jTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+		rule = new StandardLoggerRule();
 		rule.activateDefaultOptions();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}

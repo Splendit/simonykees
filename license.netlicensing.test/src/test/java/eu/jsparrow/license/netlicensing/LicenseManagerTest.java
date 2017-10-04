@@ -7,13 +7,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import eu.jsparrow.license.netlicensing.LicenseChecker;
-import eu.jsparrow.license.netlicensing.LicenseManager;
-import eu.jsparrow.license.netlicensing.LicenseStatus;
-import eu.jsparrow.license.netlicensing.LicenseType;
-import eu.jsparrow.license.netlicensing.LicenseValidator;
-import eu.jsparrow.license.netlicensing.PersistenceManager;
-import eu.jsparrow.license.netlicensing.ValidateExecutor;
 import eu.jsparrow.license.netlicensing.model.LicenseModel;
 import eu.jsparrow.license.netlicensing.model.LicenseeModel;
 import eu.jsparrow.license.netlicensing.model.PersistenceModel;

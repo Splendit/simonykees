@@ -38,13 +38,14 @@ public class Activator extends AbstractUIPlugin {
 	// is used for configuring the test fragment
 	private static BundleActivator testFragmentActivator;
 
-	private long loggingBundleID = 0;
-
 	// Flag is jSparrow is already running
 	private static boolean running = false;
 
 	private static BundleContext bundleContext;
+
 	private static IEclipseContext eclipseContext;
+
+	private long loggingBundleID = 0;
 
 	@Inject
 	private LicenseValidationService licenseValidationService;
@@ -61,6 +62,7 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.
 	 * BundleContext)
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
@@ -71,7 +73,7 @@ public class Activator extends AbstractUIPlugin {
 
 		// start jSparrow logging bundle
 		for (Bundle bundle : context.getBundles()) {
-			if (bundle.getSymbolicName().equals("eu.jsparrow.logging") //$NON-NLS-1$
+			if ("eu.jsparrow.logging".equals(bundle.getSymbolicName()) //$NON-NLS-1$
 					/*
 					 * name of the logging api bundle
 					 */
@@ -110,6 +112,7 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.
 	 * BundleContext)
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 
 		running = false;

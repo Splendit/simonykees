@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachMapASTVisitor;
 
 @SuppressWarnings("nls")
 public class LambdaForEachMapRuleTest extends SingleRuleTest {
@@ -25,7 +24,7 @@ public class LambdaForEachMapRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new LambdaForEachMapRule(LambdaForEachMapASTVisitor.class);
+		rule = new LambdaForEachMapRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

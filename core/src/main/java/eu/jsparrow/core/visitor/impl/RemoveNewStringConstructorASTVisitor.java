@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.List;
 
@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Finds all instantiations of {@link String} with no input parameter (new
@@ -29,7 +30,7 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTV
 	public boolean visit(ClassInstanceCreation node) {
 		if (ClassRelationUtil.isContentOfTypes(node.getType().resolveBinding(),
 				generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
-				&& !(ASTNode.EXPRESSION_STATEMENT == node.getParent().getNodeType())) {
+				&& ASTNode.EXPRESSION_STATEMENT != node.getParent().getNodeType()) {
 
 			/**
 			 * node.arguments() javadoc shows that its elements are at least
