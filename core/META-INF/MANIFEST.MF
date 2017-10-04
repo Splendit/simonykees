@@ -19,6 +19,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Export-Package: eu.jsparrow.core,
+ eu.jsparrow.core.config,
  eu.jsparrow.core.exception,
  eu.jsparrow.core.refactorer,
  eu.jsparrow.core.rule,
@@ -27,9 +28,11 @@ Export-Package: eu.jsparrow.core,
  eu.jsparrow.core.util,
  eu.jsparrow.core.visitor,
  eu.jsparrow.core.visitor.arithmetic,
- eu.jsparrow.core.visitor.loop.stream,
  eu.jsparrow.core.visitor.lambdaforeach,
  eu.jsparrow.core.visitor.loop.fortoforeach,
+ eu.jsparrow.core.visitor.loop.stream,
  eu.jsparrow.core.visitor.loop.whiletoforeach,
  eu.jsparrow.core.visitor.semiautomatic,
  eu.jsparrow.core.visitor.trycatch
+Bundle-ClassPath: lib/snakeyaml.jar,
+ .
