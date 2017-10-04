@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WildcardType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,6 +138,10 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					methodBlockASTVisitor.setAstRewrite(astRewrite);
 					node.accept(methodBlockASTVisitor);
 					Block moveBlock = methodBlockASTVisitor.getMethodBlock();
+					
+//					if(containsWildCards(moveBlock)) {
+//						return true;
+//					}
 
 					if (moveBlock != null && isCommentFree(node, moveBlock)) {
 
@@ -264,6 +269,12 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 		return true;
 
+	}
+
+	private boolean containsWildCards(Block moveBlock) {
+		WildCardTypeASTVisitor wildCardsVisitor = new WildCardTypeASTVisitor();
+		moveBlock.accept(wildCardsVisitor);
+		return !wildCardsVisitor.getWildCardTypes().isEmpty();
 	}
 
 	/**
@@ -568,4 +579,18 @@ class AnonymousClassNodeWrapperVisitor extends ASTVisitor {
 		return isAncestorOfNode;
 	}
 
+}
+
+class WildCardTypeASTVisitor extends ASTVisitor {
+	private List<WildcardType> wildCardTypes = new ArrayList<>();
+	
+	@Override
+	public boolean visit(WildcardType wildCard) {
+		wildCardTypes.add(wildCard);
+		return true;
+	}
+	
+	public List<WildcardType> getWildCardTypes() {
+		return this.wildCardTypes;
+	}
 }

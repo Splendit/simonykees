@@ -1,5 +1,6 @@
 package eu.jsparrow.sample.postRule.allRules;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -34,6 +35,11 @@ public class TestFunctionalInterfaceRule {
 		String s = finalInitializedStringField;
 	};
 
+	private AFunctionalInterface usingWildcardsInBody = (int a) -> {
+		List<List<? extends Number>> numbers = new ArrayList<>();
+		numbers.stream().map(List<? extends Number>::size).mapToInt(Integer::intValue).sum();
+	};
+
 	private final String declaredfterConstructor = "declaredAfterCtor";
 
 	int a;
@@ -48,7 +54,6 @@ public class TestFunctionalInterfaceRule {
 	}
 
 	public TestFunctionalInterfaceRule() {
-
 		AFunctionalInterface foo = new AFunctionalInterface() {
 
 			@Override
