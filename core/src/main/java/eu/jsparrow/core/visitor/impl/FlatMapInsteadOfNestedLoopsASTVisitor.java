@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -44,6 +45,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	private int depthCount = 0;
 	LinkedList<MethodInvocation> methodInvocationExpressionList = new LinkedList<>();
 	MethodInvocation innerMostMethodInvocation = null;
+	private List<MethodInvocation> toBeSkipped = new ArrayList<>();
 
 	/**
 	 * work is only done for {@link Collection#forEach(java.util.function.Consumer)}
@@ -53,8 +55,6 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	public boolean visit(MethodInvocation methodInvocationNode) {
 		if (FOR_EACH.equals(methodInvocationNode.getName().getIdentifier()) && methodInvocationNode.arguments() != null
 				&& methodInvocationNode.arguments().size() == 1) {
-
-			depthCount++;
 
 			Expression methodArgumentExpression = (Expression) methodInvocationNode.arguments().get(0);
 			if (methodArgumentExpression != null
@@ -73,6 +73,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 						LambdaExpression flatMapLambda = createFlatMapLambda(methodArgumentLambda,
 								(SimpleName) leftMostExpression);
 						if (flatMapLambda != null) {
+							depthCount++;
 							if (depthCount <= 1) {
 								Expression newOuterExpression = addStreamMethodInvocation(methodInvocationNode);
 								if (newOuterExpression != null
@@ -93,13 +94,21 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 							}
 
 							innerMostMethodInvocation = innerMethodInvocation;
+						} else {
+							toBeSkipped.add(methodInvocationNode);
 						}
+					} else {
+						toBeSkipped.add(methodInvocationNode);
 					}
+				} else {
+					toBeSkipped.add(methodInvocationNode);
 				}
+			} else {
+				toBeSkipped.add(methodInvocationNode);
 			}
 		}
 
-		return true;
+		return toBeSkipped.isEmpty() || depthCount == 0;
 
 	}
 
@@ -202,7 +211,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	 */
 	@Override
 	public void endVisit(MethodInvocation methodInvocationNode) {
-		if (FOR_EACH.equals(methodInvocationNode.getName().getIdentifier())) {
+		if (FOR_EACH.equals(methodInvocationNode.getName().getIdentifier()) && !toBeSkipped.contains(methodInvocationNode)) {
 			depthCount--;
 
 			if (depthCount == 0 && innerMostMethodInvocation != null && innerMostMethodInvocation.arguments() != null
@@ -226,6 +235,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 				methodInvocationExpressionList.clear();
 			}
 		}
+		toBeSkipped.remove(methodInvocationNode);
 	}
 
 	/**
