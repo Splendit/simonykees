@@ -102,9 +102,9 @@ public class LoggerRuleWizardPageModel {
 	 * 
 	 */
 	private void validateSelection() {
-		String sysOutCurr = currentSelectionMap.get(StandardLoggerConstants.SYSTEM_OUT_PRINT);
-		String sysErrCurr = currentSelectionMap.get(StandardLoggerConstants.SYSTEM_ERR_PRINT);
-		String stackTraceCurr = currentSelectionMap.get(StandardLoggerConstants.PRINT_STACKTRACE);
+		String sysOutCurr = currentSelectionMap.get(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY);
+		String sysErrCurr = currentSelectionMap.get(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY);
+		String stackTraceCurr = currentSelectionMap.get(StandardLoggerConstants.PRINT_STACKTRACE_KEY);
 
 		int sysOutCurrSeverityLevel = (noSeverityLevel.equals(sysOutCurr) || StringUtils.isEmpty(sysOutCurr)) ? 0
 				: rule.getSystemOutReplaceOptions().get(sysOutCurr);

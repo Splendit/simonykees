@@ -98,7 +98,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.selectionChanged(StandardLoggerConstants.SYSTEM_OUT_PRINT,
+				controler.selectionChanged(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY,
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 			}
 		});
@@ -135,7 +135,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.selectionChanged(StandardLoggerConstants.SYSTEM_ERR_PRINT,
+				controler.selectionChanged(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY,
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 			}
 		});
@@ -172,7 +172,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.selectionChanged(StandardLoggerConstants.PRINT_STACKTRACE,
+				controler.selectionChanged(StandardLoggerConstants.PRINT_STACKTRACE_KEY,
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 			}
 		});
@@ -221,11 +221,11 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 	private void initializeData() {
 		systemOutCombo.select(
-				systemOutCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.SYSTEM_OUT_PRINT)));
+				systemOutCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY)));
 		systemErrCombo.select(
-				systemErrCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.SYSTEM_ERR_PRINT)));
+				systemErrCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY)));
 		stackTraceCombo.select(
-				stackTraceCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.PRINT_STACKTRACE)));
+				stackTraceCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.PRINT_STACKTRACE_KEY)));
 	}
 
 	/**

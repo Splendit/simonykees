@@ -7,6 +7,14 @@ public class TestStandardLoggerRule {
 
 	private static String logger;
 	
+	public void replaceSystemOutPrintingException(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
 	public void replaceSystemOutPrint(String input) {
 		System.out.print(input);
 	}

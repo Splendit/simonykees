@@ -10,6 +10,14 @@ public class TestStandardLoggerRule {
 	private static final Logger logger1 = LoggerFactory.getLogger(TestStandardLoggerRule.class);
 	private static String logger;
 	
+	public void replaceSystemOutPrintingException(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			logger1.error(e.getMessage());
+		}
+	}
+	
 	public void replaceSystemOutPrint(String input) {
 		logger1.info(input);
 	}

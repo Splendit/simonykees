@@ -45,17 +45,32 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	private static final String INFO = "info"; //$NON-NLS-1$
 	private static final String WARN = "warn"; //$NON-NLS-1$
 	private static final String ERROR = "error"; //$NON-NLS-1$
+	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
 	private Map<String, Integer> systemOutReplaceOptions = new LinkedHashMap<>();
 	private Map<String, Integer> systemErrReplaceOptions = new LinkedHashMap<>();
+	private Map<String, Integer> systemOutPrintExceptionReplaceOptions = new LinkedHashMap<>();
+	private Map<String, Integer> systemErrPrintExceptionReplaceOptions = new LinkedHashMap<>();
 	private Map<String, Integer> pritntStacktraceReplaceOptions = new LinkedHashMap<>();
+	private Map<String, Integer> newLoggingStatementOptions = new LinkedHashMap<>();
 	private Map<String, String> selectedOptions = new HashMap<>();
+	
+	private static final Map<String, Integer> replaceOptions;
 
 	private SupportedLogger supportedLoger = null;
 	private String loggerQualifiedName = null;
+	
+	static {
+		Map<String, Integer> options = new LinkedHashMap<>();
+		options.put(TRACE, 1);
+		options.put(DEBUG, 2);
+		options.put(INFO, 3);
+		options.put(WARN, 4);
+		options.put(ERROR, 5);
+		replaceOptions = Collections.unmodifiableMap(options);
+	}
 
 	public StandardLoggerRule() {
-		super();
 		this.visitor = StandardLoggerASTVisitor.class;
 		this.name = Messages.StandardLoggerRule_name;
 		this.description = Messages.StandardLoggerRule_description;
@@ -88,7 +103,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		return false;
 	}
 
-	public void setSelectedOptions(Map<String, String> selectedOptions) {
+	private void setSelectedOptions(Map<String, String> selectedOptions) {
 		this.selectedOptions.putAll(selectedOptions);
 	}
 
@@ -97,23 +112,12 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	}
 
 	private void initLogLevelOptions() {
-		systemOutReplaceOptions.put(TRACE, 1);
-		systemOutReplaceOptions.put(DEBUG, 2);
-		systemOutReplaceOptions.put(INFO, 3);
-		systemOutReplaceOptions.put(WARN, 4);
-		systemOutReplaceOptions.put(ERROR, 5);
-
-		systemErrReplaceOptions.put(TRACE, 1);
-		systemErrReplaceOptions.put(DEBUG, 2);
-		systemErrReplaceOptions.put(INFO, 3);
-		systemErrReplaceOptions.put(WARN, 4);
-		systemErrReplaceOptions.put(ERROR, 5);
-
-		pritntStacktraceReplaceOptions.put(TRACE, 1);
-		pritntStacktraceReplaceOptions.put(DEBUG, 2);
-		pritntStacktraceReplaceOptions.put(INFO, 3);
-		pritntStacktraceReplaceOptions.put(WARN, 4);
-		pritntStacktraceReplaceOptions.put(ERROR, 5);
+		systemOutReplaceOptions.putAll(replaceOptions);
+		systemErrReplaceOptions.putAll(replaceOptions);
+		systemErrPrintExceptionReplaceOptions.putAll(replaceOptions);
+		systemOutPrintExceptionReplaceOptions.putAll(replaceOptions);
+		newLoggingStatementOptions.putAll(replaceOptions);
+		pritntStacktraceReplaceOptions.putAll(replaceOptions);
 	}
 
 	@Override
@@ -130,13 +134,31 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	public Map<String, Integer> getPrintStackTraceReplaceOptions() {
 		return pritntStacktraceReplaceOptions;
 	}
+	
+	@Override
+	public Map<String, Integer> getSystemOutPrintExceptionReplaceOptions() {
+		return systemOutPrintExceptionReplaceOptions;
+	}
+
+	@Override
+	public Map<String, Integer> getSystemErrPrintExceptionReplaceOptions() {
+		return systemErrPrintExceptionReplaceOptions;
+	}
+	
+	@Override
+	public Map<String, Integer> getNewLoggingStatementOptions() {
+		return newLoggingStatementOptions;
+	}
 
 	@Override
 	public Map<String, String> getDefaultOptions() {
 		Map<String, String> defaultOptions = new HashMap<>();
-		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT, INFO);
-		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT, ERROR);
-		defaultOptions.put(StandardLoggerConstants.PRINT_STACKTRACE, ERROR);
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, INFO);
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY, ERROR);
+		defaultOptions.put(StandardLoggerConstants.PRINT_STACKTRACE_KEY, ERROR);
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY, ERROR);
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY, ERROR);
+		defaultOptions.put(StandardLoggerConstants.NEW_LOGGING_STATEMENT_KEY, EMPTY_STRING);
 
 		return defaultOptions;
 	}

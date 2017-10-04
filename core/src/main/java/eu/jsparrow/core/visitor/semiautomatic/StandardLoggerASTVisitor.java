@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +19,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -33,6 +35,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
@@ -90,6 +93,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 */
 	private static final String LOG4J_LOGGER_FACTORY_QUALIFIED_NAME = "org.apache.logging.log4j.LogManager"; //$NON-NLS-1$
 	private static final String SEPARATOR = "->"; //$NON-NLS-1$
+	
+	private static final List<String> exceptionQualifiedName = Collections.singletonList(java.lang.Exception.class.getName());
 
 	private boolean importsNeeded = false;
 
@@ -122,9 +127,12 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	public boolean preVisit2(ASTNode node) {
 		// rule precondition: all options must be set
 		return loggerQualifiedName != null && replacingOptions != null
-				&& replacingOptions.containsKey(StandardLoggerConstants.PRINT_STACKTRACE)
-				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_ERR_PRINT)
-				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_OUT_PRINT);
+				&& replacingOptions.containsKey(StandardLoggerConstants.PRINT_STACKTRACE_KEY)
+				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY)
+				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY)
+				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY)
+				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY)
+				&& replacingOptions.containsKey(StandardLoggerConstants.NEW_LOGGING_STATEMENT_KEY);
 	}
 
 	@Override
@@ -231,37 +239,32 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		if ((PRINT.equals(methodName.getIdentifier()) || PRINTLN.equals(methodName.getIdentifier()))
 				&& methodInvocation.arguments().size() == 1) {
 			/*
-			 * Looking for System.out/err.print/ln where System.out/err is a qualified name
-			 * expression of the print/ln method invocation.
+			 * Looking for System.out/err.print/ln where System.out/err is a
+			 * qualified name expression of the print/ln method invocation.
 			 */
 			Expression argument = (Expression) methodInvocation.arguments().get(0);
+			Expression expression = methodInvocation.getExpression();
 			// ... and if the argument of the method invocation is a string
-			if (ClassRelationUtil.isContentOfTypes(argument.resolveTypeBinding(),
-					Collections.singletonList(java.lang.String.class.getName()))) {
-				Expression expression = methodInvocation.getExpression();
-				if (expression != null && ASTNode.QUALIFIED_NAME == expression.getNodeType()) {
-					QualifiedName expressionQualifier = (QualifiedName) expression;
-					Name qualifier = expressionQualifier.getQualifier();
-
-					if (ClassRelationUtil.isContentOfTypes(qualifier.resolveTypeBinding(),
-							Collections.singletonList(JAVA_LANG_SYSTEM))) {
-						SimpleName qualiferName = expressionQualifier.getName();
-						String systemOutOption = replacingOptions.get(StandardLoggerConstants.SYSTEM_OUT_PRINT);
-						String systemErrOption = replacingOptions.get(StandardLoggerConstants.SYSTEM_ERR_PRINT);
-
-						if (OUT.equals(qualiferName.getIdentifier()) && !StringUtils.isEmpty(systemOutOption)) {
-							// replace the System.out.println with a logger
-							replaceMethod(methodInvocation, systemOutOption);
-						} else if (ERR.equals(qualiferName.getIdentifier()) && !StringUtils.isEmpty(systemErrOption)) {
-							// replace the System.err.println with a logger
-							replaceMethod(methodInvocation, systemErrOption);
-						}
-					}
-				}
+			if (!ClassRelationUtil.isContentOfTypes(argument.resolveTypeBinding(),
+					Collections.singletonList(java.lang.String.class.getName())) || expression == null
+					|| ASTNode.QUALIFIED_NAME != expression.getNodeType()) {
+				return false;
 			}
 
+			QualifiedName expressionQualifier = (QualifiedName) expression;
+			Name qualifier = expressionQualifier.getQualifier();
+
+			if (!ClassRelationUtil.isContentOfTypes(qualifier.resolveTypeBinding(),
+					Collections.singletonList(JAVA_LANG_SYSTEM))) {
+				return false;
+			}
+
+			SimpleName qualiferName = expressionQualifier.getName();
+			calcReplacingOtion(argument, qualiferName)
+					.ifPresent(replacingOption -> replaceMethod(methodInvocation, replacingOption));
+
 		} else if (PRINT_STACK_TRACE.equals(methodName.getIdentifier())
-				&& !StringUtils.isEmpty(replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE))) {
+				&& !StringUtils.isEmpty(replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE_KEY))) {
 			/*
 			 * Looking for e.printStackTrace() where 'e' is a throwable object.
 			 */
@@ -272,12 +275,30 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				if (ClassRelationUtil.isInheritingContentOfTypes(iTypeBinding,
 						Collections.singletonList(JAVA_LANG_THROWABLE))) {
 					// replace printStackTrace with the logger method.
-					String replacingMethod = replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE);
+					String replacingMethod = replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE_KEY);
 					replaceMethod(methodInvocation, simpleName, replacingMethod);
 				}
 			}
 		}
 		return true;
+	}
+
+	private Optional<String> calcReplacingOtion(Expression argument, SimpleName qualiferName) {		
+		ExceptionsASTVisitor visitor = new ExceptionsASTVisitor();
+		argument.accept(visitor);
+		boolean logsException = !visitor.getFoundExceptions().isEmpty();
+		String option = ""; //$NON-NLS-1$
+		if(logsException && OUT.equals(qualiferName.getIdentifier())) {
+			option = replacingOptions.get(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY);
+		} else if (logsException && ERR.equals(qualiferName.getIdentifier())) {
+			option = replacingOptions.get(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY);
+		} else if(OUT.equals(qualiferName.getIdentifier())) {
+			option = replacingOptions.get(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY);
+		} else if (ERR.equals(qualiferName.getIdentifier())) {
+			option = replacingOptions.get(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY);
+		}
+
+		return Optional.of(option).filter(s -> !s.isEmpty());
 	}
 
 	/**
@@ -532,6 +553,28 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 		public boolean isLoggerFree() {
 			return !clashingFound;
+		}
+	}
+	
+	class ExceptionsASTVisitor extends ASTVisitor {
+		private List<SimpleName> foundExceptions = new ArrayList<>();
+		
+		@Override
+		public boolean visit(SimpleName simpleName) {
+			IBinding binding = simpleName.resolveBinding();
+			if(binding != null && IBinding.VARIABLE == binding.getKind()) {
+				ITypeBinding typeBinding = simpleName.resolveTypeBinding(); 
+				if(typeBinding != null && (ClassRelationUtil.isContentOfTypes(typeBinding, exceptionQualifiedName)
+						|| ClassRelationUtil.isInheritingContentOfTypes(typeBinding, exceptionQualifiedName))) {
+							foundExceptions.add(simpleName);
+				}
+			}
+
+			return true;
+		}
+		
+		public List<SimpleName> getFoundExceptions() {
+			return this.foundExceptions;
 		}
 	}
 }
