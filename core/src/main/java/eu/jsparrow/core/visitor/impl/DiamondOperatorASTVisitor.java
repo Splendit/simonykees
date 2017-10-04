@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Type;
@@ -67,14 +68,15 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 				ASTNode parent = node.getParent();
 
 				/*
-				 * It is important that the type arguments in the initialization
+				 * It is important that the type arguments in the declaration
 				 * matches with the type arguments in initialization/assignment.
 				 * If the declaration is a raw type, we cannot replace the type
 				 * arguments with a diamond operator.
 				 */
 
 				if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()
-						&& (!hasParameterizedArguments(node) || isMethodArgumentsTypeInferable())) {
+						&& (!hasParameterizedArguments(node) || isMethodArgumentsTypeInferable()) 
+						&& !hasMissingLambdaTypeArguments(node)) {
 
 					/*
 					 * Declaration and initialization occur in the same
@@ -97,7 +99,8 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					}
 
 				} else if (ASTNode.ASSIGNMENT == parent.getNodeType()
-						&& (!hasParameterizedArguments(node) || isMethodArgumentsTypeInferable())) {
+						&& (!hasParameterizedArguments(node) || isMethodArgumentsTypeInferable())
+						&& !hasMissingLambdaTypeArguments(node)) {
 
 					/*
 					 * Declaration and assignment occur on different statements:
@@ -116,8 +119,8 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 						if (rhsTypeBinding != null) {
 							ITypeBinding[] rhsTypeBindingArguments = rhsTypeBinding.getTypeArguments();
 							/*
-							 * compare type arguments in new instance creation with 
-							 * the ones in declaration
+							 * compare type arguments in new instance creation
+							 * with the ones in declaration
 							 */
 							sameTypes = ClassRelationUtil.compareITypeBinding(lhsTypeBindingArguments,
 									rhsTypeBindingArguments);
@@ -126,15 +129,14 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 				} else if (ASTNode.METHOD_INVOCATION == parent.getNodeType() && isMethodArgumentsTypeInferable()
 						&& MethodInvocation.ARGUMENTS_PROPERTY == node.getLocationInParent()) {
-
+					MethodInvocation methodInvocation = (MethodInvocation)parent;
 					/*
 					 * Covers the case when diamond operator can be used on the
-					 * arguments of a method invocation. e.g: <p> {@code
-					 * map.put("key", new ArrayList<String>());} <br/> can be
-					 * replaced with: <br/> {@code map.put("key", new
-					 * ArrayList<>());} <br/>
+					 * arguments of a method invocation. e.g: map.put("key", new
+					 * ArrayList<String>()). It can be replaced with:
+					 * map.put("key", new ArrayList<>())
 					 */
-					List<Expression> argumentList = ASTNodeUtil.returnTypedList(((MethodInvocation) parent).arguments(),
+					List<Expression> argumentList = ASTNodeUtil.returnTypedList(methodInvocation.arguments(),
 							Expression.class);
 
 					ITypeBinding[] parameterTypeArgs = null;
@@ -145,10 +147,11 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					 * resolve the typeBinding of the ClassInstanceCreation
 					 * position in MethodHead
 					 */
-					IMethodBinding methodBinding = ((MethodInvocation) parent).resolveMethodBinding();
+					IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 					if (-1 != i && methodBinding != null) {
 						ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
-						if (parameterTypes != null && parameterTypes.length > i) {
+						if (parameterTypes != null && parameterTypes.length > i
+								&& !ClassRelationUtil.isOverloadedWithParameterizedTypes(methodInvocation, methodBinding, i)) {
 							ITypeBinding parameterType = parameterTypes[i];
 							parameterTypeArgs = parameterType.getTypeArguments();
 						}
@@ -177,6 +180,63 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Checks whether the given {@link ClassInstanceCreation} node uses raw
+	 * method references as parameters (i.e. references to parameterized methods
+	 * without explicitly providing the type arguments).
+	 * 
+	 * @param node
+	 *            a node representing a parameterized constructor invocation
+	 * @return {@code true} if the number of the missing type arguments in a
+	 *         method reference is bigger than 1, or {@code false} otherwise.
+	 */
+	private boolean hasMissingLambdaTypeArguments(ClassInstanceCreation node) {
+		/*
+		 * in SIM-820 was discovered that a diamond operator cannot be used when
+		 * invoking a parameterized constructor which takes as parameters method
+		 * references having more than one missing type arguments.
+		 */
+		return ASTNodeUtil.returnTypedList(node.arguments(), Expression.class).stream()
+				.anyMatch(this::isLambdaWithMissingTypeArguments);
+	}
+	
+	/**
+	 * Checks if the given expression is a {@link MethodReference} invoked
+	 * without the required type arguments.
+	 * 
+	 * @param argument
+	 *            an expression representing an argument of a method invocation.
+	 * @return {@code true} if the above condition is met, or {@code false}
+	 *         otherwise.
+	 */
+	private boolean isLambdaWithMissingTypeArguments(Expression argument) {
+
+		if (argument instanceof MethodReference) {
+			MethodReference lambda = (MethodReference) argument;
+			ITypeBinding argBinding = argument.resolveTypeBinding();
+			if (argBinding == null) {
+				return false;
+			}
+			if (!argBinding.isParameterizedType()) {
+				return false;
+			}
+
+			ITypeBinding[] expectedReferenceTypes = argBinding.getTypeArguments();
+			if (expectedReferenceTypes.length != 1) {
+				return false;
+			}
+
+			ITypeBinding expectedReferenceType = expectedReferenceTypes[0];
+			if (!expectedReferenceType.isParameterizedType()) {
+				return false;
+			}
+			int numExpectedTypeArgs = expectedReferenceType.getTypeArguments().length;
+			return numExpectedTypeArgs > 1 && numExpectedTypeArgs > lambda.typeArguments().size();
+		}
+
+		return false;
 	}
 
 	/**
