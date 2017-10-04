@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,17 @@ public class LambdaToMethodReferenceRule {
 
 	List<Person> personList = Arrays.asList(new Person("asdf", LocalDate.of(1999, 1, 1)),
 			new Person("jkl", LocalDate.of(2009, 2, 2)), new Person("yxcv", LocalDate.of(1989, 1, 1)));
+
+	/*
+	 * SIM-821 - the following should not be changed
+	 */
+	Function<Integer, String> toString = (Integer i) -> i.toString();
+
+	Function<Integer, String> toStringStatic = (Integer i) -> Integer.toString(i);
+
+	Function<AmbiguousMethods, String> testingAmb = (AmbiguousMethods i) -> AmbiguousMethods.testAmbiguity(i);
+
+	Function<AmbiguousMethods, String> testingAmb2 = (AmbiguousMethods i) -> i.testAmbiguity();
 
 	public void referenceToStaticMethod() {
 		Collections.sort(personList, Person::compareByAge);
@@ -137,13 +149,13 @@ public class LambdaToMethodReferenceRule {
 
 			@Override
 			public boolean hasNext() {
-				personList.forEach((person) -> doSomething(person));
+				personList.forEach(person -> doSomething(person));
 				return false;
 			}
 
 			@Override
 			public Object next() {
-				personList.forEach((person) -> doSomething(person));
+				personList.forEach(person -> doSomething(person));
 				return null;
 			}
 
@@ -317,5 +329,27 @@ public class LambdaToMethodReferenceRule {
 			return "e:" + super.getName();
 		}
 
+	}
+}
+
+/**
+ * SIM-821
+ */
+class AmbiguousMethods {
+
+	public String testAmbiguity() {
+		return "nonStaticMethod";
+	}
+
+	public String testAmbiguity(int i) {
+		return "nonStaticMethod";
+	}
+
+	public String testAmbiguity(String s, int i) {
+		return "nonStaticMethod";
+	}
+
+	public static String testAmbiguity(AmbiguousMethods i) {
+		return String.valueOf(i);
 	}
 }

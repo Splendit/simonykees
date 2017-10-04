@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.RearrangeClassMembersASTVisitor;
+import eu.jsparrow.core.visitor.impl.RearrangeClassMembersASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -14,8 +14,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class RearrangeClassMembersRule extends RefactoringRule<RearrangeClassMembersASTVisitor> {
 
-	public RearrangeClassMembersRule(Class<RearrangeClassMembersASTVisitor> visitor) {
-		super(visitor);
+	public RearrangeClassMembersRule() {
+		super();
+		this.visitor = RearrangeClassMembersASTVisitor.class;
 		this.name = Messages.RearrangeClassMembersRule_name;
 		this.description = Messages.RearrangeClassMembersRule_description;
 	}

@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 
 import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Looks for occurrences of equals(..) that refer to an Enumeration.

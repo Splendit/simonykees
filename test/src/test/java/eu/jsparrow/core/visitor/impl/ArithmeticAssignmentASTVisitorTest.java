@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 import static org.junit.Assert.assertFalse;

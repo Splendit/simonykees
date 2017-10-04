@@ -15,8 +15,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class LambdaForEachCollectRule extends RefactoringRule<LambdaForEachCollectASTVisitor> {
 
-	public LambdaForEachCollectRule(Class<LambdaForEachCollectASTVisitor> visitor) {
-		super(visitor);
+	public LambdaForEachCollectRule() {
+		super();
+		this.visitor = LambdaForEachCollectASTVisitor.class;
 		this.name = Messages.LambdaForEachCollectRule_name;
 		this.description = Messages.LambdaForEachCollectRule_description;
 	}

@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.UseIsEmptyRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.UseIsEmptyRuleASTVisitor;
 
 @SuppressWarnings("nls")
 public class UseIsEmptyRulesTest extends SingleRuleTest {
@@ -26,7 +25,7 @@ public class UseIsEmptyRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new UseIsEmptyRule(UseIsEmptyRuleASTVisitor.class);
+		rule = new UseIsEmptyRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.IndexOfToContainsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.IndexOfToContainsASTVisitor;
 
 @SuppressWarnings("nls")
 public class IndexOfToContainsRulesTest extends SingleRuleTest {
@@ -26,7 +25,7 @@ public class IndexOfToContainsRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new IndexOfToContainsRule(IndexOfToContainsASTVisitor.class);
+		rule = new IndexOfToContainsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

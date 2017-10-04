@@ -13,12 +13,12 @@ public class FlatMapInsteadOfNestedLoopsRule {
 
 	public void test() {
 		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
-		matrix2.stream().filter(row -> !row.isEmpty()).flatMap((row) -> row.stream()).filter(col -> !col.isEmpty()).flatMap((col) -> col.stream()).filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
+		matrix2.stream().filter(row -> !row.isEmpty()).flatMap(row -> row.stream()).filter(col -> !col.isEmpty()).flatMap(col -> col.stream()).filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
 			System.out.print(element);
 		});
 
 		List<List<List<List<String>>>> matrix3 = Arrays.asList(Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl"))));
-		matrix3.stream().filter(row -> !row.isEmpty()).flatMap((row) -> row.stream()).filter(col -> !col.isEmpty()).flatMap((col) -> col.stream()).filter(cell -> !cell.isEmpty()).flatMap((cell) -> cell.stream()).filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
+		matrix3.stream().filter(row -> !row.isEmpty()).flatMap(row -> row.stream()).filter(col -> !col.isEmpty()).flatMap(col -> col.stream()).filter(cell -> !cell.isEmpty()).flatMap(cell -> cell.stream()).filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
 			System.out.print(element);
 		});
 
@@ -35,15 +35,15 @@ public class FlatMapInsteadOfNestedLoopsRule {
 			}
 		}
 
-		matrix.stream().filter(row -> !row.isEmpty()).flatMap((row) -> row.stream()).filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
+		matrix.stream().filter(row -> !row.isEmpty()).flatMap(row -> row.stream()).filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
 			System.out.print(element);
 		});
 
-		matrix.stream().flatMap((row) -> row.stream()).filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
+		matrix.stream().flatMap(row -> row.stream()).filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
 			System.out.print(element);
 		});
 
-		matrix.stream().filter(row -> !row.isEmpty()).flatMap((row) -> row.stream()).forEach(element -> {
+		matrix.stream().filter(row -> !row.isEmpty()).flatMap(row -> row.stream()).forEach(element -> {
 			System.out.print(element);
 		});
 
@@ -53,19 +53,19 @@ public class FlatMapInsteadOfNestedLoopsRule {
 			}
 		}
 
-		matrix.stream().flatMap((row) -> row.stream()).forEach(element -> {
+		matrix.stream().flatMap(row -> row.stream()).forEach(element -> {
 			System.out.print(element);
 		});
 
-		matrix.stream().flatMap((row) -> row.stream()).forEach(element -> {
+		matrix.stream().flatMap(row -> row.stream()).forEach(element -> {
 			System.out.print(element);
 		});
 
-		matrix.stream().flatMap((row) -> row.stream()).forEach(element -> {
+		matrix.stream().flatMap(row -> row.stream()).forEach(element -> {
 			System.out.print(element);
 		});
 
-		matrix.stream().flatMap((row) -> row.stream()).forEach(element -> {
+		matrix.stream().flatMap(row -> row.stream()).forEach(element -> {
 			System.out.print(element);
 		});
 

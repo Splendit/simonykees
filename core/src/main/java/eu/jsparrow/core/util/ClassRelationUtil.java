@@ -5,9 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 
@@ -91,6 +93,20 @@ public class ClassRelationUtil {
 	 *         have the same qualified name.
 	 */
 	public static boolean compareITypeBinding(ITypeBinding[] firstTypeBindings, ITypeBinding[] secondTypeBindings) {
+		if(!compareSizes(firstTypeBindings, secondTypeBindings)) {
+			return false;
+		}
+		
+		for (int i = 0; i < firstTypeBindings.length; i++) {
+			if (!compareITypeBinding(firstTypeBindings[i], secondTypeBindings[i])) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private static boolean compareSizes(ITypeBinding[] firstTypeBindings, ITypeBinding[] secondTypeBindings) {
 		if (firstTypeBindings == null || secondTypeBindings == null) {
 			return false;
 		}
@@ -98,16 +114,28 @@ public class ClassRelationUtil {
 		int lhsSize = firstTypeBindings.length;
 		int rhsSize = secondTypeBindings.length;
 
-		if (lhsSize != rhsSize) {
+		return lhsSize == rhsSize;
+	}
+	
+	public static boolean compareBoxedITypeBinding(ITypeBinding[] firstTypeBindings, ITypeBinding[] secondTypeBindings) {
+		if(!compareSizes(firstTypeBindings, secondTypeBindings)) {
 			return false;
 		}
-
-		for (int i = 0; i < lhsSize; i++) {
-			if (!compareITypeBinding(firstTypeBindings[i], secondTypeBindings[i])) {
+		
+		for(int i = 0; i<firstTypeBindings.length; i++) {
+			ITypeBinding firstType = firstTypeBindings[i];
+			ITypeBinding secondType = secondTypeBindings[i];
+			if(firstType.isPrimitive() || secondType.isPrimitive()) {
+				String firstTypeName = findBoxedTypeOfPrimitive(firstType);
+				String secondTypeName = findBoxedTypeOfPrimitive(secondType);
+				if(!firstTypeName.equals(secondTypeName)) {
+					return false;
+				}
+			} else if(!compareITypeBinding(firstType, secondType)) {
 				return false;
 			}
 		}
-
+		
 		return true;
 	}
 
@@ -182,7 +210,16 @@ public class ClassRelationUtil {
 		return ancestors.stream()
 				.flatMap(ancestor -> Arrays.asList(ancestor.getDeclaredFields()).stream()
 						.filter(field -> !Modifier.isPrivate(field.getModifiers())))
-				.map(varBinding -> varBinding.getName()).collect(Collectors.toList());
+				.map(IVariableBinding::getName).collect(Collectors.toList());
+	}
+	
+	public static List<IMethodBinding> findInheretedMethods(ITypeBinding typeBinding) {
+		List<ITypeBinding> ancestors = findAncestors(typeBinding);
+
+		return ancestors.stream()
+				.flatMap(ancestor -> Arrays.asList(ancestor.getDeclaredMethods()).stream()
+						.filter(method -> !Modifier.isPrivate(method.getModifiers())))
+				.collect(Collectors.toList());
 	}
 
 	/**

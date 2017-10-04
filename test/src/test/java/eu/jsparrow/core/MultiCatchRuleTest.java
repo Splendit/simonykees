@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.trycatch.MultiCatchASTVisitor;
 
 @SuppressWarnings("nls")
 public class MultiCatchRuleTest extends SingleRuleTest {
@@ -26,7 +25,7 @@ public class MultiCatchRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new MultiCatchRule(MultiCatchASTVisitor.class);
+		rule = new MultiCatchRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

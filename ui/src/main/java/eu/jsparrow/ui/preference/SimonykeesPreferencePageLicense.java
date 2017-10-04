@@ -18,7 +18,6 @@ import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -55,21 +54,27 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private static final Logger logger = LoggerFactory.getLogger(SimonykeesPreferencePageLicense.class);
 
-	private Label licenseLabel;
-	private Label licenseStatusLabel;
-	private Button updateButton;
-
-	private Image jSparrowImageActive;
-	private Image jSparrowImageInactive;
-	private Label logoLabel;
-
 	private static final int LICENSE_LABEL_MAX_WIDTH = 370;
 
 	private static final String LOGO_PATH_ACTIVE = "icons/jSparrow_FIN_2_scaled.png"; //$NON-NLS-1$
+
 	private static final String LOGO_PATH_INACTIVE = "icons/jSparrow_FIN_3_scaled.png"; //$NON-NLS-1$
+
+	private Label licenseLabel;
+
+	private Label licenseStatusLabel;
+
+	private Button updateButton;
+
+	private Image jSparrowImageActive;
+
+	private Image jSparrowImageInactive;
+
+	private Label logoLabel;
 
 	@Inject
 	private LicenseValidationService licenseValidationService;
+
 	private boolean isLicenseValidationServiceAvailable = false;
 
 	public SimonykeesPreferencePageLicense() {
@@ -80,8 +85,9 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	@PostConstruct
 	private void postConstruct() {
-		if (licenseValidationService != null)
+		if (licenseValidationService != null) {
 			isLicenseValidationServiceAvailable = true;
+		}
 	}
 
 	@PreDestroy
@@ -168,13 +174,9 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 		updateButton.setVisible(true);
 
-		composite.addDisposeListener(new DisposeListener() {
-
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				jSparrowImageActive.dispose();
-				jSparrowImageInactive.dispose();
-			}
+		composite.addDisposeListener((DisposeEvent e) -> {
+			jSparrowImageActive.dispose();
+			jSparrowImageInactive.dispose();
 		});
 
 		composite.pack();

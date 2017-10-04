@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.UseIsEmptyRuleASTVisitor;
+import eu.jsparrow.core.visitor.impl.UseIsEmptyRuleASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -14,8 +14,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class UseIsEmptyRule extends RefactoringRule<UseIsEmptyRuleASTVisitor> {
 
-	public UseIsEmptyRule(Class<UseIsEmptyRuleASTVisitor> visitor) {
-		super(visitor);
+	public UseIsEmptyRule() {
+		super();
+		this.visitor = UseIsEmptyRuleASTVisitor.class;
 		this.name = Messages.UseIsEmptyRule_name;
 		this.description = Messages.UseIsEmptyRule_description;
 	}

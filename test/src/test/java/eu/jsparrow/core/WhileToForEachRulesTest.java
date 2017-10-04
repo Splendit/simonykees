@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.loop.whiletoforeach.WhileToForEachASTVisitor;
 
 @SuppressWarnings("nls")
 public class WhileToForEachRulesTest extends SingleRuleTest {
@@ -30,7 +29,7 @@ public class WhileToForEachRulesTest extends SingleRuleTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		rule = new WhileToForEachRule(WhileToForEachASTVisitor.class);
+		rule = new WhileToForEachRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 	

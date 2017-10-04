@@ -37,24 +37,17 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	}
 
 	@SuppressWarnings("unchecked")
+	@Override
 	public void endVisit(CompilationUnit node) {
 
-		/**
-		 * Manages the addition of new Imports
-		 */
-		for (String iterator : addImports) {
-			/**
-			 * java.lang doesn't need to be imported
-			 */
-			if (!StringUtils.startsWith(iterator, JAVA_LANG_PACKAGE)) {
-				ImportDeclaration newImport = node.getAST().newImportDeclaration();
-				newImport.setName(node.getAST().newName(iterator));
-				if (node.imports().stream().noneMatch(importDeclaration -> (new ASTMatcher())
-						.match((ImportDeclaration) importDeclaration, newImport))) {
-					astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY).insertLast(newImport, null);
-				}
+		addImports.stream().filter(iterator -> !StringUtils.startsWith(iterator, JAVA_LANG_PACKAGE)).forEach(iterator -> {
+			ImportDeclaration newImport = node.getAST().newImportDeclaration();
+			newImport.setName(node.getAST().newName(iterator));
+			if (node.imports().stream().noneMatch(importDeclaration -> (new ASTMatcher())
+					.match((ImportDeclaration) importDeclaration, newImport))) {
+				astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY).insertLast(newImport, null);
 			}
-		}
+		});
 	}
 
 	/**
@@ -81,11 +74,9 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 		List<AbstractTypeDeclaration> cuDeclaredTypes = ASTNodeUtil.convertToTypedList(cu.types(),
 				AbstractTypeDeclaration.class);
 
-		List<String> toBeAdded = newImports.stream()
+		return newImports.stream()
 				.filter(newImport -> !isInSamePackage(newImport, packageQualifiedName, cuDeclaredTypes))
 				.collect(Collectors.toList());
-
-		return toBeAdded;
 	}
 
 	/**
@@ -106,9 +97,9 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			List<AbstractTypeDeclaration> cuDeclaredTypes) {
 		boolean isInSamePackage = false;
 
-		if (newImport.startsWith(cuPackageQualifiedName + DOT)) {
+		if (StringUtils.startsWith(newImport, cuPackageQualifiedName + DOT)) {
 			int packageNameEndIndex = cuPackageQualifiedName.length() + 1;
-			String suffix = newImport.substring(packageNameEndIndex);
+			String suffix = StringUtils.substring(newImport, packageNameEndIndex);
 			List<String> suffixComponents = Arrays.asList(suffix.split(DOT_REGEX));
 			if (suffixComponents.size() > 1) {
 				/*

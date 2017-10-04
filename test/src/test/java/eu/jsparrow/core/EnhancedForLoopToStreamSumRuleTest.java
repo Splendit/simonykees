@@ -7,29 +7,27 @@ import static org.junit.Assert.assertTrue;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runners.Parameterized.Parameters;
 
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamSumRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamSumASTVisitor;
 
 @SuppressWarnings("nls")
 public class EnhancedForLoopToStreamSumRuleTest extends SingleRuleTest {
 	
-	
 	private static final String SAMPLE_FILE = "EnhancedForLoopToStreamSumRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "enhancedForLoopToStreamSum";
-
+	private String fileName;
+	private Path preRule;
+	private Path postRule;
 	private EnhancedForLoopToStreamSumRule rule;
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new EnhancedForLoopToStreamSumRule(EnhancedForLoopToStreamSumASTVisitor.class);
+		rule = new EnhancedForLoopToStreamSumRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
@@ -52,7 +50,6 @@ public class EnhancedForLoopToStreamSumRuleTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-	
 
 	@Test
 	public void calculateEnabledForProjectShouldBeDisabled() {

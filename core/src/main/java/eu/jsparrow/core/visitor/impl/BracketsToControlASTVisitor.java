@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.function.Predicate;
 
@@ -11,6 +11,8 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+
 /**
  * ASTVisitor that searches control statements for non-block bodies and wraps it
  * into a block.
@@ -21,12 +23,9 @@ import org.eclipse.jdt.core.dom.WhileStatement;
  */
 public class BracketsToControlASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final Predicate<Statement> NOT_BLOCK_TEST = (nodeToTest) -> {
-		return !(nodeToTest instanceof Block);
-	};
-	private static final Predicate<Statement> NOT_BLOCK_TEST_FOR_ELSE = (nodeToTest) -> {
-		return nodeToTest != null && !(nodeToTest instanceof Block) && !(nodeToTest instanceof IfStatement);
-	};
+	private static final Predicate<Statement> NOT_BLOCK_TEST = nodeToTest -> !(nodeToTest instanceof Block);
+	private static final Predicate<Statement> NOT_BLOCK_TEST_FOR_ELSE = nodeToTest -> nodeToTest != null
+			&& !(nodeToTest instanceof Block) && !(nodeToTest instanceof IfStatement);
 
 	@Override
 	public boolean visit(ForStatement node) {

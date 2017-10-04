@@ -65,7 +65,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 			} else {
 				indexInitializer.put(LOOP_INITIALIZER_INCORRECT_EXPRESSION, initializer);
 			}
-		} else if (initializers.size() > 0) {
+		} else if (!initializers.isEmpty()) {
 			multipleLoopInits = true;
 		}
 

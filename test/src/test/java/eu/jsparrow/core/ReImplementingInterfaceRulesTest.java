@@ -11,9 +11,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
-import eu.jsparrow.core.visitor.ReImplementingInterfaceASTVisitor;
+import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class ReImplementingInterfaceRulesTest extends SingleRuleTest {
@@ -25,7 +24,7 @@ public class ReImplementingInterfaceRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new ReImplementingInterfaceRule(ReImplementingInterfaceASTVisitor.class);
+		rule = new ReImplementingInterfaceRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
