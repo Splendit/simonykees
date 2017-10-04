@@ -72,7 +72,7 @@ public class GreetingMojo extends AbstractMojo {
 		final Map<String, String> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, "target/bundlecache");
-		configuration.put(CONFIG_FILE_PATH, configFile.getAbsolutePath());
+		configuration.put(CONFIG_FILE_PATH, (configFile.exists() && !configFile.isDirectory()) ? configFile.getAbsolutePath() : "");
 		configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile);
 
 		// Set working directory
