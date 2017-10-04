@@ -45,7 +45,7 @@ public class TestFunctionalInterfaceRule {
 		@Override
 		public void method(int a) {
 			List<List<? extends Number>> numbers = new ArrayList<>();
-			numbers.stream().map(List<? extends Number>::hashCode).mapToInt(Integer::intValue).sum();
+			numbers.stream().map(Lis::hashCode).mapToInt(Integer::intValue).sum();
 		}
 	};
 	
