@@ -139,9 +139,9 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					node.accept(methodBlockASTVisitor);
 					Block moveBlock = methodBlockASTVisitor.getMethodBlock();
 					
-//					if(containsWildCards(moveBlock)) {
-//						return true;
-//					}
+					if(containsWildCards(moveBlock)) {
+						return true;
+					}
 
 					if (moveBlock != null && isCommentFree(node, moveBlock)) {
 
@@ -271,9 +271,15 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	}
 
-	private boolean containsWildCards(Block moveBlock) {
+	/**
+	 * Checks if a block has at least one occurrence of a 
+	 * {@link WildcardType} node.
+	 * @param block  the block to be checked
+	 * @return {@code true} if the above condition is met and false otherwise. 
+	 */
+	private boolean containsWildCards(Block block) {
 		WildCardTypeASTVisitor wildCardsVisitor = new WildCardTypeASTVisitor();
-		moveBlock.accept(wildCardsVisitor);
+		block.accept(wildCardsVisitor);
 		return !wildCardsVisitor.getWildCardTypes().isEmpty();
 	}
 

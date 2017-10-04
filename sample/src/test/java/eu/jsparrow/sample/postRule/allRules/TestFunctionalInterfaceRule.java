@@ -35,9 +35,13 @@ public class TestFunctionalInterfaceRule {
 		String s = finalInitializedStringField;
 	};
 
-	private AFunctionalInterface usingWildcardsInBody = (int a) -> {
-		List<List<? extends Number>> numbers = new ArrayList<>();
-		numbers.stream().map(List<? extends Number>::size).mapToInt(Integer::intValue).sum();
+	private AFunctionalInterface usingWildcardsInBody = new AFunctionalInterface() {
+
+		@Override
+		public void method(int a) {
+			List<List<? extends Number>> numbers = new ArrayList<>();
+			numbers.stream().map(List<? extends Number>::size).mapToInt(Integer::intValue).sum();
+		}
 	};
 
 	private final String declaredfterConstructor = "declaredAfterCtor";
