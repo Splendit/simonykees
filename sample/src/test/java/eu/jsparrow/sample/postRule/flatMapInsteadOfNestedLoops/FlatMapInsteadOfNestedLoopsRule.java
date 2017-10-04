@@ -106,7 +106,7 @@ public class FlatMapInsteadOfNestedLoopsRule {
 			if(matrix2.size() == 2) {
 				return;
 			}
-			row.stream().filter(col -> !col.isEmpty()).flatMap((col) -> col.stream()).filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
+			row.stream().filter(col -> !col.isEmpty()).flatMap(col -> col.stream()).filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
 				System.out.print(element);
 			});
 		});
@@ -126,7 +126,7 @@ public class FlatMapInsteadOfNestedLoopsRule {
 	
 	public void testQuartedNestedStreams() {
 		List<List<List<List<String>>>> matrix3 = Arrays.asList(Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl"))));
-		matrix3.stream().flatMap((first) -> first.stream()).forEach(second -> {
+		matrix3.stream().flatMap(first -> first.stream()).forEach(second -> {
 			int size = matrix3.size();
 			second.forEach(third -> {
 				third.forEach(fourth -> {
