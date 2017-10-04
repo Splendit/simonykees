@@ -5,7 +5,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.DiamondOperatorASTVisitor;
+import eu.jsparrow.core.visitor.impl.DiamondOperatorASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -21,8 +21,9 @@ public class DiamondOperatorRule extends RefactoringRule<DiamondOperatorASTVisit
 
 	private JavaVersion javaVersion;
 	
-	public DiamondOperatorRule(Class<DiamondOperatorASTVisitor> visitor) {
-		super(visitor);
+	public DiamondOperatorRule() {
+		super();
+		this.visitor = DiamondOperatorASTVisitor.class;
 		this.name = Messages.DiamondOperatorRule_name;
 		this.description = Messages.DiamondOperatorRule_description;
 	}

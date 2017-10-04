@@ -26,10 +26,9 @@ public class LocalVariableUsagesASTVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(SimpleName node) {
-		if (node.resolveBinding().getKind() == IBinding.VARIABLE) {
-			if (StringUtils.equals(node.getIdentifier(), targetName.getIdentifier())) {
-				usages.add(node);
-			}
+		if (node.resolveBinding().getKind() == IBinding.VARIABLE
+				&& StringUtils.equals(node.getIdentifier(), targetName.getIdentifier())) {
+			usages.add(node);
 		}
 		return false;
 	}

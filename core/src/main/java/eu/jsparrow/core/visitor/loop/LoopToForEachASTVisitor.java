@@ -115,7 +115,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			iteratorTypeBinding = iterableTypeBinding.getComponentType();
 		}
 
-		if (iteratorTypeBinding == null || iteratorTypeBinding.getName().isEmpty()) {
+		if (iteratorTypeBinding == null || StringUtils.isEmpty(iteratorTypeBinding.getName())) {
 			return null;
 		}
 
@@ -149,7 +149,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			}
 		}
 
-		Arrays.stream(addedImports).filter(addedImport -> !addedImport.startsWith(JAVA_LANG_PACKAGE))
+		Arrays.stream(addedImports).filter(addedImport -> !StringUtils.startsWith(addedImport, JAVA_LANG_PACKAGE))
 				.forEach(newImports::add);
 
 		return iteratorType;
@@ -226,8 +226,8 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		}
 
 		String identifier = simpleName.getIdentifier();
-		if (identifier.length() > 1 && identifier.endsWith("s")) { //$NON-NLS-1$
-			return identifier.substring(0, identifier.length() - 1);
+		if (identifier.length() > 1 && StringUtils.endsWith(identifier, "s")) { //$NON-NLS-1$
+			return StringUtils.substring(identifier, 0, identifier.length() - 1);
 		} else {
 			return addSingularPrefix(identifier);
 		}
@@ -245,15 +245,15 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	 */
 	private String addSingularPrefix(String identifier) {
 
-		String firstLetter = identifier.substring(0, 1);
-		String remaining = identifier.substring(1);
+		String firstLetter = StringUtils.substring(identifier, 0, 1);
+		String remaining = StringUtils.substring(identifier, 1);
 		String prefix;
 		if (isVowel(identifier.charAt(0))) {
 			prefix = "an"; //$NON-NLS-1$
 		} else {
 			prefix = "a"; //$NON-NLS-1$
 		}
-		return prefix + firstLetter.toUpperCase() + remaining;
+		return prefix + StringUtils.upperCase(firstLetter) + remaining;
 	}
 
 	/**
@@ -265,10 +265,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	 *         otherwise.
 	 */
 	private boolean isVowel(char c) {
-		if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' || c == 'y') {
-			return true;
-		}
-		return false;
+		return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' || c == 'y';
 	}
 
 	protected void storeTempName(Statement node, String newIteratorIdentifier) {
@@ -385,10 +382,10 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 		return
 		// iterator type is not an inner type
-		types.stream().map(ITypeBinding::getErasure).map(type -> type.getQualifiedName())
+		types.stream().map(ITypeBinding::getErasure).map(ITypeBinding::getQualifiedName)
 				.noneMatch(qualifiedName -> qualifiedName.equals(iteratorErasure.getQualifiedName())) &&
 		// iterator type clashes with an inner type
-				types.stream().map(type -> type.getName()).anyMatch(name -> name.equals(iteratorErasure.getName()));
+				types.stream().map(ITypeBinding::getName).anyMatch(name -> name.equals(iteratorErasure.getName()));
 
 	}
 
@@ -531,10 +528,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	 */
 	protected boolean isSingleStatementBodyOfOuterLoop(T node) {
 		StructuralPropertyDescriptor locationProperty = node.getLocationInParent();
-		if (ForStatement.BODY_PROPERTY == locationProperty || WhileStatement.BODY_PROPERTY == locationProperty) {
-			return true;
-		}
 
-		return false;
+		return ForStatement.BODY_PROPERTY == locationProperty || WhileStatement.BODY_PROPERTY == locationProperty;
 	}
 }

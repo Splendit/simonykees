@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.FunctionalInterfaceRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
 
 @SuppressWarnings("nls")
 public class FunctionalInterfaceRuleTest extends SingleRuleTest {
@@ -28,7 +27,7 @@ public class FunctionalInterfaceRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class);
+		rule = new FunctionalInterfaceRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

@@ -55,8 +55,8 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 			List<VariableDeclaration> lambdaExpressionParams = ASTNodeUtil
 					.convertToTypedList(lambdaExpression.parameters(), VariableDeclaration.class);
 
+			// if statement can only be in a block
 			if (lambdaExpressionParams.size() == 1 && lambdaExpression.getBody() instanceof Block) {
-				// if statement can only be in a block
 
 				Block block = (Block) lambdaExpression.getBody();
 
@@ -137,19 +137,20 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 	}
 
 	/**
-	 * creates a new instance of {@link LambdaExpression} with a single
-	 * parameter and the given body
+	 * creates a new instance of {@link LambdaExpression} with a single parameter
+	 * and the given body
 	 * 
 	 * @param parameter
 	 *            the only parameter of the new lambda expression
 	 * @param body
 	 *            the body of the new lambda expression, which must either be an
 	 *            {@link Expression} or a {@link Block}
-	 * @return the newly created {@link LambdaExpression} or null, if the body
-	 *         is not of type {@link Expression},  {@link ExpressionStatement} or {@link Block}.
+	 * @return the newly created {@link LambdaExpression} or null, if the body is
+	 *         not of type {@link Expression}, {@link ExpressionStatement} or
+	 *         {@link Block}.
 	 */
 	private LambdaExpression createLambdaExpression(VariableDeclaration parameter, ASTNode body) {
-		
+
 		LambdaExpression lambda = astRewrite.getAST().newLambdaExpression();
 		lambda.setParentheses(false);
 		
@@ -157,14 +158,14 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 				LambdaExpression.PARAMETERS_PROPERTY);
 		lambdaParamsListRewrite.insertFirst(parameter, null);
 		if (body.getNodeType() == ASTNode.BLOCK) {
-			lambda.setBody((Block)astRewrite.createCopyTarget(body));
+			lambda.setBody((Block) astRewrite.createCopyTarget(body));
 			return lambda;
 		} else if (body.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
-			Expression expression = ((ExpressionStatement)body).getExpression();
-			lambda.setBody((Expression)astRewrite.createCopyTarget(expression));
+			Expression expression = ((ExpressionStatement) body).getExpression();
+			lambda.setBody((Expression) astRewrite.createCopyTarget(expression));
 			return lambda;
 		} else if (body instanceof Expression) {
-			lambda.setBody((Expression)astRewrite.createCopyTarget(body));
+			lambda.setBody((Expression) astRewrite.createCopyTarget(body));
 			return lambda;
 		}
 
@@ -192,13 +193,12 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 	}
 
 	/**
-	 * checks, if a {@link SimpleName} is used in the specified
-	 * {@link Expression}
+	 * checks, if a {@link SimpleName} is used in the specified {@link Expression}
 	 * 
 	 * @param parameter
 	 * @param expression
-	 * @return true, if the {@link SimpleName} is used in the
-	 *         {@link Expression}, false otherwise
+	 * @return true, if the {@link SimpleName} is used in the {@link Expression},
+	 *         false otherwise
 	 */
 	private boolean isParameterUsedInExpression(SimpleName parameter, Expression expression) {
 		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(parameter);
@@ -207,9 +207,8 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 	}
 
 	/**
-	 * checks if the given else statement is null or empty, where empty means
-	 * either one empty statement or a block, which only contains empty
-	 * statements
+	 * checks if the given else statement is null or empty, where empty means either
+	 * one empty statement or a block, which only contains empty statements
 	 * 
 	 * @param elseStatement
 	 * @return true, if the else statement is null or empty, false otherwise
@@ -222,13 +221,7 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 				Block elseStatementBlock = (Block) elseStatement;
 				List<Statement> statements = ASTNodeUtil.convertToTypedList(elseStatementBlock.statements(),
 						Statement.class);
-				boolean onlyEmptyStatementsInBlock = true;
-				for (Statement statement : statements) {
-					if (!(statement instanceof EmptyStatement)) {
-						onlyEmptyStatementsInBlock = false;
-						break;
-					}
-				}
+				boolean onlyEmptyStatementsInBlock = statements.stream().filter(statement -> !(statement instanceof EmptyStatement)).findFirst().map(statement -> false).orElse(true);
 				return onlyEmptyStatementsInBlock;
 			} else if (elseStatement instanceof EmptyStatement) {
 				return true;

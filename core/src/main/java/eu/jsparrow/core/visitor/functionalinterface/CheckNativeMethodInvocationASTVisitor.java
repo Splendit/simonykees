@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
  */
 class CheckNativeMethodInvocationASTVisitor extends ASTVisitor {
 
-	private static String OBJECT = java.lang.Object.class.getName();
+	private static String object = java.lang.Object.class.getName();
 
 	private boolean nonObjectMethodsInvocated = true;
 
@@ -32,7 +32,7 @@ class CheckNativeMethodInvocationASTVisitor extends ASTVisitor {
 	public boolean visit(MethodInvocation node) {
 		IMethodBinding mb = node.resolveMethodBinding();
 		if (mb != null && mb.getDeclaringClass() != null) {
-			nonObjectMethodsInvocated = !OBJECT.equals(mb.getDeclaringClass().getQualifiedName());
+			nonObjectMethodsInvocated = !object.equals(mb.getDeclaringClass().getQualifiedName());
 		}
 		return nonObjectMethodsInvocated;
 	}

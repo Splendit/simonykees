@@ -14,8 +14,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class MultiCatchRule extends RefactoringRule<MultiCatchASTVisitor> {
 
-	public MultiCatchRule(Class<MultiCatchASTVisitor> visitor) {
-		super(visitor);
+	public MultiCatchRule() {
+		super();
+		this.visitor = MultiCatchASTVisitor.class;
 		this.name = Messages.MultiCatchRule_name;
 		this.description = Messages.MultiCatchRule_description;
 	}

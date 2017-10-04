@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Transforms calls to {@link String#indexOf(String)} and
@@ -118,21 +119,6 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final List<String> COLLECTION_TYPE_BINDING_CHECK_LIST = Collections
 			.singletonList(COLLECTION_QUALIFIED_NAME);
 
-	private enum TransformationOption {
-		CONTAINS,
-		NOT_CONTAINS,
-	}
-
-	private enum TransformationType {
-		STRING,
-		COLLECTION,
-	}
-
-	private enum IndexOfMethodPosition {
-		LEFT,
-		RIGHT,
-	}
-
 	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
 		if ("indexOf".equals(methodInvocationNode.getName().getIdentifier())) { //$NON-NLS-1$
@@ -162,40 +148,37 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	private void convertToContains(MethodInvocation methodInvocationNode, TransformationType type) {
 		ASTNode parentNode = methodInvocationNode.getParent();
-		if (parentNode.getNodeType() == ASTNode.INFIX_EXPRESSION) {
+		if (parentNode != null && parentNode.getNodeType() == ASTNode.INFIX_EXPRESSION) {
 			InfixExpression parent = (InfixExpression) parentNode;
-			if (parent != null) {
-				IndexOfMethodPosition position = this.getPosition(parent);
-				TransformationOption option = this.getTransformationOption(parent, position);
-				if (option != null) {
-					List<Expression> methodArguments = ASTNodeUtil.convertToTypedList(methodInvocationNode.arguments(),
-							Expression.class);
-					if (methodArguments != null && methodArguments.size() == 1) {
-						Expression methodArgumentExpression = methodArguments.get(0);
-						boolean doTransformation = true;
+			IndexOfMethodPosition position = this.getPosition(parent);
+			TransformationOption option = this.getTransformationOption(parent, position);
+			if (option != null) {
+				List<Expression> methodArguments = ASTNodeUtil.convertToTypedList(methodInvocationNode.arguments(),
+						Expression.class);
+				if (methodArguments.size() == 1) {
+					Expression methodArgumentExpression = methodArguments.get(0);
+					boolean doTransformation = true;
 
-						/*
-						 * for strings, the argument of the contains method must
-						 * be a string itself. char-Variables or char literals
-						 * will be ignored.
-						 */
-						if (type == TransformationType.STRING && !isStringType(methodArgumentExpression)) {
-							doTransformation = false;
-						}
+					/*
+					 * for strings, the argument of the contains method must be a string itself.
+					 * char-Variables or char literals will be ignored.
+					 */
+					if (type == TransformationType.STRING && !isStringType(methodArgumentExpression)) {
+						doTransformation = false;
+					}
 
-						if (doTransformation) {
-							this.transform(methodInvocationNode.getExpression(), methodArgumentExpression, parent,
-									option);
-						}
+					if (doTransformation) {
+						this.transform(methodInvocationNode.getExpression(), methodArgumentExpression, parent, option);
 					}
 				}
 			}
+
 		}
 	}
 
 	/**
-	 * evaluates whether the method call to indexOf will be replaced by contains
-	 * or !contains or if it will be ignored.
+	 * evaluates whether the method call to indexOf will be replaced by contains or
+	 * !contains or if it will be ignored.
 	 * 
 	 * @param parent
 	 * @param position
@@ -217,39 +200,41 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 				comparisonValueExpression = parent.getLeftOperand();
 			}
 
-			Integer comparisonValue = (Integer) comparisonValueExpression.resolveConstantExpressionValue();
+			if (comparisonValueExpression != null) {
+				Integer comparisonValue = (Integer) comparisonValueExpression.resolveConstantExpressionValue();
 
-			if (comparisonValue != null) {
-				if (comparisonValue == -1) {
-					if (InfixExpression.Operator.EQUALS.equals(operator)) {
-						option = TransformationOption.NOT_CONTAINS;
-					} else if (InfixExpression.Operator.NOT_EQUALS.equals(operator)) {
-						option = TransformationOption.CONTAINS;
-					} else if (position == IndexOfMethodPosition.LEFT) {
-						if (InfixExpression.Operator.GREATER.equals(operator)) {
-							option = TransformationOption.CONTAINS;
-						} else if (InfixExpression.Operator.LESS_EQUALS.equals(operator)) {
+				if (comparisonValue != null) {
+					if (comparisonValue == -1) {
+						if (InfixExpression.Operator.EQUALS.equals(operator)) {
 							option = TransformationOption.NOT_CONTAINS;
+						} else if (InfixExpression.Operator.NOT_EQUALS.equals(operator)) {
+							option = TransformationOption.CONTAINS;
+						} else if (position == IndexOfMethodPosition.LEFT) {
+							if (InfixExpression.Operator.GREATER.equals(operator)) {
+								option = TransformationOption.CONTAINS;
+							} else if (InfixExpression.Operator.LESS_EQUALS.equals(operator)) {
+								option = TransformationOption.NOT_CONTAINS;
+							}
+						} else if (position == IndexOfMethodPosition.RIGHT) {
+							if (InfixExpression.Operator.LESS.equals(operator)) {
+								option = TransformationOption.CONTAINS;
+							} else if (InfixExpression.Operator.GREATER_EQUALS.equals(operator)) {
+								option = TransformationOption.NOT_CONTAINS;
+							}
 						}
-					} else if (position == IndexOfMethodPosition.RIGHT) {
-						if (InfixExpression.Operator.LESS.equals(operator)) {
-							option = TransformationOption.CONTAINS;
-						} else if (InfixExpression.Operator.GREATER_EQUALS.equals(operator)) {
-							option = TransformationOption.NOT_CONTAINS;
-						}
-					}
-				} else if (comparisonValue == 0) {
-					if (position == IndexOfMethodPosition.LEFT) {
-						if (InfixExpression.Operator.GREATER_EQUALS.equals(operator)) {
-							option = TransformationOption.CONTAINS;
-						} else if (InfixExpression.Operator.LESS.equals(operator)) {
-							option = TransformationOption.NOT_CONTAINS;
-						}
-					} else if (position == IndexOfMethodPosition.RIGHT) {
-						if (InfixExpression.Operator.LESS_EQUALS.equals(operator)) {
-							option = TransformationOption.CONTAINS;
-						} else if (InfixExpression.Operator.GREATER.equals(operator)) {
-							option = TransformationOption.NOT_CONTAINS;
+					} else if (comparisonValue == 0) {
+						if (position == IndexOfMethodPosition.LEFT) {
+							if (InfixExpression.Operator.GREATER_EQUALS.equals(operator)) {
+								option = TransformationOption.CONTAINS;
+							} else if (InfixExpression.Operator.LESS.equals(operator)) {
+								option = TransformationOption.NOT_CONTAINS;
+							}
+						} else if (position == IndexOfMethodPosition.RIGHT) {
+							if (InfixExpression.Operator.LESS_EQUALS.equals(operator)) {
+								option = TransformationOption.CONTAINS;
+							} else if (InfixExpression.Operator.GREATER.equals(operator)) {
+								option = TransformationOption.NOT_CONTAINS;
+							}
 						}
 					}
 				}
@@ -301,14 +286,14 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 * evaluates the position of the method invocation to indexOf within the
-	 * parent {@link InfixExpression}.
+	 * evaluates the position of the method invocation to indexOf within the parent
+	 * {@link InfixExpression}.
 	 * 
 	 * @param infixExpression
 	 *            parent
 	 * @return {@link IndexOfMethodPosition#LEFT} or
-	 *         {@link IndexOfMethodPosition#RIGHT} according to the position in
-	 *         the parent. null, if the position could not been determined.
+	 *         {@link IndexOfMethodPosition#RIGHT} according to the position in the
+	 *         parent. null, if the position could not been determined.
 	 */
 	private IndexOfMethodPosition getPosition(InfixExpression infixExpression) {
 		IndexOfMethodPosition position = null;
@@ -344,12 +329,11 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		if (expression != null) {
 			ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
-			if (expressionTypeBinding != null) {
-				if (ClassRelationUtil.isContentOfTypes(expressionTypeBinding, COLLECTION_TYPE_BINDING_CHECK_LIST)
-						|| ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding,
-								COLLECTION_TYPE_BINDING_CHECK_LIST)) {
-					result = true;
-				}
+			if (expressionTypeBinding != null
+					&& ClassRelationUtil.isContentOfTypes(expressionTypeBinding, COLLECTION_TYPE_BINDING_CHECK_LIST)
+					|| ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding,
+							COLLECTION_TYPE_BINDING_CHECK_LIST)) {
+				result = true;
 			}
 		}
 
@@ -357,24 +341,22 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 * checks if the type binding of the given expression is of type
-	 * {@link String}
+	 * checks if the type binding of the given expression is of type {@link String}
 	 * 
 	 * @param expression
-	 * @return true, if the expression is of type {@link String}, false
-	 *         otherwise (and if the expression is null).
+	 * @return true, if the expression is of type {@link String}, false otherwise
+	 *         (and if the expression is null).
 	 */
 	private boolean isStringType(Expression expression) {
 		boolean result = false;
 
 		if (expression != null) {
 			ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
-			if (expressionTypeBinding != null) {
-				if (ClassRelationUtil.isContentOfTypes(expressionTypeBinding, STRING_TYPE_BINDING_CHECK_LIST)
-						|| ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding,
-								STRING_TYPE_BINDING_CHECK_LIST)) {
-					result = true;
-				}
+			if (expressionTypeBinding != null
+					&& (ClassRelationUtil.isContentOfTypes(expressionTypeBinding, STRING_TYPE_BINDING_CHECK_LIST)
+							|| ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding,
+									STRING_TYPE_BINDING_CHECK_LIST))) {
+				result = true;
 			}
 		}
 
@@ -382,27 +364,36 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 * checks if the type binding of the given expression is of type
-	 * {@link Integer}
+	 * checks if the type binding of the given expression is of type {@link Integer}
 	 * 
 	 * @param expression
-	 * @return true, if the expression is of type {@link Integer}, false
-	 *         otherwise (and if the expression is null).
+	 * @return true, if the expression is of type {@link Integer}, false otherwise
+	 *         (and if the expression is null).
 	 */
 	private boolean isIntegerType(Expression expression) {
 		boolean result = false;
 
 		if (expression != null) {
 			ITypeBinding expressionType = expression.resolveTypeBinding();
-			if (expressionType != null) {
-				if (ClassRelationUtil.isContentOfTypes(expressionType, INTEGER_TYPE_BINDING_CHECK_LIST)
-						|| ClassRelationUtil.isInheritingContentOfTypes(expressionType,
-								INTEGER_TYPE_BINDING_CHECK_LIST)) {
-					result = true;
-				}
+			if (expressionType != null && (ClassRelationUtil.isContentOfTypes(expressionType,
+					INTEGER_TYPE_BINDING_CHECK_LIST)
+					|| ClassRelationUtil.isInheritingContentOfTypes(expressionType, INTEGER_TYPE_BINDING_CHECK_LIST))) {
+				result = true;
 			}
 		}
 
 		return result;
+	}
+
+	private enum TransformationOption {
+		CONTAINS, NOT_CONTAINS,
+	}
+
+	private enum TransformationType {
+		STRING, COLLECTION,
+	}
+
+	private enum IndexOfMethodPosition {
+		LEFT, RIGHT,
 	}
 }

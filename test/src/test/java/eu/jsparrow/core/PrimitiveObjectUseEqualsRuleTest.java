@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.PrimitiveObjectUseEqualsASTVisitor;
 
 @SuppressWarnings("nls")
 public class PrimitiveObjectUseEqualsRuleTest extends SingleRuleTest {
@@ -25,7 +24,7 @@ public class PrimitiveObjectUseEqualsRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new PrimitiveObjectUseEqualsRule(PrimitiveObjectUseEqualsASTVisitor.class);
+		rule = new PrimitiveObjectUseEqualsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

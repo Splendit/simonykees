@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 import static org.junit.Assert.assertFalse;
@@ -6,6 +6,8 @@ import static org.junit.Assert.assertFalse;
 import org.eclipse.jdt.core.dom.Block;
 import org.junit.Before;
 import org.junit.Test;
+
+import eu.jsparrow.core.visitor.impl.PrimitiveObjectUseEqualsASTVisitor;
 
 @SuppressWarnings({ "nls" })
 public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTest {

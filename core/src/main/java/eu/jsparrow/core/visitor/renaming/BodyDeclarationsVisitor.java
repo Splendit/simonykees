@@ -69,6 +69,7 @@ class BodyDeclarationsVisitor extends ASTVisitor {
 		return nestedTypeDeclarationLevel == 1;
 	}
 
+	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
 		nestedTypeDeclarationLevel--;
 	}

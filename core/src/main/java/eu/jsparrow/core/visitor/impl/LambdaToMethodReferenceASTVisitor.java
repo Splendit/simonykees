@@ -1,11 +1,12 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
-import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -22,6 +23,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -34,13 +36,14 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.AbstractAddImportASTVisitor;
 
 /**
  * converts lambda expressions to method references of the form
  * {@code <Expression>::<MethodName>}. statement lambdas have to be converted to
  * expression lambdas first, using {@link StatementLambdaToExpressionASTVisitor}
  * 
- * @author Matthias Webhofer
+ * @author Matthias Webhofer, Ardit Ymeri
  * @since 1.2
  *
  */
@@ -100,6 +103,15 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 				 */
 				if (methodArguments.size() == lambdaParams.size()
 						&& checkMethodParameters(lambdaParams, methodArguments)) {
+					
+					IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+						
+					List<ITypeBinding> ambParams = methodArguments.stream().skip(1).map(Expression::resolveTypeBinding)
+							.collect(Collectors.toList());
+					if (isAmbiguousMethodReference(methodInvocation, ambParams)) {
+						return true;
+					}
+
 
 					ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
 
@@ -117,7 +129,6 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 						 * We have to check this, because the method could be
 						 * declared in the outer class.
 						 */
-						IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 						ITypeBinding methodsDeclaringClass = methodBinding.getDeclaringClass();
 						AbstractTypeDeclaration lambdaEnclosing = ASTNodeUtil.getSpecificAncestor(lambdaExpressionNode,
 								AbstractTypeDeclaration.class);
@@ -185,8 +196,10 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 								lambdaParams.subList(1, lambdaParams.size()), methodArguments)) {
 
 							String typeNameStr = findTypeOfSimpleName(methodInvocationExpressionName);
-
-							if (typeNameStr != null && !typeNameStr.isEmpty()) {
+							List<ITypeBinding> ambTypes = lambdaParams.stream()
+									.map(var -> var.resolveBinding().getType()).collect(Collectors.toList());
+							if (typeNameStr != null && !typeNameStr.isEmpty()
+									&& !isAmbiguousMethodReference(methodInvocation, ambTypes)) {
 
 								Name typeName = astRewrite.getAST().newName(typeNameStr);
 								SimpleName methodName = (SimpleName) astRewrite
@@ -241,6 +254,57 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 
 		return true;
 	}
+
+	/**
+	 * Checks if the transformation of a lambda expression to a method reference
+	 * will cause an ambiguity for the java compiler. For example
+	 * {@code Integer::toString} causes an ambiguity because it can point to
+	 * both {@link Integer#toString()} and {@link Integer#toString(int)}, where
+	 * the former is a static method and the latter is an instance method.
+	 * 
+	 * @param methodInvocation
+	 *            a node representing a method invocation
+	 * @param params
+	 *            the type of the parameters that can cause ambiguity
+	 * @return {@code true} if an ambiguity is detected, and {@code false}
+	 *         otherwise.
+	 */
+	private boolean isAmbiguousMethodReference(MethodInvocation methodInvocation, List<ITypeBinding> params) {
+		Expression expression = methodInvocation.getExpression();
+		IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+		ITypeBinding type;
+		List<IMethodBinding> methods = new ArrayList<>();
+		if (expression != null) {
+			type = expression.resolveTypeBinding();
+		} else {
+			type = methodBinding.getDeclaringClass();
+		}
+		methods.addAll(Arrays.asList(type.getDeclaredMethods()));
+		methods.addAll(ClassRelationUtil.findInheretedMethods(type));
+		String methodIdentifier = methodInvocation.getName().getIdentifier();
+
+		ITypeBinding[] paramsArray = params.stream().toArray(ITypeBinding[]::new);
+		if (Modifier.isStatic(methodBinding.getModifiers())) {
+			/*
+			 * static methods can cause ambiguity with non-static methods
+			 */
+			return methods.stream()
+					.anyMatch(method -> methodIdentifier.equals(method.getName())
+							&& !Modifier.isStatic(method.getModifiers()) && ClassRelationUtil
+									.compareBoxedITypeBinding(method.getParameterTypes(), paramsArray));
+		} else {
+			/*
+			 * non-static methods can cause ambiguity with static methods
+			 */
+			return methods.stream()
+					.anyMatch(method -> methodIdentifier.equals(method.getName())
+							&& Modifier.isStatic(method.getModifiers()) && ClassRelationUtil
+									.compareBoxedITypeBinding(method.getParameterTypes(), paramsArray));
+		}
+
+	}
+	
+	
 
 	/**
 	 * Inserts the existing type arguments to the method reference.

@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.function.Predicate;
 
@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.constants.ReservedNames;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Primitives should not be boxed just for "String" conversion
@@ -88,9 +89,9 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 					 * primitives that are implicit cast-able to float. doubles
 					 * do not have this property
 					 */
-					Predicate<ITypeBinding> isDoubleVariable = (
-							binding) -> (binding != null && (binding.getName().contains(ReservedNames.DOUBLE_PRIMITIVE)
-									|| (binding.getName().contains(ReservedNames.DOUBLE))));
+					Predicate<ITypeBinding> isDoubleVariable = 
+							binding -> (binding != null && (StringUtils.contains(binding.getName(), ReservedNames.DOUBLE_PRIMITIVE)
+									|| (StringUtils.contains(binding.getName(), ReservedNames.DOUBLE))));
 
 					if (ReservedNames.FLOAT.equals(refactorPrimitiveType.getIdentifier())
 							&& isDoubleVariable.test(refactorCandidateTypeBinding)) {

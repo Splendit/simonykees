@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.StringConcatToPlusASTVisitor;
+import eu.jsparrow.core.visitor.impl.StringConcatToPlusASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -14,8 +14,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class StringConcatToPlusRule extends RefactoringRule<StringConcatToPlusASTVisitor> {
 
-	public StringConcatToPlusRule(Class<StringConcatToPlusASTVisitor> visitor) {
-		super(visitor);
+	public StringConcatToPlusRule() {
+		super();
+		this.visitor = StringConcatToPlusASTVisitor.class;
 		this.name = Messages.StringConcatToPlusRule_name;
 		this.description = Messages.StringConcatToPlusRule_description;
 	}

@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * An Collection that removes it from itself is replaced with clear
@@ -26,27 +27,27 @@ public class CollectionRemoveAllASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	private static final Logger logger = LoggerFactory.getLogger(CollectionRemoveAllASTVisitor.class);
 
-	private static String COLLECTION_FULLY_QUALLIFIED_NAME = java.util.Collection.class.getName();
+	private static String collectionFullyQualifiedName = java.util.Collection.class.getName();
 
 	private ASTMatcher astMatcher = new ASTMatcher();
 
 	@Override
 	public boolean visit(MethodInvocation node) {
 		if (StringUtils.equals("removeAll", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
-				&& node.getExpression() instanceof SimpleName && ClassRelationUtil.isInheritingContentOfTypes(
-						node.getExpression().resolveTypeBinding(), Collections.singletonList(COLLECTION_FULLY_QUALLIFIED_NAME))) {
+				&& node.getExpression() instanceof SimpleName
+				&& ClassRelationUtil.isInheritingContentOfTypes(node.getExpression().resolveTypeBinding(),
+						Collections.singletonList(collectionFullyQualifiedName))) {
 
 			@SuppressWarnings("unchecked")
 			List<Expression> arguments = (List<Expression>) node.arguments();
-			if (arguments.size() == 1 && arguments.get(0) instanceof SimpleName) {
-				if (astMatcher.match((SimpleName) arguments.get(0), node.getExpression())) {
-					logger.debug("replace statement"); //$NON-NLS-1$
-					
-					SimpleName clear = node.getAST().newSimpleName("clear"); //$NON-NLS-1$
-					MethodInvocation newMI = NodeBuilder.newMethodInvocation(node.getAST(),
-							(Expression) astRewrite.createMoveTarget(node.getExpression()), clear);
-					astRewrite.replace(node, newMI, null);
-				}
+			if (arguments.size() == 1 && arguments.get(0) instanceof SimpleName
+					&& astMatcher.match((SimpleName) arguments.get(0), node.getExpression())) {
+				logger.debug("replace statement"); //$NON-NLS-1$
+
+				SimpleName clear = node.getAST().newSimpleName("clear"); //$NON-NLS-1$
+				MethodInvocation newMI = NodeBuilder.newMethodInvocation(node.getAST(),
+						(Expression) astRewrite.createMoveTarget(node.getExpression()), clear);
+				astRewrite.replace(node, newMI, null);
 			}
 		}
 		return true;

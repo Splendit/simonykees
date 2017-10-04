@@ -18,8 +18,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class TryWithResourceRule extends RefactoringRule<TryWithResourceASTVisitor> {
 
-	public TryWithResourceRule(Class<TryWithResourceASTVisitor> visitor) {
-		super(visitor);
+	public TryWithResourceRule() {
+		super();
+		this.visitor = TryWithResourceASTVisitor.class;
 		this.name = Messages.TryWithResourceRule_name;
 		this.description = Messages.TryWithResourceRule_description;
 	}
