@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.RemoveNewStringConstructorASTVisitor;
 
 @SuppressWarnings("nls")
 public class RemoveNewStringConstructorRulesTest extends SingleRuleTest {
@@ -25,7 +24,7 @@ public class RemoveNewStringConstructorRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new RemoveNewStringConstructorRule(RemoveNewStringConstructorASTVisitor.class);
+		rule = new RemoveNewStringConstructorRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

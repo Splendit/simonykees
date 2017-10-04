@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.loop.stream;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -18,6 +19,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -66,8 +68,8 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 			if (approvedStatement != null) {
 
 				/*
-				 * create method invocation java.util.Collection::stream on the
-				 * expression of the enhanced for loop with no parameters
+				 * create method invocation java.util.Collection::stream on the expression of
+				 * the enhanced for loop with no parameters
 				 */
 				Expression expressionCopy = createExpressionForStreamMethodInvocation(expression);
 
@@ -79,24 +81,26 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				}
 
 				/*
-				 * create lambda expression, which will be used as the only
-				 * parameter of the forEach method. The parameter and the body
-				 * of the enhanced for loop will be used for the corresponding
-				 * parts of the lambda expression.
+				 * create lambda expression, which will be used as the only parameter of the
+				 * forEach method. The parameter and the body of the enhanced for loop will be
+				 * used for the corresponding parts of the lambda expression.
 				 */
-				SimpleName parameterCopy = (SimpleName) astRewrite.createCopyTarget(parameterName);
+				SimpleName parameterNameCopy = (SimpleName) astRewrite.createCopyTarget(parameterName);
+				VariableDeclarationFragment lambdaParameter = astRewrite.getAST().newVariableDeclarationFragment();
+				lambdaParameter.setName(parameterNameCopy);
+				
 				ASTNode statementCopy = astRewrite.createCopyTarget(approvedStatement);
 
 				LambdaExpression lambdaExpression = astRewrite.getAST().newLambdaExpression();
+				lambdaExpression.setParentheses(false);
 				ListRewrite lambdaExpressionParameterListRewrite = astRewrite.getListRewrite(lambdaExpression,
 						LambdaExpression.PARAMETERS_PROPERTY);
-				lambdaExpressionParameterListRewrite.insertFirst(parameterCopy, null);
+				lambdaExpressionParameterListRewrite.insertFirst(lambdaParameter, null);
 				lambdaExpression.setBody(statementCopy);
 
 				/*
-				 * create method invocation java.util.stream.Stream::forEach on
-				 * the previously created stream method invocation with a single
-				 * lambda expression as parameter
+				 * create method invocation java.util.stream.Stream::forEach on the previously
+				 * created stream method invocation with a single lambda expression as parameter
 				 */
 				SimpleName forEachMethodName = astRewrite.getAST().newSimpleName("forEach"); //$NON-NLS-1$
 
@@ -108,8 +112,8 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				forEachMethodInvocationArgumentsListRewrite.insertFirst(lambdaExpression, null);
 
 				/*
-				 * replace enhanced for loop with newly created forEach method
-				 * call, wrapped in an expression statement
+				 * replace enhanced for loop with newly created forEach method call, wrapped in
+				 * an expression statement
 				 */
 				ExpressionStatement expressionStatement = astRewrite.getAST()
 						.newExpressionStatement(forEachMethodInvocation);
@@ -134,10 +138,8 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 			if (isStatementValid(statement, parameter)) {
 				return statement;
 			}
-		} else if (ASTNode.EXPRESSION_STATEMENT == statement.getNodeType()) {
-			if (isStatementValid(statement, parameter)) {
-				return ((ExpressionStatement) statement).getExpression();
-			}
+		} else if (ASTNode.EXPRESSION_STATEMENT == statement.getNodeType() && isStatementValid(statement, parameter)) {
+			return ((ExpressionStatement) statement).getExpression();
 		}
 
 		return null;
@@ -173,10 +175,10 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 			return null;
 		}
 
-		String methodName = ""; //$NON-NLS-1$
+		String methodName;
 		String primitiveName = binding.getName();
 		String expMethRefName = VALUE_OF;
-		Class<? extends Number> boxedClass = null;
+		Class<? extends Number> boxedClass;
 
 		switch (primitiveName) {
 		case "int": //$NON-NLS-1$
@@ -191,9 +193,12 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 			methodName = MAP_TO_DOUBLE;
 			boxedClass = Double.class;
 			break;
+		default:
+			methodName = ""; //$NON-NLS-1$
+			boxedClass = null;
 		}
 
-		if (methodName.isEmpty() || boxedClass == null) {
+		if (StringUtils.isEmpty(methodName) || boxedClass == null) {
 			return null;
 		}
 
@@ -220,8 +225,8 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 	}
 
 	/**
-	 * Makes use of {@link ImportRewrite} to check whether an import statement
-	 * is needed for the given qualified name, and if yes, stores it to the
+	 * Makes use of {@link ImportRewrite} to check whether an import statement is
+	 * needed for the given qualified name, and if yes, stores it to the
 	 * {@link #addImports}.
 	 * 
 	 * @param qualifiedName

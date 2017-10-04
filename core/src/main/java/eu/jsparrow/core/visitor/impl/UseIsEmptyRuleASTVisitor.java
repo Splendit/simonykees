@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.List;
 
@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Looks for Collections, Maps and String length operation that are compared to
@@ -36,6 +37,7 @@ public class UseIsEmptyRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String LENGTH = "length"; //$NON-NLS-1$
 	private static final String SIZE = "size"; //$NON-NLS-1$
 
+	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		if (!methodInvocation.arguments().isEmpty()
 				|| ASTNode.INFIX_EXPRESSION != methodInvocation.getParent().getNodeType()
@@ -80,10 +82,7 @@ public class UseIsEmptyRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private boolean isNumber(Expression otherOperand) {
-		if (otherOperand.getNodeType() == ASTNode.NUMBER_LITERAL) {
-			return true;
-		}
-		return false;
+		return otherOperand.getNodeType() == ASTNode.NUMBER_LITERAL;
 	}
 
 	private boolean isPrefixNumber(Expression otherOperand) {
@@ -119,9 +118,6 @@ public class UseIsEmptyRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 				.isContentOfTypes(node.getExpression().resolveTypeBinding(), fullyQualifiedStringName);
 		boolean isListOrMapType = StringUtils.equals(SIZE, node.getName().getFullyQualifiedName()) && ClassRelationUtil
 				.isContentOfTypes(node.getExpression().resolveTypeBinding(), fullyQualifiedDataStuctures);
-		if (isStringType || isListOrMapType) {
-			return true;
-		}
-		return false;
+		return isStringType || isListOrMapType;
 	}
 }

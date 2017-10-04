@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.InefficientConstructorRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.InefficientConstructorASTVisitor;
 
 @SuppressWarnings("nls")
 public class InefficientConstructorRulesTest extends SingleRuleTest {
@@ -27,7 +26,7 @@ public class InefficientConstructorRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new InefficientConstructorRule(InefficientConstructorASTVisitor.class);
+		rule = new InefficientConstructorRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 	

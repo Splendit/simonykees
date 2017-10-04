@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.RemoveToStringOnStringRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.RemoveToStringOnStringASTVisitor;
 
 @SuppressWarnings("nls")
 public class RemoveToStringRulesTest extends SingleRuleTest {
@@ -25,7 +24,7 @@ public class RemoveToStringRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new RemoveToStringOnStringRule(RemoveToStringOnStringASTVisitor.class);
+		rule = new RemoveToStringOnStringRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

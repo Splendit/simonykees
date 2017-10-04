@@ -39,8 +39,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 	/*
-	 * is initialized in constructor and set to null again if condition is
-	 * broken
+	 * is initialized in constructor and set to null again if condition is broken
 	 */
 	private SimpleName iteratorName;
 	private Statement loopStatement;
@@ -86,27 +85,26 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(VariableDeclarationFragment node) {
-		if (null != iteratorName && node.getName().getIdentifier().equals(iteratorName.getIdentifier())) {
-			if (node.getInitializer() instanceof MethodInvocation) {
-				MethodInvocation nodeInitializer = (MethodInvocation) node.getInitializer();
-				if (ReservedNames.MI_Iterator.equals(nodeInitializer.getName().getFullyQualifiedName())
-						&& nodeInitializer.arguments().isEmpty() && null != nodeInitializer.getExpression()
-						&& nodeInitializer.getExpression() instanceof Name) {
+		if (null != iteratorName && node.getName().getIdentifier().equals(iteratorName.getIdentifier())
+				&& node.getInitializer() instanceof MethodInvocation) {
+			MethodInvocation nodeInitializer = (MethodInvocation) node.getInitializer();
+			if (ReservedNames.MI_Iterator.equals(nodeInitializer.getName().getFullyQualifiedName())
+					&& nodeInitializer.arguments().isEmpty() && null != nodeInitializer.getExpression()
+					&& nodeInitializer.getExpression() instanceof Name) {
 
-					Expression iterableExpression = nodeInitializer.getExpression();
-					ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
-					
-					boolean isRaw = iterableTypeBinding.isRawType();
+				Expression iterableExpression = nodeInitializer.getExpression();
+				ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
 
-					String iterableFullyQualifiedName = Iterable.class.getName();
-					// check if iterable object is compatible with java Iterable
-					boolean isIterable = ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
-							Collections.singletonList(iterableFullyQualifiedName));
+				boolean isRaw = iterableTypeBinding.isRawType();
 
-					if (isIterable && !isRaw) {
-						listName = (Name) iterableExpression;
-						return false;
-					}
+				String iterableFullyQualifiedName = Iterable.class.getName();
+				// check if iterable object is compatible with java Iterable
+				boolean isIterable = ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
+						Collections.singletonList(iterableFullyQualifiedName));
+
+				if (isIterable && !isRaw) {
+					listName = (Name) iterableExpression;
+					return false;
 				}
 			}
 		}
@@ -158,16 +156,16 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 						setNodesToNull();
 						return false;
 					}
-					
+
 					/*
 					 * if 'next()' is called in a nested loop, the transformation cannot be done
 					 */
 					Statement eclosingLoopStatement = findEnclosingLoopStatement(node);
-					if(eclosingLoopStatement != loopStatement) {
+					if (eclosingLoopStatement != loopStatement) {
 						setNodesToNull();
 						return false;
 					}
-					
+
 					iteratorNextCall = methodInvocation;
 					return true;
 				} else if (ReservedNames.MI_HAS_NEXT.equals(methodInvocation.getName().getFullyQualifiedName())
@@ -211,12 +209,12 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		}
 	}
 
-	public void replaceLoop(Statement loopStatement, Statement loopBody, Map<String, Integer> multipleIteratorUse, String iteratorName) {
+	public void replaceLoop(Statement loopStatement, Statement loopBody, Map<String, Integer> multipleIteratorUse,
+			String iteratorName) {
 		Type iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 
 		/*
-		 * iterator has no type-parameter therefore an optimization could not be
-		 * applied
+		 * iterator has no type-parameter therefore an optimization could not be applied
 		 */
 		if (null == iteratorType) {
 			return;
@@ -250,14 +248,13 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 			} else {
 				Integer i = multipleIteratorUse.get(iteratorName);
 				multipleIteratorUse.put(iteratorName, i + 1);
-				iteratorName = iteratorName + i;
+				iteratorName += i;
 			}
 
 			singleVariableDeclaration = NodeBuilder.newSingleVariableDeclaration(loopBody.getAST(),
 					NodeBuilder.newSimpleName(loopBody.getAST(), iteratorName), iteratorType);
 			/*
-			 * if the next call is used only as an ExpressionStatement just
-			 * remove it.
+			 * if the next call is used only as an ExpressionStatement just remove it.
 			 */
 			if (nextCall.getParent() instanceof ExpressionStatement) {
 				astRewrite.remove(nextCall.getParent(), null);

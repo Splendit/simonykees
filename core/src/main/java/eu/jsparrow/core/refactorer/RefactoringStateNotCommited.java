@@ -37,7 +37,7 @@ public class RefactoringStateNotCommited {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 
 		sb.append("["); //$NON-NLS-1$
 		sb.append(exception.getMessage());

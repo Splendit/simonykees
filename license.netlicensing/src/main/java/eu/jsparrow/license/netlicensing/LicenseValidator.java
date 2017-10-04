@@ -23,13 +23,14 @@ import eu.jsparrow.license.netlicensing.model.LicenseeModel;
  */
 public class LicenseValidator {
 
+	private static final Logger logger = LoggerFactory.getLogger(LicenseValidator.class);
+
 	private LicenseValidator() {
 		/*
 		 * Hiding public constructor
 		 */
 	}
-	private static final Logger logger = LoggerFactory.getLogger(LicenseValidator.class);
-	
+
 	public static void doValidate(LicenseeModel licensee) {
 
 		try {
@@ -59,7 +60,7 @@ public class LicenseValidator {
 			logger.warn(Messages.LicenseValidator_cannot_reach_license_provider_on_validation_call, e);
 		}
 	}
-	
+
 	public static boolean isValidLicensee(String licenseeNumber) {
 		boolean validLicensee = false;
 		Context context = RestApiConnection.getAPIRestConnection().getContext();

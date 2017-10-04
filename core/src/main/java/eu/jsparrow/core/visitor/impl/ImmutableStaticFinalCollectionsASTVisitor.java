@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.AbstractAddImportASTVisitor;
 
 /**
  * The {@link VariableDeclarationFragment}s of the {@link FieldDeclaration} will
@@ -128,36 +129,32 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 		if (fragmentNode.getParent() != null && ASTNode.FIELD_DECLARATION == fragmentNode.getParent().getNodeType()) {
 			FieldDeclaration parent = (FieldDeclaration) fragmentNode.getParent();
 			ITypeBinding parentTypeBinding = parent.getType().resolveBinding();
-			if (parentTypeBinding != null) {
 
-				if (ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isStatic)
-						&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isFinal)
-						&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isPrivate)) {
+			if (parentTypeBinding != null && ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isStatic)
+					&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isFinal)
+					&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isPrivate)) {
 
-					Expression initializer = fragmentNode.getInitializer();
-					if (initializer != null && ASTNode.CLASS_INSTANCE_CREATION == initializer.getNodeType()) {
+				Expression initializer = fragmentNode.getInitializer();
+				if (initializer != null && ASTNode.CLASS_INSTANCE_CREATION == initializer.getNodeType()) {
 
-						ITypeBinding initializerTypeBinding = initializer.resolveTypeBinding();
-						List<String> parentTypeList = Collections
-								.singletonList(parentTypeBinding.getErasure().getQualifiedName());
+					ITypeBinding initializerTypeBinding = initializer.resolveTypeBinding();
+					List<String> parentTypeList = Collections
+							.singletonList(parentTypeBinding.getErasure().getQualifiedName());
 
-						if (ClassRelationUtil.isContentOfTypes(initializerTypeBinding, parentTypeList)
-								|| ClassRelationUtil.isInheritingContentOfTypes(initializerTypeBinding,
-										parentTypeList)) {
-							String methodNameString = getSuitableMethodNameForType(parentTypeBinding);
+					if (ClassRelationUtil.isContentOfTypes(initializerTypeBinding, parentTypeList)
+							|| ClassRelationUtil.isInheritingContentOfTypes(initializerTypeBinding, parentTypeList)) {
+						String methodNameString = getSuitableMethodNameForType(parentTypeBinding);
 
-							if (methodNameString != null) {
-								this.addImports.add(JAVA_UTIL_COLLECTIONS);
+						if (methodNameString != null) {
+							this.addImports.add(JAVA_UTIL_COLLECTIONS);
 
-								String fieldName = fragmentNode.getName().getIdentifier();
-								initializersToReplace.put(fieldName, initializer);
-								methodNames.put(fieldName, methodNameString);
-							}
+							String fieldName = fragmentNode.getName().getIdentifier();
+							initializersToReplace.put(fieldName, initializer);
+							methodNames.put(fieldName, methodNameString);
 						}
 					}
 				}
 			}
-
 		}
 
 		return false;
@@ -184,13 +181,12 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 						Expression.class);
 				arguments.forEach(argument -> {
 					ITypeBinding argumentTypeBinding = argument.resolveTypeBinding();
-					if (ClassRelationUtil.isContentOfTypes(argumentTypeBinding, COLLECTION_TYPE_LIST)
+					if ((ClassRelationUtil.isContentOfTypes(argumentTypeBinding, COLLECTION_TYPE_LIST)
 							|| ClassRelationUtil.isInheritingContentOfTypes(argumentTypeBinding, COLLECTION_TYPE_LIST)
 							|| ClassRelationUtil.isContentOfTypes(argumentTypeBinding, MAP_TYPE_LIST)
-							|| ClassRelationUtil.isInheritingContentOfTypes(argumentTypeBinding, MAP_TYPE_LIST)) {
-						if (ASTNode.SIMPLE_NAME == argument.getNodeType()) {
-							excludedNames.add(((SimpleName) argument).getIdentifier());
-						}
+							|| ClassRelationUtil.isInheritingContentOfTypes(argumentTypeBinding, MAP_TYPE_LIST))
+							&& ASTNode.SIMPLE_NAME == argument.getNodeType()) {
+						excludedNames.add(((SimpleName) argument).getIdentifier());
 					}
 				});
 			}
@@ -218,13 +214,11 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 
 	@Override
 	public void endVisit(CompilationUnit compilationUnitNode) {
-		methodNames.keySet().forEach(key -> {
-			if (initializersToReplace.keySet().contains(key) && !excludedNames.contains(key)) {
-				this.addImports.add(JAVA_UTIL_COLLECTIONS);
-				MethodInvocation newMI = createNewMethodInvocation(initializersToReplace.get(key),
-						methodNames.get(key));
-				astRewrite.replace(initializersToReplace.get(key), newMI, null);
-			}
+		methodNames.keySet().stream().filter((key) -> initializersToReplace.keySet().contains(key) && !excludedNames.contains(key)).forEach((key) -> {
+			this.addImports.add(JAVA_UTIL_COLLECTIONS);
+			MethodInvocation newMI = createNewMethodInvocation(initializersToReplace.get(key),
+					methodNames.get(key));
+			astRewrite.replace(initializersToReplace.get(key), newMI, null);
 		});
 
 		super.endVisit(compilationUnitNode);
@@ -233,8 +227,8 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	/*** PRIVATE HELPER METHODS ***/
 
 	/**
-	 * creates the new {@link MethodInvocation} with the given name and the
-	 * given initializer as an argument
+	 * creates the new {@link MethodInvocation} with the given name and the given
+	 * initializer as an argument
 	 * 
 	 * @param initializer
 	 * @param methodNameString
@@ -257,14 +251,13 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	}
 
 	/**
-	 * checks the type of the {@link VariableDeclarationFragment} and selects
-	 * the suitable method name for the unmodifiable {@link Collection} or
-	 * {@link Map}
+	 * checks the type of the {@link VariableDeclarationFragment} and selects the
+	 * suitable method name for the unmodifiable {@link Collection} or {@link Map}
 	 * 
 	 * @param typeBinding
 	 *            of the {@link VariableDeclarationFragment}
-	 * @return the suitable method name for the given type or null, if there
-	 *         isn't one
+	 * @return the suitable method name for the given type or null, if there isn't
+	 *         one
 	 */
 	private String getSuitableMethodNameForType(ITypeBinding typeBinding) {
 		String methodName = null;

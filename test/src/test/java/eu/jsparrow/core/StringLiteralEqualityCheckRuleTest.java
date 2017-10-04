@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.StringLiteralEqualityCheckASTVisitor;
 
 @SuppressWarnings("nls")
 public class StringLiteralEqualityCheckRuleTest extends SingleRuleTest {
@@ -25,7 +24,7 @@ public class StringLiteralEqualityCheckRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new StringLiteralEqualityCheckRule(StringLiteralEqualityCheckASTVisitor.class);
+		rule = new StringLiteralEqualityCheckRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

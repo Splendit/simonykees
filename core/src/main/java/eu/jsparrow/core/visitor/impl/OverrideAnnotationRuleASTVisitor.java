@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Adds the missing @{@link Override} annotation when overriding a method from a
@@ -79,7 +80,7 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 		for (MethodDeclaration method : methods) {
 			// skip constructors, private methods and methods that have the @Override annotation 
 			if (!method.isConstructor()
-					&& !ASTNodeUtil.hasModifier(method.modifiers(), modifier -> modifier.isPrivate())
+					&& !ASTNodeUtil.hasModifier(method.modifiers(), Modifier::isPrivate)
 					&& !isOverrideAnnotated(method)) {
 
 				IMethodBinding methodBinding = method.resolveBinding();

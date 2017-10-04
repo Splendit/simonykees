@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.StringFormatLineSeparatorRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.StringFormatLineSeparatorASTVisitor;
 
 @SuppressWarnings("nls")
 public class StringFormatLineSeparatorRulesTest extends SingleRuleTest {
@@ -26,7 +25,7 @@ public class StringFormatLineSeparatorRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new StringFormatLineSeparatorRule(StringFormatLineSeparatorASTVisitor.class);
+		rule = new StringFormatLineSeparatorRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

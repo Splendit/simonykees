@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor;
+package eu.jsparrow.core.visitor.impl;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Removes all occurrences of StringVariable.concat(Parameter) and transforms

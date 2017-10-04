@@ -14,8 +14,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class LambdaForEachIfWrapperToFilterRule extends RefactoringRule<LambdaForEachIfWrapperToFilterASTVisitor> {
 
-	public LambdaForEachIfWrapperToFilterRule(Class<LambdaForEachIfWrapperToFilterASTVisitor> visitor) {
-		super(visitor);
+	public LambdaForEachIfWrapperToFilterRule() {
+		super();
+		this.visitor = LambdaForEachIfWrapperToFilterASTVisitor.class;
 		this.name = Messages.LambdaForEachIfWrapperToFilterRule_name;
 		this.description = Messages.LambdaForEachIfWrapperToFilterRule_description;
 	}

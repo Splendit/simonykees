@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 
 /**
@@ -206,7 +207,7 @@ public class ClassRelationUtil {
 		return ancestors.stream()
 				.flatMap(ancestor -> Arrays.asList(ancestor.getDeclaredFields()).stream()
 						.filter(field -> !Modifier.isPrivate(field.getModifiers())))
-				.map(varBinding -> varBinding.getName()).collect(Collectors.toList());
+				.map(IVariableBinding::getName).collect(Collectors.toList());
 	}
 	
 	public static List<IMethodBinding> findInheretedMethods(ITypeBinding typeBinding) {

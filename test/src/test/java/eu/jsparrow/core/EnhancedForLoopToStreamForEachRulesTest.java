@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamForEachRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamForEachASTVisitor;
 
 @SuppressWarnings("nls")
 public class EnhancedForLoopToStreamForEachRulesTest extends SingleRuleTest {
@@ -26,7 +25,7 @@ public class EnhancedForLoopToStreamForEachRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new EnhancedForLoopToStreamForEachRule(EnhancedForLoopToStreamForEachASTVisitor.class);
+		rule = new EnhancedForLoopToStreamForEachRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

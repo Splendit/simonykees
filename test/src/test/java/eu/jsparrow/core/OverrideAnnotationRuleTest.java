@@ -14,7 +14,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.OverrideAnnotationRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.OverrideAnnotationRuleASTVisitor;
 
 @SuppressWarnings("nls")
 public class OverrideAnnotationRuleTest extends SingleRuleTest {
@@ -26,7 +25,7 @@ public class OverrideAnnotationRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new OverrideAnnotationRule(OverrideAnnotationRuleASTVisitor.class);
+		rule = new OverrideAnnotationRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
