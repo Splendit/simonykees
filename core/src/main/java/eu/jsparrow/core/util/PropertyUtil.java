@@ -35,6 +35,12 @@ public class PropertyUtil {
 		if (version == null) {
 			return JavaVersion.JAVA_1_1;
 		}
+		/*
+		 * SIM-844 HOTFIX: Java 9 should be treated as Java 8
+		 */
+		if ("9".equals(version) || "1.9".equals(version)) { //$NON-NLS-1$//$NON-NLS-2$
+			version = "1.8"; //$NON-NLS-1$
+		}
 		String enumRepresentation = convertCompilerComplianceToEnumRepresentation(version);
 		JavaVersion usedJavaVersion = JavaVersion.JAVA_1_1;
 		try {
