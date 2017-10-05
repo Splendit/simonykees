@@ -74,6 +74,12 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	private boolean forcedSelectLeft = false;
 
+	private enum SelectionSide {
+		LEFT, RIGHT, NONE,
+	}
+
+	private SelectionSide latestSelectionSide = SelectionSide.NONE;
+
 	public AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
 			AbstractSelectRulesWizardControler controler) {
 		super(Messages.SelectRulesWizardPage_page_name);
@@ -114,11 +120,11 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	protected abstract void createFilteringPart(Composite composite);
 
 	/**
-	 * Creates part of wizard for selecting the rules, built from tree parts.
-	 * First part, left, is tree view in which all filtered rules are shown and
-	 * can be chosen to add on right side. Middle part contains buttons to add
-	 * chosen rules to selection or remove rules already selected. Third, right,
-	 * part is table view containing rules that are selected to be applied.
+	 * Creates part of wizard for selecting the rules, built from tree parts. First
+	 * part, left, is tree view in which all filtered rules are shown and can be
+	 * chosen to add on right side. Middle part contains buttons to add chosen rules
+	 * to selection or remove rules already selected. Third, right, part is table
+	 * view containing rules that are selected to be applied.
 	 * 
 	 * @param parent
 	 */
@@ -187,10 +193,10 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			if (forcedSelectLeft) {
 				forcedSelectLeft = false;
 				/*
-				 * if it is manually selected because of moving, don't
-				 * update view
+				 * if it is manually selected because of moving, don't update view
 				 */
 			} else {
+				latestSelectionSide = SelectionSide.LEFT;
 				controler.selectionChanged();
 			}
 		});
@@ -202,9 +208,14 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			}
 		});
 
-		leftTreeViewer.addDoubleClickListener((DoubleClickEvent event) -> controler.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection()));
+		leftTreeViewer.addDoubleClickListener((DoubleClickEvent event) -> controler
+				.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection()));
 
-		rightTableViewer.addSelectionChangedListener((SelectionChangedEvent event) -> removeButton.setEnabled(!event.getSelection().isEmpty()));
+		rightTableViewer.addSelectionChangedListener((SelectionChangedEvent event) -> {
+			latestSelectionSide = SelectionSide.RIGHT;
+			controler.selectionChanged();
+			removeButton.setEnabled(!event.getSelection().isEmpty());
+		});
 
 		removeButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -213,7 +224,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			}
 		});
 
-		rightTableViewer.addDoubleClickListener((DoubleClickEvent event) -> controler.removeButtonClicked((IStructuredSelection) rightTableViewer.getSelection()));
+		rightTableViewer.addDoubleClickListener((DoubleClickEvent event) -> controler
+				.removeButtonClicked((IStructuredSelection) rightTableViewer.getSelection()));
 
 		addAllButton.addSelectionListener(new SelectionAdapter() {
 			/*
@@ -337,18 +349,16 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Creates bottom part of select wizard containing Text field with
-	 * description of selected rule if only one rule is selected, default
-	 * description otherwise.
+	 * Creates bottom part of select wizard containing Text field with description
+	 * of selected rule if only one rule is selected, default description otherwise.
 	 * 
 	 * @param parent
 	 */
 	private void createDescriptionViewer(Composite parent) {
 		/*
-		 * There is a known issue with automatically showing and hiding
-		 * scrollbars and SWT.WRAP. Using StyledText and
-		 * setAlwaysShowScrollBars(false) makes the vertical scroll work
-		 * correctly at least.
+		 * There is a known issue with automatically showing and hiding scrollbars and
+		 * SWT.WRAP. Using StyledText and setAlwaysShowScrollBars(false) makes the
+		 * vertical scroll work correctly at least.
 		 */
 		descriptionStyledText = new StyledText(parent, SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
 		descriptionStyledText.setAlwaysShowScrollBars(false);
@@ -365,8 +375,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	@SuppressWarnings("unchecked")
 	private void updateData() {
 		/*
-		 * check if model has changed to update table and tree view or is just
-		 * selection changed to update description field and buttons
+		 * check if model has changed to update table and tree view or is just selection
+		 * changed to update description field and buttons
 		 */
 		if (model.hasChanged()) {
 			if (!model.isForced()) {
@@ -379,8 +389,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				}
 				rightTableViewer.setInput(model.getSelection());
 				/*
-				 * updates enabling Finish button according to right side table
-				 * view if selection is empty Finish button is disabled
+				 * updates enabling Finish button according to right side table view if
+				 * selection is empty Finish button is disabled
 				 */
 			} else {
 				leftTreeViewer.setInput(model.getPosibilities());
@@ -411,17 +421,21 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Sets the rule description text according to the currently selected rule
-	 * or to the default text if no rule is selected.
+	 * Sets the rule description text according to the currently selected rule or to
+	 * the default text if no rule is selected.
 	 */
 	@SuppressWarnings("unchecked")
 	private void populateDescriptionTextViewer() {
-		List<Object> selection = ((IStructuredSelection) leftTreeViewer.getSelection()).toList();
-		if (selection.size() == 1) {
+		List<Object> leftSelection = ((IStructuredSelection) leftTreeViewer.getSelection()).toList();
+		List<Object> rightSelection = ((IStructuredSelection) rightTableViewer.getSelection()).toList();
+
+		if (latestSelectionSide == SelectionSide.LEFT && leftSelection.size() == 1) {
 			// descriptionStyledText.setText(
 			// ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>)
 			// selection.get(0)).getDescription());
-			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) selection.get(0));
+			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) leftSelection.get(0));
+		} else if (latestSelectionSide == SelectionSide.RIGHT && rightSelection.size() == 1) {
+			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) rightSelection.get(0));
 		} else {
 			descriptionStyledText.setText(Messages.SelectRulesWizardPage_defaultDescriptionText);
 		}
@@ -443,8 +457,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		String requiredLibrariesValue = (null != rule.requiredLibraries()) ? rule.requiredLibraries()
 				: Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
 		String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
-		String tagsValue = StringUtils
-				.join(rule.getTags().stream().map(Tag::getTagNames).collect(Collectors.toList()), "  "); //$NON-NLS-1$
+		String tagsValue = StringUtils.join(rule.getTags().stream().map(Tag::getTagNames).collect(Collectors.toList()),
+				"  "); //$NON-NLS-1$
 
 		String descriptionText = name + lineDelimiter + lineDelimiter + description + lineDelimiter + lineDelimiter
 				+ requirementsLabel + lineDelimiter + minJavaVersionLabel + minJavaVersionValue + lineDelimiter
@@ -535,7 +549,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	@SuppressWarnings("unchecked")
 	private boolean selectionContainsEnabledEntry(List<Object> selection) {
-		return selection.stream().anyMatch(object -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).isEnabled());
+		return selection.stream()
+				.anyMatch(object -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).isEnabled());
 	}
 
 	public void recalculateLayout() {
@@ -563,8 +578,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		}
 
 		/*
-		 * the mode severe status will be displayed and the OK button
-		 * enabled/disabled.
+		 * the mode severe status will be displayed and the OK button enabled/disabled.
 		 */
 		updateStatus(status);
 	}
@@ -588,10 +602,9 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Updates the status line and the OK button according to the status
-	 * evaluate from an array of status. The most severe error is taken. In case
-	 * that two status with the same severity exists, the status with lower
-	 * index is taken.
+	 * Updates the status line and the OK button according to the status evaluate
+	 * from an array of status. The most severe error is taken. In case that two
+	 * status with the same severity exists, the status with lower index is taken.
 	 *
 	 * @param status
 	 *            the array of status
