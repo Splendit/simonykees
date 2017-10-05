@@ -23,8 +23,8 @@ public class PropertyUtil {
 
 	/**
 	 * Converts a String that is declared in the style of
-	 * {@link JavaCore#COMPILER_COMPLIANCE} to the {@link JavaVersion} counterpart.
-	 * Defaults to Java
+	 * {@link JavaCore#COMPILER_COMPLIANCE} to the {@link JavaVersion}
+	 * counterpart. Defaults to Java
 	 * 
 	 * @param version
 	 *            the {@link JavaCore#COMPILER_COMPLIANCE} String representation
@@ -41,9 +41,9 @@ public class PropertyUtil {
 			usedJavaVersion = JavaVersion.valueOf(enumRepresentation);
 		} catch (IllegalArgumentException e) {
 			/*
-			 * SIM-844 HOTFIX to accept java 9: java 1 to 8 constants from eclipse can be
-			 * translated to a commons.lang 3.1 version Java 9 is not accepted handle it as
-			 * Java 1
+			 * SIM-844 HOTFIX to accept java 9: java 1 to 8 constants from
+			 * eclipse can be translated to a commons.lang 3.1 version Java 9 is
+			 * not accepted handle it as Java 1
 			 */
 			logger.error("Java Version could not be parsed by JavaVersion Enum", e); //$NON-NLS-1$
 		}
