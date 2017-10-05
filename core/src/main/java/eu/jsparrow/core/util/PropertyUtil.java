@@ -8,10 +8,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility class to handle property conversion
  * 
- * Since 2.2.1
- * 
- * @author mgh
- *
+ * @author Martin Huter
+ * @since 2.2.1
  */
 public class PropertyUtil {
 
@@ -47,9 +45,7 @@ public class PropertyUtil {
 			usedJavaVersion = JavaVersion.valueOf(enumRepresentation);
 		} catch (IllegalArgumentException e) {
 			/*
-			 * SIM-844 HOTFIX to accept java 9: java 1 to 8 constants from
-			 * eclipse can be translated to a commons.lang 3.1 version Java 9 is
-			 * not accepted handle it as Java 1
+			 * SIM-844 HOTFIX: If no version fits, Java 1 is used.
 			 */
 			logger.error("Java Version could not be parsed by JavaVersion Enum", e); //$NON-NLS-1$
 		}

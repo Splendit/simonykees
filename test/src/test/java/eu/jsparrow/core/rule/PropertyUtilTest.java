@@ -12,6 +12,12 @@ import org.junit.runners.Parameterized.Parameters;
 
 import eu.jsparrow.core.util.PropertyUtil;
 
+/**
+ * Tests for getting the JavaVersion
+ * 
+ * @author Martin Huter
+ * @since 2.2.1
+ */
 @RunWith(Parameterized.class)
 public class PropertyUtilTest {
 
