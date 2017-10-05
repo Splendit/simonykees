@@ -15,6 +15,7 @@ import eu.jsparrow.core.util.PropertyUtil;
 @RunWith(Parameterized.class)
 public class PropertyUtilTest {
 
+	@SuppressWarnings("nls")
 	@Parameters(name = "{index}: InputString[{0}]")
 	public static Collection<Object[]> data() {
 		return Arrays.asList(new Object[][] { { "Other", JavaVersion.JAVA_1_1 }, { "1.1", JavaVersion.JAVA_1_1 },

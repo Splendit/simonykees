@@ -228,7 +228,7 @@ public class RefactoringPipeline {
 
 					/** SIM-748 Test work around to don't apply syntax checks there */
 					if (!testmode && RefactoringUtil.checkForSyntaxErrors(compilationUnit)) {
-						logger.info("Adding compilation unit to errorList: " + compilationUnit.getElementName());
+						logger.info("Adding compilation unit to errorList: " + compilationUnit.getElementName()); //$NON-NLS-1$
 						containingErrorList.add(compilationUnit);
 					} else {
 						refactoringStates

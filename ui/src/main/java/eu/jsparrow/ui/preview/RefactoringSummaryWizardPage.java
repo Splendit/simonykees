@@ -283,7 +283,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 				ci = new CompareInput(currentRefactoringState.getWorkingCopyName(),
 						initialSource.get(currentRefactoringState), finalSource.get(currentRefactoringState));
 			} else {
-				ci = new CompareInput("", "", "");
+				ci = new CompareInput("", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			compareControl = createInput(changeContainer, ci);
 			compareControl.getParent().layout();

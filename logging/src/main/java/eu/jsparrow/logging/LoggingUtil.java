@@ -77,7 +77,7 @@ public class LoggingUtil {
 		/**
 		 * ignoring logging from eu.jsparrow.core for automated testing.
 		 */
-		Logger logger = (Logger) LoggerFactory.getLogger("eu.jsparrow.core");
+		Logger logger = (Logger) LoggerFactory.getLogger("eu.jsparrow.core"); //$NON-NLS-1$
 		logger.setLevel(ch.qos.logback.classic.Level.OFF);
 		return returnValue;
 	}

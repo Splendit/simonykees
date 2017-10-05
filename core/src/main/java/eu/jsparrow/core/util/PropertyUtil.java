@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Util to handle property conversion
+ * Utility class to handle property conversion
  * 
  * Since 2.2.1
  * 
@@ -45,7 +45,7 @@ public class PropertyUtil {
 			 * translated to a commons.lang 3.1 version Java 9 is not accepted handle it as
 			 * Java 1
 			 */
-			logger.error("Java Version could not be parsed by JavaVersion Enum", e);
+			logger.error("Java Version could not be parsed by JavaVersion Enum", e); //$NON-NLS-1$
 		}
 		return usedJavaVersion;
 	}
