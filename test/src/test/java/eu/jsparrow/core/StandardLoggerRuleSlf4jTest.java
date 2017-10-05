@@ -31,6 +31,7 @@ public class StandardLoggerRuleSlf4jTest extends SingleRuleTest {
 		rule = new StandardLoggerRule();
 		Map<String, String> replaceOptions = rule.getDefaultOptions();
 		replaceOptions.put("new-logging-statement", "error");
+		replaceOptions.put("system-out-print-exception", "error");
 		rule.activateOptions(replaceOptions);
 		
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");

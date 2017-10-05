@@ -43,6 +43,7 @@ public class AllRulesTest extends AbstractRulesTest {
 		StandardLoggerRule standardLoggerRule = new StandardLoggerRule();
 		Map<String, String> options = standardLoggerRule.getDefaultOptions();
 		options.put("new-logging-statement", "error");
+		options.put("system-out-print-exception", "error");
 		standardLoggerRule.activateOptions(options);
 		rulesList.add(standardLoggerRule);
 		rulesList.addAll(RulesContainer.getAllRules());

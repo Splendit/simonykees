@@ -136,7 +136,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY)
 				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY)
 				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY)
-				&& replacingOptions.containsKey(StandardLoggerConstants.NEW_LOGGING_STATEMENT_KEY);
+				&& replacingOptions.containsKey(StandardLoggerConstants.MISSING_LOGG_KEY);
 	}
 
 	@Override
@@ -206,7 +206,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	
 	@Override
 	public boolean visit(CatchClause catchClause) {
-		String replaceOption = replacingOptions.get(StandardLoggerConstants.NEW_LOGGING_STATEMENT_KEY);
+		String replaceOption = replacingOptions.get(StandardLoggerConstants.MISSING_LOGG_KEY);
 		if (replaceOption == null || StringUtils.isEmpty(replaceOption)) {
 			return true;
 		}
@@ -294,9 +294,11 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 			Expression argument = (Expression) methodInvocation.arguments().get(0);
 			Expression expression = methodInvocation.getExpression();
 			// ... and if the argument of the method invocation is a string
-			if (!ClassRelationUtil.isContentOfTypes(argument.resolveTypeBinding(),
-					Collections.singletonList(java.lang.String.class.getName())) || expression == null
-					|| ASTNode.QUALIFIED_NAME != expression.getNodeType()) {
+			if ((!ClassRelationUtil.isContentOfTypes(argument.resolveTypeBinding(),
+					Collections.singletonList(java.lang.String.class.getName()))
+					&& !ClassRelationUtil.isInheritingContentOfTypes(argument.resolveTypeBinding(),
+							Collections.singletonList(java.lang.String.class.getName())))
+					|| expression == null || ASTNode.QUALIFIED_NAME != expression.getNodeType()) {
 				return false;
 			}
 
@@ -318,7 +320,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 			 * Looking for e.printStackTrace() where 'e' is a throwable object.
 			 */
 			Expression expression = methodInvocation.getExpression();
-			if(expression == null || ASTNode.SIMPLE_NAME != expression.getNodeType()) {
+			if (expression == null || ASTNode.SIMPLE_NAME != expression.getNodeType()) {
 				return true;
 			}
 
@@ -330,7 +332,6 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				String replacingMethod = replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE_KEY);
 				replaceMethod(methodInvocation, simpleName, replacingMethod);
 			}
-
 		}
 		return true;
 	}

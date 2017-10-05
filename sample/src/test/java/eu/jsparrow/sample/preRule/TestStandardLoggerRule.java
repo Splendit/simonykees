@@ -9,6 +9,15 @@ public class TestStandardLoggerRule {
 	
 	private final String e = "I am not an exception";
 	
+	public void printingExceptionsAndPrimitives(String input) {
+		System.out.println();
+		System.out.println(6);
+		System.out.println();
+		System.out.println(new Exception().getMessage());
+		System.out.println(new Exception("adsfads").getMessage());
+		System.out.println("adsfads");
+	}
+	
 	public void replaceSystemOutPrintingException(String input) {
 		try {
 			input.substring(5);

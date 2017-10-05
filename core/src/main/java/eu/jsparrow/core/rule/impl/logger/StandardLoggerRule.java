@@ -45,7 +45,6 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	private static final String INFO = "info"; //$NON-NLS-1$
 	private static final String WARN = "warn"; //$NON-NLS-1$
 	private static final String ERROR = "error"; //$NON-NLS-1$
-	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
 	private Map<String, Integer> systemOutReplaceOptions = new LinkedHashMap<>();
 	private Map<String, Integer> systemErrReplaceOptions = new LinkedHashMap<>();
@@ -146,7 +145,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	}
 	
 	@Override
-	public Map<String, Integer> getNewLoggingStatementOptions() {
+	public Map<String, Integer> getMissingLoggInsertOptions() {
 		return newLoggingStatementOptions;
 	}
 
@@ -156,9 +155,9 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, INFO);
 		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY, ERROR);
 		defaultOptions.put(StandardLoggerConstants.PRINT_STACKTRACE_KEY, ERROR);
-		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY, ERROR);
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY, INFO);
 		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY, ERROR);
-		defaultOptions.put(StandardLoggerConstants.NEW_LOGGING_STATEMENT_KEY, EMPTY_STRING);
+		defaultOptions.put(StandardLoggerConstants.MISSING_LOGG_KEY, ERROR);
 		defaultOptions.put(StandardLoggerConstants.LOGGER_QUALIFIED_NAME, StandardLoggerConstants.SLF4J_LOGGER);
 
 		return defaultOptions;

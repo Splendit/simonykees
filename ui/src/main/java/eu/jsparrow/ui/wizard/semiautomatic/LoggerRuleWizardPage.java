@@ -14,6 +14,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
@@ -36,11 +37,12 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	private LoggerRuleWizardPageModel model;
 	private LoggerRuleWizardPageControler controler;
 
-	private Composite composite;
-
 	private Combo systemOutCombo;
 	private Combo systemErrCombo;
 	private Combo stackTraceCombo;
+	private Combo missingLoggCombo;
+	
+	private Button defaultForExceptionLogg;
 
 	private Font boldFont;
 
@@ -57,6 +59,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 	@Override
 	public void createControl(Composite parent) {
+		Composite composite;
 		initializeDialogUnits(parent);
 
 		composite = new Composite(parent, SWT.NONE);
@@ -70,6 +73,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		createSystemOutPart(composite);
 		createSystemErrPart(composite);
 		createStackTracePart(composite);
+		createMissingLogPart(composite);
 
 		model.addListener(this::doStatusUpdate);
 
@@ -100,6 +104,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				controler.selectionChanged(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY,
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
+				updatePrintingExceptionsOptions(defaultForExceptionLogg);
 			}
 		});
 		gridData = new GridData(GridData.FILL, GridData.FILL, false, false);
@@ -137,6 +142,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				controler.selectionChanged(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY,
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
+				updatePrintingExceptionsOptions(defaultForExceptionLogg);
 			}
 		});
 		gridData = new GridData(GridData.FILL, GridData.FILL, false, false);
@@ -174,6 +180,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				controler.selectionChanged(StandardLoggerConstants.PRINT_STACKTRACE_KEY,
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
+				updatePrintingExceptionsOptions(defaultForExceptionLogg);
 			}
 		});
 		gridData = new GridData(GridData.FILL, GridData.FILL, false, false);
@@ -187,6 +194,70 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		stackTraceExplainLabel.setLayoutData(gridData);
 		stackTraceExplainLabel.setText(
 				Messages.LoggerRuleWizardPage_stackTraceMessageLabel);
+		
+		defaultForExceptionLogg = new Button(stackTraceGroup, SWT.CHECK);
+		defaultForExceptionLogg.setText("Always use this option for logging excetions.");
+		defaultForExceptionLogg.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Button btn = (Button) e.getSource();
+				updatePrintingExceptionsOptions(btn);
+			}
+		});
+	}
+	
+	private void updatePrintingExceptionsOptions(Button btn) {
+		if(btn.getSelection()) {
+			String comboSelectedItem = stackTraceCombo.getItem(stackTraceCombo.getSelectionIndex());
+			controler.selectionChanged(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY,
+					comboSelectedItem);
+			controler.selectionChanged(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY,
+					comboSelectedItem);
+		} else {
+			controler.selectionChanged(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY,
+					systemOutCombo.getItem(systemOutCombo.getSelectionIndex()));
+			controler.selectionChanged(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY,
+					systemErrCombo.getItem(systemErrCombo.getSelectionIndex()));
+		}
+	}
+	
+	private void createMissingLogPart(Composite parent) {
+		Group missingLoggGroup = new Group(parent, SWT.NONE);
+		missingLoggGroup.setText("Missing logg statement");
+		missingLoggGroup.setFont(boldFont);
+		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gridData.horizontalSpan = 2;
+		gridData.verticalIndent = 15;
+		gridData.widthHint = 400;
+		missingLoggGroup.setLayoutData(gridData);
+		missingLoggGroup.setLayout(new GridLayout(2, false));
+
+		Label missingLoggLabel = new Label(missingLoggGroup, SWT.NONE);
+		missingLoggLabel.setText("Choose severity level");
+
+		missingLoggCombo = new Combo(missingLoggGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+		populateMissingLogCombo();
+		missingLoggCombo.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				controler.selectionChanged(StandardLoggerConstants.MISSING_LOGG_KEY,
+						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
+			}
+		});
+		gridData = new GridData(GridData.FILL, GridData.FILL, false, false);
+		gridData.widthHint = 200;
+		missingLoggCombo.setLayoutData(gridData);
+
+		Label missingLoggExplainLabel = new Label(missingLoggGroup, SWT.WRAP | SWT.LEFT);
+		gridData = new GridData(SWT.HORIZONTAL, SWT.TOP, true, false, 1, 1);
+		gridData.horizontalSpan = 2;
+		gridData.verticalIndent = 5;
+		missingLoggExplainLabel.setLayoutData(gridData);
+		missingLoggExplainLabel.setText(
+				"Applying rule to selected resources will insert Logger statement with selected severity level to the catch-clauses that are not logging the exception that they cacth.");
+		
 	}
 
 	@Override
@@ -218,6 +289,14 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		Set<String> severityLevels = model.getPrintStackTraceReplaceOptions();
 		severityLevels.forEach(stackTraceCombo::add);
 	}
+	
+	/**
+	 * Set all items for the dropdown ({@link Combo})
+	 */
+	private void populateMissingLogCombo() {
+		Set<String> severityLevels = model.getMissingLoggInsertOptions();
+		severityLevels.forEach(missingLoggCombo::add);
+	}
 
 	private void initializeData() {
 		systemOutCombo.select(
@@ -226,6 +305,8 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 				systemErrCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY)));
 		stackTraceCombo.select(
 				stackTraceCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.PRINT_STACKTRACE_KEY)));
+		missingLoggCombo.select(
+				missingLoggCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.MISSING_LOGG_KEY)));
 	}
 
 	/**

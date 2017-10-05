@@ -13,6 +13,15 @@ public class TestStandardLoggerRule {
 	
 	private final String e = "I am not an exception";
 	
+	public void printingExceptionsAndPrimitives(String input) {
+		System.out.println();
+		System.out.println(6);
+		System.out.println();
+		logger1.info(new Exception().getMessage());
+		logger1.info(new Exception("adsfads").getMessage());
+		logger1.info("adsfads");
+	}
+	
 	public void replaceSystemOutPrintingException(String input) {
 		try {
 			input.substring(5);
