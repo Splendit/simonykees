@@ -14,10 +14,13 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -30,18 +33,19 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractAddImportASTVisitor;
+import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
@@ -193,11 +197,56 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	public boolean visit(MethodDeclaration methodDeclaration) {
 		/*
 		 * Since it is not possible to have a static field in a nested class, the
-		 * introduced logger will be an instance field too. Therefore, it cannot be used
+		 * introduced logger has to be an instance field too. Therefore, it cannot be used
 		 * in a static method.
 		 */
 		return !(nestedTypeDeclarationLevel > 1
 				&& ASTNodeUtil.hasModifier(methodDeclaration.modifiers(), Modifier::isStatic));
+	}
+	
+	@Override
+	public boolean visit(CatchClause catchClause) {
+		String replaceOption = replacingOptions.get(StandardLoggerConstants.NEW_LOGGING_STATEMENT_KEY);
+		if (replaceOption == null || StringUtils.isEmpty(replaceOption)) {
+			return true;
+		}
+		SingleVariableDeclaration exception = catchClause.getException();
+		SimpleName exceptionName = exception.getName();
+
+		Block catchBody = catchClause.getBody();
+		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(exceptionName);
+		catchBody.accept(visitor);
+		List<SimpleName> exceptionUsages = visitor.getUsages();
+		if (!exceptionUsages.isEmpty()) {
+			return true;
+		}
+
+		if (getLoggerName() == null) {
+			addLogger();
+		}
+
+		ExpressionStatement loggingStatement = prepareLoggingStatement(exceptionName, replaceOption, getLoggerName());
+		ListRewrite statemetnRewrite = astRewrite.getListRewrite(catchBody, Block.STATEMENTS_PROPERTY);
+		statemetnRewrite.insertFirst(loggingStatement, null);
+
+		return true;
+	}
+
+	private ExpressionStatement prepareLoggingStatement(SimpleName exceptionName, String replaceOption,
+			String loggerName) {
+		AST ast = astRewrite.getAST();
+		MethodInvocation loggingMethodInocation = ast.newMethodInvocation();
+		loggingMethodInocation.setName(ast.newSimpleName(replaceOption));
+		loggingMethodInocation.setExpression(ast.newSimpleName(loggerName));
+
+		MethodInvocation loggingMessage = ast.newMethodInvocation();
+		loggingMessage.setName(ast.newSimpleName(THROWABLE_GET_MESSAGE));
+		loggingMessage.setExpression(ast.newSimpleName(exceptionName.getIdentifier()));
+
+		ListRewrite argRewrite = astRewrite.getListRewrite(loggingMethodInocation, MethodInvocation.ARGUMENTS_PROPERTY);
+		argRewrite.insertFirst(loggingMessage, null);
+
+		return ast.newExpressionStatement(loggingMethodInocation);
 	}
 
 	/**
@@ -269,21 +318,24 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 			 * Looking for e.printStackTrace() where 'e' is a throwable object.
 			 */
 			Expression expression = methodInvocation.getExpression();
-			if (expression != null && ASTNode.SIMPLE_NAME == expression.getNodeType()) {
-				SimpleName simpleName = (SimpleName) expression;
-				ITypeBinding iTypeBinding = simpleName.resolveTypeBinding();
-				if (ClassRelationUtil.isInheritingContentOfTypes(iTypeBinding,
-						Collections.singletonList(JAVA_LANG_THROWABLE))) {
-					// replace printStackTrace with the logger method.
-					String replacingMethod = replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE_KEY);
-					replaceMethod(methodInvocation, simpleName, replacingMethod);
-				}
+			if(expression == null || ASTNode.SIMPLE_NAME != expression.getNodeType()) {
+				return true;
 			}
+
+			SimpleName simpleName = (SimpleName) expression;
+			ITypeBinding iTypeBinding = simpleName.resolveTypeBinding();
+			if (ClassRelationUtil.isInheritingContentOfTypes(iTypeBinding,
+					Collections.singletonList(JAVA_LANG_THROWABLE))) {
+				// replace printStackTrace with the logger method.
+				String replacingMethod = replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE_KEY);
+				replaceMethod(methodInvocation, simpleName, replacingMethod);
+			}
+
 		}
 		return true;
 	}
 
-	private Optional<String> calcReplacingOtion(Expression argument, SimpleName qualiferName) {		
+	private Optional<String> calcReplacingOtion(Expression argument, SimpleName qualiferName) {
 		ExceptionsASTVisitor visitor = new ExceptionsASTVisitor();
 		argument.accept(visitor);
 		boolean logsException = !visitor.getFoundExceptions().isEmpty();

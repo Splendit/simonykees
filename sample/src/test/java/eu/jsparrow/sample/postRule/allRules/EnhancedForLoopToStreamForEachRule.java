@@ -110,6 +110,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			try {
 				Class.forName(s);
 			} catch (ClassNotFoundException cnfe) {
+				logger.error(cnfe.getMessage());
 				logger.info(s);
 			}
 		});

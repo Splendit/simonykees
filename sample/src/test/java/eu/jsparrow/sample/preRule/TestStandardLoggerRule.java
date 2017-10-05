@@ -7,11 +7,65 @@ public class TestStandardLoggerRule {
 
 	private static String logger;
 	
+	private final String e = "I am not an exception";
+	
 	public void replaceSystemOutPrintingException(String input) {
 		try {
 			input.substring(5);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
+		}
+	}
+	
+	public void replaceSystemErrPrintingException(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
+	}
+	
+	public void insertLoggingStatementInEmptycatchClasuse(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			
+		}
+	}
+	
+	public void insertMissingLoggingStatementInCatchClasuse(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			/*
+			 * The catch clause is not empty, but the exception is not logged.
+			 */
+			
+			System.out.println("Nothing to show");
+		}
+	}
+	
+	public void distinguishLoggedExceptionFromField(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			/*
+			 * The catch clause is not empty, but the exception is not logged.
+			 */
+			
+			System.out.println(this.e);
+		}
+	}
+	
+	public void nestedCatchClauses(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			try {
+				input.substring(5);
+			} catch (Exception e1) {
+				System.out.println(e.getMessage());
+			}
 		}
 	}
 	

@@ -159,6 +159,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY, ERROR);
 		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY, ERROR);
 		defaultOptions.put(StandardLoggerConstants.NEW_LOGGING_STATEMENT_KEY, EMPTY_STRING);
+		defaultOptions.put(StandardLoggerConstants.LOGGER_QUALIFIED_NAME, StandardLoggerConstants.SLF4J_LOGGER);
 
 		return defaultOptions;
 	}

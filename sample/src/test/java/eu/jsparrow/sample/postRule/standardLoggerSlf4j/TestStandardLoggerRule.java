@@ -8,13 +8,72 @@ import org.slf4j.LoggerFactory;
 public class TestStandardLoggerRule {
 
 	private static final Logger logger1 = LoggerFactory.getLogger(TestStandardLoggerRule.class);
+
 	private static String logger;
+	
+	private final String e = "I am not an exception";
 	
 	public void replaceSystemOutPrintingException(String input) {
 		try {
 			input.substring(5);
 		} catch (Exception e) {
 			logger1.error(e.getMessage());
+		}
+	}
+	
+	public void replaceSystemErrPrintingException(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			logger1.error(e.getMessage());
+		}
+	}
+	
+	public void insertLoggingStatementInEmptycatchClasuse(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			logger1.error(e.getMessage());
+			
+		}
+	}
+	
+	public void insertMissingLoggingStatementInCatchClasuse(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			/*
+			 * The catch clause is not empty, but the exception is not logged.
+			 */
+			
+			logger1.error(e.getMessage());
+			logger1.info("Nothing to show");
+		}
+	}
+	
+	public void distinguishLoggedExceptionFromField(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			/*
+			 * The catch clause is not empty, but the exception is not logged.
+			 */
+			
+			logger1.error(e.getMessage());
+			logger1.info(this.e);
+		}
+	}
+	
+	public void nestedCatchClauses(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			try {
+				input.substring(5);
+			} catch (Exception e1) {
+				logger1.error(e1.getMessage());
+				logger1.error(e.getMessage());
+			}
 		}
 	}
 	

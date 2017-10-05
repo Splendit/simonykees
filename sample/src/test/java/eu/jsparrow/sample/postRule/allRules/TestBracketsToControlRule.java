@@ -76,6 +76,7 @@ public class TestBracketsToControlRule {
 			try {
 				input /= 0;
 			} catch (ArithmeticException e) {
+				logger.error(e.getMessage());
 				input /= 2;
 			} finally {
 				return ++input;
