@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.compare.internal.CompareDialog;
 import org.eclipse.compare.internal.ComparePreferencePage;
 import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.runtime.IStatus;
@@ -283,7 +282,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 				ci = new CompareInput(currentRefactoringState.getWorkingCopyName(),
 						initialSource.get(currentRefactoringState), finalSource.get(currentRefactoringState));
 			} else {
-				ci = new CompareInput("", "", "");
+				ci = new CompareInput("", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			compareControl = createInput(changeContainer, ci);
 			compareControl.getParent().layout();
