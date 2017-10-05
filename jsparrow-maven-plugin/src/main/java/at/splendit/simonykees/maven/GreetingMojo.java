@@ -41,6 +41,12 @@ public class GreetingMojo extends AbstractMojo {
 	 */
 	@Parameter(defaultValue = "${basedir}/src/main/java")
 	protected File sourceDirectory;
+	
+	@Parameter(defaultValue = "jsparrow.yml", property = "configFile")
+	protected File configFile;
+	
+	@Parameter(defaultValue = "", property = "profile")
+	protected String profile;
 
 	List<String> path = new ArrayList<>();
 
@@ -48,7 +54,9 @@ public class GreetingMojo extends AbstractMojo {
 	public static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone"; //$NON-NLS-1$
 	public static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default"; //$NON-NLS-1$
 	public static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
-
+	public static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH";  //$NON-NLS-1$
+	public static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
+	
 	public void execute() throws MojoExecutionException {
 		getLog().info("Hello, world.");
 
@@ -64,6 +72,8 @@ public class GreetingMojo extends AbstractMojo {
 		final Map<String, String> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, "target/bundlecache");
+		configuration.put(CONFIG_FILE_PATH, (configFile.exists() && !configFile.isDirectory()) ? configFile.getAbsolutePath() : "");
+		configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile);
 
 		// Set working directory
 		String file = System.getProperty("java.io.tmpdir");
@@ -78,7 +88,7 @@ public class GreetingMojo extends AbstractMojo {
 
 		ServiceLoader<FrameworkFactory> ffs = ServiceLoader.load(FrameworkFactory.class);
 		FrameworkFactory frameworkFactory = ffs.iterator().next();
-
+		
 		final Framework framework = frameworkFactory.newFramework(configuration);
 
 		framework.start();
