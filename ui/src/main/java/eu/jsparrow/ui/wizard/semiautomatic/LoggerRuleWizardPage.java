@@ -196,7 +196,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 				Messages.LoggerRuleWizardPage_stackTraceMessageLabel);
 		
 		defaultForExceptionLogg = new Button(stackTraceGroup, SWT.CHECK);
-		defaultForExceptionLogg.setText("Always use this option for logging excetions.");
+		defaultForExceptionLogg.setText(Messages.LoggerRuleWizardPage_alwaysUsePrintStacktraceOptionForLoggingException);
 		defaultForExceptionLogg.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -224,7 +224,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	
 	private void createMissingLogPart(Composite parent) {
 		Group missingLoggGroup = new Group(parent, SWT.NONE);
-		missingLoggGroup.setText("Missing logg statement");
+		missingLoggGroup.setText(Messages.LoggerRuleWizardPage_missingLogLabel);
 		missingLoggGroup.setFont(boldFont);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gridData.horizontalSpan = 2;
@@ -234,7 +234,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		missingLoggGroup.setLayout(new GridLayout(2, false));
 
 		Label missingLoggLabel = new Label(missingLoggGroup, SWT.NONE);
-		missingLoggLabel.setText("Choose severity level");
+		missingLoggLabel.setText(Messages.LoggerRuleWizardPage_severityLevelLabel);
 
 		missingLoggCombo = new Combo(missingLoggGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateMissingLogCombo();
@@ -250,13 +250,13 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		gridData.widthHint = 200;
 		missingLoggCombo.setLayoutData(gridData);
 
-		Label missingLoggExplainLabel = new Label(missingLoggGroup, SWT.WRAP | SWT.LEFT);
+		Label missingLogExplainLabel = new Label(missingLoggGroup, SWT.WRAP | SWT.LEFT);
 		gridData = new GridData(SWT.HORIZONTAL, SWT.TOP, true, false, 1, 1);
 		gridData.horizontalSpan = 2;
 		gridData.verticalIndent = 5;
-		missingLoggExplainLabel.setLayoutData(gridData);
-		missingLoggExplainLabel.setText(
-				"Applying rule to selected resources will insert Logger statement with selected severity level to the catch-clauses that are not logging the exception that they cacth.");
+		missingLogExplainLabel.setLayoutData(gridData);
+		missingLogExplainLabel.setText(
+				Messages.LoggerRuleWizardPage_missingLogMessageLabel);
 		
 	}
 
