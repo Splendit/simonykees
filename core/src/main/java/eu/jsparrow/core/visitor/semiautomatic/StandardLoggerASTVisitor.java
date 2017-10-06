@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
@@ -92,6 +93,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String LOG4J_LOGGER_MANAGER = "LogManager"; //$NON-NLS-1$
 	private static final String LOG4J_GET_LOGGER = "getLogger"; //$NON-NLS-1$
 	private static final String SLF4J_LOGGER_FACTORY_QUALIFIED_NAME = org.slf4j.LoggerFactory.class.getName();
+	private static final String VALUE_OF = "valueOf"; //$NON-NLS-1$
 	/**
 	 * log4j is not within the class path
 	 */
@@ -136,7 +138,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY)
 				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY)
 				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY)
-				&& replacingOptions.containsKey(StandardLoggerConstants.MISSING_LOGG_KEY);
+				&& replacingOptions.containsKey(StandardLoggerConstants.MISSING_LOG_KEY);
 	}
 
 	@Override
@@ -206,7 +208,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	
 	@Override
 	public boolean visit(CatchClause catchClause) {
-		String replaceOption = replacingOptions.get(StandardLoggerConstants.MISSING_LOGG_KEY);
+		String replaceOption = replacingOptions.get(StandardLoggerConstants.MISSING_LOG_KEY);
 		if (replaceOption == null || StringUtils.isEmpty(replaceOption)) {
 			return true;
 		}
@@ -294,13 +296,11 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 			Expression argument = (Expression) methodInvocation.arguments().get(0);
 			Expression expression = methodInvocation.getExpression();
 			// ... and if the argument of the method invocation is a string
-			if ((!ClassRelationUtil.isContentOfTypes(argument.resolveTypeBinding(),
-					Collections.singletonList(java.lang.String.class.getName()))
-					&& !ClassRelationUtil.isInheritingContentOfTypes(argument.resolveTypeBinding(),
-							Collections.singletonList(java.lang.String.class.getName())))
-					|| expression == null || ASTNode.QUALIFIED_NAME != expression.getNodeType()) {
+			if (expression == null || ASTNode.QUALIFIED_NAME != expression.getNodeType()) {
 				return false;
 			}
+			
+
 
 			QualifiedName expressionQualifier = (QualifiedName) expression;
 			Name qualifier = expressionQualifier.getQualifier();
@@ -310,9 +310,10 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				return false;
 			}
 
+			Expression logExpression = calcLogExpression(argument);
 			SimpleName qualiferName = expressionQualifier.getName();
 			calcReplacingOtion(argument, qualiferName)
-					.ifPresent(replacingOption -> replaceMethod(methodInvocation, replacingOption));
+					.ifPresent(replacingOption -> replaceMethod(methodInvocation, replacingOption, logExpression));
 
 		} else if (PRINT_STACK_TRACE.equals(methodName.getIdentifier())
 				&& !StringUtils.isEmpty(replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE_KEY))) {
@@ -336,6 +337,23 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		return true;
 	}
 
+	private Expression calcLogExpression(Expression argument) {
+		ITypeBinding argTypeBinding = argument.resolveTypeBinding();
+		List<String> stringQualifiedName = Collections.singletonList(java.lang.String.class.getName());
+		if(ClassRelationUtil.isContentOfTypes(argTypeBinding, stringQualifiedName) || 
+				ClassRelationUtil.isInheritingContentOfTypes(argTypeBinding, stringQualifiedName)) {
+			return (Expression)astRewrite.createCopyTarget(argument);
+		} else {
+			AST ast = astRewrite.getAST();
+			MethodInvocation stringValueOf = ast.newMethodInvocation();
+			stringValueOf.setName(ast.newSimpleName(VALUE_OF));
+			stringValueOf.setExpression(ast.newSimpleName(String.class.getSimpleName()));
+			ListRewrite argRewrite = astRewrite.getListRewrite(stringValueOf, MethodInvocation.ARGUMENTS_PROPERTY);
+			argRewrite.insertFirst((Expression)astRewrite.createCopyTarget(argument), null);
+			return stringValueOf;
+		}
+	}
+
 	private Optional<String> calcReplacingOtion(Expression argument, SimpleName qualiferName) {
 		ExceptionsASTVisitor visitor = new ExceptionsASTVisitor();
 		argument.accept(visitor);
@@ -355,15 +373,27 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	/**
-	 * Replaces the method invocation with a logger method having one string as a
-	 * parameter
+	 * Replaces the method invocation with a logger method having one string as
+	 * a parameter
 	 * 
 	 * @param methodInvocation
 	 *            to be replaced
 	 * @param replacingMethod
 	 *            name of the replacing method
 	 */
-	private void replaceMethod(MethodInvocation methodInvocation, String replacingMethod) {
+
+	/**
+	 * Replaces the method invocation with a logger method having one string as
+	 * a parameter
+	 * 
+	 * @param methodInvocation
+	 *            to be replaced
+	 * @param replacingMethod
+	 *            name of the replacing method
+	 * @param logExpression
+	 *            the expression being logged
+	 */
+	private void replaceMethod(MethodInvocation methodInvocation, String replacingMethod, Expression logExpression) {
 		if (getLoggerName() == null) {
 			addLogger();
 		}
@@ -373,6 +403,10 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		SimpleName loggerName = ast.newSimpleName(loggerNameIdentifier);
 		astRewrite.replace(methodInvocation.getName(), loggerMethodName, null);
 		astRewrite.replace(methodInvocation.getExpression(), loggerName, null);
+		ListRewrite argRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
+		ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
+				.forEach(arg -> argRewrite.remove(arg, null));
+		argRewrite.insertFirst(logExpression, null);
 	}
 
 	/**
@@ -610,23 +644,33 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 	
 	class ExceptionsASTVisitor extends ASTVisitor {
-		private List<SimpleName> foundExceptions = new ArrayList<>();
+		private List<ASTNode> foundExceptions = new ArrayList<>();
 		
 		@Override
 		public boolean visit(SimpleName simpleName) {
 			IBinding binding = simpleName.resolveBinding();
 			if(binding != null && IBinding.VARIABLE == binding.getKind()) {
 				ITypeBinding typeBinding = simpleName.resolveTypeBinding(); 
-				if(typeBinding != null && (ClassRelationUtil.isContentOfTypes(typeBinding, exceptionQualifiedName)
-						|| ClassRelationUtil.isInheritingContentOfTypes(typeBinding, exceptionQualifiedName))) {
-							foundExceptions.add(simpleName);
-				}
+				storeIfExceptionType(typeBinding, simpleName);
 			}
-
 			return true;
 		}
 		
-		public List<SimpleName> getFoundExceptions() {
+		@Override
+		public boolean visit(ClassInstanceCreation classCreation) {
+			ITypeBinding typeBinding = classCreation.resolveTypeBinding();
+			storeIfExceptionType(typeBinding, classCreation);
+			return true;
+		}
+
+		private void storeIfExceptionType(ITypeBinding typeBinding, ASTNode node) {
+			if(typeBinding != null && (ClassRelationUtil.isContentOfTypes(typeBinding, exceptionQualifiedName)
+					|| ClassRelationUtil.isInheritingContentOfTypes(typeBinding, exceptionQualifiedName))) {
+						foundExceptions.add(node);
+			}
+		}
+		
+		public List<ASTNode> getFoundExceptions() {
 			return this.foundExceptions;
 		}
 	}

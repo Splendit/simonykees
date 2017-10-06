@@ -40,7 +40,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	private Combo systemOutCombo;
 	private Combo systemErrCombo;
 	private Combo stackTraceCombo;
-	private Combo missingLoggCombo;
+	private Combo missingLogCombo;
 	
 	private Button defaultForExceptionLogg;
 
@@ -227,34 +227,34 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	}
 	
 	private void createMissingLogPart(Composite parent) {
-		Group missingLoggGroup = new Group(parent, SWT.NONE);
-		missingLoggGroup.setText(Messages.LoggerRuleWizardPage_missingLogLabel);
-		missingLoggGroup.setFont(boldFont);
+		Group missingLogGroup = new Group(parent, SWT.NONE);
+		missingLogGroup.setText(Messages.LoggerRuleWizardPage_missingLogLabel);
+		missingLogGroup.setFont(boldFont);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gridData.horizontalSpan = 2;
 		gridData.verticalIndent = 15;
 		gridData.widthHint = 400;
-		missingLoggGroup.setLayoutData(gridData);
-		missingLoggGroup.setLayout(new GridLayout(2, false));
+		missingLogGroup.setLayoutData(gridData);
+		missingLogGroup.setLayout(new GridLayout(2, false));
 
-		Label missingLoggLabel = new Label(missingLoggGroup, SWT.NONE);
+		Label missingLoggLabel = new Label(missingLogGroup, SWT.NONE);
 		missingLoggLabel.setText(Messages.LoggerRuleWizardPage_severityLevelLabel);
 
-		missingLoggCombo = new Combo(missingLoggGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+		missingLogCombo = new Combo(missingLogGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateMissingLogCombo();
-		missingLoggCombo.addSelectionListener(new SelectionAdapter() {
+		missingLogCombo.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.selectionChanged(StandardLoggerConstants.MISSING_LOGG_KEY,
+				controler.selectionChanged(StandardLoggerConstants.MISSING_LOG_KEY,
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 			}
 		});
 		gridData = new GridData(GridData.FILL, GridData.FILL, false, false);
 		gridData.widthHint = 200;
-		missingLoggCombo.setLayoutData(gridData);
+		missingLogCombo.setLayoutData(gridData);
 
-		Label missingLogExplainLabel = new Label(missingLoggGroup, SWT.WRAP | SWT.LEFT);
+		Label missingLogExplainLabel = new Label(missingLogGroup, SWT.WRAP | SWT.LEFT);
 		gridData = new GridData(SWT.HORIZONTAL, SWT.TOP, true, false, 1, 1);
 		gridData.horizontalSpan = 2;
 		gridData.verticalIndent = 5;
@@ -298,8 +298,8 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 * Set all items for the dropdown ({@link Combo})
 	 */
 	private void populateMissingLogCombo() {
-		Set<String> severityLevels = model.getMissingLoggInsertOptions();
-		severityLevels.forEach(missingLoggCombo::add);
+		Set<String> severityLevels = model.getMissingLogInsertOptions();
+		severityLevels.forEach(missingLogCombo::add);
 	}
 
 	private void initializeData() {
@@ -309,8 +309,8 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 				systemErrCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY)));
 		stackTraceCombo.select(
 				stackTraceCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.PRINT_STACKTRACE_KEY)));
-		missingLoggCombo.select(
-				missingLoggCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.MISSING_LOGG_KEY)));
+		missingLogCombo.select(
+				missingLogCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.MISSING_LOG_KEY)));
 	}
 
 	/**

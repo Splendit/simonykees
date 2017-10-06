@@ -145,7 +145,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	}
 	
 	@Override
-	public Map<String, Integer> getMissingLoggInsertOptions() {
+	public Map<String, Integer> getMissingLogInsertOptions() {
 		return newLoggingStatementOptions;
 	}
 
@@ -157,7 +157,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		defaultOptions.put(StandardLoggerConstants.PRINT_STACKTRACE_KEY, ERROR);
 		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY, INFO);
 		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY, ERROR);
-		defaultOptions.put(StandardLoggerConstants.MISSING_LOGG_KEY, ERROR);
+		defaultOptions.put(StandardLoggerConstants.MISSING_LOG_KEY, ERROR);
 		defaultOptions.put(StandardLoggerConstants.LOGGER_QUALIFIED_NAME, StandardLoggerConstants.SLF4J_LOGGER);
 
 		return defaultOptions;

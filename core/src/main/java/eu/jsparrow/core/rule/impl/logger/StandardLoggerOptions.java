@@ -61,7 +61,7 @@ public interface StandardLoggerOptions {
 	 * 
 	 * @return a map of replacement options.
 	 */
-	Map<String, Integer> getMissingLoggInsertOptions();
+	Map<String, Integer> getMissingLogInsertOptions();
 
 	/**
 	 * Returns the default replacement options for:
