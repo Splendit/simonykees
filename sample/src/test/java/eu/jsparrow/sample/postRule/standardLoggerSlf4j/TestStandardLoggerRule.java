@@ -25,10 +25,10 @@ public class TestStandardLoggerRule {
 		logger1.info("adsfads");
 		logger1.error(String.valueOf(e));
 		
-		System.out.printf("");
-		System.out.printf("%d - %d", 5, 6);
-		System.out.printf(Locale.GERMANY, "%d - %d", 5, 6);
-		System.out.printf(Locale.GERMANY, "%d - %d");
+		logger1.info("");
+		logger1.info("%d - %d", 5, 6);
+		logger1.info(String.format(Locale.GERMANY, "%d - %d", 5, 6));
+		logger1.info(String.format(Locale.GERMANY, "%d - %d"));
 	}
 	
 	public void replaceSystemOutPrintingException(String input) {
@@ -44,6 +44,16 @@ public class TestStandardLoggerRule {
 			input.substring(5);
 		} catch (Exception e) {
 			logger1.error(e.getMessage());
+		}
+	}
+	
+	public void replaceSystemOutPrintFormatException(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			logger1.error("%d : " + e.getMessage(), 1);
+			logger1.info("%d : val %d : ", 1, 2);
+			logger1.info(String.format(Locale.FRANCE, "%d : val %d : ", 1, 2));
 		}
 	}
 	
@@ -103,12 +113,22 @@ public class TestStandardLoggerRule {
 		logger1.info(input);
 	}
 	
+	public void replaceSystemOutPrintf(String input) {
+		logger1.info("%d : " + input, 1);
+		logger1.info(String.format(Locale.GERMANY, "%d : " + input, 1));
+	}
+	
 	public void replaceSystemErrPrint(String input) {
 		logger1.error(input);
 	}
 	
 	public void replaceSystemErrPrintln(String input) {
 		logger1.error(input);
+	}
+	
+	public void replaceSystemErrPrintf(String input) {
+		logger1.error("%d : " + input, 1);
+		logger1.error(String.format(Locale.GERMANY, "%d : " + input, 1));
 	}
 	
 	public void replacePrintStackTrace(String input) {

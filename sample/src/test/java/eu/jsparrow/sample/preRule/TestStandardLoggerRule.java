@@ -43,6 +43,16 @@ public class TestStandardLoggerRule {
 		}
 	}
 	
+	public void replaceSystemOutPrintFormatException(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			System.out.printf("%d : " + e.getMessage(), 1);
+			System.out.printf("%d : val %d : ", 1, 2);
+			System.out.printf(Locale.FRANCE, "%d : val %d : ", 1, 2);
+		}
+	}
+	
 	public void insertLoggingStatementInEmptycatchClasuse(String input) {
 		try {
 			input.substring(5);
@@ -95,12 +105,22 @@ public class TestStandardLoggerRule {
 		System.out.println(input);
 	}
 	
+	public void replaceSystemOutPrintf(String input) {
+		System.out.printf("%d : " + input , 1);
+		System.out.printf(Locale.GERMANY, "%d : " + input, 1);
+	}
+	
 	public void replaceSystemErrPrint(String input) {
 		System.err.print(input);
 	}
 	
 	public void replaceSystemErrPrintln(String input) {
 		System.err.println(input);
+	}
+	
+	public void replaceSystemErrPrintf(String input) {
+		System.err.printf("%d : " + input , 1);
+		System.err.printf(Locale.GERMANY, "%d : " + input, 1);
 	}
 	
 	public void replacePrintStackTrace(String input) {
