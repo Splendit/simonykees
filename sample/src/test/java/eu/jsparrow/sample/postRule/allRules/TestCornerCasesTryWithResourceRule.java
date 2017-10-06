@@ -96,7 +96,7 @@ public class TestCornerCasesTryWithResourceRule {
 		try (ByteArrayInputStream istream = new ByteArrayInputStream(null)) {
 			ObjectInputStream p;
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			logger.error(e.getMessage(), e);
 		}
 	}
 
@@ -128,7 +128,7 @@ public class TestCornerCasesTryWithResourceRule {
 			}
 
 		} catch (IOException fileNotFoundException) {
-			logger.error(fileNotFoundException.getMessage());
+			logger.error(fileNotFoundException.getMessage(), fileNotFoundException);
 
 		}
 	}
@@ -144,7 +144,7 @@ public class TestCornerCasesTryWithResourceRule {
 			uniqueName001.close();
 
 		} catch (IOException fileNotFoundException) {
-			logger.error(fileNotFoundException.getMessage());
+			logger.error(fileNotFoundException.getMessage(), fileNotFoundException);
 
 		}
 	}
@@ -157,7 +157,7 @@ public class TestCornerCasesTryWithResourceRule {
 			uniqueName001.flush();
 
 		} catch (IOException fileNotFoundException) {
-			logger.error(fileNotFoundException.getMessage());
+			logger.error(fileNotFoundException.getMessage(), fileNotFoundException);
 
 		}
 	}

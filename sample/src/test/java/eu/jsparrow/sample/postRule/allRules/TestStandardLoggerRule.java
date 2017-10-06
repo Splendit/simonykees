@@ -1,5 +1,6 @@
 package eu.jsparrow.sample.postRule.allRules;
 
+import java.util.Locale;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
@@ -16,12 +17,19 @@ public class TestStandardLoggerRule {
 	private final String e = "I am not an exception";
 
 	public void printingExceptionsAndPrimitives(String input) {
+		Exception e = new Exception("Made up exception...");
+		logger1.error(String.valueOf(new Exception()));
 		System.out.println();
-		System.out.println(6);
-		System.out.println();
-		logger1.info(new Exception().getMessage());
-		logger1.info(new Exception("adsfads").getMessage());
+		logger1.info(String.valueOf(6));
+		logger1.info(String.valueOf(new char[] { 'c', 'd', 'e' }));
+		logger1.error(String.valueOf(new Exception("adsfads")));
 		logger1.info("adsfads");
+		logger1.error(String.valueOf(e));
+
+		System.out.printf("");
+		System.out.printf("%d - %d", 5, 6);
+		System.out.printf(Locale.GERMANY, "%d - %d", 5, 6);
+		System.out.printf(Locale.GERMANY, "%d - %d");
 	}
 
 	public void replaceSystemOutPrintingException(String input) {
@@ -44,7 +52,7 @@ public class TestStandardLoggerRule {
 		try {
 			StringUtils.substring(input, 5);
 		} catch (Exception e) {
-			logger1.error(e.getMessage());
+			logger1.error(e.getMessage(), e);
 
 		}
 	}
@@ -57,7 +65,7 @@ public class TestStandardLoggerRule {
 			 * The catch clause is not empty, but the exception is not logged.
 			 */
 
-			logger1.error(e.getMessage());
+			logger1.error(e.getMessage(), e);
 			logger1.info("Nothing to show");
 		}
 	}
@@ -70,7 +78,7 @@ public class TestStandardLoggerRule {
 			 * The catch clause is not empty, but the exception is not logged.
 			 */
 
-			logger1.error(e.getMessage());
+			logger1.error(e.getMessage(), e);
 			logger1.info(this.e);
 		}
 	}
@@ -82,7 +90,7 @@ public class TestStandardLoggerRule {
 			try {
 				StringUtils.substring(input, 5);
 			} catch (Exception e1) {
-				logger1.error(e1.getMessage());
+				logger1.error(e1.getMessage(), e1);
 				logger1.error(e.getMessage());
 			}
 		}

@@ -16,6 +16,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import eu.jsparrow.sample.utilities.Person;
 import eu.jsparrow.sample.utilities.TestModifier;
 
@@ -27,6 +30,8 @@ import eu.jsparrow.sample.utilities.TestModifier;
  */
 @SuppressWarnings({ "nls", "unused", "unchecked", "rawtypes" })
 public class LambdaToMethodReferenceRule {
+
+	private static final Logger logger = LoggerFactory.getLogger(LambdaToMethodReferenceRule.class);
 
 	List<LocalDate> dateList = Arrays.asList(LocalDate.of(1992, 1, 1), LocalDate.of(2001, 2, 3),
 			LocalDate.of(2010, 10, 10), LocalDate.of(2017, 5, 15));
@@ -56,9 +61,9 @@ public class LambdaToMethodReferenceRule {
 
 		Collections.sort(personList, Person::compareByAge);
 
-		personList.forEach(System.out::println);
+		personList.forEach(element -> logger.info(String.valueOf(element)));
 
-		personList.forEach(System.out::println);
+		personList.forEach(element -> logger.info(String.valueOf(element)));
 
 		personList.forEach(System.out::println);
 

@@ -58,8 +58,8 @@ import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
  * <pre>
  * 
  * As an example, assuming that the <b>default</b> replacing options from
- * {@link StandardLoggerRule#getDefaultOptions()} the following replacements are
- * possible:
+ * {@link StandardLoggerRule#getDefaultOptions()} are activated, 
+ * the following replacements are possible:
  * 
  * <ul>
  * <li>The occurrences of {@code System.out.println("Some message");} and
@@ -247,6 +247,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 		ListRewrite argRewrite = astRewrite.getListRewrite(loggingMethodInocation, MethodInvocation.ARGUMENTS_PROPERTY);
 		argRewrite.insertFirst(loggingMessage, null);
+		argRewrite.insertLast(astRewrite.createCopyTarget(exceptionName), null);
 
 		return ast.newExpressionStatement(loggingMethodInocation);
 	}
@@ -286,9 +287,10 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
 		SimpleName methodName = methodInvocation.getName();
+		String methodIdentifier = methodName.getIdentifier();
 		// if the method invocation name is print or println
-		if ((PRINT.equals(methodName.getIdentifier()) || PRINTLN.equals(methodName.getIdentifier()))
-				&& methodInvocation.arguments().size() == 1) {
+		if ((PRINT.equals(methodIdentifier) || PRINTLN.equals(methodIdentifier))
+				&& !methodInvocation.arguments().isEmpty()) {
 			/*
 			 * Looking for System.out/err.print/ln where System.out/err is a
 			 * qualified name expression of the print/ln method invocation.
@@ -315,7 +317,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 			calcReplacingOtion(argument, qualiferName)
 					.ifPresent(replacingOption -> replaceMethod(methodInvocation, replacingOption, logExpression));
 
-		} else if (PRINT_STACK_TRACE.equals(methodName.getIdentifier())
+		} else if (PRINT_STACK_TRACE.equals(methodIdentifier)
 				&& !StringUtils.isEmpty(replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE_KEY))) {
 			/*
 			 * Looking for e.printStackTrace() where 'e' is a throwable object.
@@ -341,7 +343,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		ITypeBinding argTypeBinding = argument.resolveTypeBinding();
 		List<String> stringQualifiedName = Collections.singletonList(java.lang.String.class.getName());
 		if(ClassRelationUtil.isContentOfTypes(argTypeBinding, stringQualifiedName) || 
-				ClassRelationUtil.isInheritingContentOfTypes(argTypeBinding, stringQualifiedName)) {
+				ClassRelationUtil.isInheritingContentOfTypes(argTypeBinding, stringQualifiedName)
+				|| StandardLoggerConstants.LOG4J_LOGGER.equals(loggerQualifiedName)) {
 			return (Expression)astRewrite.createCopyTarget(argument);
 		} else {
 			AST ast = astRewrite.getAST();
@@ -357,7 +360,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private Optional<String> calcReplacingOtion(Expression argument, SimpleName qualiferName) {
 		ExceptionsASTVisitor visitor = new ExceptionsASTVisitor();
 		argument.accept(visitor);
-		boolean logsException = !visitor.getFoundExceptions().isEmpty();
+		boolean logsException = !visitor.getExceptions().isEmpty();
 		String option = ""; //$NON-NLS-1$
 		if(logsException && OUT.equals(qualiferName.getIdentifier())) {
 			option = replacingOptions.get(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY);
@@ -670,7 +673,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 			}
 		}
 		
-		public List<ASTNode> getFoundExceptions() {
+		public List<ASTNode> getExceptions() {
 			return this.foundExceptions;
 		}
 	}

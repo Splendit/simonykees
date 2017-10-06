@@ -33,47 +33,47 @@ public class LambdaForEachIfWrapperToFilterRule {
 		list.stream().filter(s -> s.length() > 3).forEach(logger::info);
 
 		intList.stream().filter(i -> i < 5).forEach(i -> {
-			System.out.println(i);
+			logger.info(String.valueOf(i));
 			i++;
-			System.out.println(i);
+			logger.info(String.valueOf(i));
 		});
 
-		intList.stream().filter(i -> i == 5).forEach(System.out::println);
+		intList.stream().filter(i -> i == 5).forEach(i -> logger.info(String.valueOf(i)));
 
-		booleanList.stream().filter(b -> b).forEach(System.out::println);
+		booleanList.stream().filter(b -> b).forEach(b -> logger.info(String.valueOf(b)));
 
-		booleanList.stream().filter(b -> !b).forEach(System.out::println);
+		booleanList.stream().filter(b -> !b).forEach(b -> logger.info(String.valueOf(b)));
 
-		intList.stream().filter(i -> i == 5).forEach(System.out::println);
+		intList.stream().filter(i -> i == 5).forEach(i -> logger.info(String.valueOf(i)));
 
 		intList.stream().forEach(i -> {
 			if (getRandomNuber() > 0) {
-				System.out.println(i);
+				logger.info(String.valueOf(i));
 			}
 		});
 
 		intList.stream().forEach(i -> {
 			int j;
 			if ((j = getRandomNuber()) > 0) {
-				System.out.println(i + j);
+				logger.info(String.valueOf(i + j));
 			}
 		});
 
 		intList.stream().forEach(i -> {
 			if (i < 0) {
-				System.out.println(i);
+				logger.info(String.valueOf(i));
 			} else {
-				System.out.println(i + 1);
+				logger.info(String.valueOf(i + 1));
 			}
 		});
 
-		intList.stream().filter(i -> i < 0).forEach(System.out::println);
+		intList.stream().filter(i -> i < 0).forEach(i -> logger.info(String.valueOf(i)));
 
-		intList.stream().filter(i -> i < 0).forEach(System.out::println);
+		intList.stream().filter(i -> i < 0).forEach(i -> logger.info(String.valueOf(i)));
 
-		intList.stream().filter(i -> i < 0).forEach(System.out::println);
+		intList.stream().filter(i -> i < 0).forEach(i -> logger.info(String.valueOf(i)));
 
-		intList.stream().filter(i -> i < 0).forEach(System.out::println);
+		intList.stream().filter(i -> i < 0).forEach(i -> logger.info(String.valueOf(i)));
 	}
 
 	public void forEachOnCollection() {

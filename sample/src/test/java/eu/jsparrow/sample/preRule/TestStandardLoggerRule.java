@@ -1,5 +1,7 @@
 package eu.jsparrow.sample.preRule;
 
+import java.io.IOException;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 @SuppressWarnings({"unused", "nls"})
@@ -10,12 +12,19 @@ public class TestStandardLoggerRule {
 	private final String e = "I am not an exception";
 	
 	public void printingExceptionsAndPrimitives(String input) {
+		Exception e = new Exception("Made up exception...");
+		System.out.println(new Exception());
 		System.out.println();
 		System.out.println(6);
-		System.out.println();
-		System.out.println(new Exception().getMessage());
-		System.out.println(new Exception("adsfads").getMessage());
+		System.out.println(new char[] {'c', 'd', 'e'});
+		System.out.println(new Exception("adsfads"));
 		System.out.println("adsfads");
+		System.out.println(e);
+		
+		System.out.printf("");
+		System.out.printf("%d - %d", 5, 6);
+		System.out.printf(Locale.GERMANY, "%d - %d", 5, 6);
+		System.out.printf(Locale.GERMANY, "%d - %d");
 	}
 	
 	public void replaceSystemOutPrintingException(String input) {
