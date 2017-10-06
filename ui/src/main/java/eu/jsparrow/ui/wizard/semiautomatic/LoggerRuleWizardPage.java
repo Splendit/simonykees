@@ -196,6 +196,10 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 				Messages.LoggerRuleWizardPage_stackTraceMessageLabel);
 		
 		defaultForExceptionLogg = new Button(stackTraceGroup, SWT.CHECK);
+		gridData = new GridData(SWT.HORIZONTAL, SWT.TOP, true, false, 1, 1);
+		gridData.horizontalSpan = 2;
+		gridData.verticalIndent = 5;
+		defaultForExceptionLogg.setLayoutData(gridData);
 		defaultForExceptionLogg.setText(Messages.LoggerRuleWizardPage_alwaysUsePrintStacktraceOptionForLoggingException);
 		defaultForExceptionLogg.addSelectionListener(new SelectionAdapter() {
 			
