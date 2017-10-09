@@ -7,11 +7,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.ServiceLoader;
+import java.util.Set;
 
+import org.apache.maven.model.Dependency;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -19,6 +24,11 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.invoker.DefaultInvocationRequest;
+import org.apache.maven.shared.invoker.DefaultInvoker;
+import org.apache.maven.shared.invoker.InvocationRequest;
+import org.apache.maven.shared.invoker.Invoker;
+import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -35,7 +45,10 @@ public class GreetingMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "${project}", required = true)
 	MavenProject project;
-
+	
+	@Parameter(defaultValue = "${maven.home}", required = true)
+	String mavenHome;
+	
 	/**
 	 * The directory where files are located.
 	 */
@@ -48,6 +61,8 @@ public class GreetingMojo extends AbstractMojo {
 	public static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone"; //$NON-NLS-1$
 	public static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default"; //$NON-NLS-1$
 	public static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
+	public static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
+	public static final String PROJECT_DEPENDENCIES = "PROJECT.DEPENDENCIES"; //$NON-NLS-1$
 
 	public void execute() throws MojoExecutionException {
 		getLog().info("Hello, world.");
@@ -75,6 +90,27 @@ public class GreetingMojo extends AbstractMojo {
 
 		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
 		configuration.put(PROJECT_PATH_CONSTANT, project.getBasedir().getAbsolutePath());
+		configuration.put(PROJECT_NAME_CONSTANT, project.getName());
+
+		extractDependencies();
+		// TODO add System.getProperty("user.dir") + File.separator + "deps" to classpath
+		
+//		Set<Dependency> dependencies = new HashSet<>(project.getDependencies());
+////		List<Dependency> dependencies = loadCopiedDependencies();
+//
+//		if (null != project.getParent()) {
+//			getLog().info("Number of parent dependencies: " + project.getParent().getDependencies().size());
+//			dependencies.addAll(project.getParent().getDependencies());
+//		}
+//
+//		String dependenciesString = "";
+//		for (Dependency dependency : dependencies) {
+//			getLog().info("DEPENDENCY: " + dependency.getGroupId() + File.separator + dependency.getArtifactId()
+//					+ File.separator + dependency.getVersion());
+//			dependenciesString += dependency.getGroupId() + File.separator + dependency.getArtifactId() + File.separator
+//					+ dependency.getVersion() + ";";
+//		}
+//		configuration.put(PROJECT_DEPENDENCIES, dependenciesString);
 
 		ServiceLoader<FrameworkFactory> ffs = ServiceLoader.load(FrameworkFactory.class);
 		FrameworkFactory frameworkFactory = ffs.iterator().next();
@@ -86,22 +122,6 @@ public class GreetingMojo extends AbstractMojo {
 		final BundleContext ctx = framework.getBundleContext();
 
 		final List<Bundle> bundles = new ArrayList<>();
-
-		// for (File f : new
-		// File("/home/andreja/workspaces/rcp-neon/jSparrow.maven/resources/plugins").listFiles())
-		// {
-		//
-		// try (FileInputStream fileInputStream = new FileInputStream(f)) {
-		// bundles.add(ctx.installBundle("reference:" + f.toURI()));
-		// fileInputStream.close();
-		// } catch (IOException e) {
-		// getLog().error(e.getMessage(), e);
-		// }
-		// }
-
-		// InputStream is =
-		// GreetingMojo.class.getResourceAsStream(File.separator +
-		// "manifest.standalone");
 
 		try (InputStream is = GreetingMojo.class.getResourceAsStream(File.separator + "manifest.standalone");
 				BufferedReader reader = new BufferedReader(new InputStreamReader(is));) {
@@ -175,6 +195,24 @@ public class GreetingMojo extends AbstractMojo {
 					}
 				}
 			}
+		}
+	}
+
+	private void extractDependencies() {
+		final InvocationRequest request = new DefaultInvocationRequest();
+		getLog().info("POM path: " + project.getBasedir().getAbsolutePath() + File.separator + "pom.xml");
+		request.setPomFile(new File(project.getBasedir().getAbsolutePath() + File.separator + "pom.xml"));
+		request.setGoals(Collections.singletonList("dependency:copy-dependencies "));
+		final Properties props = new Properties();
+		props.setProperty("outputDirectory", System.getProperty("user.dir") + File.separator + "deps");
+		request.setProperties(props);
+		final Invoker invoker = new DefaultInvoker();
+		getLog().info("M2_HOME path: " + mavenHome);
+		invoker.setMavenHome(new File(mavenHome));
+		try {
+			invoker.execute(request);
+		} catch (final MavenInvocationException e) {
+			e.printStackTrace();
 		}
 	}
 }

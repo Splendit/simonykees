@@ -6,12 +6,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.osgi.framework.BundleActivator;
@@ -25,6 +30,7 @@ import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RulesContainer;
+import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -44,6 +50,8 @@ public class Activator implements BundleActivator {
 
 	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	public static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
+	public static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
+	public static final String PROJECT_DEPENDENCIES = "PROJECT.DEPENDENCIES"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Activator plugin;
@@ -72,6 +80,12 @@ public class Activator implements BundleActivator {
 		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
 		logger.info("PATH FROM CONTEXT: " + projectPath);
 
+		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
+		logger.info("NAME FROM CONTEXT: " + projectName);
+
+		String projectDependencies = context.getProperty(PROJECT_DEPENDENCIES);
+		logger.info("DEPENDENCIES FROM CONTEXT: " + projectDependencies);
+		
 		// Set working directory
 		String file = System.getProperty("java.io.tmpdir");
 		directory = new File(file + File.separator + "temp_jSparrow").getAbsoluteFile();
@@ -80,13 +94,20 @@ public class Activator implements BundleActivator {
 			logger.info("Set user.dir to " + directory.getAbsolutePath());
 		}
 
-		test = new TestStandalone(projectPath);
+		test = new TestStandalone(projectName, projectPath, projectDependencies);
 
 		logger.info("Getting compilation units");
 		List<ICompilationUnit> compUnits = test.getCompUnits();
 
 		logger.info("Creating refactoring states");
+		/*
+		 * create refactoring states only from compilation units without
+		 * compilation error
+		 */
+
+		logger.info("Number compilation units " + compUnits.size());
 		refactoringPipeline.createRefactoringStates(compUnits);
+		logger.info("Number refactoring states " + refactoringPipeline.getRefactoringStates().size());
 
 		try {
 			logger.info("Starting refactoring proccess");
@@ -118,7 +139,7 @@ public class Activator implements BundleActivator {
 				ResourcesPlugin.getWorkspace().forgetSavedTree(PLUGIN_ID);
 				ResourcesPlugin.getWorkspace().removeSaveParticipant(PLUGIN_ID);
 			}
-			
+
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} finally {
@@ -177,4 +198,5 @@ public class Activator implements BundleActivator {
 	public static BundleContext getBundleContext() {
 		return bundleContext;
 	}
+	
 }
