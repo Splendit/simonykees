@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -60,7 +61,8 @@ public class SerialVersionUidASTVisitor extends AbstractASTRewriteASTVisitor {
 				VariableDeclarationFragment serialUidNode = (VariableDeclarationFragment) astRewrite
 						.createMoveTarget(checkSerialUidASTVisitor.getSerialUidNode());
 				List<ASTNode> newModifier = new ArrayList<>();
-				node.modifiers().stream().filter((m) -> m instanceof ASTNode).forEach((m) -> newModifier.add(astRewrite.createCopyTarget((ASTNode) m)));
+				ASTNodeUtil.convertToTypedList(node.modifiers(), Modifier.class).stream().filter(m -> m instanceof ASTNode)
+				.forEach(m -> newModifier.add(astRewrite.createCopyTarget((ASTNode) m)));
 				checkSerialUidASTVisitor.getWantedKeyWords().stream()
 						.forEach(mk -> newModifier.add(node.getAST().newModifier(mk)));
 				Type newType = (Type) astRewrite.createCopyTarget(node.getType());
