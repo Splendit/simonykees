@@ -1,23 +1,10 @@
 package eu.jsparrow.standalone;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -30,7 +17,6 @@ import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RulesContainer;
-import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -49,26 +35,19 @@ public class Activator implements BundleActivator {
 	public static final String PLUGIN_ID = "eu.jsparrow.standalone"; //$NON-NLS-1$
 
 	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
+	public static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
 	public static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
 	public static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
-	public static final String PROJECT_DEPENDENCIES = "PROJECT.DEPENDENCIES"; //$NON-NLS-1$
+	public static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
+	public static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
+	public static final String MAVEN_NATURE_CONSTANT = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
+	public static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
 
-	// The shared instance
-	private static Activator plugin;
-
-	private static List<Job> jobs = Collections.synchronizedList(new ArrayList<>());
-
-	// Flag is jSparrow is already running
-	private static boolean running = false;
-
-	private static BundleContext bundleContext;
-
-	private File directory;
-	private TestStandalone test;
+	private StandaloneConfig standaloneConfig;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
-		logger.info("Start ACTIVATOR"); //$NON-NLS-1$
+		logger.info(Messages.Activator_start);
 
 		// PREPARE RULES
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
@@ -77,50 +56,40 @@ public class Activator implements BundleActivator {
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 		refactoringPipeline.setRules(rules);
 
+		// get project path and name from context
 		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
-		logger.info("PATH FROM CONTEXT: " + projectPath);
-
 		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
-		logger.info("NAME FROM CONTEXT: " + projectName);
 
-		String projectDependencies = context.getProperty(PROJECT_DEPENDENCIES);
-		logger.info("DEPENDENCIES FROM CONTEXT: " + projectDependencies);
-		
-		// Set working directory
-		String file = System.getProperty("java.io.tmpdir");
-		directory = new File(file + File.separator + "temp_jSparrow").getAbsoluteFile();
+		// Set working directory to temp_jSparrow in java tmp folder
+		String file = System.getProperty(JAVA_TMP);
+		File directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
 		if (directory.exists() || directory.mkdirs()) {
 			System.setProperty(USER_DIR, directory.getAbsolutePath());
-			logger.info("Set user.dir to " + directory.getAbsolutePath());
 		}
 
-		test = new TestStandalone(projectName, projectPath, projectDependencies);
+		standaloneConfig = new StandaloneConfig(projectName, projectPath);
 
-		logger.info("Getting compilation units");
-		List<ICompilationUnit> compUnits = test.getCompUnits();
+		logger.info(Messages.Activator_debug_collectCompilationUnits);
+		List<ICompilationUnit> compUnits = standaloneConfig.getCompUnits();
 
-		logger.info("Creating refactoring states");
-		/*
-		 * create refactoring states only from compilation units without
-		 * compilation error
-		 */
+		logger.debug(Messages.Activator_debug_createRefactoringStates);
 
-		logger.info("Number compilation units " + compUnits.size());
+		logger.debug(Messages.Activator_debug_numCompilationUnits + compUnits.size());
 		refactoringPipeline.createRefactoringStates(compUnits);
-		logger.info("Number refactoring states " + refactoringPipeline.getRefactoringStates().size());
+		logger.debug(Messages.Activator_debug_numRefactoringStates + refactoringPipeline.getRefactoringStates().size());
 
+		// Do refactoring
 		try {
-			logger.info("Starting refactoring proccess");
+			logger.info(Messages.Activator_debug_startRefactoring);
 			refactoringPipeline.doRefactoring(new NullProgressMonitor());
-
-			logger.info("Has changes: " + refactoringPipeline.hasChanges());
 		} catch (RefactoringException | RuleException e) {
 			logger.error(e.getMessage(), e);
 			return;
 		}
 
+		// Commit refactoring
 		try {
-			logger.info("Commiting refactoring changes to compilation units");
+			logger.info(Messages.Activator_debug_commitRefactoring);
 			refactoringPipeline.commitRefactoring();
 		} catch (RefactoringException | ReconcileException e) {
 			logger.error(e.getMessage(), e);
@@ -130,9 +99,6 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void stop(BundleContext context) {
-
-		running = false;
-
 		try {
 			/* Unregister as a save participant */
 			if (ResourcesPlugin.getWorkspace() != null) {
@@ -143,60 +109,9 @@ public class Activator implements BundleActivator {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} finally {
-			logger.info("Clean directory " + directory.getAbsolutePath());
-			try {
-				deleteChildren(new File(directory.getAbsolutePath() + File.separator + ".metadata"));
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-			}
-			plugin = null;
-			bundleContext = null;
+			standaloneConfig.cleanUp();
 		}
 
 		logger.info(Messages.Activator_stop);
 	}
-
-	private void deleteChildren(File parentDirectory) throws IOException {
-		for (String file : Arrays.asList(parentDirectory.list())) {
-			File currentFile = new File(parentDirectory.getAbsolutePath(), file);
-			if (currentFile.isDirectory()) {
-				deleteChildren(currentFile);
-			}
-			currentFile.delete();
-		}
-	}
-
-	/**
-	 * Returns the shared instance
-	 *
-	 * @return the shared instance
-	 */
-	public static Activator getDefault() {
-		return plugin;
-	}
-
-	public static void registerJob(Job job) {
-		synchronized (jobs) {
-			jobs.add(job);
-		}
-	}
-
-	public static void unregisterJob(Job job) {
-		synchronized (jobs) {
-			jobs.remove(job);
-		}
-	}
-
-	public static boolean isRunning() {
-		return running;
-	}
-
-	public static void setRunning(boolean isRunning) {
-		running = isRunning;
-	}
-
-	public static BundleContext getBundleContext() {
-		return bundleContext;
-	}
-	
 }

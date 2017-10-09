@@ -26,6 +26,18 @@ public class Messages extends NLS {
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
+	public static String Activator_debug_collectCompilationUnits;
+
+	public static String Activator_debug_commitRefactoring;
+
+	public static String Activator_debug_createRefactoringStates;
+
+	public static String Activator_debug_numCompilationUnits;
+
+	public static String Activator_debug_numRefactoringStates;
+
+	public static String Activator_debug_startRefactoring;
+
 	public static String Activator_start;
 	public static String Activator_stop;
 	public static String ArithmethicAssignmentRule_description;
@@ -245,6 +257,18 @@ public class Messages extends NLS {
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_title;
 	public static String SimonykeesUpdateLicenseDialog_update_llicense_dialog_button;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_group_title;
+	public static String StandaloneConfig_debug_cleanUp;
+
+	public static String StandaloneConfig_debug_collectDependencies;
+
+	public static String StandaloneConfig_debug_createdProject;
+
+	public static String StandaloneConfig_debug_createJavaProject;
+
+	public static String StandaloneConfig_debug_createProject;
+
+	public static String StandaloneConfig_debug_createWorkspace;
+
 	public static String StandardLoggerRule_description;
 	public static String StandardLoggerRule_name;
 	public static String StatementLambdaToExpressionRule_description;
