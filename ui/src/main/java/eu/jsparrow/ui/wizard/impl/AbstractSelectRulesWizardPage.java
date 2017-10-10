@@ -114,11 +114,11 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	protected abstract void createFilteringPart(Composite composite);
 
 	/**
-	 * Creates part of wizard for selecting the rules, built from tree parts.
-	 * First part, left, is tree view in which all filtered rules are shown and
-	 * can be chosen to add on right side. Middle part contains buttons to add
-	 * chosen rules to selection or remove rules already selected. Third, right,
-	 * part is table view containing rules that are selected to be applied.
+	 * Creates part of wizard for selecting the rules, built from tree parts. First
+	 * part, left, is tree view in which all filtered rules are shown and can be
+	 * chosen to add on right side. Middle part contains buttons to add chosen rules
+	 * to selection or remove rules already selected. Third, right, part is table
+	 * view containing rules that are selected to be applied.
 	 * 
 	 * @param parent
 	 */
@@ -187,8 +187,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			if (forcedSelectLeft) {
 				forcedSelectLeft = false;
 				/*
-				 * if it is manually selected because of moving, don't
-				 * update view
+				 * if it is manually selected because of moving, don't update view
 				 */
 			} else {
 				controler.selectionChanged();
@@ -202,9 +201,11 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			}
 		});
 
-		leftTreeViewer.addDoubleClickListener((DoubleClickEvent event) -> controler.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection()));
+		leftTreeViewer.addDoubleClickListener((DoubleClickEvent event) -> controler
+				.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection()));
 
-		rightTableViewer.addSelectionChangedListener((SelectionChangedEvent event) -> removeButton.setEnabled(!event.getSelection().isEmpty()));
+		rightTableViewer.addSelectionChangedListener(
+				(SelectionChangedEvent event) -> removeButton.setEnabled(!event.getSelection().isEmpty()));
 
 		removeButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -213,7 +214,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			}
 		});
 
-		rightTableViewer.addDoubleClickListener((DoubleClickEvent event) -> controler.removeButtonClicked((IStructuredSelection) rightTableViewer.getSelection()));
+		rightTableViewer.addDoubleClickListener((DoubleClickEvent event) -> controler
+				.removeButtonClicked((IStructuredSelection) rightTableViewer.getSelection()));
 
 		addAllButton.addSelectionListener(new SelectionAdapter() {
 			/*
@@ -239,6 +241,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				controler.removeAllButtonClicked();
 			}
+
 		});
 
 	}
@@ -337,18 +340,16 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Creates bottom part of select wizard containing Text field with
-	 * description of selected rule if only one rule is selected, default
-	 * description otherwise.
+	 * Creates bottom part of select wizard containing Text field with description
+	 * of selected rule if only one rule is selected, default description otherwise.
 	 * 
 	 * @param parent
 	 */
 	private void createDescriptionViewer(Composite parent) {
 		/*
-		 * There is a known issue with automatically showing and hiding
-		 * scrollbars and SWT.WRAP. Using StyledText and
-		 * setAlwaysShowScrollBars(false) makes the vertical scroll work
-		 * correctly at least.
+		 * There is a known issue with automatically showing and hiding scrollbars and
+		 * SWT.WRAP. Using StyledText and setAlwaysShowScrollBars(false) makes the
+		 * vertical scroll work correctly at least.
 		 */
 		descriptionStyledText = new StyledText(parent, SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
 		descriptionStyledText.setAlwaysShowScrollBars(false);
@@ -363,10 +364,10 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	 * Updates entire view with data every time something is changed in model.
 	 */
 	@SuppressWarnings("unchecked")
-	private void updateData() {
+	protected void updateData() {
 		/*
-		 * check if model has changed to update table and tree view or is just
-		 * selection changed to update description field and buttons
+		 * check if model has changed to update table and tree view or is just selection
+		 * changed to update description field and buttons
 		 */
 		if (model.hasChanged()) {
 			if (!model.isForced()) {
@@ -379,8 +380,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				}
 				rightTableViewer.setInput(model.getSelection());
 				/*
-				 * updates enabling Finish button according to right side table
-				 * view if selection is empty Finish button is disabled
+				 * updates enabling Finish button according to right side table view if
+				 * selection is empty Finish button is disabled
 				 */
 			} else {
 				leftTreeViewer.setInput(model.getPosibilities());
@@ -411,8 +412,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Sets the rule description text according to the currently selected rule
-	 * or to the default text if no rule is selected.
+	 * Sets the rule description text according to the currently selected rule or to
+	 * the default text if no rule is selected.
 	 */
 	@SuppressWarnings("unchecked")
 	private void populateDescriptionTextViewer() {
@@ -443,8 +444,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		String requiredLibrariesValue = (null != rule.requiredLibraries()) ? rule.requiredLibraries()
 				: Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
 		String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
-		String tagsValue = StringUtils
-				.join(rule.getTags().stream().map(Tag::getTagNames).collect(Collectors.toList()), "  "); //$NON-NLS-1$
+		String tagsValue = StringUtils.join(rule.getTags().stream().map(Tag::getTagNames).collect(Collectors.toList()),
+				"  "); //$NON-NLS-1$
 
 		String descriptionText = name + lineDelimiter + lineDelimiter + description + lineDelimiter + lineDelimiter
 				+ requirementsLabel + lineDelimiter + minJavaVersionLabel + minJavaVersionValue + lineDelimiter
@@ -535,7 +536,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	@SuppressWarnings("unchecked")
 	private boolean selectionContainsEnabledEntry(List<Object> selection) {
-		return selection.stream().anyMatch(object -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).isEnabled());
+		return selection.stream()
+				.anyMatch(object -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).isEnabled());
 	}
 
 	public void recalculateLayout() {
@@ -563,8 +565,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		}
 
 		/*
-		 * the mode severe status will be displayed and the OK button
-		 * enabled/disabled.
+		 * the mode severe status will be displayed and the OK button enabled/disabled.
 		 */
 		updateStatus(status);
 	}
@@ -588,10 +589,9 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Updates the status line and the OK button according to the status
-	 * evaluate from an array of status. The most severe error is taken. In case
-	 * that two status with the same severity exists, the status with lower
-	 * index is taken.
+	 * Updates the status line and the OK button according to the status evaluate
+	 * from an array of status. The most severe error is taken. In case that two
+	 * status with the same severity exists, the status with lower index is taken.
 	 *
 	 * @param status
 	 *            the array of status
@@ -600,4 +600,27 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		updateStatus(StatusUtil.getMostSevere(status));
 	}
 
+	protected TreeViewer getLeftTreeViewer() {
+		return leftTreeViewer;
+	}
+
+	protected TableViewer getRightTableViewer() {
+		return rightTableViewer;
+	}
+
+	protected Button getAddButton() {
+		return addButton;
+	}
+
+	protected Button getAddAllButton() {
+		return addAllButton;
+	}
+
+	protected Button getRemoveButton() {
+		return removeButton;
+	}
+
+	protected Button getRemoveAllButton() {
+		return removeAllButton;
+	}
 }
