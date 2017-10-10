@@ -73,6 +73,13 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	protected IStatus fSelectionStatus;
 
 	private boolean forcedSelectLeft = false;
+	private boolean forcedSelectRight = false;
+
+	private enum SelectionSide {
+		LEFT, RIGHT, NONE,
+	}
+
+	private SelectionSide latestSelectionSide = SelectionSide.NONE;
 
 	public AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
 			AbstractSelectRulesWizardControler controler) {
@@ -184,12 +191,15 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		removeAllButton.setText(Messages.SelectRulesWizardPage_removeAllButtonLabel);
 
 		leftTreeViewer.addSelectionChangedListener((SelectionChangedEvent event) -> {
+			latestSelectionSide = SelectionSide.LEFT;
+			
 			if (forcedSelectLeft) {
 				forcedSelectLeft = false;
 				/*
 				 * if it is manually selected because of moving, don't update view
 				 */
 			} else {
+				latestSelectionSide = SelectionSide.LEFT;
 				controler.selectionChanged();
 			}
 		});
@@ -204,8 +214,16 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		leftTreeViewer.addDoubleClickListener((DoubleClickEvent event) -> controler
 				.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection()));
 
-		rightTableViewer.addSelectionChangedListener(
-				(SelectionChangedEvent event) -> removeButton.setEnabled(!event.getSelection().isEmpty()));
+		rightTableViewer.addSelectionChangedListener((SelectionChangedEvent event) -> {
+			latestSelectionSide = SelectionSide.RIGHT;
+
+			if (forcedSelectRight) {
+				forcedSelectRight = false;
+			} else {
+				controler.selectionChanged();
+				removeButton.setEnabled(!event.getSelection().isEmpty());
+			}
+		});
 
 		removeButton.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -390,6 +408,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			}
 			if (!model.getRecentlyMoved().isEmpty()) {
 				if (model.isMovedToRight()) {
+					forcedSelectRight = true;
 					rightTableViewer.setSelection(new StructuredSelection(model.getRecentlyMoved().toArray()), false);
 				} else {
 					forcedSelectLeft = true;
@@ -417,12 +436,16 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	 */
 	@SuppressWarnings("unchecked")
 	private void populateDescriptionTextViewer() {
-		List<Object> selection = ((IStructuredSelection) leftTreeViewer.getSelection()).toList();
-		if (selection.size() == 1) {
+		List<Object> leftSelection = ((IStructuredSelection) leftTreeViewer.getSelection()).toList();
+		List<Object> rightSelection = ((IStructuredSelection) rightTableViewer.getSelection()).toList();
+
+		if (latestSelectionSide == SelectionSide.LEFT && leftSelection.size() == 1) {
 			// descriptionStyledText.setText(
 			// ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>)
 			// selection.get(0)).getDescription());
-			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) selection.get(0));
+			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) leftSelection.get(0));
+		} else if (latestSelectionSide == SelectionSide.RIGHT && rightSelection.size() == 1) {
+			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) rightSelection.get(0));
 		} else {
 			descriptionStyledText.setText(Messages.SelectRulesWizardPage_defaultDescriptionText);
 		}
