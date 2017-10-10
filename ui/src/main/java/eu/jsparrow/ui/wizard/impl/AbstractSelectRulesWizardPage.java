@@ -251,6 +251,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				controler.removeAllButtonClicked();
 			}
+
 		});
 
 	}
@@ -373,7 +374,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	 * Updates entire view with data every time something is changed in model.
 	 */
 	@SuppressWarnings("unchecked")
-	private void updateData() {
+	protected void updateData() {
 		/*
 		 * check if model has changed to update table and tree view or is just selection
 		 * changed to update description field and buttons
@@ -613,4 +614,27 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		updateStatus(StatusUtil.getMostSevere(status));
 	}
 
+	protected TreeViewer getLeftTreeViewer() {
+		return leftTreeViewer;
+	}
+
+	protected TableViewer getRightTableViewer() {
+		return rightTableViewer;
+	}
+
+	protected Button getAddButton() {
+		return addButton;
+	}
+
+	protected Button getAddAllButton() {
+		return addAllButton;
+	}
+
+	protected Button getRemoveButton() {
+		return removeButton;
+	}
+
+	protected Button getRemoveAllButton() {
+		return removeAllButton;
+	}
 }
