@@ -20,9 +20,7 @@ public class EnhancedForLoopToStreamSumRuleTest extends SingleRuleTest {
 	
 	private static final String SAMPLE_FILE = "EnhancedForLoopToStreamSumRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "enhancedForLoopToStreamSum";
-	private String fileName;
-	private Path preRule;
-	private Path postRule;
+	
 	private EnhancedForLoopToStreamSumRule rule;
 
 	@Before

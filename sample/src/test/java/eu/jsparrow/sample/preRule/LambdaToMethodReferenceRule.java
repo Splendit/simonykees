@@ -16,6 +16,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import eu.jsparrow.sample.utilities.NumberUtils;
 import eu.jsparrow.sample.utilities.Person;
 
 /**
@@ -313,6 +314,15 @@ public class LambdaToMethodReferenceRule {
 	Function<AmbiguousMethods, String> testingAmb = (AmbiguousMethods i) -> AmbiguousMethods.testAmbiguity(i);
 	Function<AmbiguousMethods, String> testingAmb2 = (AmbiguousMethods i) -> i.testAmbiguity();
 	
+	
+	public void usingQualifiedName() {
+		List<UsingApacheNumberUtils> numberUtils = new ArrayList<>();
+		/*
+		 * Expecting the transformation to use a fully qualified name. 
+		 */
+		numberUtils.stream().map(v -> v.getNumber()).map(num -> num.toString());
+	}
+
 	class ComparisonProvider {
 		public int compareByName(Person a, Person b) {
 			return a.getName().compareTo(b.getName());
@@ -363,6 +373,17 @@ public class LambdaToMethodReferenceRule {
 			return "e:" + super.getName();
 		}
 		
+	}
+	
+	class UsingApacheNumberUtils {
+		/**
+		 * There is already an existing import of another NumberUtils class.
+		 * Namely {@link NumberUtils}. Therefore, {@link org.apache.commons.lang3.math.NumberUtils}
+		 * has to always use a fully qualified name.
+		 */
+		public org.apache.commons.lang3.math.NumberUtils getNumber() {
+			return null;
+		}
 	}
 }
 

@@ -6,7 +6,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -17,9 +20,11 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
@@ -350,5 +355,82 @@ public class ASTNodeUtil {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Sets the given name as the type property of the given {@link Type} node.
+	 * Considers {@link SimpleType}s, {@link ArrayType}s and
+	 * {@link ParameterizedType}s.
+	 * 
+	 * @param type
+	 *            the type to be modified
+	 * @param qualifiedName
+	 *            new name of the type.
+	 * 
+	 * @return the type node having the new name property or the unmodified type
+	 *         node if it doesn't fall in any of the aforementioned types.
+	 */
+	public static Type convertToQualifiedName(Type type, Name qualifiedName) {
+		AST ast = type.getAST();
+		if (type.isArrayType()) {
+			ArrayType arrayType = (ArrayType) type;
+			SimpleType simpleType = ast.newSimpleType(qualifiedName);
+			arrayType.setStructuralProperty(ArrayType.ELEMENT_TYPE_PROPERTY, simpleType);
+			return arrayType;
+		} else if (type.isSimpleType()) {
+			SimpleType simpleType = (SimpleType) type;
+			simpleType.setName(qualifiedName);
+			return simpleType;
+		} else if (type.isParameterizedType()) {
+			ParameterizedType parameterizedType = (ParameterizedType) type;
+			SimpleType simpleType = ast.newSimpleType(qualifiedName);
+			parameterizedType.setStructuralProperty(ParameterizedType.TYPE_PROPERTY, simpleType);
+			return parameterizedType;
+		}
+	
+		return type;
+	}
+
+	/**
+	 * Converts {@link SimpleType}s, the {@link ArrayType}s and the
+	 * {@link ParameterizedType}s to types with qualified name.
+	 * 
+	 * @param type
+	 *            original type to be converted.
+	 * @param typeBinding
+	 *            a type binding to get the qualified name from.
+	 * 
+	 * @return the given type binding having a qualified name property.
+	 */
+	public static Type convertToQualifiedName(Type type, ITypeBinding typeBinding) {
+		AST ast = type.getAST();
+		Name qualifiedName = ast.newName(typeBinding.getQualifiedName());
+		return convertToQualifiedName(type, qualifiedName);
+	}
+
+	/**
+	 * Checks whether the given {@link ASTNode} and the declaration of the given type
+	 * are enclosed in the same class.
+	 * 
+	 * @param loop
+	 *            a node expected to represent a code snippet.
+	 * @param typeBinding
+	 *            a type binding expected to represent an inner class.
+	 * @return {@code true} if node and the type declaration are wrapped by
+	 *         the same class or {@code false} otherwise.
+	 */
+	public static boolean enclosedInSameType(ASTNode loop, ITypeBinding typeBinding) {
+		AbstractTypeDeclaration enclosingType = getSpecificAncestor(loop, AbstractTypeDeclaration.class);
+		if (enclosingType != null && typeBinding != null) {
+			ITypeBinding enclosingTypeBinding = enclosingType.resolveBinding();
+			if (enclosingTypeBinding != null
+					&& (ClassRelationUtil.compareITypeBinding(enclosingTypeBinding.getErasure(), typeBinding.getErasure())
+							|| ClassRelationUtil.compareITypeBinding(enclosingTypeBinding.getErasure(),
+									typeBinding.getDeclaringClass().getErasure()))) {
+				return true;
+			}
+		}
+	
+		return false;
 	}
 }
