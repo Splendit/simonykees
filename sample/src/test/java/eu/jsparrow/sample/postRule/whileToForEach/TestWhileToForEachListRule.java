@@ -275,6 +275,15 @@ public class TestWhileToForEachListRule {
 		return sb.toString();
 	}
 	
+	public String intKeyWord(String input) {
+		List<Double> ints = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		for (Double anInt : ints) {
+			sb.append(anInt);
+		}
+		return sb.toString();
+	}
+	
 	class Foo {
 		@Override
 		public String toString() {

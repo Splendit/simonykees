@@ -8,13 +8,8 @@ import static org.junit.Assert.assertTrue;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
-import eu.jsparrow.license.netlicensing.LicenseChecker;
-import eu.jsparrow.license.netlicensing.LicenseStatus;
-import eu.jsparrow.license.netlicensing.LicenseType;
-import eu.jsparrow.license.netlicensing.PersistenceManager;
 import eu.jsparrow.license.netlicensing.model.PersistenceModel;
 
 /**
