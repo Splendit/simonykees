@@ -27,6 +27,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+import eu.jsparrow.core.visitor.helper.WildCardTypeASTVisitor;
+
 /**
  * A utility class for computing different properties of {@link ASTNode}s.
  * 
@@ -350,5 +352,17 @@ public class ASTNodeUtil {
 		}
 
 		return result;
+	}
+	
+	/**
+	 * Checks if a node has at least one occurrence of a 
+	 * {@link WildcardType} node.
+	 * @param node  the node to be checked
+	 * @return {@code true} if the above condition is met and false otherwise. 
+	 */
+	public static boolean containsWildCards(ASTNode node) {
+		WildCardTypeASTVisitor wildCardsVisitor = new WildCardTypeASTVisitor();
+		node.accept(wildCardsVisitor);
+		return !wildCardsVisitor.getWildCardTypes().isEmpty();
 	}
 }
