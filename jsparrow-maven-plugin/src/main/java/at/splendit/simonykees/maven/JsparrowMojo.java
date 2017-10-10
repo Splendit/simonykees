@@ -40,6 +40,7 @@ import org.osgi.framework.launch.FrameworkFactory;
  * @since 2.2.1
  *
  */
+@SuppressWarnings("nls")
 @Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, requiresProject = true)
 public class JsparrowMojo extends AbstractMojo {
 
@@ -62,19 +63,19 @@ public class JsparrowMojo extends AbstractMojo {
 	protected String profile;
 
 	// CONSTANTS
-	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
-	public static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
-	public static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone"; //$NON-NLS-1$
-	public static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default"; //$NON-NLS-1$
-	public static final String FRAMEWORK_STORAGE_VALUE = "target/bundlecache"; //$NON-NLS-1$
-	public static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
-	public static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
-	public static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH";  //$NON-NLS-1$
-	public static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
-	public static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
-	public static final String JSPARROW_MANIFEST = "manifest.standalone"; //$NON-NLS-1$
-	public static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory"; //$NON-NLS-1$
-	public static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
+	public static final String USER_DIR = "user.dir"; 
+	public static final String JAVA_TMP = "java.io.tmpdir"; 
+	public static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone"; 
+	public static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default"; 
+	public static final String FRAMEWORK_STORAGE_VALUE = "target/bundlecache"; 
+	public static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; 
+	public static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; 
+	public static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH";  
+	public static final String SELECTED_PROFILE = "PROFILE.SELECTED"; 
+	public static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; 
+	public static final String JSPARROW_MANIFEST = "manifest.standalone"; 
+	public static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory"; 
+	public static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; 
 
 	public void execute() throws MojoExecutionException {
 		try {
@@ -97,8 +98,8 @@ public class JsparrowMojo extends AbstractMojo {
 		final Map<String, String> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
-		configuration.put(CONFIG_FILE_PATH, (configFile.exists() && !configFile.isDirectory()) ? configFile.getAbsolutePath() : "");
-		configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile);
+		configuration.put(CONFIG_FILE_PATH, (configFile.exists() && !configFile.isDirectory()) ? configFile.getAbsolutePath() : ""); 
+		configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile); 
 
 		// Set working directory
 		String file = System.getProperty(JAVA_TMP);
@@ -131,12 +132,12 @@ public class JsparrowMojo extends AbstractMojo {
 
 		try (InputStream is = JsparrowMojo.class.getResourceAsStream(File.separator + JSPARROW_MANIFEST);
 				BufferedReader reader = new BufferedReader(new InputStreamReader(is));) {
-			String line = ""; //$NON-NLS-1$
+			String line = ""; 
 
 			if (is != null) {
 				while ((line = reader.readLine()) != null) {
 					InputStream fileStream = JsparrowMojo.class.getResourceAsStream(File.separator + line);
-					bundles.add(ctx.installBundle("file://" + line, fileStream)); //$NON-NLS-1$
+					bundles.add(ctx.installBundle("file://" + line, fileStream));
 				}
 			}
 		} catch (IOException e) {
@@ -203,8 +204,8 @@ public class JsparrowMojo extends AbstractMojo {
 	 */
 	private void extractAndCopyDependencies() {
 		final InvocationRequest request = new DefaultInvocationRequest();
-		request.setPomFile(new File(project.getBasedir().getAbsolutePath() + File.separator + "pom.xml")); //$NON-NLS-1$
-		request.setGoals(Collections.singletonList("dependency:copy-dependencies ")); //$NON-NLS-1$
+		request.setPomFile(new File(project.getBasedir().getAbsolutePath() + File.separator + "pom.xml"));
+		request.setGoals(Collections.singletonList("dependency:copy-dependencies "));
 		final Properties props = new Properties();
 		props.setProperty(OUTPUT_DIRECTORY_CONSTANT,
 				System.getProperty(USER_DIR) + File.separator + DEPENDENCIES_FOLDER_CONSTANT);
