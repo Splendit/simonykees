@@ -73,6 +73,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	protected IStatus fSelectionStatus;
 
 	private boolean forcedSelectLeft = false;
+	private boolean forcedSelectRight = false;
 
 	private enum SelectionSide {
 		LEFT, RIGHT, NONE,
@@ -190,6 +191,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		removeAllButton.setText(Messages.SelectRulesWizardPage_removeAllButtonLabel);
 
 		leftTreeViewer.addSelectionChangedListener((SelectionChangedEvent event) -> {
+			latestSelectionSide = SelectionSide.LEFT;
+			
 			if (forcedSelectLeft) {
 				forcedSelectLeft = false;
 				/*
@@ -213,8 +216,13 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		rightTableViewer.addSelectionChangedListener((SelectionChangedEvent event) -> {
 			latestSelectionSide = SelectionSide.RIGHT;
-			controler.selectionChanged();
-			removeButton.setEnabled(!event.getSelection().isEmpty());
+
+			if (forcedSelectRight) {
+				forcedSelectRight = false;
+			} else {
+				controler.selectionChanged();
+				removeButton.setEnabled(!event.getSelection().isEmpty());
+			}
 		});
 
 		removeButton.addSelectionListener(new SelectionAdapter() {
@@ -400,6 +408,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			}
 			if (!model.getRecentlyMoved().isEmpty()) {
 				if (model.isMovedToRight()) {
+					forcedSelectRight = true;
 					rightTableViewer.setSelection(new StructuredSelection(model.getRecentlyMoved().toArray()), false);
 				} else {
 					forcedSelectLeft = true;
