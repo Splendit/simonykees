@@ -30,6 +30,7 @@ import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.ExceptionMessages;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * This class manages the selected {@link RefactoringRule}s and the selected
@@ -238,7 +239,8 @@ public class RefactoringPipeline {
 					 * there
 					 */
 					if (!testmode && RefactoringUtil.checkForSyntaxErrors(compilationUnit)) {
-						logger.info("Adding compilation unit to errorList: " + compilationUnit.getElementName());
+						String loggerInfo = NLS.bind(Messages.RefactoringPipeline_AddingCompilationUnitToErrorList, compilationUnit.getElementName());
+						logger.info(loggerInfo);
 						containingErrorList.add(compilationUnit);
 					} else {
 						refactoringStates
@@ -261,8 +263,9 @@ public class RefactoringPipeline {
 				 * the user
 				 */
 				if (!containingErrorList.isEmpty()) {
-					logger.info(NLS.bind(ExceptionMessages.RefactoringPipeline_syntax_errors_exist, containingErrorList
-							.stream().map(ICompilationUnit::getElementName).collect(Collectors.joining(", ")))); //$NON-NLS-1$
+					String loggerInfo = NLS.bind(ExceptionMessages.RefactoringPipeline_syntax_errors_exist, containingErrorList
+							.stream().map(ICompilationUnit::getElementName).collect(Collectors.joining(", "))); //$NON-NLS-1$
+					logger.info(loggerInfo); 
 
 				}
 				return containingErrorList;
@@ -285,9 +288,8 @@ public class RefactoringPipeline {
 				if (((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.isEmpty()) {
 					refactoringStates.add(new RefactoringState(compilationUnit, workingCopy));
 				} else {
-					logger.info("Compilation unit with compilation error: " + compilationUnit.getElementName()
-							+ ", problems: "
-							+ ((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.get(0));
+					String loggerInfo = NLS.bind(Messages.RefactoringPipeline_CompilationUnitWithCompilationErrors, compilationUnit.getElementName(), ((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.get(0));
+					logger.info(loggerInfo);
 				}
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
