@@ -225,4 +225,12 @@ public class StandaloneConfig {
 			return true;
 		}
 	}
+	
+	/**
+	 * Getter for IJavaProject
+	 * @return generated IJavaProject 
+	 */
+	public IJavaProject getJavaProject() {
+		return javaProject;
+	}
 }

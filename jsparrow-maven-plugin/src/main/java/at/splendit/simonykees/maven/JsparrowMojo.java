@@ -55,6 +55,12 @@ public class JsparrowMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${maven.home}", required = true)
 	String mavenHome;
 
+	@Parameter(defaultValue = "jsparrow.yml", property = "configFile")
+	protected File configFile;
+	
+	@Parameter(defaultValue = "", property = "profile")
+	protected String profile;
+
 	// CONSTANTS
 	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	public static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
@@ -63,6 +69,8 @@ public class JsparrowMojo extends AbstractMojo {
 	public static final String FRAMEWORK_STORAGE_VALUE = "target/bundlecache"; //$NON-NLS-1$
 	public static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
 	public static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
+	public static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH";  //$NON-NLS-1$
+	public static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 	public static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
 	public static final String JSPARROW_MANIFEST = "manifest.standalone"; //$NON-NLS-1$
 	public static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory"; //$NON-NLS-1$
@@ -89,6 +97,8 @@ public class JsparrowMojo extends AbstractMojo {
 		final Map<String, String> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
+		configuration.put(CONFIG_FILE_PATH, (configFile.exists() && !configFile.isDirectory()) ? configFile.getAbsolutePath() : "");
+		configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile);
 
 		// Set working directory
 		String file = System.getProperty(JAVA_TMP);

@@ -134,7 +134,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 				// HandlerUtil.getActiveShell(event)
 				final WizardDialog dialog = new WizardDialog(shell, new SelectRulesWizard(selectedJavaElements,
-						refactoringPipeline, RulesContainer.getRulesForProject(selectedJavaProjekt))) {
+						refactoringPipeline, RulesContainer.getRulesForProject(selectedJavaProjekt, false))) {
 					/*
 					 * Removed unnecessary empty space on the bottom of the
 					 * wizard intended for ProgressMonitor that is not used

@@ -42,7 +42,7 @@ public class AllRulesTest extends AbstractRulesTest {
 		StandardLoggerRule standardLoggerRule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
 		standardLoggerRule.activateDefaultOptions();
 		rulesList.add(standardLoggerRule);
-		rulesList.addAll(RulesContainer.getAllRules());
+		rulesList.addAll(RulesContainer.getAllRules(false));
 	}
 
 	/**

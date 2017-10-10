@@ -214,10 +214,6 @@ public class RefactoringPipeline {
 
 				IJavaProject javaProjekt = compilationUnits.get(0).getJavaProject();
 
-				logger.info("NUMBER OF COMPILATION UNITS: " + compilationUnits.size());
-				createRefactoringStates(compilationUnits);
-				logger.info("NUMBER OF REFACTORING STATES: " + refactoringStates.size());
-
 				for (ICompilationUnit compilationUnit : compilationUnits) {
 					subMonitor.subTask(compilationUnit.getElementName());
 
