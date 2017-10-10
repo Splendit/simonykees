@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +109,9 @@ public class StandaloneConfig {
 
 		IProject project = workspace.getRoot().getProject(description.getName());
 		project.create(description, new NullProgressMonitor());
-		logger.debug(Messages.StandaloneConfig_debug_createProject + description.getName());
+		
+		String loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createProject, description.getName());
+		logger.debug(loggerInfo);
 
 		project.open(new NullProgressMonitor());
 

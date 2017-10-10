@@ -27,19 +27,20 @@ public class Messages extends NLS {
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
 	public static String Activator_debug_collectCompilationUnits;
-
 	public static String Activator_debug_commitRefactoring;
-
 	public static String Activator_debug_createRefactoringStates;
-
 	public static String Activator_debug_numCompilationUnits;
-
 	public static String Activator_debug_numRefactoringStates;
-
 	public static String Activator_debug_startRefactoring;
-
 	public static String Activator_start;
 	public static String Activator_stop;
+	public static String Activator_standalone_LoadingConfiguration;
+	public static String Activator_standalone_SelectedProfile;
+	public static String Activator_standalone_SelectedRules;
+	public static String Activator_standalone_DefaultProfileDoesNotExist;
+	public static String Activator_standalone_RulesDoNotExist;
+	public static String Activator_standalone_ConfigFileReadSuccessfully;
+	public static String Activator_standalone_UsingDefaultConfiguration;
 	public static String ArithmethicAssignmentRule_description;
 	public static String ArithmethicAssignmentRule_name;
 	public static String BracketsToControlRule_description;
