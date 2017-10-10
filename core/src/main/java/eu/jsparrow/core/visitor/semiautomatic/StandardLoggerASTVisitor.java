@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,11 +14,16 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -28,6 +34,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeLiteral;
@@ -39,6 +46,7 @@ import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractAddImportASTVisitor;
+import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
@@ -50,8 +58,8 @@ import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
  * <pre>
  * 
  * As an example, assuming that the <b>default</b> replacing options from
- * {@link StandardLoggerRule#getDefaultOptions()} the following replacements are
- * possible:
+ * {@link StandardLoggerRule#getDefaultOptions()} are activated, the following
+ * replacements are possible:
  * 
  * <ul>
  * <li>The occurrences of {@code System.out.println("Some message");} and
@@ -74,6 +82,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String JAVA_LANG_THROWABLE = java.lang.Throwable.class.getName();
 	private static final String OUT = "out"; //$NON-NLS-1$
 	private static final String PRINT = "print"; //$NON-NLS-1$
+	private static final String PRINTF = "printf"; //$NON-NLS-1$
 	private static final String PRINTLN = "println"; //$NON-NLS-1$
 	private static final String ERR = "err"; //$NON-NLS-1$
 	private static final String PRINT_STACK_TRACE = "printStackTrace"; //$NON-NLS-1$
@@ -85,11 +94,16 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String LOG4J_LOGGER_MANAGER = "LogManager"; //$NON-NLS-1$
 	private static final String LOG4J_GET_LOGGER = "getLogger"; //$NON-NLS-1$
 	private static final String SLF4J_LOGGER_FACTORY_QUALIFIED_NAME = org.slf4j.LoggerFactory.class.getName();
+	private static final String VALUE_OF = "valueOf"; //$NON-NLS-1$
+	private static final String FORMAT = "format"; //$NON-NLS-1$
 	/**
 	 * log4j is not within the class path
 	 */
 	private static final String LOG4J_LOGGER_FACTORY_QUALIFIED_NAME = "org.apache.logging.log4j.LogManager"; //$NON-NLS-1$
 	private static final String SEPARATOR = "->"; //$NON-NLS-1$
+
+	private static final List<String> exceptionQualifiedName = Collections
+			.singletonList(java.lang.Exception.class.getName());
 
 	private boolean importsNeeded = false;
 
@@ -122,9 +136,12 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	public boolean preVisit2(ASTNode node) {
 		// rule precondition: all options must be set
 		return loggerQualifiedName != null && replacingOptions != null
-				&& replacingOptions.containsKey(StandardLoggerConstants.PRINT_STACKTRACE)
-				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_ERR_PRINT)
-				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_OUT_PRINT);
+				&& replacingOptions.containsKey(StandardLoggerConstants.PRINT_STACKTRACE_KEY)
+				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY)
+				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY)
+				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY)
+				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY)
+				&& replacingOptions.containsKey(StandardLoggerConstants.MISSING_LOG_KEY);
 	}
 
 	@Override
@@ -184,17 +201,129 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	@Override
 	public boolean visit(MethodDeclaration methodDeclaration) {
 		/*
-		 * Since it is not possible to have a static field in a nested class, the
-		 * introduced logger will be an instance field too. Therefore, it cannot be used
-		 * in a static method.
+		 * Since it is not possible to have a static field in a nested class,
+		 * the introduced logger has to be an instance field too. Therefore, it
+		 * cannot be used in a static method.
 		 */
 		return !(nestedTypeDeclarationLevel > 1
 				&& ASTNodeUtil.hasModifier(methodDeclaration.modifiers(), Modifier::isStatic));
 	}
 
+	@Override
+	public boolean visit(CatchClause catchClause) {
+		String replaceOption = replacingOptions.get(StandardLoggerConstants.MISSING_LOG_KEY);
+		if (replaceOption == null || StringUtils.isEmpty(replaceOption)) {
+			return true;
+		}
+		SingleVariableDeclaration exception = catchClause.getException();
+		SimpleName exceptionName = exception.getName();
+
+		Block catchBody = catchClause.getBody();
+		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(exceptionName);
+		catchBody.accept(visitor);
+		List<SimpleName> exceptionUsages = visitor.getUsages();
+		if (!exceptionUsages.isEmpty()) {
+			return true;
+		}
+
+		if (getLoggerName() == null) {
+			addLogger();
+		}
+
+		ExpressionStatement loggingStatement = prepareLoggingStatement(exceptionName, replaceOption, getLoggerName());
+		ListRewrite statemetnRewrite = astRewrite.getListRewrite(catchBody, Block.STATEMENTS_PROPERTY);
+		statemetnRewrite.insertFirst(loggingStatement, null);
+
+		return true;
+	}
+
+	@Override
+	public boolean visit(MethodInvocation methodInvocation) {
+		SimpleName methodName = methodInvocation.getName();
+		String methodIdentifier = methodName.getIdentifier();
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+		// if the method invocation name is print, printf or println
+		if (isPrintMethod(methodIdentifier) && !arguments.isEmpty()) {
+			/*
+			 * Looking for System.out/err.print/ln where System.out/err is a
+			 * qualified name expression of the print/ln method invocation.
+			 */
+			Expression expression = methodInvocation.getExpression();
+			// ... and if the argument of the method invocation is a string
+			if (expression == null || ASTNode.QUALIFIED_NAME != expression.getNodeType()) {
+				return false;
+			}
+
+			QualifiedName expressionQualifier = (QualifiedName) expression;
+			Name qualifier = expressionQualifier.getQualifier();
+			if (!ClassRelationUtil.isContentOfTypes(qualifier.resolveTypeBinding(),
+					Collections.singletonList(JAVA_LANG_SYSTEM))) {
+				return false;
+			}
+
+			List<Expression> logArguments = calcLogArgument(arguments, methodIdentifier);
+			SimpleName qualiferName = expressionQualifier.getName();
+			calcReplacingOtion(arguments, qualiferName)
+					.ifPresent(replacingOption -> replaceMethod(methodInvocation, replacingOption, logArguments));
+
+		} else if (PRINT_STACK_TRACE.equals(methodIdentifier)
+				&& !StringUtils.isEmpty(replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE_KEY))) {
+			/*
+			 * Looking for e.printStackTrace() where 'e' is a throwable object.
+			 */
+			Expression expression = methodInvocation.getExpression();
+			if (expression == null || ASTNode.SIMPLE_NAME != expression.getNodeType()) {
+				return true;
+			}
+
+			SimpleName simpleName = (SimpleName) expression;
+			ITypeBinding iTypeBinding = simpleName.resolveTypeBinding();
+			if (ClassRelationUtil.isInheritingContentOfTypes(iTypeBinding,
+					Collections.singletonList(JAVA_LANG_THROWABLE))) {
+				// replace printStackTrace with the logger method.
+				String replacingMethod = replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE_KEY);
+				replaceMethod(methodInvocation, simpleName, replacingMethod);
+			}
+		}
+		return true;
+	}
+
 	/**
-	 * Keeps track of the possibly nested types (classes or enums) declared inside
-	 * the compilation unit.
+	 * Creates a new unparented {@link ExpressionStatement} for logging an
+	 * exception. The structure of the expression is:
+	 * 
+	 * <pre>
+	 * {@code [loggerName].[logLevelName]([exceptionName].getMessage(), [exceptionName]);}
+	 * 
+	 * @param exceptionName
+	 *            the name of the exception to be logged.
+	 * @param logLevelName
+	 *            the name of the logging level to be used
+	 * @param loggerName
+	 *            the name of the logger object.
+	 * @return the newly created statement as described above.
+	 */
+	private ExpressionStatement prepareLoggingStatement(SimpleName exceptionName, String logLevelName,
+			String loggerName) {
+		AST ast = astRewrite.getAST();
+		MethodInvocation loggingMethodInocation = ast.newMethodInvocation();
+		loggingMethodInocation.setName(ast.newSimpleName(logLevelName));
+		loggingMethodInocation.setExpression(ast.newSimpleName(loggerName));
+
+		MethodInvocation loggingMessage = ast.newMethodInvocation();
+		loggingMessage.setName(ast.newSimpleName(THROWABLE_GET_MESSAGE));
+		loggingMessage.setExpression(ast.newSimpleName(exceptionName.getIdentifier()));
+
+		ListRewrite argRewrite = astRewrite.getListRewrite(loggingMethodInocation, MethodInvocation.ARGUMENTS_PROPERTY);
+		argRewrite.insertFirst(loggingMessage, null);
+		argRewrite.insertLast(astRewrite.createCopyTarget(exceptionName), null);
+
+		return ast.newExpressionStatement(loggingMethodInocation);
+	}
+
+	/**
+	 * Keeps track of the possibly nested types (classes or enums) declared
+	 * inside the compilation unit.
 	 * 
 	 * @param abstractType
 	 *            node representing a type declaration.
@@ -208,8 +337,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	/**
-	 * Discard stored information related to the type after its corresponding node
-	 * is visited.
+	 * Discard stored information related to the type after its corresponding
+	 * node is visited.
 	 * 
 	 * @param typeDeclaration2
 	 *            end visit node
@@ -224,72 +353,120 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		}
 	}
 
-	@Override
-	public boolean visit(MethodInvocation methodInvocation) {
-		SimpleName methodName = methodInvocation.getName();
-		// if the method invocation name is print or println
-		if ((PRINT.equals(methodName.getIdentifier()) || PRINTLN.equals(methodName.getIdentifier()))
-				&& methodInvocation.arguments().size() == 1) {
-			/*
-			 * Looking for System.out/err.print/ln where System.out/err is a qualified name
-			 * expression of the print/ln method invocation.
-			 */
-			Expression argument = (Expression) methodInvocation.arguments().get(0);
-			// ... and if the argument of the method invocation is a string
-			if (ClassRelationUtil.isContentOfTypes(argument.resolveTypeBinding(),
-					Collections.singletonList(java.lang.String.class.getName()))) {
-				Expression expression = methodInvocation.getExpression();
-				if (expression != null && ASTNode.QUALIFIED_NAME == expression.getNodeType()) {
-					QualifiedName expressionQualifier = (QualifiedName) expression;
-					Name qualifier = expressionQualifier.getQualifier();
-
-					if (ClassRelationUtil.isContentOfTypes(qualifier.resolveTypeBinding(),
-							Collections.singletonList(JAVA_LANG_SYSTEM))) {
-						SimpleName qualiferName = expressionQualifier.getName();
-						String systemOutOption = replacingOptions.get(StandardLoggerConstants.SYSTEM_OUT_PRINT);
-						String systemErrOption = replacingOptions.get(StandardLoggerConstants.SYSTEM_ERR_PRINT);
-
-						if (OUT.equals(qualiferName.getIdentifier()) && !StringUtils.isEmpty(systemOutOption)) {
-							// replace the System.out.println with a logger
-							replaceMethod(methodInvocation, systemOutOption);
-						} else if (ERR.equals(qualiferName.getIdentifier()) && !StringUtils.isEmpty(systemErrOption)) {
-							// replace the System.err.println with a logger
-							replaceMethod(methodInvocation, systemErrOption);
-						}
-					}
-				}
-			}
-
-		} else if (PRINT_STACK_TRACE.equals(methodName.getIdentifier())
-				&& !StringUtils.isEmpty(replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE))) {
-			/*
-			 * Looking for e.printStackTrace() where 'e' is a throwable object.
-			 */
-			Expression expression = methodInvocation.getExpression();
-			if (expression != null && ASTNode.SIMPLE_NAME == expression.getNodeType()) {
-				SimpleName simpleName = (SimpleName) expression;
-				ITypeBinding iTypeBinding = simpleName.resolveTypeBinding();
-				if (ClassRelationUtil.isInheritingContentOfTypes(iTypeBinding,
-						Collections.singletonList(JAVA_LANG_THROWABLE))) {
-					// replace printStackTrace with the logger method.
-					String replacingMethod = replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE);
-					replaceMethod(methodInvocation, simpleName, replacingMethod);
-				}
-			}
-		}
-		return true;
+	private boolean isPrintMethod(String methodIdentifier) {
+		return PRINT.equals(methodIdentifier) || PRINTLN.equals(methodIdentifier) || PRINTF.equals(methodIdentifier);
 	}
 
 	/**
-	 * Replaces the method invocation with a logger method having one string as a
-	 * parameter
+	 * Computes the argument(s) to be used in a logger statements. Adapts the
+	 * parameters of {@link System.out#print}, {@link System.out#printf} and
+	 * {@link System.out#println} for both slf4j and log4j.
+	 * 
+	 * @param arguments
+	 *            arguments used in the print statement
+	 * @param methodIdentifier
+	 *            the name of the method used for printing to standard outputs.
+	 * @return the list of the arguments adapted for the
+	 *         {@value #loggerQualifiedName}
+	 */
+	private List<Expression> calcLogArgument(List<Expression> arguments, String methodIdentifier) {
+		List<Expression> logArguments = new ArrayList<>();
+		List<String> stringQualifiedName = Collections.singletonList(java.lang.String.class.getName());
+		Expression firstArgument = arguments.get(0);
+		ITypeBinding stArgTypeBinding = firstArgument.resolveTypeBinding();
+		if (PRINTF.equals(methodIdentifier)) {
+			if (ClassRelationUtil.isContentOfTypes(stArgTypeBinding,
+					Collections.singletonList(java.util.Locale.class.getName()))) {
+				/*
+				 * No corresponding log statements exists for this case. The
+				 * arguments shall be wrapped in a String::format
+				 */
+				AST ast = astRewrite.getAST();
+				MethodInvocation stringFormat = ast.newMethodInvocation();
+				stringFormat.setName(ast.newSimpleName(FORMAT));
+				stringFormat.setExpression(ast.newSimpleName(String.class.getSimpleName()));
+				ListRewrite argRewrite = astRewrite.getListRewrite(stringFormat, MethodInvocation.ARGUMENTS_PROPERTY);
+				arguments.forEach(arg -> argRewrite.insertLast(arg, null));
+				logArguments.add(stringFormat);
+			} else {
+				/*
+				 * Both slf4j and log4j are able accept formatting parameters
+				 */
+				logArguments.addAll(arguments);
+			}
+
+		} else {
+			if (ClassRelationUtil.isContentOfTypes(stArgTypeBinding, stringQualifiedName)
+					|| ClassRelationUtil.isInheritingContentOfTypes(stArgTypeBinding, stringQualifiedName)
+					|| StandardLoggerConstants.LOG4J_LOGGER.equals(loggerQualifiedName)) {
+				/*
+				 * log4j is able to accept an object as input
+				 */
+				logArguments.add((Expression) astRewrite.createCopyTarget(firstArgument));
+			} else {
+				/*
+				 * slf4j does NOT accept an Object. Therefore, the argument has
+				 * to be wrapped in a String.valueOf
+				 */
+				AST ast = astRewrite.getAST();
+				MethodInvocation stringValueOf = ast.newMethodInvocation();
+				stringValueOf.setName(ast.newSimpleName(VALUE_OF));
+				stringValueOf.setExpression(ast.newSimpleName(String.class.getSimpleName()));
+				ListRewrite argRewrite = astRewrite.getListRewrite(stringValueOf, MethodInvocation.ARGUMENTS_PROPERTY);
+				argRewrite.insertFirst((Expression) astRewrite.createCopyTarget(firstArgument), null);
+				logArguments.add(stringValueOf);
+			}
+		}
+
+		return logArguments;
+	}
+
+	/**
+	 * Computes the logging level to be used, based on the
+	 * {@link #replacingOptions}, the method used for printing to standard
+	 * output and whether an exception occurs in the parameters used in the
+	 * print method.
+	 * 
+	 * @param arguments
+	 *            the list of the arguments occurring in the print method
+	 * @param qualiferName
+	 *            the qualifier of the print method
+	 * @return the optional of the identifier of the logging level to be used,
+	 *         or an empty optional if the qualifier name does not match with
+	 *         the qualifiers of the standard output of if the replacement
+	 *         option is not set in {@link #replacingOptions}.
+	 */
+	private Optional<String> calcReplacingOtion(List<Expression> arguments, SimpleName qualiferName) {
+		ExceptionsASTVisitor visitor = new ExceptionsASTVisitor();
+		arguments.forEach(argument -> argument.accept(visitor));
+		boolean logsException = !visitor.getExceptions().isEmpty();
+		String option = ""; //$NON-NLS-1$
+		if (logsException && OUT.equals(qualiferName.getIdentifier())) {
+			option = replacingOptions.get(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY);
+		} else if (logsException && ERR.equals(qualiferName.getIdentifier())) {
+			option = replacingOptions.get(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY);
+		} else if (OUT.equals(qualiferName.getIdentifier())) {
+			option = replacingOptions.get(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY);
+		} else if (ERR.equals(qualiferName.getIdentifier())) {
+			option = replacingOptions.get(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY);
+		}
+
+		return Optional.of(option).filter(s -> !s.isEmpty());
+	}
+
+	/**
+	 * Replaces the method invocation with a logger method having one string as
+	 * a parameter
 	 * 
 	 * @param methodInvocation
 	 *            to be replaced
 	 * @param replacingMethod
 	 *            name of the replacing method
+	 * @param logArgument
+	 *            the expression being logged
 	 */
-	private void replaceMethod(MethodInvocation methodInvocation, String replacingMethod) {
+	private void replaceMethod(MethodInvocation methodInvocation, String replacingMethod,
+			List<Expression> logArguments) {
 		if (getLoggerName() == null) {
 			addLogger();
 		}
@@ -299,11 +476,15 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		SimpleName loggerName = ast.newSimpleName(loggerNameIdentifier);
 		astRewrite.replace(methodInvocation.getName(), loggerMethodName, null);
 		astRewrite.replace(methodInvocation.getExpression(), loggerName, null);
+		ListRewrite argRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
+		ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
+				.forEach(arg -> argRewrite.remove(arg, null));
+		logArguments.forEach(logArgument -> argRewrite.insertLast(logArgument, null));
 	}
 
 	/**
-	 * Replaces the given method invocation with a logger method having the error
-	 * message and the throwable object as parameters. For example:
+	 * Replaces the given method invocation with a logger method having the
+	 * error message and the throwable object as parameters. For example:
 	 * 
 	 * {@code e.printStackTrace();}
 	 * 
@@ -342,8 +523,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	/**
-	 * Creates a logger object as a final field and initializes it using a proper
-	 * factory. The field is inserted at the beginning of the class body.
+	 * Creates a logger object as a final field and initializes it using a
+	 * proper factory. The field is inserted at the beginning of the class body.
 	 */
 	private void addLogger() {
 		importsNeeded = true;
@@ -392,8 +573,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	/**
-	 * Stores the name of the logger for the current type declaration which is being
-	 * visited. Generates a unique identification for it.
+	 * Stores the name of the logger for the current type declaration which is
+	 * being visited. Generates a unique identification for it.
 	 * 
 	 * @param loggerName
 	 *            name to be stored.
@@ -404,8 +585,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 	/**
 	 * Generates an initializer expression for the logger based on the qualified
-	 * name of the logger ({@value #typeDeclaration}). The initializer generated for
-	 * {@value StandardLoggerConstants#SLF4J_LOGGER} is:
+	 * name of the logger ({@value #typeDeclaration}). The initializer generated
+	 * for {@value StandardLoggerConstants#SLF4J_LOGGER} is:
 	 * 
 	 * {@code LoggerFactory.getLogger()}
 	 * 
@@ -446,11 +627,11 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	/**
-	 * Generates a name for the logger object. Avoids clashes with the rest of the
-	 * fields in the current class or in the outer classes in case the logger is
-	 * being introduced in a nested class. The default logger name is
-	 * {@value #DEFAULT_LOGGER_NAME}. A number is added as a suffix if the default
-	 * name is already taken by some other object within the scope.
+	 * Generates a name for the logger object. Avoids clashes with the rest of
+	 * the fields in the current class or in the outer classes in case the
+	 * logger is being introduced in a nested class. The default logger name is
+	 * {@value #DEFAULT_LOGGER_NAME}. A number is added as a suffix if the
+	 * default name is already taken by some other object within the scope.
 	 * 
 	 * @return a string representing the logger name.
 	 */
@@ -481,8 +662,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 * @param typeDeclaration
 	 *            a node representing a type declaration.
 	 * 
-	 * @return a mixture of the type name, its starting position in the compilation
-	 *         unit and its length.
+	 * @return a mixture of the type name, its starting position in the
+	 *         compilation unit and its length.
 	 */
 	private String generateUniqueTypeId(AbstractTypeDeclaration typeDeclaration) {
 		return typeDeclaration.getName().getIdentifier() + SEPARATOR + typeDeclaration.getStartPosition() + SEPARATOR
@@ -532,6 +713,38 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 		public boolean isLoggerFree() {
 			return !clashingFound;
+		}
+	}
+
+	class ExceptionsASTVisitor extends ASTVisitor {
+		private List<ASTNode> foundExceptions = new ArrayList<>();
+
+		@Override
+		public boolean visit(SimpleName simpleName) {
+			IBinding binding = simpleName.resolveBinding();
+			if (binding != null && IBinding.VARIABLE == binding.getKind()) {
+				ITypeBinding typeBinding = simpleName.resolveTypeBinding();
+				storeIfExceptionType(typeBinding, simpleName);
+			}
+			return true;
+		}
+
+		@Override
+		public boolean visit(ClassInstanceCreation classCreation) {
+			ITypeBinding typeBinding = classCreation.resolveTypeBinding();
+			storeIfExceptionType(typeBinding, classCreation);
+			return true;
+		}
+
+		private void storeIfExceptionType(ITypeBinding typeBinding, ASTNode node) {
+			if (typeBinding != null && (ClassRelationUtil.isContentOfTypes(typeBinding, exceptionQualifiedName)
+					|| ClassRelationUtil.isInheritingContentOfTypes(typeBinding, exceptionQualifiedName))) {
+				foundExceptions.add(node);
+			}
+		}
+
+		public List<ASTNode> getExceptions() {
+			return this.foundExceptions;
 		}
 	}
 }

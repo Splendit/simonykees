@@ -33,12 +33,13 @@ public class LoggerRuleWizardPageModel {
 	Map<String, Integer> systemOutReplaceOptions = new LinkedHashMap<>();
 	Map<String, Integer> systemErrReplaceOptions = new LinkedHashMap<>();
 	Map<String, Integer> printStackTraceReplaceOptions = new LinkedHashMap<>();
+	Map<String, Integer> missingLogInsertOptions = new LinkedHashMap<>();
 
 	Set<IValueChangeListener> listeners = new HashSet<>();
 
 	private String selectionStatus = ""; //$NON-NLS-1$
 
-	private final String noSeverityLevel = Messages.LoggerRuleWizardPageModel_noSeverityLevel;
+	private static final String NO_SEVERITY_LEVEL = Messages.LoggerRuleWizardPageModel_noSeverityLevel;
 
 	public LoggerRuleWizardPageModel(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		this.rule = (StandardLoggerRule) rule;
@@ -48,6 +49,7 @@ public class LoggerRuleWizardPageModel {
 		systemOutReplaceOptions.putAll(this.rule.getSystemOutReplaceOptions());
 		systemErrReplaceOptions.putAll(this.rule.getSystemErrReplaceOptions());
 		printStackTraceReplaceOptions.putAll(this.rule.getPrintStackTraceReplaceOptions());
+		missingLogInsertOptions.putAll(this.rule.getMissingLogInsertOptions());
 	}
 
 	/**
@@ -87,7 +89,7 @@ public class LoggerRuleWizardPageModel {
 	 *            new value of selected field
 	 */
 	public void setNewSelection(String source, String selection) {
-		if (selection.equals(noSeverityLevel)) {
+		if (selection.equals(NO_SEVERITY_LEVEL)) {
 			selection = ""; //$NON-NLS-1$
 		}
 		currentSelectionMap.put(source, selection);
@@ -102,20 +104,36 @@ public class LoggerRuleWizardPageModel {
 	 * 
 	 */
 	private void validateSelection() {
-		String sysOutCurr = currentSelectionMap.get(StandardLoggerConstants.SYSTEM_OUT_PRINT);
-		String sysErrCurr = currentSelectionMap.get(StandardLoggerConstants.SYSTEM_ERR_PRINT);
-		String stackTraceCurr = currentSelectionMap.get(StandardLoggerConstants.PRINT_STACKTRACE);
+		String sysOutCurr = currentSelectionMap.get(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY);
+		String sysErrCurr = currentSelectionMap.get(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY);
+		String stackTraceCurr = currentSelectionMap.get(StandardLoggerConstants.PRINT_STACKTRACE_KEY);
+		String missingLogCurr = currentSelectionMap.get(StandardLoggerConstants.MISSING_LOG_KEY);
 
-		int sysOutCurrSeverityLevel = (noSeverityLevel.equals(sysOutCurr) || StringUtils.isEmpty(sysOutCurr)) ? 0
+		int sysOutCurrSeverityLevel = (NO_SEVERITY_LEVEL.equals(sysOutCurr) || StringUtils.isEmpty(sysOutCurr)) ? 0
 				: rule.getSystemOutReplaceOptions().get(sysOutCurr);
-		int sysErrCurrSeverityLevel = (StringUtils.equalsIgnoreCase(noSeverityLevel, sysErrCurr) || StringUtils.isEmpty(sysErrCurr)) ? 0
-				: rule.getSystemErrReplaceOptions().get(sysErrCurr);
-		int stackTraceCurrSeverityLevel = (noSeverityLevel.equals(stackTraceCurr) || StringUtils.isEmpty(stackTraceCurr)) ? 0
-				: rule.getPrintStackTraceReplaceOptions().get(stackTraceCurr);
+		int sysErrCurrSeverityLevel = (StringUtils.equalsIgnoreCase(NO_SEVERITY_LEVEL, sysErrCurr)
+				|| StringUtils.isEmpty(sysErrCurr)) ? 0 : rule.getSystemErrReplaceOptions().get(sysErrCurr);
+		int stackTraceCurrSeverityLevel = (NO_SEVERITY_LEVEL.equals(stackTraceCurr)
+				|| StringUtils.isEmpty(stackTraceCurr)) ? 0
+						: rule.getPrintStackTraceReplaceOptions().get(stackTraceCurr);
+		int missingLogCurrSeverityLevel = (StringUtils.equalsIgnoreCase(NO_SEVERITY_LEVEL, sysErrCurr)
+				|| StringUtils.isEmpty(missingLogCurr)) ? 0 : rule.getMissingLogInsertOptions().get(missingLogCurr);
 
-		if (sysOutCurrSeverityLevel == 0 && sysErrCurrSeverityLevel == 0 && stackTraceCurrSeverityLevel == 0) {
+		selectionStatus = ""; //$NON-NLS-1$
+		
+		if (sysOutCurrSeverityLevel == 0 && sysErrCurrSeverityLevel == 0 && stackTraceCurrSeverityLevel == 0
+				&& missingLogCurrSeverityLevel == 0) {
 			selectionStatus = Messages.LoggerRuleWizardPageModel_err_noTransformation;
-		} else if (!(stackTraceCurrSeverityLevel == 0) && (stackTraceCurrSeverityLevel < sysOutCurrSeverityLevel
+		} else if (missingLogCurrSeverityLevel != 0 && (missingLogCurrSeverityLevel < stackTraceCurrSeverityLevel
+				|| missingLogCurrSeverityLevel < sysErrCurrSeverityLevel
+				|| missingLogCurrSeverityLevel < sysOutCurrSeverityLevel)) {
+			/*
+			 * The newly inserted logging statement shouldn't have lower
+			 * severity level than printStackTrace, System.out.println or
+			 * System.err.println
+			 */
+			selectionStatus = Messages.LoggerRuleWizardPageModel_warn_missingLoggSeverity;
+		} else if (stackTraceCurrSeverityLevel != 0 && (stackTraceCurrSeverityLevel < sysOutCurrSeverityLevel
 				|| stackTraceCurrSeverityLevel < sysErrCurrSeverityLevel)) {
 			// if stackTraceCurrSeverityLevel is empty skip validation of it
 			selectionStatus = Messages.LoggerRuleWizardPageModel_warn_stackTraceSeverity;
@@ -123,11 +141,9 @@ public class LoggerRuleWizardPageModel {
 			 * stack.trace shouldn't have lesser severity level than System.out
 			 * or System.err
 			 */
-		} else if (!(sysErrCurrSeverityLevel == 0) && (sysErrCurrSeverityLevel < sysOutCurrSeverityLevel)) {
+		} else if (sysErrCurrSeverityLevel != 0 && (sysErrCurrSeverityLevel < sysOutCurrSeverityLevel)) {
 			// System.err shouldn't have lesser severity level than System.out
 			selectionStatus = Messages.LoggerRuleWizardPageModel_warn_errSeverity;
-		} else {
-			selectionStatus = ""; //$NON-NLS-1$
 		}
 	}
 
@@ -138,7 +154,7 @@ public class LoggerRuleWizardPageModel {
 	 */
 	public Set<String> getSystemOutReplaceOptions() {
 		Set<String> systemOutReplaceOptionsSet = new LinkedHashSet<>();
-		systemOutReplaceOptionsSet.add(noSeverityLevel);
+		systemOutReplaceOptionsSet.add(NO_SEVERITY_LEVEL);
 		systemOutReplaceOptionsSet.addAll(systemOutReplaceOptions.keySet());
 		return systemOutReplaceOptionsSet;
 	}
@@ -150,7 +166,7 @@ public class LoggerRuleWizardPageModel {
 	 */
 	public Set<String> getSystemErrReplaceOptions() {
 		Set<String> systemErrReplaceOptionsSet = new LinkedHashSet<>();
-		systemErrReplaceOptionsSet.add(noSeverityLevel);
+		systemErrReplaceOptionsSet.add(NO_SEVERITY_LEVEL);
 		systemErrReplaceOptionsSet.addAll(systemErrReplaceOptions.keySet());
 		return systemErrReplaceOptionsSet;
 	}
@@ -162,9 +178,22 @@ public class LoggerRuleWizardPageModel {
 	 */
 	public Set<String> getPrintStackTraceReplaceOptions() {
 		Set<String> printStackTraceReplaceOptionsSet = new LinkedHashSet<>();
-		printStackTraceReplaceOptionsSet.add(noSeverityLevel);
+		printStackTraceReplaceOptionsSet.add(NO_SEVERITY_LEVEL);
 		printStackTraceReplaceOptionsSet.addAll(printStackTraceReplaceOptions.keySet());
 		return printStackTraceReplaceOptionsSet;
+	}
+	
+	/**
+	 * Returns the available options for inserting a missing logg statement
+	 * in a catch clause.
+	 * 
+	 * @return a set of options.
+	 */
+	public Set<String> getMissingLogInsertOptions() {
+		Set<String> missingLogInsertOptionsSet = new LinkedHashSet<>();
+		missingLogInsertOptionsSet.add(NO_SEVERITY_LEVEL);
+		missingLogInsertOptionsSet.addAll(missingLogInsertOptions.keySet());
+		return missingLogInsertOptionsSet;
 	}
 
 	/**

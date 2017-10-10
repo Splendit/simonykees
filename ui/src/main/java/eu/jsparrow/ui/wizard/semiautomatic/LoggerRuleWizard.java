@@ -96,10 +96,12 @@ public class LoggerRuleWizard extends Wizard {
 
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(rule);
 		refactoringPipeline.setRules(rules);
-		// AbstractRefactorer refactorer = new AbstractRefactorer(javaElements,
-		// rules);
+		/*
+		 * AbstractRefactorer refactorer = new AbstractRefactorer(javaElements,
+		 * rules)
+		 */
 		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
-		rule.setSelectedOptions(model.getCurrentSelectionMap());
+		rule.activateOptions(model.getCurrentSelectionMap());
 
 		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
 

@@ -319,10 +319,12 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 	}
 
 	/**
-	 * creates a new {@link ClassInstanceCreation} of type {@link StringBuilder}.
+	 * creates a new {@link ClassInstanceCreation} of type
+	 * {@link StringBuilder}.
 	 * 
 	 * @param oldCreation
-	 * @return a new {@link ClassInstanceCreation} of type {@link StringBuilder}.
+	 * @return a new {@link ClassInstanceCreation} of type
+	 *         {@link StringBuilder}.
 	 */
 	private ClassInstanceCreation createClassInstanceCreation(ClassInstanceCreation oldCreation) {
 		SimpleName stringBuilderName = astRewrite.getAST().newSimpleName(JAVA_LANG_STRINGBUILDER_SIMPLENAME);
@@ -334,7 +336,8 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 		if (!oldCreation.arguments().isEmpty()) {
 			ListRewrite newCreationArguments = astRewrite.getListRewrite(newCreation,
 					ClassInstanceCreation.ARGUMENTS_PROPERTY);
-			oldCreation.arguments().forEach((argument) -> newCreationArguments.insertLast(astRewrite.createCopyTarget((ASTNode) argument), null));
+			ASTNodeUtil.convertToTypedList(oldCreation.arguments(), Expression.class).forEach(
+					argument -> newCreationArguments.insertLast(astRewrite.createCopyTarget((ASTNode) argument), null));
 		}
 
 		return newCreation;

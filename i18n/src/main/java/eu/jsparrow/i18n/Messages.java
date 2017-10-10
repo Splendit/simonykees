@@ -141,7 +141,13 @@ public class Messages extends NLS {
 	public static String LoggerRuleWizard_title;
 	public static String LoggerRuleWizardHandler_info_supportedFrameworkFound;
 	public static String LoggerRuleWizardHandler_noLogger;
+	public static String LoggerRuleWizardPage_alwaysUsePrintStacktraceOptionForLoggingException;
+
 	public static String LoggerRuleWizardPage_description;
+
+	public static String LoggerRuleWizardPage_missingLogLabel;
+
+	public static String LoggerRuleWizardPage_missingLogMessageLabel;
 	public static String LoggerRuleWizardPage_pageName;
 	public static String LoggerRuleWizardPage_severityLevelLabel;
 	public static String LoggerRuleWizardPage_stackTraceLabel;
@@ -154,6 +160,8 @@ public class Messages extends NLS {
 	public static String LoggerRuleWizardPageModel_noSeverityLevel;
 	public static String LoggerRuleWizardPageModel_warn_blankLoggingType;
 	public static String LoggerRuleWizardPageModel_warn_errSeverity;
+
+	public static String LoggerRuleWizardPageModel_warn_missingLoggSeverity;
 	public static String LoggerRuleWizardPageModel_warn_stackTraceSeverity;
 	public static String ImmutableStaticFinalCollectionsRule_description;
 	public static String ImmutableStaticFinalCollectionsRule_name;
