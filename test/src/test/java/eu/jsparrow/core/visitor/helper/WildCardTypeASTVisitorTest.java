@@ -6,46 +6,29 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.junit.Test;
 
-import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 public class WildCardTypeASTVisitorTest {
 	
 	@Test
-	public void treeContainsWildCardTypeASTVisitor() throws Exception {
-		WildCardTypeASTVisitor wildCardTypeASTVisitor = new WildCardTypeASTVisitor();
+	public void visitor_wildCardTypeTree_nodeFound() throws Exception {
+		WildCardTypeASTVisitor visitor = new WildCardTypeASTVisitor();
 		
 		ASTNode astNode = ASTNodeBuilder.createBlock("List<? extends String> aList;");  //$NON-NLS-1$
 		
-		astNode.accept(wildCardTypeASTVisitor);
+		astNode.accept(visitor);
 		
-		assertFalse(wildCardTypeASTVisitor.getWildCardTypes().isEmpty());
+		assertFalse(visitor.getWildCardTypes().isEmpty());
 	}
 	
 	@Test
-	public void treeDontContainsWildCardTypeASTVisitorTest() throws Exception {
-		WildCardTypeASTVisitor wildCardTypeASTVisitor = new WildCardTypeASTVisitor();
+	public void visitor_noWildCardTypeTree_noNodeFound() throws Exception {
+		WildCardTypeASTVisitor visitor = new WildCardTypeASTVisitor();
 		
 		ASTNode astNode = ASTNodeBuilder.createBlock("List<String> aList;");  //$NON-NLS-1$
 		
-		astNode.accept(wildCardTypeASTVisitor);
+		astNode.accept(visitor);
 		
-		assertTrue(wildCardTypeASTVisitor.getWildCardTypes().isEmpty());
+		assertTrue(visitor.getWildCardTypes().isEmpty());
 	}
-	
-	@Test
-	public void WildCardTypeASTNodeUtilTest01() throws Exception {
-		ASTNode astNode = ASTNodeBuilder.createBlock("List<? extends String> aList;");  //$NON-NLS-1$
-		
-		assertTrue(ASTNodeUtil.containsWildCards(astNode));
-	}
-	
-	@Test
-	public void WildCardTypeASTNodeUtilTest02() throws Exception {
-		ASTNode astNode = ASTNodeBuilder.createBlock("List<String> aList;");  //$NON-NLS-1$
-		
-		assertFalse(ASTNodeUtil.containsWildCards(astNode));
-	}
-	
-	
 }
