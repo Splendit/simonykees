@@ -11,18 +11,20 @@ import org.eclipse.ui.PlatformUI;
 
 import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.rule.impl.PublicFieldsRenamingRule;
+import at.splendit.simonykees.core.visitor.renaming.FieldMetadata;
 
 public class RenamingRulePreviewWizard extends Wizard {
 
 	private Map<String, List<DocumentChange>> documentChanges;
 	private PublicFieldsRenamingRule rule;
 	private Shell shell;
+	Map<String, FieldMetadata> metadataMap;
 
-	public RenamingRulePreviewWizard(Map<String, List<DocumentChange>> documentChanges, PublicFieldsRenamingRule rule) {
-		super();
+	public RenamingRulePreviewWizard(Map<String, List<DocumentChange>> documentChanges, Map<String, FieldMetadata> dataMap, PublicFieldsRenamingRule rule) {
 		this.documentChanges = documentChanges;
 		this.rule = rule;
 		this.shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+		this.metadataMap = dataMap;
 		setNeedsProgressMonitor(true);
 	}
 
@@ -33,7 +35,7 @@ public class RenamingRulePreviewWizard extends Wizard {
 	 */
 	@Override
 	public void addPages() {
-		addPage(new RenamingRulePreviewWizardPage(documentChanges, rule));
+		addPage(new RenamingRulePreviewWizardPage(documentChanges, metadataMap, rule));
 	}
 
 	@Override

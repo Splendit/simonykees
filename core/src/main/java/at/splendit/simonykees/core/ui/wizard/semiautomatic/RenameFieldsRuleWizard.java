@@ -73,7 +73,6 @@ public class RenameFieldsRuleWizard extends Wizard {
 	private boolean canRefactor = true;
 
 	public RenameFieldsRuleWizard(List<IJavaElement> selectedJavaElements) {
-		super();
 		this.selectedJavaElements = selectedJavaElements;
 		setNeedsProgressMonitor(true);
 	}
@@ -388,6 +387,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 		// changes onpreview
 
 		Map<String, List<DocumentChange>> changes = new HashMap<>();
+		Map<String, FieldMetadata> metaDataMap = new HashMap<>();
 		for (FieldMetadata data : metadata) {
 
 			try {
@@ -397,6 +397,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 				data.getCompilationUnit().getJavaElement();
 				List<DocumentChange> docsChanges = renameFieldsRule.computeDocumentChangesPerFiled(data);
 				changes.put(newIdentifier, docsChanges);
+				metaDataMap.put(newIdentifier, data);
 			} catch (JavaModelException e) {
 				// TODO Auto-generated catch
 				// block
@@ -405,11 +406,11 @@ public class RenameFieldsRuleWizard extends Wizard {
 		}
 
 //		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
-		synchronizeWithUIShowRefactoringPreviewWizard(changes);
+		synchronizeWithUIShowRefactoringPreviewWizard(changes, metaDataMap);
 	}
 
 	private void synchronizeWithUIShowRefactoringPreviewWizard(
-			Map<String, List<DocumentChange>> changes) {
+			Map<String, List<DocumentChange>> changes, Map<String, FieldMetadata> dataMap) {
 
 		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
 				selectedJavaProjekt.getElementName()));
@@ -419,7 +420,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 		Display.getDefault().asyncExec(() -> {
 			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 			final WizardDialog dialog = new WizardDialog(shell,
-					new RenamingRulePreviewWizard(changes, renameFieldsRule));
+					new RenamingRulePreviewWizard(changes, dataMap, renameFieldsRule));
 
 			// maximizes the RefactoringPreviewWizard
 //			dialog.setPageSize(rectangle.width, rectangle.height);

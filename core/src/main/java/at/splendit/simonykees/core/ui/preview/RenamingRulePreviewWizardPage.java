@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
 import org.eclipse.swt.SWT;
@@ -16,8 +17,10 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.text.edits.TextEditGroup;
 
 import at.splendit.simonykees.core.rule.impl.PublicFieldsRenamingRule;
+import at.splendit.simonykees.core.visitor.renaming.FieldMetadata;
 
 @SuppressWarnings("restriction")
 public class RenamingRulePreviewWizardPage extends WizardPage {
@@ -28,14 +31,16 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	private IChangePreviewViewer currentPreviewViewer;
 	
 	private List<DocumentChangeWrapper> changesWrapperList;
+	private Map<String, FieldMetadata> metadataMap;
 
-	public RenamingRulePreviewWizardPage(Map<String, List<DocumentChange>> changes,
+	public RenamingRulePreviewWizardPage(Map<String, List<DocumentChange>> changes, Map<String, FieldMetadata> metadataMap,
 			PublicFieldsRenamingRule rule) {
 		super(rule.getName());
 		setTitle(rule.getName());
 		setDescription(rule.getDescription());
 
 		this.changes = changes;
+		this.metadataMap = metadataMap;
 
 		try {
 			convertChangesToDocumentChangeWrappers();
@@ -50,20 +55,20 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		for (String declaration : changes.keySet()) {
 			List<DocumentChange> changesForField = changes.get(declaration);
 			DocumentChange parent = null;
-			DocumentChangeWrapper dcw = null;
-			for (DocumentChange document : changesForField) {
-				if (document.getCurrentContent(new NullProgressMonitor()).contains(declaration.toString())) {
-					parent = document;
-					dcw = new DocumentChangeWrapper(document, null);
-					break;
-				}
+			TextEditGroup parentGroupEdit = null;
+			FieldMetadata metaData = metadataMap.get(declaration);
+			List<ICompilationUnit> targetICus = metaData.getTargetICompilationUnits();
+			
+			
+			parent = changesForField.get(0);
+			parentGroupEdit = metaData.getTextEditGroup(targetICus.get(0));
+			DocumentChangeWrapper dcw = new DocumentChangeWrapper(parent, parentGroupEdit, null);
+			for (int i = 1; i<changesForField.size(); i++) {
+				DocumentChange document = changesForField.get(i);
+				dcw.addChild(document, metaData.getTextEditGroup(targetICus.get(0)));
+				
 			}
-			if (null == parent) {
-				continue;
-			}
-			for (DocumentChange document : changesForField) {
-				dcw.addChild(document);
-			}
+			
 			changesWrapperList.add(dcw);
 		}
 	}

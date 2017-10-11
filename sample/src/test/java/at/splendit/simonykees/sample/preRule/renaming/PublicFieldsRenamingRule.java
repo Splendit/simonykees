@@ -4,6 +4,7 @@ package at.splendit.simonykees.sample.preRule.renaming;
 public class PublicFieldsRenamingRule {
 	
 	public String a_public_field_sample = "bad name";
+	public String referenced_on_other_classes = "not referenced in this class";
 	public String to_not_be_shadowed = "";
 	public String avoid_clashes;
 	private String avoidClashes;

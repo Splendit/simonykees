@@ -9,10 +9,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
+import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.renaming.FieldMetadata;
 import at.splendit.simonykees.core.visitor.renaming.PublicFieldsRenamingASTVisitor;
@@ -49,6 +51,13 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 		return new PublicFieldsRenamingASTVisitor(metaData, todosMetaData);
 	}
 	
+	@Override
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
+			throws ReflectiveOperationException, JavaModelException, RefactoringException {
+		DocumentChange documentChange = super.applyRuleImpl(workingCopy);
+		return documentChange;
+	}
+	
 	/**
 	 * Computes the list of document changes related to the renaming of a field
 	 * represented by the given {@link FieldMetadata}.
@@ -66,10 +75,25 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 		for (ICompilationUnit iCompilationUnit : targetCompilationUnits) {
 			TextEditGroup editGroup = metaData.getTextEditGroup(iCompilationUnit);
 			if (!editGroup.isEmpty()) {
-				DocumentChange documentChange = new DocumentChange(metaData.getNewIdentifier(), metaData.getDocument(iCompilationUnit));
-				TextEdit rootEdit = editGroup.getTextEdits()[0].getRoot();
+				
+				Document doc = metaData.getDocument(iCompilationUnit);
+				DocumentChange documentChange = new DocumentChange(metaData.getNewIdentifier(), doc);
+				TextEdit rootEdit = new MultiTextEdit();
+				TextEdit[] edits = editGroup.getTextEdits();
+				for(int i = edits.length-1; i>=0; i--) {
+					rootEdit.addChild(edits[i].copy());
+				}
+//				for(TextEdit edit : editGroup.getTextEdits()) {
+//					rootEdit.addChild(edit.copy());
+//				}
 				documentChange.setEdit(rootEdit);
-				documentChange.addTextEditGroup(editGroup);
+//		        TextEdit rootEdit = editGroup.getTextEdits()[0].getRoot(); 
+//		        documentChange.setEdit(rootEdit); 
+//		        documentChange.addTextEditGroup(editGroup);
+//				TextEdit rootEdit = editGroup.getTextEdits()[0].getRoot();
+//				documentChange.setEdit(rootEdit);
+//				documentChange.addChangeGroup(new TextEditBasedChangeGroup(documentChange, editGroup));
+//				documentChange.addTextEditGroup(editGroup);
 				documentChange.setTextType("java"); //$NON-NLS-1$
 				documentChanges.add(documentChange);
 			}

@@ -5,5 +5,6 @@ public class PublicFieldsRenamingRule2 {
 	public void directAccessOfFieldFromExternalCu() {
 		PublicFieldsRenamingRule rule = new PublicFieldsRenamingRule();
 		rule.aPublicFieldSample = "";
+		rule.referencedOnOtherClasses = "";
 	}
 }
