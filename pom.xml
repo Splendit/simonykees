@@ -195,6 +195,11 @@
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/technology/epp/logging/stable/</url>
 		</repository>
+		<repository>
+			<id>m2e</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/technology/m2e/releases/</url>
+		</repository>
 	</repositories>
 
 	<!-- don't manage simonykees.samples -->

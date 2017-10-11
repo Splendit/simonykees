@@ -1,6 +1,7 @@
 Steps to configure maven plugin:
 - in src/main/resources create file named "manifest.standalone"
-- in releng project open jSparrow.product and run Eclipse Product export wizard
+- run mvn clean verify on simonykees project
+- in releng project open jSparrow.product and run Eclipse Product export wizard (uncheck Synchronize before exporting)
 - from folder created by product export go to repository/plugins/ and copy all plugins to src/main/resources
 - copy all plugin names in manifest.standalone
 - run mvn install on jsparrow-maven-plugin project

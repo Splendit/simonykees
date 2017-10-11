@@ -1,6 +1,7 @@
 package eu.jsparrow.core.rule;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -111,8 +112,9 @@ public class RulesContainer {
 	 * @return a List of {@link RefactoringRule} with all used Rules is
 	 *         returned.
 	 */
-	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules() {
-		return Arrays.asList(
+	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules(boolean isStandalone) {
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = new LinkedList<>();
+		rules.addAll(Arrays.asList(
 				/*
 				 * Coding conventions
 				 */
@@ -168,13 +170,18 @@ public class RulesContainer {
 				 * Code formatting and organizing imports should always happen
 				 * last.
 				 */
-				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class),
-				new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class));
+				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class)));
+		
+		if (!isStandalone) {
+			rules.add(new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class));
+		}
+		
+		return rules;
 	}
 
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getRulesForProject(
-			IJavaProject selectedJavaProjekt) {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result = getAllRules();
+			IJavaProject selectedJavaProjekt, boolean isStandalone) {
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result = getAllRules(isStandalone);
 		result.stream().forEach(rule -> rule.calculateEnabledForProject(selectedJavaProjekt));
 		return result;
 	}

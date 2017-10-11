@@ -1,10 +1,6 @@
 package eu.jsparrow.standalone;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -12,10 +8,10 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -49,80 +45,77 @@ public class Activator implements BundleActivator {
 	public static final String PLUGIN_ID = "eu.jsparrow.standalone"; //$NON-NLS-1$
 
 	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
+	public static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
 	public static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
-
+	public static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
+	public static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
+	public static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
+	public static final String MAVEN_NATURE_CONSTANT = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
+	public static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
 	public static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	public static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 
-	// The shared instance
-	private static Activator plugin;
+	private StandaloneConfig standaloneConfig;
 
-	private static List<Job> jobs = Collections.synchronizedList(new ArrayList<>());
-
-	// Flag is jSparrow is already running
-	private static boolean running = false;
-
-	private static BundleContext bundleContext;
-
-	private File directory;
-	private TestStandalone test;
-
-	@SuppressWarnings("nls")
 	@Override
 	public void start(BundleContext context) throws Exception {
-		logger.info("Start ACTIVATOR"); //$NON-NLS-1$
+		logger.info(Messages.Activator_start);
 
-		// String configFilePath = context.getProperty(CONFIG_FILE_PATH);
-		String configFilePath = "/home/matthias/workspace/runtime-EclipseApplication/weka/weka/jsparrow.yml";
-		logger.info("loading configuration from: " + configFilePath);
+		String configFilePath = context.getProperty(CONFIG_FILE_PATH);
+		
+		String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
+		logger.info(loggerInfo);
 
-		// String profile = context.getProperty(SELECTED_PROFILE);
-		String profile = "";
-		logger.info("selected profile: " + profile);
+		String profile = context.getProperty(SELECTED_PROFILE);
+		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, profile);
+		logger.info(loggerInfo);
 
 		YAMLConfig config = readConfig(configFilePath, profile);
 
-		// String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
-		String projectPath = "/home/matthias/workspace/runtime-EclipseApplication/weka/weka/";
+		// get project path and name from context
+		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
+		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
 
-		logger.info("PATH FROM CONTEXT: " + projectPath);
-
-		// Set working directory
-		String file = System.getProperty("java.io.tmpdir");
-		directory = new File(file + File.separator + "temp_jSparrow").getAbsoluteFile();
+		// Set working directory to temp_jSparrow in java tmp folder
+		String file = System.getProperty(JAVA_TMP);
+		File directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
 		if (directory.exists() || directory.mkdirs()) {
 			System.setProperty(USER_DIR, directory.getAbsolutePath());
-			logger.info("Set user.dir to " + directory.getAbsolutePath());
 		}
 
-		test = new TestStandalone(projectPath);
-
-		logger.info("Getting compilation units");
-		List<ICompilationUnit> compUnits = test.getCompUnits();
+		standaloneConfig = new StandaloneConfig(projectName, projectPath);
 
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = getSelectedRulesFromConfig(config,
-				compUnits.get(0).getJavaProject());
+				standaloneConfig.getJavaProject());
 
-		// CREATE REFACTORING PIPELINE AND SET RULES
+		// Create refactoring pipeline and set rules
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 		refactoringPipeline.setRules(selectedRules);
-		logger.info("selected rules (" + selectedRules.size() + "): " + selectedRules.toString());
+		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(), selectedRules.toString());
+		logger.info(loggerInfo);
 
-		logger.info("Creating refactoring states");
+		logger.info(Messages.Activator_debug_collectCompilationUnits);
+		List<ICompilationUnit> compUnits = standaloneConfig.getCompUnits();
+		loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compUnits.size());
+		logger.debug(loggerInfo);
+
+		logger.debug(Messages.Activator_debug_createRefactoringStates);
 		refactoringPipeline.createRefactoringStates(compUnits);
+		loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates, refactoringPipeline.getRefactoringStates().size());
+		logger.debug(loggerInfo);
 
+		// Do refactoring
 		try {
-			logger.info("Starting refactoring proccess");
+			logger.info(Messages.Activator_debug_startRefactoring);
 			refactoringPipeline.doRefactoring(new NullProgressMonitor());
-
-			logger.info("Has changes: " + refactoringPipeline.hasChanges());
 		} catch (RefactoringException | RuleException e) {
 			logger.error(e.getMessage(), e);
 			return;
 		}
 
+		// Commit refactoring
 		try {
-			logger.info("Commiting refactoring changes to compilation units");
+			logger.info(Messages.Activator_debug_commitRefactoring);
 			refactoringPipeline.commitRefactoring();
 		} catch (RefactoringException | ReconcileException e) {
 			logger.error(e.getMessage(), e);
@@ -132,9 +125,6 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void stop(BundleContext context) {
-
-		running = false;
-
 		try {
 			/* Unregister as a save participant */
 			if (ResourcesPlugin.getWorkspace() != null) {
@@ -145,31 +135,24 @@ public class Activator implements BundleActivator {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} finally {
-			logger.info("Clean directory " + directory.getAbsolutePath());
-			try {
-				deleteChildren(new File(directory.getAbsolutePath() + File.separator + ".metadata"));
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-			}
-			plugin = null;
-			bundleContext = null;
+			standaloneConfig.cleanUp();
 		}
 
 		logger.info(Messages.Activator_stop);
 	}
 
 	/**
-	 * this method selects the rules to be applied. for all rules it will be checked
-	 * if they are available in general and for the current project. if a rule does
-	 * not meet the criteria, it will be filtered.
+	 * this method selects the rules to be applied. for all rules it will be
+	 * checked if they are available in general and for the current project. if
+	 * a rule does not meet the criteria, it will be filtered.
 	 * 
 	 * <ul>
 	 * <li>the defaultProfile is checked and if it exists its rules will be
 	 * used</li>
 	 * <li>if no defaultProfile is set the rules in the rules-section of the
 	 * configuration file will be used</li>
-	 * <li>if the given defaultProfile is not specified or a selected rule does not
-	 * exist a {@link YAMLConfigException} will be thrown</li>
+	 * <li>if the given defaultProfile is not specified or a selected rule does
+	 * not exist a {@link YAMLConfigException} will be thrown</li>
 	 * </ul>
 	 * 
 	 * @param config
@@ -181,10 +164,10 @@ public class Activator implements BundleActivator {
 	 */
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRulesFromConfig(YAMLConfig config,
 			IJavaProject javaProject) throws YAMLConfigException {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result = new LinkedList<>();
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result  = new LinkedList<>();
 
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
-				.getRulesForProject(javaProject);
+				.getRulesForProject(javaProject, true);
 
 		String defaultProfile = config.getDefaultProfile();
 		if (defaultProfile != null && !defaultProfile.isEmpty()) {
@@ -197,19 +180,21 @@ public class Activator implements BundleActivator {
 							configProfile.get().getRules());
 
 					result = projectRules.stream().filter(rule -> rule.isEnabled())
-							.filter(rule -> profileRules.contains(rule)).collect(Collectors.toList());
+							.filter(profileRules::contains).collect(Collectors.toList());
 				} else {
-					throw new YAMLConfigException("the given defaultProfile " + defaultProfile + " does not exist!");
+					String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, defaultProfile)
+;					throw new YAMLConfigException(exceptionMessage);
 				}
 			} else {
-				throw new YAMLConfigException("the given defaultProfile " + defaultProfile + " does not exist!");
+				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, defaultProfile);
+				throw new YAMLConfigException(exceptionMessage);
 			}
 		} else { // use all rules from config file
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> configSelectedRules = getConfigRules(
 					config.getRules());
 
-			result = projectRules.stream().filter(rule -> rule.isEnabled())
-					.filter(rule -> configSelectedRules.contains(rule)).collect(Collectors.toList());
+			result = projectRules.stream().filter(RefactoringRule::isEnabled)
+					.filter(configSelectedRules::contains).collect(Collectors.toList());
 		}
 
 		return result;
@@ -226,7 +211,7 @@ public class Activator implements BundleActivator {
 	 */
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getConfigRules(List<String> configRules)
 			throws YAMLConfigException {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules(true);
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> configSelectedRules = new LinkedList<>();
 		List<String> nonExistentRules = new LinkedList<>();
 
@@ -241,16 +226,18 @@ public class Activator implements BundleActivator {
 		}
 
 		if (!nonExistentRules.isEmpty()) {
-			throw new YAMLConfigException("the following rules do not exist: " + nonExistentRules.toString());
+			String exceptionMessage = NLS.bind(Messages.Activator_standalone_RulesDoNotExist, nonExistentRules.toString());
+			throw new YAMLConfigException(exceptionMessage);
 		}
 
 		return configSelectedRules;
 	}
 
 	/**
-	 * reads the configuration file and modifies it according to maven flags. if no
-	 * configuration file is specified the default configuration will be used. if a
-	 * profile is chosen via maven flags there is a check if the profile exists.
+	 * reads the configuration file and modifies it according to maven flags. if
+	 * no configuration file is specified the default configuration will be
+	 * used. if a profile is chosen via maven flags there is a check if the
+	 * profile exists.
 	 * 
 	 * @param configFilePath
 	 *            path to the configuration file
@@ -258,8 +245,8 @@ public class Activator implements BundleActivator {
 	 *            selected profile
 	 * @return jsparrow configuration
 	 * @throws YAMLConfigException
-	 *             if an error occurs during loading of the file or if the profile
-	 *             does not exist
+	 *             if an error occurs during loading of the file or if the
+	 *             profile does not exist
 	 */
 	private YAMLConfig readConfig(String configFilePath, String profile) throws YAMLConfigException {
 		YAMLConfig config = null;
@@ -267,21 +254,23 @@ public class Activator implements BundleActivator {
 			File configFile = new File(configFilePath);
 			if (configFile.exists() && !configFile.isDirectory()) {
 				config = YAMLConfigUtil.loadConfiguration(configFile);
-				logger.info("config file read successfully from " + configFilePath + " !");
+				String loggerInfo = NLS.bind(Messages.Activator_standalone_ConfigFileReadSuccessfully, configFilePath);
+				logger.info(loggerInfo);
 				logger.debug(config.toString());
 			}
 		}
 
 		if (config == null) {
 			config = YAMLConfig.getDefaultConfig();
-			logger.warn("using default configuration...");
+			logger.warn(Messages.Activator_standalone_UsingDefaultConfiguration);
 		}
 
 		if (profile != null && !profile.isEmpty()) {
 			if (checkProfileExistence(config, profile)) {
 				config.setDefaultProfile(profile);
 			} else {
-				throw new YAMLConfigException("profile " + profile + " does not exist!");
+				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, profile);
+				throw new YAMLConfigException(exceptionMessage);
 			}
 		}
 
@@ -299,48 +288,5 @@ public class Activator implements BundleActivator {
 	 */
 	private boolean checkProfileExistence(YAMLConfig config, String profile) {
 		return config.getProfiles().stream().anyMatch(configProfile -> configProfile.getName().equals(profile));
-	}
-
-	private void deleteChildren(File parentDirectory) throws IOException {
-		for (String file : Arrays.asList(parentDirectory.list())) {
-			File currentFile = new File(parentDirectory.getAbsolutePath(), file);
-			if (currentFile.isDirectory()) {
-				deleteChildren(currentFile);
-			}
-			currentFile.delete();
-		}
-	}
-
-	/**
-	 * Returns the shared instance
-	 *
-	 * @return the shared instance
-	 */
-	public static Activator getDefault() {
-		return plugin;
-	}
-
-	public static void registerJob(Job job) {
-		synchronized (jobs) {
-			jobs.add(job);
-		}
-	}
-
-	public static void unregisterJob(Job job) {
-		synchronized (jobs) {
-			jobs.remove(job);
-		}
-	}
-
-	public static boolean isRunning() {
-		return running;
-	}
-
-	public static void setRunning(boolean isRunning) {
-		running = isRunning;
-	}
-
-	public static BundleContext getBundleContext() {
-		return bundleContext;
 	}
 }
