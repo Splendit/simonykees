@@ -1,5 +1,6 @@
 package eu.jsparrow.sample.postRule.functionalInterface;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
@@ -34,8 +35,16 @@ public class TestFunctionalInterfaceRule {
 		String s = FINAL_INITIALIZED_STRING_FIELD;
 	};
 	
-	public TestFunctionalInterfaceRule() {
+	private AFunctionalInterface usingWildcardsInBody =  new AFunctionalInterface() {
 
+		@Override
+		public void method(int a) {
+			List<List<? extends Number>> numbers = new ArrayList<>();
+			numbers.stream().map(List::hashCode).mapToInt(Integer::intValue).sum();
+		}
+	};
+	
+	public TestFunctionalInterfaceRule() {
 		AFunctionalInterface foo = new AFunctionalInterface() {
 			
 			@Override

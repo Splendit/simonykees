@@ -32,6 +32,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+import eu.jsparrow.core.visitor.helper.WildCardTypeASTVisitor;
+
 /**
  * A utility class for computing different properties of {@link ASTNode}s.
  * 
@@ -85,8 +87,8 @@ public class ASTNodeUtil {
 	 * 
 	 * @param variableDeclaration
 	 *            {@link VariableDeclarationStatement} or
-	 *            {@link VariableDeclarationExpression} that holds exactly on
-	 *            type parameter
+	 *            {@link VariableDeclarationExpression} that holds exactly on type
+	 *            parameter
 	 * @return
 	 */
 	public static Type getSingleTypeParameterOfVariableDeclaration(ASTNode variableDeclaration) {
@@ -122,13 +124,12 @@ public class ASTNodeUtil {
 	}
 
 	/**
-	 * Returns the SimpleName of an {@link MethodInvocation#getExpression()} if
-	 * it is one and the {@link MethodInvocation} is "hasNext"
+	 * Returns the SimpleName of an {@link MethodInvocation#getExpression()} if it
+	 * is one and the {@link MethodInvocation} is "hasNext"
 	 * 
 	 * @param node
 	 *            Assumed MethodInvocation of "hasNext"
-	 * @return {@link SimpleName} of the
-	 *         {@link MethodInvocation#getExpression()}
+	 * @return {@link SimpleName} of the {@link MethodInvocation#getExpression()}
 	 */
 	public static SimpleName replaceableIteratorCondition(Expression node) {
 		if (ASTNode.METHOD_INVOCATION == node.getNodeType()) {
@@ -147,10 +148,9 @@ public class ASTNodeUtil {
 	 * {@link ClassInstanceCreation} is used
 	 * 
 	 * @param parentNode
-	 *            {@link ClassInstanceCreation} that is used to find its
-	 *            environment
-	 * @return the least required {@link ITypeBinding} from the position where
-	 *         the {@link ClassInstanceCreation} is used
+	 *            {@link ClassInstanceCreation} that is used to find its environment
+	 * @return the least required {@link ITypeBinding} from the position where the
+	 *         {@link ClassInstanceCreation} is used
 	 */
 	public static ITypeBinding getTypeBindingOfNodeUsage(ClassInstanceCreation parentNode) {
 		// Find the type of the executing environment
@@ -245,8 +245,8 @@ public class ASTNodeUtil {
 	}
 
 	/**
-	 * Converts the raw list to a typed list. Filters out the elements that are
-	 * not instances of the given type.
+	 * Converts the raw list to a typed list. Filters out the elements that are not
+	 * instances of the given type.
 	 * 
 	 * @param rawlist
 	 * @param type
@@ -258,8 +258,8 @@ public class ASTNodeUtil {
 	}
 
 	/**
-	 * Filters a list of modifiers if specific modifiers are present defined by
-	 * the predicate
+	 * Filters a list of modifiers if specific modifiers are present defined by the
+	 * predicate
 	 * 
 	 * @param modifiers
 	 *            List of Assuming to be modifiers, can't use type because JDT
@@ -281,8 +281,8 @@ public class ASTNodeUtil {
 	 * @param initializerBinding
 	 *            type binding of the resulting stream type.
 	 * 
-	 * @return {@value #STREAM_MAP_METHOD_NAME} if the given type is not any of
-	 *         the aforementioned types, or any of the following:
+	 * @return {@value #STREAM_MAP_METHOD_NAME} if the given type is not any of the
+	 *         aforementioned types, or any of the following:
 	 *         {@value #STREAM_MAP_TO_INT_METHOD_NAME},
 	 *         {@value #STREAM_MAP_TO_DOUBLE_METHOD_NAME} or
 	 *         {@value #STREAM_MAP_TO_LONG_METHOD_NAME} respectively for
@@ -306,8 +306,8 @@ public class ASTNodeUtil {
 	}
 
 	/**
-	 * Finds the scope where the statement belongs to. A scope is either the
-	 * body of:
+	 * Finds the scope where the statement belongs to. A scope is either the body
+	 * of:
 	 * <ul>
 	 * <li>a method</li>
 	 * <li>an initializer</li>
@@ -326,7 +326,7 @@ public class ASTNodeUtil {
 				&& parent.getNodeType() != ASTNode.INITIALIZER && parent.getNodeType() != ASTNode.TYPE_DECLARATION
 				&& parent.getNodeType() != ASTNode.ENUM_DECLARATION
 				&& parent.getNodeType() != ASTNode.ANNOTATION_TYPE_DECLARATION) {
-	
+
 			parent = parent.getParent();
 		}
 		return parent;
@@ -334,8 +334,7 @@ public class ASTNodeUtil {
 
 	/**
 	 * This method extracts the left most {@link Expression} of a
-	 * {@link MethodInvocation} by recursively walking the
-	 * {@link MethodInvocation}.
+	 * {@link MethodInvocation} by recursively walking the {@link MethodInvocation}.
 	 * 
 	 * @param methodInvocation
 	 * @return the left most expression of the given {@link MethodInvocation}
@@ -355,6 +354,19 @@ public class ASTNodeUtil {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Checks if a node has at least one occurrence of a {@link WildcardType} node.
+	 * 
+	 * @param node
+	 *            the node to be checked
+	 * @return {@code true} if the above condition is met and false otherwise.
+	 */
+	public static boolean containsWildCards(ASTNode node) {
+		WildCardTypeASTVisitor wildCardsVisitor = new WildCardTypeASTVisitor();
+		node.accept(wildCardsVisitor);
+		return !wildCardsVisitor.getWildCardTypes().isEmpty();
 	}
 
 	/**
@@ -387,7 +399,7 @@ public class ASTNodeUtil {
 			parameterizedType.setStructuralProperty(ParameterizedType.TYPE_PROPERTY, simpleType);
 			return parameterizedType;
 		}
-	
+
 		return type;
 	}
 
@@ -409,28 +421,28 @@ public class ASTNodeUtil {
 	}
 
 	/**
-	 * Checks whether the given {@link ASTNode} and the declaration of the given type
-	 * are enclosed in the same class.
+	 * Checks whether the given {@link ASTNode} and the declaration of the given
+	 * type are enclosed in the same class.
 	 * 
 	 * @param loop
 	 *            a node expected to represent a code snippet.
 	 * @param typeBinding
 	 *            a type binding expected to represent an inner class.
-	 * @return {@code true} if node and the type declaration are wrapped by
-	 *         the same class or {@code false} otherwise.
+	 * @return {@code true} if node and the type declaration are wrapped by the same
+	 *         class or {@code false} otherwise.
 	 */
 	public static boolean enclosedInSameType(ASTNode loop, ITypeBinding typeBinding) {
 		AbstractTypeDeclaration enclosingType = getSpecificAncestor(loop, AbstractTypeDeclaration.class);
 		if (enclosingType != null && typeBinding != null) {
 			ITypeBinding enclosingTypeBinding = enclosingType.resolveBinding();
-			if (enclosingTypeBinding != null
-					&& (ClassRelationUtil.compareITypeBinding(enclosingTypeBinding.getErasure(), typeBinding.getErasure())
-							|| ClassRelationUtil.compareITypeBinding(enclosingTypeBinding.getErasure(),
-									typeBinding.getDeclaringClass().getErasure()))) {
+			if (enclosingTypeBinding != null && (ClassRelationUtil
+					.compareITypeBinding(enclosingTypeBinding.getErasure(), typeBinding.getErasure())
+					|| ClassRelationUtil.compareITypeBinding(enclosingTypeBinding.getErasure(),
+							typeBinding.getDeclaringClass().getErasure()))) {
 				return true;
 			}
 		}
-	
+
 		return false;
 	}
 }

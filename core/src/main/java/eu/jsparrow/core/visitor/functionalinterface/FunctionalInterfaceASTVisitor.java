@@ -137,6 +137,10 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					methodBlockASTVisitor.setAstRewrite(astRewrite);
 					node.accept(methodBlockASTVisitor);
 					Block moveBlock = methodBlockASTVisitor.getMethodBlock();
+					
+					if(ASTNodeUtil.containsWildCards(moveBlock)) {
+						return true;
+					}
 
 					if (moveBlock != null && isCommentFree(node, moveBlock)) {
 

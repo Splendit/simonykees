@@ -1,18 +1,14 @@
 package eu.jsparrow.core.visitor.impl;
 
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Block;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.jdtunit.JdtUnitException;
 import eu.jsparrow.jdtunit.JdtUnitFixture;
+import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 public abstract class AbstractASTVisitorTest {
 
@@ -37,18 +33,7 @@ public abstract class AbstractASTVisitorTest {
 	}
 
 	protected Block createBlock(String string) throws Exception {
-		ASTParser astParser = ASTParser.newParser(AST.JLS8);
-		astParser.setSource(string.toCharArray());
-		astParser.setKind(ASTParser.K_STATEMENTS);
-		ASTNode result = astParser.createAST(null);
-		if ((result.getFlags() & ASTNode.MALFORMED) == ASTNode.MALFORMED) {
-			throw new Exception(String.format("Failed to parse '%s'.", string)); //$NON-NLS-1$
-		}
-		Block block = (Block) result;
-		if (block.statements().isEmpty()) {
-			throw new JdtUnitException("Can not create an empty block. There might be syntax errors"); //$NON-NLS-1$
-		}
-		return block;
+		return ASTNodeBuilder.createBlock(string);
 	}
 
 }
