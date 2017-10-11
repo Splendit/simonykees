@@ -243,7 +243,7 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	}
 
 	private int indexOfRuleInSortedList(RefactoringRule<? extends AbstractASTRewriteASTVisitor> searchedRule) {
-		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> sortedRules = RulesContainer.getAllRules();
+		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> sortedRules = RulesContainer.getAllRules(false);
 		for (int i = 0; i < sortedRules.size(); i++) {
 			if (sortedRules.get(i).getName().equals(searchedRule.getName())) {
 				return i;

@@ -46,7 +46,7 @@ public class AllRulesTest extends AbstractRulesTest {
 		options.put("system-out-print-exception", "error");
 		standardLoggerRule.activateOptions(options);
 		rulesList.add(standardLoggerRule);
-		rulesList.addAll(RulesContainer.getAllRules());
+		rulesList.addAll(RulesContainer.getAllRules(false));
 	}
 
 	/**

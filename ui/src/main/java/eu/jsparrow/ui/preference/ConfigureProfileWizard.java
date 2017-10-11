@@ -31,7 +31,7 @@ public class ConfigureProfileWizard extends Wizard {
 
 	public ConfigureProfileWizard(String profileId) {
 		super();
-		this.rules = RulesContainer.getAllRules();
+		this.rules = RulesContainer.getAllRules(false);
 		this.profileId = profileId;
 	}
 

@@ -13,7 +13,10 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
@@ -27,6 +30,7 @@ import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.ExceptionMessages;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * This class manages the selected {@link RefactoringRule}s and the selected
@@ -225,9 +229,13 @@ public class RefactoringPipeline {
 						return null;
 					}
 
-					/** SIM-748 Test work around to don't apply syntax checks there */
-					if (RefactoringUtil.checkForSyntaxErrors(compilationUnit) && !testmode) {
-						logger.info("Adding compilation unit to errorList: " + compilationUnit.getElementName()); //$NON-NLS-1$
+					/**
+					 * SIM-748 Test work around to don't apply syntax checks
+					 * there
+					 */
+					if (!testmode && RefactoringUtil.checkForSyntaxErrors(compilationUnit)) {
+						String loggerInfo = NLS.bind(Messages.RefactoringPipeline_AddingCompilationUnitToErrorList, compilationUnit.getElementName());
+						logger.info(loggerInfo);
 						containingErrorList.add(compilationUnit);
 					} else {
 						refactoringStates
@@ -250,8 +258,9 @@ public class RefactoringPipeline {
 				 * the user
 				 */
 				if (!containingErrorList.isEmpty()) {
-					logger.info(NLS.bind(ExceptionMessages.RefactoringPipeline_syntax_errors_exist, containingErrorList
-							.stream().map(ICompilationUnit::getElementName).collect(Collectors.joining(", ")))); //$NON-NLS-1$
+					String loggerInfo = NLS.bind(ExceptionMessages.RefactoringPipeline_syntax_errors_exist, containingErrorList
+							.stream().map(ICompilationUnit::getElementName).collect(Collectors.joining(", "))); //$NON-NLS-1$
+					logger.info(loggerInfo); 
 
 				}
 				return containingErrorList;
@@ -266,8 +275,17 @@ public class RefactoringPipeline {
 	public void createRefactoringStates(List<ICompilationUnit> compilationUnits) {
 		compilationUnits.forEach(compilationUnit -> {
 
+			final ProblemRequestor problemRequestor = new ProblemRequestor();
+			final WorkingCopyOwner wcOwner = createWorkingCopyOwner(problemRequestor);
+
 			try {
-				refactoringStates.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
+				ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(wcOwner, null);
+				if (((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.isEmpty()) {
+					refactoringStates.add(new RefactoringState(compilationUnit, workingCopy));
+				} else {
+					String loggerInfo = NLS.bind(Messages.RefactoringPipeline_CompilationUnitWithCompilationErrors, compilationUnit.getElementName(), ((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.get(0));
+					logger.info(loggerInfo);
+				}
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
 			}
@@ -579,4 +597,46 @@ public class RefactoringPipeline {
 	public List<RefactoringState> getRefactoringStates() {
 		return refactoringStates;
 	}
+
+	private WorkingCopyOwner createWorkingCopyOwner(ProblemRequestor problemRequestor) {
+		return new WorkingCopyOwner() {
+
+			@Override
+			public IProblemRequestor getProblemRequestor(ICompilationUnit unit) {
+				return problemRequestor;
+			}
+		};
+	}
+
+	private class ProblemRequestor implements IProblemRequestor {
+
+		private List<IProblem> problems = new ArrayList<>();
+
+		@Override
+		public void acceptProblem(IProblem problem) {
+			if (problem.isError()) {
+				problems.add(problem);
+			}
+		}
+
+		@Override
+		public void beginReporting() {
+			// not used
+		}
+
+		@Override
+		public void endReporting() {
+			// not used
+		}
+
+		@Override
+		public boolean isActive() {
+			return true;
+		}
+
+		public void reset() {
+			problems.clear();
+		}
+	}
+
 }
