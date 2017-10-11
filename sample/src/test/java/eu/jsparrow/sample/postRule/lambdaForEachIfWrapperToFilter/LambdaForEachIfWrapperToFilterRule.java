@@ -16,38 +16,38 @@ public class LambdaForEachIfWrapperToFilterRule {
 	public List<Boolean> booleanList = Arrays.asList(true, false, true, true, false);
 
 	public void doSomething() {
-		list.stream().filter((s) -> s.length() > 3).forEach((s) -> {
+		list.stream().filter(s -> s.length() > 3).forEach(s -> {
 			System.out.println(s);
 			System.out.println(s + s);
 		});
 
-		list.parallelStream().filter((s) -> s.equals("asdf")).forEach((s) -> {
+		list.parallelStream().filter(s -> s.equals("asdf")).forEach(s -> {
 			System.out.println(s);
 		});
 
-		list.parallelStream().filter((s) -> "asdf".equals(s)).forEach((s) -> {
+		list.parallelStream().filter(s -> "asdf".equals(s)).forEach(s -> {
 			System.out.println(s);
 		});
 
-		list.stream().filter((s) -> s.length() > 3).forEach((s) -> {
+		list.stream().filter(s -> s.length() > 3).forEach(s -> {
 			System.out.println(s);
 		});
 
-		intList.stream().filter((i) -> i < 5).forEach((i) -> {
+		intList.stream().filter(i -> i < 5).forEach(i -> {
 			System.out.println(i);
 			i++;
 			System.out.println(i);
 		});
 
-		intList.stream().filter((i) -> i == 5).forEach((i) -> {
+		intList.stream().filter(i -> i == 5).forEach(i -> {
 			System.out.println(i);
 		});
 
-		booleanList.stream().filter((b) -> b).forEach((b) -> {
+		booleanList.stream().filter(b -> b).forEach(b -> {
 			System.out.println(b);
 		});
 
-		booleanList.stream().filter((b) -> !b).forEach((b) -> {
+		booleanList.stream().filter(b -> !b).forEach(b -> {
 			System.out.println(b);
 		});
 
@@ -76,25 +76,25 @@ public class LambdaForEachIfWrapperToFilterRule {
 			}
 		});
 
-		intList.stream().filter((i) -> i < 0).forEach((i) -> {
+		intList.stream().filter(i -> i < 0).forEach(i -> {
 			System.out.println(i);
 		});
 
-		intList.stream().filter((i) -> i < 0).forEach((i) -> {
+		intList.stream().filter(i -> i < 0).forEach(i -> {
 			System.out.println(i);
 		});
 
-		intList.stream().filter((i) -> i < 0).forEach((i) -> {
+		intList.stream().filter(i -> i < 0).forEach(i -> {
 			System.out.println(i);
 		});
 
-		intList.stream().filter((i) -> i < 0).forEach((i) -> {
+		intList.stream().filter(i -> i < 0).forEach(i -> {
 			System.out.println(i);
 		});
 	}
 	
 	public void forEachOnCollection() {
-		list.stream().filter((s) -> s.length() > 3).forEach((s) -> {
+		list.stream().filter(s -> s.length() > 3).forEach(s -> {
 			System.out.println(s);
 			System.out.println(s + s);
 		});
@@ -102,7 +102,7 @@ public class LambdaForEachIfWrapperToFilterRule {
 	
 	public void ifWithExpressionStatementBody(String input) {
 		StringBuilder sb = new StringBuilder();
-		list.stream().filter((s) -> !s.isEmpty()).forEach((s) -> sb.append(s));
+		list.stream().filter(s -> !s.isEmpty()).forEach(s -> sb.append(s));
 	}
 
 	private int getRandomNuber() {

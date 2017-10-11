@@ -49,46 +49,6 @@ import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.core.visitor.BracketsToControlASTVisitor;
-import eu.jsparrow.core.visitor.CollectionRemoveAllASTVisitor;
-import eu.jsparrow.core.visitor.DiamondOperatorASTVisitor;
-import eu.jsparrow.core.visitor.EnumsWithoutEqualsASTVisitor;
-import eu.jsparrow.core.visitor.FlatMapInsteadOfNestedLoopsASTVisitor;
-import eu.jsparrow.core.visitor.ImmutableStaticFinalCollectionsASTVisitor;
-import eu.jsparrow.core.visitor.IndexOfToContainsASTVisitor;
-import eu.jsparrow.core.visitor.InefficientConstructorASTVisitor;
-import eu.jsparrow.core.visitor.LambdaToMethodReferenceASTVisitor;
-import eu.jsparrow.core.visitor.MultiVariableDeclarationLineASTVisitor;
-import eu.jsparrow.core.visitor.OverrideAnnotationRuleASTVisitor;
-import eu.jsparrow.core.visitor.PrimitiveBoxedForStringASTVisitor;
-import eu.jsparrow.core.visitor.PrimitiveObjectUseEqualsASTVisitor;
-import eu.jsparrow.core.visitor.ReImplementingInterfaceASTVisitor;
-import eu.jsparrow.core.visitor.RearrangeClassMembersASTVisitor;
-import eu.jsparrow.core.visitor.RemoveNewStringConstructorASTVisitor;
-import eu.jsparrow.core.visitor.RemoveToStringOnStringASTVisitor;
-import eu.jsparrow.core.visitor.SerialVersionUidASTVisitor;
-import eu.jsparrow.core.visitor.StatementLambdaToExpressionASTVisitor;
-import eu.jsparrow.core.visitor.StringBufferToBuilderASTVisitor;
-import eu.jsparrow.core.visitor.StringBuildingLoopASTVisitor;
-import eu.jsparrow.core.visitor.StringConcatToPlusASTVisitor;
-import eu.jsparrow.core.visitor.StringFormatLineSeparatorASTVisitor;
-import eu.jsparrow.core.visitor.StringLiteralEqualityCheckASTVisitor;
-import eu.jsparrow.core.visitor.StringUtilsASTVisitor;
-import eu.jsparrow.core.visitor.UseIsEmptyRuleASTVisitor;
-import eu.jsparrow.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
-import eu.jsparrow.core.visitor.functionalinterface.FunctionalInterfaceASTVisitor;
-import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachCollectASTVisitor;
-import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachIfWrapperToFilterASTVisitor;
-import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachMapASTVisitor;
-import eu.jsparrow.core.visitor.loop.fortoforeach.ForToForEachASTVisitor;
-import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamAnyMatchASTVisitor;
-import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamFindFirstASTVisitor;
-import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamForEachASTVisitor;
-import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamSumASTVisitor;
-import eu.jsparrow.core.visitor.loop.whiletoforeach.WhileToForEachASTVisitor;
-import eu.jsparrow.core.visitor.renaming.FieldNameConventionASTVisitor;
-import eu.jsparrow.core.visitor.trycatch.MultiCatchASTVisitor;
-import eu.jsparrow.core.visitor.trycatch.TryWithResourceASTVisitor;
 
 /**
  * {@link RulesContainer} is a HelperClass that holds a static list of all
@@ -118,53 +78,53 @@ public class RulesContainer {
 				/*
 				 * Coding conventions
 				 */
-				new TryWithResourceRule(TryWithResourceASTVisitor.class),
-				new MultiCatchRule(MultiCatchASTVisitor.class),
-				new FunctionalInterfaceRule(FunctionalInterfaceASTVisitor.class),
-				new CollectionRemoveAllRule(CollectionRemoveAllASTVisitor.class),
-				new DiamondOperatorRule(DiamondOperatorASTVisitor.class),
-				new OverrideAnnotationRule(OverrideAnnotationRuleASTVisitor.class),
-				new SerialVersionUidRule(SerialVersionUidASTVisitor.class),
-				new RearrangeClassMembersRule(RearrangeClassMembersASTVisitor.class),
-				new BracketsToControlRule(BracketsToControlASTVisitor.class),
-				new FieldNameConventionRule(FieldNameConventionASTVisitor.class),
-				new MultiVariableDeclarationLineRule(MultiVariableDeclarationLineASTVisitor.class),
-				new EnumsWithoutEqualsRule(EnumsWithoutEqualsASTVisitor.class),
-				new ReImplementingInterfaceRule(ReImplementingInterfaceASTVisitor.class),
+				new TryWithResourceRule(),
+				new MultiCatchRule(),
+				new FunctionalInterfaceRule(),
+				new CollectionRemoveAllRule(),
+				new DiamondOperatorRule(),
+				new OverrideAnnotationRule(),
+				new SerialVersionUidRule(),
+				new RearrangeClassMembersRule(),
+				new BracketsToControlRule(),
+				new FieldNameConventionRule(),
+				new MultiVariableDeclarationLineRule(),
+				new EnumsWithoutEqualsRule(),
+				new ReImplementingInterfaceRule(),
 
-				new ImmutableStaticFinalCollectionsRule(ImmutableStaticFinalCollectionsASTVisitor.class),
+				new ImmutableStaticFinalCollectionsRule(),
 				/*
 				 * String manipulations and arithmetic expressions
 				 */
-				new RemoveNewStringConstructorRule(RemoveNewStringConstructorASTVisitor.class),
-				new InefficientConstructorRule(InefficientConstructorASTVisitor.class),
-				new PrimitiveBoxedForStringRule(PrimitiveBoxedForStringASTVisitor.class),
-				new StringFormatLineSeparatorRule(StringFormatLineSeparatorASTVisitor.class),
-				new IndexOfToContainsRule(IndexOfToContainsASTVisitor.class),
-				new RemoveToStringOnStringRule(RemoveToStringOnStringASTVisitor.class),
-				new StringUtilsRule(StringUtilsASTVisitor.class),
-				new StringLiteralEqualityCheckRule(StringLiteralEqualityCheckASTVisitor.class),
-				new StringConcatToPlusRule(StringConcatToPlusASTVisitor.class),
-				new UseIsEmptyRule(UseIsEmptyRuleASTVisitor.class),
-				new ArithmethicAssignmentRule(ArithmethicAssignmentASTVisitor.class),
-				new StringBufferToBuilderRule(StringBufferToBuilderASTVisitor.class),
-				new PrimitiveObjectUseEqualsRule(PrimitiveObjectUseEqualsASTVisitor.class),
+				new RemoveNewStringConstructorRule(),
+				new InefficientConstructorRule(),
+				new PrimitiveBoxedForStringRule(),
+				new StringFormatLineSeparatorRule(),
+				new IndexOfToContainsRule(),
+				new RemoveToStringOnStringRule(),
+				new StringUtilsRule(),
+				new StringLiteralEqualityCheckRule(),
+				new StringConcatToPlusRule(),
+				new UseIsEmptyRule(),
+				new ArithmethicAssignmentRule(),
+				new StringBufferToBuilderRule(),
+				new PrimitiveObjectUseEqualsRule(),
 				/*
 				 * Loops and streams
 				 */
-				new WhileToForEachRule(WhileToForEachASTVisitor.class),
-				new ForToForEachRule(ForToForEachASTVisitor.class),
-				new EnhancedForLoopToStreamForEachRule(EnhancedForLoopToStreamForEachASTVisitor.class),
-				new LambdaForEachIfWrapperToFilterRule(LambdaForEachIfWrapperToFilterASTVisitor.class),
-				new StatementLambdaToExpressionRule(StatementLambdaToExpressionASTVisitor.class),
-				new LambdaForEachCollectRule(LambdaForEachCollectASTVisitor.class),
-				new LambdaForEachMapRule(LambdaForEachMapASTVisitor.class),
-				new FlatMapInsteadOfNestedLoopsRule(FlatMapInsteadOfNestedLoopsASTVisitor.class),
-				new EnhancedForLoopToStreamAnyMatchRule(EnhancedForLoopToStreamAnyMatchASTVisitor.class),
-				new EnhancedForLoopToStreamFindFirstRule(EnhancedForLoopToStreamFindFirstASTVisitor.class),
-				new EnhancedForLoopToStreamSumRule(EnhancedForLoopToStreamSumASTVisitor.class),
-				new StringBuildingLoopRule(StringBuildingLoopASTVisitor.class),
-				new LambdaToMethodReferenceRule(LambdaToMethodReferenceASTVisitor.class),
+				new WhileToForEachRule(),
+				new ForToForEachRule(),
+				new EnhancedForLoopToStreamForEachRule(),
+				new LambdaForEachIfWrapperToFilterRule(),
+				new StatementLambdaToExpressionRule(),
+				new LambdaForEachCollectRule(),
+				new LambdaForEachMapRule(),
+				new FlatMapInsteadOfNestedLoopsRule(),
+				new EnhancedForLoopToStreamAnyMatchRule(),
+				new EnhancedForLoopToStreamFindFirstRule(),
+				new EnhancedForLoopToStreamSumRule(),
+				new StringBuildingLoopRule(),
+				new LambdaToMethodReferenceRule(),
 
 				/*
 				 * Code formatting and organizing imports should always happen

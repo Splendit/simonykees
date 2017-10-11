@@ -67,7 +67,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
-		boolean isFinal = ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isFinal());
+		boolean isFinal = ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), Modifier::isFinal);
 		safeToUseFields
 				.addAll(ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class)
 						.stream().filter(fragment -> !isFinal || fragment.getInitializer() != null)
@@ -137,6 +137,10 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 					methodBlockASTVisitor.setAstRewrite(astRewrite);
 					node.accept(methodBlockASTVisitor);
 					Block moveBlock = methodBlockASTVisitor.getMethodBlock();
+					
+					if(ASTNodeUtil.containsWildCards(moveBlock)) {
+						return true;
+					}
 
 					if (moveBlock != null && isCommentFree(node, moveBlock)) {
 
@@ -164,7 +168,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 							modifiers = ((MethodDeclaration) scope).modifiers();
 						}
 
-						if (modifiers != null && ASTNodeUtil.hasModifier(modifiers, modifier -> modifier.isStatic())) {
+						if (modifiers != null && ASTNodeUtil.hasModifier(modifiers, Modifier::isStatic)) {
 							CheckNativeMethodInvocationASTVisitor visitor = new CheckNativeMethodInvocationASTVisitor();
 							node.accept(visitor);
 							if (visitor.objectMethodDeclarationInvocated()) {
@@ -251,9 +255,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 								}
 							}
 
-							for (SingleVariableDeclaration s : parameteres) {
-								newInitializer.parameters().add(astRewrite.createMoveTarget(s));
-							}
+							parameteres.forEach(s -> newInitializer.parameters().add(astRewrite.createMoveTarget(s)));
 						}
 
 						newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
@@ -299,13 +301,13 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		List<SimpleName> initializedFields = new ArrayList<>();
 
-		for (FieldDeclaration field : fields) {
-			boolean isFinal = ASTNodeUtil.hasModifier(field.modifiers(), modifier -> modifier.isFinal());
+		fields.forEach(field -> {
+			boolean isFinal = ASTNodeUtil.hasModifier(field.modifiers(), Modifier::isFinal);
 			initializedFields
 					.addAll(ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
 							.stream().filter(fragment -> !isFinal || fragment.getInitializer() != null)
 							.map(VariableDeclarationFragment::getName).collect(Collectors.toList()));
-		}
+		});
 
 		initializedFields
 				.addAll(ASTNodeUtil.convertToTypedList(methodDeclaration.parameters(), SingleVariableDeclaration.class)
@@ -365,7 +367,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 		// FIXME SIM-335: it is better to detected the uninitialized fields that
 		// are referenced in the body.
-		// boolean isConstructor = node.isConstructor();
+		// boolean isConstructor = node.isConstructor()
 
 		return true;
 	}
@@ -426,9 +428,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			node.accept(visitor);
 			String newName = calcNewName(scopeNames, conflictingName);
 			List<SimpleName> usages = visitor.getUsages();
-			for (SimpleName usage : usages) {
-				astRewrite.set(usage, SimpleName.IDENTIFIER_PROPERTY, newName, null);
-			}
+			usages.forEach(usage -> astRewrite.set(usage, SimpleName.IDENTIFIER_PROPERTY, newName, null));
 		}
 	}
 
@@ -506,7 +506,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 		List<String> varNames = scopeVariableNames.stream().map(SimpleName::getIdentifier).distinct()
 				.collect(Collectors.toList());
 
-		return parameters.stream().map(parameter -> parameter.getName())
+		return parameters.stream().map(SingleVariableDeclaration::getName)
 				.filter(parameter -> varNames.contains(parameter.getIdentifier())).collect(Collectors.toList());
 	}
 

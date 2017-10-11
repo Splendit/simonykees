@@ -5,8 +5,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.util.PropertyUtil;
+import eu.jsparrow.core.visitor.impl.StringBuildingLoopASTVisitor;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.core.visitor.StringBuildingLoopASTVisitor;
 
 /**
  * @see StringBuildingLoopASTVisitor
@@ -19,8 +20,9 @@ public class StringBuildingLoopRule extends RefactoringRule<StringBuildingLoopAS
 
 	private JavaVersion javaVersion;
 	
-	public StringBuildingLoopRule(Class<StringBuildingLoopASTVisitor> visitor) {
-		super(visitor);
+	public StringBuildingLoopRule() {
+		super();
+		this.visitor = StringBuildingLoopASTVisitor.class;
 		this.name = Messages.StringBuildingLoopRule_name;
 		this.description = Messages.StringBuildingLoopRule_description;
 	}
@@ -31,8 +33,7 @@ public class StringBuildingLoopRule extends RefactoringRule<StringBuildingLoopAS
 	@Override
 	public boolean ruleSpecificImplementation(IJavaProject project) {
 		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-		String enumRepresentation = convertCompilerComplianceToEnumRepresentation(compilerCompliance);
-		javaVersion = JavaVersion.valueOf(enumRepresentation);
+		javaVersion = PropertyUtil.stringToJavaVersion(compilerCompliance);
 		return true;
 	}
 	

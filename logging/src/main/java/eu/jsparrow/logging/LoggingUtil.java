@@ -40,28 +40,22 @@ import ch.qos.logback.core.util.FileSize;
  */
 public class LoggingUtil {
 
+	private static final int ROLLING_POLICY_MIN_INDEX = 0;
+	private static final int ROLLING_POLICY_MAX_INDEX = 5;
+	private static final String TRIGGER_MAX_FILE_SIZE = "5MB"; //$NON-NLS-1$
+	private static final String ROLLING_FILE_APPENDER_NAME = "eu.jsparrow.logging.rollingFile"; //$NON-NLS-1$
+	private static final String JUL_ROLLING_FILE_APPENDER_NAME = "eu.jsparrow.logging.jul.rollingFile"; //$NON-NLS-1$
+	private static final String ROOT_LOGGER_NAME = org.slf4j.Logger.ROOT_LOGGER_NAME;
+	private static final String JUL_LOGGER_NAME = "jul"; //$NON-NLS-1$
+	private static final String LOG_FILE_NAME = "jsparrow.log"; //$NON-NLS-1$
+	private static final String JUL_LOG_FILE_NAME = "jsparrow.jul.log"; //$NON-NLS-1$
+	private static Bundle bundle = null;
+	private static boolean isLogbackConfigured = false;
+
 	// sonar lint suggestion to hide the public default constructor
 	private LoggingUtil() {
 
 	}
-
-	private static final int ROLLING_POLICY_MIN_INDEX = 0;
-	private static final int ROLLING_POLICY_MAX_INDEX = 5;
-
-	private static final String TRIGGER_MAX_FILE_SIZE = "5MB"; //$NON-NLS-1$
-
-	private static final String ROLLING_FILE_APPENDER_NAME = "eu.jsparrow.logging.rollingFile"; //$NON-NLS-1$
-	private static final String JUL_ROLLING_FILE_APPENDER_NAME = "eu.jsparrow.logging.jul.rollingFile"; //$NON-NLS-1$
-
-	private static final String ROOT_LOGGER_NAME = org.slf4j.Logger.ROOT_LOGGER_NAME;
-	private static final String JUL_LOGGER_NAME = "jul"; //$NON-NLS-1$
-
-	private static final String LOG_FILE_NAME = "jsparrow.log"; //$NON-NLS-1$
-	private static final String JUL_LOG_FILE_NAME = "jsparrow.jul.log"; //$NON-NLS-1$
-
-	private static Bundle bundle = null;
-
-	private static boolean isLogbackConfigured = false;
 
 	/**
 	 * Triggers the logging configuration for plug in tests
@@ -73,7 +67,13 @@ public class LoggingUtil {
 	 *             from {@link #configureLogback(Bundle)}
 	 */
 	public static boolean configureLoggerForTesting() throws JoranException, IOException {
-		return initLogger(getTestLogFilePath(LOG_FILE_NAME), getTestLogFilePath(JUL_LOG_FILE_NAME));
+		boolean returnValue = initLogger(getTestLogFilePath(LOG_FILE_NAME), getTestLogFilePath(JUL_LOG_FILE_NAME));
+		/**
+		 * ignoring logging from eu.jsparrow.core for automated testing.
+		 */
+		Logger logger = (Logger) LoggerFactory.getLogger("eu.jsparrow.core"); //$NON-NLS-1$
+		logger.setLevel(ch.qos.logback.classic.Level.OFF);
+		return returnValue;
 	}
 
 	/**
@@ -112,8 +112,8 @@ public class LoggingUtil {
 	}
 
 	/**
-	 * Configures logback with the help of the logback-test.xml file (located in the
-	 * project root) and {@link JoranConfigurator}.
+	 * Configures logback with the help of the logback-test.xml file (located in
+	 * the project root) and {@link JoranConfigurator}.
 	 * 
 	 * @param bundle
 	 *            current Bundle
@@ -154,12 +154,13 @@ public class LoggingUtil {
 	}
 
 	/**
-	 * Configures a rolling file appender where the roll over is done as soon as the
-	 * file size exceeds the value specified in {@link #TRIGGER_MAX_FILE_SIZE}}}.
+	 * Configures a rolling file appender where the roll over is done as soon as
+	 * the file size exceeds the value specified in
+	 * {@link #TRIGGER_MAX_FILE_SIZE}}}.
 	 * 
-	 * The minimum index is {@link #ROLLING_POLICY_MIN_INDEX}. The maximum index is
-	 * {@link #ROLLING_POLICY_MAX_INDEX}. The oldest log file will be deleted as
-	 * soon as the roll over takes place and there is no free index available
+	 * The minimum index is {@link #ROLLING_POLICY_MIN_INDEX}. The maximum index
+	 * is {@link #ROLLING_POLICY_MAX_INDEX}. The oldest log file will be deleted
+	 * as soon as the roll over takes place and there is no free index available
 	 * anymore.
 	 * 
 	 * @param fileAppenderName
@@ -220,7 +221,8 @@ public class LoggingUtil {
 	}
 
 	/**
-	 * removes the appender with the given name from the logger with the given name
+	 * removes the appender with the given name from the logger with the given
+	 * name
 	 * 
 	 * @param appenderName
 	 * @param loggerName

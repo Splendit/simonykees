@@ -9,10 +9,6 @@ import java.time.Instant;
 import org.junit.After;
 import org.junit.Test;
 
-import eu.jsparrow.license.netlicensing.LicenseChecker;
-import eu.jsparrow.license.netlicensing.LicenseManager;
-import eu.jsparrow.license.netlicensing.ValidateExecutor;
-import eu.jsparrow.license.netlicensing.ValidationResultCache;
 import eu.jsparrow.license.netlicensing.model.LicenseeModel;
 
 /**

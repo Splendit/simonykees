@@ -15,8 +15,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class EnhancedForLoopToStreamAnyMatchRule extends RefactoringRule<EnhancedForLoopToStreamAnyMatchASTVisitor> {
 
-	public EnhancedForLoopToStreamAnyMatchRule(Class<EnhancedForLoopToStreamAnyMatchASTVisitor> visitor) {
-		super(visitor);
+	public EnhancedForLoopToStreamAnyMatchRule() {
+		super();
+		this.visitor = EnhancedForLoopToStreamAnyMatchASTVisitor.class;
 		this.name = Messages.EnhancedForLoopToStreamAnyMatchRule_name;
 		this.description = Messages.EnhancedForLoopToStreamAnyMatchRule_description;
 	}

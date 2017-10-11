@@ -12,9 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import eu.jsparrow.sample.utilities.NumberUtils;
 import eu.jsparrow.sample.utilities.Person;
 import eu.jsparrow.sample.utilities.TestModifier;
 
@@ -231,11 +233,11 @@ public class LambdaToMethodReferenceRule {
 	public void referenceToParameterizedType() {
 		Map<String, String> map = new HashMap<>();
 
-		map.entrySet().stream().forEach(Entry::getValue);
+		map.entrySet().stream().forEach(Map.Entry::getValue);
 
-		map.entrySet().stream().forEach(Entry::getValue);
+		map.entrySet().stream().forEach(Map.Entry::getValue);
 
-		map.entrySet().stream().forEach(Entry::getValue);
+		map.entrySet().stream().forEach(Map.Entry::getValue);
 
 		map.entrySet().stream().forEach(Entry<String, String>::getValue);
 
@@ -294,6 +296,23 @@ public class LambdaToMethodReferenceRule {
 	public void missingImports() {
 		Person.filter(TestModifier::isStatic);
 	}
+	
+	/*
+	 * SIM-821 - the following should not be changed
+	 */
+	Function<Integer, String> toString = (Integer i) -> i.toString();
+	Function<Integer, String> toStringStatic = (Integer i) -> Integer.toString(i);
+	Function<AmbiguousMethods, String> testingAmb = (AmbiguousMethods i) -> AmbiguousMethods.testAmbiguity(i);
+	Function<AmbiguousMethods, String> testingAmb2 = (AmbiguousMethods i) -> i.testAmbiguity();
+	
+	
+	public void usingQualifiedName() {
+		List<UsingApacheNumberUtils> numberUtils = new ArrayList<>();
+		/*
+		 * Expecting the transformation to use a fully qualified name. 
+		 */
+		numberUtils.stream().map(UsingApacheNumberUtils::getNumber).map(org.apache.commons.lang3.math.NumberUtils::toString);
+	}
 
 	class ComparisonProvider {
 		public int compareByName(Person a, Person b) {
@@ -345,5 +364,38 @@ public class LambdaToMethodReferenceRule {
 			return "e:" + super.getName();
 		}
 		
+	}
+	
+	class UsingApacheNumberUtils {
+		/**
+		 * There is already an existing import of another NumberUtils class.
+		 * Namely {@link NumberUtils}. Therefore, {@link org.apache.commons.lang3.math.NumberUtils}
+		 * has to always use a fully qualified name.
+		 */
+		public org.apache.commons.lang3.math.NumberUtils getNumber() {
+			return null;
+		}
+	}
+}
+
+/**
+ *  SIM-821
+ */
+class AmbiguousMethods {
+	
+	public String testAmbiguity() {
+		return "nonStaticMethod";
+	}
+	
+	public String testAmbiguity(int i) {
+		return "nonStaticMethod";
+	}
+	
+	public String testAmbiguity(String s, int i) {
+		return "nonStaticMethod";
+	}
+	
+	public static String testAmbiguity(AmbiguousMethods i) {
+		return  String.valueOf(i);
 	}
 }

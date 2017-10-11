@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.StringConcatToPlusRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.StringConcatToPlusASTVisitor;
 
 @SuppressWarnings("nls")
 public class StringConcatToPlusRulesTest extends SingleRuleTest {
@@ -25,7 +24,7 @@ public class StringConcatToPlusRulesTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new StringConcatToPlusRule(StringConcatToPlusASTVisitor.class);
+		rule = new StringConcatToPlusRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

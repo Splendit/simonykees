@@ -14,13 +14,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import eu.jsparrow.license.netlicensing.LicenseChecker;
-import eu.jsparrow.license.netlicensing.LicenseManager;
-import eu.jsparrow.license.netlicensing.LicenseStatus;
-import eu.jsparrow.license.netlicensing.LicenseType;
-import eu.jsparrow.license.netlicensing.PersistenceManager;
-import eu.jsparrow.license.netlicensing.ValidateExecutor;
-import eu.jsparrow.license.netlicensing.ValidationResultCache;
 import eu.jsparrow.license.netlicensing.model.FloatingModel;
 import eu.jsparrow.license.netlicensing.model.LicenseModel;
 import eu.jsparrow.license.netlicensing.model.LicenseeModel;

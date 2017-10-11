@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -76,9 +78,9 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 		/**
 		 * Only private fields can be renamed, unless they are static final.
 		 */
-		if (ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isPrivate())
-				&& !(ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isStatic())
-						&& ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isFinal()))) {
+		if (ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), Modifier::isPrivate)
+				&& !(ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), Modifier::isStatic)
+						&& ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), Modifier::isFinal))) {
 
 			ASTNode parent = fieldDeclaration.getParent();
 			if (parent != null && parent.getNodeType() == ASTNode.TYPE_DECLARATION) {
@@ -87,9 +89,7 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 				ITypeBinding parentTypeBidning = type.resolveBinding();
 				List<VariableDeclarationFragment> fragments = ASTNodeUtil.returnTypedList(fieldDeclaration.fragments(),
 						VariableDeclarationFragment.class);
-				// iterate through the fragments...
-				for (VariableDeclarationFragment fragment : fragments) {
-					SimpleName fragmentName = fragment.getName();
+				fragments.stream().map(VariableDeclarationFragment::getName).forEach((fragmentName) -> {
 					String fragmentIdentifier = fragmentName.getIdentifier();
 					// check if the field name complies with the convention
 					if (!isComplyingWithConventions(fragmentIdentifier)) {
@@ -143,7 +143,7 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 									});
 						}
 					}
-				}
+				});
 			}
 		}
 
@@ -201,17 +201,17 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 		// split by $ or by _ or by upper-case letters
 		String[] parts = identifier.split("\\$|_|(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])"); //$NON-NLS-1$
 
-		List<String> partsList = Arrays.asList(parts).stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
+		List<String> partsList = Arrays.asList(parts).stream().filter(s -> !StringUtils.isEmpty(s)).collect(Collectors.toList());
 
 		String newName = null;
 		if (!partsList.isEmpty()) {
 			// the prefix has to start with lower case
 			String prefix = partsList.remove(0);
-			String lowerCasePrefix = prefix.toLowerCase();
+			String lowerCasePrefix = StringUtils.lowerCase(prefix);
 
 			// convert the other parts to Title case.
-			String suffix = partsList.stream().filter(s -> !s.isEmpty()).map(String::toLowerCase)
-					.map(input -> input.substring(0, 1).toUpperCase() + input.substring(1))
+			String suffix = partsList.stream().filter(s -> !StringUtils.isEmpty(s)).map(String::toLowerCase)
+					.map(input -> StringUtils.upperCase(input.substring(0, 1)) + StringUtils.substring(input, 1))
 					.collect(Collectors.joining());
 
 			// the final identifier
@@ -224,6 +224,6 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 			}
 		}
 
-		return Optional.ofNullable(newName).filter(s -> !s.isEmpty());
+		return Optional.ofNullable(newName).filter(s -> !StringUtils.isEmpty(s));
 	}
 }

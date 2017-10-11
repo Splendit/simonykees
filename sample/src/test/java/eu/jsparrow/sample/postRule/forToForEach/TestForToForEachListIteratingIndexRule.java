@@ -545,6 +545,24 @@ public class TestForToForEachListIteratingIndexRule {
 		return sb.toString();
 	}
 	
+	public String packageKeyWord(String input) {
+		List<String> packages = generateList(input);
+		StringBuilder sb = new StringBuilder();
+		for (String aPackage : packages) {
+			sb.append(aPackage);
+		}
+		return sb.toString();
+	}
+	
+	public String doubleKeyWord(String input) {
+		List<Double> doubles = new ArrayList<>();
+		StringBuilder sb = new StringBuilder();
+		for (Double aDouble : doubles) {
+			sb.append(aDouble);
+		}
+		return sb.toString();
+	}
+	
 	private class GenericClassSample<T> {
 		class InnerType {
 			

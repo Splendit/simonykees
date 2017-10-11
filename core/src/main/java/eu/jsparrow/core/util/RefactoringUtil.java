@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -124,14 +125,11 @@ public final class RefactoringUtil {
 			IPackageFragmentRoot fragmentRoot = (IPackageFragmentRoot) p.getParent();
 			try {
 				packages = Arrays.asList(fragmentRoot.getChildren());
-				for (IJavaElement packageElement : packages) {
-					if (packageElement.getElementName().startsWith(p.getElementName())
-							&& !packageElement.getElementName().equals(p.getElementName())) {
-						result.add(packageElement);
-						logger.debug("Subpackage found:" + packageElement.getElementName()); //$NON-NLS-1$
-					}
-
-				}
+				packages.stream().filter(packageElement -> StringUtils.startsWith(packageElement.getElementName(), p.getElementName())
+						&& !packageElement.getElementName().equals(p.getElementName())).forEach(packageElement -> {
+result.add(packageElement);
+logger.debug("Subpackage found:" + packageElement.getElementName()); //$NON-NLS-1$
+});
 			} catch (JavaModelException e) {
 				logger.debug("Java Model Exception", e); //$NON-NLS-1$
 			}
@@ -248,12 +246,11 @@ public final class RefactoringUtil {
 			boolean foundProblems = IMarker.SEVERITY_ERROR == iCompilationUnit.getResource().findMaxProblemSeverity(
 					IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
 			if (foundProblems) {
-				logger.info("Check markers"); //$NON-NLS-1$
 				List<IMarker> markers = Arrays.asList(iCompilationUnit.getResource()
 						.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE));
 				for (IMarker marker : markers) {
 					String message = String.format("Found marker on line %s, with message: %s", //$NON-NLS-1$
-							marker.getAttribute(IMarker.LOCATION), marker.getAttribute(IMarker.MESSAGE));
+							marker.getAttribute(IMarker.LINE_NUMBER), marker.getAttribute(IMarker.MESSAGE));
 					logger.info(message);
 				}
 			}

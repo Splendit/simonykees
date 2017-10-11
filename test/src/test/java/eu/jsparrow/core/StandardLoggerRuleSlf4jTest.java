@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.Before;
@@ -15,7 +16,6 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.semiautomatic.StandardLoggerASTVisitor;
 
 @SuppressWarnings("nls")
 public class StandardLoggerRuleSlf4jTest extends SingleRuleTest {
@@ -28,8 +28,12 @@ public class StandardLoggerRuleSlf4jTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
-		rule.activateDefaultOptions();
+		rule = new StandardLoggerRule();
+		Map<String, String> replaceOptions = rule.getDefaultOptions();
+		replaceOptions.put("new-logging-statement", "error");
+		replaceOptions.put("system-out-print-exception", "error");
+		rule.activateOptions(replaceOptions);
+		
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

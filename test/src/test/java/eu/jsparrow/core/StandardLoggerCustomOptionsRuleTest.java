@@ -17,7 +17,6 @@ import org.junit.Test;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.semiautomatic.StandardLoggerASTVisitor;
 
 @SuppressWarnings("nls")
 public class StandardLoggerCustomOptionsRuleTest extends SingleRuleTest {
@@ -29,7 +28,7 @@ public class StandardLoggerCustomOptionsRuleTest extends SingleRuleTest {
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new StandardLoggerRule(StandardLoggerASTVisitor.class);
+		rule = new StandardLoggerRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
@@ -41,10 +40,10 @@ public class StandardLoggerCustomOptionsRuleTest extends SingleRuleTest {
 				RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25")));
 		RulesTestUtil.addToClasspath(testProject, RulesTestUtil.getClassPathEntries(root));
 		Map<String, String> selectedOptions = new HashMap<>();
-		selectedOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT, ""); // -->> Leave as is 
-		selectedOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT, "debug");
-		selectedOptions.put(StandardLoggerConstants.PRINT_STACKTRACE, "warn");
-		rule.setSelectedOptions(selectedOptions);
+		selectedOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, ""); // -->> Leave as is 
+		selectedOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY, "debug");
+		selectedOptions.put(StandardLoggerConstants.PRINT_STACKTRACE_KEY, "warn");
+		rule.activateOptions(selectedOptions);
 		
 		rule.calculateEnabledForProject(testProject);
 		

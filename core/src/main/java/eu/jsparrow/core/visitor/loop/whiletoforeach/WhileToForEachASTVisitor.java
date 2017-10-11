@@ -71,7 +71,7 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 					replaceInformationASTVisitorList.put(node, iteratorDefinitionAstVisior);
 				}
 			}
-		} else if (loopCondition != null && ASTNode.INFIX_EXPRESSION == loopCondition.getNodeType()) {
+		} else if (ASTNode.INFIX_EXPRESSION == loopCondition.getNodeType()) {
 			// if the condition of the for loop is an infix expression....
 			InfixExpression infixExpression = (InfixExpression) loopCondition;
 			Expression rhs = infixExpression.getRightOperand();
