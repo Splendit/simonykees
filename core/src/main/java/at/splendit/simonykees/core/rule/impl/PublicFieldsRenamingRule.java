@@ -7,14 +7,15 @@ import java.util.Map;
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
+import org.eclipse.text.edits.DeleteEdit;
+import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
-import at.splendit.simonykees.core.exception.RefactoringException;
 import at.splendit.simonykees.core.rule.RefactoringRule;
 import at.splendit.simonykees.core.visitor.renaming.FieldMetadata;
 import at.splendit.simonykees.core.visitor.renaming.PublicFieldsRenamingASTVisitor;
@@ -51,13 +52,6 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 		return new PublicFieldsRenamingASTVisitor(metaData, todosMetaData);
 	}
 	
-	@Override
-	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
-			throws ReflectiveOperationException, JavaModelException, RefactoringException {
-		DocumentChange documentChange = super.applyRuleImpl(workingCopy);
-		return documentChange;
-	}
-	
 	/**
 	 * Computes the list of document changes related to the renaming of a field
 	 * represented by the given {@link FieldMetadata}.
@@ -69,31 +63,35 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 	 *         affected by the renaming of the field.
 	 * @throws JavaModelException if an exception occurs while accessing the resource of a {@link ICompilationUnit}.
 	 */
-	public List<DocumentChange> computeDocumentChangesPerFiled(FieldMetadata metaData) throws JavaModelException {
+	public List<DocumentChange> computeDocumentChangesPerFiled(FieldMetadata metaData) {
 		List<ICompilationUnit> targetCompilationUnits = metaData.getTargetICompilationUnits();
 		List<DocumentChange> documentChanges = new ArrayList<>();
 		for (ICompilationUnit iCompilationUnit : targetCompilationUnits) {
 			TextEditGroup editGroup = metaData.getTextEditGroup(iCompilationUnit);
 			if (!editGroup.isEmpty()) {
-				
+				String newIdentifier = metaData.getNewIdentifier();
+				int newIdentifierLength = newIdentifier.length();
+				VariableDeclarationFragment oldFragment = metaData.getFieldDeclaration();
 				Document doc = metaData.getDocument(iCompilationUnit);
-				DocumentChange documentChange = new DocumentChange(metaData.getNewIdentifier(), doc);
+				DocumentChange documentChange = new DocumentChange(newIdentifier, doc);
 				TextEdit rootEdit = new MultiTextEdit();
-				TextEdit[] edits = editGroup.getTextEdits();
-				for(int i = edits.length-1; i>=0; i--) {
-					rootEdit.addChild(edits[i].copy());
-				}
-//				for(TextEdit edit : editGroup.getTextEdits()) {
-//					rootEdit.addChild(edit.copy());
-//				}
 				documentChange.setEdit(rootEdit);
-//		        TextEdit rootEdit = editGroup.getTextEdits()[0].getRoot(); 
-//		        documentChange.setEdit(rootEdit); 
-//		        documentChange.addTextEditGroup(editGroup);
-//				TextEdit rootEdit = editGroup.getTextEdits()[0].getRoot();
-//				documentChange.setEdit(rootEdit);
-//				documentChange.addChangeGroup(new TextEditBasedChangeGroup(documentChange, editGroup));
-//				documentChange.addTextEditGroup(editGroup);
+				int delta = oldFragment.getName().getLength() - newIdentifierLength;
+				if(iCompilationUnit.getPath().toString().equals(metaData.getCompilationUnit().getJavaElement().getPath().toString())) {					
+					int declOffset = oldFragment.getStartPosition();
+					InsertEdit declInsertEdit = new InsertEdit(declOffset, newIdentifier);
+					DeleteEdit declDeleteEdit = new DeleteEdit(declOffset, delta + newIdentifierLength);
+					documentChange.addEdit(declInsertEdit);
+					documentChange.addEdit(declDeleteEdit);
+				}
+				metaData.getReferences().forEach(match -> {
+					if(match.getResource().getFullPath().toString().equals(iCompilationUnit.getPath().toString())) {
+						InsertEdit insertEdit = new InsertEdit(match.getOffset(), newIdentifier);
+						DeleteEdit deleteEdit = new DeleteEdit(match.getOffset(), delta + newIdentifierLength);
+						documentChange.addEdit(insertEdit);
+						documentChange.addEdit(deleteEdit);
+					}
+				});
 				documentChange.setTextType("java"); //$NON-NLS-1$
 				documentChanges.add(documentChange);
 			}

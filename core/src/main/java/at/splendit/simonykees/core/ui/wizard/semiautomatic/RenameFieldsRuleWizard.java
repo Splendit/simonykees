@@ -390,19 +390,14 @@ public class RenameFieldsRuleWizard extends Wizard {
 		Map<String, FieldMetadata> metaDataMap = new HashMap<>();
 		for (FieldMetadata data : metadata) {
 
-			try {
-				String newIdentifier = data.getNewIdentifier();
-				SimpleName oldName = data.getFieldDeclaration().getName();
-				String oldIdentifier = oldName.getIdentifier();
-				data.getCompilationUnit().getJavaElement();
-				List<DocumentChange> docsChanges = renameFieldsRule.computeDocumentChangesPerFiled(data);
-				changes.put(newIdentifier, docsChanges);
-				metaDataMap.put(newIdentifier, data);
-			} catch (JavaModelException e) {
-				// TODO Auto-generated catch
-				// block
-				e.printStackTrace();
-			}
+		String newIdentifier = data.getNewIdentifier();
+		SimpleName oldName = data.getFieldDeclaration().getName();
+		String oldIdentifier = oldName.getIdentifier();
+		data.getCompilationUnit().getJavaElement();
+		List<DocumentChange> docsChanges = renameFieldsRule.computeDocumentChangesPerFiled(data);
+		changes.put(newIdentifier, docsChanges);
+		metaDataMap.put(newIdentifier, data);
+
 		}
 
 //		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();

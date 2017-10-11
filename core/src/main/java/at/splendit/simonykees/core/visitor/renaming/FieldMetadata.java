@@ -27,7 +27,7 @@ public class FieldMetadata {
 	private VariableDeclarationFragment declarationFragment;
 	private String newIdentifier;
 	private Map<ICompilationUnit, TextEditGroup> textEditGroups;
-	private Map<ICompilationUnit, Document> documentMap;
+	private Map<String, Document> documentMap;
 
 	public FieldMetadata(CompilationUnit cu, List<ReferenceSearchMatch> references,
 			VariableDeclarationFragment fragment, String newIdentifier) {
@@ -38,6 +38,13 @@ public class FieldMetadata {
 		this.textEditGroups = new HashMap<>();
 		this.documentMap = new HashMap<>();
 		references.forEach(referece -> referece.setMetadata(this));
+		try {
+			createDocument((ICompilationUnit)cu.getJavaElement());
+		} catch (JavaModelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	/**
@@ -82,14 +89,6 @@ public class FieldMetadata {
 		if (!textEditGroups.containsKey(iCompilationUnit)) {
 			TextEditGroup textEditGroup = new TextEditGroup(newIdentifier);
 			textEditGroups.put(iCompilationUnit, textEditGroup);
-			try {
-				if (!documentMap.containsKey(iCompilationUnit)) {
-					createDocument(iCompilationUnit);
-				}
-			} catch (JavaModelException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			return textEditGroup;
 		} else {
 			return textEditGroups.get(iCompilationUnit);
@@ -98,7 +97,7 @@ public class FieldMetadata {
 
 	private void createDocument(ICompilationUnit iCompilationUnit) throws JavaModelException {
 		Document document = new Document(iCompilationUnit.getSource());
-		documentMap.put(iCompilationUnit, document);
+		documentMap.put(iCompilationUnit.getPath().toString(), document);
 	}
 
 	/**
@@ -108,7 +107,7 @@ public class FieldMetadata {
 	 * @throws JavaModelException
 	 */
 	public Document getDocument(ICompilationUnit iCompilationUnit) {
-		return documentMap.get(iCompilationUnit);
+		return documentMap.get(iCompilationUnit.getPath().toString());
 	}
 
 	/**
