@@ -52,7 +52,7 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
-		System.out.println("Hello World!!");
+		System.out.println("Hello World!!"); //$NON-NLS-1$
 
 		// PREPARE RULES
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules();
@@ -63,17 +63,17 @@ public class Activator implements BundleActivator {
 
 		TestStandalone test = new TestStandalone();
 
-		logger.debug("Getting compilation units");
-		System.out.println("Getting compilation units");
+		logger.debug("Getting compilation units"); //$NON-NLS-1$
+		System.out.println("Getting compilation units"); //$NON-NLS-1$
 		List<ICompilationUnit> compUnits = test.getCompUnits();
 
-		logger.debug("Creating refactoring states");
-		System.out.println("Creating refactoring states");
+		logger.debug("Creating refactoring states"); //$NON-NLS-1$
+		System.out.println("Creating refactoring states"); //$NON-NLS-1$
 		refactoringPipeline.createRefactoringStates(compUnits);
 
 		try {
-			logger.debug("Starting refactoring proccess");
-			System.out.println("Starting refactoring proccess");
+			logger.debug("Starting refactoring proccess"); //$NON-NLS-1$
+			System.out.println("Starting refactoring proccess"); //$NON-NLS-1$
 			refactoringPipeline.doRefactoring(new NullProgressMonitor());
 		} catch (RefactoringException e) {
 			return;
@@ -83,8 +83,8 @@ public class Activator implements BundleActivator {
 		}
 
 		try {
-			logger.debug("Commiting refactoring changes to compilation units");
-			System.out.println("Commiting refactoring changes to compilation units");
+			logger.debug("Commiting refactoring changes to compilation units"); //$NON-NLS-1$
+			System.out.println("Commiting refactoring changes to compilation units"); //$NON-NLS-1$
 			refactoringPipeline.commitRefactoring();
 		} catch (RefactoringException e) {
 			// TODO exception
@@ -107,7 +107,7 @@ public class Activator implements BundleActivator {
 		plugin = null;
 		bundleContext = null;
 
-		System.out.println("Stop ACTIVATOR");
+		System.out.println("Stop ACTIVATOR"); //$NON-NLS-1$
 	}
 
 	/**

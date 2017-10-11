@@ -59,17 +59,17 @@ public class TestStandalone {
 		BufferedReader br = null;
 		FileReader fr = null;
 		
-		String userHome = System.getProperty("user.home");
-		File directory = new File(userHome + "/temp").getAbsoluteFile();
+		String userHome = System.getProperty("user.home"); //$NON-NLS-1$
+		File directory = new File(userHome + "/temp").getAbsoluteFile(); //$NON-NLS-1$
 		if (directory.exists() || directory.mkdirs()) {
-			System.setProperty("user.dir", directory.getAbsolutePath());
-			System.out.println("Set user.dir to " + directory.getAbsolutePath());
+			System.setProperty("user.dir", directory.getAbsolutePath()); //$NON-NLS-1$
+			System.out.println("Set user.dir to " + directory.getAbsolutePath()); //$NON-NLS-1$
 		}
 
-		String path = "";
+		String path = ""; //$NON-NLS-1$
 		try {
-			String file = System.getProperty("user.dir") + File.separator + "path.txt";
-			System.out.println("file: " + file);
+			String file = System.getProperty("user.dir") + File.separator + "path.txt"; //$NON-NLS-1$ //$NON-NLS-2$
+			System.out.println("file: " + file); //$NON-NLS-1$
 
 			fr = new FileReader(file);
 			br = new BufferedReader(fr);
@@ -95,7 +95,7 @@ public class TestStandalone {
 		workspace = ResourcesPlugin.getWorkspace();
 		// org.eclipse.ui.internal.ide.actions.OpenWorkspaceAction.restart
 
-		System.out.println("Created workspace in " + workspace.getRoot().getFullPath());
+		System.out.println("Created workspace in " + workspace.getRoot().getFullPath()); //$NON-NLS-1$
 
 		description = workspace.loadProjectDescription(new Path(path + File.separator + ".project")); //$NON-NLS-1$
 
@@ -114,26 +114,26 @@ public class TestStandalone {
 
 		compUnits = getUnit(javaProject);
 
-		System.out.println("Created project");
+		System.out.println("Created project"); //$NON-NLS-1$
 	}
 
 	public static List<ICompilationUnit> getUnit(IProject javaProject) {
 		List<IPackageFragment> packages = new ArrayList<>();
 		List<ICompilationUnit> units = new ArrayList<>();
 
-		System.out.println("CREATING TEST PROJECT");
+		System.out.println("CREATING TEST PROJECT"); //$NON-NLS-1$
 
 		try {
-			System.out.println("CATCHING PACKAGES");
+			System.out.println("CATCHING PACKAGES"); //$NON-NLS-1$
 			IJavaProject testProject = JavaCore.create(javaProject);
-			System.out.println("TEST PROJECT: " + testProject);
+			System.out.println("TEST PROJECT: " + testProject); //$NON-NLS-1$
 			try {
 				testProject.open(null);
 			} catch (JavaModelException e) {
 				System.out.println(e.getMessage());
 				return new ArrayList<>();
 			}
-			System.out.println("TEST PROJECT PACKAGE FRAGMENTS: " + testProject.getPackageFragments());
+			System.out.println("TEST PROJECT PACKAGE FRAGMENTS: " + testProject.getPackageFragments()); //$NON-NLS-1$
 			packages = Arrays.asList(testProject.getPackageFragments());
 
 			for (IPackageFragment mypackage : packages) {
