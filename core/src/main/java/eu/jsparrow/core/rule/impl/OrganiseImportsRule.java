@@ -62,12 +62,9 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 
 		final CompilationUnit astRoot = RefactoringUtil.parse(workingCopy);
 		final boolean hasAmbiguity[] = new boolean[] { false };
-		IChooseImportQuery query = new IChooseImportQuery() {
-			@Override
-			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
-				hasAmbiguity[0] = true;
-				return new TypeNameMatch[0];
-			}
+		IChooseImportQuery query = (TypeNameMatch[][] openChoices, ISourceRange[] ranges) -> {
+			hasAmbiguity[0] = true;
+			return new TypeNameMatch[0];
 		};
 
 		OrganizeImportsOperation importsOperation = new OrganizeImportsOperation(workingCopy, astRoot, false, true,

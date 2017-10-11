@@ -13,9 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.ExceptionMessages;
-import eu.jsparrow.license.netlicensing.LicenseManager;
-import eu.jsparrow.license.netlicensing.LicenseType;
-import eu.jsparrow.license.netlicensing.PersistenceManager;
 import eu.jsparrow.license.netlicensing.model.PersistenceModel;
 
 /**

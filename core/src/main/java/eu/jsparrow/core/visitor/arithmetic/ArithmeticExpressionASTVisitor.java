@@ -59,25 +59,12 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 				return false;
 			}
 
-			/*
-			 * Unused code Check if removeable
-			 * 
-			 * @SuppressWarnings("unchecked") List<Expression> extendedOperands
-			 * = node.extendedOperands();
-			 * 
-			 * for (Expression extendedOperand : extendedOperands) { if
-			 * (isSimpleNameAndEqualsVarName(extendedOperand)) { newOperator =
-			 * node.getOperator(); astRewrite.getListRewrite(node,
-			 * InfixExpression.EXTENDED_OPERANDS_PROPERTY).remove(
-			 * extendedOperand, null); return false; } }
-			 */
-		} else if (InfixExpression.Operator.MINUS.equals(currentOperator)
-				|| InfixExpression.Operator.DIVIDE.equals(currentOperator)) {
-			if (isSimpleNameAndEqualsVarName(node.getLeftOperand())
-					&& !(node.getRightOperand() instanceof InfixExpression)) {
-				replaceLeft(node);
-				return false;
-			}
+		} else if ((InfixExpression.Operator.MINUS.equals(currentOperator)
+				|| InfixExpression.Operator.DIVIDE.equals(currentOperator))
+				&& isSimpleNameAndEqualsVarName(node.getLeftOperand())
+				&& !(node.getRightOperand() instanceof InfixExpression)) {
+			replaceLeft(node);
+			return false;
 		}
 		return false;
 	}

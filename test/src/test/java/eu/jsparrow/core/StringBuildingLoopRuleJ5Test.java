@@ -23,6 +23,7 @@ public class StringBuildingLoopRuleJ5Test extends SingleRuleTest {
 
 	private StringBuildingLoopRule rule;
 
+
 	@Before
 	public void setUp() throws Exception {
 		rule = new StringBuildingLoopRule();
@@ -51,7 +52,6 @@ public class StringBuildingLoopRuleJ5Test extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-	
 
 	@Test
 	public void calculateEnabledForProjectShouldBeDisabled() {

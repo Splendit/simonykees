@@ -110,6 +110,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			try {
 				Class.forName(s);
 			} catch (ClassNotFoundException cnfe) {
+				logger.error(cnfe.getMessage(), cnfe);
 				logger.info(s);
 			}
 		});
@@ -129,7 +130,7 @@ public class EnhancedForLoopToStreamForEachRule {
 		final int length2 = 0;
 		stringList1.forEach(s -> {
 			if (length2 > 0) {
-				System.out.println(length2);
+				logger.info(String.valueOf(length2));
 			}
 		});
 
@@ -154,7 +155,7 @@ public class EnhancedForLoopToStreamForEachRule {
 		String u = "asdf";
 		for (String s : stringList1) {
 			if (s.equals(u)) {
-				System.out.println(u.length());
+				logger.info(String.valueOf(u.length()));
 			}
 		}
 
@@ -237,7 +238,7 @@ public class EnhancedForLoopToStreamForEachRule {
 			TestClass tc = new TestClass(1);
 		}
 
-		((List) stringList1).forEach(System.out::println);
+		((List) stringList1).forEach(o -> logger.info(String.valueOf(o)));
 
 		return "";
 	}
@@ -245,21 +246,21 @@ public class EnhancedForLoopToStreamForEachRule {
 	public void rawIterator() {
 		List<Class> classes = stringList1.stream().map(String::getClass).collect(Collectors.toList());
 		for (Class clazz : classes) {
-			System.out.println(clazz);
+			logger.info(String.valueOf(clazz));
 		}
 	}
 
 	public void captureTypeIterator() {
 		List<List<? extends Person>> persons = new ArrayList<>();
 		for (List<? extends Person> clazz : persons) {
-			System.out.println(clazz);
+			logger.info(String.valueOf(clazz));
 		}
 	}
 
 	public void wildCardTypeIterator() {
 		List<List<? extends Person>> persons = new ArrayList<>();
 		for (Class clazz : getWildCardSet()) {
-			System.out.println(clazz);
+			logger.info(String.valueOf(clazz));
 		}
 	}
 
@@ -276,7 +277,7 @@ public class EnhancedForLoopToStreamForEachRule {
 
 		doubles.stream().mapToDouble(Double::valueOf).forEach(d -> {
 			double halfD = d / 2;
-			System.out.println(halfD + d);
+			logger.info(String.valueOf(halfD + d));
 		});
 	}
 
@@ -284,7 +285,7 @@ public class EnhancedForLoopToStreamForEachRule {
 		List<Integer> doubles = new ArrayList<>();
 		doubles.stream().mapToInt(Integer::valueOf).forEach(i -> {
 			int plusTwo = i + 2;
-			System.out.println(plusTwo + i);
+			logger.info(String.valueOf(plusTwo + i));
 		});
 	}
 
@@ -292,7 +293,7 @@ public class EnhancedForLoopToStreamForEachRule {
 		List<Long> longs = new ArrayList<>();
 		longs.stream().mapToLong(Long::valueOf).forEach(l -> {
 			long minusTwo = l - 2;
-			System.out.println(minusTwo + l);
+			logger.info(String.valueOf(minusTwo + l));
 		});
 	}
 
@@ -300,7 +301,7 @@ public class EnhancedForLoopToStreamForEachRule {
 		List<Double> doubles = new ArrayList<>();
 		doubles.forEach(d -> {
 			double halfD = d / 2;
-			System.out.println(halfD + d);
+			logger.info(String.valueOf(halfD + d));
 		});
 	}
 

@@ -10,7 +10,7 @@ import java.util.List;
  */
 @SuppressWarnings("nls")
 public class FlatMapInsteadOfNestedLoopsRule {
-
+	
 	public void test() {
 		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
 		matrix2.stream().filter(row -> !row.isEmpty()).flatMap(row -> row.stream()).filter(col -> !col.isEmpty()).flatMap(col -> col.stream()).filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
@@ -93,6 +93,45 @@ public class FlatMapInsteadOfNestedLoopsRule {
 		matrix4.forEach(t -> {
 			t.getTestList().forEach(element -> {
 				System.out.println(element);
+			});
+		});
+	}
+	
+	public void testAvoidingOuterMostLoop() {
+		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
+		matrix2.stream().filter(row -> !row.isEmpty()).forEach(row -> {
+			/*
+			 * Some statement just to avoid transformation
+			 */
+			if(matrix2.size() == 2) {
+				return;
+			}
+			row.stream().filter(col -> !col.isEmpty()).flatMap(col -> col.stream()).filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
+				System.out.print(element);
+			});
+		});
+	}
+
+	public void testAvoidInnerMostLoop() {
+		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
+		matrix2.stream().filter(first -> !first.isEmpty()).flatMap((first) -> first.stream()).filter(second -> !second.isEmpty()).forEach(second -> {
+			if (matrix2.size() == 2) {
+				return;
+			}
+			second.stream().filter(third -> !third.isEmpty()).map(third -> third.substring(0, 1)).forEach(third -> {
+				System.out.print(third);
+			});
+		});
+	}
+	
+	public void testQuartedNestedStreams() {
+		List<List<List<List<String>>>> matrix3 = Arrays.asList(Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl"))));
+		matrix3.stream().flatMap(first -> first.stream()).forEach(second -> {
+			int size = matrix3.size();
+			second.forEach(third -> {
+				third.forEach(fourth -> {
+					System.out.print(fourth);
+				});
 			});
 		});
 	}

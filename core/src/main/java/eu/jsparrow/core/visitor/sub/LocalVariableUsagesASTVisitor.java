@@ -5,7 +5,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 /**
@@ -26,10 +28,12 @@ public class LocalVariableUsagesASTVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(SimpleName node) {
-		if (node.resolveBinding().getKind() == IBinding.VARIABLE) {
-			if (StringUtils.equals(node.getIdentifier(), targetName.getIdentifier())) {
-				usages.add(node);
-			}
+		IBinding binding = node.resolveBinding();
+		if (binding != null && binding.getKind() == IBinding.VARIABLE
+				&& StringUtils.equals(node.getIdentifier(), targetName.getIdentifier())
+				&& node.getLocationInParent() != FieldAccess.NAME_PROPERTY
+				&& node.getLocationInParent() != QualifiedName.NAME_PROPERTY) {
+			usages.add(node);
 		}
 		return false;
 	}

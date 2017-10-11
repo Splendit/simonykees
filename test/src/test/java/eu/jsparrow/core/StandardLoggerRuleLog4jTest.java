@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.junit.Before;
@@ -28,7 +29,10 @@ public class StandardLoggerRuleLog4jTest extends SingleRuleTest {
 	@Before
 	public void setUp() throws Exception {
 		rule = new StandardLoggerRule();
-		rule.activateDefaultOptions();
+		Map<String, String> options = rule.getDefaultOptions();
+		options.put("new-logging-statement", "error");
+		options.put("system-out-print-exception", "error");
+		rule.activateOptions(options);
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 

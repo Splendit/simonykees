@@ -17,6 +17,14 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
  */
 public class ResponseParser implements LicenseChecker {
 
+	private static final String PRODUCT_MODULE_NUMBER_KEY = "productModuleNumber"; //$NON-NLS-1$
+	private static final String FEATURE_NAME_KEY = "featureName"; //$NON-NLS-1$
+	private static final String PRODUCT_MODULE_NAME_KEY = "productModuleName";//$NON-NLS-1$
+	private static final String LICENSING_MODEL_KEY = "licensingModel"; //$NON-NLS-1$
+	private static final String EXPIRATION_TIME_STAMP_KEY = "expirationTimestamp"; //$NON-NLS-1$
+	private static final String EVALUATION_EXPIRES_DATE_KEY = "evaluationExpires"; //$NON-NLS-1$
+	private static final String VALID_KEY = "valid"; //$NON-NLS-1$
+	private static final String SUBSCRIPTION_EXPIRES_KEY = "expires"; //$NON-NLS-1$
 	private LicenseType licenseType;
 	private boolean licenseModelStatus;
 	private Instant timestamp;
@@ -29,15 +37,6 @@ public class ResponseParser implements LicenseChecker {
 	private boolean subscriptionStatus;
 	private LicenseStatus licenseStatus;
 	private ValidationAction validationAction;
-
-	private static final String PRODUCT_MODULE_NUMBER_KEY = "productModuleNumber"; //$NON-NLS-1$
-	private static final String FEATURE_NAME_KEY = "featureName"; //$NON-NLS-1$
-	private static final String PRODUCT_MODULE_NAME_KEY = "productModuleName";//$NON-NLS-1$
-	private static final String LICENSING_MODEL_KEY = "licensingModel"; //$NON-NLS-1$
-	private static final String EXPIRATION_TIME_STAMP_KEY = "expirationTimestamp"; //$NON-NLS-1$
-	private static final String EVALUATION_EXPIRES_DATE_KEY = "evaluationExpires"; //$NON-NLS-1$
-	private static final String VALID_KEY = "valid"; //$NON-NLS-1$
-	private static final String SUBSCRIPTION_EXPIRES_KEY = "expires"; //$NON-NLS-1$
 
 
 	public ResponseParser(ValidationResult validationResult, Instant timestamp, String licenseeName, ValidationAction validationAction) {
@@ -121,7 +120,7 @@ public class ResponseParser implements LicenseChecker {
 			}
 		});
 	}
-	
+
 	private String extractNodeLockedFeatureKey(ValidationResult validationResult) {
 		String nodeLockedFeatureKey = ""; //$NON-NLS-1$
 		Map<String, Composition> validations = validationResult.getValidations();
@@ -133,7 +132,7 @@ public class ResponseParser implements LicenseChecker {
 			String receivedTypeStr = properties.get(LICENSING_MODEL_KEY).getValue();
 			LicenseType receivedType = LicenseType.fromString(receivedTypeStr);
 			
-			if(LicenseType.NODE_LOCKED.equals(receivedType)) {
+			if(LicenseType.NODE_LOCKED == receivedType) {
 				
 				for(Map.Entry<String, Composition> entry : properties.entrySet()) {
 					String key = entry.getKey();
@@ -151,7 +150,7 @@ public class ResponseParser implements LicenseChecker {
 		
 		return nodeLockedFeatureKey;
 	}
-	
+
 	/**
 	 * Similar to {@link extractValidationData(ValidationResult, LicenseType)} except 
 	 * that it checks only of the subscription license type.
@@ -185,7 +184,7 @@ public class ResponseParser implements LicenseChecker {
 			}
 		});
 	}
-	
+
 	public static boolean parseLicenseeValidation(ValidationResult validationResult) {
 		boolean isValid = false;
 		Map<String, Composition> validations = validationResult.getValidations();
@@ -203,7 +202,7 @@ public class ResponseParser implements LicenseChecker {
 		
 		return isValid;
 	}
-	
+
 	private void setSubscriptionExpiresDate(ZonedDateTime subscriptionExpiresDate) {
 		this.subscriptionExpiresDate = subscriptionExpiresDate;
 	}
@@ -239,7 +238,7 @@ public class ResponseParser implements LicenseChecker {
 		boolean status = false;
 		
 		if(getType()!= null) {
-			if(getType().equals(LicenseType.TRY_AND_BUY)) {
+			if(getType() == LicenseType.TRY_AND_BUY) {
 				/*
 				 * In case of TRY_AND_BUY type, the license is valid if the
 				 * corresponding valid field is true
@@ -273,7 +272,7 @@ public class ResponseParser implements LicenseChecker {
 	private void setTimestamp(Instant timestamp) {
 		this.timestamp = timestamp;
 	}
-	
+
 	private void setLicenseeName(String licenseeName) {
 		this.licenseeName = licenseeName;
 	}
@@ -290,19 +289,19 @@ public class ResponseParser implements LicenseChecker {
 	public String getProductModulName() {
 		return productModuleName;
 	}
-	
+
 	public ZonedDateTime getEvaluationExpiresDate() {
 		return evaluationExpiresDate;
 	}
-	
+
 	public ZonedDateTime getExpirationTimeStamp() {
 		return this.expirationTimeStamp;
 	}
-	
+
 	public boolean getSubscriptionStatus() {
 		return subscriptionStatus;
 	}
-	
+
 	@Override
 	public ZonedDateTime getExpirationDate() {
 		return subscriptionExpiresDate;
@@ -311,12 +310,12 @@ public class ResponseParser implements LicenseChecker {
 	private void setValidationAction(ValidationAction validationAction) {
 		this.validationAction = validationAction;
 	}
-	
+
 	@Override
 	public LicenseStatus getLicenseStatus() {
 		return licenseStatus;
 	}
-	
+
 	private void setLicenseStatus(LicenseStatus licenseStatus) {
 		this.licenseStatus = licenseStatus;
 		
@@ -354,9 +353,9 @@ public class ResponseParser implements LicenseChecker {
 			ValidationAction action = getValidationAction();
 			if(isValid()) {
 				status = LicenseStatus.FLOATING_CHECKED_OUT;
-			} else if(action.equals(ValidationAction.CHECK_OUT) && getSubscriptionStatus()) {
+			} else if(action == ValidationAction.CHECK_OUT && getSubscriptionStatus()) {
 				status = LicenseStatus.FLOATING_OUT_OF_SESSION;
-			} else if(action.equals(ValidationAction.CHECK_IN) && getSubscriptionStatus()) {
+			} else if(action == ValidationAction.CHECK_IN && getSubscriptionStatus()) {
 				status = LicenseStatus.FLOATING_CHECKED_IN;
 			} else {
 				status = LicenseStatus.FLOATING_EXPIRED;

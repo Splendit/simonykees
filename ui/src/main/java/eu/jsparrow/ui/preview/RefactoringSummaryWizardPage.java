@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.compare.internal.ComparePreferencePage;
 import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.runtime.IStatus;
@@ -155,11 +156,9 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 			finalSource.clear();
 		}
 		refactoringPipeline.setSourceMap(finalSource);
-		refactoringPipeline.getRefactoringStates().stream().forEach(state -> {
-			if (!state.hasChange()) {
-				initialSource.remove(state);
-				finalSource.remove(state);
-			}
+		refactoringPipeline.getRefactoringStates().stream().filter(state -> !state.hasChange()).forEach(state -> {
+			initialSource.remove(state);
+			finalSource.remove(state);
 		});
 	
 		populateFileView();
@@ -206,7 +205,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	 */
 	private String getPathString(ICompilationUnit compilationUnit) {
 		String temp = compilationUnit.getParent().getPath().toString();
-		return temp.startsWith("/") ? temp.substring(1) : temp; //$NON-NLS-1$
+		return StringUtils.startsWith(temp, "/") ? StringUtils.substring(temp, 1) : temp; //$NON-NLS-1$
 	}
 
 	private void createPreviewViewer(Composite parent) {

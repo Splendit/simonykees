@@ -11,8 +11,6 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -40,10 +38,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.Tag;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.wizard.IValueChangeListener;
 
 /**
  * Lists all rules as checkboxes and a description for the currently selected
@@ -75,6 +73,13 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	protected IStatus fSelectionStatus;
 
 	private boolean forcedSelectLeft = false;
+	private boolean forcedSelectRight = false;
+
+	private enum SelectionSide {
+		LEFT, RIGHT, NONE,
+	}
+
+	private SelectionSide latestSelectionSide = SelectionSide.NONE;
 
 	public AbstractSelectRulesWizardPage(AbstractSelectRulesWizardModel model,
 			AbstractSelectRulesWizardControler controler) {
@@ -106,13 +111,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		createDescriptionViewer(composite);
 
-		model.addListener(new IValueChangeListener() {
-
-			@Override
-			public void valueChanged() {
-				updateData();
-			}
-		});
+		model.addListener(this::updateData);
 
 		Dialog.applyDialogFont(composite);
 
@@ -122,11 +121,11 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	protected abstract void createFilteringPart(Composite composite);
 
 	/**
-	 * Creates part of wizard for selecting the rules, built from tree parts.
-	 * First part, left, is tree view in which all filtered rules are shown and
-	 * can be chosen to add on right side. Middle part contains buttons to add
-	 * chosen rules to selection or remove rules already selected. Third, right,
-	 * part is table view containing rules that are selected to be applied.
+	 * Creates part of wizard for selecting the rules, built from tree parts. First
+	 * part, left, is tree view in which all filtered rules are shown and can be
+	 * chosen to add on right side. Middle part contains buttons to add chosen rules
+	 * to selection or remove rules already selected. Third, right, part is table
+	 * view containing rules that are selected to be applied.
 	 * 
 	 * @param parent
 	 */
@@ -191,17 +190,17 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		removeAllButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		removeAllButton.setText(Messages.SelectRulesWizardPage_removeAllButtonLabel);
 
-		leftTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				if (forcedSelectLeft) {
-					forcedSelectLeft = false;
-					/*
-					 * if it is manually selected because of moving, don't
-					 * update view
-					 */
-				} else {
-					controler.selectionChanged();
-				}
+		leftTreeViewer.addSelectionChangedListener((SelectionChangedEvent event) -> {
+			latestSelectionSide = SelectionSide.LEFT;
+			
+			if (forcedSelectLeft) {
+				forcedSelectLeft = false;
+				/*
+				 * if it is manually selected because of moving, don't update view
+				 */
+			} else {
+				latestSelectionSide = SelectionSide.LEFT;
+				controler.selectionChanged();
 			}
 		});
 
@@ -212,14 +211,16 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			}
 		});
 
-		leftTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
-			public void doubleClick(DoubleClickEvent event) {
-				controler.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection());
-			}
-		});
+		leftTreeViewer.addDoubleClickListener((DoubleClickEvent event) -> controler
+				.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection()));
 
-		rightTableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
+		rightTableViewer.addSelectionChangedListener((SelectionChangedEvent event) -> {
+			latestSelectionSide = SelectionSide.RIGHT;
+
+			if (forcedSelectRight) {
+				forcedSelectRight = false;
+			} else {
+				controler.selectionChanged();
 				removeButton.setEnabled(!event.getSelection().isEmpty());
 			}
 		});
@@ -231,11 +232,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			}
 		});
 
-		rightTableViewer.addDoubleClickListener(new IDoubleClickListener() {
-			public void doubleClick(DoubleClickEvent event) {
-				controler.removeButtonClicked((IStructuredSelection) rightTableViewer.getSelection());
-			}
-		});
+		rightTableViewer.addDoubleClickListener((DoubleClickEvent event) -> controler
+				.removeButtonClicked((IStructuredSelection) rightTableViewer.getSelection()));
 
 		addAllButton.addSelectionListener(new SelectionAdapter() {
 			/*
@@ -261,6 +259,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				controler.removeAllButtonClicked();
 			}
+
 		});
 
 	}
@@ -329,21 +328,25 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	protected void configureTable(TableViewer table) {
 		rightTableViewer.setContentProvider(new IStructuredContentProvider() {
 
+			@Override
 			@SuppressWarnings("unchecked")
 			public Object[] getElements(Object inputElement) {
 				Set<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> list = (Set<RefactoringRule<? extends AbstractASTRewriteASTVisitor>>) inputElement;
 				return list.toArray();
 			}
 
+			@Override
 			public void dispose() {
 			}
 
+			@Override
 			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 			}
 
 		});
 		table.setLabelProvider(new TableLabelProvider());
 		table.setComparator(new ViewerComparator() {
+			@Override
 			@SuppressWarnings("unchecked")
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule1 = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) e1;
@@ -355,18 +358,16 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Creates bottom part of select wizard containing Text field with
-	 * description of selected rule if only one rule is selected, default
-	 * description otherwise.
+	 * Creates bottom part of select wizard containing Text field with description
+	 * of selected rule if only one rule is selected, default description otherwise.
 	 * 
 	 * @param parent
 	 */
 	private void createDescriptionViewer(Composite parent) {
 		/*
-		 * There is a known issue with automatically showing and hiding
-		 * scrollbars and SWT.WRAP. Using StyledText and
-		 * setAlwaysShowScrollBars(false) makes the vertical scroll work
-		 * correctly at least.
+		 * There is a known issue with automatically showing and hiding scrollbars and
+		 * SWT.WRAP. Using StyledText and setAlwaysShowScrollBars(false) makes the
+		 * vertical scroll work correctly at least.
 		 */
 		descriptionStyledText = new StyledText(parent, SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
 		descriptionStyledText.setAlwaysShowScrollBars(false);
@@ -381,24 +382,24 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	 * Updates entire view with data every time something is changed in model.
 	 */
 	@SuppressWarnings("unchecked")
-	private void updateData() {
+	protected void updateData() {
 		/*
-		 * check if model has changed to update table and tree view or is just
-		 * selection changed to update description field and buttons
+		 * check if model has changed to update table and tree view or is just selection
+		 * changed to update description field and buttons
 		 */
 		if (model.hasChanged()) {
 			if (!model.isForced()) {
 				model.filterPosibilitiesByTags();
 				model.removeAlreadySelected();
-				if (model.getNameFilter().isEmpty()) {
+				if (StringUtils.isEmpty(model.getNameFilter())) {
 					leftTreeViewer.setInput(model.getPosibilities());
 				} else {
 					leftTreeViewer.setInput(model.filterPosibilitiesByName());
 				}
 				rightTableViewer.setInput(model.getSelection());
 				/*
-				 * updates enabling Finish button according to right side table
-				 * view if selection is empty Finish button is disabled
+				 * updates enabling Finish button according to right side table view if
+				 * selection is empty Finish button is disabled
 				 */
 			} else {
 				leftTreeViewer.setInput(model.getPosibilities());
@@ -407,6 +408,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			}
 			if (!model.getRecentlyMoved().isEmpty()) {
 				if (model.isMovedToRight()) {
+					forcedSelectRight = true;
 					rightTableViewer.setSelection(new StructuredSelection(model.getRecentlyMoved().toArray()), false);
 				} else {
 					forcedSelectLeft = true;
@@ -429,17 +431,21 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Sets the rule description text according to the currently selected rule
-	 * or to the default text if no rule is selected.
+	 * Sets the rule description text according to the currently selected rule or to
+	 * the default text if no rule is selected.
 	 */
 	@SuppressWarnings("unchecked")
 	private void populateDescriptionTextViewer() {
-		List<Object> selection = ((IStructuredSelection) leftTreeViewer.getSelection()).toList();
-		if (selection.size() == 1) {
+		List<Object> leftSelection = ((IStructuredSelection) leftTreeViewer.getSelection()).toList();
+		List<Object> rightSelection = ((IStructuredSelection) rightTableViewer.getSelection()).toList();
+
+		if (latestSelectionSide == SelectionSide.LEFT && leftSelection.size() == 1) {
 			// descriptionStyledText.setText(
 			// ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>)
 			// selection.get(0)).getDescription());
-			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) selection.get(0));
+			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) leftSelection.get(0));
+		} else if (latestSelectionSide == SelectionSide.RIGHT && rightSelection.size() == 1) {
+			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) rightSelection.get(0));
 		} else {
 			descriptionStyledText.setText(Messages.SelectRulesWizardPage_defaultDescriptionText);
 		}
@@ -461,8 +467,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		String requiredLibrariesValue = (null != rule.requiredLibraries()) ? rule.requiredLibraries()
 				: Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
 		String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
-		String tagsValue = StringUtils
-				.join(rule.getTags().stream().map(tag -> tag.getTagNames()).collect(Collectors.toList()), "  "); //$NON-NLS-1$
+		String tagsValue = StringUtils.join(rule.getTags().stream().map(Tag::getTagNames).collect(Collectors.toList()),
+				"  "); //$NON-NLS-1$
 
 		String descriptionText = name + lineDelimiter + lineDelimiter + description + lineDelimiter + lineDelimiter
 				+ requirementsLabel + lineDelimiter + minJavaVersionLabel + minJavaVersionValue + lineDelimiter
@@ -553,12 +559,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	@SuppressWarnings("unchecked")
 	private boolean selectionContainsEnabledEntry(List<Object> selection) {
-		for (Object object : selection) {
-			if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).isEnabled()) {
-				return true;
-			}
-		}
-		return false;
+		return selection.stream()
+				.anyMatch(object -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).isEnabled());
 	}
 
 	public void recalculateLayout() {
@@ -586,8 +588,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		}
 
 		/*
-		 * the mode severe status will be displayed and the OK button
-		 * enabled/disabled.
+		 * the mode severe status will be displayed and the OK button enabled/disabled.
 		 */
 		updateStatus(status);
 	}
@@ -611,10 +612,9 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Updates the status line and the OK button according to the status
-	 * evaluate from an array of status. The most severe error is taken. In case
-	 * that two status with the same severity exists, the status with lower
-	 * index is taken.
+	 * Updates the status line and the OK button according to the status evaluate
+	 * from an array of status. The most severe error is taken. In case that two
+	 * status with the same severity exists, the status with lower index is taken.
 	 *
 	 * @param status
 	 *            the array of status
@@ -623,4 +623,27 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		updateStatus(StatusUtil.getMostSevere(status));
 	}
 
+	protected TreeViewer getLeftTreeViewer() {
+		return leftTreeViewer;
+	}
+
+	protected TableViewer getRightTableViewer() {
+		return rightTableViewer;
+	}
+
+	protected Button getAddButton() {
+		return addButton;
+	}
+
+	protected Button getAddAllButton() {
+		return addAllButton;
+	}
+
+	protected Button getRemoveButton() {
+		return removeButton;
+	}
+
+	protected Button getRemoveAllButton() {
+		return removeAllButton;
+	}
 }

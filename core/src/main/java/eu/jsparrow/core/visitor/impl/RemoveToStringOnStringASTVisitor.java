@@ -23,12 +23,12 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
+	private static String stringFullyQualifiedName = java.lang.String.class.getName();
 
 	private List<MethodInvocation> methodInvocationSkipList;
 
 	public RemoveToStringOnStringASTVisitor() {
-		this.methodInvocationSkipList = new ArrayList<MethodInvocation>();
+		this.methodInvocationSkipList = new ArrayList<>();
 	}
 
 	@Override
@@ -41,7 +41,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 			return true;
 		}
 		
-		List<String> stringFullyQualifiedName = generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME);
+		List<String> stringFullyQualifiedNameList = generateFullyQuallifiedNameList(stringFullyQualifiedName);
 
 		/*
 		 * Checks if method invocation is toString. The invocation needs to have
@@ -51,7 +51,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 		if (StringUtils.equals(ReservedNames.MI_TO_STRING, node.getName().getFullyQualifiedName())
 				&& !(node.getParent() instanceof ExpressionStatement) && node.typeArguments().isEmpty()
 				&& (node.getExpression() != null && ClassRelationUtil.isContentOfTypes(
-						node.getExpression().resolveTypeBinding(), stringFullyQualifiedName))) {
+						node.getExpression().resolveTypeBinding(), stringFullyQualifiedNameList))) {
 			
 			Expression variableExpression = node.getExpression();
 
@@ -68,7 +68,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 					if (StringUtils.equals(ReservedNames.MI_TO_STRING, mI.getName().getFullyQualifiedName())
 							&& mI.typeArguments().isEmpty()
 							&& (mI.getExpression() != null && ClassRelationUtil.isContentOfTypes(
-									mI.getExpression().resolveTypeBinding(), stringFullyQualifiedName))) {
+									mI.getExpression().resolveTypeBinding(), stringFullyQualifiedNameList))) {
 						variableExpression = mI.getExpression();
 						methodInvocationSkipList.add(mI);
 						unwrapped = true;
