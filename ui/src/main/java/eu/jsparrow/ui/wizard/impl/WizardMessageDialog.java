@@ -17,17 +17,12 @@ public class WizardMessageDialog {
 	 * are required from non UI thread
 	 */
 	public static void synchronizeWithUIShowWarningNoRefactoringDialog() {
-		Display.getDefault().asyncExec(new Runnable() {
+		Display.getDefault().asyncExec(() -> {
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizard_warning_no_refactorings,
+					MessageDialog.INFORMATION);
 
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizard_warning_no_refactorings,
-						MessageDialog.INFORMATION);
-
-				Activator.setRunning(false);
-			}
-
+			Activator.setRunning(false);
 		});
 	}
 
@@ -35,15 +30,11 @@ public class WizardMessageDialog {
 	 * Method used to open ErrorDialog from non UI thread
 	 */
 	public static void synchronizeWithUIShowError(SimonykeesException exception) {
-		Display.getDefault().asyncExec(new Runnable() {
+		Display.getDefault().asyncExec(() -> {
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			SimonykeesMessageDialog.openErrorMessageDialog(shell, exception);
 
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openErrorMessageDialog(shell, exception);
-
-				Activator.setRunning(false);
-			}
+			Activator.setRunning(false);
 		});
 	}
 
@@ -54,15 +45,11 @@ public class WizardMessageDialog {
 	 * working copies were found to apply
 	 */
 	public static void synchronizeWithUIShowInfo(SimonykeesException exception) {
-		Display.getDefault().asyncExec(new Runnable() {
+		Display.getDefault().asyncExec(() -> {
+			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+			SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
 
-			@Override
-			public void run() {
-				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
-
-				Activator.setRunning(false);
-			}
+			Activator.setRunning(false);
 		});
 	}
 }

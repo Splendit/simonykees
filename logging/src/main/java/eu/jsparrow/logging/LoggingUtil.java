@@ -40,28 +40,22 @@ import ch.qos.logback.core.util.FileSize;
  */
 public class LoggingUtil {
 
+	private static final int ROLLING_POLICY_MIN_INDEX = 0;
+	private static final int ROLLING_POLICY_MAX_INDEX = 5;
+	private static final String TRIGGER_MAX_FILE_SIZE = "5MB"; //$NON-NLS-1$
+	private static final String ROLLING_FILE_APPENDER_NAME = "eu.jsparrow.logging.rollingFile"; //$NON-NLS-1$
+	private static final String JUL_ROLLING_FILE_APPENDER_NAME = "eu.jsparrow.logging.jul.rollingFile"; //$NON-NLS-1$
+	private static final String ROOT_LOGGER_NAME = org.slf4j.Logger.ROOT_LOGGER_NAME;
+	private static final String JUL_LOGGER_NAME = "jul"; //$NON-NLS-1$
+	private static final String LOG_FILE_NAME = "jsparrow.log"; //$NON-NLS-1$
+	private static final String JUL_LOG_FILE_NAME = "jsparrow.jul.log"; //$NON-NLS-1$
+	private static Bundle bundle = null;
+	private static boolean isLogbackConfigured = false;
+
 	// sonar lint suggestion to hide the public default constructor
 	private LoggingUtil() {
 
 	}
-
-	private static final int ROLLING_POLICY_MIN_INDEX = 0;
-	private static final int ROLLING_POLICY_MAX_INDEX = 5;
-
-	private static final String TRIGGER_MAX_FILE_SIZE = "5MB"; //$NON-NLS-1$
-
-	private static final String ROLLING_FILE_APPENDER_NAME = "eu.jsparrow.logging.rollingFile"; //$NON-NLS-1$
-	private static final String JUL_ROLLING_FILE_APPENDER_NAME = "eu.jsparrow.logging.jul.rollingFile"; //$NON-NLS-1$
-
-	private static final String ROOT_LOGGER_NAME = org.slf4j.Logger.ROOT_LOGGER_NAME;
-	private static final String JUL_LOGGER_NAME = "jul"; //$NON-NLS-1$
-
-	private static final String LOG_FILE_NAME = "jsparrow.log"; //$NON-NLS-1$
-	private static final String JUL_LOG_FILE_NAME = "jsparrow.jul.log"; //$NON-NLS-1$
-
-	private static Bundle bundle = null;
-
-	private static boolean isLogbackConfigured = false;
 
 	/**
 	 * Triggers the logging configuration for plug in tests

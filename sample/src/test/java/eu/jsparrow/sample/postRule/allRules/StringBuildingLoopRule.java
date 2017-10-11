@@ -104,7 +104,7 @@ public class StringBuildingLoopRule {
 
 		collectionOfStrings.add(anotherDecl);
 
-		collectionOfStrings.forEach((val) -> result = result + val);
+		collectionOfStrings.forEach(val -> result = result + val);
 
 		return result;
 	}

@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.StatementLambdaToExpressionASTVisitor;
+import eu.jsparrow.core.visitor.impl.StatementLambdaToExpressionASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -15,9 +15,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class StatementLambdaToExpressionRule extends RefactoringRule<StatementLambdaToExpressionASTVisitor> {
 
-	public StatementLambdaToExpressionRule(Class<StatementLambdaToExpressionASTVisitor> visitor) {
-		super(visitor);
-		// TODO i18n
+	public StatementLambdaToExpressionRule() {
+		super();
+		this.visitor = StatementLambdaToExpressionASTVisitor.class;
 		this.name = Messages.StatementLambdaToExpressionRule_name;
 		this.description = Messages.StatementLambdaToExpressionRule_description;
 	}

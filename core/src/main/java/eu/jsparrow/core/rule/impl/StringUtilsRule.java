@@ -10,6 +10,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -20,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.StringUtilsASTVisitor;
+import eu.jsparrow.core.visitor.impl.StringUtilsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -32,7 +33,7 @@ import eu.jsparrow.i18n.Messages;
  */
 public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 	
-	private final String VERSION_3_1 = "3.1"; //$NON-NLS-1$
+	private final String version31 = "3.1"; //$NON-NLS-1$
 
 	Logger logger = LoggerFactory.getLogger(StringUtilsRule.class);
 
@@ -41,11 +42,12 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 	 */
 	private List<String> supportetVersion = new ArrayList<>();
 
-	public StringUtilsRule(Class<StringUtilsASTVisitor> visitor) {
-		super(visitor);
+	public StringUtilsRule() {
+		super();
+		this.visitor = StringUtilsASTVisitor.class;
 		this.name = Messages.StringUtilsRule_name;
 		this.description = Messages.StringUtilsRule_description;
-		this.supportetVersion.add(VERSION_3_1);
+		this.supportetVersion.add(version31);
 	}
 	
 	@Override
@@ -73,8 +75,8 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 						for (Object attribute : attributes.keySet()) {
 							Name key = (Name) attribute;
 							String keyword = key.toString();
-							if (keyword.equals("Implementation-Version")) { //$NON-NLS-1$
-								if (supportetVersion.stream().anyMatch(s -> attributes.getValue(key).startsWith(s))) {
+							if ("Implementation-Version".equals(keyword)) { //$NON-NLS-1$
+								if (supportetVersion.stream().anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s))) {
 									return true;
 								} else {
 									return false;

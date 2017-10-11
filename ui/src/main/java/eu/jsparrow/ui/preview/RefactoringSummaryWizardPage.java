@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.compare.internal.ComparePreferencePage;
 import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.runtime.IStatus;
@@ -101,8 +102,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		createPreviewViewer(sashForm);
 
 		/*
-		 * sets height relation between children to be 1:3 when it has two
-		 * children
+		 * sets height relation between children to be 1:3 when it has two children
 		 */
 		sashForm.setWeights(new int[] { 1, 3 });
 
@@ -112,8 +112,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		viewer = new TableViewer(parent, SWT.SINGLE);
 
 		/*
-		 * label provider that sets the text displayed in CompilationUnits table
-		 * to show the name of the CompilationUnit
+		 * label provider that sets the text displayed in CompilationUnits table to show
+		 * the name of the CompilationUnit
 		 */
 		viewer.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -138,8 +138,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Sets {@link Map} containing all {@link RefactoringState}s and their
-	 * original source code before any change by any rule was made
+	 * Sets {@link Map} containing all {@link RefactoringState}s and their original
+	 * source code before any change by any rule was made
 	 */
 	public void setInitialChanges() {
 		initialSource.putAll(refactoringPipeline.getInitialSourceMap());
@@ -155,19 +155,17 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 			finalSource.clear();
 		}
 		refactoringPipeline.setSourceMap(finalSource);
-		refactoringPipeline.getRefactoringStates().stream().forEach(state -> {
-			if (!state.hasChange()) {
-				initialSource.remove(state);
-				finalSource.remove(state);
-			}
+		refactoringPipeline.getRefactoringStates().stream().filter(state -> !state.hasChange()).forEach(state -> {
+			initialSource.remove(state);
+			finalSource.remove(state);
 		});
-	
+
 		populateFileView();
-		
+
 		if (viewer.getTable().getItemCount() > 0) {
 			this.currentRefactoringState = (RefactoringState) viewer.getElementAt(0);
 		} else {
-			this.currentRefactoringState = null;			
+			this.currentRefactoringState = null;
 		}
 	}
 
@@ -198,15 +196,15 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Returns the path of an {@link ICompilationUnit} without leading slash
-	 * (the same as in the Externalize Strings refactoring view).
+	 * Returns the path of an {@link ICompilationUnit} without leading slash (the
+	 * same as in the Externalize Strings refactoring view).
 	 * 
 	 * @param compilationUnit
 	 * @return
 	 */
 	private String getPathString(ICompilationUnit compilationUnit) {
 		String temp = compilationUnit.getParent().getPath().toString();
-		return temp.startsWith("/") ? temp.substring(1) : temp; //$NON-NLS-1$
+		return StringUtils.startsWith(temp, "/") ? StringUtils.substring(temp, 1) : temp; //$NON-NLS-1$
 	}
 
 	private void createPreviewViewer(Composite parent) {
@@ -224,8 +222,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	}
 
 	/**
-	 * When this page gets visible, final changes should be collected and stored
-	 * and preview viewer has to be set with content
+	 * When this page gets visible, final changes should be collected and stored and
+	 * preview viewer has to be set with content
 	 */
 	@Override
 	public void setVisible(boolean visible) {
@@ -315,8 +313,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		}
 
 		/*
-		 * the mode severe status will be displayed and the OK button
-		 * enabled/disabled.
+		 * the mode severe status will be displayed and the OK button enabled/disabled.
 		 */
 		updateStatus(fSelectionStatus);
 	}

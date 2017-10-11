@@ -53,9 +53,9 @@ public class TestForToForEachListIteratingIndexRule {
 	public String testDublicateIteratorName(String input) {
 		List<String> fooList = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
-		fooList.forEach((aFooList) -> {
+		fooList.forEach(aFooList -> {
 			sb.append(aFooList);
-			fooList.forEach((aFooList1) -> sb.append(aFooList + input + aFooList1));
+			fooList.forEach(aFooList1 -> sb.append(aFooList + input + aFooList1));
 		});
 		return "";
 	}
@@ -64,7 +64,7 @@ public class TestForToForEachListIteratingIndexRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		foo.forEach((s) -> {
+		foo.forEach(s -> {
 			sb.append(s);
 			sb.append(s);
 		});
@@ -86,7 +86,7 @@ public class TestForToForEachListIteratingIndexRule {
 		StringBuilder sb = new StringBuilder();
 		int j;
 
-		foo.forEach((aFoo) -> {
+		foo.forEach(aFoo -> {
 			// i want my comments here
 			if (foo.size() > 0) {
 				String s = aFoo;
@@ -156,7 +156,7 @@ public class TestForToForEachListIteratingIndexRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		foo.forEach((aFoo) -> {
+		foo.forEach(aFoo -> {
 			int i = 0;
 			int k = 0;
 			String it = foo.get(i);
@@ -204,7 +204,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		foo.forEach((s) -> {
+		foo.forEach(s -> {
 			s += ";";
 			sb.append(s);
 			secondFoo.forEach(sb::append);
@@ -238,7 +238,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		foo.forEach((s) -> {
+		foo.forEach(s -> {
 			s += ";";
 			sb.append(s);
 			foo.forEach(sb::append);
@@ -274,12 +274,12 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		foo.forEach((it) -> {
+		foo.forEach(it -> {
 			String someConstant = "const";
 			sb.append(it + someConstant);
 		});
 
-		foo.forEach((it) -> {
+		foo.forEach(it -> {
 			String someConstant = "const";
 			sb.append(it + someConstant);
 		});
@@ -292,7 +292,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 		if (foo != null) {
-			foo.forEach((it) -> {
+			foo.forEach(it -> {
 				String someConstant = "const";
 				sb.append(it + someConstant);
 			});
@@ -307,7 +307,7 @@ public class TestForToForEachListIteratingIndexRule {
 		StringBuilder sb = new StringBuilder();
 		try {
 			if (foo != null) {
-				foo.forEach((s) -> {
+				foo.forEach(s -> {
 					String someConstant = "const";
 					try {
 						sb.append(s + someConstant);
@@ -374,7 +374,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		foo.forEach((s) -> sb.append(s.toString()));
+		foo.forEach(s -> sb.append(s.toString()));
 
 		return sb.toString();
 	}
@@ -474,7 +474,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 	public <T extends Foo> void listOfTypeArguments() {
 		List<T> elements = new ArrayList<>();
-		elements.forEach((foo) -> {
+		elements.forEach(foo -> {
 			foo.toString();
 			foo.isFoo();
 		});
@@ -482,7 +482,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 	public <T extends Foo> void captureOfTypeArguments() {
 		List<? extends T> elements = new ArrayList<>();
-		elements.forEach((foo) -> {
+		elements.forEach(foo -> {
 			foo.toString();
 			foo.isFoo();
 		});
@@ -490,7 +490,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 	public <T extends MyCollection<String>> void listOfParameterizedTypeArguments() {
 		List<T> elements = new ArrayList<>();
-		elements.forEach((foo) -> {
+		elements.forEach(foo -> {
 			foo.toString();
 			foo.hasNext();
 		});

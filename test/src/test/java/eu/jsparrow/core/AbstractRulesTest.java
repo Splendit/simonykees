@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -36,14 +37,20 @@ public abstract class AbstractRulesTest {
 
 	private static final String UTILITY_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/utilities"; //$NON-NLS-1$
 
-	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
-
 	protected static IPackageFragmentRoot root = null;
-	
+
 	protected static String javaVersion = JavaCore.VERSION_1_8;
 
+	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
+
+	protected IJavaProject testproject;
+
+	public AbstractRulesTest() {
+		super();
+	}
+
 	@BeforeClass
-	public static void setUp() throws Exception {
+	public static void classSetUp() throws Exception {
 		if (root == null) {
 			root = RulesTestUtil.getPackageFragementRoot(javaVersion);
 			String packageString = "eu.jsparrow.sample.utilities"; //$NON-NLS-1$
@@ -57,13 +64,9 @@ public abstract class AbstractRulesTest {
 	}
 
 	@AfterClass
-	public static void tearDown() throws Exception {
+	public static void classTearDown() throws Exception {
 		root = null;
 		javaVersion = JavaCore.VERSION_1_8;
-	}
-
-	public AbstractRulesTest() {
-		super();
 	}
 
 	/**

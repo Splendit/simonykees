@@ -120,14 +120,14 @@ public class RefactoringPipeline {
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		Map<ICompilationUnit, DocumentChange> currentChanges = new HashMap<>();
 
-		for (RefactoringState refactoringState : refactoringStates) {
+		refactoringStates.forEach(refactoringState -> {
 			DocumentChange documentChange = refactoringState.getChangeIfPresent(rule);
 			if (null != documentChange) {
 				currentChanges.put(refactoringState.getWorkingCopy(), documentChange);
 			} else if (refactoringState.wasChangeInitialyPresent(rule)) {
 				currentChanges.put(refactoringState.getWorkingCopy(), null);
 			}
-		}
+		});
 
 		return currentChanges;
 	}
@@ -145,12 +145,7 @@ public class RefactoringPipeline {
 	 * @since 1.2
 	 */
 	public boolean hasChanges() {
-		for (RefactoringState refactoringState : refactoringStates) {
-			if (refactoringState.hasChange()) {
-				return true;
-			}
-		}
-		return false;
+		return refactoringStates.stream().anyMatch(RefactoringState::hasChange);
 	}
 
 	/**
@@ -230,11 +225,8 @@ public class RefactoringPipeline {
 						return null;
 					}
 
-					/**
-					 * SIM-748 Test work around to don't apply syntax checks
-					 * there
-					 */
-					if (!testmode && RefactoringUtil.checkForSyntaxErrors(compilationUnit)) {
+					/** SIM-748 Test work around to don't apply syntax checks there */
+					if (RefactoringUtil.checkForSyntaxErrors(compilationUnit) && !testmode) {
 						logger.info("Adding compilation unit to errorList: " + compilationUnit.getElementName()); //$NON-NLS-1$
 						containingErrorList.add(compilationUnit);
 					} else {
@@ -272,7 +264,7 @@ public class RefactoringPipeline {
 	}
 
 	public void createRefactoringStates(List<ICompilationUnit> compilationUnits) {
-		for (ICompilationUnit compilationUnit : compilationUnits) {
+		compilationUnits.forEach(compilationUnit -> {
 
 			try {
 				refactoringStates.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
@@ -280,7 +272,7 @@ public class RefactoringPipeline {
 				logger.error(e.getMessage(), e);
 			}
 
-		}
+		});
 
 	}
 
@@ -380,12 +372,8 @@ public class RefactoringPipeline {
 				.setWorkRemaining(rules.size() * changedCompilationUnits.size());
 		subMonitor.setTaskName(""); //$NON-NLS-1$
 
-		for (RefactoringState refactoringState : refactoringStates) {
-			if (changedCompilationUnits.stream()
-					.anyMatch(unit -> unit.getElementName().equals(refactoringState.getWorkingCopyName()))) {
-				refactoringState.resetWorkingCopy();
-			}
-		}
+		refactoringStates.stream().filter(refactoringState -> changedCompilationUnits.stream()
+				.anyMatch(unit -> unit.getElementName().equals(refactoringState.getWorkingCopyName()))).forEach(RefactoringState::resetWorkingCopy);
 
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
 			for (RefactoringState refactoringState : refactoringStates) {
@@ -466,8 +454,6 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * TODO adjust description
-	 * 
 	 * Commit the working copies to the underlying {@link ICompilationUnit}s
 	 * 
 	 * @throws RefactoringException

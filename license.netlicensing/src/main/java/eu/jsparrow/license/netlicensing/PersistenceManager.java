@@ -32,19 +32,27 @@ import eu.jsparrow.license.netlicensing.model.PersistenceModel;
 public class PersistenceManager {
 		
 	private static final Logger logger = LoggerFactory.getLogger(PersistenceManager.class);
-	
-	private PersistenceModel persistenceModel;
+
 	private static final String LICENSEE_CREDENTIALS_NODE_KEY = "credentials"; //$NON-NLS-1$
+
 	private static final String SIMONYKEES_KEY = "simonykees"; //$NON-NLS-1$
+
 	private static PersistenceManager instance;
+
 	private static final String ALGORITHM = "AES"; //$NON-NLS-1$
+
 	private static final String TRANSFORMATION = "AES"; //$NON-NLS-1$
+
 	private static final String KEY = "SOME_SECRET_KEY_"; //$NON-NLS-1$ //FIXME
+
 	private static final String EMPTY_STRING = "";  //$NON-NLS-1$
+
 	/**
 	 * Time period (in seconds) of valid license without internet connection. 
 	 */
 	private static final long OFFLINE_EXPIRATION_TIME_PERIOD = 3600;
+
+	private PersistenceModel persistenceModel;
 
 	private PersistenceManager() {
 		
@@ -135,7 +143,7 @@ public class PersistenceManager {
 				logger.warn(ExceptionMessages.PersistenceManager_encryption_error, exception);
 		}
 	}
-	
+
 	/**
 	 * Constructs a {@link PersistenceModel} object from the persisted data on
 	 * the secure storage.
@@ -189,13 +197,31 @@ public class PersistenceManager {
 								));
 		return new OfflineLicenseChecker(persistence);
 	}
-	
+
 	public PersistenceModel getPersistenceModel() {
 		return persistenceModel;
 	}
 
 	void setPersistenceModel(PersistenceModel persistenceModel) {
 		this.persistenceModel = persistenceModel;
+	}
+
+	public void updateLicenseeData(String licenseeName, String licenseeNumber) {
+		PersistenceModel persistence = 
+				readPersistedData()
+				.orElse(
+						// if persisted data is corrupted, keep licensee number
+						// and licensee name, and ignore the rest of the data.
+						new PersistenceModel(
+							licenseeNumber,
+							licenseeName,
+							false,
+							null, null, null, null, null, 
+							false, null, null, null
+						));
+		persistence.updateLicenseeCredential(licenseeName, licenseeNumber);
+		setPersistenceModel(persistence);
+		persist();
 	}
 	
 	private class OfflineLicenseChecker implements LicenseChecker {
@@ -239,7 +265,7 @@ public class PersistenceManager {
 		private ZonedDateTime calcExpirationDate(PersistenceModel persistenceModel) {
 			ZonedDateTime date;
 			
-			if(getType() != null && getType().equals(LicenseType.TRY_AND_BUY)) {
+			if(getType() != null && getType() == LicenseType.TRY_AND_BUY) {
 				date = persistenceModel.getDemoExpirationDate().orElse(null);
 			} else {
 				date = persistenceModel.getSubscriptionExpirationDate().orElse(null);
@@ -275,7 +301,7 @@ public class PersistenceManager {
 				if(optLicenseType.isPresent()) {
 					// license type was stored...
 					LicenseType type = optLicenseType.get();
-					if(LicenseType.TRY_AND_BUY.equals(type)) {
+					if(LicenseType.TRY_AND_BUY == type) {
 						// the stored license type was TryAndBuy. A further check is needed for the expiration date.
 						Optional<ZonedDateTime> demoExpiration = persistence.getDemoExpirationDate();
 						if(demoExpiration.isPresent()
@@ -284,8 +310,8 @@ public class PersistenceManager {
 							status = true;
 						}
 						
-					} else if(LicenseType.FLOATING.equals(type) 
-								|| LicenseType.NODE_LOCKED.equals(type)) {
+					} else if(LicenseType.FLOATING == type 
+								|| LicenseType.NODE_LOCKED == type) {
 						/*  
 						 * the stored license type was either Floating or NodeLocked
 						 * a further check is needed for the subscription expiration
@@ -324,23 +350,5 @@ public class PersistenceManager {
 			return expirationDate;
 		}
 		
-	}
-
-	public void updateLicenseeData(String licenseeName, String licenseeNumber) {
-		PersistenceModel persistence = 
-				readPersistedData()
-				.orElse(
-						// if persisted data is corrupted, keep licensee number
-						// and licensee name, and ignore the rest of the data.
-						new PersistenceModel(
-							licenseeNumber,
-							licenseeName,
-							false,
-							null, null, null, null, null, 
-							false, null, null, null
-						));
-		persistence.updateLicenseeCredential(licenseeName, licenseeNumber);
-		setPersistenceModel(persistence);
-		persist();
 	}
 }

@@ -301,7 +301,7 @@ public class EnhancedForLoopToStreamFindFirstRule {
 
 	public String missingReturnValue(String input) {
 		List<String> values = generateList(input);
-		values.stream().filter((value) -> value.length() > 4).forEach((value) -> {
+		values.stream().filter(value -> value.length() > 4).forEach(value -> {
 			// missing body
 		});
 

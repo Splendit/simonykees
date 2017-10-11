@@ -15,14 +15,15 @@ import eu.jsparrow.i18n.Messages;
  */
 public class FieldNameConventionRule extends RefactoringRule<FieldNameConventionASTVisitor> {
 
-	public FieldNameConventionRule(Class<FieldNameConventionASTVisitor> visitor) {
-		super(visitor);
+	public FieldNameConventionRule() {
+		super();
+		this.visitor = FieldNameConventionASTVisitor.class;
 		this.name = Messages.FieldNameConventionRule_name;
 		this.description = Messages.FieldNameConventionRule_description;
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
-		return JavaVersion.JAVA_0_9;
+		return JavaVersion.JAVA_1_1;
 	}
 }
