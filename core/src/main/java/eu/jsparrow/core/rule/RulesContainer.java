@@ -130,10 +130,10 @@ public class RulesContainer {
 				 * Code formatting and organizing imports should always happen
 				 * last.
 				 */
-				new CodeFormatterRule(AbstractASTRewriteASTVisitor.class)));
+				new CodeFormatterRule()));
 		
 		if (!isStandalone) {
-			rules.add(new OrganiseImportsRule(AbstractASTRewriteASTVisitor.class));
+			rules.add(new OrganiseImportsRule());
 		}
 		
 		return rules;

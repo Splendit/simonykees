@@ -19,6 +19,7 @@ Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Export-Package: eu.jsparrow.core;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
+ eu.jsparrow.core.config,
  eu.jsparrow.core.exception;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
  eu.jsparrow.core.refactorer;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
  eu.jsparrow.core.rule;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
@@ -26,3 +27,5 @@ Export-Package: eu.jsparrow.core;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalo
  eu.jsparrow.core.rule.impl.logger;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
  eu.jsparrow.core.util;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
  eu.jsparrow.core.visitor;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone"
+Bundle-ClassPath: lib/snakeyaml.jar,
+ .
