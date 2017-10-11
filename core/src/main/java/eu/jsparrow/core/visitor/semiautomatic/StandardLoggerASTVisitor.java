@@ -157,10 +157,14 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		boolean exisitngLoggerImported = ASTNodeUtil
 				.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class).stream()
 				.filter(importDecl -> !importDecl.isOnDemand()).map(ImportDeclaration::getName)
-				.filter(Name::isQualifiedName).map(name -> ((QualifiedName) name).getName())
-				.map(SimpleName::getIdentifier).anyMatch(LOGGER_CLASS_NAME::equals);
+				.filter(Name::isQualifiedName).map(QualifiedName.class::cast)
+				.anyMatch(this::isClasshingLoggerName);
 
 		return noClashingTypes && !exisitngLoggerImported && super.visit(compilationUnit);
+	}
+	
+	private boolean isClasshingLoggerName(QualifiedName name) {
+		return LOGGER_CLASS_NAME.equals(name.getName().getIdentifier()) && !loggerQualifiedName.equals(name.getFullyQualifiedName());
 	}
 
 	@Override
@@ -174,6 +178,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 		visitNewTypeDeclaration(typeDeclaration);
+		
+		
 		return true;
 	}
 
@@ -334,6 +340,28 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		}
 		this.typeDeclaration = abstractType;
 		this.nestedTypeDeclarationLevel++;
+		findDeclaredLogger(abstractType).ifPresent(identifier -> loggerNames.put(generateUniqueTypeId(abstractType), identifier));
+	}
+	
+	/**
+	 * Checks if a logger of type {@value #loggerQualifiedName} is declared as a
+	 * field in the given type declaration.
+	 * 
+	 * @param typeDeclaration
+	 *            a type declaration to look into
+	 * @return the identifier of the declared logger or an empty optional if no
+	 *         logger declaration was found;
+	 */
+	private Optional<String> findDeclaredLogger(AbstractTypeDeclaration typeDeclaration) {
+		return ASTNodeUtil.convertToTypedList(typeDeclaration.bodyDeclarations(), FieldDeclaration.class).stream()
+				.filter(field -> {
+					Type type = field.getType();
+					ITypeBinding typeBinding = type.resolveBinding();
+					String qualifiedName = typeBinding.getQualifiedName();
+					return loggerQualifiedName.equals(qualifiedName);
+				}).flatMap(field -> ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
+						.stream())
+				.map(VariableDeclarationFragment::getName).map(SimpleName::getIdentifier).findAny();
 	}
 
 	/**
@@ -700,7 +728,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		@Override
 		public boolean visit(SimpleType simpleType) {
 			Name typeName = simpleType.getName();
-			if (typeName.isSimpleName() && isClashingLoggerName(((SimpleName) typeName).getIdentifier())) {
+			
+			if (typeName.isSimpleName() && isClashingLoggerName(((SimpleName) typeName).getIdentifier(), simpleType)) {
 				clashingFound = true;
 			}
 			return true;
@@ -709,6 +738,17 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		private boolean isClashingLoggerName(String typeIdentifier) {
 			return LOGGER_CLASS_NAME.equals(typeIdentifier) || LOG4J_LOGGER_MANAGER.equals(typeIdentifier)
 					|| SLF4J_LOGGER_FACTORY.equals(typeIdentifier);
+		}
+		
+		private boolean isClashingLoggerName(String typeIdentifier, SimpleType simpleType) {
+			if(isClashingLoggerName(typeIdentifier)) {
+				ITypeBinding typeBidning = simpleType.resolveBinding();
+				if(typeBidning != null) {
+					 String bindingQualifiedName = typeBidning.getQualifiedName();
+					 return !newImports.get(loggerQualifiedName).contains(bindingQualifiedName);
+				}
+			}
+			return false;
 		}
 
 		public boolean isLoggerFree() {

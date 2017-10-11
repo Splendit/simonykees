@@ -66,6 +66,7 @@ public class TestMultiCatchRule {
 		try {
 			throwSomethingWithInheritance(i);
 		} catch (SecondException | FirstException e5) {
+			log.error(e5.getMessage(), e5);
 			i++;
 		}
 		return i;
@@ -75,12 +76,16 @@ public class TestMultiCatchRule {
 		try {
 			throwSomething(i);
 		} catch (SecondException | FirstException e) {
+			log.error(e.getMessage(), e);
 			i++; // A
 		} catch (ThirdException e) {
+			log.error(e.getMessage(), e);
 			i += 10; // B
 		} catch (FifthException | FourthException e) {
+			log.error(e.getMessage(), e);
 			i--; // C
 		} catch (SixthException e) {
+			log.error(e.getMessage(), e);
 			i -= 10; // D
 		}
 		return i;
@@ -91,6 +96,7 @@ public class TestMultiCatchRule {
 			throwSomethingMixedCheckedAndUnchecked(i);
 		} catch (ThirdUncheckedException | ThirdException | SecondtUncheckedException | SecondException
 				| FirstUncheckedException | FirstException e) {
+			log.error(e.getMessage(), e);
 			i++;
 		}
 		return i;
@@ -107,6 +113,7 @@ public class TestMultiCatchRule {
 		} catch (ThirdException | SecondChildChildException e) {
 			log.warn(e.getMessage());
 		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			log.debug("Same as the most general exception");
 		}
 	}
@@ -128,6 +135,7 @@ public class TestMultiCatchRule {
 		} catch (FirstException e) {
 			log.warn(e.getMessage());
 		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			log.debug("Same as the most general exception");
 		}
 	}
@@ -147,6 +155,7 @@ public class TestMultiCatchRule {
 		} catch (FirstException | ThirdException e) {
 			log.warn(e.getMessage());
 		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			log.debug("Same as the most general exception");
 		}
 	}
