@@ -30,6 +30,10 @@ public class YAMLConfigUtil {
 
 	private static final String CONFIG_TAG = "!jsparrow.config"; //$NON-NLS-1$
 
+	private YAMLConfigUtil() {
+		// private constructor to hide public default constructor
+	}
+
 	/**
 	 * loads a jsparrow configuration file and returns a {@link YAMLConfig}
 	 * 
