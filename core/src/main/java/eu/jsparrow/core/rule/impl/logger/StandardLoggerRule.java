@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
 import eu.jsparrow.core.rule.SemiAutomaticRefactoringRule;
-import eu.jsparrow.core.visitor.semiautomatic.StandardLoggerASTVisitor;
+import eu.jsparrow.core.visitor.logger.StandardLoggerASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
