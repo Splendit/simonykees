@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
 import eu.jsparrow.core.rule.SemiAutomaticRefactoringRule;
-import eu.jsparrow.core.visitor.semiautomatic.StandardLoggerASTVisitor;
+import eu.jsparrow.core.visitor.logger.StandardLoggerASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -158,7 +158,6 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY, INFO);
 		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY, ERROR);
 		defaultOptions.put(StandardLoggerConstants.MISSING_LOG_KEY, ERROR);
-		defaultOptions.put(StandardLoggerConstants.LOGGER_QUALIFIED_NAME, StandardLoggerConstants.SLF4J_LOGGER);
 
 		return defaultOptions;
 	}
@@ -176,7 +175,6 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	public void activateDefaultOptions() {
 		// default options should be activated only for test purposes
 		setSelectedOptions(getDefaultOptions());
-		this.loggerQualifiedName = StandardLoggerConstants.SLF4J_LOGGER;
 	}
 
 	@Override
@@ -189,7 +187,6 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 			}
 		});
 		setSelectedOptions(defaultOptions);
-		this.loggerQualifiedName = options.get(StandardLoggerConstants.LOGGER_QUALIFIED_NAME);
 	}
 
 	@Override
