@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 public class DiamondOperatorRule {
 
 	/**
-	 * SIM-820 - if a diamond operator is used, eclipse will not indicate a
-	 * compile error but the code will not compile.
+	 * SIM-820 - if a diamond operator is used, eclipse will not indicate a compile
+	 * error but the code will not compile.
 	 */
 	CtorExpectingLambdas<String> collection = new CtorExpectingLambdas<String>(ArrayList::new, IdentityHashMap::new);
 

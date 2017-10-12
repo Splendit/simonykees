@@ -93,7 +93,7 @@
 		<!-- standalone -->
 		<module>standalone</module>
 		
-		<module>jsparrow-maven-plugin</module>
+		<!-- <module>jsparrow-maven-plugin</module> -->
 	</modules>
 
 	<scm>
@@ -185,6 +185,11 @@
 			<id>splendit-nexus-2</id>
 			<layout>p2</layout>
 			<url>http://nexus-vm-02.splendit.loc/content/repositories/neon-p2/</url>
+		</repository>
+ 		<repository>
+			<id>oxygen</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/eclipse/updates/4.7</url>
 		</repository>
 		<repository>
 			<id>netlicensing</id>
