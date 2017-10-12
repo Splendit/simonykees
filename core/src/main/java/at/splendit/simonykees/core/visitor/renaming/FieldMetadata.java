@@ -11,6 +11,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEditGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A type for storing information about a field to be renamed and all its
@@ -22,6 +24,7 @@ import org.eclipse.text.edits.TextEditGroup;
  */
 public class FieldMetadata {
 
+	private static final Logger logger = LoggerFactory.getLogger(FieldMetadata.class);
 	private CompilationUnit compilationUnit;
 	private List<ReferenceSearchMatch> references;
 	private VariableDeclarationFragment declarationFragment;
@@ -37,13 +40,14 @@ public class FieldMetadata {
 		this.newIdentifier = newIdentifier;
 		this.textEditGroups = new HashMap<>();
 		this.documentMap = new HashMap<>();
-		references.forEach(referece -> referece.setMetadata(this));
-		try {
-			createDocument((ICompilationUnit)cu.getJavaElement());
-		} catch (JavaModelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		references.forEach(referece -> {
+			referece.setMetadata(this);
+			try {
+				createDocument(referece.getICompilationUnit());
+			} catch (JavaModelException e) {
+				logger.error("Cannot create document for displaying changes - " + e.getMessage(), e); //$NON-NLS-1$
+			}
+		});
 
 	}
 

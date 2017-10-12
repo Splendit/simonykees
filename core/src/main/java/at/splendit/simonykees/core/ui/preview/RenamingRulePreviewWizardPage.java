@@ -7,10 +7,14 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.ITreeViewerListener;
+import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
+import org.eclipse.ltk.ui.refactoring.ChangePreviewViewerInput;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -42,15 +46,11 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		this.changes = changes;
 		this.metadataMap = metadataMap;
 
-		try {
-			convertChangesToDocumentChangeWrappers();
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		convertChangesToDocumentChangeWrappers();
+
 	}
 
-	private void convertChangesToDocumentChangeWrappers() throws CoreException {
+	private void convertChangesToDocumentChangeWrappers() {
 		changesWrapperList = new ArrayList<>();
 		for (String declaration : changes.keySet()) {
 			List<DocumentChange> changesForField = changes.get(declaration);
@@ -120,7 +120,8 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	}
 
 	private void populateFileView() {
-		viewer.setInput(changesWrapperList.toArray(new DocumentChangeWrapper[]{}));
+		DocumentChangeWrapper[] changesArray = changesWrapperList.toArray(new DocumentChangeWrapper[]{});
+		viewer.setInput(changesArray);
 	}
 
 	private void createPreviewViewer(SashForm parent) {
@@ -132,11 +133,15 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		currentPreviewViewer = new TextEditChangePreviewViewer();
 		currentPreviewViewer.createControl(parent);
 
-		populatePreviewViewer();
+		populatePreviewViewer(0);
 	}
 
-	private void populatePreviewViewer() {
-		currentPreviewViewer.setInput(TextEditChangePreviewViewer.createInput(changesWrapperList.get(0).getDocumentChange()));
+	private void populatePreviewViewer(int i) {
+		if (changesWrapperList.size() > i) {
+			DocumentChange docChange = changesWrapperList.get(i).getDocumentChange();
+			ChangePreviewViewerInput viewerInput = TextEditChangePreviewViewer.createInput(docChange);
+			currentPreviewViewer.setInput(viewerInput);
+		}
 	}
 
 }

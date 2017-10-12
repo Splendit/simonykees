@@ -1,5 +1,6 @@
 package at.splendit.simonykees.core.visitor.renaming;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.SearchMatch;
 
@@ -16,8 +17,9 @@ public class ReferenceSearchMatch extends SearchMatch {
 	
 	private String matchedName;
 	private FieldMetadata metaData;
+	private ICompilationUnit iCompilationUnit;
 
-	public ReferenceSearchMatch(SearchMatch searchMatch, String matchedName) {
+	public ReferenceSearchMatch(SearchMatch searchMatch, String matchedName, ICompilationUnit iCompilationUnit) {
 		super(
 				(IJavaElement)searchMatch.getElement(), 
 				searchMatch.getAccuracy(), 
@@ -28,6 +30,7 @@ public class ReferenceSearchMatch extends SearchMatch {
 
 		((IJavaElement)getElement()).getElementName();
 		this.matchedName = matchedName;
+		this.iCompilationUnit = iCompilationUnit;
 	}
 	
 	/**
@@ -40,6 +43,10 @@ public class ReferenceSearchMatch extends SearchMatch {
 	
 	void setMetadata(FieldMetadata metaData) {
 		this.metaData = metaData;
+	}
+	
+	public ICompilationUnit getICompilationUnit() {
+		return this.iCompilationUnit;
 	}
 	
 	/**

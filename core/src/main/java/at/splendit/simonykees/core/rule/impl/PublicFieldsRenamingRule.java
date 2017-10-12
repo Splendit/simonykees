@@ -61,7 +61,6 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 	 *            renamed.
 	 * @return the list of document changes for all complation units that are
 	 *         affected by the renaming of the field.
-	 * @throws JavaModelException if an exception occurs while accessing the resource of a {@link ICompilationUnit}.
 	 */
 	public List<DocumentChange> computeDocumentChangesPerFiled(FieldMetadata metaData) {
 		List<ICompilationUnit> targetCompilationUnits = metaData.getTargetICompilationUnits();
@@ -73,11 +72,13 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 				int newIdentifierLength = newIdentifier.length();
 				VariableDeclarationFragment oldFragment = metaData.getFieldDeclaration();
 				Document doc = metaData.getDocument(iCompilationUnit);
-				DocumentChange documentChange = new DocumentChange(newIdentifier, doc);
+				DocumentChange documentChange = new DocumentChange(
+						oldFragment.getName().getIdentifier() + " -> " + newIdentifier, doc); //$NON-NLS-1$
 				TextEdit rootEdit = new MultiTextEdit();
 				documentChange.setEdit(rootEdit);
 				int delta = oldFragment.getName().getLength() - newIdentifierLength;
-				if(iCompilationUnit.getPath().toString().equals(metaData.getCompilationUnit().getJavaElement().getPath().toString())) {					
+				if (iCompilationUnit.getPath().toString()
+						.equals(metaData.getCompilationUnit().getJavaElement().getPath().toString())) {
 					int declOffset = oldFragment.getStartPosition();
 					InsertEdit declInsertEdit = new InsertEdit(declOffset, newIdentifier);
 					DeleteEdit declDeleteEdit = new DeleteEdit(declOffset, delta + newIdentifierLength);
@@ -85,7 +86,7 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 					documentChange.addEdit(declDeleteEdit);
 				}
 				metaData.getReferences().forEach(match -> {
-					if(match.getResource().getFullPath().toString().equals(iCompilationUnit.getPath().toString())) {
+					if (match.getResource().getFullPath().toString().equals(iCompilationUnit.getPath().toString())) {
 						InsertEdit insertEdit = new InsertEdit(match.getOffset(), newIdentifier);
 						DeleteEdit deleteEdit = new DeleteEdit(match.getOffset(), delta + newIdentifierLength);
 						documentChange.addEdit(insertEdit);
@@ -135,8 +136,9 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 				Document document = new Document(iCompilationUnit.getSource());
 				DocumentChange documentChange = new DocumentChange(editGroup.getName(), document);
 				documentChange.setEdit(new MultiTextEdit());
-				documentChange.addTextEditGroup(editGroup);
-
+				for(TextEdit edit : editGroup.getTextEdits()) {
+					documentChange.addEdit(edit.copy());
+				}
 				documentChanges.add(documentChange);
 			}
 		}

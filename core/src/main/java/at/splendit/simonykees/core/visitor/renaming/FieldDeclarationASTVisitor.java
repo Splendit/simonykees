@@ -35,7 +35,6 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
-import org.eclipse.jdt.internal.core.ResolvedSourceMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -301,8 +300,6 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		 */
 		List<ReferenceSearchMatch> references = new ArrayList<>();
 		String fragmentIdentifier = fragment.getName().getIdentifier();
-		
-		boolean referencesInCuWithCompilationErros;
 
 		/*
 		 * The object that stores the search result.
@@ -311,17 +308,17 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 
 			@Override
 			public void acceptSearchMatch(SearchMatch match) {
-				ReferenceSearchMatch reference = new ReferenceSearchMatch(match, fragmentIdentifier);
-				references.add(reference);
 				IPath path = match.getResource().getFullPath();
-				IJavaElement icu = (IJavaElement) match.getElement();
-				IMember rsm = (IMember)icu;
-				ICompilationUnit castedICU = rsm.getCompilationUnit();
-				if(RefactoringUtil.checkForSyntaxErrors(castedICU)) {
+				IJavaElement iJavaElement = (IJavaElement) match.getElement();
+				IMember iMember = (IMember)iJavaElement;
+				ICompilationUnit icu = iMember.getCompilationUnit();
+				ReferenceSearchMatch reference = new ReferenceSearchMatch(match, fragmentIdentifier, icu);
+				references.add(reference);
+				if(RefactoringUtil.checkForSyntaxErrors(icu)) {
 					references.clear();
 					throw new FileWithCompilationErrorException(FILE_WITH_COMPILATION_ERROR_EXCEPTION_MESSAGE);
 				}
-				storeIJavaElement(castedICU);
+				storeIJavaElement(icu);
 				storePath(path);
 			}
 		};
