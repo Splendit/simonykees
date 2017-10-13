@@ -70,25 +70,6 @@ public class YAMLConfigUtil {
 	}
 
 	/**
-	 * loads the given configuration file and imports the declared profiles to
-	 * jsparrow eclipse version
-	 * 
-	 * @param file
-	 *            configuration file
-	 * @throws YAMLConfigException
-	 */
-	public static void importProfiles(File file) throws YAMLConfigException {
-		YAMLConfig config = YAMLConfigUtil.loadConfiguration(file);
-		if (config != null) {
-			List<YAMLProfile> profiles = config.getProfiles();
-			profiles.forEach(profile -> {
-				// TODO actual import
-				logger.info(profile.toString());
-			});
-		}
-	}
-
-	/**
 	 * exports configuration in form of {@link YAMLConfig} to the given file. this
 	 * is also used for exporting profiles from jsparrow eclipse version.
 	 * 
