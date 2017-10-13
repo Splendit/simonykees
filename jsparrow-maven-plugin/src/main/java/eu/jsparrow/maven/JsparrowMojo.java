@@ -87,7 +87,7 @@ public class JsparrowMojo extends AbstractMojo {
 
 	private boolean standaloneStarted = false;
 	private Framework framework = null;
-	
+
 	private String mavenHomeUnzipped = "";
 
 	private File directory;
@@ -117,8 +117,7 @@ public class JsparrowMojo extends AbstractMojo {
 						try {
 							framework.stop();
 						} catch (BundleException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							getLog().error(e.getMessage(), e);
 						}
 					}
 					// CLEAN
@@ -184,7 +183,7 @@ public class JsparrowMojo extends AbstractMojo {
 		} else {
 			throw new InterruptedException("Could not create temp folder");
 		}
-		
+
 		if (directory.getFreeSpace() < 165 * 1000000) {
 			// potential OutOfSpace
 		}

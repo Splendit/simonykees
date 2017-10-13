@@ -315,7 +315,7 @@ public class Activator implements BundleActivator {
 	private void deleteChildren(File parentDirectory) {
 		for (String file : Arrays.asList(parentDirectory.list())) {
 			File currentFile = new File(parentDirectory.getAbsolutePath(), file);
-			if (currentFile.isDirectory()) {
+			if (currentFile.isDirectory() && !("target".equals(currentFile.getName()))) {
 				deleteChildren(currentFile);
 			}
 			currentFile.delete();
