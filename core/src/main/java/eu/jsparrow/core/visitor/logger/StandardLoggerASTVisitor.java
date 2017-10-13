@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.semiautomatic;
+package eu.jsparrow.core.visitor.logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,19 +11,16 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -33,7 +30,6 @@ import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -89,9 +85,9 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String DEFAULT_LOGGER_NAME = "logger"; //$NON-NLS-1$
 	private static final String SLF4J_LOGGER_GET_LOGGER = "getLogger"; //$NON-NLS-1$
 	private static final String THROWABLE_GET_MESSAGE = "getMessage"; //$NON-NLS-1$
-	private static final String LOGGER_CLASS_NAME = org.slf4j.Logger.class.getSimpleName();
-	private static final String SLF4J_LOGGER_FACTORY = org.slf4j.LoggerFactory.class.getSimpleName();
-	private static final String LOG4J_LOGGER_MANAGER = "LogManager"; //$NON-NLS-1$
+	static final String LOGGER_CLASS_NAME = org.slf4j.Logger.class.getSimpleName();
+	static final String SLF4J_LOGGER_FACTORY = org.slf4j.LoggerFactory.class.getSimpleName();
+	static final String LOG4J_LOGGER_MANAGER = "LogManager"; //$NON-NLS-1$
 	private static final String LOG4J_GET_LOGGER = "getLogger"; //$NON-NLS-1$
 	private static final String SLF4J_LOGGER_FACTORY_QUALIFIED_NAME = org.slf4j.LoggerFactory.class.getName();
 	private static final String VALUE_OF = "valueOf"; //$NON-NLS-1$
@@ -102,18 +98,18 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String LOG4J_LOGGER_FACTORY_QUALIFIED_NAME = "org.apache.logging.log4j.LogManager"; //$NON-NLS-1$
 	private static final String SEPARATOR = "->"; //$NON-NLS-1$
 
-	private static final List<String> exceptionQualifiedName = Collections
+	static final List<String> exceptionQualifiedName = Collections
 			.singletonList(java.lang.Exception.class.getName());
 
 	private boolean importsNeeded = false;
 
 	private Map<String, String> replacingOptions;
-	private String loggerQualifiedName;
+	String loggerQualifiedName;
 	private CompilationUnit compilationUnit;
 	private AbstractTypeDeclaration typeDeclaration;
 	private AbstractTypeDeclaration rootType;
 	private int nestedTypeDeclarationLevel = 0;
-	private Map<String, List<String>> newImports;
+	Map<String, List<String>> newImports;
 	private Map<String, String> loggerNames;
 
 	public StandardLoggerASTVisitor(String loggerQualifiedName, Map<String, String> replacingOptions) {
@@ -149,18 +145,22 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		importsNeeded = false;
 		this.compilationUnit = compilationUnit;
 
-		ClashingLoggerTypesASTVisitor clashingTypesVisitor = new ClashingLoggerTypesASTVisitor();
+		ClashingLoggerTypesASTVisitor clashingTypesVisitor = new ClashingLoggerTypesASTVisitor(this);
 		compilationUnit.accept(clashingTypesVisitor);
 		boolean noClashingTypes = clashingTypesVisitor.isLoggerFree();
 
 		// checking whether there is a logger imported!!!
-		boolean exisitngLoggerImported = ASTNodeUtil
+		boolean existingLoggerImported = ASTNodeUtil
 				.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class).stream()
 				.filter(importDecl -> !importDecl.isOnDemand()).map(ImportDeclaration::getName)
-				.filter(Name::isQualifiedName).map(name -> ((QualifiedName) name).getName())
-				.map(SimpleName::getIdentifier).anyMatch(LOGGER_CLASS_NAME::equals);
+				.filter(Name::isQualifiedName).map(QualifiedName.class::cast)
+				.anyMatch(this::isClashingLoggerName);
 
-		return noClashingTypes && !exisitngLoggerImported && super.visit(compilationUnit);
+		return noClashingTypes && !existingLoggerImported && super.visit(compilationUnit);
+	}
+	
+	private boolean isClashingLoggerName(QualifiedName name) {
+		return LOGGER_CLASS_NAME.equals(name.getName().getIdentifier()) && !loggerQualifiedName.equals(name.getFullyQualifiedName());
 	}
 
 	@Override
@@ -174,6 +174,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 		visitNewTypeDeclaration(typeDeclaration);
+		
+		
 		return true;
 	}
 
@@ -262,8 +264,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 			}
 
 			List<Expression> logArguments = calcLogArgument(arguments, methodIdentifier);
-			SimpleName qualiferName = expressionQualifier.getName();
-			calcReplacingOtion(arguments, qualiferName)
+			SimpleName qualifierName = expressionQualifier.getName();
+			calcReplacingOption(arguments, qualifierName)
 					.ifPresent(replacingOption -> replaceMethod(methodInvocation, replacingOption, logArguments));
 
 		} else if (PRINT_STACK_TRACE.equals(methodIdentifier)
@@ -334,6 +336,28 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		}
 		this.typeDeclaration = abstractType;
 		this.nestedTypeDeclarationLevel++;
+		findDeclaredLogger(abstractType).ifPresent(identifier -> loggerNames.put(generateUniqueTypeId(abstractType), identifier));
+	}
+	
+	/**
+	 * Checks if a logger of type {@value #loggerQualifiedName} is declared as a
+	 * field in the given type declaration.
+	 * 
+	 * @param typeDeclaration
+	 *            a type declaration to look into
+	 * @return the identifier of the declared logger or an empty optional if no
+	 *         logger declaration was found;
+	 */
+	private Optional<String> findDeclaredLogger(AbstractTypeDeclaration typeDeclaration) {
+		return ASTNodeUtil.convertToTypedList(typeDeclaration.bodyDeclarations(), FieldDeclaration.class).stream()
+				.filter(field -> {
+					Type type = field.getType();
+					ITypeBinding typeBinding = type.resolveBinding();
+					String qualifiedName = typeBinding.getQualifiedName();
+					return loggerQualifiedName.equals(qualifiedName);
+				}).flatMap(field -> ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
+						.stream())
+				.map(VariableDeclarationFragment::getName).map(SimpleName::getIdentifier).findAny();
 	}
 
 	/**
@@ -436,7 +460,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 *         the qualifiers of the standard output of if the replacement
 	 *         option is not set in {@link #replacingOptions}.
 	 */
-	private Optional<String> calcReplacingOtion(List<Expression> arguments, SimpleName qualiferName) {
+	private Optional<String> calcReplacingOption(List<Expression> arguments, SimpleName qualiferName) {
 		ExceptionsASTVisitor visitor = new ExceptionsASTVisitor();
 		arguments.forEach(argument -> argument.accept(visitor));
 		boolean logsException = !visitor.getExceptions().isEmpty();
@@ -668,83 +692,5 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private String generateUniqueTypeId(AbstractTypeDeclaration typeDeclaration) {
 		return typeDeclaration.getName().getIdentifier() + SEPARATOR + typeDeclaration.getStartPosition() + SEPARATOR
 				+ typeDeclaration.getLength();
-	}
-
-	/**
-	 * Checks for occurrences of {@link SimpleType}s with name
-	 * {@value #LOGGER_CLASS_NAME}, {@value #SLF4J_LOGGER_FACTORY} or
-	 * {@value #SLF4J_LOGGER_FACTORY}.
-	 * 
-	 * @author Ardit Ymeri
-	 * @since 1.2
-	 *
-	 */
-	private class ClashingLoggerTypesASTVisitor extends ASTVisitor {
-
-		boolean clashingFound = false;
-
-		@Override
-		public boolean preVisit2(ASTNode node) {
-			return !clashingFound;
-		}
-
-		@Override
-		public boolean visit(TypeDeclaration typeDeclaration) {
-			String typeIdentifier = typeDeclaration.getName().getIdentifier();
-			if (isClashingLoggerName(typeIdentifier)) {
-				clashingFound = true;
-			}
-			return true;
-		}
-
-		@Override
-		public boolean visit(SimpleType simpleType) {
-			Name typeName = simpleType.getName();
-			if (typeName.isSimpleName() && isClashingLoggerName(((SimpleName) typeName).getIdentifier())) {
-				clashingFound = true;
-			}
-			return true;
-		}
-
-		private boolean isClashingLoggerName(String typeIdentifier) {
-			return LOGGER_CLASS_NAME.equals(typeIdentifier) || LOG4J_LOGGER_MANAGER.equals(typeIdentifier)
-					|| SLF4J_LOGGER_FACTORY.equals(typeIdentifier);
-		}
-
-		public boolean isLoggerFree() {
-			return !clashingFound;
-		}
-	}
-
-	class ExceptionsASTVisitor extends ASTVisitor {
-		private List<ASTNode> foundExceptions = new ArrayList<>();
-
-		@Override
-		public boolean visit(SimpleName simpleName) {
-			IBinding binding = simpleName.resolveBinding();
-			if (binding != null && IBinding.VARIABLE == binding.getKind()) {
-				ITypeBinding typeBinding = simpleName.resolveTypeBinding();
-				storeIfExceptionType(typeBinding, simpleName);
-			}
-			return true;
-		}
-
-		@Override
-		public boolean visit(ClassInstanceCreation classCreation) {
-			ITypeBinding typeBinding = classCreation.resolveTypeBinding();
-			storeIfExceptionType(typeBinding, classCreation);
-			return true;
-		}
-
-		private void storeIfExceptionType(ITypeBinding typeBinding, ASTNode node) {
-			if (typeBinding != null && (ClassRelationUtil.isContentOfTypes(typeBinding, exceptionQualifiedName)
-					|| ClassRelationUtil.isInheritingContentOfTypes(typeBinding, exceptionQualifiedName))) {
-				foundExceptions.add(node);
-			}
-		}
-
-		public List<ASTNode> getExceptions() {
-			return this.foundExceptions;
-		}
 	}
 }
