@@ -142,16 +142,11 @@ public class Activator implements BundleActivator {
 		} finally {
 			standaloneConfig.cleanUp();
 
-			context = null;
-			
+			// context = null;
+
 			// CLEAN
 			if (directory.exists()) {
-				try {
-					deleteChildren(directory);
-				} catch (IOException e) {
-					logger.error(e.getMessage(), e);
-				}
-				directory.delete();
+				deleteChildren(directory);
 			}
 		}
 
@@ -317,7 +312,7 @@ public class Activator implements BundleActivator {
 	 *            directory which content is to be deleted
 	 * @throws IOException
 	 */
-	private void deleteChildren(File parentDirectory) throws IOException {
+	private void deleteChildren(File parentDirectory) {
 		for (String file : Arrays.asList(parentDirectory.list())) {
 			File currentFile = new File(parentDirectory.getAbsolutePath(), file);
 			if (currentFile.isDirectory()) {

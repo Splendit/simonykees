@@ -85,6 +85,9 @@ public class JsparrowMojo extends AbstractMojo {
 	@Parameter(defaultValue = "", property = "profile")
 	protected String profile;
 
+	private boolean standaloneStarted = false;
+	private Framework framework = null;
+	
 	private String mavenHomeUnzipped = "";
 
 	private File directory;
@@ -110,8 +113,16 @@ public class JsparrowMojo extends AbstractMojo {
 				@Override
 				public void run() {
 					super.run();
+					if (null != framework) {
+						try {
+							framework.stop();
+						} catch (BundleException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
 					// CLEAN
-					if (null != directory) {
+					if (!standaloneStarted && null != directory) {
 						try {
 							deleteChildren(new File(directory.getAbsolutePath()));
 						} catch (IOException e) {
@@ -122,7 +133,9 @@ public class JsparrowMojo extends AbstractMojo {
 				}
 			});
 			startOSGI();
-		} catch (BundleException | InterruptedException e) {
+		} catch (BundleException e) {
+			getLog().error(e.getMessage(), e);
+		} catch (InterruptedException e) {
 			getLog().error(e.getMessage(), e);
 		} finally {
 
@@ -148,7 +161,7 @@ public class JsparrowMojo extends AbstractMojo {
 	 * @throws InterruptedException
 	 */
 	private void startOSGI() throws BundleException, InterruptedException {
-		final Map<String, String> configuration = new HashMap<>();
+		final Map<String, String> configuration = new HashMap<String, String>();
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
 		configuration.put(CONFIG_FILE_PATH,
@@ -171,6 +184,10 @@ public class JsparrowMojo extends AbstractMojo {
 		} else {
 			throw new InterruptedException("Could not create temp folder");
 		}
+		
+		if (directory.getFreeSpace() < 165 * 1000000) {
+			// potential OutOfSpace
+		}
 
 		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
 		configuration.put(PROJECT_PATH_CONSTANT, project.getBasedir().getAbsolutePath());
@@ -188,31 +205,44 @@ public class JsparrowMojo extends AbstractMojo {
 			extractAndCopyDependencies(mavenHome);
 		} else {
 			String tempZipPath = directory.getAbsolutePath() + File.separator + "maven";
-			try (InputStream mavenZipInputStream = JsparrowMojo.class
-					.getResourceAsStream(File.separator + "apache-maven-3.5.0-bin.zip")) {
+			InputStream mavenZipInputStream = null;
+			try {
+				mavenZipInputStream = JsparrowMojo.class
+						.getResourceAsStream(File.separator + "apache-maven-3.5.0-bin.zip");
 				mavenHomeUnzipped += tempZipPath;
 				unzip(mavenZipInputStream, tempZipPath);
 				extractAndCopyDependencies(mavenHomeUnzipped);
 
 			} catch (IOException e) {
 				getLog().error(e.getMessage(), e);
+			} finally {
+				if (null != mavenZipInputStream) {
+					try {
+						mavenZipInputStream.close();
+					} catch (IOException e) {
+						getLog().error(e.getMessage(), e);
+					}
+				}
 			}
 		}
 
 		ServiceLoader<FrameworkFactory> ffs = ServiceLoader.load(FrameworkFactory.class);
 		FrameworkFactory frameworkFactory = ffs.iterator().next();
 
-		final Framework framework = frameworkFactory.newFramework(configuration);
+		framework = frameworkFactory.newFramework(configuration);
 
 		framework.start();
 
 		final BundleContext ctx = framework.getBundleContext();
 
-		final List<Bundle> bundles = new ArrayList<>();
+		final List<Bundle> bundles = new ArrayList<Bundle>();
 
 		// load jars from manifest and install bundles
-		try (InputStream is = JsparrowMojo.class.getResourceAsStream(File.separator + JSPARROW_MANIFEST);
-				BufferedReader reader = new BufferedReader(new InputStreamReader(is));) {
+		InputStream is = null;
+		BufferedReader reader = null;
+		try {
+			is = JsparrowMojo.class.getResourceAsStream(File.separator + JSPARROW_MANIFEST);
+			reader = new BufferedReader(new InputStreamReader(is));
 			String line = "";
 
 			if (is != null) {
@@ -223,6 +253,21 @@ public class JsparrowMojo extends AbstractMojo {
 			}
 		} catch (IOException e) {
 			getLog().error(e.getMessage(), e);
+		} finally {
+			if (null != is) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					getLog().error(e.getMessage(), e);
+				}
+			}
+			if (null != reader) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					getLog().error(e.getMessage(), e);
+				}
+			}
 		}
 
 		startBundles(bundles);
@@ -264,6 +309,7 @@ public class JsparrowMojo extends AbstractMojo {
 					getLog().info(
 							"Starting BUNDLE: " + bundle.getSymbolicName() + ", resolution: " + bundle.getState());
 					bundle.start();
+					standaloneStarted = true;
 				} catch (Exception e) {
 					getLog().error(e.getMessage(), e);
 				}
@@ -306,8 +352,7 @@ public class JsparrowMojo extends AbstractMojo {
 			executeMojo(execPlugin, "copy-dependencies", configuration,
 					executionEnvironment(project, mavenSession, pluginManager));
 		} catch (MojoExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			getLog().error(e.getMessage(), e);
 		}
 	}
 
@@ -379,7 +424,7 @@ public class JsparrowMojo extends AbstractMojo {
 		bos.close();
 		File file = new File(filePath);
 
-		Set<PosixFilePermission> perms = new HashSet<>();
+		Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
 		perms.add(PosixFilePermission.OWNER_READ);
 		perms.add(PosixFilePermission.OWNER_WRITE);
 		perms.add(PosixFilePermission.OWNER_EXECUTE);
