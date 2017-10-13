@@ -2,6 +2,8 @@ package eu.jsparrow.ui.preference;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -60,6 +62,10 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	private Button exportProfileButton;
 
 	private Font font;
+
+	private enum ProfileImportMode {
+		SKIP, RENAME, REPLACE, IMPORT,
+	}
 
 	public SimonykeesPreferencePage() {
 		super(GRID);
@@ -418,37 +424,62 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 		try {
 			YAMLConfig config = YAMLConfigUtil.loadConfiguration(file);
-			List<String> currentProfileNames = SimonykeesPreferenceManager.getAllProfileIds();
+			int importedProfileCount = 0;
 
-			config.getProfiles().forEach(profile -> {
-				boolean doImport = true;
+			for (YAMLProfile profile : config.getProfiles()) {
+				List<String> currentProfileNames = SimonykeesPreferenceManager.getAllProfileIds();
+				ProfileImportMode mode = ProfileImportMode.IMPORT;
 
 				// prevent the default profile from being replaced
 				if (Messages.Profile_DefaultProfile_profileName.equals(profile.getName())) {
 					logger.error(Messages.SimonykeesPreferencePage_DefaultProfileNotReplacable);
 					SimonykeesMessageDialog.openMessageDialog(getShell(),
 							Messages.SimonykeesPreferencePage_DefaultProfileNotReplacable, MessageDialog.ERROR);
-					return;
+					continue;
 				}
 
 				// check if the profile already exists
 				if (currentProfileNames.contains(profile.getName())) {
 					String message = NLS.bind(Messages.SimonykeesPreferencePage_ProfileExistsReplace,
 							profile.getName());
-					doImport = SimonykeesMessageDialog.openConfirmDialog(getShell(), message);
+					String[] buttonLabels = new String[] { Messages.SimonykeesPreferencePage_Skip,
+							Messages.SimonykeesPreferencePage_Replace, Messages.SimonykeesPreferencePage_KeepBoth };
+					int doImport = SimonykeesMessageDialog.openQuestionWithCancelDialog(getShell(), message,
+							buttonLabels);
+					switch (doImport) {
+					case 0:
+						mode = ProfileImportMode.SKIP;
+						break;
+					case 1:
+						mode = ProfileImportMode.REPLACE;
+						break;
+					case 2:
+						mode = ProfileImportMode.RENAME;
+						break;
+					default:
+						mode = ProfileImportMode.IMPORT;
+					}
 				}
 
-				if (doImport) {
-					SimonykeesPreferenceManager.removeProfile(profile.getName());
+				if (mode != ProfileImportMode.SKIP) {
+					if (mode == ProfileImportMode.REPLACE) {
+						SimonykeesPreferenceManager.removeProfile(profile.getName());
+					} else if (mode == ProfileImportMode.RENAME) {
+						String newProfileName = addSuffixToProfileName(profile.getName());
+						profile.setName(newProfileName);
+					}
 					SimonykeesPreferenceManager.addProfile(profile.getName(), profile.getRules());
+					importedProfileCount++;
 					logger.info("profile added: " + profile); //$NON-NLS-1$
-				} else {
-					logger.info("profile NOT added: " + profile); //$NON-NLS-1$
-				}
-			});
 
-			SimonykeesMessageDialog.openMessageDialog(getShell(),
-					Messages.SimonykeesPreferencePage_ProfileImportSuccessful, MessageDialog.INFORMATION);
+				}
+			}
+
+			String finishMessage = (importedProfileCount == 0) ? Messages.SimonykeesPreferencePage_NoProfilesImported
+					: NLS.bind(Messages.SimonykeesPreferencePage_ProfileImportSuccessful, importedProfileCount);
+
+			SimonykeesMessageDialog.openMessageDialog(getShell(), finishMessage, MessageDialog.INFORMATION);
+
 		} catch (YAMLConfigException e) {
 			logger.error(e.getMessage(), e);
 			SimonykeesMessageDialog.openMessageDialog(getShell(), e.getMessage(), MessageDialog.ERROR);
@@ -473,9 +504,11 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			File file = new File(path);
 			if (file.exists()) {
 				logger.error(Messages.SimonykeesPreferencePage_FileAlreadyExists);
-				SimonykeesMessageDialog.openMessageDialog(getShell(),
-						Messages.SimonykeesPreferencePage_FileAlreadyExists, MessageDialog.ERROR);
-				return;
+				boolean replace = SimonykeesMessageDialog.openConfirmDialog(getShell(),
+						Messages.SimonykeesPreferencePage_FileAlreadyExists);
+				if (!replace) {
+					return;
+				}
 			}
 
 			if (file.isDirectory()) {
@@ -509,5 +542,52 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			SimonykeesMessageDialog.openMessageDialog(getShell(), Messages.SimonykeesPreferencePage_NoProfilesSelected,
 					MessageDialog.ERROR);
 		}
+	}
+
+	/**
+	 * adds an integer suffix to the given profile name
+	 * 
+	 * @param profileName
+	 * @return if the given profile already exists, an integer will be appended to
+	 *         it to make it unique, otherwise the given profile name will be
+	 *         returned without change
+	 */
+	private String addSuffixToProfileName(String profileName) {
+		int index = 1;
+		String currentProfileName = profileName;
+
+		LinkedList<String> profileNameParts = new LinkedList<>(Arrays.asList(profileName.split("_"))); //$NON-NLS-1$
+		List<String> currentProfiles = SimonykeesPreferenceManager.getAllProfileIds();
+
+		/*
+		 * if an integer has already been appended to the given profile name, we take it
+		 * and increase its value. This prevents profiles being named like
+		 * "profile1_1_1_1_1" after multiple imports. Instead it will be imported as
+		 * "profile1_4"
+		 */
+		if (profileNameParts.size() > 1) {
+			try {
+				index = Integer.parseInt(profileNameParts.getLast());
+				profileNameParts.removeLast();
+				currentProfileName = String.join("_", profileNameParts); //$NON-NLS-1$
+			} catch (NumberFormatException nfe) {
+				// if the last part isn't an integer do nothing
+			}
+		}
+
+		String newProfileName = currentProfileName;
+
+		while (currentProfiles.contains(newProfileName)) {
+
+			StringBuilder sb = new StringBuilder();
+			sb.append(currentProfileName);
+			sb.append("_"); //$NON-NLS-1$
+			sb.append(index);
+
+			newProfileName = sb.toString();
+			index++;
+		}
+
+		return newProfileName;
 	}
 }
