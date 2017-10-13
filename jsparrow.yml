@@ -1,8 +1,8 @@
 !jsparrow.config
 
-# specify one of the profiles declared below as the default profile.
-# if the defaultProfile is not specified the rules in the “rules:” section will be applied
-defaultProfile: profile1
+# specify one of the profiles declared below as the selected profile.
+# if the selectedProfile is not specified the rules in the “rules:” section will be applied
+selectedProfile: profile1
 
 # define profiles here
 profiles:

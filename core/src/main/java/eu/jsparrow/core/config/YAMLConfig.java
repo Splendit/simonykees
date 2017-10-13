@@ -26,18 +26,18 @@ public class YAMLConfig {
 	 * default profile specifies a profile from the {@link YAMLConfig#profiles} list
 	 * which gets executed by default
 	 */
-	private String defaultProfile;
+	private String selectedProfile;
 
 	public YAMLConfig() {
 		this.rules = new LinkedList<>();
 		this.profiles = new LinkedList<>();
-		this.defaultProfile = ""; //$NON-NLS-1$
+		this.selectedProfile = ""; //$NON-NLS-1$
 	}
 
 	public YAMLConfig(List<String> rules, List<YAMLProfile> profiles, String defaultProfile) {
 		this.rules = rules;
 		this.profiles = profiles;
-		this.defaultProfile = defaultProfile;
+		this.selectedProfile = defaultProfile;
 	}
 
 	/**
@@ -64,7 +64,7 @@ public class YAMLConfig {
 
 		config.getProfiles().add(profile);
 
-		config.setDefaultProfile("default"); //$NON-NLS-1$
+		config.setSelectedProfile("default"); //$NON-NLS-1$
 
 		return config;
 	}
@@ -85,18 +85,18 @@ public class YAMLConfig {
 		this.profiles = profiles;
 	}
 
-	public String getDefaultProfile() {
-		return defaultProfile;
+	public String getSelectedProfile() {
+		return selectedProfile;
 	}
 
-	public void setDefaultProfile(String defaultProfile) {
-		this.defaultProfile = defaultProfile;
+	public void setSelectedProfile(String defaultProfile) {
+		this.selectedProfile = defaultProfile;
 	}
 
 	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
-		return "YAMLConfig [rules=" + rules + ", profiles=" + profiles + ", defaultProfile=" + defaultProfile + "]";
+		return "YAMLConfig [rules=" + rules + ", profiles=" + profiles + ", defaultProfile=" + selectedProfile + "]";
 	}
 
 }

@@ -169,11 +169,11 @@ public class Activator implements BundleActivator {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
 				.getRulesForProject(javaProject, true);
 
-		String defaultProfile = config.getDefaultProfile();
-		if (defaultProfile != null && !defaultProfile.isEmpty()) {
-			if (checkProfileExistence(config, defaultProfile)) {
+		String selectedProfile = config.getSelectedProfile();
+		if (selectedProfile != null && !selectedProfile.isEmpty()) {
+			if (checkProfileExistence(config, selectedProfile)) {
 				Optional<YAMLProfile> configProfile = config.getProfiles().stream()
-						.filter(profile -> profile.getName().equals(defaultProfile)).findFirst();
+						.filter(profile -> profile.getName().equals(selectedProfile)).findFirst();
 
 				if (configProfile.isPresent()) {
 					List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> profileRules = getConfigRules(
@@ -182,11 +182,11 @@ public class Activator implements BundleActivator {
 					result = projectRules.stream().filter(rule -> rule.isEnabled())
 							.filter(profileRules::contains).collect(Collectors.toList());
 				} else {
-					String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, defaultProfile)
+					String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, selectedProfile)
 ;					throw new YAMLConfigException(exceptionMessage);
 				}
 			} else {
-				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, defaultProfile);
+				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, selectedProfile);
 				throw new YAMLConfigException(exceptionMessage);
 			}
 		} else { // use all rules from config file
@@ -267,7 +267,7 @@ public class Activator implements BundleActivator {
 
 		if (profile != null && !profile.isEmpty()) {
 			if (checkProfileExistence(config, profile)) {
-				config.setDefaultProfile(profile);
+				config.setSelectedProfile(profile);
 			} else {
 				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, profile);
 				throw new YAMLConfigException(exceptionMessage);
