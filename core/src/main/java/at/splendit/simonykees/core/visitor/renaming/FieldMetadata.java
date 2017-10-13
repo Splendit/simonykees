@@ -40,12 +40,17 @@ public class FieldMetadata {
 		this.newIdentifier = newIdentifier;
 		this.textEditGroups = new HashMap<>();
 		this.documentMap = new HashMap<>();
+		try {
+			createDocument((ICompilationUnit)cu.getJavaElement());
+		} catch (JavaModelException e) {
+			logger.error("Cannot create document for displaying changes - " + e.getMessage(), e); //$NON-NLS-1$
+		}
 		references.forEach(referece -> {
 			referece.setMetadata(this);
 			try {
 				createDocument(referece.getICompilationUnit());
-			} catch (JavaModelException e) {
-				logger.error("Cannot create document for displaying changes - " + e.getMessage(), e); //$NON-NLS-1$
+			} catch (JavaModelException e1) {
+				logger.error("Cannot create document for displaying changes - " + e1.getMessage(), e1); //$NON-NLS-1$
 			}
 		});
 

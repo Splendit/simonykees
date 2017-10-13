@@ -4,15 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.ITreeViewerListener;
-import org.eclipse.jface.viewers.TreeExpansionEvent;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.ltk.ui.refactoring.ChangePreviewViewerInput;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
@@ -21,10 +16,8 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.text.edits.TextEditGroup;
 
 import at.splendit.simonykees.core.rule.impl.PublicFieldsRenamingRule;
-import at.splendit.simonykees.core.visitor.renaming.FieldMetadata;
 
 @SuppressWarnings("restriction")
 public class RenamingRulePreviewWizardPage extends WizardPage {
@@ -35,16 +28,13 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	private IChangePreviewViewer currentPreviewViewer;
 	
 	private List<DocumentChangeWrapper> changesWrapperList;
-	private Map<String, FieldMetadata> metadataMap;
+	private DocumentChangeWrapper selectedDocWrapper;
 
-	public RenamingRulePreviewWizardPage(Map<String, List<DocumentChange>> changes, Map<String, FieldMetadata> metadataMap,
-			PublicFieldsRenamingRule rule) {
+	public RenamingRulePreviewWizardPage(Map<String, List<DocumentChange>> changes, PublicFieldsRenamingRule rule) {
 		super(rule.getName());
 		setTitle(rule.getName());
 		setDescription(rule.getDescription());
-
 		this.changes = changes;
-		this.metadataMap = metadataMap;
 
 		convertChangesToDocumentChangeWrappers();
 
@@ -55,21 +45,18 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		for (String declaration : changes.keySet()) {
 			List<DocumentChange> changesForField = changes.get(declaration);
 			DocumentChange parent = null;
-			TextEditGroup parentGroupEdit = null;
-			FieldMetadata metaData = metadataMap.get(declaration);
-			List<ICompilationUnit> targetICus = metaData.getTargetICompilationUnits();
-			
-			
 			parent = changesForField.get(0);
-			parentGroupEdit = metaData.getTextEditGroup(targetICus.get(0));
-			DocumentChangeWrapper dcw = new DocumentChangeWrapper(parent, parentGroupEdit, null);
+			DocumentChangeWrapper dcw = new DocumentChangeWrapper(parent, null);
 			for (int i = 1; i<changesForField.size(); i++) {
 				DocumentChange document = changesForField.get(i);
-				dcw.addChild(document, metaData.getTextEditGroup(targetICus.get(0)));
+				dcw.addChild(document);
 				
 			}
 			
 			changesWrapperList.add(dcw);
+		}
+		if(!changesWrapperList.isEmpty()) {
+			this.selectedDocWrapper = changesWrapperList.get(0);
 		}
 	}
 
@@ -116,6 +103,17 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			}
 		});
 		
+		viewer.addSelectionChangedListener(event -> {
+			IStructuredSelection sel = (IStructuredSelection) event.getSelection();
+			if(sel.size() == 1) {
+				DocumentChangeWrapper newSelection = (DocumentChangeWrapper) sel.getFirstElement();
+				if (!newSelection.equals(selectedDocWrapper)) {
+					selectedDocWrapper = newSelection;
+					populatePreviewViewer();
+				}
+			}
+		});
+		
 		populateFileView();
 	}
 
@@ -133,12 +131,12 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		currentPreviewViewer = new TextEditChangePreviewViewer();
 		currentPreviewViewer.createControl(parent);
 
-		populatePreviewViewer(0);
+		populatePreviewViewer();
 	}
 
-	private void populatePreviewViewer(int i) {
-		if (changesWrapperList.size() > i) {
-			DocumentChange docChange = changesWrapperList.get(i).getDocumentChange();
+	private void populatePreviewViewer() {
+		if (this.selectedDocWrapper != null) {
+			DocumentChange docChange = selectedDocWrapper.getDocumentChange();
 			ChangePreviewViewerInput viewerInput = TextEditChangePreviewViewer.createInput(docChange);
 			currentPreviewViewer.setInput(viewerInput);
 		}

@@ -35,7 +35,7 @@ public class RenamingRulePreviewWizard extends Wizard {
 	 */
 	@Override
 	public void addPages() {
-		addPage(new RenamingRulePreviewWizardPage(documentChanges, metadataMap, rule));
+		addPage(new RenamingRulePreviewWizardPage(documentChanges, rule));
 	}
 
 	@Override
