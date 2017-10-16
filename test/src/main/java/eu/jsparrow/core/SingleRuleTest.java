@@ -48,13 +48,13 @@ public abstract class SingleRuleTest {
 
 		ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);
 
-		List<IJavaElement> javaElements = new ArrayList<>();
-		javaElements.add(compilationUnit);
+		List<ICompilationUnit> compilationUnits = new ArrayList<>();
+		compilationUnits.add(compilationUnit);
 
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(Arrays.asList(rule));
 		IProgressMonitor monitor = new NullProgressMonitor();
 
-		refactoringPipeline.prepareRefactoring(javaElements, monitor);
+		refactoringPipeline.prepareRefactoring(compilationUnits, monitor);
 		refactoringPipeline.doRefactoring(monitor);
 		refactoringPipeline.commitRefactoring();
 

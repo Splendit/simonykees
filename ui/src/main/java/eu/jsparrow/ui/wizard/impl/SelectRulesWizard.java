@@ -1,15 +1,22 @@
 package eu.jsparrow.ui.wizard.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -38,7 +45,8 @@ import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
  * there are changes within the code for the selected rules), or a
  * {@link MessageDialog} informing the user that there are no changes.
  * 
- * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter, Andreja Sambolec
+ * @author Hannes Schweighofer, Ludwig Werzowa, Martin Huter, Andreja Sambolec,
+ *         Matthias Webhofer
  * @since 0.9
  */
 public class SelectRulesWizard extends Wizard {
@@ -167,8 +175,7 @@ public class SelectRulesWizard extends Wizard {
 					refactoringPipeline.getRules().stream()
 							.filter(rule -> null != refactoringPipeline.getChangesForRule(rule)
 									&& !refactoringPipeline.getChangesForRule(rule).isEmpty())
-							.map(RefactoringRule::getName)
-							.collect(Collectors.joining("; ")))); //$NON-NLS-1$
+							.map(RefactoringRule::getName).collect(Collectors.joining("; ")))); //$NON-NLS-1$
 
 			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 			final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactoringPipeline)) {
@@ -191,5 +198,102 @@ public class SelectRulesWizard extends Wizard {
 			dialog.setPageSize(rectangle.width, rectangle.height);
 			dialog.open();
 		});
+	}
+
+	/**
+	 * Populates the list {@code result} with {@code ICompilationUnit}s found in
+	 * {@code javaElements}
+	 * 
+	 * @param result
+	 *            will contain compilation units
+	 * @param javaElements
+	 *            contains java elements which should be split up into compilation
+	 *            units
+	 * @throws JavaModelException
+	 *             if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource.
+	 * @since 0.9
+	 */
+	public static void collectICompilationUnits(List<ICompilationUnit> result, List<IJavaElement> javaElements,
+			IProgressMonitor monitor) throws JavaModelException {
+
+		/*
+		 * Converts the monitor to a SubMonitor and sets name of task on progress
+		 * monitor dialog. Size is set to number 100 and then scaled to size of the
+		 * javaElements list. Each java element increases worked amount for same size.
+		 */
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(javaElements.size());
+		subMonitor.setTaskName(Messages.ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName);
+		for (IJavaElement javaElement : javaElements) {
+			subMonitor.subTask(javaElement.getElementName());
+			if (javaElement instanceof ICompilationUnit) {
+				ICompilationUnit compilationUnit = (ICompilationUnit) javaElement;
+				addCompilationUnit(result, compilationUnit);
+			} else if (javaElement instanceof IPackageFragment) {
+				IPackageFragment packageFragment = (IPackageFragment) javaElement;
+
+				addCompilationUnit(result, packageFragment.getCompilationUnits());
+			} else if (javaElement instanceof IPackageFragmentRoot) {
+				IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot) javaElement;
+				collectICompilationUnits(result, Arrays.asList(packageFragmentRoot.getChildren()), subMonitor);
+			} else if (javaElement instanceof IJavaProject) {
+				IJavaProject javaProject = (IJavaProject) javaElement;
+				for (IPackageFragment packageFragment : javaProject.getPackageFragments()) {
+					addCompilationUnit(result, packageFragment.getCompilationUnits());
+				}
+			}
+
+			/*
+			 * If cancel is pressed on progress monitor, abort all and return, else continue
+			 */
+			if (subMonitor.isCanceled()) {
+				return;
+			} else {
+				subMonitor.worked(1);
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param result
+	 *            List of {@link ICompilationUnit} where the {@code compilationUnit}
+	 *            is added
+	 * @param compilationUnit
+	 *            {@link ICompilationUnit} that is tested for consistency and write
+	 *            access.
+	 * @throws JavaModelException
+	 *             if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource.
+	 * @since 0.9
+	 */
+
+	private static void addCompilationUnit(List<ICompilationUnit> result, ICompilationUnit compilationUnit)
+			throws JavaModelException {
+		if (!compilationUnit.isConsistent()) {
+			compilationUnit.makeConsistent(null);
+		}
+		if (!compilationUnit.isReadOnly()) {
+			result.add(compilationUnit);
+		}
+	}
+
+	/**
+	 * 
+	 * @param result
+	 *            List of {@link ICompilationUnit} where the
+	 *            {@code compilationUnits} are added
+	 * @param compilationUnits
+	 *            array of {@link ICompilationUnit} which are loaded
+	 * @throws JavaModelException
+	 *             if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource.
+	 * @since 0.9
+	 */
+	private static void addCompilationUnit(List<ICompilationUnit> result, ICompilationUnit[] compilationUnits)
+			throws JavaModelException {
+		for (ICompilationUnit compilationUnit : compilationUnits) {
+			addCompilationUnit(result, compilationUnit);
+		}
 	}
 }
