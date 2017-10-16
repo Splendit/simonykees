@@ -45,6 +45,8 @@ public class StandaloneConfig {
 	private IJavaProject javaProject = null;
 
 	private List<ICompilationUnit> compUnits = new ArrayList<>();
+	
+	private IClasspathEntry[] oldEntries;
 
 	/**
 	 * Constructor that calls setting up of the project and collecting the
@@ -170,6 +172,10 @@ public class StandaloneConfig {
 				System.getProperty(Activator.USER_DIR) + File.separator + Activator.DEPENDENCIES_FOLDER_CONSTANT);
 		File[] listOfFiles = depsFolder.listFiles();
 		List<IClasspathEntry> collectedEntries = new ArrayList<>();
+		
+		if (null == listOfFiles || listOfFiles.length == 0) {
+			return;
+		}
 
 		for (File file : listOfFiles) {
 			String jarPath = file.toString();
@@ -195,7 +201,7 @@ public class StandaloneConfig {
 	public void addToClasspath(IJavaProject javaProject, List<IClasspathEntry> classpathEntries)
 			throws JavaModelException {
 		if (!classpathEntries.isEmpty()) {
-			IClasspathEntry[] oldEntries = javaProject.getRawClasspath();
+			oldEntries = javaProject.getRawClasspath();
 			IClasspathEntry[] newEntries;
 			if (oldEntries.length != 0) {
 				Set<IClasspathEntry> set = new HashSet<>(Arrays.asList(oldEntries));
@@ -214,9 +220,11 @@ public class StandaloneConfig {
 	 * 
 	 * @return true if .project deleted, is not programmatically generated or
 	 *         doesn't exist any more, false otherwise
+	 * @throws JavaModelException 
 	 */
-	public boolean cleanUp() {
+	public boolean cleanUp() throws JavaModelException {
 		logger.debug(Messages.StandaloneConfig_debug_cleanUp);
+		revertClasspath();
 		if (descriptionGenerated) {
 			File projectDescription = new File(path + File.separator + Activator.PROJECT_DESCRIPTION_CONSTANT);
 			if (projectDescription.exists()) {
@@ -229,6 +237,12 @@ public class StandaloneConfig {
 		}
 	}
 	
+	private void revertClasspath() throws JavaModelException {
+		if (null != oldEntries) {
+			javaProject.setRawClasspath(oldEntries, null);
+		}
+	}
+
 	/**
 	 * Getter for IJavaProject
 	 * @return generated IJavaProject 
