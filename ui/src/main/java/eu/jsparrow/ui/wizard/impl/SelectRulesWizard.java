@@ -32,9 +32,11 @@ import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
 
 /**
@@ -231,16 +233,18 @@ public class SelectRulesWizard extends Wizard {
 				addCompilationUnit(result, compilationUnit);
 			} else if (javaElement instanceof IPackageFragment) {
 				IPackageFragment packageFragment = (IPackageFragment) javaElement;
-
+				if (SimonykeesPreferenceManager.getResolvePackagesRecursively()) {
+					resolveSubPackages(result, packageFragment);
+				}
 				addCompilationUnit(result, packageFragment.getCompilationUnits());
 			} else if (javaElement instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot) javaElement;
-				collectICompilationUnits(result, Arrays.asList(packageFragmentRoot.getChildren()), subMonitor);
+				List<IPackageFragment> packageFragments = ASTNodeUtil
+						.convertToTypedList(Arrays.asList(packageFragmentRoot.getChildren()), IPackageFragment.class);
+				addCompilationUnits(result, packageFragments);
 			} else if (javaElement instanceof IJavaProject) {
 				IJavaProject javaProject = (IJavaProject) javaElement;
-				for (IPackageFragment packageFragment : javaProject.getPackageFragments()) {
-					addCompilationUnit(result, packageFragment.getCompilationUnits());
-				}
+				addCompilationUnits(result, Arrays.asList(javaProject.getPackageFragments()));
 			}
 
 			/*
@@ -251,6 +255,49 @@ public class SelectRulesWizard extends Wizard {
 			} else {
 				subMonitor.worked(1);
 			}
+		}
+	}
+
+	/**
+	 * 
+	 * 
+	 * @param result
+	 *            List of {@link ICompilationUnit} where all the
+	 *            {@link ICompilationUnit}s from the sub-packages are added
+	 * @param packageFragment
+	 *            the current {@link IPackageFragment} from which the sub-packages
+	 *            will be resolved
+	 * @throws JavaModelException
+	 */
+	private static void resolveSubPackages(List<ICompilationUnit> result, IPackageFragment packageFragment)
+			throws JavaModelException {
+		String packageName = packageFragment.getElementName();
+		IJavaElement parent = packageFragment.getParent();
+		if (parent != null && parent.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT && !packageName.isEmpty()) {
+			IPackageFragmentRoot root = (IPackageFragmentRoot) parent;
+			for (IJavaElement packageElement : root.getChildren()) {
+				if (packageElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+					IPackageFragment pkg = (IPackageFragment) packageElement;
+					if (!pkg.getElementName().equals(packageName) && pkg.getElementName().startsWith(packageName)) {
+						addCompilationUnit(result, pkg.getCompilationUnits());
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param result
+	 *            List of {@link ICompilationUnit} where the {@code compilationUnit}
+	 *            is added
+	 * @param packageFragments
+	 * @throws JavaModelException
+	 */
+	private static void addCompilationUnits(List<ICompilationUnit> result, List<IPackageFragment> packageFragments)
+			throws JavaModelException {
+		for (IPackageFragment fragment : packageFragments) {
+			addCompilationUnit(result, fragment.getCompilationUnits());
 		}
 	}
 
