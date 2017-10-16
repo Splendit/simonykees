@@ -154,11 +154,8 @@ public class Messages extends NLS {
 	public static String LoggerRuleWizardHandler_info_supportedFrameworkFound;
 	public static String LoggerRuleWizardHandler_noLogger;
 	public static String LoggerRuleWizardPage_alwaysUsePrintStacktraceOptionForLoggingException;
-
 	public static String LoggerRuleWizardPage_description;
-
 	public static String LoggerRuleWizardPage_missingLogLabel;
-
 	public static String LoggerRuleWizardPage_missingLogMessageLabel;
 	public static String LoggerRuleWizardPage_pageName;
 	public static String LoggerRuleWizardPage_severityLevelLabel;
@@ -172,7 +169,6 @@ public class Messages extends NLS {
 	public static String LoggerRuleWizardPageModel_noSeverityLevel;
 	public static String LoggerRuleWizardPageModel_warn_blankLoggingType;
 	public static String LoggerRuleWizardPageModel_warn_errSeverity;
-
 	public static String LoggerRuleWizardPageModel_warn_missingLoggSeverity;
 	public static String LoggerRuleWizardPageModel_warn_stackTraceSeverity;
 	public static String ImmutableStaticFinalCollectionsRule_description;
@@ -211,7 +207,6 @@ public class Messages extends NLS {
 	public static String ReImplementingInterfaceRule_name;
 	public static String RefactoringSummaryWizardPage_description;
 	public static String RefactoringSummaryWizardPage_title;
-
 	public static String RefactoringSummaryWizardPage_warn_disableFinishWhenTrial;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
@@ -222,7 +217,6 @@ public class Messages extends NLS {
 	public static String SelectRulesWizardHandler_noFileWithoutError;
 	public static String SelectRulesWizardPage_addAllButtonLabel;
 	public static String SelectRulesWizardPage_addButtonLabel;
-
 	public static String SelectRulesWizardPage_CustomProfileLabel;
 	public static String SelectRulesWizardPage_defaultDescriptionText;
 	public static String SelectRulesWizardPage_description;
@@ -253,6 +247,7 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_enableIntroText;
 	public static String SimonykeesPreferencePage_newProfileButtonLabel;
 	public static String SimonykeesPreferencePage_removeProfileButtonLabel;
+	public static String SimonykeesPreferencePage_resolvePackagesRecursivelyLabel;
 	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_selectProfile;
 	public static String SimonykeesPreferencePage_useProfileOptionNoProfile;
@@ -271,17 +266,11 @@ public class Messages extends NLS {
 	public static String SimonykeesUpdateLicenseDialog_update_llicense_dialog_button;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_group_title;
 	public static String StandaloneConfig_debug_cleanUp;
-
 	public static String StandaloneConfig_debug_collectDependencies;
-
 	public static String StandaloneConfig_debug_createdProject;
-
 	public static String StandaloneConfig_debug_createJavaProject;
-
 	public static String StandaloneConfig_debug_createProject;
-
 	public static String StandaloneConfig_debug_createWorkspace;
-
 	public static String StandardLoggerRule_description;
 	public static String StandardLoggerRule_name;
 	public static String StatementLambdaToExpressionRule_description;

@@ -24,5 +24,7 @@ public class SimonykeesPreferenceInitializer extends AbstractPreferenceInitializ
 				SimonykeesPreferenceManager.getDefaultProfileName());
 
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.ENABLE_INTRO, true);
+		
+		preferenceStore.setDefault(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY, true);
 	}
 }
