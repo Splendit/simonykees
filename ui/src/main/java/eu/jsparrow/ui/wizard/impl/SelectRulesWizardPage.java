@@ -1,6 +1,7 @@
 
 package eu.jsparrow.ui.wizard.impl;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -40,8 +41,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private Composite filterComposite;
 
-	private final String emptyProfil = Messages.SelectRulesWizardPage_EmptyProfileLabel;
-	private final String customProfile = Messages.SelectRulesWizardPage_CustomProfileLabel;
+	private static final String EMPTY_PROFILE = Messages.SelectRulesWizardPage_EmptyProfileLabel;
+	private static final String CUSTOM_PROFILE = Messages.SelectRulesWizardPage_CustomProfileLabel;
 
 	private Label selectProfileLabel;
 	private Combo selectProfileCombo;
@@ -179,8 +180,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 */
 	private void populateGroupFilterCombo() {
 		List<String> profiles = SimonykeesPreferenceManager.getAllProfileIds();
-		selectProfileCombo.add(customProfile);
-		selectProfileCombo.add(emptyProfil);
+		selectProfileCombo.add(EMPTY_PROFILE);
 		profiles.forEach(selectProfileCombo::add);
 	}
 
@@ -194,7 +194,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			((SelectRulesWizardPageControler) controler)
 					.profileChanged(SimonykeesPreferenceManager.getCurrentProfileId());
 		} else {
-			selectProfileCombo.select(selectProfileCombo.indexOf(emptyProfil));
+			selectProfileCombo.select(selectProfileCombo.indexOf(EMPTY_PROFILE));
 		}
 	}
 
@@ -210,7 +210,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String selectedProfileId = selectProfileCombo.getItem(selectProfileCombo.getSelectionIndex());
-				if (!selectedProfileId.equals(customProfile)) {
+				if (!selectedProfileId.equals(CUSTOM_PROFILE)) {
+					selectProfileCombo.remove(CUSTOM_PROFILE);
 					if (update) {
 						nameFilterText.setText(""); //$NON-NLS-1$
 						((SelectRulesWizardPageModel) model).getAppliedTags().clear();
@@ -275,20 +276,21 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	protected void doStatusUpdate() {
 		super.doStatusUpdate(null);
 	}
-	
-	
-	
+
 	@Override
 	protected void updateData() {
 		super.updateData();
-		
+
 		this.addChangeListeners();
 	}
 
 	private void selectCustomProfile() {
-		selectProfileCombo.select(selectProfileCombo.indexOf(Messages.SelectRulesWizardPage_CustomProfileLabel));
+		if (!Arrays.asList(selectProfileCombo.getItems()).contains(CUSTOM_PROFILE)) {
+			selectProfileCombo.add(CUSTOM_PROFILE);
+		}
+		selectProfileCombo.select(selectProfileCombo.indexOf(CUSTOM_PROFILE));
 	}
-	
+
 	private void addChangeListeners() {
 		super.getAddAllButton().addSelectionListener(new SelectionAdapter() {
 
@@ -296,38 +298,38 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			public void widgetSelected(SelectionEvent e) {
 				selectCustomProfile();
 			}
-			
+
 		});
-		
+
 		super.getRemoveAllButton().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				selectCustomProfile();
 			}
-			
+
 		});
-		
+
 		super.getAddButton().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				selectCustomProfile();
 			}
-			
+
 		});
-		
+
 		super.getRemoveButton().addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				selectCustomProfile();
 			}
-			
+
 		});
-		
+
 		super.getLeftTreeViewer().addDoubleClickListener(doubleClickEvent -> selectCustomProfile());
-		
+
 		super.getRightTableViewer().addDoubleClickListener(doubleClickEvent -> selectCustomProfile());
 	}
 }
