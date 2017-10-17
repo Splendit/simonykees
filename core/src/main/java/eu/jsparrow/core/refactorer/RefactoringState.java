@@ -40,7 +40,6 @@ public class RefactoringState {
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ignoredRules = new ArrayList<>();
 
 	public RefactoringState(ICompilationUnit original, ICompilationUnit workingCopy) {
-		super();
 		this.original = original;
 		this.workingCopy = workingCopy;
 	}
@@ -152,7 +151,6 @@ public class RefactoringState {
 	public void discardWorkingCopy() {
 		try {
 			workingCopy.discardWorkingCopy();
-			original.discardWorkingCopy();
 			workingCopy.close();
 			original.close();
 		} catch (JavaModelException e) {
