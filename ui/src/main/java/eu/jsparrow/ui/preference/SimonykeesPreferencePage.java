@@ -318,9 +318,13 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 				.equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
 			profilesTable.setEnabled(false);
 			newProfileButton.setEnabled(false);
+			exportProfileButton.setEnabled(false);
+			importProfileButton.setEnabled(false);
 		} else {
 			profilesTable.setEnabled(true);
 			newProfileButton.setEnabled(true);
+			exportProfileButton.setEnabled(true);
+			importProfileButton.setEnabled(true);
 		}
 		editProfileButton.setEnabled(false);
 		removeProfileButton.setEnabled(false);
