@@ -94,6 +94,9 @@
 		<module>standalone</module>
 		
 		<module>jsparrow-maven-plugin</module>
+		
+		
+		<module>ui.test</module>
 	</modules>
 
 	<scm>
