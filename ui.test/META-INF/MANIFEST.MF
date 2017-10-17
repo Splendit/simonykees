@@ -10,4 +10,5 @@ Require-Bundle: org.eclipse.jdt.junit4.runtime,
  org.junit;bundle-version="4.12.0",
  eu.jsparrow.logging,
  eu.jsparrow.license.netlicensing;bundle-version="2.2.2",
- org.eclipse.jdt.launching
+ org.eclipse.jdt.launching,
+ org.eclipse.jdt
