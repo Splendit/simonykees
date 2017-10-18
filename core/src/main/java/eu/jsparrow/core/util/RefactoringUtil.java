@@ -192,6 +192,7 @@ logger.debug("Subpackage found:" + packageElement.getElementName()); //$NON-NLS-
 	 * @since 0.9
 	 */
 	public static CompilationUnit parse(ICompilationUnit compilationUnit) {
+		@SuppressWarnings("deprecation") // TODO improvement needed, see SIM-878
 		ASTParser astParser = ASTParser.newParser(AST.JLS8);
 		astParser.setKind(ASTParser.K_COMPILATION_UNIT);
 		astParser.setSource(compilationUnit);
