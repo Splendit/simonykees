@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -93,10 +94,9 @@ public class JdtUnitFixture {
 	public void setUp() throws Exception {
 		createJavaProject();
 
-		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(project);
-		packageFragment = root.createPackageFragment(PACKAGE_FIXTURE_NAME, false, null);
-
-		compilationUnit = packageFragment.createCompilationUnit(FILE_FIXTURE_NAME, "", false, null);
+		packageFragment = addPackageFragment(PACKAGE_FIXTURE_NAME);
+		
+		compilationUnit= addCompilationUnit(packageFragment, FILE_FIXTURE_NAME);
 
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setSource(compilationUnit);
@@ -264,6 +264,21 @@ public class JdtUnitFixture {
 		methodDeclaration = typeDecl.getMethods()[0];
 		astRewrite = ASTRewrite.create(astRoot.getAST());
 		hasChanged = false;
+	}
+	
+	public IPackageFragment addPackageFragment(String name) throws JavaModelException {
+		if(javaProject != null) {
+			IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(project);
+			return root.createPackageFragment(name, false, null);
+		}
+		return null;
+	}
+	
+	public ICompilationUnit addCompilationUnit(IPackageFragment packageFragment, String name) throws JavaModelException {
+		if(packageFragment != null) {
+			return packageFragment.createCompilationUnit(name, "", false, null);
+		}
+		return null;
 	}
 
 	/**

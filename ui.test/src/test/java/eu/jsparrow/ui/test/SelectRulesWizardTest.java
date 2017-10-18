@@ -15,7 +15,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
-import eu.jsparrow.ui.test.jdtunit.JdtUnitFixture;
+import eu.jsparrow.jdtunit.JdtUnitFixture;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 
 /**
