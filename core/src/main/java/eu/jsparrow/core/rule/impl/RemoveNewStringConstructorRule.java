@@ -16,7 +16,7 @@ public class RemoveNewStringConstructorRule extends RefactoringRule<RemoveNewStr
 
 	public RemoveNewStringConstructorRule() {
 		super();
-		this.visitor = RemoveNewStringConstructorASTVisitor.class;
+		this.visitorClass = RemoveNewStringConstructorASTVisitor.class;
 		this.name = Messages.RemoveNewStringConstructorRule_name;
 		this.description = Messages.RemoveNewStringConstructorRule_description;
 	}

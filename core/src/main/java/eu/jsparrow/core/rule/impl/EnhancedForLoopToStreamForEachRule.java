@@ -16,7 +16,7 @@ public class EnhancedForLoopToStreamForEachRule extends RefactoringRule<Enhanced
 
 	public EnhancedForLoopToStreamForEachRule() {
 		super();
-		this.visitor = EnhancedForLoopToStreamForEachASTVisitor.class;
+		this.visitorClass = EnhancedForLoopToStreamForEachASTVisitor.class;
 		this.name = Messages.EnhancedForLoopToStreamForEachRule_name;
 		this.description = Messages.EnhancedForLoopToStreamForEachRule_description;
 	}

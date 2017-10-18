@@ -16,7 +16,7 @@ public class RearrangeClassMembersRule extends RefactoringRule<RearrangeClassMem
 
 	public RearrangeClassMembersRule() {
 		super();
-		this.visitor = RearrangeClassMembersASTVisitor.class;
+		this.visitorClass = RearrangeClassMembersASTVisitor.class;
 		this.name = Messages.RearrangeClassMembersRule_name;
 		this.description = Messages.RearrangeClassMembersRule_description;
 	}

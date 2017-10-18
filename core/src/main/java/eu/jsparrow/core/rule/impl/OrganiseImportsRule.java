@@ -36,7 +36,7 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 
 	public OrganiseImportsRule() {
 		super();
-		this.visitor = AbstractASTRewriteASTVisitor.class;
+		this.visitorClass = AbstractASTRewriteASTVisitor.class;
 		this.name = Messages.OrganiseImportsRule_name;
 		this.description = Messages.OrganiseImportsRule_description;
 	}

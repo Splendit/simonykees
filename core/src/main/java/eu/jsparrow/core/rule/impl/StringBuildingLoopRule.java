@@ -22,7 +22,7 @@ public class StringBuildingLoopRule extends RefactoringRule<StringBuildingLoopAS
 	
 	public StringBuildingLoopRule() {
 		super();
-		this.visitor = StringBuildingLoopASTVisitor.class;
+		this.visitorClass = StringBuildingLoopASTVisitor.class;
 		this.name = Messages.StringBuildingLoopRule_name;
 		this.description = Messages.StringBuildingLoopRule_description;
 	}

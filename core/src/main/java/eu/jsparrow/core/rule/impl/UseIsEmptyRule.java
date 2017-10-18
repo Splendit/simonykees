@@ -16,7 +16,7 @@ public class UseIsEmptyRule extends RefactoringRule<UseIsEmptyRuleASTVisitor> {
 
 	public UseIsEmptyRule() {
 		super();
-		this.visitor = UseIsEmptyRuleASTVisitor.class;
+		this.visitorClass = UseIsEmptyRuleASTVisitor.class;
 		this.name = Messages.UseIsEmptyRule_name;
 		this.description = Messages.UseIsEmptyRule_description;
 	}

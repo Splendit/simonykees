@@ -17,7 +17,7 @@ public class EnumsWithoutEqualsRule extends RefactoringRule<EnumsWithoutEqualsAS
 	
 	public EnumsWithoutEqualsRule() {
 		super();
-		this.visitor = EnumsWithoutEqualsASTVisitor.class;
+		this.visitorClass = EnumsWithoutEqualsASTVisitor.class;
 		this.name = Messages.EnumsWithoutEqualsRule_name;
 		this.description = Messages.EnumsWithoutEqualsRule_description;
 	}

@@ -16,7 +16,7 @@ public class StringFormatLineSeparatorRule extends RefactoringRule<StringFormatL
 
 	public StringFormatLineSeparatorRule() {
 		super();
-		this.visitor = StringFormatLineSeparatorASTVisitor.class;
+		this.visitorClass = StringFormatLineSeparatorASTVisitor.class;
 		this.name = Messages.StringFormatLineSeparatorRule_name;
 		this.description = Messages.StringFormatLineSeparatorRule_description;
 	}

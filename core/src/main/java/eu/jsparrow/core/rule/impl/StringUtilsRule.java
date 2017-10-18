@@ -44,7 +44,7 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 
 	public StringUtilsRule() {
 		super();
-		this.visitor = StringUtilsASTVisitor.class;
+		this.visitorClass = StringUtilsASTVisitor.class;
 		this.name = Messages.StringUtilsRule_name;
 		this.description = Messages.StringUtilsRule_description;
 		this.supportetVersion.add(version31);

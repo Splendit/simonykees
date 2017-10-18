@@ -99,7 +99,7 @@ public class RefactoringState {
 	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
 	 * @throws ReflectiveOperationException
-	 *             is thrown if the default constructor of {@link #visitor} is
+	 *             is thrown if the default constructor of {@link #visitorClass} is
 	 *             not present and the reflective construction fails.
 	 * @throws RefactoringException
 	 */

@@ -17,7 +17,7 @@ public class FieldNameConventionRule extends RefactoringRule<FieldNameConvention
 
 	public FieldNameConventionRule() {
 		super();
-		this.visitor = FieldNameConventionASTVisitor.class;
+		this.visitorClass = FieldNameConventionASTVisitor.class;
 		this.name = Messages.FieldNameConventionRule_name;
 		this.description = Messages.FieldNameConventionRule_description;
 	}

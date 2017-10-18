@@ -54,7 +54,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	protected boolean satisfiedJavaVersion = true;
 	protected boolean satisfiedLibraries = true;
 
-	protected Class<T> visitor;
+	protected Class<T> visitorClass;
 
 	protected RefactoringRule() {
 		this.id = this.getClass().getSimpleName();
@@ -90,7 +90,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	public Class<T> getVisitor() {
-		return visitor;
+		return visitorClass;
 	}
 
 	public String getId() {
@@ -133,7 +133,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	protected T visitorFactory() throws InstantiationException, IllegalAccessException {
-		return visitor.newInstance();
+		return visitorClass.newInstance();
 	}
 
 	/**
@@ -175,10 +175,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		// astRewrite.setTargetSourceRangeComputer(new
 		// NoCommentSourceRangeComputer());
 
-		AbstractASTRewriteASTVisitor rule = visitorFactory();
-		rule.setAstRewrite(astRewrite);
+		AbstractASTRewriteASTVisitor visitor = visitorFactory();
+		visitor.setAstRewrite(astRewrite);
 		try {
-			astRoot.accept(rule);
+			astRoot.accept(visitor);
 		} catch (RuntimeException e) {
 			throw new RefactoringException(e);
 		}
@@ -193,7 +193,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 			 * This results in an incorrect preview of the DocumentChange. To fix this
 			 * issue, a copy of the TextEdit is used for the DocumentChange.
 			 */
-			DocumentChange documentChange = RefactoringUtil.generateDocumentChange(visitor.getSimpleName(), document,
+			DocumentChange documentChange = RefactoringUtil.generateDocumentChange(visitorClass.getSimpleName(), document,
 					edits.copy());
 
 			workingCopy.applyTextEdit(edits, null);
@@ -256,7 +256,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		RefactoringRule other = (RefactoringRule) obj;
+		RefactoringRule<?> other = (RefactoringRule<?>) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;

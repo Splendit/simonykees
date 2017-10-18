@@ -17,7 +17,7 @@ public class StringLiteralEqualityCheckRule extends RefactoringRule<StringLitera
 
 	public StringLiteralEqualityCheckRule() {
 		super();
-		this.visitor = StringLiteralEqualityCheckASTVisitor.class;
+		this.visitorClass = StringLiteralEqualityCheckASTVisitor.class;
 		this.name = Messages.StringLiteralEqualityCheckRule_name;
 		this.description = Messages.StringLiteralEqualityCheckRule_description;
 	}

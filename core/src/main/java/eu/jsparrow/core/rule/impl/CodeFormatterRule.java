@@ -31,7 +31,7 @@ import eu.jsparrow.i18n.Messages;
 public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
 
 	public CodeFormatterRule() {
-		this.visitor = AbstractASTRewriteASTVisitor.class;
+		this.visitorClass = AbstractASTRewriteASTVisitor.class;
 		this.name = Messages.CodeFormatterRule_name;
 		this.description = Messages.CodeFormatterRule_description;
 	}

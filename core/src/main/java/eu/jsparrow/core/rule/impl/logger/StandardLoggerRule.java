@@ -70,7 +70,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	}
 
 	public StandardLoggerRule() {
-		this.visitor = StandardLoggerASTVisitor.class;
+		this.visitorClass = StandardLoggerASTVisitor.class;
 		this.name = Messages.StandardLoggerRule_name;
 		this.description = Messages.StandardLoggerRule_description;
 	}
