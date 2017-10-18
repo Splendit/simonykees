@@ -12,9 +12,9 @@ import eu.jsparrow.i18n.Messages;
 public enum LicenseStatus {
 
 	NONE(Messages.LicenseStatus_userMessage_NONE),
-	TRIAL_REGISTERED(Messages.LicenseStatus_userMessage_TRIAL_REGISTERED),
-	TRIAL_EXPIRED(Messages.LicenseStatus_userMessage_TRIAL_EXPIRED),
-	TRIAL_HW_ID_FAILURE(Messages.LicenseStatus_userMessage_TRIAL_HW_ID_FAILURE),
+	FREE_REGISTERED(Messages.LicenseStatus_userMessage_FREE_REGISTERED),
+	FREE_EXPIRED(Messages.LicenseStatus_userMessage_FREE_EXPIRED),
+	FREE_HW_ID_FAILURE(Messages.LicenseStatus_userMessage_FREE_HW_ID_FAILURE),
 	NODE_LOCKED_REGISTERED(Messages.LicenseStatus_userMessage_NODE_LOCKED_REGISTERED),
 	NODE_LOCKED_EXPIRED(Messages.LicenseStatus_userMessage_NODE_LOCKED_EXPIRED),
 	NODE_LOCKED_HW_ID_FAILURE(Messages.LicenseStatus_userMessage_NODE_LOCKED_HW_ID_FAILURE),
@@ -33,14 +33,14 @@ public enum LicenseStatus {
 			case "conncection-failure": //$NON-NLS-1$
 				status = LicenseStatus.CONNECTION_FAILURE;
 				break;
-			case "trial-registered": //$NON-NLS-1$
-				status = LicenseStatus.TRIAL_REGISTERED;
+			case "free-registered": //$NON-NLS-1$
+				status = LicenseStatus.FREE_REGISTERED;
 				break;
-			case "trial-expired": //$NON-NLS-1$
-				status = LicenseStatus.TRIAL_EXPIRED;
+			case "free-expired": //$NON-NLS-1$
+				status = LicenseStatus.FREE_EXPIRED;
 				break;
-			case "trial-hw-id-failure": //$NON-NLS-1$
-				status = LicenseStatus.TRIAL_HW_ID_FAILURE;
+			case "free-hw-id-failure": //$NON-NLS-1$
+				status = LicenseStatus.FREE_HW_ID_FAILURE;
 				break;
 			case "node-locked-registered": //$NON-NLS-1$
 				status = LicenseStatus.NODE_LOCKED_REGISTERED;
