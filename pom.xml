@@ -83,6 +83,7 @@
 		<!-- all integration test modules -->
 		<module>license.netlicensing.test</module>
 		<module>test</module>
+		<module>ui.test</module>
 		<!-- OSGi feature + site deployment -->
 		<module>feature.3rd.party</module>
 		<module>feature.standalone</module>
@@ -94,9 +95,6 @@
 		<module>standalone</module>
 		
 		<module>jsparrow-maven-plugin</module>
-		
-		
-		<module>ui.test</module>
 	</modules>
 
 	<scm>
