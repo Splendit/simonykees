@@ -82,8 +82,8 @@ public class StringBuildingLoopRule {
 	public String irrelevantDelaration(String input) {
 		List<String> collectionOfStrings = generateStringList(input);
 		/*
-		 * Another result variable is declared in a nested block which is not
-		 * visible in the scope of the loop.
+		 * Another result variable is declared in a nested block which is not visible in
+		 * the scope of the loop.
 		 */
 
 		if (collectionOfStrings.isEmpty()) {

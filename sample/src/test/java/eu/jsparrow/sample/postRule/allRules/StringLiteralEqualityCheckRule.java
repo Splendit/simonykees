@@ -63,8 +63,7 @@ public class StringLiteralEqualityCheckRule {
 		boolean swap =
 				// please dont loose me
 				foo // comparing equality with a copy of init value
-						.equals("cornerCaseWithCommentsInBetween" // I may be
-																	// useful
+						.equals("cornerCaseWithCommentsInBetween" // I may be useful
 				);
 
 		return swap;
