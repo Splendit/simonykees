@@ -91,6 +91,8 @@
 		<!-- standalone -->
 		<module>standalone</module>
 
+		<!-- The jsparrow-maven-plugin cannot be deployed alongside jSparrow. SIM-877 
+			will improve/fix this. -->
 		<!-- <module>jsparrow-maven-plugin</module> -->
 	</modules>
 
