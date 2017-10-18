@@ -95,8 +95,8 @@ public class JdtUnitFixture {
 		createJavaProject();
 
 		packageFragment = addPackageFragment(PACKAGE_FIXTURE_NAME);
-		
-		compilationUnit= addCompilationUnit(packageFragment, FILE_FIXTURE_NAME);
+
+		compilationUnit = addCompilationUnit(packageFragment, FILE_FIXTURE_NAME);
 
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setSource(compilationUnit);
@@ -158,8 +158,8 @@ public class JdtUnitFixture {
 	}
 
 	/**
-	 * Adds statements to the stub method and saves the compilation unit with
-	 * the changes.
+	 * Adds statements to the stub method and saves the compilation unit with the
+	 * changes.
 	 * 
 	 * @param statements
 	 *            the statements to add separated by semicolons
@@ -265,20 +265,23 @@ public class JdtUnitFixture {
 		astRewrite = ASTRewrite.create(astRoot.getAST());
 		hasChanged = false;
 	}
-	
-	public IPackageFragment addPackageFragment(String name) throws JavaModelException {
-		if(javaProject != null) {
-			IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(project);
-			return root.createPackageFragment(name, false, null);
+
+	public IPackageFragment addPackageFragment(String name) throws JdtUnitException, JavaModelException {
+		if (javaProject == null) {
+			throw new JdtUnitException("Java project is null");
 		}
-		return null;
+
+		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(project);
+		return root.createPackageFragment(name, false, null);
 	}
-	
-	public ICompilationUnit addCompilationUnit(IPackageFragment packageFragment, String name) throws JavaModelException {
-		if(packageFragment != null) {
-			return packageFragment.createCompilationUnit(name, "", false, null);
+
+	public ICompilationUnit addCompilationUnit(IPackageFragment packageFragment, String name)
+			throws JdtUnitException, JavaModelException {
+		if (packageFragment == null) {
+			throw new JdtUnitException("Package fragment is null");
 		}
-		return null;
+		
+		return packageFragment.createCompilationUnit(name, "", false, null);
 	}
 
 	/**
