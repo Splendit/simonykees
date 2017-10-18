@@ -77,7 +77,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		super(rule.getName());
 		setTitle(rule.getName());
-		setDescription(rule.getDescription());
+		setDescription(rule.getDescription() +" Times rule was applied: " +rule.getTimesApplied()); //$NON-NLS-1$
 
 		this.changesForRule = changesForRule;
 		this.rule = rule;

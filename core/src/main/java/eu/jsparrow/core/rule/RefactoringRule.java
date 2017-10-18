@@ -38,6 +38,8 @@ import eu.jsparrow.i18n.Messages;
 public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringRule.class);
+	
+	private int timesApplied;
 
 	protected String id;
 
@@ -119,8 +121,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		enabled = satisfiedJavaVersion && satisfiedLibraries;
 	}
 
-
-
 	/**
 	 * JavaVersion independent requirements for rules that need to be defined for
 	 * each rule. Returns true as default implementation
@@ -182,6 +182,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		} catch (RuntimeException e) {
 			throw new RefactoringException(e);
 		}
+		
+		this.timesApplied += visitor.getTimesApplied();
 
 		Document document = new Document(workingCopy.getSource());
 		TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
@@ -193,8 +195,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 			 * This results in an incorrect preview of the DocumentChange. To fix this
 			 * issue, a copy of the TextEdit is used for the DocumentChange.
 			 */
-			DocumentChange documentChange = RefactoringUtil.generateDocumentChange(visitorClass.getSimpleName(), document,
-					edits.copy());
+			DocumentChange documentChange = RefactoringUtil.generateDocumentChange(visitorClass.getSimpleName(),
+					document, edits.copy());
 
 			workingCopy.applyTextEdit(edits, null);
 
@@ -239,6 +241,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	public boolean isSatisfiedLibraries() {
 		return satisfiedLibraries;
 	}
+	
+	public int getTimesApplied() {
+		return timesApplied;
+	}
 
 	@Override
 	public int hashCode() {
@@ -264,6 +270,4 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 			return false;
 		return true;
 	}
-	
-	
 }

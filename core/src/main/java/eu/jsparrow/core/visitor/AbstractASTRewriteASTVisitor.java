@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	protected ASTRewrite astRewrite;
+	
+	protected int timesApplied;
 
 	public AbstractASTRewriteASTVisitor() {
 		super();
@@ -36,6 +38,10 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	protected List<String> generateFullyQuallifiedNameList(String... fullyQuallifiedName) {
 		return Arrays.asList(fullyQuallifiedName);
+	}
+
+	public int getTimesApplied() {
+		return timesApplied;
 	}
 
 }
