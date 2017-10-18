@@ -98,6 +98,7 @@ public class JdtUnitFixture {
 
 		compilationUnit = packageFragment.createCompilationUnit(FILE_FIXTURE_NAME, "", false, null);
 
+		@SuppressWarnings("deprecation") // TODO improvement needed, see SIM-878
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setSource(compilationUnit);
 		parser.setResolveBindings(false);
@@ -238,6 +239,7 @@ public class JdtUnitFixture {
 	}
 
 	private Block createBlockFromString(String string) throws JdtUnitException {
+		@SuppressWarnings("deprecation") // TODO improvement needed, see SIM-878
 		ASTParser astParser = ASTParser.newParser(AST.JLS8);
 		astParser.setSource(string.toCharArray());
 		astParser.setKind(ASTParser.K_STATEMENTS);
@@ -253,6 +255,7 @@ public class JdtUnitFixture {
 	}
 
 	private void refreshFixtures() {
+		@SuppressWarnings("deprecation") // TODO improvement needed, see SIM-878
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setSource(compilationUnit);
 		parser.setResolveBindings(true);

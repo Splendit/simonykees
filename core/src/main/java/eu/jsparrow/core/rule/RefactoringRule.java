@@ -256,7 +256,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		RefactoringRule other = (RefactoringRule) obj;
+		RefactoringRule<?> other = (RefactoringRule<?>) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;

@@ -634,9 +634,6 @@ public class RefactoringPipeline {
 			return true;
 		}
 
-		public void reset() {
-			problems.clear();
-		}
 	}
 
 }

@@ -95,16 +95,16 @@ public class StringUtilsRefactorRule {
 		if (StringUtils.contains(input, splitSign)) {
 			if ("?".equals(splitSign)) {
 				/*
-				 * We need to escape the "?" because otherwise there is the
-				 * following exception: java.util.regex.PatternSyntaxException:
-				 * Dangling meta character '?' near index 0
+				 * We need to escape the "?" because otherwise there is the following exception:
+				 * java.util.regex.PatternSyntaxException: Dangling meta character '?' near
+				 * index 0
 				 */
 				splitSign = splitSign.replace("?", "\\?");
 			}
 			if ("|".equals(splitSign)) {
 				/*
-				 * We need to escape the "|" because otherwise an empty String
-				 * is taken as split sign.
+				 * We need to escape the "|" because otherwise an empty String is taken as split
+				 * sign.
 				 */
 				splitSign = splitSign.replace("|", "\\|");
 			}
