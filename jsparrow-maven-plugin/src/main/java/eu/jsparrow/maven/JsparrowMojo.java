@@ -92,6 +92,8 @@ public class JsparrowMojo extends AbstractMojo {
 
 	private File directory;
 
+	private long standaloneBundleID = 0;
+
 	// CONSTANTS
 	public static final String USER_DIR = "user.dir";
 	public static final String JAVA_TMP = "java.io.tmpdir";
@@ -113,8 +115,13 @@ public class JsparrowMojo extends AbstractMojo {
 				@Override
 				public void run() {
 					super.run();
-					if (null != framework) {
+					if (null != framework && null != framework.getBundleContext()) {
 						try {
+							// stop jSparrow.logging
+							Bundle standaloneBundle = framework.getBundleContext().getBundle(standaloneBundleID);
+							if (standaloneBundle.getState() == Bundle.ACTIVE) {
+								standaloneBundle.stop();
+							}
 							framework.stop();
 						} catch (BundleException e) {
 							getLog().error(e.getMessage(), e);
@@ -129,6 +136,7 @@ public class JsparrowMojo extends AbstractMojo {
 						}
 						directory.delete();
 					}
+					
 				}
 			});
 			startOSGI();
@@ -308,6 +316,7 @@ public class JsparrowMojo extends AbstractMojo {
 					getLog().info(
 							"Starting BUNDLE: " + bundle.getSymbolicName() + ", resolution: " + bundle.getState());
 					bundle.start();
+					standaloneBundleID = bundle.getBundleId();
 					standaloneStarted = true;
 				} catch (Exception e) {
 					getLog().error(e.getMessage(), e);
