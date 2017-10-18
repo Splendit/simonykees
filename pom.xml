@@ -1,9 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<groupId>at.splendit</groupId>
 	<artifactId>eu.jsparrow</artifactId>
 	<version>2.2.2-SNAPSHOT</version>
@@ -92,7 +90,7 @@
 		<module>releng</module>
 		<!-- standalone -->
 		<module>standalone</module>
-		
+
 		<!-- <module>jsparrow-maven-plugin</module> -->
 	</modules>
 
@@ -186,7 +184,7 @@
 			<layout>p2</layout>
 			<url>http://nexus-vm-02.splendit.loc/content/repositories/neon-p2/</url>
 		</repository>
- 		<repository>
+		<repository>
 			<id>oxygen</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/eclipse/updates/4.7</url>
