@@ -301,26 +301,32 @@ public class EnhancedForLoopToStreamForEachRule {
 	private void collectionOfDoubles() {
 		List<Double> doubles = new ArrayList<>();
 		
-		doubles.stream().mapToDouble(Double::valueOf).forEach(d -> {
-			double halfD = d / 2;
-			System.out.println(halfD + d);
-		});
+		doubles.stream()
+			.mapToDouble(Double::valueOf)
+			.forEach(d -> {
+				double halfD = d / 2;
+				System.out.println(halfD + d);
+			});
 	}
 	
 	private void collectionOfInts() {
 		List<Integer> doubles = new ArrayList<>();
-		doubles.stream().mapToInt(Integer::valueOf).forEach(i -> {
-			int plusTwo = i + 2;
-			System.out.println(plusTwo + i);
-		});
+		doubles.stream()
+			.mapToInt(Integer::valueOf)
+			.forEach(i -> {
+				int plusTwo = i + 2;
+				System.out.println(plusTwo + i);
+			});
 	}
 	
 	private void collectionOfLongs() {
 		List<Long> longs = new ArrayList<>();
-		longs.stream().mapToLong(Long::valueOf).forEach(l -> {
-			long minusTwo = l - 2;
-			System.out.println(minusTwo + l);
-		});
+		longs.stream()
+			.mapToLong(Long::valueOf)
+			.forEach(l -> {
+				long minusTwo = l - 2;
+				System.out.println(minusTwo + l);
+			});
 	}
 	
 	private void boxedIteratingVariable() {

@@ -12,13 +12,15 @@ public class StringBuildingLoopRule {
 	
 	public String collectionOfStrings(String input) {
 		List<String> collectionOfStrings = generateStringList(input);
-		String result = collectionOfStrings.stream().collect(Collectors.joining());
+		String result = collectionOfStrings.stream()
+			.collect(Collectors.joining());
 		return result;
 	}
 	
 	public String missingCurlyBrackets(String input) {
 		List<String> collectionOfStrings = generateStringList(input);
-		String result = collectionOfStrings.stream().collect(Collectors.joining());
+		String result = collectionOfStrings.stream()
+			.collect(Collectors.joining());
 		
 		return result;
 	}
@@ -29,7 +31,8 @@ public class StringBuildingLoopRule {
 		if(collectionOfStrings.isEmpty()) {
 			collectionOfStrings.add(anotherDecl);
 		}
-		String result = collectionOfStrings.stream().collect(Collectors.joining());
+		String result = collectionOfStrings.stream()
+			.collect(Collectors.joining());
 		return result;
 	}
 	
@@ -39,7 +42,8 @@ public class StringBuildingLoopRule {
 		if(collectionOfStrings.isEmpty()) {
 			collectionOfStrings.add(anotherDecl);
 		}
-		String result = collectionOfStrings.stream().collect(Collectors.joining());
+		String result = collectionOfStrings.stream()
+			.collect(Collectors.joining());
 		return result;
 	}
 	
@@ -50,14 +54,16 @@ public class StringBuildingLoopRule {
 			collectionOfStrings.add(anotherDecl);
 			result = "-";
 		}
-		result += collectionOfStrings.stream().collect(Collectors.joining());
+		result += collectionOfStrings.stream()
+			.collect(Collectors.joining());
 		return result;
 	}
 	
 	public String nonemptyInitialization(String input) {
 		List<String> collectionOfStrings = generateStringList(input);
 		String result = "-";
-		result += collectionOfStrings.stream().collect(Collectors.joining());
+		result += collectionOfStrings.stream()
+			.collect(Collectors.joining());
 		return result;
 	}
 	
@@ -71,7 +77,8 @@ public class StringBuildingLoopRule {
 		if(collectionOfStrings.isEmpty()) {
 			collectionOfStrings.add(anotherDecl);
 
-			result += collectionOfStrings.stream().collect(Collectors.joining());
+			result += collectionOfStrings.stream()
+				.collect(Collectors.joining());
 		}
 		return result;
 	}
@@ -87,7 +94,8 @@ public class StringBuildingLoopRule {
 			String result = "-";
 			collectionOfStrings.add(result);
 		}
-		String result = collectionOfStrings.stream().collect(Collectors.joining());
+		String result = collectionOfStrings.stream()
+			.collect(Collectors.joining());
 
 		return result;
 	}
@@ -102,41 +110,48 @@ public class StringBuildingLoopRule {
 
 		collectionOfStrings.add(anotherDecl);
 
-		result += collectionOfStrings.stream().collect(Collectors.joining());
+		result += collectionOfStrings.stream()
+			.collect(Collectors.joining());
 
 		return result;
 	}
 	
 	public String plusEqualsOperator(String input) {
 		List<String> collectionOfStrings = generateStringList(input);
-		String result = collectionOfStrings.stream().collect(Collectors.joining());
+		String result = collectionOfStrings.stream()
+			.collect(Collectors.joining());
 
 		return result;
 	}
 	
 	public String collectingArrayOfStrings(String input) {
 		String[] arrayOfStrings = generateArray(input);
-		String result = Arrays.stream(arrayOfStrings).collect(Collectors.joining());
+		String result = Arrays.stream(arrayOfStrings)
+			.collect(Collectors.joining());
 		return result;
 	}
 	
 	public String collectingArrayOfNumbers(String input) {
 		Double[] arrayOfStrings = {2.1, 3.5};
-		String result = Arrays.stream(arrayOfStrings).map(Object::toString).collect(Collectors.joining());
+		String result = Arrays.stream(arrayOfStrings)
+			.map(Object::toString)
+			.collect(Collectors.joining());
 		return result;
 	}
 	
 	public String savingAnnotationOverArray(String input) {
 		String[] arrayOfStrings = generateArray(input);
 		@Deprecated
-		String result = Arrays.stream(arrayOfStrings).collect(Collectors.joining());
+		String result = Arrays.stream(arrayOfStrings)
+			.collect(Collectors.joining());
 		return result;
 	}
 	
 	public String savingAnnotationsOverCollection(String input) {
 		List<String> listOfStrings = generateStringList(input);
 		@Deprecated
-		String result = listOfStrings.stream().collect(Collectors.joining());
+		String result = listOfStrings.stream()
+			.collect(Collectors.joining());
 		return result;
 	}
 	
@@ -157,7 +172,8 @@ public class StringBuildingLoopRule {
 		String[] arrayOfStrings = generateArray(input);
 		String resultSb = "";
 		String resultSb1 = "";
-		String result = Arrays.stream(arrayOfStrings).collect(Collectors.joining());
+		String result = Arrays.stream(arrayOfStrings)
+			.collect(Collectors.joining());
 		return result;
 	}
 	
@@ -167,7 +183,8 @@ public class StringBuildingLoopRule {
 		if(resultSb.isEmpty()) {			
 			String resultSb1 = "";
 		}
-		String result = Arrays.stream(arrayOfStrings).collect(Collectors.joining());
+		String result = Arrays.stream(arrayOfStrings)
+			.collect(Collectors.joining());
 		return result;
 	}
 	
@@ -176,10 +193,12 @@ public class StringBuildingLoopRule {
 		List<String> listOfStrings = generateStringList(input);
 		String resultSb = "";
 		String resultSb1 = "";
-		String result = Arrays.stream(arrayOfStrings).collect(Collectors.joining());
+		String result = Arrays.stream(arrayOfStrings)
+			.collect(Collectors.joining());
 		
 		String anotherResult = "";
-		result += listOfStrings.stream().collect(Collectors.joining());
+		result += listOfStrings.stream()
+			.collect(Collectors.joining());
 		
 		return result + anotherResult;
 	}
@@ -187,7 +206,8 @@ public class StringBuildingLoopRule {
 	public String clashWithParameterName(String resultSb) {
 		String[] arrayOfStrings = generateArray(resultSb);
 		List<String> listOfStrings = generateStringList(resultSb);
-		String result = Arrays.stream(arrayOfStrings).collect(Collectors.joining());
+		String result = Arrays.stream(arrayOfStrings)
+			.collect(Collectors.joining());
 		
 		return result;
 	}
@@ -198,13 +218,17 @@ public class StringBuildingLoopRule {
 	
 	public String colectionOfIntegers(String input) {
 		List<Integer> collectionOfints = new ArrayList<>();
-		String result = collectionOfints.stream().map(Object::toString).collect(Collectors.joining());
+		String result = collectionOfints.stream()
+			.map(Object::toString)
+			.collect(Collectors.joining());
 		return result;
 	}
 	
 	public String colectionOfDoubles(String input) {
 		List<Double> collectionOfints = new ArrayList<>();
-		String result = collectionOfints.stream().map(Object::toString).collect(Collectors.joining());
+		String result = collectionOfints.stream()
+			.map(Object::toString)
+			.collect(Collectors.joining());
 		return result;
 	}
 	
@@ -281,7 +305,8 @@ public class StringBuildingLoopRule {
 		 */
 		
 		if(collectionOfStrings.isEmpty())
-			result += collectionOfStrings.stream().collect(Collectors.joining());
+			result += collectionOfStrings.stream()
+				.collect(Collectors.joining());
 		return result;
 	}
 
