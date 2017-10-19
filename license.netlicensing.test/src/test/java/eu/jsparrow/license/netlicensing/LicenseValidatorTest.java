@@ -91,7 +91,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 				cache.getLicenseName(), ValidationAction.NONE);
 		assertFalse(checker.isValid()); // validation should be false
 		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
-		assertEquals(LicenseStatus.TRIAL_EXPIRED, checker.getLicenseStatus());
+		assertEquals(LicenseStatus.FREE_EXPIRED, checker.getLicenseStatus());
 		assertFalse(checker.getSubscriptionStatus());
 		assertEquals(NODE_LOCKED_LICENSEE_NAME, checker.getLicenseeName());
 		// ... and expecting the validation result to be persisted...
@@ -180,7 +180,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		ResponseParser checker = new ResponseParser(cache.getCachedValidationResult(), cache.getValidationTimestamp(),
 				cache.getLicenseName(), ValidationAction.NONE);
 
-		assertEquals(LicenseStatus.TRIAL_EXPIRED, checker.getLicenseStatus());
+		assertEquals(LicenseStatus.FREE_EXPIRED, checker.getLicenseStatus());
 		assertFalse(checker.isValid());
 		assertNotNull(checker.getEvaluationExpiresDate());
 		assertTrue(checker.getEvaluationExpiresDate().isBefore(ZonedDateTime.now()));
