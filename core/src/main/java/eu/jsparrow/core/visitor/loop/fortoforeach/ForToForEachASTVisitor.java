@@ -52,7 +52,7 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 				return true;
 			}
 			if (ClassRelationUtil.isContentOfTypes(iteratorName.resolveTypeBinding(),
-					generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
+					generateFullyQualifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
 				Block parentNode = ASTNodeUtil.getSpecificAncestor(node, Block.class);
 				if (parentNode == null) {
 					/*
@@ -64,7 +64,7 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 				}
 				LoopOptimizationASTVisior iteratorDefinitionAstVisior = new LoopOptimizationASTVisior(
 						(SimpleName) iteratorName, node);
-				iteratorDefinitionAstVisior.setAstRewrite(this.astRewrite);
+				iteratorDefinitionAstVisior.setASTRewrite(this.astRewrite);
 				parentNode.accept(iteratorDefinitionAstVisior);
 
 				if (iteratorDefinitionAstVisior.allParametersFound()) {

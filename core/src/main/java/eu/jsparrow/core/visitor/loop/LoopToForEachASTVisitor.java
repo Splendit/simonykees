@@ -120,7 +120,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			return null;
 		}
 
-		ASTRewrite astRewrite = getAstRewrite();
+		ASTRewrite astRewrite = getASTRewrite();
 		ImportRewrite importRewrite = ImportRewrite.create(compilationUnit, true);
 		String[] addedImports;
 

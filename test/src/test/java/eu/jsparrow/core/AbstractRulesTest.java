@@ -23,7 +23,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.AbstractRefactoringRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
@@ -41,7 +41,7 @@ public abstract class AbstractRulesTest {
 
 	protected static String javaVersion = JavaCore.VERSION_1_8;
 
-	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
+	protected List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> rulesList = new ArrayList<>();
 
 	protected IJavaProject testproject;
 
@@ -98,7 +98,7 @@ public abstract class AbstractRulesTest {
 	}
 
 	protected String processFile(String fileName, String content,
-			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) throws Exception {
+			List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) throws Exception {
 
 		String packageString = "eu.jsparrow.sample.preRule"; //$NON-NLS-1$
 		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);

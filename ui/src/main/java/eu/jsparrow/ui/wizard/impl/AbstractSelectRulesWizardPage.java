@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.AbstractRefactoringRule;
 import eu.jsparrow.core.rule.Tag;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -331,7 +331,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			@Override
 			@SuppressWarnings("unchecked")
 			public Object[] getElements(Object inputElement) {
-				Set<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> list = (Set<RefactoringRule<? extends AbstractASTRewriteASTVisitor>>) inputElement;
+				Set<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> list = (Set<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>>) inputElement;
 				return list.toArray();
 			}
 
@@ -349,8 +349,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			@Override
 			@SuppressWarnings("unchecked")
 			public int compare(Viewer viewer, Object e1, Object e2) {
-				RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule1 = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) e1;
-				RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule2 = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) e2;
+				AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> rule1 = (AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>) e1;
+				AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> rule2 = (AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>) e2;
 				return rule1.getName().compareTo(rule2.getName());
 			};
 
@@ -443,9 +443,9 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			// descriptionStyledText.setText(
 			// ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>)
 			// selection.get(0)).getDescription());
-			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) leftSelection.get(0));
+			createTextForDescription((AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>) leftSelection.get(0));
 		} else if (latestSelectionSide == SelectionSide.RIGHT && rightSelection.size() == 1) {
-			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) rightSelection.get(0));
+			createTextForDescription((AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>) rightSelection.get(0));
 		} else {
 			descriptionStyledText.setText(Messages.SelectRulesWizardPage_defaultDescriptionText);
 		}
@@ -456,7 +456,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	 * 
 	 * @param rule
 	 */
-	private void createTextForDescription(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+	private void createTextForDescription(AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		String lineDelimiter = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_lineDelimiter;
 		String name = rule.getName();
 		String description = rule.getDescription();
@@ -560,7 +560,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	@SuppressWarnings("unchecked")
 	private boolean selectionContainsEnabledEntry(List<Object> selection) {
 		return selection.stream()
-				.anyMatch(object -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).isEnabled());
+				.anyMatch(object -> ((AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).isEnabled());
 	}
 
 	public void recalculateLayout() {

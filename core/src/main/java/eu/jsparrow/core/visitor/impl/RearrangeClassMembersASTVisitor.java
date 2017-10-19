@@ -145,7 +145,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 			
 			// swap the position according to the new order.
 			if(!sortedDeclarations.isEmpty() && startFrom >= 0) {
-				ASTRewrite astRewrite = getAstRewrite();
+				ASTRewrite astRewrite = getASTRewrite();
 				ListRewrite listRewrite = 
 						astRewrite.getListRewrite(node, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 				

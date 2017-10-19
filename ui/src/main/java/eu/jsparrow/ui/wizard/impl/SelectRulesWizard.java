@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.AbstractRefactoringRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
@@ -50,12 +50,12 @@ public class SelectRulesWizard extends Wizard {
 	private SelectRulesWizardPageModel model;
 
 	private final List<IJavaElement> javaElements;
-	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
+	private final List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
 	private RefactoringPipeline refactoringPipeline;
 
 	public SelectRulesWizard(List<IJavaElement> javaElements, RefactoringPipeline refactoringPipeline,
-			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
+			List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		super();
 		this.javaElements = javaElements;
 		this.refactoringPipeline = refactoringPipeline;
@@ -97,7 +97,7 @@ public class SelectRulesWizard extends Wizard {
 		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass().getSimpleName(),
 				this.javaElements.get(0).getJavaProject().getElementName()));
 
-		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = model.getSelectionAsList();
+		final List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = model.getSelectionAsList();
 
 		refactoringPipeline.setRules(rules);
 		refactoringPipeline.setSourceMap(refactoringPipeline.getInitialSourceMap());
@@ -167,7 +167,7 @@ public class SelectRulesWizard extends Wizard {
 					refactoringPipeline.getRules().stream()
 							.filter(rule -> null != refactoringPipeline.getChangesForRule(rule)
 									&& !refactoringPipeline.getChangesForRule(rule).isEmpty())
-							.map(RefactoringRule::getName)
+							.map(AbstractRefactoringRule::getName)
 							.collect(Collectors.joining("; ")))); //$NON-NLS-1$
 
 			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();

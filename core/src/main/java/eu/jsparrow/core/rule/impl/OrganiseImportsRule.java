@@ -15,7 +15,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.AbstractRefactoringRule;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -32,7 +32,7 @@ import eu.jsparrow.i18n.Messages;
  *
  */
 @SuppressWarnings("restriction")
-public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
+public class OrganiseImportsRule extends AbstractRefactoringRule<AbstractASTRewriteASTVisitor> {
 
 	public OrganiseImportsRule() {
 		super();

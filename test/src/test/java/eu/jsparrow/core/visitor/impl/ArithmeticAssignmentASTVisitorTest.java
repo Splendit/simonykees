@@ -20,7 +20,7 @@ public class ArithmeticAssignmentASTVisitorTest extends AbstractASTVisitorTest {
 	@Test
 	public void visit_AssignmentWithAdd_ShouldReplaceAddAssignment() throws Exception {
 		fixture.addMethodBlock("int a;  a = a + 3;");
-		visitor.setAstRewrite(fixture.getAstRewrite());
+		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 
@@ -31,7 +31,7 @@ public class ArithmeticAssignmentASTVisitorTest extends AbstractASTVisitorTest {
 	@Test
 	public void visit_AlreadyAddAssignment_ShouldNotReplace() throws Exception {
 		fixture.addMethodBlock("int a;  a += 3;");
-		visitor.setAstRewrite(fixture.getAstRewrite());
+		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 

@@ -2,7 +2,7 @@ package eu.jsparrow.core.rule.impl;
 
 import org.apache.commons.lang3.JavaVersion;
 
-import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.AbstractRefactoringRule;
 import eu.jsparrow.core.visitor.impl.LambdaToMethodReferenceASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -13,7 +13,7 @@ import eu.jsparrow.i18n.Messages;
  * @since 1.2
  *
  */
-public class LambdaToMethodReferenceRule extends RefactoringRule<LambdaToMethodReferenceASTVisitor> {
+public class LambdaToMethodReferenceRule extends AbstractRefactoringRule<LambdaToMethodReferenceASTVisitor> {
 	public LambdaToMethodReferenceRule() {
 		super();
 		this.visitorClass = LambdaToMethodReferenceASTVisitor.class;

@@ -111,8 +111,8 @@ public class UseIsEmptyRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private boolean onStringOrMapType(MethodInvocation node) {
 		// check type of variable and get name
-		List<String> fullyQualifiedStringName = generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME);
-		List<String> fullyQualifiedDataStuctures = generateFullyQuallifiedNameList(COLLECTION_FULLY_QUALLIFIED_NAME,
+		List<String> fullyQualifiedStringName = generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME);
+		List<String> fullyQualifiedDataStuctures = generateFullyQualifiedNameList(COLLECTION_FULLY_QUALLIFIED_NAME,
 				MAP_FULLY_QUALLIFIED_NAME);
 		boolean isStringType = StringUtils.equals(LENGTH, node.getName().getFullyQualifiedName()) && ClassRelationUtil
 				.isContentOfTypes(node.getExpression().resolveTypeBinding(), fullyQualifiedStringName);

@@ -178,7 +178,6 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 				replaceWithDiamond(parameterizedType, rhsTypeArguments);
 			}
 		}
-		timesApplied++;
 		return true;
 	}
 

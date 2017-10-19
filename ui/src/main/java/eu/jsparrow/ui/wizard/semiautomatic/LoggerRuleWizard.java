@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.AbstractRefactoringRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -52,7 +52,7 @@ public class LoggerRuleWizard extends Wizard {
 	private RefactoringPipeline refactoringPipeline;
 
 	public LoggerRuleWizard(IJavaProject selectedJavaProjekt,
-			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, RefactoringPipeline refactoringPipeline) {
+			AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, RefactoringPipeline refactoringPipeline) {
 		super();
 		this.selectedJavaProjekt = selectedJavaProjekt;
 		this.refactoringPipeline = refactoringPipeline;
@@ -94,7 +94,7 @@ public class LoggerRuleWizard extends Wizard {
 		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass().getSimpleName(),
 				selectedJavaProjekt.getElementName()));
 
-		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(rule);
+		final List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(rule);
 		refactoringPipeline.setRules(rules);
 		/*
 		 * AbstractRefactorer refactorer = new AbstractRefactorer(javaElements,

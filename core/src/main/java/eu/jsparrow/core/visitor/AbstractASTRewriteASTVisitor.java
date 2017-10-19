@@ -1,5 +1,6 @@
 package eu.jsparrow.core.visitor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,8 +19,8 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	protected ASTRewrite astRewrite;
 	
-	protected int timesApplied;
-
+	private List<ASTRewriteVisitorListener> listeners = new ArrayList<>();
+	
 	public AbstractASTRewriteASTVisitor() {
 		super();
 	}
@@ -28,20 +29,28 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 		super(visitDocTags);
 	}
 
-	public ASTRewrite getAstRewrite() {
+	public ASTRewrite getASTRewrite() {
 		return astRewrite;
 	}
 
-	public void setAstRewrite(ASTRewrite astRewrite) {
+	public void setASTRewrite(ASTRewrite astRewrite) {
 		this.astRewrite = astRewrite;
 	}
 
-	protected List<String> generateFullyQuallifiedNameList(String... fullyQuallifiedName) {
+	protected List<String> generateFullyQualifiedNameList(String... fullyQuallifiedName) {
 		return Arrays.asList(fullyQuallifiedName);
 	}
-
-	public int getTimesApplied() {
-		return timesApplied;
+	
+	public void addRewriteListener(ASTRewriteVisitorListener listener) {
+		listeners.add(listener);
+	}
+	
+	public void removeRewriteListener(ASTRewriteVisitorListener listener) {
+		listeners.remove(listener);
+	}
+	
+	public void onRewrite() {
+		listeners.forEach(ASTRewriteVisitorListener::update);
 	}
 
 }

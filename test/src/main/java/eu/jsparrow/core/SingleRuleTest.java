@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.BeforeClass;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.AbstractRefactoringRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
 public abstract class SingleRuleTest {
@@ -39,7 +39,7 @@ public abstract class SingleRuleTest {
 		root = RulesTestUtil.getPackageFragementRoot(JavaCore.VERSION_1_8);
 	}
 
-	protected String applyRefactoring(RefactoringRule<?> rule, Path preFile) throws Exception {
+	protected String applyRefactoring(AbstractRefactoringRule<?> rule, Path preFile) throws Exception {
 		String packageString = "eu.jsparrow.sample.preRule"; //$NON-NLS-1$
 		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
 

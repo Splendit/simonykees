@@ -35,7 +35,8 @@ import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RuleApplicationCounter;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
@@ -59,7 +60,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private IChangePreviewViewer currentPreviewViewer;
 	private CheckboxTableViewer viewer;
 	private Map<ICompilationUnit, DocumentChange> changesForRule;
-	private RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule;
+	private AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> rule;
 	/*
 	 * map that contains all names of working copies and working copies that
 	 * were unselected for this page
@@ -74,10 +75,10 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	protected IStatus fSelectionStatus;
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule,
-			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+			AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		super(rule.getName());
 		setTitle(rule.getName());
-		setDescription(rule.getDescription() +" Times rule was applied: " +rule.getTimesApplied()); //$NON-NLS-1$
+		setDescription(rule.getDescription() +" Times rule was applied: " + RuleApplicationCounter.get(rule)); //$NON-NLS-1$
 
 		this.changesForRule = changesForRule;
 		this.rule = rule;
@@ -313,7 +314,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		unselectedChange.clear();
 	}
 
-	public RefactoringRule<? extends AbstractASTRewriteASTVisitor> getRule() {
+	public AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> getRule() {
 		return rule;
 	}
 

@@ -29,7 +29,7 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTV
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		if (ClassRelationUtil.isContentOfTypes(node.getType().resolveBinding(),
-				generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
+				generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
 				&& ASTNode.EXPRESSION_STATEMENT != node.getParent().getNodeType()) {
 
 			/**
@@ -60,13 +60,13 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTV
 					arguments = null;
 					if (argument instanceof StringLiteral
 							|| ClassRelationUtil.isContentOfTypes(argument.resolveTypeBinding(),
-									generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
+									generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 						if (argument instanceof ParenthesizedExpression) {
 							argument = ASTNodeUtil.unwrapParenthesizedExpression(argument);
 						}
 						if (ASTNode.CLASS_INSTANCE_CREATION == argument.getNodeType() && ClassRelationUtil
 								.isContentOfTypes(((ClassInstanceCreation) argument).getType().resolveBinding(),
-										generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
+										generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 							arguments = (List<Expression>) ((ClassInstanceCreation) argument).arguments();
 						}
 						replacement = argument;

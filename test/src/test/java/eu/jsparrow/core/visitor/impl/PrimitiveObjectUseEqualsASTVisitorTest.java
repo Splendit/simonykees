@@ -22,7 +22,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 	@Test
 	public void visit_onEqualsInfix_ShouldReplaceWithEquals() throws Exception {
 		fixture.addMethodBlock(String.format(template, "a == b"));
-		visitor.setAstRewrite(fixture.getAstRewrite());
+		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 
@@ -33,7 +33,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 	@Test
 	public void visit_onNotEqualsInfix_ShouldReplaceWithPrefixAndEquals() throws Exception {
 		fixture.addMethodBlock(String.format(template, "a != b"));
-		visitor.setAstRewrite(fixture.getAstRewrite());
+		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 
@@ -44,7 +44,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 	@Test
 	public void visit_onNewInteger_ShouldReplaceWithEquals() throws Exception {
 		fixture.addMethodBlock(String.format(template, "new Integer(1) == new Integer(2)"));
-		visitor.setAstRewrite(fixture.getAstRewrite());
+		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 
@@ -55,7 +55,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 	@Test
 	public void visit_onSTring_ShouldReplaceWithEquals() throws Exception {
 		fixture.addMethodBlock(String.format(template, "\"String1\" == \"String2\""));
-		visitor.setAstRewrite(fixture.getAstRewrite());
+		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 
@@ -67,7 +67,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 	public void visit_onOtherInfix_ShouldNotReplaceWithEquals() throws Exception {
 		String statement = String.format(template, "a >= b");
 		fixture.addMethodBlock(statement);
-		visitor.setAstRewrite(fixture.getAstRewrite());
+		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 
@@ -78,7 +78,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 	public void visit_withExtendedOperands_ShouldNotReplace() throws Exception {
 		String statement = String.format(template, "a == b == new Integer(1) == new Integer(2)");
 		fixture.addMethodBlock(statement);
-		visitor.setAstRewrite(fixture.getAstRewrite());
+		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 
@@ -89,7 +89,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 	public void visit_onLiteralInt_ShouldNotReplace() throws Exception {
 		String statement = String.format(template, "a == 1");
 		fixture.addMethodBlock(statement);
-		visitor.setAstRewrite(fixture.getAstRewrite());
+		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 
@@ -100,7 +100,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 	public void visit_onLiteralIntSwitched_ShouldNotReplace() throws Exception {
 		String statement = String.format(template, "1 == a");
 		fixture.addMethodBlock(statement);
-		visitor.setAstRewrite(fixture.getAstRewrite());
+		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 
@@ -111,7 +111,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 	public void visit_onLiteralChar_ShouldNotReplace() throws Exception {
 		String statement = String.format(template, "a == 'c'");
 		fixture.addMethodBlock(statement);
-		visitor.setAstRewrite(fixture.getAstRewrite());
+		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 
@@ -122,7 +122,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 	public void visit_onLiteralBool_ShouldNotReplace() throws Exception {
 		String statement = String.format(template, "a == true");
 		fixture.addMethodBlock(statement);
-		visitor.setAstRewrite(fixture.getAstRewrite());
+		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 
@@ -133,7 +133,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 	@Test
 	public void visit_infixWithTypecastOnInteger_ShouldReplaceWithEqualsAndInfix() throws Exception {
 		fixture.addMethodBlock(String.format(template, "(Integer)a == b"));
-		visitor.setAstRewrite(fixture.getAstRewrite());
+		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 
@@ -144,7 +144,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 	@Test
 	public void visit_infixWithTypecastOnRightInteger_ShouldReplaceWithEquals() throws Exception {
 		fixture.addMethodBlock(String.format(template, "a == (Integer)b"));
-		visitor.setAstRewrite(fixture.getAstRewrite());
+		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
 

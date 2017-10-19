@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
-import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.AbstractRefactoringRule;
 import eu.jsparrow.core.visitor.impl.StringUtilsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -31,7 +31,7 @@ import eu.jsparrow.i18n.Messages;
  * @since 0.9
  *
  */
-public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
+public class StringUtilsRule extends AbstractRefactoringRule<StringUtilsASTVisitor> {
 	
 	private final String version31 = "3.1"; //$NON-NLS-1$
 

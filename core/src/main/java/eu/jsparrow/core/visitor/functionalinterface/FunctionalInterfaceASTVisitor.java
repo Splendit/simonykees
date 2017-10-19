@@ -134,7 +134,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 					LambdaExpression newInitializer = node.getAST().newLambdaExpression();
 					MethodBlockASTVisitor methodBlockASTVisitor = new MethodBlockASTVisitor();
-					methodBlockASTVisitor.setAstRewrite(astRewrite);
+					methodBlockASTVisitor.setASTRewrite(astRewrite);
 					node.accept(methodBlockASTVisitor);
 					Block moveBlock = methodBlockASTVisitor.getMethodBlock();
 					
@@ -259,7 +259,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						}
 
 						newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
-						getAstRewrite().replace(parentNode, newInitializer, null);
+						getASTRewrite().replace(parentNode, newInitializer, null);
 					}
 				}
 			}
