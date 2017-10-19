@@ -66,7 +66,8 @@ public class TestCornerCasesTryWithResourceRule {
 				final StringWriter sw = new StringWriter();
 				final PrintWriter pw = new PrintWriter(sw);
 				// CHECKSTYLE:OFF
-				record.getThrown().printStackTrace(pw);
+				record.getThrown()
+					.printStackTrace(pw);
 				// CHECKSTYLE:ON
 				pw.close();
 				sb.append(sw.toString());
@@ -84,7 +85,8 @@ public class TestCornerCasesTryWithResourceRule {
 		if (record.getThrown() != null) {
 			try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
 				// CHECKSTYLE:OFF
-				record.getThrown().printStackTrace(pw);
+				record.getThrown()
+					.printStackTrace(pw);
 				sb.append(sw.toString());
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
@@ -108,7 +110,8 @@ public class TestCornerCasesTryWithResourceRule {
 		if (record.getThrown() != null) {
 			try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
 				// CHECKSTYLE:OFF
-				record.getThrown().printStackTrace(pw);
+				record.getThrown()
+					.printStackTrace(pw);
 				sb.append(sw.toString());
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);

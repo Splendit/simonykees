@@ -15,7 +15,8 @@ public class TestMultiCatchRule {
 	public void tryWithResourceCommentBugTest() {
 		// TODO meaningful Asserts?
 		try {
-			String.class.getConstructor(String.class).newInstance("aa");
+			String.class.getConstructor(String.class)
+				.newInstance("aa");
 		} catch (SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException
 				| IllegalAccessException | InstantiationException e) {
 			log.trace(e.getLocalizedMessage(), e);
