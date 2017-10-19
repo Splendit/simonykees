@@ -193,6 +193,12 @@
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/eclipse/updates/4.7</url>
 		</repository>
+<!-- 		<repository>
+			<id>orbit</id>
+			<name>orbit for mockito - install hamcrast and mockito</name>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/tools/orbit/R-builds/R20170516192513/repository/</url>
+		</repository> -->
 		<repository>
 			<id>netlicensing</id>
 			<layout>p2</layout>
