@@ -155,6 +155,7 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 						null);
 				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY)
 						.insertFirst((Expression) ASTNode.copySubtree(currentAST, node.getExpression()), null);
+				onRewrite();
 				return false;
 			}
 		}

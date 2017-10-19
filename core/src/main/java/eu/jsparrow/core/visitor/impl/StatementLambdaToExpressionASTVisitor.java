@@ -38,6 +38,7 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 			}
 			if (block.statements().size() == 1 || hasExplicitReturnStatement) {
 				this.replaceNode(block);
+				onRewrite();
 			}
 		}
 

@@ -130,6 +130,7 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 						convertToContains(methodInvocationNode, TransformationType.STRING);
 					} else if (isCollectionType(methodInvocationExpression)) {
 						convertToContains(methodInvocationNode, TransformationType.COLLECTION);
+						onRewrite();
 					}
 				}
 			}
@@ -169,6 +170,7 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 					if (doTransformation) {
 						this.transform(methodInvocationNode.getExpression(), methodArgumentExpression, parent, option);
+						onRewrite();
 					}
 				}
 			}

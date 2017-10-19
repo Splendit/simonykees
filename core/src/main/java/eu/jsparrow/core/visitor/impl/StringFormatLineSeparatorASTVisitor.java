@@ -66,7 +66,8 @@ public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVi
 				 */
 				if(!formatedString.equals(formatString.getEscapedValue())){
 					StringLiteral newFormatString = NodeBuilder.newStringLiteral(node.getAST(), formatedString);
-					astRewrite.replace(formatString, newFormatString, null);	
+					astRewrite.replace(formatString, newFormatString, null);
+					onRewrite();
 				}
 			}
 		}

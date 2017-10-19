@@ -29,7 +29,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
  * @author Martin Huter, Hans-Jörg Schrödl
  * @since 2.1.0
  */
-public class UseIsEmptyRuleASTVisitor extends AbstractASTRewriteASTVisitor {
+public class UseIsEmptyOnCollectionsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final String STRING_FULLY_QUALIFIED_NAME = java.lang.String.class.getName();
 	private static final String COLLECTION_FULLY_QUALIFIED_NAME = java.util.Collection.class.getName();
