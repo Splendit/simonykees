@@ -5,7 +5,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RuleApplicationCounter;
 import eu.jsparrow.core.util.PropertyUtil;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.core.visitor.impl.DiamondOperatorASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -46,7 +48,9 @@ public class DiamondOperatorRule extends AbstractRefactoringRule<DiamondOperator
 	
 	@Override
 	protected DiamondOperatorASTVisitor visitorFactory() {
-		return new DiamondOperatorASTVisitor(javaVersion);
+		DiamondOperatorASTVisitor visitor = new DiamondOperatorASTVisitor(javaVersion);
+		visitor.addRewriteListener(RuleApplicationCounter.get(this));
+		return visitor;
 	}
 
 }

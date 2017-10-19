@@ -42,8 +42,10 @@ public class ReImplementingInterfaceASTVisitor extends AbstractASTRewriteASTVisi
 						ListRewrite interfacesListRewrite = astRewrite.getListRewrite(typeDeclarationNode,
 								TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY);
 
-						duplicateInterfaces
-								.forEach(duplicateInterface -> interfacesListRewrite.remove(duplicateInterface, null));
+						duplicateInterfaces.forEach(duplicateInterface -> {
+							interfacesListRewrite.remove(duplicateInterface, null);
+							onRewrite();
+						});
 					}
 				}
 			}
@@ -67,22 +69,23 @@ public class ReImplementingInterfaceASTVisitor extends AbstractASTRewriteASTVisi
 	 */
 	private List<Type> getDuplicateInterfaces(ITypeBinding superclass, List<Type> interfaces) {
 		List<Type> duplicateInterfaces = new LinkedList<>();
-		
+
 		if (superclass != null && interfaces != null && !interfaces.isEmpty()) {
 			ITypeBinding superclassTypeBinding = superclass;
-			
+
 			while (superclassTypeBinding != null) {
 				ITypeBinding[] superclassInterfaces = superclassTypeBinding.getInterfaces();
 
-				Arrays.stream(superclassInterfaces).forEach(superClassInterface ->
-					interfaces.stream().filter(currentInterface -> !duplicateInterfaces.contains(currentInterface))
-							.forEach(currentInterface -> {
-								ITypeBinding interfaceTypeBinding = currentInterface.resolveBinding();
-								if (ClassRelationUtil.compareITypeBinding(superClassInterface, interfaceTypeBinding)) {
-									duplicateInterfaces.add(currentInterface);
-								}
-							})
-				);
+				Arrays.stream(superclassInterfaces)
+						.forEach(superClassInterface -> interfaces.stream()
+								.filter(currentInterface -> !duplicateInterfaces.contains(currentInterface))
+								.forEach(currentInterface -> {
+									ITypeBinding interfaceTypeBinding = currentInterface.resolveBinding();
+									if (ClassRelationUtil.compareITypeBinding(superClassInterface,
+											interfaceTypeBinding)) {
+										duplicateInterfaces.add(currentInterface);
+									}
+								}));
 
 				superclassTypeBinding = superclassTypeBinding.getSuperclass();
 			}

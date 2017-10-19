@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RuleApplicationCounter;
 import eu.jsparrow.core.util.PropertyUtil;
 import eu.jsparrow.core.visitor.impl.StringBuildingLoopASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -39,7 +40,9 @@ public class StringBuildingLoopRule extends AbstractRefactoringRule<StringBuildi
 	
 	@Override
 	protected StringBuildingLoopASTVisitor visitorFactory() {
-		return new StringBuildingLoopASTVisitor(javaVersion);
+		StringBuildingLoopASTVisitor visitor = new StringBuildingLoopASTVisitor(javaVersion);
+		visitor.addRewriteListener(RuleApplicationCounter.get(this));
+		return visitor;
 	}
 
 	@Override

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
+import eu.jsparrow.core.rule.RuleApplicationCounter;
 import eu.jsparrow.core.rule.SemiAutomaticRefactoringRule;
 import eu.jsparrow.core.visitor.logger.StandardLoggerASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -193,6 +194,8 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	protected StandardLoggerASTVisitor visitorFactory() {
 		Map<String, String> replacingOptions = getSelectedOptions();
 		String availableLogger = getAvailableQualifiedLoggerName();
-		return new StandardLoggerASTVisitor(availableLogger, replacingOptions);
+		StandardLoggerASTVisitor visitor =  new StandardLoggerASTVisitor(availableLogger, replacingOptions);
+		visitor.addRewriteListener(RuleApplicationCounter.get(this));
+		return visitor;
 	}
 }

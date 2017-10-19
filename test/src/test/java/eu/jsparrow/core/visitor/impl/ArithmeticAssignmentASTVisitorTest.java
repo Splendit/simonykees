@@ -1,12 +1,13 @@
 package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 import org.eclipse.jdt.core.dom.Block;
 import org.junit.Before;
 import org.junit.Test;
 
+import eu.jsparrow.core.visitor.ASTRewriteVisitorListenerStub;
 import eu.jsparrow.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 
 @SuppressWarnings({ "nls" })
@@ -36,5 +37,17 @@ public class ArithmeticAssignmentASTVisitorTest extends AbstractASTVisitorTest {
 		fixture.accept(visitor);
 
 		assertFalse(fixture.hasChanged());
+	}
+	
+	@Test
+	public void visit__AssignmentWithAdd_ShouldUpdateListeners() throws Exception {
+		ASTRewriteVisitorListenerStub listener = new ASTRewriteVisitorListenerStub();
+		visitor.addRewriteListener(listener);
+		fixture.addMethodBlock("int a;  a = a + 3;");
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+		
+		assertTrue(listener.wasUpdated);
 	}
 }

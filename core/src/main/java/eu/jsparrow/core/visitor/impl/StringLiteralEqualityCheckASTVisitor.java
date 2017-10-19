@@ -83,6 +83,7 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 								ASTNode newArgument = astRewrite.createCopyTarget(stringLiteral);
 								astRewrite.replace(expression, newArgument, null);
 								astRewrite.replace(stringLiteral, newExpression, null);
+								onRewrite();
 							}
 						}
 					}

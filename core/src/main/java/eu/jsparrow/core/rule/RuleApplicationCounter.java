@@ -13,14 +13,14 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public class RuleApplicationCounter implements ASTRewriteVisitorListener {
 	
-	private static Map<RefactoringRule, RuleApplicationCounter> applicationCounters = new HashMap<>();
+	private static final Map<RefactoringRule, RuleApplicationCounter> applicationCounters = new HashMap<>();
 
 	private int applicationCounter = 0;
 	
 	RuleApplicationCounter() {
 	}
 	
-	public int get() {
+	public int toInt() {
 		return applicationCounter;
 	}
 

@@ -32,11 +32,11 @@ public class ApplicationCounterTest {
 
 	@Test
 	public void update_OnNewApplicationCounter_ShouldIncreaseCount() throws Exception {
-		int previous = applicationCounter.get();
+		int previous = applicationCounter.toInt();
 
 		applicationCounter.update();
 		
-		assertEquals(previous + 1, applicationCounter.get());
+		assertEquals(previous + 1, applicationCounter.toInt());
 	}
 
 }

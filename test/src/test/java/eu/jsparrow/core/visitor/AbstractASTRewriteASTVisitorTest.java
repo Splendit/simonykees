@@ -24,19 +24,7 @@ public class AbstractASTRewriteASTVisitorTest {
 		assertTrue(listener.wasUpdated);
 	}
 
-	class ASTRewriteVisitorListenerStub implements ASTRewriteVisitorListener {
-
-		public boolean wasUpdated = false;
-
-		@Override
-		public void update() {
-			wasUpdated = true;
-		}
-
-	}
-
 	class DummyASTRewriteASTVisitorImpl extends AbstractASTRewriteASTVisitor {
 
 	}
-
 }

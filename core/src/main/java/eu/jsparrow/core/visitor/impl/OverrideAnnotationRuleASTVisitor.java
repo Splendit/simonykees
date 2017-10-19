@@ -61,8 +61,8 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	}
 
 	/**
-	 * Implements the functionality of inserting the @{@link Override}
-	 * annotation above the methods that are overriding a parent method.
+	 * Implements the functionality of inserting the @{@link Override} annotation
+	 * above the methods that are overriding a parent method.
 	 * 
 	 * @param node
 	 *            parent node having method declarations.
@@ -78,9 +78,9 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 		List<MethodDeclaration> toBeAnnotated = new ArrayList<>();
 
 		for (MethodDeclaration method : methods) {
-			// skip constructors, private methods and methods that have the @Override annotation 
-			if (!method.isConstructor()
-					&& !ASTNodeUtil.hasModifier(method.modifiers(), Modifier::isPrivate)
+			// skip constructors, private methods and methods that have the @Override
+			// annotation
+			if (!method.isConstructor() && !ASTNodeUtil.hasModifier(method.modifiers(), Modifier::isPrivate)
 					&& !isOverrideAnnotated(method)) {
 
 				IMethodBinding methodBinding = method.resolveBinding();
@@ -99,9 +99,11 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 		}
 
 		// add @Override to methods marked for annotation
-		toBeAnnotated.stream()
-				.forEach(method -> astRewrite.getListRewrite(method, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(
-						NodeBuilder.newMarkerAnnotation(node.getAST(), node.getAST().newName(OVERRIDE_SIMPLE_NAME)), null));
+		toBeAnnotated.stream().forEach(method -> {
+			astRewrite.getListRewrite(method, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(
+					NodeBuilder.newMarkerAnnotation(node.getAST(), node.getAST().newName(OVERRIDE_SIMPLE_NAME)), null);
+			onRewrite();
+		});
 	}
 
 	/**
@@ -114,13 +116,14 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	private boolean isOverrideAnnotated(MethodDeclaration method) {
 
 		return ASTNodeUtil.convertToTypedList(method.modifiers(), MarkerAnnotation.class).stream()
-				.map(MarkerAnnotation::getTypeName).anyMatch(typeName -> OVERRIDE_SIMPLE_NAME.equals(typeName.getFullyQualifiedName())
+				.map(MarkerAnnotation::getTypeName)
+				.anyMatch(typeName -> OVERRIDE_SIMPLE_NAME.equals(typeName.getFullyQualifiedName())
 						|| JAVA_LANG_OVERRIDE.equals(typeName.getFullyQualifiedName()));
 	}
 
 	/**
-	 * Finds the list of methods that are overridable from the given list of
-	 * type bindings i.e. private methods and constructors are filtered out.
+	 * Finds the list of methods that are overridable from the given list of type
+	 * bindings i.e. private methods and constructors are filtered out.
 	 * 
 	 * @param ancestors
 	 * @return list of overridable methods

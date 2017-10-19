@@ -19,7 +19,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	protected ASTRewrite astRewrite;
 	
-	private List<ASTRewriteVisitorListener> listeners = new ArrayList<>();
+	protected List<ASTRewriteVisitorListener> listeners = new ArrayList<>();
 	
 	public AbstractASTRewriteASTVisitor() {
 		super();

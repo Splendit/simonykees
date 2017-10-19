@@ -1,12 +1,13 @@
 package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 import org.eclipse.jdt.core.dom.Block;
 import org.junit.Before;
 import org.junit.Test;
 
+import eu.jsparrow.core.visitor.ASTRewriteVisitorListenerStub;
 import eu.jsparrow.core.visitor.impl.PrimitiveObjectUseEqualsASTVisitor;
 
 @SuppressWarnings({ "nls" })
@@ -53,7 +54,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 	}
 
 	@Test
-	public void visit_onSTring_ShouldReplaceWithEquals() throws Exception {
+	public void visit_onString_ShouldReplaceWithEquals() throws Exception {
 		fixture.addMethodBlock(String.format(template, "\"String1\" == \"String2\""));
 		visitor.setASTRewrite(fixture.getAstRewrite());
 
@@ -151,4 +152,18 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 		Block expected = createBlock(String.format(template, "a.equals((Integer)b)"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
+	
+	@Test
+	public void visit_infixWithTypecastOnRightInteger_ShouldUpdateListeners() throws Exception {
+		ASTRewriteVisitorListenerStub listener = new ASTRewriteVisitorListenerStub();
+		visitor.addRewriteListener(listener);
+		fixture.addMethodBlock(String.format(template, "a == (Integer)b"));
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		assertTrue(listener.wasUpdated);
+	}
+	
+
 }

@@ -48,6 +48,7 @@ public class CollectionRemoveAllASTVisitor extends AbstractASTRewriteASTVisitor 
 				MethodInvocation newMI = NodeBuilder.newMethodInvocation(node.getAST(),
 						(Expression) astRewrite.createMoveTarget(node.getExpression()), clear);
 				astRewrite.replace(node, newMI, null);
+				onRewrite();
 			}
 		}
 		return true;

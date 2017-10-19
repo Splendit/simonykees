@@ -2,11 +2,13 @@ package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.eclipse.jdt.core.dom.Block;
 import org.junit.Before;
 import org.junit.Test;
 
+import eu.jsparrow.core.visitor.ASTRewriteVisitorListenerStub;
 import eu.jsparrow.core.visitor.impl.EnumsWithoutEqualsASTVisitor;
 
 @SuppressWarnings({ "nls" })
@@ -95,6 +97,19 @@ public class EnumsWithoutEqualsASTVisitorTest extends AbstractASTVisitorTest {
 		fixture.accept(visitor);
 
 		assertFalse(fixture.hasChanged());
+	}
+	
+	@Test
+	public void visit_EqualsWithEnumeration_ShouldUpdateListeners() throws Exception {
+		ASTRewriteVisitorListenerStub listener = new ASTRewriteVisitorListenerStub();
+		visitor.addRewriteListener(listener);
+		fixture.addImport("java.math.RoundingMode");
+		fixture.addMethodBlock("RoundingMode roundingMode; if(roundingMode.equals(RoundingMode.UP)){}");
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		assertTrue(listener.wasUpdated);
 	}
 
 }

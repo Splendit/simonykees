@@ -77,6 +77,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 			} while (unwrapped);
 
 			astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(variableExpression), null);
+			onRewrite();
 
 		}
 		return true;
