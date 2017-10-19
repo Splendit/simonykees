@@ -228,6 +228,15 @@ public class RulesTestUtil {
 		javaProject.setOutputLocation(binFolder.getFullPath(), null);
 		javaProject.setRawClasspath(new IClasspathEntry[0], null);
 
+		/*
+		 * The following options are extracted from our internal eclipse code
+		 * formatter at
+		 * https://bitbucket.splendit.loc/projects/INT/repos/eclipse-settings/
+		 * browse/splendit_default_formatter_20171019.xml . This has been done
+		 * for being able to format our unit tests with eclipse and not breaking
+		 * them by doing it. With this options the junit test project and
+		 * simonykees itself use the same formatting options.
+		 */
 		Map<String, String> options = javaProject.getOptions(false);
 		options.put("org.eclipse.jdt.core.formatter.alignment_for_enum_constants", "49");
 		options.put("org.eclipse.jdt.core.formatter.alignment_for_arguments_in_enum_constant", "48");
