@@ -42,7 +42,8 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 
 	private void convertChangesToDocumentChangeWrappers() {
 		changesWrapperList = new ArrayList<>();
-		for (String declaration : changes.keySet()) {
+		for (Map.Entry<String, List<DocumentChange>> entry : changes.entrySet()) {
+			String declaration = entry.getKey();
 			List<DocumentChange> changesForField = changes.get(declaration);
 			DocumentChange parent = null;
 			parent = changesForField.get(0);

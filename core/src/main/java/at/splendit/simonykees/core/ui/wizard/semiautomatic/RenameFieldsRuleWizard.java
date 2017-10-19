@@ -391,8 +391,6 @@ public class RenameFieldsRuleWizard extends Wizard {
 		for (FieldMetadata data : metadata) {
 
 		String newIdentifier = data.getNewIdentifier();
-		SimpleName oldName = data.getFieldDeclaration().getName();
-		String oldIdentifier = oldName.getIdentifier();
 		data.getCompilationUnit().getJavaElement();
 		List<DocumentChange> docsChanges = renameFieldsRule.computeDocumentChangesPerFiled(data);
 		changes.put(newIdentifier, docsChanges);
@@ -401,11 +399,11 @@ public class RenameFieldsRuleWizard extends Wizard {
 		}
 
 //		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
-		synchronizeWithUIShowRefactoringPreviewWizard(changes, metaDataMap);
+		synchronizeWithUIShowRefactoringPreviewWizard(changes);
 	}
 
 	private void synchronizeWithUIShowRefactoringPreviewWizard(
-			Map<String, List<DocumentChange>> changes, Map<String, FieldMetadata> dataMap) {
+			Map<String, List<DocumentChange>> changes) {
 
 		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
 				selectedJavaProjekt.getElementName()));
@@ -415,7 +413,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 		Display.getDefault().asyncExec(() -> {
 			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 			final WizardDialog dialog = new WizardDialog(shell,
-					new RenamingRulePreviewWizard(changes, dataMap, renameFieldsRule));
+					new RenamingRulePreviewWizard(changes, renameFieldsRule));
 
 			// maximizes the RefactoringPreviewWizard
 //			dialog.setPageSize(rectangle.width, rectangle.height);
