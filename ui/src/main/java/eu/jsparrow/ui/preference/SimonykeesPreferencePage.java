@@ -74,6 +74,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.ENABLE_INTRO,
 				Messages.SimonykeesPreferencePage_enableIntroText, composite));
 
+		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY,
+				Messages.SimonykeesPreferencePage_resolvePackagesRecursivelyLabel, composite));
+
 		initializeView();
 	}
 
@@ -223,8 +226,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	public void handleButtonClickedListener(String profileId) {
 		final WizardDialog dialog = new WizardDialog(getShell(), new ConfigureProfileWizard(profileId)) {
 			/*
-			 * Removed unnecessary empty space on the bottom of the wizard
-			 * intended for ProgressMonitor that is not used
+			 * Removed unnecessary empty space on the bottom of the wizard intended for
+			 * ProgressMonitor that is not used
 			 */
 			@Override
 			protected Control createDialogArea(Composite parent) {
@@ -244,8 +247,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			}
 		};
 		/*
-		 * the dialog is made as big enough to show rule description vertically
-		 * and horizontally to avoid two scrollers
+		 * the dialog is made as big enough to show rule description vertically and
+		 * horizontally to avoid two scrollers
 		 */
 		dialog.setPageSize(800, 700);
 
@@ -312,8 +315,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	}
 
 	/**
-	 * If cancel is pressed, no changes from current manipulation should get
-	 * stored.
+	 * If cancel is pressed, no changes from current manipulation should get stored.
 	 */
 	@Override
 	public boolean performCancel() {

@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -93,10 +94,9 @@ public class JdtUnitFixture {
 	public void setUp() throws Exception {
 		createJavaProject();
 
-		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(project);
-		packageFragment = root.createPackageFragment(PACKAGE_FIXTURE_NAME, false, null);
+		packageFragment = addPackageFragment(PACKAGE_FIXTURE_NAME);
 
-		compilationUnit = packageFragment.createCompilationUnit(FILE_FIXTURE_NAME, "", false, null);
+		compilationUnit = addCompilationUnit(packageFragment, FILE_FIXTURE_NAME);
 
 		@SuppressWarnings("deprecation") // TODO improvement needed, see SIM-878
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
@@ -159,8 +159,8 @@ public class JdtUnitFixture {
 	}
 
 	/**
-	 * Adds statements to the stub method and saves the compilation unit with
-	 * the changes.
+	 * Adds statements to the stub method and saves the compilation unit with the
+	 * changes.
 	 * 
 	 * @param statements
 	 *            the statements to add separated by semicolons
@@ -267,6 +267,24 @@ public class JdtUnitFixture {
 		methodDeclaration = typeDecl.getMethods()[0];
 		astRewrite = ASTRewrite.create(astRoot.getAST());
 		hasChanged = false;
+	}
+
+	public IPackageFragment addPackageFragment(String name) throws JdtUnitException, JavaModelException {
+		if (javaProject == null) {
+			throw new JdtUnitException("Java project is null");
+		}
+
+		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(project);
+		return root.createPackageFragment(name, false, null);
+	}
+
+	public ICompilationUnit addCompilationUnit(IPackageFragment packageFragment, String name)
+			throws JdtUnitException, JavaModelException {
+		if (packageFragment == null) {
+			throw new JdtUnitException("Package fragment is null");
+		}
+		
+		return packageFragment.createCompilationUnit(name, "", false, null);
 	}
 
 	/**
