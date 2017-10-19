@@ -93,6 +93,7 @@ public class Messages extends NLS {
 	public static String DiamondOperatorASTVisitor_using_diamond_operator;
 	public static String DiamondOperatorRule_description;
 	public static String DiamondOperatorRule_name;
+	public static String EmptyProfile_profileName;
 	public static String EnhancedForLoopToStreamAnyMatchRule_description;
 	public static String EnhancedForLoopToStreamAnyMatchRule_name;
 	public static String EnhancedForLoopToStreamFindFirstRule_description;
@@ -249,6 +250,7 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_enableIntroText;
 	public static String SimonykeesPreferencePage_ExportProfilesButton;
 	public static String SimonykeesPreferencePage_FileAlreadyExists;
+	public static String SimonykeesPreferencePage_generalSettingsGroupTitle;
 	public static String SimonykeesPreferencePage_ImportProfilesButton;
 	public static String SimonykeesPreferencePage_KeepBoth;
 	public static String SimonykeesPreferencePage_newProfileButtonLabel;
@@ -257,6 +259,8 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_ProfileExistsReplace;
 	public static String SimonykeesPreferencePage_ProfileExportSuccessfulTo;
 	public static String SimonykeesPreferencePage_ProfileImportSuccessful;
+	public static String SimonykeesPreferencePage_profilesBuiltInSuffix;
+	public static String SimonykeesPreferencePage_profileSettingsGroupTitle;
 	public static String SimonykeesPreferencePage_removeProfileButtonLabel;
 	public static String SimonykeesPreferencePage_Replace;
 	public static String SimonykeesPreferencePage_rules;
@@ -264,6 +268,7 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_SelectedPathIsDirectory;
 	public static String SimonykeesPreferencePage_Skip;
 	public static String SimonykeesPreferencePage_selectProfile;
+	public static String SimonykeesPreferencePage_UseAsDefaultProfileButtonLabel;
 	public static String SimonykeesPreferencePage_useProfileOptionNoProfile;
 	public static String SimonykeesPreferencePage_useProfileOptionRadioGroupTitle;
 	public static String SimonykeesPreferencePage_useProfileOptionSelectedProfile;
