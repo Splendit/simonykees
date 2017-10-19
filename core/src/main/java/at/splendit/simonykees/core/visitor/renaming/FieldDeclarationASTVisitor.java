@@ -74,7 +74,6 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	private List<FieldMetadata> fieldsMetaData = new ArrayList<>();
 	private Map<ASTNode, List<SimpleName>> declaredNamesPerNode = new HashMap<>();
 	private List<String> newNamesPerType = new ArrayList<>();
-	private Set<IPath> targetResources = new HashSet<>();
 	private Set<IJavaElement> targetIJavaElements = new HashSet<>();
 	private IJavaProject iJavaProject;
 	private IJavaElement[] searchScope;
@@ -314,7 +313,6 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 
 			@Override
 			public void acceptSearchMatch(SearchMatch match) {
-				IPath path = match.getResource().getFullPath();
 				IJavaElement iJavaElement = (IJavaElement) match.getElement();
 				IMember iMember = (IMember)iJavaElement;
 				ICompilationUnit icu = iMember.getCompilationUnit();
@@ -325,7 +323,6 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 					throw new FileWithCompilationErrorException(FILE_WITH_COMPILATION_ERROR_EXCEPTION_MESSAGE);
 				}
 				storeIJavaElement(icu);
-				storePath(path);
 			}
 		};
 
@@ -344,27 +341,9 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		return Optional.of(references);
 	}
-
-	/**
-	 * Collects the {@link IPath}s to the {@link #targetResources}. 
-	 * 
-	 * @param path a path to be collected.
-	 */
-	private void storePath(IPath path) {
-		this.targetResources.add(path);
-	}
 	
 	private void storeIJavaElement(IJavaElement iJavaElement) {
 		this.targetIJavaElements.add(iJavaElement);
-	}
-
-	/**
-	 * 
-	 * @return the set of the paths of the compilation units containing a reference to a 
-	 * field being renamed. 
-	 */
-	public Set<IPath> getTargetCompilationUnitPaths() {
-		return this.targetResources;
 	}
 	
 
