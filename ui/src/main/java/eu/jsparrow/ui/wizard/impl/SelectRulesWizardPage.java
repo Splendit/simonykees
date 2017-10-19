@@ -2,7 +2,6 @@
 package eu.jsparrow.ui.wizard.impl;
 
 import java.util.Arrays;
-import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
@@ -178,8 +177,10 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 * group
 	 */
 	private void populateGroupFilterCombo() {
-		List<String> profiles = SimonykeesPreferenceManager.getAllProfileIds();
-		profiles.forEach(selectProfileCombo::add);
+		SimonykeesPreferenceManager.getAllProfileIds().stream().map(SimonykeesPreferenceManager::getProfileFromName)
+				.map(profile -> profile.getProfileName()
+						+ (profile.isBuiltInProfile() ? Messages.SimonykeesPreferencePage_profilesBuiltInSuffix : "")) //$NON-NLS-1$
+				.forEach(selectProfileCombo::add);
 	}
 
 	/**
@@ -187,9 +188,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 * preferences or to currently selected profile otherwise
 	 */
 	private void initializeGroupFilterCombo() {
-		selectProfileCombo.select(selectProfileCombo.indexOf(SimonykeesPreferenceManager.getCurrentProfileId()));
+		selectProfileCombo.select(SimonykeesPreferenceManager.getAllProfileIds()
+				.indexOf(SimonykeesPreferenceManager.getCurrentProfileId()));
 		((SelectRulesWizardPageControler) controler).profileChanged(SimonykeesPreferenceManager.getCurrentProfileId());
-
 	}
 
 	/**
@@ -203,9 +204,11 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String selectedProfileId = selectProfileCombo.getItem(selectProfileCombo.getSelectionIndex());
+				String selectedProfileId = SimonykeesPreferenceManager.getAllProfileIds()
+						.get(selectProfileCombo.getSelectionIndex());
+
 				if (!selectedProfileId.equals(CUSTOM_PROFILE)) {
-					if(Arrays.asList(selectProfileCombo.getItems()).contains(CUSTOM_PROFILE)) {
+					if (Arrays.asList(selectProfileCombo.getItems()).contains(CUSTOM_PROFILE)) {
 						selectProfileCombo.remove(CUSTOM_PROFILE);
 					}
 					if (update) {
