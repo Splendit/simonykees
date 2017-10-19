@@ -60,12 +60,16 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	private Font font;
 
 	private enum ProfileImportMode {
-		SKIP, RENAME, REPLACE, IMPORT,
+		SKIP,
+		RENAME,
+		REPLACE,
+		IMPORT,
 	}
 
 	public SimonykeesPreferencePage() {
 		super(GRID);
-		setPreferenceStore(Activator.getDefault().getPreferenceStore());
+		setPreferenceStore(Activator.getDefault()
+			.getPreferenceStore());
 		SimonykeesPreferenceManager.loadCurrentProfiles();
 	}
 
@@ -83,21 +87,16 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		generalGroup.setFont(font);
 		generalGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		generalGroup.setLayout(new GridLayout(1, false));
-		
-		BooleanFieldEditor enableIntro = new BooleanFieldEditor(SimonykeesPreferenceConstants.ENABLE_INTRO,
-				Messages.SimonykeesPreferencePage_enableIntroText, generalGroup);
-		addField(enableIntro);
+
+		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.ENABLE_INTRO,
+				Messages.SimonykeesPreferencePage_enableIntroText, generalGroup));
+		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY,
+				Messages.SimonykeesPreferencePage_resolvePackagesRecursivelyLabel, composite));
 
 		createProfilesTableView(composite);
 
 		initializeButtons();
-		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.ENABLE_INTRO,
-				Messages.SimonykeesPreferencePage_enableIntroText, composite));
 
-		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY,
-				Messages.SimonykeesPreferencePage_resolvePackagesRecursivelyLabel, composite));
-
-		initializeView();
 	}
 
 	private void createProfilesTableView(Composite composite) {
@@ -142,9 +141,11 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	}
 
 	private void populateTable() {
-		for (int i = 0; i < SimonykeesPreferenceManager.getAllProfileIds().size(); i++) {
+		for (int i = 0; i < SimonykeesPreferenceManager.getAllProfileIds()
+			.size(); i++) {
 			String currentSelectedProfile = SimonykeesPreferenceManager.getCurrentProfileId();
-			String currentProfileId = SimonykeesPreferenceManager.getAllProfileIds().get(i);
+			String currentProfileId = SimonykeesPreferenceManager.getAllProfileIds()
+				.get(i);
 			SimonykeesProfile currentProfile = SimonykeesPreferenceManager.getProfileFromName(currentProfileId);
 
 			String itemText = currentProfileId
@@ -156,10 +157,13 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 			if (currentSelectedProfile.equals(currentProfileId)) {
 				FontData[] fontData = font.getFontData();
-				Arrays.stream(fontData).forEach(fd -> fd.setStyle(fd.getStyle() | SWT.BOLD));
+				Arrays.stream(fontData)
+					.forEach(fd -> fd.setStyle(fd.getStyle() | SWT.BOLD));
 				Font boldFont = new Font(font.getDevice(), fontData);
 
-				item.setText(0, Character.toString((char) 0x2713)); // Unicode 0x2713 = '✓'
+				item.setText(0, Character.toString((char) 0x2713)); // Unicode
+																	// 0x2713 =
+																	// '✓'
 				item.setFont(boldFont);
 			} else {
 				item.setFont(font);
@@ -171,8 +175,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 		int selectionCount = profilesTable.getSelectionCount();
 		if (selectionCount == 1) {
-			SimonykeesProfile profile = SimonykeesPreferenceManager.getProfileFromName(
-					SimonykeesPreferenceManager.getAllProfileIds().get(profilesTable.getSelectionIndex()));
+			SimonykeesProfile profile = SimonykeesPreferenceManager
+				.getProfileFromName(SimonykeesPreferenceManager.getAllProfileIds()
+					.get(profilesTable.getSelectionIndex()));
 			String currentProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
 
 			if (currentProfileId.equals(profile.getProfileName())) {
@@ -243,7 +248,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			public void widgetSelected(SelectionEvent e) {
 				if (profilesTable.getSelectionCount() == 1) {
 					String selectedProfileId = SimonykeesPreferenceManager.getAllProfileIds()
-							.get(profilesTable.getSelectionIndex());
+						.get(profilesTable.getSelectionIndex());
 					setDefaultProfileButton.setEnabled(false);
 					SimonykeesPreferenceManager.setCurrentProfileId(selectedProfileId);
 					updateView();
@@ -266,7 +271,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			public void widgetSelected(SelectionEvent e) {
 				if (profilesTable.getSelectionCount() == 1) {
 					String selectedProfileId = SimonykeesPreferenceManager.getAllProfileIds()
-							.get(profilesTable.getSelectionIndex());
+						.get(profilesTable.getSelectionIndex());
 					handleButtonClickedListener(selectedProfileId);
 					updateView();
 					setSelection(selectedProfileId);
@@ -301,11 +306,13 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		List<String> profilesToDelete = new LinkedList<>();
 		for (int index : profilesTable.getSelectionIndices()) {
 			SimonykeesProfile profile = SimonykeesPreferenceManager
-					.getProfileFromName(SimonykeesPreferenceManager.getAllProfileIds().get(index));
+				.getProfileFromName(SimonykeesPreferenceManager.getAllProfileIds()
+					.get(index));
 			if (!profile.isBuiltInProfile()) {
-				if (profile.getProfileName().equals(SimonykeesPreferenceManager.getCurrentProfileId())) {
+				if (profile.getProfileName()
+					.equals(SimonykeesPreferenceManager.getCurrentProfileId())) {
 					SimonykeesPreferenceManager
-							.setCurrentProfileId(SimonykeesPreferenceManager.getDefaultProfileName());
+						.setCurrentProfileId(SimonykeesPreferenceManager.getDefaultProfileName());
 				}
 				profilesToDelete.add(profile.getProfileName());
 			}
@@ -320,8 +327,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	public void handleButtonClickedListener(String profileId) {
 		final WizardDialog dialog = new WizardDialog(getShell(), new ConfigureProfileWizard(profileId)) {
 			/*
-			 * Removed unnecessary empty space on the bottom of the wizard intended for
-			 * ProgressMonitor that is not used
+			 * Removed unnecessary empty space on the bottom of the wizard
+			 * intended for ProgressMonitor that is not used
 			 */
 			@Override
 			protected Control createDialogArea(Composite parent) {
@@ -341,8 +348,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			}
 		};
 		/*
-		 * the dialog is made as big enough to show rule description vertically and
-		 * horizontally to avoid two scrollers
+		 * the dialog is made as big enough to show rule description vertically
+		 * and horizontally to avoid two scrollers
 		 */
 		dialog.setPageSize(800, 700);
 
@@ -363,7 +370,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	}
 
 	private void setSelection(String selectedProfile) {
-		profilesTable.setSelection(SimonykeesPreferenceManager.getAllProfileIds().indexOf(selectedProfile));
+		profilesTable.setSelection(SimonykeesPreferenceManager.getAllProfileIds()
+			.indexOf(selectedProfile));
 	}
 
 	/**
@@ -397,7 +405,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	}
 
 	/**
-	 * If cancel is pressed, no changes from current manipulation should get stored.
+	 * If cancel is pressed, no changes from current manipulation should get
+	 * stored.
 	 */
 	@Override
 	public boolean performCancel() {
@@ -411,8 +420,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	 * 
 	 * @param style
 	 *            must be either {@link SWT#OPEN} or {@link SWT#SAVE}
-	 * @return the selected config file path or null if the style parameter is not
-	 *         one of the above or if the user cancelled the file dialog
+	 * @return the selected config file path or null if the style parameter is
+	 *         not one of the above or if the user cancelled the file dialog
 	 */
 	private String chooseConfigFile(int style) {
 		if (style != SWT.SAVE && style != SWT.OPEN) {
@@ -422,7 +431,10 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		FileDialog fileDialog = new FileDialog(getShell(), style);
 		fileDialog.setFilterExtensions(new String[] { "*.yml", "*.yaml", "*" }); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		fileDialog.setText(Messages.SimonykeesPreferencePage_ChooseConfigFileDialogTitle);
-		fileDialog.setFilterPath(ResourcesPlugin.getWorkspace().getRoot().getLocation().toString());
+		fileDialog.setFilterPath(ResourcesPlugin.getWorkspace()
+			.getRoot()
+			.getLocation()
+			.toString());
 
 		return fileDialog.open();
 	}
@@ -553,14 +565,16 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			YAMLConfig config = new YAMLConfig();
 
 			for (int i : indices) {
-				String id = SimonykeesPreferenceManager.getAllProfileIds().get(i);
+				String id = SimonykeesPreferenceManager.getAllProfileIds()
+					.get(i);
 				SimonykeesProfile profile = SimonykeesPreferenceManager.getProfileFromName(id);
 
 				YAMLProfile yamlProfile = new YAMLProfile();
 				yamlProfile.setName(id);
 				yamlProfile.setRules(profile.getEnabledRuleIds());
 
-				config.getProfiles().add(yamlProfile);
+				config.getProfiles()
+					.add(yamlProfile);
 			}
 			try {
 				YAMLConfigUtil.exportConfig(config, file);
@@ -580,8 +594,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	 * adds an integer suffix to the given profile name
 	 * 
 	 * @param profileName
-	 * @return if the given profile already exists, an integer will be appended to
-	 *         it to make it unique, otherwise the given profile name will be
+	 * @return if the given profile already exists, an integer will be appended
+	 *         to it to make it unique, otherwise the given profile name will be
 	 *         returned without change
 	 */
 	private String addSuffixToProfileName(String profileName) {
@@ -592,10 +606,10 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		List<String> currentProfiles = SimonykeesPreferenceManager.getAllProfileIds();
 
 		/*
-		 * if an integer has already been appended to the given profile name, we take it
-		 * and increase its value. This prevents profiles being named like
-		 * "profile1_1_1_1_1" after multiple imports. Instead it will be imported as
-		 * "profile1_4"
+		 * if an integer has already been appended to the given profile name, we
+		 * take it and increase its value. This prevents profiles being named
+		 * like "profile1_1_1_1_1" after multiple imports. Instead it will be
+		 * imported as "profile1_4"
 		 */
 		if (profileNameParts.size() > 1) {
 			try {
