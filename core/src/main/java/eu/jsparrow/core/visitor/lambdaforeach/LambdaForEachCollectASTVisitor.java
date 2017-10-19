@@ -63,7 +63,7 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 	private static final String ADD_METHOD_NAME = "add"; //$NON-NLS-1$
 	private static final String JAVA_UTIL_STREAM_COLLECTORS = java.util.stream.Collectors.class.getName();
 	private static final String JAVA_UTIL_STREAM_COLLECTORS_SIMPLE_NAME = java.util.stream.Collectors.class
-			.getSimpleName();
+		.getSimpleName();
 	private static final String JAVA_UTIL_LIST = java.util.List.class.getName();
 	private static final String TO_LIST = "toList"; //$NON-NLS-1$
 	private static final String COLLECT = "collect"; //$NON-NLS-1$
@@ -72,9 +72,11 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		boolean safeToAddImport = ASTNodeUtil.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
-				.stream().map(ImportDeclaration::getName).filter(Name::isQualifiedName)
-				.map(name -> ((QualifiedName) name).getName())
-				.noneMatch(JAVA_UTIL_STREAM_COLLECTORS_SIMPLE_NAME::equals);
+			.stream()
+			.map(ImportDeclaration::getName)
+			.filter(Name::isQualifiedName)
+			.map(name -> ((QualifiedName) name).getName())
+			.noneMatch(JAVA_UTIL_STREAM_COLLECTORS_SIMPLE_NAME::equals);
 
 		return safeToAddImport && super.visit(compilationUnit);
 	}
@@ -87,7 +89,8 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 
 			// and if the parameter of 'forEach' is a lambda expression ...
 			List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-			if (arguments.size() == 1 && ASTNode.LAMBDA_EXPRESSION == arguments.get(0).getNodeType()) {
+			if (arguments.size() == 1 && ASTNode.LAMBDA_EXPRESSION == arguments.get(0)
+				.getNodeType()) {
 				/*
 				 * the lambda expression must have only one parameter and its
 				 * body must contain only one expression invoking the
@@ -120,19 +123,21 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 
 	/**
 	 * Checks if the expression of the given method binding is a raw type.
-	 * @param methodInvocation method invocation to be checked
-	 * @return {@code true} if the method invocation has an expression which resolves
-	 * to a raw type, or {@code false} otherwise.
+	 * 
+	 * @param methodInvocation
+	 *            method invocation to be checked
+	 * @return {@code true} if the method invocation has an expression which
+	 *         resolves to a raw type, or {@code false} otherwise.
 	 */
 	private boolean isRawMethodExpression(MethodInvocation methodInvocation) {
 		Expression expression = methodInvocation.getExpression();
-		if(expression != null) {
+		if (expression != null) {
 			ITypeBinding expressionBinding = expression.resolveTypeBinding();
-			if(expressionBinding != null && expressionBinding.isRawType()) {
+			if (expressionBinding != null && expressionBinding.isRawType()) {
 				return true;
 			}
 		}
-		return false; 
+		return false;
 	}
 
 	/**
@@ -158,9 +163,12 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 		collect.setName(ast.newSimpleName(COLLECT));
 
 		ListRewrite listRewirte = astRewrite.getListRewrite(collect, MethodInvocation.ARGUMENTS_PROPERTY);
-		MethodInvocation collectorsToList = collect.getAST().newMethodInvocation();
-		collectorsToList.setName(collect.getAST().newSimpleName(TO_LIST));
-		collectorsToList.setExpression(collect.getAST().newSimpleName(JAVA_UTIL_STREAM_COLLECTORS_SIMPLE_NAME));
+		MethodInvocation collectorsToList = collect.getAST()
+			.newMethodInvocation();
+		collectorsToList.setName(collect.getAST()
+			.newSimpleName(TO_LIST));
+		collectorsToList.setExpression(collect.getAST()
+			.newSimpleName(JAVA_UTIL_STREAM_COLLECTORS_SIMPLE_NAME));
 		listRewirte.insertFirst(collectorsToList, null);
 		this.addImports.add(JAVA_UTIL_STREAM_COLLECTORS);
 
@@ -190,8 +198,8 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 			List<Expression> arguments = ASTNodeUtil.returnTypedList(methodInvocation.arguments(), Expression.class);
 			if (arguments.size() == 1) {
 				Expression argument = arguments.get(0);
-				if (ASTNode.SIMPLE_NAME == argument.getNodeType()
-						&& ((SimpleName) argument).getIdentifier().equals(parameter.getIdentifier())) {
+				if (ASTNode.SIMPLE_NAME == argument.getNodeType() && ((SimpleName) argument).getIdentifier()
+					.equals(parameter.getIdentifier())) {
 					Expression expression = methodInvocation.getExpression();
 					if (expression != null && ClassRelationUtil.isContentOfTypes(expression.resolveTypeBinding(),
 							Collections.singletonList(JAVA_UTIL_LIST))) {
@@ -200,7 +208,7 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 				}
 			}
 		}
-		
+
 		return false;
 	}
 

@@ -9,7 +9,7 @@ import org.junit.Test;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
 public class ASTNodeUtilTest {
-	
+
 	@Test
 	public void containsWildCards_wildCardTypeTree_nodeExists() throws Exception {
 		ASTNode astNode = ASTNodeBuilder.createBlock("List<? extends String> aList;"); //$NON-NLS-1$

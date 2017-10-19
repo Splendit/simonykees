@@ -27,7 +27,7 @@ public class UnhandledExceptionVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final String CHECKED_EXCEPTION_SUPERTYPE = java.lang.Exception.class.getName();
 	private static final List<String> CHECKED_EXCEPTION_TYPE_LIST = Collections
-			.singletonList(CHECKED_EXCEPTION_SUPERTYPE);
+		.singletonList(CHECKED_EXCEPTION_SUPERTYPE);
 
 	protected boolean containsCheckedException = false;
 	protected boolean containsThrowStatement = false;
@@ -35,23 +35,31 @@ public class UnhandledExceptionVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(TryStatement tryStatementNode) {
-		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class).stream().map(catchClause -> catchClause.getException().resolveBinding())
-				.forEach(exceptionVariableBinding -> {
-					if (exceptionVariableBinding != null) {
-						currentHandledExceptionsTypes.add(exceptionVariableBinding.getType().getQualifiedName());
-					}
-				});
+		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class)
+			.stream()
+			.map(catchClause -> catchClause.getException()
+				.resolveBinding())
+			.forEach(exceptionVariableBinding -> {
+				if (exceptionVariableBinding != null) {
+					currentHandledExceptionsTypes.add(exceptionVariableBinding.getType()
+						.getQualifiedName());
+				}
+			});
 		return true;
 	}
 
 	@Override
 	public void endVisit(TryStatement tryStatementNode) {
-		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class).stream().map(catchClause -> catchClause.getException().resolveBinding())
-				.forEach(exceptionVariableBinding -> {
-					if (exceptionVariableBinding != null) {
-						currentHandledExceptionsTypes.remove(exceptionVariableBinding.getType().getQualifiedName());
-					}
-				});
+		ASTNodeUtil.convertToTypedList(tryStatementNode.catchClauses(), CatchClause.class)
+			.stream()
+			.map(catchClause -> catchClause.getException()
+				.resolveBinding())
+			.forEach(exceptionVariableBinding -> {
+				if (exceptionVariableBinding != null) {
+					currentHandledExceptionsTypes.remove(exceptionVariableBinding.getType()
+						.getQualifiedName());
+				}
+			});
 	}
 
 	@Override
@@ -68,8 +76,8 @@ public class UnhandledExceptionVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 * checks the given method binding for declared exceptions and looks if those
-	 * exceptions are handled. if there is an unhandled exception the
+	 * checks the given method binding for declared exceptions and looks if
+	 * those exceptions are handled. if there is an unhandled exception the
 	 * {@link StreamForEachCheckValidStatementASTVisitor#containsCheckedException}
 	 * property is set, which prevents the enhanced for loop from transforming.
 	 * 

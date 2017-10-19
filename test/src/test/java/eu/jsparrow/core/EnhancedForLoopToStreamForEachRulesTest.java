@@ -17,7 +17,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class EnhancedForLoopToStreamForEachRulesTest extends SingleRuleTest {
-	
+
 	private static final String SAMPLE_FILE = "EnhancedForLoopToStreamForEachRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "enhancedForLoopToStreamForEach";
 
@@ -48,7 +48,6 @@ public class EnhancedForLoopToStreamForEachRulesTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-	
 
 	@Test
 	public void calculateEnabledForProjectShouldBeDisabled() {

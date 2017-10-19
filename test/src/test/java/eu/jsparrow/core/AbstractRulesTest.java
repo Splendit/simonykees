@@ -56,7 +56,8 @@ public abstract class AbstractRulesTest {
 			String packageString = "eu.jsparrow.sample.utilities"; //$NON-NLS-1$
 			IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
 			for (Path utilityPath : loadUtilityClasses(UTILITY_DIRECTORY)) {
-				String utilityClassName = utilityPath.getFileName().toString();
+				String utilityClassName = utilityPath.getFileName()
+					.toString();
 				String utilitySource = new String(Files.readAllBytes(utilityPath), StandardCharsets.UTF_8);
 				packageFragment.createCompilationUnit(utilityClassName, utilitySource, true, null);
 			}
@@ -83,8 +84,10 @@ public abstract class AbstractRulesTest {
 	protected static List<Object[]> load(String postRuleDirectory) throws IOException {
 		List<Object[]> data = new ArrayList<>();
 		for (Path postRulePath : Files.newDirectoryStream(Paths.get(postRuleDirectory), RulesTestUtil.RULE_SUFFIX)) {
-			Path preRulePath = Paths.get(RulesTestUtil.PRERULE_DIRECTORY, postRulePath.getFileName().toString());
-			data.add(new Object[] { preRulePath.getFileName().toString(), preRulePath, postRulePath });
+			Path preRulePath = Paths.get(RulesTestUtil.PRERULE_DIRECTORY, postRulePath.getFileName()
+				.toString());
+			data.add(new Object[] { preRulePath.getFileName()
+				.toString(), preRulePath, postRulePath });
 		}
 		return data;
 	}
@@ -116,7 +119,8 @@ public abstract class AbstractRulesTest {
 		 */
 		IProgressMonitor monitor = new NullProgressMonitor();
 
-		rules.stream().forEach(rule -> rule.calculateEnabledForProject(packageFragment.getJavaProject()));
+		rules.stream()
+			.forEach(rule -> rule.calculateEnabledForProject(packageFragment.getJavaProject()));
 
 		refactoringPipeline.prepareRefactoring(javaElements, monitor);
 		refactoringPipeline.doRefactoring(monitor);

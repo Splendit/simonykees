@@ -255,7 +255,8 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 			updatedIconLabel.setVisible(true);
 		}
 
-		updatedIconLabel.getParent().layout();
+		updatedIconLabel.getParent()
+			.layout();
 	}
 
 	@Override

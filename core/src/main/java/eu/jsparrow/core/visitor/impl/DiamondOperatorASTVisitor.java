@@ -43,13 +43,13 @@ import eu.jsparrow.i18n.Messages;
 public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final Logger logger = LoggerFactory.getLogger(DiamondOperatorASTVisitor.class);
-	
+
 	private JavaVersion compilerCompliance;
-	
+
 	public DiamondOperatorASTVisitor(JavaVersion compilerCompliance) {
 		this.compilerCompliance = compilerCompliance;
 	}
-	
+
 	/**
 	 * Covers the case when a diamond operator can be used in the initialization
 	 * or in an assignment expression.
@@ -75,7 +75,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 				 */
 
 				if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()
-						&& (!hasParameterizedArguments(node) || isMethodArgumentsTypeInferable()) 
+						&& (!hasParameterizedArguments(node) || isMethodArgumentsTypeInferable())
 						&& !hasMissingLambdaTypeArguments(node)) {
 
 					/*
@@ -129,7 +129,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 
 				} else if (ASTNode.METHOD_INVOCATION == parent.getNodeType() && isMethodArgumentsTypeInferable()
 						&& MethodInvocation.ARGUMENTS_PROPERTY == node.getLocationInParent()) {
-					MethodInvocation methodInvocation = (MethodInvocation)parent;
+					MethodInvocation methodInvocation = (MethodInvocation) parent;
 					/*
 					 * Covers the case when diamond operator can be used on the
 					 * arguments of a method invocation. e.g: map.put("key", new
@@ -150,8 +150,8 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 					IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
 					if (-1 != i && methodBinding != null) {
 						ITypeBinding[] parameterTypes = methodBinding.getParameterTypes();
-						if (parameterTypes != null && parameterTypes.length > i
-								&& !ClassRelationUtil.isOverloadedWithParameterizedTypes(methodInvocation, methodBinding, i)) {
+						if (parameterTypes != null && parameterTypes.length > i && !ClassRelationUtil
+							.isOverloadedWithParameterizedTypes(methodInvocation, methodBinding, i)) {
 							ITypeBinding parameterType = parameterTypes[i];
 							parameterTypeArgs = parameterType.getTypeArguments();
 						}
@@ -198,10 +198,11 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		 * invoking a parameterized constructor which takes as parameters method
 		 * references having more than one missing type arguments.
 		 */
-		return ASTNodeUtil.returnTypedList(node.arguments(), Expression.class).stream()
-				.anyMatch(this::isLambdaWithMissingTypeArguments);
+		return ASTNodeUtil.returnTypedList(node.arguments(), Expression.class)
+			.stream()
+			.anyMatch(this::isLambdaWithMissingTypeArguments);
 	}
-	
+
 	/**
 	 * Checks if the given expression is a {@link MethodReference} invoked
 	 * without the required type arguments.
@@ -233,23 +234,28 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 				return false;
 			}
 			int numExpectedTypeArgs = expectedReferenceType.getTypeArguments().length;
-			return numExpectedTypeArgs > 1 && numExpectedTypeArgs > lambda.typeArguments().size();
+			return numExpectedTypeArgs > 1 && numExpectedTypeArgs > lambda.typeArguments()
+				.size();
 		}
 
 		return false;
 	}
 
 	/**
-	 * Checks whether any of the arguments of the class creation node is
-	 * a parameterized type. 
+	 * Checks whether any of the arguments of the class creation node is a
+	 * parameterized type.
 	 * 
-	 * @param node representing a new instance creation
+	 * @param node
+	 *            representing a new instance creation
 	 * 
-	 * @return {@code true} if any of the arguments is parameterized, or {@code false} otherwise.
+	 * @return {@code true} if any of the arguments is parameterized, or
+	 *         {@code false} otherwise.
 	 */
 	protected boolean hasParameterizedArguments(ClassInstanceCreation node) {
 		List<Expression> arguments = ASTNodeUtil.returnTypedList(node.arguments(), Expression.class);
-		return arguments.stream().map(Expression::resolveTypeBinding).anyMatch(ITypeBinding::isParameterizedType);
+		return arguments.stream()
+			.map(Expression::resolveTypeBinding)
+			.anyMatch(ITypeBinding::isParameterizedType);
 	}
 
 	/**
@@ -260,7 +266,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 	 *         {@value JavaVersion#JAVA_1_8} or new, {@code false} otherwise.
 	 */
 	private boolean isMethodArgumentsTypeInferable() {
-		if(compilerCompliance != null) {
+		if (compilerCompliance != null) {
 			return compilerCompliance.atLeast(JavaVersion.JAVA_1_8);
 		}
 		return false;
@@ -303,6 +309,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		logger.debug(Messages.DiamondOperatorASTVisitor_using_diamond_operator);
 		ListRewrite typeArgumentsListRewrite = astRewrite.getListRewrite(parameterizedType,
 				ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
-		rhsTypeArguments.stream().forEach(type -> typeArgumentsListRewrite.remove(type, null));
+		rhsTypeArguments.stream()
+			.forEach(type -> typeArgumentsListRewrite.remove(type, null));
 	}
 }

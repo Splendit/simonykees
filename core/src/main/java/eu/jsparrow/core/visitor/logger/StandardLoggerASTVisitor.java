@@ -98,8 +98,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String LOG4J_LOGGER_FACTORY_QUALIFIED_NAME = "org.apache.logging.log4j.LogManager"; //$NON-NLS-1$
 	private static final String SEPARATOR = "->"; //$NON-NLS-1$
 
-	static final List<String> exceptionQualifiedName = Collections
-			.singletonList(java.lang.Exception.class.getName());
+	static final List<String> exceptionQualifiedName = Collections.singletonList(java.lang.Exception.class.getName());
 
 	private boolean importsNeeded = false;
 
@@ -151,16 +150,20 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 		// checking whether there is a logger imported!!!
 		boolean existingLoggerImported = ASTNodeUtil
-				.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class).stream()
-				.filter(importDecl -> !importDecl.isOnDemand()).map(ImportDeclaration::getName)
-				.filter(Name::isQualifiedName).map(QualifiedName.class::cast)
-				.anyMatch(this::isClashingLoggerName);
+			.convertToTypedList(compilationUnit.imports(), ImportDeclaration.class)
+			.stream()
+			.filter(importDecl -> !importDecl.isOnDemand())
+			.map(ImportDeclaration::getName)
+			.filter(Name::isQualifiedName)
+			.map(QualifiedName.class::cast)
+			.anyMatch(this::isClashingLoggerName);
 
 		return noClashingTypes && !existingLoggerImported && super.visit(compilationUnit);
 	}
-	
+
 	private boolean isClashingLoggerName(QualifiedName name) {
-		return LOGGER_CLASS_NAME.equals(name.getName().getIdentifier()) && !loggerQualifiedName.equals(name.getFullyQualifiedName());
+		return LOGGER_CLASS_NAME.equals(name.getName()
+			.getIdentifier()) && !loggerQualifiedName.equals(name.getFullyQualifiedName());
 	}
 
 	@Override
@@ -174,8 +177,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
 		visitNewTypeDeclaration(typeDeclaration);
-		
-		
+
 		return true;
 	}
 
@@ -266,7 +268,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 			List<Expression> logArguments = calcLogArgument(arguments, methodIdentifier);
 			SimpleName qualifierName = expressionQualifier.getName();
 			calcReplacingOption(arguments, qualifierName)
-					.ifPresent(replacingOption -> replaceMethod(methodInvocation, replacingOption, logArguments));
+				.ifPresent(replacingOption -> replaceMethod(methodInvocation, replacingOption, logArguments));
 
 		} else if (PRINT_STACK_TRACE.equals(methodIdentifier)
 				&& !StringUtils.isEmpty(replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE_KEY))) {
@@ -336,9 +338,10 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		}
 		this.typeDeclaration = abstractType;
 		this.nestedTypeDeclarationLevel++;
-		findDeclaredLogger(abstractType).ifPresent(identifier -> loggerNames.put(generateUniqueTypeId(abstractType), identifier));
+		findDeclaredLogger(abstractType)
+			.ifPresent(identifier -> loggerNames.put(generateUniqueTypeId(abstractType), identifier));
 	}
-	
+
 	/**
 	 * Checks if a logger of type {@value #loggerQualifiedName} is declared as a
 	 * field in the given type declaration.
@@ -349,15 +352,19 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 *         logger declaration was found;
 	 */
 	private Optional<String> findDeclaredLogger(AbstractTypeDeclaration typeDeclaration) {
-		return ASTNodeUtil.convertToTypedList(typeDeclaration.bodyDeclarations(), FieldDeclaration.class).stream()
-				.filter(field -> {
-					Type type = field.getType();
-					ITypeBinding typeBinding = type.resolveBinding();
-					String qualifiedName = typeBinding.getQualifiedName();
-					return loggerQualifiedName.equals(qualifiedName);
-				}).flatMap(field -> ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
-						.stream())
-				.map(VariableDeclarationFragment::getName).map(SimpleName::getIdentifier).findAny();
+		return ASTNodeUtil.convertToTypedList(typeDeclaration.bodyDeclarations(), FieldDeclaration.class)
+			.stream()
+			.filter(field -> {
+				Type type = field.getType();
+				ITypeBinding typeBinding = type.resolveBinding();
+				String qualifiedName = typeBinding.getQualifiedName();
+				return loggerQualifiedName.equals(qualifiedName);
+			})
+			.flatMap(field -> ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
+				.stream())
+			.map(VariableDeclarationFragment::getName)
+			.map(SimpleName::getIdentifier)
+			.findAny();
 	}
 
 	/**
@@ -463,7 +470,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	private Optional<String> calcReplacingOption(List<Expression> arguments, SimpleName qualiferName) {
 		ExceptionsASTVisitor visitor = new ExceptionsASTVisitor();
 		arguments.forEach(argument -> argument.accept(visitor));
-		boolean logsException = !visitor.getExceptions().isEmpty();
+		boolean logsException = !visitor.getExceptions()
+			.isEmpty();
 		String option = ""; //$NON-NLS-1$
 		if (logsException && OUT.equals(qualiferName.getIdentifier())) {
 			option = replacingOptions.get(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY);
@@ -475,7 +483,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 			option = replacingOptions.get(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY);
 		}
 
-		return Optional.of(option).filter(s -> !s.isEmpty());
+		return Optional.of(option)
+			.filter(s -> !s.isEmpty());
 	}
 
 	/**
@@ -502,7 +511,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		astRewrite.replace(methodInvocation.getExpression(), loggerName, null);
 		ListRewrite argRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
 		ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
-				.forEach(arg -> argRewrite.remove(arg, null));
+			.forEach(arg -> argRewrite.remove(arg, null));
 		logArguments.forEach(logArgument -> argRewrite.insertLast(logArgument, null));
 	}
 
@@ -627,7 +636,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		MethodInvocation methodInvocation = ast.newMethodInvocation();
 		ListRewrite miListRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
 		TypeLiteral typeLiteral = ast.newTypeLiteral();
-		typeLiteral.setType(ast.newSimpleType(ast.newName(typeDeclaration.getName().getIdentifier())));
+		typeLiteral.setType(ast.newSimpleType(ast.newName(typeDeclaration.getName()
+			.getIdentifier())));
 
 		switch (this.loggerQualifiedName) {
 		case StandardLoggerConstants.SLF4J_LOGGER:
@@ -663,8 +673,11 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 		VariableDeclarationsVisitor declVisitor = new VariableDeclarationsVisitor();
 		rootType.accept(declVisitor);
-		List<String> declaredNames = declVisitor.getVariableDeclarationNames().stream().map(SimpleName::getIdentifier)
-				.distinct().collect(Collectors.toList());
+		List<String> declaredNames = declVisitor.getVariableDeclarationNames()
+			.stream()
+			.map(SimpleName::getIdentifier)
+			.distinct()
+			.collect(Collectors.toList());
 		String suffix = ""; //$NON-NLS-1$
 		int count = 0;
 		while (declaredNames.contains(DEFAULT_LOGGER_NAME + suffix)
@@ -690,7 +703,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 *         compilation unit and its length.
 	 */
 	private String generateUniqueTypeId(AbstractTypeDeclaration typeDeclaration) {
-		return typeDeclaration.getName().getIdentifier() + SEPARATOR + typeDeclaration.getStartPosition() + SEPARATOR
-				+ typeDeclaration.getLength();
+		return typeDeclaration.getName()
+			.getIdentifier() + SEPARATOR + typeDeclaration.getStartPosition() + SEPARATOR + typeDeclaration.getLength();
 	}
 }

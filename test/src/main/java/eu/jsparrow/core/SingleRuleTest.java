@@ -43,7 +43,8 @@ public abstract class SingleRuleTest {
 		String packageString = "eu.jsparrow.sample.preRule"; //$NON-NLS-1$
 		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
 
-		String fileName = preFile.getFileName().toString();
+		String fileName = preFile.getFileName()
+			.toString();
 		String content = new String(Files.readAllBytes(preFile), StandardCharsets.UTF_8);
 
 		ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);
@@ -65,7 +66,8 @@ public abstract class SingleRuleTest {
 		String packageString = "eu.jsparrow.sample.utilities"; //$NON-NLS-1$
 		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
 		for (Path utilityPath : loadUtilityClasses(RulesTestUtil.BASE_DIRECTORY + "/utilities")) { //$NON-NLS-1$
-			String utilityClassName = utilityPath.getFileName().toString();
+			String utilityClassName = utilityPath.getFileName()
+				.toString();
 			String utilitySource = new String(Files.readAllBytes(utilityPath), StandardCharsets.UTF_8);
 			packageFragment.createCompilationUnit(utilityClassName, utilitySource, true, null);
 		}

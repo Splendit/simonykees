@@ -15,7 +15,8 @@ public class SimonykeesPreferenceInitializer extends AbstractPreferenceInitializ
 
 	@Override
 	public void initializeDefaultPreferences() {
-		IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
+		IPreferenceStore preferenceStore = Activator.getDefault()
+			.getPreferenceStore();
 
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.PROFILE_LIST,
 				SimonykeesPreferenceManager.getDefaultProfileList());

@@ -57,7 +57,8 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 	public Color getForeground(Object element) {
 		if (element instanceof RefactoringRule<?>) {
 			if (!((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) element).isEnabled()) {
-				return Display.getDefault().getSystemColor(SWT.COLOR_TITLE_INACTIVE_FOREGROUND);
+				return Display.getDefault()
+					.getSystemColor(SWT.COLOR_TITLE_INACTIVE_FOREGROUND);
 			}
 		}
 		return null;
@@ -68,7 +69,8 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 	public Color getBackground(Object element) {
 		if (element instanceof RefactoringRule<?>) {
 			if (!((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) element).isEnabled()) {
-				return Display.getDefault().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND);
+				return Display.getDefault()
+					.getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND);
 			}
 		}
 		return null;

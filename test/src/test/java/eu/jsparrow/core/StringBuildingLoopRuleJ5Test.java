@@ -17,12 +17,11 @@ import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class StringBuildingLoopRuleJ5Test extends SingleRuleTest {
-	
+
 	private static final String SAMPLE_FILE = "StringBuildingLoopRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "stringBuildingLoopJ5";
 
 	private StringBuildingLoopRule rule;
-
 
 	@Before
 	public void setUp() throws Exception {
@@ -34,10 +33,10 @@ public class StringBuildingLoopRuleJ5Test extends SingleRuleTest {
 	public void testTransformationWithDefaultFile() throws Exception {
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
 		rule.ruleSpecificImplementation(testProject);
-		
+
 		Path preRule = getPreRuleFile(SAMPLE_FILE);
 		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
-		
+
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
@@ -61,5 +60,5 @@ public class StringBuildingLoopRuleJ5Test extends SingleRuleTest {
 
 		assertFalse(rule.isEnabled());
 	}
-	
+
 }

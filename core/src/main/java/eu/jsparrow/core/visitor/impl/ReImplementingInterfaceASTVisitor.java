@@ -28,7 +28,8 @@ public class ReImplementingInterfaceASTVisitor extends AbstractASTRewriteASTVisi
 
 	@Override
 	public boolean visit(TypeDeclaration typeDeclarationNode) {
-		if (!typeDeclarationNode.isInterface() && !typeDeclarationNode.superInterfaceTypes().isEmpty()) {
+		if (!typeDeclarationNode.isInterface() && !typeDeclarationNode.superInterfaceTypes()
+			.isEmpty()) {
 			Type superclass = typeDeclarationNode.getSuperclassType();
 			if (superclass != null) {
 				List<Type> interfaces = ASTNodeUtil.convertToTypedList(typeDeclarationNode.superInterfaceTypes(),
@@ -43,7 +44,7 @@ public class ReImplementingInterfaceASTVisitor extends AbstractASTRewriteASTVisi
 								TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY);
 
 						duplicateInterfaces
-								.forEach(duplicateInterface -> interfacesListRewrite.remove(duplicateInterface, null));
+							.forEach(duplicateInterface -> interfacesListRewrite.remove(duplicateInterface, null));
 					}
 				}
 			}
@@ -57,8 +58,8 @@ public class ReImplementingInterfaceASTVisitor extends AbstractASTRewriteASTVisi
 	 * duplicates
 	 * 
 	 * @param superclass
-	 *            {@link ITypeBinding} from the super class, where the search should
-	 *            start
+	 *            {@link ITypeBinding} from the super class, where the search
+	 *            should start
 	 * @param interfaces
 	 *            a list of interfaces (of type {@link Type}) which the current
 	 *            class implements
@@ -67,22 +68,22 @@ public class ReImplementingInterfaceASTVisitor extends AbstractASTRewriteASTVisi
 	 */
 	private List<Type> getDuplicateInterfaces(ITypeBinding superclass, List<Type> interfaces) {
 		List<Type> duplicateInterfaces = new LinkedList<>();
-		
+
 		if (superclass != null && interfaces != null && !interfaces.isEmpty()) {
 			ITypeBinding superclassTypeBinding = superclass;
-			
+
 			while (superclassTypeBinding != null) {
 				ITypeBinding[] superclassInterfaces = superclassTypeBinding.getInterfaces();
 
-				Arrays.stream(superclassInterfaces).forEach(superClassInterface ->
-					interfaces.stream().filter(currentInterface -> !duplicateInterfaces.contains(currentInterface))
-							.forEach(currentInterface -> {
-								ITypeBinding interfaceTypeBinding = currentInterface.resolveBinding();
-								if (ClassRelationUtil.compareITypeBinding(superClassInterface, interfaceTypeBinding)) {
-									duplicateInterfaces.add(currentInterface);
-								}
-							})
-				);
+				Arrays.stream(superclassInterfaces)
+					.forEach(superClassInterface -> interfaces.stream()
+						.filter(currentInterface -> !duplicateInterfaces.contains(currentInterface))
+						.forEach(currentInterface -> {
+							ITypeBinding interfaceTypeBinding = currentInterface.resolveBinding();
+							if (ClassRelationUtil.compareITypeBinding(superClassInterface, interfaceTypeBinding)) {
+								duplicateInterfaces.add(currentInterface);
+							}
+						}));
 
 				superclassTypeBinding = superclassTypeBinding.getSuperclass();
 			}

@@ -17,7 +17,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class StringBuildingLoopRuleTest extends SingleRuleTest {
-	
+
 	private static final String SAMPLE_FILE = "StringBuildingLoopRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "stringBuildingLoop";
 
@@ -33,10 +33,10 @@ public class StringBuildingLoopRuleTest extends SingleRuleTest {
 	public void testTransformationWithDefaultFile() throws Exception {
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.ruleSpecificImplementation(testProject);
-		
+
 		Path preRule = getPreRuleFile(SAMPLE_FILE);
 		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
-		
+
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
@@ -51,7 +51,6 @@ public class StringBuildingLoopRuleTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-	
 
 	@Test
 	public void calculateEnabledForProjectShouldBeDisabled() {

@@ -45,8 +45,9 @@ class FieldReferencesVisitor extends ASTVisitor {
 		IBinding resolvedBinding = simpleName.resolveBinding();
 
 		if (resolvedBinding != null && resolvedBinding.getKind() == IBinding.VARIABLE && !simpleName.isDeclaration()
-				&& identifier.equals(targetNameIdentifier) && ClassRelationUtil.compareITypeBinding(
-						simpleName.resolveTypeBinding().getErasure(), targetTypeBinding.getErasure())) {
+				&& identifier.equals(targetNameIdentifier)
+				&& ClassRelationUtil.compareITypeBinding(simpleName.resolveTypeBinding()
+					.getErasure(), targetTypeBinding.getErasure())) {
 			ASTNode parent = simpleName.getParent();
 			boolean isReference = false;
 
@@ -57,9 +58,10 @@ class FieldReferencesVisitor extends ASTVisitor {
 					/*
 					 * if the simpleName stands at the tail of the qualifedName
 					 */
-					ITypeBinding qualifierTypeBinding = ((QualifiedName) parent).getQualifier().resolveTypeBinding();
+					ITypeBinding qualifierTypeBinding = ((QualifiedName) parent).getQualifier()
+						.resolveTypeBinding();
 					if (qualifierTypeBinding != null && ClassRelationUtil
-							.compareITypeBinding(parentTypeBinding.getErasure(), qualifierTypeBinding.getErasure())) {
+						.compareITypeBinding(parentTypeBinding.getErasure(), qualifierTypeBinding.getErasure())) {
 						isReference = true;
 					}
 				} else if (!declaredLocalVarName.contains(identifier)) {
@@ -69,17 +71,19 @@ class FieldReferencesVisitor extends ASTVisitor {
 
 			} else if (parent.getNodeType() == ASTNode.FIELD_ACCESS) {
 				/*
-				 * a 'field access' is an expression of the form: this.[field_name]
+				 * a 'field access' is an expression of the form:
+				 * this.[field_name]
 				 */
-				ITypeBinding expressionTypeBinding = ((FieldAccess) parent).getExpression().resolveTypeBinding();
+				ITypeBinding expressionTypeBinding = ((FieldAccess) parent).getExpression()
+					.resolveTypeBinding();
 				if (expressionTypeBinding != null && ClassRelationUtil
-						.compareITypeBinding(parentTypeBinding.getErasure(), expressionTypeBinding.getErasure())) {
+					.compareITypeBinding(parentTypeBinding.getErasure(), expressionTypeBinding.getErasure())) {
 					isReference = true;
 				}
 			} else if (!declaredLocalVarName.contains(identifier)) {
 				/*
-				 * If not a field access and not a qualified name, then the simpleName which is
-				 * not a local variable, is a field access.
+				 * If not a field access and not a qualified name, then the
+				 * simpleName which is not a local variable, is a field access.
 				 */
 				isReference = true;
 			}

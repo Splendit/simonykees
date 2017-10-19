@@ -7,8 +7,8 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
 import eu.jsparrow.license.netlicensing.LicenseType;
 
 /**
- * A super class for all license models. Enforces construction of 
- * validation parameters. 
+ * A super class for all license models. Enforces construction of validation
+ * parameters.
  * 
  * @author Ardit Ymeri
  * @since 1.0

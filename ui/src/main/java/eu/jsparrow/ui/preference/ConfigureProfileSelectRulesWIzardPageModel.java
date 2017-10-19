@@ -51,7 +51,10 @@ public class ConfigureProfileSelectRulesWIzardPageModel extends AbstractSelectRu
 		StatusInfo status = new StatusInfo();
 		// if name is changed and already exists in profiles list it can not be
 		// used, name has to be unique
-		if (SimonykeesPreferenceManager.getAllProfileIds().contains(StringUtils.trim(name)) && !StringUtils.trim(name).equals(this.name)) {
+		if (SimonykeesPreferenceManager.getAllProfileIds()
+			.contains(StringUtils.trim(name))
+				&& !StringUtils.trim(name)
+					.equals(this.name)) {
 			status.setError(Messages.ConfigureProfileSelectRulesWIzardPageModel_error_NameExists);
 		} else {
 			this.newName = StringUtils.trim(name);

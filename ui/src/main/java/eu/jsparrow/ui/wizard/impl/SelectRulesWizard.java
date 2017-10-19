@@ -84,7 +84,8 @@ public class SelectRulesWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		if (model.getSelectionAsList().isEmpty()) {
+		if (model.getSelectionAsList()
+			.isEmpty()) {
 			return false;
 		} else {
 			return true;
@@ -94,15 +95,20 @@ public class SelectRulesWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 
-		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass().getSimpleName(),
-				this.javaElements.get(0).getJavaProject().getElementName()));
+		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
+			.getSimpleName(),
+				this.javaElements.get(0)
+					.getJavaProject()
+					.getElementName()));
 
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = model.getSelectionAsList();
 
 		refactoringPipeline.setRules(rules);
 		refactoringPipeline.setSourceMap(refactoringPipeline.getInitialSourceMap());
 
-		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
+		Rectangle rectangle = Display.getCurrent()
+			.getPrimaryMonitor()
+			.getBounds();
 
 		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
 
@@ -133,7 +139,8 @@ public class SelectRulesWizard extends Wizard {
 			@Override
 			public void done(IJobChangeEvent event) {
 
-				if (event.getResult().isOK()) {
+				if (event.getResult()
+					.isOK()) {
 					if (refactoringPipeline.hasChanges()) {
 						synchronizeWithUIShowRefactoringPreviewWizard(refactoringPipeline, rectangle);
 					} else {
@@ -158,38 +165,47 @@ public class SelectRulesWizard extends Wizard {
 	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
 			Rectangle rectangle) {
 
-		Display.getDefault().asyncExec(() -> {
+		Display.getDefault()
+			.asyncExec(() -> {
 
-			logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
-					javaElements.get(0).getJavaProject().getElementName()));
-			logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
-					javaElements.get(0).getJavaProject().getElementName(),
-					refactoringPipeline.getRules().stream()
+				logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass()
+					.getSimpleName(),
+						javaElements.get(0)
+							.getJavaProject()
+							.getElementName()));
+				logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes, javaElements.get(0)
+					.getJavaProject()
+					.getElementName(),
+						refactoringPipeline.getRules()
+							.stream()
 							.filter(rule -> null != refactoringPipeline.getChangesForRule(rule)
-									&& !refactoringPipeline.getChangesForRule(rule).isEmpty())
+									&& !refactoringPipeline.getChangesForRule(rule)
+										.isEmpty())
 							.map(RefactoringRule::getName)
 							.collect(Collectors.joining("; ")))); //$NON-NLS-1$
 
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactoringPipeline)) {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactoringPipeline)) {
 
-				@Override
-				protected void nextPressed() {
-					((RefactoringPreviewWizard) getWizard()).pressedNext();
-					super.nextPressed();
-				}
+					@Override
+					protected void nextPressed() {
+						((RefactoringPreviewWizard) getWizard()).pressedNext();
+						super.nextPressed();
+					}
 
-				@Override
-				protected void backPressed() {
-					((RefactoringPreviewWizard) getWizard()).pressedBack();
-					super.backPressed();
-				}
+					@Override
+					protected void backPressed() {
+						((RefactoringPreviewWizard) getWizard()).pressedBack();
+						super.backPressed();
+					}
 
-			};
+				};
 
-			// maximizes the RefactoringPreviewWizard
-			dialog.setPageSize(rectangle.width, rectangle.height);
-			dialog.open();
-		});
+				// maximizes the RefactoringPreviewWizard
+				dialog.setPageSize(rectangle.width, rectangle.height);
+				dialog.open();
+			});
 	}
 }

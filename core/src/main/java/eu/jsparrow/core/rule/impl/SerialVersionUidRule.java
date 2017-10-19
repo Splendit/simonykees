@@ -20,7 +20,7 @@ public class SerialVersionUidRule extends RefactoringRule<SerialVersionUidASTVis
 		this.name = Messages.SerialVersionUidRule_name;
 		this.description = Messages.SerialVersionUidRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;

@@ -53,7 +53,8 @@ public class NodeBuilder {
 	public static MethodInvocation newMethodInvocation(AST ast, Expression optionalExpression, SimpleName name,
 			Expression argument) {
 		MethodInvocation resultMI = newMethodInvocation(ast, optionalExpression, name);
-		resultMI.arguments().add(argument);
+		resultMI.arguments()
+			.add(argument);
 		return resultMI;
 	}
 
@@ -74,7 +75,8 @@ public class NodeBuilder {
 	public static MethodInvocation newMethodInvocation(AST ast, Expression optionalExpression, SimpleName name,
 			List<Expression> arguments) {
 		MethodInvocation resultMI = newMethodInvocation(ast, optionalExpression, name);
-		resultMI.arguments().addAll(arguments);
+		resultMI.arguments()
+			.addAll(arguments);
 		return resultMI;
 	}
 
@@ -161,7 +163,8 @@ public class NodeBuilder {
 			List<ASTNode> newModifier) {
 		FieldDeclaration fieldDeclaration = ast.newFieldDeclaration(serialUidNode);
 		fieldDeclaration.setType(type);
-		fieldDeclaration.modifiers().addAll(newModifier);
+		fieldDeclaration.modifiers()
+			.addAll(newModifier);
 		return fieldDeclaration;
 	}
 
@@ -189,12 +192,10 @@ public class NodeBuilder {
 	 * @return {@link Type} of the given {@link ITypeBinding}
 	 */
 	public static Type typeFromBinding(AST ast, ITypeBinding typeBinding) {
-		if (ast == null)
-		 {
+		if (ast == null) {
 			throw new NullPointerException("ast is null"); //$NON-NLS-1$
 		}
-		if (typeBinding == null)
-		 {
+		if (typeBinding == null) {
 			throw new NullPointerException("typeBinding is null"); //$NON-NLS-1$
 		}
 

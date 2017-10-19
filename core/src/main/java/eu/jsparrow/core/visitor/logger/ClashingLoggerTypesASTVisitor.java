@@ -19,11 +19,11 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
  */
 class ClashingLoggerTypesASTVisitor extends ASTVisitor {
 
-
 	private final StandardLoggerASTVisitor standardLoggerASTVisitor;
 
 	/**
-	 * @param standardLoggerASTVisitor the parent ASTVisitor
+	 * @param standardLoggerASTVisitor
+	 *            the parent ASTVisitor
 	 */
 	ClashingLoggerTypesASTVisitor(StandardLoggerASTVisitor standardLoggerASTVisitor) {
 		this.standardLoggerASTVisitor = standardLoggerASTVisitor;
@@ -38,7 +38,8 @@ class ClashingLoggerTypesASTVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(TypeDeclaration typeDeclaration) {
-		String typeIdentifier = typeDeclaration.getName().getIdentifier();
+		String typeIdentifier = typeDeclaration.getName()
+			.getIdentifier();
 		if (isClashingLoggerName(typeIdentifier)) {
 			clashingFound = true;
 		}
@@ -48,7 +49,7 @@ class ClashingLoggerTypesASTVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(SimpleType simpleType) {
 		Name typeName = simpleType.getName();
-		
+
 		if (typeName.isSimpleName() && isClashingLoggerName(((SimpleName) typeName).getIdentifier(), simpleType)) {
 			clashingFound = true;
 		}
@@ -56,16 +57,18 @@ class ClashingLoggerTypesASTVisitor extends ASTVisitor {
 	}
 
 	private boolean isClashingLoggerName(String typeIdentifier) {
-		return StandardLoggerASTVisitor.LOGGER_CLASS_NAME.equals(typeIdentifier) || StandardLoggerASTVisitor.LOG4J_LOGGER_MANAGER.equals(typeIdentifier)
+		return StandardLoggerASTVisitor.LOGGER_CLASS_NAME.equals(typeIdentifier)
+				|| StandardLoggerASTVisitor.LOG4J_LOGGER_MANAGER.equals(typeIdentifier)
 				|| StandardLoggerASTVisitor.SLF4J_LOGGER_FACTORY.equals(typeIdentifier);
 	}
-	
+
 	private boolean isClashingLoggerName(String typeIdentifier, SimpleType simpleType) {
-		if(isClashingLoggerName(typeIdentifier)) {
+		if (isClashingLoggerName(typeIdentifier)) {
 			ITypeBinding typeBinding = simpleType.resolveBinding();
-			if(typeBinding != null) {
-				 String bindingQualifiedName = typeBinding.getQualifiedName();
-				 return !this.standardLoggerASTVisitor.newImports.get(this.standardLoggerASTVisitor.loggerQualifiedName).contains(bindingQualifiedName);
+			if (typeBinding != null) {
+				String bindingQualifiedName = typeBinding.getQualifiedName();
+				return !this.standardLoggerASTVisitor.newImports.get(this.standardLoggerASTVisitor.loggerQualifiedName)
+					.contains(bindingQualifiedName);
 			}
 		}
 		return false;

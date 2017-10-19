@@ -57,7 +57,7 @@ public class ConfigureProfileSelectRulesWizardPage extends AbstractSelectRulesWi
 		nameInputText.addModifyListener((ModifyEvent e) -> {
 			Text source = (Text) e.getSource();
 			fTypeNameStatus = ((ConfigureProfileSelectRulesWizardPageControler) controler)
-					.nameTextChanged(source.getText());
+				.nameTextChanged(source.getText());
 			doStatusUpdate();
 			getContainer().updateButtons();
 		});
@@ -74,7 +74,7 @@ public class ConfigureProfileSelectRulesWizardPage extends AbstractSelectRulesWi
 				fTypeNameStatus = new StatusInfo();
 			}
 		} else {
-			// if status already contains exception, do nothing 
+			// if status already contains exception, do nothing
 		}
 
 		super.doStatusUpdate(fTypeNameStatus);
