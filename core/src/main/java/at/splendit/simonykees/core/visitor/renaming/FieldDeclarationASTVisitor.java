@@ -149,6 +149,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 				if (optNewIdentifier.isPresent()
 						&& !isConflictingIdentifier(optNewIdentifier.get(), fieldDeclaration)) {
 					String newIdentifier = optNewIdentifier.get();
+					storeIJavaElement(compilationUnit.getJavaElement());
 					findFieldReferences(fragment).ifPresent(references -> {
 						fieldsMetaData.add(new FieldMetadata(compilationUnit, references, fragment, newIdentifier));
 						newNamesPerType.add(newIdentifier);
