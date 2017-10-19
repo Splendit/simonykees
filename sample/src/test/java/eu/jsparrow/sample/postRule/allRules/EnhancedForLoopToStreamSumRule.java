@@ -150,8 +150,8 @@ public class EnhancedForLoopToStreamSumRule {
 	}
 
 	/*
-	 * Summing values of different types. The sum variable could have different
-	 * type from the elements of the collection. i.e. adding apples to pears...
+	 * Summing values of different types. The sum variable could have different type
+	 * from the elements of the collection. i.e. adding apples to pears...
 	 */
 
 	public int incompatibleTypes(String input) {

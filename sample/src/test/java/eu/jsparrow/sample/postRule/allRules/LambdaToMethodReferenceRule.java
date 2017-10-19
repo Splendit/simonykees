@@ -348,10 +348,10 @@ public class LambdaToMethodReferenceRule {
 
 	class UsingApacheNumberUtils {
 		/**
-		 * There is already an existing import of another NumberUtils class.
-		 * Namely {@link NumberUtils}. Therefore,
-		 * {@link org.apache.commons.lang3.math.NumberUtils} has to always use a
-		 * fully qualified name.
+		 * There is already an existing import of another NumberUtils class. Namely
+		 * {@link NumberUtils}. Therefore,
+		 * {@link org.apache.commons.lang3.math.NumberUtils} has to always use a fully
+		 * qualified name.
 		 */
 		public org.apache.commons.lang3.math.NumberUtils getNumber() {
 			return null;

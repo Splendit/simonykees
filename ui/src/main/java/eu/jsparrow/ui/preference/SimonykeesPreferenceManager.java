@@ -18,7 +18,7 @@ import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 /**
  * Central point to access property values.
  * 
- * @author Ludwig Werzowa, Hannes Schweighofer
+ * @author Ludwig Werzowa, Hannes Schweighofer, Matthias Webhofer
  * @since 0.9.2
  */
 public class SimonykeesPreferenceManager {
@@ -101,6 +101,19 @@ public class SimonykeesPreferenceManager {
 	 */
 	public static void setEnableIntro(boolean enabled) {
 		store.setValue(SimonykeesPreferenceConstants.ENABLE_INTRO, enabled);
+	}
+
+	/**
+	 * Returns the current selection for enabling recursive package resolving
+	 * 
+	 * @return true for recursive package resolving, false otherwise
+	 */
+	public static boolean getResolvePackagesRecursively() {
+		return store.getBoolean(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY);
+	}
+
+	public static void setResolvePackagesRecursively(boolean enabled) {
+		store.setValue(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY, enabled);
 	}
 
 	/**
@@ -200,6 +213,7 @@ public class SimonykeesPreferenceManager {
 				store.getDefaultString(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT));
 
 		store.setValue(SimonykeesPreferenceConstants.ENABLE_INTRO, true);
+		store.setValue(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY, true);
 
 		profiles.clear();
 		defaultProfile = new DefaultProfile();

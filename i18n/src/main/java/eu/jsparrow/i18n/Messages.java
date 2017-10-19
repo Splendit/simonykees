@@ -141,9 +141,9 @@ public class Messages extends NLS {
 	public static String LicenseStatus_userMessage_NODE_LOCKED_HW_ID_FAILURE;
 	public static String LicenseStatus_userMessage_NODE_LOCKED_REGISTERED;
 	public static String LicenseStatus_userMessage_NONE;
-	public static String LicenseStatus_userMessage_TRIAL_EXPIRED;
-	public static String LicenseStatus_userMessage_TRIAL_HW_ID_FAILURE;
-	public static String LicenseStatus_userMessage_TRIAL_REGISTERED;
+	public static String LicenseStatus_userMessage_FREE_EXPIRED;
+	public static String LicenseStatus_userMessage_FREE_HW_ID_FAILURE;
+	public static String LicenseStatus_userMessage_FREE_REGISTERED;
 	public static String LicenseType_floating;
 	public static String LicenseType_node_locked;
 	public static String LicenseType_subscription;
@@ -208,7 +208,7 @@ public class Messages extends NLS {
 	public static String ReImplementingInterfaceRule_name;
 	public static String RefactoringSummaryWizardPage_description;
 	public static String RefactoringSummaryWizardPage_title;
-	public static String RefactoringSummaryWizardPage_warn_disableFinishWhenTrial;
+	public static String RefactoringSummaryWizardPage_warn_disableFinishWhenFree;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
@@ -263,6 +263,7 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_profileSettingsGroupTitle;
 	public static String SimonykeesPreferencePage_removeProfileButtonLabel;
 	public static String SimonykeesPreferencePage_Replace;
+	public static String SimonykeesPreferencePage_resolvePackagesRecursivelyLabel;
 	public static String SimonykeesPreferencePage_rules;
 	public static String SimonykeesPreferencePage_SelectedFileDoesNotExist;
 	public static String SimonykeesPreferencePage_SelectedPathIsDirectory;
