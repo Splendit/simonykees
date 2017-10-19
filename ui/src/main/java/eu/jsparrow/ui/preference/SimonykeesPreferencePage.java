@@ -1,7 +1,6 @@
 package eu.jsparrow.ui.preference;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,24 +9,24 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.RadioGroupFieldEditor;
-import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.TableEditor;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -49,12 +48,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	private static final Logger logger = LoggerFactory.getLogger(SimonykeesPreferencePage.class);
 
-	private RadioGroupFieldEditor useProfileOptionRadioGroup;
-	private int currentProfileSelection = 0;
-
 	private Table profilesTable;
-	private List<Button> buttons = new ArrayList<>();
 
+	private Button setDefaultProfileButton;
 	private Button newProfileButton;
 	private Button editProfileButton;
 	private Button removeProfileButton;
@@ -78,54 +74,33 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		font = getFieldEditorParent().getFont();
 		Composite composite = new Composite(getFieldEditorParent(), SWT.NONE);
 		composite.setFont(font);
-		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		GridLayout gridLayout = new GridLayout(2, false);
+		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		GridLayout gridLayout = new GridLayout(1, false);
 		composite.setLayout(gridLayout);
 
-		String[][] useProfileOption = new String[][] {
-				{ Messages.SimonykeesPreferencePage_useProfileOptionNoProfile,
-						SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE },
-				{ Messages.SimonykeesPreferencePage_useProfileOptionSelectedProfile,
-						SimonykeesPreferenceConstants.PROFILE_USE_OPTION_SELECTED_PROFILE } };
-
-		useProfileOptionRadioGroup = new RadioGroupFieldEditor(SimonykeesPreferenceConstants.PROFILE_USE_OPTION,
-				Messages.SimonykeesPreferencePage_useProfileOptionRadioGroupTitle, 1, useProfileOption, composite);
-		addField(useProfileOptionRadioGroup);
+		Group generalGroup = new Group(composite, SWT.NONE);
+		generalGroup.setText(Messages.SimonykeesPreferencePage_generalSettingsGroupTitle);
+		generalGroup.setFont(font);
+		generalGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		generalGroup.setLayout(new GridLayout(1, false));
+		
+		BooleanFieldEditor enableIntro = new BooleanFieldEditor(SimonykeesPreferenceConstants.ENABLE_INTRO,
+				Messages.SimonykeesPreferencePage_enableIntroText, generalGroup);
+		addField(enableIntro);
 
 		createProfilesTableView(composite);
 
-		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.ENABLE_INTRO,
-				Messages.SimonykeesPreferencePage_enableIntroText, composite));
-
-		initializeView();
-	}
-
-	@Override
-	public void propertyChange(PropertyChangeEvent event) {
-		super.propertyChange(event);
-		if (event.getSource() instanceof RadioGroupFieldEditor && ((RadioGroupFieldEditor) event.getSource())
-				.getPreferenceName().equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION)) {
-			if (event.getNewValue().toString().equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
-				profilesTable.deselectAll();
-				profilesTable.setEnabled(false);
-				newProfileButton.setEnabled(false);
-				editProfileButton.setEnabled(false);
-				removeProfileButton.setEnabled(false);
-				importProfileButton.setEnabled(false);
-				exportProfileButton.setEnabled(false);
-			} else {
-				profilesTable.setEnabled(true);
-				newProfileButton.setEnabled(true);
-				editProfileButton.setEnabled(false);
-				removeProfileButton.setEnabled(false);
-				importProfileButton.setEnabled(true);
-				exportProfileButton.setEnabled(true);
-			}
-		}
+		initializeButtons();
 	}
 
 	private void createProfilesTableView(Composite composite) {
-		Composite viewerComposite = new Composite(composite, SWT.NONE);
+		Group profileGroup = new Group(composite, SWT.NONE);
+		profileGroup.setText(Messages.SimonykeesPreferencePage_profileSettingsGroupTitle);
+		profileGroup.setFont(font);
+		profileGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
+		profileGroup.setLayout(new GridLayout(1, false));
+
+		Composite viewerComposite = new Composite(profileGroup, SWT.NONE);
 		viewerComposite.setFont(font);
 		GridLayout layout = new GridLayout(2, false);
 		layout.marginHeight = layout.marginWidth = 0;
@@ -140,18 +115,19 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		data = new GridData(GridData.FILL_BOTH);
 		profilesTable.setLayoutData(data);
 		profilesTable.setFont(font);
+
+		TableColumn checkMarkColumn = new TableColumn(profilesTable, SWT.LEFT);
+		checkMarkColumn.setWidth(20);
 		TableColumn column = new TableColumn(profilesTable, SWT.NONE);
 		column.setWidth(100);
+
 		populateTable();
 
 		profilesTable.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				buttons.get(currentProfileSelection).setSelection(false);
-				currentProfileSelection = ((Table) e.getSource()).getSelectionIndex();
-				buttons.get(currentProfileSelection).setSelection(true);
-				handleSelectionChanged(currentProfileSelection);
+				handleSelectionChanged();
 			}
 		});
 
@@ -160,40 +136,61 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	private void populateTable() {
 		for (int i = 0; i < SimonykeesPreferenceManager.getAllProfileIds().size(); i++) {
-			new TableItem(profilesTable, SWT.NONE);
-		}
-		TableItem[] items = profilesTable.getItems();
-		for (int i = 0; i < items.length; i++) {
-			TableEditor editor = new TableEditor(profilesTable);
-			TableItem item = items[i];
-			Button button = new Button(profilesTable, SWT.RADIO);
-			button.setText(SimonykeesPreferenceManager.getAllProfileIds().get(i));
-			button.setFont(font);
-			button.pack();
-			button.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					super.widgetSelected(e);
-					profilesTable.setSelection(item);
-					currentProfileSelection = buttons.indexOf(button);
-					handleSelectionChanged(currentProfileSelection);
-				}
-			});
-			buttons.add(button);
-			editor.minimumWidth = button.getSize().x;
-			editor.horizontalAlignment = SWT.LEFT;
-			editor.setEditor(button, item, 0);
+			String currentSelectedProfile = SimonykeesPreferenceManager.getCurrentProfileId();
+			String currentProfileId = SimonykeesPreferenceManager.getAllProfileIds().get(i);
+			SimonykeesProfile currentProfile = SimonykeesPreferenceManager.getProfileFromName(currentProfileId);
+
+			String itemText = currentProfileId
+					+ (currentProfile.isBuiltInProfile() ? Messages.SimonykeesPreferencePage_profilesBuiltInSuffix
+							: ""); //$NON-NLS-1$
+			TableItem item = new TableItem(profilesTable, SWT.NONE);
+
+			item.setText(1, itemText);
+
+			if (currentSelectedProfile.equals(currentProfileId)) {
+				FontData[] fontData = font.getFontData();
+				Arrays.stream(fontData).forEach(fd -> fd.setStyle(fd.getStyle() | SWT.BOLD));
+				Font boldFont = new Font(font.getDevice(), fontData);
+
+				item.setText(0, Character.toString((char) 0x2713)); // Unicode 0x2713 = '✓'
+				item.setFont(boldFont);
+			} else {
+				item.setFont(font);
+			}
 		}
 	}
 
-	private void handleSelectionChanged(int selectionIndex) {
-		editProfileButton.setEnabled(true);
-		if (SimonykeesPreferenceManager
-				.getProfileFromName(SimonykeesPreferenceManager.getAllProfileIds().get(selectionIndex))
-				.isBuiltInProfile()) {
-			removeProfileButton.setEnabled(false);
-		} else {
+	private void handleSelectionChanged() {
+
+		int selectionCount = profilesTable.getSelectionCount();
+		if (selectionCount == 1) {
+			SimonykeesProfile profile = SimonykeesPreferenceManager.getProfileFromName(
+					SimonykeesPreferenceManager.getAllProfileIds().get(profilesTable.getSelectionIndex()));
+			String currentProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
+
+			if (currentProfileId.equals(profile.getProfileName())) {
+				setDefaultProfileButton.setEnabled(false);
+			} else {
+				setDefaultProfileButton.setEnabled(true);
+			}
+
+			editProfileButton.setEnabled(true);
+			exportProfileButton.setEnabled(true);
+
+			if (profile.isBuiltInProfile()) {
+				editProfileButton.setEnabled(false);
+				removeProfileButton.setEnabled(false);
+			} else {
+				editProfileButton.setEnabled(true);
+				removeProfileButton.setEnabled(true);
+			}
+		} else if (selectionCount > 1) {
+			setDefaultProfileButton.setEnabled(false);
+			editProfileButton.setEnabled(false);
 			removeProfileButton.setEnabled(true);
+			exportProfileButton.setEnabled(true);
+		} else {
+			initializeButtons();
 		}
 	}
 
@@ -202,6 +199,11 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		composite.setLayout(new GridLayout(1, false));
 		composite.setLayoutData(new GridData(SWT.CENTER));
 		composite.setFont(font);
+
+		setDefaultProfileButton = new Button(composite, SWT.PUSH);
+		setDefaultProfileButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		setDefaultProfileButton.setText(Messages.SimonykeesPreferencePage_UseAsDefaultProfileButtonLabel);
+		setDefaultProfileButton.setFont(font);
 
 		newProfileButton = new Button(composite, SWT.PUSH);
 		newProfileButton.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
@@ -228,6 +230,22 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		exportProfileButton.setText(Messages.SimonykeesPreferencePage_ExportProfilesButton);
 		exportProfileButton.setFont(font);
 
+		setDefaultProfileButton.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (profilesTable.getSelectionCount() == 1) {
+					String selectedProfileId = SimonykeesPreferenceManager.getAllProfileIds()
+							.get(profilesTable.getSelectionIndex());
+					setDefaultProfileButton.setEnabled(false);
+					SimonykeesPreferenceManager.setCurrentProfileId(selectedProfileId);
+					updateView();
+					setSelection(selectedProfileId);
+				}
+			}
+
+		});
+
 		newProfileButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -239,20 +257,20 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		editProfileButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				handleButtonClickedListener(
-						SimonykeesPreferenceManager.getAllProfileIds().get(currentProfileSelection));
-				updateView();
+				if (profilesTable.getSelectionCount() == 1) {
+					String selectedProfileId = SimonykeesPreferenceManager.getAllProfileIds()
+							.get(profilesTable.getSelectionIndex());
+					handleButtonClickedListener(selectedProfileId);
+					updateView();
+					setSelection(selectedProfileId);
+				}
 			}
 		});
 
 		removeProfileButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SimonykeesPreferenceManager
-						.removeProfile(SimonykeesPreferenceManager.getAllProfileIds().get(currentProfileSelection));
-				currentProfileSelection = 0;
-				removeProfileButton.setEnabled(false);
-				updateView();
+				removeSelectedProfiles();
 			}
 		});
 
@@ -270,6 +288,26 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 				handleProfileExport();
 			}
 		});
+	}
+
+	private void removeSelectedProfiles() {
+		List<String> profilesToDelete = new LinkedList<>();
+		for (int index : profilesTable.getSelectionIndices()) {
+			SimonykeesProfile profile = SimonykeesPreferenceManager
+					.getProfileFromName(SimonykeesPreferenceManager.getAllProfileIds().get(index));
+			if (!profile.isBuiltInProfile()) {
+				if (profile.getProfileName().equals(SimonykeesPreferenceManager.getCurrentProfileId())) {
+					SimonykeesPreferenceManager
+							.setCurrentProfileId(SimonykeesPreferenceManager.getDefaultProfileName());
+				}
+				profilesToDelete.add(profile.getProfileName());
+			}
+		}
+
+		profilesToDelete.forEach(SimonykeesPreferenceManager::removeProfile);
+
+		initializeButtons();
+		updateView();
 	}
 
 	public void handleButtonClickedListener(String profileId) {
@@ -302,32 +340,23 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		dialog.setPageSize(800, 700);
 
 		dialog.open();
-
 	}
 
 	/**
-	 * View initialization called on first creation of the view.
+	 * View initialisation called on first creation of the view.
 	 */
-	private void initializeView() {
-		Activator.getDefault().getPreferenceStore().setDefault(SimonykeesPreferenceConstants.PROFILE_USE_OPTION,
-				SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE);
-		currentProfileSelection = SimonykeesPreferenceManager.getProfiles().indexOf(
-				SimonykeesPreferenceManager.getProfileFromName(SimonykeesPreferenceManager.getCurrentProfileId()));// loadCurrentProfileId()))
-		buttons.get(currentProfileSelection).setSelection(true);
-		if (Activator.getDefault().getPreferenceStore().getString(SimonykeesPreferenceConstants.PROFILE_USE_OPTION)
-				.equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
-			profilesTable.setEnabled(false);
-			newProfileButton.setEnabled(false);
-			exportProfileButton.setEnabled(false);
-			importProfileButton.setEnabled(false);
-		} else {
-			profilesTable.setEnabled(true);
-			newProfileButton.setEnabled(true);
-			exportProfileButton.setEnabled(true);
-			importProfileButton.setEnabled(true);
-		}
+	private void initializeButtons() {
+		profilesTable.setEnabled(true);
+		setDefaultProfileButton.setEnabled(false);
+		newProfileButton.setEnabled(true);
+		exportProfileButton.setEnabled(false);
+		importProfileButton.setEnabled(true);
 		editProfileButton.setEnabled(false);
 		removeProfileButton.setEnabled(false);
+	}
+
+	private void setSelection(String selectedProfile) {
+		profilesTable.setSelection(SimonykeesPreferenceManager.getAllProfileIds().indexOf(selectedProfile));
 	}
 
 	/**
@@ -335,10 +364,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	 */
 	private void updateView() {
 		profilesTable.removeAll();
-		buttons.forEach(Button::dispose);
-		buttons.clear();
 		populateTable();
-		buttons.get(currentProfileSelection).setSelection(true);
 	}
 
 	@Override
@@ -348,8 +374,6 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	@Override
 	public boolean performOk() {
-		SimonykeesPreferenceManager
-				.setCurrentProfileId(SimonykeesPreferenceManager.getAllProfileIds().get(currentProfileSelection));
 		SimonykeesPreferenceManager.loadCurrentProfiles();
 		return super.performOk();
 	}
@@ -362,10 +386,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		SimonykeesPreferenceManager.loadCurrentProfiles();
 		updateView();
 
-		profilesTable.setEnabled(false);
-		newProfileButton.setEnabled(false);
-		editProfileButton.setEnabled(false);
-		removeProfileButton.setEnabled(false);
+		initializeButtons();
 	}
 
 	/**
