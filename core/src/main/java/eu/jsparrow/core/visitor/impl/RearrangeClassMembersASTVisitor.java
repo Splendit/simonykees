@@ -157,6 +157,11 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 				listRewrite.insertAt((BodyDeclaration)firstTarget, startFrom, null);
 				listRewrite.remove(firstDeclaration, null);
 				
+				/*
+				 * The whole type counts as one change
+				 */
+				onRewrite();
+				
 				for(int i = startFrom + 1; i<sortedDeclarations.size(); i++) {
 					
 					BodyDeclaration declaration = sortedDeclarations.get(i);

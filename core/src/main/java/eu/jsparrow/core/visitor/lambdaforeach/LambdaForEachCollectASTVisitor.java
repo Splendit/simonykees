@@ -109,6 +109,7 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 						 */
 						Expression targetDecl = createTargetExpression(methodInvocation, collection);
 						astRewrite.replace(methodInvocation, targetDecl, null);
+						onRewrite();
 					}
 				}
 

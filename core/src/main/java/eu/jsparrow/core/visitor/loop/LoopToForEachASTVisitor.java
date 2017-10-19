@@ -346,6 +346,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 		// replace the existing for loop with
 		astRewrite.replace(loop, newFor, null);
+		onRewrite();
 	}
 
 	/**

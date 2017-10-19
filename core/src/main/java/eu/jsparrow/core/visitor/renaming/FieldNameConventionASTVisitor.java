@@ -137,6 +137,7 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 											// rename the declaration and all
 											// the references...
 											astRewrite.set(fragmentName, SimpleName.IDENTIFIER_PROPERTY, newName, null);
+											onRewrite();
 											references.forEach(referene -> astRewrite.set(referene,
 													SimpleName.IDENTIFIER_PROPERTY, newName, null));
 										}

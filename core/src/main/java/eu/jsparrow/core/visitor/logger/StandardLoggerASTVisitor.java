@@ -235,6 +235,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		ExpressionStatement loggingStatement = prepareLoggingStatement(exceptionName, replaceOption, getLoggerName());
 		ListRewrite statemetnRewrite = astRewrite.getListRewrite(catchBody, Block.STATEMENTS_PROPERTY);
 		statemetnRewrite.insertFirst(loggingStatement, null);
+		onRewrite();
 
 		return true;
 	}
@@ -500,6 +501,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		SimpleName loggerName = ast.newSimpleName(loggerNameIdentifier);
 		astRewrite.replace(methodInvocation.getName(), loggerMethodName, null);
 		astRewrite.replace(methodInvocation.getExpression(), loggerName, null);
+		onRewrite();
 		ListRewrite argRewrite = astRewrite.getListRewrite(methodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
 		ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class)
 				.forEach(arg -> argRewrite.remove(arg, null));
@@ -544,6 +546,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		miListRewrite.insertLast(astRewrite.createCopyTarget(throwableName), null);
 
 		astRewrite.replace(methodInvocation, newLoggerMethod, null);
+		onRewrite();
 	}
 
 	/**

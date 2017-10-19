@@ -138,6 +138,8 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		 * replace the parameter of the forEach lambda expression
 		 */
 		astRewrite.replace(parameter, newForEachParamName, null);
+		
+		onRewrite();
 
 		/*
 		 * Replace the type of the parameter if any

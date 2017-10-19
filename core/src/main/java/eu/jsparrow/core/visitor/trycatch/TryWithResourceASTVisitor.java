@@ -121,6 +121,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (!resourceList.isEmpty()) {
 			resourceList.forEach(iteratorNode -> astRewrite.getListRewrite(node, TryStatement.RESOURCES_PROPERTY)
 					.insertLast(iteratorNode, null));
+			onRewrite();
 
 			// remove all close operations on the found resources
 			Function<SimpleName, MethodInvocation> mapper = simpleName -> NodeBuilder.newMethodInvocation(node.getAST(),

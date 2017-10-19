@@ -224,6 +224,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		}
 
 		astRewrite.replace(loopNode, newStatement, null);
+		onRewrite();
 	}
 
 	/**
@@ -267,6 +268,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 			}
 
 			blockRewrite.insertAfter(expressionStatement, loopNode, null);
+			onRewrite();
 		}
 	}
 

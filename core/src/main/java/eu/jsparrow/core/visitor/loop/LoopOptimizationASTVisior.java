@@ -269,6 +269,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(loopStatement, newFor, null);
 
 		astRewrite.remove(getIteratorDeclaration(), null);
+		onRewrite();
 	}
 
 	/**

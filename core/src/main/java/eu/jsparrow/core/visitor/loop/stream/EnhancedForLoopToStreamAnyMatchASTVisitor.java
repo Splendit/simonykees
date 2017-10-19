@@ -110,6 +110,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 					enhancedForParameter);
 			astRewrite.replace(booleanDeclFragment.getInitializer(), methodInvocation, null);
 			replaceLoopWithFragment(enhancedForStatement, booleanDeclFragment);
+			onRewrite();
 
 		} else if ((returnStatement = isReturnBlock(thenStatement, enhancedForStatement)) != null) {
 			// replace the return statement with a Stream::AnyMatch
@@ -117,6 +118,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 					enhancedForParameter);
 			astRewrite.replace(returnStatement.getExpression(), methodInvocation, null);
 			astRewrite.remove(enhancedForStatement, null);
+			onRewrite();
 		}
 
 		return true;
