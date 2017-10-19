@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.rule.AbstractRefactoringRule;
-import eu.jsparrow.core.rule.RuleApplicationCounter;
+import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
@@ -78,7 +78,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		super(rule.getName());
 		setTitle(rule.getName());
-		setDescription(rule.getDescription() +" Times rule was applied: " + RuleApplicationCounter.get(rule).toInt()); //$NON-NLS-1$
+		setDescription(rule.getDescription() +" Times rule was applied: " + RuleApplicationCount.get(rule).toInt()); //$NON-NLS-1$
 
 		this.changesForRule = changesForRule;
 		this.rule = rule;

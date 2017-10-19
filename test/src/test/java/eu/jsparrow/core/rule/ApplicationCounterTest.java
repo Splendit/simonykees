@@ -7,26 +7,26 @@ import org.junit.Test;
 
 public class ApplicationCounterTest {
 
-	private RuleApplicationCounter applicationCounter;
+	private RuleApplicationCount applicationCounter;
 
 	@Before
 	public void setUp() {
-		applicationCounter = new RuleApplicationCounter();
+		applicationCounter = new RuleApplicationCount();
 	}
 
 	@Test
 	public void get_ForNewRule_ReturnsNewApplicationCounter() {
 		DummyRule rule = new DummyRule();
-		RuleApplicationCounter ruleApplicationCounter = RuleApplicationCounter.get(rule);
+		RuleApplicationCount ruleApplicationCounter = RuleApplicationCount.get(rule);
 		assertNotNull(ruleApplicationCounter);
 	}
 
 	@Test
 	public void get_ForExistingRule_returnsExistingApplicationCounter() {
 		DummyRule rule = new DummyRule();
-		RuleApplicationCounter expectedApplicationCounter = RuleApplicationCounter.get(rule);
+		RuleApplicationCount expectedApplicationCounter = RuleApplicationCount.get(rule);
 
-		RuleApplicationCounter applicationCounter = RuleApplicationCounter.get(rule);
+		RuleApplicationCount applicationCounter = RuleApplicationCount.get(rule);
 		assertEquals(expectedApplicationCounter, applicationCounter);
 	}
 

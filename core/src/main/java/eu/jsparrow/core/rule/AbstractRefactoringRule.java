@@ -133,7 +133,7 @@ public abstract class AbstractRefactoringRule<T extends AbstractASTRewriteASTVis
 
 	protected AbstractASTRewriteASTVisitor visitorFactory() throws InstantiationException, IllegalAccessException {
 		AbstractASTRewriteASTVisitor visitor = visitorClass.newInstance();
-		visitor.addRewriteListener(RuleApplicationCounter.get(this));
+		visitor.addRewriteListener(RuleApplicationCount.get(this));
 		return visitor;
 	}
 
