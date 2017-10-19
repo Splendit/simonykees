@@ -124,6 +124,11 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	@Override
+	public boolean visit(TypeDeclaration typeDeclaration) {
+		return !typeDeclaration.isInterface();
+	}
+
+	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
 		if (!typeDeclaration.isMemberTypeDeclaration()) {
 			newNamesPerType.clear();
