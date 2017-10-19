@@ -59,7 +59,7 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 	 * @param metaData
 	 *            the metadata containing information about a field being
 	 *            renamed.
-	 * @return the list of document changes for all complation units that are
+	 * @return the list of document changes for all compilation units that are
 	 *         affected by the renaming of the field.
 	 */
 	public List<DocumentChange> computeDocumentChangesPerFiled(FieldMetadata metaData) {
@@ -94,7 +94,11 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 					}
 				});
 				documentChange.setTextType("java"); //$NON-NLS-1$
-				documentChanges.add(documentChange);
+				if(metaData.getCompilationUnit().getJavaElement() == iCompilationUnit) {
+					documentChanges.add(0, documentChange);
+				} else {					
+					documentChanges.add(documentChange);
+				}
 			}
 		}
 
