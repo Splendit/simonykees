@@ -71,7 +71,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 		this.durationInMilliseconds = durationInMilliseconds;
 
-		logger.info("DURATION (" + durationInMilliseconds + "): " + getDurationInReadableFormat());
+		logger.info("DURATION (" + durationInMilliseconds + "): " + getDurationInReadableFormat()); //$NON-NLS-1$ //$NON-NLS-2$
 
 		this.refactoringPipeline = refactoringPipeline;
 		setInitialChanges();
@@ -362,8 +362,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		int minutes = (int) ((durationInMilliseconds / (1000 * 60)) % 60);
 		int hours = (int) ((durationInMilliseconds / (1000 * 60 * 60)) % 24);
 
-		return ((hours < 10) ? "0" : "") + hours + ":" + ((minutes < 10) ? "0" : "") + minutes + ":"
-				+ ((seconds < 10) ? "0" : "") + seconds + "." + milliseconds;
+		return ((hours < 10) ? "0" : "") + hours + ":" + ((minutes < 10) ? "0" : "") + minutes + ":" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+				+ ((seconds < 10) ? "0" : "") + seconds + "." + milliseconds; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 }
