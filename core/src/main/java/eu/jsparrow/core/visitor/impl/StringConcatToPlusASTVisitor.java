@@ -71,11 +71,15 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 					replacementNode = NodeBuilder.newParenthesizedExpression(node.getAST(), replacementNode);
 				}
 				astRewrite.replace(node, replacementNode, null);
+				onRewrite();
 			}
 			modifyMethodInvocation.remove(node);
 			
 			if(modifyMethodInvocation.isEmpty()){
-				alreadyReplacedExpression.keySet().forEach(key -> astRewrite.replace(key, alreadyReplacedExpression.remove((key)), null));
+				alreadyReplacedExpression.keySet().forEach(key -> {
+					astRewrite.replace(key, alreadyReplacedExpression.remove(key), null);
+					onRewrite();
+				});
 			}
 		}
 	}

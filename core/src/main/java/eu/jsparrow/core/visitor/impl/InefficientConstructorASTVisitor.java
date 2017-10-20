@@ -63,6 +63,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 					replaceParameter = node.getAST().newBooleanLiteral(false);
 				}
 				astRewrite.replace(refactorCandidateParameter, replaceParameter, null);
+				onRewrite();
 			}
 		}
 		return true;
@@ -153,6 +154,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 			}
 			if (replacement != null) {
 				astRewrite.replace(node, replacement, null);
+				onRewrite();
 			}
 		}
 		return true;

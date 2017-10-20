@@ -231,6 +231,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 				argsListRewrite.insertFirst(arg, null);
 
 				astRewrite.replace(methodInvocationNode, newMethodInvocation, null);
+				onRewrite();
 
 				innerMostMethodInvocation = null;
 				methodInvocationExpressionList.clear();

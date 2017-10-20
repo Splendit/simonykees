@@ -219,6 +219,7 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 			MethodInvocation newMI = createNewMethodInvocation(initializersToReplace.get(key),
 					methodNames.get(key));
 			astRewrite.replace(initializersToReplace.get(key), newMI, null);
+			onRewrite();
 		});
 
 		super.endVisit(compilationUnitNode);

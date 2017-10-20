@@ -126,6 +126,7 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 
 							// rewrite the AST
 							astRewrite.replace(methodInvocationNode, forEachMethodInvocation, null);
+							onRewrite();
 						}
 					}
 				}

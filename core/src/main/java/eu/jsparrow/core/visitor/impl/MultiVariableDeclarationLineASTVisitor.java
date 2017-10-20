@@ -97,6 +97,7 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 					(ChildListPropertyDescriptor) locationInParent);
 			Collections.reverse(declarations);
 			declarations.forEach(field -> listRewrite.insertAfter(field, declaration, null));
+			onRewrite();
 		}
 	}
 }
