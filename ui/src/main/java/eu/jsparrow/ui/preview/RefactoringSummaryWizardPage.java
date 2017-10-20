@@ -355,4 +355,15 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		StatusUtil.applyToStatusLine(this, status);
 	}
 
+	private String getDurationInReadableFormat() {
+
+		int milliseconds = (int) (durationInMilliseconds % 1000);
+		int seconds = (int) (durationInMilliseconds / 1000) % 60;
+		int minutes = (int) ((durationInMilliseconds / (1000 * 60)) % 60);
+		int hours = (int) ((durationInMilliseconds / (1000 * 60 * 60)) % 24);
+
+		return ((hours < 10) ? "0" : "") + hours + ":" + ((minutes < 10) ? "0" : "") + minutes + ":"
+				+ ((seconds < 10) ? "0" : "") + seconds + "." + milliseconds;
+	}
+
 }
