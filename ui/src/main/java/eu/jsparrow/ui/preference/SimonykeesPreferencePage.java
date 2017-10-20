@@ -263,6 +263,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			public void widgetSelected(SelectionEvent e) {
 				handleButtonClickedListener(""); //$NON-NLS-1$
 				updateView();
+				initializeButtons();
 			}
 		});
 
@@ -474,8 +475,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 				List<String> currentProfileNames = SimonykeesPreferenceManager.getAllProfileIds();
 				ProfileImportMode mode = ProfileImportMode.IMPORT;
 
+				SimonykeesProfile currentProfile = SimonykeesPreferenceManager.getProfileFromName(profile.getName());
 				// prevent the default profile from being replaced
-				if (Messages.Profile_DefaultProfile_profileName.equals(profile.getName())) {
+				if (currentProfile != null && currentProfile.isBuiltInProfile()) {
 					logger.error(Messages.SimonykeesPreferencePage_DefaultProfileNotReplacable);
 					SimonykeesMessageDialog.openMessageDialog(getShell(),
 							Messages.SimonykeesPreferencePage_DefaultProfileNotReplacable, MessageDialog.ERROR);
@@ -511,6 +513,17 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 					} else if (mode == ProfileImportMode.RENAME) {
 						String newProfileName = addSuffixToProfileName(profile.getName());
 						profile.setName(newProfileName);
+					}
+					List<String> nonExistentRules = YAMLConfigUtil.getNonExistentRules(profile.getRules());
+					if (!nonExistentRules.isEmpty()) {
+						String nonExistentRulesMessage = NLS.bind(Messages.SimonykeesPreferencePage_profileAndName,
+								profile.getName()) + "\n" //$NON-NLS-1$
+								+ NLS.bind(Messages.Activator_standalone_RulesDoNotExist,
+										nonExistentRules.toString());
+						SimonykeesMessageDialog.openMessageDialog(getShell(), nonExistentRulesMessage,
+								MessageDialog.INFORMATION);
+						profile.getRules()
+							.removeAll(nonExistentRules);
 					}
 					SimonykeesPreferenceManager.addProfile(profile.getName(), profile.getRules());
 					importedProfileCount++;

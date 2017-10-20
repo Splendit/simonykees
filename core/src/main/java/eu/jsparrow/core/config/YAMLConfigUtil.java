@@ -58,9 +58,9 @@ public class YAMLConfigUtil {
 		try (FileInputStream fis = new FileInputStream(file)) {
 
 			/*
-			 * the TypeDescription specifies the type of the configuration class and of the
-			 * containing list of profiles because generics are a compile time thing. see
-			 * exportConfig method.
+			 * the TypeDescription specifies the type of the configuration class
+			 * and of the containing list of profiles because generics are a
+			 * compile time thing. see exportConfig method.
 			 */
 			TypeDescription rootTypeDescription = new TypeDescription(YAMLConfig.class, CONFIG_TAG);
 			rootTypeDescription.putListPropertyType("profiles", YAMLProfile.class); //$NON-NLS-1$
@@ -75,14 +75,14 @@ public class YAMLConfigUtil {
 
 			config = yaml.loadAs(fis, YAMLConfig.class);
 		} catch (YAMLException | IOException e) {
-			throw new YAMLConfigException(e.getMessage(), e);
+			throw new YAMLConfigException(e.getLocalizedMessage(), e);
 		}
 		return config;
 	}
 
 	/**
-	 * exports configuration in form of {@link YAMLConfig} to the given file. this
-	 * is also used for exporting profiles from jsparrow eclipse version.
+	 * exports configuration in form of {@link YAMLConfig} to the given file.
+	 * this is also used for exporting profiles from jsparrow eclipse version.
 	 * 
 	 * @param config
 	 *            configuration for export
@@ -93,9 +93,9 @@ public class YAMLConfigUtil {
 	public static void exportConfig(YAMLConfig config, File file) throws YAMLConfigException {
 		try (FileWriter fw = new FileWriter(file)) {
 			/*
-			 * the Representer is used to put an alias type into the YAML file. Otherwise
-			 * the fully qualified class name would be used and we could run into troubles
-			 * with obfuscation.
+			 * the Representer is used to put an alias type into the YAML file.
+			 * Otherwise the fully qualified class name would be used and we
+			 * could run into troubles with obfuscation.
 			 */
 			Representer representer = new Representer();
 			representer.addClassTag(YAMLConfig.class, new Tag(CONFIG_TAG));
@@ -111,7 +111,7 @@ public class YAMLConfigUtil {
 			throw new YAMLConfigException(e.getMessage(), e);
 		}
 	}
-	
+
 	/**
 	 * this method selects the rules to be applied. for all rules it will be
 	 * checked if they are available in general and for the current project. if
@@ -133,39 +133,49 @@ public class YAMLConfigUtil {
 	 * @return a list of rules to be applied on the project
 	 * @throws YAMLConfigException
 	 */
-	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRulesFromConfig(YAMLConfig config,
-			IJavaProject javaProject) throws YAMLConfigException {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result  = new LinkedList<>();
+	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRulesFromConfig(
+			YAMLConfig config, IJavaProject javaProject) throws YAMLConfigException {
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result;
 
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
-				.getRulesForProject(javaProject, true);
+			.getRulesForProject(javaProject, true);
 
 		String selectedProfile = config.getSelectedProfile();
 		if (selectedProfile != null && !selectedProfile.isEmpty()) {
 			if (checkProfileExistence(config, selectedProfile)) {
-				Optional<YAMLProfile> configProfile = config.getProfiles().stream()
-						.filter(profile -> profile.getName().equals(selectedProfile)).findFirst();
+				Optional<YAMLProfile> configProfile = config.getProfiles()
+					.stream()
+					.filter(profile -> profile.getName()
+						.equals(selectedProfile))
+					.findFirst();
 
 				if (configProfile.isPresent()) {
 					List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> profileRules = getConfigRules(
-							configProfile.get().getRules());
+							configProfile.get()
+								.getRules());
 
-					result = projectRules.stream().filter(rule -> rule.isEnabled())
-							.filter(profileRules::contains).collect(Collectors.toList());
+					result = projectRules.stream()
+						.filter(RefactoringRule::isEnabled)
+						.filter(profileRules::contains)
+						.collect(Collectors.toList());
 				} else {
-					String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, selectedProfile)
-;					throw new YAMLConfigException(exceptionMessage);
+					String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
+							selectedProfile);
+					throw new YAMLConfigException(exceptionMessage);
 				}
 			} else {
-				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, selectedProfile);
+				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
+						selectedProfile);
 				throw new YAMLConfigException(exceptionMessage);
 			}
 		} else { // use all rules from config file
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> configSelectedRules = getConfigRules(
 					config.getRules());
 
-			result = projectRules.stream().filter(RefactoringRule::isEnabled)
-					.filter(configSelectedRules::contains).collect(Collectors.toList());
+			result = projectRules.stream()
+				.filter(RefactoringRule::isEnabled)
+				.filter(configSelectedRules::contains)
+				.collect(Collectors.toList());
 		}
 
 		return result;
@@ -180,15 +190,17 @@ public class YAMLConfigUtil {
 	 * @throws YAMLConfigException
 	 *             is thrown if a given rule ID does not exist
 	 */
-	private static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getConfigRules(List<String> configRules)
-			throws YAMLConfigException {
+	private static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getConfigRules(
+			List<String> configRules) throws YAMLConfigException {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules(true);
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> configSelectedRules = new LinkedList<>();
 		List<String> nonExistentRules = new LinkedList<>();
 
 		for (String configRule : configRules) {
 			Optional<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> currentRule = rules.stream()
-					.filter(rule -> rule.getId().equals(configRule)).findFirst();
+				.filter(rule -> rule.getId()
+					.equals(configRule))
+				.findFirst();
 			if (currentRule.isPresent()) {
 				configSelectedRules.add(currentRule.get());
 			} else {
@@ -197,11 +209,42 @@ public class YAMLConfigUtil {
 		}
 
 		if (!nonExistentRules.isEmpty()) {
-			String exceptionMessage = NLS.bind(Messages.Activator_standalone_RulesDoNotExist, nonExistentRules.toString());
+			String exceptionMessage = NLS.bind(Messages.Activator_standalone_RulesDoNotExist,
+					nonExistentRules.toString());
 			throw new YAMLConfigException(exceptionMessage);
 		}
 
 		return configSelectedRules;
+	}
+
+	/**
+	 * checks if a given rule id exists
+	 * 
+	 * @param ruleId
+	 * @return
+	 */
+	public static boolean isRuleExistent(String ruleId) {
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules(true);
+		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : rules) {
+			if (rule.getId()
+				.equals(ruleId)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * searches the given list of ruleIds for non-existent rules and returns
+	 * them
+	 * 
+	 * @param ruleIds
+	 * @return
+	 */
+	public static List<String> getNonExistentRules(List<String> ruleIds) {
+		return ruleIds.stream()
+			.filter(ruleId -> !isRuleExistent(ruleId))
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -227,7 +270,8 @@ public class YAMLConfigUtil {
 				config = YAMLConfigUtil.loadConfiguration(configFile);
 				String loggerInfo = NLS.bind(Messages.Activator_standalone_ConfigFileReadSuccessfully, configFilePath);
 				logger.info(loggerInfo);
-				logger.debug(config.toString());
+				String debugInfo = config.toString();
+				logger.debug(debugInfo);
 			}
 		}
 
@@ -258,6 +302,9 @@ public class YAMLConfigUtil {
 	 * @return true, if the profile exists, false otherwise
 	 */
 	private static boolean checkProfileExistence(YAMLConfig config, String profile) {
-		return config.getProfiles().stream().anyMatch(configProfile -> configProfile.getName().equals(profile));
+		return config.getProfiles()
+			.stream()
+			.anyMatch(configProfile -> configProfile.getName()
+				.equals(profile));
 	}
 }

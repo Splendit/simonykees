@@ -11,21 +11,10 @@ import java.util.List;
  */
 public class YAMLConfig {
 
-	/**
-	 * this list holds all IDs of rules which should be executed if no default
-	 * profile has been specified
-	 */
 	private List<String> rules;
 
-	/**
-	 * this list holds all specified profiles (see {@link YAMLProfile}
-	 */
 	private List<YAMLProfile> profiles;
 
-	/**
-	 * default profile specifies a profile from the {@link YAMLConfig#profiles} list
-	 * which gets executed by default
-	 */
 	private String selectedProfile;
 
 	public YAMLConfig() {
@@ -62,13 +51,18 @@ public class YAMLConfig {
 		profile.setName("default"); //$NON-NLS-1$
 		profile.setRules(profileRules);
 
-		config.getProfiles().add(profile);
+		config.getProfiles()
+			.add(profile);
 
 		config.setSelectedProfile("default"); //$NON-NLS-1$
 
 		return config;
 	}
 
+	/**
+	 * this list holds all IDs of rules which should be executed if no default
+	 * profile has been specified
+	 */
 	public List<String> getRules() {
 		return rules;
 	}
@@ -77,6 +71,9 @@ public class YAMLConfig {
 		this.rules = rules;
 	}
 
+	/**
+	 * this list holds all specified profiles (see {@link YAMLProfile}
+	 */
 	public List<YAMLProfile> getProfiles() {
 		return profiles;
 	}
@@ -85,6 +82,10 @@ public class YAMLConfig {
 		this.profiles = profiles;
 	}
 
+	/**
+	 * default profile specifies a profile from the {@link YAMLConfig#profiles}
+	 * list which gets executed by default
+	 */
 	public String getSelectedProfile() {
 		return selectedProfile;
 	}

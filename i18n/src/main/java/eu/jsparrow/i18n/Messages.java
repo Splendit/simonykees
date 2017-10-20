@@ -259,6 +259,8 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_ProfileExistsReplace;
 	public static String SimonykeesPreferencePage_ProfileExportSuccessfulTo;
 	public static String SimonykeesPreferencePage_ProfileImportSuccessful;
+	public static String SimonykeesPreferencePage_profileAndName;
+
 	public static String SimonykeesPreferencePage_profilesBuiltInSuffix;
 	public static String SimonykeesPreferencePage_profileSettingsGroupTitle;
 	public static String SimonykeesPreferencePage_removeProfileButtonLabel;

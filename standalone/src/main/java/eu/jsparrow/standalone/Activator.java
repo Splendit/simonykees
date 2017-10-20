@@ -1,6 +1,7 @@
 package eu.jsparrow.standalone;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -79,6 +80,9 @@ public class Activator implements BundleActivator {
 
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil.getSelectedRulesFromConfig(config,
 				standaloneConfig.getJavaProject());
+		if(selectedRules == null) {
+			selectedRules = new LinkedList<>();
+		}
 
 		// Create refactoring pipeline and set rules
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
