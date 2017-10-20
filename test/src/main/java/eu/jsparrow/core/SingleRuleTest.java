@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -48,13 +47,13 @@ public abstract class SingleRuleTest {
 
 		ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);
 
-		List<IJavaElement> javaElements = new ArrayList<>();
-		javaElements.add(compilationUnit);
+		List<ICompilationUnit> compilationUnits = new ArrayList<>();
+		compilationUnits.add(compilationUnit);
 
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(Arrays.asList(rule));
 		IProgressMonitor monitor = new NullProgressMonitor();
 
-		refactoringPipeline.prepareRefactoring(javaElements, monitor);
+		refactoringPipeline.prepareRefactoring(compilationUnits, monitor);
 		refactoringPipeline.doRefactoring(monitor);
 		refactoringPipeline.commitRefactoring();
 

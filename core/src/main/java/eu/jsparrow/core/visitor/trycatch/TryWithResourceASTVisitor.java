@@ -43,7 +43,8 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String CLOSEABLE_FULLY_QUALLIFIED_NAME = java.io.Closeable.class.getName();
 	private static final String CLOSE = "close"; //$NON-NLS-1$
 
-	@SuppressWarnings("unchecked")
+	// TODO improvement for suppressed deprecation needed, see SIM-878
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	@Override
 	public boolean visit(TryStatement node) {
 		List<VariableDeclarationExpression> resourceList = new ArrayList<>();

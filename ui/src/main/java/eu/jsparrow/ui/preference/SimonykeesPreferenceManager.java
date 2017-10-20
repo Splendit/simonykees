@@ -17,7 +17,7 @@ import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 /**
  * Central point to access property values.
  * 
- * @author Ludwig Werzowa, Hannes Schweighofer
+ * @author Ludwig Werzowa, Hannes Schweighofer, Matthias Webhofer
  * @since 0.9.2
  */
 public class SimonykeesPreferenceManager {
@@ -99,6 +99,19 @@ public class SimonykeesPreferenceManager {
 	}
 
 	/**
+	 * Returns the current selection for enabling recursive package resolving
+	 * 
+	 * @return true for recursive package resolving, false otherwise
+	 */
+	public static boolean getResolvePackagesRecursively() {
+		return store.getBoolean(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY);
+	}
+
+	public static void setResolvePackagesRecursively(boolean enabled) {
+		store.setValue(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY, enabled);
+	}
+
+	/**
 	 * Get the ids of all profiles.
 	 * 
 	 * @return a list of all {@link SimonykeesProfile#getProfileId()}
@@ -125,9 +138,9 @@ public class SimonykeesPreferenceManager {
 		for (String profileInfo : profilesArray) {
 			String name = StringUtils.substring(profileInfo, 0,
 					profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER));
-			List<String> rules = Arrays.asList(
-					StringUtils.substring(profileInfo, profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
-							.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
+			List<String> rules = Arrays.asList(StringUtils
+					.substring(profileInfo, profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
+					.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
 			if (name.equals(Messages.Profile_DefaultProfile_profileName)) {
 				profiles.add(defaultProfile);
 			} else {
@@ -140,7 +153,8 @@ public class SimonykeesPreferenceManager {
 	public static String getStringFromProfiles() {
 		List<String> profilesAsString = new ArrayList<>();
 		profiles.stream().map((profile) -> profile.getProfileName() + SimonykeesPreferenceConstants.NAME_RULES_DELIMITER
-				+ StringUtils.join(profile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER)).forEach(profilesAsString::add);
+				+ StringUtils.join(profile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER))
+				.forEach(profilesAsString::add);
 		return flattenArray(profilesAsString);
 	}
 
@@ -151,8 +165,8 @@ public class SimonykeesPreferenceManager {
 	/**
 	 * This is the counterpart to {@link #parseString(String)}.
 	 * 
-	 * Takes a {@link List} of items and flattens them into a String, separated
-	 * by "|".
+	 * Takes a {@link List} of items and flattens them into a String, separated by
+	 * "|".
 	 * 
 	 * @param items
 	 *            List of items to flatten
@@ -165,8 +179,7 @@ public class SimonykeesPreferenceManager {
 	/**
 	 * This is the counterpart to {@link #flattenArray(List)}.
 	 * 
-	 * Takes a (property stored as) flat String and splits it into a String
-	 * array.
+	 * Takes a (property stored as) flat String and splits it into a String array.
 	 * 
 	 * @param stringList
 	 *            a flat String separated by "|"
@@ -192,7 +205,8 @@ public class SimonykeesPreferenceManager {
 				store.getDefaultString(SimonykeesPreferenceConstants.PROFILE_ID_CURRENT));
 
 		store.setValue(SimonykeesPreferenceConstants.ENABLE_INTRO, true);
-		
+		store.setValue(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY, true);
+
 		profiles.clear();
 		defaultProfile = new DefaultProfile();
 		loadProfilesFromStore();

@@ -47,8 +47,7 @@ public class RefactoringPipeline {
 	private boolean testmode = false;
 
 	/**
-	 * List of selected {@link IJavaElement}s wrapped as
-	 * {@link RefactoringState}s
+	 * List of selected {@link IJavaElement}s wrapped as {@link RefactoringState}s
 	 */
 	private List<RefactoringState> refactoringStates;
 
@@ -76,18 +75,17 @@ public class RefactoringPipeline {
 	 * Stores the selected rules.
 	 * 
 	 * @param rules
-	 *            {@link List} of {@link AbstractRefactoringRule}s to apply to the
-	 *            selected {@link IJavaElement}s
+	 *            {@link List} of {@link RefactoringRule}s to apply to the selected
+	 *            {@link IJavaElement}s
 	 */
 	public RefactoringPipeline(List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 
 		/*
-		 * Note: We cannot immediately call prepareRefactoring because we need
-		 * to call prepareRefactoring in the SelectRulesWizard when finishing
-		 * (in a Job) but we need the RefactoringPipeline instance outside of
-		 * the Job. Since the Job needs the pipeline to be
-		 * "final or effectively final", the constructor has to be called
-		 * outside of the Job. Plus we only know the list of rules when
+		 * Note: We cannot immediately call prepareRefactoring because we need to call
+		 * prepareRefactoring in the SelectRulesWizard when finishing (in a Job) but we
+		 * need the RefactoringPipeline instance outside of the Job. Since the Job needs
+		 * the pipeline to be "final or effectively final", the constructor has to be
+		 * called outside of the Job. Plus we only know the list of rules when
 		 * finishing.
 		 */
 
@@ -111,8 +109,8 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * Setter for rules when finish button is pressed in SelectRulesWizard to
-	 * store selected rules
+	 * Setter for rules when finish button is pressed in SelectRulesWizard to store
+	 * selected rules
 	 * 
 	 * @param rules
 	 *            selected rules
@@ -166,29 +164,27 @@ public class RefactoringPipeline {
 	/**
 	 * Prepare working copies for refactoring.
 	 * <p>
-	 * Takes a list of {@link IJavaElement}s and creates
-	 * {@link ICompilationUnit}s for them. Those {@link ICompilationUnit}s are
-	 * stored as working copies in a list of {@link RefactoringState}s.
+	 * Takes a list of {@link IJavaElement}s and creates {@link ICompilationUnit}s
+	 * for them. Those {@link ICompilationUnit}s are stored as working copies in a
+	 * list of {@link RefactoringState}s.
 	 * 
 	 * @param IProgressMonitor
 	 *            monitor used to show progress in UI
 	 * 
 	 * @throws RefactoringException
-	 *             if this element does not exist or if an exception occurs
-	 *             while accessing its corresponding resource.
+	 *             if this element does not exist or if an exception occurs while
+	 *             accessing its corresponding resource.
 	 * 
 	 * @since 0.9
 	 * 
 	 * @see RefactoringUtil#collectICompilationUnits(List, List)
 	 */
-	public List<ICompilationUnit> prepareRefactoring(List<IJavaElement> javaElements, IProgressMonitor monitor)
+	public List<ICompilationUnit> prepareRefactoring(List<ICompilationUnit> compilationUnits, IProgressMonitor monitor)
 			throws RefactoringException {
 
-		List<ICompilationUnit> compilationUnits = new ArrayList<>();
 		List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
 		try {
-			RefactoringUtil.collectICompilationUnits(compilationUnits, javaElements, monitor);
 			if (compilationUnits.isEmpty()) {
 				logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found);
 				throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found,
@@ -201,10 +197,10 @@ public class RefactoringPipeline {
 			} else {
 
 				/*
-				 * Converts the monitor to a SubMonitor and sets name of task on
-				 * progress monitor dialog. Size is set to number 100 and then
-				 * scaled to size of the compilationUnits list. Each compilation
-				 * unit increases worked amount for same size.
+				 * Converts the monitor to a SubMonitor and sets name of task on progress
+				 * monitor dialog. Size is set to number 100 and then scaled to size of the
+				 * compilationUnits list. Each compilation unit increases worked amount for same
+				 * size.
 				 */
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(compilationUnits.size());
 				subMonitor.setTaskName(""); //$NON-NLS-1$
@@ -215,12 +211,10 @@ public class RefactoringPipeline {
 					subMonitor.subTask(compilationUnit.getElementName());
 
 					/*
-					 * Check if more than one project is selected. If it is,
-					 * show message to select only one project files. Temporary
-					 * workaround for Package explorer. There is filter for
-					 * Project explorer when selected project is not Java
-					 * project to not show the jSparrow, but solution for
-					 * multiple project selection is not done.
+					 * Check if more than one project is selected. If it is, show message to select
+					 * only one project files. Temporary workaround for Package explorer. There is
+					 * filter for Project explorer when selected project is not Java project to not
+					 * show the jSparrow, but solution for multiple project selection is not done.
 					 * 
 					 * See SIM-496
 					 */
@@ -231,11 +225,11 @@ public class RefactoringPipeline {
 					}
 
 					/**
-					 * SIM-748 Test work around to don't apply syntax checks
-					 * there
+					 * SIM-748 Test work around to don't apply syntax checks there
 					 */
 					if (!testmode && RefactoringUtil.checkForSyntaxErrors(compilationUnit)) {
-						String loggerInfo = NLS.bind(Messages.RefactoringPipeline_AddingCompilationUnitToErrorList, compilationUnit.getElementName());
+						String loggerInfo = NLS.bind(Messages.RefactoringPipeline_AddingCompilationUnitToErrorList,
+								compilationUnit.getElementName());
 						logger.info(loggerInfo);
 						containingErrorList.add(compilationUnit);
 					} else {
@@ -244,8 +238,7 @@ public class RefactoringPipeline {
 					}
 
 					/*
-					 * If cancel is pressed on progress monitor, abort all and
-					 * return, else continue
+					 * If cancel is pressed on progress monitor, abort all and return, else continue
 					 */
 					if (subMonitor.isCanceled()) {
 						return containingErrorList;
@@ -255,13 +248,13 @@ public class RefactoringPipeline {
 				}
 
 				/**
-				 * if there are syntax errors within source files display it to
-				 * the user
+				 * if there are syntax errors within source files display it to the user
 				 */
 				if (!containingErrorList.isEmpty()) {
-					String loggerInfo = NLS.bind(ExceptionMessages.RefactoringPipeline_syntax_errors_exist, containingErrorList
-							.stream().map(ICompilationUnit::getElementName).collect(Collectors.joining(", "))); //$NON-NLS-1$
-					logger.info(loggerInfo); 
+					String loggerInfo = NLS.bind(ExceptionMessages.RefactoringPipeline_syntax_errors_exist,
+							containingErrorList.stream().map(ICompilationUnit::getElementName)
+									.collect(Collectors.joining(", "))); //$NON-NLS-1$
+					logger.info(loggerInfo);
 
 				}
 				return containingErrorList;
@@ -284,7 +277,9 @@ public class RefactoringPipeline {
 				if (((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.isEmpty()) {
 					refactoringStates.add(new RefactoringState(compilationUnit, workingCopy));
 				} else {
-					String loggerInfo = NLS.bind(Messages.RefactoringPipeline_CompilationUnitWithCompilationErrors, compilationUnit.getElementName(), ((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.get(0));
+					String loggerInfo = NLS.bind(Messages.RefactoringPipeline_CompilationUnitWithCompilationErrors,
+							compilationUnit.getElementName(),
+							((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.get(0));
 					logger.info(loggerInfo);
 				}
 			} catch (JavaModelException e) {
@@ -303,15 +298,15 @@ public class RefactoringPipeline {
 	 * Apply {@link AbstractRefactoringRule}s to the working copies of each
 	 * {@link RefactoringState}. Changes are <b>not</b> yet committed.
 	 * <p>
-	 * All rules that throw an exception are collected and thrown as a
-	 * RuleException at the end.
+	 * All rules that throw an exception are collected and thrown as a RuleException
+	 * at the end.
 	 * 
 	 * @param IProgressMonitor
 	 *            monitor used to show progress in UI
 	 * 
 	 * @throws RefactoringException
-	 *             if no working copies were found to apply
-	 *             {@link AbstractRefactoringRule}s to
+	 *             if no working copies were found to apply {@link RefactoringRule}s
+	 *             to
 	 * @throws RuleException
 	 *             if the {@link AbstractRefactoringRule} could no be initialised or not
 	 *             applied
@@ -332,10 +327,9 @@ public class RefactoringPipeline {
 		RuleApplicationCount.clear();
 
 		/*
-		 * Converts the monitor to a SubMonitor and sets name of task on
-		 * progress monitor dialog Size is set to number 100 and then scaled to
-		 * size of the rules list Each refactoring rule increases worked amount
-		 * for same size
+		 * Converts the monitor to a SubMonitor and sets name of task on progress
+		 * monitor dialog Size is set to number 100 and then scaled to size of the rules
+		 * list Each refactoring rule increases worked amount for same size
 		 */
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(rules.size());
 		subMonitor.setTaskName(""); //$NON-NLS-1$
@@ -346,15 +340,14 @@ public class RefactoringPipeline {
 			subMonitor.subTask(refactoringRule.getName());
 
 			/*
-			 * Sends new child of subMonitor which takes in progress bar size of
-			 * 1 of rules size In method that part of progress bar is split to
-			 * number of compilation units
+			 * Sends new child of subMonitor which takes in progress bar size of 1 of rules
+			 * size In method that part of progress bar is split to number of compilation
+			 * units
 			 */
 			applyRuleToAllStates(refactoringRule, subMonitor.newChild(1), notWorkingRules);
 
 			/*
-			 * If cancel is pressed on progress monitor, abort all and return,
-			 * else continue
+			 * If cancel is pressed on progress monitor, abort all and return, else continue
 			 */
 			if (subMonitor.isCanceled()) {
 				return;
@@ -370,8 +363,8 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * Apply {@link AbstractRefactoringRule}s to the working copies with changed check
-	 * state of each {@link RefactoringState}
+	 * Apply {@link RefactoringRule}s to the working copies with changed check state
+	 * of each {@link RefactoringState}
 	 * 
 	 * @param changedCompilationUnits
 	 *            unselected compilation units
@@ -385,17 +378,18 @@ public class RefactoringPipeline {
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
 
 		/*
-		 * Converts the monitor to a SubMonitor and sets name of task on
-		 * progress monitor dialog Size is set to number 100 and then scaled to
-		 * size of the rules list Each refactoring rule increases worked amount
-		 * for same size
+		 * Converts the monitor to a SubMonitor and sets name of task on progress
+		 * monitor dialog Size is set to number 100 and then scaled to size of the rules
+		 * list Each refactoring rule increases worked amount for same size
 		 */
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
 				.setWorkRemaining(rules.size() * changedCompilationUnits.size());
 		subMonitor.setTaskName(""); //$NON-NLS-1$
 
-		refactoringStates.stream().filter(refactoringState -> changedCompilationUnits.stream()
-				.anyMatch(unit -> unit.getElementName().equals(refactoringState.getWorkingCopyName()))).forEach(RefactoringState::resetWorkingCopy);
+		refactoringStates.stream()
+				.filter(refactoringState -> changedCompilationUnits.stream()
+						.anyMatch(unit -> unit.getElementName().equals(refactoringState.getWorkingCopyName())))
+				.forEach(RefactoringState::resetWorkingCopy);
 
 		for (AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
 			for (RefactoringState refactoringState : refactoringStates) {
@@ -525,15 +519,15 @@ public class RefactoringPipeline {
 	/**
 	 * Adds a {@link AbstractRefactoringRule} to all {@link RefactoringState}s.
 	 * <p>
-	 * If an Exception occurs while applying a rule to a state, the combination
-	 * of rule and state is added to the "not working rules" list and the
-	 * refactoring continues.
+	 * If an Exception occurs while applying a rule to a state, the combination of
+	 * rule and state is added to the "not working rules" list and the refactoring
+	 * continues.
 	 * <p>
 	 * This functionality used to be in the {@link AbstractRefactoringRule}.
 	 * 
 	 * @param rule
-	 *            {@link AbstractRefactoringRule} to apply to all
-	 *            {@link RefactoringState} instances
+	 *            {@link RefactoringRule} to apply to all {@link RefactoringState}
+	 *            instances
 	 * @param subMonitor
 	 * @param returnListNotWorkingRules
 	 *            rules that throw an exception are added to this list
@@ -556,8 +550,7 @@ public class RefactoringPipeline {
 			}
 
 			/*
-			 * If cancel is pressed on progress monitor, abort all and return,
-			 * else continue
+			 * If cancel is pressed on progress monitor, abort all and return, else continue
 			 */
 			if (monitor.isCanceled()) {
 				return;
@@ -593,8 +586,8 @@ public class RefactoringPipeline {
 	}
 
 	/**
-	 * Getter for refactoring states, used to remove all files without any
-	 * change from summary page
+	 * Getter for refactoring states, used to remove all files without any change
+	 * from summary page
 	 * 
 	 * @return
 	 */
@@ -638,9 +631,6 @@ public class RefactoringPipeline {
 			return true;
 		}
 
-		public void reset() {
-			problems.clear();
-		}
 	}
 
 }

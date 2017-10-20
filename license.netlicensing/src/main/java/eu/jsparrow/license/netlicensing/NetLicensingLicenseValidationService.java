@@ -43,7 +43,7 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 		LicenseStatus licenseStatus = LicenseManager.getInstance().getValidationData().getLicenseStatus();
 		return (licenseStatus == LicenseStatus.FLOATING_EXPIRED
 				|| licenseStatus == LicenseStatus.NODE_LOCKED_EXPIRED
-				|| licenseStatus == LicenseStatus.TRIAL_EXPIRED);
+				|| licenseStatus == LicenseStatus.FREE_EXPIRED);
 	}
 
 	@Override

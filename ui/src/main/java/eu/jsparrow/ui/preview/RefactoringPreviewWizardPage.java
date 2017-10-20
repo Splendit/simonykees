@@ -370,8 +370,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	}
 
 	protected void doStatusUpdate() {
-		if (LicenseUtil.getInstance().isTrial()) {
-			((StatusInfo) fSelectionStatus).setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenTrial);
+		if (LicenseUtil.getInstance().isFree()) {
+			((StatusInfo) fSelectionStatus).setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
 		} else {
 			fSelectionStatus = new StatusInfo();
 		}

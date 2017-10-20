@@ -380,8 +380,7 @@ public class LambdaForEachMapRule {
 		List<Wrapper> wrappers = new ArrayList<>();
 		wrappers.stream().map(wrapp -> {
 			/*
-			 * The generic method is not used as initializer of the mapping
-			 * variable.
+			 * The generic method is not used as initializer of the mapping variable.
 			 */
 			InnerClass innerClass = wrapp.getInnerClass();
 			String strInnerClass = innerClass.toString();

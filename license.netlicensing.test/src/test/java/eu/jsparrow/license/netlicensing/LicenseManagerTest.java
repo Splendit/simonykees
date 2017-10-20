@@ -71,7 +71,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		
 		// expecting to create (if it doesn't exist) a new licensee with demo license
 		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
-		assertEquals(LicenseStatus.TRIAL_REGISTERED, checker.getLicenseStatus());
+		assertEquals(LicenseStatus.FREE_REGISTERED, checker.getLicenseStatus());
 		assertTrue(checker.isValid());
 		
 		// ... and expecting the stored data to comply with created licensee
@@ -107,7 +107,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		licenseChecker = licenseManager.getValidationData();
 
 		assertEquals(LicenseType.TRY_AND_BUY, licenseChecker.getType());
-		assertEquals(LicenseStatus.TRIAL_REGISTERED, licenseChecker.getLicenseStatus());
+		assertEquals(LicenseStatus.FREE_REGISTERED, licenseChecker.getLicenseStatus());
 		assertTrue(licenseChecker.isValid());
 	}
 	
@@ -135,7 +135,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 
 		// expecting the validation data to be false
 		assertEquals(LicenseType.TRY_AND_BUY, licenseChecker.getType());
-		assertEquals(LicenseStatus.TRIAL_HW_ID_FAILURE, licenseChecker.getLicenseStatus());
+		assertEquals(LicenseStatus.FREE_HW_ID_FAILURE, licenseChecker.getLicenseStatus());
 		assertFalse(licenseChecker.isValid());
 	}
 	
@@ -153,7 +153,7 @@ public class LicenseManagerTest extends LicenseCommonTest {
 		LicenseChecker licenseChecker = licenseManager.getValidationData();
 		assertEquals(LicenseType.TRY_AND_BUY, licenseChecker.getType());
 		assertFalse(licenseChecker.isValid());
-		assertEquals(LicenseStatus.TRIAL_EXPIRED, licenseChecker.getLicenseStatus());
+		assertEquals(LicenseStatus.FREE_EXPIRED, licenseChecker.getLicenseStatus());
 		assertNotNull(licenseChecker.getExpirationDate());
 	}
 }

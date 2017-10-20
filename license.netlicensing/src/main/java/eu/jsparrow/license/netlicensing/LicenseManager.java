@@ -535,7 +535,7 @@ public class LicenseManager {
 		 * Calculates the {@link LicenseStatus} based on the parsed validity of
 		 * the license and the last successful validation time-stamp.
 		 * 
-		 * It covers the case where the NodeLocked/Trial license is still valid
+		 * It covers the case where the NodeLocked/Free license is still valid
 		 * but the hardware id does not match with the one of the first
 		 * validation. Note that this method does not calculate anything about
 		 * the validity of the license.
@@ -566,7 +566,7 @@ public class LicenseManager {
 						&& parsedLicenseType == LicenseType.TRY_AND_BUY
 						&& Instant.now().isBefore(demoExpireation.toInstant())) {
 
-					this.licenseStatus = LicenseStatus.TRIAL_HW_ID_FAILURE;
+					this.licenseStatus = LicenseStatus.FREE_HW_ID_FAILURE;
 					this.licenseType = LicenseType.TRY_AND_BUY;
 				} else {
 					// otherwise, just keep the parsed license type/status.
