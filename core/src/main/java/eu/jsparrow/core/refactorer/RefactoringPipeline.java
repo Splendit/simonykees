@@ -27,6 +27,7 @@ import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.exception.model.NotWorkingRuleModel;
 import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.ExceptionMessages;
@@ -326,6 +327,9 @@ public class RefactoringPipeline {
 			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_working_copies_found,
 					ExceptionMessages.RefactoringPipeline_user_warn_no_java_files_found_to_apply_rules);
 		}
+		
+		//When starting a new refactoring clear the old application counters
+		RuleApplicationCount.clear();
 
 		/*
 		 * Converts the monitor to a SubMonitor and sets name of task on

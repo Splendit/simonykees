@@ -49,4 +49,11 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 		}
 		return applicationCounters.get(rule);
 	}
+	
+	/**
+	 * Removes all application counters.
+	 */
+	public static void clear() {
+		applicationCounters.clear();
+	}
 }
