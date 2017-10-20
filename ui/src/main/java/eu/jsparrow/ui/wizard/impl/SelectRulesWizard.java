@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -64,6 +65,9 @@ public class SelectRulesWizard extends Wizard {
 
 	private RefactoringPipeline refactoringPipeline;
 
+	private static StopWatch stopWatch = new StopWatch();
+	private long durationInMilliseconds = 0;
+
 	public SelectRulesWizard(List<IJavaElement> javaElements, RefactoringPipeline refactoringPipeline,
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		super();
@@ -94,7 +98,8 @@ public class SelectRulesWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		if (model.getSelectionAsList().isEmpty()) {
+		if (model.getSelectionAsList()
+			.isEmpty()) {
 			return false;
 		} else {
 			return true;
@@ -104,46 +109,40 @@ public class SelectRulesWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 
-		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass().getSimpleName(),
-				this.javaElements.get(0).getJavaProject().getElementName()));
+		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
+			.getSimpleName(),
+				this.javaElements.get(0)
+					.getJavaProject()
+					.getElementName()));
 
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = model.getSelectionAsList();
 
 		refactoringPipeline.setRules(rules);
 		refactoringPipeline.setSourceMap(refactoringPipeline.getInitialSourceMap());
 
-		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
+		Rectangle rectangle = Display.getCurrent()
+			.getPrimaryMonitor()
+			.getBounds();
 
 		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					refactoringPipeline.doRefactoring(monitor);
-					if (monitor.isCanceled()) {
-						refactoringPipeline.clearStates();
-						return Status.CANCEL_STATUS;
-					}
-				} catch (RefactoringException e) {
-					WizardMessageDialog.synchronizeWithUIShowInfo(e);
-					return Status.CANCEL_STATUS;
-				} catch (RuleException e) {
-					WizardMessageDialog.synchronizeWithUIShowError(e);
-					return Status.CANCEL_STATUS;
+				preRefactoring();
+				IStatus refactoringStatus = doRefactoring(monitor);
+				postRefactoring();
 
-				} finally {
-					monitor.done();
-				}
-
-				return Status.OK_STATUS;
+				return refactoringStatus;
 			}
 		};
 
 		job.addJobChangeListener(new JobChangeAdapter() {
+
 			@Override
 			public void done(IJobChangeEvent event) {
 
-				if (event.getResult().isOK()) {
+				if (event.getResult()
+					.isOK()) {
 					if (refactoringPipeline.hasChanges()) {
 						synchronizeWithUIShowRefactoringPreviewWizard(refactoringPipeline, rectangle);
 					} else {
@@ -162,44 +161,87 @@ public class SelectRulesWizard extends Wizard {
 		return true;
 	}
 
+	private IStatus doRefactoring(IProgressMonitor monitor) {
+		try {
+			refactoringPipeline.doRefactoring(monitor);
+			if (monitor.isCanceled()) {
+				refactoringPipeline.clearStates();
+				return Status.CANCEL_STATUS;
+			}
+		} catch (RefactoringException e) {
+			WizardMessageDialog.synchronizeWithUIShowInfo(e);
+			return Status.CANCEL_STATUS;
+		} catch (RuleException e) {
+			WizardMessageDialog.synchronizeWithUIShowError(e);
+			return Status.CANCEL_STATUS;
+
+		} finally {
+			monitor.done();
+		}
+
+		return Status.OK_STATUS;
+
+	}
+
+	private void preRefactoring() {
+		stopWatch.start();
+	}
+
+	private void postRefactoring() {
+		stopWatch.stop();
+		durationInMilliseconds = stopWatch.getTime();
+		stopWatch.reset();
+	}
+
 	/**
 	 * Method used to open RefactoringPreviewWizard from non UI thread
 	 */
 	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactoringPipeline,
 			Rectangle rectangle) {
 
-		Display.getDefault().asyncExec(() -> {
+		Display.getDefault()
+			.asyncExec(() -> {
 
-			logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
-					javaElements.get(0).getJavaProject().getElementName()));
-			logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
-					javaElements.get(0).getJavaProject().getElementName(),
-					refactoringPipeline.getRules().stream()
+				logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass()
+					.getSimpleName(),
+						javaElements.get(0)
+							.getJavaProject()
+							.getElementName()));
+				logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes, javaElements.get(0)
+					.getJavaProject()
+					.getElementName(),
+						refactoringPipeline.getRules()
+							.stream()
 							.filter(rule -> null != refactoringPipeline.getChangesForRule(rule)
-									&& !refactoringPipeline.getChangesForRule(rule).isEmpty())
-							.map(RefactoringRule::getName).collect(Collectors.joining("; ")))); //$NON-NLS-1$
+									&& !refactoringPipeline.getChangesForRule(rule)
+										.isEmpty())
+							.map(RefactoringRule::getName)
+							.collect(Collectors.joining("; ")))); //$NON-NLS-1$
 
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactoringPipeline)) {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				final WizardDialog dialog = new WizardDialog(shell,
+						new RefactoringPreviewWizard(refactoringPipeline, durationInMilliseconds)) {
 
-				@Override
-				protected void nextPressed() {
-					((RefactoringPreviewWizard) getWizard()).pressedNext();
-					super.nextPressed();
-				}
+					@Override
+					protected void nextPressed() {
+						((RefactoringPreviewWizard) getWizard()).pressedNext();
+						super.nextPressed();
+					}
 
-				@Override
-				protected void backPressed() {
-					((RefactoringPreviewWizard) getWizard()).pressedBack();
-					super.backPressed();
-				}
+					@Override
+					protected void backPressed() {
+						((RefactoringPreviewWizard) getWizard()).pressedBack();
+						super.backPressed();
+					}
 
-			};
+				};
 
-			// maximizes the RefactoringPreviewWizard
-			dialog.setPageSize(rectangle.width, rectangle.height);
-			dialog.open();
-		});
+				// maximizes the RefactoringPreviewWizard
+				dialog.setPageSize(rectangle.width, rectangle.height);
+				dialog.open();
+			});
 	}
 
 	/**
@@ -209,22 +251,24 @@ public class SelectRulesWizard extends Wizard {
 	 * @param result
 	 *            will contain compilation units
 	 * @param javaElements
-	 *            contains java elements which should be split up into compilation
-	 *            units
+	 *            contains java elements which should be split up into
+	 *            compilation units
 	 * @throws JavaModelException
-	 *             if this element does not exist or if an exception occurs while
-	 *             accessing its corresponding resource.
+	 *             if this element does not exist or if an exception occurs
+	 *             while accessing its corresponding resource.
 	 * @since 0.9
 	 */
 	public static void collectICompilationUnits(List<ICompilationUnit> result, List<IJavaElement> javaElements,
 			IProgressMonitor monitor) throws JavaModelException {
 
 		/*
-		 * Converts the monitor to a SubMonitor and sets name of task on progress
-		 * monitor dialog. Size is set to number 100 and then scaled to size of the
-		 * javaElements list. Each java element increases worked amount for same size.
+		 * Converts the monitor to a SubMonitor and sets name of task on
+		 * progress monitor dialog. Size is set to number 100 and then scaled to
+		 * size of the javaElements list. Each java element increases worked
+		 * amount for same size.
 		 */
-		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(javaElements.size());
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
+			.setWorkRemaining(javaElements.size());
 		subMonitor.setTaskName(Messages.ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName);
 		for (IJavaElement javaElement : javaElements) {
 			subMonitor.subTask(javaElement.getElementName());
@@ -240,7 +284,7 @@ public class SelectRulesWizard extends Wizard {
 			} else if (javaElement instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot) javaElement;
 				List<IPackageFragment> packageFragments = ASTNodeUtil
-						.convertToTypedList(Arrays.asList(packageFragmentRoot.getChildren()), IPackageFragment.class);
+					.convertToTypedList(Arrays.asList(packageFragmentRoot.getChildren()), IPackageFragment.class);
 				addCompilationUnits(result, packageFragments);
 			} else if (javaElement instanceof IJavaProject) {
 				IJavaProject javaProject = (IJavaProject) javaElement;
@@ -248,7 +292,8 @@ public class SelectRulesWizard extends Wizard {
 			}
 
 			/*
-			 * If cancel is pressed on progress monitor, abort all and return, else continue
+			 * If cancel is pressed on progress monitor, abort all and return,
+			 * else continue
 			 */
 			if (subMonitor.isCanceled()) {
 				return;
@@ -265,8 +310,8 @@ public class SelectRulesWizard extends Wizard {
 	 *            List of {@link ICompilationUnit} where all the
 	 *            {@link ICompilationUnit}s from the sub-packages are added
 	 * @param packageFragment
-	 *            the current {@link IPackageFragment} from which the sub-packages
-	 *            will be resolved
+	 *            the current {@link IPackageFragment} from which the
+	 *            sub-packages will be resolved
 	 * @throws JavaModelException
 	 */
 	private static void resolveSubPackages(List<ICompilationUnit> result, IPackageFragment packageFragment)
@@ -278,7 +323,9 @@ public class SelectRulesWizard extends Wizard {
 			for (IJavaElement packageElement : root.getChildren()) {
 				if (packageElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 					IPackageFragment pkg = (IPackageFragment) packageElement;
-					if (!pkg.getElementName().equals(packageName) && pkg.getElementName().startsWith(packageName)) {
+					if (!pkg.getElementName()
+						.equals(packageName) && pkg.getElementName()
+							.startsWith(packageName)) {
 						addCompilationUnit(result, pkg.getCompilationUnits());
 					}
 				}
@@ -289,8 +336,8 @@ public class SelectRulesWizard extends Wizard {
 	/**
 	 * 
 	 * @param result
-	 *            List of {@link ICompilationUnit} where the {@code compilationUnit}
-	 *            is added
+	 *            List of {@link ICompilationUnit} where the
+	 *            {@code compilationUnit} is added
 	 * @param packageFragments
 	 * @throws JavaModelException
 	 */
@@ -304,14 +351,14 @@ public class SelectRulesWizard extends Wizard {
 	/**
 	 * 
 	 * @param result
-	 *            List of {@link ICompilationUnit} where the {@code compilationUnit}
-	 *            is added
+	 *            List of {@link ICompilationUnit} where the
+	 *            {@code compilationUnit} is added
 	 * @param compilationUnit
-	 *            {@link ICompilationUnit} that is tested for consistency and write
-	 *            access.
+	 *            {@link ICompilationUnit} that is tested for consistency and
+	 *            write access.
 	 * @throws JavaModelException
-	 *             if this element does not exist or if an exception occurs while
-	 *             accessing its corresponding resource.
+	 *             if this element does not exist or if an exception occurs
+	 *             while accessing its corresponding resource.
 	 * @since 0.9
 	 */
 
@@ -333,8 +380,8 @@ public class SelectRulesWizard extends Wizard {
 	 * @param compilationUnits
 	 *            array of {@link ICompilationUnit} which are loaded
 	 * @throws JavaModelException
-	 *             if this element does not exist or if an exception occurs while
-	 *             accessing its corresponding resource.
+	 *             if this element does not exist or if an exception occurs
+	 *             while accessing its corresponding resource.
 	 * @since 0.9
 	 */
 	private static void addCompilationUnit(List<ICompilationUnit> result, ICompilationUnit[] compilationUnits)

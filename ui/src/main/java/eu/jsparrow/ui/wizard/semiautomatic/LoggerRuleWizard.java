@@ -3,6 +3,7 @@ package eu.jsparrow.ui.wizard.semiautomatic;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -51,6 +52,9 @@ public class LoggerRuleWizard extends Wizard {
 
 	private RefactoringPipeline refactoringPipeline;
 
+	private static StopWatch stopWatch = new StopWatch();
+	private long durationInMilliseconds = 0;
+
 	public LoggerRuleWizard(IJavaProject selectedJavaProjekt,
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, RefactoringPipeline refactoringPipeline) {
 		super();
@@ -81,7 +85,8 @@ public class LoggerRuleWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		if (model.getSelectionStatus().equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)) {
+		if (model.getSelectionStatus()
+			.equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)) {
 			return false;
 		} else {
 			return true;
@@ -91,8 +96,8 @@ public class LoggerRuleWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 
-		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass().getSimpleName(),
-				selectedJavaProjekt.getElementName()));
+		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
+			.getSimpleName(), selectedJavaProjekt.getElementName()));
 
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(rule);
 		refactoringPipeline.setRules(rules);
@@ -100,32 +105,20 @@ public class LoggerRuleWizard extends Wizard {
 		 * AbstractRefactorer refactorer = new AbstractRefactorer(javaElements,
 		 * rules)
 		 */
-		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
+		Rectangle rectangle = Display.getCurrent()
+			.getPrimaryMonitor()
+			.getBounds();
 		rule.activateOptions(model.getCurrentSelectionMap());
 
 		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				preRefactoring();
+				IStatus refactoringStatus = doRefactoring(monitor);
+				postRefactoring();
 
-				try {
-					refactoringPipeline.doRefactoring(monitor);
-					if (monitor.isCanceled()) {
-						refactoringPipeline.clearStates();
-						return Status.CANCEL_STATUS;
-					}
-				} catch (RefactoringException e) {
-					WizardMessageDialog.synchronizeWithUIShowInfo(e);
-					return Status.CANCEL_STATUS;
-				} catch (RuleException e) {
-					WizardMessageDialog.synchronizeWithUIShowError(e);
-					return Status.CANCEL_STATUS;
-
-				} finally {
-					monitor.done();
-				}
-
-				return Status.OK_STATUS;
+				return refactoringStatus;
 			}
 		};
 
@@ -133,7 +126,8 @@ public class LoggerRuleWizard extends Wizard {
 			@Override
 			public void done(IJobChangeEvent event) {
 
-				if (event.getResult().isOK()) {
+				if (event.getResult()
+					.isOK()) {
 					if (refactoringPipeline.hasChanges()) {
 
 						synchronizeWithUIShowRefactoringPreviewWizard(refactoringPipeline, rectangle);
@@ -154,23 +148,58 @@ public class LoggerRuleWizard extends Wizard {
 		return true;
 	}
 
+	private IStatus doRefactoring(IProgressMonitor monitor) {
+		try {
+			refactoringPipeline.doRefactoring(monitor);
+			if (monitor.isCanceled()) {
+				refactoringPipeline.clearStates();
+				return Status.CANCEL_STATUS;
+			}
+		} catch (RefactoringException e) {
+			WizardMessageDialog.synchronizeWithUIShowInfo(e);
+			return Status.CANCEL_STATUS;
+		} catch (RuleException e) {
+			WizardMessageDialog.synchronizeWithUIShowError(e);
+			return Status.CANCEL_STATUS;
+
+		} finally {
+			monitor.done();
+		}
+
+		return Status.OK_STATUS;
+	}
+
+	private void preRefactoring() {
+		stopWatch.start();
+	}
+
+	private void postRefactoring() {
+		stopWatch.stop();
+		durationInMilliseconds = stopWatch.getTime();
+		stopWatch.reset();
+	}
+
 	/**
 	 * Method used to open RefactoringPreviewWizard from non UI thread
 	 */
 	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactorer, Rectangle rectangle) {
 
-		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
-				selectedJavaProjekt.getElementName()));
+		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass()
+			.getSimpleName(), selectedJavaProjekt.getElementName()));
 		logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes, selectedJavaProjekt.getElementName(),
 				rule.getName()));
 
-		Display.getDefault().asyncExec(() -> {
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactorer));
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				final WizardDialog dialog = new WizardDialog(shell,
+						new RefactoringPreviewWizard(refactorer, durationInMilliseconds));
 
-			// maximizes the RefactoringPreviewWizard
-			dialog.setPageSize(rectangle.width, rectangle.height);
-			dialog.open();
-		});
+				// maximizes the RefactoringPreviewWizard
+				dialog.setPageSize(rectangle.width, rectangle.height);
+				dialog.open();
+			});
 	}
 }
