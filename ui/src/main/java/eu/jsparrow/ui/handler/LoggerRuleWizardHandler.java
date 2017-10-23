@@ -228,6 +228,8 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 					} else {
 						synchronizeWithUIShowWarningNoComlipationUnitDialog();
 					}
+				} else {
+					Activator.setRunning(false);
 				}
 			});
 	}
