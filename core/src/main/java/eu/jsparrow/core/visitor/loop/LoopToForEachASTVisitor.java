@@ -132,11 +132,14 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			ITypeBinding outerType = iteratorTypeBinding.getDeclaringClass();
 			importRewrite.addImport(outerType, astRewrite.getAST());
 			addedImports = importRewrite.getAddedImports();
-			String fullyQualifiedName = iteratorTypeBinding.getErasure().getQualifiedName();
-			int outerTypeStartingIndex = fullyQualifiedName.lastIndexOf(outerType.getErasure().getName());
-			Name qualifiedName = astRewrite.getAST().newName(fullyQualifiedName.substring(outerTypeStartingIndex));
-			iteratorType = ASTNodeUtil.convertToQualifiedName(importRewrite.addImport(iteratorTypeBinding, astRewrite.getAST()),
-					qualifiedName);
+			String fullyQualifiedName = iteratorTypeBinding.getErasure()
+				.getQualifiedName();
+			int outerTypeStartingIndex = fullyQualifiedName.lastIndexOf(outerType.getErasure()
+				.getName());
+			Name qualifiedName = astRewrite.getAST()
+				.newName(fullyQualifiedName.substring(outerTypeStartingIndex));
+			iteratorType = ASTNodeUtil.convertToQualifiedName(
+					importRewrite.addImport(iteratorTypeBinding, astRewrite.getAST()), qualifiedName);
 		} else {
 			/*
 			 * ImportRewrite::addImport is a work around for creating a Type
@@ -150,8 +153,9 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			}
 		}
 
-		Arrays.stream(addedImports).filter(addedImport -> !StringUtils.startsWith(addedImport, JAVA_LANG_PACKAGE))
-				.forEach(newImports::add);
+		Arrays.stream(addedImports)
+			.filter(addedImport -> !StringUtils.startsWith(addedImport, JAVA_LANG_PACKAGE))
+			.forEach(newImports::add);
 
 		return iteratorType;
 	}
@@ -173,8 +177,10 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		VariableDeclarationsVisitor loopBodyDeclarationsVisitor = new VariableDeclarationsVisitor();
 		loopBody.accept(loopBodyDeclarationsVisitor);
 		List<SimpleName> loobBodyDeclarations = loopBodyDeclarationsVisitor.getVariableDeclarationNames();
-		List<String> declaredNames = loobBodyDeclarations.stream().filter(name -> name != preferedName)
-				.map(SimpleName::getIdentifier).collect(Collectors.toList());
+		List<String> declaredNames = loobBodyDeclarations.stream()
+			.filter(name -> name != preferedName)
+			.map(SimpleName::getIdentifier)
+			.collect(Collectors.toList());
 
 		String newName;
 		Boolean allowedPreferedName;
@@ -188,7 +194,9 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			scope.accept(loopScopeVisitor);
 			List<SimpleName> scopeDeclaredNames = loopScopeVisitor.getVariableDeclarationNames();
 			String defaultIteratorName = createDefaultIteratorName(iterableName);
-			declaredNames = scopeDeclaredNames.stream().map(SimpleName::getIdentifier).collect(Collectors.toList());
+			declaredNames = scopeDeclaredNames.stream()
+				.map(SimpleName::getIdentifier)
+				.collect(Collectors.toList());
 			while (declaredNames.contains(defaultIteratorName + suffix)
 					|| tempIntroducedNames.containsValue(defaultIteratorName + suffix)
 					|| JavaReservedKeyWords.isKeyWord(defaultIteratorName + suffix)) {
@@ -310,7 +318,9 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 		// generate a safe iterator name
 		Map<String, Boolean> nameMap = generateNewIteratorName(preferredIteratorName, loopBody, iterableNode);
-		String newIteratorIdentifier = nameMap.keySet().iterator().next();
+		String newIteratorIdentifier = nameMap.keySet()
+			.iterator()
+			.next();
 		storeTempName(loop, newIteratorIdentifier);
 		boolean eligiblePreferredName = nameMap.get(newIteratorIdentifier);
 		if (eligiblePreferredName && indexVisitor.getPreferredNameFragment() != null) {
@@ -321,7 +331,8 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		toBeRemoved.forEach(remove -> {
 			if (remove.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
 				VariableDeclarationStatement declStatement = (VariableDeclarationStatement) remove.getParent();
-				if (declStatement.fragments().size() == 1) {
+				if (declStatement.fragments()
+					.size() == 1) {
 					astRewrite.remove(declStatement, null);
 				}
 			}
@@ -372,7 +383,8 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		 * loopStatement
 		 */
 		List<ITypeBinding> types = new ArrayList<>();
-		types.addAll(this.innerTypesMap.get(currentClass.resolveBinding().getQualifiedName()));
+		types.addAll(this.innerTypesMap.get(currentClass.resolveBinding()
+			.getQualifiedName()));
 		ASTNode parent = currentClass.getParent();
 
 		if (parent == this.compilationUnit) {
@@ -390,10 +402,14 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 		return
 		// iterator type is not an inner type
-		types.stream().map(ITypeBinding::getErasure).map(ITypeBinding::getQualifiedName)
-				.noneMatch(qualifiedName -> qualifiedName.equals(iteratorErasure.getQualifiedName())) &&
+		types.stream()
+			.map(ITypeBinding::getErasure)
+			.map(ITypeBinding::getQualifiedName)
+			.noneMatch(qualifiedName -> qualifiedName.equals(iteratorErasure.getQualifiedName())) &&
 		// iterator type clashes with an inner type
-				types.stream().map(ITypeBinding::getName).anyMatch(name -> name.equals(iteratorErasure.getName()));
+				types.stream()
+					.map(ITypeBinding::getName)
+					.anyMatch(name -> name.equals(iteratorErasure.getName()));
 
 	}
 
@@ -479,8 +495,10 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			 */
 			if (ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
 					Collections.singletonList(ITERABLE_FULLY_QUALIFIED_NAME))
-					&& StringUtils.equals(SIZE, condition.getName().getIdentifier())
-					&& condition.arguments().isEmpty()) {
+					&& StringUtils.equals(SIZE, condition.getName()
+						.getIdentifier())
+					&& condition.arguments()
+						.isEmpty()) {
 
 				/*
 				 * Initiate a visitor for investigating the replacement

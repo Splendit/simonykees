@@ -17,7 +17,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class FlatMapInsteadOfNestedLoopsRuleTest extends SingleRuleTest {
-	
+
 	private static final String SAMPLE_FILE = "FlatMapInsteadOfNestedLoopsRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "flatMapInsteadOfNestedLoops";
 
@@ -57,5 +57,5 @@ public class FlatMapInsteadOfNestedLoopsRuleTest extends SingleRuleTest {
 
 		assertFalse(rule.isEnabled());
 	}
-	
+
 }

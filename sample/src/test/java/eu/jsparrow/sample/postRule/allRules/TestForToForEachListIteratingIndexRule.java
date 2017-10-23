@@ -21,7 +21,9 @@ public class TestForToForEachListIteratingIndexRule {
 
 	private List<Integer> generateHashCodeList(String input) {
 		List<String> foo = generateList(input);
-		List<Integer> fooHashCodes = foo.stream().map(String::hashCode).collect(Collectors.toList());
+		List<Integer> fooHashCodes = foo.stream()
+			.map(String::hashCode)
+			.collect(Collectors.toList());
 		return fooHashCodes;
 	}
 
@@ -46,7 +48,9 @@ public class TestForToForEachListIteratingIndexRule {
 	public String testIeratingThroughListOfLists(String input) {
 		List<List<String>> nestedList = new ArrayList<>();
 		StringBuilder sb = new StringBuilder();
-		nestedList.stream().flatMap(List::stream).forEach(sb::append);
+		nestedList.stream()
+			.flatMap(List::stream)
+			.forEach(sb::append);
 		return "";
 	}
 

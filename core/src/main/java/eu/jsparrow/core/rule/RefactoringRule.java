@@ -57,7 +57,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	protected Class<T> visitor;
 
 	protected RefactoringRule() {
-		this.id = this.getClass().getSimpleName();
+		this.id = this.getClass()
+			.getSimpleName();
 		this.tags = TagUtil.getTagsForRule(this.getClass());
 		this.requiredJavaVersion = provideRequiredJavaVersion();
 	}
@@ -98,7 +99,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	/**
-	 * Responsible to calculate if the rule is executable in the current project.
+	 * Responsible to calculate if the rule is executable in the current
+	 * project.
 	 * 
 	 * @param project
 	 */
@@ -106,8 +108,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 		if (null == compilerCompliance) {
 			/*
-			 * if we cannot get the compiler compliance, we are unable to know whether or
-			 * not the Java version is satisfied
+			 * if we cannot get the compiler compliance, we are unable to know
+			 * whether or not the Java version is satisfied
 			 */
 			satisfiedJavaVersion = false;
 		} else {
@@ -119,11 +121,9 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		enabled = satisfiedJavaVersion && satisfiedLibraries;
 	}
 
-
-
 	/**
-	 * JavaVersion independent requirements for rules that need to be defined for
-	 * each rule. Returns true as default implementation
+	 * JavaVersion independent requirements for rules that need to be defined
+	 * for each rule. Returns true as default implementation
 	 * 
 	 * @param project
 	 * @return
@@ -137,7 +137,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	/**
-	 * Responsible to calculate of the rule is executable in the current project.
+	 * Responsible to calculate of the rule is executable in the current
+	 * project.
 	 * 
 	 */
 	public final DocumentChange applyRule(ICompilationUnit workingCopy)
@@ -184,14 +185,16 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		}
 
 		Document document = new Document(workingCopy.getSource());
-		TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
+		TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject()
+			.getOptions(true));
 
 		if (edits.hasChildren()) {
 
 			/*
-			 * The TextEdit instance changes as soon as it is applied to the working copy.
-			 * This results in an incorrect preview of the DocumentChange. To fix this
-			 * issue, a copy of the TextEdit is used for the DocumentChange.
+			 * The TextEdit instance changes as soon as it is applied to the
+			 * working copy. This results in an incorrect preview of the
+			 * DocumentChange. To fix this issue, a copy of the TextEdit is used
+			 * for the DocumentChange.
 			 */
 			DocumentChange documentChange = RefactoringUtil.generateDocumentChange(visitor.getSimpleName(), document,
 					edits.copy());
@@ -209,8 +212,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	/**
-	 * Independent library requirements for rules that need to be defined for each
-	 * rule. Returns null as default implementation
+	 * Independent library requirements for rules that need to be defined for
+	 * each rule. Returns null as default implementation
 	 * 
 	 * @return String value of required library fully qualified class name
 	 */
@@ -219,8 +222,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	/**
-	 * Helper method for description building. Saves information if java version is
-	 * satisfied for rule on selected project.
+	 * Helper method for description building. Saves information if java version
+	 * is satisfied for rule on selected project.
 	 * 
 	 * @return true if rule can be applied according to java version, false
 	 *         otherwise
@@ -233,8 +236,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	 * Helper method for description building. Saves information if required
 	 * libraries are satisfied for rule on selected project.
 	 * 
-	 * @return true if rule can be applied according to required libraries, false
-	 *         otherwise
+	 * @return true if rule can be applied according to required libraries,
+	 *         false otherwise
 	 */
 	public boolean isSatisfiedLibraries() {
 		return satisfiedLibraries;
@@ -264,6 +267,5 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 			return false;
 		return true;
 	}
-	
-	
+
 }

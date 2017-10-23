@@ -21,9 +21,11 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
  * <p>
  * Those accesses can be replaced with an isEmpty() clause.
  * <ul>
- * <li>Collection: since 1.2, ex.: myCollection.size() == 0 -> myCollection.isEmpty()</li>
+ * <li>Collection: since 1.2, ex.: myCollection.size() == 0 ->
+ * myCollection.isEmpty()</li>
  * <li>Map: since 1.2, ex.: myMap.size() == 0 -> myMap.isEmpty()</li>
- * <li>Collection: since 1.6, ex.: myString.length() == 0 -> myString.isEmpty()</li>
+ * <li>Collection: since 1.6, ex.: myString.length() == 0 ->
+ * myString.isEmpty()</li>
  * </ul>
  * 
  * @author Martin Huter, Hans-Jörg Schrödl
@@ -39,13 +41,16 @@ public class UseIsEmptyRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		if (!methodInvocation.arguments().isEmpty()
-				|| ASTNode.INFIX_EXPRESSION != methodInvocation.getParent().getNodeType()
+		if (!methodInvocation.arguments()
+			.isEmpty()
+				|| ASTNode.INFIX_EXPRESSION != methodInvocation.getParent()
+					.getNodeType()
 				|| methodInvocation.getExpression() == null) {
 			return false;
 		}
 		InfixExpression parent = (InfixExpression) methodInvocation.getParent();
-		if (!parent.extendedOperands().isEmpty() || InfixExpression.Operator.EQUALS != parent.getOperator()) {
+		if (!parent.extendedOperands()
+			.isEmpty() || InfixExpression.Operator.EQUALS != parent.getOperator()) {
 			return false;
 		}
 		if (!onStringOrMapType(methodInvocation)) {
@@ -63,7 +68,8 @@ public class UseIsEmptyRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 			return false;
 		}
 
-		SimpleName isEmptyMethod = methodInvocation.getAST().newSimpleName("isEmpty"); //$NON-NLS-1$
+		SimpleName isEmptyMethod = methodInvocation.getAST()
+			.newSimpleName("isEmpty"); //$NON-NLS-1$
 		MethodInvocation replaceNode = NodeBuilder.newMethodInvocation(methodInvocation.getAST(),
 				(Expression) astRewrite.createMoveTarget(varExpression), isEmptyMethod);
 		astRewrite.replace(parent, replaceNode, null);
@@ -114,10 +120,16 @@ public class UseIsEmptyRuleASTVisitor extends AbstractASTRewriteASTVisitor {
 		List<String> fullyQualifiedStringName = generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME);
 		List<String> fullyQualifiedDataStuctures = generateFullyQuallifiedNameList(COLLECTION_FULLY_QUALLIFIED_NAME,
 				MAP_FULLY_QUALLIFIED_NAME);
-		boolean isStringType = StringUtils.equals(LENGTH, node.getName().getFullyQualifiedName()) && ClassRelationUtil
-				.isContentOfTypes(node.getExpression().resolveTypeBinding(), fullyQualifiedStringName);
-		boolean isListOrMapType = StringUtils.equals(SIZE, node.getName().getFullyQualifiedName()) && ClassRelationUtil
-				.isContentOfTypes(node.getExpression().resolveTypeBinding(), fullyQualifiedDataStuctures);
+		boolean isStringType = StringUtils.equals(LENGTH, node.getName()
+			.getFullyQualifiedName()) && ClassRelationUtil.isContentOfTypes(
+					node.getExpression()
+						.resolveTypeBinding(),
+					fullyQualifiedStringName);
+		boolean isListOrMapType = StringUtils.equals(SIZE, node.getName()
+			.getFullyQualifiedName()) && ClassRelationUtil.isContentOfTypes(
+					node.getExpression()
+						.resolveTypeBinding(),
+					fullyQualifiedDataStuctures);
 		return isStringType || isListOrMapType;
 	}
 }

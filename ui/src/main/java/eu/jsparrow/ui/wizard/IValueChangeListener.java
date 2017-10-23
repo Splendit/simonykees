@@ -10,5 +10,5 @@ package eu.jsparrow.ui.wizard;
 public interface IValueChangeListener {
 
 	public void valueChanged();
-	
+
 }

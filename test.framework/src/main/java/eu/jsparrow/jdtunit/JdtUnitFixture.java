@@ -114,13 +114,16 @@ public class JdtUnitFixture {
 
 		TypeDeclaration td = ast.newTypeDeclaration();
 		td.setInterface(false);
-		td.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD));
+		td.modifiers()
+			.add(ast.newModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD));
 		td.setName(ast.newSimpleName(CLASS_FIXTURE_NAME));
-		astRoot.types().add(td);
+		astRoot.types()
+			.add(td);
 
 		methodDeclaration = ast.newMethodDeclaration();
 		methodDeclaration.setName(ast.newSimpleName(METHOD_FIXTURE_NAME));
-		td.bodyDeclarations().add(methodDeclaration);
+		td.bodyDeclarations()
+			.add(methodDeclaration);
 	}
 
 	/**
@@ -129,8 +132,10 @@ public class JdtUnitFixture {
 	 * @throws Exception
 	 */
 	public void clear() throws Exception {
-		astRoot.imports().clear();
-		methodDeclaration.getBody().delete();
+		astRoot.imports()
+			.clear();
+		methodDeclaration.getBody()
+			.delete();
 
 		saveChanges();
 	}
@@ -154,7 +159,8 @@ public class JdtUnitFixture {
 	public void addImport(String name) throws Exception {
 		ImportDeclaration im = ast.newImportDeclaration();
 		im.setName(ast.newName(name));
-		astRoot.imports().add(im);
+		astRoot.imports()
+			.add(im);
 		this.astRoot = this.saveChanges();
 	}
 
@@ -187,7 +193,8 @@ public class JdtUnitFixture {
 		Document document = new Document(compilationUnit.getSource());
 		TextEdit res = astRoot.rewrite(document, options);
 		res.apply(document);
-		compilationUnit.getBuffer().setContents(document.get());
+		compilationUnit.getBuffer()
+			.setContents(document.get());
 
 		refreshFixtures();
 		return astRoot;
@@ -213,7 +220,8 @@ public class JdtUnitFixture {
 	private CompilationUnit saveChanges(TextEdit textEdit) throws Exception {
 		Document document = new Document(compilationUnit.getSource());
 		textEdit.apply(document);
-		compilationUnit.getBuffer().setContents(document.get());
+		compilationUnit.getBuffer()
+			.setContents(document.get());
 
 		refreshFixtures();
 		return astRoot;
@@ -221,7 +229,9 @@ public class JdtUnitFixture {
 
 	private void createJavaProject() throws CoreException {
 
-		project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_FIXTURE_NAME);
+		project = ResourcesPlugin.getWorkspace()
+			.getRoot()
+			.getProject(PROJECT_FIXTURE_NAME);
 		project.create(null);
 		project.open(null);
 
@@ -248,7 +258,8 @@ public class JdtUnitFixture {
 			throw new JdtUnitException(String.format("Malformed statements. Failed to parse '%s'.", string));
 		}
 		Block block = (Block) result;
-		if (block.statements().isEmpty()) {
+		if (block.statements()
+			.isEmpty()) {
 			throw new JdtUnitException("Can not create an empty block. There might be syntax errors");
 		}
 		return block;
@@ -263,7 +274,8 @@ public class JdtUnitFixture {
 		astRoot = (CompilationUnit) parser.createAST(null);
 		astRoot.recordModifications();
 		ast = astRoot.getAST();
-		TypeDeclaration typeDecl = (TypeDeclaration) astRoot.types().get(0);
+		TypeDeclaration typeDecl = (TypeDeclaration) astRoot.types()
+			.get(0);
 		methodDeclaration = typeDecl.getMethods()[0];
 		astRewrite = ASTRewrite.create(astRoot.getAST());
 		hasChanged = false;

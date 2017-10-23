@@ -32,12 +32,12 @@ public class ImmutableStaticFinalCollectionsRule {
 	});
 
 	private static final Collection<String> CONSTANT_COLLECTION = Collections
-			.unmodifiableCollection(new ArrayList<String>() {
-				{
-					add("foo");
-					add("bar");
-				}
-			});
+		.unmodifiableCollection(new ArrayList<String>() {
+			{
+				add("foo");
+				add("bar");
+			}
+		});
 
 	private static final Map<String, String> CONSTANT_MAP = Collections.unmodifiableMap(new HashMap() {
 		{
@@ -53,26 +53,26 @@ public class ImmutableStaticFinalCollectionsRule {
 	});
 
 	private static final NavigableMap<String, String> CONSTANT_NAV_MAP = Collections
-			.unmodifiableNavigableMap(new TreeMap<String, String>() {
-				{
-					put("foo", "bar");
-				}
-			});
+		.unmodifiableNavigableMap(new TreeMap<String, String>() {
+			{
+				put("foo", "bar");
+			}
+		});
 
 	private static final NavigableSet<String> CONSTANT_NAV_SET = Collections
-			.unmodifiableNavigableSet(new TreeSet<String>() {
-				{
-					add("foo");
-					add("bar");
-				}
-			});
+		.unmodifiableNavigableSet(new TreeSet<String>() {
+			{
+				add("foo");
+				add("bar");
+			}
+		});
 
 	private static final SortedMap<String, String> CONSTANT_SORT_MAP = Collections
-			.unmodifiableSortedMap(new TreeMap<String, String>() {
-				{
-					put("foo", "bar");
-				}
-			});
+		.unmodifiableSortedMap(new TreeMap<String, String>() {
+			{
+				put("foo", "bar");
+			}
+		});
 
 	private static final SortedSet<String> CONSTANT_SORT_SET = Collections.unmodifiableSortedSet(new TreeSet<String>() {
 		{

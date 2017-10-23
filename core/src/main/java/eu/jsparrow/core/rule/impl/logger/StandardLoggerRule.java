@@ -53,12 +53,12 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	private Map<String, Integer> pritntStacktraceReplaceOptions = new LinkedHashMap<>();
 	private Map<String, Integer> newLoggingStatementOptions = new LinkedHashMap<>();
 	private Map<String, String> selectedOptions = new HashMap<>();
-	
+
 	private static final Map<String, Integer> replaceOptions;
 
 	private SupportedLogger supportedLoger = null;
 	private String loggerQualifiedName = null;
-	
+
 	static {
 		Map<String, Integer> options = new LinkedHashMap<>();
 		options.put(TRACE, 1);
@@ -133,7 +133,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	public Map<String, Integer> getPrintStackTraceReplaceOptions() {
 		return pritntStacktraceReplaceOptions;
 	}
-	
+
 	@Override
 	public Map<String, Integer> getSystemOutPrintExceptionReplaceOptions() {
 		return systemOutPrintExceptionReplaceOptions;
@@ -143,7 +143,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	public Map<String, Integer> getSystemErrPrintExceptionReplaceOptions() {
 		return systemErrPrintExceptionReplaceOptions;
 	}
-	
+
 	@Override
 	public Map<String, Integer> getMissingLogInsertOptions() {
 		return newLoggingStatementOptions;

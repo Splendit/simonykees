@@ -36,17 +36,20 @@ public class StandardLoggerCustomOptionsRuleTest extends SingleRuleTest {
 	public void testTransformationWithDefaultFile() throws Exception {
 		root = RulesTestUtil.addSourceContainer(testProject, "/allRulesTestRoot");
 
-		RulesTestUtil.addToClasspath(testProject, Arrays.asList(
-				RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25")));
+		RulesTestUtil.addToClasspath(testProject,
+				Arrays.asList(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25")));
 		RulesTestUtil.addToClasspath(testProject, RulesTestUtil.getClassPathEntries(root));
 		Map<String, String> selectedOptions = new HashMap<>();
-		selectedOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, ""); // -->> Leave as is 
+		selectedOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, ""); // -->>
+																				// Leave
+																				// as
+																				// is
 		selectedOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY, "debug");
 		selectedOptions.put(StandardLoggerConstants.PRINT_STACKTRACE_KEY, "warn");
 		rule.activateOptions(selectedOptions);
-		
+
 		rule.calculateEnabledForProject(testProject);
-		
+
 		Path preRule = getPreRuleFile(SAMPLE_FILE);
 		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
 

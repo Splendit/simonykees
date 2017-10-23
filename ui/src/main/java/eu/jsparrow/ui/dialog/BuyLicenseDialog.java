@@ -119,9 +119,11 @@ public class BuyLicenseDialog extends Dialog {
 		titleContainer.setLayoutData(gridData);
 
 		Dialog.applyDialogFont(composite);
-		Font font = composite.getDisplay().getSystemFont();
+		Font font = composite.getDisplay()
+			.getSystemFont();
 
-		FontDescriptor boldFontDescription = FontDescriptor.createFrom(font).setStyle(SWT.BOLD);
+		FontDescriptor boldFontDescription = FontDescriptor.createFrom(font)
+			.setStyle(SWT.BOLD);
 		Font boldFont = boldFontDescription.createFont(composite.getDisplay());
 
 		IPath iPathInactive = new Path(LOGO_PATH_INACTIVE);
@@ -147,7 +149,10 @@ public class BuyLicenseDialog extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				try {
-					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(arg0.text));
+					PlatformUI.getWorkbench()
+						.getBrowserSupport()
+						.getExternalBrowser()
+						.openURL(new URL(arg0.text));
 				} catch (PartInitException | MalformedURLException e) {
 					logger.error(Messages.SimonykeesMessageDialog_open_browser_error_message, e);
 				}
@@ -274,9 +279,11 @@ public class BuyLicenseDialog extends Dialog {
 			Rectangle r2 = t.computeTrim(r1.x, r1.y, r1.width, r1.height);
 			Point p = t.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 			// t.getHorizontalBar().setVisible(r2.width <= p.x);
-			t.getVerticalBar().setVisible(r2.height <= p.y);
+			t.getVerticalBar()
+				.setVisible(r2.height <= p.y);
 			if (event.type == SWT.Modify) {
-				t.getParent().layout(true);
+				t.getParent()
+					.layout(true);
 				t.showSelection();
 			}
 		};
@@ -287,7 +294,8 @@ public class BuyLicenseDialog extends Dialog {
 
 	private void createReasonsView(Composite parent) {
 		viewer = CheckboxTableViewer.newCheckList(parent, SWT.MULTI);
-		viewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
+		viewer.getTable()
+			.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		/*
 		 * label provider that sets the text displayed in CompilationUnits table

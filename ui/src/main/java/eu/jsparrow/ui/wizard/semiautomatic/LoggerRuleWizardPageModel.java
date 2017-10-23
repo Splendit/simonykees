@@ -110,17 +110,23 @@ public class LoggerRuleWizardPageModel {
 		String missingLogCurr = currentSelectionMap.get(StandardLoggerConstants.MISSING_LOG_KEY);
 
 		int sysOutCurrSeverityLevel = (NO_SEVERITY_LEVEL.equals(sysOutCurr) || StringUtils.isEmpty(sysOutCurr)) ? 0
-				: rule.getSystemOutReplaceOptions().get(sysOutCurr);
+				: rule.getSystemOutReplaceOptions()
+					.get(sysOutCurr);
 		int sysErrCurrSeverityLevel = (StringUtils.equalsIgnoreCase(NO_SEVERITY_LEVEL, sysErrCurr)
-				|| StringUtils.isEmpty(sysErrCurr)) ? 0 : rule.getSystemErrReplaceOptions().get(sysErrCurr);
+				|| StringUtils.isEmpty(sysErrCurr)) ? 0
+						: rule.getSystemErrReplaceOptions()
+							.get(sysErrCurr);
 		int stackTraceCurrSeverityLevel = (NO_SEVERITY_LEVEL.equals(stackTraceCurr)
 				|| StringUtils.isEmpty(stackTraceCurr)) ? 0
-						: rule.getPrintStackTraceReplaceOptions().get(stackTraceCurr);
+						: rule.getPrintStackTraceReplaceOptions()
+							.get(stackTraceCurr);
 		int missingLogCurrSeverityLevel = (StringUtils.equalsIgnoreCase(NO_SEVERITY_LEVEL, sysErrCurr)
-				|| StringUtils.isEmpty(missingLogCurr)) ? 0 : rule.getMissingLogInsertOptions().get(missingLogCurr);
+				|| StringUtils.isEmpty(missingLogCurr)) ? 0
+						: rule.getMissingLogInsertOptions()
+							.get(missingLogCurr);
 
 		selectionStatus = ""; //$NON-NLS-1$
-		
+
 		if (sysOutCurrSeverityLevel == 0 && sysErrCurrSeverityLevel == 0 && stackTraceCurrSeverityLevel == 0
 				&& missingLogCurrSeverityLevel == 0) {
 			selectionStatus = Messages.LoggerRuleWizardPageModel_err_noTransformation;
@@ -182,10 +188,10 @@ public class LoggerRuleWizardPageModel {
 		printStackTraceReplaceOptionsSet.addAll(printStackTraceReplaceOptions.keySet());
 		return printStackTraceReplaceOptionsSet;
 	}
-	
+
 	/**
-	 * Returns the available options for inserting a missing logg statement
-	 * in a catch clause.
+	 * Returns the available options for inserting a missing logg statement in a
+	 * catch clause.
 	 * 
 	 * @return a set of options.
 	 */

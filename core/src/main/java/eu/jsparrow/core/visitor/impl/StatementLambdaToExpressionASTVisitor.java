@@ -33,10 +33,12 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 		if (lambdaBody instanceof Block) {
 			Block block = (Block) lambdaBody;
 			boolean hasExplicitReturnStatement = false;
-			if (block.statements().size() == 2) {
+			if (block.statements()
+				.size() == 2) {
 				hasExplicitReturnStatement = this.checkForExplicitReutrnStatement(block);
 			}
-			if (block.statements().size() == 1 || hasExplicitReturnStatement) {
+			if (block.statements()
+				.size() == 1 || hasExplicitReturnStatement) {
 				this.replaceNode(block);
 			}
 		}
@@ -50,7 +52,8 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 	 * @param block
 	 */
 	private void replaceNode(Block block) {
-		Statement statement = (Statement) block.statements().get(0);
+		Statement statement = (Statement) block.statements()
+			.get(0);
 		if (statement instanceof ReturnStatement) {
 			ReturnStatement returnStatement = (ReturnStatement) statement;
 			astRewrite.replace(block, returnStatement.getExpression(), null);
@@ -68,7 +71,8 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 	 */
 	private boolean checkForExplicitReutrnStatement(Block block) {
 		boolean hasExplicitReturnStatement = false;
-		Statement statement = (Statement) block.statements().get(1);
+		Statement statement = (Statement) block.statements()
+			.get(1);
 		if (statement instanceof ReturnStatement) {
 			ReturnStatement returnStatement = (ReturnStatement) statement;
 			if (returnStatement.getExpression() == null) {

@@ -4,8 +4,8 @@ import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.SecurityMode;
 
 /**
- * Responsible for constructing the context REST api connection 
- * with NetLicensing.
+ * Responsible for constructing the context REST api connection with
+ * NetLicensing.
  * 
  * @author Ardit Ymeri
  * @since 1.0

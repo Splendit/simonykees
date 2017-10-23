@@ -20,7 +20,7 @@ public class StringFormatLineSeparatorRule extends RefactoringRule<StringFormatL
 		this.name = Messages.StringFormatLineSeparatorRule_name;
 		this.description = Messages.StringFormatLineSeparatorRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_5;

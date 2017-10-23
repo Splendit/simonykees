@@ -19,46 +19,85 @@ public class FlatMapInsteadOfNestedLoopsRule {
 
 	public void test() {
 		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
-		matrix2.stream().filter(row -> !row.isEmpty()).flatMap(List::stream).filter(col -> !col.isEmpty())
-				.flatMap(List::stream).filter(element -> !StringUtils.isEmpty(element))
-				.map(element -> StringUtils.substring(element, 0, 1)).forEach(logger::info);
+		matrix2.stream()
+			.filter(row -> !row.isEmpty())
+			.flatMap(List::stream)
+			.filter(col -> !col.isEmpty())
+			.flatMap(List::stream)
+			.filter(element -> !StringUtils.isEmpty(element))
+			.map(element -> StringUtils.substring(element, 0, 1))
+			.forEach(logger::info);
 
 		List<List<List<List<String>>>> matrix3 = Arrays
-				.asList(Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl"))));
-		matrix3.stream().filter(row -> !row.isEmpty()).flatMap(List::stream).filter(col -> !col.isEmpty())
-				.flatMap(List::stream).filter(cell -> !cell.isEmpty()).flatMap(List::stream)
-				.filter(element -> !StringUtils.isEmpty(element)).map(element -> StringUtils.substring(element, 0, 1))
-				.forEach(logger::info);
+			.asList(Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl"))));
+		matrix3.stream()
+			.filter(row -> !row.isEmpty())
+			.flatMap(List::stream)
+			.filter(col -> !col.isEmpty())
+			.flatMap(List::stream)
+			.filter(cell -> !cell.isEmpty())
+			.flatMap(List::stream)
+			.filter(element -> !StringUtils.isEmpty(element))
+			.map(element -> StringUtils.substring(element, 0, 1))
+			.forEach(logger::info);
 
 		List<List<String>> matrix = Arrays.asList(Arrays.asList("asdf", "jkl"));
-		matrix.stream().filter(row -> !row.isEmpty()).forEach(row -> {
-			logger.info(String.valueOf(row));
-			row.stream().filter(element -> !StringUtils.isEmpty(element))
-					.map(element -> StringUtils.substring(element, 0, 1)).forEach(logger::info);
-		});
+		matrix.stream()
+			.filter(row -> !row.isEmpty())
+			.forEach(row -> {
+				logger.info(String.valueOf(row));
+				row.stream()
+					.filter(element -> !StringUtils.isEmpty(element))
+					.map(element -> StringUtils.substring(element, 0, 1))
+					.forEach(logger::info);
+			});
 
-		matrix.stream().filter(row -> !row.isEmpty()).flatMap(List::stream)
-				.filter(element -> !StringUtils.isEmpty(element)).map(element -> StringUtils.substring(element, 0, 1))
-				.forEach(logger::info);
+		matrix.stream()
+			.filter(row -> !row.isEmpty())
+			.flatMap(List::stream)
+			.filter(element -> !StringUtils.isEmpty(element))
+			.map(element -> StringUtils.substring(element, 0, 1))
+			.forEach(logger::info);
 
-		matrix.stream().flatMap(List::stream).filter(element -> !StringUtils.isEmpty(element))
-				.map(element -> StringUtils.substring(element, 0, 1)).forEach(logger::info);
+		matrix.stream()
+			.flatMap(List::stream)
+			.filter(element -> !StringUtils.isEmpty(element))
+			.map(element -> StringUtils.substring(element, 0, 1))
+			.forEach(logger::info);
 
-		matrix.stream().filter(row -> !row.isEmpty()).flatMap(List::stream).forEach(logger::info);
+		matrix.stream()
+			.filter(row -> !row.isEmpty())
+			.flatMap(List::stream)
+			.forEach(logger::info);
 
-		matrix.stream().flatMap(List::stream).forEach(logger::info);
+		matrix.stream()
+			.flatMap(List::stream)
+			.forEach(logger::info);
 
-		matrix.stream().flatMap(List::stream).forEach(logger::info);
+		matrix.stream()
+			.flatMap(List::stream)
+			.forEach(logger::info);
 
-		matrix.stream().flatMap(List::stream).forEach(logger::info);
+		matrix.stream()
+			.flatMap(List::stream)
+			.forEach(logger::info);
 
-		matrix.stream().flatMap(List::stream).forEach(logger::info);
+		matrix.stream()
+			.flatMap(List::stream)
+			.forEach(logger::info);
 
-		matrix.stream().flatMap(List::stream).forEach(logger::info);
+		matrix.stream()
+			.flatMap(List::stream)
+			.forEach(logger::info);
 
-		matrix.stream().forEach(row -> matrix.get(row.size()).stream().forEach(logger::info));
+		matrix.stream()
+			.forEach(row -> matrix.get(row.size())
+				.stream()
+				.forEach(logger::info));
 
-		matrix.stream().forEach(row -> row.stream().filter(element -> !StringUtils.isEmpty(element))
+		matrix.stream()
+			.forEach(row -> row.stream()
+				.filter(element -> !StringUtils.isEmpty(element))
 				.forEach(element -> logger.info(row + element)));
 
 		class TestObject {
@@ -70,42 +109,55 @@ public class FlatMapInsteadOfNestedLoopsRule {
 		}
 
 		List<TestObject> matrix4 = Arrays.asList(new TestObject(), new TestObject());
-		matrix4.forEach(t -> t.getTestList().forEach(logger::info));
+		matrix4.forEach(t -> t.getTestList()
+			.forEach(logger::info));
 	}
 
 	public void testAvoidingOuterMostLoop() {
 		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
-		matrix2.stream().filter(row -> !row.isEmpty()).forEach(row -> {
-			/*
-			 * Some statement just to avoid transformation
-			 */
-			if (matrix2.size() == 2) {
-				return;
-			}
-			row.stream().filter(col -> !col.isEmpty()).flatMap(List::stream)
+		matrix2.stream()
+			.filter(row -> !row.isEmpty())
+			.forEach(row -> {
+				/*
+				 * Some statement just to avoid transformation
+				 */
+				if (matrix2.size() == 2) {
+					return;
+				}
+				row.stream()
+					.filter(col -> !col.isEmpty())
+					.flatMap(List::stream)
 					.filter(element -> !StringUtils.isEmpty(element))
-					.map(element -> StringUtils.substring(element, 0, 1)).forEach(logger::info);
-		});
+					.map(element -> StringUtils.substring(element, 0, 1))
+					.forEach(logger::info);
+			});
 	}
 
 	public void testAvoidInnerMostLoop() {
 		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
-		matrix2.stream().filter(first -> !first.isEmpty()).flatMap(List::stream).filter(second -> !second.isEmpty())
-				.forEach(second -> {
-					if (matrix2.size() == 2) {
-						return;
-					}
-					second.stream().filter(third -> !StringUtils.isEmpty(third))
-							.map(third -> StringUtils.substring(third, 0, 1)).forEach(logger::info);
-				});
+		matrix2.stream()
+			.filter(first -> !first.isEmpty())
+			.flatMap(List::stream)
+			.filter(second -> !second.isEmpty())
+			.forEach(second -> {
+				if (matrix2.size() == 2) {
+					return;
+				}
+				second.stream()
+					.filter(third -> !StringUtils.isEmpty(third))
+					.map(third -> StringUtils.substring(third, 0, 1))
+					.forEach(logger::info);
+			});
 	}
 
 	public void testQuartedNestedStreams() {
 		List<List<List<List<String>>>> matrix3 = Arrays
-				.asList(Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl"))));
-		matrix3.stream().flatMap(List::stream).forEach(second -> {
-			int size = matrix3.size();
-			second.forEach(third -> third.forEach(logger::info));
-		});
+			.asList(Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl"))));
+		matrix3.stream()
+			.flatMap(List::stream)
+			.forEach(second -> {
+				int size = matrix3.size();
+				second.forEach(third -> third.forEach(logger::info));
+			});
 	}
 }

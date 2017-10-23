@@ -35,7 +35,8 @@ public class NotWorkingRuleModel {
 	 * @return
 	 */
 	public static String asString(List<NotWorkingRuleModel> notWorkingRulesList) {
-		return notWorkingRulesList.stream().map(NotWorkingRuleModel::toString)
-				.collect(Collectors.joining(System.lineSeparator()));
+		return notWorkingRulesList.stream()
+			.map(NotWorkingRuleModel::toString)
+			.collect(Collectors.joining(System.lineSeparator()));
 	}
 }
