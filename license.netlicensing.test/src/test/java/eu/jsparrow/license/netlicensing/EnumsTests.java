@@ -45,11 +45,11 @@ public class EnumsTests {
 		assertEquals(LicenseStatus.NODE_LOCKED_EXPIRED, LicenseStatus.fromString("node-locked-expired"));
 		assertEquals(LicenseStatus.NODE_LOCKED_HW_ID_FAILURE, LicenseStatus.fromString("node-locked-hw-id-failure"));
 		assertEquals(LicenseStatus.NODE_LOCKED_REGISTERED, LicenseStatus.fromString("node-locked-registered"));
-
-		assertEquals(LicenseStatus.TRIAL_EXPIRED, LicenseStatus.fromString("trial-expired"));
-		assertEquals(LicenseStatus.TRIAL_HW_ID_FAILURE, LicenseStatus.fromString("trial-hw-id-failure"));
-		assertEquals(LicenseStatus.TRIAL_REGISTERED, LicenseStatus.fromString("trial-registered"));
-
+		
+		assertEquals(LicenseStatus.FREE_EXPIRED, LicenseStatus.fromString("free-expired"));
+		assertEquals(LicenseStatus.FREE_HW_ID_FAILURE, LicenseStatus.fromString("free-hw-id-failure"));
+		assertEquals(LicenseStatus.FREE_REGISTERED, LicenseStatus.fromString("free-registered"));
+		
 		assertEquals(LicenseStatus.NONE, LicenseStatus.fromString("none"));
 		assertEquals(LicenseStatus.NONE, LicenseStatus.fromString(null));
 		assertEquals(LicenseStatus.NONE, LicenseStatus.fromString("none-of-the-above"));

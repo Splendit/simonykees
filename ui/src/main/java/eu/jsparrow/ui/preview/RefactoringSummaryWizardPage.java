@@ -326,9 +326,9 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 	protected void doStatusUpdate() {
 		if (LicenseUtil.getInstance()
-			.isTrial()) {
+			.isFree()) {
 			((StatusInfo) fSelectionStatus)
-				.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenTrial);
+				.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
 		} else {
 			fSelectionStatus = new StatusInfo();
 		}

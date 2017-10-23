@@ -1,5 +1,6 @@
 package eu.jsparrow.ui.handler;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -12,6 +13,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
@@ -23,11 +25,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.exception.SimonykeesException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RulesContainer;
+import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
@@ -39,10 +44,13 @@ import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 /**
  * TODO SIM-103 add class description
  * 
- * @author Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec
+ * @author Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec, Matthias
+ *         Webhofer
  * @since 0.9
  */
 public class SelectRulesWizardHandler extends AbstractHandler {
+
+	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -55,8 +63,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 			if (!LicenseUtil.getInstance()
 				.isValid()) {
 				/*
-				 * do not display the SelectRulesWizard if the license is
-				 * invalid
+				 * do not display the SelectRulesWizard if the license is invalid
 				 */
 				final Shell shell = HandlerUtil.getActiveShell(event);
 				if (!LicenseUtil.getInstance()
@@ -80,12 +87,14 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 						protected IStatus run(IProgressMonitor monitor) {
 
 							try {
+								List<ICompilationUnit> compilationUnits = new LinkedList<>();
+								SelectRulesWizard.collectICompilationUnits(compilationUnits, selectedJavaElements,
+										monitor);
 								List<ICompilationUnit> containingErrorList = refactoringPipeline
-									.prepareRefactoring(selectedJavaElements, monitor);
+									.prepareRefactoring(compilationUnits, monitor);
 								if (monitor.isCanceled()) {
 									/*
-									 * Workaround that prevents selection of
-									 * multiple projects in the Package
+									 * Workaround that prevents selection of multiple projects in the Package
 									 * Explorer.
 									 * 
 									 * See SIM-496
@@ -105,7 +114,15 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 								}
 
 							} catch (RefactoringException e) {
+								logger.error(e.getMessage(), e);
 								synchronizeWithUIShowInfo(e);
+								return Status.CANCEL_STATUS;
+							} catch (JavaModelException jme) {
+								logger.error(jme.getMessage(), jme);
+								synchronizeWithUIShowInfo(new RefactoringException(
+										ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+										ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed,
+										jme));
 								return Status.CANCEL_STATUS;
 							}
 
@@ -173,9 +190,8 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Method used to open CompilationErrorsMessageDialog from non UI thread to
-	 * list all Java files that will be skipped because they contain compilation
-	 * errors.
+	 * Method used to open CompilationErrorsMessageDialog from non UI thread to list
+	 * all Java files that will be skipped because they contain compilation errors.
 	 */
 	private void synchronizeWithUIShowCompilationErrorMessage(List<ICompilationUnit> containingErrorList,
 			ExecutionEvent event, RefactoringPipeline refactoringPipeline, List<IJavaElement> selectedJavaElements,
@@ -203,10 +219,10 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Method used to open InformationDialog from non UI thread
-	 * RefactoringException is thrown if java element does not exist or if an
-	 * exception occurs while accessing its corresponding resource, or if no
-	 * working copies were found to apply
+	 * Method used to open InformationDialog from non UI thread RefactoringException
+	 * is thrown if java element does not exist or if an exception occurs while
+	 * accessing its corresponding resource, or if no working copies were found to
+	 * apply
 	 */
 	private void synchronizeWithUIShowInfo(SimonykeesException exception) {
 		Display.getDefault()
@@ -221,8 +237,8 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Method used to open MessageDialog informing the user that selection
-	 * contains no Java files without compilation error from non UI thread
+	 * Method used to open MessageDialog informing the user that selection contains
+	 * no Java files without compilation error from non UI thread
 	 */
 	private void synchronizeWithUIShowWarningNoComlipationUnitDialog() {
 		Display.getDefault()

@@ -14,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -30,7 +29,8 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 /**
  * TODO SIM-103 add class description
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
+ *         Matthias Webhofer
  * @since 0.9.2
  */
 public abstract class AbstractRulesTest {
@@ -72,8 +72,8 @@ public abstract class AbstractRulesTest {
 
 	/**
 	 * loads all pairs of Paths for the postRule domain defined by the
-	 * postRuleDirectory to assure that only pairs are loaded that are defined
-	 * in the realm of the postRuleDirectory.
+	 * postRuleDirectory to assure that only pairs are loaded that are defined in
+	 * the realm of the postRuleDirectory.
 	 * 
 	 * @param postRuleDirectory
 	 *            directory of the reference sources
@@ -108,21 +108,20 @@ public abstract class AbstractRulesTest {
 
 		ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);
 
-		List<IJavaElement> javaElements = new ArrayList<>();
-		javaElements.add(compilationUnit);
+		List<ICompilationUnit> compilationUnits = new ArrayList<>();
+		compilationUnits.add(compilationUnit);
 
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules, true);
 
 		/*
-		 * A default progress monitor implementation, used just for testing
-		 * purposes
+		 * A default progress monitor implementation, used just for testing purposes
 		 */
 		IProgressMonitor monitor = new NullProgressMonitor();
 
 		rules.stream()
 			.forEach(rule -> rule.calculateEnabledForProject(packageFragment.getJavaProject()));
 
-		refactoringPipeline.prepareRefactoring(javaElements, monitor);
+		refactoringPipeline.prepareRefactoring(compilationUnits, monitor);
 		refactoringPipeline.doRefactoring(monitor);
 		refactoringPipeline.commitRefactoring();
 

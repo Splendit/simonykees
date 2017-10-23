@@ -343,9 +343,9 @@ public class ResponseParser implements LicenseChecker {
 		switch (type) {
 		case TRY_AND_BUY:
 			if (isValid()) {
-				status = LicenseStatus.TRIAL_REGISTERED;
+				status = LicenseStatus.FREE_REGISTERED;
 			} else {
-				status = LicenseStatus.TRIAL_EXPIRED;
+				status = LicenseStatus.FREE_EXPIRED;
 			}
 			break;
 
