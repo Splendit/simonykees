@@ -20,7 +20,7 @@ public class RemoveNewStringConstructorRule extends RefactoringRule<RemoveNewStr
 		this.name = Messages.RemoveNewStringConstructorRule_name;
 		this.description = Messages.RemoveNewStringConstructorRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;

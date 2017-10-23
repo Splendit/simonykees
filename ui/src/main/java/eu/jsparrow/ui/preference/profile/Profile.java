@@ -13,11 +13,11 @@ import java.util.List;
 public class Profile implements SimonykeesProfile {
 
 	List<String> enabledRulesIds = new ArrayList<>();
-	
+
 	String profileName;
-	
+
 	boolean isBuiltInProfile = false;
-	
+
 	public Profile(String name, List<String> enabledRulesIds) {
 		this.profileName = name;
 		this.enabledRulesIds = enabledRulesIds;
@@ -36,12 +36,12 @@ public class Profile implements SimonykeesProfile {
 	public void setEnabledRulesIds(List<String> enabledRulesIds) {
 		this.enabledRulesIds = enabledRulesIds;
 	}
-	
+
 	@Override
 	public List<String> getEnabledRuleIds() {
 		return enabledRulesIds;
 	}
-	
+
 	@Override
 	public boolean containsRule(String ruleId) {
 		return enabledRulesIds.contains(ruleId);

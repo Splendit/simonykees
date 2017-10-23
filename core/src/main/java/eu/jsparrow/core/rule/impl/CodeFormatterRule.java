@@ -60,7 +60,8 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 		 * currently used IJavaProject instead of JavaCore.getOptions() (used
 		 * when passing null), which works in runtime Eclipse etc.
 		 */
-		CodeFormatter formatter = ToolFactory.createCodeFormatter(workingCopy.getJavaProject().getOptions(true));
+		CodeFormatter formatter = ToolFactory.createCodeFormatter(workingCopy.getJavaProject()
+			.getOptions(true));
 
 		int formatingKind = CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS
 				| CodeFormatter.K_UNKNOWN;

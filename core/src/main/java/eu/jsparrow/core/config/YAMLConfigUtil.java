@@ -47,9 +47,9 @@ public class YAMLConfigUtil {
 		try (FileInputStream fis = new FileInputStream(file)) {
 
 			/*
-			 * the TypeDescription specifies the type of the configuration class and of the
-			 * containing list of profiles because generics are a compile time thing. see
-			 * exportConfig method.
+			 * the TypeDescription specifies the type of the configuration class
+			 * and of the containing list of profiles because generics are a
+			 * compile time thing. see exportConfig method.
 			 */
 			TypeDescription rootTypeDescription = new TypeDescription(YAMLConfig.class, CONFIG_TAG);
 			rootTypeDescription.putListPropertyType("profiles", YAMLProfile.class); //$NON-NLS-1$
@@ -89,8 +89,8 @@ public class YAMLConfigUtil {
 	}
 
 	/**
-	 * exports configuration in form of {@link YAMLConfig} to the given file. this
-	 * is also used for exporting profiles from jsparrow eclipse version.
+	 * exports configuration in form of {@link YAMLConfig} to the given file.
+	 * this is also used for exporting profiles from jsparrow eclipse version.
 	 * 
 	 * @param config
 	 *            configuration for export
@@ -101,9 +101,9 @@ public class YAMLConfigUtil {
 	public static void exportConfig(YAMLConfig config, File file) throws YAMLConfigException {
 		try (FileWriter fw = new FileWriter(file)) {
 			/*
-			 * the Representer is used to put an alias type into the YAML file. Otherwise
-			 * the fully qualified class name would be used and we could run into troubles
-			 * with obfuscation.
+			 * the Representer is used to put an alias type into the YAML file.
+			 * Otherwise the fully qualified class name would be used and we
+			 * could run into troubles with obfuscation.
 			 */
 			Representer representer = new Representer();
 			representer.addClassTag(YAMLConfig.class, new Tag(CONFIG_TAG));

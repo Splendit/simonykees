@@ -70,7 +70,10 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 		this.refactoringPipeline = refactoringPipeline;
 		setInitialChanges();
-		this.currentRefactoringState = initialSource.keySet().stream().findFirst().orElse(null);
+		this.currentRefactoringState = initialSource.keySet()
+			.stream()
+			.findFirst()
+			.orElse(null);
 
 		fSelectionStatus = new StatusInfo();
 	}
@@ -102,7 +105,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		createPreviewViewer(sashForm);
 
 		/*
-		 * sets height relation between children to be 1:3 when it has two children
+		 * sets height relation between children to be 1:3 when it has two
+		 * children
 		 */
 		sashForm.setWeights(new int[] { 1, 3 });
 
@@ -112,8 +116,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		viewer = new TableViewer(parent, SWT.SINGLE);
 
 		/*
-		 * label provider that sets the text displayed in CompilationUnits table to show
-		 * the name of the CompilationUnit
+		 * label provider that sets the text displayed in CompilationUnits table
+		 * to show the name of the CompilationUnit
 		 */
 		viewer.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -138,8 +142,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Sets {@link Map} containing all {@link RefactoringState}s and their original
-	 * source code before any change by any rule was made
+	 * Sets {@link Map} containing all {@link RefactoringState}s and their
+	 * original source code before any change by any rule was made
 	 */
 	public void setInitialChanges() {
 		initialSource.putAll(refactoringPipeline.getInitialSourceMap());
@@ -155,14 +159,18 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 			finalSource.clear();
 		}
 		refactoringPipeline.setSourceMap(finalSource);
-		refactoringPipeline.getRefactoringStates().stream().filter(state -> !state.hasChange()).forEach(state -> {
-			initialSource.remove(state);
-			finalSource.remove(state);
-		});
+		refactoringPipeline.getRefactoringStates()
+			.stream()
+			.filter(state -> !state.hasChange())
+			.forEach(state -> {
+				initialSource.remove(state);
+				finalSource.remove(state);
+			});
 
 		populateFileView();
 
-		if (viewer.getTable().getItemCount() > 0) {
+		if (viewer.getTable()
+			.getItemCount() > 0) {
 			this.currentRefactoringState = (RefactoringState) viewer.getElementAt(0);
 		} else {
 			this.currentRefactoringState = null;
@@ -171,18 +179,23 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 	protected void populateFileView() {
 		// if redraw, remove all items before adding
-		if (viewer.getTable().getItemCount() > 0) {
-			viewer.getTable().removeAll();
+		if (viewer.getTable()
+			.getItemCount() > 0) {
+			viewer.getTable()
+				.removeAll();
 		}
 		// adding all elements in table and checking appropriately
-		initialSource.keySet().stream().forEach(entry -> {
-			for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : refactoringPipeline.getRules()) {
-				if (!entry.getIgnoredRules().contains(rule) && null != entry.getChangeIfPresent(rule)) {
-					viewer.add(entry);
-					break;
+		initialSource.keySet()
+			.stream()
+			.forEach(entry -> {
+				for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : refactoringPipeline.getRules()) {
+					if (!entry.getIgnoredRules()
+						.contains(rule) && null != entry.getChangeIfPresent(rule)) {
+						viewer.add(entry);
+						break;
+					}
 				}
-			}
-		});
+			});
 	}
 
 	/**
@@ -196,14 +209,16 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Returns the path of an {@link ICompilationUnit} without leading slash (the
-	 * same as in the Externalize Strings refactoring view).
+	 * Returns the path of an {@link ICompilationUnit} without leading slash
+	 * (the same as in the Externalize Strings refactoring view).
 	 * 
 	 * @param compilationUnit
 	 * @return
 	 */
 	private String getPathString(ICompilationUnit compilationUnit) {
-		String temp = compilationUnit.getParent().getPath().toString();
+		String temp = compilationUnit.getParent()
+			.getPath()
+			.toString();
 		return StringUtils.startsWith(temp, "/") ? StringUtils.substring(temp, 1) : temp; //$NON-NLS-1$
 	}
 
@@ -216,14 +231,15 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		changeContainer.setLayout(new GridLayout());
 		changeContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
 
-		CompareUIPlugin.getDefault().getPreferenceStore().setValue(ComparePreferencePage.OPEN_STRUCTURE_COMPARE,
-				Boolean.FALSE);
+		CompareUIPlugin.getDefault()
+			.getPreferenceStore()
+			.setValue(ComparePreferencePage.OPEN_STRUCTURE_COMPARE, Boolean.FALSE);
 
 	}
 
 	/**
-	 * When this page gets visible, final changes should be collected and stored and
-	 * preview viewer has to be set with content
+	 * When this page gets visible, final changes should be collected and stored
+	 * and preview viewer has to be set with content
 	 */
 	@Override
 	public void setVisible(boolean visible) {
@@ -262,7 +278,9 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	 */
 	private Control createInput(final Composite container, final CompareInput input) {
 		try {
-			PlatformUI.getWorkbench().getProgressService().run(true, true, input);
+			PlatformUI.getWorkbench()
+				.getProgressService()
+				.run(true, true, input);
 		} catch (InvocationTargetException | InterruptedException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -274,17 +292,19 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	private void populatePreviewViewer() {
 		disposeControl();
 
-		Display.getDefault().syncExec(() -> {
-			CompareInput ci;
-			if (null != currentRefactoringState) {
-				ci = new CompareInput(currentRefactoringState.getWorkingCopyName(),
-						initialSource.get(currentRefactoringState), finalSource.get(currentRefactoringState));
-			} else {
-				ci = new CompareInput("", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}
-			compareControl = createInput(changeContainer, ci);
-			compareControl.getParent().layout();
-		});
+		Display.getDefault()
+			.syncExec(() -> {
+				CompareInput ci;
+				if (null != currentRefactoringState) {
+					ci = new CompareInput(currentRefactoringState.getWorkingCopyName(),
+							initialSource.get(currentRefactoringState), finalSource.get(currentRefactoringState));
+				} else {
+					ci = new CompareInput("", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}
+				compareControl = createInput(changeContainer, ci);
+				compareControl.getParent()
+					.layout();
+			});
 	}
 
 	/**
@@ -305,15 +325,17 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	}
 
 	protected void doStatusUpdate() {
-		if (LicenseUtil.getInstance().isFree()) {
+		if (LicenseUtil.getInstance()
+			.isFree()) {
 			((StatusInfo) fSelectionStatus)
-					.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
+				.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
 		} else {
 			fSelectionStatus = new StatusInfo();
 		}
 
 		/*
-		 * the mode severe status will be displayed and the OK button enabled/disabled.
+		 * the mode severe status will be displayed and the OK button
+		 * enabled/disabled.
 		 */
 		updateStatus(fSelectionStatus);
 	}

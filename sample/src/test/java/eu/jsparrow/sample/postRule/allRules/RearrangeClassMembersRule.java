@@ -85,7 +85,13 @@ public class RearrangeClassMembersRule {
 	}
 
 	private enum Days {
-		Mon, Tue, Wed, Thu, Fri, Sat, Sun,
+		Mon,
+		Tue,
+		Wed,
+		Thu,
+		Fri,
+		Sat,
+		Sun,
 	}
 
 	/**

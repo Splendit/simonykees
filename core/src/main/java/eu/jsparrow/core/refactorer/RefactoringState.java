@@ -156,8 +156,9 @@ public class RefactoringState {
 			workingCopy.close();
 			original.close();
 		} catch (JavaModelException e) {
-			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_discard_working_copy,
-					workingCopy.getPath().toString(), e.getMessage()), e);
+			logger
+				.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_discard_working_copy, workingCopy.getPath()
+					.toString(), e.getMessage()), e);
 		}
 	}
 
@@ -206,8 +207,8 @@ public class RefactoringState {
 			this.workingCopy = original.getWorkingCopy(null);
 			changes.clear();
 		} catch (JavaModelException e) {
-			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_reset_working_copy,
-					workingCopy.getPath().toString(), e.getMessage()), e);
+			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_reset_working_copy, workingCopy.getPath()
+				.toString(), e.getMessage()), e);
 		}
 	}
 }

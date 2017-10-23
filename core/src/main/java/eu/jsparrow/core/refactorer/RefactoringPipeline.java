@@ -147,7 +147,8 @@ public class RefactoringPipeline {
 	 * @since 1.2
 	 */
 	public boolean hasChanges() {
-		return refactoringStates.stream().anyMatch(RefactoringState::hasChange);
+		return refactoringStates.stream()
+			.anyMatch(RefactoringState::hasChange);
 	}
 
 	/**
@@ -201,10 +202,12 @@ public class RefactoringPipeline {
 				 * compilationUnits list. Each compilation unit increases worked amount for same
 				 * size.
 				 */
-				SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(compilationUnits.size());
+				SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
+					.setWorkRemaining(compilationUnits.size());
 				subMonitor.setTaskName(""); //$NON-NLS-1$
 
-				IJavaProject javaProjekt = compilationUnits.get(0).getJavaProject();
+				IJavaProject javaProjekt = compilationUnits.get(0)
+					.getJavaProject();
 
 				for (ICompilationUnit compilationUnit : compilationUnits) {
 					subMonitor.subTask(compilationUnit.getElementName());
@@ -217,7 +220,8 @@ public class RefactoringPipeline {
 					 * 
 					 * See SIM-496
 					 */
-					if (!compilationUnit.getJavaProject().equals(javaProjekt)) {
+					if (!compilationUnit.getJavaProject()
+						.equals(javaProjekt)) {
 						subMonitor.setCanceled(true);
 						multipleProjects = true;
 						return null;
@@ -233,7 +237,7 @@ public class RefactoringPipeline {
 						containingErrorList.add(compilationUnit);
 					} else {
 						refactoringStates
-								.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
+							.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
 					}
 
 					/*
@@ -251,8 +255,9 @@ public class RefactoringPipeline {
 				 */
 				if (!containingErrorList.isEmpty()) {
 					String loggerInfo = NLS.bind(ExceptionMessages.RefactoringPipeline_syntax_errors_exist,
-							containingErrorList.stream().map(ICompilationUnit::getElementName)
-									.collect(Collectors.joining(", "))); //$NON-NLS-1$
+							containingErrorList.stream()
+								.map(ICompilationUnit::getElementName)
+								.collect(Collectors.joining(", "))); //$NON-NLS-1$
 					logger.info(loggerInfo);
 
 				}
@@ -327,7 +332,8 @@ public class RefactoringPipeline {
 		 * monitor dialog Size is set to number 100 and then scaled to size of the rules
 		 * list Each refactoring rule increases worked amount for same size
 		 */
-		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(rules.size());
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
+			.setWorkRemaining(rules.size());
 		subMonitor.setTaskName(""); //$NON-NLS-1$
 
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
@@ -379,22 +385,25 @@ public class RefactoringPipeline {
 		 * list Each refactoring rule increases worked amount for same size
 		 */
 		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
-				.setWorkRemaining(rules.size() * changedCompilationUnits.size());
+			.setWorkRemaining(rules.size() * changedCompilationUnits.size());
 		subMonitor.setTaskName(""); //$NON-NLS-1$
 
 		refactoringStates.stream()
-				.filter(refactoringState -> changedCompilationUnits.stream()
-						.anyMatch(unit -> unit.getElementName().equals(refactoringState.getWorkingCopyName())))
-				.forEach(RefactoringState::resetWorkingCopy);
+			.filter(refactoringState -> changedCompilationUnits.stream()
+				.anyMatch(unit -> unit.getElementName()
+					.equals(refactoringState.getWorkingCopyName())))
+			.forEach(RefactoringState::resetWorkingCopy);
 
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
 			for (RefactoringState refactoringState : refactoringStates) {
 				if (changedCompilationUnits.stream()
-						.anyMatch(unit -> unit.getElementName().equals(refactoringState.getWorkingCopyName()))) {
+					.anyMatch(unit -> unit.getElementName()
+						.equals(refactoringState.getWorkingCopyName()))) {
 					subMonitor.subTask(refactoringRule.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 					if (refactoringRule.equals(currentRule)) {
 						refactoringState.addRuleToIgnoredRules(currentRule);
-					} else if (!refactoringState.getIgnoredRules().contains(refactoringRule)) {
+					} else if (!refactoringState.getIgnoredRules()
+						.contains(refactoringRule)) {
 						try {
 							refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, false);
 						} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
@@ -436,7 +445,10 @@ public class RefactoringPipeline {
 
 		// get the correct RefactoringState
 		RefactoringState refactoringState = refactoringStates.stream()
-				.filter(s -> newSelection.getElementName().equals(s.getWorkingCopyName())).findFirst().get();
+			.filter(s -> newSelection.getElementName()
+				.equals(s.getWorkingCopyName()))
+			.findFirst()
+			.get();
 
 		refactoringState.resetWorkingCopy();
 
@@ -446,14 +458,15 @@ public class RefactoringPipeline {
 				if (refactoringRule.equals(currentRule)) {
 					refactoringState.removeRuleFromIgnoredRules(currentRule);
 				}
-				if (!refactoringState.getIgnoredRules().contains(refactoringRule)) {
+				if (!refactoringState.getIgnoredRules()
+					.contains(refactoringRule)) {
 					refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, false);
 				}
 
 			} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 				logger.error(e.getMessage(), e);
 				notWorkingRules
-						.add(new NotWorkingRuleModel(refactoringRule.getName(), refactoringState.getWorkingCopyName()));
+					.add(new NotWorkingRuleModel(refactoringRule.getName(), refactoringState.getWorkingCopyName()));
 			}
 		}
 
@@ -489,13 +502,15 @@ public class RefactoringPipeline {
 				iterator.remove();
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
-				refactoringStatesNotCommited.add(
-						new RefactoringStateNotCommited(refactoringState.getWorkingCopy().getPath().toString(), e));
+				refactoringStatesNotCommited.add(new RefactoringStateNotCommited(refactoringState.getWorkingCopy()
+					.getPath()
+					.toString(), e));
 			}
 		}
 		if (!refactoringStatesNotCommited.isEmpty()) {
-			String notWorkingRulesCollected = refactoringStatesNotCommited.stream().map(Object::toString)
-					.collect(Collectors.joining("\n")); //$NON-NLS-1$
+			String notWorkingRulesCollected = refactoringStatesNotCommited.stream()
+				.map(Object::toString)
+				.collect(Collectors.joining("\n")); //$NON-NLS-1$
 			throw new ReconcileException(
 					NLS.bind(ExceptionMessages.RefactoringPipeline_reconcile_failed, notWorkingRulesCollected),
 					NLS.bind(ExceptionMessages.RefactoringPipeline_user_reconcile_failed, notWorkingRulesCollected));
@@ -531,7 +546,8 @@ public class RefactoringPipeline {
 	private void applyRuleToAllStates(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
 			IProgressMonitor subMonitor, List<NotWorkingRuleModel> returnListNotWorkingRules) {
 
-		SubMonitor monitor = SubMonitor.convert(subMonitor).setWorkRemaining(refactoringStates.size());
+		SubMonitor monitor = SubMonitor.convert(subMonitor)
+			.setWorkRemaining(refactoringStates.size());
 
 		for (RefactoringState refactoringState : refactoringStates) {
 
@@ -542,7 +558,7 @@ public class RefactoringPipeline {
 			} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 				logger.error(e.getMessage(), e);
 				returnListNotWorkingRules
-						.add(new NotWorkingRuleModel(rule.getName(), refactoringState.getWorkingCopyName()));
+					.add(new NotWorkingRuleModel(rule.getName(), refactoringState.getWorkingCopyName()));
 			}
 
 			/*
@@ -563,13 +579,15 @@ public class RefactoringPipeline {
 	 * @param sourceMap
 	 */
 	public void setSourceMap(Map<RefactoringState, String> sourceMap) {
-		refactoringStates.stream().forEach(refactoringState -> {
-			try {
-				sourceMap.put(refactoringState, refactoringState.getWorkingCopy().getSource());
-			} catch (JavaModelException e) {
-				logger.error(e.getMessage(), e);
-			}
-		});
+		refactoringStates.stream()
+			.forEach(refactoringState -> {
+				try {
+					sourceMap.put(refactoringState, refactoringState.getWorkingCopy()
+						.getSource());
+				} catch (JavaModelException e) {
+					logger.error(e.getMessage(), e);
+				}
+			});
 	}
 
 	/**

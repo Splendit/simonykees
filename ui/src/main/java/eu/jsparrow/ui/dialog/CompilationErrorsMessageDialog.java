@@ -54,7 +54,8 @@ public class CompilationErrorsMessageDialog extends TitleAreaDialog {
 		tableViewer = new TableViewer(area, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
 
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		tableViewer.getControl().setLayoutData(gd);
+		tableViewer.getControl()
+			.setLayoutData(gd);
 		tableViewer.setUseHashlookup(true);
 
 		tableViewer.setContentProvider(new IStructuredContentProvider() {
@@ -109,7 +110,9 @@ public class CompilationErrorsMessageDialog extends TitleAreaDialog {
 	 * @return
 	 */
 	private String getPathString(ICompilationUnit compilationUnit) {
-		String temp = compilationUnit.getParent().getPath().toString();
+		String temp = compilationUnit.getParent()
+			.getPath()
+			.toString();
 		return StringUtils.startsWith(temp, "/") ? StringUtils.substring(temp, 1) : temp; //$NON-NLS-1$
 	}
 

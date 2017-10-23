@@ -112,7 +112,7 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 		 * mapToDouble or mapToLong
 		 */
 		MethodInvocation mapToStreamInvocation = findCorrespondingNumberStream(expression, sumVariableName)
-				.orElse(null);
+			.orElse(null);
 		if (mapToStreamInvocation == null) {
 			return true;
 		}
@@ -123,7 +123,7 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 		 * loop occurrence
 		 */
 		VariableDeclarationFragment sumDeclarationFragment = findSumVariableDeclaration(sumVariableName, loopNode)
-				.orElse(null);
+			.orElse(null);
 		if (sumDeclarationFragment == null) {
 			return true;
 		}
@@ -393,7 +393,9 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 
 		@Override
 		public boolean visit(VariableDeclarationFragment fragment) {
-			if (fragment.getName().getIdentifier().equals(variableName.getIdentifier())) {
+			if (fragment.getName()
+				.getIdentifier()
+				.equals(variableName.getIdentifier())) {
 				Expression initializer = fragment.getInitializer();
 				if (initializer != null) {
 					if (ASTNode.NUMBER_LITERAL == initializer.getNodeType()) {
@@ -438,7 +440,8 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 
 		@Override
 		public boolean visit(SimpleName simpleName) {
-			if (simpleName.getIdentifier().equals(this.variableName.getIdentifier())
+			if (simpleName.getIdentifier()
+				.equals(this.variableName.getIdentifier())
 					&& VariableDeclarationFragment.NAME_PROPERTY != simpleName.getLocationInParent()) {
 				IBinding binding = simpleName.resolveBinding();
 				StructuralPropertyDescriptor propertyDescriptor = simpleName.getLocationInParent();

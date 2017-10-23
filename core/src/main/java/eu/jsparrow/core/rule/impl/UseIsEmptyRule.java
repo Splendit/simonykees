@@ -20,7 +20,7 @@ public class UseIsEmptyRule extends RefactoringRule<UseIsEmptyRuleASTVisitor> {
 		this.name = Messages.UseIsEmptyRule_name;
 		this.description = Messages.UseIsEmptyRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		// string 1.6, collection 1.2, map 1.2

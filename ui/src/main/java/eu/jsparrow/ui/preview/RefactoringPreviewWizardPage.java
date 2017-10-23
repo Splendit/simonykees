@@ -82,7 +82,10 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		this.changesForRule = changesForRule;
 		this.rule = rule;
 
-		this.currentCompilationUnit = changesForRule.keySet().stream().findFirst().orElse(null);
+		this.currentCompilationUnit = changesForRule.keySet()
+			.stream()
+			.findFirst()
+			.orElse(null);
 
 		fSelectionStatus = new StatusInfo();
 	}
@@ -113,7 +116,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		createFileView(sashForm);
 		createPreviewViewer(sashForm);
 
-		if (!changesForRule.keySet().isEmpty()) {
+		if (!changesForRule.keySet()
+			.isEmpty()) {
 			this.currentCompilationUnit = (ICompilationUnit) viewer.getElementAt(0);
 		}
 		/*
@@ -157,16 +161,20 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 	protected void populateFileView() {
 		// if redraw, remove all items before adding
-		if (viewer.getTable().getItemCount() > 0) {
-			viewer.getTable().removeAll();
+		if (viewer.getTable()
+			.getItemCount() > 0) {
+			viewer.getTable()
+				.removeAll();
 		}
 		// adding all elements in table and checking appropriately
-		changesForRule.keySet().stream().forEach(entry -> {
-			viewer.add(entry);
-			viewer.setChecked(entry,
-					(unselected.containsKey(entry.getElementName()) || unselectedChange.contains(entry)) ? false
-							: true);
-		});
+		changesForRule.keySet()
+			.stream()
+			.forEach(entry -> {
+				viewer.add(entry);
+				viewer.setChecked(entry,
+						(unselected.containsKey(entry.getElementName()) || unselectedChange.contains(entry)) ? false
+								: true);
+			});
 	}
 
 	/**
@@ -187,7 +195,9 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	 * @return
 	 */
 	private String getPathString(ICompilationUnit compilationUnit) {
-		String temp = compilationUnit.getParent().getPath().toString();
+		String temp = compilationUnit.getParent()
+			.getPath()
+			.toString();
 		return StringUtils.startsWith(temp, "/") ? StringUtils.substring(temp, 1) : temp; //$NON-NLS-1$
 	}
 
@@ -268,13 +278,16 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		disposeControl();
 
 		currentPreviewViewer.createControl(previewContainer);
-		currentPreviewViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
+		currentPreviewViewer.getControl()
+			.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		currentPreviewViewer.setInput(TextEditChangePreviewViewer.createInput(getCurrentDocumentChange()));
 		((CompareViewerSwitchingPane) currentPreviewViewer.getControl())
-				.setTitleArgument(currentCompilationUnit.getElementName());
+			.setTitleArgument(currentCompilationUnit.getElementName());
 
-		currentPreviewViewer.getControl().getParent().layout();
+		currentPreviewViewer.getControl()
+			.getParent()
+			.layout();
 	}
 
 	private DocumentChange getCurrentDocumentChange() {
@@ -309,7 +322,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	 * unselectedChanges list.
 	 */
 	public void applyUnselectedChange() {
-		unselectedChange.stream().forEach(unit -> unselected.put(unit.getElementName(), unit));
+		unselectedChange.stream()
+			.forEach(unit -> unselected.put(unit.getElementName(), unit));
 		unselectedChange.clear();
 	}
 
@@ -325,8 +339,11 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	 */
 	public void update(Map<ICompilationUnit, DocumentChange> changesForRule) {
 		this.changesForRule = changesForRule;
-		changesForRule.keySet().stream().filter(unit -> unit.getElementName().equals(currentCompilationUnit.getElementName())
-				&& !unit.equals(currentCompilationUnit)).forEach(unit -> currentCompilationUnit = unit);
+		changesForRule.keySet()
+			.stream()
+			.filter(unit -> unit.getElementName()
+				.equals(currentCompilationUnit.getElementName()) && !unit.equals(currentCompilationUnit))
+			.forEach(unit -> currentCompilationUnit = unit);
 	}
 
 	/**
@@ -364,13 +381,16 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	 */
 	public void disposeControl() {
 		if (null != currentPreviewViewer.getControl()) {
-			currentPreviewViewer.getControl().dispose();
+			currentPreviewViewer.getControl()
+				.dispose();
 		}
 	}
 
 	protected void doStatusUpdate() {
-		if (LicenseUtil.getInstance().isFree()) {
-			((StatusInfo) fSelectionStatus).setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
+		if (LicenseUtil.getInstance()
+			.isFree()) {
+			((StatusInfo) fSelectionStatus)
+				.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
 		} else {
 			fSelectionStatus = new StatusInfo();
 		}

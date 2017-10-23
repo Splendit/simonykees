@@ -16,14 +16,16 @@ import java.util.stream.Collectors;
 public class DiamondOperatorRule {
 
 	/**
-	 * SIM-820 - if a diamond operator is used, eclipse will not indicate a compile
-	 * error but the code will not compile.
+	 * SIM-820 - if a diamond operator is used, eclipse will not indicate a
+	 * compile error but the code will not compile.
 	 */
 	CtorExpectingLambdas<String> collection = new CtorExpectingLambdas<String>(ArrayList::new, IdentityHashMap::new);
 
 	private String concatRawTypeList(List objects) {
 		objects.add(new Object());
-		Object val = objects.stream().map(Object::toString).collect(Collectors.joining(", "));
+		Object val = objects.stream()
+			.map(Object::toString)
+			.collect(Collectors.joining(", "));
 		return val.toString();
 	}
 
@@ -32,7 +34,8 @@ public class DiamondOperatorRule {
 	}
 
 	private String concatTypedList(List<String> foo, int i, Map<String, List<String>> map) {
-		return foo.stream().collect(Collectors.joining(","));
+		return foo.stream()
+			.collect(Collectors.joining(","));
 	}
 
 	public void inferListType() {

@@ -29,7 +29,7 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 
 	public SelectRulesWizardPageModel(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		super(rules);
-		
+
 		tags = Tag.getAllTags();
 	}
 
@@ -57,9 +57,10 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	@SuppressWarnings("unchecked")
 	public Set<Object> filterPosibilitiesByName() {
 		return super.getPosibilities().stream()
-				.filter(object -> StringUtils
-						.contains(((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).getName().toLowerCase(), nameFilter))
-				.collect(Collectors.toSet());
+			.filter(object -> StringUtils
+				.contains(((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).getName()
+					.toLowerCase(), nameFilter))
+			.collect(Collectors.toSet());
 	}
 
 	@Override
@@ -68,8 +69,8 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 		if (!appliedTags.isEmpty()) {
 			Set<Object> currentPossibilities = getAllPosibilities();
 			setPosibilitiesFilteredByTag(currentPossibilities.stream()
-					.filter(object -> containsTag((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object))
-					.collect(Collectors.toSet()));
+				.filter(object -> containsTag((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object))
+				.collect(Collectors.toSet()));
 		} else {
 			addAllItems(getPosibilities());
 		}
@@ -77,11 +78,13 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 
 	private boolean containsTag(RefactoringRule<? extends AbstractASTRewriteASTVisitor> object) {
 		for (String tag : appliedTags) {
-			if(null != Tag.getTageForName(tag)) {
-				if (object.getTags().contains(Tag.getTageForName(tag))) {
+			if (null != Tag.getTageForName(tag)) {
+				if (object.getTags()
+					.contains(Tag.getTageForName(tag))) {
 					return true;
 				}
-			} else if (StringUtils.contains(object.getName().toLowerCase(), tag)) {
+			} else if (StringUtils.contains(object.getName()
+				.toLowerCase(), tag)) {
 				return true;
 			}
 		}

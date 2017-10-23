@@ -42,7 +42,8 @@ class FindNextVariableASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(MethodInvocation node) {
 		if (new ASTMatcher().match(iteratorName, node.getExpression())) {
-			if ("next".equals(node.getName().getFullyQualifiedName())) { //$NON-NLS-1$
+			if ("next".equals(node.getName() //$NON-NLS-1$
+				.getFullyQualifiedName())) {
 				if (transformable || doubleNext) {
 					iteratorVariableType = null;
 					variableName = null;
@@ -65,7 +66,9 @@ class FindNextVariableASTVisitor extends AbstractASTRewriteASTVisitor {
 	public void endVisit(VariableDeclarationStatement node) {
 		if (transformable && iteratorVariableType == null && variableName != null) {
 			for (VariableDeclarationFragment fragment : (List<VariableDeclarationFragment>) node.fragments()) {
-				if (fragment.getName().getFullyQualifiedName().equals(variableName.getFullyQualifiedName())) {
+				if (fragment.getName()
+					.getFullyQualifiedName()
+					.equals(variableName.getFullyQualifiedName())) {
 					iteratorVariableType = node.getType();
 					removeWithTransformation = node;
 					break;

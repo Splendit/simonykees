@@ -30,7 +30,8 @@ public class TestPrimitiveBoxedForStringWithExpressionsRule {
 
 	public String testIntegerValueOfInIfCondition(int input) {
 		String result = "";
-		if (!StringUtils.isEmpty(Integer.toString(input)) || Integer.toString(5).length() == 1) {
+		if (!StringUtils.isEmpty(Integer.toString(input)) || Integer.toString(5)
+			.length() == 1) {
 			result = Integer.toString(input);
 		}
 		return result;

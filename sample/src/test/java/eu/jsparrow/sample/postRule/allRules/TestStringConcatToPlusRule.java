@@ -69,8 +69,11 @@ public class TestStringConcatToPlusRule {
 
 	public String testConcatWithStreamResult(String input) {
 		List<String> values = Arrays.asList("val1", "val2", input);
-		return input + values.stream().filter(s -> s.equals(input)).collect(Collectors.joining(","))
-				+ values.stream().collect(Collectors.joining(";"));
+		return input + values.stream()
+			.filter(s -> s.equals(input))
+			.collect(Collectors.joining(","))
+				+ values.stream()
+					.collect(Collectors.joining(";"));
 	}
 
 	public String testConcatEmptyString(String input) {

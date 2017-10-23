@@ -22,7 +22,8 @@ import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
  */
 public class SimonykeesPreferenceManager {
 
-	private static IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+	private static IPreferenceStore store = Activator.getDefault()
+		.getPreferenceStore();
 
 	private static List<SimonykeesProfile> profiles = new ArrayList<>();
 
@@ -30,7 +31,7 @@ public class SimonykeesPreferenceManager {
 
 	public static String getDefaultProfileList() {
 		return defaultProfile.getProfileName() + SimonykeesPreferenceConstants.NAME_RULES_DELIMITER + StringUtils
-				.join(defaultProfile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER);
+			.join(defaultProfile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER);
 	}
 
 	public static String getDefaultProfileName() {
@@ -53,12 +54,13 @@ public class SimonykeesPreferenceManager {
 		if (profiles.get(index) instanceof Profile) {
 			((Profile) profiles.get(index)).setProfileName(name);
 		}
-		profiles.get(index).setEnabledRulesIds(ruleIds);
+		profiles.get(index)
+			.setEnabledRulesIds(ruleIds);
 	}
 
 	public static boolean useProfile() {
 		if (store.getString(SimonykeesPreferenceConstants.PROFILE_USE_OPTION)
-				.equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
+			.equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
 			return false;
 		} else {
 			return true;
@@ -120,7 +122,9 @@ public class SimonykeesPreferenceManager {
 		if (profiles.isEmpty()) {
 			loadProfilesFromStore();
 		}
-		return profiles.stream().map(SimonykeesProfile::getProfileName).collect(Collectors.toList());
+		return profiles.stream()
+			.map(SimonykeesProfile::getProfileName)
+			.collect(Collectors.toList());
 	}
 
 	private static String getAllProfiles() {
@@ -139,8 +143,8 @@ public class SimonykeesPreferenceManager {
 			String name = StringUtils.substring(profileInfo, 0,
 					profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER));
 			List<String> rules = Arrays.asList(StringUtils
-					.substring(profileInfo, profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
-					.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
+				.substring(profileInfo, profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
+				.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
 			if (name.equals(Messages.Profile_DefaultProfile_profileName)) {
 				profiles.add(defaultProfile);
 			} else {
@@ -152,14 +156,19 @@ public class SimonykeesPreferenceManager {
 
 	public static String getStringFromProfiles() {
 		List<String> profilesAsString = new ArrayList<>();
-		profiles.stream().map((profile) -> profile.getProfileName() + SimonykeesPreferenceConstants.NAME_RULES_DELIMITER
-				+ StringUtils.join(profile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER))
-				.forEach(profilesAsString::add);
+		profiles.stream()
+			.map((profile) -> profile.getProfileName() + SimonykeesPreferenceConstants.NAME_RULES_DELIMITER
+					+ StringUtils.join(profile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER))
+			.forEach(profilesAsString::add);
 		return flattenArray(profilesAsString);
 	}
 
 	public static SimonykeesProfile getProfileFromName(String name) {
-		return profiles.stream().filter(profile -> profile.getProfileName().equals(name)).findFirst().orElse(null);
+		return profiles.stream()
+			.filter(profile -> profile.getProfileName()
+				.equals(name))
+			.findFirst()
+			.orElse(null);
 	}
 
 	/**
