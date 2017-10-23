@@ -17,7 +17,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class DiamondRulesTest extends SingleRuleTest {
-	
+
 	private static final String SAMPLE_FILE = "DiamondOperatorRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "diamondOperator";
 
@@ -31,13 +31,13 @@ public class DiamondRulesTest extends SingleRuleTest {
 
 	@Test
 	public void testTransformationWithDefaultFile() throws Exception {
-		//This rule depends on compiler compliance, need to set it beforehand
+		// This rule depends on compiler compliance, need to set it beforehand
 		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
 		rule.ruleSpecificImplementation(testProject);
-		
+
 		Path preRule = getPreRuleFile(SAMPLE_FILE);
 		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
-		
+
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);

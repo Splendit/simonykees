@@ -20,7 +20,7 @@ public class RemoveToStringOnStringRule extends RefactoringRule<RemoveToStringOn
 		this.name = Messages.RemoveToStringOnStringRule_name;
 		this.description = Messages.RemoveToStringOnStringRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;

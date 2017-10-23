@@ -63,13 +63,13 @@ public class LicenseUtil {
 		return false;
 	}
 
-	public boolean isTrial() {
+	public boolean isFree() {
 		if (isLicenseValidationServiceAvailable) {
 			return licenseValidationService.isDemoType();
 		}
 		return false;
 	}
-	
+
 	public boolean isFullLicense() {
 		if (isLicenseValidationServiceAvailable) {
 			return licenseValidationService.isFullValidLicense();

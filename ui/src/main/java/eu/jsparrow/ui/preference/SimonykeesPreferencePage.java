@@ -46,7 +46,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	public SimonykeesPreferencePage() {
 		super(GRID);
-		setPreferenceStore(Activator.getDefault().getPreferenceStore());
+		setPreferenceStore(Activator.getDefault()
+			.getPreferenceStore());
 		SimonykeesPreferenceManager.loadCurrentProfiles();
 	}
 
@@ -74,15 +75,21 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.ENABLE_INTRO,
 				Messages.SimonykeesPreferencePage_enableIntroText, composite));
 
+		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY,
+				Messages.SimonykeesPreferencePage_resolvePackagesRecursivelyLabel, composite));
+
 		initializeView();
 	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent event) {
 		super.propertyChange(event);
-		if (event.getSource() instanceof RadioGroupFieldEditor && ((RadioGroupFieldEditor) event.getSource())
-				.getPreferenceName().equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION)) {
-			if (event.getNewValue().toString().equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
+		if (event.getSource() instanceof RadioGroupFieldEditor
+				&& ((RadioGroupFieldEditor) event.getSource()).getPreferenceName()
+					.equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION)) {
+			if (event.getNewValue()
+				.toString()
+				.equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
 				profilesTable.deselectAll();
 				profilesTable.setEnabled(false);
 				newProfileButton.setEnabled(false);
@@ -121,9 +128,11 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				buttons.get(currentProfileSelection).setSelection(false);
+				buttons.get(currentProfileSelection)
+					.setSelection(false);
 				currentProfileSelection = ((Table) e.getSource()).getSelectionIndex();
-				buttons.get(currentProfileSelection).setSelection(true);
+				buttons.get(currentProfileSelection)
+					.setSelection(true);
 				handleSelectionChanged(currentProfileSelection);
 			}
 		});
@@ -132,7 +141,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	}
 
 	private void populateTable() {
-		for (int i = 0; i < SimonykeesPreferenceManager.getAllProfileIds().size(); i++) {
+		for (int i = 0; i < SimonykeesPreferenceManager.getAllProfileIds()
+			.size(); i++) {
 			new TableItem(profilesTable, SWT.NONE);
 		}
 		TableItem[] items = profilesTable.getItems();
@@ -140,7 +150,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			TableEditor editor = new TableEditor(profilesTable);
 			TableItem item = items[i];
 			Button button = new Button(profilesTable, SWT.RADIO);
-			button.setText(SimonykeesPreferenceManager.getAllProfileIds().get(i));
+			button.setText(SimonykeesPreferenceManager.getAllProfileIds()
+				.get(i));
 			button.setFont(font);
 			button.pack();
 			button.addSelectionListener(new SelectionAdapter() {
@@ -161,9 +172,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	private void handleSelectionChanged(int selectionIndex) {
 		editProfileButton.setEnabled(true);
-		if (SimonykeesPreferenceManager
-				.getProfileFromName(SimonykeesPreferenceManager.getAllProfileIds().get(selectionIndex))
-				.isBuiltInProfile()) {
+		if (SimonykeesPreferenceManager.getProfileFromName(SimonykeesPreferenceManager.getAllProfileIds()
+			.get(selectionIndex))
+			.isBuiltInProfile()) {
 			removeProfileButton.setEnabled(false);
 		} else {
 			removeProfileButton.setEnabled(true);
@@ -202,8 +213,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		editProfileButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				handleButtonClickedListener(
-						SimonykeesPreferenceManager.getAllProfileIds().get(currentProfileSelection));
+				handleButtonClickedListener(SimonykeesPreferenceManager.getAllProfileIds()
+					.get(currentProfileSelection));
 				updateView();
 			}
 		});
@@ -211,8 +222,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		removeProfileButton.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SimonykeesPreferenceManager
-						.removeProfile(SimonykeesPreferenceManager.getAllProfileIds().get(currentProfileSelection));
+				SimonykeesPreferenceManager.removeProfile(SimonykeesPreferenceManager.getAllProfileIds()
+					.get(currentProfileSelection));
 				currentProfileSelection = 0;
 				removeProfileButton.setEnabled(false);
 				updateView();
@@ -223,8 +234,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	public void handleButtonClickedListener(String profileId) {
 		final WizardDialog dialog = new WizardDialog(getShell(), new ConfigureProfileWizard(profileId)) {
 			/*
-			 * Removed unnecessary empty space on the bottom of the wizard
-			 * intended for ProgressMonitor that is not used
+			 * Removed unnecessary empty space on the bottom of the wizard intended for
+			 * ProgressMonitor that is not used
 			 */
 			@Override
 			protected Control createDialogArea(Composite parent) {
@@ -244,8 +255,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 			}
 		};
 		/*
-		 * the dialog is made as big enough to show rule description vertically
-		 * and horizontally to avoid two scrollers
+		 * the dialog is made as big enough to show rule description vertically and
+		 * horizontally to avoid two scrollers
 		 */
 		dialog.setPageSize(800, 700);
 
@@ -257,13 +268,18 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	 * View initialization called on first creation of the view.
 	 */
 	private void initializeView() {
-		Activator.getDefault().getPreferenceStore().setDefault(SimonykeesPreferenceConstants.PROFILE_USE_OPTION,
-				SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE);
-		currentProfileSelection = SimonykeesPreferenceManager.getProfiles().indexOf(
-				SimonykeesPreferenceManager.getProfileFromName(SimonykeesPreferenceManager.getCurrentProfileId()));// loadCurrentProfileId()));
-		buttons.get(currentProfileSelection).setSelection(true);
-		if (Activator.getDefault().getPreferenceStore().getString(SimonykeesPreferenceConstants.PROFILE_USE_OPTION)
-				.equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
+		Activator.getDefault()
+			.getPreferenceStore()
+			.setDefault(SimonykeesPreferenceConstants.PROFILE_USE_OPTION,
+					SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE);
+		currentProfileSelection = SimonykeesPreferenceManager.getProfiles()
+			.indexOf(SimonykeesPreferenceManager.getProfileFromName(SimonykeesPreferenceManager.getCurrentProfileId()));// loadCurrentProfileId()));
+		buttons.get(currentProfileSelection)
+			.setSelection(true);
+		if (Activator.getDefault()
+			.getPreferenceStore()
+			.getString(SimonykeesPreferenceConstants.PROFILE_USE_OPTION)
+			.equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
 			profilesTable.setEnabled(false);
 			newProfileButton.setEnabled(false);
 		} else {
@@ -282,7 +298,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		buttons.forEach(Button::dispose);
 		buttons.clear();
 		populateTable();
-		buttons.get(currentProfileSelection).setSelection(true);
+		buttons.get(currentProfileSelection)
+			.setSelection(true);
 	}
 
 	@Override
@@ -291,8 +308,8 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 
 	@Override
 	public boolean performOk() {
-		SimonykeesPreferenceManager
-				.setCurrentProfileId(SimonykeesPreferenceManager.getAllProfileIds().get(currentProfileSelection));
+		SimonykeesPreferenceManager.setCurrentProfileId(SimonykeesPreferenceManager.getAllProfileIds()
+			.get(currentProfileSelection));
 		SimonykeesPreferenceManager.loadCurrentProfiles();
 		return super.performOk();
 	}
@@ -312,8 +329,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	}
 
 	/**
-	 * If cancel is pressed, no changes from current manipulation should get
-	 * stored.
+	 * If cancel is pressed, no changes from current manipulation should get stored.
 	 */
 	@Override
 	public boolean performCancel() {

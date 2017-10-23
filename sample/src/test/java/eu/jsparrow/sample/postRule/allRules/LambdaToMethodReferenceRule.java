@@ -77,15 +77,20 @@ public class LambdaToMethodReferenceRule {
 		Collections.sort(personList, (a, b) -> Person.compareByAge(a.getParent1(), b));
 
 		// SIM-454 bugfix static methods
-		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+		personList.stream()
+			.filter(LambdaToMethodReferenceRule::isPerson);
 
-		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+		personList.stream()
+			.filter(LambdaToMethodReferenceRule::isPerson);
 
-		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+		personList.stream()
+			.filter(LambdaToMethodReferenceRule::isPerson);
 
-		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+		personList.stream()
+			.filter(LambdaToMethodReferenceRule::isPerson);
 
-		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+		personList.stream()
+			.filter(LambdaToMethodReferenceRule::isPerson);
 	}
 
 	public void referenceToInstanceMethod() {
@@ -131,9 +136,11 @@ public class LambdaToMethodReferenceRule {
 
 		personList.forEach(person -> getRandomPerson().doSomething(person));
 
-		personList.forEach((Person person) -> this.getRandomPerson().doSomething(person));
+		personList.forEach((Person person) -> this.getRandomPerson()
+			.doSomething(person));
 
-		personList.forEach(person -> this.getRandomPerson().doSomething(person));
+		personList.forEach(person -> this.getRandomPerson()
+			.doSomething(person));
 
 		setIterator(new Iterator() {
 
@@ -207,14 +214,18 @@ public class LambdaToMethodReferenceRule {
 		 */
 		List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 0);
 
-		list.stream().map((Integer iterator) -> new java.awt.geom.Ellipse2D.Double(iterator, 2.0, 4.0, 4.0));
+		list.stream()
+			.map((Integer iterator) -> new java.awt.geom.Ellipse2D.Double(iterator, 2.0, 4.0, 4.0));
 
-		list.stream().map(Double::valueOf);
+		list.stream()
+			.map(Double::valueOf);
 
 		/*
 		 * SIM-532 bugfix
 		 */
-		personList.stream().map(p -> new Person(p.getName(), p.getBirthday())).forEach(Person::getBirthday);
+		personList.stream()
+			.map(p -> new Person(p.getName(), p.getBirthday()))
+			.forEach(Person::getBirthday);
 	}
 
 	/*
@@ -224,15 +235,25 @@ public class LambdaToMethodReferenceRule {
 	public void referenceToParameterizedType() {
 		Map<String, String> map = new HashMap<>();
 
-		map.entrySet().stream().forEach(Map.Entry::getValue);
+		map.entrySet()
+			.stream()
+			.forEach(Map.Entry::getValue);
 
-		map.entrySet().stream().forEach(Map.Entry::getValue);
+		map.entrySet()
+			.stream()
+			.forEach(Map.Entry::getValue);
 
-		map.entrySet().stream().forEach(Map.Entry::getValue);
+		map.entrySet()
+			.stream()
+			.forEach(Map.Entry::getValue);
 
-		map.entrySet().stream().forEach(Entry<String, String>::getValue);
+		map.entrySet()
+			.stream()
+			.forEach(Entry<String, String>::getValue);
 
-		map.entrySet().stream().forEach(Entry::getValue);
+		map.entrySet()
+			.stream()
+			.forEach(Entry::getValue);
 	}
 
 	/*
@@ -244,32 +265,41 @@ public class LambdaToMethodReferenceRule {
 
 	public void saveTypeArguments(String input) {
 		List<Person> persons = new ArrayList<>();
-		persons.stream().map(Person::getName).forEach(this::<String>consumeString);
+		persons.stream()
+			.map(Person::getName)
+			.forEach(this::<String>consumeString);
 	}
 
 	public void missingTypeArguments3(String input) {
 		List<NestedClass> persons = new ArrayList<>();
-		persons.stream().map(NestedClass::<String>consumeObject);
+		persons.stream()
+			.map(NestedClass::<String>consumeObject);
 	}
 
 	public void missingTypeArguments2(String input) {
 		List<Person> persons = new ArrayList<>();
-		persons.stream().map(Employee<String>::new);
+		persons.stream()
+			.map(Employee<String>::new);
 	}
 
 	public void missingTypeArguments(String input) {
 		List<NestedClass> persons = new ArrayList<>();
-		persons.stream().map(NestedClass::consumeObject);
+		persons.stream()
+			.map(NestedClass::consumeObject);
 	}
 
 	public void captureTypes(String input) {
 		List<? extends Person> persons = new ArrayList<>();
-		List<String> names = persons.stream().map(Person::getName).collect(Collectors.toList());
+		List<String> names = persons.stream()
+			.map(Person::getName)
+			.collect(Collectors.toList());
 	}
 
 	public void captureOfParameterizedTypes(String input) {
 		List<? extends Employee<String>> persons = new ArrayList<>();
-		List<String> names = persons.stream().map(Employee::getName).collect(Collectors.toList());
+		List<String> names = persons.stream()
+			.map(Employee::getName)
+			.collect(Collectors.toList());
 	}
 
 	public void missingImports() {
@@ -281,8 +311,9 @@ public class LambdaToMethodReferenceRule {
 		/*
 		 * Expecting the transformation to use a fully qualified name.
 		 */
-		numberUtils.stream().map(UsingApacheNumberUtils::getNumber)
-				.map(org.apache.commons.lang3.math.NumberUtils::toString);
+		numberUtils.stream()
+			.map(UsingApacheNumberUtils::getNumber)
+			.map(org.apache.commons.lang3.math.NumberUtils::toString);
 	}
 
 	public static <T, SOURCE extends Collection<T>, DEST extends Collection<T>> DEST transferElements(
@@ -312,7 +343,9 @@ public class LambdaToMethodReferenceRule {
 	class NestedClass {
 		public void referencingMethodInNestedClass() {
 			List<Person> persons = new ArrayList<>();
-			persons.stream().map(Person::getName).forEach(name -> consumeString(name));
+			persons.stream()
+				.map(Person::getName)
+				.forEach(name -> consumeString(name));
 		}
 
 		public <T> T consumeObject() {
@@ -322,11 +355,13 @@ public class LambdaToMethodReferenceRule {
 
 	class ComparisonProvider {
 		public int compareByName(Person a, Person b) {
-			return a.getName().compareTo(b.getName());
+			return a.getName()
+				.compareTo(b.getName());
 		}
 
 		public int compareByAge(Person a, Person b) {
-			return a.getBirthday().compareTo(b.getBirthday());
+			return a.getBirthday()
+				.compareTo(b.getBirthday());
 		}
 	}
 

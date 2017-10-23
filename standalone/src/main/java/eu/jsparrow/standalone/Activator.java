@@ -134,8 +134,10 @@ public class Activator implements BundleActivator {
 		try {
 			/* Unregister as a save participant */
 			if (ResourcesPlugin.getWorkspace() != null) {
-				ResourcesPlugin.getWorkspace().forgetSavedTree(PLUGIN_ID);
-				ResourcesPlugin.getWorkspace().removeSaveParticipant(PLUGIN_ID);
+				ResourcesPlugin.getWorkspace()
+					.forgetSavedTree(PLUGIN_ID);
+				ResourcesPlugin.getWorkspace()
+					.removeSaveParticipant(PLUGIN_ID);
 			}
 
 		} catch (Exception e) {
@@ -184,20 +186,26 @@ public class Activator implements BundleActivator {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result = new LinkedList<>();
 
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
-				.getRulesForProject(javaProject, true);
+			.getRulesForProject(javaProject, true);
 
 		String defaultProfile = config.getDefaultProfile();
 		if (defaultProfile != null && !defaultProfile.isEmpty()) {
 			if (checkProfileExistence(config, defaultProfile)) {
-				Optional<YAMLProfile> configProfile = config.getProfiles().stream()
-						.filter(profile -> profile.getName().equals(defaultProfile)).findFirst();
+				Optional<YAMLProfile> configProfile = config.getProfiles()
+					.stream()
+					.filter(profile -> profile.getName()
+						.equals(defaultProfile))
+					.findFirst();
 
 				if (configProfile.isPresent()) {
 					List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> profileRules = getConfigRules(
-							configProfile.get().getRules());
+							configProfile.get()
+								.getRules());
 
-					result = projectRules.stream().filter(rule -> rule.isEnabled()).filter(profileRules::contains)
-							.collect(Collectors.toList());
+					result = projectRules.stream()
+						.filter(rule -> rule.isEnabled())
+						.filter(profileRules::contains)
+						.collect(Collectors.toList());
 				} else {
 					String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
 							defaultProfile);
@@ -212,8 +220,10 @@ public class Activator implements BundleActivator {
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> configSelectedRules = getConfigRules(
 					config.getRules());
 
-			result = projectRules.stream().filter(RefactoringRule::isEnabled).filter(configSelectedRules::contains)
-					.collect(Collectors.toList());
+			result = projectRules.stream()
+				.filter(RefactoringRule::isEnabled)
+				.filter(configSelectedRules::contains)
+				.collect(Collectors.toList());
 		}
 
 		return result;
@@ -236,7 +246,9 @@ public class Activator implements BundleActivator {
 
 		for (String configRule : configRules) {
 			Optional<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> currentRule = rules.stream()
-					.filter(rule -> rule.getId().equals(configRule)).findFirst();
+				.filter(rule -> rule.getId()
+					.equals(configRule))
+				.findFirst();
 			if (currentRule.isPresent()) {
 				configSelectedRules.add(currentRule.get());
 			} else {
@@ -307,7 +319,10 @@ public class Activator implements BundleActivator {
 	 * @return true, if the profile exists, false otherwise
 	 */
 	private boolean checkProfileExistence(YAMLConfig config, String profile) {
-		return config.getProfiles().stream().anyMatch(configProfile -> configProfile.getName().equals(profile));
+		return config.getProfiles()
+			.stream()
+			.anyMatch(configProfile -> configProfile.getName()
+				.equals(profile));
 	}
 
 	/**
@@ -320,7 +335,7 @@ public class Activator implements BundleActivator {
 	private void deleteChildren(File parentDirectory) {
 		for (String file : Arrays.asList(parentDirectory.list())) {
 			File currentFile = new File(parentDirectory.getAbsolutePath(), file);
-			if (currentFile.isDirectory() && !("target".equals(currentFile.getName()))) {
+			if (currentFile.isDirectory() && !("target".equals(currentFile.getName()))) { //$NON-NLS-1$
 				deleteChildren(currentFile);
 			}
 			currentFile.delete();

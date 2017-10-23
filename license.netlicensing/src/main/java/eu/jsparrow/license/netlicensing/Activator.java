@@ -61,8 +61,8 @@ public class Activator extends Plugin {
 		// load pseudo-activator from test fragment and execute its start method
 		try {
 			Class<? extends BundleActivator> frgActClass = Class
-					.forName("eu.jsparrow.license.netlicensing.TestFragmentActivator") //$NON-NLS-1$
-					.asSubclass(BundleActivator.class);
+				.forName("eu.jsparrow.license.netlicensing.TestFragmentActivator") //$NON-NLS-1$
+				.asSubclass(BundleActivator.class);
 			testFragmentActivator = frgActClass.newInstance();
 			testFragmentActivator.start(context);
 		} catch (ClassNotFoundException e) {

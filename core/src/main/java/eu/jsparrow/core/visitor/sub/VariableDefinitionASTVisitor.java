@@ -30,61 +30,64 @@ public class VariableDefinitionASTVisitor extends AbstractASTRewriteASTVisitor {
 		variableNames = new ArrayList<>();
 		endThis = true;
 	}
-	
-	public VariableDefinitionASTVisitor(ASTNode beforeThis, List<ASTNode>relevantBlocks) {
+
+	public VariableDefinitionASTVisitor(ASTNode beforeThis, List<ASTNode> relevantBlocks) {
 		this();
 		this.beforeThis = beforeThis;
 		this.relevantBlocks = relevantBlocks;
-		
+
 	}
-	
+
 	@Override
 	public boolean preVisit2(ASTNode node) {
-		if(node==beforeThis){
+		if (node == beforeThis) {
 			endThis = false;
 		}
 		return endThis;
 	}
-	
+
 	@Override
 	public boolean visit(Block node) {
-		boolean inScope = relevantBlocks.stream().anyMatch(block -> block == node);
-		
+		boolean inScope = relevantBlocks.stream()
+			.anyMatch(block -> block == node);
+
 		return inScope;
 	}
-	
+
 	@Override
 	public boolean visit(ForStatement node) {
-		boolean inScope = relevantBlocks.stream().anyMatch(block -> block == node);
-		
+		boolean inScope = relevantBlocks.stream()
+			.anyMatch(block -> block == node);
+
 		return inScope;
 	}
-	
+
 	@Override
 	public boolean visit(MethodDeclaration node) {
-		boolean inScope = relevantBlocks.stream().anyMatch(block -> block == node);
-		
+		boolean inScope = relevantBlocks.stream()
+			.anyMatch(block -> block == node);
+
 		return inScope;
 	}
 
 	@Override
 	public boolean visit(VariableDeclarationFragment node) {
-		if(endThis) {
+		if (endThis) {
 			variableNames.add(node.getName());
 		}
-		
+
 		return endThis;
 	}
-	
+
 	@Override
 	public boolean visit(SingleVariableDeclaration node) {
-		if(endThis) {
+		if (endThis) {
 			variableNames.add(node.getName());
 		}
-		
+
 		return endThis;
 	}
-	
+
 	public List<SimpleName> getScopeVariableNames() {
 		return variableNames;
 	}

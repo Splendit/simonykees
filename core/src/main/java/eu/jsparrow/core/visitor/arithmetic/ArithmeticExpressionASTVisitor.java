@@ -36,7 +36,8 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 		}
 
 		// only simple operations with two arguments are supported
-		if (!node.extendedOperands().isEmpty()) {
+		if (!node.extendedOperands()
+			.isEmpty()) {
 			return false;
 		}
 
@@ -99,15 +100,18 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 	 */
 	private void replace(InfixExpression replace, boolean left) {
 		newOperator = replace.getOperator();
-		if (replace.extendedOperands().isEmpty()) {
+		if (replace.extendedOperands()
+			.isEmpty()) {
 			astRewrite.replace(replace, left ? replace.getRightOperand() : replace.getLeftOperand(), null);
 		} else {
 			if (left) {
 				astRewrite.replace(replace.getLeftOperand(), replace.getRightOperand(), null);
 			}
 
-			Expression moveTarget = (Expression) replace.extendedOperands().get(0);
-			astRewrite.getListRewrite(replace, InfixExpression.EXTENDED_OPERANDS_PROPERTY).remove(moveTarget, null);
+			Expression moveTarget = (Expression) replace.extendedOperands()
+				.get(0);
+			astRewrite.getListRewrite(replace, InfixExpression.EXTENDED_OPERANDS_PROPERTY)
+				.remove(moveTarget, null);
 			astRewrite.replace(replace.getRightOperand(), astRewrite.createMoveTarget(moveTarget), null);
 		}
 	}
@@ -117,6 +121,7 @@ class ArithmeticExpressionASTVisitor extends ASTVisitor {
 	}
 
 	private boolean isSimpleNameAndEqualsVarName(ASTNode astNode) {
-		return astNode instanceof SimpleName && ((SimpleName) astNode).getIdentifier().equals(varName);
+		return astNode instanceof SimpleName && ((SimpleName) astNode).getIdentifier()
+			.equals(varName);
 	}
 }

@@ -9,8 +9,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
- * A visitor for analyzing an {@link EnhancedForStatement} whether it 
- * consists of the shape:
+ * A visitor for analyzing an {@link EnhancedForStatement} whether it consists
+ * of the shape:
  * 
  * <pre>
  * <code>
@@ -24,8 +24,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
  * </code>
  * </pre>
  * 
- * Furthermore, it finds the declaration fragment of the assigned boolean variable
- * and checks whether it initial value is {@code false}.
+ * Furthermore, it finds the declaration fragment of the assigned boolean
+ * variable and checks whether it initial value is {@code false}.
  * 
  * @author Ardit Ymeri
  * @since 2.1.1
@@ -80,7 +80,8 @@ class LoopWithBreakStatementVisitor extends ASTVisitor {
 			 */
 			return true;
 		}
-		if (beforeDeclFragment && simpleName.getIdentifier().equals(varName.getIdentifier())) {
+		if (beforeDeclFragment && simpleName.getIdentifier()
+			.equals(varName.getIdentifier())) {
 			ASTNode parent = simpleName.getParent();
 			if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()) {
 				VariableDeclarationFragment boolDeclFragment = (VariableDeclarationFragment) parent;
@@ -88,11 +89,11 @@ class LoopWithBreakStatementVisitor extends ASTVisitor {
 				this.beforeDeclFragment = false;
 				this.afterDeclFragment = true;
 			}
-		} else if (afterDeclFragment && beforeLoop
-				&& simpleName.getIdentifier().equals(varName.getIdentifier())) {
+		} else if (afterDeclFragment && beforeLoop && simpleName.getIdentifier()
+			.equals(varName.getIdentifier())) {
 			/*
-			 * The boolean variable is referenced sw between its declaration
-			 * and the for loop
+			 * The boolean variable is referenced sw between its declaration and
+			 * the for loop
 			 */
 			terminate();
 		}

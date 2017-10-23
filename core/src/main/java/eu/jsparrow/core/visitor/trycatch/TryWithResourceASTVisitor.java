@@ -43,30 +43,35 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String CLOSEABLE_FULLY_QUALLIFIED_NAME = java.io.Closeable.class.getName();
 	private static final String CLOSE = "close"; //$NON-NLS-1$
 
-	@SuppressWarnings("unchecked")
+	// TODO improvement for suppressed deprecation needed, see SIM-878
+	@SuppressWarnings({ "unchecked", "deprecation" })
 	@Override
 	public boolean visit(TryStatement node) {
 		List<VariableDeclarationExpression> resourceList = new ArrayList<>();
 		List<SimpleName> resourceNameList = new ArrayList<>();
 		boolean exit = false;
 
-		List<VariableDeclarationStatement> varDeclarationStatements = ((List<Object>) node.getBody().statements())
-				.stream().filter(VariableDeclarationStatement.class::isInstance)
-				.map(VariableDeclarationStatement.class::cast).collect(Collectors.toList());
+		List<VariableDeclarationStatement> varDeclarationStatements = ((List<Object>) node.getBody()
+			.statements()).stream()
+				.filter(VariableDeclarationStatement.class::isInstance)
+				.map(VariableDeclarationStatement.class::cast)
+				.collect(Collectors.toList());
 		List<VariableDeclarationFragment> toBeMovedToResources = new ArrayList<>();
 
 		for (VariableDeclarationStatement varDeclStatmentNode : varDeclarationStatements) {
 			/*
-			 * Move all AutoCloseable Object to resource header, stop collection after first
-			 * non resource object
+			 * Move all AutoCloseable Object to resource header, stop collection
+			 * after first non resource object
 			 */
-			ITypeBinding typeBind = varDeclStatmentNode.getType().resolveBinding();
+			ITypeBinding typeBind = varDeclStatmentNode.getType()
+				.resolveBinding();
 			if (ClassRelationUtil.isInheritingContentOfTypes(typeBind, generateFullyQuallifiedNameList(
 					AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME, CLOSEABLE_FULLY_QUALLIFIED_NAME))) {
 
 				List<VariableDeclarationFragment> fragments = ((List<Object>) varDeclStatmentNode.fragments()).stream()
-						.filter(VariableDeclarationFragment.class::isInstance)
-						.map(VariableDeclarationFragment.class::cast).collect(Collectors.toList());
+					.filter(VariableDeclarationFragment.class::isInstance)
+					.map(VariableDeclarationFragment.class::cast)
+					.collect(Collectors.toList());
 				int numFragments = fragments.size();
 
 				for (VariableDeclarationFragment variableDeclarationFragment : fragments) {
@@ -80,16 +85,18 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 
 						toBeMovedToResources.add(variableDeclarationFragment);
 						VariableDeclarationExpression variableDeclarationExpression = varDeclStatmentNode.getAST()
-								.newVariableDeclarationExpression((VariableDeclarationFragment) ASTNode.copySubtree(
-										variableDeclarationFragment.getAST(), variableDeclarationFragment));
+							.newVariableDeclarationExpression((VariableDeclarationFragment) ASTNode
+								.copySubtree(variableDeclarationFragment.getAST(), variableDeclarationFragment));
 						variableDeclarationExpression.setType((Type) ASTNode.copySubtree(varDeclStatmentNode.getAST(),
 								varDeclStatmentNode.getType()));
 
 						List<Modifier> modifierList = varDeclStatmentNode.modifiers();
 						Function<Modifier, Modifier> cloneModifier = modifier -> (Modifier) ASTNode
-								.copySubtree(modifier.getAST(), modifier);
+							.copySubtree(modifier.getAST(), modifier);
 						variableDeclarationExpression.modifiers()
-								.addAll(modifierList.stream().map(cloneModifier).collect(Collectors.toList()));
+							.addAll(modifierList.stream()
+								.map(cloneModifier)
+								.collect(Collectors.toList()));
 
 						resourceList.add(variableDeclarationExpression);
 						resourceNameList.add(variableDeclarationFragment.getName());
@@ -103,7 +110,8 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 					}
 
 					// FIXME dirty hack!
-					if (!resourceList.isEmpty() && node.resources().isEmpty()) {
+					if (!resourceList.isEmpty() && node.resources()
+						.isEmpty()) {
 						exit = true;
 						break;
 					}
@@ -120,14 +128,16 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		if (!resourceList.isEmpty()) {
 			resourceList.forEach(iteratorNode -> astRewrite.getListRewrite(node, TryStatement.RESOURCES_PROPERTY)
-					.insertLast(iteratorNode, null));
+				.insertLast(iteratorNode, null));
 
 			// remove all close operations on the found resources
 			Function<SimpleName, MethodInvocation> mapper = simpleName -> NodeBuilder.newMethodInvocation(node.getAST(),
 					(SimpleName) ASTNode.copySubtree(simpleName.getAST(), simpleName),
 					NodeBuilder.newSimpleName(node.getAST(), CLOSE));
 
-			node.accept(new RemoveCloseASTVisitor(resourceNameList.stream().map(mapper).collect(Collectors.toList())));
+			node.accept(new RemoveCloseASTVisitor(resourceNameList.stream()
+				.map(mapper)
+				.collect(Collectors.toList())));
 
 		}
 		return true;
@@ -142,7 +152,8 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		@Override
 		public boolean visit(SimpleName simpleName) {
-			if (simpleName.resolveBinding().getKind() == IBinding.VARIABLE) {
+			if (simpleName.resolveBinding()
+				.getKind() == IBinding.VARIABLE) {
 				referencedVariables.add(simpleName);
 			}
 			return true;
@@ -165,9 +176,11 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		@Override
 		public boolean visit(MethodInvocation node) {
-			if (methodInvocationList.stream().anyMatch(methodInvocation -> astMatcher.match(node, methodInvocation)
-					&& node.getParent() instanceof Statement)) {
-				node.resolveMethodBinding().getExceptionTypes();
+			if (methodInvocationList.stream()
+				.anyMatch(methodInvocation -> astMatcher.match(node, methodInvocation)
+						&& node.getParent() instanceof Statement)) {
+				node.resolveMethodBinding()
+					.getExceptionTypes();
 				getAstRewrite().remove(node.getParent(), null);
 			}
 			return false;
@@ -178,11 +191,11 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 	/**
 	 * Verifies the following condition for the given {@code SimpleName}:
 	 * 
-	 * - resource is not assigned in the try block. - resource is not closed inside
-	 * some other nested try block but directly inside the body. - resource is not
-	 * used after it is closed. - resource initializer does not use values that
-	 * could be potentially manipulated between the opening of the try block and its
-	 * occurrence.
+	 * - resource is not assigned in the try block. - resource is not closed
+	 * inside some other nested try block but directly inside the body. -
+	 * resource is not used after it is closed. - resource initializer does not
+	 * use values that could be potentially manipulated between the opening of
+	 * the try block and its occurrence.
 	 * 
 	 * @author Ardit Ymeri
 	 * @since 1.0
@@ -225,7 +238,8 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		 */
 		@Override
 		public boolean visit(VariableDeclarationExpression node) {
-			return ASTNode.TRY_STATEMENT != node.getParent().getNodeType();
+			return ASTNode.TRY_STATEMENT != node.getParent()
+				.getNodeType();
 		}
 
 		/**
@@ -234,11 +248,16 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		 */
 		@Override
 		public boolean visit(VariableDeclarationFragment node) {
-			return toBeMovedToResources.stream().filter(fragment -> node == fragment).findFirst().map(fragment -> false).orElse(true);
+			return toBeMovedToResources.stream()
+				.filter(fragment -> node == fragment)
+				.findFirst()
+				.map(fragment -> false)
+				.orElse(true);
 		}
 
 		public boolean safeToGo() {
-			// check whether the variables used initializer do not show in proceeding simple
+			// check whether the variables used initializer do not show in
+			// proceeding simple
 			// names
 
 			return !assigned && !initializerIsDirty() && !referencedAfterClose && !closeOccuredInNestedTry
@@ -246,22 +265,27 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		private boolean initializerIsDirty() {
-			List<String> proceedingsNames = proceedingSimpleNames.stream().map(SimpleName::getIdentifier)
-					.collect(Collectors.toList());
+			List<String> proceedingsNames = proceedingSimpleNames.stream()
+				.map(SimpleName::getIdentifier)
+				.collect(Collectors.toList());
 
-			return referencedByInitializer.stream().map(SimpleName::getIdentifier).anyMatch(proceedingsNames::contains);
+			return referencedByInitializer.stream()
+				.map(SimpleName::getIdentifier)
+				.anyMatch(proceedingsNames::contains);
 
 		}
 
 		@Override
 		public boolean visit(MethodInvocation invocation) {
 			// looking for the 'close' method
-			if (!closeOccurred && CLOSE.equals(invocation.getName().getIdentifier())
-					&& invocation.arguments().isEmpty()) {
+			if (!closeOccurred && CLOSE.equals(invocation.getName()
+				.getIdentifier()) && invocation.arguments()
+					.isEmpty()) {
 				Expression expression = invocation.getExpression();
 				if (ASTNode.SIMPLE_NAME == expression.getNodeType()) {
 					SimpleName simpleName = (SimpleName) expression;
-					if (targetName.getIdentifier().equals(simpleName.getIdentifier())) {
+					if (targetName.getIdentifier()
+						.equals(simpleName.getIdentifier())) {
 
 						if (nestedTryLevel == 1) {
 							closeOccurred = true;
@@ -295,7 +319,8 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 				}
 
 				if ((closeOccurred || closeOccuredInNestedTry) && simpleName.getParent() != closeStatement
-						&& targetName.getIdentifier().equals(simpleName.getIdentifier())) {
+						&& targetName.getIdentifier()
+							.equals(simpleName.getIdentifier())) {
 					referencedAfterClose = true;
 				}
 			}

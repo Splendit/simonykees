@@ -36,7 +36,7 @@ public class ExceptionMessages extends NLS {
 	public static String SimonykeesPreferencePageLicense_license_service_unavailable;
 	public static String SimonykeesUpdateLicenseDialog_license_service_unavailable;
 	public static String TableLabelProvider_not_supported;
-	
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, ExceptionMessages.class);

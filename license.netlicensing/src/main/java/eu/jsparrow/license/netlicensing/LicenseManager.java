@@ -103,11 +103,15 @@ public class LicenseManager {
 		ZonedDateTime expirationTimeStamp;
 
 		Optional<PersistenceModel> persistedData = persistenceManager.readPersistedData()
-				.filter(pm -> pm.getLastPersistedVersion().filter(LicenseManager.VERSION::equals).isPresent());
-		String name = persistedData.flatMap(PersistenceModel::getLicenseeName).filter(s -> !s.isEmpty())
-				.orElse(calcDemoLicenseeName());
-		String number = persistedData.flatMap(PersistenceModel::getLicenseeNumber).filter(s -> !s.isEmpty())
-				.orElse(calcDemoLicenseeNumber());
+			.filter(pm -> pm.getLastPersistedVersion()
+				.filter(LicenseManager.VERSION::equals)
+				.isPresent());
+		String name = persistedData.flatMap(PersistenceModel::getLicenseeName)
+			.filter(s -> !s.isEmpty())
+			.orElse(calcDemoLicenseeName());
+		String number = persistedData.flatMap(PersistenceModel::getLicenseeNumber)
+			.filter(s -> !s.isEmpty())
+			.orElse(calcDemoLicenseeNumber());
 		setLicenseeName(name);
 		setLicenseeNumber(number);
 
@@ -132,9 +136,12 @@ public class LicenseManager {
 		} catch (NetLicensingException e) {
 
 			logger.warn(Messages.LicenseManager_cannot_reach_licensing_provider_on_checkin);
-			licenseType = persistedData.flatMap(PersistenceModel::getLicenseType).orElse(LicenseType.TRY_AND_BUY);
-			evaluationExpiresDate = persistedData.flatMap(PersistenceModel::getDemoExpirationDate).orElse(null);
-			expirationTimeStamp = persistedData.flatMap(PersistenceModel::getExpirationTimeStamp).orElse(null);
+			licenseType = persistedData.flatMap(PersistenceModel::getLicenseType)
+				.orElse(LicenseType.TRY_AND_BUY);
+			evaluationExpiresDate = persistedData.flatMap(PersistenceModel::getDemoExpirationDate)
+				.orElse(null);
+			expirationTimeStamp = persistedData.flatMap(PersistenceModel::getExpirationTimeStamp)
+				.orElse(null);
 
 		}
 
@@ -164,7 +171,8 @@ public class LicenseManager {
 	private ValidationResult preValidate(String productNumber, String productModuleNumber, String licenseeNumber,
 			String licenseeName) throws NetLicensingException {
 
-		Context context = RestApiConnection.getAPIRestConnection().getContext();
+		Context context = RestApiConnection.getAPIRestConnection()
+			.getContext();
 		ValidationResult preValidationResult;
 		ZonedDateTime now = ZonedDateTime.now();
 		// to be used only during pre-validation, as a expiration date.
@@ -194,7 +202,8 @@ public class LicenseManager {
 		LicenseModel model = getLicenseModel();
 		PersistenceManager persistMng = PersistenceManager.getInstance();
 		if (model instanceof FloatingModel) {
-			Context context = RestApiConnection.getAPIRestConnection().getContext();
+			Context context = RestApiConnection.getAPIRestConnection()
+				.getContext();
 			FloatingModel floatingModel = (FloatingModel) model;
 			ValidationParameters checkingValParameters = floatingModel.getCheckInValidationParameters();
 			try {
@@ -332,7 +341,8 @@ public class LicenseManager {
 					Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE);
 				} catch (InterruptedException e) {
 					logger.error(Messages.LicenseManager_wait_for_validation_was_interrupted, e);
-					Thread.currentThread().interrupt();
+					Thread.currentThread()
+						.interrupt();
 					cache.reset();
 				}
 
@@ -380,9 +390,10 @@ public class LicenseManager {
 		 * persistence...
 		 */
 		Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
-		Instant lastSuccessTimestamp = optPersistedData.flatMap(PersistenceModel::getLastSuccessTimestamp).orElse(null);
+		Instant lastSuccessTimestamp = optPersistedData.flatMap(PersistenceModel::getLastSuccessTimestamp)
+			.orElse(null);
 		LicenseType lastSuccessType = optPersistedData.flatMap(PersistenceModel::getLastSuccessLicenseType)
-				.orElse(null);
+			.orElse(null);
 
 		/*
 		 * create an instance of LicenseChecker from the parser and last
@@ -432,7 +443,8 @@ public class LicenseManager {
 			try {
 				Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE);
 			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
+				Thread.currentThread()
+					.interrupt();
 				// do nothing. no hurt...
 			}
 
@@ -441,8 +453,7 @@ public class LicenseManager {
 				logger.warn(Messages.LicenseManager_invalid_new_license_key);
 				setLicenseeNumber(existingLicenseeNumber);
 				setLicenseeName(existingLicenseeName);
-				if (checker != null
-						&& checker.getLicenseStatus() == LicenseStatus.CONNECTION_FAILURE_UNREGISTERED) {
+				if (checker != null && checker.getLicenseStatus() == LicenseStatus.CONNECTION_FAILURE_UNREGISTERED) {
 					existingLicenseeNumber = ""; //$NON-NLS-1$
 					existingLicenseeName = ""; //$NON-NLS-1$
 				}
@@ -463,8 +474,7 @@ public class LicenseManager {
 
 		if (checker != null && checker.getLicenseStatus() != LicenseStatus.CONNECTION_FAILURE
 				&& checker.getLicenseStatus() != LicenseStatus.CONNECTION_FAILURE_UNREGISTERED
-				&& checker.getType() != null && checker.getType() != LicenseType.TRY_AND_BUY
-				&& checker.isValid()) {
+				&& checker.getType() != null && checker.getType() != LicenseType.TRY_AND_BUY && checker.isValid()) {
 			valid = true;
 		}
 
@@ -535,7 +545,7 @@ public class LicenseManager {
 		 * Calculates the {@link LicenseStatus} based on the parsed validity of
 		 * the license and the last successful validation time-stamp.
 		 * 
-		 * It covers the case where the NodeLocked/Trial license is still valid
+		 * It covers the case where the NodeLocked/Free license is still valid
 		 * but the hardware id does not match with the one of the first
 		 * validation. Note that this method does not calculate anything about
 		 * the validity of the license.
@@ -557,16 +567,17 @@ public class LicenseManager {
 				 */
 				if (lastSuccessLicenseType != null && lastSuccessTimestamp != null
 						&& lastSuccessLicenseType == LicenseType.NODE_LOCKED && parsedExpirationDate != null
-						&& Instant.now().isBefore(parsedExpirationDate.toInstant())) {
+						&& Instant.now()
+							.isBefore(parsedExpirationDate.toInstant())) {
 
 					this.licenseStatus = LicenseStatus.NODE_LOCKED_HW_ID_FAILURE;
 					this.licenseType = LicenseType.NODE_LOCKED;
 
 				} else if (this.parsedLicenseType != null && this.demoExpireation != null
-						&& parsedLicenseType == LicenseType.TRY_AND_BUY
-						&& Instant.now().isBefore(demoExpireation.toInstant())) {
+						&& parsedLicenseType == LicenseType.TRY_AND_BUY && Instant.now()
+							.isBefore(demoExpireation.toInstant())) {
 
-					this.licenseStatus = LicenseStatus.TRIAL_HW_ID_FAILURE;
+					this.licenseStatus = LicenseStatus.FREE_HW_ID_FAILURE;
 					this.licenseType = LicenseType.TRY_AND_BUY;
 				} else {
 					// otherwise, just keep the parsed license type/status.

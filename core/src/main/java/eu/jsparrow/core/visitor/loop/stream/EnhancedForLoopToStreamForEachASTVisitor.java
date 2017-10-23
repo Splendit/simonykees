@@ -68,8 +68,8 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 			if (approvedStatement != null) {
 
 				/*
-				 * create method invocation java.util.Collection::stream on the expression of
-				 * the enhanced for loop with no parameters
+				 * create method invocation java.util.Collection::stream on the
+				 * expression of the enhanced for loop with no parameters
 				 */
 				Expression expressionCopy = createExpressionForStreamMethodInvocation(expression);
 
@@ -81,17 +81,20 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				}
 
 				/*
-				 * create lambda expression, which will be used as the only parameter of the
-				 * forEach method. The parameter and the body of the enhanced for loop will be
-				 * used for the corresponding parts of the lambda expression.
+				 * create lambda expression, which will be used as the only
+				 * parameter of the forEach method. The parameter and the body
+				 * of the enhanced for loop will be used for the corresponding
+				 * parts of the lambda expression.
 				 */
 				SimpleName parameterNameCopy = (SimpleName) astRewrite.createCopyTarget(parameterName);
-				VariableDeclarationFragment lambdaParameter = astRewrite.getAST().newVariableDeclarationFragment();
+				VariableDeclarationFragment lambdaParameter = astRewrite.getAST()
+					.newVariableDeclarationFragment();
 				lambdaParameter.setName(parameterNameCopy);
-				
+
 				ASTNode statementCopy = astRewrite.createCopyTarget(approvedStatement);
 
-				LambdaExpression lambdaExpression = astRewrite.getAST().newLambdaExpression();
+				LambdaExpression lambdaExpression = astRewrite.getAST()
+					.newLambdaExpression();
 				lambdaExpression.setParentheses(false);
 				ListRewrite lambdaExpressionParameterListRewrite = astRewrite.getListRewrite(lambdaExpression,
 						LambdaExpression.PARAMETERS_PROPERTY);
@@ -99,24 +102,27 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				lambdaExpression.setBody(statementCopy);
 
 				/*
-				 * create method invocation java.util.stream.Stream::forEach on the previously
-				 * created stream method invocation with a single lambda expression as parameter
+				 * create method invocation java.util.stream.Stream::forEach on
+				 * the previously created stream method invocation with a single
+				 * lambda expression as parameter
 				 */
-				SimpleName forEachMethodName = astRewrite.getAST().newSimpleName("forEach"); //$NON-NLS-1$
+				SimpleName forEachMethodName = astRewrite.getAST()
+					.newSimpleName("forEach"); //$NON-NLS-1$
 
-				MethodInvocation forEachMethodInvocation = astRewrite.getAST().newMethodInvocation();
+				MethodInvocation forEachMethodInvocation = astRewrite.getAST()
+					.newMethodInvocation();
 				forEachMethodInvocation.setExpression(expressionCopy);
 				forEachMethodInvocation.setName(forEachMethodName);
 				ListRewrite forEachMethodInvocationArgumentsListRewrite = astRewrite
-						.getListRewrite(forEachMethodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
+					.getListRewrite(forEachMethodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
 				forEachMethodInvocationArgumentsListRewrite.insertFirst(lambdaExpression, null);
 
 				/*
-				 * replace enhanced for loop with newly created forEach method call, wrapped in
-				 * an expression statement
+				 * replace enhanced for loop with newly created forEach method
+				 * call, wrapped in an expression statement
 				 */
 				ExpressionStatement expressionStatement = astRewrite.getAST()
-						.newExpressionStatement(forEachMethodInvocation);
+					.newExpressionStatement(forEachMethodInvocation);
 				astRewrite.replace(enhancedForStatementNode, expressionStatement, null);
 			}
 		}
@@ -204,7 +210,8 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 
 		AST ast = astRewrite.getAST();
 
-		MethodInvocation streamMethodInvocation = astRewrite.getAST().newMethodInvocation();
+		MethodInvocation streamMethodInvocation = astRewrite.getAST()
+			.newMethodInvocation();
 		streamMethodInvocation.setName(ast.newSimpleName(STREAM));
 		streamMethodInvocation.setExpression(expression);
 
@@ -225,8 +232,8 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 	}
 
 	/**
-	 * Makes use of {@link ImportRewrite} to check whether an import statement is
-	 * needed for the given qualified name, and if yes, stores it to the
+	 * Makes use of {@link ImportRewrite} to check whether an import statement
+	 * is needed for the given qualified name, and if yes, stores it to the
 	 * {@link #addImports}.
 	 * 
 	 * @param qualifiedName

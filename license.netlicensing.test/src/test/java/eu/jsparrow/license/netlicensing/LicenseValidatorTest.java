@@ -15,6 +15,7 @@ import eu.jsparrow.license.netlicensing.model.LicenseeModel;
 import eu.jsparrow.license.netlicensing.model.NodeLockedModel;
 import eu.jsparrow.license.netlicensing.model.PersistenceModel;
 import eu.jsparrow.license.netlicensing.model.TryAndBuyModel;
+
 /**
  * Testing License Validator.
  * 
@@ -27,7 +28,8 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 
 	@Before
 	public void clearCache() {
-		ValidationResultCache.getInstance().reset();
+		ValidationResultCache.getInstance()
+			.reset();
 	}
 
 	@Test
@@ -60,11 +62,16 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
 		assertTrue(optPersistedData.isPresent());
 		PersistenceModel persistenceModel = optPersistedData.get();
-		assertEquals(LicenseType.NODE_LOCKED, persistenceModel.getLicenseType().orElse(null));
-		assertEquals(true, persistenceModel.getLastValidationStatus().orElse(false));
-		assertEquals(NODE_LOCKED_LICENSEE_NAME, persistenceModel.getLicenseeName().orElse(null));
-		assertEquals(NODE_LOCKED_LICENSEE_NUMBER, persistenceModel.getLicenseeNumber().orElse(null));
-		assertEquals(true, persistenceModel.getSubscriptionStatus().orElse(false));
+		assertEquals(LicenseType.NODE_LOCKED, persistenceModel.getLicenseType()
+			.orElse(null));
+		assertEquals(true, persistenceModel.getLastValidationStatus()
+			.orElse(false));
+		assertEquals(NODE_LOCKED_LICENSEE_NAME, persistenceModel.getLicenseeName()
+			.orElse(null));
+		assertEquals(NODE_LOCKED_LICENSEE_NUMBER, persistenceModel.getLicenseeNumber()
+			.orElse(null));
+		assertEquals(true, persistenceModel.getSubscriptionStatus()
+			.orElse(false));
 	}
 
 	@Test
@@ -91,18 +98,23 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 				cache.getLicenseName(), ValidationAction.NONE);
 		assertFalse(checker.isValid()); // validation should be false
 		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
-		assertEquals(LicenseStatus.TRIAL_EXPIRED, checker.getLicenseStatus());
+		assertEquals(LicenseStatus.FREE_EXPIRED, checker.getLicenseStatus());
 		assertFalse(checker.getSubscriptionStatus());
 		assertEquals(NODE_LOCKED_LICENSEE_NAME, checker.getLicenseeName());
 		// ... and expecting the validation result to be persisted...
 		Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
 		assertTrue(optPersistedData.isPresent());
 		PersistenceModel persistenceModel = optPersistedData.get();
-		assertEquals(LicenseType.TRY_AND_BUY, persistenceModel.getLicenseType().orElse(null));
-		assertFalse(persistenceModel.getLastValidationStatus().orElse(false));
-		assertEquals(NODE_LOCKED_LICENSEE_NAME, persistenceModel.getLicenseeName().orElse(null));
-		assertEquals(NODE_LOCKED_LICENSEE_NUMBER, persistenceModel.getLicenseeNumber().orElse(null));
-		assertFalse(persistenceModel.getSubscriptionStatus().orElse(false));
+		assertEquals(LicenseType.TRY_AND_BUY, persistenceModel.getLicenseType()
+			.orElse(null));
+		assertFalse(persistenceModel.getLastValidationStatus()
+			.orElse(false));
+		assertEquals(NODE_LOCKED_LICENSEE_NAME, persistenceModel.getLicenseeName()
+			.orElse(null));
+		assertEquals(NODE_LOCKED_LICENSEE_NUMBER, persistenceModel.getLicenseeNumber()
+			.orElse(null));
+		assertFalse(persistenceModel.getSubscriptionStatus()
+			.orElse(false));
 	}
 
 	@Test
@@ -153,13 +165,20 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		Optional<PersistenceModel> optPersistedData = persistenceManager.readPersistedData();
 		assertTrue(optPersistedData.isPresent());
 		PersistenceModel persistenceModel = optPersistedData.get();
-		assertEquals(LicenseType.TRY_AND_BUY, persistenceModel.getLicenseType().orElse(null));
-		assertFalse(persistenceModel.getLastValidationStatus().orElse(false));
-		assertEquals(NODE_LOCKED_LICENSEE_NAME, persistenceModel.getLicenseeName().orElse(null));
-		assertEquals(NODE_LOCKED_LICENSEE_NUMBER, persistenceModel.getLicenseeNumber().orElse(null));
-		assertFalse(persistenceModel.getSubscriptionStatus().orElse(false));
-		assertEquals(LicenseType.NODE_LOCKED, persistenceModel.getLastSuccessLicenseType().orElse(null));
-		assertNotNull(persistenceModel.getLastSuccessTimestamp().orElse(null));
+		assertEquals(LicenseType.TRY_AND_BUY, persistenceModel.getLicenseType()
+			.orElse(null));
+		assertFalse(persistenceModel.getLastValidationStatus()
+			.orElse(false));
+		assertEquals(NODE_LOCKED_LICENSEE_NAME, persistenceModel.getLicenseeName()
+			.orElse(null));
+		assertEquals(NODE_LOCKED_LICENSEE_NUMBER, persistenceModel.getLicenseeNumber()
+			.orElse(null));
+		assertFalse(persistenceModel.getSubscriptionStatus()
+			.orElse(false));
+		assertEquals(LicenseType.NODE_LOCKED, persistenceModel.getLastSuccessLicenseType()
+			.orElse(null));
+		assertNotNull(persistenceModel.getLastSuccessTimestamp()
+			.orElse(null));
 	}
 
 	@Test
@@ -167,7 +186,8 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		// having a licensee with expired demo...
 		ValidationResultCache cache = ValidationResultCache.getInstance();
 		String productNumber = LicenseManager.getProductNumber();
-		TryAndBuyModel tryAndBuy = new TryAndBuyModel(ZonedDateTime.now().minusDays(1), DEMO_EXPIRED_LICENSEE_SECRET);
+		TryAndBuyModel tryAndBuy = new TryAndBuyModel(ZonedDateTime.now()
+			.minusDays(1), DEMO_EXPIRED_LICENSEE_SECRET);
 		LicenseeModel licensee = new LicenseeModel(DEMO_EXPIRED_LICENSEE_NAME, DEMO_EXPIRED_LICENSEE_NUMBER, tryAndBuy,
 				productNumber);
 
@@ -180,10 +200,11 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 		ResponseParser checker = new ResponseParser(cache.getCachedValidationResult(), cache.getValidationTimestamp(),
 				cache.getLicenseName(), ValidationAction.NONE);
 
-		assertEquals(LicenseStatus.TRIAL_EXPIRED, checker.getLicenseStatus());
+		assertEquals(LicenseStatus.FREE_EXPIRED, checker.getLicenseStatus());
 		assertFalse(checker.isValid());
 		assertNotNull(checker.getEvaluationExpiresDate());
-		assertTrue(checker.getEvaluationExpiresDate().isBefore(ZonedDateTime.now()));
+		assertTrue(checker.getEvaluationExpiresDate()
+			.isBefore(ZonedDateTime.now()));
 	}
 
 	@Test

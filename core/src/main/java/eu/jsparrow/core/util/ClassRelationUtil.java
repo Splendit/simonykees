@@ -51,8 +51,10 @@ public class ClassRelationUtil {
 			return false;
 		}
 
-		return findAncestors(iTypeBinding).stream().map(ITypeBinding::getErasure).map(ITypeBinding::getQualifiedName)
-				.anyMatch(fullyQuallifiedTargetnames::contains);
+		return findAncestors(iTypeBinding).stream()
+			.map(ITypeBinding::getErasure)
+			.map(ITypeBinding::getQualifiedName)
+			.anyMatch(fullyQuallifiedTargetnames::contains);
 
 	}
 
@@ -73,7 +75,8 @@ public class ClassRelationUtil {
 			return false;
 		}
 
-		if (registeredITypes.contains(iTypeBinding.getErasure().getQualifiedName())) {
+		if (registeredITypes.contains(iTypeBinding.getErasure()
+			.getQualifiedName())) {
 			return true;
 		}
 
@@ -92,10 +95,10 @@ public class ClassRelationUtil {
 	 *         have the same qualified name.
 	 */
 	public static boolean compareITypeBinding(ITypeBinding[] firstTypeBindings, ITypeBinding[] secondTypeBindings) {
-		if(!compareSizes(firstTypeBindings, secondTypeBindings)) {
+		if (!compareSizes(firstTypeBindings, secondTypeBindings)) {
 			return false;
 		}
-		
+
 		for (int i = 0; i < firstTypeBindings.length; i++) {
 			if (!compareITypeBinding(firstTypeBindings[i], secondTypeBindings[i])) {
 				return false;
@@ -115,26 +118,27 @@ public class ClassRelationUtil {
 
 		return lhsSize == rhsSize;
 	}
-	
-	public static boolean compareBoxedITypeBinding(ITypeBinding[] firstTypeBindings, ITypeBinding[] secondTypeBindings) {
-		if(!compareSizes(firstTypeBindings, secondTypeBindings)) {
+
+	public static boolean compareBoxedITypeBinding(ITypeBinding[] firstTypeBindings,
+			ITypeBinding[] secondTypeBindings) {
+		if (!compareSizes(firstTypeBindings, secondTypeBindings)) {
 			return false;
 		}
-		
-		for(int i = 0; i<firstTypeBindings.length; i++) {
+
+		for (int i = 0; i < firstTypeBindings.length; i++) {
 			ITypeBinding firstType = firstTypeBindings[i];
 			ITypeBinding secondType = secondTypeBindings[i];
-			if(firstType.isPrimitive() || secondType.isPrimitive()) {
+			if (firstType.isPrimitive() || secondType.isPrimitive()) {
 				String firstTypeName = findBoxedTypeOfPrimitive(firstType);
 				String secondTypeName = findBoxedTypeOfPrimitive(secondType);
-				if(!firstTypeName.equals(secondTypeName)) {
+				if (!firstTypeName.equals(secondTypeName)) {
 					return false;
 				}
-			} else if(!compareITypeBinding(firstType, secondType)) {
+			} else if (!compareITypeBinding(firstType, secondType)) {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -207,18 +211,21 @@ public class ClassRelationUtil {
 		List<ITypeBinding> ancestors = findAncestors(typeBinding);
 
 		return ancestors.stream()
-				.flatMap(ancestor -> Arrays.asList(ancestor.getDeclaredFields()).stream()
-						.filter(field -> !Modifier.isPrivate(field.getModifiers())))
-				.map(IVariableBinding::getName).collect(Collectors.toList());
+			.flatMap(ancestor -> Arrays.asList(ancestor.getDeclaredFields())
+				.stream()
+				.filter(field -> !Modifier.isPrivate(field.getModifiers())))
+			.map(IVariableBinding::getName)
+			.collect(Collectors.toList());
 	}
-	
+
 	public static List<IMethodBinding> findInheretedMethods(ITypeBinding typeBinding) {
 		List<ITypeBinding> ancestors = findAncestors(typeBinding);
 
 		return ancestors.stream()
-				.flatMap(ancestor -> Arrays.asList(ancestor.getDeclaredMethods()).stream()
-						.filter(method -> !Modifier.isPrivate(method.getModifiers())))
-				.collect(Collectors.toList());
+			.flatMap(ancestor -> Arrays.asList(ancestor.getDeclaredMethods())
+				.stream()
+				.filter(method -> !Modifier.isPrivate(method.getModifiers())))
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -280,15 +287,15 @@ public class ClassRelationUtil {
 
 		return expressionName;
 	}
-	
+
 	/**
 	 * Checks if a method is overloaded on the i-th parameter (expected to be a
 	 * parameterized type). The search is based on type of the expression of the
-	 * given method invocation, or in the type where the method is declared if 
-	 * the expression of the method invocation is {@code null}. 
+	 * given method invocation, or in the type where the method is declared if
+	 * the expression of the method invocation is {@code null}.
 	 * 
 	 * @param methodInvocation
-	 * 			  a node representing the occurrence of the method invocation
+	 *            a node representing the occurrence of the method invocation
 	 * @param methodBinding
 	 *            a method to be checked for overloading
 	 * @param i
@@ -328,15 +335,16 @@ public class ClassRelationUtil {
 		List<IMethodBinding> methods = new ArrayList<>();
 		methods.addAll(Arrays.asList(declaringClass.getDeclaredMethods()));
 		List<ITypeBinding> ancestors = findAncestors(declaringClass);
-		methods.addAll(
-				ancestors.stream()
-						.flatMap(ancestor -> Arrays.stream(ancestor.getDeclaredMethods())
-								.filter(method -> !Modifier.isPrivate(method.getModifiers())))
-						.collect(Collectors.toList()));
-		return methods.stream().filter(method -> method.getName().equals(methodBinding.getName())
-				&& (method.getParameterTypes().length > i) && method.getParameterTypes()[i].isParameterizedType()
-				&& matchingNonParameterizedTypes(methodBinding.getParameterTypes(), method.getParameterTypes()))
-				.count() > 1;
+		methods.addAll(ancestors.stream()
+			.flatMap(ancestor -> Arrays.stream(ancestor.getDeclaredMethods())
+				.filter(method -> !Modifier.isPrivate(method.getModifiers())))
+			.collect(Collectors.toList()));
+		return methods.stream()
+			.filter(method -> method.getName()
+				.equals(methodBinding.getName()) && (method.getParameterTypes().length > i)
+					&& method.getParameterTypes()[i].isParameterizedType()
+					&& matchingNonParameterizedTypes(methodBinding.getParameterTypes(), method.getParameterTypes()))
+			.count() > 1;
 	}
 
 	/**

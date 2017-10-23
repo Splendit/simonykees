@@ -26,14 +26,9 @@ public class DefaultProfile implements SimonykeesProfile {
 	boolean isBuiltInProfile = true;
 
 	public DefaultProfile() {
-		enabledRulesIds = Arrays.asList(
-				new TryWithResourceRule().getId(),
-				new MultiCatchRule().getId(),
-				new DiamondOperatorRule().getId(),
-				new WhileToForEachRule().getId(),
-				new ForToForEachRule().getId(),
-				new EnhancedForLoopToStreamForEachRule().getId(),
-				new LambdaForEachIfWrapperToFilterRule().getId(),
+		enabledRulesIds = Arrays.asList(new TryWithResourceRule().getId(), new MultiCatchRule().getId(),
+				new DiamondOperatorRule().getId(), new WhileToForEachRule().getId(), new ForToForEachRule().getId(),
+				new EnhancedForLoopToStreamForEachRule().getId(), new LambdaForEachIfWrapperToFilterRule().getId(),
 				new CodeFormatterRule().getId());
 	}
 
@@ -51,7 +46,7 @@ public class DefaultProfile implements SimonykeesProfile {
 	public void setEnabledRulesIds(List<String> enabledRulesIds) {
 		this.enabledRulesIds = enabledRulesIds;
 	}
-	
+
 	@Override
 	public List<String> getEnabledRuleIds() {
 		return enabledRulesIds;

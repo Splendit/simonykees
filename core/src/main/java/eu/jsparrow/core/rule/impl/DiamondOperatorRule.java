@@ -12,7 +12,8 @@ import eu.jsparrow.i18n.Messages;
 /**
  * @see DiamondOperatorASTVisitor
  * 
- * Minimum java version that supports diamond operator is {@value JavaVersion.JAVA_1_7}
+ *      Minimum java version that supports diamond operator is
+ *      {@value JavaVersion.JAVA_1_7}
  * 
  * @author Ardit Ymeri
  * @since 1.0
@@ -21,19 +22,19 @@ import eu.jsparrow.i18n.Messages;
 public class DiamondOperatorRule extends RefactoringRule<DiamondOperatorASTVisitor> {
 
 	private JavaVersion javaVersion;
-	
+
 	public DiamondOperatorRule() {
 		super();
 		this.visitor = DiamondOperatorASTVisitor.class;
 		this.name = Messages.DiamondOperatorRule_name;
 		this.description = Messages.DiamondOperatorRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_7;
 	}
-	
+
 	/**
 	 * Stores java compiler compliance level.
 	 */
@@ -43,7 +44,7 @@ public class DiamondOperatorRule extends RefactoringRule<DiamondOperatorASTVisit
 		javaVersion = PropertyUtil.stringToJavaVersion(compilerCompliance);
 		return true;
 	}
-	
+
 	@Override
 	protected DiamondOperatorASTVisitor visitorFactory() {
 		return new DiamondOperatorASTVisitor(javaVersion);

@@ -23,7 +23,9 @@ public class DiamondOperatorRule {
 
 	private String concatRawTypeList(List objects) {
 		objects.add(new Object());
-		Object val = objects.stream().map(Object::toString).collect(Collectors.joining(", "));
+		Object val = objects.stream()
+			.map(Object::toString)
+			.collect(Collectors.joining(", "));
 		return val.toString();
 	}
 
@@ -32,7 +34,8 @@ public class DiamondOperatorRule {
 	}
 
 	private String concatTypedList(List<String> foo, int i, Map<String, List<String>> map) {
-		return foo.stream().collect(Collectors.joining(","));
+		return foo.stream()
+			.collect(Collectors.joining(","));
 	}
 
 	public void inferListType() {

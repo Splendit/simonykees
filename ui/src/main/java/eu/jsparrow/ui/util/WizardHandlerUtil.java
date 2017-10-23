@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.i18n.Messages;
 
 /**
- * Utility class that handles requests from handlers. 
+ * Utility class that handles requests from handlers.
  * 
  * @author Hannes Schweighofer, Martin Huter
  * @since 0.9
@@ -51,7 +51,8 @@ public class WizardHandlerUtil {
 	 * 
 	 * @param event
 	 *            that is triggered with an UI interaction in eclipse
-	 * @return <b>{@code List<IJavaElement}></b> that are selected with the given <b>{@code event}</b>
+	 * @return <b>{@code List<IJavaElement}></b> that are selected with the
+	 *         given <b>{@code event}</b>
 	 */
 	public static List<IJavaElement> getSelectedJavaElements(ExecutionEvent event) {
 		final String activePartId = HandlerUtil.getActivePartId(event);
@@ -84,21 +85,23 @@ public class WizardHandlerUtil {
 		if (javaElement instanceof ICompilationUnit) {
 			return Collections.singletonList(javaElement);
 		} else {
-			logger.error(NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_editor,
-					javaElement.getClass().getName()));
+			logger.error(
+					NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_editor, javaElement.getClass()
+						.getName()));
 		}
 		return Collections.emptyList();
 	}
 
 	/**
-	 * Returns the list of {@link IJavaElement} from the selected compilation unit, 
-	 * package or project. 
+	 * Returns the list of {@link IJavaElement} from the selected compilation
+	 * unit, package or project.
 	 * 
-	 * @param iStructuredSelection active selection
-	 * @return
-	 * list of {@link IJavaElement}s if the selected structure is a either 
-	 * of: {@link ICompilationUnit}, {@link IPackageFragment}, {@link IPackageFragmentRoot}, {@link IJavaProject}
-	 * or {@link IProject}. Otherwise an empty list.
+	 * @param iStructuredSelection
+	 *            active selection
+	 * @return list of {@link IJavaElement}s if the selected structure is a
+	 *         either of: {@link ICompilationUnit}, {@link IPackageFragment},
+	 *         {@link IPackageFragmentRoot}, {@link IJavaProject} or
+	 *         {@link IProject}. Otherwise an empty list.
 	 */
 	private static List<IJavaElement> getFromExplorer(IStructuredSelection iStructuredSelection) {
 		final List<IJavaElement> javaElements = new ArrayList<>();
@@ -113,8 +116,9 @@ public class WizardHandlerUtil {
 					javaElements.add(JavaCore.create(project));
 				}
 			} else {
-				logger.error(NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_explorer,
-						object.getClass().getName()));
+				logger.error(
+						NLS.bind(Messages.AbstractSimonykeesHandler_error_unexpected_object_explorer, object.getClass()
+							.getName()));
 			}
 		}
 		return javaElements;

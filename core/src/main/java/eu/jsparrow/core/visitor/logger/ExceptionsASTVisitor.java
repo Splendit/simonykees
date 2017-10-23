@@ -33,8 +33,10 @@ class ExceptionsASTVisitor extends ASTVisitor {
 	}
 
 	private void storeIfExceptionType(ITypeBinding typeBinding, ASTNode node) {
-		if (typeBinding != null && (ClassRelationUtil.isContentOfTypes(typeBinding, StandardLoggerASTVisitor.exceptionQualifiedName)
-				|| ClassRelationUtil.isInheritingContentOfTypes(typeBinding, StandardLoggerASTVisitor.exceptionQualifiedName))) {
+		if (typeBinding != null
+				&& (ClassRelationUtil.isContentOfTypes(typeBinding, StandardLoggerASTVisitor.exceptionQualifiedName)
+						|| ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
+								StandardLoggerASTVisitor.exceptionQualifiedName))) {
 			foundExceptions.add(node);
 		}
 	}

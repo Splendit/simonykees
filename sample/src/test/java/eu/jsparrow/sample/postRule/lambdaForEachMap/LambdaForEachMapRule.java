@@ -18,7 +18,8 @@ public class LambdaForEachMapRule {
 		List<String> list = Arrays.asList(input + "non", "non-empty");
 		StringBuilder sb = new StringBuilder();
 		
-		list.stream().map(s -> s.substring(1)).forEach(subString -> sb.append(subString));
+		list.stream()
+			.map(s -> s.substring(1)).forEach(subString -> sb.append(subString));
 		
 		return sb.toString();
 	}
@@ -373,15 +374,16 @@ public class LambdaForEachMapRule {
 	public void unusedVariablesInitializedWithGenericMethod() {
 		StringBuilder sb = new StringBuilder();
 		List<Wrapper> wrappers = new ArrayList<>();
-		wrappers.stream().map(wrapp -> {
-			/*
-			 * The generic method is not used as initializer of the
-			 * mapping variable.
-			 */
-			InnerClass innerClass = wrapp.getInnerClass();
-			String strInnerClass = innerClass.toString();
-			return wrapp.toString() + strInnerClass;
-		}).forEach(toString -> sb.append(toString));
+		wrappers.stream()
+			.map(wrapp -> {
+				/*
+				 * The generic method is not used as initializer of the
+				 * mapping variable.
+				 */
+				InnerClass innerClass = wrapp.getInnerClass();
+				String strInnerClass = innerClass.toString();
+				return wrapp.toString() + strInnerClass;
+			}).forEach(toString -> sb.append(toString));
 	}
 	
 	interface Inner {

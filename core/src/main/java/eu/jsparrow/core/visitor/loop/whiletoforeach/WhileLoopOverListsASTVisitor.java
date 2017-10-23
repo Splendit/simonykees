@@ -16,12 +16,12 @@ import org.eclipse.jdt.core.dom.WhileStatement;
  *
  */
 class WhileLoopOverListsASTVisitor extends WhileLoopIteratingIndexASTVisitor {
-	
-	public WhileLoopOverListsASTVisitor(SimpleName iteratingIndexName, SimpleName iterableNode, WhileStatement whileStatement,
-			Block parentBlock) {
+
+	public WhileLoopOverListsASTVisitor(SimpleName iteratingIndexName, SimpleName iterableNode,
+			WhileStatement whileStatement, Block parentBlock) {
 		super(iteratingIndexName, iterableNode, whileStatement, parentBlock);
 	}
-	
+
 	@Override
 	public boolean visit(SimpleName simpleName) {
 		visitIndexOfIterableGet(simpleName);

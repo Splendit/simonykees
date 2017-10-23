@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -93,11 +94,11 @@ public class JdtUnitFixture {
 	public void setUp() throws Exception {
 		createJavaProject();
 
-		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(project);
-		packageFragment = root.createPackageFragment(PACKAGE_FIXTURE_NAME, false, null);
+		packageFragment = addPackageFragment(PACKAGE_FIXTURE_NAME);
 
-		compilationUnit = packageFragment.createCompilationUnit(FILE_FIXTURE_NAME, "", false, null);
+		compilationUnit = addCompilationUnit(packageFragment, FILE_FIXTURE_NAME);
 
+		@SuppressWarnings("deprecation") // TODO improvement needed, see SIM-878
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setSource(compilationUnit);
 		parser.setResolveBindings(false);
@@ -113,13 +114,16 @@ public class JdtUnitFixture {
 
 		TypeDeclaration td = ast.newTypeDeclaration();
 		td.setInterface(false);
-		td.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD));
+		td.modifiers()
+			.add(ast.newModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD));
 		td.setName(ast.newSimpleName(CLASS_FIXTURE_NAME));
-		astRoot.types().add(td);
+		astRoot.types()
+			.add(td);
 
 		methodDeclaration = ast.newMethodDeclaration();
 		methodDeclaration.setName(ast.newSimpleName(METHOD_FIXTURE_NAME));
-		td.bodyDeclarations().add(methodDeclaration);
+		td.bodyDeclarations()
+			.add(methodDeclaration);
 	}
 
 	/**
@@ -128,8 +132,10 @@ public class JdtUnitFixture {
 	 * @throws Exception
 	 */
 	public void clear() throws Exception {
-		astRoot.imports().clear();
-		methodDeclaration.getBody().delete();
+		astRoot.imports()
+			.clear();
+		methodDeclaration.getBody()
+			.delete();
 
 		saveChanges();
 	}
@@ -153,13 +159,14 @@ public class JdtUnitFixture {
 	public void addImport(String name) throws Exception {
 		ImportDeclaration im = ast.newImportDeclaration();
 		im.setName(ast.newName(name));
-		astRoot.imports().add(im);
+		astRoot.imports()
+			.add(im);
 		this.astRoot = this.saveChanges();
 	}
 
 	/**
-	 * Adds statements to the stub method and saves the compilation unit with
-	 * the changes.
+	 * Adds statements to the stub method and saves the compilation unit with the
+	 * changes.
 	 * 
 	 * @param statements
 	 *            the statements to add separated by semicolons
@@ -186,7 +193,8 @@ public class JdtUnitFixture {
 		Document document = new Document(compilationUnit.getSource());
 		TextEdit res = astRoot.rewrite(document, options);
 		res.apply(document);
-		compilationUnit.getBuffer().setContents(document.get());
+		compilationUnit.getBuffer()
+			.setContents(document.get());
 
 		refreshFixtures();
 		return astRoot;
@@ -212,7 +220,8 @@ public class JdtUnitFixture {
 	private CompilationUnit saveChanges(TextEdit textEdit) throws Exception {
 		Document document = new Document(compilationUnit.getSource());
 		textEdit.apply(document);
-		compilationUnit.getBuffer().setContents(document.get());
+		compilationUnit.getBuffer()
+			.setContents(document.get());
 
 		refreshFixtures();
 		return astRoot;
@@ -220,7 +229,9 @@ public class JdtUnitFixture {
 
 	private void createJavaProject() throws CoreException {
 
-		project = ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_FIXTURE_NAME);
+		project = ResourcesPlugin.getWorkspace()
+			.getRoot()
+			.getProject(PROJECT_FIXTURE_NAME);
 		project.create(null);
 		project.open(null);
 
@@ -238,6 +249,7 @@ public class JdtUnitFixture {
 	}
 
 	private Block createBlockFromString(String string) throws JdtUnitException {
+		@SuppressWarnings("deprecation") // TODO improvement needed, see SIM-878
 		ASTParser astParser = ASTParser.newParser(AST.JLS8);
 		astParser.setSource(string.toCharArray());
 		astParser.setKind(ASTParser.K_STATEMENTS);
@@ -246,13 +258,15 @@ public class JdtUnitFixture {
 			throw new JdtUnitException(String.format("Malformed statements. Failed to parse '%s'.", string));
 		}
 		Block block = (Block) result;
-		if (block.statements().isEmpty()) {
+		if (block.statements()
+			.isEmpty()) {
 			throw new JdtUnitException("Can not create an empty block. There might be syntax errors");
 		}
 		return block;
 	}
 
 	private void refreshFixtures() {
+		@SuppressWarnings("deprecation") // TODO improvement needed, see SIM-878
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setSource(compilationUnit);
 		parser.setResolveBindings(true);
@@ -260,10 +274,29 @@ public class JdtUnitFixture {
 		astRoot = (CompilationUnit) parser.createAST(null);
 		astRoot.recordModifications();
 		ast = astRoot.getAST();
-		TypeDeclaration typeDecl = (TypeDeclaration) astRoot.types().get(0);
+		TypeDeclaration typeDecl = (TypeDeclaration) astRoot.types()
+			.get(0);
 		methodDeclaration = typeDecl.getMethods()[0];
 		astRewrite = ASTRewrite.create(astRoot.getAST());
 		hasChanged = false;
+	}
+
+	public IPackageFragment addPackageFragment(String name) throws JdtUnitException, JavaModelException {
+		if (javaProject == null) {
+			throw new JdtUnitException("Java project is null");
+		}
+
+		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(project);
+		return root.createPackageFragment(name, false, null);
+	}
+
+	public ICompilationUnit addCompilationUnit(IPackageFragment packageFragment, String name)
+			throws JdtUnitException, JavaModelException {
+		if (packageFragment == null) {
+			throw new JdtUnitException("Package fragment is null");
+		}
+		
+		return packageFragment.createCompilationUnit(name, "", false, null);
 	}
 
 	/**

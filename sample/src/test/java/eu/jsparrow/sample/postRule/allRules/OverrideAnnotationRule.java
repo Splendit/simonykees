@@ -143,7 +143,8 @@ class Foo extends OverrideAnnotationRule<String> implements IFoo {
 	}
 
 	enum FooEnum {
-		use, override;
+		use,
+		override;
 
 		@Override
 		public String toString() {

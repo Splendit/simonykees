@@ -106,12 +106,13 @@ public class StandaloneConfig {
 			descriptionGenerated = true;
 		} else {
 			description = workspace
-					.loadProjectDescription(new Path(path + File.separator + Activator.PROJECT_DESCRIPTION_CONSTANT));
+				.loadProjectDescription(new Path(path + File.separator + Activator.PROJECT_DESCRIPTION_CONSTANT));
 		}
 
-		IProject project = workspace.getRoot().getProject(description.getName());
+		IProject project = workspace.getRoot()
+			.getProject(description.getName());
 		project.create(description, new NullProgressMonitor());
-		
+
 		String loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createProject, description.getName());
 		logger.debug(loggerInfo);
 
@@ -245,7 +246,8 @@ public class StandaloneConfig {
 
 	/**
 	 * Getter for IJavaProject
-	 * @return generated IJavaProject 
+	 * 
+	 * @return generated IJavaProject
 	 */
 	public IJavaProject getJavaProject() {
 		return javaProject;

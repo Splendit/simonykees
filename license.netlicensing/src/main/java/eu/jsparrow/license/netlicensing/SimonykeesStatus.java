@@ -30,7 +30,8 @@ public class SimonykeesStatus extends Status {
 	 * Black magic
 	 */
 	private void initCaller() {
-		caller = Thread.currentThread().getStackTrace()[4];
+		caller = Thread.currentThread()
+			.getStackTrace()[4];
 	}
 
 	private String getSeverityLevel() {

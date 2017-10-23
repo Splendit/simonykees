@@ -40,14 +40,21 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 	@Override
 	public void endVisit(CompilationUnit node) {
 
-		addImports.stream().filter(iterator -> !StringUtils.startsWith(iterator, JAVA_LANG_PACKAGE)).forEach(iterator -> {
-			ImportDeclaration newImport = node.getAST().newImportDeclaration();
-			newImport.setName(node.getAST().newName(iterator));
-			if (node.imports().stream().noneMatch(importDeclaration -> (new ASTMatcher())
-					.match((ImportDeclaration) importDeclaration, newImport))) {
-				astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY).insertLast(newImport, null);
-			}
-		});
+		addImports.stream()
+			.filter(iterator -> !StringUtils.startsWith(iterator, JAVA_LANG_PACKAGE))
+			.forEach(iterator -> {
+				ImportDeclaration newImport = node.getAST()
+					.newImportDeclaration();
+				newImport.setName(node.getAST()
+					.newName(iterator));
+				if (node.imports()
+					.stream()
+					.noneMatch(importDeclaration -> (new ASTMatcher()).match((ImportDeclaration) importDeclaration,
+							newImport))) {
+					astRewrite.getListRewrite(node, CompilationUnit.IMPORTS_PROPERTY)
+						.insertLast(newImport, null);
+				}
+			});
 	}
 
 	/**
@@ -75,8 +82,8 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 				AbstractTypeDeclaration.class);
 
 		return newImports.stream()
-				.filter(newImport -> !isInSamePackage(newImport, packageQualifiedName, cuDeclaredTypes))
-				.collect(Collectors.toList());
+			.filter(newImport -> !isInSamePackage(newImport, packageQualifiedName, cuDeclaredTypes))
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -104,12 +111,15 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 			if (suffixComponents.size() > 1) {
 				/*
 				 * It can be the case that the new import candidate points to an
-				 * inner class declared in the same compilation unit.
-				 * Otherwise, the import points either to a type declared in an inner package
-				 * or to an inner class which is not declared in the same compilation unit. 
+				 * inner class declared in the same compilation unit. Otherwise,
+				 * the import points either to a type declared in an inner
+				 * package or to an inner class which is not declared in the
+				 * same compilation unit.
 				 */
-				isInSamePackage = cuDeclaredTypes.stream().map(type -> type.getName().getIdentifier())
-						.anyMatch(name -> name.equals(suffixComponents.get(0)));
+				isInSamePackage = cuDeclaredTypes.stream()
+					.map(type -> type.getName()
+						.getIdentifier())
+					.anyMatch(name -> name.equals(suffixComponents.get(0)));
 			} else {
 				isInSamePackage = true;
 			}
