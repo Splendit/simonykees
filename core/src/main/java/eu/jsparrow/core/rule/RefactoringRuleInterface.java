@@ -11,7 +11,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import eu.jsparrow.core.exception.RefactoringException;
 
 public interface RefactoringRuleInterface {
-	
+
 	public String getName();
 
 	public String getDescription();
@@ -20,7 +20,7 @@ public interface RefactoringRuleInterface {
 
 	public List<Tag> getTags();
 
-	public boolean isEnabled(); 
+	public boolean isEnabled();
 
 	public String getId();
 
@@ -36,5 +36,5 @@ public interface RefactoringRuleInterface {
 	public boolean isSatisfiedJavaVersion();
 
 	public boolean isSatisfiedLibraries();
-	
+
 }

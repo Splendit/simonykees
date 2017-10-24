@@ -18,9 +18,9 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	protected ASTRewrite astRewrite;
-	
+
 	protected List<ASTRewriteVisitorListener> listeners = new ArrayList<>();
-	
+
 	public AbstractASTRewriteASTVisitor() {
 		super();
 	}
@@ -31,6 +31,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	/**
 	 * Gets the {@link ASTRewrite} for this instance.
+	 * 
 	 * @return the ASTRewrite
 	 */
 	public ASTRewrite getASTRewrite() {
@@ -39,40 +40,47 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	/**
 	 * Sets the {@link ASTRewrite} for this instance.
-	 * @param astRewrite astRewrite to set
+	 * 
+	 * @param astRewrite
+	 *            astRewrite to set
 	 */
 	public void setASTRewrite(ASTRewrite astRewrite) {
 		this.astRewrite = astRewrite;
 	}
 
-
 	/**
 	 * Converts a qualified name to a list
-	 * @param fullyQualifiedName the qualified name as string
+	 * 
+	 * @param fullyQualifiedName
+	 *            the qualified name as string
 	 * @return a list of the qualified name
 	 */
 	protected List<String> generateFullyQualifiedNameList(String... fullyQualifiedName) {
 		return Arrays.asList(fullyQualifiedName);
 	}
-	
+
 	/**
 	 * Adds an {@link ASTRewriteVisitorListener}
-	 * @param listener listener to add
+	 * 
+	 * @param listener
+	 *            listener to add
 	 */
 	public void addRewriteListener(ASTRewriteVisitorListener listener) {
 		listeners.add(listener);
 	}
-	
+
 	/**
 	 * Removes a {@link ASTRewriteVisitorListener}
-	 * @param listener listener to remove
+	 * 
+	 * @param listener
+	 *            listener to remove
 	 */
 	public void removeRewriteListener(ASTRewriteVisitorListener listener) {
 		listeners.remove(listener);
 	}
-	
+
 	/**
-	 * Notifies all listeners that a rewrite occurred. 
+	 * Notifies all listeners that a rewrite occurred.
 	 */
 	public void onRewrite() {
 		listeners.forEach(ASTRewriteVisitorListener::update);

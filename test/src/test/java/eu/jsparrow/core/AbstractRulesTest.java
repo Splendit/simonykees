@@ -72,8 +72,8 @@ public abstract class AbstractRulesTest {
 
 	/**
 	 * loads all pairs of Paths for the postRule domain defined by the
-	 * postRuleDirectory to assure that only pairs are loaded that are defined in
-	 * the realm of the postRuleDirectory.
+	 * postRuleDirectory to assure that only pairs are loaded that are defined
+	 * in the realm of the postRuleDirectory.
 	 * 
 	 * @param postRuleDirectory
 	 *            directory of the reference sources
@@ -114,7 +114,8 @@ public abstract class AbstractRulesTest {
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules, true);
 
 		/*
-		 * A default progress monitor implementation, used just for testing purposes
+		 * A default progress monitor implementation, used just for testing
+		 * purposes
 		 */
 		IProgressMonitor monitor = new NullProgressMonitor();
 

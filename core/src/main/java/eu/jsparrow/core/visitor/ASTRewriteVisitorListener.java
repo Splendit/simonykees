@@ -5,8 +5,8 @@ package eu.jsparrow.core.visitor;
  * 
  * @author Hans-Jörg Schrödl
  */
-public interface ASTRewriteVisitorListener {	
-	
+public interface ASTRewriteVisitorListener {
+
 	/**
 	 * Notify of a change.
 	 */

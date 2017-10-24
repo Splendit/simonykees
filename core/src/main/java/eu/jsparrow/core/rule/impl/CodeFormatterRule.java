@@ -72,7 +72,8 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 		DocumentChange documentChange = null;
 
 		if (edit.hasChildren()) {
-			RuleApplicationCount.get(this).update();
+			RuleApplicationCount.get(this)
+				.update();
 			Document document = new Document(workingCopy.getSource());
 			documentChange = RefactoringUtil.generateDocumentChange(CodeFormatterRule.class.getSimpleName(), document,
 					edit.copy());

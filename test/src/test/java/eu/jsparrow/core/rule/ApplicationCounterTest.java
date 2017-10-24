@@ -37,7 +37,7 @@ public class ApplicationCounterTest {
 		int previous = applicationCounter.toInt();
 
 		applicationCounter.update();
-		
+
 		assertEquals(previous + 1, applicationCounter.toInt());
 	}
 

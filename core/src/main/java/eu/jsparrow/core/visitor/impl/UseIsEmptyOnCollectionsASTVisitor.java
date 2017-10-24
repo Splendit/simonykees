@@ -41,13 +41,16 @@ public class UseIsEmptyOnCollectionsASTVisitor extends AbstractASTRewriteASTVisi
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		if (!methodInvocation.arguments().isEmpty()
-				|| ASTNode.INFIX_EXPRESSION != methodInvocation.getParent().getNodeType()
+		if (!methodInvocation.arguments()
+			.isEmpty()
+				|| ASTNode.INFIX_EXPRESSION != methodInvocation.getParent()
+					.getNodeType()
 				|| methodInvocation.getExpression() == null) {
 			return true;
 		}
 		InfixExpression parent = (InfixExpression) methodInvocation.getParent();
-		if (!parent.extendedOperands().isEmpty() || InfixExpression.Operator.EQUALS != parent.getOperator()) {
+		if (!parent.extendedOperands()
+			.isEmpty() || InfixExpression.Operator.EQUALS != parent.getOperator()) {
 			return true;
 		}
 		if (!onStringOrMapType(methodInvocation)) {
@@ -65,7 +68,8 @@ public class UseIsEmptyOnCollectionsASTVisitor extends AbstractASTRewriteASTVisi
 			return true;
 		}
 
-		SimpleName isEmptyMethod = methodInvocation.getAST().newSimpleName("isEmpty"); //$NON-NLS-1$
+		SimpleName isEmptyMethod = methodInvocation.getAST()
+			.newSimpleName("isEmpty"); //$NON-NLS-1$
 		MethodInvocation replaceNode = NodeBuilder.newMethodInvocation(methodInvocation.getAST(),
 				(Expression) astRewrite.createMoveTarget(varExpression), isEmptyMethod);
 		astRewrite.replace(parent, replaceNode, null);
@@ -117,10 +121,16 @@ public class UseIsEmptyOnCollectionsASTVisitor extends AbstractASTRewriteASTVisi
 		List<String> fullyQualifiedStringName = generateFullyQualifiedNameList(STRING_FULLY_QUALIFIED_NAME);
 		List<String> fullyQualifiedDataStuctures = generateFullyQualifiedNameList(COLLECTION_FULLY_QUALIFIED_NAME,
 				MAP_FULLY_QUALIFIED_NAME);
-		boolean isStringType = StringUtils.equals(LENGTH, node.getName().getFullyQualifiedName()) && ClassRelationUtil
-				.isContentOfTypes(node.getExpression().resolveTypeBinding(), fullyQualifiedStringName);
-		boolean isListOrMapType = StringUtils.equals(SIZE, node.getName().getFullyQualifiedName()) && ClassRelationUtil
-				.isContentOfTypes(node.getExpression().resolveTypeBinding(), fullyQualifiedDataStuctures);
+		boolean isStringType = StringUtils.equals(LENGTH, node.getName()
+			.getFullyQualifiedName()) && ClassRelationUtil.isContentOfTypes(
+					node.getExpression()
+						.resolveTypeBinding(),
+					fullyQualifiedStringName);
+		boolean isListOrMapType = StringUtils.equals(SIZE, node.getName()
+			.getFullyQualifiedName()) && ClassRelationUtil.isContentOfTypes(
+					node.getExpression()
+						.resolveTypeBinding(),
+					fullyQualifiedDataStuctures);
 		return isStringType || isListOrMapType;
 	}
 }

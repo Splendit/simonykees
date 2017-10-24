@@ -13,7 +13,8 @@ public class MockTest {
 	public void testMockito() throws Exception {
 		YAMLConfig yamlConfig = Mockito.mock(YAMLConfig.class);
 
-		Mockito.when(yamlConfig.getDefaultProfile()).thenReturn("I'm a profile"); //$NON-NLS-1$
+		Mockito.when(yamlConfig.getDefaultProfile())
+			.thenReturn("I'm a profile"); //$NON-NLS-1$
 
 		assertEquals("I'm a profile", yamlConfig.getDefaultProfile()); //$NON-NLS-1$
 

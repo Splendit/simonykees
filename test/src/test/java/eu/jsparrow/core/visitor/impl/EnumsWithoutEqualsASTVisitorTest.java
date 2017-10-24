@@ -98,7 +98,7 @@ public class EnumsWithoutEqualsASTVisitorTest extends AbstractASTVisitorTest {
 
 		assertFalse(fixture.hasChanged());
 	}
-	
+
 	@Test
 	public void visit_EqualsWithEnumeration_ShouldUpdateListeners() throws Exception {
 		ASTRewriteVisitorListenerStub listener = new ASTRewriteVisitorListenerStub();

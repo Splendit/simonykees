@@ -152,7 +152,7 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 		Block expected = createBlock(String.format(template, "a.equals((Integer)b)"));
 		assertMatch(expected, fixture.getMethodBlock());
 	}
-	
+
 	@Test
 	public void visit_infixWithTypecastOnRightInteger_ShouldUpdateListeners() throws Exception {
 		ASTRewriteVisitorListenerStub listener = new ASTRewriteVisitorListenerStub();
@@ -164,6 +164,5 @@ public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTe
 
 		assertTrue(listener.wasUpdated());
 	}
-	
 
 }

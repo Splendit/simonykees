@@ -38,7 +38,7 @@ public class ArithmeticAssignmentASTVisitorTest extends AbstractASTVisitorTest {
 
 		assertFalse(fixture.hasChanged());
 	}
-	
+
 	@Test
 	public void visit__AssignmentWithAdd_ShouldUpdateListeners() throws Exception {
 		ASTRewriteVisitorListenerStub listener = new ASTRewriteVisitorListenerStub();
@@ -47,7 +47,7 @@ public class ArithmeticAssignmentASTVisitorTest extends AbstractASTVisitorTest {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 
 		fixture.accept(visitor);
-		
+
 		assertTrue(listener.wasUpdated());
 	}
 }

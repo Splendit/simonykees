@@ -14,7 +14,8 @@ import eu.jsparrow.core.rule.RefactoringRuleInterface;
 import eu.jsparrow.core.rule.Tag;
 
 /**
- * This class serves as a dummy for a refactoring rule. Strictly for use in unit tests.
+ * This class serves as a dummy for a refactoring rule. Strictly for use in unit
+ * tests.
  * 
  * @author Hans-Jörg Schrödl
  *

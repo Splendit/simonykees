@@ -99,11 +99,13 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 		}
 
 		// add @Override to methods marked for annotation
-		toBeAnnotated.stream().forEach(method -> {
-			astRewrite.getListRewrite(method, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(
-					NodeBuilder.newMarkerAnnotation(node.getAST(), node.getAST().newName(OVERRIDE_SIMPLE_NAME)), null);
-			onRewrite();
-		});
+		toBeAnnotated.stream()
+			.forEach(method -> {
+				astRewrite.getListRewrite(method, MethodDeclaration.MODIFIERS2_PROPERTY)
+					.insertFirst(NodeBuilder.newMarkerAnnotation(node.getAST(), node.getAST()
+						.newName(OVERRIDE_SIMPLE_NAME)), null);
+				onRewrite();
+			});
 	}
 
 	/**
@@ -132,9 +134,10 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	private List<IMethodBinding> findOverridableAncestorMethods(List<ITypeBinding> ancestors) {
 		List<IMethodBinding> allMethods = new ArrayList<>();
 		ancestors.forEach(ancestor -> {
-			List<IMethodBinding> overridableMethods = Arrays.asList(ancestor.getDeclaredMethods()).stream()
-					.filter(method -> !Modifier.isPrivate(method.getModifiers()) && !method.isConstructor())
-					.collect(Collectors.toList());
+			List<IMethodBinding> overridableMethods = Arrays.asList(ancestor.getDeclaredMethods())
+				.stream()
+				.filter(method -> !Modifier.isPrivate(method.getModifiers()) && !method.isConstructor())
+				.collect(Collectors.toList());
 
 			allMethods.addAll(overridableMethods);
 		});

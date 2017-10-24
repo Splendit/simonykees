@@ -7,8 +7,8 @@ import eu.jsparrow.core.visitor.ASTRewriteVisitorListener;
 
 /**
  * A {@link ASTRewriteVisitorListener} that simply increases a counter when
- * notified. Used in {@link RefactoringRule} in order to count how often
- * a specific rule has been used.
+ * notified. Used in {@link RefactoringRule} in order to count how often a
+ * specific rule has been used.
  * 
  * @author Hans-Jörg Schrödl
  */
@@ -37,10 +37,11 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 	}
 
 	/**
-	 * Returns the application count for a specific rule. If no application counter
-	 * is available for a given rule an new one is created.
+	 * Returns the application count for a specific rule. If no application
+	 * counter is available for a given rule an new one is created.
 	 * 
-	 * @param rule rule to get the application count for
+	 * @param rule
+	 *            rule to get the application count for
 	 * @return the application count for a given rule
 	 */
 	public static RuleApplicationCount get(RefactoringRuleInterface rule) {
@@ -49,7 +50,7 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 		}
 		return applicationCounters.get(rule);
 	}
-	
+
 	/**
 	 * Removes all application counters.
 	 */

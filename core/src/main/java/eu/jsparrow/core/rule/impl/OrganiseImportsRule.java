@@ -72,12 +72,12 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 				true, query);
 		TextEdit edit = importsOperation.createTextEdit(null);
 
-
 		DocumentChange documentChange = null;
 
 		if (!hasAmbiguity[0] && importsOperation.getParseError() == null && edit != null
 				&& !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
-			RuleApplicationCount.get(this).update();
+			RuleApplicationCount.get(this)
+				.update();
 			Document document = new Document(workingCopy.getSource());
 			documentChange = RefactoringUtil.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document,
 					edit.copy());

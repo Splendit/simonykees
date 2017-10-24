@@ -223,7 +223,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 
 								astRewrite.replace(lambdaExpressionNode, ref, null);
 								onRewrite();
-							
+
 							}
 						}
 					}

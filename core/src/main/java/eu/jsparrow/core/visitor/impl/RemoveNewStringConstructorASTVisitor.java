@@ -48,7 +48,8 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTV
 					/**
 					 * new String() resolves to ""
 					 */
-					replacement = node.getAST().newStringLiteral();
+					replacement = node.getAST()
+						.newStringLiteral();
 					arguments = null;
 					break;
 
