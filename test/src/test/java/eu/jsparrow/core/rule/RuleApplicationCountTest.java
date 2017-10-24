@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import eu.jsparrow.dummies.DummyRule;
 
-public class ApplicationCounterTest {
+public class RuleApplicationCountTest {
 
 	private RuleApplicationCount applicationCounter;
 
