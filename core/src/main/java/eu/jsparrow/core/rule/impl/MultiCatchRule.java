@@ -2,7 +2,7 @@ package eu.jsparrow.core.rule.impl;
 
 import org.apache.commons.lang3.JavaVersion;
 
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.visitor.trycatch.MultiCatchASTVisitor;
 import eu.jsparrow.i18n.Messages;
 /** 
@@ -12,7 +12,7 @@ import eu.jsparrow.i18n.Messages;
  * @since 0.9
  *
  */
-public class MultiCatchRule extends AbstractRefactoringRule<MultiCatchASTVisitor> {
+public class MultiCatchRule extends RefactoringRule<MultiCatchASTVisitor> {
 
 	public MultiCatchRule() {
 		super();

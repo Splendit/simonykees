@@ -4,7 +4,7 @@ import org.apache.commons.lang3.JavaVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.visitor.loop.whiletoforeach.WhileToForEachASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -14,7 +14,7 @@ import eu.jsparrow.i18n.Messages;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class WhileToForEachRule extends AbstractRefactoringRule<WhileToForEachASTVisitor> {
+public class WhileToForEachRule extends RefactoringRule<WhileToForEachASTVisitor> {
 	
 	Logger logger = LoggerFactory.getLogger(WhileToForEachASTVisitor.class);
 

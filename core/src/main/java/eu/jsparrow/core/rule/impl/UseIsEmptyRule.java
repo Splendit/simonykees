@@ -2,7 +2,7 @@ package eu.jsparrow.core.rule.impl;
 
 import org.apache.commons.lang3.JavaVersion;
 
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.visitor.impl.UseIsEmptyOnCollectionsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -12,7 +12,7 @@ import eu.jsparrow.i18n.Messages;
  * @author Martin Huter
  * @since 2.1.0
  */
-public class UseIsEmptyRule extends AbstractRefactoringRule<UseIsEmptyOnCollectionsASTVisitor> {
+public class UseIsEmptyRule extends RefactoringRule<UseIsEmptyOnCollectionsASTVisitor> {
 
 	public UseIsEmptyRule() {
 		super();

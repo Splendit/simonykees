@@ -2,7 +2,7 @@ package eu.jsparrow.core.rule.impl;
 
 import org.apache.commons.lang3.JavaVersion;
 
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.visitor.impl.IndexOfToContainsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -12,7 +12,7 @@ import eu.jsparrow.i18n.Messages;
  * @since 2.1.1
  *
  */
-public class IndexOfToContainsRule extends AbstractRefactoringRule<IndexOfToContainsASTVisitor> {
+public class IndexOfToContainsRule extends RefactoringRule<IndexOfToContainsASTVisitor> {
 
 	public IndexOfToContainsRule() {
 		super();

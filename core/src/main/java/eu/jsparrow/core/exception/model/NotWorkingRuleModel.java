@@ -4,10 +4,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import eu.jsparrow.core.refactorer.RefactoringState;
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 
 /**
- * Information we need when reporting that a {@link AbstractRefactoringRule} cannot be
+ * Information we need when reporting that a {@link RefactoringRule} cannot be
  * applied to a {@link RefactoringState}.
  * 
  * @author Ludwig Werzowa

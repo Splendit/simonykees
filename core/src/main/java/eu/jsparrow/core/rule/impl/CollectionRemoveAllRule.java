@@ -2,7 +2,7 @@ package eu.jsparrow.core.rule.impl;
 
 import org.apache.commons.lang3.JavaVersion;
 
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.visitor.impl.CollectionRemoveAllASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -12,7 +12,7 @@ import eu.jsparrow.i18n.Messages;
  * @author Martin Huter
  * @since 0.9.2
  */
-public class CollectionRemoveAllRule extends AbstractRefactoringRule<CollectionRemoveAllASTVisitor> {
+public class CollectionRemoveAllRule extends RefactoringRule<CollectionRemoveAllASTVisitor> {
 
 	public CollectionRemoveAllRule() {
 		super();

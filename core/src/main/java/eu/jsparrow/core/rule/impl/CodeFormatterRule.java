@@ -11,7 +11,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
 
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
@@ -29,7 +29,7 @@ import eu.jsparrow.i18n.Messages;
  * @since 0.9.2
  *
  */
-public class CodeFormatterRule extends AbstractRefactoringRule<AbstractASTRewriteASTVisitor> {
+public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
 
 	public CodeFormatterRule() {
 		this.visitorClass = AbstractASTRewriteASTVisitor.class;

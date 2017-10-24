@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.wizard.Wizard;
 
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -27,7 +27,7 @@ public class ConfigureProfileWizard extends Wizard {
 
 	private String profileId;
 
-	private final List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
+	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
 	public ConfigureProfileWizard(String profileId) {
 		super();
@@ -53,13 +53,13 @@ public class ConfigureProfileWizard extends Wizard {
 		int index = SimonykeesPreferenceManager.getProfiles()
 				.indexOf(SimonykeesPreferenceManager.getProfileFromName(profileId));
 		String name = ((ConfigureProfileSelectRulesWIzardPageModel) model).getName();
-		List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> ruleIds = model.getSelectionAsList();
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ruleIds = model.getSelectionAsList();
 		if (index >= 0) {
 			SimonykeesPreferenceManager.updateProfile(index, name,
-					ruleIds.stream().map(AbstractRefactoringRule::getId).collect(Collectors.toList()));
+					ruleIds.stream().map(RefactoringRule::getId).collect(Collectors.toList()));
 		} else {
 			SimonykeesPreferenceManager.addProfile(name,
-					ruleIds.stream().map(AbstractRefactoringRule::getId).collect(Collectors.toList()));
+					ruleIds.stream().map(RefactoringRule::getId).collect(Collectors.toList()));
 		}
 		return true;
 	}

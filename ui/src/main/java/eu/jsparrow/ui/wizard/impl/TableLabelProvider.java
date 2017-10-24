@@ -4,7 +4,7 @@ import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.ExceptionMessages;
 
@@ -25,7 +25,7 @@ public class TableLabelProvider extends BaseLabelProvider implements ITableLabel
 	@Override
 	public String getColumnText(Object element, int columnIndex) {
 		@SuppressWarnings("unchecked")
-		AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> rule = (AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>) element;
+		RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) element;
 		switch (columnIndex) {
 		case 0:
 			return rule.getName();

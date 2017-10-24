@@ -6,7 +6,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.exception.RefactoringException;
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.visitor.trycatch.TryWithResourceASTVisitor;
 import eu.jsparrow.i18n.Messages;
 /** 
@@ -16,7 +16,7 @@ import eu.jsparrow.i18n.Messages;
  * @since 0.9
  *
  */
-public class TryWithResourceRule extends AbstractRefactoringRule<TryWithResourceASTVisitor> {
+public class TryWithResourceRule extends RefactoringRule<TryWithResourceASTVisitor> {
 
 	public TryWithResourceRule() {
 		super();

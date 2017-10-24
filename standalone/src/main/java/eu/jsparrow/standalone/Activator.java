@@ -25,7 +25,7 @@ import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -85,7 +85,7 @@ public class Activator implements BundleActivator {
 
 		standaloneConfig = new StandaloneConfig(projectName, projectPath);
 
-		List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = getSelectedRulesFromConfig(config,
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = getSelectedRulesFromConfig(config,
 				standaloneConfig.getJavaProject());
 
 		// Create refactoring pipeline and set rules
@@ -162,11 +162,11 @@ public class Activator implements BundleActivator {
 	 * @return a list of rules to be applied on the project
 	 * @throws YAMLConfigException
 	 */
-	private List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRulesFromConfig(YAMLConfig config,
+	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRulesFromConfig(YAMLConfig config,
 			IJavaProject javaProject) throws YAMLConfigException {
-		List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> result  = new LinkedList<>();
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result  = new LinkedList<>();
 
-		List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
 				.getRulesForProject(javaProject, true);
 
 		String defaultProfile = config.getDefaultProfile();
@@ -176,7 +176,7 @@ public class Activator implements BundleActivator {
 						.filter(profile -> profile.getName().equals(defaultProfile)).findFirst();
 
 				if (configProfile.isPresent()) {
-					List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> profileRules = getConfigRules(
+					List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> profileRules = getConfigRules(
 							configProfile.get().getRules());
 
 					result = projectRules.stream().filter(rule -> rule.isEnabled())
@@ -190,10 +190,10 @@ public class Activator implements BundleActivator {
 				throw new YAMLConfigException(exceptionMessage);
 			}
 		} else { // use all rules from config file
-			List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> configSelectedRules = getConfigRules(
+			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> configSelectedRules = getConfigRules(
 					config.getRules());
 
-			result = projectRules.stream().filter(AbstractRefactoringRule::isEnabled)
+			result = projectRules.stream().filter(RefactoringRule::isEnabled)
 					.filter(configSelectedRules::contains).collect(Collectors.toList());
 		}
 
@@ -205,18 +205,18 @@ public class Activator implements BundleActivator {
 	 * 
 	 * @param configRules
 	 *            rule IDs
-	 * @return list of rules ({@link AbstractRefactoringRule})
+	 * @return list of rules ({@link RefactoringRule})
 	 * @throws YAMLConfigException
 	 *             is thrown if a given rule ID does not exist
 	 */
-	private List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> getConfigRules(List<String> configRules)
+	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getConfigRules(List<String> configRules)
 			throws YAMLConfigException {
-		List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules(true);
-		List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> configSelectedRules = new LinkedList<>();
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules(true);
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> configSelectedRules = new LinkedList<>();
 		List<String> nonExistentRules = new LinkedList<>();
 
 		for (String configRule : configRules) {
-			Optional<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> currentRule = rules.stream()
+			Optional<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> currentRule = rules.stream()
 					.filter(rule -> rule.getId().equals(configRule)).findFirst();
 			if (currentRule.isPresent()) {
 				configSelectedRules.add(currentRule.get());

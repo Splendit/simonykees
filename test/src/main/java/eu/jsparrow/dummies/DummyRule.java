@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.exception.RefactoringException;
-import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRuleInterface;
 import eu.jsparrow.core.rule.Tag;
 
 /**
@@ -19,7 +19,7 @@ import eu.jsparrow.core.rule.Tag;
  * @author Hans-Jörg Schrödl
  *
  */
-public class DummyRule implements RefactoringRule {
+public class DummyRule implements RefactoringRuleInterface {
 
 	@Override
 	public String getName() {

@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
@@ -41,7 +41,7 @@ import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * Wizard page which collects all changes on all {@link ICompilationUnit}s made
- * by all {@link AbstractRefactoringRule}s to show preview of all changes
+ * by all {@link RefactoringRule}s to show preview of all changes
  * 
  * @author Andreja Sambolec
  * @since 2.1
@@ -176,7 +176,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		}
 		// adding all elements in table and checking appropriately
 		initialSource.keySet().stream().forEach(entry -> {
-			for (AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : refactoringPipeline.getRules()) {
+			for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : refactoringPipeline.getRules()) {
 				if (!entry.getIgnoredRules().contains(rule) && null != entry.getChangeIfPresent(rule)) {
 					viewer.add(entry);
 					break;

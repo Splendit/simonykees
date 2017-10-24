@@ -4,7 +4,7 @@ import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.util.PropertyUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
@@ -20,7 +20,7 @@ import eu.jsparrow.i18n.Messages;
  * @since 1.0
  *
  */
-public class DiamondOperatorRule extends AbstractRefactoringRule<DiamondOperatorASTVisitor> {
+public class DiamondOperatorRule extends RefactoringRule<DiamondOperatorASTVisitor> {
 
 	private JavaVersion javaVersion;
 	

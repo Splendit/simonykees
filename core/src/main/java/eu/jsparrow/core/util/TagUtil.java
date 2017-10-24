@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.Tag;
 import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
@@ -69,7 +69,7 @@ public class TagUtil {
 	 * Confluence: https://confluence.splendit.loc/display/SIM/Implemented+Rules
 	 */
 	@SuppressWarnings({ "rawtypes", "nls" })
-	public static List<Tag> getTagsForRule(Class<? extends AbstractRefactoringRule> clazz) {
+	public static List<Tag> getTagsForRule(Class<? extends RefactoringRule> clazz) {
 		if (ArithmethicAssignmentRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_4, Tag.READABILITY, Tag.CODING_CONVENTIONS);
 

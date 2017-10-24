@@ -13,14 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.RefactoringException;
-import eu.jsparrow.core.rule.AbstractRefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.ExceptionMessages;
 
 /**
  * Manages the transformation state of one {@link ICompilationUnit} and offers
- * capabilities to apply or undo {@link AbstractRefactoringRule}s, as well as storing
- * the corresponding {@link DocumentChange}s for each {@link AbstractRefactoringRule}.
+ * capabilities to apply or undo {@link RefactoringRule}s, as well as storing
+ * the corresponding {@link DocumentChange}s for each {@link RefactoringRule}.
  * 
  * @author Ludwig Werzowa, Andreja Sambolec
  * @since 1.2
@@ -33,11 +33,11 @@ public class RefactoringState {
 
 	private ICompilationUnit workingCopy;
 
-	private Map<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> initialChanges = new HashMap<>();
+	private Map<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> initialChanges = new HashMap<>();
 
-	private Map<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> changes = new HashMap<>();
+	private Map<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> changes = new HashMap<>();
 
-	private List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> ignoredRules = new ArrayList<>();
+	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ignoredRules = new ArrayList<>();
 
 	public RefactoringState(ICompilationUnit original, ICompilationUnit workingCopy) {
 		super();
@@ -58,15 +58,15 @@ public class RefactoringState {
 	 * Returns a specific {@link DocumentChange} related to one rule.
 	 * 
 	 * @param rules
-	 *            {@link AbstractRefactoringRule} for which {@link DocumentChange}s
+	 *            {@link RefactoringRule} for which {@link DocumentChange}s
 	 *            should be returned
 	 * @return the corresponding {@link DocumentChange} to a rule or null
 	 */
-	public DocumentChange getChangeIfPresent(AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+	public DocumentChange getChangeIfPresent(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		return changes.get(rule);
 	}
 
-	public boolean wasChangeInitialyPresent(AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+	public boolean wasChangeInitialyPresent(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		return initialChanges.containsKey(rule);
 	}
 
@@ -90,11 +90,11 @@ public class RefactoringState {
 	}
 
 	/**
-	 * Applies a given {@link AbstractRefactoringRule}s to the working copy. Changes to
+	 * Applies a given {@link RefactoringRule}s to the working copy. Changes to
 	 * the working copy are <b>not</b> committed yet.
 	 * 
 	 * @param rule
-	 *            {@link AbstractRefactoringRule} to be applied
+	 *            {@link RefactoringRule} to be applied
 	 * @throws JavaModelException
 	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
@@ -103,7 +103,7 @@ public class RefactoringState {
 	 *             not present and the reflective construction fails.
 	 * @throws RefactoringException
 	 */
-	public void addRuleAndGenerateDocumentChanges(AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
+	public void addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
 			boolean initialApply) throws JavaModelException, ReflectiveOperationException, RefactoringException {
 
 		DocumentChange documentChange = rule.applyRule(workingCopy);
@@ -168,7 +168,7 @@ public class RefactoringState {
 	 * 
 	 * @return list of rules that are ignored
 	 */
-	public List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> getIgnoredRules() {
+	public List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getIgnoredRules() {
 		return ignoredRules;
 	}
 
@@ -179,7 +179,7 @@ public class RefactoringState {
 	 * @param rule
 	 *            to be ignored
 	 */
-	public void addRuleToIgnoredRules(AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+	public void addRuleToIgnoredRules(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		ignoredRules.add(rule);
 		changes.put(rule, null);
 	}
@@ -191,7 +191,7 @@ public class RefactoringState {
 	 * @param rule
 	 *            to be removed from ignored rules
 	 */
-	public void removeRuleFromIgnoredRules(AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+	public void removeRuleFromIgnoredRules(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		if (ignoredRules.contains(rule)) {
 			ignoredRules.remove(rule);
 		}

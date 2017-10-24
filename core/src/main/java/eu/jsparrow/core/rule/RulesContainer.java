@@ -69,11 +69,11 @@ public class RulesContainer {
 	 * certain order. The execution order of each rule is determined by the
 	 * position of each rule in this {@link List}.
 	 * 
-	 * @return a List of {@link AbstractRefactoringRule} with all used Rules is
+	 * @return a List of {@link RefactoringRule} with all used Rules is
 	 *         returned.
 	 */
-	public static List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules(boolean isStandalone) {
-		List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = new LinkedList<>();
+	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules(boolean isStandalone) {
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = new LinkedList<>();
 		rules.addAll(Arrays.asList(
 				/*
 				 * Coding conventions
@@ -139,9 +139,9 @@ public class RulesContainer {
 		return rules;
 	}
 
-	public static List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> getRulesForProject(
+	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getRulesForProject(
 			IJavaProject selectedJavaProjekt, boolean isStandalone) {
-		List<AbstractRefactoringRule<? extends AbstractASTRewriteASTVisitor>> result = getAllRules(isStandalone);
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result = getAllRules(isStandalone);
 		result.stream().forEach(rule -> rule.calculateEnabledForProject(selectedJavaProjekt));
 		return result;
 	}

@@ -1,0 +1,40 @@
+package eu.jsparrow.core.rule;
+
+import java.util.List;
+
+import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
+
+import eu.jsparrow.core.exception.RefactoringException;
+
+public interface RefactoringRuleInterface {
+	
+	public String getName();
+
+	public String getDescription();
+
+	public JavaVersion getRequiredJavaVersion();
+
+	public List<Tag> getTags();
+
+	public boolean isEnabled(); 
+
+	public String getId();
+
+	public void calculateEnabledForProject(IJavaProject project);
+
+	public boolean ruleSpecificImplementation(IJavaProject project);
+
+	public DocumentChange applyRule(ICompilationUnit workingCopy)
+			throws ReflectiveOperationException, JavaModelException, RefactoringException;
+
+	public String requiredLibraries();
+
+	public boolean isSatisfiedJavaVersion();
+
+	public boolean isSatisfiedLibraries();
+	
+}
