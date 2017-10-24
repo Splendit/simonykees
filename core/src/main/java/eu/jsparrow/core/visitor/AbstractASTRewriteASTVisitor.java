@@ -82,7 +82,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	/**
 	 * Notifies all listeners that a rewrite occurred.
 	 */
-	public void onRewrite() {
+	protected void onRewrite() {
 		listeners.forEach(ASTRewriteVisitorListener::update);
 	}
 
