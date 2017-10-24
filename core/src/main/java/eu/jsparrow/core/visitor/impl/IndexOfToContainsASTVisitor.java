@@ -131,7 +131,6 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 						convertToContains(methodInvocationNode, TransformationType.STRING);
 					} else if (isCollectionType(methodInvocationExpression)) {
 						convertToContains(methodInvocationNode, TransformationType.COLLECTION);
-						onRewrite();
 					}
 				}
 			}
