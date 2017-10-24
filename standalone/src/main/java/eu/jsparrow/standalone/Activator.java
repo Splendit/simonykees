@@ -62,7 +62,7 @@ public class Activator implements BundleActivator {
 		logger.info(Messages.Activator_start);
 
 		String configFilePath = context.getProperty(CONFIG_FILE_PATH);
-
+		
 		String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
 		logger.info(loggerInfo);
 
@@ -70,7 +70,7 @@ public class Activator implements BundleActivator {
 		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, profile);
 		logger.info(loggerInfo);
 
-		YAMLConfig config = readConfig(configFilePath, profile);
+		YAMLConfig config = YAMLConfigUtil.readConfig(configFilePath, profile);
 
 		// get project path and name from context
 		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
@@ -85,14 +85,17 @@ public class Activator implements BundleActivator {
 
 		standaloneConfig = new StandaloneConfig(projectName, projectPath);
 
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = getSelectedRulesFromConfig(config,
-				standaloneConfig.getJavaProject());
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
+				.getRulesForProject(standaloneConfig.getJavaProject(), true);
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
+		if(selectedRules == null) {
+			selectedRules = new LinkedList<>();
+		}
 
 		// Create refactoring pipeline and set rules
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 		refactoringPipeline.setRules(selectedRules);
-		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
-				selectedRules.toString());
+		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(), selectedRules.toString());
 		logger.info(loggerInfo);
 
 		logger.info(Messages.Activator_debug_collectCompilationUnits);
@@ -102,8 +105,7 @@ public class Activator implements BundleActivator {
 
 		logger.debug(Messages.Activator_debug_createRefactoringStates);
 		refactoringPipeline.createRefactoringStates(compUnits);
-		loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates, refactoringPipeline.getRefactoringStates()
-			.size());
+		loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates, refactoringPipeline.getRefactoringStates().size());
 		logger.debug(loggerInfo);
 
 		// Do refactoring
@@ -143,170 +145,5 @@ public class Activator implements BundleActivator {
 		}
 
 		logger.info(Messages.Activator_stop);
-	}
-
-	/**
-	 * this method selects the rules to be applied. for all rules it will be
-	 * checked if they are available in general and for the current project. if
-	 * a rule does not meet the criteria, it will be filtered.
-	 * 
-	 * <ul>
-	 * <li>the defaultProfile is checked and if it exists its rules will be
-	 * used</li>
-	 * <li>if no defaultProfile is set the rules in the rules-section of the
-	 * configuration file will be used</li>
-	 * <li>if the given defaultProfile is not specified or a selected rule does
-	 * not exist a {@link YAMLConfigException} will be thrown</li>
-	 * </ul>
-	 * 
-	 * @param config
-	 *            configuration
-	 * @param javaProject
-	 *            the current {@link IJavaElement}
-	 * @return a list of rules to be applied on the project
-	 * @throws YAMLConfigException
-	 */
-	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRulesFromConfig(YAMLConfig config,
-			IJavaProject javaProject) throws YAMLConfigException {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result = new LinkedList<>();
-
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
-			.getRulesForProject(javaProject, true);
-
-		String defaultProfile = config.getDefaultProfile();
-		if (defaultProfile != null && !defaultProfile.isEmpty()) {
-			if (checkProfileExistence(config, defaultProfile)) {
-				Optional<YAMLProfile> configProfile = config.getProfiles()
-					.stream()
-					.filter(profile -> profile.getName()
-						.equals(defaultProfile))
-					.findFirst();
-
-				if (configProfile.isPresent()) {
-					List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> profileRules = getConfigRules(
-							configProfile.get()
-								.getRules());
-
-					result = projectRules.stream()
-						.filter(rule -> rule.isEnabled())
-						.filter(profileRules::contains)
-						.collect(Collectors.toList());
-				} else {
-					String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
-							defaultProfile);
-					throw new YAMLConfigException(exceptionMessage);
-				}
-			} else {
-				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
-						defaultProfile);
-				throw new YAMLConfigException(exceptionMessage);
-			}
-		} else { // use all rules from config file
-			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> configSelectedRules = getConfigRules(
-					config.getRules());
-
-			result = projectRules.stream()
-				.filter(RefactoringRule::isEnabled)
-				.filter(configSelectedRules::contains)
-				.collect(Collectors.toList());
-		}
-
-		return result;
-	}
-
-	/**
-	 * this method takes a list of rule IDs and produces a list of rules
-	 * 
-	 * @param configRules
-	 *            rule IDs
-	 * @return list of rules ({@link RefactoringRule})
-	 * @throws YAMLConfigException
-	 *             is thrown if a given rule ID does not exist
-	 */
-	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getConfigRules(List<String> configRules)
-			throws YAMLConfigException {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules(true);
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> configSelectedRules = new LinkedList<>();
-		List<String> nonExistentRules = new LinkedList<>();
-
-		for (String configRule : configRules) {
-			Optional<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> currentRule = rules.stream()
-				.filter(rule -> rule.getId()
-					.equals(configRule))
-				.findFirst();
-			if (currentRule.isPresent()) {
-				configSelectedRules.add(currentRule.get());
-			} else {
-				nonExistentRules.add(configRule);
-			}
-		}
-
-		if (!nonExistentRules.isEmpty()) {
-			String exceptionMessage = NLS.bind(Messages.Activator_standalone_RulesDoNotExist,
-					nonExistentRules.toString());
-			throw new YAMLConfigException(exceptionMessage);
-		}
-
-		return configSelectedRules;
-	}
-
-	/**
-	 * reads the configuration file and modifies it according to maven flags. if
-	 * no configuration file is specified the default configuration will be
-	 * used. if a profile is chosen via maven flags there is a check if the
-	 * profile exists.
-	 * 
-	 * @param configFilePath
-	 *            path to the configuration file
-	 * @param profile
-	 *            selected profile
-	 * @return jsparrow configuration
-	 * @throws YAMLConfigException
-	 *             if an error occurs during loading of the file or if the
-	 *             profile does not exist
-	 */
-	private YAMLConfig readConfig(String configFilePath, String profile) throws YAMLConfigException {
-		YAMLConfig config = null;
-		if (configFilePath != null && !configFilePath.isEmpty()) {
-			File configFile = new File(configFilePath);
-			if (configFile.exists() && !configFile.isDirectory()) {
-				config = YAMLConfigUtil.loadConfiguration(configFile);
-				String loggerInfo = NLS.bind(Messages.Activator_standalone_ConfigFileReadSuccessfully, configFilePath);
-				logger.info(loggerInfo);
-				logger.debug(config.toString());
-			}
-		}
-
-		if (config == null) {
-			config = YAMLConfig.getDefaultConfig();
-			logger.warn(Messages.Activator_standalone_UsingDefaultConfiguration);
-		}
-
-		if (profile != null && !profile.isEmpty()) {
-			if (checkProfileExistence(config, profile)) {
-				config.setDefaultProfile(profile);
-			} else {
-				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, profile);
-				throw new YAMLConfigException(exceptionMessage);
-			}
-		}
-
-		return config;
-	}
-
-	/**
-	 * checks if the given profile exists in the configuration
-	 * 
-	 * @param config
-	 *            jsparrow configuration
-	 * @param profile
-	 *            selected profile
-	 * @return true, if the profile exists, false otherwise
-	 */
-	private boolean checkProfileExistence(YAMLConfig config, String profile) {
-		return config.getProfiles()
-			.stream()
-			.anyMatch(configProfile -> configProfile.getName()
-				.equals(profile));
 	}
 }

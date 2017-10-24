@@ -22,22 +22,18 @@ public class YAMLConfig {
 	 */
 	private List<YAMLProfile> profiles;
 
-	/**
-	 * default profile specifies a profile from the {@link YAMLConfig#profiles}
-	 * list which gets executed by default
-	 */
-	private String defaultProfile;
+	private String selectedProfile;
 
 	public YAMLConfig() {
 		this.rules = new LinkedList<>();
 		this.profiles = new LinkedList<>();
-		this.defaultProfile = ""; //$NON-NLS-1$
+		this.selectedProfile = ""; //$NON-NLS-1$
 	}
 
 	public YAMLConfig(List<String> rules, List<YAMLProfile> profiles, String defaultProfile) {
 		this.rules = rules;
 		this.profiles = profiles;
-		this.defaultProfile = defaultProfile;
+		this.selectedProfile = defaultProfile;
 	}
 
 	/**
@@ -65,11 +61,15 @@ public class YAMLConfig {
 		config.getProfiles()
 			.add(profile);
 
-		config.setDefaultProfile("default"); //$NON-NLS-1$
+		config.setSelectedProfile("default"); //$NON-NLS-1$
 
 		return config;
 	}
 
+	/**
+	 * this list holds all IDs of rules which should be executed if no default
+	 * profile has been specified
+	 */
 	public List<String> getRules() {
 		return rules;
 	}
@@ -78,6 +78,9 @@ public class YAMLConfig {
 		this.rules = rules;
 	}
 
+	/**
+	 * this list holds all specified profiles (see {@link YAMLProfile}
+	 */
 	public List<YAMLProfile> getProfiles() {
 		return profiles;
 	}
@@ -86,18 +89,22 @@ public class YAMLConfig {
 		this.profiles = profiles;
 	}
 
-	public String getDefaultProfile() {
-		return defaultProfile;
+	/**
+	 * default profile specifies a profile from the {@link YAMLConfig#profiles}
+	 * list which gets executed by default
+	 */
+	public String getSelectedProfile() {
+		return selectedProfile;
 	}
 
-	public void setDefaultProfile(String defaultProfile) {
-		this.defaultProfile = defaultProfile;
+	public void setSelectedProfile(String defaultProfile) {
+		this.selectedProfile = defaultProfile;
 	}
 
 	@SuppressWarnings("nls")
 	@Override
 	public String toString() {
-		return "YAMLConfig [rules=" + rules + ", profiles=" + profiles + ", defaultProfile=" + defaultProfile + "]";
+		return "YAMLConfig [rules=" + rules + ", profiles=" + profiles + ", defaultProfile=" + selectedProfile + "]";
 	}
 
 }

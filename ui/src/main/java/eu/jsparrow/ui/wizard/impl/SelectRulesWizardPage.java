@@ -1,7 +1,7 @@
 
 package eu.jsparrow.ui.wizard.impl;
 
-import java.util.List;
+import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
@@ -40,8 +40,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private Composite filterComposite;
 
-	private final String emptyProfil = Messages.SelectRulesWizardPage_EmptyProfileLabel;
-	private final String customProfile = Messages.SelectRulesWizardPage_CustomProfileLabel;
+	private static final String CUSTOM_PROFILE = Messages.SelectRulesWizardPage_CustomProfileLabel;
 
 	private Label selectProfileLabel;
 	private Combo selectProfileCombo;
@@ -62,9 +61,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	}
 
 	/**
-	 * Creates filtering part of the wizard view which contains label and combo
-	 * for filtering by group, label and text field for filtering by group and
-	 * check box button to show or hide disabled rules
+	 * Creates filtering part of the wizard view which contains label and combo for
+	 * filtering by group, label and text field for filtering by group and check box
+	 * button to show or hide disabled rules
 	 * 
 	 * @param parent
 	 */
@@ -98,8 +97,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		nameFilterText.setLayoutData(gridData);
 		nameFilterText.addModifyListener((ModifyEvent e) -> {
 			Text source = (Text) e.getSource();
-			((SelectRulesWizardPageControler) controler).nameFilterTextChanged(StringUtils.lowerCase(source.getText()
-				.trim()));
+			((SelectRulesWizardPageControler) controler)
+					.nameFilterTextChanged(StringUtils.lowerCase(source.getText().trim()));
 		});
 		// following doesn't work under Windows7
 		nameFilterText.addSelectionListener(new SelectionAdapter() {
@@ -110,10 +109,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 					text.setText(Messages.SelectRulesWizardPage_emptyString);
 				} else if (e.detail == SWT.ICON_SEARCH) {
 					Text text = (Text) e.getSource();
-					String input = StringUtils.lowerCase(text.getText()
-						.trim());
-					if (!StringUtils.isEmpty(input) && !((SelectRulesWizardPageModel) model).getAppliedTags()
-						.contains(input)) {
+					String input = StringUtils.lowerCase(text.getText().trim());
+					if (!StringUtils.isEmpty(input)
+							&& !((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
 						((SelectRulesWizardPageControler) controler).searchPressed(input);
 						addTagInComposite(input);
 						nameFilterText.setText(""); //$NON-NLS-1$
@@ -128,10 +126,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR) {
-					String input = StringUtils.lowerCase(((Text) e.getSource()).getText()
-						.trim());
-					if (!StringUtils.isEmpty(input) && !((SelectRulesWizardPageModel) model).getAppliedTags()
-						.contains(input)) {
+					String input = StringUtils.lowerCase(((Text) e.getSource()).getText().trim());
+					if (!StringUtils.isEmpty(input)
+							&& !((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
 						((SelectRulesWizardPageControler) controler).searchPressed(input);
 						addTagInComposite(input);
 						nameFilterText.setText(""); //$NON-NLS-1$
@@ -180,10 +177,10 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 * group
 	 */
 	private void populateGroupFilterCombo() {
-		List<String> profiles = SimonykeesPreferenceManager.getAllProfileIds();
-		selectProfileCombo.add(customProfile);
-		selectProfileCombo.add(emptyProfil);
-		profiles.forEach(selectProfileCombo::add);
+		SimonykeesPreferenceManager.getAllProfileIds().stream().map(SimonykeesPreferenceManager::getProfileFromName)
+				.map(profile -> profile.getProfileName()
+						+ (profile.isBuiltInProfile() ? Messages.SimonykeesPreferencePage_profilesBuiltInSuffix : "")) //$NON-NLS-1$
+				.forEach(selectProfileCombo::add);
 	}
 
 	/**
@@ -191,13 +188,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 * preferences or to currently selected profile otherwise
 	 */
 	private void initializeGroupFilterCombo() {
-		if (SimonykeesPreferenceManager.useProfile()) {
-			selectProfileCombo.select(selectProfileCombo.indexOf(SimonykeesPreferenceManager.getCurrentProfileId()));
-			((SelectRulesWizardPageControler) controler)
-				.profileChanged(SimonykeesPreferenceManager.getCurrentProfileId());
-		} else {
-			selectProfileCombo.select(selectProfileCombo.indexOf(emptyProfil));
-		}
+		selectProfileCombo.select(SimonykeesPreferenceManager.getAllProfileIds()
+				.indexOf(SimonykeesPreferenceManager.getCurrentProfileId()));
+		((SelectRulesWizardPageControler) controler).profileChanged(SimonykeesPreferenceManager.getCurrentProfileId());
 	}
 
 	/**
@@ -211,12 +204,16 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String selectedProfileId = selectProfileCombo.getItem(selectProfileCombo.getSelectionIndex());
-				if (!selectedProfileId.equals(customProfile)) {
+				String selectedProfileId = SimonykeesPreferenceManager.getAllProfileIds()
+						.get(selectProfileCombo.getSelectionIndex());
+
+				if (!selectedProfileId.equals(CUSTOM_PROFILE)) {
+					if (Arrays.asList(selectProfileCombo.getItems()).contains(CUSTOM_PROFILE)) {
+						selectProfileCombo.remove(CUSTOM_PROFILE);
+					}
 					if (update) {
 						nameFilterText.setText(""); //$NON-NLS-1$
-						((SelectRulesWizardPageModel) model).getAppliedTags()
-							.clear();
+						((SelectRulesWizardPageModel) model).getAppliedTags().clear();
 						removeAllTagButtons();
 						((SelectRulesWizardPageControler) controler).profileChanged(selectedProfileId);
 					} else {
@@ -287,7 +284,10 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	}
 
 	private void selectCustomProfile() {
-		selectProfileCombo.select(selectProfileCombo.indexOf(Messages.SelectRulesWizardPage_CustomProfileLabel));
+		if (!Arrays.asList(selectProfileCombo.getItems()).contains(CUSTOM_PROFILE)) {
+			selectProfileCombo.add(CUSTOM_PROFILE);
+		}
+		selectProfileCombo.select(selectProfileCombo.indexOf(CUSTOM_PROFILE));
 	}
 
 	private void addChangeListeners() {
