@@ -2,11 +2,11 @@ package at.splendit.simonykees.core.ui.wizard.semiautomatic;
 
 import java.util.List;
 
-public class RenameFieldsRuleWizardPageControler {
+public class ConfigureRenameFieldsRuleWizardPageControler {
 
-	private RenameFieldsRuleWizardPageModel model;
+	private ConfigureRenameFieldsRuleWizardPageModel model;
 	
-	public RenameFieldsRuleWizardPageControler(RenameFieldsRuleWizardPageModel model) {
+	public ConfigureRenameFieldsRuleWizardPageControler(ConfigureRenameFieldsRuleWizardPageModel model) {
 		this.model = model;
 	}
 

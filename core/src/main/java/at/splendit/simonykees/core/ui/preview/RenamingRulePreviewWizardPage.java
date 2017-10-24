@@ -1,11 +1,17 @@
 package at.splendit.simonykees.core.ui.preview;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
@@ -16,21 +22,26 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import at.splendit.simonykees.core.rule.impl.PublicFieldsRenamingRule;
+import at.splendit.simonykees.core.util.RefactoringUtil;
+import at.splendit.simonykees.core.visitor.renaming.FieldMetadata;
 
 @SuppressWarnings("restriction")
 public class RenamingRulePreviewWizardPage extends WizardPage {
 
-	Map<String, List<DocumentChange>> changes;
+	Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes;
 
 	private CheckboxTreeViewer viewer;
 	private IChangePreviewViewer currentPreviewViewer;
-	
+
 	private List<DocumentChangeWrapper> changesWrapperList;
 	private DocumentChangeWrapper selectedDocWrapper;
 
-	public RenamingRulePreviewWizardPage(Map<String, List<DocumentChange>> changes, PublicFieldsRenamingRule rule) {
+	public RenamingRulePreviewWizardPage(Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes,
+			PublicFieldsRenamingRule rule) {
 		super(rule.getName());
 		setTitle(rule.getName());
 		setDescription(rule.getDescription());
@@ -42,21 +53,42 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 
 	private void convertChangesToDocumentChangeWrappers() {
 		changesWrapperList = new ArrayList<>();
-		for (Map.Entry<String, List<DocumentChange>> entry : changes.entrySet()) {
-			String declaration = entry.getKey();
-			List<DocumentChange> changesForField = changes.get(declaration);
-			DocumentChange parent = null;
-			parent = changesForField.get(0);
-			DocumentChangeWrapper dcw = new DocumentChangeWrapper(parent, null);
-			for (int i = 1; i<changesForField.size(); i++) {
-				DocumentChange document = changesForField.get(i);
-				dcw.addChild(document);
-				
+		for (Map.Entry<FieldMetadata, Map<ICompilationUnit, DocumentChange>> entry : changes.entrySet()) {
+			FieldMetadata fieldData = entry.getKey();
+			Map<ICompilationUnit, DocumentChange> changesForField = changes.get(fieldData);
+			if (!changesForField.isEmpty()) {
+				DocumentChange parent = null;
+				for (ICompilationUnit iCompilationUnit : changesForField.keySet()) {
+					if (((ICompilationUnit) fieldData.getCompilationUnit().getJavaElement())
+							.equals(iCompilationUnit.getPrimary())) {
+						parent = changesForField.get(iCompilationUnit);
+					}
+				}
+				if (null != parent) {
+					DocumentChangeWrapper dcw;
+					try {
+						dcw = new DocumentChangeWrapper(parent, null,
+								fieldData.getFieldDeclaration().getName().getIdentifier(), fieldData.getNewIdentifier(),
+								fieldData.getCompilationUnit().getJavaElement().getElementName(),
+								((ICompilationUnit) fieldData.getCompilationUnit().getJavaElement()).getSource());
+						for (ICompilationUnit iCompilationUnit : changesForField.keySet()) {
+							if (!((ICompilationUnit) fieldData.getCompilationUnit().getJavaElement())
+									.equals(iCompilationUnit.getPrimary())) {
+								DocumentChange document = changesForField.get(iCompilationUnit);
+								dcw.addChild(document, iCompilationUnit.getElementName(), iCompilationUnit.getSource());
+							}
+
+						}
+
+						changesWrapperList.add(dcw);
+					} catch (JavaModelException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
-			
-			changesWrapperList.add(dcw);
 		}
-		if(!changesWrapperList.isEmpty()) {
+		if (!changesWrapperList.isEmpty()) {
 			this.selectedDocWrapper = changesWrapperList.get(0);
 		}
 	}
@@ -93,20 +125,25 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
 		viewer.setContentProvider(new ChangeElementContentProvider());
 		viewer.setLabelProvider(new ChangeElementLabelProvider());
-		viewer.setInput("root"); // pass a non-null that will be ignored
+		viewer.setInput("root"); // pass a non-null that will be //$NON-NLS-1$
+									// ignored
 
-		// When user checks a checkbox in the tree, check all its children
+		/*
+		 * When checkbox state changes, set same for parent, if element it self
+		 * isn't parent, and all it's children
+		 */
 		viewer.addCheckStateListener(event -> {
-			// If the item is checked . . .
-			if (event.getChecked()) {
-				// . . . check all its children
-				viewer.setSubtreeChecked(event.getElement(), true);
+			if (null == ((DocumentChangeWrapper) event.getElement()).getParent()) {
+				viewer.setSubtreeChecked(event.getElement(), event.getChecked());
+			} else {
+				viewer.setSubtreeChecked(((DocumentChangeWrapper) event.getElement()).getParent(), event.getChecked());
 			}
+			populatePreviewViewer();
 		});
-		
+
 		viewer.addSelectionChangedListener(event -> {
 			IStructuredSelection sel = (IStructuredSelection) event.getSelection();
-			if(sel.size() == 1) {
+			if (sel.size() == 1) {
 				DocumentChangeWrapper newSelection = (DocumentChangeWrapper) sel.getFirstElement();
 				if (!newSelection.equals(selectedDocWrapper)) {
 					selectedDocWrapper = newSelection;
@@ -114,13 +151,24 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 				}
 			}
 		});
-		
+
+		viewer.setComparator(new ViewerComparator() {
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				return ((DocumentChangeWrapper) e1).getOldIdentifier()
+						.compareTo(((DocumentChangeWrapper) e2).getOldIdentifier());
+			}
+		});
+
 		populateFileView();
 	}
 
 	private void populateFileView() {
-		DocumentChangeWrapper[] changesArray = changesWrapperList.toArray(new DocumentChangeWrapper[]{});
+		DocumentChangeWrapper[] changesArray = changesWrapperList.toArray(new DocumentChangeWrapper[] {});
 		viewer.setInput(changesArray);
+		Arrays.asList(changesArray).stream().forEach(change -> {
+			viewer.setSubtreeChecked(change, true);
+		});
 	}
 
 	private void createPreviewViewer(SashForm parent) {
@@ -137,10 +185,24 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 
 	private void populatePreviewViewer() {
 		if (this.selectedDocWrapper != null) {
-			DocumentChange docChange = selectedDocWrapper.getDocumentChange();
-			ChangePreviewViewerInput viewerInput = TextEditChangePreviewViewer.createInput(docChange);
+			ChangePreviewViewerInput viewerInput = TextEditChangePreviewViewer.createInput(getCurrentDocumentChange());
 			currentPreviewViewer.setInput(viewerInput);
 		}
 	}
 
+	private DocumentChange getCurrentDocumentChange() {
+		if (!viewer.getChecked(selectedDocWrapper)) {
+			/*
+			 * When compilation unit is unselected for rule that is shown,
+			 * change preview viewer should show no change. For that generate
+			 * document change is called with empty edit to create document
+			 * change with text type java but with no changes.
+			 */
+			TextEdit edit = new MultiTextEdit();
+			return RefactoringUtil.generateDocumentChange(selectedDocWrapper.getCompilationUnitName(),
+					new Document(selectedDocWrapper.getCompilationUnitSource()), edit);
+		} else {
+			return selectedDocWrapper.getDocumentChange();
+		}
+	}
 }

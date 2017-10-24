@@ -1,6 +1,7 @@
 package at.splendit.simonykees.core.rule.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,9 +33,9 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 
 	private List<FieldMetadata> metaData;
 	private List<FieldMetadata> todosMetaData;
-	
-	public PublicFieldsRenamingRule(Class<PublicFieldsRenamingASTVisitor> visitor,
-			List<FieldMetadata> metaData, List<FieldMetadata> todosMetaData) {
+
+	public PublicFieldsRenamingRule(Class<PublicFieldsRenamingASTVisitor> visitor, List<FieldMetadata> metaData,
+			List<FieldMetadata> todosMetaData) {
 		super(visitor);
 		this.metaData = metaData;
 		this.todosMetaData = todosMetaData;
@@ -51,7 +52,7 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 	public PublicFieldsRenamingASTVisitor visitorFactory() {
 		return new PublicFieldsRenamingASTVisitor(metaData, todosMetaData);
 	}
-	
+
 	/**
 	 * Computes the list of document changes related to the renaming of a field
 	 * represented by the given {@link FieldMetadata}.
@@ -62,9 +63,9 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 	 * @return the list of document changes for all compilation units that are
 	 *         affected by the renaming of the field.
 	 */
-	public List<DocumentChange> computeDocumentChangesPerFiled(FieldMetadata metaData) {
+	public Map<ICompilationUnit, DocumentChange> computeDocumentChangesPerFiled(FieldMetadata metaData) {
 		List<ICompilationUnit> targetCompilationUnits = metaData.getTargetICompilationUnits();
-		List<DocumentChange> documentChanges = new ArrayList<>();
+		Map<ICompilationUnit, DocumentChange> documentChanges = new HashMap<>();
 		for (ICompilationUnit iCompilationUnit : targetCompilationUnits) {
 			TextEditGroup editGroup = metaData.getTextEditGroup(iCompilationUnit);
 			if (!editGroup.isEmpty()) {
@@ -73,7 +74,7 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 				VariableDeclarationFragment oldFragment = metaData.getFieldDeclaration();
 				Document doc = metaData.getDocument(iCompilationUnit);
 				DocumentChange documentChange = new DocumentChange(
-						oldFragment.getName().getIdentifier() + " -> " + newIdentifier, doc); //$NON-NLS-1$
+						iCompilationUnit.getElementName() + " - " + getPathString(iCompilationUnit), doc); //$NON-NLS-1$
 				TextEdit rootEdit = new MultiTextEdit();
 				documentChange.setEdit(rootEdit);
 				int delta = oldFragment.getName().getLength() - newIdentifierLength;
@@ -94,30 +95,44 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 					}
 				});
 				documentChange.setTextType("java"); //$NON-NLS-1$
-				if(metaData.getCompilationUnit().getJavaElement() == iCompilationUnit) {
-					documentChanges.add(0, documentChange);
-				} else {					
-					documentChanges.add(documentChange);
-				}
+//				if (metaData.getCompilationUnit().getJavaElement() == iCompilationUnit) {
+//					documentChanges.add(0, documentChange);
+//				} else {
+//					documentChanges.add(documentChange);
+//				}
+				documentChanges.put(iCompilationUnit, documentChange);
 			}
 		}
 
 		return documentChanges;
 	}
-	
+
 	/**
-	 * Clears all the text edits related to the renaming of a field. 
+	 * Returns the path of an {@link ICompilationUnit} without leading slash
+	 * (the same as in the Externalize Strings refactoring view).
 	 * 
-	 * @param metaData the metadata representing the field being renamed. 
+	 * @param compilationUnit
+	 * @return
+	 */
+	private String getPathString(ICompilationUnit compilationUnit) {
+		String temp = compilationUnit.getParent().getPath().toString();
+		return temp.startsWith("/") ? temp.substring(1) : temp; //$NON-NLS-1$
+	}
+
+	/**
+	 * Clears all the text edits related to the renaming of a field.
+	 * 
+	 * @param metaData
+	 *            the metadata representing the field being renamed.
 	 */
 	public void clearTextEdits(FieldMetadata metaData) {
 		List<ICompilationUnit> targetCompilationUnits = metaData.getTargetICompilationUnits();
-		for(ICompilationUnit iCompilationUnit : targetCompilationUnits) {
+		for (ICompilationUnit iCompilationUnit : targetCompilationUnits) {
 			TextEditGroup editGroup = metaData.getTextEditGroup(iCompilationUnit);
 			editGroup.clearTextEdits();
 		}
 	}
-	
+
 	/**
 	 * Computes the list of the document changes related to the comment nodes
 	 * inserted above the fields that could not be renamed.
@@ -140,7 +155,7 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 				Document document = new Document(iCompilationUnit.getSource());
 				DocumentChange documentChange = new DocumentChange(editGroup.getName(), document);
 				documentChange.setEdit(new MultiTextEdit());
-				for(TextEdit edit : editGroup.getTextEdits()) {
+				for (TextEdit edit : editGroup.getTextEdits()) {
 					documentChange.addEdit(edit.copy());
 				}
 				documentChanges.add(documentChange);

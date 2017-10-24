@@ -9,13 +9,22 @@ public class DocumentChangeWrapper {
 
 	private DocumentChange documentChange;
 	private boolean isParent;
-	private DocumentChange parent;
+	private DocumentChangeWrapper parent;
+	private String oldIdentifier;
+	private String newIdentifier;
+	private String compilationUnitName;
+	private String compilationUnitSource;
 	private List<DocumentChangeWrapper> children = new ArrayList<>();
 
-	public DocumentChangeWrapper(DocumentChange documentChange, DocumentChange parent) {
+	public DocumentChangeWrapper(DocumentChange documentChange, DocumentChangeWrapper parent, String oldIdentifier,
+			String newIdentifier, String compilationUnitName, String compilationUnitSource) {
 		this.documentChange = documentChange;
 		this.parent = parent;
 		this.isParent = null == parent;
+		this.oldIdentifier = oldIdentifier;
+		this.newIdentifier = newIdentifier;
+		this.compilationUnitName = compilationUnitName;
+		this.compilationUnitSource = compilationUnitSource;
 	}
 
 	public DocumentChange getDocumentChange() {
@@ -26,15 +35,32 @@ public class DocumentChangeWrapper {
 		return isParent;
 	}
 
-	public void addChild(DocumentChange child) {
-		this.children.add(new DocumentChangeWrapper(child, documentChange));
+	public void addChild(DocumentChange child, String compilationUnitName, String compilationUnitSource) {
+		this.children.add(new DocumentChangeWrapper(child, this, this.oldIdentifier, this.newIdentifier,
+				compilationUnitName, compilationUnitSource));
 	}
 
 	public DocumentChangeWrapper[] getChildren() {
 		return children.toArray(new DocumentChangeWrapper[] {});
 	}
 
-	public DocumentChange getParent() {
+	public DocumentChangeWrapper getParent() {
 		return parent;
+	}
+
+	public String getOldIdentifier() {
+		return oldIdentifier;
+	}
+
+	public String getNewIdentifier() {
+		return newIdentifier;
+	}
+
+	public String getCompilationUnitName() {
+		return compilationUnitName;
+	}
+	
+	public String getCompilationUnitSource() {
+		return compilationUnitSource;
 	}
 }

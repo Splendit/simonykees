@@ -2,9 +2,9 @@ package at.splendit.simonykees.core.ui.wizard.semiautomatic;
 
 import at.splendit.simonykees.i18n.Messages;
 
-public class RenameFieldsRuleWizardPageConstants {
+public class ConfigureRenameFieldsRuleWizardPageConstants {
 
-	private RenameFieldsRuleWizardPageConstants() {
+	private ConfigureRenameFieldsRuleWizardPageConstants() {
 	}
 
 	// Constants

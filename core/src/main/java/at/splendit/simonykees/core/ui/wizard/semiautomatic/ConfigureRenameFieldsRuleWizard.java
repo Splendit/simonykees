@@ -26,12 +26,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -57,11 +57,11 @@ import at.splendit.simonykees.core.visitor.renaming.PublicFieldsRenamingASTVisit
 import at.splendit.simonykees.i18n.ExceptionMessages;
 import at.splendit.simonykees.i18n.Messages;
 
-public class RenameFieldsRuleWizard extends Wizard {
+public class ConfigureRenameFieldsRuleWizard extends Wizard {
 
-	private static final Logger logger = LoggerFactory.getLogger(RenameFieldsRuleWizard.class);
+	private static final Logger logger = LoggerFactory.getLogger(ConfigureRenameFieldsRuleWizard.class);
 
-	private RenameFieldsRuleWizardPageModel model;
+	private ConfigureRenameFieldsRuleWizardPageModel model;
 
 	private IJavaProject selectedJavaProjekt;
 	private List<IJavaElement> selectedJavaElements;
@@ -70,9 +70,11 @@ public class RenameFieldsRuleWizard extends Wizard {
 	private List<FieldMetadata> metadata;
 	private PublicFieldsRenamingRule renameFieldsRule;
 
+	private Rectangle rectangle;
+
 	private boolean canRefactor = true;
 
-	public RenameFieldsRuleWizard(List<IJavaElement> selectedJavaElements) {
+	public ConfigureRenameFieldsRuleWizard(List<IJavaElement> selectedJavaElements) {
 		this.selectedJavaElements = selectedJavaElements;
 		setNeedsProgressMonitor(true);
 	}
@@ -84,8 +86,8 @@ public class RenameFieldsRuleWizard extends Wizard {
 
 	@Override
 	public void addPages() {
-		model = new RenameFieldsRuleWizardPageModel();
-		RenameFieldsRuleWizardPage page = new RenameFieldsRuleWizardPage(model);
+		model = new ConfigureRenameFieldsRuleWizardPageModel();
+		ConfigureRenameFieldsRuleWizardPage page = new ConfigureRenameFieldsRuleWizardPage(model);
 		addPage(page);
 	}
 
@@ -107,6 +109,8 @@ public class RenameFieldsRuleWizard extends Wizard {
 	public boolean performFinish() {
 
 		selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
+
+		rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
 
 		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass().getSimpleName(),
 				selectedJavaProjekt.getElementName()));
@@ -269,7 +273,7 @@ public class RenameFieldsRuleWizard extends Wizard {
 
 	private FieldDeclarationASTVisitor createVisitor() {
 		FieldDeclarationASTVisitor visitor;
-		if (RenameFieldsRuleWizardPageConstants.SCOPE_PROJECT.equals(model.getSearchScope())) {
+		if (ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_PROJECT.equals(model.getSearchScope())) {
 			IJavaElement[] scope = { selectedJavaProjekt };
 			visitor = new FieldDeclarationASTVisitor(scope);
 		} else {
@@ -289,12 +293,12 @@ public class RenameFieldsRuleWizard extends Wizard {
 			IJavaElement[] scope = projectList.toArray(new IJavaElement[0]);
 			visitor = new FieldDeclarationASTVisitor(scope);
 		}
-		visitor.setRenamePrivateField(model.getFieldTypes().contains(RenameFieldsRuleWizardPageConstants.TYPE_PRIVATE));
+		visitor.setRenamePrivateField(model.getFieldTypes().contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PRIVATE));
 		visitor.setRenameProtectedField(
-				model.getFieldTypes().contains(RenameFieldsRuleWizardPageConstants.TYPE_PROTECTED));
+				model.getFieldTypes().contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PROTECTED));
 		visitor.setRenamePackageProtectedField(
-				model.getFieldTypes().contains(RenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPROTECTED));
-		visitor.setRenamePublicField(model.getFieldTypes().contains(RenameFieldsRuleWizardPageConstants.TYPE_PUBLIC));
+				model.getFieldTypes().contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPROTECTED));
+		visitor.setRenamePublicField(model.getFieldTypes().contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PUBLIC));
 		visitor.setUppercaseAfterUnderscore(model.setUpperCaseForUnderscoreReplacementOption());
 		visitor.setUppercaseAfterDollar(model.setUpperCaseForDollarReplacementOption());
 		visitor.setAddTodo(model.isAddTodoComments());
@@ -381,29 +385,22 @@ public class RenameFieldsRuleWizard extends Wizard {
 
 	private void createAndShowPreviewWizard() {
 
-		// TODO create and show preview wizard
-		// for multi file changing rule
-		// TODO use this below to display
-		// changes onpreview
-
-		Map<String, List<DocumentChange>> changes = new HashMap<>();
+		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes = new HashMap<>();
 		Map<String, FieldMetadata> metaDataMap = new HashMap<>();
 		for (FieldMetadata data : metadata) {
 
-		String newIdentifier = data.getNewIdentifier();
-		data.getCompilationUnit().getJavaElement();
-		List<DocumentChange> docsChanges = renameFieldsRule.computeDocumentChangesPerFiled(data);
-		changes.put(newIdentifier, docsChanges);
-		metaDataMap.put(newIdentifier, data);
+			String newIdentifier = data.getNewIdentifier();
+			data.getCompilationUnit().getJavaElement();
+			Map<ICompilationUnit, DocumentChange> docsChanges = renameFieldsRule.computeDocumentChangesPerFiled(data);
+			changes.put(data, docsChanges);
+			metaDataMap.put(newIdentifier, data);
 
 		}
 
-//		Rectangle rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
 		synchronizeWithUIShowRefactoringPreviewWizard(changes);
 	}
 
-	private void synchronizeWithUIShowRefactoringPreviewWizard(
-			Map<String, List<DocumentChange>> changes) {
+	private void synchronizeWithUIShowRefactoringPreviewWizard(Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes) {
 
 		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
 				selectedJavaProjekt.getElementName()));
@@ -413,11 +410,10 @@ public class RenameFieldsRuleWizard extends Wizard {
 		Display.getDefault().asyncExec(() -> {
 			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
 			final WizardDialog dialog = new WizardDialog(shell,
-					new RenamingRulePreviewWizard(changes, renameFieldsRule));
+					new RenamingRulePreviewWizard(refactoringPipeline, changes, renameFieldsRule));
 
 			// maximizes the RefactoringPreviewWizard
-//			dialog.setPageSize(rectangle.width, rectangle.height);
-			dialog.setPageSize(1000, 800);
+			dialog.setPageSize(rectangle.width, rectangle.height);
 			dialog.open();
 		});
 

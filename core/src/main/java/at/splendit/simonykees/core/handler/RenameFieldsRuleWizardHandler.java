@@ -22,7 +22,7 @@ import at.splendit.simonykees.core.Activator;
 import at.splendit.simonykees.core.ui.LicenseUtil;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.core.ui.wizard.impl.WizardMessageDialog;
-import at.splendit.simonykees.core.ui.wizard.semiautomatic.RenameFieldsRuleWizard;
+import at.splendit.simonykees.core.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizard;
 import at.splendit.simonykees.core.util.WizardHandlerUtil;
 import at.splendit.simonykees.i18n.Messages;
 
@@ -74,7 +74,7 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 			@Override
 			public void run() {
 				Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-				final WizardDialog dialog = new WizardDialog(shell, new RenameFieldsRuleWizard(selectedJavaElements)) {
+				final WizardDialog dialog = new WizardDialog(shell, new ConfigureRenameFieldsRuleWizard(selectedJavaElements)) {
 					/*
 					 * Removed unnecessary empty space on the bottom of the
 					 * wizard intended for ProgressMonitor that is not

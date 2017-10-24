@@ -24,22 +24,22 @@ import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.i18n.Messages;
 
 @SuppressWarnings("restriction")
-public class RenameFieldsRuleWizardPage extends NewElementWizardPage {
+public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 
-	private RenameFieldsRuleWizardPageModel model;
-	private RenameFieldsRuleWizardPageControler controler;
+	private ConfigureRenameFieldsRuleWizardPageModel model;
+	private ConfigureRenameFieldsRuleWizardPageControler controler;
 
 	private Font boldFont;
 
 	protected IStatus fSelectionStatus;
 
-	public RenameFieldsRuleWizardPage(RenameFieldsRuleWizardPageModel model) {
+	public ConfigureRenameFieldsRuleWizardPage(ConfigureRenameFieldsRuleWizardPageModel model) {
 		super(Messages.RenameFieldsRuleWizardPage_title);
 		setTitle(Messages.RenameFieldsRuleWizardPage_title);
 		setDescription(Messages.RenameFieldsRuleWizardPage_description);
 
 		this.model = model;
-		this.controler = new RenameFieldsRuleWizardPageControler(model);
+		this.controler = new ConfigureRenameFieldsRuleWizardPageControler(model);
 	}
 
 	@Override

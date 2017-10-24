@@ -8,7 +8,7 @@ import java.util.Set;
 import at.splendit.simonykees.core.ui.wizard.IValueChangeListener;
 import at.splendit.simonykees.i18n.Messages;
 
-public class RenameFieldsRuleWizardPageModel {
+public class ConfigureRenameFieldsRuleWizardPageModel {
 
 	Set<IValueChangeListener> listeners = new HashSet<>();
 
@@ -18,12 +18,12 @@ public class RenameFieldsRuleWizardPageModel {
 	private String dollarReplacementOption;
 	private boolean addTodoComments;
 
-	public RenameFieldsRuleWizardPageModel() {
+	public ConfigureRenameFieldsRuleWizardPageModel() {
 		// initialize defaults
 		fieldTypes = getFieldTypeOptions();
-		searchScope = RenameFieldsRuleWizardPageConstants.SCOPE_PROJECT;
-		underscoreReplacementOption = RenameFieldsRuleWizardPageConstants.UNDERSCORE_UPPER;
-		dollarReplacementOption = RenameFieldsRuleWizardPageConstants.DOLLAR_UPPER;
+		searchScope = ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_PROJECT;
+		underscoreReplacementOption = ConfigureRenameFieldsRuleWizardPageConstants.UNDERSCORE_UPPER;
+		dollarReplacementOption = ConfigureRenameFieldsRuleWizardPageConstants.DOLLAR_UPPER;
 		addTodoComments = true;
 	}
 
@@ -48,31 +48,31 @@ public class RenameFieldsRuleWizardPageModel {
 	// GETTERS useb by Wizard page
 	public List<String> getFieldTypeOptions() {
 		List<String> fieldTypesOptions = new ArrayList<>();
-		fieldTypesOptions.add(RenameFieldsRuleWizardPageConstants.TYPE_PRIVATE);
-		fieldTypesOptions.add(RenameFieldsRuleWizardPageConstants.TYPE_PROTECTED);
-		fieldTypesOptions.add(RenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPROTECTED);
-		fieldTypesOptions.add(RenameFieldsRuleWizardPageConstants.TYPE_PUBLIC);
+		fieldTypesOptions.add(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PRIVATE);
+		fieldTypesOptions.add(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PROTECTED);
+		fieldTypesOptions.add(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPROTECTED);
+		fieldTypesOptions.add(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PUBLIC);
 		return fieldTypesOptions;
 	}
 
 	public List<String> getSearchScopeOptions() {
 		List<String> searchScopes = new ArrayList<>();
-		searchScopes.add(RenameFieldsRuleWizardPageConstants.SCOPE_PROJECT);
-		searchScopes.add(RenameFieldsRuleWizardPageConstants.SCOPE_WORKSPACE);
+		searchScopes.add(ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_PROJECT);
+		searchScopes.add(ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_WORKSPACE);
 		return searchScopes;
 	}
 
 	public List<String> getUnderscoreReplacementOptions() {
 		List<String> underscoreReplacements = new ArrayList<>();
-		underscoreReplacements.add(RenameFieldsRuleWizardPageConstants.UNDERSCORE_UPPER);
-		underscoreReplacements.add(RenameFieldsRuleWizardPageConstants.UNDERSCORE_SAME);
+		underscoreReplacements.add(ConfigureRenameFieldsRuleWizardPageConstants.UNDERSCORE_UPPER);
+		underscoreReplacements.add(ConfigureRenameFieldsRuleWizardPageConstants.UNDERSCORE_SAME);
 		return underscoreReplacements;
 	}
 
 	public List<String> getDolarSignReplacementOptions() {
 		List<String> dolarSignReplacements = new ArrayList<>();
-		dolarSignReplacements.add(RenameFieldsRuleWizardPageConstants.DOLLAR_UPPER);
-		dolarSignReplacements.add(RenameFieldsRuleWizardPageConstants.DOLLAR_SAME);
+		dolarSignReplacements.add(ConfigureRenameFieldsRuleWizardPageConstants.DOLLAR_UPPER);
+		dolarSignReplacements.add(ConfigureRenameFieldsRuleWizardPageConstants.DOLLAR_SAME);
 		return dolarSignReplacements;
 	}
 
@@ -116,11 +116,11 @@ public class RenameFieldsRuleWizardPageModel {
 	}
 
 	public boolean setUpperCaseForUnderscoreReplacementOption() {
-		return RenameFieldsRuleWizardPageConstants.UNDERSCORE_UPPER.equals(underscoreReplacementOption);
+		return ConfigureRenameFieldsRuleWizardPageConstants.UNDERSCORE_UPPER.equals(underscoreReplacementOption);
 	}
 
 	public boolean setUpperCaseForDollarReplacementOption() {
-		return RenameFieldsRuleWizardPageConstants.DOLLAR_UPPER.equals(dollarReplacementOption);
+		return ConfigureRenameFieldsRuleWizardPageConstants.DOLLAR_UPPER.equals(dollarReplacementOption);
 	}
 
 	public boolean isAddTodoComments() {

@@ -3,7 +3,6 @@ package at.splendit.simonykees.core.ui.preview;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 
@@ -16,10 +15,13 @@ public class ChangeElementLabelProvider extends LabelProvider implements IFontPr
 
 	@Override
 	public String getText(Object object) {
-		if (object instanceof DocumentChange) {
-			return ((DocumentChange) object).getName();
+		DocumentChangeWrapper documentChangeWrapper = (DocumentChangeWrapper) object;
+		if (documentChangeWrapper.isParent()) {
+			return documentChangeWrapper.getOldIdentifier() + " -> " + documentChangeWrapper.getNewIdentifier() + "    " //$NON-NLS-1$ //$NON-NLS-2$
+					+ documentChangeWrapper.getDocumentChange().getName();
+		} else {
+			return documentChangeWrapper.getDocumentChange().getName();
 		}
-		return ((DocumentChangeWrapper) object).getDocumentChange().getName();
 	}
 
 	public Font getFont(Object element) {
