@@ -41,7 +41,7 @@ public class StringBuildingLoopRule extends RefactoringRule<StringBuildingLoopAS
 	@Override
 	protected StringBuildingLoopASTVisitor visitorFactory() {
 		StringBuildingLoopASTVisitor visitor = new StringBuildingLoopASTVisitor(javaVersion);
-		visitor.addRewriteListener(RuleApplicationCount.get(this));
+		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
 		return visitor;
 	}
 

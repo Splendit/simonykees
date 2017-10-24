@@ -76,7 +76,7 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 
 		if (!hasAmbiguity[0] && importsOperation.getParseError() == null && edit != null
 				&& !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
-			RuleApplicationCount.get(this)
+			RuleApplicationCount.getFor(this)
 				.update();
 			Document document = new Document(workingCopy.getSource());
 			documentChange = RefactoringUtil.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document,

@@ -195,7 +195,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		Map<String, String> replacingOptions = getSelectedOptions();
 		String availableLogger = getAvailableQualifiedLoggerName();
 		StandardLoggerASTVisitor visitor = new StandardLoggerASTVisitor(availableLogger, replacingOptions);
-		visitor.addRewriteListener(RuleApplicationCount.get(this));
+		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
 		return visitor;
 	}
 }

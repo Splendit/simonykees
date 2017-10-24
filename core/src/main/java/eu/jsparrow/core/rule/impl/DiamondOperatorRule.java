@@ -49,7 +49,7 @@ public class DiamondOperatorRule extends RefactoringRule<DiamondOperatorASTVisit
 	@Override
 	protected DiamondOperatorASTVisitor visitorFactory() {
 		DiamondOperatorASTVisitor visitor = new DiamondOperatorASTVisitor(javaVersion);
-		visitor.addRewriteListener(RuleApplicationCount.get(this));
+		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
 		return visitor;
 	}
 

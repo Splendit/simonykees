@@ -1,5 +1,6 @@
 package eu.jsparrow.dummies;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.rule.RefactoringRuleInterface;
+import eu.jsparrow.core.rule.RuleDescription;
 import eu.jsparrow.core.rule.Tag;
 
 /**
@@ -81,6 +83,11 @@ public class DummyRule implements RefactoringRuleInterface {
 	@Override
 	public boolean isSatisfiedLibraries() {
 		return false;
+	}
+
+	@Override
+	public RuleDescription getRuleDescription() {
+		return new RuleDescription("dummy", "dummyDescription", Duration.ofMinutes(5));
 	}
 
 }

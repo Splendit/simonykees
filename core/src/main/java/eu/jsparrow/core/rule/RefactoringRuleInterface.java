@@ -36,5 +36,6 @@ public interface RefactoringRuleInterface {
 	public boolean isSatisfiedJavaVersion();
 
 	public boolean isSatisfiedLibraries();
-
+	
+	public RuleDescription getRuleDescription();
 }

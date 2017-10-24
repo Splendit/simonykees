@@ -44,7 +44,7 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 	 *            rule to get the application count for
 	 * @return the application count for a given rule
 	 */
-	public static RuleApplicationCount get(RefactoringRuleInterface rule) {
+	public static RuleApplicationCount getFor(RefactoringRuleInterface rule) {
 		applicationCounters.putIfAbsent(rule, new RuleApplicationCount());
 		return applicationCounters.get(rule);
 	}

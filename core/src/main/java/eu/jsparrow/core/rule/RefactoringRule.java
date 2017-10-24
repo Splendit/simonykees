@@ -28,7 +28,7 @@ import eu.jsparrow.i18n.Messages;
  * description, if its enabled and the document changes for
  * {@link ICompilationUnit} that are processed
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Hans-Jörg Schrödl
  * @since 0.9
  *
  * @param <T>
@@ -38,6 +38,8 @@ import eu.jsparrow.i18n.Messages;
 public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> implements RefactoringRuleInterface {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringRule.class);
+	
+	protected RuleDescription ruleDescription;
 
 	protected String id;
 
@@ -69,6 +71,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	 * @return
 	 */
 	protected abstract JavaVersion provideRequiredJavaVersion();
+	
+	public RuleDescription getRuleDescription() {
+		return null;
+	}
 
 	public String getName() {
 		return name;
