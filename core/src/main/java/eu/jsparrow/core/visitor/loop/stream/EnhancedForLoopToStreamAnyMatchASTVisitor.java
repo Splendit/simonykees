@@ -21,8 +21,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 /**
- * Analyzes the occurrences of {@link EnhancedForStatement}s and checks whether a
- * transformation to {@link Stream#anyMatch(java.util.function.Predicate)} is
+ * Analyzes the occurrences of {@link EnhancedForStatement}s and checks whether
+ * a transformation to {@link Stream#anyMatch(java.util.function.Predicate)} is
  * possible. Considers two cases:
  * 
  * <ul>
@@ -92,7 +92,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 		Expression enhancedForExp = enhancedForStatement.getExpression();
 
 		IfStatement ifStatement = isConvertableInterruptedLoop(enhancedForStatement);
-		if(ifStatement == null) {
+		if (ifStatement == null) {
 			return true;
 		}
 
@@ -293,7 +293,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 			}
 
 		}
-		
+
 		return null;
 	}
 }

@@ -20,14 +20,14 @@ import eu.jsparrow.i18n.Messages;
 public class StringBuildingLoopRule extends RefactoringRule<StringBuildingLoopASTVisitor> {
 
 	private JavaVersion javaVersion;
-	
+
 	public StringBuildingLoopRule() {
 		super();
 		this.visitorClass = StringBuildingLoopASTVisitor.class;
 		this.name = Messages.StringBuildingLoopRule_name;
 		this.description = Messages.StringBuildingLoopRule_description;
 	}
-	
+
 	/**
 	 * Stores java compiler compliance level.
 	 */
@@ -37,7 +37,7 @@ public class StringBuildingLoopRule extends RefactoringRule<StringBuildingLoopAS
 		javaVersion = PropertyUtil.stringToJavaVersion(compilerCompliance);
 		return true;
 	}
-	
+
 	@Override
 	protected StringBuildingLoopASTVisitor visitorFactory() {
 		StringBuildingLoopASTVisitor visitor = new StringBuildingLoopASTVisitor(javaVersion);

@@ -30,10 +30,14 @@ public class StringBufferToBuilderRule {
 			localStringBuffer2 = new StringBuilder();
 		}
 
-		stringBuffer1.append("asdf").append("jkl");
-		stringBuffer2.append("asdf").append("jkl");
-		localStringBuffer1.append("asdf").insert(3, "jkl");
-		localStringBuffer2.append("asdf").insert(2, "jkl");
+		stringBuffer1.append("asdf")
+			.append("jkl");
+		stringBuffer2.append("asdf")
+			.append("jkl");
+		localStringBuffer1.append("asdf")
+			.insert(3, "jkl");
+		localStringBuffer2.append("asdf")
+			.insert(2, "jkl");
 	}
 
 	private StringBuffer test2() {
@@ -49,10 +53,14 @@ public class StringBufferToBuilderRule {
 			localStringBuffer3 = new StringBuilder();
 		}
 
-		stringBuffer1.append("asdf").append("jkl");
-		stringBuffer2.append("asdf").append("jkl");
-		localStringBuffer1.append("asdf").insert(3, "jkl");
-		localStringBuffer2.append("asdf").insert(2, "jkl");
+		stringBuffer1.append("asdf")
+			.append("jkl");
+		stringBuffer2.append("asdf")
+			.append("jkl");
+		localStringBuffer1.append("asdf")
+			.insert(3, "jkl");
+		localStringBuffer2.append("asdf")
+			.insert(2, "jkl");
 
 		return localStringBuffer4;
 	}
@@ -139,13 +147,15 @@ public class StringBufferToBuilderRule {
 
 	public StringBuffer getLocalStringBuffer1() {
 		StringBuffer localStringBuffer3 = new StringBuffer();
-		localStringBuffer3.append("asdf").append("jkl");
+		localStringBuffer3.append("asdf")
+			.append("jkl");
 		return localStringBuffer3;
 	}
 
 	private StringBuffer getLocalStringBuffer2() {
 		StringBuffer localStringBuffer4 = new StringBuffer();
-		localStringBuffer4.append("asdf").append("jkl");
+		localStringBuffer4.append("asdf")
+			.append("jkl");
 		return localStringBuffer4;
 	}
 }

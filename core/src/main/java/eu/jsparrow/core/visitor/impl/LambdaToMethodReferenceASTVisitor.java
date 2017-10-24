@@ -57,7 +57,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		this.compilationUnit = cu;
 		return true;
 	}
-	
+
 	@Override
 	public void endVisit(CompilationUnit cu) {
 		this.addImports.addAll(filterNewImportsByExcludingCurrentPackage(cu, newImports));
@@ -103,17 +103,19 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 				 */
 				if (methodArguments.size() == lambdaParams.size()
 						&& checkMethodParameters(lambdaParams, methodArguments)) {
-					
+
 					IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
-						
-					List<ITypeBinding> ambParams = methodArguments.stream().skip(1).map(Expression::resolveTypeBinding)
-							.collect(Collectors.toList());
+
+					List<ITypeBinding> ambParams = methodArguments.stream()
+						.skip(1)
+						.map(Expression::resolveTypeBinding)
+						.collect(Collectors.toList());
 					if (isAmbiguousMethodReference(methodInvocation, ambParams)) {
 						return true;
 					}
 
-
-					ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
+					ExpressionMethodReference ref = astRewrite.getAST()
+						.newExpressionMethodReference();
 
 					// save type arguments
 					saveTypeArguments(methodInvocation, ref);
@@ -136,14 +138,16 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 
 						if (Modifier.isStatic(methodBinding.getModifiers())) {
 							SimpleName staticClassName = astRewrite.getAST()
-									.newSimpleName(methodsDeclaringClass.getErasure().getName());
+								.newSimpleName(methodsDeclaringClass.getErasure()
+									.getName());
 							ref.setExpression(staticClassName);
 							isReferenceExpressionSet = true;
 						} else if (ClassRelationUtil.compareITypeBinding(methodsDeclaringClass, lambdaEnclosingType)) {
 							ClassInstanceCreation enclosingAnonymousInnerClass = ASTNodeUtil
-									.getSpecificAncestor(lambdaExpressionNode, ClassInstanceCreation.class);
+								.getSpecificAncestor(lambdaExpressionNode, ClassInstanceCreation.class);
 							if (enclosingAnonymousInnerClass == null) {
-								ThisExpression thisExpression = astRewrite.getAST().newThisExpression();
+								ThisExpression thisExpression = astRewrite.getAST()
+									.newThisExpression();
 								ref.setExpression(thisExpression);
 								isReferenceExpressionSet = true;
 							}
@@ -163,7 +167,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 
 						if (!paramUserForMethodInvocation) {
 							Expression newMethodInvocationExpression = (Expression) astRewrite
-									.createCopyTarget(methodInvocation.getExpression());
+								.createCopyTarget(methodInvocation.getExpression());
 							ref.setExpression(newMethodInvocationExpression);
 							isReferenceExpressionSet = true;
 						}
@@ -191,22 +195,28 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 					if (ASTNode.SIMPLE_NAME == methodInvocationExpression.getNodeType()) {
 						SimpleName methodInvocationExpressionName = (SimpleName) methodInvocationExpression;
 						String methodInvocationExpressionNameStr = methodInvocationExpressionName.getIdentifier();
-						String lambdaParamNameStr = lambdaParams.get(0).getName().getIdentifier();
+						String lambdaParamNameStr = lambdaParams.get(0)
+							.getName()
+							.getIdentifier();
 
 						if (methodInvocationExpressionNameStr.equals(lambdaParamNameStr) && checkMethodParameters(
 								lambdaParams.subList(1, lambdaParams.size()), methodArguments)) {
 
 							String typeNameStr = findTypeOfSimpleName(methodInvocationExpressionName);
 							List<ITypeBinding> ambTypes = lambdaParams.stream()
-									.map(var -> var.resolveBinding().getType()).collect(Collectors.toList());
+								.map(var -> var.resolveBinding()
+									.getType())
+								.collect(Collectors.toList());
 							if (typeNameStr != null && !typeNameStr.isEmpty()
 									&& !isAmbiguousMethodReference(methodInvocation, ambTypes)) {
 
-								Name typeName = astRewrite.getAST().newName(typeNameStr);
+								Name typeName = astRewrite.getAST()
+									.newName(typeNameStr);
 								SimpleName methodName = (SimpleName) astRewrite
-										.createCopyTarget(methodInvocation.getName());
+									.createCopyTarget(methodInvocation.getName());
 
-								ExpressionMethodReference ref = astRewrite.getAST().newExpressionMethodReference();
+								ExpressionMethodReference ref = astRewrite.getAST()
+									.newExpressionMethodReference();
 								saveTypeArguments(methodInvocation, ref);
 								ref.setExpression(typeName);
 								ref.setName(methodName);
@@ -234,18 +244,20 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			else if (ASTNode.CLASS_INSTANCE_CREATION == body.getNodeType()) {
 				ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) body;
 				List<Expression> classInstanceCreationArguments = ASTNodeUtil
-						.convertToTypedList(classInstanceCreation.arguments(), Expression.class);
+					.convertToTypedList(classInstanceCreation.arguments(), Expression.class);
 
 				AnonymousClassDeclaration annonymousClass = classInstanceCreation.getAnonymousClassDeclaration();
-				if (annonymousClass == null && lambdaParams.size() == classInstanceCreation.arguments().size()
-						&& checkMethodParameters(lambdaParams, classInstanceCreationArguments)) {
+				if (annonymousClass == null && lambdaParams.size() == classInstanceCreation.arguments()
+					.size() && checkMethodParameters(lambdaParams, classInstanceCreationArguments)) {
 					Type classInstanceCreationType = classInstanceCreation.getType();
 
-					CreationReference ref = astRewrite.getAST().newCreationReference();
+					CreationReference ref = astRewrite.getAST()
+						.newCreationReference();
 					if (ASTNode.PARAMETERIZED_TYPE == classInstanceCreationType.getNodeType()
-							&& ((ParameterizedType) classInstanceCreationType).typeArguments().size() == 0) {
+							&& ((ParameterizedType) classInstanceCreationType).typeArguments()
+								.size() == 0) {
 						ref.setType((Type) astRewrite
-								.createMoveTarget(((ParameterizedType) classInstanceCreationType).getType()));
+							.createMoveTarget(((ParameterizedType) classInstanceCreationType).getType()));
 					} else {
 						ref.setType((Type) astRewrite.createCopyTarget(classInstanceCreationType));
 					}
@@ -285,30 +297,30 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 		}
 		methods.addAll(Arrays.asList(type.getDeclaredMethods()));
 		methods.addAll(ClassRelationUtil.findInheretedMethods(type));
-		String methodIdentifier = methodInvocation.getName().getIdentifier();
+		String methodIdentifier = methodInvocation.getName()
+			.getIdentifier();
 
-		ITypeBinding[] paramsArray = params.stream().toArray(ITypeBinding[]::new);
+		ITypeBinding[] paramsArray = params.stream()
+			.toArray(ITypeBinding[]::new);
 		if (Modifier.isStatic(methodBinding.getModifiers())) {
 			/*
 			 * static methods can cause ambiguity with non-static methods
 			 */
 			return methods.stream()
-					.anyMatch(method -> methodIdentifier.equals(method.getName())
-							&& !Modifier.isStatic(method.getModifiers()) && ClassRelationUtil
-									.compareBoxedITypeBinding(method.getParameterTypes(), paramsArray));
+				.anyMatch(
+						method -> methodIdentifier.equals(method.getName()) && !Modifier.isStatic(method.getModifiers())
+								&& ClassRelationUtil.compareBoxedITypeBinding(method.getParameterTypes(), paramsArray));
 		} else {
 			/*
 			 * non-static methods can cause ambiguity with static methods
 			 */
 			return methods.stream()
-					.anyMatch(method -> methodIdentifier.equals(method.getName())
-							&& Modifier.isStatic(method.getModifiers()) && ClassRelationUtil
-									.compareBoxedITypeBinding(method.getParameterTypes(), paramsArray));
+				.anyMatch(
+						method -> methodIdentifier.equals(method.getName()) && Modifier.isStatic(method.getModifiers())
+								&& ClassRelationUtil.compareBoxedITypeBinding(method.getParameterTypes(), paramsArray));
 		}
 
 	}
-	
-	
 
 	/**
 	 * Inserts the existing type arguments to the method reference.
@@ -340,14 +352,16 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	private String findTypeOfSimpleName(SimpleName expression) {
 		String typeNameStr;
 		ITypeBinding binding = expression.resolveTypeBinding();
-		
-		if(binding == null) {
+
+		if (binding == null) {
 			return ""; //$NON-NLS-1$
 		}
-		
+
 		if (binding.isCapture()) {
-			Optional<ITypeBinding> optBinding = Arrays.asList(binding.getTypeBounds()).stream().findFirst()
-					.map(ITypeBinding::getErasure);
+			Optional<ITypeBinding> optBinding = Arrays.asList(binding.getTypeBounds())
+				.stream()
+				.findFirst()
+				.map(ITypeBinding::getErasure);
 			if (!optBinding.isPresent()) {
 				return ""; //$NON-NLS-1$
 			}
@@ -359,15 +373,19 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			ITypeBinding declaringClass = binding.getDeclaringClass();
 			ITypeBinding declaringClassErasure = declaringClass.getErasure();
 			String outerTypeName = declaringClassErasure.getName();
-			String qualifiedName = binding.getErasure().getQualifiedName();
+			String qualifiedName = binding.getErasure()
+				.getQualifiedName();
 			int outerTypeStartingIndex = qualifiedName.lastIndexOf(outerTypeName);
 			typeNameStr = qualifiedName.substring(outerTypeStartingIndex);
 			newImports.add(declaringClassErasure.getQualifiedName());
 		} else if (qualifiedNameNeeded(binding)) {
-			typeNameStr = binding.getErasure().getQualifiedName();
+			typeNameStr = binding.getErasure()
+				.getQualifiedName();
 		} else {
-			typeNameStr = binding.getErasure().getName();
-			newImports.add(binding.getErasure().getQualifiedName());
+			typeNameStr = binding.getErasure()
+				.getName();
+			newImports.add(binding.getErasure()
+				.getQualifiedName());
 		}
 
 		return typeNameStr;
@@ -375,12 +393,18 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 
 	private boolean qualifiedNameNeeded(ITypeBinding binding) {
 		String bindingName = binding.getName();
-		return ASTNodeUtil.returnTypedList(compilationUnit.imports(), ImportDeclaration.class).stream()
-				.map(ImportDeclaration::getName).filter(Name::isQualifiedName).anyMatch(name -> {
-					QualifiedName qualifiedImportName = (QualifiedName) name;
-					return qualifiedImportName.getName().getIdentifier().equals(bindingName)
-							&& !binding.getQualifiedName().equals(qualifiedImportName.toString());
-				});
+		return ASTNodeUtil.returnTypedList(compilationUnit.imports(), ImportDeclaration.class)
+			.stream()
+			.map(ImportDeclaration::getName)
+			.filter(Name::isQualifiedName)
+			.anyMatch(name -> {
+				QualifiedName qualifiedImportName = (QualifiedName) name;
+				return qualifiedImportName.getName()
+					.getIdentifier()
+					.equals(bindingName)
+						&& !binding.getQualifiedName()
+							.equals(qualifiedImportName.toString());
+			});
 	}
 
 	/**
@@ -436,7 +460,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 			// method argument has to be a SimpleName, not an Expression
 			if (ASTNode.SIMPLE_NAME == methodArgument.getNodeType()) {
 				String methodArgumentName = ((SimpleName) methodArgument).getIdentifier();
-				String lambdaParamName = lambdaParam.getName().getIdentifier();
+				String lambdaParamName = lambdaParam.getName()
+					.getIdentifier();
 
 				if (!methodArgumentName.equals(lambdaParamName)) {
 					paramsEqual = false;
@@ -451,7 +476,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	}
 
 	private boolean containsName(List<Expression> list, String name) {
-		return list.stream().filter(element -> element instanceof Name)
-				.anyMatch(nameIter -> name.equals(((Name) nameIter).getFullyQualifiedName()));
+		return list.stream()
+			.filter(element -> element instanceof Name)
+			.anyMatch(nameIter -> name.equals(((Name) nameIter).getFullyQualifiedName()));
 	}
 }

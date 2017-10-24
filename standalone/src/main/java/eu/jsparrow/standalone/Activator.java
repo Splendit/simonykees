@@ -62,7 +62,7 @@ public class Activator implements BundleActivator {
 		logger.info(Messages.Activator_start);
 
 		String configFilePath = context.getProperty(CONFIG_FILE_PATH);
-		
+
 		String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
 		logger.info(loggerInfo);
 
@@ -91,7 +91,8 @@ public class Activator implements BundleActivator {
 		// Create refactoring pipeline and set rules
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 		refactoringPipeline.setRules(selectedRules);
-		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(), selectedRules.toString());
+		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
+				selectedRules.toString());
 		logger.info(loggerInfo);
 
 		logger.info(Messages.Activator_debug_collectCompilationUnits);
@@ -101,7 +102,8 @@ public class Activator implements BundleActivator {
 
 		logger.debug(Messages.Activator_debug_createRefactoringStates);
 		refactoringPipeline.createRefactoringStates(compUnits);
-		loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates, refactoringPipeline.getRefactoringStates().size());
+		loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates, refactoringPipeline.getRefactoringStates()
+			.size());
 		logger.debug(loggerInfo);
 
 		// Do refactoring
@@ -128,8 +130,10 @@ public class Activator implements BundleActivator {
 		try {
 			/* Unregister as a save participant */
 			if (ResourcesPlugin.getWorkspace() != null) {
-				ResourcesPlugin.getWorkspace().forgetSavedTree(PLUGIN_ID);
-				ResourcesPlugin.getWorkspace().removeSaveParticipant(PLUGIN_ID);
+				ResourcesPlugin.getWorkspace()
+					.forgetSavedTree(PLUGIN_ID);
+				ResourcesPlugin.getWorkspace()
+					.removeSaveParticipant(PLUGIN_ID);
 			}
 
 		} catch (Exception e) {
@@ -164,37 +168,47 @@ public class Activator implements BundleActivator {
 	 */
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRulesFromConfig(YAMLConfig config,
 			IJavaProject javaProject) throws YAMLConfigException {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result  = new LinkedList<>();
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result = new LinkedList<>();
 
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
-				.getRulesForProject(javaProject, true);
+			.getRulesForProject(javaProject, true);
 
 		String defaultProfile = config.getDefaultProfile();
 		if (defaultProfile != null && !defaultProfile.isEmpty()) {
 			if (checkProfileExistence(config, defaultProfile)) {
-				Optional<YAMLProfile> configProfile = config.getProfiles().stream()
-						.filter(profile -> profile.getName().equals(defaultProfile)).findFirst();
+				Optional<YAMLProfile> configProfile = config.getProfiles()
+					.stream()
+					.filter(profile -> profile.getName()
+						.equals(defaultProfile))
+					.findFirst();
 
 				if (configProfile.isPresent()) {
 					List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> profileRules = getConfigRules(
-							configProfile.get().getRules());
+							configProfile.get()
+								.getRules());
 
-					result = projectRules.stream().filter(rule -> rule.isEnabled())
-							.filter(profileRules::contains).collect(Collectors.toList());
+					result = projectRules.stream()
+						.filter(rule -> rule.isEnabled())
+						.filter(profileRules::contains)
+						.collect(Collectors.toList());
 				} else {
-					String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, defaultProfile)
-;					throw new YAMLConfigException(exceptionMessage);
+					String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
+							defaultProfile);
+					throw new YAMLConfigException(exceptionMessage);
 				}
 			} else {
-				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist, defaultProfile);
+				String exceptionMessage = NLS.bind(Messages.Activator_standalone_DefaultProfileDoesNotExist,
+						defaultProfile);
 				throw new YAMLConfigException(exceptionMessage);
 			}
 		} else { // use all rules from config file
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> configSelectedRules = getConfigRules(
 					config.getRules());
 
-			result = projectRules.stream().filter(RefactoringRule::isEnabled)
-					.filter(configSelectedRules::contains).collect(Collectors.toList());
+			result = projectRules.stream()
+				.filter(RefactoringRule::isEnabled)
+				.filter(configSelectedRules::contains)
+				.collect(Collectors.toList());
 		}
 
 		return result;
@@ -217,7 +231,9 @@ public class Activator implements BundleActivator {
 
 		for (String configRule : configRules) {
 			Optional<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> currentRule = rules.stream()
-					.filter(rule -> rule.getId().equals(configRule)).findFirst();
+				.filter(rule -> rule.getId()
+					.equals(configRule))
+				.findFirst();
 			if (currentRule.isPresent()) {
 				configSelectedRules.add(currentRule.get());
 			} else {
@@ -226,7 +242,8 @@ public class Activator implements BundleActivator {
 		}
 
 		if (!nonExistentRules.isEmpty()) {
-			String exceptionMessage = NLS.bind(Messages.Activator_standalone_RulesDoNotExist, nonExistentRules.toString());
+			String exceptionMessage = NLS.bind(Messages.Activator_standalone_RulesDoNotExist,
+					nonExistentRules.toString());
 			throw new YAMLConfigException(exceptionMessage);
 		}
 
@@ -287,6 +304,9 @@ public class Activator implements BundleActivator {
 	 * @return true, if the profile exists, false otherwise
 	 */
 	private boolean checkProfileExistence(YAMLConfig config, String profile) {
-		return config.getProfiles().stream().anyMatch(configProfile -> configProfile.getName().equals(profile));
+		return config.getProfiles()
+			.stream()
+			.anyMatch(configProfile -> configProfile.getName()
+				.equals(profile));
 	}
 }

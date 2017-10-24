@@ -20,7 +20,7 @@ public class RearrangeClassMembersRule extends RefactoringRule<RearrangeClassMem
 		this.name = Messages.RearrangeClassMembersRule_name;
 		this.description = Messages.RearrangeClassMembersRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;

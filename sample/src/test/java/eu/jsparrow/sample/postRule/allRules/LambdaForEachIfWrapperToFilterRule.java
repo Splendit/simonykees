@@ -21,71 +21,104 @@ public class LambdaForEachIfWrapperToFilterRule {
 	public List<Boolean> booleanList = Arrays.asList(true, false, true, true, false);
 
 	public void doSomething() {
-		list.stream().filter(s -> s.length() > 3).forEach(s -> {
-			logger.info(s);
-			logger.info(s + s);
-		});
+		list.stream()
+			.filter(s -> s.length() > 3)
+			.forEach(s -> {
+				logger.info(s);
+				logger.info(s + s);
+			});
 
-		list.parallelStream().filter(s -> "asdf".equals(s)).forEach(logger::info);
+		list.parallelStream()
+			.filter(s -> "asdf".equals(s))
+			.forEach(logger::info);
 
-		list.parallelStream().filter(s -> "asdf".equals(s)).forEach(logger::info);
+		list.parallelStream()
+			.filter(s -> "asdf".equals(s))
+			.forEach(logger::info);
 
-		list.stream().filter(s -> s.length() > 3).forEach(logger::info);
+		list.stream()
+			.filter(s -> s.length() > 3)
+			.forEach(logger::info);
 
-		intList.stream().filter(i -> i < 5).forEach(i -> {
-			logger.info(String.valueOf(i));
-			i++;
-			logger.info(String.valueOf(i));
-		});
-
-		intList.stream().filter(i -> i == 5).forEach(i -> logger.info(String.valueOf(i)));
-
-		booleanList.stream().filter(b -> b).forEach(b -> logger.info(String.valueOf(b)));
-
-		booleanList.stream().filter(b -> !b).forEach(b -> logger.info(String.valueOf(b)));
-
-		intList.stream().filter(i -> i == 5).forEach(i -> logger.info(String.valueOf(i)));
-
-		intList.stream().forEach(i -> {
-			if (getRandomNuber() > 0) {
+		intList.stream()
+			.filter(i -> i < 5)
+			.forEach(i -> {
 				logger.info(String.valueOf(i));
-			}
-		});
-
-		intList.stream().forEach(i -> {
-			int j;
-			if ((j = getRandomNuber()) > 0) {
-				logger.info(String.valueOf(i + j));
-			}
-		});
-
-		intList.stream().forEach(i -> {
-			if (i < 0) {
+				i++;
 				logger.info(String.valueOf(i));
-			} else {
-				logger.info(String.valueOf(i + 1));
-			}
-		});
+			});
 
-		intList.stream().filter(i -> i < 0).forEach(i -> logger.info(String.valueOf(i)));
+		intList.stream()
+			.filter(i -> i == 5)
+			.forEach(i -> logger.info(String.valueOf(i)));
 
-		intList.stream().filter(i -> i < 0).forEach(i -> logger.info(String.valueOf(i)));
+		booleanList.stream()
+			.filter(b -> b)
+			.forEach(b -> logger.info(String.valueOf(b)));
 
-		intList.stream().filter(i -> i < 0).forEach(i -> logger.info(String.valueOf(i)));
+		booleanList.stream()
+			.filter(b -> !b)
+			.forEach(b -> logger.info(String.valueOf(b)));
 
-		intList.stream().filter(i -> i < 0).forEach(i -> logger.info(String.valueOf(i)));
+		intList.stream()
+			.filter(i -> i == 5)
+			.forEach(i -> logger.info(String.valueOf(i)));
+
+		intList.stream()
+			.forEach(i -> {
+				if (getRandomNuber() > 0) {
+					logger.info(String.valueOf(i));
+				}
+			});
+
+		intList.stream()
+			.forEach(i -> {
+				int j;
+				if ((j = getRandomNuber()) > 0) {
+					logger.info(String.valueOf(i + j));
+				}
+			});
+
+		intList.stream()
+			.forEach(i -> {
+				if (i < 0) {
+					logger.info(String.valueOf(i));
+				} else {
+					logger.info(String.valueOf(i + 1));
+				}
+			});
+
+		intList.stream()
+			.filter(i -> i < 0)
+			.forEach(i -> logger.info(String.valueOf(i)));
+
+		intList.stream()
+			.filter(i -> i < 0)
+			.forEach(i -> logger.info(String.valueOf(i)));
+
+		intList.stream()
+			.filter(i -> i < 0)
+			.forEach(i -> logger.info(String.valueOf(i)));
+
+		intList.stream()
+			.filter(i -> i < 0)
+			.forEach(i -> logger.info(String.valueOf(i)));
 	}
 
 	public void forEachOnCollection() {
-		list.stream().filter(s -> s.length() > 3).forEach(s -> {
-			logger.info(s);
-			logger.info(s + s);
-		});
+		list.stream()
+			.filter(s -> s.length() > 3)
+			.forEach(s -> {
+				logger.info(s);
+				logger.info(s + s);
+			});
 	}
 
 	public void ifWithExpressionStatementBody(String input) {
 		StringBuilder sb = new StringBuilder();
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).forEach(sb::append);
+		list.stream()
+			.filter(s -> !StringUtils.isEmpty(s))
+			.forEach(sb::append);
 	}
 
 	private int getRandomNuber() {

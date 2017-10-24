@@ -61,9 +61,11 @@ public class BracketsToControlASTVisitor extends AbstractASTRewriteASTVisitor {
 	@SuppressWarnings("unchecked")
 	private void checkIfBodyIsSingleStatement(Statement body, Predicate<Statement> predicate) {
 		if (predicate.test(body)) {
-			Block wrappingBlock = body.getAST().newBlock();
+			Block wrappingBlock = body.getAST()
+				.newBlock();
 			ASTNode placeholder = astRewrite.createMoveTarget(body);
-			wrappingBlock.statements().add(placeholder);
+			wrappingBlock.statements()
+				.add(placeholder);
 			astRewrite.remove(body, null);
 			astRewrite.set(body.getParent(), body.getLocationInParent(), wrappingBlock, null);
 			onRewrite();

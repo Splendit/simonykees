@@ -16,25 +16,28 @@ import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * This visitor looks for the cases where a string literal is used as a parameter in
- * {@link String#equals(Object)} or {@link String#equalsIgnoreCase(String)}} and
- * swaps the literal with the string expression where the method is called.
- * For example, the following code:
+ * This visitor looks for the cases where a string literal is used as a
+ * parameter in {@link String#equals(Object)} or
+ * {@link String#equalsIgnoreCase(String)}} and swaps the literal with the
+ * string expression where the method is called. For example, the following
+ * code:
+ * 
  * <pre>
  * {@code
  * 		getSomeStringVal().equals("my-val");
  * }
- * </pre> 
+ * </pre>
  * 
  * will be replaced with:
+ * 
  * <pre>
  * {@code
  * 		"my-val".equals(getSomeStringVal());
  * }
- * </pre> 
+ * </pre>
  * 
- * Skips the cases where the type of the expression is 
- * not {@link String} or if the expression is already a string literal. 
+ * Skips the cases where the type of the expression is not {@link String} or if
+ * the expression is already a string literal.
  * 
  * @author Ardit Ymeri
  * @since 1.2
@@ -53,20 +56,24 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 
 	@Override
 	public boolean visit(StringLiteral stringLiteral) {
-		//checks if the parenth is a MethodInvoation and the StringLiteral is part of the arguments
-		if(stringLiteral.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
+		// checks if the parenth is a MethodInvoation and the StringLiteral is
+		// part of the arguments
+		if (stringLiteral.getLocationInParent() == MethodInvocation.ARGUMENTS_PROPERTY) {
 			MethodInvocation methodInvocation = (MethodInvocation) stringLiteral.getParent();
 			// if the method invocation's name is 'equals' or 'equalsIgnoreCase'
-			String methodIdentifier = methodInvocation.getName().getIdentifier();
+			String methodIdentifier = methodInvocation.getName()
+				.getIdentifier();
 			if ((EQUALS.equals(methodIdentifier) || EQUALS_IGNORE_CASE.equals(methodIdentifier))
-					&& methodInvocation.arguments().size() == 1) {
+					&& methodInvocation.arguments()
+						.size() == 1) {
 				Expression expression = methodInvocation.getExpression();
 				// if the LHS is not already a literal
 				if (expression != null && expression.getNodeType() != ASTNode.STRING_LITERAL) {
 					// if the data-type of the expression is String
 					ITypeBinding expressionTypeBinding = expression.resolveTypeBinding();
 					if (expressionTypeBinding != null) {
-						boolean isString = expressionTypeBinding.getQualifiedName().equals(String.class.getName());
+						boolean isString = expressionTypeBinding.getQualifiedName()
+							.equals(String.class.getName());
 						if (isString) {
 
 							/*
@@ -94,10 +101,10 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 	}
 
 	/**
-	 * Returns if there is no comment nested with the code represented by the 
-	 * given {@link ASTNode}. For example, if a {@link MethodInvocation} node 
-	 * representing the following code is given as a parameter, then this 
-	 * method returns {@code false}.
+	 * Returns if there is no comment nested with the code represented by the
+	 * given {@link ASTNode}. For example, if a {@link MethodInvocation} node
+	 * representing the following code is given as a parameter, then this method
+	 * returns {@code false}.
 	 * 
 	 * <pre>
 	 * {@code
@@ -113,8 +120,9 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 	private boolean isCommentFree(ASTNode node) {
 		int startPos = node.getStartPosition();
 		int endPos = startPos + node.getLength();
-		boolean hasComment = comments.stream().anyMatch(comment -> (comment.getStartPosition() > startPos)
-				&& ((comment.getStartPosition() + comment.getLength()) < endPos));
+		boolean hasComment = comments.stream()
+			.anyMatch(comment -> (comment.getStartPosition() > startPos)
+					&& ((comment.getStartPosition() + comment.getLength()) < endPos));
 		return !hasComment;
 
 	}

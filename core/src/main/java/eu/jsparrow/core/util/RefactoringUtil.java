@@ -67,12 +67,14 @@ public final class RefactoringUtil {
 			try {
 				packages = Arrays.asList(fragmentRoot.getChildren());
 				packages.stream()
-						.filter(packageElement -> StringUtils.startsWith(packageElement.getElementName(),
-								p.getElementName()) && !packageElement.getElementName().equals(p.getElementName()))
-						.forEach(packageElement -> {
-							result.add(packageElement);
-							logger.debug("Subpackage found:" + packageElement.getElementName()); //$NON-NLS-1$
-						});
+					.filter(packageElement -> StringUtils.startsWith(packageElement.getElementName(),
+							p.getElementName())
+							&& !packageElement.getElementName()
+								.equals(p.getElementName()))
+					.forEach(packageElement -> {
+						result.add(packageElement);
+						logger.debug("Subpackage found:" + packageElement.getElementName()); //$NON-NLS-1$
+					});
 			} catch (JavaModelException e) {
 				logger.debug("Java Model Exception", e); //$NON-NLS-1$
 			}
@@ -143,11 +145,11 @@ public final class RefactoringUtil {
 			 * findMaxProblemSeverity returns the SEVERITY-Level of the highest order.
 			 */
 
-			boolean foundProblems = IMarker.SEVERITY_ERROR == iCompilationUnit.getResource().findMaxProblemSeverity(
-					IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
+			boolean foundProblems = IMarker.SEVERITY_ERROR == iCompilationUnit.getResource()
+				.findMaxProblemSeverity(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE);
 			if (foundProblems) {
 				List<IMarker> markers = Arrays.asList(iCompilationUnit.getResource()
-						.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE));
+					.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, false, IResource.DEPTH_INFINITE));
 				for (IMarker marker : markers) {
 					String message = String.format("Found marker on line %s, with message: %s", //$NON-NLS-1$
 							marker.getAttribute(IMarker.LINE_NUMBER), marker.getAttribute(IMarker.MESSAGE));

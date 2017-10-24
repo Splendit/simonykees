@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -49,8 +50,7 @@ public class RulesTestUtil {
 	public static final String BASE_PACKAGE = "package eu.jsparrow.sample";
 	public static final String PRERULE_PACKAGE = "package eu.jsparrow.sample.preRule";
 	public static final String BASE_DIRECTORY = SAMPLE_MODULE_PATH + "src/test/java/eu/jsparrow/sample";
-	public static final String PRERULE_DIRECTORY = SAMPLE_MODULE_PATH
-			+ "src/test/java/eu/jsparrow/sample/preRule";
+	public static final String PRERULE_DIRECTORY = SAMPLE_MODULE_PATH + "src/test/java/eu/jsparrow/sample/preRule";
 
 	private RulesTestUtil() {
 		// hiding
@@ -106,7 +106,8 @@ public class RulesTestUtil {
 			String version) throws Exception {
 		Path jarPath = new Path(getM2Repository() + File.separator + toPath(groupId) + File.separator + artifactId
 				+ File.separator + version + File.separator + artifactId + "-" + version + ".jar");
-		if (!jarPath.toFile().exists()) {
+		if (!jarPath.toFile()
+			.exists()) {
 			throw new IllegalArgumentException(String.format(
 					"Maven Dependency :[%s:%s:%s] not found in local repository, add it to ../sample/pom.xml in the maven-dependency-plugin and execute package to download",
 					groupId, artifactId, version));
@@ -120,7 +121,9 @@ public class RulesTestUtil {
 		final String userHome = System.getProperty("user.home");
 		final File m2Settings = new File(userHome + "/.m2/settings.xml");
 		if (m2Settings.exists() && m2Settings.isFile()) {
-			final Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(m2Settings);
+			final Document document = DocumentBuilderFactory.newInstance()
+				.newDocumentBuilder()
+				.parse(m2Settings);
 
 			final Node settingsNode = getNodeByNodeName(document.getChildNodes(), "settings");
 			if (settingsNode != null) {
@@ -143,7 +146,10 @@ public class RulesTestUtil {
 	}
 
 	private static Node getNodeByNodeName(NodeList nodes, String nodeName) {
-		return asList(nodes).stream().filter(node -> nodeName.equals(node.getNodeName())).findFirst().orElse(null);
+		return asList(nodes).stream()
+			.filter(node -> nodeName.equals(node.getNodeName()))
+			.findFirst()
+			.orElse(null);
 	}
 
 	private static List<Node> asList(NodeList nodeList) {
@@ -199,7 +205,8 @@ public class RulesTestUtil {
 	}
 
 	public static IJavaProject createJavaProject(String projectName, String binFolderName) throws Exception {
-		IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+		IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace()
+			.getRoot();
 		IProject project = workspaceRoot.getProject(projectName);
 
 		if (!project.exists()) {
@@ -220,6 +227,23 @@ public class RulesTestUtil {
 		IJavaProject javaProject = JavaCore.create(project);
 		javaProject.setOutputLocation(binFolder.getFullPath(), null);
 		javaProject.setRawClasspath(new IClasspathEntry[0], null);
+
+		/*
+		 * The following options are extracted from our internal eclipse code
+		 * formatter at
+		 * https://bitbucket.splendit.loc/projects/INT/repos/eclipse-settings/
+		 * browse/splendit_default_formatter_20171019.xml . This has been done
+		 * for being able to format our unit tests with eclipse and not breaking
+		 * them by doing it. With this options the junit test project and
+		 * simonykees itself use the same formatting options.
+		 */
+		Map<String, String> options = javaProject.getOptions(false);
+		options.put("org.eclipse.jdt.core.formatter.alignment_for_enum_constants", "49");
+		options.put("org.eclipse.jdt.core.formatter.alignment_for_arguments_in_enum_constant", "48");
+		options.put("org.eclipse.jdt.core.formatter.comment.count_line_length_from_starting_position", "false");
+		options.put("org.eclipse.jdt.core.formatter.alignment_for_selector_in_method_invocation", "85");
+		options.put("org.eclipse.jdt.core.formatter.alignment_for_superinterfaces_in_enum_declaration", "48");
+		javaProject.setOptions(options);
 
 		return javaProject;
 	}

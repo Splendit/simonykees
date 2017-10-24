@@ -84,7 +84,8 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 	protected Expression createExpressionForStreamMethodInvocation(Expression expression) {
 		Expression expressionCopy = (Expression) astRewrite.createCopyTarget(expression);
 		if (expression.getNodeType() == ASTNode.CAST_EXPRESSION) {
-			ParenthesizedExpression parenthesizedExpression = astRewrite.getAST().newParenthesizedExpression();
+			ParenthesizedExpression parenthesizedExpression = astRewrite.getAST()
+				.newParenthesizedExpression();
 			parenthesizedExpression.setExpression(expressionCopy);
 			return parenthesizedExpression;
 		}
@@ -231,7 +232,8 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 				if (ASTNode.BREAK_STATEMENT == ndStatement.getNodeType()
 						&& ASTNode.EXPRESSION_STATEMENT == stStatement.getNodeType()) {
 					ExpressionStatement expressionStatement = (ExpressionStatement) stStatement;
-					if (ASTNode.ASSIGNMENT == expressionStatement.getExpression().getNodeType()) {
+					if (ASTNode.ASSIGNMENT == expressionStatement.getExpression()
+						.getNodeType()) {
 						return (Assignment) expressionStatement.getExpression();
 					}
 				}
@@ -265,7 +267,8 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 			return null;
 		}
 
-		ITypeBinding parameterTypeBinding = loopParameter.getType().resolveBinding();
+		ITypeBinding parameterTypeBinding = loopParameter.getType()
+			.resolveBinding();
 		if (!isTypeSafe(parameterTypeBinding) || !isTypeSafe(expressionBinding)) {
 			return null;
 		}
@@ -411,7 +414,8 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 	protected boolean isSumOfOperands(InfixExpression expression, SimpleName sumVariableName,
 			SimpleName parameterName) {
 		InfixExpression.Operator operator = expression.getOperator();
-		if (!expression.extendedOperands().isEmpty()) {
+		if (!expression.extendedOperands()
+			.isEmpty()) {
 			/*
 			 * There are more than two operands
 			 */

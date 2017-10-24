@@ -14,7 +14,8 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	boolean missingBoolDecl = false;
 	
 	public void usingAnyMatch(List<String> strings) {
-		boolean containsEmpty = strings.stream().anyMatch(value -> value.isEmpty());
+		boolean containsEmpty = strings.stream()
+			.anyMatch(value -> value.isEmpty());
 	}
 	
 	public void statementsInBetween(List<String> strings) {
@@ -22,7 +23,8 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	    if(strings.contains("a")) {
 	    	strings.add(b);
 	    }
-	    boolean containsEmpty = strings.stream().anyMatch(value -> value.isEmpty());
+	    boolean containsEmpty = strings.stream()
+			.anyMatch(value -> value.isEmpty());
 	}
 	
 	public void statementsBefore(List<String> strings) {
@@ -30,11 +32,13 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	    if(strings.contains("a")) {
 	    	strings.add(b);
 	    }
-	    boolean containsEmpty = strings.stream().anyMatch(value -> value.isEmpty());
+	    boolean containsEmpty = strings.stream()
+			.anyMatch(value -> value.isEmpty());
 	}
 	
 	public void statementsAfter(List<String> strings) {
-	    boolean containsEmpty = strings.stream().anyMatch(value -> value.isEmpty());
+	    boolean containsEmpty = strings.stream()
+			.anyMatch(value -> value.isEmpty());
 	    
 		String b = "b";
 	    if(strings.contains("a")) {
@@ -63,7 +67,8 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	    	containsA = true;
 	    }
 	    
-	    boolean containsEmpty = strings.stream().anyMatch(value -> value.isEmpty());
+	    boolean containsEmpty = strings.stream()
+			.anyMatch(value -> value.isEmpty());
 	}
 	
 	public void missingBreakStatement(List<String> strings) {
@@ -150,7 +155,8 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	
 	public void compoundCondition(List<String> strings) {
 		String emptyString = "";
-	    boolean containsEmpty = strings.stream().anyMatch(value -> emptyString.equals(value));
+	    boolean containsEmpty = strings.stream()
+			.anyMatch(value -> emptyString.equals(value));
 	}
 	
 	public void nonEffectivelyFinalCondition(List<String> strings) {
@@ -167,7 +173,8 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	
 	public void loopWithSingleBodyStatement(List<String> strings) {
 		String emptyString = "";
-	    boolean containsEmpty = strings.stream().anyMatch(value -> emptyString.equals(value));
+	    boolean containsEmpty = strings.stream()
+			.anyMatch(value -> emptyString.equals(value));
 	}
 	
 	/*
@@ -176,7 +183,8 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	
 	public boolean loopWithReturnStatement(List<String> strings) {
 		String emptyString = "";
-	    return strings.stream().anyMatch(value -> emptyString.equals(value));
+	    return strings.stream()
+			.anyMatch(value -> emptyString.equals(value));
 	}
 	
 	public boolean nonEffectivelyFinalReturnStatement(List<String> strings) {
@@ -234,7 +242,8 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	public boolean irrelevantStatementsBeforeLoop(List<String> strings) {
 		String emptyString = "";
 		String nonEmpty = "I dont stop you from converting to anyMatch";
-	    return strings.stream().anyMatch(value -> emptyString.equals(value));
+	    return strings.stream()
+			.anyMatch(value -> emptyString.equals(value));
 	}
 	
 	public boolean noIfWrapperAroundReturn(List<String> strings) {
@@ -268,12 +277,14 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	
 	public boolean ifWithSingleBodyStatement(List<String> strings) {
 		String emptyString = "";
-	    return strings.stream().anyMatch(value -> emptyString.equals(value));
+	    return strings.stream()
+			.anyMatch(value -> emptyString.equals(value));
 	}
 	
 	public boolean singleBodyStatementEverywhere(List<String> strings) {
 		String emptyString = "";
-	    return strings.stream().anyMatch(value -> emptyString.equals(value));
+	    return strings.stream()
+			.anyMatch(value -> emptyString.equals(value));
 	}
 	
 	public void emptyReturnStatements(List<String> strings) {

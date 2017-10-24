@@ -29,10 +29,12 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
-		if (methodInvocation.arguments().size() != 1 || methodInvocation.getExpression() == null) {
+		if (methodInvocation.arguments()
+			.size() != 1 || methodInvocation.getExpression() == null) {
 			return false;
 		}
-		boolean isEquals = StringUtils.equals(EQUALS, methodInvocation.getName().getFullyQualifiedName());
+		boolean isEquals = StringUtils.equals(EQUALS, methodInvocation.getName()
+			.getFullyQualifiedName());
 		if (!isEquals) {
 			return false;
 		}
@@ -42,7 +44,8 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (expressionBinding != null && !expressionBinding.isEnum()) {
 			return false;
 		}
-		Expression argument = (Expression) methodInvocation.arguments().get(0);
+		Expression argument = (Expression) methodInvocation.arguments()
+			.get(0);
 		ITypeBinding argumentBinding = argument.resolveTypeBinding();
 		if (argumentBinding != null && !argumentBinding.isEnum()) {
 			return false;
@@ -50,7 +53,8 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		InfixExpression.Operator newOperator = InfixExpression.Operator.EQUALS;
 
-		if (methodInvocation.getParent().getNodeType() == ASTNode.PREFIX_EXPRESSION
+		if (methodInvocation.getParent()
+			.getNodeType() == ASTNode.PREFIX_EXPRESSION
 				&& ((PrefixExpression) methodInvocation.getParent()).getOperator() == PrefixExpression.Operator.NOT) {
 			newOperator = InfixExpression.Operator.NOT_EQUALS;
 		}
@@ -60,12 +64,12 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
 		Expression replacementNode = NodeBuilder.newInfixExpression(methodInvocation.getAST(), newOperator, left,
 				right);
 		Expression replacedNode = methodInvocation;
-		if (methodInvocation.getParent().getNodeType() == ASTNode.PREFIX_EXPRESSION) {
-			if(((PrefixExpression) methodInvocation.getParent()).getOperator() == PrefixExpression.Operator.NOT){
+		if (methodInvocation.getParent()
+			.getNodeType() == ASTNode.PREFIX_EXPRESSION) {
+			if (((PrefixExpression) methodInvocation.getParent()).getOperator() == PrefixExpression.Operator.NOT) {
 				((InfixExpression) replacementNode).setOperator(InfixExpression.Operator.NOT_EQUALS);
-				replacedNode = (Expression) methodInvocation.getParent();				
-			}
-			else {
+				replacedNode = (Expression) methodInvocation.getParent();
+			} else {
 				replacementNode = NodeBuilder.newParenthesizedExpression(methodInvocation.getAST(), replacementNode);
 			}
 		}

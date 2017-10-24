@@ -21,9 +21,11 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
  * <p>
  * Those accesses can be replaced with an isEmpty() clause.
  * <ul>
- * <li>Collection: since 1.2, ex.: myCollection.size() == 0 -> myCollection.isEmpty()</li>
+ * <li>Collection: since 1.2, ex.: myCollection.size() == 0 ->
+ * myCollection.isEmpty()</li>
  * <li>Map: since 1.2, ex.: myMap.size() == 0 -> myMap.isEmpty()</li>
- * <li>Collection: since 1.6, ex.: myString.length() == 0 -> myString.isEmpty()</li>
+ * <li>Collection: since 1.6, ex.: myString.length() == 0 ->
+ * myString.isEmpty()</li>
  * </ul>
  * 
  * @author Martin Huter, Hans-Jörg Schrödl

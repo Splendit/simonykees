@@ -29,18 +29,20 @@ public class MultiVariableDeclarationLineRule {
 			int e;
 			int f = 0;
 
-			list.stream().map(element -> {
-				int x;
-				int y = -20;
+			list.stream()
+				.map(element -> {
+					int x;
+					int y = -20;
 
-				return element;
-			});
+					return element;
+				});
 		}
 		return "";
 	}
 
 	enum Foo {
-		ASD, DFG;
+		ASD,
+		DFG;
 
 		int a;
 		int b;

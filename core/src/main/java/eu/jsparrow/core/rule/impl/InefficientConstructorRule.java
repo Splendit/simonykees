@@ -20,7 +20,7 @@ public class InefficientConstructorRule extends RefactoringRule<InefficientConst
 		this.name = Messages.InefficientConstructorRule_name;
 		this.description = Messages.InefficientConstructorRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_5;

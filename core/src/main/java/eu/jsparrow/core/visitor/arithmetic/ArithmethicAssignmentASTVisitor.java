@@ -27,23 +27,32 @@ public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisito
 
 	@Override
 	public boolean visit(Assignment node) {
-		if (node.getOperator() != null && node.getOperator().equals(Operator.ASSIGN)
-				&& node.getLeftHandSide() instanceof SimpleName && node.getRightHandSide() instanceof InfixExpression) {
+		if (node.getOperator() != null && node.getOperator()
+			.equals(Operator.ASSIGN) && node.getLeftHandSide() instanceof SimpleName
+				&& node.getRightHandSide() instanceof InfixExpression) {
 			SimpleName leftHandSide = (SimpleName) node.getLeftHandSide();
 
-			// TODO verbessern, dass alle kombinationen von typen abgefangen werden, die
+			// TODO verbessern, dass alle kombinationen von typen abgefangen
+			// werden, die
 			// nicht weiter untersucht werden sollen.
-			if (node.getRightHandSide().resolveTypeBinding() != null
-					&& !node.getRightHandSide().resolveTypeBinding().isPrimitive()
-					|| node.getLeftHandSide().resolveTypeBinding() != null
-							&& !node.getLeftHandSide().resolveTypeBinding().isPrimitive()) {
+			if (node.getRightHandSide()
+				.resolveTypeBinding() != null
+					&& !node.getRightHandSide()
+						.resolveTypeBinding()
+						.isPrimitive()
+					|| node.getLeftHandSide()
+						.resolveTypeBinding() != null
+							&& !node.getLeftHandSide()
+								.resolveTypeBinding()
+								.isPrimitive()) {
 				return true;
 			}
 
 			ArithmeticExpressionASTVisitor arithExpASTVisitor = new ArithmeticExpressionASTVisitor(astRewrite,
 					leftHandSide);
 
-			node.getRightHandSide().accept(arithExpASTVisitor);
+			node.getRightHandSide()
+				.accept(arithExpASTVisitor);
 
 			if (arithExpASTVisitor.getNewOperator() != null) {
 				astRewrite.set(node, Assignment.OPERATOR_PROPERTY,

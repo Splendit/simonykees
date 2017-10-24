@@ -94,7 +94,8 @@ public class SelectRulesWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		if (model.getSelectionAsList().isEmpty()) {
+		if (model.getSelectionAsList()
+			.isEmpty()) {
 			return false;
 		} else {
 			return true;

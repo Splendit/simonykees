@@ -30,7 +30,8 @@ import eu.jsparrow.core.visitor.AbstractAddImportASTVisitor;
 public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 
 	private static final String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
-	private static final String STRING_UTILS_FULLY_QUALLIFIED_NAME = org.apache.commons.lang3.StringUtils.class.getName();
+	private static final String STRING_UTILS_FULLY_QUALLIFIED_NAME = org.apache.commons.lang3.StringUtils.class
+		.getName();
 
 	private static final String STRING_UTILS = "StringUtils"; //$NON-NLS-1$
 	private static final String IS_EMPTY = "isEmpty"; //$NON-NLS-1$

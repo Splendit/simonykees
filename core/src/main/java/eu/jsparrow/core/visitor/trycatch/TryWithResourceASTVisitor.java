@@ -51,9 +51,11 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		List<SimpleName> resourceNameList = new ArrayList<>();
 		boolean exit = false;
 
-		List<VariableDeclarationStatement> varDeclarationStatements = ((List<Object>) node.getBody().statements())
-				.stream().filter(VariableDeclarationStatement.class::isInstance)
-				.map(VariableDeclarationStatement.class::cast).collect(Collectors.toList());
+		List<VariableDeclarationStatement> varDeclarationStatements = ((List<Object>) node.getBody()
+			.statements()).stream()
+				.filter(VariableDeclarationStatement.class::isInstance)
+				.map(VariableDeclarationStatement.class::cast)
+				.collect(Collectors.toList());
 		List<VariableDeclarationFragment> toBeMovedToResources = new ArrayList<>();
 
 		for (VariableDeclarationStatement varDeclStatmentNode : varDeclarationStatements) {

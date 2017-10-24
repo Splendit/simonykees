@@ -36,10 +36,10 @@ import eu.jsparrow.i18n.Messages;
  *            is the {@link AbstractASTRewriteASTVisitor} implementation that is
  *            applied by this rule
  */
-public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> implements RefactoringRuleInterface {
+public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> implements RefactoringRuleInterface{
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringRule.class);
-	
+
 	protected String id;
 
 	protected String name = Messages.RefactoringRule_default_name;
@@ -120,6 +120,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 		enabled = satisfiedJavaVersion && satisfiedLibraries;
 	}
 
+
+
 	/**
 	 * JavaVersion independent requirements for rules that need to be defined for
 	 * each rule. Returns true as default implementation
@@ -131,10 +133,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 		return true;
 	}
 
-	protected AbstractASTRewriteASTVisitor visitorFactory() throws InstantiationException, IllegalAccessException {
-		AbstractASTRewriteASTVisitor visitor = visitorClass.newInstance();
-		visitor.addRewriteListener(RuleApplicationCount.get(this));
-		return visitor;
+	protected T visitorFactory() throws InstantiationException, IllegalAccessException {
+		return visitorClass.newInstance();
 	}
 
 	/**
@@ -144,9 +144,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	public final DocumentChange applyRule(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException, RefactoringException {
 
-		String trace = NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.name,
-				workingCopy.getElementName());
-		logger.trace(trace);
+		logger.trace(NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.name,
+				workingCopy.getElementName()));
 
 		return applyRuleImpl(workingCopy);
 	}
@@ -166,7 +165,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 		final CompilationUnit astRoot = RefactoringUtil.parse(workingCopy);
 
 		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
-		// Resolves that comments are manipulated during astrewrite
+		// FIXME resolves that comments are manipulated during astrewrite
 		//
 		// Solution from https://bugs.eclipse.org/bugs/show_bug.cgi?id=250142
 		// The best solution for such problems is usually to call
@@ -174,18 +173,18 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 		// and set a NoCommentSourceRangeComputer or a properly configured
 		// TightSourceRangeComputer.
 
-		// astRewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
+		// astRewrite.setTargetSourceRangeComputer(new
+		// NoCommentSourceRangeComputer());
 
-		Document document = new Document(workingCopy.getSource());
-		
-		AbstractASTRewriteASTVisitor visitor = visitorFactory();
-		visitor.setASTRewrite(astRewrite);
+		AbstractASTRewriteASTVisitor rule = visitorFactory();
+		rule.setASTRewrite(astRewrite);
 		try {
-			astRoot.accept(visitor);
+			astRoot.accept(rule);
 		} catch (RuntimeException e) {
 			throw new RefactoringException(e);
 		}
-		
+
+		Document document = new Document(workingCopy.getSource());
 		TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
 
 		if (edits.hasChildren()) {
@@ -195,11 +194,13 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 			 * This results in an incorrect preview of the DocumentChange. To fix this
 			 * issue, a copy of the TextEdit is used for the DocumentChange.
 			 */
-			DocumentChange documentChange = RefactoringUtil.generateDocumentChange(visitorClass.getSimpleName(),
-					document, edits.copy());
+			DocumentChange documentChange = RefactoringUtil.generateDocumentChange(visitorClass.getSimpleName(), document,
+					edits.copy());
 
 			workingCopy.applyTextEdit(edits, null);
 
+			// TODO think about using IProblemRequestor
+			// TODO think about returning the new AST
 			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
 
 			return documentChange;
@@ -239,7 +240,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	public boolean isSatisfiedLibraries() {
 		return satisfiedLibraries;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -264,4 +265,5 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 			return false;
 		return true;
 	}
+
 }

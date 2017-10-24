@@ -19,10 +19,12 @@ public class TestPrimitiveObjectUseEqualsRule {
 		if (!(!a.equals(b))) {
 		}
 
-		if (Integer.valueOf(1).equals(Integer.valueOf(2))) {
+		if (Integer.valueOf(1)
+			.equals(Integer.valueOf(2))) {
 		}
 
-		if (!Integer.valueOf(1).equals(Integer.valueOf(2))) {
+		if (!Integer.valueOf(1)
+			.equals(Integer.valueOf(2))) {
 		}
 	}
 
@@ -56,25 +58,32 @@ public class TestPrimitiveObjectUseEqualsRule {
 	}
 
 	public void testOtherPrimitivesShouldRefactor() {
-		if (Byte.valueOf("1").equals(Byte.valueOf("2"))) {
+		if (Byte.valueOf("1")
+			.equals(Byte.valueOf("2"))) {
 		}
 
-		if (Character.valueOf('a').equals(Character.valueOf('b'))) {
+		if (Character.valueOf('a')
+			.equals(Character.valueOf('b'))) {
 		}
 
-		if (Short.valueOf("1").equals(Short.valueOf("2"))) {
+		if (Short.valueOf("1")
+			.equals(Short.valueOf("2"))) {
 		}
 
-		if (Long.valueOf(1).equals(Long.valueOf(2))) {
+		if (Long.valueOf(1)
+			.equals(Long.valueOf(2))) {
 		}
 
-		if (Float.valueOf(1).equals(Float.valueOf(2))) {
+		if (Float.valueOf(1)
+			.equals(Float.valueOf(2))) {
 		}
 
-		if (Double.valueOf(1).equals(Double.valueOf(2))) {
+		if (Double.valueOf(1)
+			.equals(Double.valueOf(2))) {
 		}
 
-		if (Boolean.valueOf(true).equals(Boolean.valueOf(false))) {
+		if (Boolean.valueOf(true)
+			.equals(Boolean.valueOf(false))) {
 		}
 	}
 

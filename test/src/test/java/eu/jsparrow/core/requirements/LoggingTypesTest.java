@@ -48,8 +48,8 @@ public class LoggingTypesTest {
 		List<IClasspathEntry> entries = new ArrayList<>();
 		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25"));
 		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("ch.qos.logback", "logback-classic", "1.2.3"));
-		entries.add(
-				RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
+		entries
+			.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 
 		StandardLoggerRule slr = new StandardLoggerRule();
@@ -62,8 +62,8 @@ public class LoggingTypesTest {
 	public void slf4jLog4jPresent() throws Exception {
 		List<IClasspathEntry> entries = new ArrayList<>();
 		entries.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.slf4j", "slf4j-api", "1.7.25"));
-		entries.add(
-				RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
+		entries
+			.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 
 		StandardLoggerRule slr = new StandardLoggerRule();
@@ -97,11 +97,10 @@ public class LoggingTypesTest {
 		Assert.assertEquals(SupportedLogger.SLF4J, slr.getAvailableLoggerType());
 	}
 
-
 	@Test
 	public void log4jApiPresent() throws Exception {
-		entries.add(
-				RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
+		entries
+			.add(RulesTestUtil.generateMavenEntryFromDepedencyString("org.apache.logging.log4j", "log4j-api", "2.7"));
 		RulesTestUtil.addToClasspath(testproject, entries);
 
 		StandardLoggerRule slr = new StandardLoggerRule();

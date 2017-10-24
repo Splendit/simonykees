@@ -39,7 +39,8 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 	/*
-	 * is initialized in constructor and set to null again if condition is broken
+	 * is initialized in constructor and set to null again if condition is
+	 * broken
 	 */
 	private SimpleName iteratorName;
 	private Statement loopStatement;
@@ -85,11 +86,13 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(VariableDeclarationFragment node) {
-		if (null != iteratorName && node.getName().getIdentifier().equals(iteratorName.getIdentifier())
-				&& node.getInitializer() instanceof MethodInvocation) {
+		if (null != iteratorName && node.getName()
+			.getIdentifier()
+			.equals(iteratorName.getIdentifier()) && node.getInitializer() instanceof MethodInvocation) {
 			MethodInvocation nodeInitializer = (MethodInvocation) node.getInitializer();
-			if (ReservedNames.MI_Iterator.equals(nodeInitializer.getName().getFullyQualifiedName())
-					&& nodeInitializer.arguments().isEmpty() && null != nodeInitializer.getExpression()
+			if (ReservedNames.MI_Iterator.equals(nodeInitializer.getName()
+				.getFullyQualifiedName()) && nodeInitializer.arguments()
+					.isEmpty() && null != nodeInitializer.getExpression()
 					&& nodeInitializer.getExpression() instanceof Name) {
 
 				Expression iterableExpression = nodeInitializer.getExpression();
@@ -150,7 +153,8 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 			if (MethodInvocation.EXPRESSION_PROPERTY == node.getLocationInParent()) {
 				MethodInvocation methodInvocation = (MethodInvocation) node.getParent();
-				if (ReservedNames.MI_NEXT.equals(methodInvocation.getName().getFullyQualifiedName())) {
+				if (ReservedNames.MI_NEXT.equals(methodInvocation.getName()
+					.getFullyQualifiedName())) {
 					// next was already called on this iterator
 					if (null != iteratorNextCall) {
 						setNodesToNull();
@@ -158,7 +162,8 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 					}
 
 					/*
-					 * if 'next()' is called in a nested loop, the transformation cannot be done
+					 * if 'next()' is called in a nested loop, the
+					 * transformation cannot be done
 					 */
 					Statement eclosingLoopStatement = findEnclosingLoopStatement(node);
 					if (eclosingLoopStatement != loopStatement) {
@@ -168,8 +173,8 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 					iteratorNextCall = methodInvocation;
 					return true;
-				} else if (ReservedNames.MI_HAS_NEXT.equals(methodInvocation.getName().getFullyQualifiedName())
-						&& methodInvocation.getParent() == loopStatement) {
+				} else if (ReservedNames.MI_HAS_NEXT.equals(methodInvocation.getName()
+					.getFullyQualifiedName()) && methodInvocation.getParent() == loopStatement) {
 					// allowed hasNext in while head
 					return true;
 				} else {
@@ -214,7 +219,8 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		Type iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 
 		/*
-		 * iterator has no type-parameter therefore an optimization could not be applied
+		 * iterator has no type-parameter therefore an optimization could not be
+		 * applied
 		 */
 		if (null == iteratorType) {
 			return;
@@ -228,13 +234,14 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		if (nextCall.getParent() instanceof SingleVariableDeclaration) {
 			singleVariableDeclaration = (SingleVariableDeclaration) astRewrite.createMoveTarget(nextCall.getParent());
 			astRewrite.remove(nextCall.getParent(), null);
-		} else if (nextCall.getParent() instanceof VariableDeclarationFragment
-				&& nextCall.getParent().getParent() instanceof VariableDeclarationStatement) {
+		} else if (nextCall.getParent() instanceof VariableDeclarationFragment && nextCall.getParent()
+			.getParent() instanceof VariableDeclarationStatement) {
 			VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) nextCall
-					.getParent();
+				.getParent();
 			VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) variableDeclarationFragment
-					.getParent();
-			if (1 == variableDeclarationStatement.fragments().size()) {
+				.getParent();
+			if (1 == variableDeclarationStatement.fragments()
+				.size()) {
 				singleVariableDeclaration = NodeBuilder.newSingleVariableDeclaration(loopBody.getAST(),
 						(SimpleName) astRewrite.createMoveTarget(variableDeclarationFragment.getName()), iteratorType);
 				astRewrite.remove(variableDeclarationStatement, null);
@@ -254,7 +261,8 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 			singleVariableDeclaration = NodeBuilder.newSingleVariableDeclaration(loopBody.getAST(),
 					NodeBuilder.newSimpleName(loopBody.getAST(), iteratorName), iteratorType);
 			/*
-			 * if the next call is used only as an ExpressionStatement just remove it.
+			 * if the next call is used only as an ExpressionStatement just
+			 * remove it.
 			 */
 			if (nextCall.getParent() instanceof ExpressionStatement) {
 				astRewrite.remove(nextCall.getParent(), null);

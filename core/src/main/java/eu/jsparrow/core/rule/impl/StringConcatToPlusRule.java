@@ -20,7 +20,7 @@ public class StringConcatToPlusRule extends RefactoringRule<StringConcatToPlusAS
 		this.name = Messages.StringConcatToPlusRule_name;
 		this.description = Messages.StringConcatToPlusRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;

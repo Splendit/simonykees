@@ -17,7 +17,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class OrganizeImportsRulesTest extends SingleRuleTest {
-	
+
 	private static final String SAMPLE_FILE = "OrganiseImportsRule.java";
 	private static final String CONFLICTING_IMPORTS_FILE = "OrganiseConflictingImportsRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "organiseImports";
@@ -40,7 +40,7 @@ public class OrganizeImportsRulesTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
+
 	@Test
 	// This test fails, and I don't know why. Need to ask
 	@Ignore
@@ -62,6 +62,5 @@ public class OrganizeImportsRulesTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-
 
 }

@@ -56,23 +56,26 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
 		if (Activator.isRunning()) {
-			SimonykeesMessageDialog.openMessageDialog(Display.getDefault().getActiveShell(),
-					Messages.SelectRulesWizardHandler_allready_running, MessageDialog.INFORMATION);
+			SimonykeesMessageDialog.openMessageDialog(Display.getDefault()
+				.getActiveShell(), Messages.SelectRulesWizardHandler_allready_running, MessageDialog.INFORMATION);
 		} else {
 			Activator.setRunning(true);
-			if (!LicenseUtil.getInstance().isValid()) {
+			if (!LicenseUtil.getInstance()
+				.isValid()) {
 				/*
 				 * do not display the SelectRulesWizard if the license is invalid
 				 */
 				final Shell shell = HandlerUtil.getActiveShell(event);
-				if (!LicenseUtil.getInstance().displayLicenseErrorDialog(shell)) {
+				if (!LicenseUtil.getInstance()
+					.displayLicenseErrorDialog(shell)) {
 					Activator.setRunning(false);
 					return null;
 				}
 			}
 			List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
 			if (!selectedJavaElements.isEmpty()) {
-				IJavaProject selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
+				IJavaProject selectedJavaProjekt = selectedJavaElements.get(0)
+					.getJavaProject();
 
 				if (null != selectedJavaProjekt) {
 
@@ -88,8 +91,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 								SelectRulesWizard.collectICompilationUnits(compilationUnits, selectedJavaElements,
 										monitor);
 								List<ICompilationUnit> containingErrorList = refactoringPipeline
-										.prepareRefactoring(compilationUnits, monitor);
-
+									.prepareRefactoring(compilationUnits, monitor);
 								if (monitor.isCanceled()) {
 									/*
 									 * Workaround that prevents selection of multiple projects in the Package
@@ -145,43 +147,46 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 	 */
 	private void synchronizeWithUIShowSelectRulesWizard(ExecutionEvent event, RefactoringPipeline refactoringPipeline,
 			List<IJavaElement> selectedJavaElements, IJavaProject selectedJavaProjekt) {
-		Display.getDefault().asyncExec(() -> {
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			// HandlerUtil.getActiveShell(event)
-			final WizardDialog dialog = new WizardDialog(shell, new SelectRulesWizard(selectedJavaElements,
-					refactoringPipeline, RulesContainer.getRulesForProject(selectedJavaProjekt, false))) {
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				// HandlerUtil.getActiveShell(event)
+				final WizardDialog dialog = new WizardDialog(shell, new SelectRulesWizard(selectedJavaElements,
+						refactoringPipeline, RulesContainer.getRulesForProject(selectedJavaProjekt, false))) {
+					/*
+					 * Removed unnecessary empty space on the bottom of the
+					 * wizard intended for ProgressMonitor that is not used
+					 */
+					@Override
+					protected Control createDialogArea(Composite parent) {
+						Control ctrl = super.createDialogArea(parent);
+						getProgressMonitor();
+						return ctrl;
+					}
+
+					@Override
+					protected IProgressMonitor getProgressMonitor() {
+						ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
+						GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+						gridData.heightHint = 0;
+						monitor.setLayoutData(gridData);
+						monitor.setVisible(false);
+						return monitor;
+					}
+				};
 				/*
-				 * Removed unnecessary empty space on the bottom of the wizard intended for
-				 * ProgressMonitor that is not used
+				 * the dialog is made as big enough to show rule description
+				 * vertically and horizontally to avoid two scrollers
+				 * 
+				 * note: if the size is too big, it will be reduced to the
+				 * maximum possible size.
 				 */
-				@Override
-				protected Control createDialogArea(Composite parent) {
-					Control ctrl = super.createDialogArea(parent);
-					getProgressMonitor();
-					return ctrl;
-				}
+				dialog.setPageSize(1200, 1200);
 
-				@Override
-				protected IProgressMonitor getProgressMonitor() {
-					ProgressMonitorPart monitor = (ProgressMonitorPart) super.getProgressMonitor();
-					GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
-					gridData.heightHint = 0;
-					monitor.setLayoutData(gridData);
-					monitor.setVisible(false);
-					return monitor;
-				}
-			};
-			/*
-			 * the dialog is made as big enough to show rule description vertically and
-			 * horizontally to avoid two scrollers
-			 * 
-			 * note: if the size is too big, it will be reduced to the maximum possible
-			 * size.
-			 */
-			dialog.setPageSize(1200, 1200);
-
-			dialog.open();
-		});
+				dialog.open();
+			});
 	}
 
 	/**
@@ -191,23 +196,26 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 	private void synchronizeWithUIShowCompilationErrorMessage(List<ICompilationUnit> containingErrorList,
 			ExecutionEvent event, RefactoringPipeline refactoringPipeline, List<IJavaElement> selectedJavaElements,
 			IJavaProject selectedJavaProjekt) {
-		Display.getDefault().asyncExec(() -> {
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			CompilationErrorsMessageDialog dialog = new CompilationErrorsMessageDialog(shell);
-			dialog.create();
-			dialog.setTableViewerInput(containingErrorList);
-			dialog.open();
-			if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
-				if (refactoringPipeline.hasRefactoringStates()) {
-					synchronizeWithUIShowSelectRulesWizard(event, refactoringPipeline, selectedJavaElements,
-							selectedJavaProjekt);
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				CompilationErrorsMessageDialog dialog = new CompilationErrorsMessageDialog(shell);
+				dialog.create();
+				dialog.setTableViewerInput(containingErrorList);
+				dialog.open();
+				if (dialog.getReturnCode() == IDialogConstants.OK_ID) {
+					if (refactoringPipeline.hasRefactoringStates()) {
+						synchronizeWithUIShowSelectRulesWizard(event, refactoringPipeline, selectedJavaElements,
+								selectedJavaProjekt);
+					} else {
+						synchronizeWithUIShowWarningNoComlipationUnitDialog();
+					}
 				} else {
-					synchronizeWithUIShowWarningNoComlipationUnitDialog();
+					Activator.setRunning(false);
 				}
-			} else {
-				Activator.setRunning(false);
-			}
-		});
+			});
 	}
 
 	/**
@@ -217,12 +225,15 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 	 * apply
 	 */
 	private void synchronizeWithUIShowInfo(SimonykeesException exception) {
-		Display.getDefault().asyncExec(() -> {
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
 
-			Activator.setRunning(false);
-		});
+				Activator.setRunning(false);
+			});
 	}
 
 	/**
@@ -230,20 +241,26 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 	 * no Java files without compilation error from non UI thread
 	 */
 	private void synchronizeWithUIShowWarningNoComlipationUnitDialog() {
-		Display.getDefault().asyncExec(() -> {
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizardHandler_noFileWithoutError,
-					MessageDialog.INFORMATION);
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizardHandler_noFileWithoutError,
+						MessageDialog.INFORMATION);
 
-			Activator.setRunning(false);
-		});
+				Activator.setRunning(false);
+			});
 	}
 
 	private void synchronizeWithUIShowMultiprojectMessage() {
-		Display.getDefault().asyncExec(() -> {
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizardHandler_multipleProjectsWarning,
-					MessageDialog.WARNING);
-		});
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				SimonykeesMessageDialog.openMessageDialog(shell,
+						Messages.SelectRulesWizardHandler_multipleProjectsWarning, MessageDialog.WARNING);
+			});
 	}
 }

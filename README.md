@@ -9,6 +9,10 @@ Build the project with
 Execute
  
 	Maven > Update Project...
+	
+## missing dependencies in eclipse ##
+
+Read instructions at: https://confluence.splendit.loc/display/Tutorials/Eclipse
 
 ## build ##
 

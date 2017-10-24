@@ -52,7 +52,8 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 		if (!isEqualsOrNotEqualsInfix) {
 			return true;
 		}
-		if (!infixExpression.extendedOperands().isEmpty()) {
+		if (!infixExpression.extendedOperands()
+			.isEmpty()) {
 			return true;
 		}
 
@@ -83,7 +84,8 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 	private Expression createOperand(InfixExpression infixExpression, Expression left) {
 		Expression newOperand = (Expression) astRewrite.createMoveTarget(left);
 		if (left.getNodeType() == ASTNode.CAST_EXPRESSION) {
-			ParenthesizedExpression para = infixExpression.getAST().newParenthesizedExpression();
+			ParenthesizedExpression para = infixExpression.getAST()
+				.newParenthesizedExpression();
 			para.setExpression(newOperand);
 			newOperand = para;
 		}
@@ -113,7 +115,7 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 		List<Integer> forbiddenNodeTypes = Arrays.asList(ASTNode.NUMBER_LITERAL, ASTNode.BOOLEAN_LITERAL,
 				ASTNode.CHARACTER_LITERAL);
 		return !forbiddenNodeTypes.stream()
-				.anyMatch(x -> x == leftOperand.getNodeType() || x == rightOperand.getNodeType());
+			.anyMatch(x -> x == leftOperand.getNodeType() || x == rightOperand.getNodeType());
 	}
 
 }

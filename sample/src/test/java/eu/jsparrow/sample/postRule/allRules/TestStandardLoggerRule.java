@@ -201,7 +201,12 @@ class TopLevelClass {
 
 @SuppressWarnings({ "unused", "nls" })
 enum Days {
-	Mon, Tue, Thu, Frii, Saaat, Sun;
+	Mon,
+	Tue,
+	Thu,
+	Frii,
+	Saaat,
+	Sun;
 
 	private static final Logger logger1 = LoggerFactory.getLogger(Days.class);
 	private static final String logger = "";

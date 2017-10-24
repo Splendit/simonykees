@@ -7,7 +7,7 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
 import eu.jsparrow.license.netlicensing.LicenseType;
 
 /**
- * A representation of the Node Locked license. Responsible for constructing 
+ * A representation of the Node Locked license. Responsible for constructing
  * validation parameters related to the Node Locked license.
  * 
  * @author Ardit Ymeri
@@ -17,7 +17,7 @@ import eu.jsparrow.license.netlicensing.LicenseType;
 public class NodeLockedModel extends LicenseModel {
 
 	private String secretKey;
-	
+
 	public NodeLockedModel(ZonedDateTime expireDate, String secretKey) {
 		super(LicenseType.NODE_LOCKED, expireDate);
 		setSecretKey(secretKey);
@@ -25,12 +25,12 @@ public class NodeLockedModel extends LicenseModel {
 
 	@Override
 	public ValidationParameters getValidationParameters() {
-		
+
 		String key = getSecretKey();
-		
+
 		ValidationParameters validationParams = new ValidationParameters();
 		validationParams.setLicenseeSecret(key);
-		
+
 		return validationParams;
 	}
 

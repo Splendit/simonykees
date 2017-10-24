@@ -9,12 +9,11 @@ import eu.jsparrow.i18n.Messages;
 /**
  * @see EnumsWithoutEqualsRuleASTVisitor
  * 
- * @author Hans-Jörg Schrödl 
+ * @author Hans-Jörg Schrödl
  * @since 2.1.1
  */
 public class EnumsWithoutEqualsRule extends RefactoringRule<EnumsWithoutEqualsASTVisitor> {
 
-	
 	public EnumsWithoutEqualsRule() {
 		super();
 		this.visitorClass = EnumsWithoutEqualsASTVisitor.class;

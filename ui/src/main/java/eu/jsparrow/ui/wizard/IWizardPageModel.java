@@ -20,5 +20,5 @@ public interface IWizardPageModel {
 	public void moveToLeft(IStructuredSelection selectedElements);
 
 	public void moveAllToLeft();
-	
+
 }

@@ -23,8 +23,8 @@ public class YAMLConfig {
 	private List<YAMLProfile> profiles;
 
 	/**
-	 * default profile specifies a profile from the {@link YAMLConfig#profiles} list
-	 * which gets executed by default
+	 * default profile specifies a profile from the {@link YAMLConfig#profiles}
+	 * list which gets executed by default
 	 */
 	private String defaultProfile;
 
@@ -62,7 +62,8 @@ public class YAMLConfig {
 		profile.setName("default"); //$NON-NLS-1$
 		profile.setRules(profileRules);
 
-		config.getProfiles().add(profile);
+		config.getProfiles()
+			.add(profile);
 
 		config.setDefaultProfile("default"); //$NON-NLS-1$
 

@@ -58,24 +58,24 @@ public class JsparrowMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "jsparrow.yml", property = "configFile")
 	protected File configFile;
-	
+
 	@Parameter(defaultValue = "", property = "profile")
 	protected String profile;
 
 	// CONSTANTS
-	public static final String USER_DIR = "user.dir"; 
-	public static final String JAVA_TMP = "java.io.tmpdir"; 
-	public static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone"; 
-	public static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default"; 
-	public static final String FRAMEWORK_STORAGE_VALUE = "target/bundlecache"; 
-	public static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; 
-	public static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; 
-	public static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH";  
-	public static final String SELECTED_PROFILE = "PROFILE.SELECTED"; 
-	public static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; 
-	public static final String JSPARROW_MANIFEST = "manifest.standalone"; 
-	public static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory"; 
-	public static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; 
+	public static final String USER_DIR = "user.dir";
+	public static final String JAVA_TMP = "java.io.tmpdir";
+	public static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone";
+	public static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default";
+	public static final String FRAMEWORK_STORAGE_VALUE = "target/bundlecache";
+	public static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH";
+	public static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME";
+	public static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH";
+	public static final String SELECTED_PROFILE = "PROFILE.SELECTED";
+	public static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow";
+	public static final String JSPARROW_MANIFEST = "manifest.standalone";
+	public static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory";
+	public static final String DEPENDENCIES_FOLDER_CONSTANT = "deps";
 
 	public void execute() throws MojoExecutionException {
 		try {
@@ -98,8 +98,9 @@ public class JsparrowMojo extends AbstractMojo {
 		final Map<String, String> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
-		configuration.put(CONFIG_FILE_PATH, (configFile.exists() && !configFile.isDirectory()) ? configFile.getAbsolutePath() : ""); 
-		configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile); 
+		configuration.put(CONFIG_FILE_PATH,
+				(configFile.exists() && !configFile.isDirectory()) ? configFile.getAbsolutePath() : "");
+		configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile);
 
 		// Set working directory
 		String file = System.getProperty(JAVA_TMP);
@@ -114,13 +115,15 @@ public class JsparrowMojo extends AbstractMojo {
 		}
 
 		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
-		configuration.put(PROJECT_PATH_CONSTANT, project.getBasedir().getAbsolutePath());
+		configuration.put(PROJECT_PATH_CONSTANT, project.getBasedir()
+			.getAbsolutePath());
 		configuration.put(PROJECT_NAME_CONSTANT, project.getName());
 
 		extractAndCopyDependencies();
 
 		ServiceLoader<FrameworkFactory> ffs = ServiceLoader.load(FrameworkFactory.class);
-		FrameworkFactory frameworkFactory = ffs.iterator().next();
+		FrameworkFactory frameworkFactory = ffs.iterator()
+			.next();
 
 		final Framework framework = frameworkFactory.newFramework(configuration);
 
@@ -132,7 +135,7 @@ public class JsparrowMojo extends AbstractMojo {
 
 		try (InputStream is = JsparrowMojo.class.getResourceAsStream(File.separator + JSPARROW_MANIFEST);
 				BufferedReader reader = new BufferedReader(new InputStreamReader(is));) {
-			String line = ""; 
+			String line = "";
 
 			if (is != null) {
 				while ((line = reader.readLine()) != null) {
@@ -185,11 +188,12 @@ public class JsparrowMojo extends AbstractMojo {
 	 */
 	private void startBundles(List<Bundle> bundles) {
 		for (final Bundle bundle : bundles) {
-			if (bundle.getHeaders().get(Constants.FRAGMENT_HOST) == null && null != bundle.getSymbolicName()
-					&& (bundle.getSymbolicName().startsWith(STANDALONE_BUNDLE_NAME))) {
+			if (bundle.getHeaders()
+				.get(Constants.FRAGMENT_HOST) == null && null != bundle.getSymbolicName() && (bundle.getSymbolicName()
+					.startsWith(STANDALONE_BUNDLE_NAME))) {
 				try {
-					getLog().info(
-							"Starting BUNDLE: " + bundle.getSymbolicName() + ", resolution: " + bundle.getState());
+					getLog()
+						.info("Starting BUNDLE: " + bundle.getSymbolicName() + ", resolution: " + bundle.getState());
 					bundle.start();
 				} catch (Exception e) {
 					getLog().error(e.getMessage(), e);
@@ -204,7 +208,8 @@ public class JsparrowMojo extends AbstractMojo {
 	 */
 	private void extractAndCopyDependencies() {
 		final InvocationRequest request = new DefaultInvocationRequest();
-		request.setPomFile(new File(project.getBasedir().getAbsolutePath() + File.separator + "pom.xml"));
+		request.setPomFile(new File(project.getBasedir()
+			.getAbsolutePath() + File.separator + "pom.xml"));
 		request.setGoals(Collections.singletonList("dependency:copy-dependencies "));
 		final Properties props = new Properties();
 		props.setProperty(OUTPUT_DIRECTORY_CONSTANT,

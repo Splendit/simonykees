@@ -53,11 +53,13 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 	/*** VISITORS ***/
 
 	/**
-	 * collect {@link VariableDeclarationStatement}s of type {@link StringBuffer}.
+	 * collect {@link VariableDeclarationStatement}s of type
+	 * {@link StringBuffer}.
 	 */
 	@Override
 	public boolean visit(VariableDeclarationStatement variableDeclarationStatementNode) {
-		ITypeBinding declarationTypeBinding = variableDeclarationStatementNode.getType().resolveBinding();
+		ITypeBinding declarationTypeBinding = variableDeclarationStatementNode.getType()
+			.resolveBinding();
 		if (ClassRelationUtil.isContentOfTypes(declarationTypeBinding, STRINGBUFFER_TYPE_LIST)) {
 			stringBufferDeclarations.add(variableDeclarationStatementNode);
 		}
@@ -67,8 +69,8 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 
 	/**
 	 * collects {@link Assignment}s, where the {@link Assignment.Operator} is
-	 * {@link Assignment.Operator#ASSIGN} and the left part of the Assignment is of
-	 * type {@link StringBuffer} .
+	 * {@link Assignment.Operator#ASSIGN} and the left part of the Assignment is
+	 * of type {@link StringBuffer} .
 	 */
 	@Override
 	public boolean visit(Assignment assignmentNode) {
@@ -84,8 +86,8 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 	}
 
 	/**
-	 * collects the method's {@link ReturnStatement}, if its expression is of type
-	 * {@link StringBuffer}.
+	 * collects the method's {@link ReturnStatement}, if its expression is of
+	 * type {@link StringBuffer}.
 	 */
 	@Override
 	public boolean visit(ReturnStatement returnStatementNode) {
@@ -106,15 +108,19 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 	 */
 	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
-		if (methodInvocationNode.arguments() != null && !methodInvocationNode.arguments().isEmpty()) {
+		if (methodInvocationNode.arguments() != null && !methodInvocationNode.arguments()
+			.isEmpty()) {
 			List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocationNode.arguments(),
 					Expression.class);
-			arguments.stream().filter(argument -> ASTNode.SIMPLE_NAME == argument.getNodeType()).map(argument -> (SimpleName) argument).forEach(argumentSimpleName -> {
-				ITypeBinding argumentTypeBinding = argumentSimpleName.resolveTypeBinding();
-				if (ClassRelationUtil.isContentOfTypes(argumentTypeBinding, STRINGBUFFER_TYPE_LIST)) {
-					stringBufferMethodInvocationArgs.add(argumentSimpleName.getIdentifier());
-				}
-			});
+			arguments.stream()
+				.filter(argument -> ASTNode.SIMPLE_NAME == argument.getNodeType())
+				.map(argument -> (SimpleName) argument)
+				.forEach(argumentSimpleName -> {
+					ITypeBinding argumentTypeBinding = argumentSimpleName.resolveTypeBinding();
+					if (ClassRelationUtil.isContentOfTypes(argumentTypeBinding, STRINGBUFFER_TYPE_LIST)) {
+						stringBufferMethodInvocationArgs.add(argumentSimpleName.getIdentifier());
+					}
+				});
 		}
 
 		return false;
@@ -129,11 +135,13 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 			List<VariableDeclarationFragment> fragments = ASTNodeUtil.convertToTypedList(declaration.fragments(),
 					VariableDeclarationFragment.class);
 			List<String> declarationFragmentNames = fragments.stream()
-					.map(fragment -> fragment.getName().getIdentifier()).collect(Collectors.toList());
+				.map(fragment -> fragment.getName()
+					.getIdentifier())
+				.collect(Collectors.toList());
 
 			List<String> occuringFragmentNames = declarationFragmentNames.stream()
-					.filter(stringBufferMethodInvocationArgs::contains)
-					.collect(Collectors.toList());
+				.filter(stringBufferMethodInvocationArgs::contains)
+				.collect(Collectors.toList());
 
 			if (occuringFragmentNames != null && occuringFragmentNames.isEmpty()) {
 				String returnStatementName = getReturnStatementExpressionSimpleName(stringBufferReturnStatement);
@@ -143,10 +151,15 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 
 					if (validAssignments.isPresent() && isFragmentsValid(fragments)) {
 
-						validAssignments.get().stream().filter(assignment -> ASTNode.CLASS_INSTANCE_CREATION == assignment.getRightHandSide().getNodeType()).map(assignment -> (ClassInstanceCreation) assignment.getRightHandSide()).forEach(creation -> {
-							ClassInstanceCreation newCreation = createClassInstanceCreation(creation);
-							astRewrite.replace(creation, newCreation, null);
-						});
+						validAssignments.get()
+							.stream()
+							.filter(assignment -> ASTNode.CLASS_INSTANCE_CREATION == assignment.getRightHandSide()
+								.getNodeType())
+							.map(assignment -> (ClassInstanceCreation) assignment.getRightHandSide())
+							.forEach(creation -> {
+								ClassInstanceCreation newCreation = createClassInstanceCreation(creation);
+								astRewrite.replace(creation, newCreation, null);
+							});
 
 						VariableDeclarationStatement newDeclaration = createVariableDeclarationStatement(fragments);
 
@@ -190,20 +203,23 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 	 * {@link StringBuilder}.
 	 * 
 	 * @param declarationFragmentNames
-	 * @return a {@link List} of valid {@link Assignment}s (possibly empty) if the
-	 *         transformation can occur, null otherwise
+	 * @return a {@link List} of valid {@link Assignment}s (possibly empty) if
+	 *         the transformation can occur, null otherwise
 	 */
 	private Optional<List<Assignment>> getValidAssignments(List<String> declarationFragmentNames) {
 		List<Assignment> validAssignments = new LinkedList<>();
 		int totalAssignmentCount = 0;
 		for (Assignment assignment : stringBufferAssignmetns) {
-			if (ASTNode.SIMPLE_NAME == assignment.getLeftHandSide().getNodeType()
+			if (ASTNode.SIMPLE_NAME == assignment.getLeftHandSide()
+				.getNodeType()
 					&& declarationFragmentNames.contains(((SimpleName) assignment.getLeftHandSide()).getIdentifier())) {
 				totalAssignmentCount++;
-				if (ASTNode.CLASS_INSTANCE_CREATION == assignment.getRightHandSide().getNodeType()) {
+				if (ASTNode.CLASS_INSTANCE_CREATION == assignment.getRightHandSide()
+					.getNodeType()) {
 					validAssignments.add(assignment);
 				} else {
-					ITypeBinding expressionTypeBinding = assignment.getRightHandSide().resolveTypeBinding();
+					ITypeBinding expressionTypeBinding = assignment.getRightHandSide()
+						.resolveTypeBinding();
 					if (ClassRelationUtil.isContentOfTypes(expressionTypeBinding, STRINGBUILDER_TYPE_LIST)) {
 						validAssignments.add(assignment);
 					} else {
@@ -254,11 +270,12 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 
 	/**
 	 * creates a new {@link VariableDeclarationStatement} of type
-	 * {@link StringBuilder} with the given {@link VariableDeclarationFragment}s.
+	 * {@link StringBuilder} with the given
+	 * {@link VariableDeclarationFragment}s.
 	 * 
 	 * @param fragments
-	 * @return a new {@link StringBuilder} {@link VariableDeclarationStatement} or
-	 *         null, if an error occurred.
+	 * @return a new {@link StringBuilder} {@link VariableDeclarationStatement}
+	 *         or null, if an error occurred.
 	 */
 	private VariableDeclarationStatement createVariableDeclarationStatement(
 			List<VariableDeclarationFragment> fragments) {
@@ -268,10 +285,13 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 		VariableDeclarationFragment firstFragmentCopy = createStringBuilderFragmentCopy(firstFragment);
 
 		if (firstFragmentCopy != null) {
-			newDeclaration = astRewrite.getAST().newVariableDeclarationStatement(firstFragmentCopy);
+			newDeclaration = astRewrite.getAST()
+				.newVariableDeclarationStatement(firstFragmentCopy);
 
-			SimpleName stringBuilderTypeName = astRewrite.getAST().newSimpleName(JAVA_LANG_STRINGBUILDER_SIMPLENAME);
-			SimpleType stringBuilderType = astRewrite.getAST().newSimpleType(stringBuilderTypeName);
+			SimpleName stringBuilderTypeName = astRewrite.getAST()
+				.newSimpleName(JAVA_LANG_STRINGBUILDER_SIMPLENAME);
+			SimpleType stringBuilderType = astRewrite.getAST()
+				.newSimpleType(stringBuilderTypeName);
 			newDeclaration.setType(stringBuilderType);
 
 			ListRewrite newDeclarationFragments = astRewrite.getListRewrite(newDeclaration,
@@ -328,17 +348,22 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 	 *         {@link StringBuilder}.
 	 */
 	private ClassInstanceCreation createClassInstanceCreation(ClassInstanceCreation oldCreation) {
-		SimpleName stringBuilderName = astRewrite.getAST().newSimpleName(JAVA_LANG_STRINGBUILDER_SIMPLENAME);
-		SimpleType stringBuilderType = astRewrite.getAST().newSimpleType(stringBuilderName);
+		SimpleName stringBuilderName = astRewrite.getAST()
+			.newSimpleName(JAVA_LANG_STRINGBUILDER_SIMPLENAME);
+		SimpleType stringBuilderType = astRewrite.getAST()
+			.newSimpleType(stringBuilderName);
 
-		ClassInstanceCreation newCreation = astRewrite.getAST().newClassInstanceCreation();
+		ClassInstanceCreation newCreation = astRewrite.getAST()
+			.newClassInstanceCreation();
 		newCreation.setType(stringBuilderType);
 
-		if (!oldCreation.arguments().isEmpty()) {
+		if (!oldCreation.arguments()
+			.isEmpty()) {
 			ListRewrite newCreationArguments = astRewrite.getListRewrite(newCreation,
 					ClassInstanceCreation.ARGUMENTS_PROPERTY);
-			ASTNodeUtil.convertToTypedList(oldCreation.arguments(), Expression.class).forEach(
-					argument -> newCreationArguments.insertLast(astRewrite.createCopyTarget((ASTNode) argument), null));
+			ASTNodeUtil.convertToTypedList(oldCreation.arguments(), Expression.class)
+				.forEach(argument -> newCreationArguments.insertLast(astRewrite.createCopyTarget((ASTNode) argument),
+						null));
 		}
 
 		return newCreation;
