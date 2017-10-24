@@ -58,7 +58,7 @@ public class YAMLConfigUtil {
 		try (FileInputStream fis = new FileInputStream(file)) {
 
 			/*
-			 * the TypeDescription specifies the type of the configuration class
+			 * The TypeDescription specifies the type of the configuration class
 			 * and of the containing list of profiles because generics are a
 			 * compile time thing. see exportConfig method.
 			 */
