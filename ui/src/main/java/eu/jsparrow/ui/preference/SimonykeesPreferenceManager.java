@@ -11,6 +11,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preference.profile.DefaultProfile;
+import eu.jsparrow.ui.preference.profile.EmptyProfile;
 import eu.jsparrow.ui.preference.profile.Profile;
 import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 
@@ -22,20 +23,32 @@ import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
  */
 public class SimonykeesPreferenceManager {
 
-	private static IPreferenceStore store = Activator.getDefault()
-		.getPreferenceStore();
+	private static IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 
 	private static List<SimonykeesProfile> profiles = new ArrayList<>();
 
 	private static SimonykeesProfile defaultProfile = new DefaultProfile();
+	private static SimonykeesProfile emptyProfile = new EmptyProfile();
 
 	public static String getDefaultProfileList() {
-		return defaultProfile.getProfileName() + SimonykeesPreferenceConstants.NAME_RULES_DELIMITER + StringUtils
-			.join(defaultProfile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER);
+		StringBuilder sb = new StringBuilder();
+		sb.append(emptyProfile.getProfileName());
+		sb.append(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER);
+		sb.append("|"); //$NON-NLS-1$
+		sb.append(defaultProfile.getProfileName());
+		sb.append(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER);
+		sb.append(StringUtils
+				.join(defaultProfile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
+		
+		return sb.toString();
 	}
 
 	public static String getDefaultProfileName() {
 		return defaultProfile.getProfileName();
+	}
+
+	public static String getEmptyProfileName() {
+		return emptyProfile.getProfileName();
 	}
 
 	public static List<SimonykeesProfile> getProfiles() {
@@ -54,17 +67,7 @@ public class SimonykeesPreferenceManager {
 		if (profiles.get(index) instanceof Profile) {
 			((Profile) profiles.get(index)).setProfileName(name);
 		}
-		profiles.get(index)
-			.setEnabledRulesIds(ruleIds);
-	}
-
-	public static boolean useProfile() {
-		if (store.getString(SimonykeesPreferenceConstants.PROFILE_USE_OPTION)
-			.equals(SimonykeesPreferenceConstants.PROFILE_USE_OPTION_NO_PROFILE)) {
-			return false;
-		} else {
-			return true;
-		}
+		profiles.get(index).setEnabledRulesIds(ruleIds);
 	}
 
 	/**
@@ -122,9 +125,7 @@ public class SimonykeesPreferenceManager {
 		if (profiles.isEmpty()) {
 			loadProfilesFromStore();
 		}
-		return profiles.stream()
-			.map(SimonykeesProfile::getProfileName)
-			.collect(Collectors.toList());
+		return profiles.stream().map(SimonykeesProfile::getProfileName).collect(Collectors.toList());
 	}
 
 	private static String getAllProfiles() {
@@ -143,32 +144,30 @@ public class SimonykeesPreferenceManager {
 			String name = StringUtils.substring(profileInfo, 0,
 					profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER));
 			List<String> rules = Arrays.asList(StringUtils
-				.substring(profileInfo, profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
-				.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
+					.substring(profileInfo, profileInfo.indexOf(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER) + 1)
+					.split(SimonykeesPreferenceConstants.RULE_RULE_DELIMITER));
 			if (name.equals(Messages.Profile_DefaultProfile_profileName)) {
 				profiles.add(defaultProfile);
+			} else if (name.equals(Messages.EmptyProfile_profileName)) {
+				profiles.add(emptyProfile);
 			} else {
 				profiles.add(new Profile(name, rules));
 			}
 		}
 		return profiles;
+
 	}
 
 	public static String getStringFromProfiles() {
 		List<String> profilesAsString = new ArrayList<>();
-		profiles.stream()
-			.map((profile) -> profile.getProfileName() + SimonykeesPreferenceConstants.NAME_RULES_DELIMITER
-					+ StringUtils.join(profile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER))
-			.forEach(profilesAsString::add);
+		profiles.stream().map((profile) -> profile.getProfileName() + SimonykeesPreferenceConstants.NAME_RULES_DELIMITER
+				+ StringUtils.join(profile.getEnabledRuleIds(), SimonykeesPreferenceConstants.RULE_RULE_DELIMITER))
+				.forEach(profilesAsString::add);
 		return flattenArray(profilesAsString);
 	}
 
 	public static SimonykeesProfile getProfileFromName(String name) {
-		return profiles.stream()
-			.filter(profile -> profile.getProfileName()
-				.equals(name))
-			.findFirst()
-			.orElse(null);
+		return profiles.stream().filter(profile -> profile.getProfileName().equals(name)).findFirst().orElse(null);
 	}
 
 	/**
@@ -219,6 +218,7 @@ public class SimonykeesPreferenceManager {
 
 		profiles.clear();
 		defaultProfile = new DefaultProfile();
+		emptyProfile = new EmptyProfile();
 		loadProfilesFromStore();
 	}
 

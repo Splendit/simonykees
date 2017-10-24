@@ -1,5 +1,6 @@
 package eu.jsparrow.core.config;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -20,6 +21,8 @@ public class YAMLProfile {
 	private List<String> rules;
 
 	public YAMLProfile() {
+		this.name = ""; //$NON-NLS-1$
+		this.rules = new LinkedList<>();
 	}
 
 	public YAMLProfile(String name, List<String> rules) {
