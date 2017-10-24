@@ -84,6 +84,7 @@ public class SerialVersionUidASTVisitor extends AbstractASTRewriteASTVisitor {
 					astRewrite
 						.getListRewrite(node.getParent(), (ChildListPropertyDescriptor) node.getLocationInParent())
 						.insertFirst(newField, null);
+					onRewrite();
 				}
 			}
 		}

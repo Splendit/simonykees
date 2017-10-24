@@ -34,7 +34,7 @@ public class SimonykeesPreferenceManager {
 		StringBuilder sb = new StringBuilder();
 		sb.append(emptyProfile.getProfileName());
 		sb.append(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER);
-		sb.append("|");
+		sb.append("|"); //$NON-NLS-1$
 		sb.append(defaultProfile.getProfileName());
 		sb.append(SimonykeesPreferenceConstants.NAME_RULES_DELIMITER);
 		sb.append(StringUtils
@@ -173,8 +173,8 @@ public class SimonykeesPreferenceManager {
 	/**
 	 * This is the counterpart to {@link #parseString(String)}.
 	 * 
-	 * Takes a {@link List} of items and flattens them into a String, separated by
-	 * "|".
+	 * Takes a {@link List} of items and flattens them into a String, separated
+	 * by "|".
 	 * 
 	 * @param items
 	 *            List of items to flatten
@@ -187,7 +187,8 @@ public class SimonykeesPreferenceManager {
 	/**
 	 * This is the counterpart to {@link #flattenArray(List)}.
 	 * 
-	 * Takes a (property stored as) flat String and splits it into a String array.
+	 * Takes a (property stored as) flat String and splits it into a String
+	 * array.
 	 * 
 	 * @param stringList
 	 *            a flat String separated by "|"

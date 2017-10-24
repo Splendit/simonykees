@@ -15,7 +15,7 @@ public class ReImplementingInterfaceRule extends RefactoringRule<ReImplementingI
 
 	public ReImplementingInterfaceRule() {
 		super();
-		this.visitor = ReImplementingInterfaceASTVisitor.class;
+		this.visitorClass = ReImplementingInterfaceASTVisitor.class;
 		this.name = Messages.ReImplementingInterfaceRule_name;
 		this.description = Messages.ReImplementingInterfaceRule_description;
 	}

@@ -15,7 +15,7 @@ public class StringBufferToBuilderRule extends RefactoringRule<StringBufferToBui
 
 	public StringBufferToBuilderRule() {
 		super();
-		this.visitor = StringBufferToBuilderASTVisitor.class;
+		this.visitorClass = StringBufferToBuilderASTVisitor.class;
 		this.name = Messages.StringBufferToBuilderRule_name;
 		this.description = Messages.StringBufferToBuilderRule_description;
 	}

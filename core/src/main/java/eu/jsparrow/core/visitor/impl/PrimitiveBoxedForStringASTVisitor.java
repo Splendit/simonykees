@@ -195,6 +195,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 							toStringSimpleName, valueParameter);
 
 					astRewrite.replace(node, methodInvocation, null);
+					onRewrite();
 				}
 			}
 		}

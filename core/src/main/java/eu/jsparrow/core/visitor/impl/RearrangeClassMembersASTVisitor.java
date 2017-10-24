@@ -126,7 +126,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 
 			// swap the position according to the new order.
 			if (!sortedDeclarations.isEmpty() && startFrom >= 0) {
-				ASTRewrite astRewrite = getAstRewrite();
+				ASTRewrite astRewrite = getASTRewrite();
 				ListRewrite listRewrite = astRewrite.getListRewrite(node, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 
 				BodyDeclaration firstDeclaration = sortedDeclarations.get(startFrom);
@@ -137,6 +137,11 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 					.delete());
 				listRewrite.insertAt((BodyDeclaration) firstTarget, startFrom, null);
 				listRewrite.remove(firstDeclaration, null);
+
+				/*
+				 * The whole type counts as one change
+				 */
+				onRewrite();
 
 				for (int i = startFrom + 1; i < sortedDeclarations.size(); i++) {
 

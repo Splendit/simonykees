@@ -43,8 +43,10 @@ public class ReImplementingInterfaceASTVisitor extends AbstractASTRewriteASTVisi
 						ListRewrite interfacesListRewrite = astRewrite.getListRewrite(typeDeclarationNode,
 								TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY);
 
-						duplicateInterfaces
-							.forEach(duplicateInterface -> interfacesListRewrite.remove(duplicateInterface, null));
+						duplicateInterfaces.forEach(duplicateInterface -> {
+							interfacesListRewrite.remove(duplicateInterface, null);
+							onRewrite();
+						});
 					}
 				}
 			}

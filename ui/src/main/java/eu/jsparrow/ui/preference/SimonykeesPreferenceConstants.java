@@ -18,7 +18,7 @@ public class SimonykeesPreferenceConstants {
 	
 	public static final String ENABLE_INTRO = "enableIntro";
 	public static final String RESOLVE_PACKAGES_RECURSIVELY = "resolvePackagesRecursively";
-	
+
 	public static final String NAME_RULES_DELIMITER = "^";
 	public static final String RULE_RULE_DELIMITER = "~";
 	

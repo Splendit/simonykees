@@ -15,7 +15,7 @@ public class FlatMapInsteadOfNestedLoopsRule extends RefactoringRule<FlatMapInst
 
 	public FlatMapInsteadOfNestedLoopsRule() {
 		super();
-		this.visitor = FlatMapInsteadOfNestedLoopsASTVisitor.class;
+		this.visitorClass = FlatMapInsteadOfNestedLoopsASTVisitor.class;
 		this.name = Messages.FlatMapInsteadOfNestedLoopsRule_name;
 		this.description = Messages.FlatMapInsteadOfNestedLoopsRule_description;
 	}

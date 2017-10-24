@@ -41,7 +41,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 			return true;
 		}
 
-		List<String> stringFullyQualifiedNameList = generateFullyQuallifiedNameList(stringFullyQualifiedName);
+		List<String> stringFullyQualifiedNameList = generateFullyQualifiedNameList(stringFullyQualifiedName);
 
 		/*
 		 * Checks if method invocation is toString. The invocation needs to have
@@ -79,6 +79,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 			} while (unwrapped);
 
 			astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(variableExpression), null);
+			onRewrite();
 
 		}
 		return true;

@@ -86,8 +86,8 @@ public final class RefactoringUtil {
 	 * Creates the new parser to parse {@link ICompilationUnit}
 	 * 
 	 * @param compilationUnit
-	 *            the Java model compilation unit whose source code is to be parsed,
-	 *            or null if none
+	 *            the Java model compilation unit whose source code is to be
+	 *            parsed, or null if none
 	 * 
 	 * @return newly created parsed compilation unit
 	 * 
@@ -142,7 +142,8 @@ public final class RefactoringUtil {
 	public static boolean checkForSyntaxErrors(ICompilationUnit iCompilationUnit) {
 		try {
 			/**
-			 * findMaxProblemSeverity returns the SEVERITY-Level of the highest order.
+			 * findMaxProblemSeverity returns the SEVERITY-Level of the highest
+			 * order.
 			 */
 
 			boolean foundProblems = IMarker.SEVERITY_ERROR == iCompilationUnit.getResource()

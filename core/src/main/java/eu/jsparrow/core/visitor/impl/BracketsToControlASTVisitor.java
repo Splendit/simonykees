@@ -68,6 +68,7 @@ public class BracketsToControlASTVisitor extends AbstractASTRewriteASTVisitor {
 				.add(placeholder);
 			astRewrite.remove(body, null);
 			astRewrite.set(body.getParent(), body.getLocationInParent(), wrappingBlock, null);
+			onRewrite();
 		}
 	}
 }

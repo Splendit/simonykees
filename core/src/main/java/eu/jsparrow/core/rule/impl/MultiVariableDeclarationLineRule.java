@@ -17,7 +17,7 @@ public class MultiVariableDeclarationLineRule extends RefactoringRule<MultiVaria
 
 	public MultiVariableDeclarationLineRule() {
 		super();
-		this.visitor = MultiVariableDeclarationLineASTVisitor.class;
+		this.visitorClass = MultiVariableDeclarationLineASTVisitor.class;
 		this.name = Messages.MultiVariableDeclarationLineRule_name;
 		this.description = Messages.MultiVariableDeclarationLineRule_description;
 	}

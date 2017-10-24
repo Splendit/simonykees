@@ -33,15 +33,15 @@ import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
  */
 public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final String BYTE_FULLY_QUALLIFIED_NAME = java.lang.Byte.class.getName();
-	private static final String CHAR_FULLY_QUALLIFIED_NAME = java.lang.Character.class.getName();
-	private static final String SHORT_FULLY_QUALLIFIED_NAME = java.lang.Short.class.getName();
+	private static final String BYTE_FULLY_QUALIFIED_NAME = java.lang.Byte.class.getName();
+	private static final String CHAR_FULLY_QUALIFIED_NAME = java.lang.Character.class.getName();
+	private static final String SHORT_FULLY_QUALIFIED_NAME = java.lang.Short.class.getName();
 	private static final String INTEGER_FULLY_QUALIFIED_NAME = java.lang.Integer.class.getName();
 	private static final String LONG_FULLY_QUALIFIED_NAME = java.lang.Long.class.getName();
 	private static final String FLOAT_FULLY_QUALIFIED_NAME = java.lang.Float.class.getName();
 	private static final String DOUBLE_FULLY_QUALIFIED_NAME = java.lang.Double.class.getName();
 	private static final String BOOLEAN_FULLY_QUALIFIED_NAME = java.lang.Boolean.class.getName();
-	private static final String STRING_FULLY_QUALLIFIED_NAME = java.lang.String.class.getName();
+	private static final String STRING_FULLY_QUALIFIED_NAME = java.lang.String.class.getName();
 
 	private static final String EQUALS = "equals"; //$NON-NLS-1$
 
@@ -63,7 +63,7 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 
 		Expression replaceNode = createReplacementNode(infixExpression);
 		astRewrite.replace(infixExpression, replaceNode, null);
-
+		onRewrite();
 		return true;
 	}
 
@@ -96,10 +96,10 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 		Expression leftOperand = infixExpression.getLeftOperand();
 		Expression rightOperand = infixExpression.getRightOperand();
 
-		List<String> allowedTypes = Arrays.asList(BYTE_FULLY_QUALLIFIED_NAME, CHAR_FULLY_QUALLIFIED_NAME,
-				SHORT_FULLY_QUALLIFIED_NAME, INTEGER_FULLY_QUALIFIED_NAME, LONG_FULLY_QUALIFIED_NAME,
+		List<String> allowedTypes = Arrays.asList(BYTE_FULLY_QUALIFIED_NAME, CHAR_FULLY_QUALIFIED_NAME,
+				SHORT_FULLY_QUALIFIED_NAME, INTEGER_FULLY_QUALIFIED_NAME, LONG_FULLY_QUALIFIED_NAME,
 				FLOAT_FULLY_QUALIFIED_NAME, DOUBLE_FULLY_QUALIFIED_NAME, BOOLEAN_FULLY_QUALIFIED_NAME,
-				STRING_FULLY_QUALLIFIED_NAME);
+				STRING_FULLY_QUALIFIED_NAME);
 
 		ITypeBinding leftOperandType = leftOperand.resolveTypeBinding();
 		ITypeBinding rightOperandType = rightOperand.resolveTypeBinding();

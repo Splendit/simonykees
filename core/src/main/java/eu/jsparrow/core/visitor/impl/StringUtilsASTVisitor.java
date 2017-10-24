@@ -118,7 +118,7 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 		}
 
 		if (ClassRelationUtil.isContentOfTypes(optionalExpression.resolveTypeBinding(),
-				generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
+				generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 			AST currentAST = node.getAST();
 			String replacementOperation = null;
 			String stringOperation = node.getName()
@@ -159,6 +159,7 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 					.newSimpleName(replacementOperation), null);
 				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY)
 					.insertFirst((Expression) ASTNode.copySubtree(currentAST, node.getExpression()), null);
+				onRewrite();
 				return false;
 			}
 		}

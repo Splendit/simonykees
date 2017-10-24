@@ -35,6 +35,7 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 		List<Block> blockList = catchClauses.stream()
 			.map(CatchClause::getBody)
 			.collect(Collectors.toList());
+		boolean onRewriteTriggered = false;
 		while (!blockList.isEmpty()) {
 			boolean combined = false;
 			/*
@@ -78,6 +79,10 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 				allNewTypes.forEach(insertType -> uniontype.types()
 					.add(astRewrite.createMoveTarget(insertType)));
 				astRewrite.replace(referenceExceptionType, uniontype, null);
+				if (!onRewriteTriggered) {
+					onRewrite();
+					onRewriteTriggered = true;
+				}
 			}
 
 		}

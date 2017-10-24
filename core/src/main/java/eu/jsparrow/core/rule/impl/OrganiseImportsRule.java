@@ -16,6 +16,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -36,7 +37,7 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 
 	public OrganiseImportsRule() {
 		super();
-		this.visitor = AbstractASTRewriteASTVisitor.class;
+		this.visitorClass = AbstractASTRewriteASTVisitor.class;
 		this.name = Messages.OrganiseImportsRule_name;
 		this.description = Messages.OrganiseImportsRule_description;
 	}
@@ -75,6 +76,8 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 
 		if (!hasAmbiguity[0] && importsOperation.getParseError() == null && edit != null
 				&& !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
+			RuleApplicationCount.get(this)
+				.update();
 			Document document = new Document(workingCopy.getSource());
 			documentChange = RefactoringUtil.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document,
 					edit.copy());

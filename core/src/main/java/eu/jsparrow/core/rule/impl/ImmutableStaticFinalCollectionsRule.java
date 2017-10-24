@@ -15,7 +15,7 @@ public class ImmutableStaticFinalCollectionsRule extends RefactoringRule<Immutab
 
 	public ImmutableStaticFinalCollectionsRule() {
 		super();
-		this.visitor = ImmutableStaticFinalCollectionsASTVisitor.class;
+		this.visitorClass = ImmutableStaticFinalCollectionsASTVisitor.class;
 		this.name = Messages.ImmutableStaticFinalCollectionsRule_name;
 		this.description = Messages.ImmutableStaticFinalCollectionsRule_description;
 	}
