@@ -53,7 +53,7 @@ import eu.jsparrow.ui.wizard.semiautomatic.LoggerRuleWizard;
 public class LoggerRuleWizardHandler extends AbstractHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoggerRuleWizardHandler.class);
-	
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
@@ -103,8 +103,9 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 											.prepareRefactoring(compilationUnits, monitor);
 										if (monitor.isCanceled()) {
 											/*
-											 * Workaround that prevents selection of multiple projects in the Package
-											 * Explorer.
+											 * Workaround that prevents
+											 * selection of multiple projects in
+											 * the Package Explorer.
 											 * 
 											 * See SIM-496
 											 */
@@ -206,8 +207,9 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Method used to open CompilationErrorsMessageDialog from non UI thread to list
-	 * all Java files that will be skipped because they contain compilation errors.
+	 * Method used to open CompilationErrorsMessageDialog from non UI thread to
+	 * list all Java files that will be skipped because they contain compilation
+	 * errors.
 	 */
 	private void synchronizeWithUIShowCompilationErrorMessage(List<ICompilationUnit> containingErrorList,
 			ExecutionEvent event, RefactoringPipeline refactoringPipeline, List<IJavaElement> selectedJavaElements,
@@ -235,10 +237,10 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Method used to open InformationDialog from non UI thread RefactoringException
-	 * is thrown if java element does not exist or if an exception occurs while
-	 * accessing its corresponding resource, or if no working copies were found to
-	 * apply
+	 * Method used to open InformationDialog from non UI thread
+	 * RefactoringException is thrown if java element does not exist or if an
+	 * exception occurs while accessing its corresponding resource, or if no
+	 * working copies were found to apply
 	 */
 	private void synchronizeWithUIShowInfo(SimonykeesException exception) {
 		Display.getDefault()
@@ -253,8 +255,8 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 	}
 
 	/**
-	 * Method used to open MessageDialog informing the user that selection contains
-	 * no Java files without compilation error from non UI thread
+	 * Method used to open MessageDialog informing the user that selection
+	 * contains no Java files without compilation error from non UI thread
 	 */
 	private void synchronizeWithUIShowWarningNoComlipationUnitDialog() {
 		Display.getDefault()

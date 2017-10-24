@@ -48,7 +48,7 @@ public class SelectRulesWizardTest {
 		IPackageFragment sub2Fragment = fixture.addPackageFragment(PACKAGE_PREFIX + ".sub2");
 		fixture.addCompilationUnit(sub2Fragment, "Class12.java");
 	}
-	
+
 	@AfterClass
 	public static void tearDown() throws CoreException {
 		fixture.tearDown();

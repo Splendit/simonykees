@@ -174,8 +174,8 @@ public class SimonykeesPreferenceManager {
 	/**
 	 * This is the counterpart to {@link #parseString(String)}.
 	 * 
-	 * Takes a {@link List} of items and flattens them into a String, separated by
-	 * "|".
+	 * Takes a {@link List} of items and flattens them into a String, separated
+	 * by "|".
 	 * 
 	 * @param items
 	 *            List of items to flatten
@@ -188,7 +188,8 @@ public class SimonykeesPreferenceManager {
 	/**
 	 * This is the counterpart to {@link #flattenArray(List)}.
 	 * 
-	 * Takes a (property stored as) flat String and splits it into a String array.
+	 * Takes a (property stored as) flat String and splits it into a String
+	 * array.
 	 * 
 	 * @param stringList
 	 *            a flat String separated by "|"
