@@ -69,7 +69,7 @@ public class LicenseUtil {
 		}
 		return false;
 	}
-	
+
 	public boolean isFullLicense() {
 		if (isLicenseValidationServiceAvailable) {
 			return licenseValidationService.isFullValidLicense();

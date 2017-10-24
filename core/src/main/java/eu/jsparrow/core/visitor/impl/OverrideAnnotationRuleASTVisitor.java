@@ -78,9 +78,9 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 		List<MethodDeclaration> toBeAnnotated = new ArrayList<>();
 
 		for (MethodDeclaration method : methods) {
-			// skip constructors, private methods and methods that have the @Override annotation 
-			if (!method.isConstructor()
-					&& !ASTNodeUtil.hasModifier(method.modifiers(), Modifier::isPrivate)
+			// skip constructors, private methods and methods that have the
+			// @Override annotation
+			if (!method.isConstructor() && !ASTNodeUtil.hasModifier(method.modifiers(), Modifier::isPrivate)
 					&& !isOverrideAnnotated(method)) {
 
 				IMethodBinding methodBinding = method.resolveBinding();
@@ -100,8 +100,9 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 
 		// add @Override to methods marked for annotation
 		toBeAnnotated.stream()
-				.forEach(method -> astRewrite.getListRewrite(method, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(
-						NodeBuilder.newMarkerAnnotation(node.getAST(), node.getAST().newName(OVERRIDE_SIMPLE_NAME)), null));
+			.forEach(method -> astRewrite.getListRewrite(method, MethodDeclaration.MODIFIERS2_PROPERTY)
+				.insertFirst(NodeBuilder.newMarkerAnnotation(node.getAST(), node.getAST()
+					.newName(OVERRIDE_SIMPLE_NAME)), null));
 	}
 
 	/**
@@ -113,9 +114,11 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	 */
 	private boolean isOverrideAnnotated(MethodDeclaration method) {
 
-		return ASTNodeUtil.convertToTypedList(method.modifiers(), MarkerAnnotation.class).stream()
-				.map(MarkerAnnotation::getTypeName).anyMatch(typeName -> OVERRIDE_SIMPLE_NAME.equals(typeName.getFullyQualifiedName())
-						|| JAVA_LANG_OVERRIDE.equals(typeName.getFullyQualifiedName()));
+		return ASTNodeUtil.convertToTypedList(method.modifiers(), MarkerAnnotation.class)
+			.stream()
+			.map(MarkerAnnotation::getTypeName)
+			.anyMatch(typeName -> OVERRIDE_SIMPLE_NAME.equals(typeName.getFullyQualifiedName())
+					|| JAVA_LANG_OVERRIDE.equals(typeName.getFullyQualifiedName()));
 	}
 
 	/**
@@ -128,9 +131,10 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 	private List<IMethodBinding> findOverridableAncestorMethods(List<ITypeBinding> ancestors) {
 		List<IMethodBinding> allMethods = new ArrayList<>();
 		ancestors.forEach(ancestor -> {
-			List<IMethodBinding> overridableMethods = Arrays.asList(ancestor.getDeclaredMethods()).stream()
-					.filter(method -> !Modifier.isPrivate(method.getModifiers()) && !method.isConstructor())
-					.collect(Collectors.toList());
+			List<IMethodBinding> overridableMethods = Arrays.asList(ancestor.getDeclaredMethods())
+				.stream()
+				.filter(method -> !Modifier.isPrivate(method.getModifiers()) && !method.isConstructor())
+				.collect(Collectors.toList());
 
 			allMethods.addAll(overridableMethods);
 		});

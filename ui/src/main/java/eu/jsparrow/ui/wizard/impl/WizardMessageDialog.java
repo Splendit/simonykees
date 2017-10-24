@@ -17,25 +17,31 @@ public class WizardMessageDialog {
 	 * are required from non UI thread
 	 */
 	public static void synchronizeWithUIShowWarningNoRefactoringDialog() {
-		Display.getDefault().asyncExec(() -> {
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizard_warning_no_refactorings,
-					MessageDialog.INFORMATION);
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizard_warning_no_refactorings,
+						MessageDialog.INFORMATION);
 
-			Activator.setRunning(false);
-		});
+				Activator.setRunning(false);
+			});
 	}
 
 	/**
 	 * Method used to open ErrorDialog from non UI thread
 	 */
 	public static void synchronizeWithUIShowError(SimonykeesException exception) {
-		Display.getDefault().asyncExec(() -> {
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			SimonykeesMessageDialog.openErrorMessageDialog(shell, exception);
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				SimonykeesMessageDialog.openErrorMessageDialog(shell, exception);
 
-			Activator.setRunning(false);
-		});
+				Activator.setRunning(false);
+			});
 	}
 
 	/**
@@ -45,11 +51,14 @@ public class WizardMessageDialog {
 	 * working copies were found to apply
 	 */
 	public static void synchronizeWithUIShowInfo(SimonykeesException exception) {
-		Display.getDefault().asyncExec(() -> {
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
 
-			Activator.setRunning(false);
-		});
+				Activator.setRunning(false);
+			});
 	}
 }

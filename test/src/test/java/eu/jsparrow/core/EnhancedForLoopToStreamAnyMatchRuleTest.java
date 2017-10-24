@@ -17,7 +17,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class EnhancedForLoopToStreamAnyMatchRuleTest extends SingleRuleTest {
-	
+
 	private static final String SAMPLE_FILE = "EnhancedForLoopToStreamAnyMatchRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "enhancedForLoopToStreamAnyMatch";
 
@@ -33,7 +33,7 @@ public class EnhancedForLoopToStreamAnyMatchRuleTest extends SingleRuleTest {
 	public void testTransformationWithDefaultFile() throws Exception {
 		Path preRule = getPreRuleFile(SAMPLE_FILE);
 		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
-		
+
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);

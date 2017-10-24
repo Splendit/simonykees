@@ -27,7 +27,7 @@ public interface StandardLoggerOptions {
 	 * @return a map of replacement options.
 	 */
 	Map<String, Integer> getSystemErrReplaceOptions();
-	
+
 	/**
 	 * Returns the available options for replacing the
 	 * {@link System.out#print()} method used for logging an exception together
@@ -36,7 +36,7 @@ public interface StandardLoggerOptions {
 	 * @return a map of replacement options.
 	 */
 	Map<String, Integer> getSystemOutPrintExceptionReplaceOptions();
-	
+
 	/**
 	 * Returns the available options for replacing the
 	 * {@link System.err#print()} method used for logging an exception together
@@ -53,7 +53,7 @@ public interface StandardLoggerOptions {
 	 * @return a map of replacement options.
 	 */
 	Map<String, Integer> getPrintStackTraceReplaceOptions();
-	
+
 	/**
 	 * Returns the available options for inserting a new logging statement in
 	 * the catch clauses which ignore the exception together with their log

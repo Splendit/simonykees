@@ -87,7 +87,8 @@ public class Activator extends AbstractUIPlugin {
 		// load pseudo-activator from test fragment and execute its start method
 		try {
 			Class<? extends BundleActivator> fragmentActivatorClass = Class
-					.forName("at.splendit.simonykees.core.TestFragmentActivator").asSubclass(BundleActivator.class); //$NON-NLS-1$
+				.forName("at.splendit.simonykees.core.TestFragmentActivator") //$NON-NLS-1$
+				.asSubclass(BundleActivator.class);
 			testFragmentActivator = fragmentActivatorClass.newInstance();
 			testFragmentActivator.start(context);
 		} catch (ClassNotFoundException e) {

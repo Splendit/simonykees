@@ -6,12 +6,12 @@ import org.osgi.framework.BundleContext;
 import eu.jsparrow.logging.LoggingUtil;
 
 /**
-* Pseudo Activator for test fragment. Gets called by the Activator from the
-* fragment host via reflection.
-* 
-* @author Matthias Webhofer
-* @since 1.2
-*/
+ * Pseudo Activator for test fragment. Gets called by the Activator from the
+ * fragment host via reflection.
+ * 
+ * @author Matthias Webhofer
+ * @since 1.2
+ */
 public class TestFragmentActivator implements BundleActivator {
 
 	@Override

@@ -64,10 +64,12 @@ public class TestInefficientConstructorBooleanRule {
 	}
 
 	public Boolean booleanWithMethodInvocationTest() {
-		return Boolean.valueOf(true).booleanValue();
+		return Boolean.valueOf(true)
+			.booleanValue();
 	}
 
 	public Boolean booleanTrueValueOfMethodInvocationTest() {
-		return Boolean.valueOf(true).booleanValue();
+		return Boolean.valueOf(true)
+			.booleanValue();
 	}
 }

@@ -11,8 +11,15 @@ import java.util.List;
  */
 public class YAMLConfig {
 
+	/**
+	 * this list holds all IDs of rules which should be executed if no default
+	 * profile has been specified
+	 */
 	private List<String> rules;
 
+	/**
+	 * this list holds all specified profiles (see {@link YAMLProfile}
+	 */
 	private List<YAMLProfile> profiles;
 
 	private String selectedProfile;

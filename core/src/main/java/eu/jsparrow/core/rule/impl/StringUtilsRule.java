@@ -32,7 +32,7 @@ import eu.jsparrow.i18n.Messages;
  *
  */
 public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
-	
+
 	private final String version31 = "3.1"; //$NON-NLS-1$
 
 	Logger logger = LoggerFactory.getLogger(StringUtilsRule.class);
@@ -49,7 +49,7 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 		this.description = Messages.StringUtilsRule_description;
 		this.supportetVersion.add(version31);
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
@@ -61,13 +61,14 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 			String fullyQuallifiedClassName = "org.apache.commons.lang3.StringUtils"; //$NON-NLS-1$
 			IType classtype = project.findType(fullyQuallifiedClassName);
 			if (classtype != null) {
-				
+
 				IPackageFragmentRoot commonsLangLib = getProject(classtype.getParent());
 				// file with path to libary jar
-				File file = new File(commonsLangLib.getPath().toString());
-				
+				File file = new File(commonsLangLib.getPath()
+					.toString());
+
 				try (JarFile jar = new java.util.jar.JarFile(file)) {
-					
+
 					Manifest manifest = jar.getManifest();
 					Attributes attributes = manifest.getMainAttributes();
 
@@ -76,7 +77,8 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 							Name key = (Name) attribute;
 							String keyword = key.toString();
 							if ("Implementation-Version".equals(keyword)) { //$NON-NLS-1$
-								if (supportetVersion.stream().anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s))) {
+								if (supportetVersion.stream()
+									.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s))) {
 									return true;
 								} else {
 									return false;
@@ -101,7 +103,7 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 	public String requiredLibraries() {
 		return "org.apache.commons.lang3.StringUtils"; //$NON-NLS-1$
 	}
-	
+
 	private IPackageFragmentRoot getProject(IJavaElement iJavaElement) {
 		if (null == iJavaElement) {
 			return null;

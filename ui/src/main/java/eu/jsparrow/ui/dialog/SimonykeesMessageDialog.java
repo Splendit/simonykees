@@ -100,7 +100,9 @@ public class SimonykeesMessageDialog extends MessageDialog {
 			imageLabel = new Label(composite, SWT.NULL);
 			image.setBackground(imageLabel.getBackground());
 			imageLabel.setImage(image);
-			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.BEGINNING).applyTo(imageLabel);
+			GridDataFactory.fillDefaults()
+				.align(SWT.CENTER, SWT.BEGINNING)
+				.applyTo(imageLabel);
 		}
 		if (message != null) {
 			Link link = new Link(composite, getMessageLabelStyle());
@@ -110,15 +112,20 @@ public class SimonykeesMessageDialog extends MessageDialog {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
 					try {
-						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(arg0.text));
+						PlatformUI.getWorkbench()
+							.getBrowserSupport()
+							.getExternalBrowser()
+							.openURL(new URL(arg0.text));
 					} catch (PartInitException | MalformedURLException e) {
 						logger.error(Messages.SimonykeesMessageDialog_open_browser_error_message, e);
 					}
 				}
 			});
-			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false)
-					.hint(convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT)
-					.applyTo(link);
+			GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER)
+				.grab(true, false)
+				.hint(convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT)
+				.applyTo(link);
 		}
 		return composite;
 	}

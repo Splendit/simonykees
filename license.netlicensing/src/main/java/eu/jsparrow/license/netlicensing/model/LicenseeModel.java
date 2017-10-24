@@ -3,10 +3,10 @@ package eu.jsparrow.license.netlicensing.model;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
 /**
- * Representation of the licensee entity. Responsible for constructing the 
- * validation parameters related to the licensee. It makes use of the license 
- * model for getting parameters related to the license. 
- *  
+ * Representation of the licensee entity. Responsible for constructing the
+ * validation parameters related to the licensee. It makes use of the license
+ * model for getting parameters related to the license.
+ * 
  * @author Ardit Ymeri
  * @since 1.0
  *
@@ -24,22 +24,22 @@ public class LicenseeModel {
 		setLicenseeNumber(licenseeNumber);
 		setLicenseModel(licenseModel);
 		setProductNumber(productNumber);
-		
+
 		initValidationParameters(licenseeName);
 	}
-	
+
 	private void initValidationParameters(String licenseeName) {
 		LicenseModel model = getLicenseModel();
 		String pNumber = getProductNumber();
-		
+
 		ValidationParameters params = new ValidationParameters();
-		if(model != null) {
+		if (model != null) {
 			params = model.getValidationParameters();
 		}
-		
+
 		params.setLicenseeName(licenseeName);
 		params.setProductNumber(pNumber);
-		
+
 		setValidationParameters(params);
 	}
 

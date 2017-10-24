@@ -29,7 +29,8 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 	public void shutDownAndRestartScheduler() throws InterruptedException {
 		// having an instance of license manager and a running scheduler...
 
-		ValidationResultCache.getInstance().reset();
+		ValidationResultCache.getInstance()
+			.reset();
 		persistNodeLockedLicensee();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseManager licenseManager = LicenseManager.getInstance();
@@ -59,7 +60,8 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 		 * down...
 		 */
 
-		ValidationResultCache.getInstance().reset();
+		ValidationResultCache.getInstance()
+			.reset();
 		persistNodeLockedLicensee();
 
 		LicenseManager licenseManager = LicenseManager.getInstance();

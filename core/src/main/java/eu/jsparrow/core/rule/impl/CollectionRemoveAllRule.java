@@ -20,7 +20,7 @@ public class CollectionRemoveAllRule extends RefactoringRule<CollectionRemoveAll
 		this.name = Messages.CollectionRemoveAllRule_name;
 		this.description = Messages.CollectionRemoveAllRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_2;

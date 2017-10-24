@@ -6,9 +6,10 @@ import java.util.HashMap;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
 import eu.jsparrow.license.netlicensing.LicenseType;
+
 /**
- * A representation of a floating license. Responsible for constructing 
- * the validation parameters for checking and checkout calls. 
+ * A representation of a floating license. Responsible for constructing the
+ * validation parameters for checking and checkout calls.
  * 
  * @author Ardit Ymeri
  * @since 1.0
@@ -34,7 +35,7 @@ public class FloatingModel extends LicenseModel {
 	public String getSessionId() {
 		return this.sessionId;
 	}
-	
+
 	private void setSessionId(String sessionId) {
 		this.sessionId = sessionId;
 	}
@@ -66,14 +67,13 @@ public class FloatingModel extends LicenseModel {
 
 		return validationParams;
 	}
-	
+
 	public String getProductModuleNumber() {
 		return this.productModuleNumber;
 	}
-	
-	private void setProductModuleNumber(String productModuleNumber){
+
+	private void setProductModuleNumber(String productModuleNumber) {
 		this.productModuleNumber = productModuleNumber;
 	}
-
 
 }

@@ -134,11 +134,8 @@ public class YAMLConfigUtil {
 	 * @throws YAMLConfigException
 	 */
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRulesFromConfig(
-			YAMLConfig config, IJavaProject javaProject) throws YAMLConfigException {
+			YAMLConfig config, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules) throws YAMLConfigException {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result;
-
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
-			.getRulesForProject(javaProject, true);
 
 		String selectedProfile = config.getSelectedProfile();
 		if (selectedProfile != null && !selectedProfile.isEmpty()) {
@@ -217,13 +214,7 @@ public class YAMLConfigUtil {
 		return configSelectedRules;
 	}
 
-	/**
-	 * checks if a given rule id exists
-	 * 
-	 * @param ruleId
-	 * @return
-	 */
-	public static boolean isRuleExistent(String ruleId) {
+	private static boolean isRuleExistent(String ruleId) {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules(true);
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : rules) {
 			if (rule.getId()

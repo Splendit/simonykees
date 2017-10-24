@@ -3,10 +3,14 @@ package eu.jsparrow.standalone;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -14,12 +18,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLConfig;
+import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.config.YAMLConfigUtil;
+import eu.jsparrow.core.config.YAMLProfile;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -78,8 +85,9 @@ public class Activator implements BundleActivator {
 
 		standaloneConfig = new StandaloneConfig(projectName, projectPath);
 
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil.getSelectedRulesFromConfig(config,
-				standaloneConfig.getJavaProject());
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
+				.getRulesForProject(standaloneConfig.getJavaProject(), true);
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
 		if(selectedRules == null) {
 			selectedRules = new LinkedList<>();
 		}
@@ -124,8 +132,10 @@ public class Activator implements BundleActivator {
 		try {
 			/* Unregister as a save participant */
 			if (ResourcesPlugin.getWorkspace() != null) {
-				ResourcesPlugin.getWorkspace().forgetSavedTree(PLUGIN_ID);
-				ResourcesPlugin.getWorkspace().removeSaveParticipant(PLUGIN_ID);
+				ResourcesPlugin.getWorkspace()
+					.forgetSavedTree(PLUGIN_ID);
+				ResourcesPlugin.getWorkspace()
+					.removeSaveParticipant(PLUGIN_ID);
 			}
 
 		} catch (Exception e) {

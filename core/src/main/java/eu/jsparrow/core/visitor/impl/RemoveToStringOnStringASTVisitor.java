@@ -40,7 +40,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 		if (methodInvocationSkipList.contains(node)) {
 			return true;
 		}
-		
+
 		List<String> stringFullyQualifiedNameList = generateFullyQuallifiedNameList(stringFullyQualifiedName);
 
 		/*
@@ -48,11 +48,12 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 		 * zero arguments. The expressions type where the toString is used on
 		 * needs to be a String or a StringLiteral
 		 */
-		if (StringUtils.equals(ReservedNames.MI_TO_STRING, node.getName().getFullyQualifiedName())
-				&& !(node.getParent() instanceof ExpressionStatement) && node.typeArguments().isEmpty()
-				&& (node.getExpression() != null && ClassRelationUtil.isContentOfTypes(
-						node.getExpression().resolveTypeBinding(), stringFullyQualifiedNameList))) {
-			
+		if (StringUtils.equals(ReservedNames.MI_TO_STRING, node.getName()
+			.getFullyQualifiedName()) && !(node.getParent() instanceof ExpressionStatement) && node.typeArguments()
+				.isEmpty()
+				&& (node.getExpression() != null && ClassRelationUtil.isContentOfTypes(node.getExpression()
+					.resolveTypeBinding(), stringFullyQualifiedNameList))) {
+
 			Expression variableExpression = node.getExpression();
 
 			boolean unwrapped = false;
@@ -65,10 +66,11 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 
 				if (variableExpression instanceof MethodInvocation) {
 					MethodInvocation mI = (MethodInvocation) variableExpression;
-					if (StringUtils.equals(ReservedNames.MI_TO_STRING, mI.getName().getFullyQualifiedName())
-							&& mI.typeArguments().isEmpty()
-							&& (mI.getExpression() != null && ClassRelationUtil.isContentOfTypes(
-									mI.getExpression().resolveTypeBinding(), stringFullyQualifiedNameList))) {
+					if (StringUtils.equals(ReservedNames.MI_TO_STRING, mI.getName()
+						.getFullyQualifiedName()) && mI.typeArguments()
+							.isEmpty()
+							&& (mI.getExpression() != null && ClassRelationUtil.isContentOfTypes(mI.getExpression()
+								.resolveTypeBinding(), stringFullyQualifiedNameList))) {
 						variableExpression = mI.getExpression();
 						methodInvocationSkipList.add(mI);
 						unwrapped = true;

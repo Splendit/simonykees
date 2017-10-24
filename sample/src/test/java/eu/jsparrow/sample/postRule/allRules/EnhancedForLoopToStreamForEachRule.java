@@ -187,8 +187,11 @@ public class EnhancedForLoopToStreamForEachRule {
 		rule.intField = 12;
 		rule.testClassField.testIntField = 1;
 		for (Map.Entry<String, Map<String, String>> entry : validationConfigurations.entrySet()) {
-			Map<String, String> clone = new HashMap<>(entry.getValue().size());
-			entry.getValue().entrySet().forEach(entry2 -> clone.put(entry2.getKey(), entry2.getValue()));
+			Map<String, String> clone = new HashMap<>(entry.getValue()
+				.size());
+			entry.getValue()
+				.entrySet()
+				.forEach(entry2 -> clone.put(entry2.getKey(), entry2.getValue()));
 			rule.validationConfigurations.put(entry.getKey(), clone);
 		}
 		rule.intField = 12;
@@ -244,7 +247,9 @@ public class EnhancedForLoopToStreamForEachRule {
 	}
 
 	public void rawIterator() {
-		List<Class> classes = stringList1.stream().map(String::getClass).collect(Collectors.toList());
+		List<Class> classes = stringList1.stream()
+			.map(String::getClass)
+			.collect(Collectors.toList());
 		for (Class clazz : classes) {
 			logger.info(String.valueOf(clazz));
 		}
@@ -275,26 +280,32 @@ public class EnhancedForLoopToStreamForEachRule {
 	private void collectionOfDoubles() {
 		List<Double> doubles = new ArrayList<>();
 
-		doubles.stream().mapToDouble(Double::valueOf).forEach(d -> {
-			double halfD = d / 2;
-			logger.info(String.valueOf(halfD + d));
-		});
+		doubles.stream()
+			.mapToDouble(Double::valueOf)
+			.forEach(d -> {
+				double halfD = d / 2;
+				logger.info(String.valueOf(halfD + d));
+			});
 	}
 
 	private void collectionOfInts() {
 		List<Integer> doubles = new ArrayList<>();
-		doubles.stream().mapToInt(Integer::valueOf).forEach(i -> {
-			int plusTwo = i + 2;
-			logger.info(String.valueOf(plusTwo + i));
-		});
+		doubles.stream()
+			.mapToInt(Integer::valueOf)
+			.forEach(i -> {
+				int plusTwo = i + 2;
+				logger.info(String.valueOf(plusTwo + i));
+			});
 	}
 
 	private void collectionOfLongs() {
 		List<Long> longs = new ArrayList<>();
-		longs.stream().mapToLong(Long::valueOf).forEach(l -> {
-			long minusTwo = l - 2;
-			logger.info(String.valueOf(minusTwo + l));
-		});
+		longs.stream()
+			.mapToLong(Long::valueOf)
+			.forEach(l -> {
+				long minusTwo = l - 2;
+				logger.info(String.valueOf(minusTwo + l));
+			});
 	}
 
 	private void boxedIteratingVariable() {

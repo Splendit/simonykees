@@ -17,7 +17,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class EnumsWithoutEqualsRuleTest extends SingleRuleTest {
-	
+
 	private static final String SAMPLE_FILE = "TestEnumsWithoutEqualsRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "enumsWithoutEquals";
 
@@ -48,7 +48,6 @@ public class EnumsWithoutEqualsRuleTest extends SingleRuleTest {
 
 		assertTrue(rule.isEnabled());
 	}
-	
 
 	@Test
 	public void calculateEnabledForProjectShouldBeDisabled() {

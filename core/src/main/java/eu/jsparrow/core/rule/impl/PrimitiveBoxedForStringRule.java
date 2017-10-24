@@ -20,7 +20,7 @@ public class PrimitiveBoxedForStringRule extends RefactoringRule<PrimitiveBoxedF
 		this.name = Messages.PrimitiveBoxedForStringRule_name;
 		this.description = Messages.PrimitiveBoxedForStringRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;

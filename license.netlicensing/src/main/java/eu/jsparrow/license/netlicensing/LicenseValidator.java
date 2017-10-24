@@ -38,8 +38,9 @@ public class LicenseValidator {
 			ValidationParameters validationParameters = licensee.getValidationParams();
 			String licenseeNumber = licensee.getLicenseeNumber();
 			String licenseeName = licensee.getLicenseeName();
-			Context context = RestApiConnection.getAPIRestConnection().getContext();
-			
+			Context context = RestApiConnection.getAPIRestConnection()
+				.getContext();
+
 			Instant timestamp = Instant.now();
 
 			// sending validation request...
@@ -47,10 +48,11 @@ public class LicenseValidator {
 
 			// caching and persisting the validation result...
 			ValidationResultCache cache = ValidationResultCache.getInstance();
-			cache.updateCachedResult(validationResult, licenseeName, licenseeNumber, timestamp, ValidationAction.CHECK_OUT, LicenseManager.VERSION);
+			cache.updateCachedResult(validationResult, licenseeName, licenseeNumber, timestamp,
+					ValidationAction.CHECK_OUT, LicenseManager.VERSION);
 			PersistenceManager persistenceManager = PersistenceManager.getInstance();
 			persistenceManager.persistCachedData();
-			
+
 			// logging validation result...
 			logger.info(Messages.LicenseValidator_received_validation_response);
 
@@ -63,14 +65,16 @@ public class LicenseValidator {
 
 	public static boolean isValidLicensee(String licenseeNumber) {
 		boolean validLicensee = false;
-		Context context = RestApiConnection.getAPIRestConnection().getContext();
+		Context context = RestApiConnection.getAPIRestConnection()
+			.getContext();
 		try {
-			ValidationResult validationResult = LicenseeService.validate(context, licenseeNumber, new ValidationParameters());
+			ValidationResult validationResult = LicenseeService.validate(context, licenseeNumber,
+					new ValidationParameters());
 			validLicensee = ResponseParser.parseLicenseeValidation(validationResult);
 		} catch (NetLicensingException e) {
 			logger.warn(Messages.LicenseValidator_invalid_licensee_number, e);
 		}
-		
+
 		return validLicensee;
 	}
 

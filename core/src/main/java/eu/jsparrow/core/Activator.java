@@ -58,7 +58,6 @@ public class Activator implements BundleActivator {
 	public static Activator getDefault() {
 		return plugin;
 	}
-	
 
 	public static void registerJob(Job job) {
 		synchronized (jobs) {

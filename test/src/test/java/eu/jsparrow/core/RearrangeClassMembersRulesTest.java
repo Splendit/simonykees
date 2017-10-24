@@ -16,7 +16,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class RearrangeClassMembersRulesTest extends SingleRuleTest {
-	
+
 	private static final String SAMPLE_FILE = "RearrangeClassMembersRule.java";
 	private static final String PARTIALLY_ARRANGED_FILE = "RearrangeClassMembersPartiallyArrangedRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "rearrangeClassMembers";
@@ -33,18 +33,18 @@ public class RearrangeClassMembersRulesTest extends SingleRuleTest {
 	public void testTransformationWithDefaultFile() throws Exception {
 		Path preRule = getPreRuleFile(SAMPLE_FILE);
 		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
-		
+
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
+
 	@Test
 	public void testTransformationWithPartiallyArrangedFile() throws Exception {
 		Path preRule = getPreRuleFile(PARTIALLY_ARRANGED_FILE);
 		Path postRule = getPostRuleFile(PARTIALLY_ARRANGED_FILE, POSTRULE_SUBDIRECTORY);
-		
+
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);

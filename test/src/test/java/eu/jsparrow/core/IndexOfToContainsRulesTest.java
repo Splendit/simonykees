@@ -17,7 +17,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class IndexOfToContainsRulesTest extends SingleRuleTest {
-	
+
 	private static final String SAMPLE_FILE = "IndexOfToContainsRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "indexOfToContains";
 
