@@ -16,10 +16,10 @@ import org.eclipse.jdt.core.dom.SimpleName;
  *
  */
 class ForLoopOverListsASTVisitor extends ForLoopIteratingIndexASTVisitor {
-	
-	public ForLoopOverListsASTVisitor(SimpleName iteratingIndexName, SimpleName iterableName,
-			ForStatement forStatement, Block scopeBlock) {
-		super(iteratingIndexName, iterableName, forStatement, scopeBlock);	
+
+	public ForLoopOverListsASTVisitor(SimpleName iteratingIndexName, SimpleName iterableName, ForStatement forStatement,
+			Block scopeBlock) {
+		super(iteratingIndexName, iterableName, forStatement, scopeBlock);
 	}
 
 	@Override

@@ -46,8 +46,9 @@ public class LicenseUtil {
 
 	@PostConstruct
 	private void postConstruct() {
-		if (licenseValidationService != null)
+		if (licenseValidationService != null) {
 			isLicenseValidationServiceAvailable = true;
+		}
 	}
 
 	@PreDestroy
@@ -56,18 +57,19 @@ public class LicenseUtil {
 	}
 
 	public boolean isValid() {
-		if (isLicenseValidationServiceAvailable)
+		if (isLicenseValidationServiceAvailable) {
 			return licenseValidationService.isValid();
+		}
 		return false;
 	}
 
-	public boolean isTrial() {
+	public boolean isFree() {
 		if (isLicenseValidationServiceAvailable) {
 			return licenseValidationService.isDemoType();
 		}
 		return false;
 	}
-	
+
 	public boolean isFullLicense() {
 		if (isLicenseValidationServiceAvailable) {
 			return licenseValidationService.isFullValidLicense();

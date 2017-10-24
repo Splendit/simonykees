@@ -3,23 +3,24 @@ package eu.jsparrow.core.rule.impl;
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.UseIsEmptyRuleASTVisitor;
+import eu.jsparrow.core.visitor.impl.UseIsEmptyOnCollectionsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
- * @see UseIsEmptyRuleASTVisitor
+ * @see UseIsEmptyOnCollectionsASTVisitor
  * 
  * @author Martin Huter
  * @since 2.1.0
  */
-public class UseIsEmptyRule extends RefactoringRule<UseIsEmptyRuleASTVisitor> {
+public class UseIsEmptyRule extends RefactoringRule<UseIsEmptyOnCollectionsASTVisitor> {
 
-	public UseIsEmptyRule(Class<UseIsEmptyRuleASTVisitor> visitor) {
-		super(visitor);
+	public UseIsEmptyRule() {
+		super();
+		this.visitorClass = UseIsEmptyOnCollectionsASTVisitor.class;
 		this.name = Messages.UseIsEmptyRule_name;
 		this.description = Messages.UseIsEmptyRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		// string 1.6, collection 1.2, map 1.2

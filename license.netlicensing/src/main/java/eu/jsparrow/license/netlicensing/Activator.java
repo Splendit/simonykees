@@ -32,6 +32,7 @@ public class Activator extends Plugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.
 	 * BundleContext)
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		plugin = this;
 
@@ -50,7 +51,7 @@ public class Activator extends Plugin {
 
 		// start jSparrow logging bundle
 		for (Bundle bundle : context.getBundles()) {
-			if (bundle.getSymbolicName().equals("jSparrow.logging") //$NON-NLS-1$
+			if ("jSparrow.logging".equals(bundle.getSymbolicName()) //$NON-NLS-1$
 					&& bundle.getState() != Bundle.ACTIVE) {
 				bundle.start();
 				break;
@@ -60,8 +61,8 @@ public class Activator extends Plugin {
 		// load pseudo-activator from test fragment and execute its start method
 		try {
 			Class<? extends BundleActivator> frgActClass = Class
-					.forName("eu.jsparrow.license.netlicensing.TestFragmentActivator") //$NON-NLS-1$
-					.asSubclass(BundleActivator.class);
+				.forName("eu.jsparrow.license.netlicensing.TestFragmentActivator") //$NON-NLS-1$
+				.asSubclass(BundleActivator.class);
 			testFragmentActivator = frgActClass.newInstance();
 			testFragmentActivator.start(context);
 		} catch (ClassNotFoundException e) {
@@ -83,6 +84,7 @@ public class Activator extends Plugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.
 	 * BundleContext)
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 	}

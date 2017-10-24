@@ -6,7 +6,6 @@ Bundle-Version: 2.2.2.qualifier
 Bundle-Activator: eu.jsparrow.core.Activator
 Require-Bundle: eu.jsparrow.logging, 
  eu.jsparrow.i18n,
- eu.jsparrow.license.api,
  org.eclipse.ui;bundle-version="[3.107.0,4.0.0)",
  org.eclipse.compare;bundle-version="[3.5.600,4.0.0)",
  org.eclipse.core.runtime;bundle-version="[3.11.0,4.0.0)",
@@ -19,18 +18,14 @@ Require-Bundle: eu.jsparrow.logging,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH
-Export-Package: eu.jsparrow.core,
- eu.jsparrow.core.exception,
- eu.jsparrow.core.refactorer,
- eu.jsparrow.core.rule,
- eu.jsparrow.core.rule.impl,
- eu.jsparrow.core.rule.impl.logger,
- eu.jsparrow.core.util,
- eu.jsparrow.core.visitor,
- eu.jsparrow.core.visitor.arithmetic,
- eu.jsparrow.core.visitor.loop.stream,
- eu.jsparrow.core.visitor.lambdaforeach,
- eu.jsparrow.core.visitor.loop.fortoforeach,
- eu.jsparrow.core.visitor.loop.whiletoforeach,
- eu.jsparrow.core.visitor.semiautomatic,
- eu.jsparrow.core.visitor.trycatch
+Export-Package: eu.jsparrow.core;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
+ eu.jsparrow.core.config,
+ eu.jsparrow.core.exception;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
+ eu.jsparrow.core.refactorer;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
+ eu.jsparrow.core.rule;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
+ eu.jsparrow.core.rule.impl;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
+ eu.jsparrow.core.rule.impl.logger;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
+ eu.jsparrow.core.util;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
+ eu.jsparrow.core.visitor;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone"
+Bundle-ClassPath: lib/snakeyaml.jar,
+ .

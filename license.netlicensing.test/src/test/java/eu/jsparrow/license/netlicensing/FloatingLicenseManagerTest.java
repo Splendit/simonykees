@@ -14,13 +14,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import eu.jsparrow.license.netlicensing.LicenseChecker;
-import eu.jsparrow.license.netlicensing.LicenseManager;
-import eu.jsparrow.license.netlicensing.LicenseStatus;
-import eu.jsparrow.license.netlicensing.LicenseType;
-import eu.jsparrow.license.netlicensing.PersistenceManager;
-import eu.jsparrow.license.netlicensing.ValidateExecutor;
-import eu.jsparrow.license.netlicensing.ValidationResultCache;
 import eu.jsparrow.license.netlicensing.model.FloatingModel;
 import eu.jsparrow.license.netlicensing.model.LicenseModel;
 import eu.jsparrow.license.netlicensing.model.LicenseeModel;
@@ -49,7 +42,9 @@ public class FloatingLicenseManagerTest extends LicenseCommonTest {
 		LicenseManager instance = LicenseManager.getInstance();
 		usedSessions.forEach(sessionId -> {
 			FloatingModel floatingModel = new FloatingModel(LicenseManager.getFloatingProductModuleNumber(),
-					ZonedDateTime.now().plusDays(356), sessionId);
+					ZonedDateTime.now()
+						.plusDays(356),
+					sessionId);
 			instance.setUniqueHwId(sessionId);
 
 			LicenseeModel licensee = new LicenseeModel("", instance.getLicenseeNumber(), floatingModel,
@@ -106,7 +101,8 @@ public class FloatingLicenseManagerTest extends LicenseCommonTest {
 		Optional<PersistenceModel> optPm = persistenceMng.readPersistedData();
 		assertTrue(optPm.isPresent());
 		PersistenceModel pm = optPm.get();
-		assertEquals(FLOATING_LICENSEE_NUMBER, pm.getLicenseeNumber().orElse(""));
+		assertEquals(FLOATING_LICENSEE_NUMBER, pm.getLicenseeNumber()
+			.orElse(""));
 
 		// expecting the validation result to comply with the pre-validation
 		// data...

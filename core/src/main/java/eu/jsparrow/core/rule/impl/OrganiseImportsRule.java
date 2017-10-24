@@ -16,6 +16,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -34,8 +35,9 @@ import eu.jsparrow.i18n.Messages;
 @SuppressWarnings("restriction")
 public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
 
-	public OrganiseImportsRule(Class<AbstractASTRewriteASTVisitor> visitor) {
-		super(visitor);
+	public OrganiseImportsRule() {
+		super();
+		this.visitorClass = AbstractASTRewriteASTVisitor.class;
 		this.name = Messages.OrganiseImportsRule_name;
 		this.description = Messages.OrganiseImportsRule_description;
 	}
@@ -61,12 +63,9 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 
 		final CompilationUnit astRoot = RefactoringUtil.parse(workingCopy);
 		final boolean hasAmbiguity[] = new boolean[] { false };
-		IChooseImportQuery query = new IChooseImportQuery() {
-			@Override
-			public TypeNameMatch[] chooseImports(TypeNameMatch[][] openChoices, ISourceRange[] ranges) {
-				hasAmbiguity[0] = true;
-				return new TypeNameMatch[0];
-			}
+		IChooseImportQuery query = (TypeNameMatch[][] openChoices, ISourceRange[] ranges) -> {
+			hasAmbiguity[0] = true;
+			return new TypeNameMatch[0];
 		};
 
 		OrganizeImportsOperation importsOperation = new OrganizeImportsOperation(workingCopy, astRoot, false, true,
@@ -77,6 +76,8 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 
 		if (!hasAmbiguity[0] && importsOperation.getParseError() == null && edit != null
 				&& !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
+			RuleApplicationCount.get(this)
+				.update();
 			Document document = new Document(workingCopy.getSource());
 			documentChange = RefactoringUtil.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document,
 					edit.copy());

@@ -1,5 +1,7 @@
 package eu.jsparrow.sample.postRule.standardLoggerLog4j;
 
+import java.io.IOException;
+import java.util.Locale;
 import java.util.function.Consumer;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -8,7 +10,100 @@ import org.apache.logging.log4j.LogManager;
 public class TestStandardLoggerRule {
 
 	private static final Logger logger1 = LogManager.getLogger(TestStandardLoggerRule.class);
+
 	private static String logger;
+	
+	private final String e = "I am not an exception";
+	
+	public void printingExceptionsAndPrimitives(String input) {
+		Exception e = new Exception("Made up exception...");
+		logger1.error(new Exception());
+		System.out.println();
+		logger1.info(6);
+		logger1.info(new char[] {'c', 'd', 'e'});
+		logger1.error(new Exception("adsfads"));
+		logger1.info("adsfads");
+		logger1.error(e);
+		
+		logger1.info("");
+		logger1.info("%d - %d", 5, 6);
+		logger1.info(String.format(Locale.GERMANY, "%d - %d", 5, 6));
+		logger1.info(String.format(Locale.GERMANY, "%d - %d"));
+	}
+	
+	public void replaceSystemOutPrintingException(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			logger1.error(e.getMessage());
+		}
+	}
+	
+	public void replaceSystemErrPrintingException(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			logger1.error(e.getMessage());
+		}
+	}
+	
+	public void replaceSystemOutPrintFormatException(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			logger1.error("%d : " + e.getMessage(), 1);
+			logger1.info("%d : val %d : ", 1, 2);
+			logger1.info(String.format(Locale.FRANCE, "%d : val %d : ", 1, 2));
+		}
+	}
+	
+	public void insertLoggingStatementInEmptycatchClasuse(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			logger1.error(e.getMessage(), e);
+			
+		}
+	}
+	
+	public void insertMissingLoggingStatementInCatchClasuse(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			/*
+			 * The catch clause is not empty, but the exception is not logged.
+			 */
+			
+			logger1.error(e.getMessage(), e);
+			logger1.info("Nothing to show");
+		}
+	}
+	
+	public void distinguishLoggedExceptionFromField(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			/*
+			 * The catch clause is not empty, but the exception is not logged.
+			 */
+			
+			logger1.error(e.getMessage(), e);
+			logger1.info(this.e);
+		}
+	}
+	
+	public void nestedCatchClauses(String input) {
+		try {
+			input.substring(5);
+		} catch (Exception e) {
+			try {
+				input.substring(5);
+			} catch (Exception e1) {
+				logger1.error(e1.getMessage(), e1);
+				logger1.error(e.getMessage());
+			}
+		}
+	}
 	
 	public void replaceSystemOutPrint(String input) {
 		logger1.info(input);
@@ -18,12 +113,22 @@ public class TestStandardLoggerRule {
 		logger1.info(input);
 	}
 	
+	public void replaceSystemOutPrintf(String input) {
+		logger1.info("%d : " + input, 1);
+		logger1.info(String.format(Locale.GERMANY, "%d : " + input, 1));
+	}
+	
 	public void replaceSystemErrPrint(String input) {
 		logger1.error(input);
 	}
 	
 	public void replaceSystemErrPrintln(String input) {
 		logger1.error(input);
+	}
+	
+	public void replaceSystemErrPrintf(String input) {
+		logger1.error("%d : " + input, 1);
+		logger1.error(String.format(Locale.GERMANY, "%d : " + input, 1));
 	}
 	
 	public void replacePrintStackTrace(String input) {

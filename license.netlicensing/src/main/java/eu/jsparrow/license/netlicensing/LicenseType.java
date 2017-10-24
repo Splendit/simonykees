@@ -11,8 +11,10 @@ import eu.jsparrow.i18n.Messages;
  */
 public enum LicenseType {
 
-	TRY_AND_BUY(Messages.LicenseType_try_and_buy), FLOATING(Messages.LicenseType_floating), NODE_LOCKED(
-			Messages.LicenseType_node_locked), SUBSCRIPTION(Messages.LicenseType_subscription);
+	TRY_AND_BUY(Messages.LicenseType_try_and_buy),
+	FLOATING(Messages.LicenseType_floating),
+	NODE_LOCKED(Messages.LicenseType_node_locked),
+	SUBSCRIPTION(Messages.LicenseType_subscription);
 
 	@SuppressWarnings("nls")
 	public static LicenseType fromString(String value) {

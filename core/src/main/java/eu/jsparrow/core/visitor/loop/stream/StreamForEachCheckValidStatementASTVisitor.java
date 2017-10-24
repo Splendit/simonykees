@@ -71,19 +71,21 @@ public class StreamForEachCheckValidStatementASTVisitor extends UnhandledExcepti
 
 	@Override
 	public boolean visit(EnhancedForStatement node) {
-		this.parameters.entrySet().stream().forEach(entry -> {
-			entry.setValue(entry.getValue() + 1);
-		});
-		this.parameters.put(node.getParameter().getName(), 0);
+		this.parameters.entrySet()
+			.stream()
+			.forEach(entry -> entry.setValue(entry.getValue() + 1));
+		this.parameters.put(node.getParameter()
+			.getName(), 0);
 		return true;
 	}
 
 	@Override
 	public void endVisit(EnhancedForStatement node) {
-		this.parameters.remove(node.getParameter().getName());
-		this.parameters.entrySet().stream().forEach(entry -> {
-			entry.setValue(entry.getValue() - 1);
-		});
+		this.parameters.remove(node.getParameter()
+			.getName());
+		this.parameters.entrySet()
+			.stream()
+			.forEach(entry -> entry.setValue(entry.getValue() - 1));
 	}
 
 	@Override
@@ -100,36 +102,43 @@ public class StreamForEachCheckValidStatementASTVisitor extends UnhandledExcepti
 			boolean isFinal = Modifier.isFinal(variableBinding.getModifiers());
 			boolean isEffectivelyFinal = variableBinding.isEffectivelyFinal();
 			boolean isLocalVariable = variableNames.stream()
-					.anyMatch(var -> var.getIdentifier().equals(simpleNameNode.getIdentifier()));
+				.anyMatch(var -> var.getIdentifier()
+					.equals(simpleNameNode.getIdentifier()));
 
 			/*
 			 * if the value is 0, then the parameter is treated as a local
 			 * variable. a higher value indicates a nested loop where a separate
 			 * check for final or effectively final has to be done.
 			 */
-			boolean isEnhancedForParameter = parameters.entrySet().stream().anyMatch(entry -> {
-				boolean result = false;
+			boolean isEnhancedForParameter = parameters.entrySet()
+				.stream()
+				.anyMatch(entry -> {
+					boolean result = false;
 
-				if (entry.getKey().getIdentifier().equals(simpleNameNode.getIdentifier())) {
-					if (entry.getValue() > 0) {
-						IVariableBinding entryBinding = (IVariableBinding) entry.getKey().resolveBinding();
-						if (entryBinding.isEffectivelyFinal() || Modifier.isFinal(entryBinding.getModifiers())) {
+					if (entry.getKey()
+						.getIdentifier()
+						.equals(simpleNameNode.getIdentifier())) {
+						if (entry.getValue() > 0) {
+							IVariableBinding entryBinding = (IVariableBinding) entry.getKey()
+								.resolveBinding();
+							if (entryBinding.isEffectivelyFinal() || Modifier.isFinal(entryBinding.getModifiers())) {
+								result = true;
+							}
+						} else {
 							result = true;
 						}
-					} else {
-						result = true;
 					}
-				}
 
-				return result;
-			});
+					return result;
+				});
 
-			if (!(isField || isFinal || isEffectivelyFinal || isLocalVariable || isEnhancedForParameter))
+			if (!(isField || isFinal || isEffectivelyFinal || isLocalVariable || isEnhancedForParameter)) {
 				invalidVariables.add(variableBinding);
+			}
 		}
 		return false;
 	}
-	
+
 	public boolean isStatementsValid() {
 		return !containsBreakStatement && !containsContinueStatement && !containsReturnStatement
 				&& !containsCheckedException && !containsThrowStatement && invalidVariables.isEmpty();

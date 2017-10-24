@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.UnionType;
 
 import eu.jsparrow.core.matcher.BijectiveSimpleNameASTMatcher;
+import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -30,21 +31,27 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(TryStatement node) {
-		List<CatchClause> catchClauses = (List<CatchClause>) node.catchClauses();
-		List<Block> blockList = catchClauses.stream().map(catchClase -> catchClase.getBody())
-				.collect(Collectors.toList());
+		List<CatchClause> catchClauses = ASTNodeUtil.returnTypedList(node.catchClauses(), CatchClause.class);
+		List<Block> blockList = catchClauses.stream()
+			.map(CatchClause::getBody)
+			.collect(Collectors.toList());
+		boolean onRewriteTriggered = false;
 		while (!blockList.isEmpty()) {
 			boolean combined = false;
-			// start from the last block because it could be the most general one.
+			/*
+			 * start from the last block because it could be the most general
+			 * one.
+			 */
 			Block reference = blockList.remove(blockList.size() - 1);
 			SingleVariableDeclaration referenceException = ((CatchClause) reference.getParent()).getException();
 			Type referenceExceptionType = referenceException.getType();
 
 			List<Type> allNewTypes = new ArrayList<>();
 			addTypesFromBlock(allNewTypes, referenceExceptionType);
+			List<Type> jumpedTypes = new ArrayList<>();
 
 			/*
-			 * Iterate blocks in the reverse order as the bottom ones could be 
+			 * Iterate blocks in the reverse order as the bottom ones could be
 			 * more generic then the above ones.
 			 */
 			for (int i = blockList.size() - 1; i >= 0; i--) {
@@ -52,28 +59,40 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 				CatchClause compareCatch = (CatchClause) compareBlock.getParent();
 				SingleVariableDeclaration compareException = compareCatch.getException();
 				Type compareExceptionType = compareException.getType();
+
 				if (reference.subtreeMatch(
 						new BijectiveSimpleNameASTMatcher(referenceException.getName(), compareException.getName()),
-						compareBlock)) {
+						compareBlock) && !jumpsSuperType(compareExceptionType, jumpedTypes)) {
 					combined = true;
 					addTypesFromBlock(allNewTypes, compareExceptionType);
 					astRewrite.remove(compareCatch, null);
 					blockList.remove(i);
+				} else {
+					jumpedTypes.add(compareExceptionType);
 				}
 			}
 
 			if (combined) {
-				UnionType uniontype = node.getAST().newUnionType();
+				UnionType uniontype = node.getAST()
+					.newUnionType();
 				removeSubTypes(allNewTypes);
-				for (Type insertType : allNewTypes) {
-					uniontype.types().add(astRewrite.createMoveTarget(insertType));
-				}
+				allNewTypes.forEach(insertType -> uniontype.types()
+					.add(astRewrite.createMoveTarget(insertType)));
 				astRewrite.replace(referenceExceptionType, uniontype, null);
+				if (!onRewriteTriggered) {
+					onRewrite();
+					onRewriteTriggered = true;
+				}
 			}
 
 		}
 
 		return true;
+	}
+
+	private boolean jumpsSuperType(Type compareExceptionType, List<Type> jumpedTypes) {
+		return jumpedTypes.stream()
+			.anyMatch(superType -> isSubType(superType, compareExceptionType));
 	}
 
 	private void removeSubTypes(List<Type> allNewTypes) {

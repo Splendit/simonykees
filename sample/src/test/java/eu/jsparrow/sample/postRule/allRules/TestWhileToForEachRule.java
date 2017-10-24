@@ -40,7 +40,7 @@ public class TestWhileToForEachRule {
 	public String loopingOverLists(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
-		list.forEach((t) -> {
+		list.forEach(t -> {
 			logger.info(t);
 			sb.append(t);
 		});
@@ -167,7 +167,7 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		l.forEach((outerVal) -> {
+		l.forEach(outerVal -> {
 			sb.append(outerVal);
 
 			l.forEach(sb::append);
@@ -200,7 +200,7 @@ public class TestWhileToForEachRule {
 		Iterator<String> innerIt = l.iterator();
 		Iterator<String> iterator = l.iterator();
 
-		l.forEach((outerKey) -> {
+		l.forEach(outerKey -> {
 			while (innerIt.hasNext()) {
 				sb.append(innerIt.next() + outerKey);
 			}
@@ -227,7 +227,7 @@ public class TestWhileToForEachRule {
 		List<String> m = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		l.forEach((outerVal) -> {
+		l.forEach(outerVal -> {
 			sb.append(outerVal);
 
 			k.forEach(sb::append);
@@ -242,7 +242,7 @@ public class TestWhileToForEachRule {
 		List<String> m = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		l.forEach((outerVal) -> {
+		l.forEach(outerVal -> {
 			sb.append(outerVal);
 
 			Iterator<String> kIterator = k.iterator();
@@ -261,7 +261,7 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		l.forEach((m) -> {
+		l.forEach(m -> {
 			String n = "nothing";
 			Integer i = 1;
 			String o = "-";
@@ -280,7 +280,7 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		l.forEach((aL) -> {
+		l.forEach(aL -> {
 			String p = "foo";
 			sb.append(p);
 		});
@@ -401,7 +401,9 @@ public class TestWhileToForEachRule {
 		String suffix = "";
 		String prefix = "";
 		for (String s : l) {
-			result = k.stream().map(key -> s + "|" + key + ";").collect(Collectors.toList());
+			result = k.stream()
+				.map(key -> s + "|" + key + ";")
+				.collect(Collectors.toList());
 
 			result.forEach(sb::append);
 		}
@@ -410,11 +412,13 @@ public class TestWhileToForEachRule {
 
 	public String testWhileLoopsNumericIterator(String input) {
 		List<String> l = generateList(input);
-		List<Number> numbers = l.stream().map(String::hashCode).collect(Collectors.toList());
+		List<Number> numbers = l.stream()
+			.map(String::hashCode)
+			.collect(Collectors.toList());
 
 		StringBuilder sb = new StringBuilder();
 
-		numbers.forEach((s) -> {
+		numbers.forEach(s -> {
 			String foo = "foo";
 			sb.append(s);
 		});
@@ -431,7 +435,8 @@ public class TestWhileToForEachRule {
 		while (iterator.hasNext()) {
 			String s = (String) iterator.next();
 			int i = StringUtils.length(s);
-			sb.append(s).append(i);
+			sb.append(s)
+				.append(i);
 		}
 
 		iterator = l2.iterator();
@@ -439,7 +444,8 @@ public class TestWhileToForEachRule {
 		while (iterator.hasNext()) {
 			String s = (String) iterator.next();
 			int i = StringUtils.length(s);
-			sb.append(s).append(i);
+			sb.append(s)
+				.append(i);
 		}
 
 		return sb.toString();

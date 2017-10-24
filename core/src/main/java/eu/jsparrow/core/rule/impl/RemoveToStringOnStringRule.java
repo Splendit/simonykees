@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.RemoveToStringOnStringASTVisitor;
+import eu.jsparrow.core.visitor.impl.RemoveToStringOnStringASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -14,12 +14,13 @@ import eu.jsparrow.i18n.Messages;
  */
 public class RemoveToStringOnStringRule extends RefactoringRule<RemoveToStringOnStringASTVisitor> {
 
-	public RemoveToStringOnStringRule(Class<RemoveToStringOnStringASTVisitor> visitor) {
-		super(visitor);
+	public RemoveToStringOnStringRule() {
+		super();
+		this.visitorClass = RemoveToStringOnStringASTVisitor.class;
 		this.name = Messages.RemoveToStringOnStringRule_name;
 		this.description = Messages.RemoveToStringOnStringRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;

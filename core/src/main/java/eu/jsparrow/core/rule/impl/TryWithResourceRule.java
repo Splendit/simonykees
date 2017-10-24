@@ -9,7 +9,8 @@ import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.visitor.trycatch.TryWithResourceASTVisitor;
 import eu.jsparrow.i18n.Messages;
-/** 
+
+/**
  * @see TryWithResourceASTVisitor
  * 
  * @author Martin Huter
@@ -18,8 +19,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class TryWithResourceRule extends RefactoringRule<TryWithResourceASTVisitor> {
 
-	public TryWithResourceRule(Class<TryWithResourceASTVisitor> visitor) {
-		super(visitor);
+	public TryWithResourceRule() {
+		super();
+		this.visitorClass = TryWithResourceASTVisitor.class;
 		this.name = Messages.TryWithResourceRule_name;
 		this.description = Messages.TryWithResourceRule_description;
 	}
@@ -32,18 +34,17 @@ public class TryWithResourceRule extends RefactoringRule<TryWithResourceASTVisit
 	@Override
 	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException, RefactoringException {
-		
+
 		/*
-		 * The TryWithResourceRule has to be applied twice. 
+		 * The TryWithResourceRule has to be applied twice.
 		 * 
-		 * See: 
-		 * FIXME SIM-396: Make all changes of the TryWithResourceRule visible
+		 * See: FIXME SIM-396: Make all changes of the TryWithResourceRule
+		 * visible
 		 */
 		DocumentChange tmp1 = super.applyRuleImpl(workingCopy);
 		DocumentChange tmp2 = super.applyRuleImpl(workingCopy);
-		
+
 		return null == tmp2 ? tmp1 : tmp2;
 	}
-	
-	
+
 }

@@ -5,9 +5,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.util.PropertyUtil;
+import eu.jsparrow.core.visitor.impl.StringBuildingLoopASTVisitor;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.core.visitor.StringBuildingLoopASTVisitor;
 
 /**
  * @see StringBuildingLoopASTVisitor
@@ -19,13 +20,14 @@ import eu.jsparrow.core.visitor.StringBuildingLoopASTVisitor;
 public class StringBuildingLoopRule extends RefactoringRule<StringBuildingLoopASTVisitor> {
 
 	private JavaVersion javaVersion;
-	
-	public StringBuildingLoopRule(Class<StringBuildingLoopASTVisitor> visitor) {
-		super(visitor);
+
+	public StringBuildingLoopRule() {
+		super();
+		this.visitorClass = StringBuildingLoopASTVisitor.class;
 		this.name = Messages.StringBuildingLoopRule_name;
 		this.description = Messages.StringBuildingLoopRule_description;
 	}
-	
+
 	/**
 	 * Stores java compiler compliance level.
 	 */
@@ -35,10 +37,12 @@ public class StringBuildingLoopRule extends RefactoringRule<StringBuildingLoopAS
 		javaVersion = PropertyUtil.stringToJavaVersion(compilerCompliance);
 		return true;
 	}
-	
+
 	@Override
 	protected StringBuildingLoopASTVisitor visitorFactory() {
-		return new StringBuildingLoopASTVisitor(javaVersion);
+		StringBuildingLoopASTVisitor visitor = new StringBuildingLoopASTVisitor(javaVersion);
+		visitor.addRewriteListener(RuleApplicationCount.get(this));
+		return visitor;
 	}
 
 	@Override

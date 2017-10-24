@@ -35,24 +35,25 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 
 	@Override
 	public boolean visit(ForStatement node) {
-		if(isSingleStatementBodyOfOuterLoop(node)) {
+		if (isSingleStatementBodyOfOuterLoop(node)) {
 			return true;
 		}
-		
+
 		// skip loops with empty condition
 		Expression nodeExpression = node.getExpression();
-		if(nodeExpression == null) {
+		if (nodeExpression == null) {
 			return true;
 		}
-		
+
 		SimpleName iteratorName = ASTNodeUtil.replaceableIteratorCondition(nodeExpression);
 		if (iteratorName != null) {
 			// Defined updaters are not allowed
-			if (!node.updaters().isEmpty()) {
+			if (!node.updaters()
+				.isEmpty()) {
 				return true;
 			}
 			if (ClassRelationUtil.isContentOfTypes(iteratorName.resolveTypeBinding(),
-					generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
+					generateFullyQualifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
 				Block parentNode = ASTNodeUtil.getSpecificAncestor(node, Block.class);
 				if (parentNode == null) {
 					/*
@@ -64,7 +65,7 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 				}
 				LoopOptimizationASTVisior iteratorDefinitionAstVisior = new LoopOptimizationASTVisior(
 						(SimpleName) iteratorName, node);
-				iteratorDefinitionAstVisior.setAstRewrite(this.astRewrite);
+				iteratorDefinitionAstVisior.setASTRewrite(this.astRewrite);
 				parentNode.accept(iteratorDefinitionAstVisior);
 
 				if (iteratorDefinitionAstVisior.allParametersFound()) {
@@ -103,8 +104,11 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 		// Do the replacement
 		if (replaceInformationASTVisitorList.containsKey(node)) {
 			LoopOptimizationASTVisior iteratorDefinitionAstVisior = replaceInformationASTVisitorList.remove(node);
-			Map<String, Boolean> newNameMap = generateNewIteratorName(null, node, iteratorDefinitionAstVisior.getListName());
-			String newName = newNameMap.keySet().iterator().next();
+			Map<String, Boolean> newNameMap = generateNewIteratorName(null, node,
+					iteratorDefinitionAstVisior.getListName());
+			String newName = newNameMap.keySet()
+				.iterator()
+				.next();
 			iteratorDefinitionAstVisior.replaceLoop(node, node.getBody(), multipleIteratorUse, newName);
 
 			// clear the variableIterator if no other loop is present

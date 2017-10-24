@@ -49,7 +49,8 @@ public class FieldNameConventionRule {
 	public String someFieldsAreShadowed() {
 		String shadowed_var = "myLocalVal";
 		String Österreich = "Österreich";
-		return shadowed_var + Österreich + Optional.ofNullable(this.shadowedVar).orElse("");
+		return shadowed_var + Österreich + Optional.ofNullable(this.shadowedVar)
+			.orElse("");
 	}
 
 	public String referenceWithQualifiedName() {
@@ -76,7 +77,8 @@ public class FieldNameConventionRule {
 	}
 
 	public String methodImplementigAnAnonymousClass() {
-		String _myval = Optional.ofNullable(this.myval).orElse("");
+		String _myval = Optional.ofNullable(this.myval)
+			.orElse("");
 		FooInterface fooInterface = new FooInterface() {
 			int _myval = 0;
 
@@ -103,7 +105,13 @@ public class FieldNameConventionRule {
 	}
 
 	enum WeekDays {
-		Mon, Tue, Wed, Thu, Fri, SATURDAAAY, SUNDAAAYY;
+		Mon,
+		Tue,
+		Wed,
+		Thu,
+		Fri,
+		SATURDAAAY,
+		SUNDAAAYY;
 
 		private Integer _myval;
 

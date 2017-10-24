@@ -20,7 +20,9 @@ public class LambdaForEachMapRule {
 		List<String> list = Arrays.asList(input + "non", "non-empty");
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().map(s -> StringUtils.substring(s, 1)).forEach(sb::append);
+		list.stream()
+			.map(s -> StringUtils.substring(s, 1))
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -29,7 +31,10 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).map(s -> StringUtils.substring(s, 1)).forEach(sb::append);
+		list.stream()
+			.filter(s -> !StringUtils.isEmpty(s))
+			.map(s -> StringUtils.substring(s, 1))
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -38,7 +43,10 @@ public class LambdaForEachMapRule {
 		List<Long> list = Arrays.asList(5L, 3L, 2L);
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().filter(l -> l > 0).mapToLong(l -> 100L / l).forEach(sb::append);
+		list.stream()
+			.filter(l -> l > 0)
+			.mapToLong(l -> 100L / l)
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -47,7 +55,10 @@ public class LambdaForEachMapRule {
 		List<Double> list = Arrays.asList(5D, 3D, 2D);
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().filter(d -> d > 0).mapToDouble(d -> 100D / d).forEach(sb::append);
+		list.stream()
+			.filter(d -> d > 0)
+			.mapToDouble(d -> 100D / d)
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -56,7 +67,10 @@ public class LambdaForEachMapRule {
 		List<Integer> list = Arrays.asList(5, 3, 2);
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().filter(i -> i > 0).mapToInt(i -> 100 - i).forEach(sb::append);
+		list.stream()
+			.filter(i -> i > 0)
+			.mapToInt(i -> 100 - i)
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -65,13 +79,16 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).map(s -> {
-			int i = 10;
-			return StringUtils.substring(s, 1) + i;
-		}).forEach(subString -> {
-			String lower = StringUtils.lowerCase(subString);
-			sb.append(lower);
-		});
+		list.stream()
+			.filter(s -> !StringUtils.isEmpty(s))
+			.map(s -> {
+				int i = 10;
+				return StringUtils.substring(s, 1) + i;
+			})
+			.forEach(subString -> {
+				String lower = StringUtils.lowerCase(subString);
+				sb.append(lower);
+			});
 
 		return sb.toString();
 	}
@@ -80,12 +97,14 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).forEach(s -> {
-			int i = 10;
-			String subString = StringUtils.substring(s, 1) + i;
-			String lower = StringUtils.lowerCase(subString);
-			sb.append(lower + i);
-		});
+		list.stream()
+			.filter(s -> !StringUtils.isEmpty(s))
+			.forEach(s -> {
+				int i = 10;
+				String subString = StringUtils.substring(s, 1) + i;
+				String lower = StringUtils.lowerCase(subString);
+				sb.append(lower + i);
+			});
 		return sb.toString();
 	}
 
@@ -93,13 +112,15 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).forEach(s -> {
-			int i = 10;
-			int c = 0;
-			String subString = StringUtils.substring(s, 1) + i + c;
-			String lower = StringUtils.lowerCase(subString);
-			sb.append(lower + c);
-		});
+		list.stream()
+			.filter(s -> !StringUtils.isEmpty(s))
+			.forEach(s -> {
+				int i = 10;
+				int c = 0;
+				String subString = StringUtils.substring(s, 1) + i + c;
+				String lower = StringUtils.lowerCase(subString);
+				sb.append(lower + c);
+			});
 		return sb.toString();
 	}
 
@@ -107,16 +128,18 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).forEach(s -> {
-			int i = 10;
-			int c = 0;
-			String subString = StringUtils.substring(s, 1) + i + c;
-			String lower = StringUtils.lowerCase(subString);
-			sb.append(lower);
-			if (StringUtils.isEmpty(lower)) {
-				sb.append(s);
-			}
-		});
+		list.stream()
+			.filter(s -> !StringUtils.isEmpty(s))
+			.forEach(s -> {
+				int i = 10;
+				int c = 0;
+				String subString = StringUtils.substring(s, 1) + i + c;
+				String lower = StringUtils.lowerCase(subString);
+				sb.append(lower);
+				if (StringUtils.isEmpty(lower)) {
+					sb.append(s);
+				}
+			});
 		return sb.toString();
 	}
 
@@ -124,10 +147,13 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).mapToInt(s -> {
-			int offset = 10;
-			return StringUtils.indexOf(s, "i") + offset;
-		}).forEach(pos -> sb.append(Integer.toString(pos)));
+		list.stream()
+			.filter(s -> !StringUtils.isEmpty(s))
+			.mapToInt(s -> {
+				int offset = 10;
+				return StringUtils.indexOf(s, "i") + offset;
+			})
+			.forEach(pos -> sb.append(Integer.toString(pos)));
 		return sb.toString();
 	}
 
@@ -135,8 +161,10 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).mapToInt(s -> StringUtils.indexOf(s, "i") + 10)
-				.forEach(pos -> sb.append(Integer.toString(pos)));
+		list.stream()
+			.filter(s -> !StringUtils.isEmpty(s))
+			.mapToInt(s -> StringUtils.indexOf(s, "i") + 10)
+			.forEach(pos -> sb.append(Integer.toString(pos)));
 		return sb.toString();
 	}
 
@@ -145,16 +173,19 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 
 		int offset = 10;
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).mapToInt(s -> {
-			sb.append(s);
-			sb.append("c");
-			return StringUtils.indexOf(s, "i") + 10;
-		}).forEach(pos -> {
-			sb.append("d");
-			if (offset > 0) {
-				sb.append(Integer.toString(pos));
-			}
-		});
+		list.stream()
+			.filter(s -> !StringUtils.isEmpty(s))
+			.mapToInt(s -> {
+				sb.append(s);
+				sb.append("c");
+				return StringUtils.indexOf(s, "i") + 10;
+			})
+			.forEach(pos -> {
+				sb.append("d");
+				if (offset > 0) {
+					sb.append(Integer.toString(pos));
+				}
+			});
 		return sb.toString();
 	}
 
@@ -163,15 +194,18 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 
 		int offset = 10;
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).mapToInt(s -> {
-			if (offset > 0) {
-				sb.append(s);
-			}
-			return StringUtils.indexOf(s, "i");
-		}).forEach(pos -> {
-			sb.append("c");
-			sb.append(pos + "d");
-		});
+		list.stream()
+			.filter(s -> !StringUtils.isEmpty(s))
+			.mapToInt(s -> {
+				if (offset > 0) {
+					sb.append(s);
+				}
+				return StringUtils.indexOf(s, "i");
+			})
+			.forEach(pos -> {
+				sb.append("c");
+				sb.append(pos + "d");
+			});
 		return sb.toString();
 	}
 
@@ -180,17 +214,20 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 
 		int offset = 10;
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).mapToInt(s -> {
-			// I may be necessary here
-			if (offset > 0) {
-				sb.append(s);
-			}
-			return StringUtils.indexOf(s, "i");
-		}).forEach(pos -> {
-			// and here...
-			sb.append("c");
-			sb.append(pos + "d");
-		});
+		list.stream()
+			.filter(s -> !StringUtils.isEmpty(s))
+			.mapToInt(s -> {
+				// I may be necessary here
+				if (offset > 0) {
+					sb.append(s);
+				}
+				return StringUtils.indexOf(s, "i");
+			})
+			.forEach(pos -> {
+				// and here...
+				sb.append("c");
+				sb.append(pos + "d");
+			});
 		return sb.toString();
 	}
 
@@ -199,15 +236,18 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 
 		int offset = 10;
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).mapToInt(s -> {
-			int i;// not important
-			// not used
-			int j;
-			return StringUtils.indexOf(s, "i");
-		}).forEach(pos -> {
-			sb.append("c");
-			sb.append(pos + "d");
-		});
+		list.stream()
+			.filter(s -> !StringUtils.isEmpty(s))
+			.mapToInt(s -> {
+				int i;// not important
+				// not used
+				int j;
+				return StringUtils.indexOf(s, "i");
+			})
+			.forEach(pos -> {
+				sb.append("c");
+				sb.append(pos + "d");
+			});
 		return sb.toString();
 	}
 
@@ -215,14 +255,17 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		list.stream().filter(s -> !StringUtils.isEmpty(s)).mapToInt(s -> {
-			sb.append(s);
-			return StringUtils.indexOf(s, "i");
-		}).forEach(pos -> {
-			int c = 0;
-			sb.append("c");
-			sb.append(pos + "d");
-		});
+		list.stream()
+			.filter(s -> !StringUtils.isEmpty(s))
+			.mapToInt(s -> {
+				sb.append(s);
+				return StringUtils.indexOf(s, "i");
+			})
+			.forEach(pos -> {
+				int c = 0;
+				sb.append("c");
+				sb.append(pos + "d");
+			});
 		return sb.toString();
 	}
 
@@ -232,10 +275,13 @@ public class LambdaForEachMapRule {
 		numbers.add(4.5);
 
 		StringBuilder sb = new StringBuilder();
-		numbers.stream().filter(n -> n.doubleValue() > 0).map((Number n) -> (Double) n).forEach((Double d) -> {
-			String s = d.toString();
-			sb.append(s);
-		});
+		numbers.stream()
+			.filter(n -> n.doubleValue() > 0)
+			.map((Number n) -> (Double) n)
+			.forEach((Double d) -> {
+				String s = d.toString();
+				sb.append(s);
+			});
 
 		return sb.toString();
 	}
@@ -246,12 +292,14 @@ public class LambdaForEachMapRule {
 		numbers.add(4.5);
 
 		StringBuilder sb = new StringBuilder();
-		numbers.stream().filter(n -> n.doubleValue() > 0).forEach((Number n) -> {
-			List<Number> nums = Arrays.asList(n);
-			Double d = (Double) nums.get(0);
-			String s = d.toString();
-			sb.append(nums.toString());
-		});
+		numbers.stream()
+			.filter(n -> n.doubleValue() > 0)
+			.forEach((Number n) -> {
+				List<Number> nums = Arrays.asList(n);
+				Double d = (Double) nums.get(0);
+				String s = d.toString();
+				sb.append(nums.toString());
+			});
 
 		return sb.toString();
 	}
@@ -262,12 +310,14 @@ public class LambdaForEachMapRule {
 		numbers.add(4.5);
 
 		StringBuilder sb = new StringBuilder();
-		numbers.stream().filter(n -> n.doubleValue() > 0).forEach((Number n) -> {
-			Number[] nums = { n };
-			Double d = (Double) nums[0];
-			String s = d.toString();
-			sb.append(nums.toString());
-		});
+		numbers.stream()
+			.filter(n -> n.doubleValue() > 0)
+			.forEach((Number n) -> {
+				Number[] nums = { n };
+				Double d = (Double) nums[0];
+				String s = d.toString();
+				sb.append(nums.toString());
+			});
 
 		return sb.toString();
 	}
@@ -278,7 +328,10 @@ public class LambdaForEachMapRule {
 		numbers.add(4.5);
 
 		StringBuilder sb = new StringBuilder();
-		numbers.stream().filter(n -> n.doubleValue() > 0).mapToInt((Number n) -> (int) n / 2).forEach(sb::append);
+		numbers.stream()
+			.filter(n -> n.doubleValue() > 0)
+			.mapToInt((Number n) -> (int) n / 2)
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -287,11 +340,13 @@ public class LambdaForEachMapRule {
 
 		List rawList = generateRawListOfStrings();
 		StringBuilder sb = new StringBuilder();
-		rawList.stream().filter(o -> o != null).forEach((Object n) -> {
-			String s = (String) n;
-			Number d = (int) Integer.valueOf(s) / 2;
-			sb.append(d);
-		});
+		rawList.stream()
+			.filter(o -> o != null)
+			.forEach((Object n) -> {
+				String s = (String) n;
+				Number d = (int) Integer.valueOf(s) / 2;
+				sb.append(d);
+			});
 
 		return sb.toString();
 	}
@@ -300,10 +355,13 @@ public class LambdaForEachMapRule {
 
 		List<Object> rawList = generateRawListOfStrings();
 		StringBuilder sb = new StringBuilder();
-		rawList.stream().filter(o -> o != null).map((Object n) -> (String) n).forEach((final String s) -> {
-			Number d = (int) Integer.valueOf(s) / 2;
-			sb.append(d);
-		});
+		rawList.stream()
+			.filter(o -> o != null)
+			.map((Object n) -> (String) n)
+			.forEach((final String s) -> {
+				Number d = (int) Integer.valueOf(s) / 2;
+				sb.append(d);
+			});
 
 		return sb.toString();
 	}
@@ -312,13 +370,15 @@ public class LambdaForEachMapRule {
 
 		List<Object> rawList = generateRawListOfStrings();
 		StringBuilder sb = new StringBuilder();
-		rawList.stream().filter(o -> o != null).forEach((Object n) -> {
-			@Deprecated
-			final String s = (String) n;
-			Number d = (int) Integer.valueOf(s) / 2;
+		rawList.stream()
+			.filter(o -> o != null)
+			.forEach((Object n) -> {
+				@Deprecated
+				final String s = (String) n;
+				Number d = (int) Integer.valueOf(s) / 2;
 
-			sb.append(d);
-		});
+				sb.append(d);
+			});
 
 		return sb.toString();
 	}
@@ -326,39 +386,45 @@ public class LambdaForEachMapRule {
 	public String rawTypeFromMethodInvocation() {
 
 		StringBuilder sb = new StringBuilder();
-		this.generateRawListOfStrings().stream().filter(o -> o != null).forEach((Object n) -> {
-			String s = (String) n;
-			Number d = (int) Integer.valueOf(s) / 2;
-			sb.append(d);
-		});
+		this.generateRawListOfStrings()
+			.stream()
+			.filter(o -> o != null)
+			.forEach((Object n) -> {
+				String s = (String) n;
+				Number d = (int) Integer.valueOf(s) / 2;
+				sb.append(d);
+			});
 
 		return sb.toString();
 	}
 
 	public <T> void mapToGenericType(List<Person> refs) {
 		List<List<T>> keys = new ArrayList<>();
-		refs.stream().forEach(ref -> {
-			final List<T> testKey = refToKey(ref);
-			keys.add(testKey);
-		});
+		refs.stream()
+			.forEach(ref -> {
+				final List<T> testKey = refToKey(ref);
+				keys.add(testKey);
+			});
 	}
 
 	public <T> void mapToNestedType(List<Person> refs) {
 		List<List<String>> keys = new ArrayList<>();
-		refs.stream().forEach(ref -> {
-			final List<String> testKey = Collections.singletonList(ref.getName());
-			keys.add(testKey);
-		});
+		refs.stream()
+			.forEach(ref -> {
+				final List<String> testKey = Collections.singletonList(ref.getName());
+				keys.add(testKey);
+			});
 	}
 
 	public void parameterizedMapMethod() {
 		StringBuilder sb = new StringBuilder();
 		List<Wrapper> wrappers = new ArrayList<>();
-		wrappers.stream().forEach(wrapp -> {
-			InnerClass innerClass = wrapp.getInnerClass();
-			useInnerClass(innerClass);
-			sb.append(innerClass.getName());
-		});
+		wrappers.stream()
+			.forEach(wrapp -> {
+				InnerClass innerClass = wrapp.getInnerClass();
+				useInnerClass(innerClass);
+				sb.append(innerClass.getName());
+			});
 	}
 
 	public void multipleVariablesInitializedWithGenericMethod() {
@@ -378,15 +444,17 @@ public class LambdaForEachMapRule {
 	public void unusedVariablesInitializedWithGenericMethod() {
 		StringBuilder sb = new StringBuilder();
 		List<Wrapper> wrappers = new ArrayList<>();
-		wrappers.stream().map(wrapp -> {
-			/*
-			 * The generic method is not used as initializer of the mapping
-			 * variable.
-			 */
-			InnerClass innerClass = wrapp.getInnerClass();
-			String strInnerClass = innerClass.toString();
-			return wrapp.toString() + strInnerClass;
-		}).forEach(sb::append);
+		wrappers.stream()
+			.map(wrapp -> {
+				/*
+				 * The generic method is not used as initializer of the mapping
+				 * variable.
+				 */
+				InnerClass innerClass = wrapp.getInnerClass();
+				String strInnerClass = innerClass.toString();
+				return wrapp.toString() + strInnerClass;
+			})
+			.forEach(sb::append);
 	}
 
 	public void useInnerClass(InnerClass innerClass) {
@@ -395,10 +463,11 @@ public class LambdaForEachMapRule {
 
 	public <T> void mapToTypeVariable(List<Person> refs) {
 		List<T> keys = new ArrayList<>();
-		refs.stream().forEach(ref -> {
-			final T testKey = refToKeyT(ref);
-			keys.add(testKey);
-		});
+		refs.stream()
+			.forEach(ref -> {
+				final T testKey = refToKeyT(ref);
+				keys.add(testKey);
+			});
 	}
 
 	private <T> T refToKeyT(Person ref) {
@@ -420,7 +489,8 @@ public class LambdaForEachMapRule {
 
 	class InnerClass implements Inner {
 		public String getName() {
-			return this.getClass().getName();
+			return this.getClass()
+				.getName();
 		}
 	}
 

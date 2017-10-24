@@ -18,7 +18,8 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList.stream().forEach(sb::append);
+		resultList.stream()
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -32,7 +33,8 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList2.stream().forEach(sb::append);
+		resultList2.stream()
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -50,9 +52,12 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList1.stream().forEach(sb::append);
-		resultList2.stream().forEach(sb::append);
-		resultList3.stream().forEach(sb::append);
+		resultList1.stream()
+			.forEach(sb::append);
+		resultList2.stream()
+			.forEach(sb::append);
+		resultList3.stream()
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -68,7 +73,8 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList2.stream().forEach(sb::append);
+		resultList2.stream()
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -78,7 +84,7 @@ public class TestCollectionRemoveAllRule {
 		List<String> resultList2 = generateList(input);
 		resultList2.add("d");
 
-		resultList2.forEach((s) -> {
+		resultList2.forEach(s -> {
 			if (!resultList.isEmpty()) {
 				resultList.clear();
 			}
@@ -86,7 +92,8 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList2.stream().forEach(sb::append);
+		resultList2.stream()
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -104,7 +111,8 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList2.stream().forEach(sb::append);
+		resultList2.stream()
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -127,7 +135,8 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList2.stream().forEach(sb::append);
+		resultList2.stream()
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -149,7 +158,8 @@ public class TestCollectionRemoveAllRule {
 		}
 
 		StringBuilder sb = new StringBuilder();
-		resultList.stream().forEach(sb::append);
+		resultList.stream()
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -161,7 +171,8 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList.stream().forEach(sb::append);
+		resultList.stream()
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -169,11 +180,13 @@ public class TestCollectionRemoveAllRule {
 	public String testModifiedCollection(String input) {
 		List<String> resultList = generateList(input);
 
-		resultList.removeAll(resultList.stream().collect(Collectors.toList()));
+		resultList.removeAll(resultList.stream()
+			.collect(Collectors.toList()));
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList.stream().forEach(sb::append);
+		resultList.stream()
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
@@ -186,28 +199,34 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		resultList.stream().forEach(sb::append);
+		resultList.stream()
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
 
 	public String testNumericCollection(String input) {
 		List<String> resultList = generateList(input);
-		List<Number> numericList = resultList.stream().map(String::hashCode).collect(Collectors.toList());
+		List<Number> numericList = resultList.stream()
+			.map(String::hashCode)
+			.collect(Collectors.toList());
 
 		resultList.clear();
 		numericList.clear();
 
 		StringBuilder sb = new StringBuilder();
 
-		numericList.stream().forEach(sb::append);
+		numericList.stream()
+			.forEach(sb::append);
 
 		return sb.toString();
 	}
 
 	public String testMultipleConvertionPerLine(String input) {
 		List<String> resultList = generateList(input);
-		List<Number> numericList = resultList.stream().map(String::hashCode).collect(Collectors.toList());
+		List<Number> numericList = resultList.stream()
+			.map(String::hashCode)
+			.collect(Collectors.toList());
 
 		resultList.clear();
 		numericList.clear();
@@ -216,8 +235,10 @@ public class TestCollectionRemoveAllRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		numericList.stream().forEach(sb::append);
-		resultList.stream().forEach(sb::append);
+		numericList.stream()
+			.forEach(sb::append);
+		resultList.stream()
+			.forEach(sb::append);
 
 		return sb.toString();
 	}

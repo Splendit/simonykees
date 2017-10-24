@@ -1,8 +1,9 @@
 
 package eu.jsparrow.ui.wizard.impl;
 
-import java.util.List;
+import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
@@ -11,7 +12,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -40,7 +40,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private Composite filterComposite;
 
-	private final String EMPTY_PROFIL = Messages.SelectRulesWizardPage_EmptyProfileLabel;
+	private static final String CUSTOM_PROFILE = Messages.SelectRulesWizardPage_CustomProfileLabel;
 
 	private Label selectProfileLabel;
 	private Combo selectProfileCombo;
@@ -61,12 +61,13 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	}
 
 	/**
-	 * Creates filtering part of the wizard view which contains label and combo
-	 * for filtering by group, label and text field for filtering by group and
-	 * check box button to show or hide disabled rules
+	 * Creates filtering part of the wizard view which contains label and combo for
+	 * filtering by group, label and text field for filtering by group and check box
+	 * button to show or hide disabled rules
 	 * 
 	 * @param parent
 	 */
+	@Override
 	protected void createFilteringPart(Composite parent) {
 		filterComposite = new Composite(parent, SWT.NONE);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -94,14 +95,10 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		gridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
 		gridData.widthHint = 180;
 		nameFilterText.setLayoutData(gridData);
-		nameFilterText.addModifyListener(new ModifyListener() {
-
-			@Override
-			public void modifyText(ModifyEvent e) {
-				Text source = (Text) e.getSource();
-				((SelectRulesWizardPageControler) controler)
-						.nameFilterTextChanged(source.getText().trim().toLowerCase());
-			}
+		nameFilterText.addModifyListener((ModifyEvent e) -> {
+			Text source = (Text) e.getSource();
+			((SelectRulesWizardPageControler) controler)
+					.nameFilterTextChanged(StringUtils.lowerCase(source.getText().trim()));
 		});
 		// following doesn't work under Windows7
 		nameFilterText.addSelectionListener(new SelectionAdapter() {
@@ -112,8 +109,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 					text.setText(Messages.SelectRulesWizardPage_emptyString);
 				} else if (e.detail == SWT.ICON_SEARCH) {
 					Text text = (Text) e.getSource();
-					String input = text.getText().trim().toLowerCase();
-					if (!input.isEmpty() && !((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
+					String input = StringUtils.lowerCase(text.getText().trim());
+					if (!StringUtils.isEmpty(input)
+							&& !((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
 						((SelectRulesWizardPageControler) controler).searchPressed(input);
 						addTagInComposite(input);
 						nameFilterText.setText(""); //$NON-NLS-1$
@@ -128,8 +126,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.keyCode == SWT.CR || e.keyCode == SWT.KEYPAD_CR) {
-					String input = ((Text) e.getSource()).getText().trim().toLowerCase();
-					if (!input.isEmpty() && !((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
+					String input = StringUtils.lowerCase(((Text) e.getSource()).getText().trim());
+					if (!StringUtils.isEmpty(input)
+							&& !((SelectRulesWizardPageModel) model).getAppliedTags().contains(input)) {
 						((SelectRulesWizardPageControler) controler).searchPressed(input);
 						addTagInComposite(input);
 						nameFilterText.setText(""); //$NON-NLS-1$
@@ -178,11 +177,10 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 * group
 	 */
 	private void populateGroupFilterCombo() {
-		List<String> profiles = SimonykeesPreferenceManager.getAllProfileIds();
-		selectProfileCombo.add(EMPTY_PROFIL);
-		for (String profile : profiles) {
-			selectProfileCombo.add(profile);
-		}
+		SimonykeesPreferenceManager.getAllProfileIds().stream().map(SimonykeesPreferenceManager::getProfileFromName)
+				.map(profile -> profile.getProfileName()
+						+ (profile.isBuiltInProfile() ? Messages.SimonykeesPreferencePage_profilesBuiltInSuffix : "")) //$NON-NLS-1$
+				.forEach(selectProfileCombo::add);
 	}
 
 	/**
@@ -190,13 +188,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 * preferences or to currently selected profile otherwise
 	 */
 	private void initializeGroupFilterCombo() {
-		if (SimonykeesPreferenceManager.useProfile()) {
-			selectProfileCombo.select(selectProfileCombo.indexOf(SimonykeesPreferenceManager.getCurrentProfileId()));
-			((SelectRulesWizardPageControler) controler)
-					.profileChanged(SimonykeesPreferenceManager.getCurrentProfileId());
-		} else {
-			selectProfileCombo.select(selectProfileCombo.indexOf(EMPTY_PROFIL));
-		}
+		selectProfileCombo.select(SimonykeesPreferenceManager.getAllProfileIds()
+				.indexOf(SimonykeesPreferenceManager.getCurrentProfileId()));
+		((SelectRulesWizardPageControler) controler).profileChanged(SimonykeesPreferenceManager.getCurrentProfileId());
 	}
 
 	/**
@@ -210,10 +204,13 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				String selectedProfileId = selectProfileCombo.getItem(selectProfileCombo.getSelectionIndex());
-				if (selectedProfileId.equals(((SelectRulesWizardPageModel) model).getCurrentProfileId())) {
-					// nothing
-				} else {
+				String selectedProfileId = SimonykeesPreferenceManager.getAllProfileIds()
+						.get(selectProfileCombo.getSelectionIndex());
+
+				if (!selectedProfileId.equals(CUSTOM_PROFILE)) {
+					if (Arrays.asList(selectProfileCombo.getItems()).contains(CUSTOM_PROFILE)) {
+						selectProfileCombo.remove(CUSTOM_PROFILE);
+					}
 					if (update) {
 						nameFilterText.setText(""); //$NON-NLS-1$
 						((SelectRulesWizardPageModel) model).getAppliedTags().clear();
@@ -277,5 +274,61 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	@Override
 	protected void doStatusUpdate() {
 		super.doStatusUpdate(null);
+	}
+
+	@Override
+	protected void updateData() {
+		super.updateData();
+
+		this.addChangeListeners();
+	}
+
+	private void selectCustomProfile() {
+		if (!Arrays.asList(selectProfileCombo.getItems()).contains(CUSTOM_PROFILE)) {
+			selectProfileCombo.add(CUSTOM_PROFILE);
+		}
+		selectProfileCombo.select(selectProfileCombo.indexOf(CUSTOM_PROFILE));
+	}
+
+	private void addChangeListeners() {
+		super.getAddAllButton().addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				selectCustomProfile();
+			}
+
+		});
+
+		super.getRemoveAllButton().addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				selectCustomProfile();
+			}
+
+		});
+
+		super.getAddButton().addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				selectCustomProfile();
+			}
+
+		});
+
+		super.getRemoveButton().addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				selectCustomProfile();
+			}
+
+		});
+
+		super.getLeftTreeViewer().addDoubleClickListener(doubleClickEvent -> selectCustomProfile());
+
+		super.getRightTableViewer().addDoubleClickListener(doubleClickEvent -> selectCustomProfile());
 	}
 }

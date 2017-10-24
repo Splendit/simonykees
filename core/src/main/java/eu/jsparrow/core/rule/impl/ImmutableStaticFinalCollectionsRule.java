@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.ImmutableStaticFinalCollectionsASTVisitor;
+import eu.jsparrow.core.visitor.impl.ImmutableStaticFinalCollectionsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -13,8 +13,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class ImmutableStaticFinalCollectionsRule extends RefactoringRule<ImmutableStaticFinalCollectionsASTVisitor> {
 
-	public ImmutableStaticFinalCollectionsRule(Class<ImmutableStaticFinalCollectionsASTVisitor> visitor) {
-		super(visitor);
+	public ImmutableStaticFinalCollectionsRule() {
+		super();
+		this.visitorClass = ImmutableStaticFinalCollectionsASTVisitor.class;
 		this.name = Messages.ImmutableStaticFinalCollectionsRule_name;
 		this.description = Messages.ImmutableStaticFinalCollectionsRule_description;
 	}

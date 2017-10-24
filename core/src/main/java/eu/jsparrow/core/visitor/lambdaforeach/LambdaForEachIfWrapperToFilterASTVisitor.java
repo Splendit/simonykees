@@ -34,9 +34,9 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
 		boolean toStreamNeeded = false;
-		
+
 		// only forEach method is interesting
-		if(isCollectionForEachInvocation(methodInvocationNode)) {
+		if (isCollectionForEachInvocation(methodInvocationNode)) {
 			toStreamNeeded = true;
 		} else if (!isStreamForEachInvocation(methodInvocationNode)) {
 			return true;
@@ -49,96 +49,98 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 		if (methodArgs.size() == 1 && methodArgs.get(0) instanceof LambdaExpression) {
 
 			/*
-			 * get lambda expression and its parameters and check for
-			 * size
+			 * get lambda expression and its parameters and check for size
 			 */
 			LambdaExpression lambdaExpression = (LambdaExpression) methodArgs.get(0);
 			List<VariableDeclaration> lambdaExpressionParams = ASTNodeUtil
-					.convertToTypedList(lambdaExpression.parameters(), VariableDeclaration.class);
+				.convertToTypedList(lambdaExpression.parameters(), VariableDeclaration.class);
 
-			if (lambdaExpressionParams.size() == 1) {
+			// if statement can only be in a block
+			if (lambdaExpressionParams.size() == 1 && lambdaExpression.getBody() instanceof Block) {
 
-				// if statement can only be in a block
-				if (lambdaExpression.getBody() instanceof Block) {
-					Block block = (Block) lambdaExpression.getBody();
+				Block block = (Block) lambdaExpression.getBody();
+
+				/*
+				 * block should contain a single if statement and nothing before
+				 * or after it
+				 */
+				if (block.statements()
+					.size() == 1
+						&& block.statements()
+							.get(0) instanceof IfStatement) {
+					IfStatement ifStatement = (IfStatement) block.statements()
+						.get(0);
+					Expression ifStatementExpression = ifStatement.getExpression();
+
+					VariableDeclaration variableDeclaration = lambdaExpressionParams.get(0);
+					SimpleName paramName = variableDeclaration.getName();
 
 					/*
-					 * block should contain a single if statement and
-					 * nothing before or after it
+					 * an else statement must not be present and the parameter
+					 * passed to the forEach lambda must be used for filtering
+					 * in the containing if statement
 					 */
-					if (block.statements().size() == 1 && block.statements().get(0) instanceof IfStatement) {
-						IfStatement ifStatement = (IfStatement) block.statements().get(0);
-						Expression ifStatementExpression = ifStatement.getExpression();
-
-						VariableDeclaration variableDeclaration = lambdaExpressionParams.get(0);
-						SimpleName paramName = variableDeclaration.getName();
+					if (isElseStatementNullOrEmpty(ifStatement.getElseStatement())
+							&& this.isParameterUsedInExpression(paramName, ifStatementExpression)) {
 
 						/*
-						 * an else statement must not be present and the
-						 * parameter passed to the forEach lambda must
-						 * be used for filtering in the containing if
-						 * statement
+						 * create lambda expression for the filter() method
 						 */
-						if (isElseStatementNullOrEmpty(ifStatement.getElseStatement())
-								&& this.isParameterUsedInExpression(paramName, ifStatementExpression)) {
+						VariableDeclaration variableDeclarationCopy = (VariableDeclaration) ASTNode
+							.copySubtree(astRewrite.getAST(), variableDeclaration);
 
+						LambdaExpression filterLambda = createLambdaExpression(variableDeclarationCopy,
+								ifStatementExpression);
+
+						/*
+						 * create filter() method invocation with filter lambda
+						 * as argument
+						 */
+						Expression streamExpressionCopy = (Expression) astRewrite
+							.createCopyTarget(methodInvocationNode.getExpression());
+
+						if (toStreamNeeded) {
+							SimpleName streamName = astRewrite.getAST()
+								.newSimpleName(STREAM);
+							MethodInvocation streamMethodInvocation = astRewrite.getAST()
+								.newMethodInvocation();
+							streamMethodInvocation.setName(streamName);
+							streamMethodInvocation.setExpression(streamExpressionCopy);
+							streamExpressionCopy = streamMethodInvocation;
+						}
+
+						SimpleName filterName = astRewrite.getAST()
+							.newSimpleName("filter"); //$NON-NLS-1$
+
+						MethodInvocation filterMethodInvocation = createMethodInvocation(streamExpressionCopy,
+								filterName, filterLambda);
+
+						/*
+						 * create lambda expression for the new forEach() method
+						 */
+
+						LambdaExpression forEachLambda = createLambdaExpression(variableDeclarationCopy,
+								ifStatement.getThenStatement());
+
+						if (forEachLambda != null) {
 							/*
-							 * create lambda expression for the filter()
-							 * method
+							 * create new forEach() method with forEach lambda
+							 * as argument
 							 */
-							VariableDeclaration variableDeclarationCopy = (VariableDeclaration) ASTNode
-									.copySubtree(astRewrite.getAST(), variableDeclaration);
+							SimpleName forEachMethodName = astRewrite.getAST()
+								.newSimpleName("forEach"); //$NON-NLS-1$
+							MethodInvocation forEachMethodInvocation = createMethodInvocation(filterMethodInvocation,
+									forEachMethodName, forEachLambda);
 
-							LambdaExpression filterLambda = createLambdaExpression(variableDeclarationCopy,
-									ifStatementExpression);
-
-							/*
-							 * create filter() method invocation with
-							 * filter lambda as argument
-							 */
-							Expression streamExpressionCopy = (Expression) astRewrite
-									.createCopyTarget(methodInvocationNode.getExpression());
-							
-							if(toStreamNeeded) {
-								SimpleName streamName = astRewrite.getAST().newSimpleName(STREAM);
-								MethodInvocation streamMethodInvocation = astRewrite.getAST().newMethodInvocation();
-								streamMethodInvocation.setName(streamName);
-								streamMethodInvocation.setExpression(streamExpressionCopy);
-								streamExpressionCopy = streamMethodInvocation;
-							}
-							
-							SimpleName filterName = astRewrite.getAST().newSimpleName("filter"); //$NON-NLS-1$
-
-							MethodInvocation filterMethodInvocation = createMethodInvocation(
-									streamExpressionCopy, filterName, filterLambda);
-
-							/*
-							 * create lambda expression for the new
-							 * forEach() method
-							 */
-
-							LambdaExpression forEachLambda = createLambdaExpression(variableDeclarationCopy,
-									ifStatement.getThenStatement());
-
-							if(forEachLambda != null) {
-								/*
-								 * create new forEach() method with forEach
-								 * lambda as argument
-								 */
-								SimpleName forEachMethodName = astRewrite.getAST().newSimpleName("forEach"); //$NON-NLS-1$
-								MethodInvocation forEachMethodInvocation = createMethodInvocation(
-										filterMethodInvocation, forEachMethodName, forEachLambda);
-								
-								// rewrite the AST
-								astRewrite.replace(methodInvocationNode, forEachMethodInvocation, null);
-							}
+							// rewrite the AST
+							astRewrite.replace(methodInvocationNode, forEachMethodInvocation, null);
+							onRewrite();
 						}
 					}
 				}
 			}
+
 		}
-
-
 
 		return true;
 	}
@@ -153,24 +155,26 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 	 *            the body of the new lambda expression, which must either be an
 	 *            {@link Expression} or a {@link Block}
 	 * @return the newly created {@link LambdaExpression} or null, if the body
-	 *         is not of type {@link Expression},  {@link ExpressionStatement} or {@link Block}.
+	 *         is not of type {@link Expression}, {@link ExpressionStatement} or
+	 *         {@link Block}.
 	 */
 	private LambdaExpression createLambdaExpression(VariableDeclaration parameter, ASTNode body) {
-		
-		LambdaExpression lambda = astRewrite.getAST().newLambdaExpression();
-		
-		ListRewrite lambdaParamsListRewrite = astRewrite.getListRewrite(lambda,
-				LambdaExpression.PARAMETERS_PROPERTY);
+
+		LambdaExpression lambda = astRewrite.getAST()
+			.newLambdaExpression();
+		lambda.setParentheses(false);
+
+		ListRewrite lambdaParamsListRewrite = astRewrite.getListRewrite(lambda, LambdaExpression.PARAMETERS_PROPERTY);
 		lambdaParamsListRewrite.insertFirst(parameter, null);
 		if (body.getNodeType() == ASTNode.BLOCK) {
-			lambda.setBody((Block)astRewrite.createCopyTarget(body));
+			lambda.setBody((Block) astRewrite.createCopyTarget(body));
 			return lambda;
 		} else if (body.getNodeType() == ASTNode.EXPRESSION_STATEMENT) {
-			Expression expression = ((ExpressionStatement)body).getExpression();
-			lambda.setBody((Expression)astRewrite.createCopyTarget(expression));
+			Expression expression = ((ExpressionStatement) body).getExpression();
+			lambda.setBody((Expression) astRewrite.createCopyTarget(expression));
 			return lambda;
 		} else if (body instanceof Expression) {
-			lambda.setBody((Expression)astRewrite.createCopyTarget(body));
+			lambda.setBody((Expression) astRewrite.createCopyTarget(body));
 			return lambda;
 		}
 
@@ -188,7 +192,8 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 	 */
 	private MethodInvocation createMethodInvocation(Expression methodExpression, SimpleName methodName,
 			LambdaExpression methodParam) {
-		MethodInvocation methodInvocation = astRewrite.getAST().newMethodInvocation();
+		MethodInvocation methodInvocation = astRewrite.getAST()
+			.newMethodInvocation();
 		methodInvocation.setExpression(methodExpression);
 		methodInvocation.setName(methodName);
 		ListRewrite forEachMethodArgsListRewrite = astRewrite.getListRewrite(methodInvocation,
@@ -209,7 +214,8 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 	private boolean isParameterUsedInExpression(SimpleName parameter, Expression expression) {
 		LocalVariableUsagesASTVisitor visitor = new LocalVariableUsagesASTVisitor(parameter);
 		expression.accept(visitor);
-		return !visitor.getUsages().isEmpty();
+		return !visitor.getUsages()
+			.isEmpty();
 	}
 
 	/**
@@ -228,13 +234,11 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 				Block elseStatementBlock = (Block) elseStatement;
 				List<Statement> statements = ASTNodeUtil.convertToTypedList(elseStatementBlock.statements(),
 						Statement.class);
-				boolean onlyEmptyStatementsInBlock = true;
-				for (Statement statement : statements) {
-					if (!(statement instanceof EmptyStatement)) {
-						onlyEmptyStatementsInBlock = false;
-						break;
-					}
-				}
+				boolean onlyEmptyStatementsInBlock = statements.stream()
+					.filter(statement -> !(statement instanceof EmptyStatement))
+					.findFirst()
+					.map(statement -> false)
+					.orElse(true);
 				return onlyEmptyStatementsInBlock;
 			} else if (elseStatement instanceof EmptyStatement) {
 				return true;

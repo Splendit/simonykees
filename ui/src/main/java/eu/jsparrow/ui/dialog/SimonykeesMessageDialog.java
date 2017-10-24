@@ -20,8 +20,8 @@ import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.core.exception.SimonykeesException;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * Simple help dialog that gets populated with default values
@@ -43,6 +43,13 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	private static final String splenditUrl = Messages.HelpMessageDialog_homepage_url;
 
 	private static String messageText;
+
+	private SimonykeesMessageDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage,
+			int dialogImageType, int defaultIndex, String... dialogButtonLabels) {
+		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels,
+				defaultIndex);
+		messageText = dialogMessage;
+	}
 
 	public static boolean openDefaultHelpMessageDialog(Shell parentShell) {
 		messageText = dialogInformationMessage + System.lineSeparator() + splenditUrl;
@@ -69,11 +76,21 @@ public class SimonykeesMessageDialog extends MessageDialog {
 				defaultIndex, dialogButtonLabels).open() == 0;
 	}
 
-	private SimonykeesMessageDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage,
-			int dialogImageType, int defaultIndex, String... dialogButtonLabels) {
-		super(parentShell, dialogTitle, dialogTitleImage, dialogMessage, dialogImageType, dialogButtonLabels,
-				defaultIndex);
-		messageText = dialogMessage;
+	/**
+	 * opens a dialog of the form {@link MessageDialog#QUESTION_WITH_CANCEL}
+	 * 
+	 * @param parentShell
+	 * @param question
+	 *            message to be shown in the dialog
+	 * @param dialogButtons
+	 *            a list with button labels, which should be displayed in the
+	 *            dialog. The last element in the list will be the default button.
+	 * @return the index of the clicked button according to the dialogButtons
+	 *         parameter
+	 */
+	public static int openQuestionWithCancelDialog(Shell parentShell, String question, String[] dialogButtons) {
+		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, question,
+				MessageDialog.QUESTION_WITH_CANCEL, dialogButtons.length, dialogButtons).open();
 	}
 
 	@Override
@@ -83,7 +100,9 @@ public class SimonykeesMessageDialog extends MessageDialog {
 			imageLabel = new Label(composite, SWT.NULL);
 			image.setBackground(imageLabel.getBackground());
 			imageLabel.setImage(image);
-			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.BEGINNING).applyTo(imageLabel);
+			GridDataFactory.fillDefaults()
+				.align(SWT.CENTER, SWT.BEGINNING)
+				.applyTo(imageLabel);
 		}
 		if (message != null) {
 			Link link = new Link(composite, getMessageLabelStyle());
@@ -93,15 +112,20 @@ public class SimonykeesMessageDialog extends MessageDialog {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
 					try {
-						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(arg0.text));
+						PlatformUI.getWorkbench()
+							.getBrowserSupport()
+							.getExternalBrowser()
+							.openURL(new URL(arg0.text));
 					} catch (PartInitException | MalformedURLException e) {
 						logger.error(Messages.SimonykeesMessageDialog_open_browser_error_message, e);
 					}
 				}
 			});
-			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false)
-					.hint(convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT)
-					.applyTo(link);
+			GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER)
+				.grab(true, false)
+				.hint(convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT)
+				.applyTo(link);
 		}
 		return composite;
 	}

@@ -14,8 +14,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class EnhancedForLoopToStreamSumRule extends RefactoringRule<EnhancedForLoopToStreamSumASTVisitor> {
 
-	public EnhancedForLoopToStreamSumRule(Class<EnhancedForLoopToStreamSumASTVisitor> visitor) {
-		super(visitor);
+	public EnhancedForLoopToStreamSumRule() {
+		super();
+		this.visitorClass = EnhancedForLoopToStreamSumASTVisitor.class;
 		this.name = Messages.EnhancedForLoopToStreamSumRule_name;
 		this.description = Messages.EnhancedForLoopToStreamSumRule_description;
 	}

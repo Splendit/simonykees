@@ -22,15 +22,17 @@ public class CustomSLF4JBridgeHandler extends SLF4JBridgeHandler {
 	 * Adds a {@link CustomSLF4JBridgeHandler} to jul's root logger
 	 */
 	public static void install() {
-		LogManager.getLogManager().getLogger("").addHandler(new CustomSLF4JBridgeHandler()); //$NON-NLS-1$
+		LogManager.getLogManager()
+			.getLogger("") //$NON-NLS-1$
+			.addHandler(new CustomSLF4JBridgeHandler());
 	}
 
 	/**
 	 * in the original method, the logger name is derived directly from
-	 * java.util.logging and therefore it cannot be redirected in a separate file
-	 * because the derived logger is usually the root logger. Hence, the overridden
-	 * method returns a reference to the logger named "jul" in logback.xml to make
-	 * this work.
+	 * java.util.logging and therefore it cannot be redirected in a separate
+	 * file because the derived logger is usually the root logger. Hence, the
+	 * overridden method returns a reference to the logger named "jul" in
+	 * logback.xml to make this work.
 	 */
 	@Override
 	protected Logger getSLF4JLogger(LogRecord record) {

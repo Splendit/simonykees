@@ -12,6 +12,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -30,8 +31,8 @@ import eu.jsparrow.i18n.Messages;
  */
 public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisitor> {
 
-	public CodeFormatterRule(Class<AbstractASTRewriteASTVisitor> visitor) {
-		super(visitor);
+	public CodeFormatterRule() {
+		this.visitorClass = AbstractASTRewriteASTVisitor.class;
 		this.name = Messages.CodeFormatterRule_name;
 		this.description = Messages.CodeFormatterRule_description;
 	}
@@ -60,7 +61,8 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 		 * currently used IJavaProject instead of JavaCore.getOptions() (used
 		 * when passing null), which works in runtime Eclipse etc.
 		 */
-		CodeFormatter formatter = ToolFactory.createCodeFormatter(workingCopy.getJavaProject().getOptions(true));
+		CodeFormatter formatter = ToolFactory.createCodeFormatter(workingCopy.getJavaProject()
+			.getOptions(true));
 
 		int formatingKind = CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS
 				| CodeFormatter.K_UNKNOWN;
@@ -70,6 +72,8 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 		DocumentChange documentChange = null;
 
 		if (edit.hasChildren()) {
+			RuleApplicationCount.get(this)
+				.update();
 			Document document = new Document(workingCopy.getSource());
 			documentChange = RefactoringUtil.generateDocumentChange(CodeFormatterRule.class.getSimpleName(), document,
 					edit.copy());

@@ -25,35 +25,36 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import eu.jsparrow.core.util.ASTNodeUtil;
 
 /**
- * A super class of the visitors that analyzes a loop (@link {@link ForStatement} or {@link WhileStatement})
- * whether it can be transformed to an {@link EnhancedForStatement} or not.
+ * A super class of the visitors that analyzes a loop (@link
+ * {@link ForStatement} or {@link WhileStatement}) whether it can be transformed
+ * to an {@link EnhancedForStatement} or not.
  * 
  * @author Ardit Ymeri
  * @since 1.2
  *
  */
 public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
-	
+
 	protected static final String ONE = "1"; //$NON-NLS-1$
 	protected static final String ZERO = "0"; //$NON-NLS-1$
 	private static final String GET = "get"; //$NON-NLS-1$
-	
+
 	private SimpleName iterableName;
 	protected SimpleName newIteratorName;
 	protected VariableDeclarationFragment preferredNameFragment;
 	private List<ASTNode> nodesToBeRemoved;
 	private boolean isParameterizedIteratorType = false;
-	
+
 	protected boolean insideLoop = false;
 	protected boolean beforeLoop = true;
 	protected boolean afterLoop = false;
 	private boolean hasEmptyStatement = false;
 	private boolean hasRawTypeIterator = false;
-	
+
 	private List<ASTNode> iteratingObjectInitializers;
 	private boolean indexReferencedOutsideLoop = false;
 	private boolean indexReferencedInsideLoop = false;
-	
+
 	protected LoopIteratingIndexASTVisitor(SimpleName iterableNode) {
 		this.iterableName = iterableNode;
 		isParameterizedIteratorType = isIterableWithParameterizedElements(iterableNode);
@@ -87,23 +88,26 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Checks whether the given expression is an assignment to zero
-	 * expression of a variable with the same name as the given simple name. 
+	 * Checks whether the given expression is an assignment to zero expression
+	 * of a variable with the same name as the given simple name.
 	 * 
-	 * @param name simple name to check for
-	 * @param expression expression to investigate
+	 * @param name
+	 *            simple name to check for
+	 * @param expression
+	 *            expression to investigate
 	 * 
-	 * @return {@code true} if the expression is an assignment to zero expression
-	 * of a variable with the given simple name. 
+	 * @return {@code true} if the expression is an assignment to zero
+	 *         expression of a variable with the given simple name.
 	 */
 	protected boolean isAssignmetnToZero(SimpleName name, Expression expression) {
 		boolean isAssignmentOfIteratingIndex = false;
-		if(ASTNode.ASSIGNMENT == expression.getNodeType()) {
-			Assignment assignment = (Assignment)expression;
+		if (ASTNode.ASSIGNMENT == expression.getNodeType()) {
+			Assignment assignment = (Assignment) expression;
 			Expression lhs = assignment.getLeftHandSide();
 			Expression rhs = assignment.getRightHandSide();
-			if(ASTNode.SIMPLE_NAME == lhs.getNodeType() && ((SimpleName)lhs).getIdentifier().equals(name.getIdentifier()) 
-					&& ASTNode.NUMBER_LITERAL == rhs.getNodeType() && ZERO.equals(((NumberLiteral)rhs).getToken())) {
+			if (ASTNode.SIMPLE_NAME == lhs.getNodeType() && ((SimpleName) lhs).getIdentifier()
+				.equals(name.getIdentifier()) && ASTNode.NUMBER_LITERAL == rhs.getNodeType()
+					&& ZERO.equals(((NumberLiteral) rhs).getToken())) {
 				isAssignmentOfIteratingIndex = true;
 			}
 		}
@@ -115,19 +119,19 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 		// Anonymous classes have their own scope
 		return false;
 	}
-	
+
 	public SimpleName getIteratorName() {
 		return this.newIteratorName;
 	}
-	
+
 	public List<ASTNode> getNodesToBeRemoved() {
 		return this.nodesToBeRemoved;
 	}
-	
+
 	protected void markAsToBeRemoved(ASTNode node) {
 		nodesToBeRemoved.add(node);
 	}
-	
+
 	public List<ASTNode> getIteratingObjectInitializers() {
 		return iteratingObjectInitializers;
 	}
@@ -135,19 +139,19 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	protected void addIteratingObjectInitializer(ASTNode node) {
 		iteratingObjectInitializers.add(node);
 	}
-	
+
 	protected boolean isBeforeLoop() {
 		return beforeLoop;
 	}
-	
+
 	protected boolean isInsideLoop() {
 		return insideLoop;
 	}
-	
+
 	protected boolean isAfterLoop() {
 		return afterLoop;
 	}
-	
+
 	protected void setIndexReferencedOutsideLoop() {
 		this.indexReferencedOutsideLoop = true;
 	}
@@ -155,12 +159,12 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	public VariableDeclarationFragment getPreferredNameFragment() {
 		return this.preferredNameFragment;
 	}
-	
+
 	protected void setIndexReferencedInsideLoop() {
 		this.indexReferencedInsideLoop = true;
 
 	}
-	
+
 	protected void setHasEmptyStatement() {
 		this.hasEmptyStatement = true;
 	}
@@ -183,71 +187,73 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	 */
 	protected boolean isValidIncrementExpression(Expression expression, SimpleName operandName) {
 		boolean isIncrement = false;
-		
+
 		int expressionType = expression.getNodeType();
-	
+
 		if (ASTNode.POSTFIX_EXPRESSION == expressionType) {
-			// covers the case: operand++;
+			// covers the case: operand++
 			PostfixExpression postfixExpression = (PostfixExpression) expression;
 			Expression operand = postfixExpression.getOperand();
-			if (ASTNode.SIMPLE_NAME == operand.getNodeType()
-					&& ((SimpleName) operand).getIdentifier().equals(operandName.getIdentifier())
+			if (ASTNode.SIMPLE_NAME == operand.getNodeType() && ((SimpleName) operand).getIdentifier()
+				.equals(operandName.getIdentifier())
 					&& PostfixExpression.Operator.INCREMENT.equals(postfixExpression.getOperator())) {
-	
+
 				isIncrement = true;
 			}
 		} else if (ASTNode.ASSIGNMENT == expressionType) {
 			Assignment assignmentExpression = (Assignment) expression;
 			Expression lhs = assignmentExpression.getLeftHandSide();
 			Expression rhs = assignmentExpression.getRightHandSide();
-	
-			if (ASTNode.SIMPLE_NAME == lhs.getNodeType()
-					&& ((SimpleName) lhs).getIdentifier().equals(operandName.getIdentifier())) {
-				if(ASTNode.INFIX_EXPRESSION == rhs.getNodeType()) {
-					// covers the case: operand = operand +1;
-	
+
+			if (ASTNode.SIMPLE_NAME == lhs.getNodeType() && ((SimpleName) lhs).getIdentifier()
+				.equals(operandName.getIdentifier())) {
+				if (ASTNode.INFIX_EXPRESSION == rhs.getNodeType()) {
+					// covers the case: operand = operand +1
+
 					InfixExpression infixExpression = (InfixExpression) rhs;
 					Expression leftOperand = infixExpression.getLeftOperand();
 					Expression rightOperand = infixExpression.getRightOperand();
 					/*
-					 * the form of the expression should either be:
-					 * 		operand = operand + 1;
-					 * or
-					 * 		operand = 1 + operand; 
+					 * the form of the expression should either be: operand =
+					 * operand + 1 or operand = 1 + operand
 					 * 
 					 */
-					if (InfixExpression.Operator.PLUS.equals(infixExpression.getOperator()) && ((ASTNode.SIMPLE_NAME == leftOperand.getNodeType()
-							&& ((SimpleName) leftOperand).getIdentifier().equals(operandName.getIdentifier())
-							&& ASTNode.NUMBER_LITERAL == rightOperand.getNodeType()
-							&& ONE.equals(((NumberLiteral) rightOperand).getToken()))
-							|| ((ASTNode.SIMPLE_NAME == rightOperand.getNodeType()
-									&& ((SimpleName) rightOperand).getIdentifier().equals(operandName.getIdentifier())
-									&& ASTNode.NUMBER_LITERAL == leftOperand.getNodeType()
-									&& ONE.equals(((NumberLiteral) leftOperand).getToken()))))) {
-	
+					if (InfixExpression.Operator.PLUS.equals(infixExpression.getOperator())
+							&& ((ASTNode.SIMPLE_NAME == leftOperand.getNodeType()
+									&& ((SimpleName) leftOperand).getIdentifier()
+										.equals(operandName.getIdentifier())
+									&& ASTNode.NUMBER_LITERAL == rightOperand.getNodeType()
+									&& ONE.equals(((NumberLiteral) rightOperand).getToken()))
+									|| (ASTNode.SIMPLE_NAME == rightOperand.getNodeType()
+											&& ((SimpleName) rightOperand).getIdentifier()
+												.equals(operandName.getIdentifier())
+											&& ASTNode.NUMBER_LITERAL == leftOperand.getNodeType()
+											&& ONE.equals(((NumberLiteral) leftOperand).getToken())))) {
+
 						isIncrement = true;
 					}
 				} else if (ASTNode.NUMBER_LITERAL == rhs.getNodeType()) {
-					// covers the case: operand += 1;
-					String numLiteral = ((NumberLiteral)rhs).getToken();
-					if(ONE.equals(numLiteral) && Assignment.Operator.PLUS_ASSIGN.equals(assignmentExpression.getOperator())) {
+					// covers the case: operand += 1
+					String numLiteral = ((NumberLiteral) rhs).getToken();
+					if (ONE.equals(numLiteral)
+							&& Assignment.Operator.PLUS_ASSIGN.equals(assignmentExpression.getOperator())) {
 						isIncrement = true;
 					}
-					
+
 				}
 			}
-	
+
 		} else if (ASTNode.PREFIX_EXPRESSION == expressionType) {
 			// covers the case: ++operand;
 			PrefixExpression postfixExpression = (PrefixExpression) expression;
 			Expression operand = postfixExpression.getOperand();
-			if (ASTNode.SIMPLE_NAME == operand.getNodeType()
-					&& ((SimpleName) operand).getIdentifier().equals(operandName.getIdentifier())
+			if (ASTNode.SIMPLE_NAME == operand.getNodeType() && ((SimpleName) operand).getIdentifier()
+				.equals(operandName.getIdentifier())
 					&& PrefixExpression.Operator.INCREMENT.equals(postfixExpression.getOperator())) {
 				isIncrement = true;
 			}
 		}
-	
+
 		return isIncrement;
 	}
 
@@ -261,7 +267,8 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 			Assignment assignment = (Assignment) initExpresion;
 			Expression rhs = assignment.getRightHandSide();
 			if (ASTNode.NUMBER_LITERAL == rhs.getNodeType()) {
-				assignedToZero = ((NumberLiteral) rhs).getToken().equals(ZERO);
+				assignedToZero = ((NumberLiteral) rhs).getToken()
+					.equals(ZERO);
 			}
 		} else if (ASTNode.VARIABLE_DECLARATION_EXPRESSION == initExpresion.getNodeType()) {
 			VariableDeclarationExpression declExpresion = (VariableDeclarationExpression) initExpresion;
@@ -271,24 +278,27 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 				VariableDeclarationFragment fragment = fragments.get(0);
 				Expression initializer = fragment.getInitializer();
 				if (initializer != null && ASTNode.NUMBER_LITERAL == initializer.getNodeType()) {
-					assignedToZero = ((NumberLiteral) initializer).getToken().equals(ZERO);
+					assignedToZero = ((NumberLiteral) initializer).getToken()
+						.equals(ZERO);
 				}
 			}
 		} else if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == initExpresion.getNodeType()) {
 			VariableDeclarationFragment declFragment = (VariableDeclarationFragment) initExpresion;
 			Expression initializer = declFragment.getInitializer();
 			if (initializer != null && ASTNode.NUMBER_LITERAL == initializer.getNodeType()) {
-				assignedToZero = ((NumberLiteral) initializer).getToken().equals(ZERO);
+				assignedToZero = ((NumberLiteral) initializer).getToken()
+					.equals(ZERO);
 			}
 		}
-	
+
 		return assignedToZero;
 	}
-	
+
 	/**
 	 * Checks whether the given instance of a {@link SimpleName} is used as an
-	 * index for accessing an element of the given iterableName. Furthermore, checks
-	 * whether the array access occurs in the left hand side of an assignment.
+	 * index for accessing an element of the given iterableName. Furthermore,
+	 * checks whether the array access occurs in the left hand side of an
+	 * assignment.
 	 * 
 	 * @param simpleName
 	 *            simple name to be checked.
@@ -306,18 +316,20 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 			Expression arrayExpression = arrayAccess.getArray();
 			if (ASTNode.SIMPLE_NAME == arrayExpression.getNodeType()) {
 				SimpleName arrayName = (SimpleName) arrayExpression;
-				replacableAccess = arrayName.getIdentifier().equals(iterableName.getIdentifier());
+				replacableAccess = arrayName.getIdentifier()
+					.equals(iterableName.getIdentifier());
 			}
 		}
 		return replacableAccess;
 	}
-	
+
 	/**
-	 * Analyzes the occurrences of the iterating index of a loop. Checks whether 
-	 * the iterating index is referenced outside the loop and whether it is 
-	 * used only as an index of an array access. 
+	 * Analyzes the occurrences of the iterating index of a loop. Checks whether
+	 * the iterating index is referenced outside the loop and whether it is used
+	 * only as an index of an array access.
 	 * 
-	 * @param simpleName name of the iterating index
+	 * @param simpleName
+	 *            name of the iterating index
 	 */
 	protected void visitIndexOfArrayAccess(SimpleName simpleName) {
 		if (!isNameOfIteratingIndex(simpleName)) {
@@ -348,17 +360,19 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 			setIndexReferencedOutsideLoop();
 		}
 	}
-	
+
 	/**
-	 * Analyzes the occurrences of the iterating index of a loop. Checks whether 
-	 * the iterating index is referenced outside the loop and whether it is 
-	 * only used as an index for getting an element of the iterable object {@link #iterableName}
-	 * i.e. it is only used as a parameter in the invocation of {@link List#get(int)} . 
+	 * Analyzes the occurrences of the iterating index of a loop. Checks whether
+	 * the iterating index is referenced outside the loop and whether it is only
+	 * used as an index for getting an element of the iterable object
+	 * {@link #iterableName} i.e. it is only used as a parameter in the
+	 * invocation of {@link List#get(int)} .
 	 * 
-	 * @param simpleName name of the iterating index
+	 * @param simpleName
+	 *            name of the iterating index
 	 */
 	protected void visitIndexOfIterableGet(SimpleName simpleName) {
-		if(!isNameOfIteratingIndex(simpleName)) {
+		if (!isNameOfIteratingIndex(simpleName)) {
 			return;
 		}
 
@@ -371,40 +385,46 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 				MethodInvocation methodInvocation = (MethodInvocation) parent;
 				Expression methodExpression = methodInvocation.getExpression();
 
-				if (GET.equals(methodInvocation.getName().getIdentifier())
-						&& methodInvocation.arguments().size() == 1 && methodExpression != null
-						&& methodExpression.getNodeType() == ASTNode.SIMPLE_NAME
-						&& ((SimpleName) methodExpression).getIdentifier().equals(iterableName.getIdentifier())) {
-					
-					if (ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent().getNodeType()) {
+				if (GET.equals(methodInvocation.getName()
+					.getIdentifier())
+						&& methodInvocation.arguments()
+							.size() == 1
+						&& methodExpression != null && methodExpression.getNodeType() == ASTNode.SIMPLE_NAME
+						&& ((SimpleName) methodExpression).getIdentifier()
+							.equals(iterableName.getIdentifier())) {
+
+					if (ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent()
+						.getNodeType()) {
 						/*
-						 * replacing the expression statement with a variable name leads to compile error
+						 * replacing the expression statement with a variable
+						 * name leads to compile error
 						 */
 						setHasEmptyStatement();
 						return;
 					}
-					
-					if(isParameterizedIteratorType() && isAssignmentOfRawType(methodInvocation)) {
+
+					if (isParameterizedIteratorType() && isAssignmentOfRawType(methodInvocation)) {
 						/*
-						 * it is not safe to use a raw object as iterator, because it 
-						 * could be casted to wrong types and therefore producing 
-						 * compile errors after transformation...
+						 * it is not safe to use a raw object as iterator,
+						 * because it could be casted to wrong types and
+						 * therefore producing compile errors after
+						 * transformation...
 						 */
 						setHasAssignmentToRawType();
 						return;
 					}
-					
+
 					/*
-					 * simpleName is the parameter of the get() method in the iterable object. 
+					 * simpleName is the parameter of the get() method in the
+					 * iterable object.
 					 */
 					addIteratingObjectInitializer(methodInvocation);
 
 					// store the preferred iterator name
-					if (newIteratorName == null
-							&& VariableDeclarationFragment.INITIALIZER_PROPERTY == methodInvocation
-									.getLocationInParent()) {
+					if (newIteratorName == null && VariableDeclarationFragment.INITIALIZER_PROPERTY == methodInvocation
+						.getLocationInParent()) {
 						VariableDeclarationFragment fragment = (VariableDeclarationFragment) methodInvocation
-								.getParent();
+							.getParent();
 						this.newIteratorName = fragment.getName();
 						this.preferredNameFragment = fragment;
 					}
@@ -419,38 +439,39 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 			setIndexReferencedOutsideLoop();
 		}
 	}
-	
+
 	private void setHasAssignmentToRawType() {
-		this.hasRawTypeIterator = true;		
+		this.hasRawTypeIterator = true;
 	}
 
 	/**
-	 * Checks whether the result of the method invocation is used for assigning 
-	 * a raw collection. Considers the right hand side of an assignment expression
-	 * and the initializer of a variable declaration fragment.
+	 * Checks whether the result of the method invocation is used for assigning
+	 * a raw collection. Considers the right hand side of an assignment
+	 * expression and the initializer of a variable declaration fragment.
 	 * 
-	 * @param methodInvocation method invocation to check for.
+	 * @param methodInvocation
+	 *            method invocation to check for.
 	 * 
-	 * @return {@code true} if the result of the method invocation is stored 
-	 * in a raw collection. 
+	 * @return {@code true} if the result of the method invocation is stored in
+	 *         a raw collection.
 	 */
 	private boolean isAssignmentOfRawType(MethodInvocation methodInvocation) {
 		Expression lhs = null;
-		if(methodInvocation.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			Assignment parent = (Assignment)methodInvocation.getParent();
+		if (methodInvocation.getLocationInParent() == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
+			Assignment parent = (Assignment) methodInvocation.getParent();
 			lhs = parent.getLeftHandSide();
 		} else if (methodInvocation.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
 			VariableDeclarationFragment parent = (VariableDeclarationFragment) methodInvocation.getParent();
 			lhs = parent.getName();
 		}
-		
-		if(lhs != null) {
+
+		if (lhs != null) {
 			ITypeBinding type = lhs.resolveTypeBinding();
-			if(type != null && type.isRawType()) {
+			if (type != null && type.isRawType()) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -459,11 +480,11 @@ public abstract class LoopIteratingIndexASTVisitor extends ASTVisitor {
 	}
 
 	protected abstract boolean isNameOfIteratingIndex(SimpleName simpleName);
-	
+
 	protected abstract boolean isLoopProperty(SimpleName simpleName);
-	
+
 	protected abstract void analyseBeforeLoopOccurrence(SimpleName simpleName);
-	
+
 	public boolean checkTransformPrecondition() {
 		return !hasEmptyStatement && !hasRawTypeIterator && !indexReferencedInsideLoop && !indexReferencedOutsideLoop;
 	}

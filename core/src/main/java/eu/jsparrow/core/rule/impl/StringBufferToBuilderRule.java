@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.StringBufferToBuilderASTVisitor;
+import eu.jsparrow.core.visitor.impl.StringBufferToBuilderASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -13,8 +13,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class StringBufferToBuilderRule extends RefactoringRule<StringBufferToBuilderASTVisitor> {
 
-	public StringBufferToBuilderRule(Class<StringBufferToBuilderASTVisitor> visitor) {
-		super(visitor);
+	public StringBufferToBuilderRule() {
+		super();
+		this.visitorClass = StringBufferToBuilderASTVisitor.class;
 		this.name = Messages.StringBufferToBuilderRule_name;
 		this.description = Messages.StringBufferToBuilderRule_description;
 	}

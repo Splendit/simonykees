@@ -3,7 +3,7 @@ package eu.jsparrow.core.rule.impl;
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.StringLiteralEqualityCheckASTVisitor;
+import eu.jsparrow.core.visitor.impl.StringLiteralEqualityCheckASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -15,8 +15,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class StringLiteralEqualityCheckRule extends RefactoringRule<StringLiteralEqualityCheckASTVisitor> {
 
-	public StringLiteralEqualityCheckRule(Class<StringLiteralEqualityCheckASTVisitor> visitor) {
-		super(visitor);
+	public StringLiteralEqualityCheckRule() {
+		super();
+		this.visitorClass = StringLiteralEqualityCheckASTVisitor.class;
 		this.name = Messages.StringLiteralEqualityCheckRule_name;
 		this.description = Messages.StringLiteralEqualityCheckRule_description;
 	}

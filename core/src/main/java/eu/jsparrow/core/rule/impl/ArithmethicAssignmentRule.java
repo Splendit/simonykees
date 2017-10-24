@@ -6,7 +6,7 @@ import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
-/** 
+/**
  * @see ArithmethicAssignmentASTVisitor
  * 
  * @author Martin Huter
@@ -15,12 +15,13 @@ import eu.jsparrow.i18n.Messages;
  */
 public class ArithmethicAssignmentRule extends RefactoringRule<ArithmethicAssignmentASTVisitor> {
 
-	public ArithmethicAssignmentRule(Class<ArithmethicAssignmentASTVisitor> visitor) {
-		super(visitor);
+	public ArithmethicAssignmentRule() {
+		super();
+		this.visitorClass = ArithmethicAssignmentASTVisitor.class;
 		this.name = Messages.ArithmethicAssignmentRule_name;
 		this.description = Messages.ArithmethicAssignmentRule_description;
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_4;

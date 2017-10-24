@@ -14,8 +14,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class ForToForEachRule extends RefactoringRule<ForToForEachASTVisitor> {
 
-	public ForToForEachRule(Class<ForToForEachASTVisitor> visitor) {
-		super(visitor);
+	public ForToForEachRule() {
+		super();
+		this.visitorClass = ForToForEachASTVisitor.class;
 		this.name = Messages.ForToForEachRule_name;
 		this.description = Messages.ForToForEachRule_description;
 	}

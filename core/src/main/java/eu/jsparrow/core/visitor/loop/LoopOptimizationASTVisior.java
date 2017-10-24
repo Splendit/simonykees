@@ -86,27 +86,28 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(VariableDeclarationFragment node) {
-		if (null != iteratorName && node.getName().getIdentifier().equals(iteratorName.getIdentifier())) {
-			if (node.getInitializer() instanceof MethodInvocation) {
-				MethodInvocation nodeInitializer = (MethodInvocation) node.getInitializer();
-				if (ReservedNames.MI_Iterator.equals(nodeInitializer.getName().getFullyQualifiedName())
-						&& nodeInitializer.arguments().isEmpty() && null != nodeInitializer.getExpression()
-						&& nodeInitializer.getExpression() instanceof Name) {
+		if (null != iteratorName && node.getName()
+			.getIdentifier()
+			.equals(iteratorName.getIdentifier()) && node.getInitializer() instanceof MethodInvocation) {
+			MethodInvocation nodeInitializer = (MethodInvocation) node.getInitializer();
+			if (ReservedNames.MI_Iterator.equals(nodeInitializer.getName()
+				.getFullyQualifiedName()) && nodeInitializer.arguments()
+					.isEmpty() && null != nodeInitializer.getExpression()
+					&& nodeInitializer.getExpression() instanceof Name) {
 
-					Expression iterableExpression = nodeInitializer.getExpression();
-					ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
-					
-					boolean isRaw = iterableTypeBinding.isRawType();
+				Expression iterableExpression = nodeInitializer.getExpression();
+				ITypeBinding iterableTypeBinding = iterableExpression.resolveTypeBinding();
 
-					String iterableFullyQualifiedName = Iterable.class.getName();
-					// check if iterable object is compatible with java Iterable
-					boolean isIterable = ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
-							Collections.singletonList(iterableFullyQualifiedName));
+				boolean isRaw = iterableTypeBinding.isRawType();
 
-					if (isIterable && !isRaw) {
-						listName = (Name) iterableExpression;
-						return false;
-					}
+				String iterableFullyQualifiedName = Iterable.class.getName();
+				// check if iterable object is compatible with java Iterable
+				boolean isIterable = ClassRelationUtil.isInheritingContentOfTypes(iterableTypeBinding,
+						Collections.singletonList(iterableFullyQualifiedName));
+
+				if (isIterable && !isRaw) {
+					listName = (Name) iterableExpression;
+					return false;
 				}
 			}
 		}
@@ -152,26 +153,28 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 			if (MethodInvocation.EXPRESSION_PROPERTY == node.getLocationInParent()) {
 				MethodInvocation methodInvocation = (MethodInvocation) node.getParent();
-				if (ReservedNames.MI_NEXT.equals(methodInvocation.getName().getFullyQualifiedName())) {
+				if (ReservedNames.MI_NEXT.equals(methodInvocation.getName()
+					.getFullyQualifiedName())) {
 					// next was already called on this iterator
 					if (null != iteratorNextCall) {
 						setNodesToNull();
 						return false;
 					}
-					
+
 					/*
-					 * if 'next()' is called in a nested loop, the transformation cannot be done
+					 * if 'next()' is called in a nested loop, the
+					 * transformation cannot be done
 					 */
 					Statement eclosingLoopStatement = findEnclosingLoopStatement(node);
-					if(eclosingLoopStatement != loopStatement) {
+					if (eclosingLoopStatement != loopStatement) {
 						setNodesToNull();
 						return false;
 					}
-					
+
 					iteratorNextCall = methodInvocation;
 					return true;
-				} else if (ReservedNames.MI_HAS_NEXT.equals(methodInvocation.getName().getFullyQualifiedName())
-						&& methodInvocation.getParent() == loopStatement) {
+				} else if (ReservedNames.MI_HAS_NEXT.equals(methodInvocation.getName()
+					.getFullyQualifiedName()) && methodInvocation.getParent() == loopStatement) {
 					// allowed hasNext in while head
 					return true;
 				} else {
@@ -211,7 +214,8 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		}
 	}
 
-	public void replaceLoop(Statement loopStatement, Statement loopBody, Map<String, Integer> multipleIteratorUse, String iteratorName) {
+	public void replaceLoop(Statement loopStatement, Statement loopBody, Map<String, Integer> multipleIteratorUse,
+			String iteratorName) {
 		Type iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 
 		/*
@@ -230,13 +234,14 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		if (nextCall.getParent() instanceof SingleVariableDeclaration) {
 			singleVariableDeclaration = (SingleVariableDeclaration) astRewrite.createMoveTarget(nextCall.getParent());
 			astRewrite.remove(nextCall.getParent(), null);
-		} else if (nextCall.getParent() instanceof VariableDeclarationFragment
-				&& nextCall.getParent().getParent() instanceof VariableDeclarationStatement) {
+		} else if (nextCall.getParent() instanceof VariableDeclarationFragment && nextCall.getParent()
+			.getParent() instanceof VariableDeclarationStatement) {
 			VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) nextCall
-					.getParent();
+				.getParent();
 			VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) variableDeclarationFragment
-					.getParent();
-			if (1 == variableDeclarationStatement.fragments().size()) {
+				.getParent();
+			if (1 == variableDeclarationStatement.fragments()
+				.size()) {
 				singleVariableDeclaration = NodeBuilder.newSingleVariableDeclaration(loopBody.getAST(),
 						(SimpleName) astRewrite.createMoveTarget(variableDeclarationFragment.getName()), iteratorType);
 				astRewrite.remove(variableDeclarationStatement, null);
@@ -250,7 +255,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 			} else {
 				Integer i = multipleIteratorUse.get(iteratorName);
 				multipleIteratorUse.put(iteratorName, i + 1);
-				iteratorName = iteratorName + i;
+				iteratorName += i;
 			}
 
 			singleVariableDeclaration = NodeBuilder.newSingleVariableDeclaration(loopBody.getAST(),
@@ -272,6 +277,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(loopStatement, newFor, null);
 
 		astRewrite.remove(getIteratorDeclaration(), null);
+		onRewrite();
 	}
 
 	/**

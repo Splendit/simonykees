@@ -57,9 +57,9 @@ public interface LicenseValidationService {
 	String getLicenseStautsUserMessage();
 
 	/**
-	 * checks if type is demo/trial
+	 * checks if type is demo/free
 	 * 
-	 * @return true if type is demo (trial), false otherwise
+	 * @return true if type is demo (free), false otherwise
 	 */
 	boolean isDemoType();
 

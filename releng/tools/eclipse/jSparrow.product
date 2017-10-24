@@ -32,8 +32,8 @@
    </plugins>
 
    <features>
-      <feature id="jSparrow.3rd.party.feature"/>
-      <feature id="jSparrow.standalone.feature"/>
+      <feature id="eu.jsparrow.3rd.party.feature" version="2.2.1.qualifier"/>
+      <feature id="eu.jsparrow.standalone.feature" version="2.2.1.qualifier"/>
       <feature id="org.eclipse.e4.rcp" version="1.5.3.v20170228-0512"/>
       <feature id="org.eclipse.emf.ecore"/>
       <feature id="org.eclipse.emf.common"/>
