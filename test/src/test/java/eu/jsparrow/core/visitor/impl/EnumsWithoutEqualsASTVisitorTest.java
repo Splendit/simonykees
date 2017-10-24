@@ -8,8 +8,8 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.core.visitor.ASTRewriteVisitorListenerStub;
 import eu.jsparrow.core.visitor.impl.EnumsWithoutEqualsASTVisitor;
+import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 
 @SuppressWarnings({ "nls" })
 public class EnumsWithoutEqualsASTVisitorTest extends AbstractASTVisitorTest {
@@ -109,7 +109,7 @@ public class EnumsWithoutEqualsASTVisitorTest extends AbstractASTVisitorTest {
 
 		fixture.accept(visitor);
 
-		assertTrue(listener.wasUpdated);
+		assertTrue(listener.wasUpdated());
 	}
 
 }

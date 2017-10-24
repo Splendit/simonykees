@@ -1,5 +1,6 @@
-package eu.jsparrow.core.rule;
+package eu.jsparrow.dummies;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.JavaVersion;
@@ -9,7 +10,15 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.exception.RefactoringException;
+import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.Tag;
 
+/**
+ * This class serves as a dummy for a refactoring rule. Strictly for use in unit tests.
+ * 
+ * @author Hans-Jörg Schrödl
+ *
+ */
 public class DummyRule implements RefactoringRule {
 
 	@Override
@@ -29,7 +38,7 @@ public class DummyRule implements RefactoringRule {
 
 	@Override
 	public List<Tag> getTags() {
-		return null;
+		return new ArrayList<>();
 	}
 
 	@Override
@@ -44,7 +53,7 @@ public class DummyRule implements RefactoringRule {
 
 	@Override
 	public void calculateEnabledForProject(IJavaProject project) {
-	
+		return;
 	}
 
 	@Override

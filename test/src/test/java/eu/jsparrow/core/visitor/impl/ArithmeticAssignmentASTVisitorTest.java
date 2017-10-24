@@ -7,8 +7,8 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.core.visitor.ASTRewriteVisitorListenerStub;
 import eu.jsparrow.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
+import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 
 @SuppressWarnings({ "nls" })
 public class ArithmeticAssignmentASTVisitorTest extends AbstractASTVisitorTest {
@@ -48,6 +48,6 @@ public class ArithmeticAssignmentASTVisitorTest extends AbstractASTVisitorTest {
 
 		fixture.accept(visitor);
 		
-		assertTrue(listener.wasUpdated);
+		assertTrue(listener.wasUpdated());
 	}
 }

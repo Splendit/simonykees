@@ -5,6 +5,8 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import eu.jsparrow.dummies.DummyRule;
+
 public class ApplicationCounterTest {
 
 	private RuleApplicationCount applicationCounter;
@@ -22,7 +24,7 @@ public class ApplicationCounterTest {
 	}
 
 	@Test
-	public void get_ForExistingRule_returnsExistingApplicationCounter() {
+	public void get_ForExistingRule_ReturnsExistingApplicationCounter() {
 		DummyRule rule = new DummyRule();
 		RuleApplicationCount expectedApplicationCounter = RuleApplicationCount.get(rule);
 

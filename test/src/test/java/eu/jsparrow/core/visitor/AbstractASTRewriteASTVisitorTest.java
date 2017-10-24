@@ -5,6 +5,8 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
+
 public class AbstractASTRewriteASTVisitorTest {
 
 	private AbstractASTRewriteASTVisitor visitor;
@@ -21,7 +23,7 @@ public class AbstractASTRewriteASTVisitorTest {
 
 		visitor.onRewrite();
 
-		assertTrue(listener.wasUpdated);
+		assertTrue(listener.wasUpdated());
 	}
 
 	class DummyASTRewriteASTVisitorImpl extends AbstractASTRewriteASTVisitor {
