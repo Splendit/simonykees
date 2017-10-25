@@ -21,8 +21,6 @@ public class IndexOfToContainsRule extends RefactoringRule<IndexOfToContainsASTV
 	public IndexOfToContainsRule() {
 		super();
 		this.visitorClass = IndexOfToContainsASTVisitor.class;
-		this.name = Messages.IndexOfToContainsRule_name;
-		this.description = Messages.IndexOfToContainsRule_description;
 	}
 
 	@Override

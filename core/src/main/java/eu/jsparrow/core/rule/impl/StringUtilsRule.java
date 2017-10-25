@@ -39,18 +39,13 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 	private final String version31 = "3.1"; //$NON-NLS-1$
 
 	Logger logger = LoggerFactory.getLogger(StringUtilsRule.class);
-
-	/**
-	 * 
-	 */
-	private List<String> supportetVersion = new ArrayList<>();
+	
+	private List<String> supportedVersion = new ArrayList<>();
 
 	public StringUtilsRule() {
 		super();
 		this.visitorClass = StringUtilsASTVisitor.class;
-		this.name = Messages.StringUtilsRule_name;
-		this.description = Messages.StringUtilsRule_description;
-		this.supportetVersion.add(version31);
+		this.supportedVersion.add(version31);
 	}
 
 	@Override
@@ -87,7 +82,7 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 							Name key = (Name) attribute;
 							String keyword = key.toString();
 							if ("Implementation-Version".equals(keyword)) { //$NON-NLS-1$
-								if (supportetVersion.stream()
+								if (supportedVersion.stream()
 									.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s))) {
 									return true;
 								} else {

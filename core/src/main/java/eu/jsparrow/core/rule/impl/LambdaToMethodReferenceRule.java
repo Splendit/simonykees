@@ -21,8 +21,6 @@ public class LambdaToMethodReferenceRule extends RefactoringRule<LambdaToMethodR
 	public LambdaToMethodReferenceRule() {
 		super();
 		this.visitorClass = LambdaToMethodReferenceASTVisitor.class;
-		this.name = Messages.LambdaToMethodReferenceRule_name;
-		this.description = Messages.LambdaToMethodReferenceRule_description;
 	}
 
 	@Override

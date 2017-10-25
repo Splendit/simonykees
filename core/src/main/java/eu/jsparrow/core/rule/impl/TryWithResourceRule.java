@@ -26,8 +26,6 @@ public class TryWithResourceRule extends RefactoringRule<TryWithResourceASTVisit
 	public TryWithResourceRule() {
 		super();
 		this.visitorClass = TryWithResourceASTVisitor.class;
-		this.name = Messages.TryWithResourceRule_name;
-		this.description = Messages.TryWithResourceRule_description;
 	}
 
 	@Override

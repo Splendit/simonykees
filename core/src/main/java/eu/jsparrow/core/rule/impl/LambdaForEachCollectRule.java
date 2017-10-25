@@ -22,8 +22,6 @@ public class LambdaForEachCollectRule extends RefactoringRule<LambdaForEachColle
 	public LambdaForEachCollectRule() {
 		super();
 		this.visitorClass = LambdaForEachCollectASTVisitor.class;
-		this.name = Messages.LambdaForEachCollectRule_name;
-		this.description = Messages.LambdaForEachCollectRule_description;
 	}
 
 	@Override

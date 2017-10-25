@@ -21,8 +21,6 @@ public class InefficientConstructorRule extends RefactoringRule<InefficientConst
 	public InefficientConstructorRule() {
 		super();
 		this.visitorClass = InefficientConstructorASTVisitor.class;
-		this.name = Messages.InefficientConstructorRule_name;
-		this.description = Messages.InefficientConstructorRule_description;
 	}
 
 	@Override

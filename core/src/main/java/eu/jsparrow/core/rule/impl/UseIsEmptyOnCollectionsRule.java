@@ -21,8 +21,6 @@ public class UseIsEmptyOnCollectionsRule extends RefactoringRule<UseIsEmptyOnCol
 	public UseIsEmptyOnCollectionsRule() {
 		super();
 		this.visitorClass = UseIsEmptyOnCollectionsASTVisitor.class;
-		this.name = Messages.UseIsEmptyOnCollectionsRule_name;
-		this.description = Messages.UseIsEmptyOnCollectionsRule_description;
 	}
 
 	@Override

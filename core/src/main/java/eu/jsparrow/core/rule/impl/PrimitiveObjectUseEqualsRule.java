@@ -23,8 +23,6 @@ public class PrimitiveObjectUseEqualsRule extends RefactoringRule<PrimitiveObjec
 	public PrimitiveObjectUseEqualsRule() {
 		super();
 		this.visitorClass = PrimitiveObjectUseEqualsASTVisitor.class;
-		this.name = Messages.PrimitiveObjectUseEqualsRule_name;
-		this.description = Messages.PrimitiveObjectUseEqualsRule_description;
 	}
 
 	@Override

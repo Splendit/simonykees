@@ -39,17 +39,9 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringRule.class);
 	
-	protected RuleDescription ruleDescription;
-
 	protected String id;
 
-	protected String name = Messages.RefactoringRule_default_name;
-
-	protected String description = Messages.RefactoringRule_default_description;
-
 	protected final JavaVersion requiredJavaVersion;
-
-	protected final List<Tag> tags;
 
 	// default is true because of preferences page
 	protected boolean enabled = true;
@@ -61,7 +53,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	protected RefactoringRule() {
 		this.id = this.getClass()
 			.getSimpleName();
-		this.tags = TagUtil.getTagsForRule(this.getClass());
 		this.requiredJavaVersion = provideRequiredJavaVersion();
 	}
 
@@ -72,10 +63,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	 */
 	protected abstract JavaVersion provideRequiredJavaVersion();
 	
-	public RuleDescription getRuleDescription() {
-		return null;
-	}
-
 	public JavaVersion getRequiredJavaVersion() {
 		return requiredJavaVersion;
 	}
@@ -138,8 +125,9 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	public final DocumentChange applyRule(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException, RefactoringException {
 
-		logger.trace(NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.name,
-				workingCopy.getElementName()));
+		String bind = NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.getRuleDescription().getName(),
+						workingCopy.getElementName());
+		logger.trace(bind);
 
 		return applyRuleImpl(workingCopy);
 	}

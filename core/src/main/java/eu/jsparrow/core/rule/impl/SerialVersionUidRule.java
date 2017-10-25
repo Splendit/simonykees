@@ -21,8 +21,6 @@ public class SerialVersionUidRule extends RefactoringRule<SerialVersionUidASTVis
 	public SerialVersionUidRule() {
 		super();
 		this.visitorClass = SerialVersionUidASTVisitor.class;
-		this.name = Messages.SerialVersionUidRule_name;
-		this.description = Messages.SerialVersionUidRule_description;
 	}
 
 	@Override

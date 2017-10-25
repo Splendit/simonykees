@@ -23,8 +23,6 @@ public class ArithmethicAssignmentRule extends RefactoringRule<ArithmethicAssign
 	public ArithmethicAssignmentRule() {
 		super();
 		this.visitorClass = ArithmethicAssignmentASTVisitor.class;
-		this.name = Messages.ArithmethicAssignmentRule_name;
-		this.description = Messages.ArithmethicAssignmentRule_description;
 	}
 
 	@Override

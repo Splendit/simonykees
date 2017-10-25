@@ -21,8 +21,6 @@ public class RemoveToStringOnStringRule extends RefactoringRule<RemoveToStringOn
 	public RemoveToStringOnStringRule() {
 		super();
 		this.visitorClass = RemoveToStringOnStringASTVisitor.class;
-		this.name = Messages.RemoveToStringOnStringRule_name;
-		this.description = Messages.RemoveToStringOnStringRule_description;
 	}
 
 	@Override

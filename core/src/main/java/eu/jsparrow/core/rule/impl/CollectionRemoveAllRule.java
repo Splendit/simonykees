@@ -21,8 +21,6 @@ public class CollectionRemoveAllRule extends RefactoringRule<CollectionRemoveAll
 	public CollectionRemoveAllRule() {
 		super();
 		this.visitorClass = CollectionRemoveAllASTVisitor.class;
-		this.name = Messages.CollectionRemoveAllRule_name;
-		this.description = Messages.CollectionRemoveAllRule_description;
 	}
 
 	@Override

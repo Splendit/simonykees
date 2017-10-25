@@ -22,8 +22,6 @@ public class LambdaForEachMapRule extends RefactoringRule<LambdaForEachMapASTVis
 	public LambdaForEachMapRule() {
 		super();
 		this.visitorClass = LambdaForEachMapASTVisitor.class;
-		this.name = Messages.LambdaForEachMapRule_name;
-		this.description = Messages.LambdaForEachMapRule_description;
 	}
 
 	@Override

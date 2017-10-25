@@ -42,8 +42,6 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 	public OrganiseImportsRule() {
 		super();
 		this.visitorClass = AbstractASTRewriteASTVisitor.class;
-		this.name = Messages.OrganiseImportsRule_name;
-		this.description = Messages.OrganiseImportsRule_description;
 	}
 
 	@Override
@@ -69,10 +67,10 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 	}
 
 	private DocumentChange applyOrganising(ICompilationUnit workingCopy)
-			throws OperationCanceledException, CoreException {
+			throws CoreException {
 
 		final CompilationUnit astRoot = RefactoringUtil.parse(workingCopy);
-		final boolean hasAmbiguity[] = new boolean[] { false };
+		final boolean[] hasAmbiguity = new boolean[] { false };
 		IChooseImportQuery query = (TypeNameMatch[][] openChoices, ISourceRange[] ranges) -> {
 			hasAmbiguity[0] = true;
 			return new TypeNameMatch[0];

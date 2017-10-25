@@ -31,8 +31,6 @@ public class DiamondOperatorRule extends RefactoringRule<DiamondOperatorASTVisit
 	public DiamondOperatorRule() {
 		super();
 		this.visitorClass = DiamondOperatorASTVisitor.class;
-		this.name = Messages.DiamondOperatorRule_name;
-		this.description = Messages.DiamondOperatorRule_description;
 	}
 
 	@Override

@@ -26,8 +26,6 @@ public class OverrideAnnotationRule extends RefactoringRule<OverrideAnnotationRu
 	public OverrideAnnotationRule() {
 		super();
 		this.visitorClass = OverrideAnnotationRuleASTVisitor.class;
-		this.name = Messages.OverrideAnnotationRule_name;
-		this.description = Messages.OverrideAnnotationRule_description;
 	}
 
 	@Override

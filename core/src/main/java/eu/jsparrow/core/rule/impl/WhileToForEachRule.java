@@ -20,13 +20,9 @@ import eu.jsparrow.i18n.Messages;
  */
 public class WhileToForEachRule extends RefactoringRule<WhileToForEachASTVisitor> {
 
-	Logger logger = LoggerFactory.getLogger(WhileToForEachASTVisitor.class);
-
 	public WhileToForEachRule() {
 		super();
 		this.visitorClass = WhileToForEachASTVisitor.class;
-		this.name = Messages.WhileToForEachRule_name;
-		this.description = Messages.WhileToForEachRule_description;
 	}
 
 	@Override

@@ -22,8 +22,6 @@ public class EnhancedForLoopToStreamFindFirstRule extends RefactoringRule<Enhanc
 	public EnhancedForLoopToStreamFindFirstRule() {
 		super();
 		this.visitorClass = EnhancedForLoopToStreamFindFirstASTVisitor.class;
-		this.name = Messages.EnhancedForLoopToStreamFindFirstRule_name;
-		this.description = Messages.EnhancedForLoopToStreamFindFirstRule_description;
 	}
 
 	@Override

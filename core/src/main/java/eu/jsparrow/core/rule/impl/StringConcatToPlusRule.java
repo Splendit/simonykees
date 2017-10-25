@@ -21,8 +21,6 @@ public class StringConcatToPlusRule extends RefactoringRule<StringConcatToPlusAS
 	public StringConcatToPlusRule() {
 		super();
 		this.visitorClass = StringConcatToPlusASTVisitor.class;
-		this.name = Messages.StringConcatToPlusRule_name;
-		this.description = Messages.StringConcatToPlusRule_description;
 	}
 
 	@Override

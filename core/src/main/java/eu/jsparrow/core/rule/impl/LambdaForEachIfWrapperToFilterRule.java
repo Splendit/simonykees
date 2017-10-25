@@ -21,8 +21,6 @@ public class LambdaForEachIfWrapperToFilterRule extends RefactoringRule<LambdaFo
 	public LambdaForEachIfWrapperToFilterRule() {
 		super();
 		this.visitorClass = LambdaForEachIfWrapperToFilterASTVisitor.class;
-		this.name = Messages.LambdaForEachIfWrapperToFilterRule_name;
-		this.description = Messages.LambdaForEachIfWrapperToFilterRule_description;
 	}
 
 	@Override

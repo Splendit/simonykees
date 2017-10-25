@@ -21,8 +21,6 @@ public class PrimitiveBoxedForStringRule extends RefactoringRule<PrimitiveBoxedF
 	public PrimitiveBoxedForStringRule() {
 		super();
 		this.visitorClass = PrimitiveBoxedForStringASTVisitor.class;
-		this.name = Messages.PrimitiveBoxedForStringRule_name;
-		this.description = Messages.PrimitiveBoxedForStringRule_description;
 	}
 
 	@Override
