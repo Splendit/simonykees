@@ -1,8 +1,12 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.OverrideAnnotationRuleASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -30,4 +34,11 @@ public class OverrideAnnotationRule extends RefactoringRule<OverrideAnnotationRu
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_6;
 	}
+	
+	@Override
+	public RuleDescription getRuleDescription() {
+		return new RuleDescription(Messages.OverrideAnnotationRule_name, Messages.OverrideAnnotationRule_description,
+				Duration.ofMinutes(5), TagUtil.getTagsForRule(this.getClass()));
+	}
+
 }

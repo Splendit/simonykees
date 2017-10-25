@@ -1,5 +1,7 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -13,7 +15,9 @@ import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RuleApplicationCount;
+import eu.jsparrow.core.rule.RuleDescription;
 import eu.jsparrow.core.util.RefactoringUtil;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -40,6 +44,12 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
+	}
+	
+	@Override
+	public RuleDescription getRuleDescription() {
+		return new RuleDescription(Messages.CodeFormatterRule_name, Messages.CodeFormatterRule_description,
+				Duration.ofMinutes(1), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

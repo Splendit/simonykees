@@ -2,6 +2,7 @@ package eu.jsparrow.core.rule.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.Attributes;
@@ -21,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.StringUtilsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -53,6 +56,13 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
+	}
+	
+	
+	@Override
+	public RuleDescription getRuleDescription() {
+		return new RuleDescription(Messages.StringLiteralEqualityCheckRule_name, Messages.StringLiteralEqualityCheckRule_description,
+				Duration.ofMinutes(10), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

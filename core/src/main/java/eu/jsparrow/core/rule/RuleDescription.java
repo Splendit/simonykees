@@ -6,19 +6,23 @@ import java.util.List;
 
 public class RuleDescription {
 
-	private String name;
+	private final String name;
 
-	private String description;
+	private final String description;
 
 	private final List<Tag> tags;
 
-	private Duration remediationCost;
+	private final Duration remediationCost;
 	
-	public RuleDescription(String name, String description, Duration remediationCost, Tag... tags) {
+	public RuleDescription(String name, String description, Duration remediationCost, List<Tag> tags) {
 		this.name = name;
 		this.description = description;
 		this.remediationCost = remediationCost;
-		this.tags = Arrays.asList(tags);
+		this.tags = tags;
+	}
+	
+	public RuleDescription(String name, String description, Duration remediationCost, Tag... tags) {
+		this(name, description, remediationCost, Arrays.asList(tags));
 	}
 	
 	public String getName() {
