@@ -20,6 +20,7 @@ import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.util.PropertyUtil;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.util.TagUtil;
+import eu.jsparrow.core.visitor.ASTRewriteVisitorListener;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -113,8 +114,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 		return true;
 	}
 
-	protected T visitorFactory() throws InstantiationException, IllegalAccessException {
-		return visitorClass.newInstance();
+	protected AbstractASTRewriteASTVisitor visitorFactory() throws InstantiationException, IllegalAccessException {
+		AbstractASTRewriteASTVisitor visitor = visitorClass.newInstance();
+		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
+		return visitor;
 	}
 
 	/**

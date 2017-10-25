@@ -69,11 +69,12 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 	public RefactoringSummaryWizardPage(RefactoringPipeline refactoringPipeline) {
 		super(Messages.RefactoringSummaryWizardPage_title);
-		setTitle(Messages.RefactoringSummaryWizardPage_title);
-
 		this.refactoringPipeline = refactoringPipeline;
 		Duration totalTimeSaved = EliminatedTechnicalDebt.getTotalFor(refactoringPipeline.getRules());
-		setDescription(Messages.RefactoringSummaryWizardPage_description + " Total Time Saved: " + totalTimeSaved.toMinutes());
+		
+		setTitle(Messages.RefactoringSummaryWizardPage_title +", Eliminated technical debt: " + totalTimeSaved.toMinutes() +" Minutes");
+
+		setDescription(Messages.RefactoringSummaryWizardPage_description);
 
 		setInitialChanges();
 		this.currentRefactoringState = initialSource.keySet()

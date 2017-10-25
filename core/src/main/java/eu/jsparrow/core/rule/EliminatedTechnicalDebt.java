@@ -41,9 +41,10 @@ public class EliminatedTechnicalDebt {
 	 * @return the sum of the technical debts as duration.
 	 */
 	public static Duration getTotalFor(List<? extends RefactoringRuleInterface> list) {
-		return list
+		Duration total =  list
 			.stream()
 			.map(x -> new EliminatedTechnicalDebt(x).get())
 			.reduce(Duration.ZERO, (x, y) -> x.plus(y));
+		return total;
 	}
 }

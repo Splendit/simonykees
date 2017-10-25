@@ -1,6 +1,7 @@
 package eu.jsparrow.core.rule;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import eu.jsparrow.core.visitor.ASTRewriteVisitorListener;
@@ -45,6 +46,7 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 	 * @return the application count for a given rule
 	 */
 	public static RuleApplicationCount getFor(RefactoringRuleInterface rule) {
+		Map count = applicationCounters;
 		applicationCounters.putIfAbsent(rule, new RuleApplicationCount());
 		return applicationCounters.get(rule);
 	}
