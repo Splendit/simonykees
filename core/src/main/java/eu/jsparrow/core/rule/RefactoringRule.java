@@ -80,10 +80,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 		return requiredJavaVersion;
 	}
 
-	public List<Tag> getTags() {
-		return tags;
-	}
-
 	public boolean isEnabled() {
 		return enabled;
 	}

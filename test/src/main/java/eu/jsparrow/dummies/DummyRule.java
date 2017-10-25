@@ -30,11 +30,6 @@ public class DummyRule implements RefactoringRuleInterface {
 	}
 
 	@Override
-	public List<Tag> getTags() {
-		return new ArrayList<>();
-	}
-
-	@Override
 	public boolean isEnabled() {
 		return false;
 	}

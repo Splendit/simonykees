@@ -79,7 +79,7 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	private boolean containsTag(RefactoringRule<? extends AbstractASTRewriteASTVisitor> object) {
 		for (String tag : appliedTags) {
 			if (null != Tag.getTageForName(tag)) {
-				if (object.getTags()
+				if (object.getRuleDescription().getTags()
 					.contains(Tag.getTageForName(tag))) {
 					return true;
 				}

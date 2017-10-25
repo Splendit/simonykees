@@ -480,7 +480,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		String requiredLibrariesValue = (null != rule.requiredLibraries()) ? rule.requiredLibraries()
 				: Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
 		String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
-		String tagsValue = StringUtils.join(rule.getTags()
+		String tagsValue = StringUtils.join(rule.getRuleDescription().getTags()
 			.stream()
 			.map(Tag::getTagNames)
 			.collect(Collectors.toList()), "  "); //$NON-NLS-1$
