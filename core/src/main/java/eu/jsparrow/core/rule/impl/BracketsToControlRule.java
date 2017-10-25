@@ -31,6 +31,7 @@ public class BracketsToControlRule extends RefactoringRule<BracketsToControlASTV
 		return JavaVersion.JAVA_1_1;
 	}
 
+	@Override
 	public RuleDescription getRuleDescription() {
 		return new RuleDescription(Messages.BracketsToControlRule_name, Messages.BracketsToControlRule_description,
 				Duration.ofMinutes(2), TagUtil.getTagsForRule(this.getClass()));

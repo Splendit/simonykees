@@ -357,8 +357,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule1 = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) e1;
 				RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule2 = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) e2;
-				return rule1.getName()
-					.compareTo(rule2.getName());
+				return rule1.getRuleDescription().getName()
+					.compareTo(rule2.getRuleDescription().getName());
 			};
 
 		});
@@ -437,10 +437,10 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		addButton.setEnabled(!leftTreeViewer.getSelection()
 			.isEmpty()
 				&& selectionContainsEnabledEntry(((IStructuredSelection) leftTreeViewer.getSelection()).toList()));
-		addAllButton.setEnabled(((Set<Object>) leftTreeViewer.getInput()).size() > 0);
+		addAllButton.setEnabled(!((Set<Object>) leftTreeViewer.getInput()).isEmpty());
 		removeButton.setEnabled(!rightTableViewer.getSelection()
 			.isEmpty());
-		removeAllButton.setEnabled(((Set<Object>) rightTableViewer.getInput()).size() > 0);
+		removeAllButton.setEnabled(!((Set<Object>) rightTableViewer.getInput()).isEmpty());
 
 		doStatusUpdate();
 	}
@@ -455,9 +455,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		List<Object> rightSelection = ((IStructuredSelection) rightTableViewer.getSelection()).toList();
 
 		if (latestSelectionSide == SelectionSide.LEFT && leftSelection.size() == 1) {
-			// descriptionStyledText.setText(
-			// ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>)
-			// selection.get(0)).getDescription());
 			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) leftSelection.get(0));
 		} else if (latestSelectionSide == SelectionSide.RIGHT && rightSelection.size() == 1) {
 			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) rightSelection.get(0));
@@ -473,7 +470,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	 */
 	private void createTextForDescription(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		String lineDelimiter = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_lineDelimiter;
-		String name = rule.getName();
+		String name = rule.getRuleDescription().getName();
 		String description = rule.getDescription();
 		String requirementsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
 		String minJavaVersionLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_minJavaVersionLabel;

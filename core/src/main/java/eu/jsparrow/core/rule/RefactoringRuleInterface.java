@@ -12,8 +12,6 @@ import eu.jsparrow.core.exception.RefactoringException;
 
 public interface RefactoringRuleInterface {
 
-	public String getName();
-
 	public String getDescription();
 
 	public JavaVersion getRequiredJavaVersion();
