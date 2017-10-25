@@ -30,7 +30,7 @@ public class TableLabelProvider extends BaseLabelProvider implements ITableLabel
 		case 0:
 			return rule.getRuleDescription().getName();
 		case 1:
-			return rule.getDescription();
+			return rule.getRuleDescription().getDescription();
 		default:
 			return ExceptionMessages.TableLabelProvider_not_supported;
 		}

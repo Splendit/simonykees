@@ -471,7 +471,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	private void createTextForDescription(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		String lineDelimiter = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_lineDelimiter;
 		String name = rule.getRuleDescription().getName();
-		String description = rule.getDescription();
+		String description = rule.getRuleDescription().getDescription();
 		String requirementsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
 		String minJavaVersionLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_minJavaVersionLabel;
 		String minJavaVersionValue = rule.getRequiredJavaVersion()

@@ -25,11 +25,6 @@ import eu.jsparrow.core.rule.Tag;
 public class DummyRule implements RefactoringRuleInterface {
 
 	@Override
-	public String getDescription() {
-		return null;
-	}
-
-	@Override
 	public JavaVersion getRequiredJavaVersion() {
 		return null;
 	}

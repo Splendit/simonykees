@@ -76,10 +76,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 		return null;
 	}
 
-	public String getDescription() {
-		return description;
-	}
-
 	public JavaVersion getRequiredJavaVersion() {
 		return requiredJavaVersion;
 	}
