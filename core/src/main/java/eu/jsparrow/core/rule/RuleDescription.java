@@ -41,10 +41,23 @@ public class RuleDescription {
 		return description;
 	}
 
+	/**
+	 * Gets the tags associated with this rule. See {@link Tag}.
+	 * 
+	 * @return the tags associated with this rule. 
+	 */
 	public List<Tag> getTags() {
 		return tags;
 	}
 
+	/**
+	 * Gets the remediation cost for this rule. The remedation cost is the
+	 * amount of time it would take to manually fix an instance of a rule
+	 * violation. That cost includes not only the time to change code, but also
+	 * things like testing, integration testing, deployment...
+	 * 
+	 * @return the remedation cost for this rule
+	 */
 	public Duration getRemediationCost() {
 		return remediationCost;
 	}
