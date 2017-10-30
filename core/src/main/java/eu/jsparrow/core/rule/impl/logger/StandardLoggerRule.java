@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
+import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.rule.SemiAutomaticRefactoringRule;
 import eu.jsparrow.core.visitor.logger.StandardLoggerASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -50,7 +51,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	private Map<String, Integer> systemErrReplaceOptions = new LinkedHashMap<>();
 	private Map<String, Integer> systemOutPrintExceptionReplaceOptions = new LinkedHashMap<>();
 	private Map<String, Integer> systemErrPrintExceptionReplaceOptions = new LinkedHashMap<>();
-	private Map<String, Integer> pritntStacktraceReplaceOptions = new LinkedHashMap<>();
+	private Map<String, Integer> printStacktraceReplaceOptions = new LinkedHashMap<>();
 	private Map<String, Integer> newLoggingStatementOptions = new LinkedHashMap<>();
 	private Map<String, String> selectedOptions = new HashMap<>();
 
@@ -70,7 +71,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	}
 
 	public StandardLoggerRule() {
-		this.visitor = StandardLoggerASTVisitor.class;
+		this.visitorClass = StandardLoggerASTVisitor.class;
 		this.name = Messages.StandardLoggerRule_name;
 		this.description = Messages.StandardLoggerRule_description;
 	}
@@ -116,7 +117,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		systemErrPrintExceptionReplaceOptions.putAll(replaceOptions);
 		systemOutPrintExceptionReplaceOptions.putAll(replaceOptions);
 		newLoggingStatementOptions.putAll(replaceOptions);
-		pritntStacktraceReplaceOptions.putAll(replaceOptions);
+		printStacktraceReplaceOptions.putAll(replaceOptions);
 	}
 
 	@Override
@@ -131,7 +132,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 
 	@Override
 	public Map<String, Integer> getPrintStackTraceReplaceOptions() {
-		return pritntStacktraceReplaceOptions;
+		return printStacktraceReplaceOptions;
 	}
 
 	@Override
@@ -193,6 +194,8 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	protected StandardLoggerASTVisitor visitorFactory() {
 		Map<String, String> replacingOptions = getSelectedOptions();
 		String availableLogger = getAvailableQualifiedLoggerName();
-		return new StandardLoggerASTVisitor(availableLogger, replacingOptions);
+		StandardLoggerASTVisitor visitor = new StandardLoggerASTVisitor(availableLogger, replacingOptions);
+		visitor.addRewriteListener(RuleApplicationCount.get(this));
+		return visitor;
 	}
 }

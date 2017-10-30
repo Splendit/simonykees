@@ -20,7 +20,7 @@ public class WhileToForEachRule extends RefactoringRule<WhileToForEachASTVisitor
 
 	public WhileToForEachRule() {
 		super();
-		this.visitor = WhileToForEachASTVisitor.class;
+		this.visitorClass = WhileToForEachASTVisitor.class;
 		this.name = Messages.WhileToForEachRule_name;
 		this.description = Messages.WhileToForEachRule_description;
 	}

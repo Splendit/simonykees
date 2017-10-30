@@ -17,7 +17,7 @@ public class BracketsToControlRule extends RefactoringRule<BracketsToControlASTV
 
 	public BracketsToControlRule() {
 		super();
-		this.visitor = BracketsToControlASTVisitor.class;
+		this.visitorClass = BracketsToControlASTVisitor.class;
 		this.name = Messages.BracketsToControlRule_name;
 		this.description = Messages.BracketsToControlRule_description;
 	}

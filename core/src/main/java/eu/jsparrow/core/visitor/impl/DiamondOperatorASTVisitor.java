@@ -176,9 +176,9 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 			}
 			if (sameTypes) {
 				replaceWithDiamond(parameterizedType, rhsTypeArguments);
+				onRewrite();
 			}
 		}
-
 		return true;
 	}
 

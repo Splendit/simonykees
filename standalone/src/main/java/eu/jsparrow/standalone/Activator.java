@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -21,9 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLConfig;
-import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.config.YAMLConfigUtil;
-import eu.jsparrow.core.config.YAMLProfile;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.exception.RuleException;
@@ -66,7 +62,7 @@ public class Activator implements BundleActivator {
 		logger.info(Messages.Activator_start);
 
 		String configFilePath = context.getProperty(CONFIG_FILE_PATH);
-
+		
 		String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
 		logger.info(loggerInfo);
 
@@ -74,7 +70,7 @@ public class Activator implements BundleActivator {
 		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, profile);
 		logger.info(loggerInfo);
 
-		YAMLConfig config = readConfig(configFilePath, profile);
+		YAMLConfig config = YAMLConfigUtil.readConfig(configFilePath, profile);
 
 		// get project path and name from context
 		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
@@ -89,14 +85,17 @@ public class Activator implements BundleActivator {
 
 		standaloneConfig = new StandaloneConfig(projectName, projectPath);
 
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = getSelectedRulesFromConfig(config,
-				standaloneConfig.getJavaProject());
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
+				.getRulesForProject(standaloneConfig.getJavaProject(), true);
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
+		if(selectedRules == null) {
+			selectedRules = new LinkedList<>();
+		}
 
 		// Create refactoring pipeline and set rules
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 		refactoringPipeline.setRules(selectedRules);
-		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
-				selectedRules.toString());
+		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(), selectedRules.toString());
 		logger.info(loggerInfo);
 
 		logger.info(Messages.Activator_debug_collectCompilationUnits);

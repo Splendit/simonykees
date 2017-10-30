@@ -5,6 +5,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.util.PropertyUtil;
 import eu.jsparrow.core.visitor.impl.StringBuildingLoopASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -22,7 +23,7 @@ public class StringBuildingLoopRule extends RefactoringRule<StringBuildingLoopAS
 
 	public StringBuildingLoopRule() {
 		super();
-		this.visitor = StringBuildingLoopASTVisitor.class;
+		this.visitorClass = StringBuildingLoopASTVisitor.class;
 		this.name = Messages.StringBuildingLoopRule_name;
 		this.description = Messages.StringBuildingLoopRule_description;
 	}
@@ -39,7 +40,9 @@ public class StringBuildingLoopRule extends RefactoringRule<StringBuildingLoopAS
 
 	@Override
 	protected StringBuildingLoopASTVisitor visitorFactory() {
-		return new StringBuildingLoopASTVisitor(javaVersion);
+		StringBuildingLoopASTVisitor visitor = new StringBuildingLoopASTVisitor(javaVersion);
+		visitor.addRewriteListener(RuleApplicationCount.get(this));
+		return visitor;
 	}
 
 	@Override

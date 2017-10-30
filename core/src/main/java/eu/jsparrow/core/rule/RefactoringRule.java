@@ -35,7 +35,7 @@ import eu.jsparrow.i18n.Messages;
  *            is the {@link AbstractASTRewriteASTVisitor} implementation that is
  *            applied by this rule
  */
-public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
+public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> implements RefactoringRuleInterface {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringRule.class);
 
@@ -54,7 +54,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	protected boolean satisfiedJavaVersion = true;
 	protected boolean satisfiedLibraries = true;
 
-	protected Class<T> visitor;
+	protected Class<T> visitorClass;
 
 	protected RefactoringRule() {
 		this.id = this.getClass()
@@ -91,7 +91,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	public Class<T> getVisitor() {
-		return visitor;
+		return visitorClass;
 	}
 
 	public String getId() {
@@ -133,7 +133,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	protected T visitorFactory() throws InstantiationException, IllegalAccessException {
-		return visitor.newInstance();
+		return visitorClass.newInstance();
 	}
 
 	/**
@@ -177,7 +177,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		// NoCommentSourceRangeComputer());
 
 		AbstractASTRewriteASTVisitor rule = visitorFactory();
-		rule.setAstRewrite(astRewrite);
+		rule.setASTRewrite(astRewrite);
 		try {
 			astRoot.accept(rule);
 		} catch (RuntimeException e) {
@@ -196,8 +196,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 			 * DocumentChange. To fix this issue, a copy of the TextEdit is used
 			 * for the DocumentChange.
 			 */
-			DocumentChange documentChange = RefactoringUtil.generateDocumentChange(visitor.getSimpleName(), document,
-					edits.copy());
+			DocumentChange documentChange = RefactoringUtil.generateDocumentChange(visitorClass.getSimpleName(),
+					document, edits.copy());
 
 			workingCopy.applyTextEdit(edits, null);
 

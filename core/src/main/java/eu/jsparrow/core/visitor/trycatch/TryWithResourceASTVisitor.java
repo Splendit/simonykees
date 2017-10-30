@@ -65,7 +65,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 			 */
 			ITypeBinding typeBind = varDeclStatmentNode.getType()
 				.resolveBinding();
-			if (ClassRelationUtil.isInheritingContentOfTypes(typeBind, generateFullyQuallifiedNameList(
+			if (ClassRelationUtil.isInheritingContentOfTypes(typeBind, generateFullyQualifiedNameList(
 					AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME, CLOSEABLE_FULLY_QUALLIFIED_NAME))) {
 
 				List<VariableDeclarationFragment> fragments = ((List<Object>) varDeclStatmentNode.fragments()).stream()
@@ -129,6 +129,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (!resourceList.isEmpty()) {
 			resourceList.forEach(iteratorNode -> astRewrite.getListRewrite(node, TryStatement.RESOURCES_PROPERTY)
 				.insertLast(iteratorNode, null));
+			onRewrite();
 
 			// remove all close operations on the found resources
 			Function<SimpleName, MethodInvocation> mapper = simpleName -> NodeBuilder.newMethodInvocation(node.getAST(),
@@ -181,7 +182,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 						&& node.getParent() instanceof Statement)) {
 				node.resolveMethodBinding()
 					.getExceptionTypes();
-				getAstRewrite().remove(node.getParent(), null);
+				getASTRewrite().remove(node.getParent(), null);
 			}
 			return false;
 		}

@@ -57,6 +57,7 @@ public class ArithmethicAssignmentASTVisitor extends AbstractASTRewriteASTVisito
 			if (arithExpASTVisitor.getNewOperator() != null) {
 				astRewrite.set(node, Assignment.OPERATOR_PROPERTY,
 						ArithmeticUtil.generateOperator(arithExpASTVisitor.getNewOperator()), null);
+				onRewrite();
 			}
 		}
 		return true;

@@ -69,6 +69,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 						.newBooleanLiteral(false);
 				}
 				astRewrite.replace(refactorCandidateParameter, replaceParameter, null);
+				onRewrite();
 			}
 		}
 		return true;
@@ -116,7 +117,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 
 				/* wrapping string variables into Boolean.valueOf(...) */
 				else if (ClassRelationUtil.isContentOfTypes(refactorCandidateTypeBinding,
-						generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
+						generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 					replacement = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
 				}
 
@@ -156,7 +157,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 				 * PrimitiveType.valueOf(...)
 				 */
 				if (ClassRelationUtil.isContentOfTypes(refactorCandidateTypeBinding,
-						generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
+						generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
 						|| isPrimitiveTypeClass(refactorCandidateTypeBinding.getName())) {
 					SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(), ReservedNames.MI_VALUE_OF);
 					replacement = NodeBuilder.newMethodInvocation(node.getAST(),
@@ -166,6 +167,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 			}
 			if (replacement != null) {
 				astRewrite.replace(node, replacement, null);
+				onRewrite();
 			}
 		}
 		return true;

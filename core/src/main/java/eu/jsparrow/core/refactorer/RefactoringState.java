@@ -40,7 +40,6 @@ public class RefactoringState {
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ignoredRules = new ArrayList<>();
 
 	public RefactoringState(ICompilationUnit original, ICompilationUnit workingCopy) {
-		super();
 		this.original = original;
 		this.workingCopy = workingCopy;
 	}
@@ -99,8 +98,8 @@ public class RefactoringState {
 	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
 	 * @throws ReflectiveOperationException
-	 *             is thrown if the default constructor of {@link #visitor} is
-	 *             not present and the reflective construction fails.
+	 *             is thrown if the default constructor of {@link #visitorClass}
+	 *             is not present and the reflective construction fails.
 	 * @throws RefactoringException
 	 */
 	public void addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
@@ -152,7 +151,6 @@ public class RefactoringState {
 	public void discardWorkingCopy() {
 		try {
 			workingCopy.discardWorkingCopy();
-			original.discardWorkingCopy();
 			workingCopy.close();
 			original.close();
 		} catch (JavaModelException e) {

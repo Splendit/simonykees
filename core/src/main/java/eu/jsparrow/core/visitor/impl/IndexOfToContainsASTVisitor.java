@@ -171,6 +171,7 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 					if (doTransformation) {
 						this.transform(methodInvocationNode.getExpression(), methodArgumentExpression, parent, option);
+						onRewrite();
 					}
 				}
 			}

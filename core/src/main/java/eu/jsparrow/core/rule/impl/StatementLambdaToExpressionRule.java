@@ -17,7 +17,7 @@ public class StatementLambdaToExpressionRule extends RefactoringRule<StatementLa
 
 	public StatementLambdaToExpressionRule() {
 		super();
-		this.visitor = StatementLambdaToExpressionASTVisitor.class;
+		this.visitorClass = StatementLambdaToExpressionASTVisitor.class;
 		this.name = Messages.StatementLambdaToExpressionRule_name;
 		this.description = Messages.StatementLambdaToExpressionRule_description;
 	}

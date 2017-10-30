@@ -100,9 +100,12 @@ public class OverrideAnnotationRuleASTVisitor extends AbstractASTRewriteASTVisit
 
 		// add @Override to methods marked for annotation
 		toBeAnnotated.stream()
-			.forEach(method -> astRewrite.getListRewrite(method, MethodDeclaration.MODIFIERS2_PROPERTY)
-				.insertFirst(NodeBuilder.newMarkerAnnotation(node.getAST(), node.getAST()
-					.newName(OVERRIDE_SIMPLE_NAME)), null));
+			.forEach(method -> {
+				astRewrite.getListRewrite(method, MethodDeclaration.MODIFIERS2_PROPERTY)
+					.insertFirst(NodeBuilder.newMarkerAnnotation(node.getAST(), node.getAST()
+						.newName(OVERRIDE_SIMPLE_NAME)), null);
+				onRewrite();
+			});
 	}
 
 	/**

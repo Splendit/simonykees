@@ -16,7 +16,7 @@ import eu.jsparrow.i18n.Messages;
 public class LambdaToMethodReferenceRule extends RefactoringRule<LambdaToMethodReferenceASTVisitor> {
 	public LambdaToMethodReferenceRule() {
 		super();
-		this.visitor = LambdaToMethodReferenceASTVisitor.class;
+		this.visitorClass = LambdaToMethodReferenceASTVisitor.class;
 		this.name = Messages.LambdaToMethodReferenceRule_name;
 		this.description = Messages.LambdaToMethodReferenceRule_description;
 	}

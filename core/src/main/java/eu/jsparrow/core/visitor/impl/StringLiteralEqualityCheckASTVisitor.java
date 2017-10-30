@@ -85,11 +85,12 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 							boolean isCommentFree = isCommentFree(methodInvocation);
 							if (isCommentFree) {
 								// use the rewriter for swapping
-								ASTRewrite astRewrite = getAstRewrite();
+								ASTRewrite astRewrite = getASTRewrite();
 								ASTNode newExpression = astRewrite.createCopyTarget(expression);
 								ASTNode newArgument = astRewrite.createCopyTarget(stringLiteral);
 								astRewrite.replace(expression, newArgument, null);
 								astRewrite.replace(stringLiteral, newExpression, null);
+								onRewrite();
 							}
 						}
 					}

@@ -226,22 +226,24 @@ public class SelectRulesWizard extends Wizard {
 	 * @param result
 	 *            will contain compilation units
 	 * @param javaElements
-	 *            contains java elements which should be split up into compilation
-	 *            units
+	 *            contains java elements which should be split up into
+	 *            compilation units
 	 * @throws JavaModelException
-	 *             if this element does not exist or if an exception occurs while
-	 *             accessing its corresponding resource.
+	 *             if this element does not exist or if an exception occurs
+	 *             while accessing its corresponding resource.
 	 * @since 0.9
 	 */
 	public static void collectICompilationUnits(List<ICompilationUnit> result, List<IJavaElement> javaElements,
 			IProgressMonitor monitor) throws JavaModelException {
 
 		/*
-		 * Converts the monitor to a SubMonitor and sets name of task on progress
-		 * monitor dialog. Size is set to number 100 and then scaled to size of the
-		 * javaElements list. Each java element increases worked amount for same size.
+		 * Converts the monitor to a SubMonitor and sets name of task on
+		 * progress monitor dialog. Size is set to number 100 and then scaled to
+		 * size of the javaElements list. Each java element increases worked
+		 * amount for same size.
 		 */
-		SubMonitor subMonitor = SubMonitor.convert(monitor, 100).setWorkRemaining(javaElements.size());
+		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
+			.setWorkRemaining(javaElements.size());
 		subMonitor.setTaskName(Messages.ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName);
 		for (IJavaElement javaElement : javaElements) {
 			subMonitor.subTask(javaElement.getElementName());
@@ -257,7 +259,7 @@ public class SelectRulesWizard extends Wizard {
 			} else if (javaElement instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot) javaElement;
 				List<IPackageFragment> packageFragments = ASTNodeUtil
-						.convertToTypedList(Arrays.asList(packageFragmentRoot.getChildren()), IPackageFragment.class);
+					.convertToTypedList(Arrays.asList(packageFragmentRoot.getChildren()), IPackageFragment.class);
 				addCompilationUnits(result, packageFragments);
 			} else if (javaElement instanceof IJavaProject) {
 				IJavaProject javaProject = (IJavaProject) javaElement;
@@ -265,7 +267,8 @@ public class SelectRulesWizard extends Wizard {
 			}
 
 			/*
-			 * If cancel is pressed on progress monitor, abort all and return, else continue
+			 * If cancel is pressed on progress monitor, abort all and return,
+			 * else continue
 			 */
 			if (subMonitor.isCanceled()) {
 				return;
@@ -282,8 +285,8 @@ public class SelectRulesWizard extends Wizard {
 	 *            List of {@link ICompilationUnit} where all the
 	 *            {@link ICompilationUnit}s from the sub-packages are added
 	 * @param packageFragment
-	 *            the current {@link IPackageFragment} from which the sub-packages
-	 *            will be resolved
+	 *            the current {@link IPackageFragment} from which the
+	 *            sub-packages will be resolved
 	 * @throws JavaModelException
 	 */
 	private static void resolveSubPackages(List<ICompilationUnit> result, IPackageFragment packageFragment)
@@ -295,7 +298,9 @@ public class SelectRulesWizard extends Wizard {
 			for (IJavaElement packageElement : root.getChildren()) {
 				if (packageElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 					IPackageFragment pkg = (IPackageFragment) packageElement;
-					if (!pkg.getElementName().equals(packageName) && pkg.getElementName().startsWith(packageName)) {
+					if (!pkg.getElementName()
+						.equals(packageName) && pkg.getElementName()
+							.startsWith(packageName)) {
 						addCompilationUnit(result, pkg.getCompilationUnits());
 					}
 				}
@@ -306,8 +311,8 @@ public class SelectRulesWizard extends Wizard {
 	/**
 	 * 
 	 * @param result
-	 *            List of {@link ICompilationUnit} where the {@code compilationUnit}
-	 *            is added
+	 *            List of {@link ICompilationUnit} where the
+	 *            {@code compilationUnit} is added
 	 * @param packageFragments
 	 * @throws JavaModelException
 	 */
@@ -321,14 +326,14 @@ public class SelectRulesWizard extends Wizard {
 	/**
 	 * 
 	 * @param result
-	 *            List of {@link ICompilationUnit} where the {@code compilationUnit}
-	 *            is added
+	 *            List of {@link ICompilationUnit} where the
+	 *            {@code compilationUnit} is added
 	 * @param compilationUnit
-	 *            {@link ICompilationUnit} that is tested for consistency and write
-	 *            access.
+	 *            {@link ICompilationUnit} that is tested for consistency and
+	 *            write access.
 	 * @throws JavaModelException
-	 *             if this element does not exist or if an exception occurs while
-	 *             accessing its corresponding resource.
+	 *             if this element does not exist or if an exception occurs
+	 *             while accessing its corresponding resource.
 	 * @since 0.9
 	 */
 
@@ -350,8 +355,8 @@ public class SelectRulesWizard extends Wizard {
 	 * @param compilationUnits
 	 *            array of {@link ICompilationUnit} which are loaded
 	 * @throws JavaModelException
-	 *             if this element does not exist or if an exception occurs while
-	 *             accessing its corresponding resource.
+	 *             if this element does not exist or if an exception occurs
+	 *             while accessing its corresponding resource.
 	 * @since 0.9
 	 */
 	private static void addCompilationUnit(List<ICompilationUnit> result, ICompilationUnit[] compilationUnits)

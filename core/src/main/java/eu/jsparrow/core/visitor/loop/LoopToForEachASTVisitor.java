@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import eu.jsparrow.core.builder.NodeBuilder;
@@ -120,7 +119,6 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 			return null;
 		}
 
-		ASTRewrite astRewrite = getAstRewrite();
 		ImportRewrite importRewrite = ImportRewrite.create(compilationUnit, true);
 		String[] addedImports;
 
@@ -357,6 +355,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 		// replace the existing for loop with
 		astRewrite.replace(loop, newFor, null);
+		onRewrite();
 	}
 
 	/**

@@ -52,6 +52,7 @@ public class RulesTestUtil {
 	public static final String BASE_DIRECTORY = SAMPLE_MODULE_PATH + "src/test/java/eu/jsparrow/sample";
 	public static final String PRERULE_DIRECTORY = SAMPLE_MODULE_PATH + "src/test/java/eu/jsparrow/sample/preRule";
 
+
 	private RulesTestUtil() {
 		// hiding
 	}
