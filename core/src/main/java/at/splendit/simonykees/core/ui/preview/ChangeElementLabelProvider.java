@@ -6,6 +6,13 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 
+/**
+ * This class provides the label for the tree in FileTree
+ * 
+ * @author Andreja Sambolec
+ * @since 2.3
+ *
+ */
 public class ChangeElementLabelProvider extends LabelProvider implements IFontProvider {
 
 	@Override

@@ -23,6 +23,15 @@ import org.eclipse.swt.widgets.TableItem;
 import at.splendit.simonykees.core.ui.dialog.SimonykeesMessageDialog;
 import at.splendit.simonykees.i18n.Messages;
 
+/**
+ * {@link NewElementWizardPage} containing view for configuration of options for
+ * renaming rule.
+ * 
+ * @author Andreja Sambolec
+ * 
+ * @since 2.3
+ *
+ */
 @SuppressWarnings("restriction")
 public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 
@@ -62,6 +71,13 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 		model.addListener(this::updateView);
 	}
 
+	/**
+	 * Creates view part for choosing field type options to be searched for
+	 * renaming.
+	 * 
+	 * @param parent
+	 *            holding component
+	 */
 	private void createFieldTypeChoosingPart(Composite parent) {
 		Label partTitle = new Label(parent, SWT.NONE);
 		partTitle.setText(Messages.RenameFieldsRuleWizardPage_fieldTypeLabelText);
@@ -85,6 +101,13 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 		});
 	}
 
+	/**
+	 * Creates view part for choosing search scope option to be searched for
+	 * renaming.
+	 * 
+	 * @param parent
+	 *            holding component
+	 */
 	private void createSearchScopeChoosingPart(Composite parent) {
 		Label partTitle = new Label(parent, SWT.NONE);
 		partTitle.setText(Messages.RenameFieldsRuleWizardPage_searchScopeLabelText);
@@ -110,6 +133,12 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 		controler.searchScopeSelectionChanged(((Button) scopesGroup.getChildren()[0]).getText());
 	}
 
+	/**
+	 * Creates view part for choosing replacement options.
+	 * 
+	 * @param parent
+	 *            holding component
+	 */
 	private void createConfigureReplacementsPart(Composite parent) {
 		Label partTitle = new Label(parent, SWT.NONE);
 		partTitle.setText(Messages.RenameFieldsRuleWizardPage_replacemenentsLabelText);
@@ -139,7 +168,7 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 		gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		dollarSingGroup.setLayoutData(gridData);
 		dollarSingGroup.setText(Messages.RenameFieldsRuleWizardPage_dollarSignReplacementLabelText);
-		for (String dollarReplacement : model.getDolarSignReplacementOptions()) {
+		for (String dollarReplacement : model.getDollarSignReplacementOptions()) {
 			Button button = new Button(dollarSingGroup, SWT.RADIO);
 			button.setText(dollarReplacement);
 			button.addSelectionListener(new SelectionAdapter() {
@@ -154,6 +183,13 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 		controler.dollarReplacementSelectionChanged(((Button) dollarSingGroup.getChildren()[0]).getText());
 	}
 
+	/**
+	 * Creates view part for choosing if to-do comments should be added where
+	 * renaming is not possible.
+	 * 
+	 * @param parent
+	 *            holding component
+	 */
 	private void createTodoChoosingPart(Composite parent) {
 		Label partTitle = new Label(parent, SWT.NONE);
 		partTitle.setText(Messages.RenameFieldsRuleWizardPage_todoCommentsLabelText);

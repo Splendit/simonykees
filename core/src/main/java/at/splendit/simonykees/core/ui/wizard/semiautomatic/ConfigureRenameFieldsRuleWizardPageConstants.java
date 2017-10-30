@@ -2,6 +2,14 @@ package at.splendit.simonykees.core.ui.wizard.semiautomatic;
 
 import at.splendit.simonykees.i18n.Messages;
 
+/**
+ * Wizard page constants for configuring renaming rule when applying to selected
+ * resources
+ * 
+ * @author Andreja Sambolec
+ * @since 2.3
+ *
+ */
 public class ConfigureRenameFieldsRuleWizardPageConstants {
 
 	private ConfigureRenameFieldsRuleWizardPageConstants() {

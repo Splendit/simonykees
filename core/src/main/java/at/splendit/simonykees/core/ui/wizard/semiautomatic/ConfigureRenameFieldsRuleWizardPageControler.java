@@ -2,10 +2,18 @@ package at.splendit.simonykees.core.ui.wizard.semiautomatic;
 
 import java.util.List;
 
+/**
+ * Wizard page controller for configuring renaming rule when applying to
+ * selected resources
+ * 
+ * @author Andreja Sambolec
+ * @since 2.3
+ *
+ */
 public class ConfigureRenameFieldsRuleWizardPageControler {
 
 	private ConfigureRenameFieldsRuleWizardPageModel model;
-	
+
 	public ConfigureRenameFieldsRuleWizardPageControler(ConfigureRenameFieldsRuleWizardPageModel model) {
 		this.model = model;
 	}

@@ -57,6 +57,16 @@ import at.splendit.simonykees.core.visitor.renaming.PublicFieldsRenamingASTVisit
 import at.splendit.simonykees.i18n.ExceptionMessages;
 import at.splendit.simonykees.i18n.Messages;
 
+/**
+ * Wizard that holds {@link ConfigureRenameFieldsRuleWizardPage} with
+ * configuration options for {@link PublicFieldsRenamingRule}. On Finish it sets
+ * chosen options on rule and start refactoring process.
+ * 
+ * @author Andreja Sambolec
+ * 
+ * @since 2.3
+ *
+ */
 public class ConfigureRenameFieldsRuleWizard extends Wizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfigureRenameFieldsRuleWizard.class);
@@ -69,6 +79,8 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 	private RefactoringPipeline refactoringPipeline;
 	private List<FieldMetadata> metadata;
 	private PublicFieldsRenamingRule renameFieldsRule;
+
+	private List<ICompilationUnit> targetCompilationUnits = new ArrayList<>();
 
 	private Rectangle rectangle;
 
@@ -105,6 +117,9 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 		return super.canFinish();
 	}
 
+	/**
+	 * On finish rule applying is started.
+	 */
 	@Override
 	public boolean performFinish() {
 
@@ -112,8 +127,9 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 
 		rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
 
-		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass().getSimpleName(),
-				selectedJavaProjekt.getElementName()));
+		String message = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass().getSimpleName(),
+				selectedJavaProjekt.getElementName());
+		logger.info(message);
 
 		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
 
@@ -217,6 +233,11 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 		});
 	}
 
+	/**
+	 * Creates Job which does refactoring and creates preview wizard.
+	 * 
+	 * @return Job which does refactoring on collected refactoring states.
+	 */
 	private Job startRefactoringJob() {
 		Job refactorJob = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
 
@@ -271,6 +292,12 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 		return refactorJob;
 	}
 
+	/**
+	 * Creates {@link FieldDeclarationASTVisitor} and sets all options selected
+	 * by user from {@link ConfigureRenameFieldsRuleWizardPageModel}.
+	 * 
+	 * @return created and updated {@link FieldDeclarationASTVisitor}
+	 */
 	private FieldDeclarationASTVisitor createVisitor() {
 		FieldDeclarationASTVisitor visitor;
 		if (ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_PROJECT.equals(model.getSearchScope())) {
@@ -293,18 +320,32 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 			IJavaElement[] scope = projectList.toArray(new IJavaElement[0]);
 			visitor = new FieldDeclarationASTVisitor(scope);
 		}
-		visitor.setRenamePrivateField(model.getFieldTypes().contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PRIVATE));
+		visitor.setRenamePrivateField(
+				model.getFieldTypes().contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PRIVATE));
 		visitor.setRenameProtectedField(
 				model.getFieldTypes().contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PROTECTED));
 		visitor.setRenamePackageProtectedField(
 				model.getFieldTypes().contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPROTECTED));
-		visitor.setRenamePublicField(model.getFieldTypes().contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PUBLIC));
+		visitor.setRenamePublicField(
+				model.getFieldTypes().contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PUBLIC));
 		visitor.setUppercaseAfterUnderscore(model.setUpperCaseForUnderscoreReplacementOption());
 		visitor.setUppercaseAfterDollar(model.setUpperCaseForDollarReplacementOption());
 		visitor.setAddTodo(model.isAddTodoComments());
 		return visitor;
 	}
 
+	/**
+	 * Collects all CompilationUnits from IjavaElements
+	 * 
+	 * @param resultCompilationUnitsList
+	 *            resulting list containing all created CompilationUnits
+	 * @param sourceJavaElementsList
+	 *            source list containing all IJavaElements
+	 * @param monitor
+	 *            progress monitor
+	 * @return false if result list is empty of exception occurred while
+	 *         collecting, true otherwise
+	 */
 	private boolean getCompilationUnits(List<ICompilationUnit> resultCompilationUnitsList,
 			List<IJavaElement> sourceJavaElementsList, IProgressMonitor monitor) {
 
@@ -329,6 +370,15 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 		return true;
 	}
 
+	/**
+	 * Collects target compilation units and creates refactoring states from
+	 * them.
+	 * 
+	 * @param subMonitor
+	 *            progress monitor
+	 * @param visitor
+	 *            {@link PublicFieldsRenamingRule} visitor
+	 */
 	private void searchScopeAndPrepareRefactoringStates(SubMonitor subMonitor, FieldDeclarationASTVisitor visitor) {
 
 		Set<IJavaElement> targetJavaElements = visitor.getTargetIJavaElements();
@@ -337,8 +387,6 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 			canRefactor = false;
 			return;
 		}
-
-		List<ICompilationUnit> targetCompilationUnits = new ArrayList<>();
 
 		metadata = visitor.getFieldMetadata();
 		List<FieldMetadata> todosMetadata = visitor.getUnmodifiableFieldMetadata();
@@ -383,6 +431,9 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 		refactoringPipeline.setRefactoringStates(refactoringStates);
 	}
 
+	/**
+	 * Creates DocumentChanges and calls method to show preview wizard.
+	 */
 	private void createAndShowPreviewWizard() {
 
 		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes = new HashMap<>();
@@ -400,17 +451,26 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 		synchronizeWithUIShowRefactoringPreviewWizard(changes);
 	}
 
-	private void synchronizeWithUIShowRefactoringPreviewWizard(Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes) {
+	/**
+	 * Open preview wizard containing all changes made by this rule.
+	 * 
+	 * @param changes
+	 *            Map containing changes to be displayed
+	 */
+	private void synchronizeWithUIShowRefactoringPreviewWizard(
+			Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes) {
 
-		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
-				selectedJavaProjekt.getElementName()));
-		logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes, selectedJavaProjekt.getElementName(),
-				renameFieldsRule.getName()));
+		String message = NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
+				selectedJavaProjekt.getElementName());
+		logger.info(message);
+		message = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, selectedJavaProjekt.getElementName(),
+				renameFieldsRule.getName());
+		logger.info(message);
 
 		Display.getDefault().asyncExec(() -> {
 			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			final WizardDialog dialog = new WizardDialog(shell,
-					new RenamingRulePreviewWizard(refactoringPipeline, changes, renameFieldsRule));
+			final WizardDialog dialog = new WizardDialog(shell, new RenamingRulePreviewWizard(refactoringPipeline,
+					metadata, changes, targetCompilationUnits, renameFieldsRule));
 
 			// maximizes the RefactoringPreviewWizard
 			dialog.setPageSize(rectangle.width, rectangle.height);
