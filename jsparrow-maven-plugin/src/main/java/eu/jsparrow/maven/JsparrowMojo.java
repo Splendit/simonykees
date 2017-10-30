@@ -215,7 +215,7 @@ public class JsparrowMojo extends AbstractMojo {
 			InputStream mavenZipInputStream = null;
 			try {
 				mavenZipInputStream = JsparrowMojo.class
-						.getResourceAsStream(File.separator + "apache-maven-3.5.0-bin.zip");
+						.getResourceAsStream(File.separator + "apache-maven-3.5.2-bin.zip");
 				mavenHomeUnzipped += tempZipPath;
 				unzip(mavenZipInputStream, tempZipPath);
 				extractAndCopyDependencies(mavenHomeUnzipped);
