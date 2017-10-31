@@ -1,0 +1,72 @@
+package eu.jsparrow.license.api;
+
+/**
+ * provides a common interface for license validation as declarative service
+ * 
+ * @author Matthias Webhofer, Andreja Sambolec
+ * @since 1.2
+ */
+public interface LicenseValidationService {
+	/**
+	 * starts the heart beat of the validation process
+	 */
+	void startValidation();
+
+	/**
+	 * stops the validation process
+	 */
+	void stopValidation();
+
+	/**
+	 * checks, if a valid license is present
+	 * 
+	 * @return true, if a valid license is present, false otherwise
+	 */
+	boolean isValid();
+
+	/**
+	 * checks, if license is expired
+	 * 
+	 * @return true, if a license is expired, false otherwise
+	 */
+	boolean isExpired();
+
+	/**
+	 * updates the license key
+	 * 
+	 * @param licenseKey
+	 *            new licensee key.
+	 * @param licenseName
+	 *            new licensee name.
+	 * @return status of update
+	 */
+	boolean updateLicenseeNumber(String licenseKey, String licenseName);
+
+	/**
+	 * produces human readable license information
+	 * 
+	 * @return human readable license information
+	 */
+	String getDisplayableLicenseInformation();
+
+	/**
+	 * produces human readable information about the status of the license
+	 * 
+	 * @return human readable status information
+	 */
+	String getLicenseStautsUserMessage();
+
+	/**
+	 * checks if type is demo/free
+	 * 
+	 * @return true if type is demo (free), false otherwise
+	 */
+	boolean isDemoType();
+
+	/**
+	 * check if license is valid and type is NODE_LOCKED or FLOATING
+	 * 
+	 * @return true if both conditions are met, false otherwise
+	 */
+	boolean isFullValidLicense();
+}

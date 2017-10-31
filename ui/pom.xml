@@ -1,0 +1,53 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>at.splendit</groupId>
+		<artifactId>eu.jsparrow</artifactId>
+		<version>2.3.0-SNAPSHOT</version>
+		<relativePath>..</relativePath>
+	</parent>
+
+	<artifactId>eu.jsparrow.ui</artifactId>
+	<packaging>eclipse-plugin</packaging>
+	<name>jSparrow :: ui</name>
+	<description>jSparrow UI Plugin</description>
+	<profiles>
+		<profile>
+			<id>proguard</id>
+			<activation>
+				<property>
+					<!-- With this profile active, obfuscation will happen -->
+					<name>proguard</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.wvengen</groupId>
+						<artifactId>proguard-maven-plugin</artifactId>
+						<configuration>
+							<options>
+								<option>
+									-libraryjars
+									${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
+								</option>
+								<option>
+									-libraryjars
+									${project.basedir}/../core/target/eu.jsparrow.core-${project.version}_proguard_base.jar
+								</option>
+								<option>-applymapping
+									${project.basedir}/../logging/target/logging.out</option>
+								<option>-applymapping
+									${project.basedir}/../core/target/core.out</option>
+								<option>-printmapping
+									${project.build.directory}/ui.out</option>
+							</options>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>
