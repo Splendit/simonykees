@@ -268,4 +268,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "Rule [id=" + id + ", name=" + name + "]";
+	}
+
+	
 }
