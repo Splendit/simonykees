@@ -1,8 +1,6 @@
 package eu.jsparrow.dummies;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -13,7 +11,6 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.rule.RefactoringRuleInterface;
 import eu.jsparrow.core.rule.RuleDescription;
-import eu.jsparrow.core.rule.Tag;
 
 /**
  * This class serves as a dummy for a refactoring rule. Strictly for use in unit

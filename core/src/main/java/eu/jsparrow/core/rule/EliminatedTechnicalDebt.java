@@ -1,10 +1,7 @@
 package eu.jsparrow.core.rule;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
-
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * This class represents the technical debt that has been eliminated by applying

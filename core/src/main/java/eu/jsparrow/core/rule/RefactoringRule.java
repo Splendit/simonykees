@@ -1,7 +1,5 @@
 package eu.jsparrow.core.rule;
 
-import java.util.List;
-
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -19,8 +17,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.util.PropertyUtil;
 import eu.jsparrow.core.util.RefactoringUtil;
-import eu.jsparrow.core.util.TagUtil;
-import eu.jsparrow.core.visitor.ASTRewriteVisitorListener;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 

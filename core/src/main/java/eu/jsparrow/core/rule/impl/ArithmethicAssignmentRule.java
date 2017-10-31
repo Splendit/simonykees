@@ -1,7 +1,6 @@
 package eu.jsparrow.core.rule.impl;
 
 import java.time.Duration;
-import java.util.Arrays;
 
 import org.apache.commons.lang3.JavaVersion;
 

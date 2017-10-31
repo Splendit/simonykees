@@ -3,8 +3,6 @@ package eu.jsparrow.core.rule.impl;
 import java.time.Duration;
 
 import org.apache.commons.lang3.JavaVersion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RuleDescription;
