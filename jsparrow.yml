@@ -14,8 +14,15 @@ profiles:
       - CollectionRemoveAllRule
       - DiamondOperatorRule
       - OverrideAnnotationRule
+  - name: profile2
+    rules:
+      - SerialVersionUidRule
+      - RearrangeClassMembersRule
+      - BracketsToControlRule
+      - FieldNameConventionRule
+      - MultiVariableDeclarationLineRule
 
-# rules in this section will be executed, if no profile has been specified as defaultProfile or via maven.
+# rules in this section will be executed, if no profile has been specified as selectedProfile or via maven.
 # to deactivate rules, they could be commented with the #-sign
 rules:
   - TryWithResourceRule
