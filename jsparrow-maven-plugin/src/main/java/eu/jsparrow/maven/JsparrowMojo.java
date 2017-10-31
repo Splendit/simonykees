@@ -111,34 +111,36 @@ public class JsparrowMojo extends AbstractMojo {
 
 	public void execute() throws MojoExecutionException {
 		try {
-			Runtime.getRuntime().addShutdownHook(new Thread() {
-				@Override
-				public void run() {
-					super.run();
-					if (null != framework && null != framework.getBundleContext()) {
-						try {
-							// stop jSparrow.logging
-							Bundle standaloneBundle = framework.getBundleContext().getBundle(standaloneBundleID);
-							if (standaloneBundle.getState() == Bundle.ACTIVE) {
-								standaloneBundle.stop();
+			Runtime.getRuntime()
+				.addShutdownHook(new Thread() {
+					@Override
+					public void run() {
+						super.run();
+						if (null != framework && null != framework.getBundleContext()) {
+							try {
+								// stop jSparrow.logging
+								Bundle standaloneBundle = framework.getBundleContext()
+									.getBundle(standaloneBundleID);
+								if (standaloneBundle.getState() == Bundle.ACTIVE) {
+									standaloneBundle.stop();
+								}
+								framework.stop();
+							} catch (BundleException e) {
+								getLog().error(e.getMessage(), e);
 							}
-							framework.stop();
-						} catch (BundleException e) {
-							getLog().error(e.getMessage(), e);
 						}
-					}
-					// CLEAN
-					if (!standaloneStarted && null != directory) {
-						try {
-							deleteChildren(new File(directory.getAbsolutePath()));
-						} catch (IOException e) {
-							getLog().error(e.getMessage(), e);
+						// CLEAN
+						if (!standaloneStarted && null != directory) {
+							try {
+								deleteChildren(new File(directory.getAbsolutePath()));
+							} catch (IOException e) {
+								getLog().error(e.getMessage(), e);
+							}
+							directory.delete();
 						}
-						directory.delete();
+
 					}
-					
-				}
-			});
+				});
 			startOSGI();
 		} catch (BundleException e) {
 			getLog().error(e.getMessage(), e);
@@ -179,7 +181,8 @@ public class JsparrowMojo extends AbstractMojo {
 		String file = System.getProperty(JAVA_TMP);
 		directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
 		if (directory.exists()) {
-			if (Arrays.asList(directory.list()).size() == 1) {
+			if (Arrays.asList(directory.list())
+				.size() == 1) {
 				System.setProperty(USER_DIR, directory.getAbsolutePath());
 				getLog().info("Set user.dir to " + directory.getAbsolutePath());
 			} else {
@@ -197,7 +200,8 @@ public class JsparrowMojo extends AbstractMojo {
 		}
 
 		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
-		configuration.put(PROJECT_PATH_CONSTANT, project.getBasedir().getAbsolutePath());
+		configuration.put(PROJECT_PATH_CONSTANT, project.getBasedir()
+			.getAbsolutePath());
 		configuration.put(PROJECT_NAME_CONSTANT, project.getName());
 
 		// TODO improve with this approach
@@ -215,7 +219,7 @@ public class JsparrowMojo extends AbstractMojo {
 			InputStream mavenZipInputStream = null;
 			try {
 				mavenZipInputStream = JsparrowMojo.class
-						.getResourceAsStream(File.separator + "apache-maven-3.5.2-bin.zip");
+					.getResourceAsStream(File.separator + "apache-maven-3.5.2-bin.zip");
 				mavenHomeUnzipped += tempZipPath;
 				unzip(mavenZipInputStream, tempZipPath);
 				extractAndCopyDependencies(mavenHomeUnzipped);
@@ -234,7 +238,8 @@ public class JsparrowMojo extends AbstractMojo {
 		}
 
 		ServiceLoader<FrameworkFactory> ffs = ServiceLoader.load(FrameworkFactory.class);
-		FrameworkFactory frameworkFactory = ffs.iterator().next();
+		FrameworkFactory frameworkFactory = ffs.iterator()
+			.next();
 
 		framework = frameworkFactory.newFramework(configuration);
 
@@ -292,12 +297,15 @@ public class JsparrowMojo extends AbstractMojo {
 	 * @throws IOException
 	 */
 	private void deleteChildren(File parentDirectory) throws IOException {
-		for (String file : Arrays.asList(parentDirectory.list())) {
-			File currentFile = new File(parentDirectory.getAbsolutePath(), file);
-			if (currentFile.isDirectory()) {
-				deleteChildren(currentFile);
+		String[] children = parentDirectory.list();
+		if (children != null) {
+			for (String file : Arrays.asList(children)) {
+				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
+				if (currentFile.isDirectory()) {
+					deleteChildren(currentFile);
+				}
+				currentFile.delete();
 			}
-			currentFile.delete();
 		}
 	}
 
@@ -310,11 +318,12 @@ public class JsparrowMojo extends AbstractMojo {
 	 */
 	private void startBundles(List<Bundle> bundles) {
 		for (final Bundle bundle : bundles) {
-			if (bundle.getHeaders().get(Constants.FRAGMENT_HOST) == null && null != bundle.getSymbolicName()
-					&& (bundle.getSymbolicName().startsWith(STANDALONE_BUNDLE_NAME))) {
+			if (bundle.getHeaders()
+				.get(Constants.FRAGMENT_HOST) == null && null != bundle.getSymbolicName() && (bundle.getSymbolicName()
+					.startsWith(STANDALONE_BUNDLE_NAME))) {
 				try {
-					getLog().info(
-							"Starting BUNDLE: " + bundle.getSymbolicName() + ", resolution: " + bundle.getState());
+					getLog()
+						.info("Starting BUNDLE: " + bundle.getSymbolicName() + ", resolution: " + bundle.getState());
 					bundle.start();
 					standaloneBundleID = bundle.getBundleId();
 					standaloneStarted = true;
@@ -331,7 +340,8 @@ public class JsparrowMojo extends AbstractMojo {
 	 */
 	private void extractAndCopyDependencies(String mavenHome) {
 		final InvocationRequest request = new DefaultInvocationRequest();
-		request.setPomFile(new File(project.getBasedir().getAbsolutePath() + File.separator + "pom.xml"));
+		request.setPomFile(new File(project.getBasedir()
+			.getAbsolutePath() + File.separator + "pom.xml"));
 		request.setGoals(Collections.singletonList("dependency:copy-dependencies "));
 
 		final Properties props = new Properties();

@@ -65,11 +65,12 @@ public class Activator implements BundleActivator {
 		logger.info(loggerInfo);
 
 		String profile = context.getProperty(SELECTED_PROFILE);
-		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, profile);
-		logger.info(loggerInfo);
+		
 
 		YAMLConfig config = YAMLConfigUtil.readConfig(configFilePath, profile);
-
+		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, config.getSelectedProfile());
+		logger.info(loggerInfo);
+		
 		// get project path and name from context
 		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
 		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
@@ -165,12 +166,15 @@ public class Activator implements BundleActivator {
 	 * @throws IOException
 	 */
 	private void deleteChildren(File parentDirectory) {
-		for (String file : Arrays.asList(parentDirectory.list())) {
-			File currentFile = new File(parentDirectory.getAbsolutePath(), file);
-			if (currentFile.isDirectory() && !("target".equals(currentFile.getName()))) { //$NON-NLS-1$
-				deleteChildren(currentFile);
+		String[] children = parentDirectory.list();
+		if (children != null) {
+			for (String file : Arrays.asList(children)) {
+				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
+				if (currentFile.isDirectory() && !("target".equals(currentFile.getName()))) { //$NON-NLS-1$
+					deleteChildren(currentFile);
+				}
+				currentFile.delete();
 			}
-			currentFile.delete();
 		}
 	}
 }
