@@ -20,6 +20,7 @@ public class FunctionalInterfaceRule extends RefactoringRule<FunctionalInterface
 		this.visitorClass = FunctionalInterfaceASTVisitor.class;
 		this.name = Messages.FunctionalInterfaceRule_name;
 		this.description = Messages.FunctionalInterfaceRule_description;
+		this.id = "FunctionalInterface"; //$NON-NLS-1$
 	}
 
 	@Override

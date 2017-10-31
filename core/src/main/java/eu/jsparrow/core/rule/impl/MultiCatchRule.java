@@ -20,6 +20,7 @@ public class MultiCatchRule extends RefactoringRule<MultiCatchASTVisitor> {
 		this.visitorClass = MultiCatchASTVisitor.class;
 		this.name = Messages.MultiCatchRule_name;
 		this.description = Messages.MultiCatchRule_description;
+		this.id = "MultiCatch"; //$NON-NLS-1$
 	}
 
 	@Override

@@ -19,6 +19,7 @@ public class EnhancedForLoopToStreamForEachRule extends RefactoringRule<Enhanced
 		this.visitorClass = EnhancedForLoopToStreamForEachASTVisitor.class;
 		this.name = Messages.EnhancedForLoopToStreamForEachRule_name;
 		this.description = Messages.EnhancedForLoopToStreamForEachRule_description;
+		this.id = "EnhancedForLoopToStreamForEach"; //$NON-NLS-1$
 	}
 
 	@Override

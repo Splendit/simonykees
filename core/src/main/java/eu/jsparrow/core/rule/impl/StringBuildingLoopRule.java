@@ -26,6 +26,7 @@ public class StringBuildingLoopRule extends RefactoringRule<StringBuildingLoopAS
 		this.visitorClass = StringBuildingLoopASTVisitor.class;
 		this.name = Messages.StringBuildingLoopRule_name;
 		this.description = Messages.StringBuildingLoopRule_description;
+		this.id = "StringBuildingLoop"; //$NON-NLS-1$
 	}
 
 	/**

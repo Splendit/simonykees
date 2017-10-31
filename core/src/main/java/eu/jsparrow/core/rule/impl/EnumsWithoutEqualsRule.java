@@ -19,6 +19,7 @@ public class EnumsWithoutEqualsRule extends RefactoringRule<EnumsWithoutEqualsAS
 		this.visitorClass = EnumsWithoutEqualsASTVisitor.class;
 		this.name = Messages.EnumsWithoutEqualsRule_name;
 		this.description = Messages.EnumsWithoutEqualsRule_description;
+		this.id = "EnumsWithoutEquals"; //$NON-NLS-1$
 	}
 
 	@Override

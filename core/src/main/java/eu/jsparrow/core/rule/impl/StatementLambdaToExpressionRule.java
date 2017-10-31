@@ -20,6 +20,7 @@ public class StatementLambdaToExpressionRule extends RefactoringRule<StatementLa
 		this.visitorClass = StatementLambdaToExpressionASTVisitor.class;
 		this.name = Messages.StatementLambdaToExpressionRule_name;
 		this.description = Messages.StatementLambdaToExpressionRule_description;
+		this.id = "StatementLambdaToExpression"; //$NON-NLS-1$
 	}
 
 	@Override

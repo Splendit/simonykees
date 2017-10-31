@@ -35,6 +35,7 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 		this.visitorClass = AbstractASTRewriteASTVisitor.class;
 		this.name = Messages.CodeFormatterRule_name;
 		this.description = Messages.CodeFormatterRule_description;
+		this.id = "CodeFormatter"; //$NON-NLS-1$
 	}
 
 	@Override

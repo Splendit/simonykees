@@ -20,6 +20,7 @@ public class MultiVariableDeclarationLineRule extends RefactoringRule<MultiVaria
 		this.visitorClass = MultiVariableDeclarationLineASTVisitor.class;
 		this.name = Messages.MultiVariableDeclarationLineRule_name;
 		this.description = Messages.MultiVariableDeclarationLineRule_description;
+		this.id = "MultiVariableDeclarationLine"; // TODO: probably not a good id //$NON-NLS-1$
 	}
 
 	@Override

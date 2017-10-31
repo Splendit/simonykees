@@ -21,6 +21,7 @@ public class PrimitiveObjectUseEqualsRule extends RefactoringRule<PrimitiveObjec
 		this.visitorClass = PrimitiveObjectUseEqualsASTVisitor.class;
 		this.name = Messages.PrimitiveObjectUseEqualsRule_name;
 		this.description = Messages.PrimitiveObjectUseEqualsRule_description;
+		this.id = "PrimitiveObjectUseEquals"; //$NON-NLS-1$
 	}
 
 	@Override
