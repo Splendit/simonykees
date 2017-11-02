@@ -90,6 +90,8 @@ public class Messages extends NLS {
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputLabel;
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputText;
 	public static String ConfigureProfileSelectRulesWIzardPageModel_error_NameExists;
+
+	public static String ConfigureRenameFieldsRuleWizard_WizardTitle_RenameFields;
 	public static String DiamondOperatorASTVisitor_using_diamond_operator;
 	public static String DiamondOperatorRule_description;
 	public static String DiamondOperatorRule_name;
@@ -202,6 +204,14 @@ public class Messages extends NLS {
 	public static String RearrangeClassMembersRule_name;
 	public static String RefactoringPipeline_AddingCompilationUnitToErrorList;
 	public static String RefactoringPipeline_CompilationUnitWithCompilationErrors;
+
+	public static String RefactoringPipeline_java_element_resolution_failed;
+	public static String RefactoringPipeline_user_java_element_resolution_failed;
+
+	public static String RefactoringPipeline_user_warn_no_compilation_units_found;
+
+	public static String RefactoringPipeline_warn_no_compilation_units_found;
+
 	public static String RefactoringPreviewWizard_err_runnableWithProgress;
 	public static String RefactoringRule_applying_rule_to_workingcopy;
 	public static String RefactoringRule_default_description;

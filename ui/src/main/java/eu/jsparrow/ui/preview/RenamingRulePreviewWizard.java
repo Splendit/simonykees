@@ -207,4 +207,13 @@ public class RenamingRulePreviewWizard extends Wizard {
 		Activator.setRunning(false);
 		return super.performCancel();
 	}
+	
+	@Override
+	public boolean canFinish() {
+		if (!LicenseUtil.getInstance()
+			.isFullLicense()) {
+			return false;
+		}
+		return super.canFinish();
+	}
 }

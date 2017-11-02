@@ -93,7 +93,7 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 
 	@Override
 	public String getWindowTitle() {
-		return Messages.LoggerRuleWizard_title;
+		return Messages.ConfigureRenameFieldsRuleWizard_WizardTitle_RenameFields;
 	}
 
 	@Override
