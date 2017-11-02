@@ -1,11 +1,17 @@
 package eu.jsparrow.ui.preview;
 
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -15,23 +21,29 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.osgi.framework.Bundle;
 
+import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.util.MapContentProvider;
+import org.eclipse.wb.swt.ResourceManager;
 
-@SuppressWarnings({"restriction", "nls"})
+@SuppressWarnings({ "restriction", "nls" })
 public class SummaryWizardPage extends WizardPage {
 
-	private Composite rootcomposite;
-	private ExpandBar expandBar;
+	private Composite rootComposite;
+	private Bundle bundle;
 
 	/**
 	 * Create the wizard.
@@ -39,7 +51,7 @@ public class SummaryWizardPage extends WizardPage {
 	public SummaryWizardPage() {
 		super("wizardPage");
 		setTitle("Run Summary");
-
+		bundle = Platform.getBundle(Activator.PLUGIN_ID);
 	}
 
 	/**
@@ -48,36 +60,42 @@ public class SummaryWizardPage extends WizardPage {
 	 * @param parent
 	 */
 	public void createControl(Composite parent) {
-		rootcomposite = new Composite(parent, SWT.NONE);
-		setControl(rootcomposite);
-		rootcomposite.setLayout(new GridLayout(1, false));
+		rootComposite = new Composite(parent, SWT.NONE);
+		setControl(rootComposite);
+		rootComposite.setLayout(new GridLayout(1, false));
 		addHeader();
-		Label label = new Label(rootcomposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		addExpandSection(rootcomposite);
+		addExpandSection(rootComposite);
 	}
 
 	private void addHeader() {
-		Composite composite = new Composite(rootcomposite, SWT.NONE);
-		composite.setLayout(new GridLayout(3, true));
+		Composite composite = new Composite(rootComposite, SWT.NONE);
+		GridLayout layout = new GridLayout(3, true);
+		layout.marginHeight = 10;
+		layout.marginWidth = 10;
+		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-
-		Label labelExecutionTime = new Label(composite, SWT.NONE);
-		labelExecutionTime.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		CLabel labelExecutionTime = new CLabel(composite, SWT.NONE);
+		labelExecutionTime.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		labelExecutionTime.setText("Run Duration: 30 Seconds");
+		labelExecutionTime.setImage(ResourceManager.getPluginImage("eu.jsparrow.ui", "icons/fa-hourglass-half.png"));
 
-		Label labelIssuesFixed = new Label(composite, SWT.NONE);
+		CLabel labelIssuesFixed = new CLabel(composite, SWT.NONE);
+		labelIssuesFixed.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		labelIssuesFixed.setText("230 Issues fixed");
-		labelIssuesFixed.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, true));
+		labelIssuesFixed.setImage(ResourceManager.getPluginImage("eu.jsparrow.ui", "icons/fa-bolt.png"));
 
-		Label labelHoursSaved = new Label(composite, SWT.NONE);
-		labelHoursSaved.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, true));
+		CLabel labelHoursSaved = new CLabel(composite, SWT.NONE);
+		labelHoursSaved.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		labelHoursSaved.setText("1003 Hours Saved");
+		labelHoursSaved.setImage(ResourceManager.getPluginImage("eu.jsparrow.ui", "icons/fa-clock.png"));
 	}
 
 	private void addExpandSection(Composite container) {
 
-		expandBar = new ExpandBar(container, SWT.V_SCROLL);
+		ExpandBar expandBar = new ExpandBar(container, SWT.V_SCROLL);
 		expandBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		expandBar.setSpacing(8);
 
@@ -140,8 +158,61 @@ public class SummaryWizardPage extends WizardPage {
 		composite.setLayout(layout);
 		filesExpandItem.setControl(composite);
 
-		Composite tableComposite = new Composite(composite, SWT.NONE);
+		TableViewer viewer = addRulesTable(composite);
+		addTableData(viewer);
 
+		// Set the size to at most half of the display
+		int halfDisplayHeight = composite.getDisplay()
+			.getActiveShell()
+			.getSize().y / 2;
+		int height = Math.min(filesExpandItem.getControl()
+			.computeSize(SWT.DEFAULT, SWT.DEFAULT).y, halfDisplayHeight);
+		filesExpandItem.setHeight(height);
+	}
+
+	private void addTableData(TableViewer viewer) {
+		// Testdata for checking height scaling
+		Map<String, Integer> map = new HashMap<>();
+		map.put("Replace For-Loop with Stream::anyMatch", 15);
+		map.put("Remove Inherited Interfaces from Class Declaration", 9);
+		map.put("Replace For-Loop with Enhanced-For-Loop", 120);
+		map.put("Remove toString() on String", 4);
+		map.put("Replace Assignment with Compound Operator", 22);
+		map.put("Remove Explicit Type Argument1", 42);
+		map.put("Remove Explicit Type Argument2", 42);
+		map.put("Remove Explicit Type Argument3", 42);
+		map.put("Remove Explicit Type Argument4", 42);
+		map.put("Remove Explicit Type Argument5", 42);
+		map.put("Remove Explicit Type Argumen67t", 42);
+		map.put("Remove Explicit Tyape Aedrgument", 42);
+		map.put("Remove Explicit Typdse Argument", 42);
+		map.put("Remove Explicit Tyaape Argument", 42);
+		map.put("Remove Explicit Typae Argument", 42);
+		map.put("Remoade Explicit Type Argument", 42);
+		map.put("Remove Explicitasd Type Argument", 42);
+		map.put("Remove Exasdfplicit Type Argument", 42);
+		map.put("Remove Explicit Tasdfype Argument", 42);
+		map.put("Remove Explicit Typeasd Argument", 42);
+		map.put("Remove Expasddflicit Type Argument", 42);
+		map.put("Remove Exasdpasdflicit Type Argument", 42);
+		map.put("Remove Expaasdfsdflicit Type Argument", 42);
+		map.put("Remove Expaasdsdflicit Type Argument", 42);
+		map.put("Remove Expasdflicit Tyasdpe Argument", 42);
+		map.put("Remove Expaaaasdflicit Type Argument", 42);
+		map.put("Remove Expssssasdflicit Type Argument", 42);
+		map.put("Remove Expadddddsdflicit Type Argument", 42);
+		map.put("Remove Expafffffsdflicit Type Argument", 42);
+		map.put("Remove Expagggggsdflicit Type Argument", 42);
+		map.put("Remove Expahhhhhhsdflicit Type Argument", 42);
+		map.put("Remove Expasccccccdflicit Type Argument", 42);
+		map.put("Remove Expasdvvvvvvvflicit Type Argument", 42);
+		map.put("Remove Expasdflbbbbbbbicit Type Argument", 42);
+		map.put("Remove Expasdfbnnnlicit Type Argument", 42);
+		viewer.setInput(map);
+	}
+
+	private TableViewer addRulesTable(Composite composite) {
+		Composite tableComposite = new Composite(composite, SWT.NONE);
 		TableViewer viewer = new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION);
 		Table table = viewer.getTable();
 		table.setHeaderVisible(true);
@@ -181,53 +252,7 @@ public class SummaryWizardPage extends WizardPage {
 		tableComposite.setLayout(tableLayout);
 		tableLayout.setColumnData(colRuleName.getColumn(), new ColumnWeightData(80));
 		tableLayout.setColumnData(colTimes.getColumn(), new ColumnWeightData(20));
-
-		// Testdata for checking height scaling
-		Map<String, Integer> map = new HashMap<>();
-		map.put("Replace For-Loop with Stream::anyMatch", 15);
-		map.put("Remove Inherited Interfaces from Class Declaration", 9);
-		map.put("Replace For-Loop with Enhanced-For-Loop", 120);
-		map.put("Remove toString() on String", 4);
-		map.put("Replace Assignment with Compound Operator", 22);
-		map.put("Remove Explicit Type Argument1", 42);
-		map.put("Remove Explicit Type Argument2", 42);
-		map.put("Remove Explicit Type Argument3", 42);
-		map.put("Remove Explicit Type Argument4", 42);
-		map.put("Remove Explicit Type Argument5", 42);
-		map.put("Remove Explicit Type Argumen67t", 42);
-		map.put("Remove Explicit Tyape Aedrgument", 42);
-		map.put("Remove Explicit Typdse Argument", 42);
-		map.put("Remove Explicit Tyaape Argument", 42);
-		map.put("Remove Explicit Typae Argument", 42);
-		map.put("Remoade Explicit Type Argument", 42);
-		map.put("Remove Explicitasd Type Argument", 42);
-		map.put("Remove Exasdfplicit Type Argument", 42);
-		map.put("Remove Explicit Tasdfype Argument", 42);
-		map.put("Remove Explicit Typeasd Argument", 42);
-		map.put("Remove Expasddflicit Type Argument", 42);
-		map.put("Remove Exasdpasdflicit Type Argument", 42);
-		map.put("Remove Expaasdfsdflicit Type Argument", 42);
-		map.put("Remove Expaasdsdflicit Type Argument", 42);
-		map.put("Remove Expasdflicit Tyasdpe Argument", 42);
-		map.put("Remove Expaaaasdflicit Type Argument", 42);
-		map.put("Remove Expssssasdflicit Type Argument", 42);
-		map.put("Remove Expadddddsdflicit Type Argument", 42);
-		map.put("Remove Expafffffsdflicit Type Argument", 42);
-		map.put("Remove Expagggggsdflicit Type Argument", 42);
-		map.put("Remove Expahhhhhhsdflicit Type Argument", 42);
-		map.put("Remove Expasccccccdflicit Type Argument", 42);
-		map.put("Remove Expasdvvvvvvvflicit Type Argument", 42);
-		map.put("Remove Expasdflbbbbbbbicit Type Argument", 42);
-		map.put("Remove Expasdfbnnnlicit Type Argument", 42);
-		viewer.setInput(map);
-
-		//Set the size to at most half of the display
-		int halfDisplayHeight = composite.getDisplay()
-			.getActiveShell()
-			.getSize().y / 2;
-		int height = Math.min(filesExpandItem.getControl()
-			.computeSize(SWT.DEFAULT, SWT.DEFAULT).y, halfDisplayHeight);
-		filesExpandItem.setHeight(height);
+		return viewer;
 	}
 
 }
