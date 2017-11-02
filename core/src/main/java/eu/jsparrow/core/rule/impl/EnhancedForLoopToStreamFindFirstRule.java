@@ -20,6 +20,7 @@ public class EnhancedForLoopToStreamFindFirstRule extends RefactoringRule<Enhanc
 		this.visitorClass = EnhancedForLoopToStreamFindFirstASTVisitor.class;
 		this.name = Messages.EnhancedForLoopToStreamFindFirstRule_name;
 		this.description = Messages.EnhancedForLoopToStreamFindFirstRule_description;
+		this.id = "EnhancedForLoopToStreamFindFirst"; //$NON-NLS-1$
 	}
 
 	@Override

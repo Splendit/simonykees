@@ -19,6 +19,7 @@ public class RemoveNewStringConstructorRule extends RefactoringRule<RemoveNewStr
 		this.visitorClass = RemoveNewStringConstructorASTVisitor.class;
 		this.name = Messages.RemoveNewStringConstructorRule_name;
 		this.description = Messages.RemoveNewStringConstructorRule_description;
+		this.id = "RemoveNewStringConstructor"; //$NON-NLS-1$
 	}
 
 	@Override

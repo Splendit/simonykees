@@ -20,6 +20,7 @@ public class ArithmethicAssignmentRule extends RefactoringRule<ArithmethicAssign
 		this.visitorClass = ArithmethicAssignmentASTVisitor.class;
 		this.name = Messages.ArithmethicAssignmentRule_name;
 		this.description = Messages.ArithmethicAssignmentRule_description;
+		this.id = "ArithmethicAssignment"; //$NON-NLS-1$
 	}
 
 	@Override

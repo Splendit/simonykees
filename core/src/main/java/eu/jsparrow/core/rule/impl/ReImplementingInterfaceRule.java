@@ -18,6 +18,7 @@ public class ReImplementingInterfaceRule extends RefactoringRule<ReImplementingI
 		this.visitorClass = ReImplementingInterfaceASTVisitor.class;
 		this.name = Messages.ReImplementingInterfaceRule_name;
 		this.description = Messages.ReImplementingInterfaceRule_description;
+		this.id = "ReImplementingInterface"; //$NON-NLS-1$
 	}
 
 	@Override

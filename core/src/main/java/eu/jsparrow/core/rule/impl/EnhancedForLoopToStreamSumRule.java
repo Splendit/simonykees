@@ -19,6 +19,7 @@ public class EnhancedForLoopToStreamSumRule extends RefactoringRule<EnhancedForL
 		this.visitorClass = EnhancedForLoopToStreamSumASTVisitor.class;
 		this.name = Messages.EnhancedForLoopToStreamSumRule_name;
 		this.description = Messages.EnhancedForLoopToStreamSumRule_description;
+		this.id = "EnhancedForLoopToStreamSum"; //$NON-NLS-1$
 	}
 
 	@Override

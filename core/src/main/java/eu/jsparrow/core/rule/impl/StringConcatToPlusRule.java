@@ -19,6 +19,7 @@ public class StringConcatToPlusRule extends RefactoringRule<StringConcatToPlusAS
 		this.visitorClass = StringConcatToPlusASTVisitor.class;
 		this.name = Messages.StringConcatToPlusRule_name;
 		this.description = Messages.StringConcatToPlusRule_description;
+		this.id = "StringConcatToPlus"; //$NON-NLS-1$
 	}
 
 	@Override

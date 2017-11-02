@@ -24,6 +24,7 @@ public class OverrideAnnotationRule extends RefactoringRule<OverrideAnnotationRu
 		this.visitorClass = OverrideAnnotationRuleASTVisitor.class;
 		this.name = Messages.OverrideAnnotationRule_name;
 		this.description = Messages.OverrideAnnotationRule_description;
+		this.id = "OverrideAnnotation"; //$NON-NLS-1$
 	}
 
 	@Override

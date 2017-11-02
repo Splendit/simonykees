@@ -74,6 +74,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		this.visitorClass = StandardLoggerASTVisitor.class;
 		this.name = Messages.StandardLoggerRule_name;
 		this.description = Messages.StandardLoggerRule_description;
+		this.id = "StandardLogger"; //$NON-NLS-1$
 	}
 
 	@Override

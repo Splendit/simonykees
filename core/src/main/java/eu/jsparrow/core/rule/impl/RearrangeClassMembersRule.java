@@ -19,6 +19,7 @@ public class RearrangeClassMembersRule extends RefactoringRule<RearrangeClassMem
 		this.visitorClass = RearrangeClassMembersASTVisitor.class;
 		this.name = Messages.RearrangeClassMembersRule_name;
 		this.description = Messages.RearrangeClassMembersRule_description;
+		this.id = "RearrangeClassMembers"; //$NON-NLS-1$
 	}
 
 	@Override

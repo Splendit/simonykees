@@ -20,6 +20,7 @@ public class StringLiteralEqualityCheckRule extends RefactoringRule<StringLitera
 		this.visitorClass = StringLiteralEqualityCheckASTVisitor.class;
 		this.name = Messages.StringLiteralEqualityCheckRule_name;
 		this.description = Messages.StringLiteralEqualityCheckRule_description;
+		this.id = "StringLiteralEqualityCheck"; //$NON-NLS-1$
 	}
 
 	@Override

@@ -20,6 +20,7 @@ public class FieldNameConventionRule extends RefactoringRule<FieldNameConvention
 		this.visitorClass = FieldNameConventionASTVisitor.class;
 		this.name = Messages.FieldNameConventionRule_name;
 		this.description = Messages.FieldNameConventionRule_description;
+		this.id = "FieldNameConvention"; //$NON-NLS-1$
 	}
 
 	@Override

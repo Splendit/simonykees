@@ -19,6 +19,7 @@ public class LambdaToMethodReferenceRule extends RefactoringRule<LambdaToMethodR
 		this.visitorClass = LambdaToMethodReferenceASTVisitor.class;
 		this.name = Messages.LambdaToMethodReferenceRule_name;
 		this.description = Messages.LambdaToMethodReferenceRule_description;
+		this.id = "LambdaToMethodReference"; //$NON-NLS-1$
 	}
 
 	@Override

@@ -20,6 +20,7 @@ public class LambdaForEachCollectRule extends RefactoringRule<LambdaForEachColle
 		this.visitorClass = LambdaForEachCollectASTVisitor.class;
 		this.name = Messages.LambdaForEachCollectRule_name;
 		this.description = Messages.LambdaForEachCollectRule_description;
+		this.id = "LambdaForEachCollect"; //$NON-NLS-1$
 	}
 
 	@Override
