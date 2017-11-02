@@ -69,7 +69,7 @@ public class YAMLConfigUtilTest {
 	@Test
 	public void getSelectedRulesFromConfig_WithoutProfileWithValidRules_ShouldReturnAllRules() throws Exception {
 		YAMLConfig config = new YAMLConfig();
-		config.getRules().add("TryWithResourceRule");
+		config.getRules().add("TryWithResource");
 		//TODO: This method is hard to test. It must be refactored
 		
 		YAMLConfigUtil.getSelectedRulesFromConfig(config, new ArrayList<>());
