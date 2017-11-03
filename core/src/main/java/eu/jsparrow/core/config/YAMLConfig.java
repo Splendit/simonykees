@@ -71,7 +71,7 @@ public class YAMLConfig {
 	 * profile has been specified
 	 */
 	public List<String> getRules() {
-		if(rules == null) {
+		if (rules == null) {
 			rules = new LinkedList<>();
 		}
 		return rules;
@@ -85,7 +85,7 @@ public class YAMLConfig {
 	 * this list holds all specified profiles (see {@link YAMLProfile}
 	 */
 	public List<YAMLProfile> getProfiles() {
-		if(profiles == null) {
+		if (profiles == null) {
 			profiles = new LinkedList<>();
 		}
 		return profiles;

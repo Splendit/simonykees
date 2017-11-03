@@ -133,7 +133,8 @@ public class YAMLConfigUtil {
 	 * @throws YAMLConfigException
 	 */
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRulesFromConfig(
-			YAMLConfig config, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules) throws YAMLConfigException {
+			YAMLConfig config, List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules)
+			throws YAMLConfigException {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result;
 
 		String selectedProfile = config.getSelectedProfile();
