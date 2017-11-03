@@ -63,21 +63,21 @@ public class RefactoringPreviewWizard extends Wizard {
 		 * First summary page is created to collect all initial source from
 		 * working copies
 		 */
-		addPage(new SummaryWizardPage());
+		SummaryWizardPage summaryPage = new SummaryWizardPage(refactoringPipeline);
 //		RefactoringSummaryWizardPage summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline);
-//		refactoringPipeline.getRules()
-//			.forEach(rule -> {
-//				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
-//				if (!changes.isEmpty()) {
-//					addPage(new RefactoringPreviewWizardPage(changes, rule));
-//				}
-//			});
-//		if (!(refactoringPipeline.getRules()
-//			.size() == 1
-//				&& refactoringPipeline.getRules()
-//					.get(0) instanceof StandardLoggerRule)) {
-//			addPage(summaryPage);
-//		}
+		refactoringPipeline.getRules()
+			.forEach(rule -> {
+				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
+				if (!changes.isEmpty()) {
+					addPage(new RefactoringPreviewWizardPage(changes, rule));
+				}
+			});
+		if (!(refactoringPipeline.getRules()
+			.size() == 1
+				&& refactoringPipeline.getRules()
+					.get(0) instanceof StandardLoggerRule)) {
+			addPage(summaryPage);
+		}
 	}
 
 	@Override

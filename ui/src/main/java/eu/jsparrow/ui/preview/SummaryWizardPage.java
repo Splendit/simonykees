@@ -1,19 +1,18 @@
 package eu.jsparrow.ui.preview;
 
-import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.compare.internal.ComparePreferencePage;
+import org.eclipse.compare.internal.CompareUIPlugin;
+import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.PojoProperties;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
+import org.eclipse.jface.databinding.viewers.ViewerProperties;
+import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.layout.TableColumnLayout;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -23,35 +22,50 @@ import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
-import org.osgi.framework.Bundle;
-
-import eu.jsparrow.ui.Activator;
-import eu.jsparrow.ui.util.MapContentProvider;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.wb.swt.ResourceManager;
+
+import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.preview.dialog.CompareInput;
 
 @SuppressWarnings({ "restriction", "nls" })
 public class SummaryWizardPage extends WizardPage {
+	private DataBindingContext bindingContext;
 
 	private Composite rootComposite;
-	private Bundle bundle;
+
+	private CLabel labelExecutionTime;
+
+	private CLabel labelIssuesFixed;
+
+	private CLabel labelHoursSaved;
+
+	private TableViewer fileTableViewer;
+
+	private TableViewer ruleTableViewer;
+
+	private CompareInput currentPreviewViewer;
+
+	private SummaryWizardPageModel summaryWizardPageModel;
 
 	/**
 	 * Create the wizard.
 	 */
-	public SummaryWizardPage() {
+	public SummaryWizardPage(RefactoringPipeline refactoringPipeline) {
 		super("wizardPage");
 		setTitle("Run Summary");
-		bundle = Platform.getBundle(Activator.PLUGIN_ID);
+
+		this.summaryWizardPageModel = new SummaryWizardPageModel(refactoringPipeline);
 	}
 
 	/**
@@ -67,6 +81,8 @@ public class SummaryWizardPage extends WizardPage {
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		addExpandSection(rootComposite);
+
+		initDataBindings();
 	}
 
 	private void addHeader() {
@@ -76,21 +92,19 @@ public class SummaryWizardPage extends WizardPage {
 		layout.marginWidth = 10;
 		composite.setLayout(layout);
 		composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		
-		CLabel labelExecutionTime = new CLabel(composite, SWT.NONE);
+
+		labelExecutionTime = new CLabel(composite, SWT.NONE);
 		labelExecutionTime.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		labelExecutionTime.setText("Run Duration: 30 Seconds");
-		labelExecutionTime.setImage(ResourceManager.getPluginImage("eu.jsparrow.ui", "icons/fa-hourglass-half.png"));
+		labelExecutionTime.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-hourglass-half.png"));
 
-		CLabel labelIssuesFixed = new CLabel(composite, SWT.NONE);
+		labelIssuesFixed = new CLabel(composite, SWT.NONE);
 		labelIssuesFixed.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		labelIssuesFixed.setText("230 Issues fixed");
-		labelIssuesFixed.setImage(ResourceManager.getPluginImage("eu.jsparrow.ui", "icons/fa-bolt.png"));
+		labelIssuesFixed.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-bolt.png"));
 
-		CLabel labelHoursSaved = new CLabel(composite, SWT.NONE);
+		labelHoursSaved = new CLabel(composite, SWT.NONE);
 		labelHoursSaved.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		labelHoursSaved.setText("1003 Hours Saved");
-		labelHoursSaved.setImage(ResourceManager.getPluginImage("eu.jsparrow.ui", "icons/fa-clock.png"));
+		labelHoursSaved.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-clock.png"));
+
 	}
 
 	private void addExpandSection(Composite container) {
@@ -127,10 +141,7 @@ public class SummaryWizardPage extends WizardPage {
 		SashForm sashForm = new SashForm(composite, SWT.VERTICAL);
 		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-		TableViewer viewer = new TableViewer(sashForm, SWT.SINGLE);
-		viewer.setContentProvider(ArrayContentProvider.getInstance());
-		viewer.setInput(Arrays.asList("Somefile.java", "CoolFile.java", "TableViewThing.java", "MegaList.java",
-				"MuchWow.java"));
+		fileTableViewer = new TableViewer(sashForm, SWT.SINGLE);
 
 		Composite previewContainer = new Composite(sashForm, SWT.NONE);
 		GridLayout layout = new GridLayout();
@@ -138,13 +149,25 @@ public class SummaryWizardPage extends WizardPage {
 		layout.marginWidth = 0;
 		previewContainer.setLayout(layout);
 		previewContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		currentPreviewViewer = new CompareInput("asdf", "blabla", "asdfasdf");
+		try {
+			PlatformUI.getWorkbench()
+				.getProgressService()
+				.run(true, true, currentPreviewViewer);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Control compareControl = currentPreviewViewer.createContents(previewContainer);
+		compareControl.setLayoutData(new GridData(GridData.FILL_BOTH));
+		compareControl.getParent().layout();
 
-		IChangePreviewViewer currentPreviewViewer = new TextEditChangePreviewViewer();
-		currentPreviewViewer.createControl(previewContainer);
-		currentPreviewViewer.getControl()
-			.setLayoutData(new GridData(GridData.FILL_BOTH));
+		CompareUIPlugin.getDefault()
+			.getPreferenceStore()
+			.setValue(ComparePreferencePage.OPEN_STRUCTURE_COMPARE, Boolean.FALSE);
 
 		sashForm.setWeights(new int[] { 1, 1 });
+
 	}
 
 	private void addRulesSection(ExpandBar expandBar) {
@@ -158,101 +181,83 @@ public class SummaryWizardPage extends WizardPage {
 		composite.setLayout(layout);
 		filesExpandItem.setControl(composite);
 
-		TableViewer viewer = addRulesTable(composite);
-		addTableData(viewer);
+		ruleTableViewer = addRulesTable(composite);
 
 		// Set the size to at most half of the display
-		int halfDisplayHeight = composite.getDisplay()
+		int thirdDisplayHeight = composite.getDisplay()
 			.getActiveShell()
-			.getSize().y / 2;
-		int height = Math.min(filesExpandItem.getControl()
-			.computeSize(SWT.DEFAULT, SWT.DEFAULT).y, halfDisplayHeight);
-		filesExpandItem.setHeight(height);
-	}
-
-	private void addTableData(TableViewer viewer) {
-		// Testdata for checking height scaling
-		Map<String, Integer> map = new HashMap<>();
-		map.put("Replace For-Loop with Stream::anyMatch", 15);
-		map.put("Remove Inherited Interfaces from Class Declaration", 9);
-		map.put("Replace For-Loop with Enhanced-For-Loop", 120);
-		map.put("Remove toString() on String", 4);
-		map.put("Replace Assignment with Compound Operator", 22);
-		map.put("Remove Explicit Type Argument1", 42);
-		map.put("Remove Explicit Type Argument2", 42);
-		map.put("Remove Explicit Type Argument3", 42);
-		map.put("Remove Explicit Type Argument4", 42);
-		map.put("Remove Explicit Type Argument5", 42);
-		map.put("Remove Explicit Type Argumen67t", 42);
-		map.put("Remove Explicit Tyape Aedrgument", 42);
-		map.put("Remove Explicit Typdse Argument", 42);
-		map.put("Remove Explicit Tyaape Argument", 42);
-		map.put("Remove Explicit Typae Argument", 42);
-		map.put("Remoade Explicit Type Argument", 42);
-		map.put("Remove Explicitasd Type Argument", 42);
-		map.put("Remove Exasdfplicit Type Argument", 42);
-		map.put("Remove Explicit Tasdfype Argument", 42);
-		map.put("Remove Explicit Typeasd Argument", 42);
-		map.put("Remove Expasddflicit Type Argument", 42);
-		map.put("Remove Exasdpasdflicit Type Argument", 42);
-		map.put("Remove Expaasdfsdflicit Type Argument", 42);
-		map.put("Remove Expaasdsdflicit Type Argument", 42);
-		map.put("Remove Expasdflicit Tyasdpe Argument", 42);
-		map.put("Remove Expaaaasdflicit Type Argument", 42);
-		map.put("Remove Expssssasdflicit Type Argument", 42);
-		map.put("Remove Expadddddsdflicit Type Argument", 42);
-		map.put("Remove Expafffffsdflicit Type Argument", 42);
-		map.put("Remove Expagggggsdflicit Type Argument", 42);
-		map.put("Remove Expahhhhhhsdflicit Type Argument", 42);
-		map.put("Remove Expasccccccdflicit Type Argument", 42);
-		map.put("Remove Expasdvvvvvvvflicit Type Argument", 42);
-		map.put("Remove Expasdflbbbbbbbicit Type Argument", 42);
-		map.put("Remove Expasdfbnnnlicit Type Argument", 42);
-		viewer.setInput(map);
+			.getSize().y / 3;
+		// TODO: Bind list height to number of items
+		// int height = Math.min(filesExpandItem.getControl()
+		// .computeSize(SWT.DEFAULT, SWT.DEFAULT).y, thirdDisplayHeight);
+		filesExpandItem.setHeight(thirdDisplayHeight);
 	}
 
 	private TableViewer addRulesTable(Composite composite) {
 		Composite tableComposite = new Composite(composite, SWT.NONE);
-		TableViewer viewer = new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION);
-		Table table = viewer.getTable();
+		ruleTableViewer = new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION);
+		Table table = ruleTableViewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
-		viewer.setContentProvider(MapContentProvider.getInstance());
 
-		TableViewerColumn colRuleName = new TableViewerColumn(viewer, SWT.NONE);
+		TableViewerColumn colRuleName = new TableViewerColumn(ruleTableViewer, SWT.NONE);
 		colRuleName.getColumn()
 			.setText("Rule");
 		colRuleName.getColumn()
 			.setResizable(false);
-		colRuleName.setLabelProvider(new ColumnLabelProvider() {
-			@SuppressWarnings("unchecked")
-			@Override
-			public String getText(Object element) {
-				Entry<String, Integer> p = (Entry<String, Integer>) element;
-				return p.getKey();
-			}
-		});
 
-		TableViewerColumn colTimes = new TableViewerColumn(viewer, SWT.NONE);
+		TableViewerColumn colTimes = new TableViewerColumn(ruleTableViewer, SWT.NONE);
 		colTimes.getColumn()
 			.setResizable(false);
 		colTimes.getColumn()
 			.setText("Times Applied");
-		colTimes.setLabelProvider(new ColumnLabelProvider() {
-			@SuppressWarnings("unchecked")
-			@Override
-			public String getText(Object element) {
-				Entry<String, Integer> p = (Entry<String, Integer>) element;
-				return p.getValue()
-					.toString();
-			}
-		});
 
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		tableComposite.setLayout(tableLayout);
 		tableLayout.setColumnData(colRuleName.getColumn(), new ColumnWeightData(80));
 		tableLayout.setColumnData(colTimes.getColumn(), new ColumnWeightData(20));
-		return viewer;
+		return ruleTableViewer;
 	}
 
+	protected void initDataBindings() {
+		bindingContext = new DataBindingContext();
+		//
+		IObservableValue observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
+			.observe(labelExecutionTime);
+		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("executionTime")
+			.observe(summaryWizardPageModel);
+		bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
+				executionTimeSummaryWizardPageModelObserveValue, null, null);
+		//
+		IObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
+			.observe(labelIssuesFixed);
+		IObservableValue issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("issuesFixed")
+			.observe(summaryWizardPageModel);
+		bindingContext.bindValue(observeTextLabelIssuesFixedObserveWidget,
+				issuesFixedSummaryWizardPageModelObserveValue, null, null);
+		//
+		IObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
+			.observe(labelHoursSaved);
+		IObservableValue hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("hoursSaved")
+			.observe(summaryWizardPageModel);
+		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue,
+				null, null);
+		//
+
+		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
+				BeanProperties.values("name", "times"));
+
+		ViewerSupport.bind(fileTableViewer, summaryWizardPageModel.getChangedFiles(), BeanProperties.values("name"));
+
+		// IObservableValue target = WidgetProperties.text()
+		// .observe(testlabel);
+		//
+		IViewerObservableValue selectedFile = ViewerProperties.singleSelection()
+			.observe(fileTableViewer);
+		IObservableValue detailValue = PojoProperties.value("name", String.class)
+			.observeDetail(selectedFile);
+		//
+		// bindingContext.bindValue(target, detailValue);
+
+	}
 }
