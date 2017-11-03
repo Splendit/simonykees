@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLConfig;
+import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.config.YAMLConfigUtil;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RefactoringException;
@@ -38,16 +39,19 @@ public class Activator implements BundleActivator {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "eu.jsparrow.standalone"; //$NON-NLS-1$
 
-	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
-	public static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
-	public static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
-	public static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
-	public static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
-	public static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
-	public static final String MAVEN_NATURE_CONSTANT = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
-	public static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
-	public static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
-	public static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
+	protected static final String USER_DIR = "user.dir"; //$NON-NLS-1$
+	protected static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
+	protected static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
+	protected static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
+	protected static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
+	protected static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
+	protected static final String MAVEN_NATURE_CONSTANT = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
+	protected static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
+	protected static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
+	protected static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
+	protected static final String LIST_RULES = "LIST.RULES"; //$NON-NLS-1$
+	protected static final String LIST_RULES_SHORT = "LIST.RULES.SHORT"; //$NON-NLS-1$
+	protected static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
 
 	private StandaloneConfig standaloneConfig;
 
@@ -55,8 +59,46 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		logger.info(Messages.Activator_start);
 
+		boolean listRules = Boolean.parseBoolean(context.getProperty(LIST_RULES));
+		boolean listRulesShort = Boolean.parseBoolean(context.getProperty(LIST_RULES_SHORT));
+		String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID);
+
+		if (listRules) {
+			if (listRulesId != null && !listRulesId.isEmpty()) {
+				ListRulesUtil.listRules(listRulesId);
+			} else {
+				ListRulesUtil.listRules();
+			}
+		} else if (listRulesShort) {
+			ListRulesUtil.listRulesShort();
+		} else {
+			startRefactoring(context);
+		}
+	}
+
+	@Override
+	public void stop(BundleContext context) {
+		try {
+			/* Unregister as a save participant */
+			if (ResourcesPlugin.getWorkspace() != null) {
+				ResourcesPlugin.getWorkspace()
+					.forgetSavedTree(PLUGIN_ID);
+				ResourcesPlugin.getWorkspace()
+					.removeSaveParticipant(PLUGIN_ID);
+			}
+
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			standaloneConfig.cleanUp();
+		}
+
+		logger.info(Messages.Activator_stop);
+	}
+
+	private void startRefactoring(BundleContext context) throws YAMLConfigException {
 		String configFilePath = context.getProperty(CONFIG_FILE_PATH);
-		
+
 		String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
 		logger.info(loggerInfo);
 
@@ -80,16 +122,18 @@ public class Activator implements BundleActivator {
 		standaloneConfig = new StandaloneConfig(projectName, projectPath);
 
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
-				.getRulesForProject(standaloneConfig.getJavaProject(), true);
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
-		if(selectedRules == null) {
+			.getRulesForProject(standaloneConfig.getJavaProject(), true);
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil
+			.getSelectedRulesFromConfig(config, projectRules);
+		if (selectedRules == null) {
 			selectedRules = new LinkedList<>();
 		}
 
 		// Create refactoring pipeline and set rules
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 		refactoringPipeline.setRules(selectedRules);
-		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(), selectedRules.toString());
+		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
+				selectedRules.toString());
 		logger.info(loggerInfo);
 
 		logger.info(Messages.Activator_debug_collectCompilationUnits);
@@ -99,7 +143,8 @@ public class Activator implements BundleActivator {
 
 		logger.debug(Messages.Activator_debug_createRefactoringStates);
 		refactoringPipeline.createRefactoringStates(compUnits);
-		loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates, refactoringPipeline.getRefactoringStates().size());
+		loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates, refactoringPipeline.getRefactoringStates()
+			.size());
 		logger.debug(loggerInfo);
 
 		// Do refactoring
@@ -121,23 +166,4 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	@Override
-	public void stop(BundleContext context) {
-		try {
-			/* Unregister as a save participant */
-			if (ResourcesPlugin.getWorkspace() != null) {
-				ResourcesPlugin.getWorkspace()
-					.forgetSavedTree(PLUGIN_ID);
-				ResourcesPlugin.getWorkspace()
-					.removeSaveParticipant(PLUGIN_ID);
-			}
-
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		} finally {
-			standaloneConfig.cleanUp();
-		}
-
-		logger.info(Messages.Activator_stop);
-	}
 }
