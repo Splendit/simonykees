@@ -80,8 +80,8 @@ public class YAMLConfigUtilTest {
 		YAMLConfigUtil.readConfig("file", "INVALID");
 	}
 	
-	@Test
-	public void readConfig_NonExistentFileWithoutProfile_ShouldReturnDefaultConfig() throws Exception {
+	@Test(expected = YAMLConfigException.class)
+	public void readConfig_NonExistentFileWithoutProfile_ShouldThrowException() throws Exception {
 		YAMLConfig config = YAMLConfigUtil.readConfig("file", null);
 		
 		assertEquals("default", config.getSelectedProfile());
