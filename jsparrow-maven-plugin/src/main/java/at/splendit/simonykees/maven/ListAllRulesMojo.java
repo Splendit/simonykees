@@ -33,19 +33,19 @@ public class ListAllRulesMojo extends AbstractMojo {
 	 */
 	@Parameter(defaultValue = "${maven.home}", required = true)
 	private String mavenHome;
-	
+
 	@Parameter(property = "rule")
 	private String ruleId;
-	
+
 	private static final String LIST_RULES = "LIST.RULES";
 	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID";
-	
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		try {
 			final Map<String, String> configuration = new HashMap<>();
 			configuration.put(LIST_RULES, Boolean.toString(true));
-			if(ruleId != null && !ruleId.isEmpty()) {
+			if (ruleId != null && !ruleId.isEmpty()) {
 				configuration.put(LIST_RULES_SELECTED_ID, ruleId);
 			}
 

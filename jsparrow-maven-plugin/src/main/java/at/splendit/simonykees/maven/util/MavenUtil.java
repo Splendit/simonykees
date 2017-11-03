@@ -30,6 +30,12 @@ import org.osgi.framework.launch.FrameworkFactory;
 
 import at.splendit.simonykees.maven.JsparrowMojo;
 
+/**
+ * 
+ * @author Andreja Sambolec, Matthias Webhofer
+ * @since 2.3.0
+ *
+ */
 @SuppressWarnings("nls")
 public class MavenUtil {
 

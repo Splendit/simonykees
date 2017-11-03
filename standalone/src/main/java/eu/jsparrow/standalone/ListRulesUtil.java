@@ -47,7 +47,6 @@ public class ListRulesUtil {
 	@SuppressWarnings("nls")
 	public static void listRules(String ruleId) {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules;
-		
 
 		if (ruleId != null) {
 			String newRuleId = ruleId.replace(" ", "");

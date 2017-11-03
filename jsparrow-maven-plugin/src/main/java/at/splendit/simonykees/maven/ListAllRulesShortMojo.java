@@ -33,9 +33,9 @@ public class ListAllRulesShortMojo extends AbstractMojo {
 	 */
 	@Parameter(defaultValue = "${maven.home}", required = true)
 	private String mavenHome;
-	
+
 	private static final String LIST_RULES_SHORT = "LIST.RULES.SHORT";
-	
+
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		try {
