@@ -45,7 +45,7 @@ public class StandaloneConfig {
 	private IJavaProject javaProject = null;
 
 	private List<ICompilationUnit> compUnits = new ArrayList<>();
-	
+
 	private IClasspathEntry[] oldEntries;
 
 	/**
@@ -173,7 +173,7 @@ public class StandaloneConfig {
 				System.getProperty(Activator.USER_DIR) + File.separator + Activator.DEPENDENCIES_FOLDER_CONSTANT);
 		File[] listOfFiles = depsFolder.listFiles();
 		List<IClasspathEntry> collectedEntries = new ArrayList<>();
-		
+
 		if (null == listOfFiles || listOfFiles.length == 0) {
 			return;
 		}
@@ -221,7 +221,7 @@ public class StandaloneConfig {
 	 * 
 	 * @return true if .project deleted, is not programmatically generated or
 	 *         doesn't exist any more, false otherwise
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
 	 */
 	public boolean cleanUp() throws JavaModelException {
 		logger.debug(Messages.StandaloneConfig_debug_cleanUp);
@@ -237,7 +237,7 @@ public class StandaloneConfig {
 			return true;
 		}
 	}
-	
+
 	private void revertClasspath() throws JavaModelException {
 		if (null != oldEntries) {
 			javaProject.setRawClasspath(oldEntries, null);
