@@ -41,6 +41,8 @@ public class Messages extends NLS {
 	public static String Activator_standalone_RulesDoNotExist;
 	public static String Activator_standalone_ConfigFileReadSuccessfully;
 
+	public static String Activator_standalone_None;
+
 	public static String Activator_standalone_noRulesSelected;
 	public static String Activator_standalone_UsingDefaultConfiguration;
 	public static String ArithmethicAssignmentRule_description;
