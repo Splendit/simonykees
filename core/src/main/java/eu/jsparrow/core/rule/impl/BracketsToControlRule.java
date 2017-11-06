@@ -20,6 +20,7 @@ public class BracketsToControlRule extends RefactoringRule<BracketsToControlASTV
 		this.visitorClass = BracketsToControlASTVisitor.class;
 		this.name = Messages.BracketsToControlRule_name;
 		this.description = Messages.BracketsToControlRule_description;
+		this.id = "BracketsToControl"; //$NON-NLS-1$
 	}
 
 	@Override

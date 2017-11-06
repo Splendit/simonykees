@@ -19,6 +19,7 @@ public class ForToForEachRule extends RefactoringRule<ForToForEachASTVisitor> {
 		this.visitorClass = ForToForEachASTVisitor.class;
 		this.name = Messages.ForToForEachRule_name;
 		this.description = Messages.ForToForEachRule_description;
+		this.id = "ForToForEach"; //$NON-NLS-1$
 	}
 
 	@Override

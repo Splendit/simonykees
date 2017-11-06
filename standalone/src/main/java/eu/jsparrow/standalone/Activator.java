@@ -88,44 +88,46 @@ public class Activator implements BundleActivator {
 			.getRulesForProject(standaloneConfig.getJavaProject(), true);
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil
 			.getSelectedRulesFromConfig(config, projectRules);
-		if (selectedRules == null) {
-			selectedRules = new LinkedList<>();
-		}
 
-		// Create refactoring pipeline and set rules
-		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
-		refactoringPipeline.setRules(selectedRules);
-		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
-				selectedRules.toString());
-		logger.info(loggerInfo);
+		if (selectedRules != null && !selectedRules.isEmpty()) {
+			// Create refactoring pipeline and set rules
+			RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
+			refactoringPipeline.setRules(selectedRules);
+			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
+					selectedRules.toString());
+			logger.info(loggerInfo);
 
-		logger.info(Messages.Activator_debug_collectCompilationUnits);
-		List<ICompilationUnit> compUnits = standaloneConfig.getCompUnits();
-		loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compUnits.size());
-		logger.debug(loggerInfo);
+			logger.info(Messages.Activator_debug_collectCompilationUnits);
+			List<ICompilationUnit> compUnits = standaloneConfig.getCompUnits();
+			loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compUnits.size());
+			logger.debug(loggerInfo);
 
-		logger.debug(Messages.Activator_debug_createRefactoringStates);
-		refactoringPipeline.createRefactoringStates(compUnits);
-		loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates, refactoringPipeline.getRefactoringStates()
-			.size());
-		logger.debug(loggerInfo);
+			logger.debug(Messages.Activator_debug_createRefactoringStates);
+			refactoringPipeline.createRefactoringStates(compUnits);
+			loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates,
+					refactoringPipeline.getRefactoringStates()
+						.size());
+			logger.debug(loggerInfo);
 
-		// Do refactoring
-		try {
-			logger.info(Messages.Activator_debug_startRefactoring);
-			refactoringPipeline.doRefactoring(new NullProgressMonitor());
-		} catch (RefactoringException | RuleException e) {
-			logger.error(e.getMessage(), e);
-			return;
-		}
+			// Do refactoring
+			try {
+				logger.info(Messages.Activator_debug_startRefactoring);
+				refactoringPipeline.doRefactoring(new NullProgressMonitor());
+			} catch (RefactoringException | RuleException e) {
+				logger.error(e.getMessage(), e);
+				return;
+			}
 
-		// Commit refactoring
-		try {
-			logger.info(Messages.Activator_debug_commitRefactoring);
-			refactoringPipeline.commitRefactoring();
-		} catch (RefactoringException | ReconcileException e) {
-			logger.error(e.getMessage(), e);
-			return;
+			// Commit refactoring
+			try {
+				logger.info(Messages.Activator_debug_commitRefactoring);
+				refactoringPipeline.commitRefactoring();
+			} catch (RefactoringException | ReconcileException e) {
+				logger.error(e.getMessage(), e);
+				return;
+			}
+		} else {
+			logger.info(Messages.Activator_standalone_noRulesSelected);
 		}
 	}
 

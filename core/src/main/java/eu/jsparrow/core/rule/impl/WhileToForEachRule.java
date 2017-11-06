@@ -23,6 +23,7 @@ public class WhileToForEachRule extends RefactoringRule<WhileToForEachASTVisitor
 		this.visitorClass = WhileToForEachASTVisitor.class;
 		this.name = Messages.WhileToForEachRule_name;
 		this.description = Messages.WhileToForEachRule_description;
+		this.id = "WhileToForEach"; //$NON-NLS-1$
 	}
 
 	@Override

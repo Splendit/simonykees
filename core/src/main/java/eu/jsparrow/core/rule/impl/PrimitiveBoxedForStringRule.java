@@ -19,6 +19,7 @@ public class PrimitiveBoxedForStringRule extends RefactoringRule<PrimitiveBoxedF
 		this.visitorClass = PrimitiveBoxedForStringASTVisitor.class;
 		this.name = Messages.PrimitiveBoxedForStringRule_name;
 		this.description = Messages.PrimitiveBoxedForStringRule_description;
+		this.id = "PrimitiveBoxedForString"; //$NON-NLS-1$
 	}
 
 	@Override

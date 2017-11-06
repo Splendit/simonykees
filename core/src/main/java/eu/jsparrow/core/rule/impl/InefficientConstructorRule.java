@@ -19,6 +19,7 @@ public class InefficientConstructorRule extends RefactoringRule<InefficientConst
 		this.visitorClass = InefficientConstructorASTVisitor.class;
 		this.name = Messages.InefficientConstructorRule_name;
 		this.description = Messages.InefficientConstructorRule_description;
+		this.id = "InefficientConstructor"; //$NON-NLS-1$
 	}
 
 	@Override

@@ -19,6 +19,7 @@ public class UseIsEmptyRule extends RefactoringRule<UseIsEmptyOnCollectionsASTVi
 		this.visitorClass = UseIsEmptyOnCollectionsASTVisitor.class;
 		this.name = Messages.UseIsEmptyRule_name;
 		this.description = Messages.UseIsEmptyRule_description;
+		this.id = "UseIsEmpty"; //$NON-NLS-1$
 	}
 
 	@Override

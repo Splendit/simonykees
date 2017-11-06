@@ -24,6 +24,7 @@ public class TryWithResourceRule extends RefactoringRule<TryWithResourceASTVisit
 		this.visitorClass = TryWithResourceASTVisitor.class;
 		this.name = Messages.TryWithResourceRule_name;
 		this.description = Messages.TryWithResourceRule_description;
+		this.id = "TryWithResource"; //$NON-NLS-1$
 	}
 
 	@Override

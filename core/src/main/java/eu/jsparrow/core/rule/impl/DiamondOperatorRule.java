@@ -29,6 +29,7 @@ public class DiamondOperatorRule extends RefactoringRule<DiamondOperatorASTVisit
 		this.visitorClass = DiamondOperatorASTVisitor.class;
 		this.name = Messages.DiamondOperatorRule_name;
 		this.description = Messages.DiamondOperatorRule_description;
+		this.id = "DiamondOperator"; //$NON-NLS-1$
 	}
 
 	@Override

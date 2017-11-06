@@ -19,6 +19,7 @@ public class IndexOfToContainsRule extends RefactoringRule<IndexOfToContainsASTV
 		this.visitorClass = IndexOfToContainsASTVisitor.class;
 		this.name = Messages.IndexOfToContainsRule_name;
 		this.description = Messages.IndexOfToContainsRule_description;
+		this.id = "IndexOfToContains"; //$NON-NLS-1$
 	}
 
 	@Override

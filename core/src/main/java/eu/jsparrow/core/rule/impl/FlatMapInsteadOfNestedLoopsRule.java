@@ -18,6 +18,7 @@ public class FlatMapInsteadOfNestedLoopsRule extends RefactoringRule<FlatMapInst
 		this.visitorClass = FlatMapInsteadOfNestedLoopsASTVisitor.class;
 		this.name = Messages.FlatMapInsteadOfNestedLoopsRule_name;
 		this.description = Messages.FlatMapInsteadOfNestedLoopsRule_description;
+		this.id = "FlatMapInsteadOfNestedLoops"; //$NON-NLS-1$
 	}
 
 	@Override

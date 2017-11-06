@@ -19,6 +19,7 @@ public class RemoveToStringOnStringRule extends RefactoringRule<RemoveToStringOn
 		this.visitorClass = RemoveToStringOnStringASTVisitor.class;
 		this.name = Messages.RemoveToStringOnStringRule_name;
 		this.description = Messages.RemoveToStringOnStringRule_description;
+		this.id = "RemoveToStringOnString"; //$NON-NLS-1$
 	}
 
 	@Override

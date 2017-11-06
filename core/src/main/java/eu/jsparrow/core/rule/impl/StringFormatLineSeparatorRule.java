@@ -19,6 +19,7 @@ public class StringFormatLineSeparatorRule extends RefactoringRule<StringFormatL
 		this.visitorClass = StringFormatLineSeparatorASTVisitor.class;
 		this.name = Messages.StringFormatLineSeparatorRule_name;
 		this.description = Messages.StringFormatLineSeparatorRule_description;
+		this.id = "StringFormatLineSeparator"; //$NON-NLS-1$
 	}
 
 	@Override

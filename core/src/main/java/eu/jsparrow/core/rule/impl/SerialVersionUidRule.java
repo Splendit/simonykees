@@ -19,6 +19,7 @@ public class SerialVersionUidRule extends RefactoringRule<SerialVersionUidASTVis
 		this.visitorClass = SerialVersionUidASTVisitor.class;
 		this.name = Messages.SerialVersionUidRule_name;
 		this.description = Messages.SerialVersionUidRule_description;
+		this.id = "SerialVersionUid"; //$NON-NLS-1$
 	}
 
 	@Override

@@ -19,6 +19,7 @@ public class CollectionRemoveAllRule extends RefactoringRule<CollectionRemoveAll
 		this.visitorClass = CollectionRemoveAllASTVisitor.class;
 		this.name = Messages.CollectionRemoveAllRule_name;
 		this.description = Messages.CollectionRemoveAllRule_description;
+		this.id = "CollectionRemoveAll"; //$NON-NLS-1$
 	}
 
 	@Override

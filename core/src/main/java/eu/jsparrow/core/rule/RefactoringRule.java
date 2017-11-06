@@ -57,8 +57,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	protected Class<T> visitorClass;
 
 	protected RefactoringRule() {
-		this.id = this.getClass()
-			.getSimpleName();
 		this.tags = TagUtil.getTagsForRule(this.getClass());
 		this.requiredJavaVersion = provideRequiredJavaVersion();
 	}

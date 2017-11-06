@@ -18,6 +18,7 @@ public class ImmutableStaticFinalCollectionsRule extends RefactoringRule<Immutab
 		this.visitorClass = ImmutableStaticFinalCollectionsASTVisitor.class;
 		this.name = Messages.ImmutableStaticFinalCollectionsRule_name;
 		this.description = Messages.ImmutableStaticFinalCollectionsRule_description;
+		this.id = "ImmutableStaticFinalCollections"; //$NON-NLS-1$
 	}
 
 	@Override
