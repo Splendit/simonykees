@@ -65,12 +65,13 @@ public class Activator implements BundleActivator {
 		logger.info(loggerInfo);
 
 		String profile = context.getProperty(SELECTED_PROFILE);
-		
 
 		YAMLConfig config = YAMLConfigUtil.readConfig(configFilePath, profile);
-		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, config.getSelectedProfile());
+		String selectedProfile = config.getSelectedProfile();
+		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
+				(selectedProfile == null) ? Messages.Activator_standalone_None : selectedProfile);
 		logger.info(loggerInfo);
-		
+
 		// get project path and name from context
 		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
 		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
