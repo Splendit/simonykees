@@ -62,6 +62,9 @@ public class JsparrowMojo extends AbstractMojo {
 	@Parameter(defaultValue = "", property = "profile")
 	protected String profile;
 
+	@Parameter(property = "defaultConfiguration")
+	protected boolean useDefaultConfig;
+
 	// CONSTANTS
 	public static final String USER_DIR = "user.dir";
 	public static final String JAVA_TMP = "java.io.tmpdir";
@@ -72,12 +75,14 @@ public class JsparrowMojo extends AbstractMojo {
 	public static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME";
 	public static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH";
 	public static final String SELECTED_PROFILE = "PROFILE.SELECTED";
+	public static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG";
 	public static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow";
 	public static final String JSPARROW_MANIFEST = "manifest.standalone";
 	public static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory";
 	public static final String DEPENDENCIES_FOLDER_CONSTANT = "deps";
 
 	public void execute() throws MojoExecutionException {
+
 		try {
 			startOSGI();
 		} catch (BundleException | InterruptedException e) {
@@ -101,6 +106,7 @@ public class JsparrowMojo extends AbstractMojo {
 		configuration.put(CONFIG_FILE_PATH,
 				(configFile.exists() && !configFile.isDirectory()) ? configFile.getAbsolutePath() : "");
 		configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile);
+		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 
 		// Set working directory
 		String file = System.getProperty(JAVA_TMP);

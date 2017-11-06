@@ -48,6 +48,7 @@ public class Activator implements BundleActivator {
 	public static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
 	public static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	public static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
+	public static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 
 	private StandaloneConfig standaloneConfig;
 
@@ -55,16 +56,26 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext context) throws Exception {
 		logger.info(Messages.Activator_start);
 
-		String configFilePath = context.getProperty(CONFIG_FILE_PATH);
-		
-		String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
-		logger.info(loggerInfo);
+		YAMLConfig config;
+		String loggerInfo;
 
-		String profile = context.getProperty(SELECTED_PROFILE);
-		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, profile);
-		logger.info(loggerInfo);
+		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
 
-		YAMLConfig config = YAMLConfigUtil.readConfig(configFilePath, profile);
+		if (useDefaultConfig) {
+			logger.info(Messages.Activator_standalone_UsingDefaultConfiguration);
+			config = YAMLConfig.getDefaultConfig();
+		} else {
+			String configFilePath = context.getProperty(CONFIG_FILE_PATH);
+
+			loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
+			logger.info(loggerInfo);
+
+			String profile = context.getProperty(SELECTED_PROFILE);
+			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, profile);
+			logger.info(loggerInfo);
+
+			config = YAMLConfigUtil.readConfig(configFilePath, profile);
+		}
 
 		// get project path and name from context
 		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
@@ -80,16 +91,18 @@ public class Activator implements BundleActivator {
 		standaloneConfig = new StandaloneConfig(projectName, projectPath);
 
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
-				.getRulesForProject(standaloneConfig.getJavaProject(), true);
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
-		if(selectedRules == null) {
+			.getRulesForProject(standaloneConfig.getJavaProject(), true);
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil
+			.getSelectedRulesFromConfig(config, projectRules);
+		if (selectedRules == null) {
 			selectedRules = new LinkedList<>();
 		}
 
 		// Create refactoring pipeline and set rules
 		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 		refactoringPipeline.setRules(selectedRules);
-		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(), selectedRules.toString());
+		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
+				selectedRules.toString());
 		logger.info(loggerInfo);
 
 		logger.info(Messages.Activator_debug_collectCompilationUnits);
@@ -99,7 +112,8 @@ public class Activator implements BundleActivator {
 
 		logger.debug(Messages.Activator_debug_createRefactoringStates);
 		refactoringPipeline.createRefactoringStates(compUnits);
-		loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates, refactoringPipeline.getRefactoringStates().size());
+		loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates, refactoringPipeline.getRefactoringStates()
+			.size());
 		logger.debug(loggerInfo);
 
 		// Do refactoring
