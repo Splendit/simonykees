@@ -142,9 +142,7 @@ public class JsparrowMojo extends AbstractMojo {
 					}
 				});
 			startOSGI();
-		} catch (BundleException e) {
-			getLog().error(e.getMessage(), e);
-		} catch (InterruptedException e) {
+		} catch (BundleException | InterruptedException e) {
 			getLog().error(e.getMessage(), e);
 		} finally {
 
@@ -250,11 +248,8 @@ public class JsparrowMojo extends AbstractMojo {
 		final List<Bundle> bundles = new ArrayList<Bundle>();
 
 		// load jars from manifest and install bundles
-		InputStream is = null;
-		BufferedReader reader = null;
-		try {
-			is = JsparrowMojo.class.getResourceAsStream(File.separator + JSPARROW_MANIFEST);
-			reader = new BufferedReader(new InputStreamReader(is));
+		try (InputStream is = JsparrowMojo.class.getResourceAsStream(File.separator + JSPARROW_MANIFEST);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 			String line = "";
 
 			if (is != null) {
@@ -265,21 +260,6 @@ public class JsparrowMojo extends AbstractMojo {
 			}
 		} catch (IOException e) {
 			getLog().error(e.getMessage(), e);
-		} finally {
-			if (null != is) {
-				try {
-					is.close();
-				} catch (IOException e) {
-					getLog().error(e.getMessage(), e);
-				}
-			}
-			if (null != reader) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					getLog().error(e.getMessage(), e);
-				}
-			}
 		}
 
 		startBundles(bundles);
@@ -433,16 +413,18 @@ public class JsparrowMojo extends AbstractMojo {
 	 */
 	private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
 		getLog().info("file unzip : " + filePath);
-		BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
-		byte[] bytesIn = new byte[BUFFER_SIZE];
-		int read = 0;
-		while ((read = zipIn.read(bytesIn)) != -1) {
-			bos.write(bytesIn, 0, read);
+		try (FileOutputStream fos = new FileOutputStream(filePath);
+				BufferedOutputStream bos = new BufferedOutputStream(fos)) {
+			byte[] bytesIn = new byte[BUFFER_SIZE];
+			int read = 0;
+			while ((read = zipIn.read(bytesIn)) != -1) {
+				bos.write(bytesIn, 0, read);
+			}
 		}
-		bos.close();
+
 		File file = new File(filePath);
 
-		Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+		Set<PosixFilePermission> perms = new HashSet<>();
 		perms.add(PosixFilePermission.OWNER_READ);
 		perms.add(PosixFilePermission.OWNER_WRITE);
 		perms.add(PosixFilePermission.OWNER_EXECUTE);
