@@ -8,19 +8,19 @@ selectedProfile: profile1
 profiles:
   - name: profile1
     rules:
-      - TryWithResourceRule
-      - MultiCatchRule
-      - FunctionalInterfaceRule
-      - CollectionRemoveAllRule
-      - DiamondOperatorRule
-      - OverrideAnnotationRule
+      - TryWithResource
+      - MultiCatch
+      - FunctionalInterface
+      - CollectionRemoveAll
+      - DiamondOperator
+      - OverrideAnnotation
   - name: profile2
     rules:
-      - SerialVersionUidRule
-      - RearrangeClassMembersRule
-      - BracketsToControlRule
-      - FieldNameConventionRule
-      - MultiVariableDeclarationLineRule
+      - SerialVersionUid
+      - RearrangeClassMembers
+      - BracketsToControl
+      - FieldNameConvention
+      - MultiVariableDeclarationLine
 
 # rules in this section will be executed, if no profile has been specified as selectedProfile or via maven.
 # to deactivate rules, they could be commented with the #-sign
