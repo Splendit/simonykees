@@ -1,12 +1,14 @@
 package eu.jsparrow.standalone;
 
 import java.io.File;
-import java.util.LinkedList;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -50,6 +52,7 @@ public class Activator implements BundleActivator {
 	public static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 
 	private StandaloneConfig standaloneConfig;
+	private File directory;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
@@ -61,10 +64,12 @@ public class Activator implements BundleActivator {
 		logger.info(loggerInfo);
 
 		String profile = context.getProperty(SELECTED_PROFILE);
-		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, profile);
-		logger.info(loggerInfo);
 
 		YAMLConfig config = YAMLConfigUtil.readConfig(configFilePath, profile);
+		String selectedProfile = config.getSelectedProfile();
+		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
+				(selectedProfile == null) ? Messages.Activator_standalone_None : selectedProfile);
+		logger.info(loggerInfo);
 
 		// get project path and name from context
 		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
@@ -72,7 +77,7 @@ public class Activator implements BundleActivator {
 
 		// Set working directory to temp_jSparrow in java tmp folder
 		String file = System.getProperty(JAVA_TMP);
-		File directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
+		directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
 		if (directory.exists() || directory.mkdirs()) {
 			System.setProperty(USER_DIR, directory.getAbsolutePath());
 		}
@@ -140,9 +145,38 @@ public class Activator implements BundleActivator {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} finally {
-			standaloneConfig.cleanUp();
+			try {
+				standaloneConfig.cleanUp();
+			} catch (JavaModelException e) {
+				logger.error(e.getMessage(), e);
+			}
+
+			// CLEAN
+			if (directory.exists()) {
+				deleteChildren(directory);
+			}
 		}
 
 		logger.info(Messages.Activator_stop);
+	}
+
+	/**
+	 * Recursively deletes all sub-folders from received folder.
+	 * 
+	 * @param parentDirectory
+	 *            directory which content is to be deleted
+	 * @throws IOException
+	 */
+	private void deleteChildren(File parentDirectory) {
+		String[] children = parentDirectory.list();
+		if (children != null) {
+			for (String file : Arrays.asList(children)) {
+				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
+				if (currentFile.isDirectory() && !("target".equals(currentFile.getName()))) { //$NON-NLS-1$
+					deleteChildren(currentFile);
+				}
+				currentFile.delete();
+			}
+		}
 	}
 }
