@@ -318,6 +318,8 @@ public class Messages extends NLS {
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;
 
+	public static String YAMLConfigUtil_providedPathNotLeadingToYAMLConfig;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
