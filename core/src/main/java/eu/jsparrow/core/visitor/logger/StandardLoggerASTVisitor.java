@@ -248,7 +248,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		SimpleName methodName = methodInvocation.getName();
 		String methodIdentifier = methodName.getIdentifier();
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
-		
+
 		// if the method invocation name is print, printf or println
 		if (isPrintMethod(methodIdentifier) && !arguments.isEmpty()) {
 
@@ -268,15 +268,14 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 					Collections.singletonList(JAVA_LANG_SYSTEM))) {
 				return false;
 			}
-
+			
 			ExceptionsASTVisitor visitor = new ExceptionsASTVisitor();
 			arguments.forEach(argument -> argument.accept(visitor));
 			List<Expression> exceptions = visitor.getExceptions();
 			boolean logsException = !exceptions.isEmpty();
-			boolean logExcepetions = Boolean.parseBoolean(replacingOptions.get(StandardLoggerConstants.ATTACH_EXCEPTION_OBJECT));
-			List<Expression> tobeLogedExceptins = new ArrayList<>();
-			exceptions.stream().filter(e -> logExcepetions).findFirst().ifPresent(tobeLogedExceptins::add);
-			
+
+			List<Expression> tobeLogedExceptins = findExceptionsToBeLogged(exceptions);
+
 			List<Expression> logArguments = calcLogArgument(arguments, methodIdentifier, tobeLogedExceptins);
 			SimpleName qualifierName = expressionQualifier.getName();
 			calcReplacingOption(arguments, qualifierName, logsException)
@@ -302,6 +301,19 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 			}
 		}
 		return true;
+	}
+
+	private List<Expression> findExceptionsToBeLogged(List<Expression> exceptions) {
+
+		boolean logExcepetions = Boolean
+			.parseBoolean(replacingOptions.get(StandardLoggerConstants.ATTACH_EXCEPTION_OBJECT));
+		List<Expression> tobeLogedExceptins = new ArrayList<>();
+		exceptions.stream()
+			.filter(e -> logExcepetions && e.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION)
+			.findFirst()
+			.ifPresent(tobeLogedExceptins::add);
+		
+		return tobeLogedExceptins;
 	}
 
 	/**

@@ -24,7 +24,7 @@ public class TestStandardLoggerRule {
 		logger1.info(String.valueOf(new char[] { 'c', 'd', 'e' }));
 		logger1.error(String.valueOf(new Exception("adsfads")));
 		logger1.info("adsfads");
-		logger1.error(String.valueOf(e));
+		logger1.error(String.valueOf(e), e);
 
 		logger1.info("");
 		logger1.info("%d - %d", 5, 6);
@@ -36,7 +36,7 @@ public class TestStandardLoggerRule {
 		try {
 			StringUtils.substring(input, 5);
 		} catch (Exception e) {
-			logger1.error(e.getMessage());
+			logger1.error(e.getMessage(), e);
 		}
 	}
 
@@ -44,7 +44,7 @@ public class TestStandardLoggerRule {
 		try {
 			StringUtils.substring(input, 5);
 		} catch (Exception e) {
-			logger1.error(e.getMessage());
+			logger1.error(e.getMessage(), e);
 		}
 	}
 
@@ -52,7 +52,7 @@ public class TestStandardLoggerRule {
 		try {
 			StringUtils.substring(input, 5);
 		} catch (Exception e) {
-			logger1.error("%d : " + e.getMessage(), 1);
+			logger1.error(String.format("%d : " + e.getMessage(), 1), e);
 			logger1.info("%d : val %d : ", 1, 2);
 			logger1.info(String.format(Locale.FRANCE, "%d : val %d : ", 1, 2));
 		}
@@ -101,7 +101,7 @@ public class TestStandardLoggerRule {
 				StringUtils.substring(input, 5);
 			} catch (Exception e1) {
 				logger1.error(e1.getMessage(), e1);
-				logger1.error(e.getMessage());
+				logger1.error(e.getMessage(), e);
 			}
 		}
 	}
