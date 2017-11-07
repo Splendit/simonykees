@@ -22,6 +22,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -38,6 +39,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
+import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
 
 /**
  * {@link Wizard} holding the {@link AbstractSelectRulesWizardPage}, which
@@ -197,7 +199,8 @@ public class SelectRulesWizard extends Wizard {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactoringPipeline)) {
+				RefactoringPreviewWizard previewWizard = new RefactoringPreviewWizard(refactoringPipeline);
+				final WizardDialog dialog = new WizardDialog(shell, previewWizard) {
 
 					@Override
 					protected void nextPressed() {
@@ -211,6 +214,28 @@ public class SelectRulesWizard extends Wizard {
 						super.backPressed();
 					}
 
+					@Override
+					protected void createButtonsForButtonBar(Composite parent) {
+						createButton(parent, 9, "Summary", false);
+						super.createButtonsForButtonBar(parent);
+					};
+
+					@Override
+					protected void buttonPressed(int buttonId) {
+						if (buttonId == 9) {
+							summaryButtonPressed();
+						} else {
+							super.buttonPressed(buttonId);
+						}
+					};
+
+					private void summaryButtonPressed() {
+						if (getCurrentPage() instanceof RefactoringPreviewWizardPage) {
+							previewWizard.updateViewsOnNavigation(getCurrentPage());
+							((RefactoringPreviewWizardPage) getCurrentPage()).disposeControl();
+						}
+						showPage(previewWizard.getSummaryPage());
+					}
 				};
 
 				// maximizes the RefactoringPreviewWizard
