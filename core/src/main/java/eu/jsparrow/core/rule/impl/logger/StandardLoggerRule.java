@@ -46,6 +46,8 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	private static final String INFO = "info"; //$NON-NLS-1$
 	private static final String WARN = "warn"; //$NON-NLS-1$
 	private static final String ERROR = "error"; //$NON-NLS-1$
+	private static final String TRUE = "true"; //$NON-NLS-1$
+	private static final String FALSE = "false"; //$NON-NLS-1$
 
 	private Map<String, Integer> systemOutReplaceOptions = new LinkedHashMap<>();
 	private Map<String, Integer> systemErrReplaceOptions = new LinkedHashMap<>();
@@ -160,6 +162,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY, INFO);
 		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY, ERROR);
 		defaultOptions.put(StandardLoggerConstants.MISSING_LOG_KEY, ERROR);
+		defaultOptions.put(StandardLoggerConstants.ATTACH_EXCEPTION_OBJECT, TRUE);
 
 		return defaultOptions;
 	}

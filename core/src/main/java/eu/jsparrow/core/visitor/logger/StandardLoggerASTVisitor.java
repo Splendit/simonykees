@@ -136,7 +136,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY)
 				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY)
 				&& replacingOptions.containsKey(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY)
-				&& replacingOptions.containsKey(StandardLoggerConstants.MISSING_LOG_KEY);
+				&& replacingOptions.containsKey(StandardLoggerConstants.MISSING_LOG_KEY)
+				&& replacingOptions.containsKey(StandardLoggerConstants.ATTACH_EXCEPTION_OBJECT);
 	}
 
 	@Override
@@ -247,8 +248,10 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 		SimpleName methodName = methodInvocation.getName();
 		String methodIdentifier = methodName.getIdentifier();
 		List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocation.arguments(), Expression.class);
+		
 		// if the method invocation name is print, printf or println
 		if (isPrintMethod(methodIdentifier) && !arguments.isEmpty()) {
+
 			/*
 			 * Looking for System.out/err.print/ln where System.out/err is a
 			 * qualified name expression of the print/ln method invocation.
@@ -266,9 +269,17 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				return false;
 			}
 
-			List<Expression> logArguments = calcLogArgument(arguments, methodIdentifier);
+			ExceptionsASTVisitor visitor = new ExceptionsASTVisitor();
+			arguments.forEach(argument -> argument.accept(visitor));
+			List<Expression> exceptions = visitor.getExceptions();
+			boolean logsException = !exceptions.isEmpty();
+			boolean logExcepetions = Boolean.parseBoolean(replacingOptions.get(StandardLoggerConstants.ATTACH_EXCEPTION_OBJECT));
+			List<Expression> tobeLogedExceptins = new ArrayList<>();
+			exceptions.stream().filter(e -> logExcepetions).findFirst().ifPresent(tobeLogedExceptins::add);
+			
+			List<Expression> logArguments = calcLogArgument(arguments, methodIdentifier, tobeLogedExceptins);
 			SimpleName qualifierName = expressionQualifier.getName();
-			calcReplacingOption(arguments, qualifierName)
+			calcReplacingOption(arguments, qualifierName, logsException)
 				.ifPresent(replacingOption -> replaceMethod(methodInvocation, replacingOption, logArguments));
 
 		} else if (PRINT_STACK_TRACE.equals(methodIdentifier)
@@ -390,7 +401,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	/**
-	 * Computes the argument(s) to be used in a logger statements. Adapts the
+	 * Computes the argument(s) to be used in logger statements. Adapts the
 	 * parameters of {@link System.out#print}, {@link System.out#printf} and
 	 * {@link System.out#println} for both slf4j and log4j.
 	 * 
@@ -401,13 +412,13 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 * @return the list of the arguments adapted for the
 	 *         {@value #loggerQualifiedName}
 	 */
-	private List<Expression> calcLogArgument(List<Expression> arguments, String methodIdentifier) {
+	private List<Expression> calcLogArgument(List<Expression> arguments, String methodIdentifier, List<Expression>exceptions) {
 		List<Expression> logArguments = new ArrayList<>();
 		List<String> stringQualifiedName = Collections.singletonList(java.lang.String.class.getName());
 		Expression firstArgument = arguments.get(0);
 		ITypeBinding stArgTypeBinding = firstArgument.resolveTypeBinding();
 		if (PRINTF.equals(methodIdentifier)) {
-			if (ClassRelationUtil.isContentOfTypes(stArgTypeBinding,
+			if (!exceptions.isEmpty() || ClassRelationUtil.isContentOfTypes(stArgTypeBinding,
 					Collections.singletonList(java.util.Locale.class.getName()))) {
 				/*
 				 * No corresponding log statements exists for this case. The
@@ -420,6 +431,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				ListRewrite argRewrite = astRewrite.getListRewrite(stringFormat, MethodInvocation.ARGUMENTS_PROPERTY);
 				arguments.forEach(arg -> argRewrite.insertLast(arg, null));
 				logArguments.add(stringFormat);
+				logArguments.addAll(exceptions);
 			} else {
 				/*
 				 * Both slf4j and log4j are able accept formatting parameters
@@ -448,6 +460,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 				argRewrite.insertFirst((Expression) astRewrite.createCopyTarget(firstArgument), null);
 				logArguments.add(stringValueOf);
 			}
+			
+			logArguments.addAll(exceptions);
 		}
 
 		return logArguments;
@@ -468,11 +482,8 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 *         the qualifiers of the standard output of if the replacement
 	 *         option is not set in {@link #replacingOptions}.
 	 */
-	private Optional<String> calcReplacingOption(List<Expression> arguments, SimpleName qualiferName) {
-		ExceptionsASTVisitor visitor = new ExceptionsASTVisitor();
-		arguments.forEach(argument -> argument.accept(visitor));
-		boolean logsException = !visitor.getExceptions()
-			.isEmpty();
+	private Optional<String> calcReplacingOption(List<Expression> arguments, SimpleName qualiferName, boolean logsException) {
+
 		String option = ""; //$NON-NLS-1$
 		if (logsException && OUT.equals(qualiferName.getIdentifier())) {
 			option = replacingOptions.get(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY);
