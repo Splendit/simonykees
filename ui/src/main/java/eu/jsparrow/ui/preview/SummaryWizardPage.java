@@ -14,19 +14,22 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.WizardPage;
-import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
-import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
@@ -35,7 +38,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.wb.swt.ResourceManager;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.preview.SummaryWizardPageModel.ChangedFilesModel;
 import eu.jsparrow.ui.preview.dialog.CompareInput;
 
 @SuppressWarnings({ "restriction", "nls" })
@@ -54,7 +59,12 @@ public class SummaryWizardPage extends WizardPage {
 
 	private TableViewer ruleTableViewer;
 
-	private CompareInput currentPreviewViewer;
+	
+	private Composite sashFormContainer; 
+	
+	private Composite compareInputContainer;
+
+	private Control compareInputControl;
 
 	private SummaryWizardPageModel summaryWizardPageModel;
 
@@ -122,75 +132,64 @@ public class SummaryWizardPage extends WizardPage {
 		technicalDebtExpandItem.setText("File Summary");
 		technicalDebtExpandItem.setExpanded(true);
 
-		Composite composite = new Composite(expandBar, SWT.NONE);
+		sashFormContainer = new Composite(expandBar, SWT.NONE);
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginHeight = 10;
 		layout.marginWidth = 10;
 		layout.verticalSpacing = 10;
-		composite.setLayout(layout);
+		sashFormContainer.setLayout(layout);
 
-		addFilePreview(composite);
-		technicalDebtExpandItem.setControl(composite);
+		addFilePreview(sashFormContainer);
+		technicalDebtExpandItem.setControl(sashFormContainer);
 		technicalDebtExpandItem.setHeight(technicalDebtExpandItem.getControl()
-			.computeSize(SWT.DEFAULT, composite.getDisplay()
+			.computeSize(SWT.DEFAULT, Display.getDefault()
 				.getActiveShell()
-				.getSize().y / 2).y);
+				.getSize().y).y);
 	}
 
 	private void addFilePreview(Composite composite) {
 		SashForm sashForm = new SashForm(composite, SWT.VERTICAL);
-		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		sashForm.setLayout(new GridLayout());
+		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		fileTableViewer = new TableViewer(sashForm, SWT.SINGLE);
 
-		Composite previewContainer = new Composite(sashForm, SWT.NONE);
+		compareInputContainer = new Composite(sashForm, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
-		previewContainer.setLayout(layout);
-		previewContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
+		compareInputContainer.setLayout(layout);
+		compareInputContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		currentPreviewViewer = new CompareInput("asdf", "blabla", "asdfasdf");
-		try {
-			PlatformUI.getWorkbench()
-				.getProgressService()
-				.run(true, true, currentPreviewViewer);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		Control compareControl = currentPreviewViewer.createContents(previewContainer);
-		compareControl.setLayoutData(new GridData(GridData.FILL_BOTH));
-		compareControl.getParent().layout();
-
 		CompareUIPlugin.getDefault()
 			.getPreferenceStore()
 			.setValue(ComparePreferencePage.OPEN_STRUCTURE_COMPARE, Boolean.FALSE);
 
-		sashForm.setWeights(new int[] { 1, 1 });
+		sashForm.setWeights(new int[] { 1, 3 });
 
 	}
 
 	private void addRulesSection(ExpandBar expandBar) {
-		ExpandItem filesExpandItem = new ExpandItem(expandBar, SWT.NONE);
-		filesExpandItem.setExpanded(true);
-		filesExpandItem.setText("Rule Summary");
+		ExpandItem rulesExpandItem = new ExpandItem(expandBar, SWT.NONE);
+		rulesExpandItem.setExpanded(true);
+		rulesExpandItem.setText("Rule Summary");
 
 		Composite composite = new Composite(expandBar, SWT.NONE);
 		FillLayout layout = new FillLayout(SWT.HORIZONTAL);
 		layout.marginWidth = layout.marginHeight = 10;
 		composite.setLayout(layout);
-		filesExpandItem.setControl(composite);
+		rulesExpandItem.setControl(composite);
 
 		ruleTableViewer = addRulesTable(composite);
 
 		// Set the size to at most half of the display
-		int thirdDisplayHeight = composite.getDisplay()
+		int thirdDisplayHeight = Display.getDefault()
 			.getActiveShell()
 			.getSize().y / 3;
 		// TODO: Bind list height to number of items
 		// int height = Math.min(filesExpandItem.getControl()
 		// .computeSize(SWT.DEFAULT, SWT.DEFAULT).y, thirdDisplayHeight);
-		filesExpandItem.setHeight(thirdDisplayHeight);
+		rulesExpandItem.setHeight(thirdDisplayHeight);
 	}
 
 	private TableViewer addRulesTable(Composite composite) {
@@ -219,6 +218,7 @@ public class SummaryWizardPage extends WizardPage {
 		return ruleTableViewer;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void initDataBindings() {
 		bindingContext = new DataBindingContext();
 		//
@@ -242,22 +242,63 @@ public class SummaryWizardPage extends WizardPage {
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue,
 				null, null);
-		//
 
 		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
 				BeanProperties.values("name", "times"));
 
 		ViewerSupport.bind(fileTableViewer, summaryWizardPageModel.getChangedFiles(), BeanProperties.values("name"));
 
-		// IObservableValue target = WidgetProperties.text()
-		// .observe(testlabel);
-		//
 		IViewerObservableValue selectedFile = ViewerProperties.singleSelection()
 			.observe(fileTableViewer);
 		IObservableValue detailValue = PojoProperties.value("name", String.class)
 			.observeDetail(selectedFile);
-		//
-		// bindingContext.bindValue(target, detailValue);
 
+		selectedFile.addValueChangeListener(e -> {
+			ChangedFilesModel selectedItem = (ChangedFilesModel) e.getObservableValue()
+				.getValue();
+			updateCompareInputControl("Test", selectedItem.getSourceLeft(), selectedItem.getSourceRight());
+		});
+	}
+	
+	@Override
+	public void setVisible(boolean visible) {
+		if (visible) {
+			createCompareInputControl();
+		}
+		super.setVisible(visible);
+	}
+
+	private void createCompareInputControl() {
+		Display.getDefault()
+			.syncExec(() -> {
+				CompareInput compareInput = new CompareInput("", "", ""); 
+				updateCompareInputControl(compareInput);
+			});
+	}
+
+	private void updateCompareInputControl(String name, String left, String right) {
+		if (compareInputControl != null) {
+			compareInputControl.dispose();
+		}
+		Display.getDefault()
+			.syncExec(() -> {
+				CompareInput compareInput = new CompareInput(name, left, right);
+				updateCompareInputControl(compareInput);
+			});
+	}
+
+	private void updateCompareInputControl(CompareInput compareInput) {
+		try {
+			PlatformUI.getWorkbench()
+				.getProgressService()
+				.run(true, true, compareInput);
+		} catch (InvocationTargetException | InterruptedException e) {
+			e.printStackTrace();
+		}
+		compareInputControl = compareInput.createContents(compareInputContainer);
+		compareInputControl.setLayoutData(new GridData(GridData.FILL_BOTH));
+		compareInputControl.getParent().layout();
+		compareInputContainer.layout();
+		sashFormContainer.layout();
 	}
 }
