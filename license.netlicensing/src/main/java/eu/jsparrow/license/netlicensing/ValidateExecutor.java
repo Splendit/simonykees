@@ -34,7 +34,7 @@ public class ValidateExecutor {
 		 */
 	}
 
-	protected static synchronized void startSchedule(SchedulerModel schedulingInfo, LicenseeModel licensee) {
+	protected static void startSchedule(SchedulerModel schedulingInfo, LicenseeModel licensee) {
 		final ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 
 		lock.readLock()
@@ -71,7 +71,11 @@ public class ValidateExecutor {
 				}
 			}, schedulingInfo.getInitialDelay(), schedulingInfo.getValidateInterval(), TimeUnit.SECONDS);
 
+			lock.writeLock()
+				.lock();
 			scheduler = scheduledExecutor;
+			lock.writeLock()
+				.unlock();
 		}
 	}
 
@@ -84,17 +88,29 @@ public class ValidateExecutor {
 
 	public static boolean isTerminated() {
 		boolean isTerminated = true;
+
+		lock.readLock()
+			.lock();
 		if (scheduler != null) {
 			isTerminated = scheduler.isTerminated();
 		}
+		lock.readLock()
+			.unlock();
+
 		return isTerminated;
 	}
 
 	public static boolean isShutDown() {
 		boolean isShutDown = true;
+
+		lock.readLock()
+			.lock();
 		if (scheduler != null) {
 			isShutDown = scheduler.isShutdown();
 		}
+		lock.readLock()
+			.unlock();
+
 		return isShutDown;
 	}
 
