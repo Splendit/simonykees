@@ -11,6 +11,7 @@ import eu.jsparrow.core.visitor.ASTRewriteVisitorListener;
  * specific rule has been used.
  * 
  * @author Hans-Jörg Schrödl
+ * @since 2.3.0
  */
 public class RuleApplicationCount implements ASTRewriteVisitorListener {
 
@@ -44,7 +45,7 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 	 *            rule to get the application count for
 	 * @return the application count for a given rule
 	 */
-	public static RuleApplicationCount get(RefactoringRuleInterface rule) {
+	public static RuleApplicationCount getFor(RefactoringRuleInterface rule) {
 		applicationCounters.putIfAbsent(rule, new RuleApplicationCount());
 		return applicationCounters.get(rule);
 	}

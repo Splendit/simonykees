@@ -1,8 +1,9 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
@@ -17,7 +18,9 @@ import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RuleApplicationCount;
+import eu.jsparrow.core.rule.RuleDescription;
 import eu.jsparrow.core.util.RefactoringUtil;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -38,9 +41,10 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 	public OrganiseImportsRule() {
 		super();
 		this.visitorClass = AbstractASTRewriteASTVisitor.class;
-		this.name = Messages.OrganiseImportsRule_name;
-		this.description = Messages.OrganiseImportsRule_description;
 		this.id = "OrganiseImports"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.OrganiseImportsRule_name,
+				Messages.OrganiseImportsRule_description, Duration.ofMinutes(1),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -59,11 +63,10 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 		}
 	}
 
-	private DocumentChange applyOrganising(ICompilationUnit workingCopy)
-			throws OperationCanceledException, CoreException {
+	private DocumentChange applyOrganising(ICompilationUnit workingCopy) throws CoreException {
 
 		final CompilationUnit astRoot = RefactoringUtil.parse(workingCopy);
-		final boolean hasAmbiguity[] = new boolean[] { false };
+		final boolean[] hasAmbiguity = new boolean[] { false };
 		IChooseImportQuery query = (TypeNameMatch[][] openChoices, ISourceRange[] ranges) -> {
 			hasAmbiguity[0] = true;
 			return new TypeNameMatch[0];
@@ -77,7 +80,7 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 
 		if (!hasAmbiguity[0] && importsOperation.getParseError() == null && edit != null
 				&& !(edit instanceof MultiTextEdit && edit.getChildrenSize() == 0)) {
-			RuleApplicationCount.get(this)
+			RuleApplicationCount.getFor(this)
 				.update();
 			Document document = new Document(workingCopy.getSource());
 			documentChange = RefactoringUtil.generateDocumentChange(OrganiseImportsRule.class.getSimpleName(), document,

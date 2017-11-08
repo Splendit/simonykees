@@ -1,5 +1,7 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -7,6 +9,8 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.trycatch.TryWithResourceASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -22,9 +26,10 @@ public class TryWithResourceRule extends RefactoringRule<TryWithResourceASTVisit
 	public TryWithResourceRule() {
 		super();
 		this.visitorClass = TryWithResourceASTVisitor.class;
-		this.name = Messages.TryWithResourceRule_name;
-		this.description = Messages.TryWithResourceRule_description;
 		this.id = "TryWithResource"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.TryWithResourceRule_name,
+				Messages.TryWithResourceRule_description, Duration.ofMinutes(15),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

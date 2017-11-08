@@ -44,7 +44,7 @@ public class LoggerRuleWizard extends Wizard {
 
 	private LoggerRuleWizardPage page;
 	private LoggerRuleWizardPageModel model;
-	private LoggerRuleWizardPageControler controler;
+	private LoggerRuleWizardPageControler controller;
 
 	private IJavaProject selectedJavaProjekt;
 	private final StandardLoggerRule rule;
@@ -68,8 +68,8 @@ public class LoggerRuleWizard extends Wizard {
 	@Override
 	public void addPages() {
 		model = new LoggerRuleWizardPageModel(rule);
-		controler = new LoggerRuleWizardPageControler(model);
-		page = new LoggerRuleWizardPage(model, controler);
+		controller = new LoggerRuleWizardPageControler(model);
+		page = new LoggerRuleWizardPage(model, controller);
 		addPage(page);
 	}
 
@@ -92,8 +92,9 @@ public class LoggerRuleWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 
-		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
-			.getSimpleName(), selectedJavaProjekt.getElementName()));
+		String bind = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
+			.getSimpleName(), selectedJavaProjekt.getElementName());
+		logger.info(bind);
 
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(rule);
 		refactoringPipeline.setRules(rules);
@@ -162,11 +163,13 @@ public class LoggerRuleWizard extends Wizard {
 	 * Method used to open RefactoringPreviewWizard from non UI thread
 	 */
 	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactorer, Rectangle rectangle) {
+		String messageEndRefactoring = NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass()
+				.getSimpleName(), selectedJavaProjekt.getElementName());
+		logger.info(messageEndRefactoring);
 
-		logger.info(NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass()
-			.getSimpleName(), selectedJavaProjekt.getElementName()));
-		logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes, selectedJavaProjekt.getElementName(),
-				rule.getName()));
+		String messageRulesWithChanges = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, selectedJavaProjekt.getElementName(),
+				rule.getRuleDescription().getName());
+		logger.info(messageRulesWithChanges);
 
 		Display.getDefault()
 			.asyncExec(() -> {
