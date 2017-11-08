@@ -20,6 +20,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -69,8 +70,9 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		super(Messages.RefactoringSummaryWizardPage_title);
 		this.refactoringPipeline = refactoringPipeline;
 		Duration totalTimeSaved = EliminatedTechnicalDebt.getTotalFor(refactoringPipeline.getRules());
-		
-		setTitle(Messages.RefactoringSummaryWizardPage_title +", Eliminated technical debt: " + totalTimeSaved.toMinutes() +" Minutes");
+
+		setTitle(String.format("%s,  %s", Messages.RefactoringSummaryWizardPage_title, //$NON-NLS-1$
+				NLS.bind(Messages.RefactoringSummaryWizardPage_eliminated_technical_debt, totalTimeSaved.toMinutes())));
 
 		setDescription(Messages.RefactoringSummaryWizardPage_description);
 
@@ -82,7 +84,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 		fSelectionStatus = new StatusInfo();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
