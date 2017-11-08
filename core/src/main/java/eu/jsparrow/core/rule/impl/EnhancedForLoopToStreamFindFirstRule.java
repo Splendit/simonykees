@@ -22,17 +22,15 @@ public class EnhancedForLoopToStreamFindFirstRule extends RefactoringRule<Enhanc
 	public EnhancedForLoopToStreamFindFirstRule() {
 		super();
 		this.visitorClass = EnhancedForLoopToStreamFindFirstASTVisitor.class;
+		this.id = "EnhancedForLoopToStreamFindFirst"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.EnhancedForLoopToStreamFindFirstRule_name,
+				Messages.EnhancedForLoopToStreamFindFirstRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_8;
-	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.EnhancedForLoopToStreamFindFirstRule_name, Messages.EnhancedForLoopToStreamFindFirstRule_description,
-				Duration.ofMinutes(2), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 }

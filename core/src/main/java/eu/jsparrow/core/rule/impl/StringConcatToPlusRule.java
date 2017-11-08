@@ -21,16 +21,15 @@ public class StringConcatToPlusRule extends RefactoringRule<StringConcatToPlusAS
 	public StringConcatToPlusRule() {
 		super();
 		this.visitorClass = StringConcatToPlusASTVisitor.class;
+		this.id = "StringConcatToPlus"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StringConcatToPlusRule_name,
+				Messages.StringConcatToPlusRule_description, Duration.ofMinutes(5),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.StringConcatToPlusRule_name, Messages.StringConcatToPlusRule_description,
-				Duration.ofMinutes(5), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }

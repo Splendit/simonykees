@@ -22,16 +22,14 @@ public class MultiCatchRule extends RefactoringRule<MultiCatchASTVisitor> {
 	public MultiCatchRule() {
 		super();
 		this.visitorClass = MultiCatchASTVisitor.class;
+		this.id = "MultiCatch"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.MultiCatchRule_name, Messages.MultiCatchRule_description,
+				Duration.ofMinutes(5), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_7;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.MultiCatchRule_name, Messages.MultiCatchRule_description,
-				Duration.ofMinutes(5), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }

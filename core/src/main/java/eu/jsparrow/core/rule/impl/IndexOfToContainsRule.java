@@ -21,6 +21,10 @@ public class IndexOfToContainsRule extends RefactoringRule<IndexOfToContainsASTV
 	public IndexOfToContainsRule() {
 		super();
 		this.visitorClass = IndexOfToContainsASTVisitor.class;
+		this.id = "IndexOfToContains"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.IndexOfToContainsRule_name,
+				Messages.IndexOfToContainsRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -28,9 +32,4 @@ public class IndexOfToContainsRule extends RefactoringRule<IndexOfToContainsASTV
 		return JavaVersion.JAVA_1_5; // for lists 1.2, but for strings 1.5
 	}
 
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.IndexOfToContainsRule_name, Messages.IndexOfToContainsRule_description,
-				Duration.ofMinutes(2), TagUtil.getTagsForRule(this.getClass()));
-	}
 }

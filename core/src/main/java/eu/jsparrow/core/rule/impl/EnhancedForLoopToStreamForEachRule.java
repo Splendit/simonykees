@@ -21,18 +21,15 @@ public class EnhancedForLoopToStreamForEachRule extends RefactoringRule<Enhanced
 	public EnhancedForLoopToStreamForEachRule() {
 		super();
 		this.visitorClass = EnhancedForLoopToStreamForEachASTVisitor.class;
+		this.id = "EnhancedForLoopToStreamForEach"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.EnhancedForLoopToStreamForEachRule_name,
+				Messages.EnhancedForLoopToStreamForEachRule_description, Duration.ofMinutes(15),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_8;
-	}
-	
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.EnhancedForLoopToStreamForEachRule_name, Messages.EnhancedForLoopToStreamForEachRule_description,
-				Duration.ofMinutes(15), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 }

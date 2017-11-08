@@ -22,16 +22,15 @@ public class MultiVariableDeclarationLineRule extends RefactoringRule<MultiVaria
 	public MultiVariableDeclarationLineRule() {
 		super();
 		this.visitorClass = MultiVariableDeclarationLineASTVisitor.class;
+		this.id = "MultiVariableDeclarationLine"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.MultiVariableDeclarationLineRule_name,
+				Messages.MultiVariableDeclarationLineRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.MultiVariableDeclarationLineRule_name, Messages.MultiVariableDeclarationLineRule_description,
-				Duration.ofMinutes(2), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }

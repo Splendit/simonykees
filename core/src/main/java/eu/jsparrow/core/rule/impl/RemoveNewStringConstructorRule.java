@@ -21,16 +21,15 @@ public class RemoveNewStringConstructorRule extends RefactoringRule<RemoveNewStr
 	public RemoveNewStringConstructorRule() {
 		super();
 		this.visitorClass = RemoveNewStringConstructorASTVisitor.class;
+		this.id = "RemoveNewStringConstructor"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.RemoveNewStringConstructorRule_name,
+				Messages.RemoveNewStringConstructorRule_description, Duration.ofMinutes(5),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.RemoveNewStringConstructorRule_name, Messages.RemoveNewStringConstructorRule_description,
-				Duration.ofMinutes(5), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }

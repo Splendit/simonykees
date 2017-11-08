@@ -26,18 +26,15 @@ public class TryWithResourceRule extends RefactoringRule<TryWithResourceASTVisit
 	public TryWithResourceRule() {
 		super();
 		this.visitorClass = TryWithResourceASTVisitor.class;
+		this.id = "TryWithResource"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.TryWithResourceRule_name,
+				Messages.TryWithResourceRule_description, Duration.ofMinutes(15),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_7;
-	}
-	
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.TryWithResourceRule_name, Messages.TryWithResourceRule_description,
-				Duration.ofMinutes(15), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

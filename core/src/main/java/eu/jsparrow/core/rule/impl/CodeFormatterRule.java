@@ -37,17 +37,14 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 
 	public CodeFormatterRule() {
 		this.visitorClass = AbstractASTRewriteASTVisitor.class;
+		this.id = "CodeFormatter"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.CodeFormatterRule_name,
+				Messages.CodeFormatterRule_description, Duration.ofMinutes(1), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
-	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.CodeFormatterRule_name, Messages.CodeFormatterRule_description,
-				Duration.ofMinutes(1), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

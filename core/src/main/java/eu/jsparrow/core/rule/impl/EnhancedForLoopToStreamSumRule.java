@@ -21,18 +21,15 @@ public class EnhancedForLoopToStreamSumRule extends RefactoringRule<EnhancedForL
 	public EnhancedForLoopToStreamSumRule() {
 		super();
 		this.visitorClass = EnhancedForLoopToStreamSumASTVisitor.class;
+		this.id = "EnhancedForLoopToStreamSum"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.EnhancedForLoopToStreamSumRule_name,
+				Messages.EnhancedForLoopToStreamSumRule_name, Duration.ofMinutes(10),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_8;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.EnhancedForLoopToStreamSumRule_name, Messages.EnhancedForLoopToStreamSumRule_name,
-				Duration.ofMinutes(10), TagUtil.getTagsForRule(this.getClass()));
-	}
-
 
 }

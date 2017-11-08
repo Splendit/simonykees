@@ -21,16 +21,15 @@ public class LambdaToMethodReferenceRule extends RefactoringRule<LambdaToMethodR
 	public LambdaToMethodReferenceRule() {
 		super();
 		this.visitorClass = LambdaToMethodReferenceASTVisitor.class;
+		this.id = "LambdaToMethodReference"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.LambdaToMethodReferenceRule_name,
+				Messages.LambdaToMethodReferenceRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_8;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.LambdaToMethodReferenceRule_name, Messages.LambdaToMethodReferenceRule_description,
-				Duration.ofMinutes(2), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }

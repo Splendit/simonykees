@@ -28,6 +28,10 @@ public class StringBuildingLoopRule extends RefactoringRule<StringBuildingLoopAS
 	public StringBuildingLoopRule() {
 		super();
 		this.visitorClass = StringBuildingLoopASTVisitor.class;
+		this.id = "StringBuildingLoop"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StringBuildingLoopRule_name,
+				Messages.StringBuildingLoopRule_description, Duration.ofMinutes(10),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	/**
@@ -50,12 +54,6 @@ public class StringBuildingLoopRule extends RefactoringRule<StringBuildingLoopAS
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_5;
-	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.StringBuildingLoopRule_name, Messages.StringBuildingLoopRule_description,
-				Duration.ofMinutes(10), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 }

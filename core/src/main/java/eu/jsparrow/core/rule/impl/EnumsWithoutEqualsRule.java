@@ -21,6 +21,10 @@ public class EnumsWithoutEqualsRule extends RefactoringRule<EnumsWithoutEqualsAS
 	public EnumsWithoutEqualsRule() {
 		super();
 		this.visitorClass = EnumsWithoutEqualsASTVisitor.class;
+		this.id = "EnumsWithoutEquals"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.EnumsWithoutEqualsRule_name,
+				Messages.EnumsWithoutEqualsRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -28,10 +32,5 @@ public class EnumsWithoutEqualsRule extends RefactoringRule<EnumsWithoutEqualsAS
 		// Enums exist since 1.5
 		return JavaVersion.JAVA_1_5;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.EnumsWithoutEqualsRule_name, Messages.EnumsWithoutEqualsRule_description,
-				Duration.ofMinutes(2), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }

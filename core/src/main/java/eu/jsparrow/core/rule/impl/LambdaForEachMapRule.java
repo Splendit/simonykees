@@ -22,6 +22,10 @@ public class LambdaForEachMapRule extends RefactoringRule<LambdaForEachMapASTVis
 	public LambdaForEachMapRule() {
 		super();
 		this.visitorClass = LambdaForEachMapASTVisitor.class;
+		this.id = "LambdaForEachMap"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.LambdaForEachMapRule_name,
+				Messages.LambdaForEachMapRule_description, Duration.ofMinutes(15),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -29,9 +33,4 @@ public class LambdaForEachMapRule extends RefactoringRule<LambdaForEachMapASTVis
 		return JavaVersion.JAVA_1_8;
 	}
 
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.LambdaForEachMapRule_name, Messages.LambdaForEachMapRule_description,
-				Duration.ofMinutes(15), TagUtil.getTagsForRule(this.getClass()));
-	}
 }

@@ -21,16 +21,15 @@ public class RearrangeClassMembersRule extends RefactoringRule<RearrangeClassMem
 	public RearrangeClassMembersRule() {
 		super();
 		this.visitorClass = RearrangeClassMembersASTVisitor.class;
+		this.id = "RearrangeClassMembers"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.RearrangeClassMembersRule_name,
+				Messages.RearrangeClassMembersRule_description, Duration.ofMinutes(5),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.RearrangeClassMembersRule_name, Messages.RearrangeClassMembersRule_description,
-				Duration.ofMinutes(5), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }

@@ -75,17 +75,15 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 
 	public StandardLoggerRule() {
 		this.visitorClass = StandardLoggerASTVisitor.class;
+		this.id = "StandardLogger"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StandardLoggerRule_name,
+				Messages.StandardLoggerRule_description, Duration.ofMinutes(10),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
-	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.StandardLoggerRule_name, Messages.StandardLoggerRule_description,
-				Duration.ofMinutes(10), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

@@ -22,16 +22,15 @@ public class StringLiteralEqualityCheckRule extends RefactoringRule<StringLitera
 	public StringLiteralEqualityCheckRule() {
 		super();
 		this.visitorClass = StringLiteralEqualityCheckASTVisitor.class;
+		this.id = "StringLiteralEqualityCheck"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StringLiteralEqualityCheckRule_name,
+				Messages.StringLiteralEqualityCheckRule_description, Duration.ofMinutes(10),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.StringLiteralEqualityCheckRule_name, Messages.StringLiteralEqualityCheckRule_description,
-				Duration.ofMinutes(10), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }

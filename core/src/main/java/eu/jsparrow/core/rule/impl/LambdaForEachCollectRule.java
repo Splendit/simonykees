@@ -22,6 +22,10 @@ public class LambdaForEachCollectRule extends RefactoringRule<LambdaForEachColle
 	public LambdaForEachCollectRule() {
 		super();
 		this.visitorClass = LambdaForEachCollectASTVisitor.class;
+		this.id = "LambdaForEachCollect"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.LambdaForEachCollectRule_name,
+				Messages.LambdaForEachCollectRule_description, Duration.ofMinutes(15),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -29,9 +33,4 @@ public class LambdaForEachCollectRule extends RefactoringRule<LambdaForEachColle
 		return JavaVersion.JAVA_1_8;
 	}
 
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.LambdaForEachCollectRule_name, Messages.LambdaForEachCollectRule_description,
-				Duration.ofMinutes(15), TagUtil.getTagsForRule(this.getClass()));
-	}
 }

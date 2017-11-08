@@ -22,17 +22,15 @@ public class StatementLambdaToExpressionRule extends RefactoringRule<StatementLa
 	public StatementLambdaToExpressionRule() {
 		super();
 		this.visitorClass = StatementLambdaToExpressionASTVisitor.class;
+		this.id = "StatementLambdaToExpression"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StatementLambdaToExpressionRule_name,
+				Messages.StatementLambdaToExpressionRule_description, Duration.ofMinutes(5),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_8;
-	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.StatementLambdaToExpressionRule_name, Messages.StatementLambdaToExpressionRule_description,
-				Duration.ofMinutes(5), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 }

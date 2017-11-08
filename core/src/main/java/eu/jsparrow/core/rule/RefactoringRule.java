@@ -35,8 +35,10 @@ import eu.jsparrow.i18n.Messages;
 public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> implements RefactoringRuleInterface {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringRule.class);
-	
+
 	protected String id;
+
+	protected RuleDescription ruleDescription;
 
 	protected final JavaVersion requiredJavaVersion;
 
@@ -48,8 +50,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	protected Class<T> visitorClass;
 
 	protected RefactoringRule() {
-		this.id = this.getClass()
-			.getSimpleName();
 		this.requiredJavaVersion = provideRequiredJavaVersion();
 	}
 
@@ -59,7 +59,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	 * @return
 	 */
 	protected abstract JavaVersion provideRequiredJavaVersion();
-	
+
 	public JavaVersion getRequiredJavaVersion() {
 		return requiredJavaVersion;
 	}
@@ -124,8 +124,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	public final DocumentChange applyRule(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException, RefactoringException {
 
-		String bind = NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.getRuleDescription().getName(),
-						workingCopy.getElementName());
+		String bind = NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.getRuleDescription()
+			.getName(), workingCopy.getElementName());
 		logger.trace(bind);
 
 		return applyRuleImpl(workingCopy);
@@ -225,6 +225,11 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	}
 
 	@Override
+	public RuleDescription getRuleDescription() {
+		return this.ruleDescription;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -247,6 +252,12 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Rule [id=" + id + ", name=" + this.getRuleDescription() //$NON-NLS-1$ //$NON-NLS-2$
+			.getName() + "]"; //$NON-NLS-1$
 	}
 
 }

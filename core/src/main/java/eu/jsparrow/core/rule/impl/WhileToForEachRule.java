@@ -21,16 +21,15 @@ public class WhileToForEachRule extends RefactoringRule<WhileToForEachASTVisitor
 	public WhileToForEachRule() {
 		super();
 		this.visitorClass = WhileToForEachASTVisitor.class;
+		this.id = "WhileToForEach"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.WhileToForEachRule_name,
+				Messages.WhileToForEachRule_description, Duration.ofMinutes(5),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_5;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.WhileToForEachRule_name, Messages.WhileToForEachRule_description,
-				Duration.ofMinutes(5), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }

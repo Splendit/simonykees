@@ -21,6 +21,10 @@ public class CollectionRemoveAllRule extends RefactoringRule<CollectionRemoveAll
 	public CollectionRemoveAllRule() {
 		super();
 		this.visitorClass = CollectionRemoveAllASTVisitor.class;
+		this.id = "CollectionRemoveAll"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.CollectionRemoveAllRule_name,
+				Messages.CollectionRemoveAllRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -28,10 +32,4 @@ public class CollectionRemoveAllRule extends RefactoringRule<CollectionRemoveAll
 		return JavaVersion.JAVA_1_2;
 	}
 
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.CollectionRemoveAllRule_name, Messages.CollectionRemoveAllRule_description,
-				Duration.ofMinutes(2), TagUtil.getTagsForRule(this.getClass()));
-	}
-	
 }

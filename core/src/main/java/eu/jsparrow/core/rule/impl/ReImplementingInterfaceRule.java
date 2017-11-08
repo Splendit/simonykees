@@ -20,16 +20,15 @@ public class ReImplementingInterfaceRule extends RefactoringRule<ReImplementingI
 	public ReImplementingInterfaceRule() {
 		super();
 		this.visitorClass = ReImplementingInterfaceASTVisitor.class;
+		this.id = "ReImplementingInterface"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.ReImplementingInterfaceRule_name,
+				Messages.ReImplementingInterfaceRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.ReImplementingInterfaceRule_name, Messages.ReImplementingInterfaceRule_description,
-				Duration.ofMinutes(2), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }

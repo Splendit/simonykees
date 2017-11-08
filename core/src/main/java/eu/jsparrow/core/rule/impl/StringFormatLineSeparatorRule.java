@@ -21,16 +21,15 @@ public class StringFormatLineSeparatorRule extends RefactoringRule<StringFormatL
 	public StringFormatLineSeparatorRule() {
 		super();
 		this.visitorClass = StringFormatLineSeparatorASTVisitor.class;
+		this.id = "StringFormatLineSeparator"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StringFormatLineSeparatorRule_name,
+				Messages.StringFormatLineSeparatorRule_description, Duration.ofMinutes(1),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_5;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.StringFormatLineSeparatorRule_name, Messages.StringFormatLineSeparatorRule_description,
-				Duration.ofMinutes(1), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }

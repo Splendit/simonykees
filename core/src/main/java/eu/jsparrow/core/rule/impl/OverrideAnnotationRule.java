@@ -26,17 +26,15 @@ public class OverrideAnnotationRule extends RefactoringRule<OverrideAnnotationRu
 	public OverrideAnnotationRule() {
 		super();
 		this.visitorClass = OverrideAnnotationRuleASTVisitor.class;
+		this.id = "OverrideAnnotation"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.OverrideAnnotationRule_name,
+				Messages.OverrideAnnotationRule_description, Duration.ofMinutes(5),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_6;
-	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.OverrideAnnotationRule_name, Messages.OverrideAnnotationRule_description,
-				Duration.ofMinutes(5), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 }

@@ -23,6 +23,10 @@ public class PrimitiveObjectUseEqualsRule extends RefactoringRule<PrimitiveObjec
 	public PrimitiveObjectUseEqualsRule() {
 		super();
 		this.visitorClass = PrimitiveObjectUseEqualsASTVisitor.class;
+		this.id = "PrimitiveObjectUseEquals"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.PrimitiveObjectUseEqualsRule_name,
+				Messages.PrimitiveObjectUseEqualsRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -30,9 +34,4 @@ public class PrimitiveObjectUseEqualsRule extends RefactoringRule<PrimitiveObjec
 		return JavaVersion.JAVA_1_1;
 	}
 
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.PrimitiveObjectUseEqualsRule_name, Messages.PrimitiveObjectUseEqualsRule_description,
-				Duration.ofMinutes(2), TagUtil.getTagsForRule(this.getClass()));
-	}
 }

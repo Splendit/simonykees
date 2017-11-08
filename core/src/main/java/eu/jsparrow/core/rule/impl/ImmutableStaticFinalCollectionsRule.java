@@ -20,17 +20,15 @@ public class ImmutableStaticFinalCollectionsRule extends RefactoringRule<Immutab
 	public ImmutableStaticFinalCollectionsRule() {
 		super();
 		this.visitorClass = ImmutableStaticFinalCollectionsASTVisitor.class;
+		this.id = "ImmutableStaticFinalCollections"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.ImmutableStaticFinalCollectionsRule_name,
+				Messages.ImmutableStaticFinalCollectionsRule_description, Duration.ofMinutes(10),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_2;
-	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.ImmutableStaticFinalCollectionsRule_name, Messages.ImmutableStaticFinalCollectionsRule_description,
-				Duration.ofMinutes(10), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 }

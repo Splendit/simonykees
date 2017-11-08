@@ -22,6 +22,10 @@ public class BracketsToControlRule extends RefactoringRule<BracketsToControlASTV
 	public BracketsToControlRule() {
 		super();
 		this.visitorClass = BracketsToControlASTVisitor.class;
+		this.id = "BracketsToControl"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.BracketsToControlRule_name,
+				Messages.BracketsToControlRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -29,9 +33,4 @@ public class BracketsToControlRule extends RefactoringRule<BracketsToControlASTV
 		return JavaVersion.JAVA_1_1;
 	}
 
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.BracketsToControlRule_name, Messages.BracketsToControlRule_description,
-				Duration.ofMinutes(2), TagUtil.getTagsForRule(this.getClass()));
-	}
 }

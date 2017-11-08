@@ -22,16 +22,15 @@ public class FunctionalInterfaceRule extends RefactoringRule<FunctionalInterface
 	public FunctionalInterfaceRule() {
 		super();
 		this.visitorClass = FunctionalInterfaceASTVisitor.class;
+		this.id = "FunctionalInterface"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.FunctionalInterfaceRule_name,
+				Messages.FunctionalInterfaceRule_description, Duration.ofMinutes(5),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_8;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.FunctionalInterfaceRule_name, Messages.FunctionalInterfaceRule_description,
-				Duration.ofMinutes(5), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }

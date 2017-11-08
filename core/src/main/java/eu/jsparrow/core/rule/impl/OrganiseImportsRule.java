@@ -41,17 +41,15 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 	public OrganiseImportsRule() {
 		super();
 		this.visitorClass = AbstractASTRewriteASTVisitor.class;
+		this.id = "OrganiseImports"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.OrganiseImportsRule_name,
+				Messages.OrganiseImportsRule_description, Duration.ofMinutes(1),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
-	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.OrganiseImportsRule_name, Messages.OrganiseImportsRule_description,
-				Duration.ofMinutes(1), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -65,8 +63,7 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 		}
 	}
 
-	private DocumentChange applyOrganising(ICompilationUnit workingCopy)
-			throws CoreException {
+	private DocumentChange applyOrganising(ICompilationUnit workingCopy) throws CoreException {
 
 		final CompilationUnit astRoot = RefactoringUtil.parse(workingCopy);
 		final boolean[] hasAmbiguity = new boolean[] { false };

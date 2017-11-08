@@ -21,16 +21,14 @@ public class ForToForEachRule extends RefactoringRule<ForToForEachASTVisitor> {
 	public ForToForEachRule() {
 		super();
 		this.visitorClass = ForToForEachASTVisitor.class;
+		this.id = "ForToForEach"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.ForToForEachRule_name,
+				Messages.ForToForEachRule_description, Duration.ofMinutes(5), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_5;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.ForToForEachRule_name, Messages.ForToForEachRule_description,
-				Duration.ofMinutes(5), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }

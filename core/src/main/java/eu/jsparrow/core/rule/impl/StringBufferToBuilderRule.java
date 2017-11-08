@@ -20,18 +20,15 @@ public class StringBufferToBuilderRule extends RefactoringRule<StringBufferToBui
 	public StringBufferToBuilderRule() {
 		super();
 		this.visitorClass = StringBufferToBuilderASTVisitor.class;
+		this.id = "StringBufferToBuilder"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StringBufferToBuilderRule_name,
+				Messages.StringBufferToBuilderRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_5;
-	}
-	
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.StringBufferToBuilderRule_name, Messages.StringBufferToBuilderRule_description,
-				Duration.ofMinutes(2), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 }

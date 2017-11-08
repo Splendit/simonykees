@@ -21,16 +21,15 @@ public class InefficientConstructorRule extends RefactoringRule<InefficientConst
 	public InefficientConstructorRule() {
 		super();
 		this.visitorClass = InefficientConstructorASTVisitor.class;
+		this.id = "InefficientConstructor"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.InefficientConstructorRule_name,
+				Messages.InefficientConstructorRule_description, Duration.ofMinutes(5),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_5;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.InefficientConstructorRule_name, Messages.InefficientConstructorRule_description,
-				Duration.ofMinutes(5), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }

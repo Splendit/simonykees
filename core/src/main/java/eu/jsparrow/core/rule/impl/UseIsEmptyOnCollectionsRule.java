@@ -21,6 +21,10 @@ public class UseIsEmptyOnCollectionsRule extends RefactoringRule<UseIsEmptyOnCol
 	public UseIsEmptyOnCollectionsRule() {
 		super();
 		this.visitorClass = UseIsEmptyOnCollectionsASTVisitor.class;
+		this.id = "UseIsEmpty"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.UseIsEmptyOnCollectionsRule_name,
+				Messages.UseIsEmptyOnCollectionsRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -28,10 +32,5 @@ public class UseIsEmptyOnCollectionsRule extends RefactoringRule<UseIsEmptyOnCol
 		// string 1.6, collection 1.2, map 1.2
 		return JavaVersion.JAVA_1_6;
 	}
-	
-	@Override
-	public RuleDescription getRuleDescription() {
-		return new RuleDescription(Messages.UseIsEmptyOnCollectionsRule_name, Messages.UseIsEmptyOnCollectionsRule_description,
-				Duration.ofMinutes(2), TagUtil.getTagsForRule(this.getClass()));
-	}
+
 }
