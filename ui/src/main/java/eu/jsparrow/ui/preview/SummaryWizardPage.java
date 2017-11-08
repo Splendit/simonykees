@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.ExpandBar;
 import org.eclipse.swt.widgets.ExpandItem;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.PlatformUI;
@@ -69,8 +70,6 @@ public class SummaryWizardPage extends WizardPage {
 
 	private TableViewer ruleTableViewer;
 
-	private Composite sashFormContainer;
-
 	private Composite compareInputContainer;
 
 	private Control compareInputControl;
@@ -96,11 +95,8 @@ public class SummaryWizardPage extends WizardPage {
 		setControl(rootComposite);
 		rootComposite.setLayout(new GridLayout(1, false));
 		addHeader();
-
-		addFilePreview(sashFormContainer);
-		
-		addExpandSection(rootComposite);
-
+		addRulesSection();
+		addFilesSection();
 		initializeDataBindings();
 	}
 	
@@ -149,42 +145,15 @@ public class SummaryWizardPage extends WizardPage {
 		
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
 	}
 
-	private void addExpandSection(Composite container) {
-		ExpandBar expandBar = new ExpandBar(container, SWT.V_SCROLL);
-		expandBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		expandBar.setSpacing(8);
 
-		addRulesSection(expandBar);
-		addFilesSection(expandBar);
-		
-	}
-
-	private void addFilesSection(ExpandBar expandBar) {
-		ExpandItem technicalDebtExpandItem = new ExpandItem(expandBar, SWT.NONE, 0);
-		technicalDebtExpandItem.setText("File Summary");
-		technicalDebtExpandItem.setExpanded(true);
-
-		sashFormContainer = new Composite(expandBar, SWT.NONE);
-		GridLayout layout = new GridLayout();
-		layout.marginHeight = 10;
-		layout.marginWidth = 10;
-		layout.verticalSpacing = 10;
-		sashFormContainer.setLayout(layout);
-		sashFormContainer.setSize(SWT.DEFAULT, 1000);
-		
-		addFilePreview(sashFormContainer);
-		technicalDebtExpandItem.setControl(sashFormContainer);
-		technicalDebtExpandItem.setHeight(technicalDebtExpandItem.getControl()
-			.computeSize(SWT.DEFAULT, Display.getDefault()
-				.getActiveShell()
-				.getSize().y).y);
-	}
-
-	private void addFilePreview(Composite composite) {
-		SashForm sashForm = new SashForm(composite, SWT.VERTICAL);
+	private void addFilesSection() {
+		Group filesGroup = new Group(rootComposite, SWT.SHADOW_ETCHED_IN);
+		filesGroup.setLayout(new GridLayout(1, false));
+		filesGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
+		filesGroup.setText("Files");
+		SashForm sashForm = new SashForm(filesGroup, SWT.VERTICAL);
 		sashForm.setLayout(new GridLayout());
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
 		sashForm.setBackground(sashForm.getDisplay().getSystemColor( SWT.COLOR_GRAY));
@@ -193,6 +162,8 @@ public class SummaryWizardPage extends WizardPage {
 
 		compareInputContainer = new Composite(sashForm, SWT.FILL);
 		GridLayout layout = new GridLayout();
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
 		compareInputContainer.setLayout(layout);
 		compareInputContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
 		compareInputContainer.setSize(SWT.DEFAULT, 1000);
@@ -205,29 +176,11 @@ public class SummaryWizardPage extends WizardPage {
 
 	}
 
-	private void addRulesSection(ExpandBar expandBar) {
-		ExpandItem rulesExpandItem = new ExpandItem(expandBar, SWT.NONE);
-		rulesExpandItem.setExpanded(true);
-		rulesExpandItem.setText("Rule Summary");
-
-		Composite composite = new Composite(expandBar, SWT.NONE);
-		FillLayout layout = new FillLayout(SWT.HORIZONTAL);
-		layout.marginWidth = layout.marginHeight = 10;
-		composite.setLayout(layout);
-		rulesExpandItem.setControl(composite);
-
-		ruleTableViewer = addRulesTable(composite);
-
-		// Set the size to at most half of the display
-		int thirdDisplayHeight = Display.getDefault()
-			.getActiveShell()
-			.getSize().y / 3;
-		// TODO: Bind list height to number of items
-		rulesExpandItem.setHeight(thirdDisplayHeight);
-	}
-
-	private TableViewer addRulesTable(Composite composite) {
-		Composite tableComposite = new Composite(composite, SWT.NONE);
+	private void addRulesSection() {
+		Group tableComposite = new Group(rootComposite, SWT.SHADOW_ETCHED_IN);
+		tableComposite.setText("Rules");
+		tableComposite.setLayout(new GridLayout(1, false));
+		tableComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		ruleTableViewer = new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION);
 		Table table = ruleTableViewer.getTable();
 		table.setHeaderVisible(true);
@@ -244,12 +197,11 @@ public class SummaryWizardPage extends WizardPage {
 			.setResizable(false);
 		colTimes.getColumn()
 			.setText("Times Applied");
-
-		TableColumnLayout tableLayout = new TableColumnLayout();
-		tableComposite.setLayout(tableLayout);
-		tableLayout.setColumnData(colRuleName.getColumn(), new ColumnWeightData(80));
-		tableLayout.setColumnData(colTimes.getColumn(), new ColumnWeightData(20));
-		return ruleTableViewer;
+		
+        TableColumnLayout tableLayout = new TableColumnLayout(); 
+        tableComposite.setLayout(tableLayout); 
+        tableLayout.setColumnData(colRuleName.getColumn(), new ColumnWeightData(80)); 
+        tableLayout.setColumnData(colTimes.getColumn(), new ColumnWeightData(20)); 
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -283,8 +235,6 @@ public class SummaryWizardPage extends WizardPage {
 
 		IViewerObservableValue selectedFile = ViewerProperties.singleSelection()
 			.observe(fileTableViewer);
-		IObservableValue detailValue = PojoProperties.value("name", String.class)
-			.observeDetail(selectedFile);
 
 		selectedFile.addValueChangeListener(e -> {
 			ChangedFilesModel selectedItem = (ChangedFilesModel) e.getObservableValue()
