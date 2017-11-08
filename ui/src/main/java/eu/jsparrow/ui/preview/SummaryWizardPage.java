@@ -1,13 +1,11 @@
 package eu.jsparrow.ui.preview;
 
-import java.awt.Container;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.compare.internal.ComparePreferencePage;
 import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -17,24 +15,17 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.ExpandBar;
-import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
@@ -44,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
@@ -208,26 +198,7 @@ public class SummaryWizardPage extends WizardPage {
 	protected void initializeDataBindings() {
 		DataBindingContext bindingContext = new DataBindingContext();
 	
-		IObservableValue observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
-			.observe(labelExecutionTime);
-		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("executionTime")
-			.observe(summaryWizardPageModel);
-		bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
-				executionTimeSummaryWizardPageModelObserveValue, null, null);
-		//
-		IObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
-			.observe(labelIssuesFixed);
-		IObservableValue issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("issuesFixed")
-			.observe(summaryWizardPageModel);
-		bindingContext.bindValue(observeTextLabelIssuesFixedObserveWidget,
-				issuesFixedSummaryWizardPageModelObserveValue, null, null);
-		//
-		IObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
-			.observe(labelHoursSaved);
-		IObservableValue hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("hoursSaved")
-			.observe(summaryWizardPageModel);
-		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue,
-				null, null);
+		bindHeader(bindingContext);
 
 		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
 				BeanProperties.values("name", "times"));
@@ -251,6 +222,30 @@ public class SummaryWizardPage extends WizardPage {
 			}
 			StatusUtil.applyToStatusLine(this, statusInfo);
 		});
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void bindHeader(DataBindingContext bindingContext) {
+		IObservableValue observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
+			.observe(labelExecutionTime);
+		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("executionTime")
+			.observe(summaryWizardPageModel);
+		bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
+				executionTimeSummaryWizardPageModelObserveValue, null, null);
+		//
+		IObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
+			.observe(labelIssuesFixed);
+		IObservableValue issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("issuesFixed")
+			.observe(summaryWizardPageModel);
+		bindingContext.bindValue(observeTextLabelIssuesFixedObserveWidget,
+				issuesFixedSummaryWizardPageModelObserveValue, null, null);
+		//
+		IObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
+			.observe(labelHoursSaved);
+		IObservableValue hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("hoursSaved")
+			.observe(summaryWizardPageModel);
+		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue,
+				null, null);
 	}
 
 	private void createCompareInputControl() {
