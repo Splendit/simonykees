@@ -43,6 +43,8 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	private Shell shell;
 
+	private RefactoringSummaryWizardPage summaryPage;
+
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
 		this.refactoringPipeline = refactoringPipeline;
@@ -85,7 +87,7 @@ public class RefactoringPreviewWizard extends Wizard {
 		return super.getPreviousPage(page);
 	}
 
-	private void updateViewsOnNavigation(IWizardPage page) {
+	public void updateViewsOnNavigation(IWizardPage page) {
 		if (page instanceof RefactoringPreviewWizardPage) {
 			if (!((RefactoringPreviewWizardPage) page).getUnselectedChange()
 				.isEmpty()) {
@@ -322,5 +324,9 @@ public class RefactoringPreviewWizard extends Wizard {
 			return false;
 		}
 		return super.canFinish();
+	}
+
+	public RefactoringSummaryWizardPage getSummaryPage() {
+		return summaryPage;
 	}
 }

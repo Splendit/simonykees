@@ -27,9 +27,12 @@ import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
@@ -101,7 +104,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	public void createControl(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
 
-		GridLayout layout = new GridLayout();
+		GridLayout layout = new GridLayout(1, false);
 
 		// margin from TextEditChangePreviewViewer to Composite
 		layout.marginHeight = 0;
@@ -112,7 +115,15 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 		setControl(container);
 
-		SashForm sashForm = new SashForm(container, SWT.VERTICAL);
+		Composite statisticsComposite = new Composite(container, SWT.NONE);
+		statisticsComposite.setLayout(new RowLayout());
+		createStatisticsView(statisticsComposite);
+
+		// Create the SashForm
+		Composite sash = new Composite(container, SWT.NONE);
+		sash.setLayout(new GridLayout());
+		sash.setLayoutData(new GridData(GridData.FILL_BOTH));
+		SashForm sashForm = new SashForm(sash, SWT.VERTICAL);
 
 		createFileView(sashForm);
 		createPreviewViewer(sashForm);
@@ -127,6 +138,20 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		 */
 		sashForm.setWeights(new int[] { 1, 3 });
 
+	}
+
+	private void createStatisticsView(Composite statisticsComposite) {
+		Label techDebtLabel = new Label(statisticsComposite, SWT.NONE);
+		techDebtLabel.setText("Technical Debt: ");
+
+		Label techDebtValue = new Label(statisticsComposite, SWT.NONE);
+		techDebtValue.setText("02h 15min");
+
+		Label issuesFixedLabel = new Label(statisticsComposite, SWT.NONE);
+		issuesFixedLabel.setText("Issues Fixed: ");
+
+		Label issuesFixedValue = new Label(statisticsComposite, SWT.NONE);
+		issuesFixedValue.setText("9");
 	}
 
 	private void createFileView(Composite parent) {
