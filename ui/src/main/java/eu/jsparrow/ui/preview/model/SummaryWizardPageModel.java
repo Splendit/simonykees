@@ -74,11 +74,11 @@ public class SummaryWizardPageModel extends ModelObject {
 	}
 
 	public String getIssuesFixed() {
-		return "230 Issues fixed";
+		return "Issues fixed: 230";
 	}
 
 	public String getHoursSaved() {
-		return "1003 Hours Saved";
+		return "Hours Saved: 1003";
 	}
 	
 	public void setIsFreeLicense(Boolean validLicense) {

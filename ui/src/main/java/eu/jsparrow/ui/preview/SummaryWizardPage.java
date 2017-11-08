@@ -1,5 +1,6 @@
 package eu.jsparrow.ui.preview;
 
+import java.awt.Container;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.compare.internal.ComparePreferencePage;
@@ -38,6 +39,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.wb.swt.ResourceManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
@@ -51,7 +54,8 @@ import eu.jsparrow.ui.util.LicenseUtil;
 
 @SuppressWarnings({ "restriction", "nls" })
 public class SummaryWizardPage extends WizardPage {
-	private DataBindingContext bindingContext;
+	
+	private static final Logger logger = LoggerFactory.getLogger(RefactoringSummaryWizardPage.class);
 
 	private Composite rootComposite;
 
@@ -60,7 +64,7 @@ public class SummaryWizardPage extends WizardPage {
 	private CLabel labelIssuesFixed;
 
 	private CLabel labelHoursSaved;
-
+	
 	private TableViewer fileTableViewer;
 
 	private TableViewer ruleTableViewer;
@@ -92,12 +96,15 @@ public class SummaryWizardPage extends WizardPage {
 		setControl(rootComposite);
 		rootComposite.setLayout(new GridLayout(1, false));
 		addHeader();
-		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
-		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		addFilePreview(sashFormContainer);
+		
 		addExpandSection(rootComposite);
 
-		initDataBindings();
+		initializeDataBindings();
 	}
+	
+
 	
 	public void disposeCompareInputControl() {
 		if (compareInputControl != null) {
@@ -139,17 +146,20 @@ public class SummaryWizardPage extends WizardPage {
 		labelHoursSaved = new CLabel(composite, SWT.NONE);
 		labelHoursSaved.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		labelHoursSaved.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-clock.png"));
+		
+		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
 	}
 
 	private void addExpandSection(Composite container) {
-
 		ExpandBar expandBar = new ExpandBar(container, SWT.V_SCROLL);
 		expandBar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		expandBar.setSpacing(8);
 
 		addRulesSection(expandBar);
 		addFilesSection(expandBar);
+		
 	}
 
 	private void addFilesSection(ExpandBar expandBar) {
@@ -158,13 +168,13 @@ public class SummaryWizardPage extends WizardPage {
 		technicalDebtExpandItem.setExpanded(true);
 
 		sashFormContainer = new Composite(expandBar, SWT.NONE);
-		GridLayout layout = new GridLayout(1, false);
+		GridLayout layout = new GridLayout();
 		layout.marginHeight = 10;
 		layout.marginWidth = 10;
 		layout.verticalSpacing = 10;
 		sashFormContainer.setLayout(layout);
-		sashFormContainer.setSize(sashFormContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
+		sashFormContainer.setSize(SWT.DEFAULT, 1000);
+		
 		addFilePreview(sashFormContainer);
 		technicalDebtExpandItem.setControl(sashFormContainer);
 		technicalDebtExpandItem.setHeight(technicalDebtExpandItem.getControl()
@@ -175,17 +185,18 @@ public class SummaryWizardPage extends WizardPage {
 
 	private void addFilePreview(Composite composite) {
 		SashForm sashForm = new SashForm(composite, SWT.VERTICAL);
-		sashForm.setLayout(new FillLayout());
+		sashForm.setLayout(new GridLayout());
+		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
+		sashForm.setBackground(sashForm.getDisplay().getSystemColor( SWT.COLOR_GRAY));
 
 		fileTableViewer = new TableViewer(sashForm, SWT.SINGLE);
 
-		compareInputContainer = new Composite(sashForm, SWT.NONE);
+		compareInputContainer = new Composite(sashForm, SWT.FILL);
 		GridLayout layout = new GridLayout();
-		layout.marginHeight = 0;
-		layout.marginWidth = 0;
 		compareInputContainer.setLayout(layout);
 		compareInputContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
-
+		compareInputContainer.setSize(SWT.DEFAULT, 1000);
+		
 		CompareUIPlugin.getDefault()
 			.getPreferenceStore()
 			.setValue(ComparePreferencePage.OPEN_STRUCTURE_COMPARE, Boolean.FALSE);
@@ -212,8 +223,6 @@ public class SummaryWizardPage extends WizardPage {
 			.getActiveShell()
 			.getSize().y / 3;
 		// TODO: Bind list height to number of items
-		// int height = Math.min(filesExpandItem.getControl()
-		// .computeSize(SWT.DEFAULT, SWT.DEFAULT).y, thirdDisplayHeight);
 		rulesExpandItem.setHeight(thirdDisplayHeight);
 	}
 
@@ -244,9 +253,9 @@ public class SummaryWizardPage extends WizardPage {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected void initDataBindings() {
-		bindingContext = new DataBindingContext();
-		//
+	protected void initializeDataBindings() {
+		DataBindingContext bindingContext = new DataBindingContext();
+	
 		IObservableValue observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
 			.observe(labelExecutionTime);
 		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("executionTime")
@@ -318,13 +327,11 @@ public class SummaryWizardPage extends WizardPage {
 				.getProgressService()
 				.run(true, true, compareInput);
 		} catch (InvocationTargetException | InterruptedException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		compareInputControl = compareInput.createContents(compareInputContainer);
+		compareInputControl.setSize(compareInputControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		compareInputControl.setLayoutData(new GridData(GridData.FILL_BOTH));
-		compareInputControl.getParent()
-			.layout();
 		compareInputContainer.layout();
-		sashFormContainer.layout();
 	}
 }

@@ -78,8 +78,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		super(rule.getName());
 		setTitle(rule.getName());
-		setDescription(rule.getDescription() + " Times rule was applied: " + RuleApplicationCount.get(rule) //$NON-NLS-1$
-			.toInt());
+		setDescription(rule.getDescription());
 
 		this.changesForRule = changesForRule;
 		this.rule = rule;
@@ -246,7 +245,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				if (unselectedChange.contains(newSelection)) {
 					unselectedChange.remove(newSelection);
 				}
-				imediatelyUpdateForSelected(newSelection);
+				immediatelyUpdateForSelected(newSelection);
 			} else {
 				// add in list with unselected classes
 				if (!unselected.containsKey(newSelection.getElementName())) {
@@ -272,7 +271,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		super.setVisible(visible);
 	}
 
-	private void imediatelyUpdateForSelected(ICompilationUnit newSelection) {
+	private void immediatelyUpdateForSelected(ICompilationUnit newSelection) {
 		((RefactoringPreviewWizard) getWizard()).imediatelyUpdateForSelected(newSelection, rule);
 	}
 
