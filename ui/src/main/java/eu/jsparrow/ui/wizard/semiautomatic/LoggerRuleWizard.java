@@ -66,8 +66,7 @@ public class LoggerRuleWizard extends Wizard {
 	@Override
 	public void addPages() {
 		model = new LoggerRuleWizardPageModel(rule);
-		LoggerRuleWizardPage page = new LoggerRuleWizardPage(model);
-		addPage(page);
+		addPage(new LoggerRuleWizardPage(model));
 	}
 
 	@Override
