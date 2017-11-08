@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.preview;
+package eu.jsparrow.ui.preview.model;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;

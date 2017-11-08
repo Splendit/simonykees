@@ -8,6 +8,8 @@ import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.databinding.viewers.IViewerObservableValue;
 import org.eclipse.jface.databinding.viewers.ViewerProperties;
@@ -39,9 +41,13 @@ import org.eclipse.wb.swt.ResourceManager;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
-import eu.jsparrow.ui.preview.SummaryWizardPageModel.ChangedFilesModel;
+import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.dialog.CompareInput;
+import eu.jsparrow.ui.preview.model.SummaryWizardPageModel;
+import eu.jsparrow.ui.preview.model.SummaryWizardPageModel.ChangedFilesModel;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 @SuppressWarnings({ "restriction", "nls" })
 public class SummaryWizardPage extends WizardPage {
@@ -59,9 +65,8 @@ public class SummaryWizardPage extends WizardPage {
 
 	private TableViewer ruleTableViewer;
 
-	
-	private Composite sashFormContainer; 
-	
+	private Composite sashFormContainer;
+
 	private Composite compareInputContainer;
 
 	private Control compareInputControl;
@@ -74,7 +79,6 @@ public class SummaryWizardPage extends WizardPage {
 	public SummaryWizardPage(RefactoringPipeline refactoringPipeline) {
 		super("wizardPage");
 		setTitle("Run Summary");
-
 		this.summaryWizardPageModel = new SummaryWizardPageModel(refactoringPipeline);
 	}
 
@@ -93,6 +97,27 @@ public class SummaryWizardPage extends WizardPage {
 		addExpandSection(rootComposite);
 
 		initDataBindings();
+	}
+	
+	public void disposeCompareInputControl() {
+		if (compareInputControl != null) {
+			compareInputControl.dispose();
+		}
+	}
+
+	@Override
+	public void performHelp() {
+		SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
+	}
+
+	@Override
+	public void setVisible(boolean visible) {
+		if(visible) {
+			createCompareInputControl();
+			summaryWizardPageModel.setIsFreeLicense(LicenseUtil.getInstance()
+				.isFree());
+		}
+		super.setVisible(visible);
 	}
 
 	private void addHeader() {
@@ -138,6 +163,7 @@ public class SummaryWizardPage extends WizardPage {
 		layout.marginWidth = 10;
 		layout.verticalSpacing = 10;
 		sashFormContainer.setLayout(layout);
+		sashFormContainer.setSize(sashFormContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 
 		addFilePreview(sashFormContainer);
 		technicalDebtExpandItem.setControl(sashFormContainer);
@@ -149,8 +175,7 @@ public class SummaryWizardPage extends WizardPage {
 
 	private void addFilePreview(Composite composite) {
 		SashForm sashForm = new SashForm(composite, SWT.VERTICAL);
-		sashForm.setLayout(new GridLayout());
-		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
+		sashForm.setLayout(new FillLayout());
 
 		fileTableViewer = new TableViewer(sashForm, SWT.SINGLE);
 
@@ -160,11 +185,11 @@ public class SummaryWizardPage extends WizardPage {
 		layout.marginWidth = 0;
 		compareInputContainer.setLayout(layout);
 		compareInputContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
+
 		CompareUIPlugin.getDefault()
 			.getPreferenceStore()
 			.setValue(ComparePreferencePage.OPEN_STRUCTURE_COMPARE, Boolean.FALSE);
-
+		
 		sashForm.setWeights(new int[] { 1, 3 });
 
 	}
@@ -245,7 +270,6 @@ public class SummaryWizardPage extends WizardPage {
 
 		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
 				BeanProperties.values("name", "times"));
-
 		ViewerSupport.bind(fileTableViewer, summaryWizardPageModel.getChangedFiles(), BeanProperties.values("name"));
 
 		IViewerObservableValue selectedFile = ViewerProperties.singleSelection()
@@ -258,28 +282,29 @@ public class SummaryWizardPage extends WizardPage {
 				.getValue();
 			updateCompareInputControl("Test", selectedItem.getSourceLeft(), selectedItem.getSourceRight());
 		});
-	}
-	
-	@Override
-	public void setVisible(boolean visible) {
-		if (visible) {
-			createCompareInputControl();
-		}
-		super.setVisible(visible);
+		
+		IObservableValue isFreeLicenseObservalbeValue = BeanProperties.value("isFreeLicense").observe(summaryWizardPageModel);
+		isFreeLicenseObservalbeValue.addValueChangeListener(e -> {
+			Boolean isFreeLicense = (Boolean) e.getObservableValue().getValue();
+			StatusInfo statusInfo = new StatusInfo();
+			if(isFreeLicense) {
+				statusInfo.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
+			}
+			StatusUtil.applyToStatusLine(this, statusInfo);
+		});
 	}
 
 	private void createCompareInputControl() {
+		disposeCompareInputControl();
 		Display.getDefault()
 			.syncExec(() -> {
-				CompareInput compareInput = new CompareInput("", "", ""); 
+				CompareInput compareInput = new CompareInput("", "", "");
 				updateCompareInputControl(compareInput);
 			});
 	}
 
 	private void updateCompareInputControl(String name, String left, String right) {
-		if (compareInputControl != null) {
-			compareInputControl.dispose();
-		}
+		disposeCompareInputControl();
 		Display.getDefault()
 			.syncExec(() -> {
 				CompareInput compareInput = new CompareInput(name, left, right);
@@ -297,7 +322,8 @@ public class SummaryWizardPage extends WizardPage {
 		}
 		compareInputControl = compareInput.createContents(compareInputContainer);
 		compareInputControl.setLayoutData(new GridData(GridData.FILL_BOTH));
-		compareInputControl.getParent().layout();
+		compareInputControl.getParent()
+			.layout();
 		compareInputContainer.layout();
 		sashFormContainer.layout();
 	}

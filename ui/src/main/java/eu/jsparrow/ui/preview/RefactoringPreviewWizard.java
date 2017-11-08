@@ -64,7 +64,6 @@ public class RefactoringPreviewWizard extends Wizard {
 		 * working copies
 		 */
 		SummaryWizardPage summaryPage = new SummaryWizardPage(refactoringPipeline);
-//		RefactoringSummaryWizardPage summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline);
 		refactoringPipeline.getRules()
 			.forEach(rule -> {
 				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
@@ -310,7 +309,7 @@ public class RefactoringPreviewWizard extends Wizard {
 			if (getContainer().getCurrentPage() instanceof RefactoringPreviewWizardPage) {
 				((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
 			} else {
-				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeControl();
+				((SummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
 			}
 			getPreviousPage(getContainer().getCurrentPage());
 		}
