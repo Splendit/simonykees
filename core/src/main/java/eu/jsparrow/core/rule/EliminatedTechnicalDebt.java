@@ -8,7 +8,7 @@ import java.util.List;
  * a specific rule to a project.
  * 
  * @author Hans-Jörg Schrödl
- *
+ * @since 2.3.0
  */
 public class EliminatedTechnicalDebt {
 

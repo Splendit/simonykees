@@ -11,6 +11,7 @@ import eu.jsparrow.core.visitor.ASTRewriteVisitorListener;
  * specific rule has been used.
  * 
  * @author Hans-Jörg Schrödl
+ * @since 2.3.0
  */
 public class RuleApplicationCount implements ASTRewriteVisitorListener {
 
