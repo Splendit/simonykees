@@ -21,7 +21,7 @@ public class UseIsEmptyOnCollectionsRule extends RefactoringRule<UseIsEmptyOnCol
 	public UseIsEmptyOnCollectionsRule() {
 		super();
 		this.visitorClass = UseIsEmptyOnCollectionsASTVisitor.class;
-		this.id = "UseIsEmpty"; //$NON-NLS-1$
+		this.id = "UseIsEmptyOnCollections"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.UseIsEmptyOnCollectionsRule_name,
 				Messages.UseIsEmptyOnCollectionsRule_description, Duration.ofMinutes(2),
 				TagUtil.getTagsForRule(this.getClass()));
