@@ -1,5 +1,6 @@
 package eu.jsparrow.core.rule.impl.logger;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,7 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
 import eu.jsparrow.core.rule.RuleApplicationCount;
+import eu.jsparrow.core.rule.RuleDescription;
 import eu.jsparrow.core.rule.SemiAutomaticRefactoringRule;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.logger.StandardLoggerASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -72,8 +75,10 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 
 	public StandardLoggerRule() {
 		this.visitorClass = StandardLoggerASTVisitor.class;
-		this.name = Messages.StandardLoggerRule_name;
-		this.description = Messages.StandardLoggerRule_description;
+		this.id = "StandardLogger"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StandardLoggerRule_name,
+				Messages.StandardLoggerRule_description, Duration.ofMinutes(10),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -195,7 +200,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		Map<String, String> replacingOptions = getSelectedOptions();
 		String availableLogger = getAvailableQualifiedLoggerName();
 		StandardLoggerASTVisitor visitor = new StandardLoggerASTVisitor(availableLogger, replacingOptions);
-		visitor.addRewriteListener(RuleApplicationCount.get(this));
+		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
 		return visitor;
 	}
 }

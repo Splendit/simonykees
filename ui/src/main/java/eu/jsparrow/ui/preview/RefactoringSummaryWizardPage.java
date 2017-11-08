@@ -1,6 +1,7 @@
 package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
+import eu.jsparrow.core.rule.EliminatedTechnicalDebt;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -65,10 +67,13 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 	public RefactoringSummaryWizardPage(RefactoringPipeline refactoringPipeline) {
 		super(Messages.RefactoringSummaryWizardPage_title);
-		setTitle(Messages.RefactoringSummaryWizardPage_title);
+		this.refactoringPipeline = refactoringPipeline;
+		Duration totalTimeSaved = EliminatedTechnicalDebt.getTotalFor(refactoringPipeline.getRules());
+		
+		setTitle(Messages.RefactoringSummaryWizardPage_title +", Eliminated technical debt: " + totalTimeSaved.toMinutes() +" Minutes");
+
 		setDescription(Messages.RefactoringSummaryWizardPage_description);
 
-		this.refactoringPipeline = refactoringPipeline;
 		setInitialChanges();
 		this.currentRefactoringState = initialSource.keySet()
 			.stream()
@@ -77,7 +82,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 		fSelectionStatus = new StatusInfo();
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 

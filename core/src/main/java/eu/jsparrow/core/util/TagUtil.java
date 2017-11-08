@@ -47,7 +47,7 @@ import eu.jsparrow.core.rule.impl.StringFormatLineSeparatorRule;
 import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
-import eu.jsparrow.core.rule.impl.UseIsEmptyRule;
+import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 
@@ -182,7 +182,7 @@ public class TagUtil {
 		} else if (StringBuildingLoopRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
 
-		} else if (UseIsEmptyRule.class == clazz) {
+		} else if (UseIsEmptyOnCollectionsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_6, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS, Tag.READABILITY);
 
 		} else if (IndexOfToContainsRule.class == clazz) {

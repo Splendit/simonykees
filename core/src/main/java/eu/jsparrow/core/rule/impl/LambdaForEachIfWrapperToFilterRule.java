@@ -1,8 +1,12 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachIfWrapperToFilterASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -17,8 +21,10 @@ public class LambdaForEachIfWrapperToFilterRule extends RefactoringRule<LambdaFo
 	public LambdaForEachIfWrapperToFilterRule() {
 		super();
 		this.visitorClass = LambdaForEachIfWrapperToFilterASTVisitor.class;
-		this.name = Messages.LambdaForEachIfWrapperToFilterRule_name;
-		this.description = Messages.LambdaForEachIfWrapperToFilterRule_description;
+		this.id = "LambdaForEachIfWrapperToFilter"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.LambdaForEachIfWrapperToFilterRule_name,
+				Messages.LambdaForEachIfWrapperToFilterRule_description, Duration.ofMinutes(5),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

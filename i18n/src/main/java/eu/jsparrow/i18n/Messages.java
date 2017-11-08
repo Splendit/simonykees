@@ -40,6 +40,10 @@ public class Messages extends NLS {
 	public static String Activator_standalone_DefaultProfileDoesNotExist;
 	public static String Activator_standalone_RulesDoNotExist;
 	public static String Activator_standalone_ConfigFileReadSuccessfully;
+
+	public static String Activator_standalone_None;
+
+	public static String Activator_standalone_noRulesSelected;
 	public static String Activator_standalone_UsingDefaultConfiguration;
 	public static String ArithmethicAssignmentRule_description;
 	public static String ArithmethicAssignmentRule_name;
@@ -365,12 +369,14 @@ public class Messages extends NLS {
 	public static String StringUtilsRule_name;
 	public static String TryWithResourceRule_description;
 	public static String TryWithResourceRule_name;
-	public static String UseIsEmptyRule_description;
-	public static String UseIsEmptyRule_name;
+	public static String UseIsEmptyOnCollectionsRule_description;
+	public static String UseIsEmptyOnCollectionsRule_name;
 	public static String ValidateExecutor_shutting_down_validation_scheduler;
 	public static String ValidateExecutor_validation_scheduler_started;
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;
+
+	public static String YAMLConfigUtil_providedPathNotLeadingToYAMLConfig;
 
 	static {
 		// initialize resource bundle
