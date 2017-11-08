@@ -21,7 +21,7 @@ public class SerialVersionUidRule extends RefactoringRule<SerialVersionUidASTVis
 	public SerialVersionUidRule() {
 		super();
 		this.visitorClass = SerialVersionUidASTVisitor.class;
-		this.id = "SerialVersionUid"; //$NON-NLS-1$
+		this.id = "SerialVersionUID"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.SerialVersionUidRule_name,
 				Messages.SerialVersionUidRule_description, Duration.ofMinutes(5),
 				TagUtil.getTagsForRule(this.getClass()));
