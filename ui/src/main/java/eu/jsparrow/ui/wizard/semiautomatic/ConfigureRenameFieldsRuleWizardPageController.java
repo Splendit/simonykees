@@ -10,11 +10,11 @@ import java.util.List;
  * @since 2.3.0
  *
  */
-public class ConfigureRenameFieldsRuleWizardPageControler {
+public class ConfigureRenameFieldsRuleWizardPageController {
 
 	private ConfigureRenameFieldsRuleWizardPageModel model;
 
-	public ConfigureRenameFieldsRuleWizardPageControler(ConfigureRenameFieldsRuleWizardPageModel model) {
+	public ConfigureRenameFieldsRuleWizardPageController(ConfigureRenameFieldsRuleWizardPageModel model) {
 		this.model = model;
 	}
 
