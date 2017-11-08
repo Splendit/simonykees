@@ -108,12 +108,6 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 						}
 					});
 				documentChange.setTextType("java"); //$NON-NLS-1$
-				// if (metaData.getCompilationUnit().getJavaElement() ==
-				// iCompilationUnit) {
-				// documentChanges.add(0, documentChange);
-				// } else {
-				// documentChanges.add(documentChange);
-				// }
 				documentChanges.put(iCompilationUnit, documentChange);
 			}
 		}
