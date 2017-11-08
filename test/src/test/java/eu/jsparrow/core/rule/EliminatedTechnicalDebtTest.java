@@ -14,12 +14,9 @@ public class EliminatedTechnicalDebtTest {
 
 	private DummyRule dummyRule;
 
-	private EliminatedTechnicalDebt eliminatedTechnicalDebt;
-
 	@Before
 	public void setUp() {
 		dummyRule = new DummyRule();
-		eliminatedTechnicalDebt = new EliminatedTechnicalDebt(dummyRule);
 	}
 
 	@Test
@@ -27,8 +24,8 @@ public class EliminatedTechnicalDebtTest {
 		RuleApplicationCount.getFor(dummyRule)
 			.update();
 
-		//The dummy rule has a remediation time of 5 minutes. 
-		assertEquals(5, eliminatedTechnicalDebt.get()
+		// The dummy rule has a remediation time of 5 minutes.
+		assertEquals(5, EliminatedTechnicalDebt.get(dummyRule)
 			.toMinutes());
 	}
 
@@ -37,9 +34,9 @@ public class EliminatedTechnicalDebtTest {
 		RuleApplicationCount.getFor(dummyRule)
 			.update();
 		Duration total = EliminatedTechnicalDebt.getTotalFor(Arrays.asList(dummyRule, dummyRule, dummyRule));
-		
-		//The dummy rule has a remediation time of 5 minutes. 
-		//Total time: 5 * 3 = 15
+
+		// The dummy rule has a remediation time of 5 minutes.
+		// Total time: 5 * 3 = 15
 		assertEquals(15, total.toMinutes());
 	}
 

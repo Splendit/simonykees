@@ -12,19 +12,17 @@ import java.util.List;
  */
 public class EliminatedTechnicalDebt {
 
-	private RefactoringRuleInterface rule;
-
-	public EliminatedTechnicalDebt(RefactoringRuleInterface rule) {
-		this.rule = rule;
+	private EliminatedTechnicalDebt() {
 	}
 
 	/**
 	 * Gets the eliminated technical debt as {@link Duration} by multiplying the
 	 * rule remediation cost with the times the rule has been applied.
 	 * 
+	 * @param rule the rule used for the calculation
 	 * @return the eliminated technical debt as {@link Duration}.
 	 */
-	public Duration get() {
+	public static Duration get(RefactoringRuleInterface rule) {
 		return rule.getRuleDescription()
 			.getRemediationCost()
 			.multipliedBy(RuleApplicationCount.getFor(rule)
@@ -34,13 +32,13 @@ public class EliminatedTechnicalDebt {
 	/**
 	 * Returns the sum of the given technical debts.
 	 * 
-	 * @param list debts to sum up.
+	 * @param list
+	 *            debts to sum up.
 	 * @return the sum of the technical debts as duration.
 	 */
 	public static Duration getTotalFor(List<? extends RefactoringRuleInterface> list) {
-		return list
-			.stream()
-			.map(x -> new EliminatedTechnicalDebt(x).get())
+		return list.stream()
+			.map(x -> EliminatedTechnicalDebt.get(x))
 			.reduce(Duration.ZERO, (x, y) -> x.plus(y));
 	}
 }
