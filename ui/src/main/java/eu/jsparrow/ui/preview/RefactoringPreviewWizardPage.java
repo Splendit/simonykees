@@ -79,9 +79,12 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule,
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
-		super(rule.getName());
-		setTitle(rule.getName());
-		setDescription(rule.getDescription());
+		super(rule.getRuleDescription()
+			.getName());
+		setTitle(rule.getRuleDescription()
+			.getName());
+		setDescription(rule.getRuleDescription()
+			.getDescription());
 
 		this.changesForRule = changesForRule;
 		this.rule = rule;

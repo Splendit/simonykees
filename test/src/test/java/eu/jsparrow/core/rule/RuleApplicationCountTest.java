@@ -19,16 +19,16 @@ public class RuleApplicationCountTest {
 	@Test
 	public void get_ForNewRule_ReturnsNewApplicationCounter() {
 		DummyRule rule = new DummyRule();
-		RuleApplicationCount ruleApplicationCounter = RuleApplicationCount.get(rule);
+		RuleApplicationCount ruleApplicationCounter = RuleApplicationCount.getFor(rule);
 		assertNotNull(ruleApplicationCounter);
 	}
 
 	@Test
 	public void get_ForExistingRule_ReturnsExistingApplicationCounter() {
 		DummyRule rule = new DummyRule();
-		RuleApplicationCount expectedApplicationCounter = RuleApplicationCount.get(rule);
+		RuleApplicationCount expectedApplicationCounter = RuleApplicationCount.getFor(rule);
 
-		RuleApplicationCount applicationCounter = RuleApplicationCount.get(rule);
+		RuleApplicationCount applicationCounter = RuleApplicationCount.getFor(rule);
 		assertEquals(expectedApplicationCounter, applicationCounter);
 	}
 

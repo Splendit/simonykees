@@ -112,8 +112,9 @@ public class RefactoringState {
 				initialChanges.put(rule, documentChange);
 			}
 		} else {
-			logger.trace(NLS.bind(ExceptionMessages.RefactoringState_no_changes_found, rule.getName(),
-					workingCopy.getElementName()));
+			String message = NLS.bind(ExceptionMessages.RefactoringState_no_changes_found, rule.getRuleDescription()
+				.getName(), workingCopy.getElementName());
+			logger.trace(message);
 		}
 
 	}

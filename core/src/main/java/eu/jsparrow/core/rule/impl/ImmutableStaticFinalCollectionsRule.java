@@ -1,8 +1,12 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.ImmutableStaticFinalCollectionsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -16,8 +20,10 @@ public class ImmutableStaticFinalCollectionsRule extends RefactoringRule<Immutab
 	public ImmutableStaticFinalCollectionsRule() {
 		super();
 		this.visitorClass = ImmutableStaticFinalCollectionsASTVisitor.class;
-		this.name = Messages.ImmutableStaticFinalCollectionsRule_name;
-		this.description = Messages.ImmutableStaticFinalCollectionsRule_description;
+		this.id = "ImmutableStaticFinalCollections"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.ImmutableStaticFinalCollectionsRule_name,
+				Messages.ImmutableStaticFinalCollectionsRule_description, Duration.ofMinutes(10),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

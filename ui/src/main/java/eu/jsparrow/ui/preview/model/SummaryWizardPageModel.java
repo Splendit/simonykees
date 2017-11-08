@@ -1,5 +1,6 @@
 package eu.jsparrow.ui.preview.model;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,9 +11,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
-import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.EliminatedTechnicalDebt;
 import eu.jsparrow.core.rule.RuleApplicationCount;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 public class SummaryWizardPageModel extends ModelObject {
 
@@ -23,7 +23,7 @@ public class SummaryWizardPageModel extends ModelObject {
 	private String issuesFixed;
 
 	private String hoursSaved;
-	
+
 	private Boolean isFreeLicense;
 
 	private Map<RefactoringState, String> initialSource = new HashMap<>();
@@ -60,8 +60,9 @@ public class SummaryWizardPageModel extends ModelObject {
 		IObservableList<RuleTimesModel> ruleTimes = new WritableList<>();
 		refactoringPipeline.getRules()
 			.forEach(x -> {
-				String name = x.getName();
-				int times = RuleApplicationCount.get(x)
+				String name = x.getRuleDescription()
+					.getName();
+				int times = RuleApplicationCount.getFor(x)
 					.toInt();
 				RuleTimesModel ruleTimesModel = new RuleTimesModel(name, times);
 				ruleTimes.add(ruleTimesModel);
@@ -74,21 +75,27 @@ public class SummaryWizardPageModel extends ModelObject {
 	}
 
 	public String getIssuesFixed() {
-		return "Issues fixed: 230";
+		int totalIssuesFixed = refactoringPipeline.getRules()
+			.stream()
+			.mapToInt(x -> RuleApplicationCount.getFor(x)
+				.toInt())
+			.sum();
+		return String.format("Issues fixed: %d", totalIssuesFixed);
 	}
 
 	public String getHoursSaved() {
-		return "Hours Saved: 1003";
+		Duration totalTimeSaved = EliminatedTechnicalDebt.getTotalFor(refactoringPipeline.getRules());
+		return String.format("Minutes Saved: %s", totalTimeSaved.toMinutes());
 	}
-	
+
 	public void setIsFreeLicense(Boolean validLicense) {
-		firePropertyChange("isFreeLicense", this.isFreeLicense, this.isFreeLicense = validLicense);
+		this.isFreeLicense = validLicense;
+		firePropertyChange("isFreeLicense", this.isFreeLicense, this.isFreeLicense);
 	}
 
 	public Boolean getIsFreeLicense() {
 		return isFreeLicense;
 	}
-
 
 	private String getPathString(ICompilationUnit compilationUnit) {
 		String temp = compilationUnit.getParent()

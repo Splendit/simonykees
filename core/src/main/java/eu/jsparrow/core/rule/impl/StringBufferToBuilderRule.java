@@ -1,8 +1,12 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.StringBufferToBuilderASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -16,8 +20,10 @@ public class StringBufferToBuilderRule extends RefactoringRule<StringBufferToBui
 	public StringBufferToBuilderRule() {
 		super();
 		this.visitorClass = StringBufferToBuilderASTVisitor.class;
-		this.name = Messages.StringBufferToBuilderRule_name;
-		this.description = Messages.StringBufferToBuilderRule_description;
+		this.id = "StringBufferToBuilder"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StringBufferToBuilderRule_name,
+				Messages.StringBufferToBuilderRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

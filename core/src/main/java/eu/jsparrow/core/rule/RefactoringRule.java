@@ -1,7 +1,5 @@
 package eu.jsparrow.core.rule;
 
-import java.util.List;
-
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -19,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.util.PropertyUtil;
 import eu.jsparrow.core.util.RefactoringUtil;
-import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -28,7 +25,7 @@ import eu.jsparrow.i18n.Messages;
  * description, if its enabled and the document changes for
  * {@link ICompilationUnit} that are processed
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Hans-Jörg Schrödl
  * @since 0.9
  *
  * @param <T>
@@ -41,13 +38,9 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 
 	protected String id;
 
-	protected String name = Messages.RefactoringRule_default_name;
-
-	protected String description = Messages.RefactoringRule_default_description;
+	protected RuleDescription ruleDescription;
 
 	protected final JavaVersion requiredJavaVersion;
-
-	protected final List<Tag> tags;
 
 	// default is true because of preferences page
 	protected boolean enabled = true;
@@ -57,9 +50,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	protected Class<T> visitorClass;
 
 	protected RefactoringRule() {
-		this.id = this.getClass()
-			.getSimpleName();
-		this.tags = TagUtil.getTagsForRule(this.getClass());
 		this.requiredJavaVersion = provideRequiredJavaVersion();
 	}
 
@@ -70,20 +60,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	 */
 	protected abstract JavaVersion provideRequiredJavaVersion();
 
-	public String getName() {
-		return name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
 	public JavaVersion getRequiredJavaVersion() {
 		return requiredJavaVersion;
-	}
-
-	public List<Tag> getTags() {
-		return tags;
 	}
 
 	public boolean isEnabled() {
@@ -132,8 +110,10 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 		return true;
 	}
 
-	protected T visitorFactory() throws InstantiationException, IllegalAccessException {
-		return visitorClass.newInstance();
+	protected AbstractASTRewriteASTVisitor visitorFactory() throws InstantiationException, IllegalAccessException {
+		AbstractASTRewriteASTVisitor visitor = visitorClass.newInstance();
+		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
+		return visitor;
 	}
 
 	/**
@@ -144,8 +124,9 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	public final DocumentChange applyRule(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException, RefactoringException {
 
-		logger.trace(NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.name,
-				workingCopy.getElementName()));
+		String bind = NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.getRuleDescription()
+			.getName(), workingCopy.getElementName());
+		logger.trace(bind);
 
 		return applyRuleImpl(workingCopy);
 	}
@@ -244,6 +225,11 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 	}
 
 	@Override
+	public RuleDescription getRuleDescription() {
+		return this.ruleDescription;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -266,6 +252,12 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Rule [id=" + id + ", name=" + this.getRuleDescription() //$NON-NLS-1$ //$NON-NLS-2$
+			.getName() + "]"; //$NON-NLS-1$
 	}
 
 }

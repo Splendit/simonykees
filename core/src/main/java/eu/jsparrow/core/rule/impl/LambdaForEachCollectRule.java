@@ -1,8 +1,12 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachCollectASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -18,8 +22,10 @@ public class LambdaForEachCollectRule extends RefactoringRule<LambdaForEachColle
 	public LambdaForEachCollectRule() {
 		super();
 		this.visitorClass = LambdaForEachCollectASTVisitor.class;
-		this.name = Messages.LambdaForEachCollectRule_name;
-		this.description = Messages.LambdaForEachCollectRule_description;
+		this.id = "LambdaForEachCollect"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.LambdaForEachCollectRule_name,
+				Messages.LambdaForEachCollectRule_description, Duration.ofMinutes(15),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
