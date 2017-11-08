@@ -20,7 +20,7 @@ public final class StandardLoggerConstants {
 	public static final String SYSTEM_OUT_PRINT_EXCEPTION_KEY = "system-out-print-exception"; //$NON-NLS-1$
 	public static final String SYSTEM_ERR_PRINT_EXCEPTION_KEY = "system-err-print-exception"; //$NON-NLS-1$
 	public static final String MISSING_LOG_KEY = "new-logging-statement"; //$NON-NLS-1$
-	public static final String ATTACH_EXCEPTION_OBJECT = "attach-exception-object";
+	public static final String ATTACH_EXCEPTION_OBJECT = "attach-exception-object"; //$NON-NLS-1$
 
 	private StandardLoggerConstants() {
 		// we don't want instances of that class

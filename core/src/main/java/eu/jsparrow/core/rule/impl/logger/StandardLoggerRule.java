@@ -46,8 +46,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	private static final String INFO = "info"; //$NON-NLS-1$
 	private static final String WARN = "warn"; //$NON-NLS-1$
 	private static final String ERROR = "error"; //$NON-NLS-1$
-	private static final String TRUE = "true"; //$NON-NLS-1$
-	private static final String FALSE = "false"; //$NON-NLS-1$
+	private static final String TRUE = Boolean.TRUE.toString();
 
 	private Map<String, Integer> systemOutReplaceOptions = new LinkedHashMap<>();
 	private Map<String, Integer> systemErrReplaceOptions = new LinkedHashMap<>();
