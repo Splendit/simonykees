@@ -35,7 +35,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
  * representing the changes in one compilation unit.
  * 
  * @author Ardit Ymeri
- * @since 2.1.0
+ * @since 2.3.0
  *
  */
 public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor {

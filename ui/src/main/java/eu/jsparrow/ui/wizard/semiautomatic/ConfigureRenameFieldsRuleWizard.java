@@ -63,8 +63,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  * chosen options on rule and start refactoring process.
  * 
  * @author Andreja Sambolec
- * 
- * @since 2.3
+ * @since 2.3.0
  *
  */
 public class ConfigureRenameFieldsRuleWizard extends Wizard {

@@ -29,7 +29,7 @@ import eu.jsparrow.i18n.Messages;
  * @see PublicFieldsRenamingASTVisitor
  * 
  * @author Ardit Ymeri
- * @since 2.1.0
+ * @since 2.3.0
  *
  */
 public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenamingASTVisitor> {

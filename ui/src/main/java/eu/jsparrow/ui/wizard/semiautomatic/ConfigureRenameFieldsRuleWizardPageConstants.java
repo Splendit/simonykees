@@ -7,7 +7,7 @@ import eu.jsparrow.i18n.Messages;
  * resources
  * 
  * @author Andreja Sambolec
- * @since 2.3
+ * @since 2.3.0
  *
  */
 public class ConfigureRenameFieldsRuleWizardPageConstants {

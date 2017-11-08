@@ -12,7 +12,7 @@ import eu.jsparrow.core.visitor.renaming.NamingConventionUtil;
  * ones containing underscores and dollar sings. 
  * 
  * @author Ardit Ymeri
- * @since 2.1.0
+ * @since 2.3.0
  *
  */
 @SuppressWarnings("nls")

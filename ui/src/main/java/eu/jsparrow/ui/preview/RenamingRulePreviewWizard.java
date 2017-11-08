@@ -36,8 +36,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  * changes to {@link CompilationUnit}s.
  * 
  * @author Andreja Sambolec
- * 
- * @since 2.3
+ * @since 2.3.0
  *
  */
 public class RenamingRulePreviewWizard extends Wizard {

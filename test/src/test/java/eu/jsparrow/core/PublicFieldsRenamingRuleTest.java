@@ -34,7 +34,7 @@ import eu.jsparrow.core.visitor.renaming.FieldMetadata;
  * outside the class. 
  * 
  * @author Ardit Ymeri
- * @since 2.1.0
+ * @since 2.3.0
  *
  */
 @RunWith(Parameterized.class)

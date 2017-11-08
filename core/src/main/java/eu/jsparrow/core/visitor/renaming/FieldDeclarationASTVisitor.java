@@ -51,7 +51,7 @@ import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
  * scope.
  * 
  * @author Ardit Ymeri
- * @since 2.1.0
+ * @since 2.3.0
  *
  */
 public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {

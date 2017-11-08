@@ -15,8 +15,7 @@ import eu.jsparrow.core.visitor.renaming.FieldMetadata;
  * that change.
  * 
  * @author Andreja Sambolec
- * 
- * @since 2.3
+ * @since 2.3.0
  *
  */
 public class DocumentChangeWrapper {

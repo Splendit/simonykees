@@ -28,8 +28,7 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
  * renaming rule.
  * 
  * @author Andreja Sambolec
- * 
- * @since 2.3
+ * @since 2.3.0
  *
  */
 @SuppressWarnings("restriction")

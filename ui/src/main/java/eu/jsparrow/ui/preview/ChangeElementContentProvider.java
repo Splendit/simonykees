@@ -6,7 +6,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
  * This class provides the content for the tree in FileTree
  * 
  * @author Andreja Sambolec
- * @since 2.1.1
+ * @since 2.3.0
  *
  */
 public class ChangeElementContentProvider implements ITreeContentProvider {

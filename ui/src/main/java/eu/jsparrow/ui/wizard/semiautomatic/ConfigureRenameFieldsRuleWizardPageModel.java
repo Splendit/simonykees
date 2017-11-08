@@ -16,7 +16,7 @@ import eu.jsparrow.ui.wizard.IValueChangeListener;
  * resources
  * 
  * @author Andreja Sambolec
- * @since 2.3
+ * @since 2.3.0
  *
  */
 public class ConfigureRenameFieldsRuleWizardPageModel {

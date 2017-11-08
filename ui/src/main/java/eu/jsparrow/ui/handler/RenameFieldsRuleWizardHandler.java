@@ -30,7 +30,7 @@ import eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizard;
  * Handler for semi-automatic rename public fields rule
  * 
  * @author Andreja Sambolec
- * @since 2.1
+ * @since 2.3.0
  *
  */
 public class RenameFieldsRuleWizardHandler extends AbstractHandler {

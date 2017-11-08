@@ -7,7 +7,7 @@ import java.util.List;
  * selected resources
  * 
  * @author Andreja Sambolec
- * @since 2.3
+ * @since 2.3.0
  *
  */
 public class ConfigureRenameFieldsRuleWizardPageControler {

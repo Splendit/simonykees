@@ -38,8 +38,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  * {@link TextEditChangePreviewViewer}, which is an internal Eclipse class.
  * 
  * @author Andreja Sambolec
- * 
- * @since 2.3
+ * @since 2.3.0
  *
  */
 @SuppressWarnings("restriction")

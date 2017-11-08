@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
  * references.
  * 
  * @author Ardit Ymeri
- * @since 2.1.0
+ * @since 2.3.0
  *
  */
 public class ReferenceSearchMatch extends SearchMatch {

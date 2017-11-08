@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * references.
  * 
  * @author Ardit Ymeri
- * @since 2.1.0
+ * @since 2.3.0
  *
  */
 public class FieldMetadata {
