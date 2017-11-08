@@ -57,9 +57,12 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 
 	public RenamingRulePreviewWizardPage(Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes,
 			PublicFieldsRenamingRule rule) {
-		super(rule.getName());
-		setTitle(rule.getName());
-		setDescription(rule.getDescription());
+		super(rule.getRuleDescription()
+			.getName());
+		setTitle(rule.getRuleDescription()
+			.getName());
+		setDescription(rule.getRuleDescription()
+			.getDescription());
 		this.changes = changes;
 
 		convertChangesToDocumentChangeWrappers();
@@ -79,8 +82,8 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			if (!changesForField.isEmpty()) {
 				DocumentChange parent = null;
 				for (ICompilationUnit iCompilationUnit : changesForField.keySet()) {
-					if (((ICompilationUnit) fieldData.getCompilationUnit().getJavaElement())
-							.equals(iCompilationUnit.getPrimary())) {
+					if (((ICompilationUnit) fieldData.getCompilationUnit()
+						.getJavaElement()).equals(iCompilationUnit.getPrimary())) {
 						parent = changesForField.get(iCompilationUnit);
 					}
 				}
@@ -107,8 +110,8 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		try {
 			dcw = new DocumentChangeWrapper(parent, null, fieldData);
 			for (ICompilationUnit iCompilationUnit : changesForField.keySet()) {
-				if (!((ICompilationUnit) fieldData.getCompilationUnit().getJavaElement())
-						.equals(iCompilationUnit.getPrimary())) {
+				if (!((ICompilationUnit) fieldData.getCompilationUnit()
+					.getJavaElement()).equals(iCompilationUnit.getPrimary())) {
 					DocumentChange document = changesForField.get(iCompilationUnit);
 					dcw.addChild(document, iCompilationUnit.getElementName(), iCompilationUnit.getSource());
 				}
@@ -160,7 +163,8 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	 */
 	private void createFileView(SashForm parent) {
 		viewer = new CheckboxTreeViewer(parent);
-		viewer.getTree().setLayoutData(new GridData(GridData.FILL_BOTH));
+		viewer.getTree()
+			.setLayoutData(new GridData(GridData.FILL_BOTH));
 		viewer.setContentProvider(new ChangeElementContentProvider());
 		viewer.setLabelProvider(new ChangeElementLabelProvider());
 		viewer.setInput("root"); // pass a non-null that will be //$NON-NLS-1$
@@ -201,7 +205,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				return ((DocumentChangeWrapper) e1).getOldIdentifier()
-						.compareTo(((DocumentChangeWrapper) e2).getOldIdentifier());
+					.compareTo(((DocumentChangeWrapper) e2).getOldIdentifier());
 			}
 		});
 
@@ -214,7 +218,9 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	private void populateFileView() {
 		DocumentChangeWrapper[] changesArray = changesWrapperList.toArray(new DocumentChangeWrapper[] {});
 		viewer.setInput(changesArray);
-		Arrays.asList(changesArray).stream().forEach(change -> viewer.setSubtreeChecked(change, true));
+		Arrays.asList(changesArray)
+			.stream()
+			.forEach(change -> viewer.setSubtreeChecked(change, true));
 	}
 
 	/**

@@ -25,13 +25,16 @@ public class ChangeElementLabelProvider extends LabelProvider implements IFontPr
 		DocumentChangeWrapper documentChangeWrapper = (DocumentChangeWrapper) object;
 		if (documentChangeWrapper.isParent()) {
 			return documentChangeWrapper.getOldIdentifier() + " -> " + documentChangeWrapper.getNewIdentifier() + "    " //$NON-NLS-1$ //$NON-NLS-2$
-					+ documentChangeWrapper.getDocumentChange().getName();
+					+ documentChangeWrapper.getDocumentChange()
+						.getName();
 		} else {
-			return documentChangeWrapper.getDocumentChange().getName();
+			return documentChangeWrapper.getDocumentChange()
+				.getName();
 		}
 	}
 
 	public Font getFont(Object element) {
-		return JFaceResources.getFontRegistry().getItalic(JFaceResources.DIALOG_FONT);
+		return JFaceResources.getFontRegistry()
+			.getItalic(JFaceResources.DIALOG_FONT);
 	}
 }

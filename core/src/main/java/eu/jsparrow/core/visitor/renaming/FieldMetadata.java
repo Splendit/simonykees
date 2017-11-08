@@ -41,7 +41,7 @@ public class FieldMetadata {
 		this.textEditGroups = new HashMap<>();
 		this.documentMap = new HashMap<>();
 		try {
-			createDocument((ICompilationUnit)cu.getJavaElement());
+			createDocument((ICompilationUnit) cu.getJavaElement());
 		} catch (JavaModelException e) {
 			logger.error("Cannot create document for displaying changes - " + e.getMessage(), e); //$NON-NLS-1$
 		}
@@ -106,7 +106,8 @@ public class FieldMetadata {
 
 	private void createDocument(ICompilationUnit iCompilationUnit) throws JavaModelException {
 		Document document = new Document(iCompilationUnit.getSource());
-		documentMap.put(iCompilationUnit.getPath().toString(), document);
+		documentMap.put(iCompilationUnit.getPath()
+			.toString(), document);
 	}
 
 	/**
@@ -116,7 +117,8 @@ public class FieldMetadata {
 	 * @throws JavaModelException
 	 */
 	public Document getDocument(ICompilationUnit iCompilationUnit) {
-		return documentMap.get(iCompilationUnit.getPath().toString());
+		return documentMap.get(iCompilationUnit.getPath()
+			.toString());
 	}
 
 	/**

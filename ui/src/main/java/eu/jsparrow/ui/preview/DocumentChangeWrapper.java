@@ -36,10 +36,15 @@ public class DocumentChangeWrapper {
 		this.documentChange = documentChange;
 		this.parent = parent;
 		this.isParent = null == parent;
-		this.oldIdentifier = fieldData.getFieldDeclaration().getName().getIdentifier();
+		this.oldIdentifier = fieldData.getFieldDeclaration()
+			.getName()
+			.getIdentifier();
 		this.newIdentifier = fieldData.getNewIdentifier();
-		this.compilationUnitName = fieldData.getCompilationUnit().getJavaElement().getElementName();
-		this.compilationUnitSource = ((ICompilationUnit) fieldData.getCompilationUnit().getJavaElement()).getSource();
+		this.compilationUnitName = fieldData.getCompilationUnit()
+			.getJavaElement()
+			.getElementName();
+		this.compilationUnitSource = ((ICompilationUnit) fieldData.getCompilationUnit()
+			.getJavaElement()).getSource();
 		this.fieldData = fieldData;
 	}
 

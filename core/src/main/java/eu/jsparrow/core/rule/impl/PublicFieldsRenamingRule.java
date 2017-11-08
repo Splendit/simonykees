@@ -1,5 +1,6 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,8 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.renaming.FieldMetadata;
 import eu.jsparrow.core.visitor.renaming.PublicFieldsRenamingASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -38,8 +41,9 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 		this.visitorClass = PublicFieldsRenamingASTVisitor.class;
 		this.metaData = metaData;
 		this.todosMetaData = todosMetaData;
-		this.name = Messages.PublicFieldsRenamingRule_name;
-		this.description = Messages.PublicFieldsRenamingRule_description;
+		this.ruleDescription = new RuleDescription(Messages.PublicFieldsRenamingRule_name,
+				Messages.PublicFieldsRenamingRule_description, Duration.ofMinutes(5), // FIXME value for duration
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -76,29 +80,40 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 						iCompilationUnit.getElementName() + " - " + getPathString(iCompilationUnit), doc); //$NON-NLS-1$
 				TextEdit rootEdit = new MultiTextEdit();
 				documentChange.setEdit(rootEdit);
-				int delta = oldFragment.getName().getLength() - newIdentifierLength;
-				if (iCompilationUnit.getPath().toString()
-						.equals(metaData.getCompilationUnit().getJavaElement().getPath().toString())) {
+				int delta = oldFragment.getName()
+					.getLength() - newIdentifierLength;
+				if (iCompilationUnit.getPath()
+					.toString()
+					.equals(metaData.getCompilationUnit()
+						.getJavaElement()
+						.getPath()
+						.toString())) {
 					int declOffset = oldFragment.getStartPosition();
 					InsertEdit declInsertEdit = new InsertEdit(declOffset, newIdentifier);
 					DeleteEdit declDeleteEdit = new DeleteEdit(declOffset, delta + newIdentifierLength);
 					documentChange.addEdit(declInsertEdit);
 					documentChange.addEdit(declDeleteEdit);
 				}
-				metaData.getReferences().forEach(match -> {
-					if (match.getResource().getFullPath().toString().equals(iCompilationUnit.getPath().toString())) {
-						InsertEdit insertEdit = new InsertEdit(match.getOffset(), newIdentifier);
-						DeleteEdit deleteEdit = new DeleteEdit(match.getOffset(), delta + newIdentifierLength);
-						documentChange.addEdit(insertEdit);
-						documentChange.addEdit(deleteEdit);
-					}
-				});
+				metaData.getReferences()
+					.forEach(match -> {
+						if (match.getResource()
+							.getFullPath()
+							.toString()
+							.equals(iCompilationUnit.getPath()
+								.toString())) {
+							InsertEdit insertEdit = new InsertEdit(match.getOffset(), newIdentifier);
+							DeleteEdit deleteEdit = new DeleteEdit(match.getOffset(), delta + newIdentifierLength);
+							documentChange.addEdit(insertEdit);
+							documentChange.addEdit(deleteEdit);
+						}
+					});
 				documentChange.setTextType("java"); //$NON-NLS-1$
-//				if (metaData.getCompilationUnit().getJavaElement() == iCompilationUnit) {
-//					documentChanges.add(0, documentChange);
-//				} else {
-//					documentChanges.add(documentChange);
-//				}
+				// if (metaData.getCompilationUnit().getJavaElement() ==
+				// iCompilationUnit) {
+				// documentChanges.add(0, documentChange);
+				// } else {
+				// documentChanges.add(documentChange);
+				// }
 				documentChanges.put(iCompilationUnit, documentChange);
 			}
 		}
@@ -114,7 +129,9 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 	 * @return
 	 */
 	private String getPathString(ICompilationUnit compilationUnit) {
-		String temp = compilationUnit.getParent().getPath().toString();
+		String temp = compilationUnit.getParent()
+			.getPath()
+			.toString();
 		return temp.startsWith("/") ? temp.substring(1) : temp; //$NON-NLS-1$
 	}
 

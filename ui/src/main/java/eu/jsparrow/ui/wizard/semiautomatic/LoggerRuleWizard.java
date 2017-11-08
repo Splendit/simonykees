@@ -153,11 +153,12 @@ public class LoggerRuleWizard extends Wizard {
 	 */
 	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactorer, Rectangle rectangle) {
 		String messageEndRefactoring = NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass()
-				.getSimpleName(), selectedJavaProjekt.getElementName());
+			.getSimpleName(), selectedJavaProjekt.getElementName());
 		logger.info(messageEndRefactoring);
 
-		String messageRulesWithChanges = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, selectedJavaProjekt.getElementName(),
-				rule.getRuleDescription().getName());
+		String messageRulesWithChanges = NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
+				selectedJavaProjekt.getElementName(), rule.getRuleDescription()
+					.getName());
 		logger.info(messageRulesWithChanges);
 
 		Display.getDefault()

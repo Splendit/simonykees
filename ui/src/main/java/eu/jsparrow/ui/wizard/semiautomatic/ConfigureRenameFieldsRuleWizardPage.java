@@ -36,7 +36,7 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 
 	private ConfigureRenameFieldsRuleWizardPageModel model;
-	private ConfigureRenameFieldsRuleWizardPageControler controler;
+	private ConfigureRenameFieldsRuleWizardPageController controler;
 
 	private Font boldFont;
 
@@ -48,7 +48,7 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 		setDescription(Messages.RenameFieldsRuleWizardPage_description);
 
 		this.model = model;
-		this.controler = new ConfigureRenameFieldsRuleWizardPageControler(model);
+		this.controler = new ConfigureRenameFieldsRuleWizardPageController(model);
 	}
 
 	@Override
@@ -60,7 +60,8 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 
 		setControl(composite);
 
-		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont()).setStyle(SWT.BOLD);
+		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont())
+			.setStyle(SWT.BOLD);
 		boldFont = boldDescriptor.createFont(composite.getDisplay());
 
 		createFieldTypeChoosingPart(composite);
@@ -95,8 +96,11 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 
 		table.addListener(SWT.Selection, event -> {
 			if (event.detail == SWT.CHECK) {
-				controler.fieldTypeSelectionChanged(Arrays.asList(table.getItems()).stream()
-						.filter(TableItem::getChecked).map(TableItem::getText).collect(Collectors.toList()));
+				controler.fieldTypeSelectionChanged(Arrays.asList(table.getItems())
+					.stream()
+					.filter(TableItem::getChecked)
+					.map(TableItem::getText)
+					.collect(Collectors.toList()));
 			}
 		});
 	}
@@ -205,7 +209,8 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 
 		table.addListener(SWT.Selection, event -> {
 			if (event.detail == SWT.CHECK) {
-				controler.todoSelectionChanged(table.getItem(0).getChecked());
+				controler.todoSelectionChanged(table.getItem(0)
+					.getChecked());
 			}
 		});
 	}
@@ -216,7 +221,8 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 	 * will be shown.
 	 */
 	private void updateView() {
-		if (model.getFieldTypes().isEmpty()) {
+		if (model.getFieldTypes()
+			.isEmpty()) {
 			((StatusInfo) fSelectionStatus).setError(Messages.RenameFieldsRuleWizardPage_warning_noFieldSelected);
 		} else {
 			fSelectionStatus = new StatusInfo();

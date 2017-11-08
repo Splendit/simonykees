@@ -111,7 +111,8 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		if (model.getFieldTypes().isEmpty()) {
+		if (model.getFieldTypes()
+			.isEmpty()) {
 			return false;
 		}
 		return super.canFinish();
@@ -123,12 +124,15 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 
-		selectedJavaProjekt = selectedJavaElements.get(0).getJavaProject();
+		selectedJavaProjekt = selectedJavaElements.get(0)
+			.getJavaProject();
 
-		rectangle = Display.getCurrent().getPrimaryMonitor().getBounds();
+		rectangle = Display.getCurrent()
+			.getPrimaryMonitor()
+			.getBounds();
 
-		String message = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass().getSimpleName(),
-				selectedJavaProjekt.getElementName());
+		String message = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
+			.getSimpleName(), selectedJavaProjekt.getElementName());
 		logger.info(message);
 
 		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
@@ -155,7 +159,8 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 				child.setWorkRemaining(result.size());
 				child.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
 				for (ICompilationUnit compilationUnit : result) {
-					if (!compilationUnit.getJavaProject().equals(selectedJavaProjekt)) {
+					if (!compilationUnit.getJavaProject()
+						.equals(selectedJavaProjekt)) {
 						WizardMessageDialog.synchronizeWithUIShowMultiprojectMessage();
 						return Status.CANCEL_STATUS;
 
@@ -199,7 +204,8 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 			@Override
 			public void done(IJobChangeEvent event) {
 
-				if (event.getResult().isOK() && canRefactor) {
+				if (event.getResult()
+					.isOK() && canRefactor) {
 					Job refactorJob = startRefactoringJob();
 
 					refactorJob.setUser(true);
@@ -220,17 +226,20 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 	 * errors.
 	 */
 	private void synchronizeWithUIShowCompilationErrorMessage(List<ICompilationUnit> containingErrorList) {
-		Display.getDefault().syncExec(() -> {
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			CompilationErrorsMessageDialog dialog = new CompilationErrorsMessageDialog(shell);
-			dialog.create();
-			dialog.setTableViewerInput(containingErrorList);
-			dialog.open();
-			if (dialog.getReturnCode() != IDialogConstants.OK_ID) {
-				canRefactor = false;
-				Activator.setRunning(false);
-			}
-		});
+		Display.getDefault()
+			.syncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				CompilationErrorsMessageDialog dialog = new CompilationErrorsMessageDialog(shell);
+				dialog.create();
+				dialog.setTableViewerInput(containingErrorList);
+				dialog.open();
+				if (dialog.getReturnCode() != IDialogConstants.OK_ID) {
+					canRefactor = false;
+					Activator.setRunning(false);
+				}
+			});
 	}
 
 	/**
@@ -269,8 +278,10 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 			@Override
 			public void done(IJobChangeEvent event) {
 
-				if (event.getResult().isOK()) {
-					if (LicenseUtil.getInstance().isValid()) {
+				if (event.getResult()
+					.isOK()) {
+					if (LicenseUtil.getInstance()
+						.isValid()) {
 						if (refactoringPipeline.hasChanges()) {
 							createAndShowPreviewWizard();
 
@@ -306,7 +317,8 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 		} else {
 			List<IJavaProject> projectList = new LinkedList<>();
 			try {
-				IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+				IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace()
+					.getRoot();
 				IProject[] projects = workspaceRoot.getProjects();
 				for (int i = 0; i < projects.length; i++) {
 					IProject project = projects[i];
@@ -320,14 +332,14 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 			IJavaElement[] scope = projectList.toArray(new IJavaElement[0]);
 			visitor = new FieldDeclarationASTVisitor(scope);
 		}
-		visitor.setRenamePrivateField(
-				model.getFieldTypes().contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PRIVATE));
-		visitor.setRenameProtectedField(
-				model.getFieldTypes().contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PROTECTED));
-		visitor.setRenamePackageProtectedField(
-				model.getFieldTypes().contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPROTECTED));
-		visitor.setRenamePublicField(
-				model.getFieldTypes().contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PUBLIC));
+		visitor.setRenamePrivateField(model.getFieldTypes()
+			.contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PRIVATE));
+		visitor.setRenameProtectedField(model.getFieldTypes()
+			.contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PROTECTED));
+		visitor.setRenamePackageProtectedField(model.getFieldTypes()
+			.contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPROTECTED));
+		visitor.setRenamePublicField(model.getFieldTypes()
+			.contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PUBLIC));
 		visitor.setUppercaseAfterUnderscore(model.setUpperCaseForUnderscoreReplacementOption());
 		visitor.setUppercaseAfterDollar(model.setUpperCaseForDollarReplacementOption());
 		visitor.setAddTodo(model.isAddTodoComments());
@@ -391,8 +403,8 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 		metadata = visitor.getFieldMetadata();
 		List<FieldMetadata> todosMetadata = visitor.getUnmodifiableFieldMetadata();
 
-		if (!getCompilationUnits(targetCompilationUnits, targetJavaElements.stream().collect(Collectors.toList()),
-				subMonitor.split(20))) {
+		if (!getCompilationUnits(targetCompilationUnits, targetJavaElements.stream()
+			.collect(Collectors.toList()), subMonitor.split(20))) {
 			canRefactor = false;
 			return;
 		}
@@ -441,7 +453,8 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 		for (FieldMetadata data : metadata) {
 
 			String newIdentifier = data.getNewIdentifier();
-			data.getCompilationUnit().getJavaElement();
+			data.getCompilationUnit()
+				.getJavaElement();
 			Map<ICompilationUnit, DocumentChange> docsChanges = renameFieldsRule.computeDocumentChangesPerFiled(data);
 			changes.put(data, docsChanges);
 			metaDataMap.put(newIdentifier, data);
@@ -460,22 +473,26 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 	private void synchronizeWithUIShowRefactoringPreviewWizard(
 			Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes) {
 
-		String message = NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass().getSimpleName(),
-				selectedJavaProjekt.getElementName());
+		String message = NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass()
+			.getSimpleName(), selectedJavaProjekt.getElementName());
 		logger.info(message);
 		message = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, selectedJavaProjekt.getElementName(),
-				renameFieldsRule.getName());
+				renameFieldsRule.getRuleDescription()
+					.getName());
 		logger.info(message);
 
-		Display.getDefault().asyncExec(() -> {
-			Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			final WizardDialog dialog = new WizardDialog(shell, new RenamingRulePreviewWizard(refactoringPipeline,
-					metadata, changes, targetCompilationUnits, renameFieldsRule));
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				final WizardDialog dialog = new WizardDialog(shell, new RenamingRulePreviewWizard(refactoringPipeline,
+						metadata, changes, targetCompilationUnits, renameFieldsRule));
 
-			// maximizes the RefactoringPreviewWizard
-			dialog.setPageSize(rectangle.width, rectangle.height);
-			dialog.open();
-		});
+				// maximizes the RefactoringPreviewWizard
+				dialog.setPageSize(rectangle.width, rectangle.height);
+				dialog.open();
+			});
 
 	}
 }

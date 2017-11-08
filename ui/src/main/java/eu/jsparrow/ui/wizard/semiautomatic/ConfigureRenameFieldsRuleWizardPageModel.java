@@ -122,7 +122,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 
 	// SETTERS used by controler
 	/**
-	 * Setter used by {@link ConfigureRenameFieldsRuleWizardPageControler} to
+	 * Setter used by {@link ConfigureRenameFieldsRuleWizardPageController} to
 	 * set selected field type options.
 	 * 
 	 * @param selection
@@ -134,7 +134,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	}
 
 	/**
-	 * Setter used by {@link ConfigureRenameFieldsRuleWizardPageControler} to
+	 * Setter used by {@link ConfigureRenameFieldsRuleWizardPageController} to
 	 * set selected search scope option.
 	 * 
 	 * @param newValue
@@ -146,7 +146,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	}
 
 	/**
-	 * Setter used by {@link ConfigureRenameFieldsRuleWizardPageControler} to
+	 * Setter used by {@link ConfigureRenameFieldsRuleWizardPageController} to
 	 * set selected underscore replacement option.
 	 * 
 	 * @param newValue
@@ -158,7 +158,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	}
 
 	/**
-	 * Setter used by {@link ConfigureRenameFieldsRuleWizardPageControler} to
+	 * Setter used by {@link ConfigureRenameFieldsRuleWizardPageController} to
 	 * set selected dollar replacement option.
 	 * 
 	 * @param newValue
@@ -170,7 +170,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	}
 
 	/**
-	 * Setter used by {@link ConfigureRenameFieldsRuleWizardPageControler} to
+	 * Setter used by {@link ConfigureRenameFieldsRuleWizardPageController} to
 	 * set selected wanted to-do replacement.
 	 * 
 	 * @param addTodo

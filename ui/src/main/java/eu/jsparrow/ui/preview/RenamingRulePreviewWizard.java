@@ -79,9 +79,11 @@ public class RenamingRulePreviewWizard extends Wizard {
 	 */
 	@Override
 	public boolean performFinish() {
-		if (!((RenamingRulePreviewWizardPage) getPage(rule.getName())).getUncheckedFields().isEmpty()) {
-			for (FieldMetadata fieldData : ((RenamingRulePreviewWizardPage) getPage(rule.getName()))
-					.getUncheckedFields()) {
+		if (!((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
+			.getName())).getUncheckedFields()
+				.isEmpty()) {
+			for (FieldMetadata fieldData : ((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
+				.getName())).getUncheckedFields()) {
 				metadata.remove(fieldData);
 			}
 
@@ -108,7 +110,8 @@ public class RenamingRulePreviewWizard extends Wizard {
 	 * committing changes, message about exception is displayed.
 	 */
 	private void commitChanges() {
-		if (LicenseUtil.getInstance().isValid()) {
+		if (LicenseUtil.getInstance()
+			.isValid()) {
 			try {
 				refactoringPipeline.commitRefactoring();
 				Activator.setRunning(false);
@@ -163,7 +166,8 @@ public class RenamingRulePreviewWizard extends Wizard {
 					for (FieldMetadata data : metadata) {
 
 						String newIdentifier = data.getNewIdentifier();
-						data.getCompilationUnit().getJavaElement();
+						data.getCompilationUnit()
+							.getJavaElement();
 						Map<ICompilationUnit, DocumentChange> docsChanges = rule.computeDocumentChangesPerFiled(data);
 						changes.put(data, docsChanges);
 						metaDataMap.put(newIdentifier, data);
@@ -207,7 +211,7 @@ public class RenamingRulePreviewWizard extends Wizard {
 		Activator.setRunning(false);
 		return super.performCancel();
 	}
-	
+
 	@Override
 	public boolean canFinish() {
 		if (!LicenseUtil.getInstance()

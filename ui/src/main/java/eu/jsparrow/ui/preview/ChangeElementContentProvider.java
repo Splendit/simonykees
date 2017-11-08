@@ -52,6 +52,6 @@ public class ChangeElementContentProvider implements ITreeContentProvider {
 		if (element instanceof DocumentChangeWrapper[]) {
 			return (DocumentChangeWrapper[]) element;
 		}
-		return new Object[]{};
+		return new Object[] {};
 	}
 }
