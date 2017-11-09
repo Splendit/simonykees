@@ -1,11 +1,14 @@
 package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
 
 import org.eclipse.compare.internal.ComparePreferencePage;
 import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -47,8 +50,6 @@ import eu.jsparrow.ui.util.LicenseUtil;
 public class SummaryWizardPage extends WizardPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringSummaryWizardPage.class);
-
-	private DataBindingContext bindingContext;
 
 	private Composite rootComposite;
 
@@ -190,20 +191,29 @@ public class SummaryWizardPage extends WizardPage {
 		colTimes.getColumn()
 			.setText("Times Applied");
 
+		TableViewerColumn colTimeSaved = new TableViewerColumn(ruleTableViewer, SWT.NONE);
+		colTimes.getColumn()
+			.setResizable(false);
+		colTimes.getColumn()
+			.setText("Time Saved");
+
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		tableComposite.setLayout(tableLayout);
-		tableLayout.setColumnData(colRuleName.getColumn(), new ColumnWeightData(80));
+		tableLayout.setColumnData(colRuleName.getColumn(), new ColumnWeightData(60));
 		tableLayout.setColumnData(colTimes.getColumn(), new ColumnWeightData(20));
+		tableLayout.setColumnData(colTimeSaved.getColumn(), new ColumnWeightData(20));
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initializeDataBindings() {
-		bindingContext = new DataBindingContext();
+		DataBindingContext bindingContext = new DataBindingContext();
 
 		initializeHeaderDataBindings(bindingContext);
 
+		IConverter convertToString = IConverter.create(Duration.class, String.class,
+				duration -> String.format("%s", ((Duration) duration).toMinutes()));
 		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
-				BeanProperties.values("name", "times"));
+				BeanProperties.values("name", "times", "timeSaved"));
 		ViewerSupport.bind(fileTableViewer, summaryWizardPageModel.getChangedFiles(), BeanProperties.values("name"));
 
 		IViewerObservableValue selectedFile = ViewerProperties.singleSelection()

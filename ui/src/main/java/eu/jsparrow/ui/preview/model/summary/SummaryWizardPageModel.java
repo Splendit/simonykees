@@ -8,14 +8,13 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
+import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.EliminatedTechnicalDebt;
-import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RuleApplicationCount;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.preview.model.BaseModel;
 
 public class SummaryWizardPageModel extends BaseModel {
@@ -28,7 +27,7 @@ public class SummaryWizardPageModel extends BaseModel {
 
 	private String hoursSaved;
 
-	private Boolean isFreeLicense;
+	private WritableValue<Boolean> isFreeLicense = new WritableValue<>();
 
 	private Map<RefactoringState, String> initialSource = new HashMap<>();
 
@@ -82,15 +81,12 @@ public class SummaryWizardPageModel extends BaseModel {
 	}
 
 	public void setIsFreeLicense(Boolean validLicense) {
-		this.isFreeLicense = validLicense;
-		firePropertyChange("isFreeLicense", this.isFreeLicense, this.isFreeLicense);
+		isFreeLicense.setValue(validLicense);
 	}
 
 	public Boolean getIsFreeLicense() {
-		return isFreeLicense;
+		return isFreeLicense.getValue();
 	}
-
-
 
 	private void addModifiedFiles() {
 		refactoringPipeline.getInitialSourceMap()
@@ -105,16 +101,18 @@ public class SummaryWizardPageModel extends BaseModel {
 
 	private void addRuleTimes() {
 		refactoringPipeline.getRules()
-			.forEach(x -> {
-				String name = x.getRuleDescription()
+			.forEach(rule -> {
+				String name = rule.getRuleDescription()
 					.getName();
-				int times = RuleApplicationCount.getFor(x)
+				int times = RuleApplicationCount.getFor(rule)
 					.toInt();
-				RuleTimesModel ruleTimesModel = new RuleTimesModel(name, times);
+				Duration timeSaved = EliminatedTechnicalDebt.get(rule);
+				String timeSavedString = String.format("%s Minutes", timeSaved.toMinutes());
+				RuleTimesModel ruleTimesModel = new RuleTimesModel(name, times, timeSavedString);
 				ruleTimes.add(ruleTimesModel);
 			});
 	}
-	
+
 	private String getPathString(ICompilationUnit compilationUnit) {
 		String temp = compilationUnit.getParent()
 			.getPath()
@@ -133,7 +131,7 @@ public class SummaryWizardPageModel extends BaseModel {
 			.stream()
 			.allMatch(rule -> state.getIgnoredRules()
 				.contains(rule));
-		if(allRulesIgnored) {
+		if (allRulesIgnored) {
 			return false;
 		}
 		Boolean noChangePresent = refactoringPipeline.getRules()
