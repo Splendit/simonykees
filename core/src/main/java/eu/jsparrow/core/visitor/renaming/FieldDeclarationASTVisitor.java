@@ -73,7 +73,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	private List<FieldMetadata> fieldsMetaData = new ArrayList<>();
 	private Map<ASTNode, List<SimpleName>> declaredNamesPerNode = new HashMap<>();
 	private List<String> newNamesPerType = new ArrayList<>();
-	private Set<IJavaElement> targetIJavaElements = new HashSet<>();
+	private Set<ICompilationUnit> targetIJavaElements = new HashSet<>();
 	private IJavaProject iJavaProject;
 	private IJavaElement[] searchScope;
 	private List<FieldMetadata> unmodifiableFields = new ArrayList<>();
@@ -152,7 +152,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 				if (optNewIdentifier.isPresent()
 						&& !isConflictingIdentifier(optNewIdentifier.get(), fieldDeclaration)) {
 					String newIdentifier = optNewIdentifier.get();
-					storeIJavaElement(compilationUnit.getJavaElement());
+					storeIJavaElement((ICompilationUnit)compilationUnit.getJavaElement());
 					findFieldReferences(fragment).ifPresent(references -> {
 						fieldsMetaData.add(new FieldMetadata(compilationUnit, references, fragment, newIdentifier));
 						newNamesPerType.add(newIdentifier);
@@ -341,7 +341,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		return Optional.of(references);
 	}
 	
-	private void storeIJavaElement(IJavaElement iJavaElement) {
+	private void storeIJavaElement(ICompilationUnit iJavaElement) {
 		this.targetIJavaElements.add(iJavaElement);
 	}
 	
@@ -351,7 +351,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	 * @return the set of the {@link IJavaElement}s containing a reference to a 
 	 * field being renamed.
 	 */
-	public Set<IJavaElement> getTargetIJavaElements() {
+	public Set<ICompilationUnit> getTargetIJavaElements() {
 		return this.targetIJavaElements;
 	}
 

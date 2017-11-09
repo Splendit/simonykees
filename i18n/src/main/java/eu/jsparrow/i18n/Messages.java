@@ -224,6 +224,8 @@ public class Messages extends NLS {
 	public static String RemoveNewStringConstructorRule_description;
 	public static String RemoveNewStringConstructorRule_name;
 	public static String RenameFieldsRuleWizard_taskName_collectingUnits;
+
+	public static String RenameFieldsRuleWizardHandler_performFinish_jobName;
 	public static String RenameFieldsRuleWizardPage_description;
 	public static String RenameFieldsRuleWizardPage_dollarSignReplacementLabelText;
 	public static String RenameFieldsRuleWizardPage_fieldTypeLabelText;

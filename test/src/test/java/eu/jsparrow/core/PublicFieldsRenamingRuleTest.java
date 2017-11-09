@@ -86,9 +86,9 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 		 */
 		metaData = referencesVisitor.getFieldMetadata();
 		todosMetaData = referencesVisitor.getUnmodifiableFieldMetadata();
-		Set<IJavaElement> targetICUs = referencesVisitor.getTargetIJavaElements();
+		Set<ICompilationUnit> targetICUs = referencesVisitor.getTargetIJavaElements();
 		
-		return targetICUs.stream().map(IJavaElement::getPath).map(iPath -> new Path[] { Paths.get(iPath.toFile().getPath()) }).collect(Collectors.toList());
+		return targetICUs.stream().map(ICompilationUnit::getPath).map(iPath -> new Path[] { Paths.get(iPath.toFile().getPath()) }).collect(Collectors.toList());
 	}
 	
 

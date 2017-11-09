@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -26,7 +24,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
@@ -51,10 +48,8 @@ import eu.jsparrow.core.visitor.renaming.FieldMetadata;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
-import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.preview.RenamingRulePreviewWizard;
 import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -73,7 +68,7 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 	private ConfigureRenameFieldsRuleWizardPageModel model;
 
 	private IJavaProject selectedJavaProjekt;
-	private List<IJavaElement> selectedJavaElements;
+	private List<ICompilationUnit> selectedJavaElements;
 
 	private RefactoringPipeline refactoringPipeline;
 	private List<FieldMetadata> metadata;
@@ -85,7 +80,7 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 
 	private boolean canRefactor = true;
 
-	public ConfigureRenameFieldsRuleWizard(List<IJavaElement> selectedJavaElements) {
+	public ConfigureRenameFieldsRuleWizard(List<ICompilationUnit> selectedJavaElements) {
 		this.selectedJavaElements = selectedJavaElements;
 		setNeedsProgressMonitor(true);
 	}
@@ -143,33 +138,20 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
-				List<ICompilationUnit> result = new ArrayList<>();
-				if (!getCompilationUnits(result, selectedJavaElements, subMonitor.split(10))) {
-					return Status.CANCEL_STATUS;
-				}
-
-				/*
-				 * list with compilation units with compilation error, which
-				 * should be excluded from scope
-				 */
-				List<ICompilationUnit> containingErrorList = new ArrayList<>();
-
 				SubMonitor child = subMonitor.split(40);
-				child.setWorkRemaining(result.size());
+				child.setWorkRemaining(selectedJavaElements.size());
 				child.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
-				for (ICompilationUnit compilationUnit : result) {
+				for (ICompilationUnit compilationUnit : selectedJavaElements) {
 					if (!compilationUnit.getJavaProject()
 						.equals(selectedJavaProjekt)) {
 						WizardMessageDialog.synchronizeWithUIShowMultiprojectMessage();
 						return Status.CANCEL_STATUS;
 
 					}
-					if (RefactoringUtil.checkForSyntaxErrors(compilationUnit)) {
-						containingErrorList.add(compilationUnit);
-					} else {
-						CompilationUnit cu = RefactoringUtil.parse(compilationUnit);
-						cu.accept(visitor);
-					}
+
+					CompilationUnit cu = RefactoringUtil.parse(compilationUnit);
+					cu.accept(visitor);
+
 					if (child.isCanceled()) {
 						return Status.CANCEL_STATUS;
 					} else {
@@ -179,12 +161,9 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 
 				SubMonitor childSecondPart = subMonitor.split(50);
 				childSecondPart.setWorkRemaining(100);
-				if (!containingErrorList.isEmpty()) {
-					synchronizeWithUIShowCompilationErrorMessage(containingErrorList);
-				}
-				if (canRefactor) {
-					searchScopeAndPrepareRefactoringStates(childSecondPart, visitor);
-				} else {
+				
+				searchScopeAndPrepareRefactoringStates(childSecondPart, visitor);
+				if (!canRefactor) {
 					return Status.CANCEL_STATUS;
 				}
 				if (childSecondPart.isCanceled()) {
@@ -217,28 +196,6 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 		});
 
 		return true;
-	}
-
-	/**
-	 * Method used to open CompilationErrorsMessageDialog from non UI thread to
-	 * list all Java files that will be skipped because they contain compilation
-	 * errors.
-	 */
-	private void synchronizeWithUIShowCompilationErrorMessage(List<ICompilationUnit> containingErrorList) {
-		Display.getDefault()
-			.syncExec(() -> {
-				Shell shell = PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow()
-					.getShell();
-				CompilationErrorsMessageDialog dialog = new CompilationErrorsMessageDialog(shell);
-				dialog.create();
-				dialog.setTableViewerInput(containingErrorList);
-				dialog.open();
-				if (dialog.getReturnCode() != IDialogConstants.OK_ID) {
-					canRefactor = false;
-					Activator.setRunning(false);
-				}
-			});
 	}
 
 	/**
@@ -346,42 +303,6 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 	}
 
 	/**
-	 * Collects all CompilationUnits from IjavaElements
-	 * 
-	 * @param resultCompilationUnitsList
-	 *            resulting list containing all created CompilationUnits
-	 * @param sourceJavaElementsList
-	 *            source list containing all IJavaElements
-	 * @param monitor
-	 *            progress monitor
-	 * @return false if result list is empty of exception occurred while
-	 *         collecting, true otherwise
-	 */
-	private boolean getCompilationUnits(List<ICompilationUnit> resultCompilationUnitsList,
-			List<IJavaElement> sourceJavaElementsList, IProgressMonitor monitor) {
-
-		try {
-			SelectRulesWizard.collectICompilationUnits(resultCompilationUnitsList, sourceJavaElementsList, monitor);
-			if (resultCompilationUnitsList.isEmpty()) {
-				logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found);
-				WizardMessageDialog.synchronizeWithUIShowInfo(
-						new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found,
-								ExceptionMessages.RefactoringPipeline_user_warn_no_compilation_units_found));
-				return false;
-
-			}
-		} catch (JavaModelException e) {
-			logger.error(e.getMessage(), e);
-			WizardMessageDialog.synchronizeWithUIShowInfo(
-					new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
-							ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
 	 * Collects target compilation units and creates refactoring states from
 	 * them.
 	 * 
@@ -392,9 +313,9 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 	 */
 	private void searchScopeAndPrepareRefactoringStates(SubMonitor subMonitor, FieldDeclarationASTVisitor visitor) {
 
-		Set<IJavaElement> targetJavaElements = visitor.getTargetIJavaElements();
-		if (targetJavaElements.isEmpty()) {
-			WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitDialog();
+		targetCompilationUnits = new ArrayList<>(visitor.getTargetIJavaElements());
+		if (targetCompilationUnits.isEmpty()) {
+			WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
 			canRefactor = false;
 			return;
 		}
@@ -402,11 +323,6 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 		metadata = visitor.getFieldMetadata();
 		List<FieldMetadata> todosMetadata = visitor.getUnmodifiableFieldMetadata();
 
-		if (!getCompilationUnits(targetCompilationUnits, targetJavaElements.stream()
-			.collect(Collectors.toList()), subMonitor.split(20))) {
-			canRefactor = false;
-			return;
-		}
 		if (subMonitor.isCanceled()) {
 			return;
 		}
