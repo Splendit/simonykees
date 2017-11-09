@@ -18,16 +18,25 @@ import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
@@ -35,7 +44,7 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 /**
  * Wizard page for configuring logger rule when applying to selected resources
  * 
- * @author Andreja Sambolec
+ * @author Andreja Sambolec, Ardit Ymeri
  * @since 1.2
  *
  */
@@ -43,7 +52,7 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 	private LoggerRuleWizardPageModel model;
-	private LoggerRuleWizardPageControler controler;
+	private LoggerRuleWizardPageControler controller;
 
 	private Combo systemOutCombo;
 	private Combo systemErrCombo;
@@ -64,7 +73,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		setDescription(Messages.LoggerRuleWizardPage_description);
 
 		this.model = model;
-		this.controler = controler;
+		this.controller = controler;
 	}
 
 	@Override
@@ -112,7 +121,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.selectionChanged(SYSTEM_OUT_PRINT_KEY,
+				controller.selectionChanged(SYSTEM_OUT_PRINT_KEY,
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 				updatePrintingExceptionsOptions(defaultForExceptionLogButton);
 			}
@@ -149,7 +158,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.selectionChanged(SYSTEM_ERR_PRINT_KEY,
+				controller.selectionChanged(SYSTEM_ERR_PRINT_KEY,
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
 				updatePrintingExceptionsOptions(defaultForExceptionLogButton);
 			}
@@ -189,7 +198,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 				Combo combo = (Combo) e.getSource();
 				int selectedIndex = combo.getSelectionIndex();
 				String value = combo.getItem(selectedIndex);
-				controler.selectionChanged(PRINT_STACKTRACE_KEY, value);
+				controller.selectionChanged(PRINT_STACKTRACE_KEY, value);
 				setExceptionButtonsEnabled(selectedIndex != 0);
 				updatePrintingExceptionsOptions(defaultForExceptionLogButton);
 				updateMissingLogStatementOptions(missingLogStatementButton);
@@ -201,10 +210,20 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		gridData.widthHint = 200;
 		exceptionsCombo.setLayoutData(gridData);
 
+		Group checkBoxGroup = new Group(stackTraceGroup, SWT.NONE);
+		gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gridData.horizontalSpan = 2;
+		gridData.verticalIndent = 15;
+		gridData.widthHint = 400;
+		checkBoxGroup.setLayoutData(gridData);
+		checkBoxGroup.setLayout(new GridLayout(2, false));
+
 		// 1. printStacktrace
-		printStackTraceButton = createExceptionGroupButton(stackTraceGroup,
+		printStackTraceButton = createCheckBox(checkBoxGroup,
 				Messages.LoggerRuleWizardPage_replacePrintstacktraceWithLogger,
-				new SelectionAdapter() {
+				Messages.LoggerRuleWizardPage_print_stack_trace_popup_description,
+				Messages.LoggerRuleWizardPage_print_stack_trace_example_before,
+				Messages.LoggerRuleWizardPage_print_stack_trace_example_after, new SelectionAdapter() {
 
 					@Override
 					public void widgetSelected(SelectionEvent e) {
@@ -214,9 +233,11 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 				});
 
 		// 2. Add missing log statement
-		missingLogStatementButton = createExceptionGroupButton(stackTraceGroup,
+		missingLogStatementButton = createCheckBox(checkBoxGroup,
 				Messages.LoggerRuleWizardPage_insertNewLoggerStatementInEmptyCatch,
-				new SelectionAdapter() {
+				Messages.LoggerRuleWizardPage_missing_logger_pupup_description,
+				Messages.LoggerRuleWizardPage_missing_logger_example_before,
+				Messages.LoggerRuleWizardPage_missing_logger_example_after, new SelectionAdapter() {
 
 					@Override
 					public void widgetSelected(SelectionEvent e) {
@@ -225,21 +246,12 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 					}
 				});
 
-		// 3. defaultForExceptionLog
-		defaultForExceptionLogButton = createExceptionGroupButton(stackTraceGroup,
-				Messages.LoggerRuleWizardPage_alwaysUsePrintStacktraceOptionForLoggingException,
-				new SelectionAdapter() {
-
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						Button btn = (Button) e.getSource();
-						updatePrintingExceptionsOptions(btn);
-					}
-				});
-
-		// 4. Always log the exception object
-		logExceptionObjectButton = createExceptionGroupButton(stackTraceGroup,
-				Messages.LoggerRuleWizardPage_alwaysAddExceptionParamInLoggerStatement, new SelectionAdapter() {
+		// 3. Always log the exception object
+		logExceptionObjectButton = createCheckBox(checkBoxGroup,
+				Messages.LoggerRuleWizardPage_alwaysAddExceptionParamInLoggerStatement,
+				Messages.LoggerRuleWizardPage_log_exception_object_popup_description,
+				Messages.LoggerRuleWizardPage_log_exception_object_example_before,
+				Messages.LoggerRuleWizardPage_log_exception_object_example_after, new SelectionAdapter() {
 
 					@Override
 					public void widgetSelected(SelectionEvent e) {
@@ -247,16 +259,35 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 						updateLogExceptionObjectOptions(btn);
 					}
 				});
+
+		// 4. defaultForExceptionLog
+		defaultForExceptionLogButton = createCheckBox(checkBoxGroup,
+				Messages.LoggerRuleWizardPage_alwaysUsePrintStacktraceOptionForLoggingException,
+				Messages.LoggerRuleWizardPage_default_log_for_exception_popup_description,
+				Messages.LoggerRuleWizardPage_default_log_for_exception_example_before,
+				Messages.LoggerRuleWizardPage_default_log_for_exception_example_after, new SelectionAdapter() {
+
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						Button btn = (Button) e.getSource();
+						updatePrintingExceptionsOptions(btn);
+					}
+				});
 	}
 	
-	private Button createExceptionGroupButton(Composite parent, String text, SelectionAdapter selectionAdapter) {
+	private Button createCheckBox(Composite parent, String text, String popupDescription, String exampleBefore,
+			String exampleAfter, SelectionAdapter selectionAdapter) {
 		Button button = new Button(parent, SWT.CHECK);
-		GridData gridData = new GridData(SWT.HORIZONTAL, SWT.TOP, true, false, 1, 1);
-		gridData.horizontalSpan = 2;
+		GridData gridData = new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1);
+		gridData.horizontalSpan = 1;
 		gridData.verticalIndent = 5;
 		button.setLayoutData(gridData);
-		button.setText(text);
 		button.addSelectionListener(selectionAdapter);
+		button.addMouseTrackListener(new PopupTrackAdapter(popupDescription, exampleBefore, exampleAfter, button));
+
+		Label label = new Label(parent, SWT.WRAP | SWT.LEFT);
+		label.setText(text);
+
 		return button;
 	}
 	
@@ -274,7 +305,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		} else {
 			value = exceptionsCombo.getItem(0);
 		}
-		controler.selectionChanged(MISSING_LOG_KEY, value);
+		controller.selectionChanged(MISSING_LOG_KEY, value);
 	}
 	
 	private void updatePrintStackTraceOptions(Button btn) {
@@ -284,18 +315,18 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		} else {
 			value = exceptionsCombo.getItem(0);
 		}
-		controler.selectionChanged(PRINT_STACKTRACE_KEY, value);
+		controller.selectionChanged(PRINT_STACKTRACE_KEY, value);
 	}
 
 	private void updatePrintingExceptionsOptions(Button btn) {
 		if (btn.getSelection()) {
 			String comboSelectedItem = exceptionsCombo.getItem(exceptionsCombo.getSelectionIndex());
-			controler.selectionChanged(SYSTEM_OUT_PRINT_EXCEPTION_KEY, comboSelectedItem);
-			controler.selectionChanged(SYSTEM_ERR_PRINT_EXCEPTION_KEY, comboSelectedItem);
+			controller.selectionChanged(SYSTEM_OUT_PRINT_EXCEPTION_KEY, comboSelectedItem);
+			controller.selectionChanged(SYSTEM_ERR_PRINT_EXCEPTION_KEY, comboSelectedItem);
 		} else {
-			controler.selectionChanged(SYSTEM_OUT_PRINT_EXCEPTION_KEY,
+			controller.selectionChanged(SYSTEM_OUT_PRINT_EXCEPTION_KEY,
 					systemOutCombo.getItem(systemOutCombo.getSelectionIndex()));
-			controler.selectionChanged(SYSTEM_ERR_PRINT_EXCEPTION_KEY,
+			controller.selectionChanged(SYSTEM_ERR_PRINT_EXCEPTION_KEY,
 					systemErrCombo.getItem(systemErrCombo.getSelectionIndex()));
 		}
 	}
@@ -307,7 +338,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		} else {
 			value = Boolean.FALSE.toString();
 		}
-		controler.selectionChanged(ATTACH_EXCEPTION_OBJECT, value);
+		controller.selectionChanged(ATTACH_EXCEPTION_OBJECT, value);
 	}
 
 	@Override
@@ -387,4 +418,113 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	public void performHelp() {
 		SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
 	}
+	
+	/**
+	 * A {@link MouseTrackAdapter} for showing a popup on hover. 
+	 *
+	 */
+	class PopupTrackAdapter extends MouseTrackAdapter {
+		private Shell popup;
+		private String popupDescription;
+		private Control parent;
+		private String before;
+		private String after;
+		
+		/**
+		 * Creates a {@link MouseTrackAdapter} for showing a popup on hover.
+		 * 
+		 * @param description
+		 *            the description on the popup.
+		 * @param before
+		 *            code example before applying the rule
+		 * @param after
+		 *            code example after applying the rule
+		 * @param parent
+		 *            parent control of the popup
+		 */
+		public PopupTrackAdapter(String description, String before, String after, Control parent) {
+			this.popupDescription = description;
+			this.parent = parent;
+			this.before = before;
+			this.after = after;
+		}
+		
+		@Override
+		public void mouseEnter(MouseEvent e) {
+			showPopup(popupDescription, before, after, parent);
+		}
+		
+		@Override
+		public void mouseExit(MouseEvent e) {
+			closePopup();
+		}
+		
+		private void showPopup(String popupDescription, String before, String after, Control parent) {
+			if(popup == null) {	
+				popup = new Shell(parent.getShell().getDisplay(),  SWT.RESIZE);
+				
+				GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
+				gridData.horizontalSpan = 1;
+				gridData.widthHint = 400;
+				
+				popup.setLayoutData(gridData);
+				popup.setLayout(new GridLayout(1, false));
+				
+				Label description = new Label(popup, SWT.WRAP | SWT.LEFT);
+				final GridData data = new GridData(SWT.HORIZONTAL, SWT.TOP, true, false, 1, 1);
+				data.horizontalSpan = 1;
+				data.widthHint = 380;
+				description.setLayoutData(data);
+				description.setText(popupDescription);
+				
+				RGB rgbWhite = new RGB(252, 252, 252);
+				RGB rgbBlack = new RGB(60, 60, 60);
+				
+				FontData monospaceFontData = new FontData("Monospace", 9, SWT.NONE); //$NON-NLS-1$
+				Text codeExampleBefore = new Text(popup, SWT.MULTI | SWT.BORDER);
+				codeExampleBefore.setFont(new Font(codeExampleBefore.getDisplay(), monospaceFontData));
+				codeExampleBefore.setEditable(false);
+				codeExampleBefore.setText(before);
+				gridData = new GridData(SWT.FILL, SWT.CENTER, false, true);
+				gridData.horizontalSpan = 1;
+				gridData.widthHint = 310;
+				codeExampleBefore.setLayoutData(gridData);
+				// a work around for disabling the cursor
+				codeExampleBefore.setEnabled(false);
+				codeExampleBefore.setBackground(new Color(Display.getCurrent(), rgbWhite));
+				codeExampleBefore.setForeground(new Color(Display.getCurrent(), rgbBlack));
+				
+				Label willBeTransformedToLabel = new Label(popup, SWT.NONE);
+				willBeTransformedToLabel.setText(Messages.LoggerRuleWizardPage_will_be_transformed_to);
+				willBeTransformedToLabel.setFocus();
+				
+				Text codeExampleAfter = new Text(popup, SWT.MULTI | SWT.BORDER);
+				codeExampleAfter.setEditable(false);
+				codeExampleAfter.setText(after);
+				codeExampleAfter.setFont(new Font(codeExampleAfter.getDisplay(), monospaceFontData));
+				gridData = new GridData(SWT.FILL, SWT.CENTER, false, true);
+				gridData.horizontalSpan = 1;
+				gridData.widthHint = 310;
+				codeExampleAfter.setLayoutData(gridData);
+				// a work around for disabling the cursor
+				codeExampleAfter.setEnabled(false);
+				codeExampleAfter.setBackground(new Color(Display.getCurrent(), rgbWhite));
+				codeExampleAfter.setForeground(new Color(Display.getCurrent(), rgbBlack));
+				
+				popup.setFocus();
+				popup.pack();
+				popup.open();
+				
+				
+			}
+		}
+		
+		private void closePopup() {
+			if(popup != null && !popup.isDisposed()) {
+				popup.close();
+				popup = null;
+			}
+		}
+	}
 }
+
