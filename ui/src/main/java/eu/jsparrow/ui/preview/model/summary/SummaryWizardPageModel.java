@@ -1,4 +1,4 @@
-package eu.jsparrow.ui.preview.model;
+package eu.jsparrow.ui.preview.model.summary;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import eu.jsparrow.core.rule.EliminatedTechnicalDebt;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
+import eu.jsparrow.ui.preview.model.BaseModel;
 
 public class SummaryWizardPageModel extends BaseModel {
 
@@ -34,40 +34,32 @@ public class SummaryWizardPageModel extends BaseModel {
 
 	private Map<RefactoringState, String> finalSource = new HashMap<>();
 
-	private IObservableList<RuleTimesModel> ruleTimes;
+	private IObservableList<RuleTimesModel> ruleTimes = new WritableList<>();
 
-	private IObservableList<ChangedFilesModel> changedFiles;
+	private IObservableList<ChangedFilesModel> changedFiles = new WritableList<>();
 
 	public SummaryWizardPageModel(RefactoringPipeline refactoringPipeline) {
 		this.refactoringPipeline = refactoringPipeline;
+		initialize();
+	}
+
+	private void initialize() {
 		initialSource.putAll(refactoringPipeline.getInitialSourceMap());
 		refactoringPipeline.setSourceMap(finalSource);
+		addModifiedFiles();
+		addRuleTimes();
 	}
 
 	public IObservableList<ChangedFilesModel> getChangedFiles() {
-		IObservableList<ChangedFilesModel> changedFiles = new WritableList<>();
-		refactoringPipeline.getInitialSourceMap()
-			.entrySet()
-			.stream()
-			.filter(this::noChangesOnRefactoringState)
-			.forEach(x -> {
-				RefactoringState state = x.getKey();
-				changedFiles.add(createModelFromRefactoringState(state));
-			});
 		return changedFiles;
 	}
 
+	public void updateFiles() {
+		changedFiles.clear();
+		addModifiedFiles();
+	}
+
 	public IObservableList<RuleTimesModel> getRuleTimes() {
-		IObservableList<RuleTimesModel> ruleTimes = new WritableList<>();
-		refactoringPipeline.getRules()
-			.forEach(x -> {
-				String name = x.getRuleDescription()
-					.getName();
-				int times = RuleApplicationCount.getFor(x)
-					.toInt();
-				RuleTimesModel ruleTimesModel = new RuleTimesModel(name, times);
-				ruleTimes.add(ruleTimesModel);
-			});
 		return ruleTimes;
 	}
 
@@ -98,6 +90,31 @@ public class SummaryWizardPageModel extends BaseModel {
 		return isFreeLicense;
 	}
 
+
+
+	private void addModifiedFiles() {
+		refactoringPipeline.getInitialSourceMap()
+			.entrySet()
+			.stream()
+			.filter(this::hasChanges)
+			.forEach(x -> {
+				RefactoringState state = x.getKey();
+				changedFiles.add(createModelFromRefactoringState(state));
+			});
+	}
+
+	private void addRuleTimes() {
+		refactoringPipeline.getRules()
+			.forEach(x -> {
+				String name = x.getRuleDescription()
+					.getName();
+				int times = RuleApplicationCount.getFor(x)
+					.toInt();
+				RuleTimesModel ruleTimesModel = new RuleTimesModel(name, times);
+				ruleTimes.add(ruleTimesModel);
+			});
+	}
+	
 	private String getPathString(ICompilationUnit compilationUnit) {
 		String temp = compilationUnit.getParent()
 			.getPath()
@@ -105,21 +122,24 @@ public class SummaryWizardPageModel extends BaseModel {
 		return StringUtils.startsWith(temp, "/") ? StringUtils.substring(temp, 1) : temp; //$NON-NLS-1$
 	}
 
-	private boolean noChangesOnRefactoringState(Entry<RefactoringState, String> entry) {
+	private boolean hasChanges(Entry<RefactoringState, String> entry) {
 		RefactoringState state = entry.getKey();
 		// Filter out those refactoring states that were deselected or
 		// have no changes present.
 		if (!state.hasChange()) {
-			return true;
+			return false;
 		}
-		Boolean ignoredRule = refactoringPipeline.getRules()
+		Boolean allRulesIgnored = refactoringPipeline.getRules()
 			.stream()
-			.anyMatch(rule -> state.getIgnoredRules()
+			.allMatch(rule -> state.getIgnoredRules()
 				.contains(rule));
+		if(allRulesIgnored) {
+			return false;
+		}
 		Boolean noChangePresent = refactoringPipeline.getRules()
 			.stream()
-			.noneMatch(rule -> null == state.getChangeIfPresent(rule));
-		return !ignoredRule && !noChangePresent;
+			.allMatch(rule -> null == state.getChangeIfPresent(rule));
+		return !noChangePresent;
 	}
 
 	private ChangedFilesModel createModelFromRefactoringState(RefactoringState state) {
@@ -128,26 +148,6 @@ public class SummaryWizardPageModel extends BaseModel {
 		String left = initialSource.get(state) == null ? "" : initialSource.get(state);
 		String right = finalSource.get(state) == null ? "" : finalSource.get(state);
 		return new ChangedFilesModel(fileName, left, right);
-	}
-
-	public class RuleTimesModel extends BaseModel {
-
-		private String name;
-
-		private Integer times;
-
-		public String getName() {
-			return name;
-		}
-
-		public Integer getTimes() {
-			return times;
-		}
-
-		public RuleTimesModel(String name, Integer times) {
-			this.name = name;
-			this.times = times;
-		}
 	}
 
 }

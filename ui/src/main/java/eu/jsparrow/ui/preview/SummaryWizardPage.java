@@ -39,14 +39,16 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.dialog.CompareInput;
-import eu.jsparrow.ui.preview.model.SummaryWizardPageModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
+import eu.jsparrow.ui.preview.model.summary.SummaryWizardPageModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 @SuppressWarnings({ "restriction", "nls" })
 public class SummaryWizardPage extends WizardPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringSummaryWizardPage.class);
+
+	private DataBindingContext bindingContext;
 
 	private Composite rootComposite;
 
@@ -105,6 +107,7 @@ public class SummaryWizardPage extends WizardPage {
 	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
+			summaryWizardPageModel.updateFiles();
 			createCompareInputControl();
 			summaryWizardPageModel.setIsFreeLicense(LicenseUtil.getInstance()
 				.isFree());
@@ -195,7 +198,7 @@ public class SummaryWizardPage extends WizardPage {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initializeDataBindings() {
-		DataBindingContext bindingContext = new DataBindingContext();
+		bindingContext = new DataBindingContext();
 
 		initializeHeaderDataBindings(bindingContext);
 
@@ -209,7 +212,10 @@ public class SummaryWizardPage extends WizardPage {
 		selectedFile.addValueChangeListener(e -> {
 			ChangedFilesModel selectedItem = (ChangedFilesModel) e.getObservableValue()
 				.getValue();
-			updateCompareInputControl("Test", selectedItem.getSourceLeft(), selectedItem.getSourceRight());
+			if (selectedItem != null) {
+				updateCompareInputControl(selectedItem.getName(), selectedItem.getSourceLeft(),
+						selectedItem.getSourceRight());
+			}
 		});
 
 		IObservableValue isFreeLicenseObservalbeValue = BeanProperties.value("isFreeLicense")

@@ -1,21 +1,18 @@
 package eu.jsparrow.ui.preview.model;
 
-import java.util.Map;
-
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
-import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.EliminatedTechnicalDebt;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RefactoringRuleInterface;
 import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.ui.preview.model.SummaryWizardPageModel.RuleTimesModel;
+import eu.jsparrow.ui.preview.model.summary.RuleTimesModel;
 
-public class RefactoringPreviewWizardModel extends BaseModel{
+public class RefactoringPreviewWizardModel extends BaseModel {
 
 	private WritableValue<String> issuesFixed = new WritableValue<>();
 
