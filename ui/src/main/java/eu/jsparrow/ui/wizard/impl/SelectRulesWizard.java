@@ -110,12 +110,6 @@ public class SelectRulesWizard extends Wizard {
 					.getElementName());
 		logger.info(message);
 
-		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
-			.getSimpleName(),
-				this.javaElements.get(0)
-					.getJavaProject()
-					.getElementName()));
-
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = model.getSelectionAsList();
 
 		refactoringPipeline.setRules(rules);
@@ -216,7 +210,7 @@ public class SelectRulesWizard extends Wizard {
 							.filter(rule -> null != refactoringPipeline.getChangesForRule(rule)
 									&& !refactoringPipeline.getChangesForRule(rule)
 										.isEmpty())
-							.map(RefactoringRule::getName)
+							.map(rule -> rule.getRuleDescription().getName())
 							.collect(Collectors.joining("; ")))); //$NON-NLS-1$
 
 				Shell shell = PlatformUI.getWorkbench()
