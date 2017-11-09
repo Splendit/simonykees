@@ -2,6 +2,7 @@ package eu.jsparrow.core.rule.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.Attributes;
@@ -21,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.StringUtilsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -37,17 +40,16 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 
 	Logger logger = LoggerFactory.getLogger(StringUtilsRule.class);
 
-	/**
-	 * 
-	 */
-	private List<String> supportetVersion = new ArrayList<>();
+	private List<String> supportedVersion = new ArrayList<>();
 
 	public StringUtilsRule() {
 		super();
 		this.visitorClass = StringUtilsASTVisitor.class;
-		this.name = Messages.StringUtilsRule_name;
-		this.description = Messages.StringUtilsRule_description;
-		this.supportetVersion.add(version31);
+		this.supportedVersion.add(version31);
+		this.id = "StringUtils"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StringLiteralEqualityCheckRule_name,
+				Messages.StringLiteralEqualityCheckRule_description, Duration.ofMinutes(10),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -77,7 +79,7 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 							Name key = (Name) attribute;
 							String keyword = key.toString();
 							if ("Implementation-Version".equals(keyword)) { //$NON-NLS-1$
-								if (supportetVersion.stream()
+								if (supportedVersion.stream()
 									.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s))) {
 									return true;
 								} else {

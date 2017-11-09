@@ -1,7 +1,5 @@
 package eu.jsparrow.core.rule;
 
-import java.util.List;
-
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -12,13 +10,7 @@ import eu.jsparrow.core.exception.RefactoringException;
 
 public interface RefactoringRuleInterface {
 
-	public String getName();
-
-	public String getDescription();
-
 	public JavaVersion getRequiredJavaVersion();
-
-	public List<Tag> getTags();
 
 	public boolean isEnabled();
 
@@ -36,5 +28,6 @@ public interface RefactoringRuleInterface {
 	public boolean isSatisfiedJavaVersion();
 
 	public boolean isSatisfiedLibraries();
-
+	
+	public RuleDescription getRuleDescription();
 }

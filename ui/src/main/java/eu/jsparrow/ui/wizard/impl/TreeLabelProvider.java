@@ -30,7 +30,7 @@ public class TreeLabelProvider extends LabelProvider implements IColorProvider {
 	public String getText(Object element) {
 		String s;
 		if (element instanceof RefactoringRule<?>) {
-			s = ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) element).getName();
+			s = ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) element).getRuleDescription().getName();
 		} else {
 			s = (String) element;
 		}

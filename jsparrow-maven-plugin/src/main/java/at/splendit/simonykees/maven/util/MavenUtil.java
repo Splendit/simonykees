@@ -28,7 +28,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
-import at.splendit.simonykees.maven.JsparrowMojo;
+import eu.jsparrow.maven.JsparrowMojo;
 
 /**
  * 

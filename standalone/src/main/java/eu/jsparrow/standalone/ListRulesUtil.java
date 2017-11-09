@@ -75,13 +75,13 @@ public class ListRulesUtil {
 				sb.append(LINE_SEPARATOR_HIPHEN);
 
 				sb.append("Name: ");
-				sb.append(rule.getName());
+				sb.append(rule.getRuleDescription().getName());
 				sb.append("\n");
 
 				sb.append(LINE_SEPARATOR_HIPHEN);
 
 				sb.append("Description: ");
-				sb.append(rule.getDescription());
+				sb.append(rule.getRuleDescription().getDescription());
 				sb.append("\n");
 			});
 		} else {
@@ -125,7 +125,7 @@ public class ListRulesUtil {
 				sb.append(calculateWhitespace(rule.getId()
 					.length(), maxWordLength.orElse(1)));
 				sb.append("| ");
-				sb.append(rule.getName());
+				sb.append(rule.getRuleDescription().getName());
 				sb.append("\n");
 			});
 		} else {
