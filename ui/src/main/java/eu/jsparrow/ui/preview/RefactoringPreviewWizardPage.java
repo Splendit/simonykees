@@ -7,11 +7,15 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.compare.CompareViewerSwitchingPane;
+import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -26,6 +30,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
@@ -35,6 +40,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.wb.swt.ResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +50,9 @@ import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -59,11 +67,18 @@ import eu.jsparrow.ui.util.LicenseUtil;
 public class RefactoringPreviewWizardPage extends WizardPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringPreviewWizardPage.class);
+
+	private CLabel techDebtLabel;
+
+	private CLabel issuesFixedLabel;
+
 	private ICompilationUnit currentCompilationUnit;
 	private IChangePreviewViewer currentPreviewViewer;
 	private CheckboxTableViewer viewer;
 	private Map<ICompilationUnit, DocumentChange> changesForRule;
 	private RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule;
+
+	private RefactoringPreviewWizardModel model;
 	/*
 	 * map that contains all names of working copies and working copies that
 	 * were unselected for this page
@@ -86,6 +101,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		setDescription(rule.getRuleDescription()
 			.getDescription());
 
+		this.model = new RefactoringPreviewWizardModel(rule);
+
 		this.changesForRule = changesForRule;
 		this.rule = rule;
 
@@ -95,6 +112,23 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 			.orElse(null);
 
 		fSelectionStatus = new StatusInfo();
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void initializeDataBindings() {
+		DataBindingContext bindingContext = new DataBindingContext();
+
+		IObservableValue issuesFixedLabelObserveValue = WidgetProperties.text()
+			.observe(issuesFixedLabel);
+		IObservableValue issuesFixedModelObserveValue = BeanProperties.value("issuesFixed")
+			.observe(model);
+		bindingContext.bindValue(issuesFixedLabelObserveValue, issuesFixedModelObserveValue, null, null);
+
+		IObservableValue hoursSavedLabelObserveValue = WidgetProperties.text()
+			.observe(techDebtLabel);
+		IObservableValue hoursSavedModelObserveValue = BeanProperties.value("hoursSaved")
+			.observe(model);
+		bindingContext.bindValue(hoursSavedLabelObserveValue, hoursSavedModelObserveValue, null, null);
 	}
 
 	/*
@@ -118,9 +152,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 		setControl(container);
 
-		Composite statisticsComposite = new Composite(container, SWT.NONE);
-		statisticsComposite.setLayout(new RowLayout());
-		createStatisticsView(statisticsComposite);
+		createStatisticsView(container);
 
 		// Create the SashForm
 		Composite sash = new Composite(container, SWT.NONE);
@@ -141,20 +173,27 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		 */
 		sashForm.setWeights(new int[] { 1, 3 });
 
+		initializeDataBindings();
 	}
 
-	private void createStatisticsView(Composite statisticsComposite) {
-		Label techDebtLabel = new Label(statisticsComposite, SWT.NONE);
-		techDebtLabel.setText("Technical Debt: ");
+	private void createStatisticsView(Composite rootComposite) {
+		Composite composite = new Composite(rootComposite, SWT.NONE);
+		GridLayout layout = new GridLayout(2, true);
+		layout.marginHeight = 10;
+		layout.marginWidth = 10;
+		composite.setLayout(layout);
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
-		Label techDebtValue = new Label(statisticsComposite, SWT.NONE);
-		techDebtValue.setText("02h 15min");
+		issuesFixedLabel = new CLabel(composite, SWT.NONE);
+		issuesFixedLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		issuesFixedLabel.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-bolt.png"));
 
-		Label issuesFixedLabel = new Label(statisticsComposite, SWT.NONE);
-		issuesFixedLabel.setText("Issues Fixed: ");
-
-		Label issuesFixedValue = new Label(statisticsComposite, SWT.NONE);
-		issuesFixedValue.setText("9");
+		techDebtLabel = new CLabel(composite, SWT.NONE);
+		techDebtLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		techDebtLabel.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-clock.png"));
+		
+		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
+		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
 	private void createFileView(Composite parent) {

@@ -80,7 +80,7 @@ public class SummaryWizardPageModel extends ModelObject {
 			.mapToInt(x -> RuleApplicationCount.getFor(x)
 				.toInt())
 			.sum();
-		return String.format("Issues fixed: %d", totalIssuesFixed);
+		return String.format("Issues Fixed: %d", totalIssuesFixed);
 	}
 
 	public String getHoursSaved() {

@@ -198,7 +198,7 @@ public class SummaryWizardPage extends WizardPage {
 	protected void initializeDataBindings() {
 		DataBindingContext bindingContext = new DataBindingContext();
 	
-		bindHeader(bindingContext);
+		initializeHeaderDataBindings(bindingContext);
 
 		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
 				BeanProperties.values("name", "times"));
@@ -225,21 +225,21 @@ public class SummaryWizardPage extends WizardPage {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void bindHeader(DataBindingContext bindingContext) {
+	public void initializeHeaderDataBindings(DataBindingContext bindingContext) {
 		IObservableValue observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
 			.observe(labelExecutionTime);
 		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("executionTime")
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
 				executionTimeSummaryWizardPageModelObserveValue, null, null);
-		//
+		
 		IObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
 			.observe(labelIssuesFixed);
 		IObservableValue issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("issuesFixed")
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelIssuesFixedObserveWidget,
 				issuesFixedSummaryWizardPageModelObserveValue, null, null);
-		//
+		
 		IObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
 			.observe(labelHoursSaved);
 		IObservableValue hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("hoursSaved")
