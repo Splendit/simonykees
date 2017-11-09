@@ -66,7 +66,11 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 		createFieldTypeChoosingPart(composite);
 		createSearchScopeChoosingPart(composite);
 		createConfigureReplacementsPart(composite);
-		createTodoChoosingPart(composite);
+		/*
+		 * FIXME: See SIM-893. Comments with todos should be added as regular
+		 * comments, not in Javadoc style
+		 */
+		// createTodoChoosingPart(composite);
 
 		model.addListener(this::updateView);
 	}
@@ -187,12 +191,16 @@ public class ConfigureRenameFieldsRuleWizardPage extends NewElementWizardPage {
 	}
 
 	/**
+	 * FIXME: See SIM-893. Comments with todos should be added as regular
+	 * comments, not in Javadoc style
+	 * 
 	 * Creates view part for choosing if to-do comments should be added where
 	 * renaming is not possible.
 	 * 
 	 * @param parent
 	 *            holding component
 	 */
+	@SuppressWarnings("unused") // FIXME SIM-893
 	private void createTodoChoosingPart(Composite parent) {
 		Label partTitle = new Label(parent, SWT.NONE);
 		partTitle.setText(Messages.RenameFieldsRuleWizardPage_todoCommentsLabelText);

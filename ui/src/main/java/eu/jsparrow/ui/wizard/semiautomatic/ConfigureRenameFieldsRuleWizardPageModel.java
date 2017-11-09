@@ -35,7 +35,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 		searchScope = ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_PROJECT;
 		underscoreReplacementOption = ConfigureRenameFieldsRuleWizardPageConstants.UNDERSCORE_UPPER;
 		dollarReplacementOption = ConfigureRenameFieldsRuleWizardPageConstants.DOLLAR_UPPER;
-		addTodoComments = true;
+		addTodoComments = false;
 	}
 
 	/**
