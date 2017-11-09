@@ -41,9 +41,9 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final String DASH = "-"; //$NON-NLS-1$
-	private static final String COMMENT_TEMPLLATE = "Rename %s to comply with naming conventions."; //$NON-NLS-1$
+	private static final String COMMENT_TEMPLATE = "Rename %s to comply with naming conventions."; //$NON-NLS-1$
 	private static final String TODO_TAG = "TODO"; //$NON-NLS-1$
-	private static final String STARTIGN_POSITION = "field-starting-position"; //$NON-NLS-1$
+	private static final String STARTING_POSITION = "field-starting-position"; //$NON-NLS-1$
 
 	private Map<String, FieldMetadata> cuRelatedReplacements;
 	private Map<String, List<String>> cuRelatedUnmodifiable;
@@ -103,7 +103,7 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 
 	/**
 	 * Insert a {@link Javadoc} node to the given field declaration. The content
-	 * of the node is obtained by using the template {@link #COMMENT_TEMPLLATE}
+	 * of the node is obtained by using the template {@link #COMMENT_TEMPLATE}
 	 * and the given list of identifiers.
 	 * 
 	 * @param fieldDecl
@@ -122,7 +122,7 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 			.newTagElement();
 		TextElement textElement = fieldDecl.getAST()
 			.newTextElement();
-		textElement.setText(String.format(COMMENT_TEMPLLATE, fragmentNames));
+		textElement.setText(String.format(COMMENT_TEMPLATE, fragmentNames));
 		ListRewrite commentRewriter = astRewrite.getListRewrite(tagElement, TagElement.FRAGMENTS_PROPERTY);
 
 		TextEditGroup editGroup = findTodoEditGroup();
@@ -338,7 +338,7 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	}
 
 	private String calcFieldIdentifier(int startingPosition) {
-		return STARTIGN_POSITION + ":" + startingPosition; //$NON-NLS-1$
+		return STARTING_POSITION + ":" + startingPosition; //$NON-NLS-1$
 	}
 
 	private String calcFieldIdentifier(FieldDeclaration field) {
