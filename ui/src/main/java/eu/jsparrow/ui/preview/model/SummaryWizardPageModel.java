@@ -3,6 +3,7 @@ package eu.jsparrow.ui.preview.model;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -12,9 +13,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.EliminatedTechnicalDebt;
+import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RuleApplicationCount;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 
-public class SummaryWizardPageModel extends ModelObject {
+public class SummaryWizardPageModel extends BaseModel {
 
 	private final RefactoringPipeline refactoringPipeline;
 
@@ -44,14 +48,11 @@ public class SummaryWizardPageModel extends ModelObject {
 		IObservableList<ChangedFilesModel> changedFiles = new WritableList<>();
 		refactoringPipeline.getInitialSourceMap()
 			.entrySet()
+			.stream()
+			.filter(this::noChangesOnRefactoringState)
 			.forEach(x -> {
 				RefactoringState state = x.getKey();
-				ICompilationUnit compUnit = state.getWorkingCopy();
-				String fileName = String.format("%s - %s", compUnit.getElementName(), getPathString(compUnit)); //$NON-NLS-1$
-				String left = initialSource.get(state) == null ? "" : initialSource.get(state);
-				String right = finalSource.get(state) == null ? "" : finalSource.get(state);
-				ChangedFilesModel model = new ChangedFilesModel(fileName, left, right);
-				changedFiles.add(model);
+				changedFiles.add(createModelFromRefactoringState(state));
 			});
 		return changedFiles;
 	}
@@ -104,7 +105,32 @@ public class SummaryWizardPageModel extends ModelObject {
 		return StringUtils.startsWith(temp, "/") ? StringUtils.substring(temp, 1) : temp; //$NON-NLS-1$
 	}
 
-	public class RuleTimesModel extends ModelObject {
+	private boolean noChangesOnRefactoringState(Entry<RefactoringState, String> entry) {
+		RefactoringState state = entry.getKey();
+		// Filter out those refactoring states that were deselected or
+		// have no changes present.
+		if (!state.hasChange()) {
+			return true;
+		}
+		Boolean ignoredRule = refactoringPipeline.getRules()
+			.stream()
+			.anyMatch(rule -> state.getIgnoredRules()
+				.contains(rule));
+		Boolean noChangePresent = refactoringPipeline.getRules()
+			.stream()
+			.noneMatch(rule -> null == state.getChangeIfPresent(rule));
+		return !ignoredRule && !noChangePresent;
+	}
+
+	private ChangedFilesModel createModelFromRefactoringState(RefactoringState state) {
+		ICompilationUnit compUnit = state.getWorkingCopy();
+		String fileName = String.format("%s - %s", compUnit.getElementName(), getPathString(compUnit)); //$NON-NLS-1$
+		String left = initialSource.get(state) == null ? "" : initialSource.get(state);
+		String right = finalSource.get(state) == null ? "" : finalSource.get(state);
+		return new ChangedFilesModel(fileName, left, right);
+	}
+
+	public class RuleTimesModel extends BaseModel {
 
 		private String name;
 
@@ -122,47 +148,6 @@ public class SummaryWizardPageModel extends ModelObject {
 			this.name = name;
 			this.times = times;
 		}
-
-	}
-
-	public class ChangedFilesModel extends ModelObject {
-
-		private String name;
-
-		private String sourceLeft;
-
-		private String sourceRight;
-
-		public ChangedFilesModel(String name) {
-			this.name = name;
-		}
-
-		public ChangedFilesModel(String name, String sourceLeft, String sourceRight) {
-			this(name);
-			this.sourceLeft = sourceLeft;
-			this.sourceRight = sourceRight;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getSourceLeft() {
-			return sourceLeft;
-		}
-
-		public String getSourceRight() {
-			return sourceRight;
-		}
-
-		public void setSourceLeft(String sourceLeft) {
-			this.sourceLeft = sourceLeft;
-		}
-
-		public void setSourceRight(String sourceRight) {
-			firePropertyChange("sourceRight", this.name, this.name = name);
-		}
-
 	}
 
 }

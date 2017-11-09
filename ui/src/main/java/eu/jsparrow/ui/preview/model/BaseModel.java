@@ -3,7 +3,7 @@ package eu.jsparrow.ui.preview.model;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-public class ModelObject {
+public class BaseModel {
 	private final PropertyChangeSupport changeSupport = new PropertyChangeSupport(this);
 
 	public void addPropertyChangeListener(PropertyChangeListener listener) {

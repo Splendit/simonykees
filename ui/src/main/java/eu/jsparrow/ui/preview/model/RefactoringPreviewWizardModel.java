@@ -15,7 +15,7 @@ import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.preview.model.SummaryWizardPageModel.RuleTimesModel;
 
-public class RefactoringPreviewWizardModel {
+public class RefactoringPreviewWizardModel extends BaseModel{
 
 	private WritableValue<String> issuesFixed = new WritableValue<>();
 

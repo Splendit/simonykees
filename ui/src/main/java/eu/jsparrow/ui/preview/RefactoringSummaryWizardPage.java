@@ -80,7 +80,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 		fSelectionStatus = new StatusInfo();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -169,7 +169,6 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 				initialSource.remove(state);
 				finalSource.remove(state);
 			});
-
 		populateFileView();
 
 		if (viewer.getTable()
