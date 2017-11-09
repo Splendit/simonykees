@@ -33,6 +33,7 @@ import eu.jsparrow.core.rule.impl.OrganiseImportsRule;
 import eu.jsparrow.core.rule.impl.OverrideAnnotationRule;
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
+import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
 import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
@@ -199,6 +200,8 @@ public class TagUtil {
 		} else if (ImmutableStaticFinalCollectionsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_2, Tag.CODING_CONVENTIONS);
 
+		} else if (PutIfAbsentRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_8, Tag.OLD_LANGUAGE_CONSTRUCTS);
 		}
 
 		throw new NoSuchElementException("Class:[" + clazz.getName() + "] has no tags defined. Fix this in:["
