@@ -85,6 +85,7 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 			SimpleName newName = ast.newSimpleName(newIdentifier);
 			TextEditGroup editGroup = mData.getTextEditGroup(iCompilationUnit);
 			astRewrite.replace(simpleName, newName, editGroup);
+			onRewrite();
 		});
 
 		return true;
@@ -112,11 +113,15 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 */
 	private void insertJavadocNode(FieldDeclaration fieldDecl, List<String> identifiers) {
 
-		String fragmentNames = identifiers.stream().collect(Collectors.joining(", ")); //$NON-NLS-1$
-		Javadoc javaDoc = fieldDecl.getAST().newJavadoc();
+		String fragmentNames = identifiers.stream()
+			.collect(Collectors.joining(", ")); //$NON-NLS-1$
+		Javadoc javaDoc = fieldDecl.getAST()
+			.newJavadoc();
 
-		TagElement tagElement = fieldDecl.getAST().newTagElement();
-		TextElement textElement = fieldDecl.getAST().newTextElement();
+		TagElement tagElement = fieldDecl.getAST()
+			.newTagElement();
+		TextElement textElement = fieldDecl.getAST()
+			.newTextElement();
 		textElement.setText(String.format(COMMENT_TEMPLLATE, fragmentNames));
 		ListRewrite commentRewriter = astRewrite.getListRewrite(tagElement, TagElement.FRAGMENTS_PROPERTY);
 
@@ -142,7 +147,8 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 		if (this.todosEditGroups.containsKey(this.iCompilationUnit)) {
 			group = todosEditGroups.get(this.iCompilationUnit);
 		} else {
-			group = new TextEditGroup(this.iCompilationUnit.getResource().getName());
+			group = new TextEditGroup(this.iCompilationUnit.getResource()
+				.getName());
 			todosEditGroups.put(this.iCompilationUnit, group);
 		}
 		return group;
@@ -164,15 +170,20 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	private Map<String, FieldMetadata> findRelatedCuDeclarationFragments(CompilationUnit compilationUnit) {
 
 		Map<String, FieldMetadata> declarations = new HashMap<>();
-		metaData.stream().filter(mData -> {
-			IPath originDeclarationPath = mData.getCompilationUnit().getJavaElement().getPath();
-			IPath path = compilationUnit.getJavaElement().getPath();
-			return matchingIPaths(originDeclarationPath, path);
-		}).forEach(mData -> {
-			VariableDeclarationFragment fragment = mData.getFieldDeclaration();
-			SimpleName oldName = fragment.getName();
-			declarations.put(calcIdentifier(oldName), mData);
-		});
+		metaData.stream()
+			.filter(mData -> {
+				IPath originDeclarationPath = mData.getCompilationUnit()
+					.getJavaElement()
+					.getPath();
+				IPath path = compilationUnit.getJavaElement()
+					.getPath();
+				return matchingIPaths(originDeclarationPath, path);
+			})
+			.forEach(mData -> {
+				VariableDeclarationFragment fragment = mData.getFieldDeclaration();
+				SimpleName oldName = fragment.getName();
+				declarations.put(calcIdentifier(oldName), mData);
+			});
 
 		return declarations;
 	}
@@ -188,7 +199,8 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 *         otherwise.
 	 */
 	private boolean matchingIPaths(IPath cuPath, IPath cuOriginPath) {
-		return cuPath.toString().equals(cuOriginPath.toString());
+		return cuPath.toString()
+			.equals(cuOriginPath.toString());
 	}
 
 	/**
@@ -203,10 +215,13 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 *         identifier of a field.
 	 */
 	private Map<String, FieldMetadata> findCuRelatedData(CompilationUnit cu) {
-		IResource cuResource = cu.getJavaElement().getResource();
+		IResource cuResource = cu.getJavaElement()
+			.getResource();
 		List<ReferenceSearchMatch> relatedcuReferences = metaData.stream()
-				.flatMap(mData -> mData.getReferences().stream()).filter(match -> isMatchingResource(cuResource, match))
-				.collect(Collectors.toList());
+			.flatMap(mData -> mData.getReferences()
+				.stream())
+			.filter(match -> isMatchingResource(cuResource, match))
+			.collect(Collectors.toList());
 		Map<String, FieldMetadata> oldToNewKeys = new HashMap<>();
 		relatedcuReferences.forEach(match -> {
 			FieldMetadata relatedMatchData = match.getMetadata();
@@ -231,21 +246,25 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 		IPath currentPath = compilationUnit.getPath();
 		Map<String, List<String>> data = new HashMap<>();
 
-		unmodifiableFields.stream().filter(mData -> {
-			CompilationUnit cu = mData.getCompilationUnit();
-			return matchingIPaths(cu.getJavaElement().getPath(), currentPath);
-		}).forEach(mData -> {
-			FieldDeclaration field = (FieldDeclaration) mData.getFieldDeclaration().getParent();
-			String key = calcFieldIdentifier(field);
-			if (data.containsKey(key)) {
-				List<String> fragmentNames = data.get(key);
-				fragmentNames.add(mData.getNewIdentifier());
-			} else {
-				List<String> fragmentNames = new ArrayList<>();
-				fragmentNames.add(mData.getNewIdentifier());
-				data.put(key, fragmentNames);
-			}
-		});
+		unmodifiableFields.stream()
+			.filter(mData -> {
+				CompilationUnit cu = mData.getCompilationUnit();
+				return matchingIPaths(cu.getJavaElement()
+					.getPath(), currentPath);
+			})
+			.forEach(mData -> {
+				FieldDeclaration field = (FieldDeclaration) mData.getFieldDeclaration()
+					.getParent();
+				String key = calcFieldIdentifier(field);
+				if (data.containsKey(key)) {
+					List<String> fragmentNames = data.get(key);
+					fragmentNames.add(mData.getNewIdentifier());
+				} else {
+					List<String> fragmentNames = new ArrayList<>();
+					fragmentNames.add(mData.getNewIdentifier());
+					data.put(key, fragmentNames);
+				}
+			});
 
 		return data;
 	}
@@ -263,7 +282,10 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 */
 	private boolean isMatchingResource(IResource cuResource, SearchMatch match) {
 		IResource resource = match.getResource();
-		return resource.getFullPath().toString().equals(cuResource.getFullPath().toString());
+		return resource.getFullPath()
+			.toString()
+			.equals(cuResource.getFullPath()
+				.toString());
 	}
 
 	/**
