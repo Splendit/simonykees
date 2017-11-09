@@ -1,14 +1,17 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
 
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.PrimitiveObjectUseEqualsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
- * This rule replaces ==, != when called on primitive objects with equals. 
+ * This rule replaces ==, != when called on primitive objects with equals.
  * 
  * @see PrimitiveObjectUseEqualsASTVisitor
  * 
@@ -19,9 +22,11 @@ public class PrimitiveObjectUseEqualsRule extends RefactoringRule<PrimitiveObjec
 
 	public PrimitiveObjectUseEqualsRule() {
 		super();
-		this.visitor = PrimitiveObjectUseEqualsASTVisitor.class;
-		this.name = Messages.PrimitiveObjectUseEqualsRule_name;
-		this.description = Messages.PrimitiveObjectUseEqualsRule_description;
+		this.visitorClass = PrimitiveObjectUseEqualsASTVisitor.class;
+		this.id = "PrimitiveObjectUseEquals"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.PrimitiveObjectUseEqualsRule_name,
+				Messages.PrimitiveObjectUseEqualsRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

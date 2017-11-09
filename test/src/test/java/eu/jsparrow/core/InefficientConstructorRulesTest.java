@@ -29,7 +29,6 @@ public class InefficientConstructorRulesTest extends SingleRuleTest {
 		rule = new InefficientConstructorRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
-	
 
 	@Test
 	public void testTransformationWithDefaultFile() throws Exception {
@@ -41,7 +40,6 @@ public class InefficientConstructorRulesTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
 
 	@Test
 	public void testTransformationWithPrimitiveFile() throws Exception {
@@ -53,7 +51,6 @@ public class InefficientConstructorRulesTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-
 
 	@Test
 	public void calculateEnabledForProjectShouldBeEnabled() {
@@ -72,6 +69,5 @@ public class InefficientConstructorRulesTest extends SingleRuleTest {
 
 		assertFalse(rule.isEnabled());
 	}
-	
-	
+
 }

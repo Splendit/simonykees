@@ -33,10 +33,10 @@ public class CollectionRemoveAllASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-		if (StringUtils.equals("removeAll", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
-				&& node.getExpression() instanceof SimpleName
-				&& ClassRelationUtil.isInheritingContentOfTypes(node.getExpression().resolveTypeBinding(),
-						Collections.singletonList(collectionFullyQualifiedName))) {
+		if (StringUtils.equals("removeAll", node.getName() //$NON-NLS-1$
+			.getFullyQualifiedName()) && node.getExpression() instanceof SimpleName
+				&& ClassRelationUtil.isInheritingContentOfTypes(node.getExpression()
+					.resolveTypeBinding(), Collections.singletonList(collectionFullyQualifiedName))) {
 
 			@SuppressWarnings("unchecked")
 			List<Expression> arguments = (List<Expression>) node.arguments();
@@ -44,10 +44,12 @@ public class CollectionRemoveAllASTVisitor extends AbstractASTRewriteASTVisitor 
 					&& astMatcher.match((SimpleName) arguments.get(0), node.getExpression())) {
 				logger.debug("replace statement"); //$NON-NLS-1$
 
-				SimpleName clear = node.getAST().newSimpleName("clear"); //$NON-NLS-1$
+				SimpleName clear = node.getAST()
+					.newSimpleName("clear"); //$NON-NLS-1$
 				MethodInvocation newMI = NodeBuilder.newMethodInvocation(node.getAST(),
 						(Expression) astRewrite.createMoveTarget(node.getExpression()), clear);
 				astRewrite.replace(node, newMI, null);
+				onRewrite();
 			}
 		}
 		return true;

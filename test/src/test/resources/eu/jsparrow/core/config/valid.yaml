@@ -1,0 +1,7 @@
+!jsparrow.config
+profiles:
+- name: aaa
+  rules:
+  - OrganiseImportsRule
+rules: []
+selectedProfile: ''

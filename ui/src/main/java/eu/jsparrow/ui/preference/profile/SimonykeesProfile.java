@@ -7,12 +7,14 @@ import java.util.List;
  * @since 0.9.2
  */
 public interface SimonykeesProfile {
-	
+
 	String getProfileName();
 
 	List<String> getEnabledRuleIds();
+
 	public void setEnabledRulesIds(List<String> enabledRulesIds);
+
 	boolean containsRule(String id);
-	
-	boolean isBuiltInProfile();	
+
+	boolean isBuiltInProfile();
 }

@@ -106,7 +106,8 @@ public class TestPrimitiveBoxedForStringWithVariablesRule {
 	}
 
 	public String testIntegertoStringWithParameters(int input) {
-		return Integer.valueOf(input).toString(4);
+		return Integer.valueOf(input)
+			.toString(4);
 	}
 
 	public String test(Integer input) {

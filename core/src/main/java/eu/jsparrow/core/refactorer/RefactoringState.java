@@ -40,7 +40,6 @@ public class RefactoringState {
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ignoredRules = new ArrayList<>();
 
 	public RefactoringState(ICompilationUnit original, ICompilationUnit workingCopy) {
-		super();
 		this.original = original;
 		this.workingCopy = workingCopy;
 	}
@@ -99,8 +98,8 @@ public class RefactoringState {
 	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
 	 * @throws ReflectiveOperationException
-	 *             is thrown if the default constructor of {@link #visitor} is
-	 *             not present and the reflective construction fails.
+	 *             is thrown if the default constructor of {@link #visitorClass}
+	 *             is not present and the reflective construction fails.
 	 * @throws RefactoringException
 	 */
 	public void addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
@@ -113,8 +112,9 @@ public class RefactoringState {
 				initialChanges.put(rule, documentChange);
 			}
 		} else {
-			logger.trace(NLS.bind(ExceptionMessages.RefactoringState_no_changes_found, rule.getName(),
-					workingCopy.getElementName()));
+			String message = NLS.bind(ExceptionMessages.RefactoringState_no_changes_found, rule.getRuleDescription()
+				.getName(), workingCopy.getElementName());
+			logger.trace(message);
 		}
 
 	}
@@ -152,12 +152,12 @@ public class RefactoringState {
 	public void discardWorkingCopy() {
 		try {
 			workingCopy.discardWorkingCopy();
-			original.discardWorkingCopy();
 			workingCopy.close();
 			original.close();
 		} catch (JavaModelException e) {
-			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_discard_working_copy,
-					workingCopy.getPath().toString(), e.getMessage()), e);
+			logger
+				.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_discard_working_copy, workingCopy.getPath()
+					.toString(), e.getMessage()), e);
 		}
 	}
 
@@ -206,8 +206,8 @@ public class RefactoringState {
 			this.workingCopy = original.getWorkingCopy(null);
 			changes.clear();
 		} catch (JavaModelException e) {
-			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_reset_working_copy,
-					workingCopy.getPath().toString(), e.getMessage()), e);
+			logger.error(NLS.bind(ExceptionMessages.RefactoringState_unable_to_reset_working_copy, workingCopy.getPath()
+				.toString(), e.getMessage()), e);
 		}
 	}
 }

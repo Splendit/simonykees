@@ -1,8 +1,12 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.CollectionRemoveAllASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -16,13 +20,16 @@ public class CollectionRemoveAllRule extends RefactoringRule<CollectionRemoveAll
 
 	public CollectionRemoveAllRule() {
 		super();
-		this.visitor = CollectionRemoveAllASTVisitor.class;
-		this.name = Messages.CollectionRemoveAllRule_name;
-		this.description = Messages.CollectionRemoveAllRule_description;
+		this.visitorClass = CollectionRemoveAllASTVisitor.class;
+		this.id = "CollectionRemoveAll"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.CollectionRemoveAllRule_name,
+				Messages.CollectionRemoveAllRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_2;
 	}
+
 }

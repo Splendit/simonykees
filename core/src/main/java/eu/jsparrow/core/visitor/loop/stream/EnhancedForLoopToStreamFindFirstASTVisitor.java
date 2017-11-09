@@ -132,8 +132,9 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			List<Expression> boxingExpresions = new ArrayList<>();
 			Expression orElseExpression = checkInitializerImlicitCasting(varDeclFragment, tailingMap, boxingExpresions,
 					loopExpression);
-			List<Expression> mapCopyTargets = tailingMap.stream().map(e -> (Expression) astRewrite.createCopyTarget(e))
-					.collect(Collectors.toList());
+			List<Expression> mapCopyTargets = tailingMap.stream()
+				.map(e -> (Expression) astRewrite.createCopyTarget(e))
+				.collect(Collectors.toList());
 			mapCopyTargets.addAll(boxingExpresions);
 
 			MethodInvocation methodInvocation = createStreamFindFirstInitalizer(loopExpression, ifCondition,
@@ -141,6 +142,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 
 			astRewrite.replace(varDeclFragment.getInitializer(), methodInvocation, null);
 			replaceLoopWithFragment(forLoop, varDeclFragment);
+			onRewrite();
 
 		} else if ((returnStatement = isConvertableWithReturn(thenStatement, forLoop, loopParameter.getName(),
 				tailingMap)) != null) {
@@ -150,20 +152,23 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			List<Expression> boxingExpresions = new ArrayList<>();
 			Expression orElseExpression = boxReturnExpressionIfPrimitive(returnStatement, tailingMap, boxingExpresions,
 					loopExpression);
-			List<Expression> mapCopyTargets = tailingMap.stream().map(e -> (Expression) astRewrite.createCopyTarget(e))
-					.collect(Collectors.toList());
+			List<Expression> mapCopyTargets = tailingMap.stream()
+				.map(e -> (Expression) astRewrite.createCopyTarget(e))
+				.collect(Collectors.toList());
 			mapCopyTargets.addAll(boxingExpresions);
 			MethodInvocation methodInvocation = createStreamFindFirstInitalizer(loopExpression, ifCondition,
 					loopParameter, orElseExpression, mapCopyTargets);
 			astRewrite.replace(returnStatement.getExpression(), methodInvocation, null);
 			astRewrite.remove(forLoop, null);
+			onRewrite();
 		}
 
 		return true;
 	}
 
 	private boolean containsNonEffectiveVariable(List<Expression> tailingMap) {
-		return tailingMap.stream().anyMatch(this::containsNonEffectivelyFinalVariable);
+		return tailingMap.stream()
+			.anyMatch(this::containsNonEffectivelyFinalVariable);
 	}
 
 	/**
@@ -183,7 +188,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			/*
 			 * The returned expression should be a new node.
 			 */
-			return (Expression)astRewrite.createCopyTarget(expression);
+			return (Expression) astRewrite.createCopyTarget(expression);
 		}
 
 		AST ast = expression.getAST();
@@ -221,7 +226,8 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 	private Expression checkInitializerImlicitCasting(VariableDeclarationFragment declarationFragment,
 			List<Expression> tailingMap, List<Expression> boxingExpression, Expression loopExpression) {
 		Expression initializer = declarationFragment.getInitializer();
-		ITypeBinding expectedType = declarationFragment.getName().resolveTypeBinding();
+		ITypeBinding expectedType = declarationFragment.getName()
+			.resolveTypeBinding();
 		return checkImplicitCasting(tailingMap, boxingExpression, loopExpression, initializer, expectedType);
 	}
 
@@ -295,7 +301,8 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 		if (tailingMap.isEmpty()) {
 			streamType = (loopExpression.resolveTypeBinding()).getTypeArguments()[0];
 		} else {
-			streamType = tailingMap.get(tailingMap.size() - 1).resolveTypeBinding();
+			streamType = tailingMap.get(tailingMap.size() - 1)
+				.resolveTypeBinding();
 		}
 		streamTypeBoxed = ClassRelationUtil.findBoxedTypeOfPrimitive(streamType);
 
@@ -465,8 +472,8 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 	 */
 	private List<Expression> wrapNonIdentical(Expression expression, SimpleName parameter) {
 		List<Expression> tailingMapExpressions = new ArrayList<>();
-		if (ASTNode.SIMPLE_NAME != expression.getNodeType()
-				|| !((SimpleName) expression).getIdentifier().equals(parameter.getIdentifier())) {
+		if (ASTNode.SIMPLE_NAME != expression.getNodeType() || !((SimpleName) expression).getIdentifier()
+			.equals(parameter.getIdentifier())) {
 			tailingMapExpressions.add(expression);
 		}
 

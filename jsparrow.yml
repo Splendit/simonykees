@@ -1,62 +1,68 @@
 !jsparrow.config
 
-# specify one of the profiles declared below as the default profile.
-# if the defaultProfile is not specified the rules in the “rules:” section will be applied
-defaultProfile: profile1
+# specify one of the profiles declared below as the selected profile.
+# if the selectedProfile is not specified the rules in the “rules:” section will be applied
+selectedProfile: profile1
 
 # define profiles here
 profiles:
   - name: profile1
     rules:
-      - TryWithResourceRule
-      - MultiCatchRule
-      - FunctionalInterfaceRule
-      - CollectionRemoveAllRule
-      - DiamondOperatorRule
-      - OverrideAnnotationRule
+      - TryWithResource
+      - MultiCatch
+      - FunctionalInterface
+      - CollectionRemoveAll
+      - DiamondOperator
+      - OverrideAnnotation
+  - name: profile2
+    rules:
+      - SerialVersionUid
+      - RearrangeClassMembers
+      - BracketsToControl
+      - FieldNameConvention
+      - MultiVariableDeclarationLine
 
-# rules in this section will be executed, if no profile has been specified as defaultProfile or via maven.
+# rules in this section will be executed, if no profile has been specified as selectedProfile or via maven.
 # to deactivate rules, they could be commented with the #-sign
 rules:
-  - TryWithResourceRule
-  - MultiCatchRule
-  - FunctionalInterfaceRule
-  - CollectionRemoveAllRule
-  - DiamondOperatorRule
-  - OverrideAnnotationRule
-  - SerialVersionUidRule
-  - RearrangeClassMembersRule
-  - BracketsToControlRule
-  - FieldNameConventionRule
-  - MultiVariableDeclarationLineRule
-  - EnumsWithoutEqualsRule
-  - ReImplementingInterfaceRule
-  - ImmutableStaticFinalCollectionsRule
-  - RemoveNewStringConstructorRule
-  - InefficientConstructorRule
-  - PrimitiveBoxedForStringRule
-  - StringFormatLineSeparatorRule
-  - IndexOfToContainsRule
-  - RemoveToStringOnStringRule
-  - StringUtilsRule
-  - StringLiteralEqualityCheckRule
-  - StringConcatToPlusRule
-  - UseIsEmptyRule
-  - ArithmethicAssignmentRule
-  - StringBufferToBuilderRule
-  - PrimitiveObjectUseEqualsRule
-  - WhileToForEachRule
-  - ForToForEachRule
-  - EnhancedForLoopToStreamForEachRule
-  - LambdaForEachIfWrapperToFilterRule
-  - StatementLambdaToExpressionRule
-  - LambdaForEachCollectRule
-  - LambdaForEachMapRule
-  - FlatMapInsteadOfNestedLoopsRule
-  - EnhancedForLoopToStreamAnyMatchRule
-  - EnhancedForLoopToStreamFindFirstRule
-  - EnhancedForLoopToStreamSumRule
-  - StringBuildingLoopRule
-  - LambdaToMethodReferenceRule
-  - CodeFormatterRule
-  - OrganiseImportsRule
+  - TryWithResource
+  - MultiCatch
+  - FunctionalInterface
+  - CollectionRemoveAll
+  - DiamondOperator
+  - OverrideAnnotation
+  - SerialVersionUid
+  - RearrangeClassMembers
+  - BracketsToControl
+  - FieldNameConvention
+  - MultiVariableDeclarationLine
+  - EnumsWithoutEquals
+  - ReImplementingInterface
+  - ImmutableStaticFinalCollections
+  - RemoveNewStringConstructor
+  - InefficientConstructor
+  - PrimitiveBoxedForString
+  - StringFormatLineSeparator
+  - IndexOfToContains
+  - RemoveToStringOnString
+  - StringUtils
+  - StringLiteralEqualityCheck
+  - StringConcatToPlus
+  - UseIsEmpty
+  - ArithmethicAssignment
+  - StringBufferToBuilder
+  - PrimitiveObjectUseEquals
+  - WhileToForEach
+  - ForToForEach
+  - EnhancedForLoopToStreamForEach
+  - LambdaForEachIfWrapperToFilter
+  - StatementLambdaToExpression
+  - LambdaForEachCollect
+  - LambdaForEachMap
+  - FlatMapInsteadOfNestedLoops
+  - EnhancedForLoopToStreamAnyMatch
+  - EnhancedForLoopToStreamFindFirst
+  - EnhancedForLoopToStreamSum
+  - StringBuildingLoop
+  - LambdaToMethodReference
+  - CodeFormatter

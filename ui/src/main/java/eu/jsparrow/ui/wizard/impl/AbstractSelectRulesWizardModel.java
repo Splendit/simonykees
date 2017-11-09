@@ -114,14 +114,15 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	@Override
 	@SuppressWarnings("unchecked")
 	public void moveToRight(IStructuredSelection selectedElements) {
-		selectedElements.toList().stream().filter(
-				posibility -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled())
-				.forEach(posibility -> {
-					selection.add(posibility);
-					posibilities.remove(posibility);
-					recentlyMoved.add(posibility);
-					changed = true;
-				});
+		selectedElements.toList()
+			.stream()
+			.filter(posibility -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled())
+			.forEach(posibility -> {
+				selection.add(posibility);
+				posibilities.remove(posibility);
+				recentlyMoved.add(posibility);
+				changed = true;
+			});
 		movedToRight = true;
 		notifyListeners();
 	}
@@ -135,13 +136,13 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	@SuppressWarnings("unchecked")
 	public void moveAllToRight() {
 		Set<Object> currentPosibilities = filterPosibilitiesByName();
-		currentPosibilities.stream().filter(
-				posibility -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled())
-				.forEach(posibility -> {
-					selection.add(posibility);
-					posibilities.remove(posibility);
-					changed = true;
-				});
+		currentPosibilities.stream()
+			.filter(posibility -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled())
+			.forEach(posibility -> {
+				selection.add(posibility);
+				posibilities.remove(posibility);
+				changed = true;
+			});
 		notifyListeners();
 	}
 
@@ -202,9 +203,10 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		if (removeDisabled) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
-			currentPosibilities.stream().filter(
-					posibility -> !((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled())
-					.forEach(applicable::remove);
+			currentPosibilities.stream()
+				.filter(posibility -> !((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility)
+					.isEnabled())
+				.forEach(applicable::remove);
 		}
 	}
 
@@ -214,9 +216,10 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 		if (doit) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
-			currentPosibilities.stream().filter(
-					posibility -> !((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled())
-					.forEach(posibilities::remove);
+			currentPosibilities.stream()
+				.filter(posibility -> !((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility)
+					.isEnabled())
+				.forEach(posibilities::remove);
 		} else {
 			posibilities.clear();
 			posibilities.addAll(rules);
@@ -229,8 +232,8 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	@SuppressWarnings("unchecked")
 	public List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectionAsList() {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = selection.stream()
-				.map(object -> (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object)
-				.collect(Collectors.toList());
+			.map(object -> (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object)
+			.collect(Collectors.toList());
 		Collections.sort(rules, new Comparator<RefactoringRule<? extends AbstractASTRewriteASTVisitor>>() {
 			@Override
 			public int compare(RefactoringRule<? extends AbstractASTRewriteASTVisitor> o1,
@@ -243,9 +246,12 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	}
 
 	private int indexOfRuleInSortedList(RefactoringRule<? extends AbstractASTRewriteASTVisitor> searchedRule) {
-		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> sortedRules = RulesContainer.getAllRules(false);
+		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> sortedRules = RulesContainer
+			.getAllRules(false);
 		for (int i = 0; i < sortedRules.size(); i++) {
-			if (sortedRules.get(i).getName().equals(searchedRule.getName())) {
+			if (sortedRules.get(i)
+				.getRuleDescription().getName()
+				.equals(searchedRule.getRuleDescription().getName())) {
 				return i;
 			}
 		}
@@ -305,18 +311,19 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 				&& !StringUtils.isEmpty(currentProfileId)) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
-			currentPosibilities.stream().filter(
-					posibility -> SimonykeesPreferenceManager.getProfileFromName(currentProfileId).containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
+			currentPosibilities.stream()
+				.filter(posibility -> SimonykeesPreferenceManager.getProfileFromName(currentProfileId)
+					.containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
 							// SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
 							((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getId()))
-					.forEach(posibility -> {
-						if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
-							selection.add(posibility);
-							posibilities.remove(posibility);
-						} else {
-							unapplicableRules.add(posibility);
-						}
-					});
+				.forEach(posibility -> {
+					if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
+						selection.add(posibility);
+						posibilities.remove(posibility);
+					} else {
+						unapplicableRules.add(posibility);
+					}
+				});
 		}
 
 		setChanged(true);
@@ -326,7 +333,9 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 	public void removeAlreadySelected() {
 		Set<Object> currentPosibilities = new HashSet<>();
 		currentPosibilities.addAll(posibilities);
-		currentPosibilities.stream().filter(selection::contains).forEach(posibilities::remove);
+		currentPosibilities.stream()
+			.filter(selection::contains)
+			.forEach(posibilities::remove);
 	}
 
 }

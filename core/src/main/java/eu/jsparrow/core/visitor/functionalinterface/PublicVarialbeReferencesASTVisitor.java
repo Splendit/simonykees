@@ -17,7 +17,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 /**
  * A visitor for finding references of variables that are not local variables
- * and are <em>NOT</em> assigned <em>inside</em> the node which is being visited.
+ * and are <em>NOT</em> assigned <em>inside</em> the node which is being
+ * visited.
  * 
  * @author Ardit Ymeri
  * @since 2.0
@@ -31,13 +32,15 @@ public class PublicVarialbeReferencesASTVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(VariableDeclarationFragment fragment) {
-		localVariableNames.add(fragment.getName().getIdentifier());
+		localVariableNames.add(fragment.getName()
+			.getIdentifier());
 		return true;
 	}
 
 	@Override
 	public boolean visit(SingleVariableDeclaration singleVarDeclaration) {
-		localVariableNames.add(singleVarDeclaration.getName().getIdentifier());
+		localVariableNames.add(singleVarDeclaration.getName()
+			.getIdentifier());
 		return true;
 	}
 
@@ -71,8 +74,9 @@ public class PublicVarialbeReferencesASTVisitor extends ASTVisitor {
 	 *         {@code false} otherwise
 	 */
 	private boolean isReferenced(SimpleName simpleName) {
-		return getPublicVariableReferences().stream().map(SimpleName::getIdentifier)
-				.anyMatch(id -> id.equals(simpleName.getIdentifier()));
+		return getPublicVariableReferences().stream()
+			.map(SimpleName::getIdentifier)
+			.anyMatch(id -> id.equals(simpleName.getIdentifier()));
 	}
 
 	/**
@@ -85,8 +89,8 @@ public class PublicVarialbeReferencesASTVisitor extends ASTVisitor {
 	 * @return {@code true} if a match is found, or {@code false} otherwise.
 	 */
 	private boolean isLocalVariable(SimpleName simpleName) {
-		return simpleName.getLocationInParent() != FieldAccess.NAME_PROPERTY
-				&& localVariableNames.stream().anyMatch(s -> s.equals(simpleName.getIdentifier()));
+		return simpleName.getLocationInParent() != FieldAccess.NAME_PROPERTY && localVariableNames.stream()
+			.anyMatch(s -> s.equals(simpleName.getIdentifier()));
 	}
 
 	public List<SimpleName> getPublicVariableReferences() {
@@ -101,9 +105,10 @@ public class PublicVarialbeReferencesASTVisitor extends ASTVisitor {
 	 */
 	public List<SimpleName> getUnassignedVariableReferences() {
 		return publicVariableReferences.stream()
-				.filter(ref -> !assignedPublicVariables.stream()
-						.anyMatch(assigned -> assigned.getIdentifier().equals(ref.getIdentifier())))
-				.collect(Collectors.toList());
+			.filter(ref -> !assignedPublicVariables.stream()
+				.anyMatch(assigned -> assigned.getIdentifier()
+					.equals(ref.getIdentifier())))
+			.collect(Collectors.toList());
 	}
 
 	public List<SimpleName> getAssignedPublicVariables() {

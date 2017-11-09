@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class SecureStoreTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(SecureStoreTest.class);
-	
+
 	private File file;
 
 	@Rule
@@ -45,9 +45,12 @@ public class SecureStoreTest {
 	@Test
 	public void testPrivateSecureStore() throws IOException, StorageException {
 		logger.info(file.toString());
-		ISecurePreferences iSecurePreferences = SecurePreferencesFactory.open(file.toURI().toURL(), null);
-		iSecurePreferences.node("simonykees").put("key", "value", false);
-		logger.info(iSecurePreferences.node("simonykees").get("key", ""));
+		ISecurePreferences iSecurePreferences = SecurePreferencesFactory.open(file.toURI()
+			.toURL(), null);
+		iSecurePreferences.node("simonykees")
+			.put("key", "value", false);
+		logger.info(iSecurePreferences.node("simonykees")
+			.get("key", ""));
 		iSecurePreferences.flush();
 	}
 

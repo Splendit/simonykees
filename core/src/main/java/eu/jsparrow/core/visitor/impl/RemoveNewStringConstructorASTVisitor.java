@@ -28,9 +28,10 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTV
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
-		if (ClassRelationUtil.isContentOfTypes(node.getType().resolveBinding(),
-				generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
-				&& ASTNode.EXPRESSION_STATEMENT != node.getParent().getNodeType()) {
+		if (ClassRelationUtil.isContentOfTypes(node.getType()
+			.resolveBinding(), generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
+				&& ASTNode.EXPRESSION_STATEMENT != node.getParent()
+					.getNodeType()) {
 
 			/**
 			 * node.arguments() javadoc shows that its elements are at least
@@ -47,7 +48,8 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTV
 					/**
 					 * new String() resolves to ""
 					 */
-					replacement = node.getAST().newStringLiteral();
+					replacement = node.getAST()
+						.newStringLiteral();
 					arguments = null;
 					break;
 
@@ -60,13 +62,13 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTV
 					arguments = null;
 					if (argument instanceof StringLiteral
 							|| ClassRelationUtil.isContentOfTypes(argument.resolveTypeBinding(),
-									generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
+									generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 						if (argument instanceof ParenthesizedExpression) {
 							argument = ASTNodeUtil.unwrapParenthesizedExpression(argument);
 						}
-						if (ASTNode.CLASS_INSTANCE_CREATION == argument.getNodeType() && ClassRelationUtil
-								.isContentOfTypes(((ClassInstanceCreation) argument).getType().resolveBinding(),
-										generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
+						if (ASTNode.CLASS_INSTANCE_CREATION == argument.getNodeType()
+								&& ClassRelationUtil.isContentOfTypes(((ClassInstanceCreation) argument).getType()
+									.resolveBinding(), generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 							arguments = (List<Expression>) ((ClassInstanceCreation) argument).arguments();
 						}
 						replacement = argument;
@@ -80,6 +82,7 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTV
 			} while (arguments != null);
 			if (replacement != null) {
 				astRewrite.replace(node, replacement, null);
+				onRewrite();
 			}
 		}
 		return true;

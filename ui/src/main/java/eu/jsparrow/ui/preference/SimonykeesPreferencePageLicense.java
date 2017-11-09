@@ -79,7 +79,8 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	public SimonykeesPreferencePageLicense() {
 		super();
-		setPreferenceStore(Activator.getDefault().getPreferenceStore());
+		setPreferenceStore(Activator.getDefault()
+			.getPreferenceStore());
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 	}
 
@@ -136,7 +137,8 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		jSparrowLink.setText(Messages.SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow);
 
 		licenseStatusLabel = new Label(composite, SWT.NONE);
-		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont()).setStyle(SWT.BOLD);
+		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont())
+			.setStyle(SWT.BOLD);
 		licenseStatusLabel.setFont(boldDescriptor.createFont(composite.getDisplay()));
 		licenseStatusLabel.setForeground(display.getSystemColor(SWT.COLOR_RED));
 		licenseStatusLabel.setVisible(true);
@@ -162,7 +164,10 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				try {
-					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(arg0.text));
+					PlatformUI.getWorkbench()
+						.getBrowserSupport()
+						.getExternalBrowser()
+						.openURL(new URL(arg0.text));
 				} catch (PartInitException | MalformedURLException e) {
 					// nothing...
 				}
@@ -199,8 +204,10 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			logger.error(ExceptionMessages.SimonykeesPreferencePageLicense_license_service_unavailable);
 		}
 
-		licenseLabel.getParent().pack();
-		licenseLabel.getParent().layout(true);
+		licenseLabel.getParent()
+			.pack();
+		licenseLabel.getParent()
+			.layout(true);
 	}
 
 }

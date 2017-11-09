@@ -32,39 +32,47 @@ public class SerialVersionUidASTVisitor extends AbstractASTRewriteASTVisitor {
 	public boolean visit(FieldDeclaration node) {
 
 		// test if it a primitive long, otherwise ignore this node
-		if (!(node.getType().isPrimitiveType()
-				&& PrimitiveType.LONG.equals(((PrimitiveType) node.getType()).getPrimitiveTypeCode()))) {
+		if (!(node.getType()
+			.isPrimitiveType() && PrimitiveType.LONG.equals(((PrimitiveType) node.getType()).getPrimitiveTypeCode()))) {
 			return true;
 		}
 
 		// check if improvements can be done
 		CheckSerialUidASTVisitor checkSerialUidASTVisitor = new CheckSerialUidASTVisitor();
 		node.accept(checkSerialUidASTVisitor);
-		if (checkSerialUidASTVisitor.getSerialUidNode() != null
-				&& !checkSerialUidASTVisitor.getWantedKeyWords().isEmpty()) {
+		if (checkSerialUidASTVisitor.getSerialUidNode() != null && !checkSerialUidASTVisitor.getWantedKeyWords()
+			.isEmpty()) {
 
 			/*
 			 * only one variable is defined in this FieldDeclaration.
 			 * FieldDeclaration -> (Modifiers) (Type) (Fragments)
 			 */
-			if (1 == node.fragments().size()) {
+			if (1 == node.fragments()
+				.size()) {
 				ListRewrite modifieresRewrite = astRewrite.getListRewrite(node, FieldDeclaration.MODIFIERS2_PROPERTY);
-				checkSerialUidASTVisitor.getWantedKeyWords().forEach(modifierKeyword -> modifieresRewrite.insertLast(node.getAST().newModifier(modifierKeyword), null));
+				checkSerialUidASTVisitor.getWantedKeyWords()
+					.forEach(modifierKeyword -> modifieresRewrite.insertLast(node.getAST()
+						.newModifier(modifierKeyword), null));
 			}
 			/*
 			 * if two or more variables are defined in one statement, we split
 			 * the declaration.
 			 */
-			else if (1 < node.fragments().size()) {
+			else if (1 < node.fragments()
+				.size()) {
 				ListRewrite fragmentsRewrite = astRewrite.getListRewrite(node, FieldDeclaration.FRAGMENTS_PROPERTY);
 				fragmentsRewrite.remove(checkSerialUidASTVisitor.getSerialUidNode(), null);
 				VariableDeclarationFragment serialUidNode = (VariableDeclarationFragment) astRewrite
-						.createMoveTarget(checkSerialUidASTVisitor.getSerialUidNode());
+					.createMoveTarget(checkSerialUidASTVisitor.getSerialUidNode());
 				List<ASTNode> newModifier = new ArrayList<>();
-				ASTNodeUtil.convertToTypedList(node.modifiers(), Modifier.class).stream().filter(m -> m instanceof ASTNode)
-				.forEach(m -> newModifier.add(astRewrite.createCopyTarget((ASTNode) m)));
-				checkSerialUidASTVisitor.getWantedKeyWords().stream()
-						.forEach(mk -> newModifier.add(node.getAST().newModifier(mk)));
+				ASTNodeUtil.convertToTypedList(node.modifiers(), Modifier.class)
+					.stream()
+					.filter(m -> m instanceof ASTNode)
+					.forEach(m -> newModifier.add(astRewrite.createCopyTarget((ASTNode) m)));
+				checkSerialUidASTVisitor.getWantedKeyWords()
+					.stream()
+					.forEach(mk -> newModifier.add(node.getAST()
+						.newModifier(mk)));
 				Type newType = (Type) astRewrite.createCopyTarget(node.getType());
 				FieldDeclaration newField = NodeBuilder.newFieldDeclaration(node.getAST(), newType, serialUidNode,
 						newModifier);
@@ -74,8 +82,9 @@ public class SerialVersionUidASTVisitor extends AbstractASTRewriteASTVisitor {
 				 */
 				if (node.getLocationInParent() instanceof ChildListPropertyDescriptor) {
 					astRewrite
-							.getListRewrite(node.getParent(), (ChildListPropertyDescriptor) node.getLocationInParent())
-							.insertFirst(newField, null);
+						.getListRewrite(node.getParent(), (ChildListPropertyDescriptor) node.getLocationInParent())
+						.insertFirst(newField, null);
+					onRewrite();
 				}
 			}
 		}
@@ -98,7 +107,8 @@ public class SerialVersionUidASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		@Override
 		public boolean visit(VariableDeclarationFragment node) {
-			if (StringUtils.equals(node.getName().getIdentifier(), "serialVersionUID")) { //$NON-NLS-1$
+			if (StringUtils.equals(node.getName()
+				.getIdentifier(), "serialVersionUID")) { //$NON-NLS-1$
 				serialUidNode = node;
 			}
 			return true;

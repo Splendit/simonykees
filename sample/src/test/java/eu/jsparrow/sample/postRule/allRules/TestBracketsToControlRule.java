@@ -23,7 +23,8 @@ public class TestBracketsToControlRule {
 		for (int i = 1; i < 2; i++) {
 			;
 		}
-		Arrays.asList(1, 2, 3).forEach(i -> logger.info(String.valueOf(i)));
+		Arrays.asList(1, 2, 3)
+			.forEach(i -> logger.info(String.valueOf(i)));
 	}
 
 	public static void thestWhileLoop() {

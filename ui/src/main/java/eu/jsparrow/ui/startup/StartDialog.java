@@ -113,18 +113,21 @@ public class StartDialog extends Dialog {
 		titleContainer.setLayoutData(gridData);
 
 		Dialog.applyDialogFont(parent);
-		Font font = parent.getDisplay().getSystemFont();
+		Font font = parent.getDisplay()
+			.getSystemFont();
 		FontData fontData = font.getFontData()[0];
 
-		FontDescriptor titleFontDescription = FontDescriptor.createFrom(font).setHeight(fontData.getHeight() * 2);
+		FontDescriptor titleFontDescription = FontDescriptor.createFrom(font)
+			.setHeight(fontData.getHeight() * 2);
 		titleFont = titleFontDescription.createFont(parent.getDisplay());
 		FontDescriptor paragraphTitleFontDescription = FontDescriptor.createFrom(font)
-				.setHeight(fontData.getHeight() * 3 / 2);
+			.setHeight(fontData.getHeight() * 3 / 2);
 		paragraphTitleFont = paragraphTitleFontDescription.createFont(parent.getDisplay());
 		FontDescriptor paragraphTextFontDescription = FontDescriptor.createFrom(font)
-				.setHeight(fontData.getHeight() * 6 / 5);
+			.setHeight(fontData.getHeight() * 6 / 5);
 		paragraphTextFont = paragraphTextFontDescription.createFont(parent.getDisplay());
-		FontDescriptor instructionsFontDescription = FontDescriptor.createFrom(font).setStyle(SWT.BOLD);
+		FontDescriptor instructionsFontDescription = FontDescriptor.createFrom(font)
+			.setStyle(SWT.BOLD);
 		instructionsFont = instructionsFontDescription.createFont(parent.getDisplay());
 
 		Label logoLabel = new Label(titleContainer, SWT.NONE);
@@ -298,10 +301,10 @@ public class StartDialog extends Dialog {
 		buyLicenseLabel.setText(Messages.StartDialog_buyLicenseLabel);
 
 		Link licenseLinkLabel = new Link(parent, SWT.NONE);
-	    gridData = new GridData();
-	    gridData.verticalIndent = 12;
-	    gridData.widthHint = 320;
-	    licenseLinkLabel.setLayoutData(gridData);
+		gridData = new GridData();
+		gridData.verticalIndent = 12;
+		gridData.widthHint = 320;
+		licenseLinkLabel.setLayoutData(gridData);
 		licenseLinkLabel.setText(Messages.StartDialog_licenseLinkLabel);
 		addLinkSelectionListener(licenseLinkLabel);
 
@@ -402,9 +405,11 @@ public class StartDialog extends Dialog {
 			Rectangle r2 = t.computeTrim(r1.x, r1.y, r1.width, r1.height);
 			Point p = t.computeSize(SWT.DEFAULT, SWT.DEFAULT, true);
 			// t.getHorizontalBar().setVisible(r2.width <= p.x);
-			t.getVerticalBar().setVisible(r2.height <= p.y);
+			t.getVerticalBar()
+				.setVisible(r2.height <= p.y);
 			if (event.type == SWT.Modify) {
-				t.getParent().layout(true);
+				t.getParent()
+					.layout(true);
 				t.showSelection();
 			}
 		};
@@ -513,7 +518,10 @@ public class StartDialog extends Dialog {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				try {
-					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(arg0.text));
+					PlatformUI.getWorkbench()
+						.getBrowserSupport()
+						.getExternalBrowser()
+						.openURL(new URL(arg0.text));
 				} catch (PartInitException | MalformedURLException e) {
 					logger.error(e.getMessage(), e);
 				}

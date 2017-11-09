@@ -1,8 +1,12 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.RemoveToStringOnStringASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -16,13 +20,16 @@ public class RemoveToStringOnStringRule extends RefactoringRule<RemoveToStringOn
 
 	public RemoveToStringOnStringRule() {
 		super();
-		this.visitor = RemoveToStringOnStringASTVisitor.class;
-		this.name = Messages.RemoveToStringOnStringRule_name;
-		this.description = Messages.RemoveToStringOnStringRule_description;
+		this.visitorClass = RemoveToStringOnStringASTVisitor.class;
+		this.id = "RemoveToStringOnString"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.RemoveToStringOnStringRule_name,
+				Messages.RemoveToStringOnStringRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
 	}
+
 }

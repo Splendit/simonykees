@@ -17,7 +17,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
 public class FunctionalInterfaceRuleTest extends SingleRuleTest {
-	
+
 	private static final String SAMPLE_FILE1 = "TestFunctionalInterfaceRule.java";
 	private static final String SAMPLE_FILE2 = "TestFunctionalInterface2Rule.java";
 	private static final String SAMPLE_FILE3 = "TestFunctionalInterface3Rule.java";
@@ -41,7 +41,7 @@ public class FunctionalInterfaceRuleTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
+
 	@Test
 	public void testTransformationWithAnotherFile() throws Exception {
 		Path preRule = getPreRuleFile(SAMPLE_FILE2);
@@ -52,7 +52,7 @@ public class FunctionalInterfaceRuleTest extends SingleRuleTest {
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
 	}
-	
+
 	@Test
 	public void testTransformationWithYetAnotherFile() throws Exception {
 		Path preRule = getPreRuleFile(SAMPLE_FILE3);

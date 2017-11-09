@@ -15,7 +15,8 @@ public class SimonykeesPreferenceInitializer extends AbstractPreferenceInitializ
 
 	@Override
 	public void initializeDefaultPreferences() {
-		IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
+		IPreferenceStore preferenceStore = Activator.getDefault()
+			.getPreferenceStore();
 
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.PROFILE_LIST,
 				SimonykeesPreferenceManager.getDefaultProfileList());
@@ -24,7 +25,7 @@ public class SimonykeesPreferenceInitializer extends AbstractPreferenceInitializ
 				SimonykeesPreferenceManager.getDefaultProfileName());
 
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.ENABLE_INTRO, true);
-		
+
 		preferenceStore.setDefault(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY, true);
 	}
 }

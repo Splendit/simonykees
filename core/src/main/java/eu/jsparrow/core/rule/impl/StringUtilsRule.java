@@ -2,6 +2,7 @@ package eu.jsparrow.core.rule.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.Attributes;
@@ -21,6 +22,8 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.StringUtilsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -32,24 +35,23 @@ import eu.jsparrow.i18n.Messages;
  *
  */
 public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
-	
+
 	private final String version31 = "3.1"; //$NON-NLS-1$
 
 	Logger logger = LoggerFactory.getLogger(StringUtilsRule.class);
 
-	/**
-	 * 
-	 */
-	private List<String> supportetVersion = new ArrayList<>();
+	private List<String> supportedVersion = new ArrayList<>();
 
 	public StringUtilsRule() {
 		super();
-		this.visitor = StringUtilsASTVisitor.class;
-		this.name = Messages.StringUtilsRule_name;
-		this.description = Messages.StringUtilsRule_description;
-		this.supportetVersion.add(version31);
+		this.visitorClass = StringUtilsASTVisitor.class;
+		this.supportedVersion.add(version31);
+		this.id = "StringUtils"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StringLiteralEqualityCheckRule_name,
+				Messages.StringLiteralEqualityCheckRule_description, Duration.ofMinutes(10),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
@@ -61,13 +63,14 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 			String fullyQuallifiedClassName = "org.apache.commons.lang3.StringUtils"; //$NON-NLS-1$
 			IType classtype = project.findType(fullyQuallifiedClassName);
 			if (classtype != null) {
-				
+
 				IPackageFragmentRoot commonsLangLib = getProject(classtype.getParent());
 				// file with path to libary jar
-				File file = new File(commonsLangLib.getPath().toString());
-				
+				File file = new File(commonsLangLib.getPath()
+					.toString());
+
 				try (JarFile jar = new java.util.jar.JarFile(file)) {
-					
+
 					Manifest manifest = jar.getManifest();
 					Attributes attributes = manifest.getMainAttributes();
 
@@ -76,7 +79,8 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 							Name key = (Name) attribute;
 							String keyword = key.toString();
 							if ("Implementation-Version".equals(keyword)) { //$NON-NLS-1$
-								if (supportetVersion.stream().anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s))) {
+								if (supportedVersion.stream()
+									.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s))) {
 									return true;
 								} else {
 									return false;
@@ -101,7 +105,7 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 	public String requiredLibraries() {
 		return "org.apache.commons.lang3.StringUtils"; //$NON-NLS-1$
 	}
-	
+
 	private IPackageFragmentRoot getProject(IJavaElement iJavaElement) {
 		if (null == iJavaElement) {
 			return null;

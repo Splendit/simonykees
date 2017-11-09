@@ -30,25 +30,30 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 
 	@Override
 	public void stopValidation() {
-		LicenseManager.getInstance().checkIn();
+		LicenseManager.getInstance()
+			.checkIn();
 	}
 
 	@Override
 	public boolean isValid() {
-		return LicenseManager.getInstance().getValidationData().isValid();
+		return LicenseManager.getInstance()
+			.getValidationData()
+			.isValid();
 	}
 
 	@Override
 	public boolean isExpired() {
-		LicenseStatus licenseStatus = LicenseManager.getInstance().getValidationData().getLicenseStatus();
-		return (licenseStatus == LicenseStatus.FLOATING_EXPIRED
-				|| licenseStatus == LicenseStatus.NODE_LOCKED_EXPIRED
+		LicenseStatus licenseStatus = LicenseManager.getInstance()
+			.getValidationData()
+			.getLicenseStatus();
+		return (licenseStatus == LicenseStatus.FLOATING_EXPIRED || licenseStatus == LicenseStatus.NODE_LOCKED_EXPIRED
 				|| licenseStatus == LicenseStatus.FREE_EXPIRED);
 	}
 
 	@Override
 	public boolean updateLicenseeNumber(String licenseKey, String licenseName) {
-		return LicenseManager.getInstance().updateLicenseeNumber(licenseKey.trim(), licenseName);
+		return LicenseManager.getInstance()
+			.updateLicenseeNumber(licenseKey.trim(), licenseName);
 	}
 
 	@Override
@@ -66,7 +71,8 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 			displayableLicenseInformation.append(licenseType.getLicenseName());
 
 			if (LicenseType.TRY_AND_BUY != licenseType) {
-				String licenseKey = licenseManger.getLicensee().getLicenseeNumber();
+				String licenseKey = licenseManger.getLicensee()
+					.getLicenseeNumber();
 
 				displayableLicenseInformation.append(" "); //$NON-NLS-1$
 				displayableLicenseInformation.append(Messages.SimonykeesPreferencePageLicense_under_key_label);
@@ -89,23 +95,30 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 
 	@Override
 	public String getLicenseStautsUserMessage() {
-		return LicenseManager.getInstance().getValidationData().getLicenseStatus().getUserMessage();
+		return LicenseManager.getInstance()
+			.getValidationData()
+			.getLicenseStatus()
+			.getUserMessage();
 	}
 
 	private String extractDateFormat(ZonedDateTime date) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
 		return date.format(formatter);
 	}
-	
+
 	@Override
 	public boolean isFullValidLicense() {
-		LicenseType licenseType = LicenseManager.getInstance().getValidationData().getType();
+		LicenseType licenseType = LicenseManager.getInstance()
+			.getValidationData()
+			.getType();
 		return isValid() && (LicenseType.NODE_LOCKED == licenseType || LicenseType.FLOATING == licenseType);
 	}
 
 	@Override
 	public boolean isDemoType() {
-		LicenseType licenseType = LicenseManager.getInstance().getValidationData().getType();
+		LicenseType licenseType = LicenseManager.getInstance()
+			.getValidationData()
+			.getType();
 		return LicenseType.TRY_AND_BUY == licenseType;
 	}
 }

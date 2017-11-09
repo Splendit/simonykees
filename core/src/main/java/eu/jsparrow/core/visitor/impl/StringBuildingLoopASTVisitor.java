@@ -47,51 +47,54 @@ import eu.jsparrow.core.visitor.loop.stream.AbstractEnhancedForLoopToStreamASTVi
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
- * Analyzes the occurrences of the {@link EnhancedForStatement}s and checks whether they 
- * are only used for concatenating the strings of a collection or array. It considers 
- * two cases:
+ * Analyzes the occurrences of the {@link EnhancedForStatement}s and checks
+ * whether they are only used for concatenating the strings of a collection or
+ * array. It considers two cases:
  * 
  * <ul>
- *  <li>If the compliance level of the java project is set to @{@link JavaVersion#JAVA_1_8} or later, 
- *  then the whole loop is replaced with an invocation of {@link Stream#collect(Collector)} for joining the strings.
- *  For example, the following code:
- *  
- *  <pre>
- *  <code>
+ * <li>If the compliance level of the java project is set
+ * to @{@link JavaVersion#JAVA_1_8} or later, then the whole loop is replaced
+ * with an invocation of {@link Stream#collect(Collector)} for joining the
+ * strings. For example, the following code:
+ * 
+ * <pre>
+ * <code>
  *  	List<String> collectionOfStrings = generateStringList(input);
  *		String result = "";
  *		for(String val : collectionOfStrings) {
  *			result = result + val;
  *		}
  *  </code>
- *  
- *  is replaced with: 
- *  <pre>
- *  <code>
+ * 
+ * is replaced with:
+ * 
+ * <pre>
+ * <code>
 		List<String> collectionOfStrings = generateStringList(input);
 		String result = collectionOfStrings.stream().collect(Collectors.joining());
  *  </code>
- *  
- *  A collection, is converted into a stream by invoking the {@link Collection#stream()}
- *  whereas, an array is converted into a stream by invoking {@link Arrays#stream(Object[])}. 
- *  </li>
- *  <li>Otherwise, if the compliance level is set to {@link JavaVersion#JAVA_1_5} or later, 
- *  then a {@link StringBuilder} is used for the concatenation, thus avoiding the direct
- *  string concatenations inside the loop. For example, the following code:
- *  
- *  <pre>
- *  <code>
+ * 
+ * A collection, is converted into a stream by invoking the
+ * {@link Collection#stream()} whereas, an array is converted into a stream by
+ * invoking {@link Arrays#stream(Object[])}.</li>
+ * <li>Otherwise, if the compliance level is set to {@link JavaVersion#JAVA_1_5}
+ * or later, then a {@link StringBuilder} is used for the concatenation, thus
+ * avoiding the direct string concatenations inside the loop. For example, the
+ * following code:
+ * 
+ * <pre>
+ * <code>
  *  	List<String> collectionOfStrings = generateStringList(input);
  *		String result = "";
  *		for(String val : collectionOfStrings) {
  *			result = result + val;
  *		}
  *  </code>
- *  
- *  is converted to:
- *  
- *  <pre>
- *  <code>
+ * 
+ * is converted to:
+ * 
+ * <pre>
+ * <code>
  *  	List<String> collectionOfStrings = generateStringList(input);
  *		StringBuilder resultSb = new StringBuilder();
  *		for(String val : collectionOfStrings) {
@@ -99,15 +102,14 @@ import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
  *		}
  *		String result = resultSb.toString();
  *  </code>
- *  
- *  A new {@link StringBuilder} is introduced just before the occurrence of the 
- *  loop, and each element of the collection/array is appended to it.
- *  Afterwards, the result of the StringBuilder is assigned to the original
- *  variable. 
- *  </li>
+ * 
+ * A new {@link StringBuilder} is introduced just before the occurrence of the
+ * loop, and each element of the collection/array is appended to it. Afterwards,
+ * the result of the StringBuilder is assigned to the original variable.</li>
  * </ul>
  * 
- * Only the collections/arrays of {@link String}s or {@link Number}s are supported, in both cases.
+ * Only the collections/arrays of {@link String}s or {@link Number}s are
+ * supported, in both cases.
  * 
  * @author Ardit Ymeri
  * @since 2.1.1
@@ -120,24 +122,24 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 	private static final String TO_STRING = "toString"; //$NON-NLS-1$
 	private static final String APPEND = "append"; //$NON-NLS-1$
 	private static final String STRING_BUILDER_CORE_IDENTIFIER = "Sb"; //$NON-NLS-1$
-	
+
 	/**
-	 * Stores the identifiers of the {@link StringBuilder}s generated
-	 * inside one method. 
+	 * Stores the identifiers of the {@link StringBuilder}s generated inside one
+	 * method.
 	 */
 	private List<String> generatedIdsPerMethod = new ArrayList<>();
-	
+
 	private JavaVersion javaVersion;
-	
+
 	public StringBuildingLoopASTVisitor(JavaVersion javaVersion) {
 		this.javaVersion = javaVersion;
 	}
-	
+
 	@Override
 	public void endVisit(MethodDeclaration methodDeclaration) {
 		generatedIdsPerMethod.clear();
 	}
-	
+
 	@Override
 	public void endVisit(Initializer initializer) {
 		generatedIdsPerMethod.clear();
@@ -167,7 +169,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 		if (this.javaVersion.atLeast(JavaVersion.JAVA_1_8)) {
 			// create the collection statement
-			
+
 			MethodInvocation streamExpression;
 			ITypeBinding loopExpressionTypeBinding = loopExpression.resolveTypeBinding();
 			if (isCollectionOfStrings(loopExpressionTypeBinding)) {
@@ -188,8 +190,8 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 				concatUsingCollectorsJoining(loopNode, resultVariable, streamExpression);
 			} else {
 				/*
-				 * the loop expression cannot be converted to a stream,
-				 * but using a StringBuilder may still be possible.
+				 * the loop expression cannot be converted to a stream, but
+				 * using a StringBuilder may still be possible.
 				 */
 				concatUsingStringBuilder(loopNode, loopParameter, singleBodyStatement, resultVariable);
 			}
@@ -202,11 +204,16 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 	}
 
 	/**
-	 * Replaces the loop with a stream expression which computes the concatenation
-	 * result by invoking {@code collect(Collectors.joining())}. 
-	 * @param loopNode the original loop
-	 * @param resultVariable the variable for storing the result
-	 * @param streamExpression the expression providing the stream for {@code collect(Collectors.joining())}.
+	 * Replaces the loop with a stream expression which computes the
+	 * concatenation result by invoking {@code collect(Collectors.joining())}.
+	 * 
+	 * @param loopNode
+	 *            the original loop
+	 * @param resultVariable
+	 *            the variable for storing the result
+	 * @param streamExpression
+	 *            the expression providing the stream for
+	 *            {@code collect(Collectors.joining())}.
 	 */
 	private void concatUsingCollectorsJoining(EnhancedForStatement loopNode, SimpleName resultVariable,
 			MethodInvocation streamExpression) {
@@ -214,7 +221,8 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		collect.setExpression(streamExpression);
 		ASTNode newStatement;
 		Optional<VariableDeclarationFragment> optFragment = isReassignable(resultVariable, loopNode);
-		if (ASTNode.BLOCK == loopNode.getParent().getNodeType() && optFragment.isPresent()) {
+		if (ASTNode.BLOCK == loopNode.getParent()
+			.getNodeType() && optFragment.isPresent()) {
 			VariableDeclarationFragment fragment = optFragment.get();
 			VariableDeclarationStatement oldDeclStatement = (VariableDeclarationStatement) fragment.getParent();
 			newStatement = assignCollectToResult(collect, resultVariable, oldDeclStatement);
@@ -224,6 +232,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		}
 
 		astRewrite.replace(loopNode, newStatement, null);
+		onRewrite();
 	}
 
 	/**
@@ -267,6 +276,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 			}
 
 			blockRewrite.insertAfter(expressionStatement, loopNode, null);
+			onRewrite();
 		}
 	}
 
@@ -322,8 +332,8 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		ListRewrite modifiersRewriter = astRewrite.getListRewrite(newDecl,
 				VariableDeclarationStatement.MODIFIERS2_PROPERTY);
 		List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(oldDeclaration.modifiers(), Modifier.class);
-		modifiers.forEach(
-				modifier -> modifiersRewriter.insertLast((Modifier) astRewrite.createCopyTarget(modifier), null));
+		modifiers
+			.forEach(modifier -> modifiersRewriter.insertLast((Modifier) astRewrite.createCopyTarget(modifier), null));
 		List<Annotation> annotations = ASTNodeUtil.convertToTypedList(oldDeclaration.modifiers(), Annotation.class);
 		annotations.forEach(
 				annotation -> modifiersRewriter.insertLast((Annotation) astRewrite.createCopyTarget(annotation), null));
@@ -396,8 +406,10 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		ASTNode scope = ASTNodeUtil.findScope(loopNode);
 		VariableDeclarationsVisitor declVisitor = new VariableDeclarationsVisitor();
 		scope.accept(declVisitor);
-		List<String> declaredIds = declVisitor.getVariableDeclarationNames().stream().map(SimpleName::getIdentifier)
-				.collect(Collectors.toList());
+		List<String> declaredIds = declVisitor.getVariableDeclarationNames()
+			.stream()
+			.map(SimpleName::getIdentifier)
+			.collect(Collectors.toList());
 		int count = 0;
 		String defaultIdentifier = prefix + STRING_BUILDER_CORE_IDENTIFIER;
 		String sbIdentifier = defaultIdentifier;
@@ -450,11 +462,10 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		argRewriter.insertFirst(loopExpression, null);
 		return stream;
 	}
-	
+
 	private MethodInvocation createStreamFromNumnbersArray(Expression loopExpression) {
 		AST ast = astRewrite.getAST();
-		
-		
+
 		MethodInvocation stream = createStreamFromArray(loopExpression);
 		MethodInvocation mapToString = ast.newMethodInvocation();
 		mapToString.setName(ast.newSimpleName(MAP));
@@ -466,14 +477,14 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 		ListRewrite argRewriter = astRewrite.getListRewrite(mapToString, MethodInvocation.ARGUMENTS_PROPERTY);
 		argRewriter.insertFirst(methodReference, null);
-		
+
 		return mapToString;
 	}
 
 	/**
-	 * Creates a node representing an invocation of
-	 * {@link Collection#stream()} and plugs the given expression to the 
-	 * expression of the method invocation.
+	 * Creates a node representing an invocation of {@link Collection#stream()}
+	 * and plugs the given expression to the expression of the method
+	 * invocation.
 	 * 
 	 * @param loopExpression
 	 *            a node representing a collection
@@ -490,21 +501,22 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 	/**
 	 * 
-	 * @return a node representing the invocation of {@link Collectors#joining()}.
+	 * @return a node representing the invocation of
+	 *         {@link Collectors#joining()}.
 	 */
 	private MethodInvocation createCollectInvocation() {
 		AST ast = astRewrite.getAST();
 		MethodInvocation collect = ast.newMethodInvocation();
 		collect.setName(ast.newSimpleName(COLLECT));
-		
+
 		MethodInvocation collectorsJoining = ast.newMethodInvocation();
 		collectorsJoining.setName(ast.newSimpleName(JOINING));
 		collectorsJoining.setExpression(ast.newSimpleName(java.util.stream.Collectors.class.getSimpleName()));
 		this.addImports.add(java.util.stream.Collectors.class.getName());
-		
+
 		ListRewrite argRewriter = astRewrite.getListRewrite(collect, MethodInvocation.ARGUMENTS_PROPERTY);
 		argRewriter.insertFirst(collectorsJoining, null);
-		
+
 		return collect;
 	}
 
@@ -536,9 +548,9 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 	/**
 	 * Replaces the given expression statement with a new statement of the form
-	 * {@code sbName.append(loopParameter)}, which appends the value of the variable
-	 * represented by the given name, to the {@link StringBuilder} with the given 
-	 * identifier. 
+	 * {@code sbName.append(loopParameter)}, which appends the value of the
+	 * variable represented by the given name, to the {@link StringBuilder} with
+	 * the given identifier.
 	 * 
 	 * @param singleBodyStatement
 	 *            statement to be replaced
@@ -582,7 +594,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		varDeclStatement.setType(ast.newSimpleType(ast.newSimpleName(StringBuilder.class.getSimpleName())));
 		return varDeclStatement;
 	}
-	
+
 	/**
 	 * 
 	 * @param loopExpression
@@ -606,7 +618,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 		return mapToString;
 	}
-	
+
 	/**
 	 * Checks whether the given {@link ITypeBinding} represents a collection of
 	 * {@link Number}s.
@@ -648,7 +660,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Checks whether the given {@link ITypeBinding} represents an array of
 	 * {@link String}s.
@@ -666,7 +678,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Checks whether the given {@link ITypeBinding} represents an array of
 	 * {@link Number}s.
@@ -680,11 +692,12 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 	private boolean isArrayOfNumbers(ITypeBinding expressionBinding) {
 		if (expressionBinding != null && expressionBinding.isArray()) {
 			ITypeBinding componentType = expressionBinding.getComponentType();
-			return ClassRelationUtil.isInheritingContentOfTypes(componentType, Collections.singletonList(Number.class.getName()));
+			return ClassRelationUtil.isInheritingContentOfTypes(componentType,
+					Collections.singletonList(Number.class.getName()));
 		}
 		return false;
 	}
-	
+
 	/**
 	 * A visitor for checking whether a variable storing the result of the
 	 * concatenation is declared in the same block as the loop, is initialized
@@ -718,7 +731,8 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 		@Override
 		public boolean visit(SimpleName simpleName) {
-			if (simpleName.getIdentifier().equals(this.resultName.getIdentifier())
+			if (simpleName.getIdentifier()
+				.equals(this.resultName.getIdentifier())
 					&& VariableDeclarationFragment.NAME_PROPERTY != simpleName.getLocationInParent()) {
 				IBinding binding = simpleName.resolveBinding();
 				StructuralPropertyDescriptor propertyDescriptor = simpleName.getLocationInParent();
@@ -737,7 +751,8 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		@Override
 		public boolean visit(VariableDeclarationFragment fragment) {
 			SimpleName fragmentName = fragment.getName();
-			if (fragmentName.getIdentifier().equals(resultName.getIdentifier())) {
+			if (fragmentName.getIdentifier()
+				.equals(resultName.getIdentifier())) {
 				Expression initializer = fragment.getInitializer();
 				if (ASTNode.STRING_LITERAL == initializer.getNodeType()) {
 					StringLiteral stringLiteral = (StringLiteral) initializer;

@@ -117,11 +117,12 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 			PRIMITIVE_INT_QUALIFIED_NAME);
 	private static final List<String> STRING_TYPE_BINDING_CHECK_LIST = Collections.singletonList(STRING_QUALIFIED_NAME);
 	private static final List<String> COLLECTION_TYPE_BINDING_CHECK_LIST = Collections
-			.singletonList(COLLECTION_QUALIFIED_NAME);
+		.singletonList(COLLECTION_QUALIFIED_NAME);
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocationNode) {
-		if ("indexOf".equals(methodInvocationNode.getName().getIdentifier())) { //$NON-NLS-1$
+		if ("indexOf".equals(methodInvocationNode.getName() //$NON-NLS-1$
+			.getIdentifier())) {
 			Expression methodInvocationExpression = methodInvocationNode.getExpression();
 			if (methodInvocationExpression != null) {
 				ITypeBinding expressionBinding = methodInvocationExpression.resolveTypeBinding();
@@ -160,8 +161,9 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 					boolean doTransformation = true;
 
 					/*
-					 * for strings, the argument of the contains method must be a string itself.
-					 * char-Variables or char literals will be ignored.
+					 * for strings, the argument of the contains method must be
+					 * a string itself. char-Variables or char literals will be
+					 * ignored.
 					 */
 					if (type == TransformationType.STRING && !isStringType(methodArgumentExpression)) {
 						doTransformation = false;
@@ -169,6 +171,7 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 					if (doTransformation) {
 						this.transform(methodInvocationNode.getExpression(), methodArgumentExpression, parent, option);
+						onRewrite();
 					}
 				}
 			}
@@ -177,8 +180,8 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 * evaluates whether the method call to indexOf will be replaced by contains or
-	 * !contains or if it will be ignored.
+	 * evaluates whether the method call to indexOf will be replaced by contains
+	 * or !contains or if it will be ignored.
 	 * 
 	 * @param parent
 	 * @param position
@@ -266,14 +269,18 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 			Expression copyLeftExpression = (Expression) astRewrite.createMoveTarget(leftExpression);
 			Expression copyMethodArgumentExpression = (Expression) astRewrite.createCopyTarget(methodArgument);
-			SimpleName containsSimpleName = astRewrite.getAST().newSimpleName("contains"); //$NON-NLS-1$
-			MethodInvocation containsMethodInvocation = astRewrite.getAST().newMethodInvocation();
+			SimpleName containsSimpleName = astRewrite.getAST()
+				.newSimpleName("contains"); //$NON-NLS-1$
+			MethodInvocation containsMethodInvocation = astRewrite.getAST()
+				.newMethodInvocation();
 			containsMethodInvocation.setExpression(copyLeftExpression);
 			containsMethodInvocation.setName(containsSimpleName);
-			containsMethodInvocation.arguments().add(copyMethodArgumentExpression);
+			containsMethodInvocation.arguments()
+				.add(copyMethodArgumentExpression);
 
 			if (option == TransformationOption.NOT_CONTAINS) {
-				PrefixExpression notExpression = astRewrite.getAST().newPrefixExpression();
+				PrefixExpression notExpression = astRewrite.getAST()
+					.newPrefixExpression();
 				notExpression.setOperator(PrefixExpression.Operator.NOT);
 				notExpression.setOperand(containsMethodInvocation);
 
@@ -286,14 +293,14 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 * evaluates the position of the method invocation to indexOf within the parent
-	 * {@link InfixExpression}.
+	 * evaluates the position of the method invocation to indexOf within the
+	 * parent {@link InfixExpression}.
 	 * 
 	 * @param infixExpression
 	 *            parent
 	 * @return {@link IndexOfMethodPosition#LEFT} or
-	 *         {@link IndexOfMethodPosition#RIGHT} according to the position in the
-	 *         parent. null, if the position could not been determined.
+	 *         {@link IndexOfMethodPosition#RIGHT} according to the position in
+	 *         the parent. null, if the position could not been determined.
 	 */
 	private IndexOfMethodPosition getPosition(InfixExpression infixExpression) {
 		IndexOfMethodPosition position = null;
@@ -341,11 +348,12 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 * checks if the type binding of the given expression is of type {@link String}
+	 * checks if the type binding of the given expression is of type
+	 * {@link String}
 	 * 
 	 * @param expression
-	 * @return true, if the expression is of type {@link String}, false otherwise
-	 *         (and if the expression is null).
+	 * @return true, if the expression is of type {@link String}, false
+	 *         otherwise (and if the expression is null).
 	 */
 	private boolean isStringType(Expression expression) {
 		boolean result = false;
@@ -364,11 +372,12 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	/**
-	 * checks if the type binding of the given expression is of type {@link Integer}
+	 * checks if the type binding of the given expression is of type
+	 * {@link Integer}
 	 * 
 	 * @param expression
-	 * @return true, if the expression is of type {@link Integer}, false otherwise
-	 *         (and if the expression is null).
+	 * @return true, if the expression is of type {@link Integer}, false
+	 *         otherwise (and if the expression is null).
 	 */
 	private boolean isIntegerType(Expression expression) {
 		boolean result = false;
@@ -386,14 +395,17 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private enum TransformationOption {
-		CONTAINS, NOT_CONTAINS,
+		CONTAINS,
+		NOT_CONTAINS,
 	}
 
 	private enum TransformationType {
-		STRING, COLLECTION,
+		STRING,
+		COLLECTION,
 	}
 
 	private enum IndexOfMethodPosition {
-		LEFT, RIGHT,
+		LEFT,
+		RIGHT,
 	}
 }

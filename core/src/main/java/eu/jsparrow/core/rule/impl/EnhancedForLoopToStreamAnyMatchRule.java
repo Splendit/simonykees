@@ -1,8 +1,12 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamAnyMatchASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -17,9 +21,11 @@ public class EnhancedForLoopToStreamAnyMatchRule extends RefactoringRule<Enhance
 
 	public EnhancedForLoopToStreamAnyMatchRule() {
 		super();
-		this.visitor = EnhancedForLoopToStreamAnyMatchASTVisitor.class;
-		this.name = Messages.EnhancedForLoopToStreamAnyMatchRule_name;
-		this.description = Messages.EnhancedForLoopToStreamAnyMatchRule_description;
+		this.visitorClass = EnhancedForLoopToStreamAnyMatchASTVisitor.class;
+		this.id = "EnhancedForLoopToStreamAnyMatch"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.EnhancedForLoopToStreamAnyMatchRule_name,
+				Messages.EnhancedForLoopToStreamAnyMatchRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

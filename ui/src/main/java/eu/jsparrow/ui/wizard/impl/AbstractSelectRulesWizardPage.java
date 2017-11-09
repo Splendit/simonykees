@@ -76,7 +76,9 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	private boolean forcedSelectRight = false;
 
 	private enum SelectionSide {
-		LEFT, RIGHT, NONE,
+		LEFT,
+		RIGHT,
+		NONE,
 	}
 
 	private SelectionSide latestSelectionSide = SelectionSide.NONE;
@@ -121,11 +123,11 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	protected abstract void createFilteringPart(Composite composite);
 
 	/**
-	 * Creates part of wizard for selecting the rules, built from tree parts. First
-	 * part, left, is tree view in which all filtered rules are shown and can be
-	 * chosen to add on right side. Middle part contains buttons to add chosen rules
-	 * to selection or remove rules already selected. Third, right, part is table
-	 * view containing rules that are selected to be applied.
+	 * Creates part of wizard for selecting the rules, built from tree parts.
+	 * First part, left, is tree view in which all filtered rules are shown and
+	 * can be chosen to add on right side. Middle part contains buttons to add
+	 * chosen rules to selection or remove rules already selected. Third, right,
+	 * part is table view containing rules that are selected to be applied.
 	 * 
 	 * @param parent
 	 */
@@ -192,11 +194,12 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		leftTreeViewer.addSelectionChangedListener((SelectionChangedEvent event) -> {
 			latestSelectionSide = SelectionSide.LEFT;
-			
+
 			if (forcedSelectLeft) {
 				forcedSelectLeft = false;
 				/*
-				 * if it is manually selected because of moving, don't update view
+				 * if it is manually selected because of moving, don't update
+				 * view
 				 */
 			} else {
 				latestSelectionSide = SelectionSide.LEFT;
@@ -212,7 +215,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		});
 
 		leftTreeViewer.addDoubleClickListener((DoubleClickEvent event) -> controler
-				.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection()));
+			.addButtonClicked((IStructuredSelection) leftTreeViewer.getSelection()));
 
 		rightTableViewer.addSelectionChangedListener((SelectionChangedEvent event) -> {
 			latestSelectionSide = SelectionSide.RIGHT;
@@ -221,7 +224,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				forcedSelectRight = false;
 			} else {
 				controler.selectionChanged();
-				removeButton.setEnabled(!event.getSelection().isEmpty());
+				removeButton.setEnabled(!event.getSelection()
+					.isEmpty());
 			}
 		});
 
@@ -233,7 +237,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		});
 
 		rightTableViewer.addDoubleClickListener((DoubleClickEvent event) -> controler
-				.removeButtonClicked((IStructuredSelection) rightTableViewer.getSelection()));
+			.removeButtonClicked((IStructuredSelection) rightTableViewer.getSelection()));
 
 		addAllButton.addSelectionListener(new SelectionAdapter() {
 			/*
@@ -266,7 +270,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	private void createTree(Composite parent) {
 		leftTreeViewer = new TreeViewer(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
-		leftTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		leftTreeViewer.getControl()
+			.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		leftTreeViewer.setUseHashlookup(true);
 
 		configureTree(leftTreeViewer);
@@ -276,7 +281,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		rightTableViewer = new TableViewer(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
 
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		rightTableViewer.getControl().setLayoutData(gd);
+		rightTableViewer.getControl()
+			.setLayoutData(gd);
 		rightTableViewer.setUseHashlookup(true);
 
 		configureTable(rightTableViewer);
@@ -351,23 +357,26 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule1 = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) e1;
 				RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule2 = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) e2;
-				return rule1.getName().compareTo(rule2.getName());
+				return rule1.getRuleDescription().getName()
+					.compareTo(rule2.getRuleDescription().getName());
 			};
 
 		});
 	}
 
 	/**
-	 * Creates bottom part of select wizard containing Text field with description
-	 * of selected rule if only one rule is selected, default description otherwise.
+	 * Creates bottom part of select wizard containing Text field with
+	 * description of selected rule if only one rule is selected, default
+	 * description otherwise.
 	 * 
 	 * @param parent
 	 */
 	private void createDescriptionViewer(Composite parent) {
 		/*
-		 * There is a known issue with automatically showing and hiding scrollbars and
-		 * SWT.WRAP. Using StyledText and setAlwaysShowScrollBars(false) makes the
-		 * vertical scroll work correctly at least.
+		 * There is a known issue with automatically showing and hiding
+		 * scrollbars and SWT.WRAP. Using StyledText and
+		 * setAlwaysShowScrollBars(false) makes the vertical scroll work
+		 * correctly at least.
 		 */
 		descriptionStyledText = new StyledText(parent, SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
 		descriptionStyledText.setAlwaysShowScrollBars(false);
@@ -384,8 +393,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	@SuppressWarnings("unchecked")
 	protected void updateData() {
 		/*
-		 * check if model has changed to update table and tree view or is just selection
-		 * changed to update description field and buttons
+		 * check if model has changed to update table and tree view or is just
+		 * selection changed to update description field and buttons
 		 */
 		if (model.hasChanged()) {
 			if (!model.isForced()) {
@@ -398,41 +407,47 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				}
 				rightTableViewer.setInput(model.getSelection());
 				/*
-				 * updates enabling Finish button according to right side table view if
-				 * selection is empty Finish button is disabled
+				 * updates enabling Finish button according to right side table
+				 * view if selection is empty Finish button is disabled
 				 */
 			} else {
 				leftTreeViewer.setInput(model.getPosibilities());
 				rightTableViewer.setInput(model.getSelection());
 				model.resetForced();
 			}
-			if (!model.getRecentlyMoved().isEmpty()) {
+			if (!model.getRecentlyMoved()
+				.isEmpty()) {
 				if (model.isMovedToRight()) {
 					forcedSelectRight = true;
-					rightTableViewer.setSelection(new StructuredSelection(model.getRecentlyMoved().toArray()), false);
+					rightTableViewer.setSelection(new StructuredSelection(model.getRecentlyMoved()
+						.toArray()), false);
 				} else {
 					forcedSelectLeft = true;
-					leftTreeViewer.setSelection(new StructuredSelection(model.getRecentlyMoved().toArray()), false);
+					leftTreeViewer.setSelection(new StructuredSelection(model.getRecentlyMoved()
+						.toArray()), false);
 				}
-				model.getRecentlyMoved().clear();
+				model.getRecentlyMoved()
+					.clear();
 			}
 			getContainer().updateButtons();
 			model.resetChanged();
 		}
 		populateDescriptionTextViewer();
 
-		addButton.setEnabled(!leftTreeViewer.getSelection().isEmpty()
+		addButton.setEnabled(!leftTreeViewer.getSelection()
+			.isEmpty()
 				&& selectionContainsEnabledEntry(((IStructuredSelection) leftTreeViewer.getSelection()).toList()));
-		addAllButton.setEnabled(((Set<Object>) leftTreeViewer.getInput()).size() > 0);
-		removeButton.setEnabled(!rightTableViewer.getSelection().isEmpty());
-		removeAllButton.setEnabled(((Set<Object>) rightTableViewer.getInput()).size() > 0);
+		addAllButton.setEnabled(!((Set<Object>) leftTreeViewer.getInput()).isEmpty());
+		removeButton.setEnabled(!rightTableViewer.getSelection()
+			.isEmpty());
+		removeAllButton.setEnabled(!((Set<Object>) rightTableViewer.getInput()).isEmpty());
 
 		doStatusUpdate();
 	}
 
 	/**
-	 * Sets the rule description text according to the currently selected rule or to
-	 * the default text if no rule is selected.
+	 * Sets the rule description text according to the currently selected rule
+	 * or to the default text if no rule is selected.
 	 */
 	@SuppressWarnings("unchecked")
 	private void populateDescriptionTextViewer() {
@@ -440,9 +455,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		List<Object> rightSelection = ((IStructuredSelection) rightTableViewer.getSelection()).toList();
 
 		if (latestSelectionSide == SelectionSide.LEFT && leftSelection.size() == 1) {
-			// descriptionStyledText.setText(
-			// ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>)
-			// selection.get(0)).getDescription());
 			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) leftSelection.get(0));
 		} else if (latestSelectionSide == SelectionSide.RIGHT && rightSelection.size() == 1) {
 			createTextForDescription((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) rightSelection.get(0));
@@ -458,28 +470,33 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	 */
 	private void createTextForDescription(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		String lineDelimiter = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_lineDelimiter;
-		String name = rule.getName();
-		String description = rule.getDescription();
+		String name = rule.getRuleDescription().getName();
+		String description = rule.getRuleDescription().getDescription();
 		String requirementsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
 		String minJavaVersionLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_minJavaVersionLabel;
-		String minJavaVersionValue = rule.getRequiredJavaVersion().toString();
+		String minJavaVersionValue = rule.getRequiredJavaVersion()
+			.toString();
 		String requiredLibrariesLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesLabel;
 		String requiredLibrariesValue = (null != rule.requiredLibraries()) ? rule.requiredLibraries()
 				: Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
 		String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
-		String tagsValue = StringUtils.join(rule.getTags().stream().map(Tag::getTagNames).collect(Collectors.toList()),
-				"  "); //$NON-NLS-1$
+		String tagsValue = StringUtils.join(rule.getRuleDescription().getTags()
+			.stream()
+			.map(Tag::getTagNames)
+			.collect(Collectors.toList()), "  "); //$NON-NLS-1$
 
 		String descriptionText = name + lineDelimiter + lineDelimiter + description + lineDelimiter + lineDelimiter
 				+ requirementsLabel + lineDelimiter + minJavaVersionLabel + minJavaVersionValue + lineDelimiter
 				+ requiredLibrariesLabel + requiredLibrariesValue + lineDelimiter + lineDelimiter + tagsLabel
 				+ lineDelimiter + tagsValue;
 
-		FontData data = descriptionStyledText.getFont().getFontData()[0];
+		FontData data = descriptionStyledText.getFont()
+			.getFontData()[0];
 		Font ruleName = new Font(getShell().getDisplay(), data.getName(), data.getHeight() * 3 / 2, data.getStyle());
 		Font paragraphTitle = new Font(getShell().getDisplay(), data.getName(), data.getHeight(), SWT.BOLD);
 		Font normalTitle = new Font(getShell().getDisplay(), data.getName(), data.getHeight(), data.getStyle());
-		Color unsetisfiedRequirementsColor = getShell().getDisplay().getSystemColor(SWT.COLOR_RED);
+		Color unsetisfiedRequirementsColor = getShell().getDisplay()
+			.getSystemColor(SWT.COLOR_RED);
 
 		StyleRange ruleNameStyleRange = new StyleRange();
 		ruleNameStyleRange.start = 0;
@@ -518,7 +535,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 		StyleRange style0 = new StyleRange();
 		style0.metrics = new GlyphMetrics(0, 0, 40);
-		style0.foreground = getShell().getDisplay().getSystemColor(SWT.COLOR_BLACK);
+		style0.foreground = getShell().getDisplay()
+			.getSystemColor(SWT.COLOR_BLACK);
 		Bullet bullet0 = new Bullet(style0);
 
 		descriptionStyledText.setText(descriptionText);
@@ -560,7 +578,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	@SuppressWarnings("unchecked")
 	private boolean selectionContainsEnabledEntry(List<Object> selection) {
 		return selection.stream()
-				.anyMatch(object -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).isEnabled());
+			.anyMatch(object -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).isEnabled());
 	}
 
 	public void recalculateLayout() {
@@ -570,10 +588,12 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	protected abstract void doStatusUpdate();
 
 	protected void doStatusUpdate(IStatus additionalStatus) {
-		if (!model.getUnapplicableRules().isEmpty()) {
+		if (!model.getUnapplicableRules()
+			.isEmpty()) {
 			((StatusInfo) fSelectionStatus)
-					.setWarning(Messages.AbstractSelectRulesWizardPage_warning_RulesInProfileNotApplicable);
-		} else if (model.getSelectionAsList().isEmpty()) {
+				.setWarning(Messages.AbstractSelectRulesWizardPage_warning_RulesInProfileNotApplicable);
+		} else if (model.getSelectionAsList()
+			.isEmpty()) {
 			((StatusInfo) fSelectionStatus).setError(Messages.AbstractSelectRulesWizardPage_error_NoRulesSelected);
 		} else {
 			fSelectionStatus = new StatusInfo();
@@ -588,7 +608,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		}
 
 		/*
-		 * the mode severe status will be displayed and the OK button enabled/disabled.
+		 * the mode severe status will be displayed and the OK button
+		 * enabled/disabled.
 		 */
 		updateStatus(status);
 	}
@@ -612,9 +633,10 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	}
 
 	/**
-	 * Updates the status line and the OK button according to the status evaluate
-	 * from an array of status. The most severe error is taken. In case that two
-	 * status with the same severity exists, the status with lower index is taken.
+	 * Updates the status line and the OK button according to the status
+	 * evaluate from an array of status. The most severe error is taken. In case
+	 * that two status with the same severity exists, the status with lower
+	 * index is taken.
 	 *
 	 * @param status
 	 *            the array of status

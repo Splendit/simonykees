@@ -76,6 +76,23 @@ public class SimonykeesMessageDialog extends MessageDialog {
 				defaultIndex, dialogButtonLabels).open() == 0;
 	}
 
+	/**
+	 * opens a dialog of the form {@link MessageDialog#QUESTION_WITH_CANCEL}
+	 * 
+	 * @param parentShell
+	 * @param question
+	 *            message to be shown in the dialog
+	 * @param dialogButtons
+	 *            a list with button labels, which should be displayed in the
+	 *            dialog. The last element in the list will be the default button.
+	 * @return the index of the clicked button according to the dialogButtons
+	 *         parameter
+	 */
+	public static int openQuestionWithCancelDialog(Shell parentShell, String question, String[] dialogButtons) {
+		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, question,
+				MessageDialog.QUESTION_WITH_CANCEL, dialogButtons.length, dialogButtons).open();
+	}
+
 	@Override
 	protected Control createMessageArea(Composite composite) {
 		Image image = getImage();
@@ -83,7 +100,9 @@ public class SimonykeesMessageDialog extends MessageDialog {
 			imageLabel = new Label(composite, SWT.NULL);
 			image.setBackground(imageLabel.getBackground());
 			imageLabel.setImage(image);
-			GridDataFactory.fillDefaults().align(SWT.CENTER, SWT.BEGINNING).applyTo(imageLabel);
+			GridDataFactory.fillDefaults()
+				.align(SWT.CENTER, SWT.BEGINNING)
+				.applyTo(imageLabel);
 		}
 		if (message != null) {
 			Link link = new Link(composite, getMessageLabelStyle());
@@ -93,15 +112,20 @@ public class SimonykeesMessageDialog extends MessageDialog {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
 					try {
-						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(arg0.text));
+						PlatformUI.getWorkbench()
+							.getBrowserSupport()
+							.getExternalBrowser()
+							.openURL(new URL(arg0.text));
 					} catch (PartInitException | MalformedURLException e) {
 						logger.error(Messages.SimonykeesMessageDialog_open_browser_error_message, e);
 					}
 				}
 			});
-			GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false)
-					.hint(convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT)
-					.applyTo(link);
+			GridDataFactory.fillDefaults()
+				.align(SWT.FILL, SWT.CENTER)
+				.grab(true, false)
+				.hint(convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH), SWT.DEFAULT)
+				.applyTo(link);
 		}
 		return composite;
 	}

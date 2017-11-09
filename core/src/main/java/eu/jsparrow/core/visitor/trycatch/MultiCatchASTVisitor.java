@@ -32,7 +32,10 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(TryStatement node) {
 		List<CatchClause> catchClauses = ASTNodeUtil.returnTypedList(node.catchClauses(), CatchClause.class);
-		List<Block> blockList = catchClauses.stream().map(CatchClause::getBody).collect(Collectors.toList());
+		List<Block> blockList = catchClauses.stream()
+			.map(CatchClause::getBody)
+			.collect(Collectors.toList());
+		boolean onRewriteTriggered = false;
 		while (!blockList.isEmpty()) {
 			boolean combined = false;
 			/*
@@ -57,10 +60,9 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 				SingleVariableDeclaration compareException = compareCatch.getException();
 				Type compareExceptionType = compareException.getType();
 
-				if (reference
-						.subtreeMatch(new BijectiveSimpleNameASTMatcher(referenceException.getName(),
-								compareException.getName()), compareBlock)
-						&& !jumpsSuperType(compareExceptionType, jumpedTypes)) {
+				if (reference.subtreeMatch(
+						new BijectiveSimpleNameASTMatcher(referenceException.getName(), compareException.getName()),
+						compareBlock) && !jumpsSuperType(compareExceptionType, jumpedTypes)) {
 					combined = true;
 					addTypesFromBlock(allNewTypes, compareExceptionType);
 					astRewrite.remove(compareCatch, null);
@@ -71,10 +73,16 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 			}
 
 			if (combined) {
-				UnionType uniontype = node.getAST().newUnionType();
+				UnionType uniontype = node.getAST()
+					.newUnionType();
 				removeSubTypes(allNewTypes);
-				allNewTypes.forEach(insertType -> uniontype.types().add(astRewrite.createMoveTarget(insertType)));
+				allNewTypes.forEach(insertType -> uniontype.types()
+					.add(astRewrite.createMoveTarget(insertType)));
 				astRewrite.replace(referenceExceptionType, uniontype, null);
+				if (!onRewriteTriggered) {
+					onRewrite();
+					onRewriteTriggered = true;
+				}
 			}
 
 		}
@@ -83,7 +91,8 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 	}
 
 	private boolean jumpsSuperType(Type compareExceptionType, List<Type> jumpedTypes) {
-		return jumpedTypes.stream().anyMatch(superType -> isSubType(superType, compareExceptionType));
+		return jumpedTypes.stream()
+			.anyMatch(superType -> isSubType(superType, compareExceptionType));
 	}
 
 	private void removeSubTypes(List<Type> allNewTypes) {

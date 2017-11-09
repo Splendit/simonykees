@@ -1,8 +1,12 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.LambdaToMethodReferenceASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -16,13 +20,16 @@ import eu.jsparrow.i18n.Messages;
 public class LambdaToMethodReferenceRule extends RefactoringRule<LambdaToMethodReferenceASTVisitor> {
 	public LambdaToMethodReferenceRule() {
 		super();
-		this.visitor = LambdaToMethodReferenceASTVisitor.class;
-		this.name = Messages.LambdaToMethodReferenceRule_name;
-		this.description = Messages.LambdaToMethodReferenceRule_description;
+		this.visitorClass = LambdaToMethodReferenceASTVisitor.class;
+		this.id = "LambdaToMethodReference"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.LambdaToMethodReferenceRule_name,
+				Messages.LambdaToMethodReferenceRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_8;
 	}
+
 }

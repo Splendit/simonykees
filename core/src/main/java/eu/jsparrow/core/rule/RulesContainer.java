@@ -46,7 +46,7 @@ import eu.jsparrow.core.rule.impl.StringFormatLineSeparatorRule;
 import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
-import eu.jsparrow.core.rule.impl.UseIsEmptyRule;
+import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
@@ -78,71 +78,48 @@ public class RulesContainer {
 				/*
 				 * Coding conventions
 				 */
-				new TryWithResourceRule(),
-				new MultiCatchRule(),
-				new FunctionalInterfaceRule(),
-				new CollectionRemoveAllRule(),
-				new DiamondOperatorRule(),
-				new OverrideAnnotationRule(),
-				new SerialVersionUidRule(),
-				new RearrangeClassMembersRule(),
-				new BracketsToControlRule(),
-				new FieldNameConventionRule(),
-				new MultiVariableDeclarationLineRule(),
-				new EnumsWithoutEqualsRule(),
+				new TryWithResourceRule(), new MultiCatchRule(), new FunctionalInterfaceRule(),
+				new CollectionRemoveAllRule(), new DiamondOperatorRule(), new OverrideAnnotationRule(),
+				new SerialVersionUidRule(), new RearrangeClassMembersRule(), new BracketsToControlRule(),
+				new FieldNameConventionRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
 				new ReImplementingInterfaceRule(),
 
 				new ImmutableStaticFinalCollectionsRule(),
 				/*
 				 * String manipulations and arithmetic expressions
 				 */
-				new RemoveNewStringConstructorRule(),
-				new InefficientConstructorRule(),
-				new PrimitiveBoxedForStringRule(),
-				new StringFormatLineSeparatorRule(),
-				new IndexOfToContainsRule(),
-				new RemoveToStringOnStringRule(),
-				new StringUtilsRule(),
-				new StringLiteralEqualityCheckRule(),
-				new StringConcatToPlusRule(),
-				new UseIsEmptyRule(),
-				new ArithmethicAssignmentRule(),
-				new StringBufferToBuilderRule(),
-				new PrimitiveObjectUseEqualsRule(),
+				new RemoveNewStringConstructorRule(), new InefficientConstructorRule(),
+				new PrimitiveBoxedForStringRule(), new StringFormatLineSeparatorRule(), new IndexOfToContainsRule(),
+				new RemoveToStringOnStringRule(), new StringUtilsRule(), new StringLiteralEqualityCheckRule(),
+				new StringConcatToPlusRule(), new UseIsEmptyOnCollectionsRule(), new ArithmethicAssignmentRule(),
+				new StringBufferToBuilderRule(), new PrimitiveObjectUseEqualsRule(),
 				/*
 				 * Loops and streams
 				 */
-				new WhileToForEachRule(),
-				new ForToForEachRule(),
-				new EnhancedForLoopToStreamForEachRule(),
-				new LambdaForEachIfWrapperToFilterRule(),
-				new StatementLambdaToExpressionRule(),
-				new LambdaForEachCollectRule(),
-				new LambdaForEachMapRule(),
-				new FlatMapInsteadOfNestedLoopsRule(),
-				new EnhancedForLoopToStreamAnyMatchRule(),
-				new EnhancedForLoopToStreamFindFirstRule(),
-				new EnhancedForLoopToStreamSumRule(),
-				new StringBuildingLoopRule(),
-				new LambdaToMethodReferenceRule(),
+				new WhileToForEachRule(), new ForToForEachRule(), new EnhancedForLoopToStreamForEachRule(),
+				new LambdaForEachIfWrapperToFilterRule(), new StatementLambdaToExpressionRule(),
+				new LambdaForEachCollectRule(), new LambdaForEachMapRule(), new FlatMapInsteadOfNestedLoopsRule(),
+				new EnhancedForLoopToStreamAnyMatchRule(), new EnhancedForLoopToStreamFindFirstRule(),
+				new EnhancedForLoopToStreamSumRule(), new StringBuildingLoopRule(), new LambdaToMethodReferenceRule(),
 
 				/*
 				 * Code formatting and organizing imports should always happen
 				 * last.
 				 */
 				new CodeFormatterRule()));
-		
+
 		if (!isStandalone) {
 			rules.add(new OrganiseImportsRule());
 		}
-		
+
 		return rules;
 	}
 
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getRulesForProject(
 			IJavaProject selectedJavaProjekt, boolean isStandalone) {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> result = getAllRules(isStandalone);
-		result.stream().forEach(rule -> rule.calculateEnabledForProject(selectedJavaProjekt));
+		result.stream()
+			.forEach(rule -> rule.calculateEnabledForProject(selectedJavaProjekt));
 		return result;
 	}
 

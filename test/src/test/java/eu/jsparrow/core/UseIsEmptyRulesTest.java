@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.core.rule.impl.UseIsEmptyRule;
+import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
@@ -21,11 +21,11 @@ public class UseIsEmptyRulesTest extends SingleRuleTest {
 	private static final String SAMPLE_FILE = "TestUseIsEmptyRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "useIsEmpty";
 
-	private UseIsEmptyRule rule;
+	private UseIsEmptyOnCollectionsRule rule;
 
 	@Before
 	public void setUp() throws Exception {
-		rule = new UseIsEmptyRule();
+		rule = new UseIsEmptyOnCollectionsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
@@ -33,7 +33,7 @@ public class UseIsEmptyRulesTest extends SingleRuleTest {
 	public void testTransformationWithDefaultFile() throws Exception {
 		Path preRule = getPreRuleFile(SAMPLE_FILE);
 		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
-		
+
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);

@@ -126,9 +126,11 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	@Override
 	public boolean visit(VariableDeclarationFragment fragmentNode) {
 
-		if (fragmentNode.getParent() != null && ASTNode.FIELD_DECLARATION == fragmentNode.getParent().getNodeType()) {
+		if (fragmentNode.getParent() != null && ASTNode.FIELD_DECLARATION == fragmentNode.getParent()
+			.getNodeType()) {
 			FieldDeclaration parent = (FieldDeclaration) fragmentNode.getParent();
-			ITypeBinding parentTypeBinding = parent.getType().resolveBinding();
+			ITypeBinding parentTypeBinding = parent.getType()
+				.resolveBinding();
 
 			if (parentTypeBinding != null && ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isStatic)
 					&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isFinal)
@@ -138,17 +140,16 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 				if (initializer != null && ASTNode.CLASS_INSTANCE_CREATION == initializer.getNodeType()) {
 
 					ITypeBinding initializerTypeBinding = initializer.resolveTypeBinding();
-					List<String> parentTypeList = Collections
-							.singletonList(parentTypeBinding.getErasure().getQualifiedName());
+					List<String> parentTypeList = Collections.singletonList(parentTypeBinding.getErasure()
+						.getQualifiedName());
 
 					if (ClassRelationUtil.isContentOfTypes(initializerTypeBinding, parentTypeList)
 							|| ClassRelationUtil.isInheritingContentOfTypes(initializerTypeBinding, parentTypeList)) {
 						String methodNameString = getSuitableMethodNameForType(parentTypeBinding);
 
 						if (methodNameString != null) {
-							this.addImports.add(JAVA_UTIL_COLLECTIONS);
-
-							String fieldName = fragmentNode.getName().getIdentifier();
+							String fieldName = fragmentNode.getName()
+								.getIdentifier();
 							initializersToReplace.put(fieldName, initializer);
 							methodNames.put(fieldName, methodNameString);
 						}
@@ -171,12 +172,14 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 					|| ClassRelationUtil.isInheritingContentOfTypes(expressionTypeBinding, MAP_TYPE_LIST)) {
 
 				String expressionName = ((SimpleName) expression).getIdentifier();
-				String methodName = methodInvocationNode.getName().getIdentifier();
+				String methodName = methodInvocationNode.getName()
+					.getIdentifier();
 
 				if (!collectionNonModifingMethods.contains(methodName)) {
 					excludedNames.add(expressionName);
 				}
-			} else if (methodInvocationNode.arguments() != null && !methodInvocationNode.arguments().isEmpty()) {
+			} else if (methodInvocationNode.arguments() != null && !methodInvocationNode.arguments()
+				.isEmpty()) {
 				List<Expression> arguments = ASTNodeUtil.convertToTypedList(methodInvocationNode.arguments(),
 						Expression.class);
 				arguments.forEach(argument -> {
@@ -199,13 +202,20 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	public boolean visit(Initializer initializerNode) {
 		if (ASTNodeUtil.hasModifier(initializerNode.modifiers(), Modifier::isStatic)) {
 			Block block = initializerNode.getBody();
-			if (block != null && block.statements() != null && !block.statements().isEmpty()) {
+			if (block != null && block.statements() != null && !block.statements()
+				.isEmpty()) {
 				List<Statement> statements = ASTNodeUtil.convertToTypedList(block.statements(), Statement.class);
-				excludedNames.addAll(statements.stream().filter(ExpressionStatement.class::isInstance)
-						.map(ExpressionStatement.class::cast).map(ExpressionStatement::getExpression)
-						.filter(MethodInvocation.class::isInstance).map(MethodInvocation.class::cast)
-						.map(ASTNodeUtil::getLeftMostExpressionOfMethodInvocation).filter(SimpleName.class::isInstance)
-						.map(SimpleName.class::cast).map(SimpleName::getIdentifier).collect(Collectors.toSet()));
+				excludedNames.addAll(statements.stream()
+					.filter(ExpressionStatement.class::isInstance)
+					.map(ExpressionStatement.class::cast)
+					.map(ExpressionStatement::getExpression)
+					.filter(MethodInvocation.class::isInstance)
+					.map(MethodInvocation.class::cast)
+					.map(ASTNodeUtil::getLeftMostExpressionOfMethodInvocation)
+					.filter(SimpleName.class::isInstance)
+					.map(SimpleName.class::cast)
+					.map(SimpleName::getIdentifier)
+					.collect(Collectors.toSet()));
 			}
 		}
 
@@ -214,12 +224,17 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 
 	@Override
 	public void endVisit(CompilationUnit compilationUnitNode) {
-		methodNames.keySet().stream().filter((key) -> initializersToReplace.keySet().contains(key) && !excludedNames.contains(key)).forEach((key) -> {
-			this.addImports.add(JAVA_UTIL_COLLECTIONS);
-			MethodInvocation newMI = createNewMethodInvocation(initializersToReplace.get(key),
-					methodNames.get(key));
-			astRewrite.replace(initializersToReplace.get(key), newMI, null);
-		});
+		methodNames.keySet()
+			.stream()
+			.filter(key -> initializersToReplace.keySet()
+				.contains(key) && !excludedNames.contains(key))
+			.forEach(key -> {
+				this.addImports.add(JAVA_UTIL_COLLECTIONS);
+				MethodInvocation newMI = createNewMethodInvocation(initializersToReplace.get(key),
+						methodNames.get(key));
+				astRewrite.replace(initializersToReplace.get(key), newMI, null);
+				onRewrite();
+			});
 
 		super.endVisit(compilationUnitNode);
 	}
@@ -227,18 +242,21 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	/*** PRIVATE HELPER METHODS ***/
 
 	/**
-	 * creates the new {@link MethodInvocation} with the given name and the given
-	 * initializer as an argument
+	 * creates the new {@link MethodInvocation} with the given name and the
+	 * given initializer as an argument
 	 * 
 	 * @param initializer
 	 * @param methodNameString
 	 * @return new {@link MethodInvocation}
 	 */
 	private MethodInvocation createNewMethodInvocation(Expression initializer, String methodNameString) {
-		SimpleName collectionsClassName = astRewrite.getAST().newSimpleName(JAVA_UTIL_COLLECTIONS_SIMPLENAME);
-		SimpleName methodName = astRewrite.getAST().newSimpleName(methodNameString);
+		SimpleName collectionsClassName = astRewrite.getAST()
+			.newSimpleName(JAVA_UTIL_COLLECTIONS_SIMPLENAME);
+		SimpleName methodName = astRewrite.getAST()
+			.newSimpleName(methodNameString);
 
-		MethodInvocation newMI = astRewrite.getAST().newMethodInvocation();
+		MethodInvocation newMI = astRewrite.getAST()
+			.newMethodInvocation();
 		newMI.setExpression(collectionsClassName);
 		newMI.setName(methodName);
 
@@ -251,13 +269,14 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	}
 
 	/**
-	 * checks the type of the {@link VariableDeclarationFragment} and selects the
-	 * suitable method name for the unmodifiable {@link Collection} or {@link Map}
+	 * checks the type of the {@link VariableDeclarationFragment} and selects
+	 * the suitable method name for the unmodifiable {@link Collection} or
+	 * {@link Map}
 	 * 
 	 * @param typeBinding
 	 *            of the {@link VariableDeclarationFragment}
-	 * @return the suitable method name for the given type or null, if there isn't
-	 *         one
+	 * @return the suitable method name for the given type or null, if there
+	 *         isn't one
 	 */
 	private String getSuitableMethodNameForType(ITypeBinding typeBinding) {
 		String methodName = null;

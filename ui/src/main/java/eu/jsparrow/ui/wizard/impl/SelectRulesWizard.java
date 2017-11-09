@@ -57,7 +57,7 @@ public class SelectRulesWizard extends Wizard {
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
 
 	private AbstractSelectRulesWizardPage page;
-	private SelectRulesWizardPageControler controler;
+	private SelectRulesWizardPageControler controller;
 	private SelectRulesWizardPageModel model;
 
 	private final List<IJavaElement> javaElements;
@@ -85,8 +85,8 @@ public class SelectRulesWizard extends Wizard {
 	@Override
 	public void addPages() {
 		model = new SelectRulesWizardPageModel(rules);
-		controler = new SelectRulesWizardPageControler(model);
-		page = new SelectRulesWizardPage(model, controler);
+		controller = new SelectRulesWizardPageControler(model);
+		page = new SelectRulesWizardPage(model, controller);
 		addPage(page);
 	}
 
@@ -98,16 +98,17 @@ public class SelectRulesWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		if (model.getSelectionAsList()
-			.isEmpty()) {
-			return false;
-		} else {
-			return true;
-		}
+		return !model.getSelectionAsList().isEmpty();
 	}
 
 	@Override
 	public boolean performFinish() {
+		String message = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
+			.getSimpleName(),
+				this.javaElements.get(0)
+					.getJavaProject()
+					.getElementName());
+		logger.info(message);
 
 		logger.info(NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
 			.getSimpleName(),

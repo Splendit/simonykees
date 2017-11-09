@@ -81,7 +81,9 @@ public class TestToStringOnStringRule {
 
 	public String testToStringInLambdaExpressionBody(String input) {
 		List<String> stringList = Arrays.asList(input, "foo");
-		String result = stringList.stream().map(s -> s + ";").collect(Collectors.joining(","));
+		String result = stringList.stream()
+			.map(s -> s + ";")
+			.collect(Collectors.joining(","));
 		return result;
 	}
 
@@ -133,7 +135,8 @@ public class TestToStringOnStringRule {
 	}
 
 	public String testChainMethodInvocatioonToString(String input) {
-		String className = this.getClass().getName();
+		String className = this.getClass()
+			.getName();
 		return input + className;
 	}
 }

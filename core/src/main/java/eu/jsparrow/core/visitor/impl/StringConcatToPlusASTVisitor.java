@@ -34,12 +34,16 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	@Override
 	public boolean visit(MethodInvocation node) {
-		List<String> fullyQualifiedStringName = generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME);
-		if (StringUtils.equals("concat", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
-				&& ClassRelationUtil.isContentOfTypes(node.getExpression().resolveTypeBinding(), fullyQualifiedStringName)
-				&& ASTNode.EXPRESSION_STATEMENT != node.getParent().getNodeType() && node.arguments().size() == 1
-				&& ClassRelationUtil.isContentOfTypes(
-						((Expression) node.arguments().get(0)).resolveTypeBinding(), fullyQualifiedStringName)) {
+		List<String> fullyQualifiedStringName = generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME);
+		if (StringUtils.equals("concat", node.getName() //$NON-NLS-1$
+			.getFullyQualifiedName()) && ClassRelationUtil.isContentOfTypes(node.getExpression()
+					.resolveTypeBinding(), fullyQualifiedStringName)
+				&& ASTNode.EXPRESSION_STATEMENT != node.getParent()
+					.getNodeType()
+				&& node.arguments()
+					.size() == 1
+				&& ClassRelationUtil.isContentOfTypes(((Expression) node.arguments()
+					.get(0)).resolveTypeBinding(), fullyQualifiedStringName)) {
 			modifyMethodInvocation.add(node);
 		}
 		return true;
@@ -49,7 +53,8 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 	public void endVisit(MethodInvocation node) {
 		if (modifyMethodInvocation.contains(node)) {
 			Expression optionalExpression = node.getExpression();
-			Expression argument = (Expression) node.arguments().get(0);
+			Expression argument = (Expression) node.arguments()
+				.get(0);
 
 			Expression left = alreadyReplacedExpression.remove(optionalExpression);
 			if (null == left) {
@@ -71,11 +76,16 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 					replacementNode = NodeBuilder.newParenthesizedExpression(node.getAST(), replacementNode);
 				}
 				astRewrite.replace(node, replacementNode, null);
+				onRewrite();
 			}
 			modifyMethodInvocation.remove(node);
-			
-			if(modifyMethodInvocation.isEmpty()){
-				alreadyReplacedExpression.keySet().forEach(key -> astRewrite.replace(key, alreadyReplacedExpression.remove((key)), null));
+
+			if (modifyMethodInvocation.isEmpty()) {
+				alreadyReplacedExpression.keySet()
+					.forEach(key -> {
+						astRewrite.replace(key, alreadyReplacedExpression.remove(key), null);
+						onRewrite();
+					});
 			}
 		}
 	}

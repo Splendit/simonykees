@@ -1,8 +1,12 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.StatementLambdaToExpressionASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -17,9 +21,11 @@ public class StatementLambdaToExpressionRule extends RefactoringRule<StatementLa
 
 	public StatementLambdaToExpressionRule() {
 		super();
-		this.visitor = StatementLambdaToExpressionASTVisitor.class;
-		this.name = Messages.StatementLambdaToExpressionRule_name;
-		this.description = Messages.StatementLambdaToExpressionRule_description;
+		this.visitorClass = StatementLambdaToExpressionASTVisitor.class;
+		this.id = "StatementLambdaToExpression"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StatementLambdaToExpressionRule_name,
+				Messages.StatementLambdaToExpressionRule_description, Duration.ofMinutes(5),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

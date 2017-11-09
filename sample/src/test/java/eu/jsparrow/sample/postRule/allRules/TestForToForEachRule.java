@@ -19,7 +19,9 @@ public class TestForToForEachRule {
 
 	private List<Integer> generateHashCodeList(String input) {
 		List<String> foo = generateList(input);
-		List<Integer> fooHashCodes = foo.stream().map(String::hashCode).collect(Collectors.toList());
+		List<Integer> fooHashCodes = foo.stream()
+			.map(String::hashCode)
+			.collect(Collectors.toList());
 		return fooHashCodes;
 	}
 
@@ -197,7 +199,8 @@ public class TestForToForEachRule {
 
 		for (int i = 0; i < coordinates.size(); i++) {
 			final Double coordinate = coordinates.get(i);
-			if (Double.compare(coordinate, point.getCoordinates().get(i)) != 0) {
+			if (Double.compare(coordinate, point.getCoordinates()
+				.get(i)) != 0) {
 				return false;
 			}
 		}

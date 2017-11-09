@@ -34,9 +34,9 @@ public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVi
 	 */
 	@Override
 	public boolean visit(MethodInvocation node) {
-		if (StringUtils.equals("format", node.getName().getFullyQualifiedName()) //$NON-NLS-1$
-				&& node.getExpression() instanceof SimpleName && ClassRelationUtil.isContentOfTypes(
-						node.getExpression().resolveTypeBinding(), generateFullyQuallifiedNameList(stringFullyQualifiedName))) {
+		if (StringUtils.equals("format", node.getName() //$NON-NLS-1$
+			.getFullyQualifiedName()) && node.getExpression() instanceof SimpleName && ClassRelationUtil.isContentOfTypes(node.getExpression()
+					.resolveTypeBinding(), generateFullyQualifiedNameList(stringFullyQualifiedName))) {
 
 			@SuppressWarnings("rawtypes")
 			List arguments = node.arguments();
@@ -49,8 +49,8 @@ public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVi
 			 * be an LOCALE & the second an StringLiteral
 			 */
 			else if (arguments.size() >= 2 && arguments.get(0) instanceof QualifiedName
-					&& ClassRelationUtil.isContentOfTypes(
-							((QualifiedName) arguments.get(0)).resolveTypeBinding(), generateFullyQuallifiedNameList(localeFullyQualifiedName))
+					&& ClassRelationUtil.isContentOfTypes(((QualifiedName) arguments.get(0)).resolveTypeBinding(),
+							generateFullyQualifiedNameList(localeFullyQualifiedName))
 					&& arguments.get(1) instanceof StringLiteral) {
 				formatString = (StringLiteral) arguments.get(1);
 			}
@@ -64,9 +64,10 @@ public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVi
 				/**
 				 * only make an astRewrite, if a change happened
 				 */
-				if(!formatedString.equals(formatString.getEscapedValue())){
+				if (!formatedString.equals(formatString.getEscapedValue())) {
 					StringLiteral newFormatString = NodeBuilder.newStringLiteral(node.getAST(), formatedString);
-					astRewrite.replace(formatString, newFormatString, null);	
+					astRewrite.replace(formatString, newFormatString, null);
+					onRewrite();
 				}
 			}
 		}

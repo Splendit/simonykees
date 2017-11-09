@@ -35,22 +35,26 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 		 * Boolean.valueOf(true); -> true, Boolean.valueOf("true"); -> true
 		 * Boolean.valueOf(false); -> false, Boolean.valueOf("false"); -> false
 		 * Boolean.valueOf("anyOtherString"); -> false Boolean/boolean b = ...
-		 * Boolean.valueOf(b); -> b String s = ...; Boolean.valueOf(s); -> ignore
+		 * Boolean.valueOf(b); -> b String s = ...; Boolean.valueOf(s); ->
+		 * ignore
 		 */
 		if (node.getExpression() == null) {
 			return true;
 		}
 
-		if (ASTNode.METHOD_INVOCATION == node.getParent().getNodeType()) {
+		if (ASTNode.METHOD_INVOCATION == node.getParent()
+			.getNodeType()) {
 			return true;
 		}
 
-		if (StringUtils.equals(ReservedNames.MI_VALUE_OF, node.getName().getFullyQualifiedName())
-				&& null != node.getExpression() && ASTNode.SIMPLE_NAME == node.getExpression().getNodeType()
-				&& 1 == node.arguments().size()) {
+		if (StringUtils.equals(ReservedNames.MI_VALUE_OF, node.getName()
+			.getFullyQualifiedName()) && null != node.getExpression() && ASTNode.SIMPLE_NAME == node.getExpression()
+				.getNodeType() && 1 == node.arguments()
+					.size()) {
 			SimpleName refactorPrimitiveType = (SimpleName) node.getExpression();
 			ITypeBinding refactorPrimitiveTypeBinding = refactorPrimitiveType.resolveTypeBinding();
-			Expression refactorCandidateParameter = (Expression) node.arguments().get(0);
+			Expression refactorCandidateParameter = (Expression) node.arguments()
+				.get(0);
 
 			Expression replaceParameter;
 
@@ -58,11 +62,14 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 					&& ASTNode.STRING_LITERAL == refactorCandidateParameter.getNodeType()) {
 				StringLiteral stringParameter = (StringLiteral) refactorCandidateParameter;
 				if (ReservedNames.BOOLEAN_TRUE.equals(stringParameter.getLiteralValue())) {
-					replaceParameter = node.getAST().newBooleanLiteral(true);
+					replaceParameter = node.getAST()
+						.newBooleanLiteral(true);
 				} else {
-					replaceParameter = node.getAST().newBooleanLiteral(false);
+					replaceParameter = node.getAST()
+						.newBooleanLiteral(false);
 				}
 				astRewrite.replace(refactorCandidateParameter, replaceParameter, null);
+				onRewrite();
 			}
 		}
 		return true;
@@ -70,12 +77,16 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
-		if (ASTNode.SIMPLE_TYPE == node.getType().getNodeType()
-				&& ASTNode.SIMPLE_NAME == ((SimpleType) node.getType()).getName().getNodeType()
-				&& 1 == node.arguments().size()) {
+		if (ASTNode.SIMPLE_TYPE == node.getType()
+			.getNodeType()
+				&& ASTNode.SIMPLE_NAME == ((SimpleType) node.getType()).getName()
+					.getNodeType()
+				&& 1 == node.arguments()
+					.size()) {
 			SimpleName refactorPrimitiveType = (SimpleName) ((SimpleType) node.getType()).getName();
 			ITypeBinding refactorPrimitiveTypeBinding = refactorPrimitiveType.resolveTypeBinding();
-			Expression refactorCandidateParameter = (Expression) node.arguments().get(0);
+			Expression refactorCandidateParameter = (Expression) node.arguments()
+				.get(0);
 			ITypeBinding refactorCandidateTypeBinding = refactorCandidateParameter.resolveTypeBinding();
 			Expression replacement = null;
 
@@ -96,15 +107,17 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 					StringLiteral stringParameter = (StringLiteral) refactorCandidateParameter;
 					// wrapIfParentMethodInvocation = true
 					if (ReservedNames.BOOLEAN_TRUE.equals(stringParameter.getLiteralValue())) {
-						replacement = node.getAST().newBooleanLiteral(true);
+						replacement = node.getAST()
+							.newBooleanLiteral(true);
 					} else {
-						replacement = node.getAST().newBooleanLiteral(false);
+						replacement = node.getAST()
+							.newBooleanLiteral(false);
 					}
 				}
 
 				/* wrapping string variables into Boolean.valueOf(...) */
 				else if (ClassRelationUtil.isContentOfTypes(refactorCandidateTypeBinding,
-						generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
+						generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 					replacement = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
 				}
 
@@ -126,9 +139,9 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 			else if (isPrimitiveTypeClass(refactorPrimitiveTypeBinding.getName())) {
 
 				/*
-				 * new Float(4D) is not transformable to Float.valueOf(4D) because valueOf only
-				 * allows primitives that are implicit cast-able to float. doubles do not have
-				 * this property
+				 * new Float(4D) is not transformable to Float.valueOf(4D)
+				 * because valueOf only allows primitives that are implicit
+				 * cast-able to float. doubles do not have this property
 				 */
 				Predicate<ITypeBinding> isDoubleVariable = binding -> (binding != null
 						&& (StringUtils.contains(binding.getName(), ReservedNames.DOUBLE_PRIMITIVE)
@@ -140,10 +153,11 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 				}
 
 				/*
-				 * wrapping string and primitive input parameter into PrimitiveType.valueOf(...)
+				 * wrapping string and primitive input parameter into
+				 * PrimitiveType.valueOf(...)
 				 */
 				if (ClassRelationUtil.isContentOfTypes(refactorCandidateTypeBinding,
-						generateFullyQuallifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
+						generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME))
 						|| isPrimitiveTypeClass(refactorCandidateTypeBinding.getName())) {
 					SimpleName valueOfInvocation = NodeBuilder.newSimpleName(node.getAST(), ReservedNames.MI_VALUE_OF);
 					replacement = NodeBuilder.newMethodInvocation(node.getAST(),
@@ -153,6 +167,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 			}
 			if (replacement != null) {
 				astRewrite.replace(node, replacement, null);
+				onRewrite();
 			}
 		}
 		return true;

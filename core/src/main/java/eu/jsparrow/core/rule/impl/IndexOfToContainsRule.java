@@ -1,8 +1,12 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.IndexOfToContainsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -16,9 +20,11 @@ public class IndexOfToContainsRule extends RefactoringRule<IndexOfToContainsASTV
 
 	public IndexOfToContainsRule() {
 		super();
-		this.visitor = IndexOfToContainsASTVisitor.class;
-		this.name = Messages.IndexOfToContainsRule_name;
-		this.description = Messages.IndexOfToContainsRule_description;
+		this.visitorClass = IndexOfToContainsASTVisitor.class;
+		this.id = "IndexOfToContains"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.IndexOfToContainsRule_name,
+				Messages.IndexOfToContainsRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

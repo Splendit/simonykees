@@ -63,7 +63,7 @@ public class StringLiteralEqualityCheckRule {
 		boolean swap =
 				// please dont loose me
 				foo // comparing equality with a copy of init value
-						.equals("cornerCaseWithCommentsInBetween" // I may be useful
+					.equals("cornerCaseWithCommentsInBetween" // I may be useful
 				);
 
 		return swap;
@@ -74,7 +74,7 @@ public class StringLiteralEqualityCheckRule {
 		boolean swap =
 				// comparing equality with a copy of init value
 				foo // please dont loose me
-						.equals("cornerCaseWithCommentsInBetween");
+					.equals("cornerCaseWithCommentsInBetween");
 
 		return swap;
 	}
@@ -117,7 +117,8 @@ public class StringLiteralEqualityCheckRule {
 		}
 
 		public boolean equals(Foo foo) {
-			return foo.toString().equals(this.foo);
+			return foo.toString()
+				.equals(this.foo);
 		}
 
 		public boolean equals(Foo foo, String otherFoo) {

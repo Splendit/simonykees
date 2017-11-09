@@ -33,21 +33,25 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 
 		if (fragments.size() > 1) {
 
-			List<FieldDeclaration> newFieldDeclarations = fragments.stream().skip(1).map(fragment -> {
+			List<FieldDeclaration> newFieldDeclarations = fragments.stream()
+				.skip(1)
+				.map(fragment -> {
 
-				FieldDeclaration newFieldDeclaration = (FieldDeclaration) ASTNode.copySubtree(astRewrite.getAST(),
-						fieldDeclaration);
-				VariableDeclarationFragment newFragment = (VariableDeclarationFragment) astRewrite
+					FieldDeclaration newFieldDeclaration = (FieldDeclaration) ASTNode.copySubtree(astRewrite.getAST(),
+							fieldDeclaration);
+					VariableDeclarationFragment newFragment = (VariableDeclarationFragment) astRewrite
 						.createMoveTarget(fragment);
 
-				newFieldDeclaration.fragments().clear();
+					newFieldDeclaration.fragments()
+						.clear();
 
-				ListRewrite fieldRewrite = astRewrite.getListRewrite(newFieldDeclaration,
-						FieldDeclaration.FRAGMENTS_PROPERTY);
-				fieldRewrite.insertLast(newFragment, null);
+					ListRewrite fieldRewrite = astRewrite.getListRewrite(newFieldDeclaration,
+							FieldDeclaration.FRAGMENTS_PROPERTY);
+					fieldRewrite.insertLast(newFragment, null);
 
-				return newFieldDeclaration;
-			}).collect(Collectors.toList());
+					return newFieldDeclaration;
+				})
+				.collect(Collectors.toList());
 
 			writeNewDeclaration(fieldDeclaration, newFieldDeclarations);
 		}
@@ -58,25 +62,28 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 	@Override
 	public boolean visit(VariableDeclarationStatement variableDeclarationStatement) {
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil
-				.convertToTypedList(variableDeclarationStatement.fragments(), VariableDeclarationFragment.class);
+			.convertToTypedList(variableDeclarationStatement.fragments(), VariableDeclarationFragment.class);
 
 		if (fragments.size() > 1) {
 
-			List<VariableDeclarationStatement> newVariableDeclarationStatements = fragments.stream().skip(1)
-					.map(fragment -> {
+			List<VariableDeclarationStatement> newVariableDeclarationStatements = fragments.stream()
+				.skip(1)
+				.map(fragment -> {
 
-						VariableDeclarationStatement newVariableDeclarationStatement = (VariableDeclarationStatement) ASTNode
-								.copySubtree(astRewrite.getAST(), variableDeclarationStatement);
-						VariableDeclarationFragment newFragment = (VariableDeclarationFragment) astRewrite
-								.createMoveTarget(fragment);
+					VariableDeclarationStatement newVariableDeclarationStatement = (VariableDeclarationStatement) ASTNode
+						.copySubtree(astRewrite.getAST(), variableDeclarationStatement);
+					VariableDeclarationFragment newFragment = (VariableDeclarationFragment) astRewrite
+						.createMoveTarget(fragment);
 
-						newVariableDeclarationStatement.fragments().clear();
-						ListRewrite variableRewrite = astRewrite.getListRewrite(newVariableDeclarationStatement,
-								VariableDeclarationStatement.FRAGMENTS_PROPERTY);
-						variableRewrite.insertLast(newFragment, null);
+					newVariableDeclarationStatement.fragments()
+						.clear();
+					ListRewrite variableRewrite = astRewrite.getListRewrite(newVariableDeclarationStatement,
+							VariableDeclarationStatement.FRAGMENTS_PROPERTY);
+					variableRewrite.insertLast(newFragment, null);
 
-						return newVariableDeclarationStatement;
-					}).collect(Collectors.toList());
+					return newVariableDeclarationStatement;
+				})
+				.collect(Collectors.toList());
 
 			writeNewDeclaration(variableDeclarationStatement, newVariableDeclarationStatements);
 		}
@@ -87,8 +94,11 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 	/**
 	 * Execution of the Refactoring of the rule
 	 * 
-	 * @param declaration starting {@link ASTNode} from which the addition fragment nodes are appended
-	 * @param declarations fragments that are added to the listRewrite List
+	 * @param declaration
+	 *            starting {@link ASTNode} from which the addition fragment
+	 *            nodes are appended
+	 * @param declarations
+	 *            fragments that are added to the listRewrite List
 	 */
 	private void writeNewDeclaration(ASTNode declaration, List<? extends ASTNode> declarations) {
 		StructuralPropertyDescriptor locationInParent = declaration.getLocationInParent();
@@ -97,6 +107,7 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 					(ChildListPropertyDescriptor) locationInParent);
 			Collections.reverse(declarations);
 			declarations.forEach(field -> listRewrite.insertAfter(field, declaration, null));
+			onRewrite();
 		}
 	}
 }

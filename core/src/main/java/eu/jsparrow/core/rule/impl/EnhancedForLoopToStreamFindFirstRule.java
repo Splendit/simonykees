@@ -1,8 +1,12 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamFindFirstASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -17,9 +21,11 @@ public class EnhancedForLoopToStreamFindFirstRule extends RefactoringRule<Enhanc
 
 	public EnhancedForLoopToStreamFindFirstRule() {
 		super();
-		this.visitor = EnhancedForLoopToStreamFindFirstASTVisitor.class;
-		this.name = Messages.EnhancedForLoopToStreamFindFirstRule_name;
-		this.description = Messages.EnhancedForLoopToStreamFindFirstRule_description;
+		this.visitorClass = EnhancedForLoopToStreamFindFirstASTVisitor.class;
+		this.id = "EnhancedForLoopToStreamFindFirst"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.EnhancedForLoopToStreamFindFirstRule_name,
+				Messages.EnhancedForLoopToStreamFindFirstRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

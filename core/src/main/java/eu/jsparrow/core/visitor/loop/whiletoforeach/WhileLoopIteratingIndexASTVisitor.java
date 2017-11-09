@@ -44,7 +44,6 @@ abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVi
 		this.iteratingIndexName = iteratingIndexName;
 		this.parentBlock = parentBlock;
 
-
 		// checking loop updater inside the body
 		Statement loopBody = whileStatement.getBody();
 		if (loopBody.getNodeType() == ASTNode.BLOCK) {
@@ -106,8 +105,8 @@ abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVi
 		boolean doVisit = false;
 
 		IBinding resolvedBinding = simpleName.resolveBinding();
-		if (resolvedBinding != null && IBinding.VARIABLE == resolvedBinding.getKind()
-				&& simpleName.getIdentifier().equals(iteratingIndexName.getIdentifier())) {
+		if (resolvedBinding != null && IBinding.VARIABLE == resolvedBinding.getKind() && simpleName.getIdentifier()
+			.equals(iteratingIndexName.getIdentifier())) {
 
 			doVisit = true;
 		}
@@ -173,8 +172,8 @@ abstract class WhileLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVi
 		ASTNode parent = simpleName.getParent();
 		ASTNode grandParent = parent.getParent();
 		return (parent.getLocationInParent() == WhileStatement.EXPRESSION_PROPERTY && grandParent == whileStatement)
-				|| parent == indexUpdater || parent.getParent() == indexUpdater
-				|| parent.getParent().getParent() == indexUpdater || parent == indexDeclaration
-				|| parent.getParent() == indexDeclaration;
+				|| parent == indexUpdater || parent.getParent() == indexUpdater || parent.getParent()
+					.getParent() == indexUpdater
+				|| parent == indexDeclaration || parent.getParent() == indexDeclaration;
 	}
 }
