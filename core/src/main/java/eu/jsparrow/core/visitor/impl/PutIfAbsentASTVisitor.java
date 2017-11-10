@@ -15,15 +15,41 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
+import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * Looks for occurrences of map.put(key, value) where the following conditions
+ * are met:
+ * <ul>
+ * <li>The statement is surrounded by an if-statement, allowing for at most one
+ * block in between.</li>
+ * <li>There are no other statements in this if-statement, neither in the then
+ * nor else branch.</li>
+ * <li>The condition of the if-statement is a invocation of
+ * map.contains(..).</li>
+ * <li>The expressions and first argument of both invocations match.</li>
+ * <p>
+ * 
+ * If all conditions are met the entire if-statement is replaced with a call to
+ * map.putIfAbsent(..) where the expression matches the previous expression and
+ * the arguments match the previous argument.
+ * 
+ * Used in PutIfAbsentRule.
+ * 
+ * @see PutIfAbsentRule
+ * 
+ * @author Hans-Jörg Schrödl
+ *
+ */
 public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	private static final String MAP_FULLY_QUALIFIED_NAME = java.util.Map.class.getName();
 
 	private static final String PUT = "put"; //$NON-NLS-1$
-	private static final String CONTAINS_KEY = "containsKey";
+	private static final String CONTAINS_KEY = "containsKey"; //$NON-NLS-1$
 
 	private static final String PUT_IF_ABSENT = "putIfAbsent"; //$NON-NLS-1$
 
@@ -42,7 +68,6 @@ public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (ifStatement == null) {
 			return true;
 		}
-
 		if (ifStatement.getElseStatement() != null) {
 			return true;
 		}
@@ -55,7 +80,7 @@ public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (!methodExpressionsAndArgumentsMatch(methodInvocation, containsMethod)) {
 			return true;
 		}
-		
+
 		ExpressionStatement statement = createPutIfAbsent(methodInvocation);
 		astRewrite.replace(ifStatement, statement, null);
 		onRewrite();
@@ -137,7 +162,7 @@ public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	public ExpressionStatement createPutIfAbsent(MethodInvocation methodInvocation) {
 		SimpleName putIfAbsentName = methodInvocation.getAST()
-			.newSimpleName(PUT_IF_ABSENT); 
+			.newSimpleName(PUT_IF_ABSENT);
 		Expression firstArgument = (Expression) astRewrite.createMoveTarget((Expression) methodInvocation.arguments()
 			.get(0));
 		Expression secondArgument = (Expression) astRewrite.createMoveTarget((Expression) methodInvocation.arguments()

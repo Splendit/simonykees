@@ -7,18 +7,24 @@ import org.apache.commons.lang3.JavaVersion;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RuleDescription;
 import eu.jsparrow.core.util.TagUtil;
-import eu.jsparrow.core.visitor.impl.BracketsToControlASTVisitor;
 import eu.jsparrow.core.visitor.impl.PutIfAbsentASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
+/**
+ * This rule replaces map.put(..) with map.putIfAbsent(..) if certain criteria are met.
+ * 
+ * @see PutIfAbsentASTVisitor
+ * 
+ * @author Hans-Jörg Schrödl
+ * @since 2.3.0
+ */
 public class PutIfAbsentRule extends RefactoringRule<PutIfAbsentASTVisitor> {
 
 	public PutIfAbsentRule() {
 		super();
 		this.visitorClass = PutIfAbsentASTVisitor.class;
 		this.id = "BracketsToControl"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription(Messages.BracketsToControlRule_name,
-				Messages.BracketsToControlRule_description, Duration.ofMinutes(2),
+		this.ruleDescription = new RuleDescription(Messages.PutIfAbsentRule_name, Messages.PutIfAbsentRule_description, Duration.ofMinutes(2),
 				TagUtil.getTagsForRule(this.getClass()));
 	}
 
