@@ -40,14 +40,12 @@ import eu.jsparrow.ui.util.LicenseUtil;
 public class RefactoringPreviewWizard extends Wizard {
 
 	private RefactoringPipeline refactoringPipeline;
-	private long durationInMilliseconds = 0;
 
 	private Shell shell;
 
-	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline, long duration) {
+	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
 		this.refactoringPipeline = refactoringPipeline;
-		this.durationInMilliseconds = duration;
 		this.shell = PlatformUI.getWorkbench()
 			.getActiveWorkbenchWindow()
 			.getShell();
@@ -65,8 +63,7 @@ public class RefactoringPreviewWizard extends Wizard {
 		 * First summary page is created to collect all initial source from
 		 * working copies
 		 */
-		RefactoringSummaryWizardPage summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline,
-				durationInMilliseconds);
+		RefactoringSummaryWizardPage summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline);
 		refactoringPipeline.getRules()
 			.forEach(rule -> {
 				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);

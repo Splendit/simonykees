@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -39,6 +38,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
+import eu.jsparrow.ui.util.StopWatchUtil;
 
 /**
  * {@link Wizard} holding the {@link AbstractSelectRulesWizardPage}, which
@@ -64,9 +64,6 @@ public class SelectRulesWizard extends Wizard {
 	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
 	private RefactoringPipeline refactoringPipeline;
-
-	private static StopWatch stopWatch = new StopWatch();
-	private long durationInMilliseconds = 0;
 
 	public SelectRulesWizard(List<IJavaElement> javaElements, RefactoringPipeline refactoringPipeline,
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
@@ -98,7 +95,8 @@ public class SelectRulesWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		return !model.getSelectionAsList().isEmpty();
+		return !model.getSelectionAsList()
+			.isEmpty();
 	}
 
 	@Override
@@ -179,13 +177,11 @@ public class SelectRulesWizard extends Wizard {
 	}
 
 	private void preRefactoring() {
-		stopWatch.start();
+		StopWatchUtil.start();
 	}
 
 	private void postRefactoring() {
-		stopWatch.stop();
-		durationInMilliseconds = stopWatch.getTime();
-		stopWatch.reset();
+		StopWatchUtil.stop();
 	}
 
 	/**
@@ -210,14 +206,14 @@ public class SelectRulesWizard extends Wizard {
 							.filter(rule -> null != refactoringPipeline.getChangesForRule(rule)
 									&& !refactoringPipeline.getChangesForRule(rule)
 										.isEmpty())
-							.map(rule -> rule.getRuleDescription().getName())
+							.map(rule -> rule.getRuleDescription()
+								.getName())
 							.collect(Collectors.joining("; ")))); //$NON-NLS-1$
 
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				final WizardDialog dialog = new WizardDialog(shell,
-						new RefactoringPreviewWizard(refactoringPipeline, durationInMilliseconds)) {
+				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactoringPipeline)) {
 
 					@Override
 					protected void nextPressed() {

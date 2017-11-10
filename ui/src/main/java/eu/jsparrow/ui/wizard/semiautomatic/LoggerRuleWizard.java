@@ -3,7 +3,6 @@ package eu.jsparrow.ui.wizard.semiautomatic;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.time.StopWatch;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -30,6 +29,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
+import eu.jsparrow.ui.util.StopWatchUtil;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -51,9 +51,6 @@ public class LoggerRuleWizard extends Wizard {
 	private final StandardLoggerRule rule;
 
 	private RefactoringPipeline refactoringPipeline;
-
-	private static StopWatch stopWatch = new StopWatch();
-	private long durationInMilliseconds = 0;
 
 	public LoggerRuleWizard(IJavaProject selectedJavaProjekt,
 			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, RefactoringPipeline refactoringPipeline) {
@@ -171,13 +168,11 @@ public class LoggerRuleWizard extends Wizard {
 	}
 
 	private void preRefactoring() {
-		stopWatch.start();
+		StopWatchUtil.start();
 	}
 
 	private void postRefactoring() {
-		stopWatch.stop();
-		durationInMilliseconds = stopWatch.getTime();
-		stopWatch.reset();
+		StopWatchUtil.stop();
 	}
 
 	/**
@@ -185,11 +180,12 @@ public class LoggerRuleWizard extends Wizard {
 	 */
 	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactorer, Rectangle rectangle) {
 		String messageEndRefactoring = NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass()
-				.getSimpleName(), selectedJavaProjekt.getElementName());
+			.getSimpleName(), selectedJavaProjekt.getElementName());
 		logger.info(messageEndRefactoring);
 
-		String messageRulesWithChanges = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, selectedJavaProjekt.getElementName(),
-				rule.getRuleDescription().getName());
+		String messageRulesWithChanges = NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
+				selectedJavaProjekt.getElementName(), rule.getRuleDescription()
+					.getName());
 		logger.info(messageRulesWithChanges);
 
 		Display.getDefault()
@@ -197,8 +193,7 @@ public class LoggerRuleWizard extends Wizard {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				final WizardDialog dialog = new WizardDialog(shell,
-						new RefactoringPreviewWizard(refactorer, durationInMilliseconds));
+				final WizardDialog dialog = new WizardDialog(shell, new RefactoringPreviewWizard(refactorer));
 
 				// maximizes the RefactoringPreviewWizard
 				dialog.setPageSize(rectangle.width, rectangle.height);

@@ -54,7 +54,6 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringSummaryWizardPage.class);
 
-	private long durationInMilliseconds = 0;
 	private RefactoringPipeline refactoringPipeline;
 	private Map<RefactoringState, String> initialSource = new HashMap<>();
 	private Map<RefactoringState, String> finalSource = new HashMap<>();
@@ -67,7 +66,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 	protected IStatus fSelectionStatus;
 
-	public RefactoringSummaryWizardPage(RefactoringPipeline refactoringPipeline, long durationInMilliseconds) {
+	public RefactoringSummaryWizardPage(RefactoringPipeline refactoringPipeline) {
 		super(Messages.RefactoringSummaryWizardPage_title);
 		this.refactoringPipeline = refactoringPipeline;
 		Duration totalTimeSaved = EliminatedTechnicalDebt.getTotalFor(refactoringPipeline.getRules());
@@ -76,12 +75,6 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 				+ totalTimeSaved.toMinutes() + " Minutes");
 
 		setDescription(Messages.RefactoringSummaryWizardPage_description);
-
-		this.durationInMilliseconds = durationInMilliseconds;
-
-		String loggerInfo = NLS.bind(Messages.RefactoringSummaryWizardPage_Duration, durationInMilliseconds,
-				getDurationInReadableFormat());
-		logger.info(loggerInfo);
 
 		this.refactoringPipeline = refactoringPipeline;
 		setInitialChanges();
@@ -364,16 +357,4 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	protected void updateStatus(IStatus status) {
 		StatusUtil.applyToStatusLine(this, status);
 	}
-
-	private String getDurationInReadableFormat() {
-
-		int milliseconds = (int) (durationInMilliseconds % 1000);
-		int seconds = (int) (durationInMilliseconds / 1000) % 60;
-		int minutes = (int) ((durationInMilliseconds / (1000 * 60)) % 60);
-		int hours = (int) ((durationInMilliseconds / (1000 * 60 * 60)) % 24);
-
-		return ((hours < 10) ? "0" : "") + hours + ":" + ((minutes < 10) ? "0" : "") + minutes + ":" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
-				+ ((seconds < 10) ? "0" : "") + seconds + "." + milliseconds; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	}
-
 }
