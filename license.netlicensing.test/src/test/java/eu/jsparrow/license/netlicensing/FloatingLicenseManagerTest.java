@@ -57,7 +57,8 @@ public class FloatingLicenseManagerTest extends LicenseCommonTest {
 			try {
 				Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 			} catch (InterruptedException e) {
-
+				Thread.currentThread()
+					.interrupt();
 			}
 		});
 

@@ -48,7 +48,7 @@ public class ConfigureProfileSelectRulesWizardPage extends AbstractSelectRulesWi
 		if (!StringUtils.isEmpty(profileId)) {
 			nameInputText.setText(profileId);
 		}
-		if (profileId.equals(Messages.Profile_DefaultProfile_profileName)) {
+		if (Messages.Profile_DefaultProfile_profileName.equals(profileId)) {
 			nameInputText.setEnabled(false);
 		}
 		GridData gridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);

@@ -197,7 +197,12 @@ public class Activator implements BundleActivator {
 				if (currentFile.isDirectory() && !("target".equals(currentFile.getName()))) { //$NON-NLS-1$
 					deleteChildren(currentFile);
 				}
-				currentFile.delete();
+
+				if (!currentFile.delete()) {
+					String loggerError = NLS.bind(Messages.Activator_couldNotDeleteFileWithPath,
+							currentFile.getAbsolutePath());
+					logger.error(loggerError);
+				}
 			}
 		}
 	}

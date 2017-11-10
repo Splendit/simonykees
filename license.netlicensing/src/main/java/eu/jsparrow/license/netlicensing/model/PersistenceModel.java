@@ -1,6 +1,5 @@
 package eu.jsparrow.license.netlicensing.model;
 
-import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -16,9 +15,7 @@ import eu.jsparrow.license.netlicensing.LicenseType;
  * @since 1.0
  *
  */
-public class PersistenceModel implements Serializable {
-
-	private static final long serialVersionUID = 1L;
+public class PersistenceModel {
 
 	private static final String SEPARATOR_REGEX = ","; //$NON-NLS-1$
 	private static final String KEY_VALUE_SEPARATOR_REGEX = "\\|"; //$NON-NLS-1$

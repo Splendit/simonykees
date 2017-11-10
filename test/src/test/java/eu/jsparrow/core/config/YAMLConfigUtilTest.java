@@ -3,17 +3,25 @@ package eu.jsparrow.core.config;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import org.eclipse.osgi.util.NLS;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import eu.jsparrow.i18n.Messages;
 
 @SuppressWarnings("nls")
 public class YAMLConfigUtilTest {
+
+	private static final Logger logger = LoggerFactory.getLogger(YAMLConfigUtilTest.class);
 
 	// For testing file operations refer to file in the resources directory
 	private static final String RESOURCE_DIRECTORY = "src/test/resources/eu/jsparrow/core/config";
@@ -27,7 +35,10 @@ public class YAMLConfigUtilTest {
 
 	@After
 	public void tearDown() {
-		exportFile.delete();
+		if (!exportFile.delete()) {
+			String loggerError = NLS.bind(Messages.Activator_couldNotDeleteFileWithPath, exportFile.getAbsolutePath());
+			logger.error(loggerError);
+		}
 	}
 
 	@Test
@@ -53,7 +64,7 @@ public class YAMLConfigUtilTest {
 	@Test(expected = YAMLConfigException.class)
 	public void exportConfig_ToNonWritableFile_ShouldThrowException() throws Exception {
 		YAMLConfig config = new YAMLConfig();
-		exportFile.setWritable(false);
+		assertTrue(exportFile.setWritable(false));
 		YAMLConfigUtil.exportConfig(config, exportFile);
 	}
 
