@@ -32,10 +32,8 @@ import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.text.edits.MultiTextEdit;
@@ -60,7 +58,7 @@ import eu.jsparrow.ui.util.LicenseUtil;
  * {@link TextEditChangePreviewViewer}, which is an internal Eclipse class.
  * 
  * @author Ludwig Werzowa, Hannes Schweighofer, Andreja Sambolec, Hans-Jörg
- *         Schrödl
+ *         Schrödl, Matthias Webhofer
  * @since 0.9
  */
 @SuppressWarnings("restriction")
@@ -120,13 +118,13 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 		IObservableValue issuesFixedLabelObserveValue = WidgetProperties.text()
 			.observe(issuesFixedLabel);
-		IObservableValue issuesFixedModelObserveValue = BeanProperties.value("issuesFixed")
+		IObservableValue issuesFixedModelObserveValue = BeanProperties.value("issuesFixed") //$NON-NLS-1$
 			.observe(model);
 		bindingContext.bindValue(issuesFixedLabelObserveValue, issuesFixedModelObserveValue, null, null);
 
 		IObservableValue hoursSavedLabelObserveValue = WidgetProperties.text()
 			.observe(techDebtLabel);
-		IObservableValue hoursSavedModelObserveValue = BeanProperties.value("hoursSaved")
+		IObservableValue hoursSavedModelObserveValue = BeanProperties.value("hoursSaved") //$NON-NLS-1$
 			.observe(model);
 		bindingContext.bindValue(hoursSavedLabelObserveValue, hoursSavedModelObserveValue, null, null);
 	}
@@ -186,12 +184,12 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 		issuesFixedLabel = new CLabel(composite, SWT.NONE);
 		issuesFixedLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		issuesFixedLabel.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-bolt.png"));
+		issuesFixedLabel.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-bolt.png")); //$NON-NLS-1$
 
 		techDebtLabel = new CLabel(composite, SWT.NONE);
 		techDebtLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		techDebtLabel.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-clock.png"));
-		
+		techDebtLabel.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-clock.png")); //$NON-NLS-1$
+
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
@@ -318,7 +316,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				if (!unselected.containsKey(newSelection.getElementName())) {
 					unselectedChange.add(newSelection);
 				}
-				RuleApplicationCount.getFor(getRule()).remove(newSelection.getHandleIdentifier());
+				RuleApplicationCount.getFor(getRule())
+					.remove(newSelection.getHandleIdentifier());
 			}
 		};
 	}

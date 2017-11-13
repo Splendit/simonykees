@@ -25,7 +25,8 @@ import eu.jsparrow.i18n.Messages;
  * description, if its enabled and the document changes for
  * {@link ICompilationUnit} that are processed
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Hans-Jörg Schrödl
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Hans-Jörg Schrödl,
+ *         Matthias Webhofer
  * @since 0.9
  *
  * @param <T>

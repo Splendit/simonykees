@@ -1,7 +1,5 @@
 package eu.jsparrow.dummies;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-
 import eu.jsparrow.core.visitor.ASTRewriteVisitorListener;
 
 /**

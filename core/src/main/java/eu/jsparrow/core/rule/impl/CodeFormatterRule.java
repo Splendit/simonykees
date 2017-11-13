@@ -29,7 +29,7 @@ import eu.jsparrow.i18n.Messages;
  * The formatter selected in the Eclipse settings of the processed project is
  * used.
  * 
- * @author Hannes Schweighofer, Ludwig Werzowa
+ * @author Hannes Schweighofer, Ludwig Werzowa, Matthias Webhofer
  * @since 0.9.2
  *
  */

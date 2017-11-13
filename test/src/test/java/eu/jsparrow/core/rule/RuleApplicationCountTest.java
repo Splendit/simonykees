@@ -1,6 +1,7 @@
 package eu.jsparrow.core.rule;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.junit.Before;

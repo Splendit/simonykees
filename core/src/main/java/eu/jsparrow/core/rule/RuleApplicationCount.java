@@ -2,9 +2,6 @@ package eu.jsparrow.core.rule;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.eclipse.jdt.core.ICompilationUnit;
 
 import eu.jsparrow.core.visitor.ASTRewriteVisitorListener;
 
@@ -13,7 +10,7 @@ import eu.jsparrow.core.visitor.ASTRewriteVisitorListener;
  * notified. Used in {@link RefactoringRule} in order to count how often a
  * specific rule has been used.
  * 
- * @author Hans-Jörg Schrödl
+ * @author Hans-Jörg Schrödl, Matthias Webhofer
  * @since 2.3.0
  */
 public class RuleApplicationCount implements ASTRewriteVisitorListener {
@@ -38,8 +35,8 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 			.sum();
 	}
 
-	public int toInt(ICompilationUnit compilationUnit) {
-		return applicationCounterPerCompilationUnit.get(compilationUnit);
+	public int toInt(String compilationUnitHandle) {
+		return applicationCounterPerCompilationUnit.get(compilationUnitHandle);
 	}
 
 	@Override

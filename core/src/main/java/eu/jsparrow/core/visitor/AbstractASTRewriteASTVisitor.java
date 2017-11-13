@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
@@ -12,14 +11,14 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
  * Abstract implementation of an {@link ASTVisitor} to assure all used visitors
  * have an field for {@link ASTRewrite} to commit the changes in the tree.
  * 
- * @author Martin Huter, Hans-Jörg Schrödl
+ * @author Martin Huter, Hans-Jörg Schrödl, Matthias Webhofer
  * @since 0.9
  */
 
 public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	protected ASTRewrite astRewrite;
-	
+
 	protected String compilationUnitHandle;
 
 	protected List<ASTRewriteVisitorListener> listeners = new ArrayList<>();
@@ -50,7 +49,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	public void setASTRewrite(ASTRewrite astRewrite) {
 		this.astRewrite = astRewrite;
 	}
-	
+
 	public String getCompilationUnit() {
 		return compilationUnitHandle;
 	}
