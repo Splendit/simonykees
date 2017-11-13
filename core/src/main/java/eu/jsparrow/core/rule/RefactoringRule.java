@@ -159,6 +159,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 
 		AbstractASTRewriteASTVisitor rule = visitorFactory();
 		rule.setASTRewrite(astRewrite);
+		rule.setCompilationUnit(workingCopy.getHandleIdentifier());
 		try {
 			astRoot.accept(rule);
 		} catch (RuntimeException e) {
