@@ -21,9 +21,6 @@
 				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
 					style="push"/>
-				<command commandId="eu.jsparrow.ui.RenameFieldsRuleWizardHandler" 
-					label="%command.label.rename_fields_rule_wizard" 
-					style="push"/>
 			</menu>
 		</menuContribution>
 		<menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=org.eclipse.jdt.ui.refactoring.menu">
@@ -33,9 +30,6 @@
 					style="push"/>
 				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
-					style="push"/>
-				<command commandId="eu.jsparrow.ui.RenameFieldsRuleWizardHandler" 
-					label="%command.label.rename_fields_rule_wizard" 
 					style="push"/>
 			</menu>
 		</menuContribution>
@@ -47,9 +41,6 @@
 				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
 					style="push"/>
-				<command commandId="eu.jsparrow.ui.RenameFieldsRuleWizardHandler" 
-					label="%command.label.rename_fields_rule_wizard" 
-					style="push"/>
 			</menu>
 		</menuContribution>
 	</extension>
@@ -60,9 +51,6 @@
 		<command defaultHandler="eu.jsparrow.ui.handler.LoggerRuleWizardHandler" 
 			id="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 			name="%command.name.logger_rule_wizard_handler"/>
-		<command defaultHandler="eu.jsparrow.ui.handler.RenameFieldsRuleWizardHandler" 
-			id="eu.jsparrow.ui.RenameFieldsRuleWizardHandler" 
-			name="%command.label.rename_fields_rule_wizard"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page class="eu.jsparrow.ui.preference.SimonykeesPreferencePage" 
