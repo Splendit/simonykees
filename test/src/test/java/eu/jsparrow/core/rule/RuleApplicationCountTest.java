@@ -2,18 +2,22 @@ package eu.jsparrow.core.rule;
 
 import static org.junit.Assert.*;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import eu.jsparrow.dummies.DummyRule;
 
 public class RuleApplicationCountTest {
 
 	private RuleApplicationCount applicationCounter;
+	private ICompilationUnit compilationUnit;
 
 	@Before
 	public void setUp() {
 		applicationCounter = new RuleApplicationCount();
+		compilationUnit = Mockito.mock(ICompilationUnit.class);
 	}
 
 	@Test
@@ -36,7 +40,7 @@ public class RuleApplicationCountTest {
 	public void update_OnNewApplicationCounter_ShouldIncreaseCount() throws Exception {
 		int previous = applicationCounter.toInt();
 
-		applicationCounter.update();
+		applicationCounter.update(compilationUnit.getHandleIdentifier());
 
 		assertEquals(previous + 1, applicationCounter.toInt());
 	}
