@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+
 /**
  * Implementors listen on {@link AbstractASTRewriteASTVisitor} for rewrites.
  * 
@@ -10,5 +12,7 @@ public interface ASTRewriteVisitorListener {
 	/**
 	 * Notify of a change.
 	 */
-	public void update();
+	public void update(String compilationUnitHandle);
+	
+	public boolean remove(String compilationUnitHandle);
 }
