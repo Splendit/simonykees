@@ -318,6 +318,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				if (!unselected.containsKey(newSelection.getElementName())) {
 					unselectedChange.add(newSelection);
 				}
+				RuleApplicationCount.getFor(getRule()).remove(newSelection.getHandleIdentifier());
 			}
 		};
 	}
