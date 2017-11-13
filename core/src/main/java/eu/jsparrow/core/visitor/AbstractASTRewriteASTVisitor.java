@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
@@ -18,6 +19,8 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	protected ASTRewrite astRewrite;
+	
+	protected String compilationUnitHandle;
 
 	protected List<ASTRewriteVisitorListener> listeners = new ArrayList<>();
 
@@ -46,6 +49,14 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	 */
 	public void setASTRewrite(ASTRewrite astRewrite) {
 		this.astRewrite = astRewrite;
+	}
+	
+	public String getCompilationUnit() {
+		return compilationUnitHandle;
+	}
+
+	public void setCompilationUnit(String compilationUnitHandle) {
+		this.compilationUnitHandle = compilationUnitHandle;
 	}
 
 	/**
@@ -83,7 +94,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	 * Notifies all listeners that a rewrite occurred.
 	 */
 	protected void onRewrite() {
-		listeners.forEach(ASTRewriteVisitorListener::update);
+		listeners.forEach(listener -> listener.update(compilationUnitHandle));
 	}
 
 }
