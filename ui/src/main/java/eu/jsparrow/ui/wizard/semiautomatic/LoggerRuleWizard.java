@@ -43,9 +43,7 @@ public class LoggerRuleWizard extends Wizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoggerRuleWizard.class);
 
-	private LoggerRuleWizardPage page;
 	private LoggerRuleWizardPageModel model;
-	private LoggerRuleWizardPageControler controller;
 
 	private IJavaProject selectedJavaProjekt;
 	private final StandardLoggerRule rule;
@@ -69,9 +67,7 @@ public class LoggerRuleWizard extends Wizard {
 	@Override
 	public void addPages() {
 		model = new LoggerRuleWizardPageModel(rule);
-		controller = new LoggerRuleWizardPageControler(model);
-		page = new LoggerRuleWizardPage(model, controller);
-		addPage(page);
+		addPage(new LoggerRuleWizardPage(model));
 	}
 
 	@Override
@@ -82,12 +78,8 @@ public class LoggerRuleWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		if (model.getSelectionStatus()
-			.equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)) {
-			return false;
-		} else {
-			return true;
-		}
+		return (!model.getSelectionStatus()
+			.equals(Messages.LoggerRuleWizardPageModel_err_noTransformation));
 	}
 
 	@Override
@@ -99,10 +91,7 @@ public class LoggerRuleWizard extends Wizard {
 
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(rule);
 		refactoringPipeline.setRules(rules);
-		/*
-		 * AbstractRefactorer refactorer = new AbstractRefactorer(javaElements,
-		 * rules)
-		 */
+
 		Rectangle rectangle = Display.getCurrent()
 			.getPrimaryMonitor()
 			.getBounds();

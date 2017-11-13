@@ -71,8 +71,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		this.refactoringPipeline = refactoringPipeline;
 		Duration totalTimeSaved = EliminatedTechnicalDebt.getTotalFor(refactoringPipeline.getRules());
 
-		setTitle(Messages.RefactoringSummaryWizardPage_title + ", Eliminated technical debt: "
-				+ totalTimeSaved.toMinutes() + " Minutes");
+		setTitle(String.format("%s,  %s", Messages.RefactoringSummaryWizardPage_title, //$NON-NLS-1$
+				NLS.bind(Messages.RefactoringSummaryWizardPage_eliminated_technical_debt, totalTimeSaved.toMinutes())));
 
 		setDescription(Messages.RefactoringSummaryWizardPage_description);
 
