@@ -2,6 +2,9 @@ package eu.jsparrow.core.rule;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.eclipse.jdt.core.ICompilationUnit;
 
 import eu.jsparrow.core.visitor.ASTRewriteVisitorListener;
 
@@ -17,7 +20,7 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 
 	private static final Map<RefactoringRuleInterface, RuleApplicationCount> applicationCounters = new HashMap<>();
 
-	private int applicationCounter = 0;
+	private Map<String, Integer> applicationCounterPerCompilationUnit = new HashMap<>();
 
 	// Internal visibility for usage in unit tests
 	RuleApplicationCount() {
@@ -29,12 +32,23 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 	 * @return the current application counter
 	 */
 	public int toInt() {
-		return applicationCounter;
+		return applicationCounterPerCompilationUnit.values()
+			.stream()
+			.mapToInt(Integer::intValue)
+			.sum();
+	}
+
+	public int toInt(ICompilationUnit compilationUnit) {
+		return applicationCounterPerCompilationUnit.get(compilationUnit);
 	}
 
 	@Override
-	public void update() {
-		applicationCounter++;
+	public void update(String compilationUnitHandle) {
+		int count = 1;
+		if (applicationCounterPerCompilationUnit.containsKey(compilationUnitHandle)) {
+			count = (applicationCounterPerCompilationUnit.get(compilationUnitHandle)) + 1;
+		}
+		applicationCounterPerCompilationUnit.put(compilationUnitHandle, count);
 	}
 
 	/**
@@ -55,5 +69,15 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 	 */
 	public static void clear() {
 		applicationCounters.clear();
+	}
+
+	public Map<String, Integer> getApplicationCounterPerCompilationUnit() {
+		return applicationCounterPerCompilationUnit;
+	}
+
+	@Override
+	public boolean remove(String compilationUnitHandle) {
+		Integer currentCount = applicationCounterPerCompilationUnit.remove(compilationUnitHandle);
+		return currentCount != null ? true : false;
 	}
 }
