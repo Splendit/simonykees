@@ -29,6 +29,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
+import eu.jsparrow.ui.util.StopWatchUtil;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -100,25 +101,11 @@ public class LoggerRuleWizard extends Wizard {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				preRefactoring();
+				IStatus refactoringStatus = doRefactoring(monitor);
+				postRefactoring();
 
-				try {
-					refactoringPipeline.doRefactoring(monitor);
-					if (monitor.isCanceled()) {
-						refactoringPipeline.clearStates();
-						return Status.CANCEL_STATUS;
-					}
-				} catch (RefactoringException e) {
-					WizardMessageDialog.synchronizeWithUIShowInfo(e);
-					return Status.CANCEL_STATUS;
-				} catch (RuleException e) {
-					WizardMessageDialog.synchronizeWithUIShowError(e);
-					return Status.CANCEL_STATUS;
-
-				} finally {
-					monitor.done();
-				}
-
-				return Status.OK_STATUS;
+				return refactoringStatus;
 			}
 		};
 
@@ -146,6 +133,35 @@ public class LoggerRuleWizard extends Wizard {
 		job.schedule();
 
 		return true;
+	}
+
+	private IStatus doRefactoring(IProgressMonitor monitor) {
+		try {
+			refactoringPipeline.doRefactoring(monitor);
+			if (monitor.isCanceled()) {
+				refactoringPipeline.clearStates();
+				return Status.CANCEL_STATUS;
+			}
+		} catch (RefactoringException e) {
+			WizardMessageDialog.synchronizeWithUIShowInfo(e);
+			return Status.CANCEL_STATUS;
+		} catch (RuleException e) {
+			WizardMessageDialog.synchronizeWithUIShowError(e);
+			return Status.CANCEL_STATUS;
+
+		} finally {
+			monitor.done();
+		}
+
+		return Status.OK_STATUS;
+	}
+
+	private void preRefactoring() {
+		StopWatchUtil.start();
+	}
+
+	private void postRefactoring() {
+		StopWatchUtil.stop();
 	}
 
 	/**

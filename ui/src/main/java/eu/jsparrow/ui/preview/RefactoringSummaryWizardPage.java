@@ -76,6 +76,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 		setDescription(Messages.RefactoringSummaryWizardPage_description);
 
+		this.refactoringPipeline = refactoringPipeline;
 		setInitialChanges();
 		this.currentRefactoringState = initialSource.keySet()
 			.stream()
@@ -356,5 +357,4 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	protected void updateStatus(IStatus status) {
 		StatusUtil.applyToStatusLine(this, status);
 	}
-
 }
