@@ -305,15 +305,17 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 	private List<Expression> findExceptionsToBeLogged(List<Expression> exceptions) {
 
-		boolean logExcepetions = Boolean
+		boolean logExceptions = Boolean
 			.parseBoolean(replacingOptions.get(StandardLoggerConstants.ATTACH_EXCEPTION_OBJECT));
-		List<Expression> tobeLogedExceptins = new ArrayList<>();
-		exceptions.stream()
-			.filter(e -> logExcepetions && e.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION)
-			.findFirst()
-			.ifPresent(tobeLogedExceptins::add);
-		
-		return tobeLogedExceptins;
+		List<Expression> tobeLogedExceptions = new ArrayList<>();
+		if (logExceptions) {
+			exceptions.stream()
+				.filter(e -> e.getNodeType() != ASTNode.CLASS_INSTANCE_CREATION)
+				.findFirst()
+				.ifPresent(tobeLogedExceptions::add);
+		}
+
+		return tobeLogedExceptions;
 	}
 
 	/**
