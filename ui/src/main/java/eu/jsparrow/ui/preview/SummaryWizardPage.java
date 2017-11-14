@@ -1,16 +1,11 @@
 package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
-import java.time.Duration;
 
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.eclipse.compare.internal.ComparePreferencePage;
 import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
-import org.eclipse.core.databinding.beans.PojoProperties;
-import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -34,24 +29,23 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.wb.swt.ResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.dialog.CompareInput;
+import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.SummaryWizardPageModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.StopWatchUtil;
 
-@SuppressWarnings({ "restriction", "nls" })
+@SuppressWarnings({ "restriction" })
 public class SummaryWizardPage extends WizardPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringSummaryWizardPage.class);
@@ -78,8 +72,8 @@ public class SummaryWizardPage extends WizardPage {
 	 * Create the wizard.
 	 */
 	public SummaryWizardPage(RefactoringPipeline refactoringPipeline) {
-		super("wizardPage");
-		setTitle("Run Summary");
+		super("wizardPage"); //$NON-NLS-1$
+		setTitle(Messages.SummaryWizardPage_RunSummary);
 		this.summaryWizardPageModel = new SummaryWizardPageModel(refactoringPipeline);
 	}
 
@@ -113,10 +107,9 @@ public class SummaryWizardPage extends WizardPage {
 	public void setVisible(boolean visible) {
 		if (visible) {
 			summaryWizardPageModel.updateFiles();
-			createCompareInputControl();
-			setStatusInfo(LicenseUtil.getInstance()
+			summaryWizardPageModel.setIsFreeLicense(LicenseUtil.getInstance()
 				.isFree());
-			summaryWizardPageModel.setRunDuration(summaryWizardPageModel.getRunDuration() + "1");
+			createCompareInputControl();
 		}
 		super.setVisible(visible);
 	}
@@ -131,15 +124,15 @@ public class SummaryWizardPage extends WizardPage {
 
 		labelExecutionTime = new CLabel(composite, SWT.NONE);
 		labelExecutionTime.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		labelExecutionTime.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-hourglass-half.png"));
+		labelExecutionTime.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-hourglass-half.png")); //$NON-NLS-1$
 
 		labelIssuesFixed = new CLabel(composite, SWT.NONE);
 		labelIssuesFixed.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		labelIssuesFixed.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-bolt.png"));
+		labelIssuesFixed.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-bolt.png")); //$NON-NLS-1$
 
 		labelHoursSaved = new CLabel(composite, SWT.NONE);
 		labelHoursSaved.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		labelHoursSaved.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-clock.png"));
+		labelHoursSaved.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-clock.png")); //$NON-NLS-1$
 
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -149,7 +142,7 @@ public class SummaryWizardPage extends WizardPage {
 		Group filesGroup = new Group(rootComposite, SWT.SHADOW_ETCHED_IN);
 		filesGroup.setLayout(new GridLayout(1, false));
 		filesGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
-		filesGroup.setText("Files");
+		filesGroup.setText(Messages.SummaryWizardPage_Files);
 		SashForm sashForm = new SashForm(filesGroup, SWT.VERTICAL);
 		sashForm.setLayout(new GridLayout());
 		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -176,7 +169,7 @@ public class SummaryWizardPage extends WizardPage {
 
 	private void addRulesSection() {
 		Group tableComposite = new Group(rootComposite, SWT.SHADOW_ETCHED_IN);
-		tableComposite.setText("Rules");
+		tableComposite.setText(Messages.SummaryWizardPage_Rules);
 		tableComposite.setLayout(new GridLayout(1, false));
 		tableComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		ruleTableViewer = new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION);
@@ -186,7 +179,7 @@ public class SummaryWizardPage extends WizardPage {
 
 		TableViewerColumn colRuleName = new TableViewerColumn(ruleTableViewer, SWT.NONE);
 		colRuleName.getColumn()
-			.setText("Rule");
+			.setText(Messages.SummaryWizardPage_Rule);
 		colRuleName.getColumn()
 			.setResizable(false);
 
@@ -194,13 +187,13 @@ public class SummaryWizardPage extends WizardPage {
 		colTimes.getColumn()
 			.setResizable(false);
 		colTimes.getColumn()
-			.setText("Times Applied");
+			.setText(Messages.SummaryWizardPage_TimesApplied);
 
 		TableViewerColumn colTimeSaved = new TableViewerColumn(ruleTableViewer, SWT.NONE);
-		colTimes.getColumn()
+		colTimeSaved.getColumn()
 			.setResizable(false);
-		colTimes.getColumn()
-			.setText("Time Saved");
+		colTimeSaved.getColumn()
+			.setText(Messages.SummaryWizardPage_TimeSaved);
 
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		tableComposite.setLayout(tableLayout);
@@ -216,8 +209,8 @@ public class SummaryWizardPage extends WizardPage {
 		initializeHeaderDataBindings(bindingContext);
 
 		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
-				BeanProperties.values("name", "times", "timeSaved"));
-		ViewerSupport.bind(fileTableViewer, summaryWizardPageModel.getChangedFiles(), BeanProperties.values("name"));
+				BeanProperties.values("name", "times", "timeSaved")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		ViewerSupport.bind(fileTableViewer, summaryWizardPageModel.getChangedFiles(), BeanProperties.values("name")); //$NON-NLS-1$
 
 		IViewerObservableValue selectedFile = ViewerProperties.singleSelection()
 			.observe(fileTableViewer);
@@ -232,7 +225,7 @@ public class SummaryWizardPage extends WizardPage {
 		});
 
 		IObservableValue isFreeLicenseObservableValue = BeanProperties
-			.value(SummaryWizardPageModel.class, "isFreeLicense")
+			.value(SummaryWizardPageModel.class, "isFreeLicense") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		isFreeLicenseObservableValue.addValueChangeListener(e -> {
 			Boolean isFreeLicense = (Boolean) e.getObservableValue()
@@ -253,41 +246,32 @@ public class SummaryWizardPage extends WizardPage {
 	private void initializeHeaderDataBindings(DataBindingContext bindingContext) {
 		IObservableValue observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
 			.observe(labelExecutionTime);
-		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("runDuration")
+		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
 				executionTimeSummaryWizardPageModelObserveValue);
 
 		IObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
 			.observe(labelIssuesFixed);
-		IObservableValue issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("issuesFixed")
+		IObservableValue issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("issuesFixed") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelIssuesFixedObserveWidget,
 				issuesFixedSummaryWizardPageModelObserveValue);
 
 		IObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
 			.observe(labelHoursSaved);
-		IObservableValue hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("hoursSaved")
+		IObservableValue hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("hoursSaved") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue);
 
-		summaryWizardPageModel.setRunDuration(formatExecutionTime());
-	}
-
-	public String formatExecutionTime() {
-		String formatted = DurationFormatUtils.formatDuration(StopWatchUtil.getTime(),
-				"HH 'Hours' mm 'Minutes' ss 'Seconds'", false);
-		formatted = formatted.replaceAll("(^0 Hours\\s)", "");
-		formatted = formatted.replaceAll("(^0 Minutes\\s)", "");
-		formatted = formatted.replaceAll("(^0 Seconds\\s)", "");
-		return String.format("Run Duration: %s", formatted);
+		summaryWizardPageModel.setRunDuration(DurationFormatUtil.formatRunDuration(StopWatchUtil.getTime()));
 	}
 
 	private void createCompareInputControl() {
 		disposeCompareInputControl();
 		Display.getDefault()
 			.syncExec(() -> {
-				CompareInput compareInput = new CompareInput("", "", "");
+				CompareInput compareInput = new CompareInput("", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				updateCompareInputControl(compareInput);
 			});
 	}

@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -15,22 +14,15 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.preview.model.BaseModel;
+import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 
 public class SummaryWizardPageModel extends BaseModel {
 
 	private final RefactoringPipeline refactoringPipeline;
 
 	private String runDuration;
-
-	public String getRunDuration() {
-		return runDuration;
-	}
-
-	public void setRunDuration(String runDuration) {
-		firePropertyChange("runDuration", this.runDuration, runDuration);
-		this.runDuration = runDuration;
-	}
 
 	private Boolean isFreeLicense;
 
@@ -53,7 +45,15 @@ public class SummaryWizardPageModel extends BaseModel {
 		refactoringPipeline.setSourceMap(finalSource);
 		addModifiedFiles();
 		addRuleTimes();
-		setRunDuration("HH 'Hours' mm 'Minutes' ss 'Seconds'");
+		setRunDuration(""); //$NON-NLS-1$
+	}
+
+	public String getRunDuration() {
+		return runDuration;
+	}
+
+	public void setRunDuration(String runDuration) {
+		firePropertyChange("runDuration", this.runDuration, this.runDuration = runDuration); //$NON-NLS-1$
 	}
 
 	public IObservableList<ChangedFilesModel> getChangedFiles() {
@@ -75,22 +75,16 @@ public class SummaryWizardPageModel extends BaseModel {
 			.mapToInt(x -> RuleApplicationCount.getFor(x)
 				.toInt())
 			.sum();
-		return String.format("Issues Fixed: %d", totalIssuesFixed);
+		return String.format(Messages.SummaryWizardPageModel_IssuesFixed, totalIssuesFixed);
 	}
 
 	public String getHoursSaved() {
 		Duration totalTimeSaved = EliminatedTechnicalDebt.getTotalFor(refactoringPipeline.getRules());
-		String formatted = DurationFormatUtils.formatDuration(totalTimeSaved.toMillis(),
-				"dd 'Days' HH 'Hours' mm 'Minutes'", false);
-		formatted = formatted.replaceAll("(^0 Days\\s)", "");
-		formatted = formatted.replaceAll("(^0 Hours\\s)", "");
-		formatted = formatted.replaceAll("(^0 Minutes\\s)", "");
-		return formatted;
+		return String.format(Messages.DurationFormatUtil_TimeSaved, DurationFormatUtil.formatTimeSaved(totalTimeSaved));
 	}
 
 	public void setIsFreeLicense(Boolean validLicense) {
-		firePropertyChange("isFreeLicense", isFreeLicense, validLicense);
-		isFreeLicense = validLicense;
+		firePropertyChange("isFreeLicense", this.isFreeLicense, isFreeLicense = validLicense); //$NON-NLS-1$
 	}
 
 	public Boolean getIsFreeLicense() {
@@ -110,13 +104,16 @@ public class SummaryWizardPageModel extends BaseModel {
 
 	private void addRuleTimes() {
 		refactoringPipeline.getRules()
+			.stream()
+			.filter(rule -> RuleApplicationCount.getFor(rule)
+				.toInt() > 0)
 			.forEach(rule -> {
 				String name = rule.getRuleDescription()
 					.getName();
 				int times = RuleApplicationCount.getFor(rule)
 					.toInt();
 				Duration timeSaved = EliminatedTechnicalDebt.get(rule);
-				String timeSavedString = String.format("%s Minutes", timeSaved.toMinutes());
+				String timeSavedString = DurationFormatUtil.formatTimeSaved(timeSaved);
 				RuleTimesModel ruleTimesModel = new RuleTimesModel(name, times, timeSavedString);
 				ruleTimes.add(ruleTimesModel);
 			});
@@ -152,8 +149,8 @@ public class SummaryWizardPageModel extends BaseModel {
 	private ChangedFilesModel createModelFromRefactoringState(RefactoringState state) {
 		ICompilationUnit compUnit = state.getWorkingCopy();
 		String fileName = String.format("%s - %s", compUnit.getElementName(), getPathString(compUnit)); //$NON-NLS-1$
-		String left = initialSource.get(state) == null ? "" : initialSource.get(state);
-		String right = finalSource.get(state) == null ? "" : finalSource.get(state);
+		String left = initialSource.get(state) == null ? "" : initialSource.get(state); //$NON-NLS-1$
+		String right = finalSource.get(state) == null ? "" : finalSource.get(state); //$NON-NLS-1$
 		return new ChangedFilesModel(fileName, left, right);
 	}
 
