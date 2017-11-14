@@ -33,6 +33,7 @@ import eu.jsparrow.core.rule.impl.OrganiseImportsRule;
 import eu.jsparrow.core.rule.impl.OverrideAnnotationRule;
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
+import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
 import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
@@ -136,6 +137,9 @@ public class TagUtil {
 
 		} else if (PrimitiveBoxedForStringRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE);
+			
+		} else if (PublicFieldsRenamingRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY);
 
 		} else if (RearrangeClassMembersRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY);

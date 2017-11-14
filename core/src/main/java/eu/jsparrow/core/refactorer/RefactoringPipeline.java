@@ -585,6 +585,10 @@ public class RefactoringPipeline {
 			}
 		}
 	}
+	
+	public void setRefactoringStates(List<RefactoringState> refactoringStates) {
+		this.refactoringStates = refactoringStates;
+	}
 
 	/**
 	 * Method for creating Map with relation from {@link RefactoringState} to
