@@ -274,9 +274,9 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 			List<Expression> exceptions = visitor.getExceptions();
 			boolean logsException = !exceptions.isEmpty();
 
-			List<Expression> tobeLogedExceptins = findExceptionsToBeLogged(exceptions);
+			List<Expression> tobeLoggedExceptions = findExceptionsToBeLogged(exceptions);
 
-			List<Expression> logArguments = calcLogArgument(arguments, methodIdentifier, tobeLogedExceptins);
+			List<Expression> logArguments = calcLogArgument(arguments, methodIdentifier, tobeLoggedExceptions);
 			SimpleName qualifierName = expressionQualifier.getName();
 			calcReplacingOption(arguments, qualifierName, logsException)
 				.ifPresent(replacingOption -> replaceMethod(methodInvocation, replacingOption, logArguments));
