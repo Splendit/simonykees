@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -68,8 +69,11 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		this.refactoringPipeline = refactoringPipeline;
 		setTitle(Messages.RefactoringSummaryWizardPage_title);
 
+		setTitle(String.format("%s", Messages.RefactoringSummaryWizardPage_title));
+
 		setDescription(Messages.RefactoringSummaryWizardPage_description);
 
+		this.refactoringPipeline = refactoringPipeline;
 		setInitialChanges();
 		this.currentRefactoringState = initialSource.keySet()
 			.stream()
@@ -349,5 +353,4 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	protected void updateStatus(IStatus status) {
 		StatusUtil.applyToStatusLine(this, status);
 	}
-
 }

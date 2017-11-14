@@ -39,6 +39,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
+import eu.jsparrow.ui.util.StopWatchUtil;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
 
 /**
@@ -96,7 +97,8 @@ public class SelectRulesWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		return !model.getSelectionAsList().isEmpty();
+		return !model.getSelectionAsList()
+			.isEmpty();
 	}
 
 	@Override
@@ -121,28 +123,16 @@ public class SelectRulesWizard extends Wizard {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				try {
-					refactoringPipeline.doRefactoring(monitor);
-					if (monitor.isCanceled()) {
-						refactoringPipeline.clearStates();
-						return Status.CANCEL_STATUS;
-					}
-				} catch (RefactoringException e) {
-					WizardMessageDialog.synchronizeWithUIShowInfo(e);
-					return Status.CANCEL_STATUS;
-				} catch (RuleException e) {
-					WizardMessageDialog.synchronizeWithUIShowError(e);
-					return Status.CANCEL_STATUS;
+				preRefactoring();
+				IStatus refactoringStatus = doRefactoring(monitor);
+				postRefactoring();
 
-				} finally {
-					monitor.done();
-				}
-
-				return Status.OK_STATUS;
+				return refactoringStatus;
 			}
 		};
 
 		job.addJobChangeListener(new JobChangeAdapter() {
+
 			@Override
 			public void done(IJobChangeEvent event) {
 
@@ -164,6 +154,36 @@ public class SelectRulesWizard extends Wizard {
 		job.schedule();
 
 		return true;
+	}
+
+	private IStatus doRefactoring(IProgressMonitor monitor) {
+		try {
+			refactoringPipeline.doRefactoring(monitor);
+			if (monitor.isCanceled()) {
+				refactoringPipeline.clearStates();
+				return Status.CANCEL_STATUS;
+			}
+		} catch (RefactoringException e) {
+			WizardMessageDialog.synchronizeWithUIShowInfo(e);
+			return Status.CANCEL_STATUS;
+		} catch (RuleException e) {
+			WizardMessageDialog.synchronizeWithUIShowError(e);
+			return Status.CANCEL_STATUS;
+
+		} finally {
+			monitor.done();
+		}
+
+		return Status.OK_STATUS;
+
+	}
+
+	private void preRefactoring() {
+		StopWatchUtil.start();
+	}
+
+	private void postRefactoring() {
+		StopWatchUtil.stop();
 	}
 
 	/**
@@ -188,7 +208,8 @@ public class SelectRulesWizard extends Wizard {
 							.filter(rule -> null != refactoringPipeline.getChangesForRule(rule)
 									&& !refactoringPipeline.getChangesForRule(rule)
 										.isEmpty())
-							.map(x -> x.getRuleDescription().getName())
+							.map(rule -> rule.getRuleDescription()
+								.getName())
 							.collect(Collectors.joining("; ")))); //$NON-NLS-1$
 
 				Shell shell = PlatformUI.getWorkbench()

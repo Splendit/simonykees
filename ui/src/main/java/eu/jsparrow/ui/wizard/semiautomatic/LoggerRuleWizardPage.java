@@ -48,21 +48,20 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 	protected IStatus fSelectionStatus;
 
-	public LoggerRuleWizardPage(LoggerRuleWizardPageModel model, LoggerRuleWizardPageControler controler) {
+	public LoggerRuleWizardPage(LoggerRuleWizardPageModel model) {
 		super(Messages.LoggerRuleWizardPage_pageName);
 		setTitle(Messages.LoggerRuleWizard_title);
 		setDescription(Messages.LoggerRuleWizardPage_description);
 
 		this.model = model;
-		this.controler = controler;
+		this.controler = new LoggerRuleWizardPageControler(model);
 	}
 
 	@Override
 	public void createControl(Composite parent) {
-		Composite composite;
 		initializeDialogUnits(parent);
 
-		composite = new Composite(parent, SWT.NONE);
+		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 
 		setControl(composite);

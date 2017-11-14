@@ -148,8 +148,6 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 						String methodNameString = getSuitableMethodNameForType(parentTypeBinding);
 
 						if (methodNameString != null) {
-							this.addImports.add(JAVA_UTIL_COLLECTIONS);
-
 							String fieldName = fragmentNode.getName()
 								.getIdentifier();
 							initializersToReplace.put(fieldName, initializer);
@@ -228,9 +226,9 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	public void endVisit(CompilationUnit compilationUnitNode) {
 		methodNames.keySet()
 			.stream()
-			.filter((key) -> initializersToReplace.keySet()
+			.filter(key -> initializersToReplace.keySet()
 				.contains(key) && !excludedNames.contains(key))
-			.forEach((key) -> {
+			.forEach(key -> {
 				this.addImports.add(JAVA_UTIL_COLLECTIONS);
 				MethodInvocation newMI = createNewMethodInvocation(initializersToReplace.get(key),
 						methodNames.get(key));

@@ -40,9 +40,7 @@ public class Messages extends NLS {
 	public static String Activator_standalone_DefaultProfileDoesNotExist;
 	public static String Activator_standalone_RulesDoNotExist;
 	public static String Activator_standalone_ConfigFileReadSuccessfully;
-
 	public static String Activator_standalone_None;
-
 	public static String Activator_standalone_noRulesSelected;
 	public static String Activator_standalone_UsingDefaultConfiguration;
 	public static String ArithmethicAssignmentRule_description;
@@ -94,6 +92,7 @@ public class Messages extends NLS {
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputLabel;
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputText;
 	public static String ConfigureProfileSelectRulesWIzardPageModel_error_NameExists;
+	public static String ConfigureRenameFieldsRuleWizard_WizardTitle_RenameFields;
 	public static String DiamondOperatorASTVisitor_using_diamond_operator;
 	public static String DiamondOperatorRule_description;
 	public static String DiamondOperatorRule_name;
@@ -200,10 +199,16 @@ public class Messages extends NLS {
 	public static String ProgressMonitor_AbstractRefactorer_prepareRefactoring_taskName;
 	public static String ProgressMonitor_AbstractRefactorer_doRefactoring_taskName;
 	public static String ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName;
+	public static String PublicFieldsRenamingRule_description;
+	public static String PublicFieldsRenamingRule_name;
 	public static String RearrangeClassMembersRule_description;
 	public static String RearrangeClassMembersRule_name;
 	public static String RefactoringPipeline_AddingCompilationUnitToErrorList;
 	public static String RefactoringPipeline_CompilationUnitWithCompilationErrors;
+	public static String RefactoringPipeline_java_element_resolution_failed;
+	public static String RefactoringPipeline_user_java_element_resolution_failed;
+	public static String RefactoringPipeline_user_warn_no_compilation_units_found;
+	public static String RefactoringPipeline_warn_no_compilation_units_found;
 	public static String RefactoringPreviewWizard_err_runnableWithProgress;
 	public static String RefactoringRule_applying_rule_to_workingcopy;
 	public static String RefactoringRule_default_description;
@@ -211,12 +216,37 @@ public class Messages extends NLS {
 	public static String ReImplementingInterfaceRule_description;
 	public static String ReImplementingInterfaceRule_name;
 	public static String RefactoringSummaryWizardPage_description;
+	public static String RefactoringSummaryWizardPage_Duration;
+	public static String RefactoringSummaryWizardPage_eliminated_technical_debt;
 	public static String RefactoringSummaryWizardPage_title;
 	public static String RefactoringSummaryWizardPage_warn_disableFinishWhenFree;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
 	public static String RemoveNewStringConstructorRule_name;
+	public static String RenameFieldsRuleWizard_taskName_collectingUnits;
+
+	public static String RenameFieldsRuleWizardHandler_performFinish_jobName;
+	public static String RenameFieldsRuleWizardPage_description;
+	public static String RenameFieldsRuleWizardPage_dollarSignReplacementLabelText;
+	public static String RenameFieldsRuleWizardPage_fieldTypeLabelText;
+	public static String RenameFieldsRuleWizardPage_replacemenentsLabelText;
+	public static String RenameFieldsRuleWizardPage_searchScopeLabelText;
+	public static String RenameFieldsRuleWizardPage_title;
+	public static String RenameFieldsRuleWizardPage_todoCommentsLabelText;
+	public static String RenameFieldsRuleWizardPage_underscoreReplacementLabelText;
+	public static String RenameFieldsRuleWizardPage_warning_noFieldSelected;
+	public static String RenameFieldsRuleWizardPageModel_addTodoCommentsText;
+	public static String RenameFieldsRuleWizardPageModel_dollarSignReplacementOption_leaveAsIs;
+	public static String RenameFieldsRuleWizardPageModel_dollarSignReplacementOption_upperCase;
+	public static String RenameFieldsRuleWizardPageModel_scopeOption_project;
+	public static String RenameFieldsRuleWizardPageModel_scopeOption_workspace;
+	public static String RenameFieldsRuleWizardPageModel_typeOption_packageProtectedFields;
+	public static String RenameFieldsRuleWizardPageModel_typeOption_privateFields;
+	public static String RenameFieldsRuleWizardPageModel_typeOption_protectedFields;
+	public static String RenameFieldsRuleWizardPageModel_typeOption_publicFields;
+	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_leaveAsIs;
+	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_upperCase;
 	public static String SelectRulesWizardHandler_allready_running;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
 	public static String SelectRulesWizardHandler_noFileWithoutError;
@@ -264,7 +294,6 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_ProfileExportSuccessfulTo;
 	public static String SimonykeesPreferencePage_ProfileImportSuccessful;
 	public static String SimonykeesPreferencePage_profileAndName;
-
 	public static String SimonykeesPreferencePage_profilesBuiltInSuffix;
 	public static String SimonykeesPreferencePage_profileSettingsGroupTitle;
 	public static String SimonykeesPreferencePage_removeProfileButtonLabel;
@@ -321,7 +350,6 @@ public class Messages extends NLS {
 	public static String ValidateExecutor_validation_scheduler_started;
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;
-
 	public static String YAMLConfigUtil_providedPathNotLeadingToYAMLConfig;
 
 	static {

@@ -69,7 +69,7 @@ public class DummyRule implements RefactoringRuleInterface {
 
 	@Override
 	public RuleDescription getRuleDescription() {
-		return new RuleDescription("dummy", "dummyDescription", Duration.ofMinutes(5));
+		return new RuleDescription("dummy", "dummyDescription", Duration.ofMinutes(5)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 }

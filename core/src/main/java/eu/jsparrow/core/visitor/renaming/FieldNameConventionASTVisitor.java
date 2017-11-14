@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
-import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -128,8 +127,8 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 											 * between fields of inner type from
 											 * fields of outer type
 											 */
-											collidingWithOuterTypeField = hasField(fragmentName,
-													typeDeeclarationParent);
+											collidingWithOuterTypeField = NamingConventionUtil
+												.hasField(typeDeeclarationParent, fragmentName);
 
 											typeDeeclarationParent.accept(referencesVisitor);
 										}
@@ -160,30 +159,6 @@ public class FieldNameConventionASTVisitor extends AbstractASTRewriteASTVisitor 
 		}
 
 		return true;
-	}
-
-	/**
-	 * Checks if the type declaration has a field named the same as the given
-	 * name.
-	 * 
-	 * @param fragmentName
-	 *            the name to look for
-	 * @param typeDeclaration
-	 *            a type declaration
-	 * @return {@code true} if such a field is found, or {@code false} otherwise
-	 */
-	private boolean hasField(SimpleName fragmentName, TypeDeclaration typeDeclaration) {
-
-		return ASTNodeUtil.convertToTypedList(typeDeclaration.bodyDeclarations(), FieldDeclaration.class)
-			.stream()
-			.flatMap(fieldDecl -> ASTNodeUtil
-				.convertToTypedList(fieldDecl.fragments(), VariableDeclarationFragment.class)
-				.stream()
-				.map(VariableDeclarationFragment::getName)
-				.map(SimpleName::getIdentifier))
-			.anyMatch(identifier -> identifier.equals(fragmentName.getIdentifier()))
-				|| ClassRelationUtil.findInheretedFields(typeDeclaration.resolveBinding())
-					.contains(fragmentName.getIdentifier());
 	}
 
 	private boolean isComplyingWithConventions(String identifier) {
