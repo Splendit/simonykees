@@ -116,7 +116,7 @@ public class SummaryWizardPage extends WizardPage {
 			createCompareInputControl();
 			setStatusInfo(LicenseUtil.getInstance()
 				.isFree());
-			summaryWizardPageModel.setTestValue(summaryWizardPageModel.getTestValue() + "1");
+			summaryWizardPageModel.setRunDuration(summaryWizardPageModel.getRunDuration() + "1");
 		}
 		super.setVisible(visible);
 	}
@@ -251,18 +251,9 @@ public class SummaryWizardPage extends WizardPage {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initializeHeaderDataBindings(DataBindingContext bindingContext) {
-		// IObservableValue observeTextLabelExecutionTimeObserveWidget =
-		// WidgetProperties.text()
-		// .observe(labelExecutionTime);
-		// IObservableValue executionTimeSummaryWizardPageModelObserveValue =
-		// BeanProperties.value("executionTime")
-		// .observe(summaryWizardPageModel);
-		// bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
-		// executionTimeSummaryWizardPageModelObserveValue);
-
 		IObservableValue observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
 			.observe(labelExecutionTime);
-		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("testValue")
+		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("runDuration")
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
 				executionTimeSummaryWizardPageModelObserveValue);
@@ -280,7 +271,7 @@ public class SummaryWizardPage extends WizardPage {
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue);
 
-		summaryWizardPageModel.setTestValue(formatExecutionTime());
+		summaryWizardPageModel.setRunDuration(formatExecutionTime());
 	}
 
 	public String formatExecutionTime() {
@@ -289,7 +280,7 @@ public class SummaryWizardPage extends WizardPage {
 		formatted = formatted.replaceAll("(^0 Hours\\s)", "");
 		formatted = formatted.replaceAll("(^0 Minutes\\s)", "");
 		formatted = formatted.replaceAll("(^0 Seconds\\s)", "");
-		return String.format("Time Saved: %s", formatted);
+		return String.format("Run Duration: %s", formatted);
 	}
 
 	private void createCompareInputControl() {

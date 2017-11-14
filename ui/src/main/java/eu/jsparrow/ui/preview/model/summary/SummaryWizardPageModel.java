@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
@@ -17,32 +16,20 @@ import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.preview.model.BaseModel;
-import eu.jsparrow.ui.util.StopWatchUtil;
 
 public class SummaryWizardPageModel extends BaseModel {
 
 	private final RefactoringPipeline refactoringPipeline;
 
-	private String executionTime;
+	private String runDuration;
 
-	private String testValue;
-
-	public String getTestValue() {
-		return testValue;
+	public String getRunDuration() {
+		return runDuration;
 	}
 
-	public void setTestValue(String testValue) {
-		firePropertyChange("testValue", this.testValue, testValue);
-		this.testValue = testValue;
-	}
-
-	public String getExecutionTime() {
-		return executionTime;
-	}
-
-	public void setExecutionTime(String executionTime) {
-		firePropertyChange("executionTime", this.executionTime, executionTime);
-		this.executionTime = executionTime;
+	public void setRunDuration(String runDuration) {
+		firePropertyChange("runDuration", this.runDuration, runDuration);
+		this.runDuration = runDuration;
 	}
 
 	private Boolean isFreeLicense;
@@ -66,7 +53,7 @@ public class SummaryWizardPageModel extends BaseModel {
 		refactoringPipeline.setSourceMap(finalSource);
 		addModifiedFiles();
 		addRuleTimes();
-		setTestValue("HH 'Hours' mm 'Minutes' ss 'Seconds'");
+		setRunDuration("HH 'Hours' mm 'Minutes' ss 'Seconds'");
 	}
 
 	public IObservableList<ChangedFilesModel> getChangedFiles() {
