@@ -1,7 +1,5 @@
 package eu.jsparrow.ui.preview.model.summary;
 
-import java.time.Duration;
-
 import org.eclipse.core.databinding.observable.value.WritableValue;
 
 import eu.jsparrow.ui.preview.model.BaseModel;

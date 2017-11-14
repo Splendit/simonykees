@@ -71,6 +71,15 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 		changesPerCompilationUnit.putIfAbsent(compilationUnitHandle, new FileChangeCount(compilationUnitHandle));
 		return changesPerCompilationUnit.get(compilationUnitHandle);
 	}
+	
+	/**
+	 * Gets a map of files and their number of changes for this rule
+	 * 
+	 * @return the files with changes for this rule
+	 */
+	public  Map<String, FileChangeCount> getApplicationsInFiles() {
+		return changesPerCompilationUnit;
+	}
 
 	@Override
 	public void update(ASTRewriteEvent event) {

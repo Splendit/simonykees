@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
@@ -14,12 +13,13 @@ import eu.jsparrow.core.rule.RefactoringRuleInterface;
 import eu.jsparrow.core.rule.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.i18n.Messages;
 
 public class RefactoringPreviewWizardPageModel extends BaseModel {
 
-	private WritableValue<String> issuesFixed = new WritableValue<>();
+	private String issuesFixed;
 
-	private WritableValue<String> hoursSaved = new WritableValue<>();
+	private String timeSaved;
 
 	private IObservableList<ChangedFilesModel> changedFiles = new WritableList<>();
 
@@ -32,10 +32,10 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 	public RefactoringPreviewWizardPageModel(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
 			Map<ICompilationUnit, DocumentChange> changes) {
 		this.rule = rule;
-		setIssuesFixed(String.format("Issues Fixed: %s", RuleApplicationCount.getFor(rule)
+		setIssuesFixed(String.format(Messages.SummaryWizardPageModel_IssuesFixed, RuleApplicationCount.getFor(rule)
 			.toInt()));
-		setHoursSaved(String.format("Minutes Saved: %s", EliminatedTechnicalDebt.get(rule)
-			.toMinutes()));
+		setTimeSaved(String.format(Messages.DurationFormatUtil_TimeSaved,
+				DurationFormatUtil.formatTimeSaved(EliminatedTechnicalDebt.get(rule))));
 		changedFiles.addAll(changes.entrySet()
 			.stream()
 			.map(x -> new ChangedFilesModel(x.getKey(), x.getValue()))
@@ -44,19 +44,19 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 	}
 
 	public String getIssuesFixed() {
-		return issuesFixed.getValue();
+		return issuesFixed;
 	}
 
 	public void setIssuesFixed(String issuesFixed) {
-		this.issuesFixed.setValue(issuesFixed);
+		firePropertyChange("issuesFixed", this.issuesFixed, this.issuesFixed = issuesFixed);
 	}
 
-	public String getHoursSaved() {
-		return hoursSaved.getValue();
+	public String getTimeSaved() {
+		return timeSaved;
 	}
 
-	public void setHoursSaved(String hoursSaved) {
-		this.hoursSaved.setValue(hoursSaved);
+	public void setTimeSaved(String timeSaved) {
+		firePropertyChange("timeSaved", this.timeSaved, this.timeSaved = timeSaved);
 	}
 
 }

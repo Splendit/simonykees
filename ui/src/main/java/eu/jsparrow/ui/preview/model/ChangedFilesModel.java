@@ -13,8 +13,16 @@ public class ChangedFilesModel {
 
 	public ChangedFilesModel(ICompilationUnit compilationUnit, DocumentChange documentChange) {
 		this.changeSelected = true;
-		this.compilationUnit = compilationUnit; 
+		this.compilationUnit = compilationUnit;
 		this.change = documentChange;
+	}
+	
+	public boolean isChangeSelected() {
+		return changeSelected;
+	}
+
+	public void setChangeSelected(boolean changeSelected) {
+		this.changeSelected = changeSelected;
 	}
 
 }

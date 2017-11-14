@@ -30,7 +30,7 @@ public class EliminatedTechnicalDebt {
 			.multipliedBy(RuleApplicationCount.getFor(rule)
 				.toInt());
 	}
-
+	
 	/**
 	 * Returns the sum of the given technical debts.
 	 * 
