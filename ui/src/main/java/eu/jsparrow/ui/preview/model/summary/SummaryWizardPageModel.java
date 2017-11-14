@@ -13,8 +13,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
-import eu.jsparrow.core.rule.EliminatedTechnicalDebt;
-import eu.jsparrow.core.rule.RuleApplicationCount;
+import eu.jsparrow.core.rule.statistics.EliminatedTechnicalDebt;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.preview.model.BaseModel;
 
 public class SummaryWizardPageModel extends BaseModel {

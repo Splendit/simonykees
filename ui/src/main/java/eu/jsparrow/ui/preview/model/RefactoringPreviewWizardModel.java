@@ -5,10 +5,10 @@ import org.eclipse.core.databinding.observable.value.WritableValue;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
-import eu.jsparrow.core.rule.EliminatedTechnicalDebt;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RefactoringRuleInterface;
-import eu.jsparrow.core.rule.RuleApplicationCount;
+import eu.jsparrow.core.rule.statistics.EliminatedTechnicalDebt;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.preview.model.summary.RuleTimesModel;
 

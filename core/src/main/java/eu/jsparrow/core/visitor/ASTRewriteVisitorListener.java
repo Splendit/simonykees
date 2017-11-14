@@ -10,7 +10,5 @@ public interface ASTRewriteVisitorListener {
 	/**
 	 * Notify of a change.
 	 */
-	public void update(String compilationUnitHandle);
-
-	public boolean remove(String compilationUnitHandle);
+	public void update(ASTRewriteEvent event);
 }

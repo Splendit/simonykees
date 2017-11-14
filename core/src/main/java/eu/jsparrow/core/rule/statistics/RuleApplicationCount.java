@@ -1,8 +1,13 @@
-package eu.jsparrow.core.rule;
+package eu.jsparrow.core.rule.statistics;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRuleInterface;
+import eu.jsparrow.core.visitor.ASTRewriteEvent;
 import eu.jsparrow.core.visitor.ASTRewriteVisitorListener;
 
 /**
@@ -17,7 +22,7 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 
 	private static final Map<RefactoringRuleInterface, RuleApplicationCount> applicationCounters = new HashMap<>();
 
-	private Map<String, Integer> applicationCounterPerCompilationUnit = new HashMap<>();
+	private Map<String, FileChangeCount> changesPerCompilationUnit = new HashMap<>();
 
 	// Internal visibility for usage in unit tests
 	RuleApplicationCount() {
@@ -29,23 +34,10 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 	 * @return the current application counter
 	 */
 	public int toInt() {
-		return applicationCounterPerCompilationUnit.values()
+		return changesPerCompilationUnit.values()
 			.stream()
-			.mapToInt(Integer::intValue)
+			.mapToInt(FileChangeCount::getCount)
 			.sum();
-	}
-
-	public int toInt(String compilationUnitHandle) {
-		return applicationCounterPerCompilationUnit.get(compilationUnitHandle);
-	}
-
-	@Override
-	public void update(String compilationUnitHandle) {
-		int count = 1;
-		if (applicationCounterPerCompilationUnit.containsKey(compilationUnitHandle)) {
-			count = (applicationCounterPerCompilationUnit.get(compilationUnitHandle)) + 1;
-		}
-		applicationCounterPerCompilationUnit.put(compilationUnitHandle, count);
 	}
 
 	/**
@@ -68,13 +60,14 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 		applicationCounters.clear();
 	}
 
-	public Map<String, Integer> getApplicationCounterPerCompilationUnit() {
-		return applicationCounterPerCompilationUnit;
+	public FileChangeCount getApplicationsForFile(String compilationUnitHandle) {
+		changesPerCompilationUnit.putIfAbsent(compilationUnitHandle, new FileChangeCount(compilationUnitHandle));
+		return changesPerCompilationUnit.get(compilationUnitHandle);
 	}
 
 	@Override
-	public boolean remove(String compilationUnitHandle) {
-		Integer currentCount = applicationCounterPerCompilationUnit.remove(compilationUnitHandle);
-		return currentCount != null ? true : false;
+	public void update(ASTRewriteEvent event) {
+		String compilationUnitHandle = event.getCompilationUnit();
+		getApplicationsForFile(compilationUnitHandle).update();
 	}
 }

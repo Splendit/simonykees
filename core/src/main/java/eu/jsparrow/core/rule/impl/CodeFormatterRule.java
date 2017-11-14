@@ -14,8 +14,8 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
@@ -78,7 +78,8 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 
 		if (edit.hasChildren()) {
 			RuleApplicationCount.getFor(this)
-				.update(workingCopy.getHandleIdentifier());
+				.getApplicationsForFile(workingCopy.getHandleIdentifier())
+				.update();
 			Document document = new Document(workingCopy.getSource());
 			documentChange = RefactoringUtil.generateDocumentChange(CodeFormatterRule.class.getSimpleName(), document,
 					edit.copy());

@@ -8,17 +8,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import eu.jsparrow.core.rule.statistics.FileChangeCount;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
+import eu.jsparrow.core.visitor.ASTRewriteEvent;
 import eu.jsparrow.dummies.DummyRule;
 
 public class RuleApplicationCountTest {
 
 	private RuleApplicationCount applicationCounter;
-	private ICompilationUnit compilationUnit;
 
 	@Before
 	public void setUp() {
 		applicationCounter = new RuleApplicationCount();
-		compilationUnit = Mockito.mock(ICompilationUnit.class);
 	}
 
 	@Test
@@ -38,10 +39,18 @@ public class RuleApplicationCountTest {
 	}
 
 	@Test
+	public void get_forNewCompilationUnit_returnsFileCounter() {
+		String expectedFileName = "NewFile";
+		FileChangeCount fileChangeCount = applicationCounter.getApplicationsForFile(expectedFileName);
+
+		assertEquals(expectedFileName, fileChangeCount.getCompilationUnitHandle());
+	}
+
+	@Test
 	public void update_OnNewApplicationCounter_ShouldIncreaseCount() throws Exception {
 		int previous = applicationCounter.toInt();
 
-		applicationCounter.update(compilationUnit.getHandleIdentifier());
+		applicationCounter.update(new ASTRewriteEvent("test"));
 
 		assertEquals(previous + 1, applicationCounter.toInt());
 	}

@@ -43,8 +43,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
@@ -316,8 +316,9 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				if (!unselected.containsKey(newSelection.getElementName())) {
 					unselectedChange.add(newSelection);
 				}
-				RuleApplicationCount.getFor(getRule())
-					.remove(newSelection.getHandleIdentifier());
+//				RuleApplicationCount.getFor(getRule())
+//					.getFor(newSelection.getHandleIdentifier())
+//					.clear();
 			}
 		};
 	}

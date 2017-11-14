@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.util.ArithmeticUtil;
+import eu.jsparrow.core.visitor.ASTRewriteEvent;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**

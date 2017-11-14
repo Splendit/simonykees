@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.ASTRewriteEvent;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDefinitionASTVisitor;

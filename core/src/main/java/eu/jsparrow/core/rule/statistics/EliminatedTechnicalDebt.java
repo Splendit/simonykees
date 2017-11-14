@@ -1,7 +1,9 @@
-package eu.jsparrow.core.rule;
+package eu.jsparrow.core.rule.statistics;
 
 import java.time.Duration;
 import java.util.List;
+
+import eu.jsparrow.core.rule.RefactoringRuleInterface;
 
 /**
  * This class represents the technical debt that has been eliminated by applying
