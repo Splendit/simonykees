@@ -3,11 +3,13 @@ package eu.jsparrow.ui.preview;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.eclipse.compare.internal.ComparePreferencePage;
 import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.beans.PojoProperties;
 import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -32,12 +34,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.wb.swt.ResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
@@ -45,6 +49,7 @@ import eu.jsparrow.ui.preview.dialog.CompareInput;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.SummaryWizardPageModel;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.StopWatchUtil;
 
 @SuppressWarnings({ "restriction", "nls" })
 public class SummaryWizardPage extends WizardPage {
@@ -84,7 +89,6 @@ public class SummaryWizardPage extends WizardPage {
 	 * @param parent
 	 */
 	public void createControl(Composite parent) {
-
 		rootComposite = new Composite(parent, SWT.NONE);
 		setControl(rootComposite);
 		rootComposite.setLayout(new GridLayout(1, false));
@@ -110,8 +114,9 @@ public class SummaryWizardPage extends WizardPage {
 		if (visible) {
 			summaryWizardPageModel.updateFiles();
 			createCompareInputControl();
-			summaryWizardPageModel.setIsFreeLicense(LicenseUtil.getInstance()
+			setStatusInfo(LicenseUtil.getInstance()
 				.isFree());
+			summaryWizardPageModel.setTestValue(summaryWizardPageModel.getTestValue() + "1");
 		}
 		super.setVisible(visible);
 	}
@@ -226,41 +231,65 @@ public class SummaryWizardPage extends WizardPage {
 			}
 		});
 
-		IObservableValue isFreeLicenseObservalbeValue = BeanProperties.value("isFreeLicense")
+		IObservableValue isFreeLicenseObservableValue = BeanProperties
+			.value(SummaryWizardPageModel.class, "isFreeLicense")
 			.observe(summaryWizardPageModel);
-		isFreeLicenseObservalbeValue.addValueChangeListener(e -> {
+		isFreeLicenseObservableValue.addValueChangeListener(e -> {
 			Boolean isFreeLicense = (Boolean) e.getObservableValue()
 				.getValue();
-			StatusInfo statusInfo = new StatusInfo();
-			if (isFreeLicense) {
-				statusInfo.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
-			}
-			StatusUtil.applyToStatusLine(this, statusInfo);
+			setStatusInfo(isFreeLicense);
 		});
+	}
+
+	private void setStatusInfo(Boolean isFreeLicense) {
+		StatusInfo statusInfo = new StatusInfo();
+		if (isFreeLicense) {
+			statusInfo.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
+		}
+		StatusUtil.applyToStatusLine(this, statusInfo);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initializeHeaderDataBindings(DataBindingContext bindingContext) {
+		// IObservableValue observeTextLabelExecutionTimeObserveWidget =
+		// WidgetProperties.text()
+		// .observe(labelExecutionTime);
+		// IObservableValue executionTimeSummaryWizardPageModelObserveValue =
+		// BeanProperties.value("executionTime")
+		// .observe(summaryWizardPageModel);
+		// bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
+		// executionTimeSummaryWizardPageModelObserveValue);
+
 		IObservableValue observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
 			.observe(labelExecutionTime);
-		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("executionTime")
+		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("testValue")
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
-				executionTimeSummaryWizardPageModelObserveValue, null, null);
+				executionTimeSummaryWizardPageModelObserveValue);
 
 		IObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
 			.observe(labelIssuesFixed);
 		IObservableValue issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("issuesFixed")
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelIssuesFixedObserveWidget,
-				issuesFixedSummaryWizardPageModelObserveValue, null, null);
+				issuesFixedSummaryWizardPageModelObserveValue);
 
 		IObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
 			.observe(labelHoursSaved);
 		IObservableValue hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("hoursSaved")
 			.observe(summaryWizardPageModel);
-		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue,
-				null, null);
+		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue);
+
+		summaryWizardPageModel.setTestValue(formatExecutionTime());
+	}
+
+	public String formatExecutionTime() {
+		String formatted = DurationFormatUtils.formatDuration(StopWatchUtil.getTime(),
+				"HH 'Hours' mm 'Minutes' ss 'Seconds'", false);
+		formatted = formatted.replaceAll("(^0 Hours\\s)", "");
+		formatted = formatted.replaceAll("(^0 Minutes\\s)", "");
+		formatted = formatted.replaceAll("(^0 Seconds\\s)", "");
+		return String.format("Time Saved: %s", formatted);
 	}
 
 	private void createCompareInputControl() {

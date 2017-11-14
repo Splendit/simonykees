@@ -62,9 +62,8 @@ public class StopWatchUtil {
 			int milliseconds = (int) (durationInMilliseconds % 1000);
 			int seconds = (int) (durationInMilliseconds / 1000) % 60;
 			int minutes = (int) ((durationInMilliseconds / (1000 * 60)) % 60);
-			int hours = (int) ((durationInMilliseconds / (1000 * 60 * 60)) % 24);
-
-			return ((hours < 10) ? "0" : "") + hours + ":" + ((minutes < 10) ? "0" : "") + minutes + ":" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+			
+			return ((minutes < 10) ? "0" : "") + minutes + ":" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 					+ ((seconds < 10) ? "0" : "") + seconds + "." + milliseconds; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 

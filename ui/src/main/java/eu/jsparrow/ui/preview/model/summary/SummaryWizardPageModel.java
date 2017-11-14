@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.eclipse.core.databinding.observable.list.IObservableList;
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.databinding.observable.value.WritableValue;
@@ -16,6 +17,7 @@ import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.preview.model.BaseModel;
+import eu.jsparrow.ui.util.StopWatchUtil;
 
 public class SummaryWizardPageModel extends BaseModel {
 
@@ -23,11 +25,27 @@ public class SummaryWizardPageModel extends BaseModel {
 
 	private String executionTime;
 
-	private String issuesFixed;
+	private String testValue;
 
-	private String hoursSaved;
+	public String getTestValue() {
+		return testValue;
+	}
 
-	private WritableValue<Boolean> isFreeLicense = new WritableValue<>();
+	public void setTestValue(String testValue) {
+		firePropertyChange("testValue", this.testValue, testValue);
+		this.testValue = testValue;
+	}
+
+	public String getExecutionTime() {
+		return executionTime;
+	}
+
+	public void setExecutionTime(String executionTime) {
+		firePropertyChange("executionTime", this.executionTime, executionTime);
+		this.executionTime = executionTime;
+	}
+
+	private Boolean isFreeLicense;
 
 	private Map<RefactoringState, String> initialSource = new HashMap<>();
 
@@ -40,6 +58,7 @@ public class SummaryWizardPageModel extends BaseModel {
 	public SummaryWizardPageModel(RefactoringPipeline refactoringPipeline) {
 		this.refactoringPipeline = refactoringPipeline;
 		initialize();
+		isFreeLicense = false;
 	}
 
 	private void initialize() {
@@ -47,6 +66,7 @@ public class SummaryWizardPageModel extends BaseModel {
 		refactoringPipeline.setSourceMap(finalSource);
 		addModifiedFiles();
 		addRuleTimes();
+		setTestValue("HH 'Hours' mm 'Minutes' ss 'Seconds'");
 	}
 
 	public IObservableList<ChangedFilesModel> getChangedFiles() {
@@ -62,10 +82,6 @@ public class SummaryWizardPageModel extends BaseModel {
 		return ruleTimes;
 	}
 
-	public String getExecutionTime() {
-		return "Run Duration: 30 Seconds";
-	}
-
 	public String getIssuesFixed() {
 		int totalIssuesFixed = refactoringPipeline.getRules()
 			.stream()
@@ -77,15 +93,21 @@ public class SummaryWizardPageModel extends BaseModel {
 
 	public String getHoursSaved() {
 		Duration totalTimeSaved = EliminatedTechnicalDebt.getTotalFor(refactoringPipeline.getRules());
-		return String.format("Minutes Saved: %s", totalTimeSaved.toMinutes());
+		String formatted = DurationFormatUtils.formatDuration(totalTimeSaved.toMillis(),
+				"dd 'Days' HH 'Hours' mm 'Minutes'", false);
+		formatted = formatted.replaceAll("(^0 Days\\s)", "");
+		formatted = formatted.replaceAll("(^0 Hours\\s)", "");
+		formatted = formatted.replaceAll("(^0 Minutes\\s)", "");
+		return formatted;
 	}
 
 	public void setIsFreeLicense(Boolean validLicense) {
-		isFreeLicense.setValue(validLicense);
+		firePropertyChange("isFreeLicense", isFreeLicense, validLicense);
+		isFreeLicense = validLicense;
 	}
 
 	public Boolean getIsFreeLicense() {
-		return isFreeLicense.getValue();
+		return isFreeLicense;
 	}
 
 	private void addModifiedFiles() {
