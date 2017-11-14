@@ -1,8 +1,12 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.UseIsEmptyOnCollectionsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -12,14 +16,15 @@ import eu.jsparrow.i18n.Messages;
  * @author Martin Huter
  * @since 2.1.0
  */
-public class UseIsEmptyRule extends RefactoringRule<UseIsEmptyOnCollectionsASTVisitor> {
+public class UseIsEmptyOnCollectionsRule extends RefactoringRule<UseIsEmptyOnCollectionsASTVisitor> {
 
-	public UseIsEmptyRule() {
+	public UseIsEmptyOnCollectionsRule() {
 		super();
 		this.visitorClass = UseIsEmptyOnCollectionsASTVisitor.class;
-		this.name = Messages.UseIsEmptyRule_name;
-		this.description = Messages.UseIsEmptyRule_description;
-		this.id = "UseIsEmpty"; //$NON-NLS-1$
+		this.id = "UseIsEmptyOnCollections"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.UseIsEmptyOnCollectionsRule_name,
+				Messages.UseIsEmptyOnCollectionsRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -27,4 +32,5 @@ public class UseIsEmptyRule extends RefactoringRule<UseIsEmptyOnCollectionsASTVi
 		// string 1.6, collection 1.2, map 1.2
 		return JavaVersion.JAVA_1_6;
 	}
+
 }
