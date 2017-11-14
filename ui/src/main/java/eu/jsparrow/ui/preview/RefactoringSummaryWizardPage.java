@@ -42,7 +42,7 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.dialog.CompareInput;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
-import eu.jsparrow.ui.preview.model.summary.SummaryWizardPageModel;
+import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.StopWatchUtil;
 
@@ -67,7 +67,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 	private Control compareInputControl;
 
-	private SummaryWizardPageModel summaryWizardPageModel;
+	private RefactoringSummaryWizardPageModel summaryWizardPageModel;
 
 	/**
 	 * Create the wizard.
@@ -75,7 +75,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	public RefactoringSummaryWizardPage(RefactoringPipeline refactoringPipeline) {
 		super("wizardPage"); //$NON-NLS-1$
 		setTitle(Messages.SummaryWizardPage_RunSummary);
-		this.summaryWizardPageModel = new SummaryWizardPageModel(refactoringPipeline);
+		this.summaryWizardPageModel = new RefactoringSummaryWizardPageModel(refactoringPipeline);
 	}
 
 	/**
@@ -229,7 +229,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		});
 
 		IObservableValue isFreeLicenseObservableValue = BeanProperties
-			.value(SummaryWizardPageModel.class, "isFreeLicense") //$NON-NLS-1$
+			.value(RefactoringSummaryWizardPageModel.class, "isFreeLicense") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		isFreeLicenseObservableValue.addValueChangeListener(e -> {
 			Boolean isFreeLicense = (Boolean) e.getObservableValue()

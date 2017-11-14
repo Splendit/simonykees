@@ -18,7 +18,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.preview.model.BaseModel;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 
-public class SummaryWizardPageModel extends BaseModel {
+public class RefactoringSummaryWizardPageModel extends BaseModel {
 
 	private final RefactoringPipeline refactoringPipeline;
 
@@ -34,7 +34,7 @@ public class SummaryWizardPageModel extends BaseModel {
 
 	private IObservableList<ChangedFilesModel> changedFiles = new WritableList<>();
 
-	public SummaryWizardPageModel(RefactoringPipeline refactoringPipeline) {
+	public RefactoringSummaryWizardPageModel(RefactoringPipeline refactoringPipeline) {
 		this.refactoringPipeline = refactoringPipeline;
 		initialize();
 		isFreeLicense = false;
