@@ -43,7 +43,7 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	private Shell shell;
 
-	private SummaryWizardPage summaryPage;
+	private RefactoringSummaryWizardPage summaryPage;
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
@@ -65,7 +65,7 @@ public class RefactoringPreviewWizard extends Wizard {
 		 * First summary page is created to collect all initial source from
 		 * working copies
 		 */
-		summaryPage = new SummaryWizardPage(refactoringPipeline);
+		summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline);
 		refactoringPipeline.getRules()
 			.forEach(rule -> {
 				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
@@ -311,7 +311,7 @@ public class RefactoringPreviewWizard extends Wizard {
 			if (getContainer().getCurrentPage() instanceof RefactoringPreviewWizardPage) {
 				((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
 			} else {
-				((SummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
+				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
 			}
 			getPreviousPage(getContainer().getCurrentPage());
 		}
@@ -326,7 +326,7 @@ public class RefactoringPreviewWizard extends Wizard {
 		return super.canFinish();
 	}
 
-	public SummaryWizardPage getSummaryPage() {
+	public RefactoringSummaryWizardPage getSummaryPage() {
 		return summaryPage;
 	}
 }
