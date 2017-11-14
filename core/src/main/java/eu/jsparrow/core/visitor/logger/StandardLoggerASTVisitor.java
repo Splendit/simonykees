@@ -278,7 +278,7 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 			List<Expression> logArguments = calcLogArgument(arguments, methodIdentifier, tobeLoggedExceptions);
 			SimpleName qualifierName = expressionQualifier.getName();
-			calcReplacingOption(arguments, qualifierName, logsException)
+			calcReplacingOption(qualifierName, logsException)
 				.ifPresent(replacingOption -> replaceMethod(methodInvocation, replacingOption, logArguments));
 
 		} else if (PRINT_STACK_TRACE.equals(methodIdentifier)
@@ -484,17 +484,15 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 	 * {@link #replacingOptions}, the method used for printing to standard
 	 * output and whether an exception occurs in the parameters used in the
 	 * print method.
-	 * 
-	 * @param arguments
-	 *            the list of the arguments occurring in the print method
 	 * @param qualiferName
 	 *            the qualifier of the print method
+	 * 
 	 * @return the optional of the identifier of the logging level to be used,
 	 *         or an empty optional if the qualifier name does not match with
 	 *         the qualifiers of the standard output of if the replacement
 	 *         option is not set in {@link #replacingOptions}.
 	 */
-	private Optional<String> calcReplacingOption(List<Expression> arguments, SimpleName qualiferName, boolean logsException) {
+	private Optional<String> calcReplacingOption(SimpleName qualiferName, boolean logsException) {
 
 		String option = ""; //$NON-NLS-1$
 		if (logsException && OUT.equals(qualiferName.getIdentifier())) {
