@@ -60,6 +60,13 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 		applicationCounters.clear();
 	}
 
+	/**
+	 * Returns the number of changes for the given file
+	 * 
+	 * @param compilationUnitHandle
+	 *            handle of the file to count changes for
+	 * @return the number of changes for the given file
+	 */
 	public FileChangeCount getApplicationsForFile(String compilationUnitHandle) {
 		changesPerCompilationUnit.putIfAbsent(compilationUnitHandle, new FileChangeCount(compilationUnitHandle));
 		return changesPerCompilationUnit.get(compilationUnitHandle);

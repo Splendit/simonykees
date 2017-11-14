@@ -1,7 +1,6 @@
 package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;

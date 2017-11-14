@@ -1,4 +1,4 @@
-package eu.jsparrow.core.rule;
+package eu.jsparrow.core.rule.statistics;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
