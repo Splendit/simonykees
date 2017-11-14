@@ -15,6 +15,7 @@ import org.eclipse.jface.databinding.viewers.ViewerProperties;
 import org.eclipse.jface.databinding.viewers.ViewerSupport;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.wizard.WizardPage;
@@ -110,6 +111,9 @@ public class SummaryWizardPage extends WizardPage {
 			summaryWizardPageModel.setIsFreeLicense(LicenseUtil.getInstance()
 				.isFree());
 			createCompareInputControl();
+			// We must wait to set selection until control is visible
+			setInitialFileSelection();
+
 		}
 		super.setVisible(visible);
 	}
@@ -297,5 +301,12 @@ public class SummaryWizardPage extends WizardPage {
 		compareInputControl.setSize(compareInputControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 		compareInputControl.setLayoutData(new GridData(GridData.FILL_BOTH));
 		compareInputContainer.layout();
+	}
+
+	private void setInitialFileSelection() {
+		Object item = fileTableViewer.getElementAt(0);
+		if (item != null) {
+			fileTableViewer.setSelection(new StructuredSelection(item));
+		}
 	}
 }
