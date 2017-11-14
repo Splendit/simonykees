@@ -210,8 +210,6 @@ public class SummaryWizardPage extends WizardPage {
 
 		initializeHeaderDataBindings(bindingContext);
 
-		IConverter convertToString = IConverter.create(Duration.class, String.class,
-				duration -> String.format("%s", ((Duration) duration).toMinutes()));
 		ViewerSupport.bind(ruleTableViewer, summaryWizardPageModel.getRuleTimes(),
 				BeanProperties.values("name", "times", "timeSaved"));
 		ViewerSupport.bind(fileTableViewer, summaryWizardPageModel.getChangedFiles(), BeanProperties.values("name"));

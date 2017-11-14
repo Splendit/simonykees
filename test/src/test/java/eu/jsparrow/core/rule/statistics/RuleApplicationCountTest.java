@@ -45,7 +45,7 @@ public class RuleApplicationCountTest {
 
 		assertEquals(expectedFileName, fileChangeCount.getCompilationUnitHandle());
 	}
-
+	
 	@Test
 	public void update_OnNewApplicationCounter_ShouldIncreaseCount() throws Exception {
 		int previous = applicationCounter.toInt();

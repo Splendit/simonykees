@@ -49,7 +49,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
+import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardPageModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -75,7 +75,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private Map<ICompilationUnit, DocumentChange> changesForRule;
 	private RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule;
 
-	private RefactoringPreviewWizardModel model;
+	private RefactoringPreviewWizardPageModel model;
 	/*
 	 * map that contains all names of working copies and working copies that
 	 * were unselected for this page
@@ -98,7 +98,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		setDescription(rule.getRuleDescription()
 			.getDescription());
 
-		this.model = new RefactoringPreviewWizardModel(rule);
+		this.model = new RefactoringPreviewWizardPageModel(rule, changesForRule);
 
 		this.changesForRule = changesForRule;
 		this.rule = rule;
@@ -126,6 +126,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		IObservableValue hoursSavedModelObserveValue = BeanProperties.value("hoursSaved") //$NON-NLS-1$
 			.observe(model);
 		bindingContext.bindValue(hoursSavedLabelObserveValue, hoursSavedModelObserveValue, null, null);
+		
 	}
 
 	/*
