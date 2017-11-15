@@ -5,16 +5,13 @@ import static org.junit.Assert.assertEquals;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import eu.jsparrow.core.rule.statistics.EliminatedTechnicalDebt;
-import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.visitor.ASTRewriteEvent;
 import eu.jsparrow.dummies.DummyRule;
 
+@SuppressWarnings("nls")
 public class EliminatedTechnicalDebtTest {
 
 	private DummyRule dummyRule;

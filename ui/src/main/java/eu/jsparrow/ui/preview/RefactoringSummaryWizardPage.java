@@ -34,13 +34,11 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.wb.swt.ResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.dialog.CompareInput;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
@@ -48,6 +46,7 @@ import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.ResourceHelper;
 
 @SuppressWarnings({ "restriction" })
 public class RefactoringSummaryWizardPage extends WizardPage {
@@ -132,15 +131,15 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 		labelExecutionTime = new CLabel(composite, SWT.NONE);
 		labelExecutionTime.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		labelExecutionTime.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-hourglass-half.png")); //$NON-NLS-1$
+		labelExecutionTime.setImage(ResourceHelper.createImage("icons/fa-hourglass-half.png")); //$NON-NLS-1$
 
 		labelIssuesFixed = new CLabel(composite, SWT.NONE);
 		labelIssuesFixed.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		labelIssuesFixed.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-bolt.png")); //$NON-NLS-1$
+		labelIssuesFixed.setImage(ResourceHelper.createImage("icons/fa-bolt.png")); //$NON-NLS-1$
 
 		labelHoursSaved = new CLabel(composite, SWT.NONE);
 		labelHoursSaved.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		labelHoursSaved.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-clock.png")); //$NON-NLS-1$
+		labelHoursSaved.setImage(ResourceHelper.createImage("icons/fa-clock.png")); //$NON-NLS-1$
 
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));

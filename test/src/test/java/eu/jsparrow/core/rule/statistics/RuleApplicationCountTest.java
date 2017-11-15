@@ -1,21 +1,19 @@
 package eu.jsparrow.core.rule.statistics;
 
 import static org.junit.Assert.assertEquals;
+
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-import eu.jsparrow.core.rule.statistics.FileChangeCount;
-import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.visitor.ASTRewriteEvent;
 import eu.jsparrow.dummies.DummyRule;
 
+@SuppressWarnings("nls")
 public class RuleApplicationCountTest {
 
 	private RuleApplicationCount applicationCounter;
