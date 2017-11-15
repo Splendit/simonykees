@@ -10,14 +10,6 @@ public class RuleTimesModel extends BaseModel {
 
 	private Duration timeSavedDuration;
 
-	public Duration getTimeSavedDuration() {
-		return timeSavedDuration;
-	}
-
-	public void setTimeSavedDuration(Duration timeSavedDuration) {
-		this.timeSavedDuration = timeSavedDuration;
-	}
-
 	private String name;
 
 	private Integer times;
@@ -44,6 +36,14 @@ public class RuleTimesModel extends BaseModel {
 
 	public void setTimeSaved(String timeSaved) {
 		this.timeSaved.setValue(timeSaved);
+	}
+	
+	public Duration getTimeSavedDuration() {
+		return timeSavedDuration;
+	}
+
+	public void setTimeSavedDuration(Duration timeSavedDuration) {
+		this.timeSavedDuration = timeSavedDuration;
 	}
 
 }
