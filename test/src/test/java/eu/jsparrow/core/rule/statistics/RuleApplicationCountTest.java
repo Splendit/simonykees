@@ -35,8 +35,8 @@ public class RuleApplicationCountTest {
 		DummyRule rule = new DummyRule();
 		RuleApplicationCount expectedApplicationCounter = RuleApplicationCount.getFor(rule);
 
-		RuleApplicationCount applicationCounter = RuleApplicationCount.getFor(rule);
-		assertEquals(expectedApplicationCounter, applicationCounter);
+		RuleApplicationCount actualApplicationCounter = RuleApplicationCount.getFor(rule);
+		assertEquals(expectedApplicationCounter, actualApplicationCounter);
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class RuleApplicationCountTest {
 	}
 
 	@Test
-	public void update_OnNewApplicationCounter_ShouldIncreaseCount() throws Exception {
+	public void update_OnNewApplicationCounter_ShouldIncreaseCount() {
 		int previous = applicationCounter.toInt();
 
 		applicationCounter.update(new ASTRewriteEvent("test"));

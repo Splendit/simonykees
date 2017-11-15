@@ -58,8 +58,6 @@ public class SelectRulesWizard extends Wizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
 
-	private AbstractSelectRulesWizardPage page;
-	private SelectRulesWizardPageControler controller;
 	private SelectRulesWizardPageModel model;
 
 	private final List<IJavaElement> javaElements;
@@ -84,8 +82,7 @@ public class SelectRulesWizard extends Wizard {
 	@Override
 	public void addPages() {
 		model = new SelectRulesWizardPageModel(rules);
-		controller = new SelectRulesWizardPageControler(model);
-		page = new SelectRulesWizardPage(model, controller);
+		AbstractSelectRulesWizardPage page = new SelectRulesWizardPage(model, new SelectRulesWizardPageControler(model));
 		addPage(page);
 	}
 
@@ -110,9 +107,9 @@ public class SelectRulesWizard extends Wizard {
 					.getElementName());
 		logger.info(message);
 
-		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = model.getSelectionAsList();
+		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = model.getSelectionAsList();
 
-		refactoringPipeline.setRules(rules);
+		refactoringPipeline.setRules(selectedRules);
 		refactoringPipeline.setSourceMap(refactoringPipeline.getInitialSourceMap());
 
 		Rectangle rectangle = Display.getCurrent()
@@ -234,7 +231,7 @@ public class SelectRulesWizard extends Wizard {
 					protected void createButtonsForButtonBar(Composite parent) {
 						createButton(parent, 9, "Summary", false);
 						super.createButtonsForButtonBar(parent);
-					};
+					}
 
 					@Override
 					protected void buttonPressed(int buttonId) {
@@ -243,7 +240,7 @@ public class SelectRulesWizard extends Wizard {
 						} else {
 							super.buttonPressed(buttonId);
 						}
-					};
+					}
 
 					private void summaryButtonPressed() {
 						if (getCurrentPage() instanceof RefactoringPreviewWizardPage) {
