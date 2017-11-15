@@ -21,16 +21,21 @@ public class EliminatedTechnicalDebt {
 	 * Gets the eliminated technical debt as {@link Duration} by multiplying the
 	 * rule remediation cost with the times the rule has been applied.
 	 * 
-	 * @param rule the rule used for the calculation
+	 * @param rule
+	 *            the rule used for the calculation
 	 * @return the eliminated technical debt as {@link Duration}.
 	 */
 	public static Duration get(RefactoringRuleInterface rule) {
+		return get(rule, RuleApplicationCount.getFor(rule)
+			.toInt());
+	}
+
+	public static Duration get(RefactoringRuleInterface rule, int applicationCount) {
 		return rule.getRuleDescription()
 			.getRemediationCost()
-			.multipliedBy(RuleApplicationCount.getFor(rule)
-				.toInt());
+			.multipliedBy(applicationCount);
 	}
-	
+
 	/**
 	 * Returns the sum of the given technical debts.
 	 * 

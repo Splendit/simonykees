@@ -1,6 +1,7 @@
 package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
 
 import org.eclipse.compare.internal.ComparePreferencePage;
 import org.eclipse.compare.internal.CompareUIPlugin;
@@ -47,7 +48,6 @@ import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
 import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.StopWatchUtil;
 
 @SuppressWarnings({ "restriction" })
 public class RefactoringSummaryWizardPage extends WizardPage {
@@ -252,31 +252,32 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initializeHeaderDataBindings(DataBindingContext bindingContext) {
-		IConverter convertToString = IConverter.create(Long.class, String.class,
+		IConverter convertRunDuration = IConverter.create(Long.class, String.class,
 				x -> DurationFormatUtil.formatRunDuration((Long) x));
 		IObservableValue observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
 			.observe(labelExecutionTime);
 		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
-				executionTimeSummaryWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertToString));
+				executionTimeSummaryWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertRunDuration));
 
+		IConverter convertIssuesFixed = IConverter.create(Integer.class, String.class,
+				x -> (String.format(Messages.SummaryWizardPageModel_IssuesFixed, (Integer) x)));
 		IObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
 			.observe(labelIssuesFixed);
 		IObservableValue issuesFixedSummaryWizardPageModelObserveValue = BeanProperties.value("issuesFixed") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelIssuesFixedObserveWidget,
-				issuesFixedSummaryWizardPageModelObserveValue);
+				issuesFixedSummaryWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertIssuesFixed));
 
+		IConverter convertTimeSaved = IConverter.create(Duration.class, String.class, x -> String
+			.format(Messages.DurationFormatUtil_TimeSaved, DurationFormatUtil.formatTimeSaved((Duration) x)));
 		IObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
 			.observe(labelHoursSaved);
 		IObservableValue hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("timeSaved") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
-		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue);
-
-		summaryWizardPageModel.setRunDuration(StopWatchUtil.getTime());
-		summaryWizardPageModel.setIssuesFixed("Issues Fixed: Placeholder"); //$NON-NLS-1$
-		summaryWizardPageModel.setTimeSaved("Time Saved: XX Days XX Hours XX Minutes"); //$NON-NLS-1$
+		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue,
+				null, UpdateValueStrategy.create(convertTimeSaved));
 	}
 
 	private void createCompareInputControl() {

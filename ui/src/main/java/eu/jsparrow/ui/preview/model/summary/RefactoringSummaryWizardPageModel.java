@@ -2,11 +2,8 @@ package eu.jsparrow.ui.preview.model.summary;
 
 import java.time.Duration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -15,15 +12,13 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
-import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RefactoringRuleInterface;
 import eu.jsparrow.core.rule.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.preview.model.BaseModel;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
+import eu.jsparrow.ui.util.StopWatchUtil;
 
 public class RefactoringSummaryWizardPageModel extends BaseModel {
 
@@ -33,9 +28,9 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 
 	private Boolean isFreeLicense;
 
-	private String issuesFixed;
+	private Integer issuesFixed;
 
-	private String timeSaved;
+	private Duration timeSaved;
 
 	private Map<RefactoringState, String> initialSource = new HashMap<>();
 
@@ -67,25 +62,24 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 		return changedFiles;
 	}
 
-
 	public IObservableList<RuleTimesModel> getRuleTimes() {
 		return ruleTimes;
 	}
 
-	public String getIssuesFixed() {
+	public int getIssuesFixed() {
 		return this.issuesFixed;
 	}
 
-	public void setIssuesFixed(String issuesFixed) {
-		firePropertyChange("issuesFixed", this.issuesFixed, this.issuesFixed = issuesFixed);
+	public void setIssuesFixed(int issuesFixed) {
+		firePropertyChange("issuesFixed", this.issuesFixed, this.issuesFixed = issuesFixed); //$NON-NLS-1$
 	}
 
-	public String getTimeSaved() {
+	public Duration getTimeSaved() {
 		return timeSaved;
 	}
 
-	public void setTimeSaved(String timeSaved) {
-		firePropertyChange("timeSaved", this.timeSaved, this.timeSaved = timeSaved);
+	public void setTimeSaved(Duration timeSaved) {
+		firePropertyChange("timeSaved", this.timeSaved, this.timeSaved = timeSaved); //$NON-NLS-1$
 	}
 
 	public Boolean getIsFreeLicense() {
@@ -100,9 +94,10 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	// update the data manually :(
 	public void updateData() {
 		updateChangedFiles();
-		updateIssuesFixed();
-		updateTimeSaved();
+		// Fields depend on contents of RuleTimes list, so we update that first!
 		updateRuleTimes();
+		updateTimeSaved();
+		updateIssuesFixed();
 	}
 
 	private void initialize() {
@@ -110,9 +105,12 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 		refactoringPipeline.setSourceMap(finalSource);
 		addModifiedFiles();
 		addRuleTimes();
-		setRunDuration(0L); //$NON-NLS-1$
-		setIssuesFixed("");
-		setTimeSaved("");
+		// Set initial values to something big so labels have enough size
+		// This is easiert hat resizing/layouting labels dynamically based on
+		// their contents
+		setRunDuration(StopWatchUtil.getTime());
+		setIssuesFixed(99999);
+		setTimeSaved(Duration.ofSeconds(999999999));
 	}
 
 	private void addModifiedFiles() {
@@ -135,8 +133,10 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 				String name = rule.getRuleDescription()
 					.getName();
 				int times = getApplicationTimesForRule(rule);
-				String timeSavedString = DurationFormatUtil.formatTimeSaved(EliminatedTechnicalDebt.get(rule));
+				Duration savedTime = EliminatedTechnicalDebt.get(rule, times);
+				String timeSavedString = DurationFormatUtil.formatTimeSaved(savedTime);
 				RuleTimesModel ruleTimesModel = new RuleTimesModel(name, times, timeSavedString);
+				ruleTimesModel.setTimeSavedDuration(savedTime);
 				ruleTimes.add(ruleTimesModel);
 			});
 	}
@@ -182,27 +182,24 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	}
 
 	private void updateIssuesFixed() {
-		String result;
-		int totalIssuesFixed = refactoringPipeline.getRules()
-			.stream()
-			.mapToInt(x -> RuleApplicationCount.getFor(x)
-				.toInt())
+		int totalIssuesFixed = ruleTimes.stream()
+			.mapToInt(RuleTimesModel::getTimes)
 			.sum();
-		result = String.format(Messages.SummaryWizardPageModel_IssuesFixed, totalIssuesFixed);
-		setIssuesFixed(result);
+		setIssuesFixed(totalIssuesFixed);
 	}
 
 	private void updateTimeSaved() {
-		Duration totalTimeSaved = EliminatedTechnicalDebt.getTotalFor(refactoringPipeline.getRules());
-		setTimeSaved(String.format(Messages.DurationFormatUtil_TimeSaved,
-				DurationFormatUtil.formatTimeSaved(totalTimeSaved)));
+		Duration totalTimeSaved = ruleTimes.stream()
+			.map(RuleTimesModel::getTimeSavedDuration)
+			.reduce(Duration.ZERO, (x, y) -> x.plus(y));
+		setTimeSaved(totalTimeSaved);
 	}
 
 	private void updateRuleTimes() {
 		ruleTimes.clear();
 		addRuleTimes();
 	}
-	
+
 	private void updateChangedFiles() {
 		changedFiles.clear();
 		addModifiedFiles();
