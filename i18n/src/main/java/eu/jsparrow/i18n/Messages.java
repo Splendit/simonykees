@@ -276,6 +276,8 @@ public class Messages extends NLS {
 	public static String SelectRulesWizard_end_refactoring;
 	public static String SelectRulesWizard_rules_with_changes;
 	public static String SelectRulesWizard_start_refactoring;
+
+	public static String SelectRulesWizard_Summary;
 	public static String SelectRulesWizard_title;
 	public static String SelectRulesWizard_warning_no_refactorings;
 	public static String SerialVersionUidRule_description;

@@ -229,7 +229,7 @@ public class SelectRulesWizard extends Wizard {
 
 					@Override
 					protected void createButtonsForButtonBar(Composite parent) {
-						createButton(parent, 9, "Summary", false);
+						createButton(parent, 9, Messages.SelectRulesWizard_Summary, false);
 						super.createButtonsForButtonBar(parent);
 					}
 

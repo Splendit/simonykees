@@ -203,8 +203,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 
 		issuesFixedLabel = new CLabel(composite, SWT.NONE);
 		issuesFixedLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-		Image inLoveImage = ResourceHelper.createImage("icons/fa-bolt.png");
-		issuesFixedLabel.setImage(inLoveImage); //$NON-NLS-1$
+		Image inLoveImage = ResourceHelper.createImage("icons/fa-bolt.png"); //$NON-NLS-1$
+		issuesFixedLabel.setImage(inLoveImage);
 
 		techDebtLabel = new CLabel(composite, SWT.NONE);
 		techDebtLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));

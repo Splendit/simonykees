@@ -35,6 +35,6 @@ public class MapContentProvider implements IStructuredContentProvider {
 				.toArray();
 		}
 
-		throw new RuntimeException("Invalid input für MapContentProvider: " + inputElement.getClass());
+		throw new RuntimeException("Invalid input für MapContentProvider: " + inputElement.getClass()); //$NON-NLS-1$
 	}
 }
