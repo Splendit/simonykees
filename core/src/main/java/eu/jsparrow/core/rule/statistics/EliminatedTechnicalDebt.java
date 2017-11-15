@@ -30,6 +30,16 @@ public class EliminatedTechnicalDebt {
 			.toInt());
 	}
 
+	/**
+	 * Gets the technical debt for a specific {@link RefactoringRuleInterface}
+	 * by multiplying with a given count.
+	 * 
+	 * @param rule
+	 *            rule to count eliminated technical debt for
+	 * @param applicationCount
+	 *            times rule was applied
+	 * @return the eliminated technical debt as duration
+	 */
 	public static Duration get(RefactoringRuleInterface rule, int applicationCount) {
 		return rule.getRuleDescription()
 			.getRemediationCost()
@@ -45,7 +55,7 @@ public class EliminatedTechnicalDebt {
 	 */
 	public static Duration getTotalFor(List<? extends RefactoringRuleInterface> list) {
 		return list.stream()
-			.map(x -> EliminatedTechnicalDebt.get(x))
+			.map(EliminatedTechnicalDebt::get)
 			.reduce(Duration.ZERO, (x, y) -> x.plus(y));
 	}
 }

@@ -5,7 +5,6 @@ import java.time.Duration;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.ui.util.StopWatchUtil;
 
 public class DurationFormatUtil {
 	

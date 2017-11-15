@@ -1,6 +1,11 @@
 package eu.jsparrow.core.rule.statistics;
 
-//Tracks the number of changes within a single file
+/**
+ * This class represents the number of changes for given file. 
+ * 
+ * @author Hans-Jörg Schrödl
+ * @since 2.3.0
+ */
 public class FileChangeCount {
 
 	private String compilationUnitHandle;

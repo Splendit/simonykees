@@ -3,7 +3,6 @@ package eu.jsparrow.core.rule.statistics;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RefactoringRuleInterface;
@@ -61,7 +60,7 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 	}
 
 	/**
-	 * Returns the number of changes for the given file
+	 * Returns the number of changes for the given file.
 	 * 
 	 * @param compilationUnitHandle
 	 *            handle of the file to count changes for
@@ -72,6 +71,13 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 		return changesPerCompilationUnit.get(compilationUnitHandle);
 	}
 
+	
+	/**
+	 * Returns the number of changes for the given file handles.
+	 * 
+	 * @param compilationUnitHandles compilation unit file handles for the files to track changes for
+	 * @return the total number of changes in the given files
+	 */
 	public int getApplicationsForFiles(List<String> compilationUnitHandles) {
 		return compilationUnitHandles.stream()
 			.mapToInt(x -> getApplicationsForFile(x).getCount())
@@ -79,7 +85,7 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 	}
 
 	/**
-	 * Gets a map of files and their number of changes for this rule
+	 * Gets a map of files and their number of changes for this rule.
 	 * 
 	 * @return the files with changes for this rule
 	 */
@@ -87,9 +93,9 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 		return changesPerCompilationUnit;
 	}
 
+
 	@Override
 	public void update(ASTRewriteEvent event) {
-		String compilationUnitHandle = event.getCompilationUnit();
-		getApplicationsForFile(compilationUnitHandle).update();
+		getApplicationsForFile(event.getCompilationUnit()).update();
 	}
 }

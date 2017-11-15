@@ -29,8 +29,16 @@ public class EliminatedTechnicalDebtTest {
 		RuleApplicationCount.getFor(dummyRule)
 			.update(new ASTRewriteEvent("test"));
 
-		// The dummy rule has a remediation time of 5 minutes.
 		assertEquals(5, EliminatedTechnicalDebt.get(dummyRule)
+			.toMinutes());
+	}
+
+	@Test
+	public void get_WithRuleAppliedMoreTimes_ReturnsTotalDuration() {
+		RuleApplicationCount.getFor(dummyRule)
+			.update(new ASTRewriteEvent("test"));
+
+		assertEquals(15, EliminatedTechnicalDebt.get(dummyRule, 3)
 			.toMinutes());
 	}
 

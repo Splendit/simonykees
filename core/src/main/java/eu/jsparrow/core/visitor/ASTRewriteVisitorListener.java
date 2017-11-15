@@ -8,7 +8,9 @@ package eu.jsparrow.core.visitor;
 public interface ASTRewriteVisitorListener {
 
 	/**
-	 * Notify of a change.
+	 * Updates implementor with the given event.
+	 * 
+	 * @param event event published by a {@link AbstractASTRewriteASTVisitor}
 	 */
 	public void update(ASTRewriteEvent event);
 }

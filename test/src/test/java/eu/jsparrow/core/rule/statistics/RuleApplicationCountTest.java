@@ -3,6 +3,9 @@ package eu.jsparrow.core.rule.statistics;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +48,15 @@ public class RuleApplicationCountTest {
 
 		assertEquals(expectedFileName, fileChangeCount.getCompilationUnitHandle());
 	}
-	
+
+	@Test
+	public void get_forMultipleCompilationUnits_returnsFileCounter() {
+		List<String> compilationUnits = Arrays.asList("NewFile1", "NewFile2", "NewFile3");
+		int result = applicationCounter.getApplicationsForFiles(compilationUnits);
+
+		assertEquals(0, result);
+	}
+
 	@Test
 	public void update_OnNewApplicationCounter_ShouldIncreaseCount() throws Exception {
 		int previous = applicationCounter.toInt();

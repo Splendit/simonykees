@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -196,16 +197,7 @@ public class RefactoringPreviewWizard extends Wizard {
 						&& !((RefactoringPreviewWizardPage) page).getUnselectedChange()
 							.isEmpty())
 				.forEach(page -> {
-					try {
-						refactoringPipeline.doAdditionalRefactoring(
-								((RefactoringPreviewWizardPage) page).getUnselectedChange(),
-								((RefactoringPreviewWizardPage) page).getRule(), monitor);
-						if (monitor.isCanceled()) {
-							refactoringPipeline.clearStates();
-						}
-					} catch (RuleException e) {
-						synchronizeWithUIShowError(e);
-					}
+					tryDoAdditionalRefactoring(monitor, page);
 					((RefactoringPreviewWizardPage) page).applyUnselectedChange();
 				});
 
@@ -239,6 +231,19 @@ public class RefactoringPreviewWizard extends Wizard {
 		}
 
 		return true;
+	}
+
+	private void tryDoAdditionalRefactoring(IProgressMonitor monitor, IWizardPage page) {
+		try {
+			refactoringPipeline.doAdditionalRefactoring(
+					((RefactoringPreviewWizardPage) page).getUnselectedChange(),
+					((RefactoringPreviewWizardPage) page).getRule(), monitor);
+			if (monitor.isCanceled()) {
+				refactoringPipeline.clearStates();
+			}
+		} catch (RuleException e) {
+			synchronizeWithUIShowError(e);
+		}
 	}
 
 	/*

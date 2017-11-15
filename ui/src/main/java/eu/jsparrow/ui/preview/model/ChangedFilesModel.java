@@ -11,6 +11,7 @@ public class ChangedFilesModel {
 
 	private DocumentChange change;
 
+
 	public ChangedFilesModel(ICompilationUnit compilationUnit, DocumentChange documentChange) {
 		this.changeSelected = true;
 		this.compilationUnit = compilationUnit;
@@ -23,6 +24,22 @@ public class ChangedFilesModel {
 
 	public void setChangeSelected(boolean changeSelected) {
 		this.changeSelected = changeSelected;
+	}
+	
+	public ICompilationUnit getCompilationUnit() {
+		return compilationUnit;
+	}
+
+	public void setCompilationUnit(ICompilationUnit compilationUnit) {
+		this.compilationUnit = compilationUnit;
+	}
+	
+	public DocumentChange getChange() {
+		return change;
+	}
+
+	public void setChange(DocumentChange change) {
+		this.change = change;
 	}
 
 }

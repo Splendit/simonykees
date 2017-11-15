@@ -9,7 +9,9 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.compare.CompareViewerSwitchingPane;
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -126,17 +128,23 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private void initializeDataBindings() {
 		DataBindingContext bindingContext = new DataBindingContext();
 
+		IConverter convertIssuesFixed = IConverter.create(Integer.class, String.class,
+				x -> (String.format(Messages.SummaryWizardPageModel_IssuesFixed, (Integer) x)));
 		IObservableValue issuesFixedLabelObserveValue = WidgetProperties.text()
 			.observe(issuesFixedLabel);
 		IObservableValue issuesFixedModelObserveValue = BeanProperties.value("issuesFixed") //$NON-NLS-1$
 			.observe(model);
-		bindingContext.bindValue(issuesFixedLabelObserveValue, issuesFixedModelObserveValue);
+		bindingContext.bindValue(issuesFixedLabelObserveValue, issuesFixedModelObserveValue, null,
+				UpdateValueStrategy.create(convertIssuesFixed));
 
+		IConverter convertTimeSaved = IConverter.create(Duration.class, String.class, x -> String
+			.format(Messages.DurationFormatUtil_TimeSaved, DurationFormatUtil.formatTimeSaved((Duration) x)));
 		IObservableValue hoursSavedLabelObserveValue = WidgetProperties.text()
 			.observe(techDebtLabel);
 		IObservableValue hoursSavedModelObserveValue = BeanProperties.value("timeSaved") //$NON-NLS-1$
 			.observe(model);
-		bindingContext.bindValue(hoursSavedLabelObserveValue, hoursSavedModelObserveValue);
+		bindingContext.bindValue(hoursSavedLabelObserveValue, hoursSavedModelObserveValue, null,
+				UpdateValueStrategy.create(convertTimeSaved));
 
 	}
 
@@ -200,7 +208,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		techDebtLabel = new CLabel(composite, SWT.NONE);
 		techDebtLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		techDebtLabel.setImage(ResourceManager.getPluginImage(Activator.PLUGIN_ID, "icons/fa-clock.png")); //$NON-NLS-1$
-
+		
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
@@ -339,12 +347,11 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private void updateIssuesAndTimeForSelected() {
 		int timesApplied = RuleApplicationCount.getFor(getRule())
 			.getApplicationsForFiles(wizardModel.getFilesForRule(rule));
-		model.setIssuesFixed(String.format(Messages.SummaryWizardPageModel_IssuesFixed, timesApplied));
+		model.setIssuesFixed(timesApplied);
 		Duration timeSaved = getRule().getRuleDescription()
 			.getRemediationCost()
 			.multipliedBy(timesApplied);
-		model.setTimeSaved(
-				String.format(Messages.DurationFormatUtil_TimeSaved, DurationFormatUtil.formatTimeSaved(timeSaved)));
+		model.setTimeSaved(timeSaved);
 
 	}
 

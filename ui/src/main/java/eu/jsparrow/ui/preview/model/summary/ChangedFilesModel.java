@@ -37,7 +37,8 @@ public class ChangedFilesModel extends BaseModel {
 	}
 
 	public void setSourceRight(String sourceRight) {
-		firePropertyChange("sourceRight", this.sourceRight, this.sourceRight = sourceRight);
+		firePropertyChange("sourceRight", this.sourceRight, sourceRight); //$NON-NLS-1$
+		this.sourceRight = sourceRight;
 	}
 
 }
