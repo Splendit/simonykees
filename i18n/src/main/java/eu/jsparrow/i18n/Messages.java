@@ -380,6 +380,9 @@ public class Messages extends NLS {
 	public static String ValidateExecutor_validation_scheduler_started;
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;
+	public static String PutIfAbsentRule_description;
+	public static String PutIfAbsentRule_name;
+
 	public static String YAMLConfigUtil_providedPathNotLeadingToYAMLConfig;
 
 	static {
