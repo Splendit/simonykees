@@ -26,6 +26,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -44,6 +45,8 @@ public class RefactoringPreviewWizard extends Wizard {
 	private Shell shell;
 
 	private RefactoringSummaryWizardPage summaryPage;
+
+	private RefactoringPreviewWizardModel model;
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
@@ -65,14 +68,16 @@ public class RefactoringPreviewWizard extends Wizard {
 		 * First summary page is created to collect all initial source from
 		 * working copies
 		 */
-		summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline);
+		model = new RefactoringPreviewWizardModel();
 		refactoringPipeline.getRules()
 			.forEach(rule -> {
 				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
 				if (!changes.isEmpty()) {
-					addPage(new RefactoringPreviewWizardPage(changes, rule));
+					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model);
+					addPage(previewPage);
 				}
 			});
+		summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model);
 		if (!(refactoringPipeline.getRules()
 			.size() == 1
 				&& refactoringPipeline.getRules()
@@ -328,5 +333,12 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	public RefactoringSummaryWizardPage getSummaryPage() {
 		return summaryPage;
+	}
+
+	public RefactoringPreviewWizardModel getModel() {
+		if (model == null) {
+			model = new RefactoringPreviewWizardModel();
+		}
+		return model;
 	}
 }

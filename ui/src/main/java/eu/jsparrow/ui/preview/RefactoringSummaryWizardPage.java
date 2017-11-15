@@ -5,7 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.compare.internal.ComparePreferencePage;
 import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
+import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -41,6 +43,7 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.dialog.CompareInput;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
+import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
 import eu.jsparrow.ui.util.LicenseUtil;
@@ -72,10 +75,11 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	/**
 	 * Create the wizard.
 	 */
-	public RefactoringSummaryWizardPage(RefactoringPipeline refactoringPipeline) {
+	public RefactoringSummaryWizardPage(RefactoringPipeline refactoringPipeline,
+			RefactoringPreviewWizardModel wizardModel) {
 		super("wizardPage"); //$NON-NLS-1$
 		setTitle(Messages.SummaryWizardPage_RunSummary);
-		this.summaryWizardPageModel = new RefactoringSummaryWizardPageModel(refactoringPipeline);
+		this.summaryWizardPageModel = new RefactoringSummaryWizardPageModel(refactoringPipeline, wizardModel);
 	}
 
 	/**
@@ -107,9 +111,9 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
-			summaryWizardPageModel.updateFiles();
 			summaryWizardPageModel.setIsFreeLicense(LicenseUtil.getInstance()
 				.isFree());
+			summaryWizardPageModel.updateData();
 			createCompareInputControl();
 			// We must wait to set selection until control is visible
 			setInitialFileSelection();
@@ -248,12 +252,14 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void initializeHeaderDataBindings(DataBindingContext bindingContext) {
+		IConverter convertToString = IConverter.create(Long.class, String.class,
+				x -> DurationFormatUtil.formatRunDuration((Long) x));
 		IObservableValue observeTextLabelExecutionTimeObserveWidget = WidgetProperties.text()
 			.observe(labelExecutionTime);
 		IObservableValue executionTimeSummaryWizardPageModelObserveValue = BeanProperties.value("runDuration") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelExecutionTimeObserveWidget,
-				executionTimeSummaryWizardPageModelObserveValue);
+				executionTimeSummaryWizardPageModelObserveValue, null, UpdateValueStrategy.create(convertToString));
 
 		IObservableValue observeTextLabelIssuesFixedObserveWidget = WidgetProperties.text()
 			.observe(labelIssuesFixed);
@@ -264,11 +270,13 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 
 		IObservableValue observeTextLabelHoursSavedObserveWidget = WidgetProperties.text()
 			.observe(labelHoursSaved);
-		IObservableValue hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("hoursSaved") //$NON-NLS-1$
+		IObservableValue hoursSavedSummaryWizardPageModelObserveValue = BeanProperties.value("timeSaved") //$NON-NLS-1$
 			.observe(summaryWizardPageModel);
 		bindingContext.bindValue(observeTextLabelHoursSavedObserveWidget, hoursSavedSummaryWizardPageModelObserveValue);
 
-		summaryWizardPageModel.setRunDuration(DurationFormatUtil.formatRunDuration(StopWatchUtil.getTime()));
+		summaryWizardPageModel.setRunDuration(StopWatchUtil.getTime());
+		summaryWizardPageModel.setIssuesFixed("Issues Fixed: Placeholder"); //$NON-NLS-1$
+		summaryWizardPageModel.setTimeSaved("Time Saved: XX Days XX Hours XX Minutes"); //$NON-NLS-1$
 	}
 
 	private void createCompareInputControl() {

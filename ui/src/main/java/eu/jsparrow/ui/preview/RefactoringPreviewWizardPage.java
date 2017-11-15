@@ -28,6 +28,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
@@ -55,6 +56,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
+import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardPageModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 
@@ -95,8 +97,10 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	private List<ICompilationUnit> unselectedChange = new ArrayList<>();
 	protected IStatus fSelectionStatus;
 
+	private RefactoringPreviewWizardModel wizardModel;
+
 	public RefactoringPreviewWizardPage(Map<ICompilationUnit, DocumentChange> changesForRule,
-			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
+			RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule, RefactoringPreviewWizardModel wizardModel) {
 		super(rule.getRuleDescription()
 			.getName());
 		setTitle(rule.getRuleDescription()
@@ -104,7 +108,12 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		setDescription(rule.getRuleDescription()
 			.getDescription());
 
+		this.wizardModel = wizardModel;
 		this.model = new RefactoringPreviewWizardPageModel(rule, changesForRule);
+		wizardModel.addRule(rule);
+		changesForRule.keySet()
+			.stream()
+			.forEach(x -> wizardModel.addFileToRule(rule, x.getHandleIdentifier()));
 
 		this.changesForRule = changesForRule;
 		this.rule = rule;
@@ -316,33 +325,28 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				if (unselectedChange.contains(newSelection)) {
 					unselectedChange.remove(newSelection);
 				}
+				wizardModel.addFileToRule(rule, newSelection.getHandleIdentifier());
 				immediatelyUpdateForSelected(newSelection);
 			} else {
 				// add in list with unselected classes
 				if (!unselected.containsKey(newSelection.getElementName())) {
 					unselectedChange.add(newSelection);
 				}
+				wizardModel.removeFileFromRule(rule, newSelection.getHandleIdentifier());
 			}
+			// This method simply counts checked items in the table. Not very
+			// MVC, and should be replaced with a proper solution
 			updateIssuesAndTimeForSelected();
 		};
 	}
 
 	private void updateIssuesAndTimeForSelected() {
-		Stream<ICompilationUnit> compilationUnitStream = Arrays.asList(viewer.getTable()
-			.getItems())
-			.stream()
-			.filter(TableItem::getChecked)
-			.map(x -> (ICompilationUnit)x.getData());
-		int timesApplied = compilationUnitStream.mapToInt(x -> RuleApplicationCount.getFor(getRule())
-			.getApplicationsForFile(x.getHandleIdentifier())
-			.getCount())
-			.sum();
+		int timesApplied = RuleApplicationCount.getFor(getRule())
+			.getApplicationsForFiles(wizardModel.getFilesForRule(rule));
 		model.setIssuesFixed(String.format(Messages.SummaryWizardPageModel_IssuesFixed, timesApplied));
-
 		Duration timeSaved = getRule().getRuleDescription()
 			.getRemediationCost()
 			.multipliedBy(timesApplied);
-
 		model.setTimeSaved(
 				String.format(Messages.DurationFormatUtil_TimeSaved, DurationFormatUtil.formatTimeSaved(timeSaved)));
 
