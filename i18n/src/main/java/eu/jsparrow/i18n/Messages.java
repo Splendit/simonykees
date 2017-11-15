@@ -157,18 +157,48 @@ public class Messages extends NLS {
 	public static String LoggerRuleWizard_title;
 	public static String LoggerRuleWizardHandler_info_supportedFrameworkFound;
 	public static String LoggerRuleWizardHandler_noLogger;
+	public static String LoggerRuleWizardPage_alwaysAddExceptionParamInLoggerStatement;
+
 	public static String LoggerRuleWizardPage_alwaysUsePrintStacktraceOptionForLoggingException;
+	public static String LoggerRuleWizardPage_default_log_for_exception_example_after;
+
+	public static String LoggerRuleWizardPage_default_log_for_exception_example_before;
+
+	public static String LoggerRuleWizardPage_default_log_for_exception_popup_description;
+
 	public static String LoggerRuleWizardPage_description;
-	public static String LoggerRuleWizardPage_missingLogLabel;
-	public static String LoggerRuleWizardPage_missingLogMessageLabel;
+
+	public static String LoggerRuleWizardPage_insertNewLoggerStatementInEmptyCatch;
+
+	public static String LoggerRuleWizardPage_log_exception_object_example_after;
+
+	public static String LoggerRuleWizardPage_log_exception_object_example_before;
+
+	public static String LoggerRuleWizardPage_log_exception_object_popup_description;
+
+	public static String LoggerRuleWizardPage_loggingExceptionsLabel;
+	public static String LoggerRuleWizardPage_missing_logger_example_after;
+
+	public static String LoggerRuleWizardPage_missing_logger_example_before;
+
+	public static String LoggerRuleWizardPage_missing_logger_pupup_description;
+
 	public static String LoggerRuleWizardPage_pageName;
+
+	public static String LoggerRuleWizardPage_print_stack_trace_example_after;
+
+	public static String LoggerRuleWizardPage_print_stack_trace_example_before;
+
+	public static String LoggerRuleWizardPage_print_stack_trace_popup_description;
+
+	public static String LoggerRuleWizardPage_replacePrintstacktraceWithLogger;
 	public static String LoggerRuleWizardPage_severityLevelLabel;
-	public static String LoggerRuleWizardPage_stackTraceLabel;
-	public static String LoggerRuleWizardPage_stackTraceMessageLabel;
 	public static String LoggerRuleWizardPage_sysErrLabel;
 	public static String LoggerRuleWizardPage_sysErrMessageLabel;
 	public static String LoggerRuleWizardPage_sysOutLabel;
 	public static String LoggerRuleWizardPage_sysOutMessageLabel;
+
+	public static String LoggerRuleWizardPage_will_be_transformed_to;
 	public static String LoggerRuleWizardPageModel_err_noTransformation;
 	public static String LoggerRuleWizardPageModel_noSeverityLevel;
 	public static String LoggerRuleWizardPageModel_warn_blankLoggingType;
