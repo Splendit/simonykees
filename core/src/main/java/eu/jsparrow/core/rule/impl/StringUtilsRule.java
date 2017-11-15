@@ -73,20 +73,15 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 					Manifest manifest = jar.getManifest();
 					Attributes attributes = manifest.getMainAttributes();
 
-					if (attributes != null) {
-						for (Object attribute : attributes.keySet()) {
+					return attributes != null && attributes.keySet()
+						.stream()
+						.anyMatch(attribute -> {
 							Name key = (Name) attribute;
 							String keyword = key.toString();
-							if ("Implementation-Version".equals(keyword)) { //$NON-NLS-1$
-								if (supportedVersion.stream()
-									.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s))) {
-									return true;
-								} else {
-									return false;
-								}
-							}
-						}
-					}
+							return "Implementation-Version".equals(keyword) && supportedVersion.stream() //$NON-NLS-1$
+								.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s));
+						});
+
 				} catch (IOException e) {
 					logger.debug("Jar Manifest load error in:", e); //$NON-NLS-1$
 					// Resolving version failed, rule cant be executed
