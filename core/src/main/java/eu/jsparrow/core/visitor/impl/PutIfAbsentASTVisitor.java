@@ -15,7 +15,6 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.builder.NodeBuilder;
-import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
 import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
@@ -127,7 +126,7 @@ public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
 		MethodInvocation containsMethodInvocation = (MethodInvocation) ifPrefixExpression.getOperand();
 		if (containsMethodInvocation.arguments()
 			.isEmpty() || containsMethodInvocation.getExpression() == null) {
-			return true;
+			return false;
 		}
 		return hasRightTypeAndName(containsMethodInvocation, MAP_FULLY_QUALIFIED_NAME, CONTAINS_KEY);
 	}

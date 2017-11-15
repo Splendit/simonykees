@@ -136,6 +136,20 @@ public class PutIfAbsentASTVisitorTest extends AbstractASTVisitorTest {
 	
 	
 	@Test
+	public void visit_missingArgumentsInIfCondition_shouldNotReplace() throws Exception {
+		fixture.addImport("java.util.Map");
+		String block = "Map map;  if (!map.isEmpty()) { map.put(2,2); }";
+		fixture.addMethodBlock(block);
+		visitor.setASTRewrite(fixture.getAstRewrite());
+
+		fixture.accept(visitor);
+
+		Block expected = createBlock(block);
+		assertMatch(expected, fixture.getMethodBlock());
+	}
+	
+	
+	@Test
 	public void visit_putSurroundedBlockAndIf_shouldReplace() throws Exception {
 		fixture.addImport("java.util.Map");
 		String block = "Map map; if (!map.containsKey(1)) { map.put(1, 2); }";
