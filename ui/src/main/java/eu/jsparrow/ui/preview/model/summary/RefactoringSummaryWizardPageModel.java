@@ -55,7 +55,8 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	}
 
 	public void setRunDuration(Long runDuration) {
-		firePropertyChange("runDuration", this.runDuration, this.runDuration = runDuration); //$NON-NLS-1$
+		firePropertyChange("runDuration", this.runDuration, runDuration); //$NON-NLS-1$
+		this.runDuration = runDuration;
 	}
 
 	public IObservableList<ChangedFilesModel> getChangedFiles() {
@@ -71,7 +72,8 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	}
 
 	public void setIssuesFixed(int issuesFixed) {
-		firePropertyChange("issuesFixed", this.issuesFixed, this.issuesFixed = issuesFixed); //$NON-NLS-1$	
+		firePropertyChange("issuesFixed", this.issuesFixed, issuesFixed); //$NON-NLS-1$
+		this.issuesFixed = issuesFixed;
 	}
 
 	public Duration getTimeSaved() {
@@ -79,7 +81,8 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	}
 
 	public void setTimeSaved(Duration timeSaved) {
-		firePropertyChange("timeSaved", this.timeSaved, this.timeSaved = timeSaved); //$NON-NLS-1$
+		firePropertyChange("timeSaved", this.timeSaved, timeSaved); //$NON-NLS-1$
+		this.timeSaved = timeSaved;
 	}
 
 	public Boolean getIsFreeLicense() {
@@ -87,7 +90,8 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	}
 
 	public void setIsFreeLicense(Boolean validLicense) {
-		firePropertyChange("isFreeLicense", this.isFreeLicense, isFreeLicense = validLicense); //$NON-NLS-1$
+		firePropertyChange("isFreeLicense", this.isFreeLicense, validLicense); //$NON-NLS-1$
+		isFreeLicense = validLicense;
 	}
 
 	// Needed because we don't have full databinding/models yet, so we need to
@@ -105,9 +109,11 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 		refactoringPipeline.setSourceMap(finalSource);
 		addModifiedFiles();
 		addRuleTimes();
-		// Set initial values to something big so labels have enough size
-		// This is easiert hat resizing/layouting labels dynamically based on
-		// their contents
+		/*
+		 * Set initial values to something big so labels have enough size This
+		 * is easiert hat resizing/layouting labels dynamically based on their
+		 * contents
+		 */
 		setRunDuration(StopWatchUtil.getTime());
 		setIssuesFixed(99999);
 		setTimeSaved(Duration.ofSeconds(999999999));
