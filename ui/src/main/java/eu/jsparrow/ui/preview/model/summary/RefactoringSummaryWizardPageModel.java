@@ -55,8 +55,7 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	}
 
 	public void setRunDuration(Long runDuration) {
-		firePropertyChange("runDuration", this.runDuration, runDuration); //$NON-NLS-1$
-		this.runDuration = runDuration;
+		firePropertyChange("runDuration", this.runDuration, this.runDuration = runDuration); //$NON-NLS-1$
 	}
 
 	public IObservableList<ChangedFilesModel> getChangedFiles() {
@@ -72,8 +71,7 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	}
 
 	public void setIssuesFixed(int issuesFixed) {
-		firePropertyChange("issuesFixed", this.issuesFixed, issuesFixed); //$NON-NLS-1$
-		this.issuesFixed = issuesFixed;
+		firePropertyChange("issuesFixed", this.issuesFixed, this.issuesFixed = issuesFixed); //$NON-NLS-1$
 	}
 
 	public Duration getTimeSaved() {
@@ -81,8 +79,7 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	}
 
 	public void setTimeSaved(Duration timeSaved) {
-		firePropertyChange("timeSaved", this.timeSaved, timeSaved); //$NON-NLS-1$
-		this.timeSaved = timeSaved;
+		firePropertyChange("timeSaved", this.timeSaved, this.timeSaved = timeSaved); //$NON-NLS-1$
 	}
 
 	public Boolean getIsFreeLicense() {
@@ -90,8 +87,7 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	}
 
 	public void setIsFreeLicense(Boolean validLicense) {
-		firePropertyChange("isFreeLicense", this.isFreeLicense, validLicense); //$NON-NLS-1$
-		isFreeLicense = validLicense;
+		firePropertyChange("isFreeLicense", this.isFreeLicense, isFreeLicense = validLicense); //$NON-NLS-1$
 	}
 
 	// Needed because we don't have full databinding/models yet, so we need to

@@ -45,8 +45,6 @@ public class DurationFormatUtil {
 	 * @return formated time unit where useless timeUnit was removed
 	 */
 	private static String removeZeroValueTimeUnit(String timeUnit, String input) {
-		String result = input.replaceAll("(^0 "+timeUnit+"\\s)", "");; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		
-		return result;
+		return input.replaceAll("(^0 "+timeUnit+"\\s)", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 }
