@@ -14,8 +14,9 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.RuleApplicationCount;
 import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.rule.statistics.FileChangeCount;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
@@ -29,7 +30,7 @@ import eu.jsparrow.i18n.Messages;
  * The formatter selected in the Eclipse settings of the processed project is
  * used.
  * 
- * @author Hannes Schweighofer, Ludwig Werzowa
+ * @author Hannes Schweighofer, Ludwig Werzowa, Matthias Webhofer
  * @since 0.9.2
  *
  */
@@ -77,8 +78,11 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 		DocumentChange documentChange = null;
 
 		if (edit.hasChildren()) {
-			RuleApplicationCount.getFor(this)
-				.update();
+
+			FileChangeCount count = RuleApplicationCount.getFor(this)
+				.getApplicationsForFile(workingCopy.getHandleIdentifier());
+			count.clear();
+			count.update();
 			Document document = new Document(workingCopy.getSource());
 			documentChange = RefactoringUtil.generateDocumentChange(CodeFormatterRule.class.getSimpleName(), document,
 					edit.copy());

@@ -27,7 +27,7 @@ import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.exception.model.NotWorkingRuleModel;
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.RuleApplicationCount;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.ExceptionMessages;

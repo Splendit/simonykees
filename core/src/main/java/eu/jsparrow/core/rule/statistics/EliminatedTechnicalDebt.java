@@ -1,7 +1,9 @@
-package eu.jsparrow.core.rule;
+package eu.jsparrow.core.rule.statistics;
 
 import java.time.Duration;
 import java.util.List;
+
+import eu.jsparrow.core.rule.RefactoringRuleInterface;
 
 /**
  * This class represents the technical debt that has been eliminated by applying
@@ -19,14 +21,29 @@ public class EliminatedTechnicalDebt {
 	 * Gets the eliminated technical debt as {@link Duration} by multiplying the
 	 * rule remediation cost with the times the rule has been applied.
 	 * 
-	 * @param rule the rule used for the calculation
+	 * @param rule
+	 *            the rule used for the calculation
 	 * @return the eliminated technical debt as {@link Duration}.
 	 */
 	public static Duration get(RefactoringRuleInterface rule) {
+		return get(rule, RuleApplicationCount.getFor(rule)
+			.toInt());
+	}
+
+	/**
+	 * Gets the technical debt for a specific {@link RefactoringRuleInterface}
+	 * by multiplying with a given count.
+	 * 
+	 * @param rule
+	 *            rule to count eliminated technical debt for
+	 * @param applicationCount
+	 *            times rule was applied
+	 * @return the eliminated technical debt as duration
+	 */
+	public static Duration get(RefactoringRuleInterface rule, int applicationCount) {
 		return rule.getRuleDescription()
 			.getRemediationCost()
-			.multipliedBy(RuleApplicationCount.getFor(rule)
-				.toInt());
+			.multipliedBy(applicationCount);
 	}
 
 	/**
@@ -38,7 +55,7 @@ public class EliminatedTechnicalDebt {
 	 */
 	public static Duration getTotalFor(List<? extends RefactoringRuleInterface> list) {
 		return list.stream()
-			.map(x -> EliminatedTechnicalDebt.get(x))
+			.map(EliminatedTechnicalDebt::get)
 			.reduce(Duration.ZERO, (x, y) -> x.plus(y));
 	}
 }

@@ -91,11 +91,17 @@ public class Messages extends NLS {
 	public static String ConfigureProfileSelectRulesWizardPage_error_EmptyName;
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputLabel;
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputText;
-	public static String ConfigureProfileSelectRulesWIzardPageModel_error_NameExists;
+	public static String ConfigureProfileSelectRulesWizardPageModel_error_NameExists;
 	public static String ConfigureRenameFieldsRuleWizard_WizardTitle_RenameFields;
 	public static String DiamondOperatorASTVisitor_using_diamond_operator;
 	public static String DiamondOperatorRule_description;
 	public static String DiamondOperatorRule_name;
+	public static String DurationFormatUtil_Days;
+	public static String DurationFormatUtil_Hours;
+	public static String DurationFormatUtil_Minutes;
+	public static String DurationFormatUtil_RunDuration;
+	public static String DurationFormatUtil_Seconds;
+	public static String DurationFormatUtil_TimeSaved;
 	public static String EmptyProfile_profileName;
 	public static String EnhancedForLoopToStreamAnyMatchRule_description;
 	public static String EnhancedForLoopToStreamAnyMatchRule_name;
@@ -300,6 +306,8 @@ public class Messages extends NLS {
 	public static String SelectRulesWizard_end_refactoring;
 	public static String SelectRulesWizard_rules_with_changes;
 	public static String SelectRulesWizard_start_refactoring;
+
+	public static String SelectRulesWizard_Summary;
 	public static String SelectRulesWizard_title;
 	public static String SelectRulesWizard_warning_no_refactorings;
 	public static String SerialVersionUidRule_description;
@@ -372,6 +380,13 @@ public class Messages extends NLS {
 	public static String StringLiteralEqualityCheckRule_name;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
+	public static String SummaryWizardPage_Files;
+	public static String SummaryWizardPage_Rule;
+	public static String SummaryWizardPage_Rules;
+	public static String SummaryWizardPage_RunSummary;
+	public static String SummaryWizardPage_TimesApplied;
+	public static String SummaryWizardPage_TimeSaved;
+	public static String SummaryWizardPageModel_IssuesFixed;
 	public static String TryWithResourceRule_description;
 	public static String TryWithResourceRule_name;
 	public static String UseIsEmptyOnCollectionsRule_description;
