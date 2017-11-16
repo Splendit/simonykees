@@ -42,7 +42,8 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 	}
 
 	public void setIssuesFixed(int issuesFixed) {
-		firePropertyChange("issuesFixed", this.issuesFixed, this.issuesFixed = issuesFixed); //$NON-NLS-1$
+		firePropertyChange("issuesFixed", this.issuesFixed, issuesFixed); //$NON-NLS-1$
+		this.issuesFixed = issuesFixed;
 	}
 
 	public Duration getTimeSaved() {
@@ -50,7 +51,8 @@ public class RefactoringPreviewWizardPageModel extends BaseModel {
 	}
 
 	public void setTimeSaved(Duration timeSaved) {
-		firePropertyChange("timeSaved", this.timeSaved, this.timeSaved = timeSaved); //$NON-NLS-1$
+		firePropertyChange("timeSaved", this.timeSaved, timeSaved); //$NON-NLS-1$
+		this.timeSaved = timeSaved;
 	}
 
 }
