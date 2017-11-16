@@ -23,19 +23,30 @@ public class DurationFormatUtil {
 	public static String formatTimeSaved(Duration duration) {
 		String dateFormat = String.format("dd '%s' HH '%s' mm '%s'", DAYS, HOURS, MINUTES); //$NON-NLS-1$
 		String formatted = DurationFormatUtils.formatDuration(duration.toMillis(), dateFormat, false);
-		formatted = formatted.replaceAll("(^0 "+DAYS+"\\s)", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		formatted = formatted.replaceAll("(^0 "+HOURS+"\\s)", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		formatted = formatted.replaceAll("(^0 "+MINUTES+"\\s)", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		formatted = removeZeroValueTimeUnit(DAYS, formatted);
+		formatted = removeZeroValueTimeUnit(HOURS, formatted);
+		formatted = removeZeroValueTimeUnit(MINUTES, formatted);
 		return formatted;
 	}
 
 	public static String formatRunDuration(long milliseconds) {
 		String dateFormat = String.format("HH '%s' mm '%s' ss '%s'", HOURS, MINUTES, SECONDS); //$NON-NLS-1$
 		String formatted = DurationFormatUtils.formatDuration(milliseconds, dateFormat, false);
-		formatted = formatted.replaceAll("(^0 "+HOURS+"\\s)", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		formatted = formatted.replaceAll("(^0 "+MINUTES+"\\s)", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		formatted = formatted.replaceAll("(^0 "+SECONDS+"\\s)", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		formatted = removeZeroValueTimeUnit(HOURS, formatted);
+		formatted = removeZeroValueTimeUnit(MINUTES, formatted);
+		formatted = removeZeroValueTimeUnit(SECONDS, formatted);
 		return String.format(Messages.DurationFormatUtil_RunDuration, formatted);
 	}
 
+	/**
+	 * Removes a leading time unit, if its value is zero
+	 * @param timeUnit written time unit
+	 * @param input formated time String
+	 * @return formated time unit where useless timeUnit was removed
+	 */
+	private static String removeZeroValueTimeUnit(String timeUnit, String input) {
+		String result = input.replaceAll("(^0 "+timeUnit+"\\s)", "");; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		
+		return result;
+	}
 }
