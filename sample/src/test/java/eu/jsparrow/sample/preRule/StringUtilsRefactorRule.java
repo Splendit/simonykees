@@ -155,9 +155,9 @@ public class StringUtilsRefactorRule {
 
 	// Reproduces SIM-319
 	public String testNestedApplication(String testString) {
-		String url = "";
+		String url = "testString/generate-skus";
 		url = url.substring(0, url.indexOf("/generate-skus"));
-		return "";
+		return testString;
 	}
 
 }
