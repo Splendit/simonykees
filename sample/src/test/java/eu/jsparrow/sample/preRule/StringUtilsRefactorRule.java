@@ -77,15 +77,15 @@ public class StringUtilsRefactorRule {
 
 		return testString;
 	}
-	
+
 	public String testSplitCornerCaseLimit(String testString) {
 		int limit = 3;
-		
+
 		testString = complexSplit(testString, "?", limit);
 		testString = complexSplit(testString, "|", limit);
 		testString = complexSplit(testString, ",", limit);
 		testString = complexSplit(testString, "a", limit);
-		
+
 		return testString;
 	}
 
@@ -116,7 +116,7 @@ public class StringUtilsRefactorRule {
 		CharSequence c1 = new StringBuilder("a");
 		CharSequence c2 = new StringBuilder("b");
 
-		// FIXME see SIM-85 
+		// FIXME see SIM-85
 		return testString.replace(String.valueOf(c1), String.valueOf(c2));
 	}
 
@@ -140,17 +140,24 @@ public class StringUtilsRefactorRule {
 
 		return testString.startsWith(prefix, toffset);
 	}
-	
+
 	public String testUpperCaseCornerCase(String testString) {
 		Locale l = Locale.GERMAN;
-		
+
 		return testString.toUpperCase(l);
 	}
-	
+
 	public String testLowerCaseCornerCase(String testString) {
 		Locale l = Locale.GERMAN;
-		
+
 		return testString.toLowerCase(l);
+	}
+
+	// Reproduces SIM-319
+	public String testNestedApplication(String testString) {
+		String url = "";
+		url = url.substring(0, url.indexOf("/generate-skus"));
+		return "";
 	}
 
 }
