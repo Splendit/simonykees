@@ -286,6 +286,7 @@ public class Messages extends NLS {
 	public static String SelectRulesWizardHandler_allready_running;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
 	public static String SelectRulesWizardHandler_noFileWithoutError;
+	public static String SelectRulesWizardHandler_selectionNotPossible_ubuntuBug;
 	public static String SelectRulesWizardPage_addAllButtonLabel;
 	public static String SelectRulesWizardPage_addButtonLabel;
 	public static String SelectRulesWizardPage_CustomProfileLabel;

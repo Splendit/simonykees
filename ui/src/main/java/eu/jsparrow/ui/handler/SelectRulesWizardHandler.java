@@ -138,6 +138,10 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 
 					return true;
 				}
+			} else {
+				// SIM-656 
+				logger.error(Messages.SelectRulesWizardHandler_selectionNotPossible_ubuntuBug);
+				Activator.setRunning(false);
 			}
 
 		}
