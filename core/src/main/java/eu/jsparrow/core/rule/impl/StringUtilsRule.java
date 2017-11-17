@@ -47,9 +47,8 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 		this.visitorClass = StringUtilsASTVisitor.class;
 		this.supportedVersion.add(version31);
 		this.id = "StringUtils"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription(Messages.StringLiteralEqualityCheckRule_name,
-				Messages.StringLiteralEqualityCheckRule_description, Duration.ofMinutes(10),
-				TagUtil.getTagsForRule(this.getClass()));
+		this.ruleDescription = new RuleDescription(Messages.StringUtilsRule_name, Messages.StringUtilsRule_description,
+				Duration.ofMinutes(10), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -74,20 +73,15 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 					Manifest manifest = jar.getManifest();
 					Attributes attributes = manifest.getMainAttributes();
 
-					if (attributes != null) {
-						for (Object attribute : attributes.keySet()) {
+					return attributes != null && attributes.keySet()
+						.stream()
+						.anyMatch(attribute -> {
 							Name key = (Name) attribute;
 							String keyword = key.toString();
-							if ("Implementation-Version".equals(keyword)) { //$NON-NLS-1$
-								if (supportedVersion.stream()
-									.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s))) {
-									return true;
-								} else {
-									return false;
-								}
-							}
-						}
-					}
+							return "Implementation-Version".equals(keyword) && supportedVersion.stream() //$NON-NLS-1$
+								.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s));
+						});
+
 				} catch (IOException e) {
 					logger.debug("Jar Manifest load error in:", e); //$NON-NLS-1$
 					// Resolving version failed, rule cant be executed
