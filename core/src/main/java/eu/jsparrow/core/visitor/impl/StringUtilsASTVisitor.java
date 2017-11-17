@@ -160,7 +160,6 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY)
 					.insertFirst((Expression) ASTNode.copySubtree(currentAST, node.getExpression()), null);
 				onRewrite();
-				return false;
 			}
 		}
 		return true;
