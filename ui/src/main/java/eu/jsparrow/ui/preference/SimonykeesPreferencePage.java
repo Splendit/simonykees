@@ -116,7 +116,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		GridData data = new GridData(GridData.FILL_BOTH);
 		viewerComposite.setLayoutData(data);
 
-		profilesTable = new Table(viewerComposite, SWT.BORDER | SWT.MULTI);
+		profilesTable = new Table(viewerComposite, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		data = new GridData(GridData.FILL_BOTH);
 		profilesTable.setLayoutData(data);
 		profilesTable.setFont(font);
