@@ -513,7 +513,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 						String newProfileName = addSuffixToProfileName(profile.getName());
 						profile.setName(newProfileName);
 					}
-					List<String> nonExistentRules = YAMLConfigUtil.getNonExistentRules(profile.getRules());
+					List<String> nonExistentRules = YAMLConfigUtil.getNonExistentRules(profile.getRules(), false);
 					if (!nonExistentRules.isEmpty()) {
 						String nonExistentRulesMessage = NLS.bind(Messages.SimonykeesPreferencePage_profileAndName,
 								profile.getName()) + "\n" //$NON-NLS-1$

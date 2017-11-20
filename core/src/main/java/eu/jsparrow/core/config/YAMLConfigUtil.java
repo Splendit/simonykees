@@ -215,8 +215,8 @@ public class YAMLConfigUtil {
 		return configSelectedRules;
 	}
 
-	private static boolean isRuleExistent(String ruleId) {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules(true);
+	private static boolean isRuleExistent(String ruleId, boolean isStandalone) {
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = RulesContainer.getAllRules(isStandalone);
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : rules) {
 			if (rule.getId()
 				.equals(ruleId)) {
@@ -233,9 +233,9 @@ public class YAMLConfigUtil {
 	 * @param ruleIds
 	 * @return
 	 */
-	public static List<String> getNonExistentRules(List<String> ruleIds) {
+	public static List<String> getNonExistentRules(List<String> ruleIds, boolean isStandalone) {
 		return ruleIds.stream()
-			.filter(ruleId -> !isRuleExistent(ruleId))
+			.filter(ruleId -> !isRuleExistent(ruleId, isStandalone))
 			.collect(Collectors.toList());
 	}
 
