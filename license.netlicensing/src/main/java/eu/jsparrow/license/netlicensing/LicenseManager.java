@@ -32,7 +32,7 @@ import oshi.hardware.HardwareAbstractionLayer;
  * result of the validation, and provides relevant information of the validation
  * results.
  * 
- * @author Ardit Ymeri, Andreja Sambolec
+ * @author Ardit Ymeri, Andreja Sambolec, Matthias Webhofer
  * @since 1.0
  *
  */
@@ -155,6 +155,7 @@ public class LicenseManager {
 		setLicensee(licensee1);
 
 		// start validate scheduler
+		ValidateExecutor.validationAttempt();
 		ValidateExecutor.startSchedule(schedulerEntity, licensee1);
 
 	}
@@ -317,6 +318,8 @@ public class LicenseManager {
 		ValidationResultCache cache = ValidationResultCache.getInstance();
 		PersistenceManager persistenceManager = PersistenceManager.getInstance();
 		LicenseChecker checker;
+
+		ValidateExecutor.validationAttempt();
 
 		// if there is a cached validation result...
 		if (!cache.isEmpty()) {
@@ -511,6 +514,10 @@ public class LicenseManager {
 		PersistenceManager persistence = PersistenceManager.getInstance();
 		persistence.setPersistenceModel(persistenceModel);
 		persistence.persist();
+	}
+
+	public static void setJSparrowRunning(boolean running) {
+		ValidateExecutor.setJSparrowRunning(running);
 	}
 
 	private class CheckerImpl implements LicenseChecker {
