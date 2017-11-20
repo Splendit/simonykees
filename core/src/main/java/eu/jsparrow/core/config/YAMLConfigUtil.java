@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
@@ -258,14 +258,17 @@ public class YAMLConfigUtil {
 		YAMLConfig config = null;
 		if (configFilePath != null && !configFilePath.isEmpty()) {
 			File configFile = new File(configFilePath);
-			String configFileExtension = FilenameUtils.getExtension(configFile.getAbsolutePath());
-			if (configFile.exists() && !configFile.isDirectory() && ("yml".equalsIgnoreCase(configFileExtension) //$NON-NLS-1$
-					|| "yaml".equalsIgnoreCase(configFileExtension))) { //$NON-NLS-1$
-				config = YAMLConfigUtil.loadConfiguration(configFile);
-				String loggerInfo = NLS.bind(Messages.Activator_standalone_ConfigFileReadSuccessfully, configFilePath);
-				logger.info(loggerInfo);
-				String debugInfo = config.toString();
-				logger.debug(debugInfo);
+			if (configFile != null && configFile.exists() && !configFile.isDirectory()) {
+				String configFileExtension = StringUtils.substringAfterLast(configFile.getAbsolutePath(), "."); //$NON-NLS-1$
+				if ("yml".equalsIgnoreCase(configFileExtension) //$NON-NLS-1$
+						|| "yaml".equalsIgnoreCase(configFileExtension)) { //$NON-NLS-1$
+					config = YAMLConfigUtil.loadConfiguration(configFile);
+					String loggerInfo = NLS.bind(Messages.Activator_standalone_ConfigFileReadSuccessfully,
+							configFilePath);
+					logger.info(loggerInfo);
+					String debugInfo = config.toString();
+					logger.debug(debugInfo);
+				}
 			}
 		}
 
