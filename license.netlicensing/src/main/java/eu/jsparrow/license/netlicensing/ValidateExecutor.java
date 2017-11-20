@@ -39,23 +39,23 @@ public class ValidateExecutor {
 
 		lock.readLock()
 			.lock();
-		boolean tempValidationAttempt = validationAttempt;
-		boolean tempJSparrowRunning = jSparrowRunning;
+		boolean tmpValidationAttempt = validationAttempt;
+		boolean tmpJSparrowRunning = jSparrowRunning;
 		lock.readLock()
 			.unlock();
 
-		if (isShutDown() && (tempValidationAttempt || tempJSparrowRunning)) {
+		if (isShutDown() && (tmpValidationAttempt || tmpJSparrowRunning)) {
 
 			scheduledExecutor.scheduleWithFixedDelay(() -> {
 
 				lock.readLock()
 					.lock();
-				boolean tempValidationAttemptThread = validationAttempt;
-				boolean tempJSparrowRunningThread = jSparrowRunning;
+				boolean tmpValidationAttemptThread = validationAttempt;
+				boolean tmpJSparrowRunningThread = jSparrowRunning;
 				lock.readLock()
 					.unlock();
 
-				if (schedulingInfo.getDoValidate() && (tempValidationAttemptThread || tempJSparrowRunningThread)) {
+				if (schedulingInfo.getDoValidate() && (tmpValidationAttemptThread || tmpJSparrowRunningThread)) {
 
 					lock.writeLock()
 						.lock();
