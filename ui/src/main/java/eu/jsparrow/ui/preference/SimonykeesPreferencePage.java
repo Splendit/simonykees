@@ -90,7 +90,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.ENABLE_INTRO,
 				Messages.SimonykeesPreferencePage_enableIntroText, generalGroup));
 		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY,
-				Messages.SimonykeesPreferencePage_resolvePackagesRecursivelyLabel, composite));
+				Messages.SimonykeesPreferencePage_resolvePackagesRecursivelyLabel, generalGroup));
 
 		createProfilesTableView(composite);
 
