@@ -63,13 +63,14 @@ public class ValidateExecutor {
 					lock.writeLock()
 						.unlock();
 
-					logger.info(Messages.ValidateExecutor_validation_scheduler_started);
 					LicenseValidator.doValidate(licensee);
 				} else {
 					logger.info(Messages.ValidateExecutor_shutting_down_validation_scheduler);
 					scheduledExecutor.shutdown();
 				}
 			}, schedulingInfo.getInitialDelay(), schedulingInfo.getValidateInterval(), TimeUnit.SECONDS);
+
+			logger.info(Messages.ValidateExecutor_validation_scheduler_started);
 
 			lock.writeLock()
 				.lock();
