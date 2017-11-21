@@ -1,9 +1,8 @@
 package eu.jsparrow.license.netlicensing;
 
 import static org.junit.Assert.assertEquals;
-import org.junit.Test;
 
-import eu.jsparrow.license.netlicensing.LicenseProperties;
+import org.junit.Test;
 
 /**
  * This test class only ensures that the test environment is being used, because

@@ -57,7 +57,7 @@ public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor
 	protected boolean isStreamForEachInvocation(MethodInvocation methodInvocation) {
 		return isForEachInvocationOf(methodInvocation, JAVA_UTIL_STREAM_STREAM);
 	}
-	
+
 	/**
 	 * Checks whether a {@link MethodInvocation} node, is an invocation of
 	 * {@link Collection#forEach(Consumer)} method.
@@ -71,7 +71,7 @@ public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor
 	protected boolean isCollectionForEachInvocation(MethodInvocation methodInvocation) {
 		return isForEachInvocationOf(methodInvocation, JAVA_UTIL_COLLECTION);
 	}
-	
+
 	/**
 	 * Checks if the expression of the given method invocation is a (sub)type of
 	 * the given qualified name.
@@ -86,8 +86,8 @@ public class AbstractLambdaForEachASTVisitor extends AbstractAddImportASTVisitor
 	private boolean isForEachInvocationOf(MethodInvocation methodInvocation, String qualifiedName) {
 		SimpleName methodName = methodInvocation.getName();
 
-		if (FOR_EACH.equals(methodName.getIdentifier())
-				&& ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent().getNodeType()) {
+		if (FOR_EACH.equals(methodName.getIdentifier()) && ASTNode.EXPRESSION_STATEMENT == methodInvocation.getParent()
+			.getNodeType()) {
 			Expression expression = methodInvocation.getExpression();
 			if (expression == null) {
 				return false;

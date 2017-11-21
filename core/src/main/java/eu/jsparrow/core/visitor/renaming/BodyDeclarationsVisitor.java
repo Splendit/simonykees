@@ -18,8 +18,8 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 
 /**
- * A visitor for finding the references of a given field in the members
- * of a class. Collects all references of each member.
+ * A visitor for finding the references of a given field in the members of a
+ * class. Collects all references of each member.
  * 
  * @author Ardit Ymeri
  * @since 1.2
@@ -69,6 +69,7 @@ class BodyDeclarationsVisitor extends ASTVisitor {
 		return nestedTypeDeclarationLevel == 1;
 	}
 
+	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
 		nestedTypeDeclarationLevel--;
 	}
@@ -97,8 +98,9 @@ class BodyDeclarationsVisitor extends ASTVisitor {
 		VariableDeclarationsVisitor declarationsVisitor = new VariableDeclarationsVisitor();
 		bodyDeclaration.accept(declarationsVisitor);
 		List<SimpleName> localDeclarations = declarationsVisitor.getVariableDeclarationNames();
-		List<String> localDeclarationNames = localDeclarations.stream().map(SimpleName::getIdentifier)
-				.collect(Collectors.toList());
+		List<String> localDeclarationNames = localDeclarations.stream()
+			.map(SimpleName::getIdentifier)
+			.collect(Collectors.toList());
 		FieldReferencesVisitor visitor = new FieldReferencesVisitor(fieldName, parentTypeBinding, fieldTypeBinding,
 				localDeclarationNames);
 		bodyDeclaration.accept(visitor);

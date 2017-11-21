@@ -65,7 +65,7 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 			} else {
 				indexInitializer.put(LOOP_INITIALIZER_INCORRECT_EXPRESSION, initializer);
 			}
-		} else if (initializers.size() > 0) {
+		} else if (!initializers.isEmpty()) {
 			multipleLoopInits = true;
 		}
 
@@ -118,7 +118,9 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 					VariableDeclarationFragment.class);
 			if (fragments.size() == 1) {
 				VariableDeclarationFragment fragment = fragments.get(0);
-				if (fragment.getName().getIdentifier().equals(name.getIdentifier())) {
+				if (fragment.getName()
+					.getIdentifier()
+					.equals(name.getIdentifier())) {
 					isSingleVarDecl = true;
 				}
 			}
@@ -172,8 +174,8 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 		boolean doVisit = false;
 		if (!indexDeclaredInInitializer || isInsideLoop()) {
 			IBinding resolvedBinding = simpleName.resolveBinding();
-			if (resolvedBinding != null && IBinding.VARIABLE == resolvedBinding.getKind()
-					&& simpleName.getIdentifier().equals(iteratingIndexName.getIdentifier())) {
+			if (resolvedBinding != null && IBinding.VARIABLE == resolvedBinding.getKind() && simpleName.getIdentifier()
+				.equals(iteratingIndexName.getIdentifier())) {
 
 				doVisit = true;
 			}
@@ -256,7 +258,8 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 		ASTNode ggParent = grandParent.getParent();
 
 		/*
-		 * check if it is a direct increment (i++;++i;i+=1) or left hand side of the expression
+		 * check if it is a direct increment (i++;++i;i+=1) or left hand side of
+		 * the expression
 		 */
 		if (((parent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY
 				|| parent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY
@@ -264,13 +267,13 @@ abstract class ForLoopIteratingIndexASTVisitor extends LoopIteratingIndexASTVisi
 				|| grandParent == getIndexUpdater(INTERNAL_INDEX_UPDATER)) {
 			return true;
 		}
-		
+
 		/*
 		 * check if it is a increment with another layer (i=i+1)
 		 */
-		if ( ((grandParent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY
+		if (((grandParent.getLocationInParent() == ForStatement.UPDATERS_PROPERTY
 				|| grandParent.getLocationInParent() == ForStatement.INITIALIZERS_PROPERTY) && ggParent == forStatement)
-				|| ggParent == getIndexUpdater(INTERNAL_INDEX_UPDATER)){
+				|| ggParent == getIndexUpdater(INTERNAL_INDEX_UPDATER)) {
 			return true;
 		}
 

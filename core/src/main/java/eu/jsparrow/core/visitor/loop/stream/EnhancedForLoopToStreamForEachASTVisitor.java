@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor.loop.stream;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -18,6 +19,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -84,13 +86,19 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				 * of the enhanced for loop will be used for the corresponding
 				 * parts of the lambda expression.
 				 */
-				SimpleName parameterCopy = (SimpleName) astRewrite.createCopyTarget(parameterName);
+				SimpleName parameterNameCopy = (SimpleName) astRewrite.createCopyTarget(parameterName);
+				VariableDeclarationFragment lambdaParameter = astRewrite.getAST()
+					.newVariableDeclarationFragment();
+				lambdaParameter.setName(parameterNameCopy);
+
 				ASTNode statementCopy = astRewrite.createCopyTarget(approvedStatement);
 
-				LambdaExpression lambdaExpression = astRewrite.getAST().newLambdaExpression();
+				LambdaExpression lambdaExpression = astRewrite.getAST()
+					.newLambdaExpression();
+				lambdaExpression.setParentheses(false);
 				ListRewrite lambdaExpressionParameterListRewrite = astRewrite.getListRewrite(lambdaExpression,
 						LambdaExpression.PARAMETERS_PROPERTY);
-				lambdaExpressionParameterListRewrite.insertFirst(parameterCopy, null);
+				lambdaExpressionParameterListRewrite.insertFirst(lambdaParameter, null);
 				lambdaExpression.setBody(statementCopy);
 
 				/*
@@ -98,13 +106,15 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				 * the previously created stream method invocation with a single
 				 * lambda expression as parameter
 				 */
-				SimpleName forEachMethodName = astRewrite.getAST().newSimpleName("forEach"); //$NON-NLS-1$
+				SimpleName forEachMethodName = astRewrite.getAST()
+					.newSimpleName("forEach"); //$NON-NLS-1$
 
-				MethodInvocation forEachMethodInvocation = astRewrite.getAST().newMethodInvocation();
+				MethodInvocation forEachMethodInvocation = astRewrite.getAST()
+					.newMethodInvocation();
 				forEachMethodInvocation.setExpression(expressionCopy);
 				forEachMethodInvocation.setName(forEachMethodName);
 				ListRewrite forEachMethodInvocationArgumentsListRewrite = astRewrite
-						.getListRewrite(forEachMethodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
+					.getListRewrite(forEachMethodInvocation, MethodInvocation.ARGUMENTS_PROPERTY);
 				forEachMethodInvocationArgumentsListRewrite.insertFirst(lambdaExpression, null);
 
 				/*
@@ -112,8 +122,9 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				 * call, wrapped in an expression statement
 				 */
 				ExpressionStatement expressionStatement = astRewrite.getAST()
-						.newExpressionStatement(forEachMethodInvocation);
+					.newExpressionStatement(forEachMethodInvocation);
 				astRewrite.replace(enhancedForStatementNode, expressionStatement, null);
+				onRewrite();
 			}
 		}
 	}
@@ -134,10 +145,8 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 			if (isStatementValid(statement, parameter)) {
 				return statement;
 			}
-		} else if (ASTNode.EXPRESSION_STATEMENT == statement.getNodeType()) {
-			if (isStatementValid(statement, parameter)) {
-				return ((ExpressionStatement) statement).getExpression();
-			}
+		} else if (ASTNode.EXPRESSION_STATEMENT == statement.getNodeType() && isStatementValid(statement, parameter)) {
+			return ((ExpressionStatement) statement).getExpression();
 		}
 
 		return null;
@@ -173,10 +182,10 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 			return null;
 		}
 
-		String methodName = ""; //$NON-NLS-1$
+		String methodName;
 		String primitiveName = binding.getName();
 		String expMethRefName = VALUE_OF;
-		Class<? extends Number> boxedClass = null;
+		Class<? extends Number> boxedClass;
 
 		switch (primitiveName) {
 		case "int": //$NON-NLS-1$
@@ -191,15 +200,19 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 			methodName = MAP_TO_DOUBLE;
 			boxedClass = Double.class;
 			break;
+		default:
+			methodName = ""; //$NON-NLS-1$
+			boxedClass = null;
 		}
 
-		if (methodName.isEmpty() || boxedClass == null) {
+		if (StringUtils.isEmpty(methodName) || boxedClass == null) {
 			return null;
 		}
 
 		AST ast = astRewrite.getAST();
 
-		MethodInvocation streamMethodInvocation = astRewrite.getAST().newMethodInvocation();
+		MethodInvocation streamMethodInvocation = astRewrite.getAST()
+			.newMethodInvocation();
 		streamMethodInvocation.setName(ast.newSimpleName(STREAM));
 		streamMethodInvocation.setExpression(expression);
 

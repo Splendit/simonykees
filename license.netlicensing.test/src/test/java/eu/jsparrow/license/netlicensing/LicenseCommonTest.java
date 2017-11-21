@@ -13,9 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.ExceptionMessages;
-import eu.jsparrow.license.netlicensing.LicenseManager;
-import eu.jsparrow.license.netlicensing.LicenseType;
-import eu.jsparrow.license.netlicensing.PersistenceManager;
 import eu.jsparrow.license.netlicensing.model.PersistenceModel;
 
 /**
@@ -54,7 +51,8 @@ public abstract class LicenseCommonTest {
 	// other constants for testing purposes
 	protected static final long WAIT_FOR_VALIDATION_RESPONSE_TIME = 1000; // in
 																			// milliseconds
-	protected static final ZonedDateTime NOW_IN_ONE_YEAR = ZonedDateTime.now().plusDays(365);
+	protected static final ZonedDateTime NOW_IN_ONE_YEAR = ZonedDateTime.now()
+		.plusDays(365);
 
 	/**
 	 * Stores/overwrites a licensee with a valid floating license.
@@ -62,9 +60,15 @@ public abstract class LicenseCommonTest {
 	protected static void persistFloatingLicensee() {
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		PersistenceModel persistenceModel = new PersistenceModel(FLOATING_LICENSEE_NUMBER, FLOATING_LICENSEE_NAME, true,
-				LicenseType.FLOATING, Instant.now(), ZonedDateTime.now().plusDays(1), ZonedDateTime.now().plusHours(1),
-				ZonedDateTime.now().plusYears(1), true, Instant.now().minusSeconds(1), LicenseType.FLOATING,
-				LicenseManager.VERSION);
+				LicenseType.FLOATING, Instant.now(), ZonedDateTime.now()
+					.plusDays(1),
+				ZonedDateTime.now()
+					.plusHours(1),
+				ZonedDateTime.now()
+					.plusYears(1),
+				true, Instant.now()
+					.minusSeconds(1),
+				LicenseType.FLOATING, LicenseManager.VERSION);
 		persistenceMng.setPersistenceModel(persistenceModel);
 		persistenceMng.persist();
 	}
@@ -75,8 +79,14 @@ public abstract class LicenseCommonTest {
 	protected static void persistNodeLockedLicensee() {
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		PersistenceModel persistenceModel = new PersistenceModel(NODE_LOCKED_LICENSEE_NUMBER, NODE_LOCKED_LICENSEE_NAME,
-				true, LicenseType.NODE_LOCKED, Instant.now(), ZonedDateTime.now().plusDays(1),
-				ZonedDateTime.now().plusHours(1), ZonedDateTime.now().plusYears(1), true, Instant.now().minusSeconds(1),
+				true, LicenseType.NODE_LOCKED, Instant.now(), ZonedDateTime.now()
+					.plusDays(1),
+				ZonedDateTime.now()
+					.plusHours(1),
+				ZonedDateTime.now()
+					.plusYears(1),
+				true, Instant.now()
+					.minusSeconds(1),
 				LicenseType.NODE_LOCKED, LicenseManager.VERSION);
 		persistenceMng.setPersistenceModel(persistenceModel);
 		persistenceMng.persist();
@@ -88,8 +98,10 @@ public abstract class LicenseCommonTest {
 	protected static void persistExpiredDemoLicensee() {
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		PersistenceModel persistenceModel = new PersistenceModel(DEMO_EXPIRED_LICENSEE_NUMBER,
-				DEMO_EXPIRED_LICENSEE_NAME, false, LicenseType.TRY_AND_BUY, Instant.now(),
-				ZonedDateTime.now().minusDays(1), null, null, false, Instant.now().minusSeconds(1),
+				DEMO_EXPIRED_LICENSEE_NAME, false, LicenseType.TRY_AND_BUY, Instant.now(), ZonedDateTime.now()
+					.minusDays(1),
+				null, null, false, Instant.now()
+					.minusSeconds(1),
 				LicenseType.TRY_AND_BUY, LicenseManager.VERSION);
 		persistenceMng.setPersistenceModel(persistenceModel);
 		persistenceMng.persist();
@@ -101,7 +113,8 @@ public abstract class LicenseCommonTest {
 		try {
 			ISecurePreferences iSecurePreferences = SecurePreferencesFactory.getDefault();
 			do {
-				iSecurePreferences.node("simonykees").removeNode();
+				iSecurePreferences.node("simonykees")
+					.removeNode();
 				iSecurePreferences.flush();
 			} while (iSecurePreferences.nodeExists("simonykees"));
 		} catch (IOException exception) {

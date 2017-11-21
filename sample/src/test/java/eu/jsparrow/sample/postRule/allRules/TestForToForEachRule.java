@@ -19,7 +19,9 @@ public class TestForToForEachRule {
 
 	private List<Integer> generateHashCodeList(String input) {
 		List<String> foo = generateList(input);
-		List<Integer> fooHashCodes = foo.stream().map(String::hashCode).collect(Collectors.toList());
+		List<Integer> fooHashCodes = foo.stream()
+			.map(String::hashCode)
+			.collect(Collectors.toList());
 		return fooHashCodes;
 	}
 
@@ -112,8 +114,8 @@ public class TestForToForEachRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		foo.forEach((s) -> {
-			foo.forEach((t) -> sb.append(t + ","));
+		foo.forEach(s -> {
+			foo.forEach(t -> sb.append(t + ","));
 			sb.append(s + ";");
 		});
 
@@ -137,7 +139,7 @@ public class TestForToForEachRule {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
-		foo.forEach((aFoo) -> {
+		foo.forEach(aFoo -> {
 			String anotherString = "foo";
 			sb.append(anotherString);
 		});
@@ -149,7 +151,7 @@ public class TestForToForEachRule {
 
 		StringBuilder sb = new StringBuilder();
 
-		foo.forEach((s) -> sb.append(s.toString()));
+		foo.forEach(s -> sb.append(s.toString()));
 
 		return sb.toString();
 	}
@@ -197,7 +199,8 @@ public class TestForToForEachRule {
 
 		for (int i = 0; i < coordinates.size(); i++) {
 			final Double coordinate = coordinates.get(i);
-			if (Double.compare(coordinate, point.getCoordinates().get(i)) != 0) {
+			if (Double.compare(coordinate, point.getCoordinates()
+				.get(i)) != 0) {
 				return false;
 			}
 		}

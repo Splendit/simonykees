@@ -38,21 +38,21 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 
 	@Override
 	public boolean visit(WhileStatement node) {
-		if(isSingleStatementBodyOfOuterLoop(node)) {
+		if (isSingleStatementBodyOfOuterLoop(node)) {
 			return true;
 		}
-		
+
 		// skip loops with empty condition
 		Expression loopCondition = node.getExpression();
-		if(loopCondition == null) {
+		if (loopCondition == null) {
 			return true;
 		}
-		
+
 		SimpleName iteratorName = ASTNodeUtil.replaceableIteratorCondition(loopCondition);
 
 		if (iteratorName != null) {
 			if (ClassRelationUtil.isContentOfTypes(iteratorName.resolveTypeBinding(),
-					generateFullyQuallifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
+					generateFullyQualifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
 				Block parentNode = ASTNodeUtil.getSpecificAncestor(node, Block.class);
 				if (parentNode == null) {
 					/*
@@ -64,14 +64,14 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 				}
 				LoopOptimizationASTVisior iteratorDefinitionAstVisior = new LoopOptimizationASTVisior(
 						(SimpleName) iteratorName, node);
-				iteratorDefinitionAstVisior.setAstRewrite(this.astRewrite);
+				iteratorDefinitionAstVisior.setASTRewrite(this.astRewrite);
 				parentNode.accept(iteratorDefinitionAstVisior);
 
 				if (iteratorDefinitionAstVisior.allParametersFound()) {
 					replaceInformationASTVisitorList.put(node, iteratorDefinitionAstVisior);
 				}
 			}
-		} else if (loopCondition != null && ASTNode.INFIX_EXPRESSION == loopCondition.getNodeType()) {
+		} else if (ASTNode.INFIX_EXPRESSION == loopCondition.getNodeType()) {
 			// if the condition of the for loop is an infix expression....
 			InfixExpression infixExpression = (InfixExpression) loopCondition;
 			Expression rhs = infixExpression.getRightOperand();
@@ -96,7 +96,7 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 				}
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -105,8 +105,11 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 		// Do the replacement
 		if (replaceInformationASTVisitorList.containsKey(node)) {
 			LoopOptimizationASTVisior iteratorDefinitionAstVisior = replaceInformationASTVisitorList.remove(node);
-			Map<String, Boolean> newNameMap = generateNewIteratorName(null, node, iteratorDefinitionAstVisior.getListName());
-			String newName = newNameMap.keySet().iterator().next();
+			Map<String, Boolean> newNameMap = generateNewIteratorName(null, node,
+					iteratorDefinitionAstVisior.getListName());
+			String newName = newNameMap.keySet()
+				.iterator()
+				.next();
 			iteratorDefinitionAstVisior.replaceLoop(node, node.getBody(), multipleIteratorUse, newName);
 
 			// clear the variableIterator if no other loop is present
@@ -114,7 +117,7 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 				multipleIteratorUse.clear();
 			}
 		}
-		
+
 		clearTempItroducedNames(node);
 	}
 }

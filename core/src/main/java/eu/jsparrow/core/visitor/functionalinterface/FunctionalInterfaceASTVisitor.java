@@ -67,11 +67,13 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
-		boolean isFinal = ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), modifier -> modifier.isFinal());
+		boolean isFinal = ASTNodeUtil.hasModifier(fieldDeclaration.modifiers(), Modifier::isFinal);
 		safeToUseFields
-				.addAll(ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class)
-						.stream().filter(fragment -> !isFinal || fragment.getInitializer() != null)
-						.map(VariableDeclarationFragment::getName).collect(Collectors.toList()));
+			.addAll(ASTNodeUtil.convertToTypedList(fieldDeclaration.fragments(), VariableDeclarationFragment.class)
+				.stream()
+				.filter(fragment -> !isFinal || fragment.getInitializer() != null)
+				.map(VariableDeclarationFragment::getName)
+				.collect(Collectors.toList()));
 		return true;
 	}
 
@@ -86,7 +88,8 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(AnonymousClassDeclaration node) {
-		if (ASTNode.CLASS_INSTANCE_CREATION == node.getParent().getNodeType()) {
+		if (ASTNode.CLASS_INSTANCE_CREATION == node.getParent()
+			.getNodeType()) {
 			ClassInstanceCreation parentNode = (ClassInstanceCreation) node.getParent();
 			Type classType = parentNode.getType();
 
@@ -112,10 +115,11 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			 * same type, method parameter is the same type)
 			 */
 			boolean allowedType = ClassRelationUtil
-					.compareITypeBinding(ASTNodeUtil.getTypeBindingOfNodeUsage(parentNode), classType.resolveBinding());
+				.compareITypeBinding(ASTNodeUtil.getTypeBindingOfNodeUsage(parentNode), classType.resolveBinding());
 
 			if (allowedType) {
-				ITypeBinding parentNodeTypeBinding = parentNode.getType().resolveBinding();
+				ITypeBinding parentNodeTypeBinding = parentNode.getType()
+					.resolveBinding();
 				if (parentNodeTypeBinding != null) {
 					/*
 					 * check that only one Method is implemented, which is the
@@ -132,11 +136,16 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 						return true;
 					}
 
-					LambdaExpression newInitializer = node.getAST().newLambdaExpression();
+					LambdaExpression newInitializer = node.getAST()
+						.newLambdaExpression();
 					MethodBlockASTVisitor methodBlockASTVisitor = new MethodBlockASTVisitor();
-					methodBlockASTVisitor.setAstRewrite(astRewrite);
+					methodBlockASTVisitor.setASTRewrite(astRewrite);
 					node.accept(methodBlockASTVisitor);
 					Block moveBlock = methodBlockASTVisitor.getMethodBlock();
+					
+					if (moveBlock == null || ASTNodeUtil.containsWildCards(moveBlock)) {
+						return true;
+					}
 
 					if (moveBlock != null && isCommentFree(node, moveBlock)) {
 
@@ -164,7 +173,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 							modifiers = ((MethodDeclaration) scope).modifiers();
 						}
 
-						if (modifiers != null && ASTNodeUtil.hasModifier(modifiers, modifier -> modifier.isStatic())) {
+						if (modifiers != null && ASTNodeUtil.hasModifier(modifiers, Modifier::isStatic)) {
 							CheckNativeMethodInvocationASTVisitor visitor = new CheckNativeMethodInvocationASTVisitor();
 							node.accept(visitor);
 							if (visitor.objectMethodDeclarationInvocated()) {
@@ -177,14 +186,14 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 							 * the anonymous class is occurring as an
 							 * initializer of a field
 							 */
-							
+
 							PublicVarialbeReferencesASTVisitor fieldReferencesVisitor = new PublicVarialbeReferencesASTVisitor();
 							node.accept(fieldReferencesVisitor);
 							List<SimpleName> unAssignedReferences = fieldReferencesVisitor
-									.getUnassignedVariableReferences();
+								.getUnassignedVariableReferences();
 
 							boolean isNotSafeReference = unAssignedReferences.stream()
-									.anyMatch(fieldReference -> !isSafeFieldReference(fieldReference));
+								.anyMatch(fieldReference -> !isSafeFieldReference(fieldReference));
 							if (isNotSafeReference) {
 								return true;
 							}
@@ -210,14 +219,16 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 								 * assigned.
 								 */
 								List<SimpleName> unnassignedReferences = fieldReferencesVisitor
-										.getUnassignedVariableReferences();
+									.getUnassignedVariableReferences();
 								/*
 								 * not safe if any of the unassigned references
 								 * doesn't match
 								 */
-								boolean unsafe = unnassignedReferences.stream().map(SimpleName::getIdentifier)
-										.anyMatch(name -> !assignedVariables.stream().map(SimpleName::getIdentifier)
-												.anyMatch(name::equals));
+								boolean unsafe = unnassignedReferences.stream()
+									.map(SimpleName::getIdentifier)
+									.anyMatch(name -> !assignedVariables.stream()
+										.map(SimpleName::getIdentifier)
+										.anyMatch(name::equals));
 								if (unsafe) {
 									return true;
 								}
@@ -251,13 +262,13 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 								}
 							}
 
-							for (SingleVariableDeclaration s : parameteres) {
-								newInitializer.parameters().add(astRewrite.createMoveTarget(s));
-							}
+							parameteres.forEach(s -> newInitializer.parameters()
+								.add(astRewrite.createMoveTarget(s)));
 						}
 
 						newInitializer.setBody(astRewrite.createMoveTarget(moveBlock));
-						getAstRewrite().replace(parentNode, newInitializer, null);
+						getASTRewrite().replace(parentNode, newInitializer, null);
+						onRewrite();
 					}
 				}
 			}
@@ -299,21 +310,27 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 		List<SimpleName> initializedFields = new ArrayList<>();
 
-		for (FieldDeclaration field : fields) {
-			boolean isFinal = ASTNodeUtil.hasModifier(field.modifiers(), modifier -> modifier.isFinal());
+		fields.forEach(field -> {
+			boolean isFinal = ASTNodeUtil.hasModifier(field.modifiers(), Modifier::isFinal);
 			initializedFields
-					.addAll(ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
-							.stream().filter(fragment -> !isFinal || fragment.getInitializer() != null)
-							.map(VariableDeclarationFragment::getName).collect(Collectors.toList()));
-		}
+				.addAll(ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
+					.stream()
+					.filter(fragment -> !isFinal || fragment.getInitializer() != null)
+					.map(VariableDeclarationFragment::getName)
+					.collect(Collectors.toList()));
+		});
 
 		initializedFields
-				.addAll(ASTNodeUtil.convertToTypedList(methodDeclaration.parameters(), SingleVariableDeclaration.class)
-						.stream().map(SingleVariableDeclaration::getName).collect(Collectors.toList()));
+			.addAll(ASTNodeUtil.convertToTypedList(methodDeclaration.parameters(), SingleVariableDeclaration.class)
+				.stream()
+				.map(SingleVariableDeclaration::getName)
+				.collect(Collectors.toList()));
 
-		List<Statement> statements = ASTNodeUtil.convertToTypedList(relevantBlocks, Block.class).stream()
-				.flatMap(block -> ASTNodeUtil.convertToTypedList(block.statements(), Statement.class).stream())
-				.collect(Collectors.toList());
+		List<Statement> statements = ASTNodeUtil.convertToTypedList(relevantBlocks, Block.class)
+			.stream()
+			.flatMap(block -> ASTNodeUtil.convertToTypedList(block.statements(), Statement.class)
+				.stream())
+			.collect(Collectors.toList());
 		for (Statement statement : statements) {
 			AnonymousClassNodeWrapperVisitor visitor = new AnonymousClassNodeWrapperVisitor(node);
 			statement.accept(visitor);
@@ -325,16 +342,19 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 				ExpressionStatement expressionStatement = (ExpressionStatement) statement;
 				Expression expression = expressionStatement.getExpression();
 				if (ASTNode.ASSIGNMENT == expression.getNodeType()
-						&& ASTNode.SIMPLE_NAME == ((Assignment) expression).getLeftHandSide().getNodeType()) {
+						&& ASTNode.SIMPLE_NAME == ((Assignment) expression).getLeftHandSide()
+							.getNodeType()) {
 					SimpleName simpleName = (SimpleName) ((Assignment) expression).getLeftHandSide();
 					initializedFields.add(simpleName);
 				}
 			} else if (ASTNode.VARIABLE_DECLARATION_STATEMENT == statement.getNodeType()) {
 				initializedFields.addAll(ASTNodeUtil
-						.convertToTypedList(((VariableDeclarationStatement) statement).fragments(),
-								VariableDeclarationFragment.class)
-						.stream().filter(fragment -> fragment.getInitializer() != null)
-						.map(VariableDeclarationFragment::getName).collect(Collectors.toList()));
+					.convertToTypedList(((VariableDeclarationStatement) statement).fragments(),
+							VariableDeclarationFragment.class)
+					.stream()
+					.filter(fragment -> fragment.getInitializer() != null)
+					.map(VariableDeclarationFragment::getName)
+					.collect(Collectors.toList()));
 
 			}
 
@@ -344,28 +364,33 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	}
 
 	/**
-	 * Makes use of {@link #safeToUseFields} to check if reference represented 
+	 * Makes use of {@link #safeToUseFields} to check if reference represented
 	 * by the given simple name, can be used in the body of a lambda expression
-	 * which is used as an initializer in a field declaration. 
+	 * which is used as an initializer in a field declaration.
 	 * 
-	 * @param fieldReference a {@link SimpleName} representing a reference of a field.
+	 * @param fieldReference
+	 *            a {@link SimpleName} representing a reference of a field.
 	 * 
-	 * @return {@code true} if the reference can be used in the body of a lambda expression
-	 * serving as initializer in a field declaration or {@code false} otherwise.
+	 * @return {@code true} if the reference can be used in the body of a lambda
+	 *         expression serving as initializer in a field declaration or
+	 *         {@code false} otherwise.
 	 */
 	private boolean isSafeFieldReference(SimpleName fieldReference) {
 		String referenceIdentifier = fieldReference.getIdentifier();
-		return safeToUseFields.stream().map(SimpleName::getIdentifier).anyMatch(referenceIdentifier::equals);
+		return safeToUseFields.stream()
+			.map(SimpleName::getIdentifier)
+			.anyMatch(referenceIdentifier::equals);
 	}
 
 	@Override
 	public boolean visit(MethodDeclaration node) {
-		if (node.getParent() != null && ASTNode.TYPE_DECLARATION == node.getParent().getNodeType()) {
+		if (node.getParent() != null && ASTNode.TYPE_DECLARATION == node.getParent()
+			.getNodeType()) {
 			renamings.clear();
 		}
 		// FIXME SIM-335: it is better to detected the uninitialized fields that
 		// are referenced in the body.
-		// boolean isConstructor = node.isConstructor();
+		// boolean isConstructor = node.isConstructor()
 
 		return true;
 	}
@@ -373,10 +398,13 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	private List<SimpleName> checkForClashingLocalVariables(List<SimpleName> scopeNames,
 			List<SimpleName> blockLocalVarNames) {
 
-		List<String> parentScopeNames = scopeNames.stream().map(SimpleName::getIdentifier).collect(Collectors.toList());
+		List<String> parentScopeNames = scopeNames.stream()
+			.map(SimpleName::getIdentifier)
+			.collect(Collectors.toList());
 
-		return blockLocalVarNames.stream().filter(simpleName -> parentScopeNames.contains(simpleName.getIdentifier()))
-				.collect(Collectors.toList());
+		return blockLocalVarNames.stream()
+			.filter(simpleName -> parentScopeNames.contains(simpleName.getIdentifier()))
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -396,9 +424,15 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			return false;
 		}
 
-		if (node.bodyDeclarations().size() == 1 && node.bodyDeclarations().get(0) instanceof MethodDeclaration) {
-			return StringUtils.equals(parentNodeTypeBinding.getFunctionalInterfaceMethod().getName(),
-					((MethodDeclaration) node.bodyDeclarations().get(0)).getName().getIdentifier());
+		if (node.bodyDeclarations()
+			.size() == 1
+				&& node.bodyDeclarations()
+					.get(0) instanceof MethodDeclaration) {
+			return StringUtils.equals(parentNodeTypeBinding.getFunctionalInterfaceMethod()
+				.getName(),
+					((MethodDeclaration) node.bodyDeclarations()
+						.get(0)).getName()
+							.getIdentifier());
 		}
 
 		return false;
@@ -426,9 +460,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 			node.accept(visitor);
 			String newName = calcNewName(scopeNames, conflictingName);
 			List<SimpleName> usages = visitor.getUsages();
-			for (SimpleName usage : usages) {
-				astRewrite.set(usage, SimpleName.IDENTIFIER_PROPERTY, newName, null);
-			}
+			usages.forEach(usage -> astRewrite.set(usage, SimpleName.IDENTIFIER_PROPERTY, newName, null));
 		}
 	}
 
@@ -445,8 +477,9 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	 */
 	private String calcNewName(List<SimpleName> scopeVariableNames, SimpleName simpleName) {
 		int suffix = 1;
-		List<String> identifiers = scopeVariableNames.stream().map(SimpleName::getIdentifier)
-				.collect(Collectors.toList());
+		List<String> identifiers = scopeVariableNames.stream()
+			.map(SimpleName::getIdentifier)
+			.collect(Collectors.toList());
 
 		String newName;
 		String currentName = simpleName.getIdentifier();
@@ -488,7 +521,8 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 				stopCondition = scope == null
 						|| (scope.getNodeType() == ASTNode.METHOD_DECLARATION && scope.getParent() != null
-								&& ASTNode.ANONYMOUS_CLASS_DECLARATION != scope.getParent().getNodeType())
+								&& ASTNode.ANONYMOUS_CLASS_DECLARATION != scope.getParent()
+									.getNodeType())
 						|| scope.getNodeType() == ASTNode.TYPE_DECLARATION
 						|| scope.getNodeType() == ASTNode.INITIALIZER;
 			} while (!stopCondition);
@@ -503,11 +537,15 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	private List<SimpleName> findConflictingNames(List<SingleVariableDeclaration> parameters,
 			List<SimpleName> scopeVariableNames) {
 
-		List<String> varNames = scopeVariableNames.stream().map(SimpleName::getIdentifier).distinct()
-				.collect(Collectors.toList());
+		List<String> varNames = scopeVariableNames.stream()
+			.map(SimpleName::getIdentifier)
+			.distinct()
+			.collect(Collectors.toList());
 
-		return parameters.stream().map(parameter -> parameter.getName())
-				.filter(parameter -> varNames.contains(parameter.getIdentifier())).collect(Collectors.toList());
+		return parameters.stream()
+			.map(SingleVariableDeclaration::getName)
+			.filter(parameter -> varNames.contains(parameter.getIdentifier()))
+			.collect(Collectors.toList());
 	}
 
 	private boolean isCommentFree(AnonymousClassDeclaration node, Block moveBlock) {
@@ -521,12 +559,13 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 
 			List<Comment> allComments = ASTNodeUtil.returnTypedList(compilationUnit.getCommentList(), Comment.class);
 
-			boolean hasComments = allComments.stream().anyMatch(comment -> {
-				int commentStartPos = comment.getStartPosition();
-				int commentLastPOs = commentStartPos + comment.getLength();
-				return (commentStartPos > nodeStartPos && commentLastPOs < blockStartPos)
-						|| (commentStartPos > blockEndPos && commentLastPOs < nodeLastPos);
-			});
+			boolean hasComments = allComments.stream()
+				.anyMatch(comment -> {
+					int commentStartPos = comment.getStartPosition();
+					int commentLastPOs = commentStartPos + comment.getLength();
+					return (commentStartPos > nodeStartPos && commentLastPOs < blockStartPos)
+							|| (commentStartPos > blockEndPos && commentLastPOs < nodeLastPos);
+				});
 
 			commentFree = !hasComments;
 		}
@@ -536,8 +575,8 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 }
 
 /**
- * A visitor for checking whether a node is an ancestor 
- * of the anonymous class given in the construct. 
+ * A visitor for checking whether a node is an ancestor of the anonymous class
+ * given in the construct.
  * 
  * @author Ardit Ymeri
  * @since 2.0

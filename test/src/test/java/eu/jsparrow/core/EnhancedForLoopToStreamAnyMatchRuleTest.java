@@ -1,48 +1,60 @@
 package eu.jsparrow.core;
 
-import java.nio.file.Path;
-import java.util.Collection;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import org.eclipse.jdt.core.JavaCore;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
 
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamAnyMatchRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.loop.stream.EnhancedForLoopToStreamAnyMatchASTVisitor;
 
-/**
- * Testing {@link EnhancedForLoopToStreamAnyMatchRule}.
- * 
- * @author Ardit Ymeri
- * @since 2.1.1
- *
- */
 @SuppressWarnings("nls")
-@RunWith(Parameterized.class)
-public class EnhancedForLoopToStreamAnyMatchRuleTest extends AbstractRulesTest {
-	
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.enhancedForLoopToStreamAnyMatch";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/enhancedForLoopToStreamAnyMatch";
+public class EnhancedForLoopToStreamAnyMatchRuleTest extends SingleRuleTest {
 
-	private String fileName;
-	private Path preRule, postRule;
+	private static final String SAMPLE_FILE = "EnhancedForLoopToStreamAnyMatchRule.java";
+	private static final String POSTRULE_SUBDIRECTORY = "enhancedForLoopToStreamAnyMatch";
 
-	public EnhancedForLoopToStreamAnyMatchRuleTest(String fileName, Path preRule, Path postRule) {
-		this.fileName = fileName;
-		this.preRule = preRule;
-		this.postRule = postRule;
-		rulesList.add(new EnhancedForLoopToStreamAnyMatchRule(EnhancedForLoopToStreamAnyMatchASTVisitor.class));
-	}
+	private EnhancedForLoopToStreamAnyMatchRule rule;
 
-	@Parameters(name = "{index}: test file[{0}]")
-	public static Collection<Object[]> data() throws Exception {
-		return AbstractRulesTest.load(POSTRULE_DIRECTORY);
+	@Before
+	public void setUp() throws Exception {
+		rule = new EnhancedForLoopToStreamAnyMatchRule();
+		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
 	}
 
 	@Test
-	public void testTransformation() throws Exception {
-		super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
+	public void testTransformationWithDefaultFile() throws Exception {
+		Path preRule = getPreRuleFile(SAMPLE_FILE);
+		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
+
+		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
+
+		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void calculateEnabledForProjectShouldBeEnabled() {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertTrue(rule.isEnabled());
+	}
+
+	@Test
+	public void calculateEnabledforProjectShouldBeDisabled() {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
+
+		rule.calculateEnabledForProject(testProject);
+
+		assertFalse(rule.isEnabled());
 	}
 }

@@ -1,12 +1,16 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
-/** 
+/**
  * @see ArithmethicAssignmentASTVisitor
  * 
  * @author Martin Huter
@@ -15,14 +19,18 @@ import eu.jsparrow.i18n.Messages;
  */
 public class ArithmethicAssignmentRule extends RefactoringRule<ArithmethicAssignmentASTVisitor> {
 
-	public ArithmethicAssignmentRule(Class<ArithmethicAssignmentASTVisitor> visitor) {
-		super(visitor);
-		this.name = Messages.ArithmethicAssignmentRule_name;
-		this.description = Messages.ArithmethicAssignmentRule_description;
+	public ArithmethicAssignmentRule() {
+		super();
+		this.visitorClass = ArithmethicAssignmentASTVisitor.class;
+		this.id = "ArithmethicAssignment"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.ArithmethicAssignmentRule_name,
+				Messages.ArithmethicAssignmentRule_description, Duration.ofMinutes(2),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_4;
 	}
+
 }

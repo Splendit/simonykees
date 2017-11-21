@@ -1,10 +1,10 @@
 package eu.jsparrow.ui.preference;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -45,7 +45,7 @@ public class ConfigureProfileSelectRulesWizardPage extends AbstractSelectRulesWi
 
 		nameInputText = new Text(composite, SWT.NONE);
 		nameInputText.setMessage(Messages.ConfigureProfileSelectRulesWizardPage_nameInputText);
-		if (!profileId.isEmpty()) {
+		if (!StringUtils.isEmpty(profileId)) {
 			nameInputText.setText(profileId);
 		}
 		if (profileId.equals(Messages.Profile_DefaultProfile_profileName)) {
@@ -54,16 +54,12 @@ public class ConfigureProfileSelectRulesWizardPage extends AbstractSelectRulesWi
 		GridData gridData = new GridData(GridData.FILL, GridData.CENTER, false, false, 1, 1);
 		gridData.widthHint = 200;
 		nameInputText.setLayoutData(gridData);
-		nameInputText.addModifyListener(new ModifyListener() {
-
-			@Override
-			public void modifyText(ModifyEvent e) {
-				Text source = (Text) e.getSource();
-				fTypeNameStatus = ((ConfigureProfileSelectRulesWizardPageControler) controler)
-						.nameTextChanged(source.getText());
-				doStatusUpdate();
-				getContainer().updateButtons();
-			}
+		nameInputText.addModifyListener((ModifyEvent e) -> {
+			Text source = (Text) e.getSource();
+			fTypeNameStatus = ((ConfigureProfileSelectRulesWizardPageControler) controler)
+				.nameTextChanged(source.getText());
+			doStatusUpdate();
+			getContainer().updateButtons();
 		});
 	}
 
@@ -72,13 +68,13 @@ public class ConfigureProfileSelectRulesWizardPage extends AbstractSelectRulesWi
 		// if name is changed and already exists in profiles list it can not be
 		// used, name has to be unique
 		if (fTypeNameStatus.isOK()) {
-			if (((ConfigureProfileSelectRulesWIzardPageModel) model).getName().isEmpty()) {
+			if (StringUtils.isEmpty(((ConfigureProfileSelectRulesWIzardPageModel) model).getName())) {
 				((StatusInfo) fTypeNameStatus).setError(Messages.ConfigureProfileSelectRulesWizardPage_error_EmptyName);
 			} else {
 				fTypeNameStatus = new StatusInfo();
 			}
 		} else {
-			// if status already contains exception, do nothing 
+			// if status already contains exception, do nothing
 		}
 
 		super.doStatusUpdate(fTypeNameStatus);

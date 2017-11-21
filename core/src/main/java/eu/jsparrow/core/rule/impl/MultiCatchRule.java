@@ -1,11 +1,16 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.trycatch.MultiCatchASTVisitor;
 import eu.jsparrow.i18n.Messages;
-/** 
+
+/**
  * @see MultiCatchASTVisitor
  * 
  * @author Martin Huter
@@ -14,14 +19,17 @@ import eu.jsparrow.i18n.Messages;
  */
 public class MultiCatchRule extends RefactoringRule<MultiCatchASTVisitor> {
 
-	public MultiCatchRule(Class<MultiCatchASTVisitor> visitor) {
-		super(visitor);
-		this.name = Messages.MultiCatchRule_name;
-		this.description = Messages.MultiCatchRule_description;
+	public MultiCatchRule() {
+		super();
+		this.visitorClass = MultiCatchASTVisitor.class;
+		this.id = "MultiCatch"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.MultiCatchRule_name, Messages.MultiCatchRule_description,
+				Duration.ofMinutes(5), TagUtil.getTagsForRule(this.getClass()));
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_7;
 	}
+
 }

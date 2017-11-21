@@ -1,5 +1,6 @@
 package eu.jsparrow.core.rule.impl.logger;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -12,8 +13,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
+import eu.jsparrow.core.rule.RuleDescription;
 import eu.jsparrow.core.rule.SemiAutomaticRefactoringRule;
-import eu.jsparrow.core.visitor.semiautomatic.StandardLoggerASTVisitor;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
+import eu.jsparrow.core.util.TagUtil;
+import eu.jsparrow.core.visitor.logger.StandardLoggerASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -45,19 +49,37 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	private static final String INFO = "info"; //$NON-NLS-1$
 	private static final String WARN = "warn"; //$NON-NLS-1$
 	private static final String ERROR = "error"; //$NON-NLS-1$
+	private static final String TRUE = Boolean.TRUE.toString();
 
 	private Map<String, Integer> systemOutReplaceOptions = new LinkedHashMap<>();
 	private Map<String, Integer> systemErrReplaceOptions = new LinkedHashMap<>();
-	private Map<String, Integer> pritntStacktraceReplaceOptions = new LinkedHashMap<>();
+	private Map<String, Integer> systemOutPrintExceptionReplaceOptions = new LinkedHashMap<>();
+	private Map<String, Integer> systemErrPrintExceptionReplaceOptions = new LinkedHashMap<>();
+	private Map<String, Integer> printStacktraceReplaceOptions = new LinkedHashMap<>();
+	private Map<String, Integer> newLoggingStatementOptions = new LinkedHashMap<>();
 	private Map<String, String> selectedOptions = new HashMap<>();
+
+	private static final Map<String, Integer> replaceOptions;
 
 	private SupportedLogger supportedLoger = null;
 	private String loggerQualifiedName = null;
 
-	public StandardLoggerRule(Class<StandardLoggerASTVisitor> visitor) {
-		super(visitor);
-		this.name = Messages.StandardLoggerRule_name;
-		this.description = Messages.StandardLoggerRule_description;
+	static {
+		Map<String, Integer> options = new LinkedHashMap<>();
+		options.put(TRACE, 1);
+		options.put(DEBUG, 2);
+		options.put(INFO, 3);
+		options.put(WARN, 4);
+		options.put(ERROR, 5);
+		replaceOptions = Collections.unmodifiableMap(options);
+	}
+
+	public StandardLoggerRule() {
+		this.visitorClass = StandardLoggerASTVisitor.class;
+		this.id = "StandardLogger"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StandardLoggerRule_name,
+				Messages.StandardLoggerRule_description, Duration.ofMinutes(10),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -87,7 +109,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		return false;
 	}
 
-	public void setSelectedOptions(Map<String, String> selectedOptions) {
+	private void setSelectedOptions(Map<String, String> selectedOptions) {
 		this.selectedOptions.putAll(selectedOptions);
 	}
 
@@ -96,23 +118,12 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	}
 
 	private void initLogLevelOptions() {
-		systemOutReplaceOptions.put(TRACE, 1);
-		systemOutReplaceOptions.put(DEBUG, 2);
-		systemOutReplaceOptions.put(INFO, 3);
-		systemOutReplaceOptions.put(WARN, 4);
-		systemOutReplaceOptions.put(ERROR, 5);
-
-		systemErrReplaceOptions.put(TRACE, 1);
-		systemErrReplaceOptions.put(DEBUG, 2);
-		systemErrReplaceOptions.put(INFO, 3);
-		systemErrReplaceOptions.put(WARN, 4);
-		systemErrReplaceOptions.put(ERROR, 5);
-
-		pritntStacktraceReplaceOptions.put(TRACE, 1);
-		pritntStacktraceReplaceOptions.put(DEBUG, 2);
-		pritntStacktraceReplaceOptions.put(INFO, 3);
-		pritntStacktraceReplaceOptions.put(WARN, 4);
-		pritntStacktraceReplaceOptions.put(ERROR, 5);
+		systemOutReplaceOptions.putAll(replaceOptions);
+		systemErrReplaceOptions.putAll(replaceOptions);
+		systemErrPrintExceptionReplaceOptions.putAll(replaceOptions);
+		systemOutPrintExceptionReplaceOptions.putAll(replaceOptions);
+		newLoggingStatementOptions.putAll(replaceOptions);
+		printStacktraceReplaceOptions.putAll(replaceOptions);
 	}
 
 	@Override
@@ -127,15 +138,34 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 
 	@Override
 	public Map<String, Integer> getPrintStackTraceReplaceOptions() {
-		return pritntStacktraceReplaceOptions;
+		return printStacktraceReplaceOptions;
+	}
+
+	@Override
+	public Map<String, Integer> getSystemOutPrintExceptionReplaceOptions() {
+		return systemOutPrintExceptionReplaceOptions;
+	}
+
+	@Override
+	public Map<String, Integer> getSystemErrPrintExceptionReplaceOptions() {
+		return systemErrPrintExceptionReplaceOptions;
+	}
+
+	@Override
+	public Map<String, Integer> getMissingLogInsertOptions() {
+		return newLoggingStatementOptions;
 	}
 
 	@Override
 	public Map<String, String> getDefaultOptions() {
 		Map<String, String> defaultOptions = new HashMap<>();
-		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT, INFO);
-		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT, ERROR);
-		defaultOptions.put(StandardLoggerConstants.PRINT_STACKTRACE, ERROR);
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY, INFO);
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY, ERROR);
+		defaultOptions.put(StandardLoggerConstants.PRINT_STACKTRACE_KEY, ERROR);
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY, INFO);
+		defaultOptions.put(StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY, ERROR);
+		defaultOptions.put(StandardLoggerConstants.MISSING_LOG_KEY, ERROR);
+		defaultOptions.put(StandardLoggerConstants.ATTACH_EXCEPTION_OBJECT, TRUE);
 
 		return defaultOptions;
 	}
@@ -153,24 +183,26 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 	public void activateDefaultOptions() {
 		// default options should be activated only for test purposes
 		setSelectedOptions(getDefaultOptions());
-		this.loggerQualifiedName = StandardLoggerConstants.SLF4J_LOGGER;
 	}
 
+	@Override
 	public void activateOptions(Map<String, String> options) {
 		// default options should be activated only for test purposes
 		Map<String, String> defaultOptions = getDefaultOptions();
 		options.forEach((key, value) -> {
-			if (defaultOptions.containsKey(key))
+			if (defaultOptions.containsKey(key)) {
 				defaultOptions.put(key, value);
+			}
 		});
 		setSelectedOptions(defaultOptions);
-		this.loggerQualifiedName = options.get(StandardLoggerConstants.LOGGER_QUALIFIED_NAME);
 	}
 
 	@Override
 	protected StandardLoggerASTVisitor visitorFactory() {
 		Map<String, String> replacingOptions = getSelectedOptions();
 		String availableLogger = getAvailableQualifiedLoggerName();
-		return new StandardLoggerASTVisitor(availableLogger, replacingOptions);
+		StandardLoggerASTVisitor visitor = new StandardLoggerASTVisitor(availableLogger, replacingOptions);
+		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
+		return visitor;
 	}
 }

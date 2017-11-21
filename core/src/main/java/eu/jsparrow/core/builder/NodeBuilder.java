@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -53,7 +54,8 @@ public class NodeBuilder {
 	public static MethodInvocation newMethodInvocation(AST ast, Expression optionalExpression, SimpleName name,
 			Expression argument) {
 		MethodInvocation resultMI = newMethodInvocation(ast, optionalExpression, name);
-		resultMI.arguments().add(argument);
+		resultMI.arguments()
+			.add(argument);
 		return resultMI;
 	}
 
@@ -74,7 +76,8 @@ public class NodeBuilder {
 	public static MethodInvocation newMethodInvocation(AST ast, Expression optionalExpression, SimpleName name,
 			List<Expression> arguments) {
 		MethodInvocation resultMI = newMethodInvocation(ast, optionalExpression, name);
-		resultMI.arguments().addAll(arguments);
+		resultMI.arguments()
+			.addAll(arguments);
 		return resultMI;
 	}
 
@@ -161,7 +164,8 @@ public class NodeBuilder {
 			List<ASTNode> newModifier) {
 		FieldDeclaration fieldDeclaration = ast.newFieldDeclaration(serialUidNode);
 		fieldDeclaration.setType(type);
-		fieldDeclaration.modifiers().addAll(newModifier);
+		fieldDeclaration.modifiers()
+			.addAll(newModifier);
 		return fieldDeclaration;
 	}
 
@@ -189,10 +193,12 @@ public class NodeBuilder {
 	 * @return {@link Type} of the given {@link ITypeBinding}
 	 */
 	public static Type typeFromBinding(AST ast, ITypeBinding typeBinding) {
-		if (ast == null)
+		if (ast == null) {
 			throw new NullPointerException("ast is null"); //$NON-NLS-1$
-		if (typeBinding == null)
+		}
+		if (typeBinding == null) {
 			throw new NullPointerException("typeBinding is null"); //$NON-NLS-1$
+		}
 
 		if (typeBinding.isPrimitive()) {
 			return ast.newPrimitiveType(PrimitiveType.toCode(typeBinding.getName()));
@@ -301,5 +307,18 @@ public class NodeBuilder {
 		MarkerAnnotation markerAnnotation = ast.newMarkerAnnotation();
 		markerAnnotation.setTypeName(name);
 		return markerAnnotation;
+	}
+
+	/**
+	 * Creates a {@link ExpressionStatement} from the given {@link Expression}
+	 * 
+	 * @param ast
+	 *            the AbstractSyntaxTree thats the target of the node
+	 * @param expression
+	 *            expression to be wrapped in an expression statement
+	 * @return the {@link ExpressionStatement} wrapping the expression
+	 */
+	public static ExpressionStatement newExpressionStatement(AST ast, Expression expression) {
+		return ast.newExpressionStatement(expression);
 	}
 }

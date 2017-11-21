@@ -23,7 +23,8 @@ public class TestBracketsToControlRule {
 		for (int i = 1; i < 2; i++) {
 			;
 		}
-		Arrays.asList(1, 2, 3).forEach(System.out::println);
+		Arrays.asList(1, 2, 3)
+			.forEach(i -> logger.info(String.valueOf(i)));
 	}
 
 	public static void thestWhileLoop() {
@@ -76,6 +77,7 @@ public class TestBracketsToControlRule {
 			try {
 				input /= 0;
 			} catch (ArithmeticException e) {
+				logger.error(e.getMessage(), e);
 				input /= 2;
 			} finally {
 				return ++input;

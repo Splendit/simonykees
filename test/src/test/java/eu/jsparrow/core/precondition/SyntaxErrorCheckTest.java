@@ -54,10 +54,10 @@ public class SyntaxErrorCheckTest {
 
 	@Test
 	public void fileWithOutErrorPresent() throws Exception {
-		String source = "package eu.jsparrow.core.precondition;" + System.lineSeparator()
-				+ "import java.util.List;" + System.lineSeparator() + "public class SyntaxErrorCheckTest2 {"
-				+ System.lineSeparator() + "" + System.lineSeparator() + "List<String> testproject = null;"
-				+ System.lineSeparator() + "" + System.lineSeparator() + "}" + System.lineSeparator();
+		String source = "package eu.jsparrow.core.precondition;" + System.lineSeparator() + "import java.util.List;"
+				+ System.lineSeparator() + "public class SyntaxErrorCheckTest2 {" + System.lineSeparator() + ""
+				+ System.lineSeparator() + "List<String> testproject = null;" + System.lineSeparator() + ""
+				+ System.lineSeparator() + "}" + System.lineSeparator();
 		ICompilationUnit testfile = packageFragment.createCompilationUnit("SyntaxErrorCheckTest2.java", source, true,
 				null);
 		Assert.assertFalse(RefactoringUtil.checkForSyntaxErrors(testfile));

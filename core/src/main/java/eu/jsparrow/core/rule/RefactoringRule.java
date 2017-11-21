@@ -1,7 +1,5 @@
 package eu.jsparrow.core.rule;
 
-import java.util.List;
-
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -17,9 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.RefactoringException;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.util.PropertyUtil;
 import eu.jsparrow.core.util.RefactoringUtil;
-import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -28,38 +26,32 @@ import eu.jsparrow.i18n.Messages;
  * description, if its enabled and the document changes for
  * {@link ICompilationUnit} that are processed
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Hans-Jörg Schrödl,
+ *         Matthias Webhofer
  * @since 0.9
  *
  * @param <T>
  *            is the {@link AbstractASTRewriteASTVisitor} implementation that is
  *            applied by this rule
  */
-public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
+public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> implements RefactoringRuleInterface {
 
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringRule.class);
 
 	protected String id;
 
-	protected String name = Messages.RefactoringRule_default_name;
-
-	protected String description = Messages.RefactoringRule_default_description;
+	protected RuleDescription ruleDescription;
 
 	protected final JavaVersion requiredJavaVersion;
-
-	protected final List<Tag> tags;
 
 	// default is true because of preferences page
 	protected boolean enabled = true;
 	protected boolean satisfiedJavaVersion = true;
 	protected boolean satisfiedLibraries = true;
 
-	private Class<T> visitor;
+	protected Class<T> visitorClass;
 
-	protected RefactoringRule(Class<T> visitor) {
-		this.visitor = visitor;
-		this.id = this.getClass().getSimpleName();
-		this.tags = TagUtil.getTagsForRule(this.getClass());
+	protected RefactoringRule() {
 		this.requiredJavaVersion = provideRequiredJavaVersion();
 	}
 
@@ -70,20 +62,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	 */
 	protected abstract JavaVersion provideRequiredJavaVersion();
 
-	public String getName() {
-		return name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
 	public JavaVersion getRequiredJavaVersion() {
 		return requiredJavaVersion;
-	}
-
-	public List<Tag> getTags() {
-		return tags;
 	}
 
 	public boolean isEnabled() {
@@ -91,7 +71,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	public Class<T> getVisitor() {
-		return visitor;
+		return visitorClass;
 	}
 
 	public String getId() {
@@ -99,7 +79,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	/**
-	 * Responsible to calculate if the rule is executable in the current project.
+	 * Responsible to calculate if the rule is executable in the current
+	 * project.
 	 * 
 	 * @param project
 	 */
@@ -107,8 +88,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
 		if (null == compilerCompliance) {
 			/*
-			 * if we cannot get the compiler compliance, we are unable to know whether or
-			 * not the Java version is satisfied
+			 * if we cannot get the compiler compliance, we are unable to know
+			 * whether or not the Java version is satisfied
 			 */
 			satisfiedJavaVersion = false;
 		} else {
@@ -120,11 +101,9 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		enabled = satisfiedJavaVersion && satisfiedLibraries;
 	}
 
-
-
 	/**
-	 * JavaVersion independent requirements for rules that need to be defined for
-	 * each rule. Returns true as default implementation
+	 * JavaVersion independent requirements for rules that need to be defined
+	 * for each rule. Returns true as default implementation
 	 * 
 	 * @param project
 	 * @return
@@ -133,19 +112,23 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		return true;
 	}
 
-	protected T visitorFactory() throws InstantiationException, IllegalAccessException {
-		return visitor.newInstance();
+	protected AbstractASTRewriteASTVisitor visitorFactory() throws InstantiationException, IllegalAccessException {
+		AbstractASTRewriteASTVisitor visitor = visitorClass.newInstance();
+		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
+		return visitor;
 	}
 
 	/**
-	 * Responsible to calculate of the rule is executable in the current project.
+	 * Responsible to calculate of the rule is executable in the current
+	 * project.
 	 * 
 	 */
 	public final DocumentChange applyRule(ICompilationUnit workingCopy)
 			throws ReflectiveOperationException, JavaModelException, RefactoringException {
 
-		logger.trace(NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.name,
-				workingCopy.getElementName()));
+		String bind = NLS.bind(Messages.RefactoringRule_applying_rule_to_workingcopy, this.getRuleDescription()
+			.getName(), workingCopy.getElementName());
+		logger.trace(bind);
 
 		return applyRuleImpl(workingCopy);
 	}
@@ -177,7 +160,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		// NoCommentSourceRangeComputer());
 
 		AbstractASTRewriteASTVisitor rule = visitorFactory();
-		rule.setAstRewrite(astRewrite);
+		rule.setASTRewrite(astRewrite);
+		rule.setCompilationUnit(workingCopy.getHandleIdentifier());
 		try {
 			astRoot.accept(rule);
 		} catch (RuntimeException e) {
@@ -185,17 +169,19 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 		}
 
 		Document document = new Document(workingCopy.getSource());
-		TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject().getOptions(true));
+		TextEdit edits = astRewrite.rewriteAST(document, workingCopy.getJavaProject()
+			.getOptions(true));
 
 		if (edits.hasChildren()) {
 
 			/*
-			 * The TextEdit instance changes as soon as it is applied to the working copy.
-			 * This results in an incorrect preview of the DocumentChange. To fix this
-			 * issue, a copy of the TextEdit is used for the DocumentChange.
+			 * The TextEdit instance changes as soon as it is applied to the
+			 * working copy. This results in an incorrect preview of the
+			 * DocumentChange. To fix this issue, a copy of the TextEdit is used
+			 * for the DocumentChange.
 			 */
-			DocumentChange documentChange = RefactoringUtil.generateDocumentChange(visitor.getSimpleName(), document,
-					edits.copy());
+			DocumentChange documentChange = RefactoringUtil.generateDocumentChange(visitorClass.getSimpleName(),
+					document, edits.copy());
 
 			workingCopy.applyTextEdit(edits, null);
 
@@ -210,8 +196,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	/**
-	 * Independent library requirements for rules that need to be defined for each
-	 * rule. Returns null as default implementation
+	 * Independent library requirements for rules that need to be defined for
+	 * each rule. Returns null as default implementation
 	 * 
 	 * @return String value of required library fully qualified class name
 	 */
@@ -220,8 +206,8 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	}
 
 	/**
-	 * Helper method for description building. Saves information if java version is
-	 * satisfied for rule on selected project.
+	 * Helper method for description building. Saves information if java version
+	 * is satisfied for rule on selected project.
 	 * 
 	 * @return true if rule can be applied according to java version, false
 	 *         otherwise
@@ -234,10 +220,47 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> {
 	 * Helper method for description building. Saves information if required
 	 * libraries are satisfied for rule on selected project.
 	 * 
-	 * @return true if rule can be applied according to required libraries, false
-	 *         otherwise
+	 * @return true if rule can be applied according to required libraries,
+	 *         false otherwise
 	 */
 	public boolean isSatisfiedLibraries() {
 		return satisfiedLibraries;
 	}
+
+	@Override
+	public RuleDescription getRuleDescription() {
+		return this.ruleDescription;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		RefactoringRule<?> other = (RefactoringRule<?>) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Rule [id=" + id + ", name=" + this.getRuleDescription() //$NON-NLS-1$ //$NON-NLS-2$
+			.getName() + "]"; //$NON-NLS-1$
+	}
+
 }

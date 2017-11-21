@@ -9,23 +9,23 @@ import java.util.Optional;
 import eu.jsparrow.license.netlicensing.LicenseType;
 
 /**
- * A representation of the license data to be persisted. Responsible 
- * for serializing the data to and from string. 
+ * A representation of the license data to be persisted. Responsible for
+ * serializing the data to and from string.
  * 
  * @author Ardit Ymeri
  * @since 1.0
  *
  */
 public class PersistenceModel implements Serializable {
-	
+
 	private static final long serialVersionUID = 1L;
-	
+
 	private static final String SEPARATOR_REGEX = ","; //$NON-NLS-1$
 	private static final String KEY_VALUE_SEPARATOR_REGEX = "\\|"; //$NON-NLS-1$
 	private static final String SEPARATOR = ","; //$NON-NLS-1$
 	private static final String KEY_VALUE_SEPARATOR = "|"; //$NON-NLS-1$
-	private static final String EMPTY_STRING = "";  //$NON-NLS-1$
-	
+	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
+
 	private static final String LICENSEE_NUMBER_KEY = "licensee-number"; //$NON-NLS-1$
 	private static final String LICENSEE_NAME_KEY = "licensee-name"; //$NON-NLS-1$
 	private static final String LAST_VALIDATION_STATUS_KEY = "last-validation-status"; //$NON-NLS-1$
@@ -54,9 +54,8 @@ public class PersistenceModel implements Serializable {
 
 	public PersistenceModel(String licenseeNumber, String licenseeName, boolean lastValidationStatus,
 			LicenseType licenseType, Instant lastValidationTimestamp, ZonedDateTime demoExpirationDate,
-			ZonedDateTime expirationTimeStamp, ZonedDateTime subscriptionExpirationDate, 
-			boolean subscriptionStatus, Instant lastSuccessTimestamp, LicenseType lastSuccessType, 
-			String version) {
+			ZonedDateTime expirationTimeStamp, ZonedDateTime subscriptionExpirationDate, boolean subscriptionStatus,
+			Instant lastSuccessTimestamp, LicenseType lastSuccessType, String version) {
 
 		setLicenseeName(licenseeName);
 		setLicenseeNumber(licenseeNumber);
@@ -75,11 +74,11 @@ public class PersistenceModel implements Serializable {
 	public Optional<LicenseType> getLastSuccessLicenseType() {
 		return Optional.ofNullable(lastSuccessLicenseType);
 	}
-	
+
 	private void setLastSuccessLicenseType(LicenseType lastSuccessType) {
 		this.lastSuccessLicenseType = lastSuccessType;
 	}
-	
+
 	public Optional<Instant> getLastSuccessTimestamp() {
 		return Optional.ofNullable(lastSuccessTimestamp);
 	}
@@ -89,15 +88,16 @@ public class PersistenceModel implements Serializable {
 	}
 
 	private void setExpirationTimeStamp(ZonedDateTime expirationTimeStamp) {
-		this.expirationTimeStamp = expirationTimeStamp;	
+		this.expirationTimeStamp = expirationTimeStamp;
 	}
-	
+
 	public Optional<ZonedDateTime> getExpirationTimeStamp() {
 		return Optional.ofNullable(expirationTimeStamp);
 	}
 
 	public Optional<String> getLicenseeNumber() {
-		return Optional.ofNullable(licenseeNumber).filter(s -> !s.isEmpty());
+		return Optional.ofNullable(licenseeNumber)
+			.filter(s -> !s.isEmpty());
 	}
 
 	private void setLicenseeNumber(String licenseeNumber) {
@@ -105,7 +105,8 @@ public class PersistenceModel implements Serializable {
 	}
 
 	public Optional<String> getLicenseeName() {
-		return Optional.ofNullable(licenseeName).filter(s -> !s.isEmpty());
+		return Optional.ofNullable(licenseeName)
+			.filter(s -> !s.isEmpty());
 	}
 
 	private void setLicenseeName(String licenseeName) {
@@ -159,28 +160,28 @@ public class PersistenceModel implements Serializable {
 	private void setSubscriptionStatus(boolean subscriptionStatus) {
 		this.subscriptionStatus = subscriptionStatus;
 	}
-	
+
 	public Optional<String> getLastPersistedVersion() {
 		return Optional.ofNullable(lastPersistedVersion);
 	}
-	
+
 	private void setLastPersistedVersion(String version) {
 		this.lastPersistedVersion = version;
 	}
-	
+
 	public static PersistenceModel fromString(String strPersistenceModel) {
 		HashMap<String, String> data = new HashMap<>();
 		String[] splitedByComma = strPersistenceModel.split(SEPARATOR_REGEX);
-		for(String row : splitedByComma) {
-			String [] splitedRow = row.split(KEY_VALUE_SEPARATOR_REGEX);
+		for (String row : splitedByComma) {
+			String[] splitedRow = row.split(KEY_VALUE_SEPARATOR_REGEX);
 			String key = splitedRow[0];
 			String val = EMPTY_STRING;
-			if(splitedRow.length > 1) {
+			if (splitedRow.length > 1) {
 				val = splitedRow[1];
 			}
 			data.put(key, val);
 		}
-		
+
 		String licenseeNumber = data.get(LICENSEE_NUMBER_KEY);
 		String licenseeName = data.get(LICENSEE_NAME_KEY);
 		String lastValStr = data.get(LAST_VALIDATION_STATUS_KEY);
@@ -193,125 +194,107 @@ public class PersistenceModel implements Serializable {
 		String strLastSuccessTimestamp = data.get(LAST_SUCCESS_TIMESTAMP);
 		String strLastSuccessLicenseType = data.get(LAST_SUCCESS_LICENSE_TYPE);
 		String version = data.get(LAST_PERSISTED_VERSION);
-		
+
 		boolean lastVal = false;
-		if(lastValStr!=null && !lastValStr.isEmpty()) {
+		if (lastValStr != null && !lastValStr.isEmpty()) {
 			lastVal = Boolean.valueOf(lastValStr);
 		}
-		
+
 		LicenseType licenseType = null;
-		if(strLicenseType!= null && !strLicenseType.isEmpty()) {
+		if (strLicenseType != null && !strLicenseType.isEmpty()) {
 			licenseType = LicenseType.fromString(strLicenseType);
 		}
-		
+
 		Instant lastValTimestamp = null;
-		if(strLastValTimeStamp!= null && !strLastValTimeStamp.isEmpty()) {
+		if (strLastValTimeStamp != null && !strLastValTimeStamp.isEmpty()) {
 			lastValTimestamp = Instant.parse(strLastValTimeStamp);
 		}
-		
+
 		ZonedDateTime demoExpiration = null;
-		if(strDemoExpiration!= null && !strDemoExpiration.isEmpty()) {
+		if (strDemoExpiration != null && !strDemoExpiration.isEmpty()) {
 			demoExpiration = ZonedDateTime.parse(strDemoExpiration);
 		}
-		
+
 		ZonedDateTime expirationTimestamp = null;
-		if(strExpirationTimestamp!=null && !strExpirationTimestamp.isEmpty()) {
+		if (strExpirationTimestamp != null && !strExpirationTimestamp.isEmpty()) {
 			expirationTimestamp = ZonedDateTime.parse(strExpirationTimestamp);
 		}
-		
+
 		ZonedDateTime subscriptionExpires = null;
-		if(strSubscriptionExpires!=null && !strSubscriptionExpires.isEmpty()) {
+		if (strSubscriptionExpires != null && !strSubscriptionExpires.isEmpty()) {
 			subscriptionExpires = ZonedDateTime.parse(strSubscriptionExpires);
 		}
-		
+
 		boolean subscriptionStatus = false;
-		if(strSubscriptionStatus!= null && !strSubscriptionStatus.isEmpty()) {
+		if (strSubscriptionStatus != null && !strSubscriptionStatus.isEmpty()) {
 			subscriptionStatus = Boolean.valueOf(strSubscriptionStatus);
 		}
-		
+
 		Instant lastSuccessTimestamp = null;
-		if(strLastSuccessTimestamp!=null && !strLastSuccessTimestamp.isEmpty()) {
+		if (strLastSuccessTimestamp != null && !strLastSuccessTimestamp.isEmpty()) {
 			lastSuccessTimestamp = Instant.parse(strLastSuccessTimestamp);
 		}
-		
+
 		LicenseType lastSuccessType = null;
-		if(strLastSuccessLicenseType!=null && !strLastSuccessLicenseType.isEmpty()) {
+		if (strLastSuccessLicenseType != null && !strLastSuccessLicenseType.isEmpty()) {
 			lastSuccessType = LicenseType.fromString(strLastSuccessLicenseType);
 		}
-		
-		PersistenceModel persistenceModel = new PersistenceModel(
-				licenseeNumber,
-				licenseeName, 
-				lastVal, 
-				licenseType, 
-				lastValTimestamp, 
-				demoExpiration, 
-				expirationTimestamp,
-				subscriptionExpires, 
-				subscriptionStatus, 
-				lastSuccessTimestamp, 
-				lastSuccessType, 
-				version);
-		
+
+		PersistenceModel persistenceModel = new PersistenceModel(licenseeNumber, licenseeName, lastVal, licenseType,
+				lastValTimestamp, demoExpiration, expirationTimestamp, subscriptionExpires, subscriptionStatus,
+				lastSuccessTimestamp, lastSuccessType, version);
+
 		return persistenceModel;
 	}
-	
+
 	@Override
 	public String toString() {
 
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append(LICENSEE_NUMBER_KEY + KEY_VALUE_SEPARATOR + getLicenseeNumber().orElse(EMPTY_STRING) + SEPARATOR);
-		stringBuilder.append(LICENSEE_NAME_KEY + KEY_VALUE_SEPARATOR + getLicenseeName().orElse(EMPTY_STRING) + SEPARATOR);
-		
+		stringBuilder
+			.append(LICENSEE_NUMBER_KEY + KEY_VALUE_SEPARATOR + getLicenseeNumber().orElse(EMPTY_STRING) + SEPARATOR);
+		stringBuilder
+			.append(LICENSEE_NAME_KEY + KEY_VALUE_SEPARATOR + getLicenseeName().orElse(EMPTY_STRING) + SEPARATOR);
+
 		stringBuilder.append(LAST_VALIDATION_STATUS_KEY + KEY_VALUE_SEPARATOR);
-		getLastValidationStatus()
-		.ifPresent(stringBuilder::append);
+		getLastValidationStatus().ifPresent(stringBuilder::append);
 		stringBuilder.append(SEPARATOR);
-		
+
 		stringBuilder.append(LICENSE_TYPE_KEY + KEY_VALUE_SEPARATOR);
-		getLicenseType()
-		.ifPresent(stringBuilder::append);
+		getLicenseType().ifPresent(stringBuilder::append);
 		stringBuilder.append(SEPARATOR);
-		
+
 		stringBuilder.append(LAST_VALIDATION_TIMESTAMP_KEY + KEY_VALUE_SEPARATOR);
-		getLastValidationTimestamp()
-		.ifPresent(stringBuilder::append);
+		getLastValidationTimestamp().ifPresent(stringBuilder::append);
 		stringBuilder.append(SEPARATOR);
-		
+
 		stringBuilder.append(DEMO_EXPIRATION_KEY + KEY_VALUE_SEPARATOR);
-		getDemoExpirationDate()
-		.ifPresent(stringBuilder::append);
+		getDemoExpirationDate().ifPresent(stringBuilder::append);
 		stringBuilder.append(SEPARATOR);
-		
+
 		stringBuilder.append(EXPIRATION_TIMESTAMP_KEY + KEY_VALUE_SEPARATOR);
-		getExpirationTimeStamp()
-		.ifPresent(stringBuilder::append);
+		getExpirationTimeStamp().ifPresent(stringBuilder::append);
 		stringBuilder.append(SEPARATOR);
-		
+
 		stringBuilder.append(SUBSCRIPTION_EXPIRES_KEY + KEY_VALUE_SEPARATOR);
-		getSubscriptionExpirationDate()
-		.ifPresent(stringBuilder::append);
+		getSubscriptionExpirationDate().ifPresent(stringBuilder::append);
 		stringBuilder.append(SEPARATOR);
-		
+
 		stringBuilder.append(SUBSCRIPTION_STATUS_KEY + KEY_VALUE_SEPARATOR);
-		getSubscriptionStatus()
-		.ifPresent(stringBuilder::append);
+		getSubscriptionStatus().ifPresent(stringBuilder::append);
 		stringBuilder.append(SEPARATOR);
-		
+
 		stringBuilder.append(LAST_SUCCESS_TIMESTAMP + KEY_VALUE_SEPARATOR);
-		getLastSuccessTimestamp()
-		.ifPresent(stringBuilder::append);
+		getLastSuccessTimestamp().ifPresent(stringBuilder::append);
 		stringBuilder.append(SEPARATOR);
-		
+
 		stringBuilder.append(LAST_SUCCESS_LICENSE_TYPE + KEY_VALUE_SEPARATOR);
-		getLastSuccessLicenseType()
-		.ifPresent(stringBuilder::append);
+		getLastSuccessLicenseType().ifPresent(stringBuilder::append);
 		stringBuilder.append(SEPARATOR);
-		
+
 		stringBuilder.append(LAST_PERSISTED_VERSION + KEY_VALUE_SEPARATOR);
-		getLastPersistedVersion()
-		.ifPresent(stringBuilder::append);
-		
+		getLastPersistedVersion().ifPresent(stringBuilder::append);
+
 		return stringBuilder.toString();
 	}
 

@@ -2,6 +2,7 @@ package eu.jsparrow.core.rule.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.Attributes;
@@ -10,6 +11,7 @@ import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import org.apache.commons.lang3.JavaVersion;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -20,7 +22,9 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.StringUtilsASTVisitor;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
+import eu.jsparrow.core.visitor.impl.StringUtilsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -31,23 +35,22 @@ import eu.jsparrow.i18n.Messages;
  *
  */
 public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
-	
-	private final String VERSION_3_1 = "3.1"; //$NON-NLS-1$
+
+	private final String version31 = "3.1"; //$NON-NLS-1$
 
 	Logger logger = LoggerFactory.getLogger(StringUtilsRule.class);
 
-	/**
-	 * 
-	 */
-	private List<String> supportetVersion = new ArrayList<>();
+	private List<String> supportedVersion = new ArrayList<>();
 
-	public StringUtilsRule(Class<StringUtilsASTVisitor> visitor) {
-		super(visitor);
-		this.name = Messages.StringUtilsRule_name;
-		this.description = Messages.StringUtilsRule_description;
-		this.supportetVersion.add(VERSION_3_1);
+	public StringUtilsRule() {
+		super();
+		this.visitorClass = StringUtilsASTVisitor.class;
+		this.supportedVersion.add(version31);
+		this.id = "StringUtils"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StringUtilsRule_name, Messages.StringUtilsRule_description,
+				Duration.ofMinutes(10), TagUtil.getTagsForRule(this.getClass()));
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
@@ -59,29 +62,26 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 			String fullyQuallifiedClassName = "org.apache.commons.lang3.StringUtils"; //$NON-NLS-1$
 			IType classtype = project.findType(fullyQuallifiedClassName);
 			if (classtype != null) {
-				
+
 				IPackageFragmentRoot commonsLangLib = getProject(classtype.getParent());
 				// file with path to libary jar
-				File file = new File(commonsLangLib.getPath().toString());
-				
+				File file = new File(commonsLangLib.getPath()
+					.toString());
+
 				try (JarFile jar = new java.util.jar.JarFile(file)) {
-					
+
 					Manifest manifest = jar.getManifest();
 					Attributes attributes = manifest.getMainAttributes();
 
-					if (attributes != null) {
-						for (Object attribute : attributes.keySet()) {
+					return attributes != null && attributes.keySet()
+						.stream()
+						.anyMatch(attribute -> {
 							Name key = (Name) attribute;
 							String keyword = key.toString();
-							if (keyword.equals("Implementation-Version")) { //$NON-NLS-1$
-								if (supportetVersion.stream().anyMatch(s -> attributes.getValue(key).startsWith(s))) {
-									return true;
-								} else {
-									return false;
-								}
-							}
-						}
-					}
+							return "Implementation-Version".equals(keyword) && supportedVersion.stream() //$NON-NLS-1$
+								.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s));
+						});
+
 				} catch (IOException e) {
 					logger.debug("Jar Manifest load error in:", e); //$NON-NLS-1$
 					// Resolving version failed, rule cant be executed
@@ -99,7 +99,7 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 	public String requiredLibraries() {
 		return "org.apache.commons.lang3.StringUtils"; //$NON-NLS-1$
 	}
-	
+
 	private IPackageFragmentRoot getProject(IJavaElement iJavaElement) {
 		if (null == iJavaElement) {
 			return null;

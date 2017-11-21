@@ -1,7 +1,5 @@
 package eu.jsparrow.ui;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
@@ -38,21 +36,23 @@ public class Activator extends AbstractUIPlugin {
 	// is used for configuring the test fragment
 	private static BundleActivator testFragmentActivator;
 
-	private long loggingBundleID = 0;
-
 	// Flag is jSparrow is already running
 	private static boolean running = false;
 
 	private static BundleContext bundleContext;
+
 	private static IEclipseContext eclipseContext;
 
+	private long loggingBundleID = 0;
+
 	@Inject
-	private LicenseValidationService licenseValidationService;
+	private static LicenseValidationService licenseValidationService;
 
 	/**
 	 * The constructor
 	 */
 	public Activator() {
+		//
 	}
 
 	/*
@@ -61,6 +61,7 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.
 	 * BundleContext)
 	 */
+	@Override
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
@@ -71,7 +72,7 @@ public class Activator extends AbstractUIPlugin {
 
 		// start jSparrow logging bundle
 		for (Bundle bundle : context.getBundles()) {
-			if (bundle.getSymbolicName().equals("eu.jsparrow.logging") //$NON-NLS-1$
+			if ("eu.jsparrow.logging".equals(bundle.getSymbolicName()) //$NON-NLS-1$
 					/*
 					 * name of the logging api bundle
 					 */
@@ -85,7 +86,8 @@ public class Activator extends AbstractUIPlugin {
 		// load pseudo-activator from test fragment and execute its start method
 		try {
 			Class<? extends BundleActivator> fragmentActivatorClass = Class
-					.forName("at.splendit.simonykees.core.TestFragmentActivator").asSubclass(BundleActivator.class); //$NON-NLS-1$
+				.forName("at.splendit.simonykees.core.TestFragmentActivator") //$NON-NLS-1$
+				.asSubclass(BundleActivator.class);
 			testFragmentActivator = fragmentActivatorClass.newInstance();
 			testFragmentActivator.start(context);
 		} catch (ClassNotFoundException e) {
@@ -110,9 +112,10 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.
 	 * BundleContext)
 	 */
+	@Override
 	public void stop(BundleContext context) throws Exception {
 
-		running = false;
+		setRunning(false);
 
 		// FIXME (see SIM-331) figure out better logging configuration
 		logger.info(Messages.Activator_stop);
@@ -132,22 +135,6 @@ public class Activator extends AbstractUIPlugin {
 		}
 
 		super.stop(context);
-	}
-
-	/**
-	 * starts the license validation service after it has been injected
-	 */
-	@PostConstruct
-	private void startValidation() {
-		licenseValidationService.startValidation();
-	}
-
-	/**
-	 * stops the license validation service before it gets uninjected
-	 */
-	@PreDestroy
-	private void stopValidation() {
-		licenseValidationService.stopValidation();
 	}
 
 	/**
@@ -177,6 +164,7 @@ public class Activator extends AbstractUIPlugin {
 
 	public static void setRunning(boolean isRunning) {
 		running = isRunning;
+		licenseValidationService.setJSparrowRunning(isRunning);
 	}
 
 	public static BundleContext getBundleContext() {

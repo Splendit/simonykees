@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -26,6 +27,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -43,10 +45,16 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	private Shell shell;
 
+	private RefactoringSummaryWizardPage summaryPage;
+
+	private RefactoringPreviewWizardModel model;
+
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
 		this.refactoringPipeline = refactoringPipeline;
-		this.shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+		this.shell = PlatformUI.getWorkbench()
+			.getActiveWorkbenchWindow()
+			.getShell();
 		setNeedsProgressMonitor(true);
 	}
 
@@ -61,15 +69,20 @@ public class RefactoringPreviewWizard extends Wizard {
 		 * First summary page is created to collect all initial source from
 		 * working copies
 		 */
-		RefactoringSummaryWizardPage summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline);
-		refactoringPipeline.getRules().forEach(rule -> {
-			Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
-			if (!changes.isEmpty()) {
-				addPage(new RefactoringPreviewWizardPage(changes, rule));
-			}
-		});
-		if (!(refactoringPipeline.getRules().size() == 1
-				&& refactoringPipeline.getRules().get(0) instanceof StandardLoggerRule)) {
+		model = new RefactoringPreviewWizardModel();
+		refactoringPipeline.getRules()
+			.forEach(rule -> {
+				Map<ICompilationUnit, DocumentChange> changes = refactoringPipeline.getChangesForRule(rule);
+				if (!changes.isEmpty()) {
+					RefactoringPreviewWizardPage previewPage = new RefactoringPreviewWizardPage(changes, rule, model);
+					addPage(previewPage);
+				}
+			});
+		summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model);
+		if (!(refactoringPipeline.getRules()
+			.size() == 1
+				&& refactoringPipeline.getRules()
+					.get(0) instanceof StandardLoggerRule)) {
 			addPage(summaryPage);
 		}
 	}
@@ -80,9 +93,10 @@ public class RefactoringPreviewWizard extends Wizard {
 		return super.getPreviousPage(page);
 	}
 
-	private void updateViewsOnNavigation(IWizardPage page) {
+	public void updateViewsOnNavigation(IWizardPage page) {
 		if (page instanceof RefactoringPreviewWizardPage) {
-			if (!((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
+			if (!((RefactoringPreviewWizardPage) page).getUnselectedChange()
+				.isEmpty()) {
 				/*
 				 * if there are changes in refactoring page, it means that Back
 				 * button was pressed and recalculation is needed
@@ -159,7 +173,7 @@ public class RefactoringPreviewWizard extends Wizard {
 		for (IWizardPage page : getPages()) {
 			if (page instanceof RefactoringPreviewWizardPage) {
 				((RefactoringPreviewWizardPage) page)
-						.update(refactoringPipeline.getChangesForRule(((RefactoringPreviewWizardPage) page).getRule()));
+					.update(refactoringPipeline.getChangesForRule(((RefactoringPreviewWizardPage) page).getRule()));
 			}
 		}
 	}
@@ -177,24 +191,18 @@ public class RefactoringPreviewWizard extends Wizard {
 			 * Update all changes and unselected classes that were unselected in
 			 * the last page shown before finish was pressed
 			 */
-			Arrays.asList(getPages()).stream().forEach(page -> {
-				if ((page instanceof RefactoringPreviewWizardPage)
-						&& !((RefactoringPreviewWizardPage) page).getUnselectedChange().isEmpty()) {
-					try {
-						refactoringPipeline.doAdditionalRefactoring(
-								((RefactoringPreviewWizardPage) page).getUnselectedChange(),
-								((RefactoringPreviewWizardPage) page).getRule(), monitor);
-						if (monitor.isCanceled()) {
-							refactoringPipeline.clearStates();
-						}
-					} catch (RuleException e) {
-						synchronizeWithUIShowError(e);
-					}
+			Arrays.asList(getPages())
+				.stream()
+				.filter(page -> (page instanceof RefactoringPreviewWizardPage)
+						&& !((RefactoringPreviewWizardPage) page).getUnselectedChange()
+							.isEmpty())
+				.forEach(page -> {
+					tryDoAdditionalRefactoring(monitor, page);
 					((RefactoringPreviewWizardPage) page).applyUnselectedChange();
-				}
-			});
+				});
 
-			if (LicenseUtil.getInstance().isValid()) {
+			if (LicenseUtil.getInstance()
+				.isValid()) {
 				try {
 					refactoringPipeline.commitRefactoring();
 					Activator.setRunning(false);
@@ -207,7 +215,8 @@ public class RefactoringPreviewWizard extends Wizard {
 					Activator.setRunning(false);
 				}
 			} else {
-				LicenseUtil.getInstance().displayLicenseErrorDialog(getShell());
+				LicenseUtil.getInstance()
+					.displayLicenseErrorDialog(getShell());
 				Activator.setRunning(false);
 			}
 			return;
@@ -222,6 +231,19 @@ public class RefactoringPreviewWizard extends Wizard {
 		}
 
 		return true;
+	}
+
+	private void tryDoAdditionalRefactoring(IProgressMonitor monitor, IWizardPage page) {
+		try {
+			refactoringPipeline.doAdditionalRefactoring(
+					((RefactoringPreviewWizardPage) page).getUnselectedChange(),
+					((RefactoringPreviewWizardPage) page).getRule(), monitor);
+			if (monitor.isCanceled()) {
+				refactoringPipeline.clearStates();
+			}
+		} catch (RuleException e) {
+			synchronizeWithUIShowError(e);
+		}
 	}
 
 	/*
@@ -268,11 +290,14 @@ public class RefactoringPreviewWizard extends Wizard {
 	 * Method used to open ErrorDialog from non UI thread
 	 */
 	private void synchronizeWithUIShowError(SimonykeesException exception) {
-		Display.getDefault().asyncExec(() -> {
-			Shell workbenchShell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
-			SimonykeesMessageDialog.openErrorMessageDialog(workbenchShell, exception);
-			Activator.setRunning(false);
-		});
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell workbenchShell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				SimonykeesMessageDialog.openErrorMessageDialog(workbenchShell, exception);
+				Activator.setRunning(false);
+			});
 	}
 
 	/**
@@ -296,7 +321,7 @@ public class RefactoringPreviewWizard extends Wizard {
 			if (getContainer().getCurrentPage() instanceof RefactoringPreviewWizardPage) {
 				((RefactoringPreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
 			} else {
-				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeControl();
+				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
 			}
 			getPreviousPage(getContainer().getCurrentPage());
 		}
@@ -304,9 +329,21 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		if (!LicenseUtil.getInstance().isFullLicense()) {
+		if (!LicenseUtil.getInstance()
+			.isFullLicense()) {
 			return false;
 		}
 		return super.canFinish();
+	}
+
+	public RefactoringSummaryWizardPage getSummaryPage() {
+		return summaryPage;
+	}
+
+	public RefactoringPreviewWizardModel getModel() {
+		if (model == null) {
+			model = new RefactoringPreviewWizardModel();
+		}
+		return model;
 	}
 }

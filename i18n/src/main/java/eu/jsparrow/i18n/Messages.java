@@ -26,8 +26,23 @@ public class Messages extends NLS {
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
+	public static String Activator_debug_collectCompilationUnits;
+	public static String Activator_debug_commitRefactoring;
+	public static String Activator_debug_createRefactoringStates;
+	public static String Activator_debug_numCompilationUnits;
+	public static String Activator_debug_numRefactoringStates;
+	public static String Activator_debug_startRefactoring;
 	public static String Activator_start;
 	public static String Activator_stop;
+	public static String Activator_standalone_LoadingConfiguration;
+	public static String Activator_standalone_SelectedProfile;
+	public static String Activator_standalone_SelectedRules;
+	public static String Activator_standalone_DefaultProfileDoesNotExist;
+	public static String Activator_standalone_RulesDoNotExist;
+	public static String Activator_standalone_ConfigFileReadSuccessfully;
+	public static String Activator_standalone_None;
+	public static String Activator_standalone_noRulesSelected;
+	public static String Activator_standalone_UsingDefaultConfiguration;
 	public static String ArithmethicAssignmentRule_description;
 	public static String ArithmethicAssignmentRule_name;
 	public static String BracketsToControlRule_description;
@@ -76,10 +91,18 @@ public class Messages extends NLS {
 	public static String ConfigureProfileSelectRulesWizardPage_error_EmptyName;
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputLabel;
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputText;
-	public static String ConfigureProfileSelectRulesWIzardPageModel_error_NameExists;
+	public static String ConfigureProfileSelectRulesWizardPageModel_error_NameExists;
+	public static String ConfigureRenameFieldsRuleWizard_WizardTitle_RenameFields;
 	public static String DiamondOperatorASTVisitor_using_diamond_operator;
 	public static String DiamondOperatorRule_description;
 	public static String DiamondOperatorRule_name;
+	public static String DurationFormatUtil_Days;
+	public static String DurationFormatUtil_Hours;
+	public static String DurationFormatUtil_Minutes;
+	public static String DurationFormatUtil_RunDuration;
+	public static String DurationFormatUtil_Seconds;
+	public static String DurationFormatUtil_TimeSaved;
+	public static String EmptyProfile_profileName;
 	public static String EnhancedForLoopToStreamAnyMatchRule_description;
 	public static String EnhancedForLoopToStreamAnyMatchRule_name;
 	public static String EnhancedForLoopToStreamFindFirstRule_description;
@@ -127,9 +150,9 @@ public class Messages extends NLS {
 	public static String LicenseStatus_userMessage_NODE_LOCKED_HW_ID_FAILURE;
 	public static String LicenseStatus_userMessage_NODE_LOCKED_REGISTERED;
 	public static String LicenseStatus_userMessage_NONE;
-	public static String LicenseStatus_userMessage_TRIAL_EXPIRED;
-	public static String LicenseStatus_userMessage_TRIAL_HW_ID_FAILURE;
-	public static String LicenseStatus_userMessage_TRIAL_REGISTERED;
+	public static String LicenseStatus_userMessage_FREE_EXPIRED;
+	public static String LicenseStatus_userMessage_FREE_HW_ID_FAILURE;
+	public static String LicenseStatus_userMessage_FREE_REGISTERED;
 	public static String LicenseType_floating;
 	public static String LicenseType_node_locked;
 	public static String LicenseType_subscription;
@@ -140,19 +163,53 @@ public class Messages extends NLS {
 	public static String LoggerRuleWizard_title;
 	public static String LoggerRuleWizardHandler_info_supportedFrameworkFound;
 	public static String LoggerRuleWizardHandler_noLogger;
+	public static String LoggerRuleWizardPage_alwaysAddExceptionParamInLoggerStatement;
+
+	public static String LoggerRuleWizardPage_alwaysUsePrintStacktraceOptionForLoggingException;
+	public static String LoggerRuleWizardPage_default_log_for_exception_example_after;
+
+	public static String LoggerRuleWizardPage_default_log_for_exception_example_before;
+
+	public static String LoggerRuleWizardPage_default_log_for_exception_popup_description;
+
 	public static String LoggerRuleWizardPage_description;
+
+	public static String LoggerRuleWizardPage_insertNewLoggerStatementInEmptyCatch;
+
+	public static String LoggerRuleWizardPage_log_exception_object_example_after;
+
+	public static String LoggerRuleWizardPage_log_exception_object_example_before;
+
+	public static String LoggerRuleWizardPage_log_exception_object_popup_description;
+
+	public static String LoggerRuleWizardPage_loggingExceptionsLabel;
+	public static String LoggerRuleWizardPage_missing_logger_example_after;
+
+	public static String LoggerRuleWizardPage_missing_logger_example_before;
+
+	public static String LoggerRuleWizardPage_missing_logger_pupup_description;
+
 	public static String LoggerRuleWizardPage_pageName;
+
+	public static String LoggerRuleWizardPage_print_stack_trace_example_after;
+
+	public static String LoggerRuleWizardPage_print_stack_trace_example_before;
+
+	public static String LoggerRuleWizardPage_print_stack_trace_popup_description;
+
+	public static String LoggerRuleWizardPage_replacePrintstacktraceWithLogger;
 	public static String LoggerRuleWizardPage_severityLevelLabel;
-	public static String LoggerRuleWizardPage_stackTraceLabel;
-	public static String LoggerRuleWizardPage_stackTraceMessageLabel;
 	public static String LoggerRuleWizardPage_sysErrLabel;
 	public static String LoggerRuleWizardPage_sysErrMessageLabel;
 	public static String LoggerRuleWizardPage_sysOutLabel;
 	public static String LoggerRuleWizardPage_sysOutMessageLabel;
+
+	public static String LoggerRuleWizardPage_will_be_transformed_to;
 	public static String LoggerRuleWizardPageModel_err_noTransformation;
 	public static String LoggerRuleWizardPageModel_noSeverityLevel;
 	public static String LoggerRuleWizardPageModel_warn_blankLoggingType;
 	public static String LoggerRuleWizardPageModel_warn_errSeverity;
+	public static String LoggerRuleWizardPageModel_warn_missingLoggSeverity;
 	public static String LoggerRuleWizardPageModel_warn_stackTraceSeverity;
 	public static String ImmutableStaticFinalCollectionsRule_description;
 	public static String ImmutableStaticFinalCollectionsRule_name;
@@ -178,8 +235,16 @@ public class Messages extends NLS {
 	public static String ProgressMonitor_AbstractRefactorer_prepareRefactoring_taskName;
 	public static String ProgressMonitor_AbstractRefactorer_doRefactoring_taskName;
 	public static String ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName;
+	public static String PublicFieldsRenamingRule_description;
+	public static String PublicFieldsRenamingRule_name;
 	public static String RearrangeClassMembersRule_description;
 	public static String RearrangeClassMembersRule_name;
+	public static String RefactoringPipeline_AddingCompilationUnitToErrorList;
+	public static String RefactoringPipeline_CompilationUnitWithCompilationErrors;
+	public static String RefactoringPipeline_java_element_resolution_failed;
+	public static String RefactoringPipeline_user_java_element_resolution_failed;
+	public static String RefactoringPipeline_user_warn_no_compilation_units_found;
+	public static String RefactoringPipeline_warn_no_compilation_units_found;
 	public static String RefactoringPreviewWizard_err_runnableWithProgress;
 	public static String RefactoringRule_applying_rule_to_workingcopy;
 	public static String RefactoringRule_default_description;
@@ -187,18 +252,44 @@ public class Messages extends NLS {
 	public static String ReImplementingInterfaceRule_description;
 	public static String ReImplementingInterfaceRule_name;
 	public static String RefactoringSummaryWizardPage_description;
+	public static String RefactoringSummaryWizardPage_Duration;
+	public static String RefactoringSummaryWizardPage_eliminated_technical_debt;
 	public static String RefactoringSummaryWizardPage_title;
-
-	public static String RefactoringSummaryWizardPage_warn_disableFinishWhenTrial;
+	public static String RefactoringSummaryWizardPage_warn_disableFinishWhenFree;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
 	public static String RemoveNewStringConstructorRule_name;
+	public static String RenameFieldsRuleWizard_taskName_collectingUnits;
+
+	public static String RenameFieldsRuleWizardHandler_performFinish_jobName;
+	public static String RenameFieldsRuleWizardPage_description;
+	public static String RenameFieldsRuleWizardPage_dollarSignReplacementLabelText;
+	public static String RenameFieldsRuleWizardPage_fieldTypeLabelText;
+	public static String RenameFieldsRuleWizardPage_replacemenentsLabelText;
+	public static String RenameFieldsRuleWizardPage_searchScopeLabelText;
+	public static String RenameFieldsRuleWizardPage_title;
+	public static String RenameFieldsRuleWizardPage_todoCommentsLabelText;
+	public static String RenameFieldsRuleWizardPage_underscoreReplacementLabelText;
+	public static String RenameFieldsRuleWizardPage_warning_noFieldSelected;
+	public static String RenameFieldsRuleWizardPageModel_addTodoCommentsText;
+	public static String RenameFieldsRuleWizardPageModel_dollarSignReplacementOption_leaveAsIs;
+	public static String RenameFieldsRuleWizardPageModel_dollarSignReplacementOption_upperCase;
+	public static String RenameFieldsRuleWizardPageModel_scopeOption_project;
+	public static String RenameFieldsRuleWizardPageModel_scopeOption_workspace;
+	public static String RenameFieldsRuleWizardPageModel_typeOption_packageProtectedFields;
+	public static String RenameFieldsRuleWizardPageModel_typeOption_privateFields;
+	public static String RenameFieldsRuleWizardPageModel_typeOption_protectedFields;
+	public static String RenameFieldsRuleWizardPageModel_typeOption_publicFields;
+	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_leaveAsIs;
+	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_upperCase;
 	public static String SelectRulesWizardHandler_allready_running;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
 	public static String SelectRulesWizardHandler_noFileWithoutError;
+	public static String SelectRulesWizardHandler_selectionNotPossible_ubuntuBug;
 	public static String SelectRulesWizardPage_addAllButtonLabel;
 	public static String SelectRulesWizardPage_addButtonLabel;
+	public static String SelectRulesWizardPage_CustomProfileLabel;
 	public static String SelectRulesWizardPage_defaultDescriptionText;
 	public static String SelectRulesWizardPage_description;
 	public static String SelectRulesWizardPage_EmptyProfileLabel;
@@ -216,6 +307,8 @@ public class Messages extends NLS {
 	public static String SelectRulesWizard_end_refactoring;
 	public static String SelectRulesWizard_rules_with_changes;
 	public static String SelectRulesWizard_start_refactoring;
+
+	public static String SelectRulesWizard_Summary;
 	public static String SelectRulesWizard_title;
 	public static String SelectRulesWizard_warning_no_refactorings;
 	public static String SerialVersionUidRule_description;
@@ -224,12 +317,33 @@ public class Messages extends NLS {
 	public static String SimonykeesMessageDialog_default_error_message;
 	public static String SimonykeesMessageDialog_open_browser_error_message;
 	public static String SimonykeesPreferenceManager_builtIn;
+	public static String SimonykeesPreferencePage_ChooseConfigFileDialogTitle;
+	public static String SimonykeesPreferencePage_DefaultProfileNotReplacable;
 	public static String SimonykeesPreferencePage_editProfileButtonLabel;
 	public static String SimonykeesPreferencePage_enableIntroText;
+	public static String SimonykeesPreferencePage_ExportProfilesButton;
+	public static String SimonykeesPreferencePage_FileAlreadyExists;
+	public static String SimonykeesPreferencePage_generalSettingsGroupTitle;
+	public static String SimonykeesPreferencePage_ImportProfilesButton;
+	public static String SimonykeesPreferencePage_KeepBoth;
 	public static String SimonykeesPreferencePage_newProfileButtonLabel;
+	public static String SimonykeesPreferencePage_NoProfilesImported;
+	public static String SimonykeesPreferencePage_NoProfilesSelected;
+	public static String SimonykeesPreferencePage_ProfileExistsReplace;
+	public static String SimonykeesPreferencePage_ProfileExportSuccessfulTo;
+	public static String SimonykeesPreferencePage_ProfileImportSuccessful;
+	public static String SimonykeesPreferencePage_profileAndName;
+	public static String SimonykeesPreferencePage_profilesBuiltInSuffix;
+	public static String SimonykeesPreferencePage_profileSettingsGroupTitle;
 	public static String SimonykeesPreferencePage_removeProfileButtonLabel;
+	public static String SimonykeesPreferencePage_Replace;
+	public static String SimonykeesPreferencePage_resolvePackagesRecursivelyLabel;
 	public static String SimonykeesPreferencePage_rules;
+	public static String SimonykeesPreferencePage_SelectedFileDoesNotExist;
+	public static String SimonykeesPreferencePage_SelectedPathIsDirectory;
+	public static String SimonykeesPreferencePage_Skip;
 	public static String SimonykeesPreferencePage_selectProfile;
+	public static String SimonykeesPreferencePage_UseAsDefaultProfileButtonLabel;
 	public static String SimonykeesPreferencePage_useProfileOptionNoProfile;
 	public static String SimonykeesPreferencePage_useProfileOptionRadioGroupTitle;
 	public static String SimonykeesPreferencePage_useProfileOptionSelectedProfile;
@@ -245,6 +359,12 @@ public class Messages extends NLS {
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_title;
 	public static String SimonykeesUpdateLicenseDialog_update_llicense_dialog_button;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_group_title;
+	public static String StandaloneConfig_debug_cleanUp;
+	public static String StandaloneConfig_debug_collectDependencies;
+	public static String StandaloneConfig_debug_createdProject;
+	public static String StandaloneConfig_debug_createJavaProject;
+	public static String StandaloneConfig_debug_createProject;
+	public static String StandaloneConfig_debug_createWorkspace;
 	public static String StandardLoggerRule_description;
 	public static String StandardLoggerRule_name;
 	public static String StatementLambdaToExpressionRule_description;
@@ -261,14 +381,25 @@ public class Messages extends NLS {
 	public static String StringLiteralEqualityCheckRule_name;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
+	public static String SummaryWizardPage_Files;
+	public static String SummaryWizardPage_Rule;
+	public static String SummaryWizardPage_Rules;
+	public static String SummaryWizardPage_RunSummary;
+	public static String SummaryWizardPage_TimesApplied;
+	public static String SummaryWizardPage_TimeSaved;
+	public static String SummaryWizardPageModel_IssuesFixed;
 	public static String TryWithResourceRule_description;
 	public static String TryWithResourceRule_name;
-	public static String UseIsEmptyRule_description;
-	public static String UseIsEmptyRule_name;
+	public static String UseIsEmptyOnCollectionsRule_description;
+	public static String UseIsEmptyOnCollectionsRule_name;
 	public static String ValidateExecutor_shutting_down_validation_scheduler;
 	public static String ValidateExecutor_validation_scheduler_started;
 	public static String WhileToForEachRule_description;
 	public static String WhileToForEachRule_name;
+	public static String PutIfAbsentRule_description;
+	public static String PutIfAbsentRule_name;
+
+	public static String YAMLConfigUtil_providedPathNotLeadingToYAMLConfig;
 
 	static {
 		// initialize resource bundle

@@ -1,7 +1,7 @@
 package eu.jsparrow.license.netlicensing.model;
 
 /**
- * A representation of the scheduling parameters. 
+ * A representation of the scheduling parameters.
  * 
  * @author Ardit Ymeri
  * @since 1.0

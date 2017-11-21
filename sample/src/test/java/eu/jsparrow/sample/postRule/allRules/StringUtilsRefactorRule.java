@@ -156,4 +156,11 @@ public class StringUtilsRefactorRule {
 		return StringUtils.lowerCase(testString, l);
 	}
 
+	// Reproduces SIM-319
+	public String testNestedApplication(String testString) {
+		String url = "testString/generate-skus";
+		url = StringUtils.substring(url, 0, StringUtils.indexOf(url, "/generate-skus"));
+		return testString;
+	}
+
 }

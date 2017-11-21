@@ -40,28 +40,22 @@ import ch.qos.logback.core.util.FileSize;
  */
 public class LoggingUtil {
 
+	private static final int ROLLING_POLICY_MIN_INDEX = 0;
+	private static final int ROLLING_POLICY_MAX_INDEX = 5;
+	private static final String TRIGGER_MAX_FILE_SIZE = "5MB"; //$NON-NLS-1$
+	private static final String ROLLING_FILE_APPENDER_NAME = "eu.jsparrow.logging.rollingFile"; //$NON-NLS-1$
+	private static final String JUL_ROLLING_FILE_APPENDER_NAME = "eu.jsparrow.logging.jul.rollingFile"; //$NON-NLS-1$
+	private static final String ROOT_LOGGER_NAME = org.slf4j.Logger.ROOT_LOGGER_NAME;
+	private static final String JUL_LOGGER_NAME = "jul"; //$NON-NLS-1$
+	private static final String LOG_FILE_NAME = "jsparrow.log"; //$NON-NLS-1$
+	private static final String JUL_LOG_FILE_NAME = "jsparrow.jul.log"; //$NON-NLS-1$
+	private static Bundle bundle = null;
+	private static boolean isLogbackConfigured = false;
+
 	// sonar lint suggestion to hide the public default constructor
 	private LoggingUtil() {
 
 	}
-
-	private static final int ROLLING_POLICY_MIN_INDEX = 0;
-	private static final int ROLLING_POLICY_MAX_INDEX = 5;
-
-	private static final String TRIGGER_MAX_FILE_SIZE = "5MB"; //$NON-NLS-1$
-
-	private static final String ROLLING_FILE_APPENDER_NAME = "eu.jsparrow.logging.rollingFile"; //$NON-NLS-1$
-	private static final String JUL_ROLLING_FILE_APPENDER_NAME = "eu.jsparrow.logging.jul.rollingFile"; //$NON-NLS-1$
-
-	private static final String ROOT_LOGGER_NAME = org.slf4j.Logger.ROOT_LOGGER_NAME;
-	private static final String JUL_LOGGER_NAME = "jul"; //$NON-NLS-1$
-
-	private static final String LOG_FILE_NAME = "jsparrow.log"; //$NON-NLS-1$
-	private static final String JUL_LOG_FILE_NAME = "jsparrow.jul.log"; //$NON-NLS-1$
-
-	private static Bundle bundle = null;
-
-	private static boolean isLogbackConfigured = false;
 
 	/**
 	 * Triggers the logging configuration for plug in tests
@@ -153,10 +147,12 @@ public class LoggingUtil {
 	 * Configures the java.util.logging to slf4j bridge
 	 */
 	private static void configureJulToSlf4jBridge() {
-		LogManager.getLogManager().reset();
+		LogManager.getLogManager()
+			.reset();
 		CustomSLF4JBridgeHandler.removeHandlersForRootLogger();
 		CustomSLF4JBridgeHandler.install();
-		java.util.logging.Logger.getLogger("global").setLevel(Level.FINEST); //$NON-NLS-1$
+		java.util.logging.Logger.getLogger("global") //$NON-NLS-1$
+			.setLevel(Level.FINEST);
 	}
 
 	/**
@@ -245,7 +241,10 @@ public class LoggingUtil {
 	 */
 	private static String getLogFilePath(String fileName) {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		IPath logFilePath = workspace.getRoot().getLocation().append(".metadata").append(fileName); //$NON-NLS-1$
+		IPath logFilePath = workspace.getRoot()
+			.getLocation()
+			.append(".metadata") //$NON-NLS-1$
+			.append(fileName);
 		return logFilePath.toString();
 	}
 
@@ -260,8 +259,10 @@ public class LoggingUtil {
 		Path logFilePath = Paths.get(userHomeDir, ".log"); //$NON-NLS-1$
 
 		// create directory <user.home>/.log if it does not exist yet
-		if (!logFilePath.toFile().exists()) {
-			logFilePath.toFile().mkdirs();
+		if (!logFilePath.toFile()
+			.exists()) {
+			logFilePath.toFile()
+				.mkdirs();
 		}
 
 		logFilePath = Paths.get(logFilePath.toString(), fileName);

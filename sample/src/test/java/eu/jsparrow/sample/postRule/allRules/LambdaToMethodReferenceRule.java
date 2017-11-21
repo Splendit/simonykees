@@ -12,9 +12,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import eu.jsparrow.sample.utilities.NumberUtils;
 import eu.jsparrow.sample.utilities.Person;
 import eu.jsparrow.sample.utilities.TestModifier;
 
@@ -27,11 +32,24 @@ import eu.jsparrow.sample.utilities.TestModifier;
 @SuppressWarnings({ "nls", "unused", "unchecked", "rawtypes" })
 public class LambdaToMethodReferenceRule {
 
+	private static final Logger logger = LoggerFactory.getLogger(LambdaToMethodReferenceRule.class);
+
 	List<LocalDate> dateList = Arrays.asList(LocalDate.of(1992, 1, 1), LocalDate.of(2001, 2, 3),
 			LocalDate.of(2010, 10, 10), LocalDate.of(2017, 5, 15));
 
 	List<Person> personList = Arrays.asList(new Person("asdf", LocalDate.of(1999, 1, 1)),
 			new Person("jkl", LocalDate.of(2009, 2, 2)), new Person("yxcv", LocalDate.of(1989, 1, 1)));
+
+	/*
+	 * SIM-821 - the following should not be changed
+	 */
+	Function<Integer, String> toString = (Integer i) -> i.toString();
+
+	Function<Integer, String> toStringStatic = (Integer i) -> Integer.toString(i);
+
+	Function<AmbiguousMethods, String> testingAmb = (AmbiguousMethods i) -> AmbiguousMethods.testAmbiguity(i);
+
+	Function<AmbiguousMethods, String> testingAmb2 = (AmbiguousMethods i) -> i.testAmbiguity();
 
 	public void referenceToStaticMethod() {
 		Collections.sort(personList, Person::compareByAge);
@@ -44,9 +62,9 @@ public class LambdaToMethodReferenceRule {
 
 		Collections.sort(personList, Person::compareByAge);
 
-		personList.forEach(System.out::println);
+		personList.forEach(element -> logger.info(String.valueOf(element)));
 
-		personList.forEach(System.out::println);
+		personList.forEach(element -> logger.info(String.valueOf(element)));
 
 		personList.forEach(System.out::println);
 
@@ -59,15 +77,20 @@ public class LambdaToMethodReferenceRule {
 		Collections.sort(personList, (a, b) -> Person.compareByAge(a.getParent1(), b));
 
 		// SIM-454 bugfix static methods
-		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+		personList.stream()
+			.filter(LambdaToMethodReferenceRule::isPerson);
 
-		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+		personList.stream()
+			.filter(LambdaToMethodReferenceRule::isPerson);
 
-		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+		personList.stream()
+			.filter(LambdaToMethodReferenceRule::isPerson);
 
-		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+		personList.stream()
+			.filter(LambdaToMethodReferenceRule::isPerson);
 
-		personList.stream().filter(LambdaToMethodReferenceRule::isPerson);
+		personList.stream()
+			.filter(LambdaToMethodReferenceRule::isPerson);
 	}
 
 	public void referenceToInstanceMethod() {
@@ -113,9 +136,11 @@ public class LambdaToMethodReferenceRule {
 
 		personList.forEach(person -> getRandomPerson().doSomething(person));
 
-		personList.forEach((Person person) -> this.getRandomPerson().doSomething(person));
+		personList.forEach((Person person) -> this.getRandomPerson()
+			.doSomething(person));
 
-		personList.forEach(person -> this.getRandomPerson().doSomething(person));
+		personList.forEach(person -> this.getRandomPerson()
+			.doSomething(person));
 
 		setIterator(new Iterator() {
 
@@ -137,13 +162,13 @@ public class LambdaToMethodReferenceRule {
 
 			@Override
 			public boolean hasNext() {
-				personList.forEach((person) -> doSomething(person));
+				personList.forEach(person -> doSomething(person));
 				return false;
 			}
 
 			@Override
 			public Object next() {
-				personList.forEach((person) -> doSomething(person));
+				personList.forEach(person -> doSomething(person));
 				return null;
 			}
 
@@ -189,14 +214,18 @@ public class LambdaToMethodReferenceRule {
 		 */
 		List<Integer> list = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 0);
 
-		list.stream().map((Integer iterator) -> new java.awt.geom.Ellipse2D.Double(iterator, 2.0, 4.0, 4.0));
+		list.stream()
+			.map((Integer iterator) -> new java.awt.geom.Ellipse2D.Double(iterator, 2.0, 4.0, 4.0));
 
-		list.stream().map(Double::valueOf);
+		list.stream()
+			.map(Double::valueOf);
 
 		/*
 		 * SIM-532 bugfix
 		 */
-		personList.stream().map(p -> new Person(p.getName(), p.getBirthday())).forEach(Person::getBirthday);
+		personList.stream()
+			.map(p -> new Person(p.getName(), p.getBirthday()))
+			.forEach(Person::getBirthday);
 	}
 
 	/*
@@ -206,15 +235,25 @@ public class LambdaToMethodReferenceRule {
 	public void referenceToParameterizedType() {
 		Map<String, String> map = new HashMap<>();
 
-		map.entrySet().stream().forEach(Entry::getValue);
+		map.entrySet()
+			.stream()
+			.forEach(Map.Entry::getValue);
 
-		map.entrySet().stream().forEach(Entry::getValue);
+		map.entrySet()
+			.stream()
+			.forEach(Map.Entry::getValue);
 
-		map.entrySet().stream().forEach(Entry::getValue);
+		map.entrySet()
+			.stream()
+			.forEach(Map.Entry::getValue);
 
-		map.entrySet().stream().forEach(Entry<String, String>::getValue);
+		map.entrySet()
+			.stream()
+			.forEach(Entry<String, String>::getValue);
 
-		map.entrySet().stream().forEach(Entry::getValue);
+		map.entrySet()
+			.stream()
+			.forEach(Entry::getValue);
 	}
 
 	/*
@@ -226,36 +265,55 @@ public class LambdaToMethodReferenceRule {
 
 	public void saveTypeArguments(String input) {
 		List<Person> persons = new ArrayList<>();
-		persons.stream().map(Person::getName).forEach(this::<String>consumeString);
+		persons.stream()
+			.map(Person::getName)
+			.forEach(this::<String>consumeString);
 	}
 
 	public void missingTypeArguments3(String input) {
 		List<NestedClass> persons = new ArrayList<>();
-		persons.stream().map(NestedClass::<String>consumeObject);
+		persons.stream()
+			.map(NestedClass::<String>consumeObject);
 	}
 
 	public void missingTypeArguments2(String input) {
 		List<Person> persons = new ArrayList<>();
-		persons.stream().map(Employee<String>::new);
+		persons.stream()
+			.map(Employee<String>::new);
 	}
 
 	public void missingTypeArguments(String input) {
 		List<NestedClass> persons = new ArrayList<>();
-		persons.stream().map(NestedClass::consumeObject);
+		persons.stream()
+			.map(NestedClass::consumeObject);
 	}
 
 	public void captureTypes(String input) {
 		List<? extends Person> persons = new ArrayList<>();
-		List<String> names = persons.stream().map(Person::getName).collect(Collectors.toList());
+		List<String> names = persons.stream()
+			.map(Person::getName)
+			.collect(Collectors.toList());
 	}
 
 	public void captureOfParameterizedTypes(String input) {
 		List<? extends Employee<String>> persons = new ArrayList<>();
-		List<String> names = persons.stream().map(Employee::getName).collect(Collectors.toList());
+		List<String> names = persons.stream()
+			.map(Employee::getName)
+			.collect(Collectors.toList());
 	}
 
 	public void missingImports() {
 		Person.filter(TestModifier::isStatic);
+	}
+
+	public void usingQualifiedName() {
+		List<UsingApacheNumberUtils> numberUtils = new ArrayList<>();
+		/*
+		 * Expecting the transformation to use a fully qualified name.
+		 */
+		numberUtils.stream()
+			.map(UsingApacheNumberUtils::getNumber)
+			.map(org.apache.commons.lang3.math.NumberUtils::toString);
 	}
 
 	public static <T, SOURCE extends Collection<T>, DEST extends Collection<T>> DEST transferElements(
@@ -285,7 +343,9 @@ public class LambdaToMethodReferenceRule {
 	class NestedClass {
 		public void referencingMethodInNestedClass() {
 			List<Person> persons = new ArrayList<>();
-			persons.stream().map(Person::getName).forEach(name -> consumeString(name));
+			persons.stream()
+				.map(Person::getName)
+				.forEach(name -> consumeString(name));
 		}
 
 		public <T> T consumeObject() {
@@ -295,11 +355,13 @@ public class LambdaToMethodReferenceRule {
 
 	class ComparisonProvider {
 		public int compareByName(Person a, Person b) {
-			return a.getName().compareTo(b.getName());
+			return a.getName()
+				.compareTo(b.getName());
 		}
 
 		public int compareByAge(Person a, Person b) {
-			return a.getBirthday().compareTo(b.getBirthday());
+			return a.getBirthday()
+				.compareTo(b.getBirthday());
 		}
 	}
 
@@ -317,5 +379,39 @@ public class LambdaToMethodReferenceRule {
 			return "e:" + super.getName();
 		}
 
+	}
+
+	class UsingApacheNumberUtils {
+		/**
+		 * There is already an existing import of another NumberUtils class.
+		 * Namely {@link NumberUtils}. Therefore,
+		 * {@link org.apache.commons.lang3.math.NumberUtils} has to always use a
+		 * fully qualified name.
+		 */
+		public org.apache.commons.lang3.math.NumberUtils getNumber() {
+			return null;
+		}
+	}
+}
+
+/**
+ * SIM-821
+ */
+class AmbiguousMethods {
+
+	public String testAmbiguity() {
+		return "nonStaticMethod";
+	}
+
+	public String testAmbiguity(int i) {
+		return "nonStaticMethod";
+	}
+
+	public String testAmbiguity(String s, int i) {
+		return "nonStaticMethod";
+	}
+
+	public static String testAmbiguity(AmbiguousMethods i) {
+		return String.valueOf(i);
 	}
 }

@@ -57,9 +57,9 @@ public interface LicenseValidationService {
 	String getLicenseStautsUserMessage();
 
 	/**
-	 * checks if type is demo/trial
+	 * checks if type is demo/free
 	 * 
-	 * @return true if type is demo (trial), false otherwise
+	 * @return true if type is demo (free), false otherwise
 	 */
 	boolean isDemoType();
 
@@ -69,4 +69,11 @@ public interface LicenseValidationService {
 	 * @return true if both conditions are met, false otherwise
 	 */
 	boolean isFullValidLicense();
+
+	/**
+	 * tells the license service if jSparrow is running
+	 * 
+	 * @param running
+	 */
+	void setJSparrowRunning(boolean running);
 }

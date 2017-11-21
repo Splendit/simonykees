@@ -45,7 +45,7 @@ public class Activator implements BundleActivator {
 		plugin = null;
 
 		synchronized (jobs) {
-			jobs.forEach(job -> job.cancel());
+			jobs.forEach(Job::cancel);
 			jobs.clear();
 		}
 	}
@@ -58,7 +58,6 @@ public class Activator implements BundleActivator {
 	public static Activator getDefault() {
 		return plugin;
 	}
-	
 
 	public static void registerJob(Job job) {
 		synchronized (jobs) {

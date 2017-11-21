@@ -1,17 +1,21 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.OverrideAnnotationRuleASTVisitor;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
+import eu.jsparrow.core.visitor.impl.OverrideAnnotationRuleASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
  * @see OverrideAnnotationRuleASTVisitor
  * 
- * Required java version is {@value JavaVersion#JAVA_1_6} because
- * with previous version it was not possible to annotate the methods
- * inherited from the interfaces.
+ *      Required java version is {@value JavaVersion#JAVA_1_6} because with
+ *      previous version it was not possible to annotate the methods inherited
+ *      from the interfaces.
  * 
  * @author Ardit Ymeri
  * @since 1.2
@@ -19,14 +23,18 @@ import eu.jsparrow.i18n.Messages;
  */
 public class OverrideAnnotationRule extends RefactoringRule<OverrideAnnotationRuleASTVisitor> {
 
-	public OverrideAnnotationRule(Class<OverrideAnnotationRuleASTVisitor> visitor) {
-		super(visitor);
-		this.name = Messages.OverrideAnnotationRule_name;
-		this.description = Messages.OverrideAnnotationRule_description;
+	public OverrideAnnotationRule() {
+		super();
+		this.visitorClass = OverrideAnnotationRuleASTVisitor.class;
+		this.id = "OverrideAnnotation"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.OverrideAnnotationRule_name,
+				Messages.OverrideAnnotationRule_description, Duration.ofMinutes(5),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
-	
+
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_6;
 	}
+
 }

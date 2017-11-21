@@ -9,10 +9,6 @@ import java.time.Instant;
 import org.junit.After;
 import org.junit.Test;
 
-import eu.jsparrow.license.netlicensing.LicenseChecker;
-import eu.jsparrow.license.netlicensing.LicenseManager;
-import eu.jsparrow.license.netlicensing.ValidateExecutor;
-import eu.jsparrow.license.netlicensing.ValidationResultCache;
 import eu.jsparrow.license.netlicensing.model.LicenseeModel;
 
 /**
@@ -33,7 +29,8 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 	public void shutDownAndRestartScheduler() throws InterruptedException {
 		// having an instance of license manager and a running scheduler...
 
-		ValidationResultCache.getInstance().reset();
+		ValidationResultCache.getInstance()
+			.reset();
 		persistNodeLockedLicensee();
 		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 		LicenseManager licenseManager = LicenseManager.getInstance();
@@ -63,7 +60,8 @@ public class ValidateExecutorTest extends LicenseCommonTest {
 		 * down...
 		 */
 
-		ValidationResultCache.getInstance().reset();
+		ValidationResultCache.getInstance()
+			.reset();
 		persistNodeLockedLicensee();
 
 		LicenseManager licenseManager = LicenseManager.getInstance();

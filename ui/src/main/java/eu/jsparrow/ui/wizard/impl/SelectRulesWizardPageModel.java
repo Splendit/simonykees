@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.Tag;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
@@ -27,7 +29,7 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 
 	public SelectRulesWizardPageModel(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) {
 		super(rules);
-		
+
 		tags = Tag.getAllTags();
 	}
 
@@ -51,21 +53,24 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	 * 
 	 * @return Set containing searched string.
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public Set<Object> filterPosibilitiesByName() {
 		return super.getPosibilities().stream()
-				.filter(object -> ((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).getName().toLowerCase()
-						.contains(nameFilter))
-				.collect(Collectors.toSet());
+			.filter(object -> StringUtils
+				.contains(((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object).getRuleDescription().getName()
+					.toLowerCase(), nameFilter))
+			.collect(Collectors.toSet());
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public void filterPosibilitiesByTags() {
 		if (!appliedTags.isEmpty()) {
-			Set<Object> currentPossibilities = getAllPosibilities();
+			Set<Object> currentPossibilities = getPosibilities();
 			setPosibilitiesFilteredByTag(currentPossibilities.stream()
-					.filter(object -> containsTag((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object))
-					.collect(Collectors.toSet()));
+				.filter(object -> containsTag((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) object))
+				.collect(Collectors.toSet()));
 		} else {
 			addAllItems(getPosibilities());
 		}
@@ -73,11 +78,13 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 
 	private boolean containsTag(RefactoringRule<? extends AbstractASTRewriteASTVisitor> object) {
 		for (String tag : appliedTags) {
-			if(null != Tag.getTageForName(tag)) {
-				if (object.getTags().contains(Tag.getTageForName(tag))) {
+			if (null != Tag.getTageForName(tag)) {
+				if (object.getRuleDescription().getTags()
+					.contains(Tag.getTageForName(tag))) {
 					return true;
 				}
-			} else if (object.getName().toLowerCase().contains(tag)) {
+			} else if (StringUtils.contains(object.getRuleDescription().getName()
+				.toLowerCase(), tag)) {
 				return true;
 			}
 		}
@@ -105,6 +112,7 @@ public class SelectRulesWizardPageModel extends AbstractSelectRulesWizardModel {
 	 * 
 	 * @return String for filter by name
 	 */
+	@Override
 	public String getNameFilter() {
 		return nameFilter;
 	}

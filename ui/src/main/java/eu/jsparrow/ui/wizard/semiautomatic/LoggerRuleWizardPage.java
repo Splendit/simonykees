@@ -1,7 +1,17 @@
 package eu.jsparrow.ui.wizard.semiautomatic;
 
+import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.ATTACH_EXCEPTION_OBJECT;
+import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.MISSING_LOG_KEY;
+import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.PRINT_STACKTRACE_KEY;
+import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_ERR_PRINT_EXCEPTION_KEY;
+import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_ERR_PRINT_KEY;
+import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_OUT_PRINT_EXCEPTION_KEY;
+import static eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants.SYSTEM_OUT_PRINT_KEY;
+
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
@@ -13,20 +23,19 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
-import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.wizard.IValueChangeListener;
 
 /**
  * Wizard page for configuring logger rule when applying to selected resources
  * 
- * @author Andreja Sambolec
+ * @author Andreja Sambolec, Ardit Ymeri
  * @since 1.2
  *
  */
@@ -34,50 +43,48 @@ import eu.jsparrow.ui.wizard.IValueChangeListener;
 public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 	private LoggerRuleWizardPageModel model;
-	private LoggerRuleWizardPageControler controler;
-
-	private Composite composite;
+	private LoggerRuleWizardPageControler controller;
 
 	private Combo systemOutCombo;
 	private Combo systemErrCombo;
-	private Combo stackTraceCombo;
+	private Combo exceptionsCombo;
+
+	private Button defaultForExceptionLogButton;
+	private Button missingLogStatementButton;
+	private Button printStackTraceButton;
+	private Button logExceptionObjectButton;
 
 	private Font boldFont;
 
 	protected IStatus fSelectionStatus;
 
-	public LoggerRuleWizardPage(LoggerRuleWizardPageModel model, LoggerRuleWizardPageControler controler) {
+	public LoggerRuleWizardPage(LoggerRuleWizardPageModel model) {
 		super(Messages.LoggerRuleWizardPage_pageName);
 		setTitle(Messages.LoggerRuleWizard_title);
 		setDescription(Messages.LoggerRuleWizardPage_description);
-		
+
 		this.model = model;
-		this.controler = controler;
+		this.controller = new LoggerRuleWizardPageControler(model);
 	}
 
 	@Override
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		composite = new Composite(parent, SWT.NONE);
+		Composite composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
 
 		setControl(composite);
 
-		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont()).setStyle(SWT.BOLD);
+		FontDescriptor boldDescriptor = FontDescriptor.createFrom(parent.getFont())
+			.setStyle(SWT.BOLD);
 		boldFont = boldDescriptor.createFont(composite.getDisplay());
 
 		createSystemOutPart(composite);
 		createSystemErrPart(composite);
-		createStackTracePart(composite);
+		createLogExceptionsPart(composite);
 
-		model.addListener(new IValueChangeListener() {
-
-			@Override
-			public void valueChanged() {
-				doStatusUpdate();
-			}
-		});
+		model.addListener(this::doStatusUpdate);
 
 		initializeData();
 		doStatusUpdate();
@@ -104,8 +111,9 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.selectionChanged(StandardLoggerConstants.SYSTEM_OUT_PRINT,
+				controller.selectionChanged(SYSTEM_OUT_PRINT_KEY,
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
+				updatePrintingExceptionsOptions(defaultForExceptionLogButton);
 			}
 		});
 		gridData = new GridData(GridData.FILL, GridData.FILL, false, false);
@@ -117,8 +125,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		gridData.horizontalSpan = 2;
 		gridData.verticalIndent = 5;
 		systemOutExplainLabel.setLayoutData(gridData);
-		systemOutExplainLabel.setText(
-				Messages.LoggerRuleWizardPage_sysOutMessageLabel);
+		systemOutExplainLabel.setText(Messages.LoggerRuleWizardPage_sysOutMessageLabel);
 	}
 
 	private void createSystemErrPart(Composite parent) {
@@ -141,8 +148,9 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.selectionChanged(StandardLoggerConstants.SYSTEM_ERR_PRINT,
+				controller.selectionChanged(SYSTEM_ERR_PRINT_KEY,
 						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
+				updatePrintingExceptionsOptions(defaultForExceptionLogButton);
 			}
 		});
 		gridData = new GridData(GridData.FILL, GridData.FILL, false, false);
@@ -154,13 +162,12 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		gridData.horizontalSpan = 2;
 		gridData.verticalIndent = 5;
 		systemErrExplainLabel.setLayoutData(gridData);
-		systemErrExplainLabel.setText(
-				Messages.LoggerRuleWizardPage_sysErrMessageLabel);
+		systemErrExplainLabel.setText(Messages.LoggerRuleWizardPage_sysErrMessageLabel);
 	}
 
-	private void createStackTracePart(Composite parent) {
+	private void createLogExceptionsPart(Composite parent) {
 		Group stackTraceGroup = new Group(parent, SWT.NONE);
-		stackTraceGroup.setText(Messages.LoggerRuleWizardPage_stackTraceLabel);
+		stackTraceGroup.setText(Messages.LoggerRuleWizardPage_loggingExceptionsLabel);
 		stackTraceGroup.setFont(boldFont);
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gridData.horizontalSpan = 2;
@@ -172,27 +179,156 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		Label stackTraceLabel = new Label(stackTraceGroup, SWT.NONE);
 		stackTraceLabel.setText(Messages.LoggerRuleWizardPage_severityLevelLabel);
 
-		stackTraceCombo = new Combo(stackTraceGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
+		exceptionsCombo = new Combo(stackTraceGroup, SWT.DROP_DOWN | SWT.READ_ONLY);
 		populateStackTraceCombo();
-		stackTraceCombo.addSelectionListener(new SelectionAdapter() {
+		exceptionsCombo.addSelectionListener(new SelectionAdapter() {
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				controler.selectionChanged(StandardLoggerConstants.PRINT_STACKTRACE,
-						((Combo) e.getSource()).getItem(((Combo) e.getSource()).getSelectionIndex()));
+				Combo combo = (Combo) e.getSource();
+				int selectedIndex = combo.getSelectionIndex();
+				String value = combo.getItem(selectedIndex);
+				controller.selectionChanged(PRINT_STACKTRACE_KEY, value);
+				setExceptionButtonsEnabled(selectedIndex != 0);
+				updatePrintingExceptionsOptions(defaultForExceptionLogButton);
+				updateMissingLogStatementOptions(missingLogStatementButton);
+				updatePrintStackTraceOptions(printStackTraceButton);
+				updateLogExceptionObjectOptions(logExceptionObjectButton);
 			}
 		});
 		gridData = new GridData(GridData.FILL, GridData.FILL, false, false);
 		gridData.widthHint = 200;
-		stackTraceCombo.setLayoutData(gridData);
+		exceptionsCombo.setLayoutData(gridData);
 
-		Label stackTraceExplainLabel = new Label(stackTraceGroup, SWT.WRAP | SWT.LEFT);
-		gridData = new GridData(SWT.HORIZONTAL, SWT.TOP, true, false, 1, 1);
+		Group checkBoxGroup = new Group(stackTraceGroup, SWT.NONE);
+		gridData = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gridData.horizontalSpan = 2;
+		gridData.verticalIndent = 15;
+		gridData.widthHint = 400;
+		checkBoxGroup.setLayoutData(gridData);
+		checkBoxGroup.setLayout(new GridLayout(2, false));
+
+		// 1. printStacktrace
+		printStackTraceButton = createCheckBox(checkBoxGroup,
+				Messages.LoggerRuleWizardPage_replacePrintstacktraceWithLogger,
+				Messages.LoggerRuleWizardPage_print_stack_trace_popup_description,
+				Messages.LoggerRuleWizardPage_print_stack_trace_example_before,
+				Messages.LoggerRuleWizardPage_print_stack_trace_example_after, new SelectionAdapter() {
+
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						Button btn = (Button) e.getSource();
+						updatePrintStackTraceOptions(btn);
+					}
+				});
+
+		// 2. Add missing log statement
+		missingLogStatementButton = createCheckBox(checkBoxGroup,
+				Messages.LoggerRuleWizardPage_insertNewLoggerStatementInEmptyCatch,
+				Messages.LoggerRuleWizardPage_missing_logger_pupup_description,
+				Messages.LoggerRuleWizardPage_missing_logger_example_before,
+				Messages.LoggerRuleWizardPage_missing_logger_example_after, new SelectionAdapter() {
+
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						Button btn = (Button) e.getSource();
+						updateMissingLogStatementOptions(btn);
+					}
+				});
+
+		// 3. Always log the exception object
+		logExceptionObjectButton = createCheckBox(checkBoxGroup,
+				Messages.LoggerRuleWizardPage_alwaysAddExceptionParamInLoggerStatement,
+				Messages.LoggerRuleWizardPage_log_exception_object_popup_description,
+				Messages.LoggerRuleWizardPage_log_exception_object_example_before,
+				Messages.LoggerRuleWizardPage_log_exception_object_example_after, new SelectionAdapter() {
+
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						Button btn = (Button) e.getSource();
+						updateLogExceptionObjectOptions(btn);
+					}
+				});
+
+		// 4. defaultForExceptionLog
+		defaultForExceptionLogButton = createCheckBox(checkBoxGroup,
+				Messages.LoggerRuleWizardPage_alwaysUsePrintStacktraceOptionForLoggingException,
+				Messages.LoggerRuleWizardPage_default_log_for_exception_popup_description,
+				Messages.LoggerRuleWizardPage_default_log_for_exception_example_before,
+				Messages.LoggerRuleWizardPage_default_log_for_exception_example_after, new SelectionAdapter() {
+
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						Button btn = (Button) e.getSource();
+						updatePrintingExceptionsOptions(btn);
+					}
+				});
+	}
+	
+	private Button createCheckBox(Composite parent, String text, String popupDescription, String exampleBefore,
+			String exampleAfter, SelectionAdapter selectionAdapter) {
+		Button button = new Button(parent, SWT.CHECK);
+		GridData gridData = new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1);
+		gridData.horizontalSpan = 1;
 		gridData.verticalIndent = 5;
-		stackTraceExplainLabel.setLayoutData(gridData);
-		stackTraceExplainLabel.setText(
-				Messages.LoggerRuleWizardPage_stackTraceMessageLabel);
+		button.setLayoutData(gridData);
+		button.addSelectionListener(selectionAdapter);
+		button.addMouseTrackListener(new LoggerRuleWizardCheckBoxTrackAdapter(popupDescription, exampleBefore, exampleAfter, button));
+
+		Label label = new Label(parent, SWT.WRAP | SWT.LEFT);
+		label.setText(text);
+
+		return button;
+	}
+	
+	private void setExceptionButtonsEnabled(boolean value) {
+		logExceptionObjectButton.setEnabled(value);
+		missingLogStatementButton.setEnabled(value);
+		defaultForExceptionLogButton.setEnabled(value);
+		printStackTraceButton.setEnabled(value);
+	}
+	
+	private void updateMissingLogStatementOptions(Button btn) {
+		String value;
+		if(btn.getSelection()) {
+			value = exceptionsCombo.getItem(exceptionsCombo.getSelectionIndex());
+		} else {
+			value = exceptionsCombo.getItem(0);
+		}
+		controller.selectionChanged(MISSING_LOG_KEY, value);
+	}
+	
+	private void updatePrintStackTraceOptions(Button btn) {
+		String value;
+		if(btn.getSelection()) {
+			value = exceptionsCombo.getItem(exceptionsCombo.getSelectionIndex());
+		} else {
+			value = exceptionsCombo.getItem(0);
+		}
+		controller.selectionChanged(PRINT_STACKTRACE_KEY, value);
+	}
+
+	private void updatePrintingExceptionsOptions(Button btn) {
+		if (btn.getSelection()) {
+			String comboSelectedItem = exceptionsCombo.getItem(exceptionsCombo.getSelectionIndex());
+			controller.selectionChanged(SYSTEM_OUT_PRINT_EXCEPTION_KEY, comboSelectedItem);
+			controller.selectionChanged(SYSTEM_ERR_PRINT_EXCEPTION_KEY, comboSelectedItem);
+		} else {
+			controller.selectionChanged(SYSTEM_OUT_PRINT_EXCEPTION_KEY,
+					systemOutCombo.getItem(systemOutCombo.getSelectionIndex()));
+			controller.selectionChanged(SYSTEM_ERR_PRINT_EXCEPTION_KEY,
+					systemErrCombo.getItem(systemErrCombo.getSelectionIndex()));
+		}
+	}
+	
+	private void updateLogExceptionObjectOptions(Button btn) {
+		String value;
+		if(btn.getSelection() && exceptionsCombo.getSelectionIndex() != 0) {
+			value = Boolean.TRUE.toString();
+		} else {
+			value = Boolean.FALSE.toString();
+		}
+		controller.selectionChanged(ATTACH_EXCEPTION_OBJECT, value);
 	}
 
 	@Override
@@ -206,9 +342,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 */
 	private void populateSystemOutCombo() {
 		Set<String> severityLevels = model.getSystemOutReplaceOptions();
-		for (String severityLevel : severityLevels) {
-			systemOutCombo.add(severityLevel);
-		}
+		severityLevels.forEach(systemOutCombo::add);
 	}
 
 	/**
@@ -216,9 +350,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 */
 	private void populateSystemErrCombo() {
 		Set<String> severityLevels = model.getSystemErrReplaceOptions();
-		for (String severityLevel : severityLevels) {
-			systemErrCombo.add(severityLevel);
-		}
+		severityLevels.forEach(systemErrCombo::add);
 	}
 
 	/**
@@ -226,18 +358,21 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 */
 	private void populateStackTraceCombo() {
 		Set<String> severityLevels = model.getPrintStackTraceReplaceOptions();
-		for (String severityLevel : severityLevels) {
-			stackTraceCombo.add(severityLevel);
-		}
+		severityLevels.forEach(exceptionsCombo::add);
 	}
 
 	private void initializeData() {
-		systemOutCombo.select(
-				systemOutCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.SYSTEM_OUT_PRINT)));
-		systemErrCombo.select(
-				systemErrCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.SYSTEM_ERR_PRINT)));
-		stackTraceCombo.select(
-				stackTraceCombo.indexOf(model.getCurrentSelectionMap().get(StandardLoggerConstants.PRINT_STACKTRACE)));
+		Map<String, String> selection = model.getCurrentSelectionMap();
+		systemOutCombo.select(systemOutCombo.indexOf(selection.get(SYSTEM_OUT_PRINT_KEY)));
+		systemErrCombo.select(systemErrCombo.indexOf(selection.get(SYSTEM_ERR_PRINT_KEY)));
+		exceptionsCombo.select(exceptionsCombo.indexOf(selection.get(PRINT_STACKTRACE_KEY)));
+		logExceptionObjectButton.setSelection(Boolean.parseBoolean(selection.get(ATTACH_EXCEPTION_OBJECT)));
+		missingLogStatementButton.setSelection(!selection.get(MISSING_LOG_KEY)
+			.isEmpty());
+		printStackTraceButton.setSelection(!selection.get(PRINT_STACKTRACE_KEY)
+			.isEmpty());
+		defaultForExceptionLogButton.setSelection(selection.get(SYSTEM_OUT_PRINT_EXCEPTION_KEY)
+			.equals(PRINT_STACKTRACE_KEY));
 	}
 
 	/**
@@ -246,9 +381,10 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 	 * will be shown.
 	 */
 	protected void doStatusUpdate() {
-		if (model.getSelectionStatus().isEmpty()) {
+		if (StringUtils.isEmpty(model.getSelectionStatus())) {
 			fSelectionStatus = new StatusInfo();
-		} else if (model.getSelectionStatus().equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)) {
+		} else if (model.getSelectionStatus()
+			.equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)) {
 			((StatusInfo) fSelectionStatus).setError(model.getSelectionStatus());
 		} else {
 			((StatusInfo) fSelectionStatus).setWarning(model.getSelectionStatus());
@@ -264,7 +400,7 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		 */
 		updateStatus(status);
 	}
-	
+
 	/**
 	 * Open help dialog
 	 */
@@ -273,3 +409,4 @@ public class LoggerRuleWizardPage extends NewElementWizardPage {
 		SimonykeesMessageDialog.openDefaultHelpMessageDialog(getShell());
 	}
 }
+

@@ -17,7 +17,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
  */
 class ForLoopOverArraysASTVisitor extends ForLoopIteratingIndexASTVisitor {
 
-
 	public ForLoopOverArraysASTVisitor(SimpleName iteratingIndexName, SimpleName iterableName,
 			ForStatement forStatement, Block scopeBloc) {
 		super(iteratingIndexName, iterableName, forStatement, scopeBloc);

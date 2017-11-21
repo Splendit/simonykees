@@ -1,9 +1,13 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.StringLiteralEqualityCheckASTVisitor;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
+import eu.jsparrow.core.visitor.impl.StringLiteralEqualityCheckASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -15,14 +19,18 @@ import eu.jsparrow.i18n.Messages;
  */
 public class StringLiteralEqualityCheckRule extends RefactoringRule<StringLiteralEqualityCheckASTVisitor> {
 
-	public StringLiteralEqualityCheckRule(Class<StringLiteralEqualityCheckASTVisitor> visitor) {
-		super(visitor);
-		this.name = Messages.StringLiteralEqualityCheckRule_name;
-		this.description = Messages.StringLiteralEqualityCheckRule_description;
+	public StringLiteralEqualityCheckRule() {
+		super();
+		this.visitorClass = StringLiteralEqualityCheckASTVisitor.class;
+		this.id = "StringLiteralEqualityCheck"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.StringLiteralEqualityCheckRule_name,
+				Messages.StringLiteralEqualityCheckRule_description, Duration.ofMinutes(10),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_1;
 	}
+
 }

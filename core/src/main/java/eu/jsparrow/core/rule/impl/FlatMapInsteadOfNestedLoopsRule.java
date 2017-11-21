@@ -1,9 +1,13 @@
 package eu.jsparrow.core.rule.impl;
 
+import java.time.Duration;
+
 import org.apache.commons.lang3.JavaVersion;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.FlatMapInsteadOfNestedLoopsASTVisitor;
+import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.util.TagUtil;
+import eu.jsparrow.core.visitor.impl.FlatMapInsteadOfNestedLoopsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -12,14 +16,19 @@ import eu.jsparrow.i18n.Messages;
  * @since 2.1.1
  */
 public class FlatMapInsteadOfNestedLoopsRule extends RefactoringRule<FlatMapInsteadOfNestedLoopsASTVisitor> {
-	public FlatMapInsteadOfNestedLoopsRule(Class<FlatMapInsteadOfNestedLoopsASTVisitor> visitor) {
-		super(visitor);
-		this.name = Messages.FlatMapInsteadOfNestedLoopsRule_name;
-		this.description = Messages.FlatMapInsteadOfNestedLoopsRule_description;
+
+	public FlatMapInsteadOfNestedLoopsRule() {
+		super();
+		this.visitorClass = FlatMapInsteadOfNestedLoopsASTVisitor.class;
+		this.id = "FlatMapInsteadOfNestedLoops"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.FlatMapInsteadOfNestedLoopsRule_name,
+				Messages.FlatMapInsteadOfNestedLoopsRule_name, Duration.ofMinutes(15),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_8;
 	}
+
 }

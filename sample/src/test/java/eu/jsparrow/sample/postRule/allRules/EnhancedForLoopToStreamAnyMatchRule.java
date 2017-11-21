@@ -16,7 +16,8 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	boolean missingBoolDecl = false;
 
 	public void usingAnyMatch(List<String> strings) {
-		boolean containsEmpty = strings.stream().anyMatch(StringUtils::isEmpty);
+		boolean containsEmpty = strings.stream()
+			.anyMatch(StringUtils::isEmpty);
 	}
 
 	public void statementsInBetween(List<String> strings) {
@@ -24,7 +25,8 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 		if (strings.contains("a")) {
 			strings.add(b);
 		}
-		boolean containsEmpty = strings.stream().anyMatch(StringUtils::isEmpty);
+		boolean containsEmpty = strings.stream()
+			.anyMatch(StringUtils::isEmpty);
 	}
 
 	public void statementsBefore(List<String> strings) {
@@ -32,11 +34,13 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 		if (strings.contains("a")) {
 			strings.add(b);
 		}
-		boolean containsEmpty = strings.stream().anyMatch(StringUtils::isEmpty);
+		boolean containsEmpty = strings.stream()
+			.anyMatch(StringUtils::isEmpty);
 	}
 
 	public void statementsAfter(List<String> strings) {
-		boolean containsEmpty = strings.stream().anyMatch(StringUtils::isEmpty);
+		boolean containsEmpty = strings.stream()
+			.anyMatch(StringUtils::isEmpty);
 
 		String b = "b";
 		if (strings.contains("a")) {
@@ -65,7 +69,8 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 			containsA = true;
 		}
 
-		boolean containsEmpty = strings.stream().anyMatch(StringUtils::isEmpty);
+		boolean containsEmpty = strings.stream()
+			.anyMatch(StringUtils::isEmpty);
 	}
 
 	public void missingBreakStatement(List<String> strings) {
@@ -121,23 +126,33 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	}
 
 	public void swappedBooleanValues(List<String> strings) {
-		boolean containsNonEmpty = strings.stream().filter(StringUtils::isEmpty).findFirst().map(value -> false)
-				.orElse(true);
+		boolean containsNonEmpty = strings.stream()
+			.filter(StringUtils::isEmpty)
+			.findFirst()
+			.map(value -> false)
+			.orElse(true);
 	}
 
 	public void sameBooleanValues1(List<String> strings) {
-		boolean containsNonEmpty = strings.stream().filter(StringUtils::isEmpty).findFirst().map(value -> true)
-				.orElse(true);
+		boolean containsNonEmpty = strings.stream()
+			.filter(StringUtils::isEmpty)
+			.findFirst()
+			.map(value -> true)
+			.orElse(true);
 	}
 
 	public void sameBooleanValues2(List<String> strings) {
-		boolean containsNonEmpty = strings.stream().filter(StringUtils::isEmpty).findFirst().map(value -> false)
-				.orElse(false);
+		boolean containsNonEmpty = strings.stream()
+			.filter(StringUtils::isEmpty)
+			.findFirst()
+			.map(value -> false)
+			.orElse(false);
 	}
 
 	public void compoundCondition(List<String> strings) {
 		String emptyString = "";
-		boolean containsEmpty = strings.stream().anyMatch(emptyString::equals);
+		boolean containsEmpty = strings.stream()
+			.anyMatch(emptyString::equals);
 	}
 
 	public void nonEffectivelyFinalCondition(List<String> strings) {
@@ -154,7 +169,8 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 
 	public void loopWithSingleBodyStatement(List<String> strings) {
 		String emptyString = "";
-		boolean containsEmpty = strings.stream().anyMatch(emptyString::equals);
+		boolean containsEmpty = strings.stream()
+			.anyMatch(emptyString::equals);
 	}
 
 	/*
@@ -163,7 +179,8 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 
 	public boolean loopWithReturnStatement(List<String> strings) {
 		String emptyString = "";
-		return strings.stream().anyMatch(emptyString::equals);
+		return strings.stream()
+			.anyMatch(emptyString::equals);
 	}
 
 	public boolean nonEffectivelyFinalReturnStatement(List<String> strings) {
@@ -190,23 +207,36 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 
 	public boolean mixedReturnValues(List<String> strings) {
 		String emptyString = "";
-		return strings.stream().filter(emptyString::equals).findFirst().map(value -> false).orElse(false);
+		return strings.stream()
+			.filter(emptyString::equals)
+			.findFirst()
+			.map(value -> false)
+			.orElse(false);
 	}
 
 	public boolean mixedReturnValues2(List<String> strings) {
 		String emptyString = "";
-		return strings.stream().filter(emptyString::equals).findFirst().map(value -> true).orElse(true);
+		return strings.stream()
+			.filter(emptyString::equals)
+			.findFirst()
+			.map(value -> true)
+			.orElse(true);
 	}
 
 	public boolean mixedReturnValues3(List<String> strings) {
 		String emptyString = "";
-		return strings.stream().filter(emptyString::equals).findFirst().map(value -> false).orElse(true);
+		return strings.stream()
+			.filter(emptyString::equals)
+			.findFirst()
+			.map(value -> false)
+			.orElse(true);
 	}
 
 	public boolean irrelevantStatementsBeforeLoop(List<String> strings) {
 		String emptyString = "";
 		String nonEmpty = "I dont stop you from converting to anyMatch";
-		return strings.stream().anyMatch(emptyString::equals);
+		return strings.stream()
+			.anyMatch(emptyString::equals);
 	}
 
 	public boolean noIfWrapperAroundReturn(List<String> strings) {
@@ -219,9 +249,11 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 
 	public boolean noReturnStatementInsideIf(List<String> strings) {
 		String emptyString = "";
-		strings.stream().filter((value) -> !emptyString.equals(value))
-				.map((value) -> StringUtils.substring(value, 0, 1)).forEach((prefix) -> {
-				});
+		strings.stream()
+			.filter(value -> !emptyString.equals(value))
+			.map(value -> StringUtils.substring(value, 0, 1))
+			.forEach(prefix -> {
+			});
 		return false;
 	}
 
@@ -238,12 +270,14 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 
 	public boolean ifWithSingleBodyStatement(List<String> strings) {
 		String emptyString = "";
-		return strings.stream().anyMatch(emptyString::equals);
+		return strings.stream()
+			.anyMatch(emptyString::equals);
 	}
 
 	public boolean singleBodyStatementEverywhere(List<String> strings) {
 		String emptyString = "";
-		return strings.stream().anyMatch(emptyString::equals);
+		return strings.stream()
+			.anyMatch(emptyString::equals);
 	}
 
 	public void emptyReturnStatements(List<String> strings) {
