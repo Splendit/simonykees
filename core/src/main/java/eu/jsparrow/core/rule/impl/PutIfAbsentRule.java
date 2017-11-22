@@ -11,7 +11,8 @@ import eu.jsparrow.core.visitor.impl.PutIfAbsentASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
 /**
- * This rule replaces map.put(..) with map.putIfAbsent(..) if certain criteria are met.
+ * This rule replaces map.put(..) with map.putIfAbsent(..) if certain criteria
+ * are met.
  * 
  * @see PutIfAbsentASTVisitor
  * 
@@ -23,9 +24,9 @@ public class PutIfAbsentRule extends RefactoringRule<PutIfAbsentASTVisitor> {
 	public PutIfAbsentRule() {
 		super();
 		this.visitorClass = PutIfAbsentASTVisitor.class;
-		this.id = "BracketsToControl"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription(Messages.PutIfAbsentRule_name, Messages.PutIfAbsentRule_description, Duration.ofMinutes(2),
-				TagUtil.getTagsForRule(this.getClass()));
+		this.id = "PutIfAbsent"; //$NON-NLS-1$
+		this.ruleDescription = new RuleDescription(Messages.PutIfAbsentRule_name, Messages.PutIfAbsentRule_description,
+				Duration.ofMinutes(2), TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override

@@ -56,6 +56,7 @@ public class ConfigureProfileSelectRulesWIzardPageModel extends AbstractSelectRu
 				&& !StringUtils.trim(name)
 					.equals(this.name)) {
 			status.setError(Messages.ConfigureProfileSelectRulesWizardPageModel_error_NameExists);
+			this.newName = null;
 		} else {
 			this.newName = StringUtils.trim(name);
 		}
