@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -136,7 +137,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
 
-		if(hasToBeSkippedModifier(fieldDeclaration)) {
+		if(hasSkippedModifier(fieldDeclaration)) {
 			return true;
 		}
 
@@ -175,7 +176,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	 * @param fieldDeclaration
 	 * @return
 	 */
-	private boolean hasToBeSkippedModifier(FieldDeclaration fieldDeclaration) {
+	private boolean hasSkippedModifier(FieldDeclaration fieldDeclaration) {
 		List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(fieldDeclaration.modifiers(), Modifier.class);
 		return (modifiers.isEmpty() && !getRenamePackageProtectedField())
 				|| (hasModifier(modifiers, Modifier::isPublic) && !getRenamePublicField())
@@ -283,11 +284,14 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	 * @param fragment
 	 *            a declaration fragment belonging to a field declaration.
 	 * @return an optional of the list of {@link ReferenceSearchMatch}s or an
-	 *         empty optional if a {@link CoreException} is thrown during the
-	 *         search.
+	 *         empty optional if the references cannot be found.
 	 */
 	private Optional<List<ReferenceSearchMatch>> findFieldReferences(VariableDeclarationFragment fragment) {
-		IJavaElement iVariableBinding = fragment.resolveBinding().getJavaElement();
+		IVariableBinding fragmentBinding = fragment.resolveBinding();
+		if(fragmentBinding == null) {
+			return Optional.empty();
+		}
+		IJavaElement iVariableBinding = fragmentBinding.getJavaElement();
 
 		/*
 		 * Create a pattern that searches for references of a field.
