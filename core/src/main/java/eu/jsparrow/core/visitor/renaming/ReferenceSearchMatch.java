@@ -5,8 +5,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.SearchMatch;
 
 /**
- * A type for encapsulating a search match, the value of the name being matched
- * and the metadata related with the field which is being searched for
+ * A type for encapsulating a search match and the value of the name being matched.
+ * 
  * references.
  * 
  * @author Ardit Ymeri
@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.search.SearchMatch;
 public class ReferenceSearchMatch extends SearchMatch {
 
 	private String matchedName;
-	private FieldMetadata metaData;
 	private ICompilationUnit iCompilationUnit;
 
 	public ReferenceSearchMatch(SearchMatch searchMatch, String matchedName, ICompilationUnit iCompilationUnit) {
@@ -36,19 +35,8 @@ public class ReferenceSearchMatch extends SearchMatch {
 		return this.matchedName;
 	}
 
-	void setMetadata(FieldMetadata metaData) {
-		this.metaData = metaData;
-	}
-
 	public ICompilationUnit getICompilationUnit() {
 		return this.iCompilationUnit;
 	}
 
-	/**
-	 * 
-	 * @return the meta data related to the field
-	 */
-	public FieldMetadata getMetadata() {
-		return this.metaData;
-	}
 }
