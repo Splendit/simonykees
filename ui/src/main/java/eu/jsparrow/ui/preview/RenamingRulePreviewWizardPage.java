@@ -114,7 +114,6 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 					DocumentChange document = changesForField.get(iCompilationUnit);
 					dcw.addChild(document, iCompilationUnit.getElementName(), iCompilationUnit.getSource());
 				}
-
 			}
 
 			changesWrapperList.add(dcw);

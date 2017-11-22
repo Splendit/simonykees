@@ -16,6 +16,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RefactoringException;
@@ -41,6 +43,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  */
 public class RenamingRulePreviewWizard extends Wizard {
 
+	private static final Logger logger = LoggerFactory.getLogger(RenamingRulePreviewWizard.class);
 	private RefactoringPipeline refactoringPipeline;
 	private List<FieldMetadata> metadata;
 
@@ -165,11 +168,14 @@ public class RenamingRulePreviewWizard extends Wizard {
 					for (FieldMetadata data : metadata) {
 
 						String newIdentifier = data.getNewIdentifier();
-						data.getCompilationUnit()
-							.getJavaElement();
-						Map<ICompilationUnit, DocumentChange> docsChanges = rule.computeDocumentChangesPerFiled(data);
-						changes.put(data, docsChanges);
-						metaDataMap.put(newIdentifier, data);
+						Map<ICompilationUnit, DocumentChange> docsChanges;
+						try {
+							docsChanges = rule.computeDocumentChangesPerFiled(data);
+							changes.put(data, docsChanges);
+							metaDataMap.put(newIdentifier, data);
+						} catch (JavaModelException e) {
+							logger.error("Cannot create document for displaying changes - " + e.getMessage(), e); //$NON-NLS-1$
+						}
 
 					}
 				}

@@ -368,11 +368,14 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 		for (FieldMetadata data : metadata) {
 
 			String newIdentifier = data.getNewIdentifier();
-			data.getCompilationUnit()
-				.getJavaElement();
-			Map<ICompilationUnit, DocumentChange> docsChanges = renameFieldsRule.computeDocumentChangesPerFiled(data);
-			changes.put(data, docsChanges);
-			metaDataMap.put(newIdentifier, data);
+			Map<ICompilationUnit, DocumentChange> docsChanges;
+			try {
+				docsChanges = renameFieldsRule.computeDocumentChangesPerFiled(data);
+				changes.put(data, docsChanges);
+				metaDataMap.put(newIdentifier, data);
+			} catch (JavaModelException e) {
+				logger.error("Cannot create document for displaying changes - " + e.getMessage(), e); //$NON-NLS-1$
+			}
 
 		}
 
