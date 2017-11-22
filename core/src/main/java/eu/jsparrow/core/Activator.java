@@ -33,6 +33,7 @@ public class Activator implements BundleActivator {
 	 * The constructor
 	 */
 	public Activator() {
+		// Needed for Bundle
 	}
 
 	@Override

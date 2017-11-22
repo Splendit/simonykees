@@ -2,7 +2,6 @@ package eu.jsparrow.license.netlicensing;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
@@ -28,7 +27,7 @@ public class SecureStoreTest {
 	public TestName name = new TestName();
 
 	@Before
-	public void setup() throws MalformedURLException, IOException {
+	public void setup() throws IOException {
 		file = new File(System.getProperty("user.home"), //$NON-NLS-1$
 				".eclipse/org.eclipse.equinox.security/jsparrow_store_" + name.getMethodName()); //$NON-NLS-1$
 		if (file.exists()) {
@@ -40,7 +39,7 @@ public class SecureStoreTest {
 	}
 
 	@After
-	public void tearDown() throws MalformedURLException, IOException {
+	public void tearDown() throws IOException {
 		if (file.exists()) {
 			if (!file.delete()) {
 				String loggerError = NLS.bind(Messages.Activator_couldNotDeleteFileWithPath, file.getAbsolutePath());

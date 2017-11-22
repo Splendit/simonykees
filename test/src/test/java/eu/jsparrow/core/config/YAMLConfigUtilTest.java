@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -29,7 +30,7 @@ public class YAMLConfigUtilTest {
 	File exportFile;
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() throws IOException {
 		exportFile = File.createTempFile("export", "yaml");
 	}
 
@@ -42,19 +43,19 @@ public class YAMLConfigUtilTest {
 	}
 
 	@Test
-	public void loadConfiguration_LoadValidYAML_ShouldReturnYAMLConfig() throws Exception {
+	public void loadConfiguration_LoadValidYAML_ShouldReturnYAMLConfig() throws YAMLConfigException {
 		YAMLConfig config = YAMLConfigUtil.loadConfiguration(loadResource("valid.yaml"));
 		assertNotNull(config);
 	}
 
 	@Test(expected = YAMLConfigException.class)
-	public void loadConfiguration_LoadInvalidYAML_ShouldThrowException() throws Exception {
+	public void loadConfiguration_LoadInvalidYAML_ShouldThrowException() throws YAMLConfigException {
 		YAMLConfig config = YAMLConfigUtil.loadConfiguration(loadResource("invalid.yaml"));
 		assertNotNull(config);
 	}
 
 	@Test
-	public void exportConfig_ToFile_ShouldWriteToFile() throws Exception {
+	public void exportConfig_ToFile_ShouldWriteToFile() throws YAMLConfigException {
 		YAMLConfig config = new YAMLConfig();
 		YAMLConfigUtil.exportConfig(config, exportFile);
 
@@ -62,14 +63,14 @@ public class YAMLConfigUtilTest {
 	}
 
 	@Test(expected = YAMLConfigException.class)
-	public void exportConfig_ToNonWritableFile_ShouldThrowException() throws Exception {
+	public void exportConfig_ToNonWritableFile_ShouldThrowException() throws YAMLConfigException {
 		YAMLConfig config = new YAMLConfig();
 		assertTrue(exportFile.setWritable(false));
 		YAMLConfigUtil.exportConfig(config, exportFile);
 	}
 
 	@Test(expected = YAMLConfigException.class)
-	public void getSelectedRulesFromConfig_InvalidSelectedProfile_ShouldThrowException() throws Exception {
+	public void getSelectedRulesFromConfig_InvalidSelectedProfile_ShouldThrowException() throws YAMLConfigException {
 		YAMLConfig config = new YAMLConfig();
 		config.setSelectedProfile("INVALID");
 
@@ -77,29 +78,29 @@ public class YAMLConfigUtilTest {
 	}
 
 	@Test
-	public void getSelectedRulesFromConfig_WithoutProfileWithValidRules_ShouldReturnAllRules() throws Exception {
+	public void getSelectedRulesFromConfig_WithoutProfileWithValidRules_ShouldReturnAllRules()
+			throws YAMLConfigException {
 		YAMLConfig config = new YAMLConfig();
 		config.getRules()
 			.add("TryWithResource");
-		// TODO: This method is hard to test. It must be refactored
 
 		YAMLConfigUtil.getSelectedRulesFromConfig(config, new ArrayList<>());
 	}
 
 	@Test(expected = YAMLConfigException.class)
-	public void readConfig_InvalidProfile_ShouldThrowException() throws Exception {
+	public void readConfig_InvalidProfile_ShouldThrowException() throws YAMLConfigException {
 		YAMLConfigUtil.readConfig("file", "INVALID");
 	}
 
 	@Test(expected = YAMLConfigException.class)
-	public void readConfig_NonExistentFileWithoutProfile_ShouldThrowException() throws Exception {
+	public void readConfig_NonExistentFileWithoutProfile_ShouldThrowException() throws YAMLConfigException {
 		YAMLConfig config = YAMLConfigUtil.readConfig("file", null);
 
 		assertEquals("default", config.getSelectedProfile());
 	}
 
 	@Test
-	public void readConfig_ExistingFileWithoutProfile_ShouldUseDefaultProfile() throws Exception {
+	public void readConfig_ExistingFileWithoutProfile_ShouldUseDefaultProfile() throws YAMLConfigException {
 		YAMLConfig config = YAMLConfigUtil.readConfig(String.join("/", RESOURCE_DIRECTORY, "valid.yaml"), null);
 
 		assertEquals("aaa", config.getProfiles()
@@ -107,7 +108,7 @@ public class YAMLConfigUtilTest {
 			.getName());
 	}
 
-	private File loadResource(String resource) throws Exception {
+	private File loadResource(String resource) {
 		return Paths.get(String.join("/", RESOURCE_DIRECTORY, resource))
 			.toFile();
 	}

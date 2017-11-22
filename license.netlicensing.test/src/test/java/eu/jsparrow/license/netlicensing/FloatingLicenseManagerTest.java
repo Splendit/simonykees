@@ -32,7 +32,7 @@ public class FloatingLicenseManagerTest extends LicenseCommonTest {
 	private final HashSet<String> usedSessions = new HashSet<>();
 
 	@Before
-	public void setUpLicensee() throws InterruptedException {
+	public void setUpLicensee() {
 		persistFloatingLicensee();
 	}
 
@@ -64,7 +64,6 @@ public class FloatingLicenseManagerTest extends LicenseCommonTest {
 
 	}
 
-	// FIXME: tests related to floating license are temporarily removed
 	@Ignore
 	@Test
 	public void testInitLicenseManager() {

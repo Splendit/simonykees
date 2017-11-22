@@ -28,7 +28,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * TODO SIM-103 add class description
+ * Base class for Rule Tests.
  * 
  * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
  *         Matthias Webhofer

@@ -237,11 +237,9 @@ public class PersistenceModel {
 			lastSuccessType = LicenseType.fromString(strLastSuccessLicenseType);
 		}
 
-		PersistenceModel persistenceModel = new PersistenceModel(licenseeNumber, licenseeName, lastVal, licenseType,
+		return new PersistenceModel(licenseeNumber, licenseeName, lastVal, licenseType,
 				lastValTimestamp, demoExpiration, expirationTimestamp, subscriptionExpires, subscriptionStatus,
 				lastSuccessTimestamp, lastSuccessType, version);
-
-		return persistenceModel;
 	}
 
 	@Override
