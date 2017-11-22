@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -306,5 +307,18 @@ public class NodeBuilder {
 		MarkerAnnotation markerAnnotation = ast.newMarkerAnnotation();
 		markerAnnotation.setTypeName(name);
 		return markerAnnotation;
+	}
+
+	/**
+	 * Creates a {@link ExpressionStatement} from the given {@link Expression}
+	 * 
+	 * @param ast
+	 *            the AbstractSyntaxTree thats the target of the node
+	 * @param expression
+	 *            expression to be wrapped in an expression statement
+	 * @return the {@link ExpressionStatement} wrapping the expression
+	 */
+	public static ExpressionStatement newExpressionStatement(AST ast, Expression expression) {
+		return ast.newExpressionStatement(expression);
 	}
 }

@@ -1,7 +1,5 @@
 package eu.jsparrow.ui;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
@@ -48,12 +46,13 @@ public class Activator extends AbstractUIPlugin {
 	private long loggingBundleID = 0;
 
 	@Inject
-	private LicenseValidationService licenseValidationService;
+	private static LicenseValidationService licenseValidationService;
 
 	/**
 	 * The constructor
 	 */
 	public Activator() {
+		//
 	}
 
 	/*
@@ -116,7 +115,7 @@ public class Activator extends AbstractUIPlugin {
 	@Override
 	public void stop(BundleContext context) throws Exception {
 
-		running = false;
+		setRunning(false);
 
 		// FIXME (see SIM-331) figure out better logging configuration
 		logger.info(Messages.Activator_stop);
@@ -136,22 +135,6 @@ public class Activator extends AbstractUIPlugin {
 		}
 
 		super.stop(context);
-	}
-
-	/**
-	 * starts the license validation service after it has been injected
-	 */
-	@PostConstruct
-	private void startValidation() {
-		licenseValidationService.startValidation();
-	}
-
-	/**
-	 * stops the license validation service before it gets uninjected
-	 */
-	@PreDestroy
-	private void stopValidation() {
-		licenseValidationService.stopValidation();
 	}
 
 	/**
@@ -181,6 +164,7 @@ public class Activator extends AbstractUIPlugin {
 
 	public static void setRunning(boolean isRunning) {
 		running = isRunning;
+		licenseValidationService.setJSparrowRunning(isRunning);
 	}
 
 	public static BundleContext getBundleContext() {

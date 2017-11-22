@@ -1,5 +1,6 @@
 package eu.jsparrow.dummies;
 
+import eu.jsparrow.core.visitor.ASTRewriteEvent;
 import eu.jsparrow.core.visitor.ASTRewriteVisitorListener;
 
 /**
@@ -14,7 +15,7 @@ public class ASTRewriteVisitorListenerStub implements ASTRewriteVisitorListener 
 	private boolean wasUpdated = false;
 
 	@Override
-	public void update() {
+	public void update(ASTRewriteEvent event) {
 		wasUpdated = true;
 	}
 

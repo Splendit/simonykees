@@ -3,9 +3,9 @@ package eu.jsparrow.core.visitor.logger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -13,7 +13,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import eu.jsparrow.core.util.ClassRelationUtil;
 
 class ExceptionsASTVisitor extends ASTVisitor {
-	private List<ASTNode> foundExceptions = new ArrayList<>();
+	private List<Expression> foundExceptions = new ArrayList<>();
 
 	@Override
 	public boolean visit(SimpleName simpleName) {
@@ -32,7 +32,7 @@ class ExceptionsASTVisitor extends ASTVisitor {
 		return true;
 	}
 
-	private void storeIfExceptionType(ITypeBinding typeBinding, ASTNode node) {
+	private void storeIfExceptionType(ITypeBinding typeBinding, Expression node) {
 		if (typeBinding != null
 				&& (ClassRelationUtil.isContentOfTypes(typeBinding, StandardLoggerASTVisitor.exceptionQualifiedName)
 						|| ClassRelationUtil.isInheritingContentOfTypes(typeBinding,
@@ -41,7 +41,7 @@ class ExceptionsASTVisitor extends ASTVisitor {
 		}
 	}
 
-	public List<ASTNode> getExceptions() {
+	public List<Expression> getExceptions() {
 		return this.foundExceptions;
 	}
 }

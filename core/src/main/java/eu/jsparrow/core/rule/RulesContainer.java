@@ -33,6 +33,7 @@ import eu.jsparrow.core.rule.impl.OrganiseImportsRule;
 import eu.jsparrow.core.rule.impl.OverrideAnnotationRule;
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
+import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
 import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
@@ -82,7 +83,7 @@ public class RulesContainer {
 				new CollectionRemoveAllRule(), new DiamondOperatorRule(), new OverrideAnnotationRule(),
 				new SerialVersionUidRule(), new RearrangeClassMembersRule(), new BracketsToControlRule(),
 				new FieldNameConventionRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
-				new ReImplementingInterfaceRule(),
+				new ReImplementingInterfaceRule(),new PutIfAbsentRule(),
 
 				new ImmutableStaticFinalCollectionsRule(),
 				/*

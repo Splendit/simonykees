@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.RefactoringException;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.util.PropertyUtil;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
@@ -25,7 +26,8 @@ import eu.jsparrow.i18n.Messages;
  * description, if its enabled and the document changes for
  * {@link ICompilationUnit} that are processed
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Hans-Jörg Schrödl
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Hans-Jörg Schrödl,
+ *         Matthias Webhofer
  * @since 0.9
  *
  * @param <T>
@@ -159,6 +161,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 
 		AbstractASTRewriteASTVisitor rule = visitorFactory();
 		rule.setASTRewrite(astRewrite);
+		rule.setCompilationUnit(workingCopy.getHandleIdentifier());
 		try {
 			astRoot.accept(rule);
 		} catch (RuntimeException e) {

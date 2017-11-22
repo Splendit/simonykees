@@ -29,6 +29,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
+import eu.jsparrow.ui.util.StopWatchUtil;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -42,9 +43,7 @@ public class LoggerRuleWizard extends Wizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoggerRuleWizard.class);
 
-	private LoggerRuleWizardPage page;
 	private LoggerRuleWizardPageModel model;
-	private LoggerRuleWizardPageControler controller;
 
 	private IJavaProject selectedJavaProjekt;
 	private final StandardLoggerRule rule;
@@ -68,9 +67,7 @@ public class LoggerRuleWizard extends Wizard {
 	@Override
 	public void addPages() {
 		model = new LoggerRuleWizardPageModel(rule);
-		controller = new LoggerRuleWizardPageControler(model);
-		page = new LoggerRuleWizardPage(model, controller);
-		addPage(page);
+		addPage(new LoggerRuleWizardPage(model));
 	}
 
 	@Override
@@ -81,12 +78,8 @@ public class LoggerRuleWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		if (model.getSelectionStatus()
-			.equals(Messages.LoggerRuleWizardPageModel_err_noTransformation)) {
-			return false;
-		} else {
-			return true;
-		}
+		return (!model.getSelectionStatus()
+			.equals(Messages.LoggerRuleWizardPageModel_err_noTransformation));
 	}
 
 	@Override
@@ -98,10 +91,7 @@ public class LoggerRuleWizard extends Wizard {
 
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(rule);
 		refactoringPipeline.setRules(rules);
-		/*
-		 * AbstractRefactorer refactorer = new AbstractRefactorer(javaElements,
-		 * rules)
-		 */
+
 		Rectangle rectangle = Display.getCurrent()
 			.getPrimaryMonitor()
 			.getBounds();
@@ -111,25 +101,11 @@ public class LoggerRuleWizard extends Wizard {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				preRefactoring();
+				IStatus refactoringStatus = doRefactoring(monitor);
+				postRefactoring();
 
-				try {
-					refactoringPipeline.doRefactoring(monitor);
-					if (monitor.isCanceled()) {
-						refactoringPipeline.clearStates();
-						return Status.CANCEL_STATUS;
-					}
-				} catch (RefactoringException e) {
-					WizardMessageDialog.synchronizeWithUIShowInfo(e);
-					return Status.CANCEL_STATUS;
-				} catch (RuleException e) {
-					WizardMessageDialog.synchronizeWithUIShowError(e);
-					return Status.CANCEL_STATUS;
-
-				} finally {
-					monitor.done();
-				}
-
-				return Status.OK_STATUS;
+				return refactoringStatus;
 			}
 		};
 
@@ -159,16 +135,46 @@ public class LoggerRuleWizard extends Wizard {
 		return true;
 	}
 
+	private IStatus doRefactoring(IProgressMonitor monitor) {
+		try {
+			refactoringPipeline.doRefactoring(monitor);
+			if (monitor.isCanceled()) {
+				refactoringPipeline.clearStates();
+				return Status.CANCEL_STATUS;
+			}
+		} catch (RefactoringException e) {
+			WizardMessageDialog.synchronizeWithUIShowInfo(e);
+			return Status.CANCEL_STATUS;
+		} catch (RuleException e) {
+			WizardMessageDialog.synchronizeWithUIShowError(e);
+			return Status.CANCEL_STATUS;
+
+		} finally {
+			monitor.done();
+		}
+
+		return Status.OK_STATUS;
+	}
+
+	private void preRefactoring() {
+		StopWatchUtil.start();
+	}
+
+	private void postRefactoring() {
+		StopWatchUtil.stop();
+	}
+
 	/**
 	 * Method used to open RefactoringPreviewWizard from non UI thread
 	 */
 	private void synchronizeWithUIShowRefactoringPreviewWizard(RefactoringPipeline refactorer, Rectangle rectangle) {
 		String messageEndRefactoring = NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass()
-				.getSimpleName(), selectedJavaProjekt.getElementName());
+			.getSimpleName(), selectedJavaProjekt.getElementName());
 		logger.info(messageEndRefactoring);
 
-		String messageRulesWithChanges = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, selectedJavaProjekt.getElementName(),
-				rule.getRuleDescription().getName());
+		String messageRulesWithChanges = NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
+				selectedJavaProjekt.getElementName(), rule.getRuleDescription()
+					.getName());
 		logger.info(messageRulesWithChanges);
 
 		Display.getDefault()

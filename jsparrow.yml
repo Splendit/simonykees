@@ -31,7 +31,7 @@ rules:
   - CollectionRemoveAll
   - DiamondOperator
   - OverrideAnnotation
-  - SerialVersionUid
+  - SerialVersionUID
   - RearrangeClassMembers
   - BracketsToControl
   - FieldNameConvention
@@ -48,7 +48,7 @@ rules:
   - StringUtils
   - StringLiteralEqualityCheck
   - StringConcatToPlus
-  - UseIsEmpty
+  - UseIsEmptyOnCollections
   - ArithmethicAssignment
   - StringBufferToBuilder
   - PrimitiveObjectUseEquals

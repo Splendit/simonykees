@@ -37,6 +37,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 public abstract class AbstractRulesTest {
 
 	private static final String UTILITY_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/utilities"; //$NON-NLS-1$
+	protected String packageString = "eu.jsparrow.sample.preRule"; //$NON-NLS-1$
 
 	protected static IPackageFragmentRoot root = null;
 
@@ -110,10 +111,10 @@ public abstract class AbstractRulesTest {
 		return data;
 	}
 
+	
 	protected String processFile(String fileName, String content,
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) throws Exception {
 
-		String packageString = "eu.jsparrow.sample.preRule"; //$NON-NLS-1$
 		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
 
 		ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);
@@ -152,5 +153,9 @@ public abstract class AbstractRulesTest {
 
 		// TODO check if tabs and newlines make a difference
 		assertEquals(expectedSource, compilationUnitSource);
+	}
+	
+	protected void setPrerulePackage(String prerulePackage) {
+		packageString = prerulePackage;
 	}
 }

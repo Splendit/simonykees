@@ -21,7 +21,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 /**
  * TODO SIM-103 add class description
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Ardit Ymeri
  * @since 0.9
  */
 @SuppressWarnings("nls")
@@ -36,7 +36,6 @@ public class AllRulesTest extends AbstractRulesTest {
 	private Path postRule;
 
 	public AllRulesTest(String fileName, Path preRule, Path postRule) {
-		super();
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;

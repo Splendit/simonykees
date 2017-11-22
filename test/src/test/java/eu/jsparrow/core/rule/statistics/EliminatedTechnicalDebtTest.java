@@ -1,6 +1,6 @@
-package eu.jsparrow.core.rule;
+package eu.jsparrow.core.rule.statistics;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -8,8 +8,10 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
+import eu.jsparrow.core.visitor.ASTRewriteEvent;
 import eu.jsparrow.dummies.DummyRule;
 
+@SuppressWarnings("nls")
 public class EliminatedTechnicalDebtTest {
 
 	private DummyRule dummyRule;
@@ -22,17 +24,25 @@ public class EliminatedTechnicalDebtTest {
 	@Test
 	public void get_WithRuleAppliedOnce_ReturnsTotalDuration() {
 		RuleApplicationCount.getFor(dummyRule)
-			.update();
+			.update(new ASTRewriteEvent("test"));
 
-		// The dummy rule has a remediation time of 5 minutes.
 		assertEquals(5, EliminatedTechnicalDebt.get(dummyRule)
+			.toMinutes());
+	}
+
+	@Test
+	public void get_WithRuleAppliedMoreTimes_ReturnsTotalDuration() {
+		RuleApplicationCount.getFor(dummyRule)
+			.update(new ASTRewriteEvent("test"));
+
+		assertEquals(15, EliminatedTechnicalDebt.get(dummyRule, 3)
 			.toMinutes());
 	}
 
 	@Test
 	public void getTotal_WithTechnicalDebt_ReturnsTotalTechnicalDebt() {
 		RuleApplicationCount.getFor(dummyRule)
-			.update();
+			.update(new ASTRewriteEvent("test"));
 		Duration total = EliminatedTechnicalDebt.getTotalFor(Arrays.asList(dummyRule, dummyRule, dummyRule));
 
 		// The dummy rule has a remediation time of 5 minutes.
