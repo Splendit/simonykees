@@ -65,8 +65,9 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 	 *            renamed.
 	 * @return the list of document changes for all compilation units that are
 	 *         affected by the renaming of the field.
+	 * @throws JavaModelException 
 	 */
-	public Map<ICompilationUnit, DocumentChange> computeDocumentChangesPerFiled(FieldMetadata metaData) {
+	public Map<ICompilationUnit, DocumentChange> computeDocumentChangesPerFiled(FieldMetadata metaData) throws JavaModelException {
 		List<ICompilationUnit> targetCompilationUnits = metaData.getTargetICompilationUnits();
 		Map<ICompilationUnit, DocumentChange> documentChanges = new HashMap<>();
 		for (ICompilationUnit iCompilationUnit : targetCompilationUnits) {
@@ -75,7 +76,7 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 				String newIdentifier = metaData.getNewIdentifier();
 				int newIdentifierLength = newIdentifier.length();
 				VariableDeclarationFragment oldFragment = metaData.getFieldDeclaration();
-				Document doc = metaData.getDocument(iCompilationUnit);
+				Document doc = new Document(iCompilationUnit.getPrimary().getSource());
 				DocumentChange documentChange = new DocumentChange(
 						iCompilationUnit.getElementName() + " - " + getPathString(iCompilationUnit), doc); //$NON-NLS-1$
 				TextEdit rootEdit = new MultiTextEdit();
