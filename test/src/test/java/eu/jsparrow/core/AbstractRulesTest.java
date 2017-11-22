@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,7 +28,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * TODO SIM-103 add class description
+ * Base class for Rule Tests.
  * 
  * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
  *         Matthias Webhofer
@@ -84,20 +85,29 @@ public abstract class AbstractRulesTest {
 	 */
 	protected static List<Object[]> load(String postRuleDirectory) throws IOException {
 		List<Object[]> data = new ArrayList<>();
-		for (Path postRulePath : Files.newDirectoryStream(Paths.get(postRuleDirectory), RulesTestUtil.RULE_SUFFIX)) {
-			Path preRulePath = Paths.get(RulesTestUtil.PRERULE_DIRECTORY, postRulePath.getFileName()
-				.toString());
-			data.add(new Object[] { preRulePath.getFileName()
-				.toString(), preRulePath, postRulePath });
+
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(postRuleDirectory),
+				RulesTestUtil.RULE_SUFFIX)) {
+			for (Path postRulePath : directoryStream) {
+				Path preRulePath = Paths.get(RulesTestUtil.PRERULE_DIRECTORY, postRulePath.getFileName()
+					.toString());
+				data.add(new Object[] { preRulePath.getFileName()
+					.toString(), preRulePath, postRulePath });
+			}
 		}
+
 		return data;
 	}
 
 	protected static List<Path> loadUtilityClasses(String utilityDirectory) throws IOException {
 		List<Path> data = new ArrayList<>();
-		for (Path utilityPath : Files.newDirectoryStream(Paths.get(utilityDirectory), "*.java")) { //$NON-NLS-1$
-			data.add(utilityPath);
+
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(utilityDirectory), "*.java")) { //$NON-NLS-1$
+			for (Path utilityPath : directoryStream) {
+				data.add(utilityPath);
+			}
 		}
+
 		return data;
 	}
 

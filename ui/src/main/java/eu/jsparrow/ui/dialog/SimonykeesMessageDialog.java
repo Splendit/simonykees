@@ -42,7 +42,7 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	private static final String[] dialogButtonLabels = { Messages.ui_ok };
 	private static final String splenditUrl = Messages.HelpMessageDialog_homepage_url;
 
-	private static String messageText;
+	private String messageText;
 
 	private SimonykeesMessageDialog(Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage,
 			int dialogImageType, int defaultIndex, String... dialogButtonLabels) {
@@ -52,25 +52,25 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	}
 
 	public static boolean openDefaultHelpMessageDialog(Shell parentShell) {
-		messageText = dialogInformationMessage + System.lineSeparator() + splenditUrl;
+		String messageText = dialogInformationMessage + System.lineSeparator() + splenditUrl;
 		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText,
 				MessageDialog.INFORMATION, defaultIndex, dialogButtonLabels).open() == 0;
 	}
 
 	public static boolean openMessageDialog(Shell parentShell, String message, int dialogImage) {
-		messageText = message;
+		String messageText = message;
 		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, dialogImage,
 				defaultIndex, dialogButtonLabels).open() == 0;
 	}
 
 	public static boolean openConfirmDialog(Shell parentShell, String message) {
-		messageText = message;
+		String messageText = message;
 		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText,
 				MessageDialog.CONFIRM, defaultIndex, new String[] { Messages.ui_cancel, Messages.ui_ok }).open() == 1;
 	}
 
 	public static boolean openErrorMessageDialog(Shell parentShell, SimonykeesException simonykeesException) {
-		messageText = ((simonykeesException != null) ? simonykeesException.getUiMessage() : dialogErrorMessage)
+		String messageText = ((simonykeesException != null) ? simonykeesException.getUiMessage() : dialogErrorMessage)
 				+ System.lineSeparator() + MAIL_BUGREPORT;
 		return new SimonykeesMessageDialog(parentShell, dialogTitle, dialogTitleImage, messageText, MessageDialog.ERROR,
 				defaultIndex, dialogButtonLabels).open() == 0;
@@ -84,7 +84,8 @@ public class SimonykeesMessageDialog extends MessageDialog {
 	 *            message to be shown in the dialog
 	 * @param dialogButtons
 	 *            a list with button labels, which should be displayed in the
-	 *            dialog. The last element in the list will be the default button.
+	 *            dialog. The last element in the list will be the default
+	 *            button.
 	 * @return the index of the clicked button according to the dialogButtons
 	 *         parameter
 	 */
