@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -199,7 +198,6 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	 *         {@code false} otherwise.
 	 */
 	private boolean isConflictingIdentifier(String newIdentifier, FieldDeclaration fieldDeclaration) {
-		ASTNode parent = fieldDeclaration.getParent();
 
 		/*
 		 * The new name does not conflict with another newly introduced name.
@@ -208,6 +206,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 			return true;
 		}
 
+		ASTNode parent = fieldDeclaration.getParent();
 		/*
 		 * The new name should not shadow another local variable.
 		 */
@@ -357,18 +356,6 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	public Set<ICompilationUnit> getTargetIJavaElements() {
 		return this.targetIJavaElements;
-	}
-
-	/**
-	 * Computes the list of all compilation units that are affected by the 
-	 * renaming. Makes use of the {@link #fieldsMetaData} to collect distinct
-	 * compilation units of all search results. 
-	 * 
-	 * @return
-	 */
-	public List<ICompilationUnit> computeAllTargetCompilationUnits() {
-		return this.fieldsMetaData.stream().flatMap(metaData -> metaData.getTargetICompilationUnits().stream())
-				.distinct().collect(Collectors.toList());
 	}
 	
 	/**

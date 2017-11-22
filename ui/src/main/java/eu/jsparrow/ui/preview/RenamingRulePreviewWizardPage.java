@@ -80,14 +80,15 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			Map<ICompilationUnit, DocumentChange> changesForField = changes.get(fieldData);
 			if (!changesForField.isEmpty()) {
 				DocumentChange parent = null;
+				ICompilationUnit parentICU = null;
 				for (ICompilationUnit iCompilationUnit : changesForField.keySet()) {
-					if (((ICompilationUnit) fieldData.getCompilationUnit()
-						.getJavaElement()).equals(iCompilationUnit.getPrimary())) {
+					if ((fieldData.getDeclarationPath()).equals(iCompilationUnit.getPath())) {
 						parent = changesForField.get(iCompilationUnit);
+						parentICU = iCompilationUnit;
 					}
 				}
 				if (null != parent) {
-					createDocumentChangeWrapperChildren(fieldData, changesForField, parent);
+					createDocumentChangeWrapperChildren(fieldData, parentICU, changesForField, parent);
 				}
 			}
 		}
@@ -103,16 +104,15 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	 * @param changesForField
 	 * @param parent
 	 */
-	private void createDocumentChangeWrapperChildren(FieldMetadata fieldData,
+	private void createDocumentChangeWrapperChildren(FieldMetadata fieldData, ICompilationUnit iCompilatinUnit,
 			Map<ICompilationUnit, DocumentChange> changesForField, DocumentChange parent) {
 		DocumentChangeWrapper dcw;
 		try {
-			dcw = new DocumentChangeWrapper(parent, null, fieldData);
+			dcw = new DocumentChangeWrapper(parent, null, iCompilatinUnit.getSource(), fieldData);
 			for (ICompilationUnit iCompilationUnit : changesForField.keySet()) {
-				if (!((ICompilationUnit) fieldData.getCompilationUnit()
-					.getJavaElement()).equals(iCompilationUnit.getPrimary())) {
+				if (!(fieldData.getDeclarationPath()).equals(iCompilationUnit.getPath())) {
 					DocumentChange document = changesForField.get(iCompilationUnit);
-					dcw.addChild(document, iCompilationUnit.getElementName(), iCompilationUnit.getSource());
+					dcw.addChild(document, iCompilationUnit.getElementName(), iCompilationUnit.getPrimary().getSource());
 				}
 			}
 

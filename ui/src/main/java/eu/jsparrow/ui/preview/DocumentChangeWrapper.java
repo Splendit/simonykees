@@ -3,8 +3,6 @@ package eu.jsparrow.ui.preview;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.visitor.renaming.FieldMetadata;
@@ -30,8 +28,7 @@ public class DocumentChangeWrapper {
 	private List<DocumentChangeWrapper> children = new ArrayList<>();
 	private FieldMetadata fieldData;
 
-	public DocumentChangeWrapper(DocumentChange documentChange, DocumentChangeWrapper parent, FieldMetadata fieldData)
-			throws JavaModelException {
+	public DocumentChangeWrapper(DocumentChange documentChange, DocumentChangeWrapper parent, String compilationUnitSource, FieldMetadata fieldData) {
 		this.documentChange = documentChange;
 		this.parent = parent;
 		this.isParent = null == parent;
@@ -39,11 +36,8 @@ public class DocumentChangeWrapper {
 			.getName()
 			.getIdentifier();
 		this.newIdentifier = fieldData.getNewIdentifier();
-		this.compilationUnitName = fieldData.getCompilationUnit()
-			.getJavaElement()
-			.getElementName();
-		this.compilationUnitSource = ((ICompilationUnit) fieldData.getCompilationUnit()
-			.getJavaElement()).getSource();
+		this.compilationUnitName = fieldData.getClassDeclarationName();
+		this.compilationUnitSource = compilationUnitSource;
 		this.fieldData = fieldData;
 	}
 

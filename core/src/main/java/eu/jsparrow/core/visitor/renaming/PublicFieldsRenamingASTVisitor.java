@@ -173,9 +173,7 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 			.getPath();
 		Map<String, FieldMetadata> declarations = new HashMap<>();
 		metaData.stream()
-			.filter(mData -> matchingIPaths(mData.getCompilationUnit()
-				.getJavaElement()
-				.getPath(), path))
+			.filter(mData -> matchingIPaths(mData.getDeclarationPath(), path))
 			.forEach(mData -> {
 				VariableDeclarationFragment fragment = mData.getFieldDeclaration();
 				SimpleName oldName = fragment.getName();
@@ -244,11 +242,7 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 		Map<String, List<String>> data = new HashMap<>();
 
 		unmodifiableFields.stream()
-			.filter(mData -> {
-				CompilationUnit cu = mData.getCompilationUnit();
-				return matchingIPaths(cu.getJavaElement()
-					.getPath(), currentPath);
-			})
+			.filter(mData -> matchingIPaths(mData.getDeclarationPath(), currentPath))
 			.forEach(mData -> {
 				FieldDeclaration field = (FieldDeclaration) mData.getFieldDeclaration()
 					.getParent();

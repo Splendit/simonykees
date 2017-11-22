@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -21,15 +23,20 @@ import org.eclipse.text.edits.TextEditGroup;
  */
 public class FieldMetadata {
 
-	private CompilationUnit compilationUnit;
 	private List<ReferenceSearchMatch> references;
 	private VariableDeclarationFragment declarationFragment;
 	private String newIdentifier;
 	private Map<ICompilationUnit, TextEditGroup> textEditGroups;
+	private IPath declarationPath;
+	private String classDeclarationName;
 
 	public FieldMetadata(CompilationUnit cu, List<ReferenceSearchMatch> references,
 			VariableDeclarationFragment fragment, String newIdentifier) {
-		this.compilationUnit = cu;
+		IJavaElement javaElement = cu.getJavaElement();
+		IPath path = javaElement.getPath();
+		String name = javaElement.getElementName();
+		setDeclarationPath(path);
+		setClassDeclarationName(name);
 		this.references = references;
 		this.declarationFragment = fragment;
 		this.newIdentifier = newIdentifier;
@@ -37,12 +44,20 @@ public class FieldMetadata {
 
 	}
 
-	/**
-	 * 
-	 * @return the compilation unit where the field was declared.
-	 */
-	public CompilationUnit getCompilationUnit() {
-		return this.compilationUnit;
+	private void setClassDeclarationName(String name) {
+		this.classDeclarationName = name;
+	}
+	
+	public String getClassDeclarationName() {
+		return this.classDeclarationName;
+	}
+
+	private void setDeclarationPath(IPath path) {
+		this.declarationPath = path;
+	}
+	
+	public IPath getDeclarationPath() {
+		return this.declarationPath;
 	}
 
 	/**
@@ -85,14 +100,6 @@ public class FieldMetadata {
 		}
 	}
 
-	/**
-	 * 
-	 * @return the list of all {@link TextEditGroup} related to the changes of
-	 *         the field.
-	 */
-	public List<TextEditGroup> getAllTexEditGroups() {
-		return new ArrayList<>(textEditGroups.values());
-	}
 
 	/**
 	 * 

@@ -85,9 +85,7 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 					.getLength() - newIdentifierLength;
 				if (iCompilationUnit.getPath()
 					.toString()
-					.equals(metaData.getCompilationUnit()
-						.getJavaElement()
-						.getPath()
+					.equals(metaData.getDeclarationPath()
 						.toString())) {
 					int declOffset = oldFragment.getStartPosition();
 					InsertEdit declInsertEdit = new InsertEdit(declOffset, newIdentifier);
@@ -128,20 +126,6 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 			.getPath()
 			.toString();
 		return temp.startsWith("/") ? temp.substring(1) : temp; //$NON-NLS-1$
-	}
-
-	/**
-	 * Clears all the text edits related to the renaming of a field.
-	 * 
-	 * @param metaData
-	 *            the metadata representing the field being renamed.
-	 */
-	public void clearTextEdits(FieldMetadata metaData) {
-		List<ICompilationUnit> targetCompilationUnits = metaData.getTargetICompilationUnits();
-		for (ICompilationUnit iCompilationUnit : targetCompilationUnits) {
-			TextEditGroup editGroup = metaData.getTextEditGroup(iCompilationUnit);
-			editGroup.clearTextEdits();
-		}
 	}
 
 	/**
