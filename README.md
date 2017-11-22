@@ -18,9 +18,14 @@ Read instructions at: https://confluence.splendit.loc/display/Tutorials/Eclipse
 
     mvn clean verify -fae
 
-## release ##
+## version update ##
 
     mvn org.eclipse.tycho:tycho-versions-plugin:0.26.0:set-version -DnewVersion=<newVersion>
+    
+Since not everything can be done by tycho yet (i.e., releng and the maven-plugin) search for any occurrences of the old version like that:
+
+	# example when upgrading to 2.4.0 and searching for references to 2.3.0:
+	egrep -ir --exclude-dir={.git,target,src} "2\.3\.0[-\.](SNAPSHOT|qualifier)" ./
     
 ## additional information how to trigger special profiles ##
 
