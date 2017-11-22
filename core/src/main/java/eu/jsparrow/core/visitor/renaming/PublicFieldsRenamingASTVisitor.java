@@ -169,16 +169,13 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 */
 	private Map<String, FieldMetadata> findRelatedCuDeclarationFragments(CompilationUnit compilationUnit) {
 
+		IPath path = compilationUnit.getJavaElement()
+			.getPath();
 		Map<String, FieldMetadata> declarations = new HashMap<>();
 		metaData.stream()
-			.filter(mData -> {
-				IPath originDeclarationPath = mData.getCompilationUnit()
-					.getJavaElement()
-					.getPath();
-				IPath path = compilationUnit.getJavaElement()
-					.getPath();
-				return matchingIPaths(originDeclarationPath, path);
-			})
+			.filter(mData -> matchingIPaths(mData.getCompilationUnit()
+				.getJavaElement()
+				.getPath(), path))
 			.forEach(mData -> {
 				VariableDeclarationFragment fragment = mData.getFieldDeclaration();
 				SimpleName oldName = fragment.getName();
@@ -215,18 +212,18 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 *         identifier of a field.
 	 */
 	private Map<String, FieldMetadata> findCuRelatedData(CompilationUnit cu) {
+
 		IResource cuResource = cu.getJavaElement()
 			.getResource();
-		List<ReferenceSearchMatch> relatedcuReferences = metaData.stream()
-			.flatMap(mData -> mData.getReferences()
-				.stream())
-			.filter(match -> isMatchingResource(cuResource, match))
-			.collect(Collectors.toList());
 		Map<String, FieldMetadata> oldToNewKeys = new HashMap<>();
-		relatedcuReferences.forEach(match -> {
-			FieldMetadata relatedMatchData = match.getMetadata();
-			String oldName = match.getMatchedName();
-			oldToNewKeys.put(calcIdentifier(oldName, match.getOffset()), relatedMatchData);
+		metaData.forEach(mData -> {
+			List<ReferenceSearchMatch> references = mData.getReferences();
+			references.stream()
+				.filter(reference -> isMatchingResource(cuResource, reference))
+				.forEach(match -> {
+					String oldName = match.getMatchedName();
+					oldToNewKeys.put(calcIdentifier(oldName, match.getOffset()), mData);
+				});
 		});
 
 		return oldToNewKeys;
