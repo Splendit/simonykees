@@ -29,6 +29,7 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.ResourceHelper;
 
 /**
  * This {@link Wizard} holds a {@link RefactoringPreviewWizardPage} for every
@@ -56,6 +57,12 @@ public class RefactoringPreviewWizard extends Wizard {
 			.getActiveWorkbenchWindow()
 			.getShell();
 		setNeedsProgressMonitor(true);
+		WizardDialog.setDefaultImage(ResourceHelper.createImage("icons/jSparrow_active_icon_32.png"));
+	}
+	
+	@Override
+	public String getWindowTitle() {
+		return Messages.SummaryWizardPage_RunSummary;
 	}
 
 	/*

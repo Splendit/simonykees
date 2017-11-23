@@ -39,6 +39,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
+import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.util.StopWatchUtil;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
 
@@ -72,6 +73,7 @@ public class SelectRulesWizard extends Wizard {
 		this.refactoringPipeline = refactoringPipeline;
 		this.rules = rules;
 		setNeedsProgressMonitor(true);
+		WizardDialog.setDefaultImage(ResourceHelper.createImage("icons/jSparrow_active_icon_32.png"));
 	}
 
 	@Override

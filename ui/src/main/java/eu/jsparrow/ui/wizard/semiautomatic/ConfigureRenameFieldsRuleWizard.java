@@ -50,6 +50,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RenamingRulePreviewWizard;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -83,6 +84,7 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 	public ConfigureRenameFieldsRuleWizard(List<ICompilationUnit> selectedJavaElements) {
 		this.selectedJavaElements = selectedJavaElements;
 		setNeedsProgressMonitor(true);
+		WizardDialog.setDefaultImage(ResourceHelper.createImage("icons/jSparrow_active_icon_32.png"));
 	}
 
 	@Override
