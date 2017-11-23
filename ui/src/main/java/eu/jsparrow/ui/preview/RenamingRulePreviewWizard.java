@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -14,6 +16,7 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.slf4j.Logger;
@@ -51,6 +54,7 @@ public class RenamingRulePreviewWizard extends Wizard {
 	private PublicFieldsRenamingRule rule;
 
 	private List<ICompilationUnit> targetCompilationUnits;
+	private Map<IPath, Document> originalDocuments;
 
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetadata> metadata,
 			Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> documentChanges,
@@ -59,8 +63,21 @@ public class RenamingRulePreviewWizard extends Wizard {
 		this.metadata = metadata;
 		this.documentChanges = documentChanges;
 		this.targetCompilationUnits = targetCompilationUnits;
+		this.originalDocuments = targetCompilationUnits.stream().map(ICompilationUnit::getPrimary).collect(Collectors.toMap(ICompilationUnit::getPath, this::createDocument));
+		
 		this.rule = rule;
 		setNeedsProgressMonitor(true);
+	}
+
+	private Document createDocument(ICompilationUnit icu) {
+		try {
+			return new Document(icu.getSource());
+		} catch (JavaModelException e1) {
+			WizardMessageDialog.synchronizeWithUIShowInfo(
+			new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+					ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e1));
+			return new Document();
+		}
 	}
 
 	/*
@@ -70,7 +87,7 @@ public class RenamingRulePreviewWizard extends Wizard {
 	 */
 	@Override
 	public void addPages() {
-		addPage(new RenamingRulePreviewWizardPage(documentChanges, rule));
+		addPage(new RenamingRulePreviewWizardPage(documentChanges, originalDocuments, rule));
 	}
 
 	/**

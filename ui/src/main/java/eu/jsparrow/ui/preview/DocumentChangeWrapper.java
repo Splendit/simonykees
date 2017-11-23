@@ -3,6 +3,7 @@ package eu.jsparrow.ui.preview;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.visitor.renaming.FieldMetadata;
@@ -24,11 +25,11 @@ public class DocumentChangeWrapper {
 	private String oldIdentifier;
 	private String newIdentifier;
 	private String compilationUnitName;
-	private String compilationUnitSource;
 	private List<DocumentChangeWrapper> children = new ArrayList<>();
 	private FieldMetadata fieldData;
+	private Document originalDocument;
 
-	public DocumentChangeWrapper(DocumentChange documentChange, DocumentChangeWrapper parent, String compilationUnitSource, FieldMetadata fieldData) {
+	public DocumentChangeWrapper(DocumentChange documentChange, DocumentChangeWrapper parent, Document originalDocument, FieldMetadata fieldData) {
 		this.documentChange = documentChange;
 		this.parent = parent;
 		this.isParent = null == parent;
@@ -37,19 +38,19 @@ public class DocumentChangeWrapper {
 			.getIdentifier();
 		this.newIdentifier = fieldData.getNewIdentifier();
 		this.compilationUnitName = fieldData.getClassDeclarationName();
-		this.compilationUnitSource = compilationUnitSource;
 		this.fieldData = fieldData;
+		this.originalDocument = originalDocument;
 	}
 
 	private DocumentChangeWrapper(DocumentChange documentChange, DocumentChangeWrapper parent, String oldIdentifier,
-			String newIdentifier, String compilationUnitName, String compilationUnitSource, FieldMetadata fieldData) {
+			String newIdentifier, String compilationUnitName, Document compilationUnitSource, FieldMetadata fieldData) {
 		this.documentChange = documentChange;
 		this.parent = parent;
 		this.isParent = null == parent;
 		this.oldIdentifier = oldIdentifier;
 		this.newIdentifier = newIdentifier;
 		this.compilationUnitName = compilationUnitName;
-		this.compilationUnitSource = compilationUnitSource;
+		this.originalDocument = compilationUnitSource;
 		this.fieldData = fieldData;
 	}
 
@@ -61,9 +62,9 @@ public class DocumentChangeWrapper {
 		return isParent;
 	}
 
-	public void addChild(DocumentChange child, String compilationUnitName, String compilationUnitSource) {
+	public void addChild(DocumentChange child, String compilationUnitName, Document document) {
 		this.children.add(new DocumentChangeWrapper(child, this, this.oldIdentifier, this.newIdentifier,
-				compilationUnitName, compilationUnitSource, this.fieldData));
+				compilationUnitName, document, this.fieldData));
 	}
 
 	public DocumentChangeWrapper[] getChildren() {
@@ -85,9 +86,9 @@ public class DocumentChangeWrapper {
 	public String getCompilationUnitName() {
 		return compilationUnitName;
 	}
-
-	public String getCompilationUnitSource() {
-		return compilationUnitSource;
+	
+	public Document getOriginalDocument() {
+		return this.originalDocument;
 	}
 
 	public FieldMetadata getFieldData() {
