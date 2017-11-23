@@ -14,6 +14,8 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -38,10 +40,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.FileWithCompilationErrorException;
+import eu.jsparrow.core.exception.runtime.ICompilationUnitNotFoundException;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * A visitor that searches for fields that do not comply with the naming
@@ -287,7 +291,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	private Optional<List<ReferenceSearchMatch>> findFieldReferences(VariableDeclarationFragment fragment) {
 		IVariableBinding fragmentBinding = fragment.resolveBinding();
-		if(fragmentBinding == null) {
+		if (fragmentBinding == null) {
 			return Optional.empty();
 		}
 		IJavaElement iVariableBinding = fragmentBinding.getJavaElement();
@@ -306,7 +310,8 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		 * A list to store the references resulting from the search process.
 		 */
 		List<ReferenceSearchMatch> references = new ArrayList<>();
-		String fragmentIdentifier = fragment.getName().getIdentifier();
+		String fragmentIdentifier = fragment.getName()
+			.getIdentifier();
 
 		/*
 		 * The object that stores the search result.
@@ -315,16 +320,34 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 
 			@Override
 			public void acceptSearchMatch(SearchMatch match) {
-				IJavaElement iJavaElement = (IJavaElement) match.getElement();
-				IMember iMember = (IMember)iJavaElement;
-				ICompilationUnit icu = iMember.getCompilationUnit();
+
+				ICompilationUnit icu = findCompilationUnit(match);
+				if (icu == null) {
+					references.clear();
+					throw new ICompilationUnitNotFoundException(
+							Messages.FieldDeclarationASTVisitor_compilation_unit_of_search_match_not_found);
+				}
 				ReferenceSearchMatch reference = new ReferenceSearchMatch(match, fragmentIdentifier, icu);
 				references.add(reference);
-				if(RefactoringUtil.checkForSyntaxErrors(icu)) {
+				if (RefactoringUtil.checkForSyntaxErrors(icu)) {
 					references.clear();
 					throw new FileWithCompilationErrorException(FILE_WITH_COMPILATION_ERROR_EXCEPTION_MESSAGE);
 				}
 				storeIJavaElement(icu);
+			}
+
+			private ICompilationUnit findCompilationUnit(SearchMatch match) {
+				ICompilationUnit icu = null;
+				IJavaElement iJavaElement = (IJavaElement) match.getElement();
+				if (iJavaElement instanceof IMember) {
+					IMember iMember = (IMember) iJavaElement;
+					icu = iMember.getCompilationUnit();
+
+				} else if (iJavaElement instanceof IImportDeclaration) {
+					IImportContainer importContainer = (IImportContainer) iJavaElement.getParent();
+					icu = (ICompilationUnit) importContainer.getParent();
+				}
+				return icu;
 			}
 		};
 
@@ -336,7 +359,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		try {
 			searchEngine.search(searchPattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() },
 					scope, requestor, null);
-		} catch (CoreException | FileWithCompilationErrorException e) {
+		} catch (CoreException | FileWithCompilationErrorException | ICompilationUnitNotFoundException e) {
 			logger.error(e.getMessage());
 			return Optional.empty();
 		}
