@@ -21,7 +21,7 @@ public class NamingConventionsUtilTest {
 	@Test
 	public void cammelCaseAfterDollar() {
 		String identifierWithDollarSign = "has$dollar_sign";
-		String newId = NamingConventionUtil.generateNewIdetifier(identifierWithDollarSign, true, false).orElse("");
+		String newId = NamingConventionUtil.generateNewIdentifier(identifierWithDollarSign, true, false).orElse("");
 		assertFalse("Expecting an identifier to be generated", newId.isEmpty());
 		assertEquals("Expecting the generated id to have upper cases after dollar sign", "hasDollarsign", newId);
 		
@@ -30,7 +30,7 @@ public class NamingConventionsUtilTest {
 	@Test
 	public void cammelCaseAfterUnderscore() {
 		String identifierWithDollarSign = "has_under$score";
-		String newId = NamingConventionUtil.generateNewIdetifier(identifierWithDollarSign, false, true).orElse("");
+		String newId = NamingConventionUtil.generateNewIdentifier(identifierWithDollarSign, false, true).orElse("");
 		assertFalse("Expecting an identifier to be generated", newId.isEmpty());
 		assertEquals("Expecting the generated id to have upper cases after '_'", "hasUnderscore", newId);
 		
@@ -39,7 +39,7 @@ public class NamingConventionsUtilTest {
 	@Test
 	public void cammelCaseAllways() {
 		String identifierWithDollarSign = "has_under$score_and$dollar_sign";
-		String newId = NamingConventionUtil.generateNewIdetifier(identifierWithDollarSign, true, true).orElse("");
+		String newId = NamingConventionUtil.generateNewIdentifier(identifierWithDollarSign, true, true).orElse("");
 		assertFalse("Expecting an identifier to be generated", newId.isEmpty());
 		assertEquals("Expecting the generated id to have upper cases after '$' and '_'", "hasUnderScoreAndDollarSign", newId);
 		

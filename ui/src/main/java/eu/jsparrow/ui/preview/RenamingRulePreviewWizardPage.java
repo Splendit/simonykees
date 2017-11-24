@@ -27,7 +27,7 @@ import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.util.RefactoringUtil;
-import eu.jsparrow.core.visitor.renaming.FieldMetadata;
+import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 
 /**
  * {@link WizardPage} containing view for preview of renaming changes. The
@@ -41,7 +41,7 @@ import eu.jsparrow.core.visitor.renaming.FieldMetadata;
 @SuppressWarnings("restriction")
 public class RenamingRulePreviewWizardPage extends WizardPage {
 
-	private Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes;
+	private Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes;
 
 	private CheckboxTreeViewer viewer;
 	private IChangePreviewViewer currentPreviewViewer;
@@ -49,10 +49,10 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	private List<DocumentChangeWrapper> changesWrapperList;
 	private DocumentChangeWrapper selectedDocWrapper;
 
-	private List<FieldMetadata> uncheckedFields = new ArrayList<>();
+	private List<FieldMetaData> uncheckedFields = new ArrayList<>();
 	private Map<IPath, Document> originalDocuments;
 
-	public RenamingRulePreviewWizardPage(Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes, Map<IPath, Document> originalDocuments,
+	public RenamingRulePreviewWizardPage(Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes, Map<IPath, Document> originalDocuments,
 			PublicFieldsRenamingRule rule) {
 		super(rule.getRuleDescription()
 			.getName());
@@ -74,8 +74,8 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	 */
 	private void convertChangesToDocumentChangeWrappers() {
 		changesWrapperList = new ArrayList<>();
-		for (Map.Entry<FieldMetadata, Map<ICompilationUnit, DocumentChange>> entry : changes.entrySet()) {
-			FieldMetadata fieldData = entry.getKey();
+		for (Map.Entry<FieldMetaData, Map<ICompilationUnit, DocumentChange>> entry : changes.entrySet()) {
+			FieldMetaData fieldData = entry.getKey();
 			Map<ICompilationUnit, DocumentChange> changesForField = changes.get(fieldData);
 			if (!changesForField.isEmpty()) {
 				DocumentChange parent = null;
@@ -104,7 +104,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	 * @param changesForField
 	 * @param parent
 	 */
-	private void createDocumentChangeWrapperChildren(FieldMetadata fieldData, Document originalDocument,
+	private void createDocumentChangeWrapperChildren(FieldMetaData fieldData, Document originalDocument,
 			Map<ICompilationUnit, DocumentChange> changesForField, DocumentChange parent) {
 		DocumentChangeWrapper dcw = new DocumentChangeWrapper(parent, null, originalDocument, fieldData);
 		for (Map.Entry<ICompilationUnit, DocumentChange> entry : changesForField.entrySet()) {
@@ -272,7 +272,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	 * 
 	 * @return list with unchecked Fields
 	 */
-	public List<FieldMetadata> getUncheckedFields() {
+	public List<FieldMetaData> getUncheckedFields() {
 		return uncheckedFields;
 	}
 }

@@ -48,19 +48,19 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String RENAME_PRIVATE_FIELDS = "private"; //$NON-NLS-1$
 	private static final String RENAME_PROTECTED_FIELDS = "protected"; //$NON-NLS-1$
 	private static final String RENAME_PACKAGE_PROTECTED_FIELDS = "package-protected"; //$NON-NLS-1$
-	private static final String UPPERCASE_FOLLOWING_DOLLAR_SIGN = "uppercase-after-dollar"; //$NON-NLS-1$
-	private static final String UPPERCASE_FOLLOWING_UNDERSCORE = "uppercase-after-underscore"; //$NON-NLS-1$
+	private static final String UPPER_CASE_FOLLOWING_DOLLAR_SIGN = "uppercase-after-dollar"; //$NON-NLS-1$
+	private static final String UPPER_CASE_FOLLOWING_UNDERSCORE = "uppercase-after-underscore"; //$NON-NLS-1$
 	private static final String ADD_COMMENT = "add-todo"; //$NON-NLS-1$
 
 	private Map<String, Boolean> modifierOptions = new HashMap<>();
 
 	private CompilationUnit compilationUnit;
-	private List<FieldMetadata> fieldsMetaData = new ArrayList<>();
+	private List<FieldMetaData> fieldsMetaData = new ArrayList<>();
 	private Map<ASTNode, List<SimpleName>> declaredNamesPerNode = new HashMap<>();
 	private List<String> newNamesPerType = new ArrayList<>();
 	private Set<ICompilationUnit> targetIJavaElements = new HashSet<>();
 	private IJavaProject iJavaProject;
-	private List<FieldMetadata> unmodifiableFields = new ArrayList<>();
+	private List<FieldMetaData> unmodifiableFields = new ArrayList<>();
 	private FieldReferencesSearchEngine searchEngine;
 
 	public FieldDeclarationASTVisitor(IJavaElement[] scope) {
@@ -75,8 +75,8 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	 * <li>{@link #RENAME_PACKAGE_PROTECTED_FIELDS} = {@code true}</li>
 	 * <li>{@link #RENAME_PROTECTED_FIELDS} = {@code true}</li>
 	 * <li>{@link #RENAME_PRIVATE_FIELDS} = {@code false}</li>
-	 * <li>{@link #UPPERCASE_FOLLOWING_DOLLAR_SIGN} = {@code true}</li>
-	 * <li>{@link #UPPERCASE_FOLLOWING_UNDERSCORE} = {@code true}</li>
+	 * <li>{@link #UPPER_CASE_FOLLOWING_DOLLAR_SIGN} = {@code true}</li>
+	 * <li>{@link #UPPER_CASE_FOLLOWING_UNDERSCORE} = {@code true}</li>
 	 * <li>{@link #ADD_COMMENT} = {@code false}</li>
 	 * </ul>
 	 */
@@ -86,8 +86,8 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		modifierOptions.put(RENAME_PACKAGE_PROTECTED_FIELDS, true);
 		modifierOptions.put(RENAME_PROTECTED_FIELDS, true);
 		modifierOptions.put(RENAME_PRIVATE_FIELDS, false);
-		modifierOptions.put(UPPERCASE_FOLLOWING_DOLLAR_SIGN, true);
-		modifierOptions.put(UPPERCASE_FOLLOWING_UNDERSCORE, true);
+		modifierOptions.put(UPPER_CASE_FOLLOWING_DOLLAR_SIGN, true);
+		modifierOptions.put(UPPER_CASE_FOLLOWING_UNDERSCORE, true);
 		modifierOptions.put(ADD_COMMENT, false);
 	}
 
@@ -134,10 +134,10 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		for (VariableDeclarationFragment fragment : fragments) {
 			SimpleName fragmentName = fragment.getName();
 			if (!NamingConventionUtil.isComplyingWithConventions(fragmentName.getIdentifier())) {
-				boolean upperCaseAfterDollar = getUppercaseAfterDollar();
-				boolean upperCaseAfterUnderscore = getUppercaseAfterUnderscore();
+				boolean upperCaseAfterDollar = getUpperCaseAfterDollar();
+				boolean upperCaseAfterUnderscore = getUpperCaseAfterUnderscore();
 				Optional<String> optNewIdentifier = NamingConventionUtil
-					.generateNewIdetifier(fragmentName.getIdentifier(), upperCaseAfterDollar, upperCaseAfterUnderscore);
+					.generateNewIdentifier(fragmentName.getIdentifier(), upperCaseAfterDollar, upperCaseAfterUnderscore);
 				if (optNewIdentifier.isPresent()
 						&& !isConflictingIdentifier(optNewIdentifier.get(), fieldDeclaration)) {
 					String newIdentifier = optNewIdentifier.get();
@@ -145,12 +145,13 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 
 					searchEngine.findFieldReferences(fragment)
 						.ifPresent(references -> {
-							fieldsMetaData.add(new FieldMetadata(compilationUnit, references, fragment, newIdentifier));
+							storeIJavaElement(searchEngine.getTargetIJavaElements());
+							fieldsMetaData.add(new FieldMetaData(compilationUnit, references, fragment, newIdentifier));
 							newNamesPerType.add(newIdentifier);
 						});
 
 				} else if (getAddTodo()) {
-					FieldMetadata unmodifiableFieldDdata = new FieldMetadata(compilationUnit, Collections.emptyList(),
+					FieldMetaData unmodifiableFieldDdata = new FieldMetaData(compilationUnit, Collections.emptyList(),
 							fragment, fragment.getName()
 								.getIdentifier());
 					unmodifiableFields.add(unmodifiableFieldDdata);
@@ -284,6 +285,10 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	private void storeIJavaElement(ICompilationUnit iJavaElement) {
 		this.targetIJavaElements.add(iJavaElement);
 	}
+	
+	private void storeIJavaElement(Set<ICompilationUnit> targetIJavaElements2) {
+		targetIJavaElements2.forEach(this::storeIJavaElement);
+	}
 
 	/**
 	 * 
@@ -296,20 +301,20 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	/**
 	 * 
-	 * @return the list of the {@link FieldMetadata} corresponding to the fields
+	 * @return the list of the {@link FieldMetaData} corresponding to the fields
 	 *         to be that are found from the search process.
 	 */
-	public List<FieldMetadata> getFieldMetadata() {
+	public List<FieldMetaData> getFieldMetaData() {
 		return this.fieldsMetaData;
 	}
 
 	/**
 	 * 
-	 * @return the list of the {@link FieldMetadata} corresponding to the fields
+	 * @return the list of the {@link FieldMetaData} corresponding to the fields
 	 *         that cannot be renamed due to unfeasibility of automatic
 	 *         generation of a new legal identifier.
 	 */
-	public List<FieldMetadata> getUnmodifiableFieldMetadata() {
+	public List<FieldMetaData> getUnmodifiableFieldMetaData() {
 		return this.unmodifiableFields;
 	}
 
@@ -333,12 +338,12 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		this.modifierOptions.put(RENAME_PRIVATE_FIELDS, value);
 	}
 
-	public void setUppercaseAfterDollar(boolean value) {
-		this.modifierOptions.put(UPPERCASE_FOLLOWING_DOLLAR_SIGN, value);
+	public void setUpperCaseAfterDollar(boolean value) {
+		this.modifierOptions.put(UPPER_CASE_FOLLOWING_DOLLAR_SIGN, value);
 	}
 
-	public void setUppercaseAfterUnderscore(boolean value) {
-		this.modifierOptions.put(UPPERCASE_FOLLOWING_UNDERSCORE, value);
+	public void setUpperCaseAfterUnderscore(boolean value) {
+		this.modifierOptions.put(UPPER_CASE_FOLLOWING_UNDERSCORE, value);
 	}
 
 	public void setAddTodo(boolean value) {
@@ -362,14 +367,14 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		return modifierOptions.containsKey(RENAME_PRIVATE_FIELDS) && modifierOptions.get(RENAME_PRIVATE_FIELDS);
 	}
 
-	private boolean getUppercaseAfterDollar() {
-		return modifierOptions.containsKey(UPPERCASE_FOLLOWING_DOLLAR_SIGN)
-				&& modifierOptions.get(UPPERCASE_FOLLOWING_DOLLAR_SIGN);
+	private boolean getUpperCaseAfterDollar() {
+		return modifierOptions.containsKey(UPPER_CASE_FOLLOWING_DOLLAR_SIGN)
+				&& modifierOptions.get(UPPER_CASE_FOLLOWING_DOLLAR_SIGN);
 	}
 
-	private boolean getUppercaseAfterUnderscore() {
-		return modifierOptions.containsKey(UPPERCASE_FOLLOWING_UNDERSCORE)
-				&& modifierOptions.get(UPPERCASE_FOLLOWING_UNDERSCORE);
+	private boolean getUpperCaseAfterUnderscore() {
+		return modifierOptions.containsKey(UPPER_CASE_FOLLOWING_UNDERSCORE)
+				&& modifierOptions.get(UPPER_CASE_FOLLOWING_UNDERSCORE);
 	}
 
 	private boolean getAddTodo() {

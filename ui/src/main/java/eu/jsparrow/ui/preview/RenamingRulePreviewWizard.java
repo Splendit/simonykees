@@ -28,7 +28,7 @@ import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
-import eu.jsparrow.core.visitor.renaming.FieldMetadata;
+import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
@@ -48,16 +48,16 @@ public class RenamingRulePreviewWizard extends Wizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(RenamingRulePreviewWizard.class);
 	private RefactoringPipeline refactoringPipeline;
-	private List<FieldMetadata> metadata;
+	private List<FieldMetaData> metadata;
 
-	private Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> documentChanges;
+	private Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges;
 	private PublicFieldsRenamingRule rule;
 
 	private List<ICompilationUnit> targetCompilationUnits;
 	private Map<IPath, Document> originalDocuments;
 
-	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetadata> metadata,
-			Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> documentChanges,
+	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
+			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			List<ICompilationUnit> targetCompilationUnits, PublicFieldsRenamingRule rule) {
 		this.refactoringPipeline = refactoringPipeline;
 		this.metadata = metadata;
@@ -101,7 +101,7 @@ public class RenamingRulePreviewWizard extends Wizard {
 		if (!((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
 			.getName())).getUncheckedFields()
 				.isEmpty()) {
-			for (FieldMetadata fieldData : ((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
+			for (FieldMetaData fieldData : ((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
 				.getName())).getUncheckedFields()) {
 				metadata.remove(fieldData);
 			}
@@ -180,9 +180,9 @@ public class RenamingRulePreviewWizard extends Wizard {
 				}
 
 				if (refactoringPipeline.hasChanges()) {
-					Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes = new HashMap<>();
-					Map<String, FieldMetadata> metaDataMap = new HashMap<>();
-					for (FieldMetadata data : metadata) {
+					Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes = new HashMap<>();
+					Map<String, FieldMetaData> metaDataMap = new HashMap<>();
+					for (FieldMetaData data : metadata) {
 
 						String newIdentifier = data.getNewIdentifier();
 						Map<ICompilationUnit, DocumentChange> docsChanges;

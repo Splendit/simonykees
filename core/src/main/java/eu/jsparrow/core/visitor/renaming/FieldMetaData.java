@@ -21,7 +21,7 @@ import org.eclipse.text.edits.TextEditGroup;
  * @since 2.3.0
  *
  */
-public class FieldMetadata {
+public class FieldMetaData {
 
 	private List<ReferenceSearchMatch> references;
 	private VariableDeclarationFragment declarationFragment;
@@ -30,7 +30,7 @@ public class FieldMetadata {
 	private IPath declarationPath;
 	private String classDeclarationName;
 
-	public FieldMetadata(CompilationUnit cu, List<ReferenceSearchMatch> references,
+	public FieldMetaData(CompilationUnit cu, List<ReferenceSearchMatch> references,
 			VariableDeclarationFragment fragment, String newIdentifier) {
 		IJavaElement javaElement = cu.getJavaElement();
 		IPath path = javaElement.getPath();

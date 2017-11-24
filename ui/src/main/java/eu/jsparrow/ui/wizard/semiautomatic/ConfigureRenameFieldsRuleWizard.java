@@ -44,7 +44,7 @@ import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
-import eu.jsparrow.core.visitor.renaming.FieldMetadata;
+import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
@@ -71,7 +71,7 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 	private List<ICompilationUnit> selectedJavaElements;
 
 	private RefactoringPipeline refactoringPipeline;
-	private List<FieldMetadata> metadata;
+	private List<FieldMetaData> metadata;
 	private PublicFieldsRenamingRule renameFieldsRule;
 
 	private List<ICompilationUnit> targetCompilationUnits = new ArrayList<>();
@@ -296,8 +296,8 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 			.contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPROTECTED));
 		visitor.setRenamePublicField(model.getFieldTypes()
 			.contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PUBLIC));
-		visitor.setUppercaseAfterUnderscore(model.setUpperCaseForUnderscoreReplacementOption());
-		visitor.setUppercaseAfterDollar(model.setUpperCaseForDollarReplacementOption());
+		visitor.setUpperCaseAfterUnderscore(model.setUpperCaseForUnderscoreReplacementOption());
+		visitor.setUpperCaseAfterDollar(model.setUpperCaseForDollarReplacementOption());
 		visitor.setAddTodo(model.isAddTodoComments());
 		return visitor;
 	}
@@ -320,8 +320,8 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 			return;
 		}
 
-		metadata = visitor.getFieldMetadata();
-		List<FieldMetadata> todosMetadata = visitor.getUnmodifiableFieldMetadata();
+		metadata = visitor.getFieldMetaData();
+		List<FieldMetaData> todosMetadata = visitor.getUnmodifiableFieldMetaData();
 
 		if (subMonitor.isCanceled()) {
 			return;
@@ -363,9 +363,9 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 	 */
 	private void createAndShowPreviewWizard() {
 
-		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes = new HashMap<>();
-		Map<String, FieldMetadata> metaDataMap = new HashMap<>();
-		for (FieldMetadata data : metadata) {
+		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes = new HashMap<>();
+		Map<String, FieldMetaData> metaDataMap = new HashMap<>();
+		for (FieldMetaData data : metadata) {
 
 			String newIdentifier = data.getNewIdentifier();
 			Map<ICompilationUnit, DocumentChange> docsChanges;
@@ -389,7 +389,7 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 	 *            Map containing changes to be displayed
 	 */
 	private void synchronizeWithUIShowRefactoringPreviewWizard(
-			Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes) {
+			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes) {
 
 		String message = NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass()
 			.getSimpleName(), selectedJavaProjekt.getElementName());

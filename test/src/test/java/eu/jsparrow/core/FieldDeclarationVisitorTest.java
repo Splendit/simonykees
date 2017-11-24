@@ -31,7 +31,7 @@ import org.junit.Test;
 
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
-import eu.jsparrow.core.visitor.renaming.FieldMetadata;
+import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.FieldReferencesSearchEngine;
 import eu.jsparrow.core.visitor.renaming.ReferenceSearchMatch;
 
@@ -101,13 +101,13 @@ public class FieldDeclarationVisitorTest extends AbstractRulesTest {
 		/*
 		 * expecting two re-nameable fields to be found...
 		 */
-		List<FieldMetadata> metaData = referencesVisitor.getFieldMetadata();
+		List<FieldMetaData> metaData = referencesVisitor.getFieldMetaData();
 		assertEquals(2, metaData.size());
 
 		/*
 		 * ... with the following properties...
 		 */
-		FieldMetadata fieldNameMetaData = findByOldIdentifier(metaData, "field_name");
+		FieldMetaData fieldNameMetaData = findByOldIdentifier(metaData, "field_name");
 		assertNotNull(fieldNameMetaData);
 		assertEquals(1, fieldNameMetaData.getReferences().size());
 		assertEquals("fieldName", fieldNameMetaData.getNewIdentifier());
@@ -183,7 +183,7 @@ public class FieldDeclarationVisitorTest extends AbstractRulesTest {
 		}
 	}
 	
-	private FieldMetadata findByOldIdentifier(List<FieldMetadata> metaData, String string) {
+	private FieldMetaData findByOldIdentifier(List<FieldMetaData> metaData, String string) {
 		return metaData.stream()
 			.filter(mData -> mData.getFieldDeclaration()
 				.getName()

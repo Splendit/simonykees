@@ -6,7 +6,7 @@ import java.util.List;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
-import eu.jsparrow.core.visitor.renaming.FieldMetadata;
+import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 
 /**
  * Wrapper class for storing relation between DocumentChange holding origin of
@@ -26,10 +26,10 @@ public class DocumentChangeWrapper {
 	private String newIdentifier;
 	private String compilationUnitName;
 	private List<DocumentChangeWrapper> children = new ArrayList<>();
-	private FieldMetadata fieldData;
+	private FieldMetaData fieldData;
 	private Document originalDocument;
 
-	public DocumentChangeWrapper(DocumentChange documentChange, DocumentChangeWrapper parent, Document originalDocument, FieldMetadata fieldData) {
+	public DocumentChangeWrapper(DocumentChange documentChange, DocumentChangeWrapper parent, Document originalDocument, FieldMetaData fieldData) {
 		this.documentChange = documentChange;
 		this.parent = parent;
 		this.isParent = null == parent;
@@ -43,7 +43,7 @@ public class DocumentChangeWrapper {
 	}
 
 	private DocumentChangeWrapper(DocumentChange documentChange, DocumentChangeWrapper parent, String oldIdentifier,
-			String newIdentifier, String compilationUnitName, Document compilationUnitSource, FieldMetadata fieldData) {
+			String newIdentifier, String compilationUnitName, Document compilationUnitSource, FieldMetaData fieldData) {
 		this.documentChange = documentChange;
 		this.parent = parent;
 		this.isParent = null == parent;
@@ -91,7 +91,7 @@ public class DocumentChangeWrapper {
 		return this.originalDocument;
 	}
 
-	public FieldMetadata getFieldData() {
+	public FieldMetaData getFieldData() {
 		return fieldData;
 	}
 }
