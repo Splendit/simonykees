@@ -32,6 +32,7 @@ import org.junit.Test;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 import eu.jsparrow.core.visitor.renaming.FieldMetadata;
+import eu.jsparrow.core.visitor.renaming.FieldReferencesSearchEngine;
 import eu.jsparrow.core.visitor.renaming.ReferenceSearchMatch;
 
 @SuppressWarnings("nls")
@@ -127,8 +128,8 @@ public class FieldDeclarationVisitorTest extends AbstractRulesTest {
 		 * Having a FieldDeclarationASTVisitor and a field with 
 		 * unsafe type name (i.e. having a $ in its name).
 		 */
-		FieldDeclarationASTVisitor referencesVisitor = new FieldDeclarationASTVisitor(
-				new IJavaElement[] { packageFragment });
+		
+		FieldReferencesSearchEngine searchEngine = new FieldReferencesSearchEngine(new IJavaElement[] { packageFragment });
 		List<VariableDeclarationFragment> fragments = findDeclarationsWithUnsafeTypeName(compilationUnits);
 		assertFalse(fragments.isEmpty());
 		VariableDeclarationFragment fragment = fragments.get(0);
@@ -136,7 +137,7 @@ public class FieldDeclarationVisitorTest extends AbstractRulesTest {
 		/*
 		 * When searching for the references of the field with unsafe type name 
 		 */
-		Optional<List<ReferenceSearchMatch>> optReferences = referencesVisitor.findFieldReferences(fragment);
+		Optional<List<ReferenceSearchMatch>> optReferences = searchEngine.findFieldReferences(fragment);
 		assertTrue(optReferences.isPresent());
 
 		/*
