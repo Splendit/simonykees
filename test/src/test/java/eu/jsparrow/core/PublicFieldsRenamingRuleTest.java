@@ -62,7 +62,8 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 		 */
 		List<ICompilationUnit> iCompilationUnits = new ArrayList<>();
 		for (Path renamingPath : loadUtilityClasses(RulesTestUtil.PRERULE_DIRECTORY + "/" + RENAMING)) {
-			String renamingClassName = renamingPath.getFileName().toString();
+			String renamingClassName = renamingPath.getFileName()
+				.toString();
 			String renamingSource = new String(Files.readAllBytes(renamingPath), StandardCharsets.UTF_8);
 			ICompilationUnit iCompilationUnit = packageFragment.createCompilationUnit(renamingClassName, renamingSource,
 					true, null);
@@ -70,7 +71,8 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 		}
 
 		/*
-		 * Parse each iCompilationUnit and visit them with FieldDeclarationASTVisitor
+		 * Parse each iCompilationUnit and visit them with
+		 * FieldDeclarationASTVisitor
 		 */
 		FieldDeclarationASTVisitor referencesVisitor = new FieldDeclarationASTVisitor(
 				new IJavaElement[] { packageFragment });
@@ -81,14 +83,18 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 		}
 
 		/*
-		 * Store the references metadata and the paths of all compilation units
-		 * having at least one declaration/reference to be renamed. 
+		 * Store the references metaData and the paths of all compilation units
+		 * having at least one declaration/reference to be renamed.
 		 */
 		metaData = referencesVisitor.getFieldMetadata();
 		todosMetaData = referencesVisitor.getUnmodifiableFieldMetadata();
 		Set<ICompilationUnit> targetICUs = referencesVisitor.getTargetIJavaElements();
-		
-		return targetICUs.stream().map(ICompilationUnit::getPath).map(iPath -> new Path[] { Paths.get(iPath.toFile().getPath()) }).collect(Collectors.toList());
+
+		return targetICUs.stream()
+			.map(ICompilationUnit::getPath)
+			.map(iPath -> new Path[] { Paths.get(iPath.toFile()
+				.getPath()) })
+			.collect(Collectors.toList());
 	}
 	
 

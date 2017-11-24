@@ -22,11 +22,13 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -143,6 +145,11 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		if(hasSkippedModifier(fieldDeclaration)) {
 			return true;
 		}
+		
+		boolean safeTypeName = hasSafeTypeName(fieldDeclaration);
+		if(!safeTypeName) {
+			return true;
+		}
 
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil.returnTypedList(fieldDeclaration.fragments(),
 				VariableDeclarationFragment.class);
@@ -172,6 +179,17 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return true;
+	}
+
+	private boolean hasSafeTypeName(FieldDeclaration fieldDeclaration) {
+		Type type = fieldDeclaration.getType();
+		ITypeBinding binding = type.resolveBinding();
+		if(binding == null) {
+			return false;
+		}
+		String typeName = binding.getName();
+		return !typeName.contains("$"); //$NON-NLS-1$
+		
 	}
 
 	/**
@@ -289,7 +307,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	 * @return an optional of the list of {@link ReferenceSearchMatch}s or an
 	 *         empty optional if the references cannot be found.
 	 */
-	private Optional<List<ReferenceSearchMatch>> findFieldReferences(VariableDeclarationFragment fragment) {
+	public Optional<List<ReferenceSearchMatch>> findFieldReferences(VariableDeclarationFragment fragment) {
 		IVariableBinding fragmentBinding = fragment.resolveBinding();
 		if (fragmentBinding == null) {
 			return Optional.empty();
