@@ -1,18 +1,26 @@
-package at.splendit.simonykees.maven.util;
+package eu.jsparrow.maven.util;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -39,6 +47,7 @@ import eu.jsparrow.maven.JsparrowMojo;
 @SuppressWarnings("nls")
 public class MavenUtil {
 
+	// CONSTANTS
 	private static final String USER_DIR = "user.dir";
 	private static final String JAVA_TMP = "java.io.tmpdir";
 	private static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone";
@@ -50,6 +59,15 @@ public class MavenUtil {
 	private static final String JSPARROW_MANIFEST = "manifest.standalone";
 	private static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory";
 	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps";
+
+	private static boolean standaloneStarted = false;
+	private static long standaloneBundleID = 0;
+
+	private static Framework framework = null;
+
+	private static String mavenHomeUnzipped = "";
+
+	private static File directory;
 
 	private MavenUtil() {
 
@@ -90,8 +108,8 @@ public class MavenUtil {
 	 * @throws BundleException
 	 * @throws InterruptedException
 	 */
-	public static void startOSGI(MavenProject project, String mavenHome, Log log,
-			Map<String, String> additionalConfiguration) throws BundleException, InterruptedException {
+	public static void startOSGI(MavenProject project, String mavenHome, Log log, Map<String, String> additionalConfiguration)
+			throws BundleException, InterruptedException {
 
 		final Map<String, String> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
@@ -108,9 +126,15 @@ public class MavenUtil {
 
 		// Set working directory
 		String file = System.getProperty(JAVA_TMP);
-		File directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
+		directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
 		if (directory.exists()) {
-			throw new InterruptedException("jSparrow already running");
+			if (Arrays.asList(directory.list())
+				.size() == 1) {
+				System.setProperty(USER_DIR, directory.getAbsolutePath());
+				log.info("Set user.dir to " + directory.getAbsolutePath());
+			} else {
+				throw new InterruptedException("jSparrow already running");
+			}
 		} else if (directory.mkdirs()) {
 			System.setProperty(USER_DIR, directory.getAbsolutePath());
 			log.info("Set user.dir to " + directory.getAbsolutePath());
@@ -118,13 +142,34 @@ public class MavenUtil {
 			throw new InterruptedException("Could not create temp folder");
 		}
 
-		extractAndCopyDependencies(project, mavenHome, log);
+		// TODO improve with this approach
+		// copyDepsWithMavenExecutor();
+
+		/*
+		 * if maven home from parameter is usable, use it, otherwise extract
+		 * maven from resources to temp folder, set execute rights and use its
+		 * maven home location
+		 */
+		if (null != mavenHome && !mavenHome.isEmpty() && !mavenHome.endsWith("EMBEDDED")) {
+			extractAndCopyDependencies(project, mavenHome, log);
+		} else {
+			String tempZipPath = directory.getAbsolutePath() + File.separator + "maven";
+
+			try (InputStream mavenZipInputStream = JsparrowMojo.class
+				.getResourceAsStream("/apache-maven-3.5.2-bin.zip")) {
+				mavenHomeUnzipped += tempZipPath;
+				unzip(mavenZipInputStream, tempZipPath, log);
+				extractAndCopyDependencies(project, mavenHomeUnzipped, log);
+			} catch (IOException e) {
+				log.error(e.getMessage(), e);
+			}
+		}
 
 		ServiceLoader<FrameworkFactory> ffs = ServiceLoader.load(FrameworkFactory.class);
 		FrameworkFactory frameworkFactory = ffs.iterator()
 			.next();
 
-		final Framework framework = frameworkFactory.newFramework(configuration);
+		framework = frameworkFactory.newFramework(configuration);
 
 		framework.start();
 
@@ -132,13 +177,13 @@ public class MavenUtil {
 
 		final List<Bundle> bundles = new ArrayList<>();
 
-		try (InputStream is = JsparrowMojo.class.getResourceAsStream(File.separator + JSPARROW_MANIFEST);
+		try (InputStream is = JsparrowMojo.class.getResourceAsStream("/" + JSPARROW_MANIFEST);
 				BufferedReader reader = new BufferedReader(new InputStreamReader(is));) {
 			String line = "";
 
 			if (is != null) {
 				while ((line = reader.readLine()) != null) {
-					InputStream fileStream = JsparrowMojo.class.getResourceAsStream(File.separator + line);
+					InputStream fileStream = JsparrowMojo.class.getResourceAsStream("/" + line);
 					bundles.add(ctx.installBundle("file://" + line, fileStream));
 				}
 			}
@@ -151,31 +196,6 @@ public class MavenUtil {
 		// STOP AND WAIT TO STOP WHEN DONE
 		framework.stop();
 		framework.waitForStop(0);
-
-		// CLEAN
-		try {
-			deleteChildren(new File(directory.getAbsolutePath()));
-		} catch (IOException e) {
-			log.error(e.getMessage(), e);
-		}
-		directory.delete();
-	}
-
-	/**
-	 * Recursively deletes all sub-folders from received folder.
-	 * 
-	 * @param parentDirectory
-	 *            directory which content is to be deleted
-	 * @throws IOException
-	 */
-	private static void deleteChildren(File parentDirectory) throws IOException {
-		for (String file : Arrays.asList(parentDirectory.list())) {
-			File currentFile = new File(parentDirectory.getAbsolutePath(), file);
-			if (currentFile.isDirectory()) {
-				deleteChildren(currentFile);
-			}
-			currentFile.delete();
-		}
 	}
 
 	/**
@@ -193,6 +213,8 @@ public class MavenUtil {
 				try {
 					log.info("Starting BUNDLE: " + bundle.getSymbolicName() + ", resolution: " + bundle.getState());
 					bundle.start();
+					standaloneBundleID = bundle.getBundleId();
+					standaloneStarted = true;
 				} catch (Exception e) {
 					log.error(e.getMessage(), e);
 				}
@@ -209,18 +231,138 @@ public class MavenUtil {
 		request.setPomFile(new File(project.getBasedir()
 			.getAbsolutePath() + File.separator + "pom.xml"));
 		request.setGoals(Collections.singletonList("dependency:copy-dependencies "));
+
 		final Properties props = new Properties();
 		props.setProperty(OUTPUT_DIRECTORY_CONSTANT,
 				System.getProperty(USER_DIR) + File.separator + DEPENDENCIES_FOLDER_CONSTANT);
 		request.setProperties(props);
+
 		final Invoker invoker = new DefaultInvoker();
-		// TODO check if maven.home is set, handle if isn't
-		log.info("M2_HOME path: " + mavenHome);
 		invoker.setMavenHome(new File(mavenHome));
+
 		try {
 			invoker.execute(request);
 		} catch (final MavenInvocationException e) {
 			log.error(e.getMessage(), e);
 		}
 	}
+
+//	private static void copyDepsWithMavenExecutor() {
+//		log.info("Session: " + mavenSession);
+//
+//		// TODO fix output directory and scope to test to include junit
+//		Plugin execPlugin = createMavenDepsPlugin();
+//		Xpp3Dom configuration = MojoExecutor.configuration();
+//		configureExecPlugin(configuration);
+//		try {
+//			executeMojo(execPlugin, "copy-dependencies", configuration,
+//					executionEnvironment(project, mavenSession, pluginManager));
+//		} catch (MojoExecutionException e) {
+//			log.error(e.getMessage(), e);
+//		}
+//	}
+//
+//	private Plugin createMavenDepsPlugin() {
+//		Plugin dependenciesPlugin = new Plugin();
+//		dependenciesPlugin.setGroupId("org.apache.maven.plugins");
+//		dependenciesPlugin.setArtifactId("maven-dependency-plugin");
+//		dependenciesPlugin.setVersion("3.0.2");
+//
+//		return dependenciesPlugin;
+//	}
+//
+//	private void configureExecPlugin(Xpp3Dom configuration) {
+//		configuration.setAttribute(OUTPUT_DIRECTORY_CONSTANT,
+//				System.getProperty(USER_DIR) + File.separator + DEPENDENCIES_FOLDER_CONSTANT);
+//	}
+
+	private static final int BUFFER_SIZE = 4096;
+
+	/**
+	 * Extracts a zip file from zipInputStream to a directory specified by
+	 * destDirectory which is created if does not exists
+	 * 
+	 * @param zipInputStream
+	 * @param destDirectory
+	 * @throws IOException
+	 */
+	public static void unzip(InputStream zipInputStream, String destDirectory, Log log) throws IOException {
+		File destDir = new File(destDirectory);
+		if (!destDir.exists()) {
+			destDir.mkdir();
+		}
+		ZipInputStream zipIn = new ZipInputStream(zipInputStream);
+		ZipEntry entry = zipIn.getNextEntry();
+		mavenHomeUnzipped += File.separator + entry.getName();
+		// iterates over entries in the zip file
+		while (entry != null) {
+			String filePath = destDirectory + File.separator + entry.getName();
+			if (!entry.isDirectory()) {
+				// if the entry is a file, extracts it
+				extractFile(zipIn, filePath, log);
+			} else {
+				// if the entry is a directory, make the directory
+				File dir = new File(filePath);
+				dir.mkdir();
+				log.info("create dir : " + dir.getAbsoluteFile());
+			}
+			zipIn.closeEntry();
+			entry = zipIn.getNextEntry();
+		}
+		zipIn.close();
+	}
+
+	/**
+	 * Extracts a zip entry (file entry)
+	 * 
+	 * @param zipIn
+	 * @param filePath
+	 * @throws IOException
+	 */
+	private static void extractFile(ZipInputStream zipIn, String filePath, Log log) throws IOException {
+		log.info("file unzip : " + filePath);
+		try (FileOutputStream fos = new FileOutputStream(filePath);
+				BufferedOutputStream bos = new BufferedOutputStream(fos)) {
+			byte[] bytesIn = new byte[BUFFER_SIZE];
+			int read = 0;
+			while ((read = zipIn.read(bytesIn)) != -1) {
+				bos.write(bytesIn, 0, read);
+			}
+		}
+
+		File file = new File(filePath);
+
+		Set<PosixFilePermission> perms = new HashSet<>();
+		perms.add(PosixFilePermission.OWNER_READ);
+		perms.add(PosixFilePermission.OWNER_WRITE);
+		perms.add(PosixFilePermission.OWNER_EXECUTE);
+
+		perms.add(PosixFilePermission.OTHERS_READ);
+		perms.add(PosixFilePermission.OTHERS_WRITE);
+		perms.add(PosixFilePermission.OWNER_EXECUTE);
+
+		perms.add(PosixFilePermission.GROUP_READ);
+		perms.add(PosixFilePermission.GROUP_WRITE);
+		perms.add(PosixFilePermission.GROUP_EXECUTE);
+
+		Files.setPosixFilePermissions(file.toPath(), perms);
+
+	}
+
+	public static boolean isStandaloneStarted() {
+		return standaloneStarted;
+	}
+
+	public static long getStandaloneBundleID() {
+		return standaloneBundleID;
+	}
+
+	public static Framework getFramework() {
+		return framework;
+	}
+
+	public static File getDirectory() {
+		return directory;
+	}
+
 }
