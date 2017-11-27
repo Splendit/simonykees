@@ -21,11 +21,12 @@ import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -71,7 +72,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	private Control compareInputControl;
 
 	private RefactoringSummaryWizardPageModel summaryWizardPageModel;
-	
+
 	private int displayHeight;
 
 	/**
@@ -83,8 +84,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		setTitle(Messages.SummaryWizardPage_RunSummary);
 		this.summaryWizardPageModel = new RefactoringSummaryWizardPageModel(refactoringPipeline, wizardModel);
 		displayHeight = Display.getCurrent()
-				.getPrimaryMonitor()
-				.getBounds().height;
+			.getPrimaryMonitor()
+			.getBounds().height;
 	}
 
 	/**
@@ -151,35 +152,6 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
-	private void addFilesSection() {
-		Group filesGroup = new Group(rootComposite, SWT.SHADOW_ETCHED_IN);
-		filesGroup.setLayout(new GridLayout(1, false));
-		filesGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
-		filesGroup.setText(Messages.SummaryWizardPage_Files);
-		SashForm sashForm = new SashForm(filesGroup, SWT.VERTICAL);
-		sashForm.setLayout(new GridLayout());
-		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
-		sashForm.setBackground(sashForm.getDisplay()
-			.getSystemColor(SWT.COLOR_GRAY));
-
-		fileTableViewer = new TableViewer(sashForm, SWT.SINGLE);
-
-		compareInputContainer = new Composite(sashForm, SWT.FILL);
-		GridLayout layout = new GridLayout();
-		layout.marginHeight = 0;
-		layout.marginWidth = 0;
-		compareInputContainer.setLayout(layout);
-		compareInputContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
-		compareInputContainer.setSize(SWT.DEFAULT, 1000);
-
-		CompareUIPlugin.getDefault()
-			.getPreferenceStore()
-			.setValue(ComparePreferencePage.OPEN_STRUCTURE_COMPARE, Boolean.FALSE);
-
-		sashForm.setWeights(new int[] { 1, 3 });
-
-	}
-
 	private void addRulesSection() {
 		Group tableComposite = new Group(rootComposite, SWT.SHADOW_ETCHED_IN);
 		tableComposite.setText(Messages.SummaryWizardPage_Rules);
@@ -192,7 +164,6 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
-		
 		TableViewerColumn colRuleName = new TableViewerColumn(ruleTableViewer, SWT.NONE);
 		colRuleName.getColumn()
 			.setText(Messages.SummaryWizardPage_Rule);
@@ -216,8 +187,46 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		tableLayout.setColumnData(colRuleName.getColumn(), new ColumnWeightData(60));
 		tableLayout.setColumnData(colTimes.getColumn(), new ColumnWeightData(20));
 		tableLayout.setColumnData(colTimeSaved.getColumn(), new ColumnWeightData(20));
-		
-		
+
+	}
+
+	private void addFilesSection() {
+		Group filesGroup = new Group(rootComposite, SWT.SHADOW_ETCHED_IN);
+		filesGroup.setLayout(new GridLayout(1, false));
+		filesGroup.setLayoutData(new GridData(GridData.FILL_BOTH));
+		filesGroup.setText(Messages.SummaryWizardPage_Files);
+		SashForm sashForm = new SashForm(filesGroup, SWT.VERTICAL);
+		sashForm.setLayout(new GridLayout());
+		sashForm.setLayoutData(new GridData(GridData.FILL_BOTH));
+		sashForm.setBackground(sashForm.getDisplay()
+			.getSystemColor(SWT.COLOR_GRAY));
+
+		fileTableViewer = new TableViewer(sashForm, SWT.SINGLE);
+
+		// sort files alphabetically (SIM-922)
+		fileTableViewer.setComparator(new ViewerComparator() {
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2) {
+				ChangedFilesModel model1 = (ChangedFilesModel) e1;
+				ChangedFilesModel model2 = (ChangedFilesModel) e2;
+				return model1.getName()
+					.compareTo(model2.getName());
+			}
+		});
+
+		compareInputContainer = new Composite(sashForm, SWT.FILL);
+		GridLayout layout = new GridLayout();
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		compareInputContainer.setLayout(layout);
+		compareInputContainer.setLayoutData(new GridData(GridData.FILL_BOTH));
+		compareInputContainer.setSize(SWT.DEFAULT, 1000);
+
+		CompareUIPlugin.getDefault()
+			.getPreferenceStore()
+			.setValue(ComparePreferencePage.OPEN_STRUCTURE_COMPARE, Boolean.FALSE);
+
+		sashForm.setWeights(new int[] { 1, 3 });
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
