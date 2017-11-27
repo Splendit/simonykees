@@ -316,10 +316,17 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		} catch (InvocationTargetException | InterruptedException e) {
 			logger.error(e.getMessage(), e);
 		}
-		compareInputControl = compareInput.createContents(compareInputContainer);
-		compareInputControl.setSize(compareInputControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
-		compareInputControl.setLayoutData(new GridData(GridData.FILL_BOTH));
-		compareInputContainer.layout();
+		createControlsIfNoneExist(compareInput);
+	}
+
+	private void createControlsIfNoneExist(CompareInput compareInput) {
+		//Condition fixes SIM-902
+		if(compareInputContainer.getChildren().length == 0) {
+			compareInputControl = compareInput.createContents(compareInputContainer);
+			compareInputControl.setSize(compareInputControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+			compareInputControl.setLayoutData(new GridData(GridData.FILL_BOTH));
+			compareInputContainer.layout();
+		}
 	}
 
 	private void setInitialFileSelection() {
