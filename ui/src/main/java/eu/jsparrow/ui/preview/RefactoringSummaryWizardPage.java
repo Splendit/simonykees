@@ -25,6 +25,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -70,6 +71,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	private Control compareInputControl;
 
 	private RefactoringSummaryWizardPageModel summaryWizardPageModel;
+	
+	private int displayHeight;
 
 	/**
 	 * Create the wizard.
@@ -79,6 +82,9 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		super("wizardPage"); //$NON-NLS-1$
 		setTitle(Messages.SummaryWizardPage_RunSummary);
 		this.summaryWizardPageModel = new RefactoringSummaryWizardPageModel(refactoringPipeline, wizardModel);
+		displayHeight = Display.getCurrent()
+				.getPrimaryMonitor()
+				.getBounds().height;
 	}
 
 	/**
@@ -178,12 +184,15 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		Group tableComposite = new Group(rootComposite, SWT.SHADOW_ETCHED_IN);
 		tableComposite.setText(Messages.SummaryWizardPage_Rules);
 		tableComposite.setLayout(new GridLayout(1, false));
-		tableComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		ruleTableViewer = new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION);
+		GridData layoutData = new GridData(SWT.FILL, SWT.FILL, true, false);
+		layoutData.heightHint = displayHeight / 4;
+		tableComposite.setLayoutData(layoutData);
+		ruleTableViewer = new TableViewer(tableComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL);
 		Table table = ruleTableViewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 
+		
 		TableViewerColumn colRuleName = new TableViewerColumn(ruleTableViewer, SWT.NONE);
 		colRuleName.getColumn()
 			.setText(Messages.SummaryWizardPage_Rule);
@@ -207,6 +216,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		tableLayout.setColumnData(colRuleName.getColumn(), new ColumnWeightData(60));
 		tableLayout.setColumnData(colTimes.getColumn(), new ColumnWeightData(20));
 		tableLayout.setColumnData(colTimeSaved.getColumn(), new ColumnWeightData(20));
+		
+		
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -305,10 +316,17 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 		} catch (InvocationTargetException | InterruptedException e) {
 			logger.error(e.getMessage(), e);
 		}
-		compareInputControl = compareInput.createContents(compareInputContainer);
-		compareInputControl.setSize(compareInputControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
-		compareInputControl.setLayoutData(new GridData(GridData.FILL_BOTH));
-		compareInputContainer.layout();
+		createControlsIfNoneExist(compareInput);
+	}
+
+	private void createControlsIfNoneExist(CompareInput compareInput) {
+		//Condition fixes SIM-902
+		if(compareInputContainer.getChildren().length == 0) {
+			compareInputControl = compareInput.createContents(compareInputContainer);
+			compareInputControl.setSize(compareInputControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
+			compareInputControl.setLayoutData(new GridData(GridData.FILL_BOTH));
+			compareInputContainer.layout();
+		}
 	}
 
 	private void setInitialFileSelection() {

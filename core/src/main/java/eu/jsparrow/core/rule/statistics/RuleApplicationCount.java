@@ -93,9 +93,10 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 		return changesPerCompilationUnit;
 	}
 
-
 	@Override
 	public void update(ASTRewriteEvent event) {
-		getApplicationsForFile(event.getCompilationUnit()).update();
+		FileChangeCount count = getApplicationsForFile(event.getCompilationUnit());
+		count.clear();
+		count.update();
 	}
 }

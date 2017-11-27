@@ -52,7 +52,6 @@ public class RulesTestUtil {
 	public static final String BASE_DIRECTORY = SAMPLE_MODULE_PATH + "src/test/java/eu/jsparrow/sample";
 	public static final String PRERULE_DIRECTORY = SAMPLE_MODULE_PATH + "src/test/java/eu/jsparrow/sample/preRule";
 
-
 	private RulesTestUtil() {
 		// hiding
 	}
@@ -90,13 +89,37 @@ public class RulesTestUtil {
 		final Document document = builder.parse(new File(classpathFile));
 
 		final Node projectNode = getNodeByNodeName(document.getChildNodes(), "project");
-		final List<Node> dependencies = asList(
-				getNodeByNodeName(projectNode.getChildNodes(), "dependencies").getChildNodes());
+		if (projectNode == null) {
+			return collectedEntries;
+		}
+
+		final Node dependencyNode = getNodeByNodeName(projectNode.getChildNodes(), "dependencies");
+		if (dependencyNode == null) {
+			return collectedEntries;
+		}
+
+		final List<Node> dependencies = asList(dependencyNode.getChildNodes());
 		for (Node dependency : dependencies) {
 			final NodeList children = dependency.getChildNodes();
-			String groupId = getNodeByNodeName(children, "groupId").getTextContent();
-			String artifactId = getNodeByNodeName(children, "artifactId").getTextContent();
-			String version = getNodeByNodeName(children, "version").getTextContent();
+
+			final Node groupIdNode = getNodeByNodeName(children, "groupId");
+			final Node artifactIdNode = getNodeByNodeName(children, "artifactId");
+			final Node versionNode = getNodeByNodeName(children, "version");
+
+			if (groupIdNode == null || artifactIdNode == null || versionNode == null) {
+				collectedEntries.clear();
+				return collectedEntries;
+			}
+
+			String groupId = groupIdNode.getTextContent();
+			String artifactId = artifactIdNode.getTextContent();
+			String version = versionNode.getTextContent();
+
+			if (groupId == null || artifactId == null || version == null) {
+				collectedEntries.clear();
+				return collectedEntries;
+			}
+
 			collectedEntries.add(generateMavenEntryFromDepedencyString(groupId, artifactId, version));
 		}
 
@@ -113,9 +136,8 @@ public class RulesTestUtil {
 					"Maven Dependency :[%s:%s:%s] not found in local repository, add it to ../sample/pom.xml in the maven-dependency-plugin and execute package to download",
 					groupId, artifactId, version));
 		}
-		IClasspathEntry returnValue = JavaCore.newLibraryEntry(jarPath, null, null);
 
-		return returnValue;
+		return JavaCore.newLibraryEntry(jarPath, null, null);
 	}
 
 	private static String getM2Repository() throws Exception {

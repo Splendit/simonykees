@@ -2,6 +2,7 @@ package eu.jsparrow.core;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -74,9 +75,13 @@ public abstract class SingleRuleTest {
 
 	private static List<Path> loadUtilityClasses(String utilityDirectory) throws IOException {
 		List<Path> data = new ArrayList<>();
-		for (Path utilityPath : Files.newDirectoryStream(Paths.get(utilityDirectory), "*.java")) { //$NON-NLS-1$
-			data.add(utilityPath);
+
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(utilityDirectory), "*.java")) { //$NON-NLS-1$
+			for (Path utilityPath : directoryStream) {
+				data.add(utilityPath);
+			}
 		}
+
 		return data;
 	}
 

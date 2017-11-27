@@ -276,10 +276,13 @@ public class StandardLoggerASTVisitor extends AbstractAddImportASTVisitor {
 
 			List<Expression> tobeLoggedExceptions = findExceptionsToBeLogged(exceptions);
 
-			List<Expression> logArguments = calcLogArgument(arguments, methodIdentifier, tobeLoggedExceptions);
+			
 			SimpleName qualifierName = expressionQualifier.getName();
 			calcReplacingOption(qualifierName, logsException)
-				.ifPresent(replacingOption -> replaceMethod(methodInvocation, replacingOption, logArguments));
+				.ifPresent(replacingOption -> {
+					List<Expression> logArguments = calcLogArgument(arguments, methodIdentifier, tobeLoggedExceptions);
+					replaceMethod(methodInvocation, replacingOption, logArguments);
+				});
 
 		} else if (PRINT_STACK_TRACE.equals(methodIdentifier)
 				&& !StringUtils.isEmpty(replacingOptions.get(StandardLoggerConstants.PRINT_STACKTRACE_KEY))) {
