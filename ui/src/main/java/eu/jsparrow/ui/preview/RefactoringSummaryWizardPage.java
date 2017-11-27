@@ -202,6 +202,8 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 			.getSystemColor(SWT.COLOR_GRAY));
 
 		fileTableViewer = new TableViewer(sashForm, SWT.SINGLE);
+
+		// sort files alphabetically (SIM-922)
 		fileTableViewer.setComparator(new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
