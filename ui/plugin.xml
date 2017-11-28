@@ -3,7 +3,10 @@
 <plugin>
 	<extension point="org.eclipse.ui.menus">
 		<menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=org.eclipse.jdt.ui.refactoring.menu">
-			<menu label="%menu.label">
+			<menu
+         icon="icons/jSparrow_active_icon_16.png"
+         id="jsparrow.menu"
+         label="%menu.label">
 				<visibleWhen>
 		           <with variable="activeMenuSelection">
 		            <iterate
@@ -24,7 +27,9 @@
 			</menu>
 		</menuContribution>
 		<menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=org.eclipse.jdt.ui.refactoring.menu">
-			<menu label="%menu.label">
+			<menu
+         icon="icons/jSparrow_active_icon_16.png"
+         label="%menu.label">
 				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler" 
 					label="%command.label.select_rules_wizard" 
 					style="push"/>
@@ -34,7 +39,9 @@
 			</menu>
 		</menuContribution>
 		<menuContribution locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.refactoring.menu">
-			<menu label="%menu.label">
+			<menu
+         icon="icons/jSparrow_active_icon_16.png"
+         label="%menu.label">
 				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler" 
 					label="%command.label.select_rules_wizard" 
 					style="push"/>

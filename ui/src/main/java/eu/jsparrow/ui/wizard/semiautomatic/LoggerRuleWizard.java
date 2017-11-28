@@ -43,6 +43,8 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 public class LoggerRuleWizard extends Wizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoggerRuleWizard.class);
+	
+	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
 
 	private LoggerRuleWizardPageModel model;
 
@@ -58,7 +60,7 @@ public class LoggerRuleWizard extends Wizard {
 		this.refactoringPipeline = refactoringPipeline;
 		this.rule = (StandardLoggerRule) rule;
 		setNeedsProgressMonitor(true);
-		WizardDialog.setDefaultImage(ResourceHelper.createImage("icons/jSparrow_active_icon_32.png")); //$NON-NLS-1$
+		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
 	}
 
 	@Override

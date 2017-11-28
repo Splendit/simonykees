@@ -42,6 +42,8 @@ import eu.jsparrow.ui.util.ResourceHelper;
  */
 public class RefactoringPreviewWizard extends Wizard {
 
+	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
+
 	private RefactoringPipeline refactoringPipeline;
 
 	private Shell shell;
@@ -57,9 +59,9 @@ public class RefactoringPreviewWizard extends Wizard {
 			.getActiveWorkbenchWindow()
 			.getShell();
 		setNeedsProgressMonitor(true);
-		WizardDialog.setDefaultImage(ResourceHelper.createImage("icons/jSparrow_active_icon_32.png"));
+		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
 	}
-	
+
 	@Override
 	public String getWindowTitle() {
 		return Messages.SummaryWizardPage_RunSummary;
@@ -242,8 +244,7 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	private void tryDoAdditionalRefactoring(IProgressMonitor monitor, IWizardPage page) {
 		try {
-			refactoringPipeline.doAdditionalRefactoring(
-					((RefactoringPreviewWizardPage) page).getUnselectedChange(),
+			refactoringPipeline.doAdditionalRefactoring(((RefactoringPreviewWizardPage) page).getUnselectedChange(),
 					((RefactoringPreviewWizardPage) page).getRule(), monitor);
 			if (monitor.isCanceled()) {
 				refactoringPipeline.clearStates();

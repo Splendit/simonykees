@@ -65,6 +65,8 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 public class ConfigureRenameFieldsRuleWizard extends Wizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfigureRenameFieldsRuleWizard.class);
+	
+	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
 
 	private ConfigureRenameFieldsRuleWizardPageModel model;
 
@@ -84,7 +86,7 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 	public ConfigureRenameFieldsRuleWizard(List<ICompilationUnit> selectedJavaElements) {
 		this.selectedJavaElements = selectedJavaElements;
 		setNeedsProgressMonitor(true);
-		WizardDialog.setDefaultImage(ResourceHelper.createImage("icons/jSparrow_active_icon_32.png"));
+		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON)); //$NON-NLS-1$
 	}
 
 	@Override

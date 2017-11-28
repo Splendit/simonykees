@@ -59,6 +59,8 @@ public class SelectRulesWizard extends Wizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
 
+	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
+
 	private SelectRulesWizardPageModel model;
 
 	private final List<IJavaElement> javaElements;
@@ -73,7 +75,7 @@ public class SelectRulesWizard extends Wizard {
 		this.refactoringPipeline = refactoringPipeline;
 		this.rules = rules;
 		setNeedsProgressMonitor(true);
-		WizardDialog.setDefaultImage(ResourceHelper.createImage("icons/jSparrow_active_icon_32.png"));
+		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
 	}
 
 	@Override
@@ -84,7 +86,8 @@ public class SelectRulesWizard extends Wizard {
 	@Override
 	public void addPages() {
 		model = new SelectRulesWizardPageModel(rules);
-		AbstractSelectRulesWizardPage page = new SelectRulesWizardPage(model, new SelectRulesWizardPageControler(model));
+		AbstractSelectRulesWizardPage page = new SelectRulesWizardPage(model,
+				new SelectRulesWizardPageControler(model));
 		addPage(page);
 	}
 
