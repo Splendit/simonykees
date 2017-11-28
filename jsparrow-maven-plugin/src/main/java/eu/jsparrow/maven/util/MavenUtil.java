@@ -59,6 +59,7 @@ public class MavenUtil {
 	private static final String JSPARROW_MANIFEST = "manifest.standalone";
 	private static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory";
 	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps";
+	private static final String OSGI_INSTANCE_AREA_CONSTANT = "osgi.instance.area";
 
 	private static boolean standaloneStarted = false;
 	private static long standaloneBundleID = 0;
@@ -131,12 +132,14 @@ public class MavenUtil {
 			if (Arrays.asList(directory.list())
 				.size() == 1) {
 				System.setProperty(USER_DIR, directory.getAbsolutePath());
+				configuration.put(OSGI_INSTANCE_AREA_CONSTANT, directory.getAbsolutePath());
 				log.info("Set user.dir to " + directory.getAbsolutePath());
 			} else {
 				throw new InterruptedException("jSparrow already running");
 			}
 		} else if (directory.mkdirs()) {
 			System.setProperty(USER_DIR, directory.getAbsolutePath());
+			configuration.put(OSGI_INSTANCE_AREA_CONSTANT, directory.getAbsolutePath());
 			log.info("Set user.dir to " + directory.getAbsolutePath());
 		} else {
 			throw new InterruptedException("Could not create temp folder");
