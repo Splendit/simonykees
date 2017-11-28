@@ -17,7 +17,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,7 @@ import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
@@ -55,6 +58,7 @@ public class RenamingRulePreviewWizard extends Wizard {
 
 	private List<ICompilationUnit> targetCompilationUnits;
 	private Map<IPath, Document> originalDocuments;
+	private RefactoringSummaryWizardPage summaryPage;
 
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
@@ -63,8 +67,10 @@ public class RenamingRulePreviewWizard extends Wizard {
 		this.metadata = metadata;
 		this.documentChanges = documentChanges;
 		this.targetCompilationUnits = targetCompilationUnits;
-		this.originalDocuments = targetCompilationUnits.stream().map(ICompilationUnit::getPrimary).collect(Collectors.toMap(ICompilationUnit::getPath, this::createDocument));
-		
+		this.originalDocuments = targetCompilationUnits.stream()
+			.map(ICompilationUnit::getPrimary)
+			.collect(Collectors.toMap(ICompilationUnit::getPath, this::createDocument));
+
 		this.rule = rule;
 		setNeedsProgressMonitor(true);
 	}
@@ -87,7 +93,12 @@ public class RenamingRulePreviewWizard extends Wizard {
 	 */
 	@Override
 	public void addPages() {
-		addPage(new RenamingRulePreviewWizardPage(documentChanges, originalDocuments, rule));
+		RefactoringPreviewWizardModel model = new RefactoringPreviewWizardModel();
+		Map<ICompilationUnit, DocumentChange> changesPerRule = refactoringPipeline.getChangesForRule(rule);
+		RenamingRulePreviewWizardPage page = new RenamingRulePreviewWizardPage(documentChanges, changesPerRule, originalDocuments, rule, model);
+		addPage(page);
+		this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model);
+		addPage(summaryPage);
 	}
 
 	/**
@@ -241,5 +252,61 @@ public class RenamingRulePreviewWizard extends Wizard {
 			return false;
 		}
 		return super.canFinish();
+	}
+
+	public RefactoringSummaryWizardPage getSummaryPage() {
+		return summaryPage;
+	}
+	
+	/**
+	 * Called from {@link WizardDialog} when Next button is pressed. Triggers
+	 * recalculation if needed. Disposes control from current page which wont be
+	 * visible any more
+	 */
+	public void pressedNext() {
+		if (null != getContainer()) {
+			((RenamingRulePreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
+			getNextPage(getContainer().getCurrentPage());
+		}
+	}
+	
+	/**
+	 * Called from {@link WizardDialog} when Back button is pressed. Disposes
+	 * all controls to be recalculated and created when needed
+	 */
+	public void pressedBack() {
+		if (null != getContainer()) {
+			if (getContainer().getCurrentPage() instanceof RenamingRulePreviewWizardPage) {
+				((RenamingRulePreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
+			} else {
+				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
+			}
+			getPreviousPage(getContainer().getCurrentPage());
+		}
+	}
+	
+	@Override
+	public IWizardPage getPreviousPage(IWizardPage page) {
+		updateViewsOnNavigation(page);
+		return super.getPreviousPage(page);
+	}
+	
+	public void updateViewsOnNavigation(IWizardPage page) {
+		if (page instanceof RenamingRulePreviewWizardPage) {
+			if (!((RenamingRulePreviewWizardPage) page).getUncheckedFields()
+				.isEmpty()) {
+				/*
+				 * if there are changes in refactoring page, it means that Back
+				 * button was pressed and recalculation is needed
+				 */
+				recalculateForUnselected();
+			} else {
+				/*
+				 * if there are no changes in refactoring page, just populate
+				 * the view with current updated values
+				 */
+				((RenamingRulePreviewWizardPage) page).populateViews(false);
+			}
+		}
 	}
 }

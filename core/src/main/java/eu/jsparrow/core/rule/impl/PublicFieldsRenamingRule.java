@@ -41,6 +41,7 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 		this.visitorClass = PublicFieldsRenamingASTVisitor.class;
 		this.metaData = metaData;
 		this.todosMetaData = todosMetaData;
+		this.id = "PublicFieldRenaming"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.PublicFieldsRenamingRule_name,
 				Messages.PublicFieldsRenamingRule_description, Duration.ofMinutes(5), // FIXME value for duration
 				TagUtil.getTagsForRule(this.getClass()));

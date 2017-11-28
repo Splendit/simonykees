@@ -24,11 +24,13 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
@@ -48,6 +50,8 @@ import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
+import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
 import eu.jsparrow.ui.preview.RenamingRulePreviewWizard;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -404,8 +408,40 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()
 					.getShell();
-				final WizardDialog dialog = new WizardDialog(shell, new RenamingRulePreviewWizard(refactoringPipeline,
-						metadata, changes, targetCompilationUnits, renameFieldsRule));
+				RenamingRulePreviewWizard renamingPreviewWizard = new RenamingRulePreviewWizard(refactoringPipeline,
+						metadata, changes, targetCompilationUnits, renameFieldsRule);
+				final WizardDialog dialog = new WizardDialog(shell, renamingPreviewWizard ) {
+					@Override
+					protected void nextPressed() {
+						((RenamingRulePreviewWizard) getWizard()).pressedNext();
+						super.nextPressed();
+					}
+
+					@Override
+					protected void backPressed() {
+						((RenamingRulePreviewWizard) getWizard()).pressedBack();
+						super.backPressed();
+					}
+
+					@Override
+					protected void createButtonsForButtonBar(Composite parent) {
+						createButton(parent, 9, Messages.SelectRulesWizard_Summary, false);
+						super.createButtonsForButtonBar(parent);
+					}
+
+					@Override
+					protected void buttonPressed(int buttonId) {
+						if (buttonId == 9) {
+							summaryButtonPressed();
+						} else {
+							super.buttonPressed(buttonId);
+						}
+					}
+
+					private void summaryButtonPressed() {
+						showPage(renamingPreviewWizard.getSummaryPage());
+					}
+				};
 
 				// maximizes the RefactoringPreviewWizard
 				dialog.setPageSize(rectangle.width, rectangle.height);

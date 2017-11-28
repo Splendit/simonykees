@@ -91,6 +91,7 @@ public class RefactoringSummaryWizardPage extends WizardPage {
 	 * 
 	 * @param parent
 	 */
+	@Override
 	public void createControl(Composite parent) {
 		rootComposite = new Composite(parent, SWT.NONE);
 		setControl(rootComposite);
