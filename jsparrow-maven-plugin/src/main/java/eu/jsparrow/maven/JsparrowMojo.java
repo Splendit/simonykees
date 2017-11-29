@@ -56,10 +56,14 @@ public class JsparrowMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "", property = "profile")
 	protected String profile;
+	
+	@Parameter(property = "defaultConfiguration")
+	protected boolean useDefaultConfig;
 
 	// CONSTANTS
 	public static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH";
 	public static final String SELECTED_PROFILE = "PROFILE.SELECTED";
+	public static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG";
 
 	public void execute() throws MojoExecutionException {
 		try {
@@ -69,6 +73,7 @@ public class JsparrowMojo extends AbstractMojo {
 			configuration.put(CONFIG_FILE_PATH,
 					(configFile.exists() && !configFile.isDirectory()) ? configFile.getAbsolutePath() : "");
 			configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile);
+			configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 
 			MavenUtil.startOSGI(project, mavenHome, getLog(), configuration);
 		} catch (BundleException | InterruptedException e) {

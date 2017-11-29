@@ -85,7 +85,6 @@ public class Activator implements BundleActivator {
 		YAMLConfig config;
 		String loggerInfo;
 
-		String profile = context.getProperty(SELECTED_PROFILE);
 		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
 
 		if (useDefaultConfig) {
