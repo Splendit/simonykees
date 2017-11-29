@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.renaming;
 
 import static eu.jsparrow.core.util.ASTNodeUtil.hasModifier;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,14 +45,6 @@ import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
  */
 public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final String RENAME_PUBLIC_FIELDS = "public"; //$NON-NLS-1$
-	private static final String RENAME_PRIVATE_FIELDS = "private"; //$NON-NLS-1$
-	private static final String RENAME_PROTECTED_FIELDS = "protected"; //$NON-NLS-1$
-	private static final String RENAME_PACKAGE_PROTECTED_FIELDS = "package-protected"; //$NON-NLS-1$
-	private static final String UPPER_CASE_FOLLOWING_DOLLAR_SIGN = "uppercase-after-dollar"; //$NON-NLS-1$
-	private static final String UPPER_CASE_FOLLOWING_UNDERSCORE = "uppercase-after-underscore"; //$NON-NLS-1$
-	private static final String ADD_COMMENT = "add-todo"; //$NON-NLS-1$
-
 	private Map<String, Boolean> modifierOptions = new HashMap<>();
 
 	private CompilationUnit compilationUnit;
@@ -89,6 +82,10 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		modifierOptions.put(UPPER_CASE_FOLLOWING_DOLLAR_SIGN, true);
 		modifierOptions.put(UPPER_CASE_FOLLOWING_UNDERSCORE, true);
 		modifierOptions.put(ADD_COMMENT, false);
+	}
+	
+	public void updateOptions(Map<String, Boolean> options) {
+		modifierOptions.putAll(options);
 	}
 
 	@Override

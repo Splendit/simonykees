@@ -3,14 +3,9 @@ package eu.jsparrow.ui.wizard.semiautomatic;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -19,11 +14,8 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
@@ -40,9 +32,9 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
-import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
+import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorFactory;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
@@ -64,7 +56,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  */
 public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 
-	private static final Logger logger = LoggerFactory.getLogger(ConfigureRenameFieldsRuleWizard.class);
+	public static final Logger logger = LoggerFactory.getLogger(ConfigureRenameFieldsRuleWizard.class);
 
 	private ConfigureRenameFieldsRuleWizardPageModel model;
 
@@ -135,6 +127,12 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 
+				/*
+				 * The Refactoring process is considered to be started as soon
+				 * as we create the FieldDeclarationASTVisitor which searches
+				 * for references of the fields to be renamed.
+				 */
+				preRefactoring();
 				FieldDeclarationASTVisitor visitor = createVisitor();
 
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
@@ -142,27 +140,21 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 				SubMonitor child = subMonitor.split(40);
 				child.setWorkRemaining(selectedJavaElements.size());
 				child.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
-				for (ICompilationUnit compilationUnit : selectedJavaElements) {
-					if (!compilationUnit.getJavaProject()
-						.equals(selectedJavaProjekt)) {
-						WizardMessageDialog.synchronizeWithUIShowMultiprojectMessage();
-						return Status.CANCEL_STATUS;
+				int prepareStatus = FieldDeclarationVisitorFactory.prepareRenaming(selectedJavaElements,
+						selectedJavaProjekt, visitor, child);
 
-					}
+				if (IStatus.INFO == prepareStatus) {
+					WizardMessageDialog.synchronizeWithUIShowMultiprojectMessage();
+					return Status.CANCEL_STATUS;
+				}
 
-					CompilationUnit cu = RefactoringUtil.parse(compilationUnit);
-					cu.accept(visitor);
-
-					if (child.isCanceled()) {
-						return Status.CANCEL_STATUS;
-					} else {
-						child.worked(1);
-					}
+				if (IStatus.CANCEL == prepareStatus) {
+					return Status.CANCEL_STATUS;
 				}
 
 				SubMonitor childSecondPart = subMonitor.split(50);
 				childSecondPart.setWorkRemaining(100);
-				
+
 				searchScopeAndPrepareRefactoringStates(childSecondPart, visitor);
 				if (!canRefactor) {
 					return Status.CANCEL_STATUS;
@@ -209,7 +201,6 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				preRefactoring();
 				IStatus status = doRefactoring(monitor, refactoringPipeline);
 				postRefactoring();
 
@@ -253,40 +244,9 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 	 * @return created and updated {@link FieldDeclarationASTVisitor}
 	 */
 	private FieldDeclarationASTVisitor createVisitor() {
-		FieldDeclarationASTVisitor visitor;
-		if (ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_PROJECT.equals(model.getSearchScope())) {
-			IJavaElement[] scope = { selectedJavaProjekt };
-			visitor = new FieldDeclarationASTVisitor(scope);
-		} else {
-			List<IJavaProject> projectList = new LinkedList<>();
-			try {
-				IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace()
-					.getRoot();
-				IProject[] projects = workspaceRoot.getProjects();
-				for (int i = 0; i < projects.length; i++) {
-					IProject project = projects[i];
-					if (project.isOpen() && project.hasNature(JavaCore.NATURE_ID)) {
-						projectList.add(JavaCore.create(project));
-					}
-				}
-			} catch (CoreException e) {
-				logger.error(e.getMessage(), e);
-			}
-			IJavaElement[] scope = projectList.toArray(new IJavaElement[0]);
-			visitor = new FieldDeclarationASTVisitor(scope);
-		}
-		visitor.setRenamePrivateField(model.getFieldTypes()
-			.contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PRIVATE));
-		visitor.setRenameProtectedField(model.getFieldTypes()
-			.contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PROTECTED));
-		visitor.setRenamePackageProtectedField(model.getFieldTypes()
-			.contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPROTECTED));
-		visitor.setRenamePublicField(model.getFieldTypes()
-			.contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PUBLIC));
-		visitor.setUpperCaseAfterUnderscore(model.setUpperCaseForUnderscoreReplacementOption());
-		visitor.setUpperCaseAfterDollar(model.setUpperCaseForDollarReplacementOption());
-		visitor.setAddTodo(model.isAddTodoComments());
-		return visitor;
+		Map<String, Boolean> options = model.getOptionsMap();
+		String modelSearchScope = model.getSearchScope();
+		return FieldDeclarationVisitorFactory.visitorFactory(selectedJavaProjekt, options, modelSearchScope);
 	}
 
 	/**

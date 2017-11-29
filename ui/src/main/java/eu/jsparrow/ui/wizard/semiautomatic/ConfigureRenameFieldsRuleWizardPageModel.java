@@ -1,13 +1,27 @@
 package eu.jsparrow.ui.wizard.semiautomatic;
 
+import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.DOLLAR_SAME;
+import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.DOLLAR_UPPER;
+import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_PROJECT;
+import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_WORKSPACE;
+import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPROTECTED;
+import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PRIVATE;
+import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PROTECTED;
+import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PUBLIC;
+import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.UNDERSCORE_SAME;
+import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.UNDERSCORE_UPPER;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jface.wizard.WizardPage;
 
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.wizard.IValueChangeListener;
 
@@ -32,9 +46,9 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	public ConfigureRenameFieldsRuleWizardPageModel() {
 		// initialize defaults
 		fieldTypes = getFieldTypeOptions();
-		searchScope = ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_PROJECT;
-		underscoreReplacementOption = ConfigureRenameFieldsRuleWizardPageConstants.UNDERSCORE_UPPER;
-		dollarReplacementOption = ConfigureRenameFieldsRuleWizardPageConstants.DOLLAR_UPPER;
+		searchScope = SCOPE_PROJECT;
+		underscoreReplacementOption = UNDERSCORE_UPPER;
+		dollarReplacementOption = DOLLAR_UPPER;
 		addTodoComments = false;
 	}
 
@@ -65,10 +79,10 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	 */
 	public List<String> getFieldTypeOptions() {
 		List<String> fieldTypesOptions = new ArrayList<>();
-		fieldTypesOptions.add(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PRIVATE);
-		fieldTypesOptions.add(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PROTECTED);
-		fieldTypesOptions.add(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPROTECTED);
-		fieldTypesOptions.add(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PUBLIC);
+		fieldTypesOptions.add(TYPE_PRIVATE);
+		fieldTypesOptions.add(TYPE_PROTECTED);
+		fieldTypesOptions.add(TYPE_PACKAGEPROTECTED);
+		fieldTypesOptions.add(TYPE_PUBLIC);
 		return fieldTypesOptions;
 	}
 
@@ -80,8 +94,8 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	 */
 	public List<String> getSearchScopeOptions() {
 		List<String> searchScopes = new ArrayList<>();
-		searchScopes.add(ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_PROJECT);
-		searchScopes.add(ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_WORKSPACE);
+		searchScopes.add(SCOPE_PROJECT);
+		searchScopes.add(SCOPE_WORKSPACE);
 		return searchScopes;
 	}
 
@@ -93,8 +107,8 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	 */
 	public List<String> getUnderscoreReplacementOptions() {
 		List<String> underscoreReplacements = new ArrayList<>();
-		underscoreReplacements.add(ConfigureRenameFieldsRuleWizardPageConstants.UNDERSCORE_UPPER);
-		underscoreReplacements.add(ConfigureRenameFieldsRuleWizardPageConstants.UNDERSCORE_SAME);
+		underscoreReplacements.add(UNDERSCORE_UPPER);
+		underscoreReplacements.add(UNDERSCORE_SAME);
 		return underscoreReplacements;
 	}
 
@@ -106,8 +120,8 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	 */
 	public List<String> getDollarSignReplacementOptions() {
 		List<String> dollarSignReplacements = new ArrayList<>();
-		dollarSignReplacements.add(ConfigureRenameFieldsRuleWizardPageConstants.DOLLAR_UPPER);
-		dollarSignReplacements.add(ConfigureRenameFieldsRuleWizardPageConstants.DOLLAR_SAME);
+		dollarSignReplacements.add(DOLLAR_UPPER);
+		dollarSignReplacements.add(DOLLAR_SAME);
 		return dollarSignReplacements;
 	}
 
@@ -209,7 +223,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	 * @return selected underscore replacement option
 	 */
 	public boolean setUpperCaseForUnderscoreReplacementOption() {
-		return ConfigureRenameFieldsRuleWizardPageConstants.UNDERSCORE_UPPER.equals(underscoreReplacementOption);
+		return UNDERSCORE_UPPER.equals(underscoreReplacementOption);
 	}
 
 	/**
@@ -219,7 +233,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	 * @return selected dollar sign replacement option
 	 */
 	public boolean setUpperCaseForDollarReplacementOption() {
-		return ConfigureRenameFieldsRuleWizardPageConstants.DOLLAR_UPPER.equals(dollarReplacementOption);
+		return DOLLAR_UPPER.equals(dollarReplacementOption);
 	}
 
 	/**
@@ -230,6 +244,31 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 	 */
 	public boolean isAddTodoComments() {
 		return addTodoComments;
+	}
+
+	public Map<String, Boolean> getOptionsMap() {
+		
+		List<String> fields = getFieldTypes();
+		
+		boolean renamePrivate = fields.contains(TYPE_PRIVATE);
+		boolean renameProtected = fields.contains(TYPE_PROTECTED);
+		boolean renamePackageProtected = fields.contains(TYPE_PACKAGEPROTECTED);
+		boolean renamePublic = fields.contains(TYPE_PUBLIC);
+		boolean uppercaseAfterUnderscore = setUpperCaseForUnderscoreReplacementOption();
+		boolean uppercaseAfterDollar = setUpperCaseForDollarReplacementOption();
+		boolean addTodos = isAddTodoComments();
+		
+		Map<String, Boolean> options = new HashMap<>();
+		
+		options.put(FieldDeclarationOptionKeys.RENAME_PRIVATE_FIELDS, renamePrivate);
+		options.put(FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS, renameProtected);
+		options.put(FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS, renamePackageProtected);
+		options.put(FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS, renamePublic);
+		options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_UNDERSCORE, uppercaseAfterUnderscore);
+		options.put(FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_DOLLAR_SIGN, uppercaseAfterDollar);
+		options.put(FieldDeclarationOptionKeys.ADD_COMMENT, addTodos);
+		
+		return options;
 	}
 
 }
