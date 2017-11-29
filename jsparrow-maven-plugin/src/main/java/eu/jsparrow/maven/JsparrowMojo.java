@@ -56,7 +56,7 @@ public class JsparrowMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "", property = "profile")
 	protected String profile;
-	
+
 	@Parameter(property = "defaultConfiguration")
 	protected boolean useDefaultConfig;
 
@@ -85,7 +85,8 @@ public class JsparrowMojo extends AbstractMojo {
 				try {
 					deleteChildren(new File(MavenUtil.getDirectory()
 						.getAbsolutePath()));
-					Files.delete(MavenUtil.getDirectory().toPath());
+					Files.delete(MavenUtil.getDirectory()
+						.toPath());
 				} catch (IOException e) {
 					getLog().error(e.getMessage(), e);
 				}
@@ -142,9 +143,10 @@ public class JsparrowMojo extends AbstractMojo {
 					} catch (IOException e) {
 						getLog().error(e.getMessage(), e);
 					}
-					
+
 					try {
-						Files.delete(MavenUtil.getDirectory().toPath());
+						Files.delete(MavenUtil.getDirectory()
+							.toPath());
 					} catch (IOException e) {
 						getLog().error(e.getMessage(), e);
 					}

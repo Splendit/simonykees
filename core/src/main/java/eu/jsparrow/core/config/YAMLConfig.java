@@ -3,9 +3,6 @@ package eu.jsparrow.core.config;
 import java.util.LinkedList;
 import java.util.List;
 
-import eu.jsparrow.core.rule.RulesContainer;
-import eu.jsparrow.core.rule.impl.CodeFormatterRule;
-
 /**
  * Model class for configuration data.
  * 
@@ -48,7 +45,7 @@ public class YAMLConfig {
 		YAMLConfig config = new YAMLConfig();
 
 		List<String> profileRules = new LinkedList<>();
-		
+
 		profileRules.add("CodeFormatter"); //$NON-NLS-1$
 		profileRules.add("DiamondOperator"); //$NON-NLS-1$
 		profileRules.add("ForToForEach"); //$NON-NLS-1$
