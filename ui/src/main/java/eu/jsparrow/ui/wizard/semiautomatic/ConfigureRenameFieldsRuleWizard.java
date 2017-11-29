@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
@@ -50,8 +49,6 @@ import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
-import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
-import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
 import eu.jsparrow.ui.preview.RenamingRulePreviewWizard;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -368,19 +365,14 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 	private void createAndShowPreviewWizard() {
 
 		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes = new HashMap<>();
-		Map<String, FieldMetaData> metaDataMap = new HashMap<>();
 		for (FieldMetaData data : metadata) {
-
-			String newIdentifier = data.getNewIdentifier();
 			Map<ICompilationUnit, DocumentChange> docsChanges;
 			try {
 				docsChanges = renameFieldsRule.computeDocumentChangesPerFiled(data);
 				changes.put(data, docsChanges);
-				metaDataMap.put(newIdentifier, data);
 			} catch (JavaModelException e) {
 				logger.error("Cannot create document for displaying changes - " + e.getMessage(), e); //$NON-NLS-1$
 			}
-
 		}
 
 		synchronizeWithUIShowRefactoringPreviewWizard(changes);
