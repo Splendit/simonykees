@@ -190,10 +190,11 @@ public class Activator implements BundleActivator {
 			logger.info(loggerInfo);
 
 			String profile = context.getProperty(SELECTED_PROFILE);
-			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, profile);
-			logger.info(loggerInfo);
 
 			config = YAMLConfigUtil.readConfig(configFilePath, profile);
+			
+			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, config.getSelectedProfile());
+			logger.info(loggerInfo);
 		}
 		
 		return config;
