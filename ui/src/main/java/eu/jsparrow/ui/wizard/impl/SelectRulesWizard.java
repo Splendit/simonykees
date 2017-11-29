@@ -107,7 +107,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = model.getSelectionAsList();
 
 		refactoringPipeline.setRules(selectedRules);
-		refactoringPipeline.setSourceMap(refactoringPipeline.getInitialSourceMap());
+		refactoringPipeline.updateInitialSourceMap();
 
 		Rectangle rectangle = Display.getCurrent()
 			.getPrimaryMonitor()

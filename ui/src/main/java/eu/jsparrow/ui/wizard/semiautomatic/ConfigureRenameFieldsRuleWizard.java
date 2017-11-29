@@ -343,6 +343,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 		}
 
 		refactoringPipeline.setRefactoringStates(refactoringStates);
+		refactoringPipeline.updateInitialSourceMap();
 	}
 
 	/**
