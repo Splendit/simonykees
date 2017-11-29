@@ -5,12 +5,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Rectangle;
@@ -20,8 +18,6 @@ import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.exception.RefactoringException;
-import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
@@ -29,7 +25,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
-import eu.jsparrow.ui.util.StopWatchUtil;
+import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -39,7 +35,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  * @since 1.2
  *
  */
-public class LoggerRuleWizard extends Wizard {
+public class LoggerRuleWizard extends AbstractRuleWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoggerRuleWizard.class);
 
@@ -102,7 +98,7 @@ public class LoggerRuleWizard extends Wizard {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				preRefactoring();
-				IStatus refactoringStatus = doRefactoring(monitor);
+				IStatus refactoringStatus = doRefactoring(monitor, refactoringPipeline);
 				postRefactoring();
 
 				return refactoringStatus;
@@ -133,35 +129,6 @@ public class LoggerRuleWizard extends Wizard {
 		job.schedule();
 
 		return true;
-	}
-
-	private IStatus doRefactoring(IProgressMonitor monitor) {
-		try {
-			refactoringPipeline.doRefactoring(monitor);
-			if (monitor.isCanceled()) {
-				refactoringPipeline.clearStates();
-				return Status.CANCEL_STATUS;
-			}
-		} catch (RefactoringException e) {
-			WizardMessageDialog.synchronizeWithUIShowInfo(e);
-			return Status.CANCEL_STATUS;
-		} catch (RuleException e) {
-			WizardMessageDialog.synchronizeWithUIShowError(e);
-			return Status.CANCEL_STATUS;
-
-		} finally {
-			monitor.done();
-		}
-
-		return Status.OK_STATUS;
-	}
-
-	private void preRefactoring() {
-		StopWatchUtil.start();
-	}
-
-	private void postRefactoring() {
-		StopWatchUtil.stop();
 	}
 
 	/**

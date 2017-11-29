@@ -24,7 +24,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
@@ -37,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.RefactoringException;
-import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.RefactoringRule;
@@ -52,6 +50,7 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RenamingRulePreviewWizard;
 import eu.jsparrow.ui.preview.RenamingRulePreviewWizardPage;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -63,7 +62,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  * @since 2.3.0
  *
  */
-public class ConfigureRenameFieldsRuleWizard extends Wizard {
+public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfigureRenameFieldsRuleWizard.class);
 
@@ -199,7 +198,7 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 
 		return true;
 	}
-
+	
 	/**
 	 * Creates Job which does refactoring and creates preview wizard.
 	 * 
@@ -210,25 +209,11 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				preRefactoring();
+				IStatus status = doRefactoring(monitor, refactoringPipeline);
+				postRefactoring();
 
-				try {
-					refactoringPipeline.doRefactoring(monitor);
-					if (monitor.isCanceled()) {
-						refactoringPipeline.clearStates();
-						return Status.CANCEL_STATUS;
-					}
-				} catch (RefactoringException e) {
-					WizardMessageDialog.synchronizeWithUIShowInfo(e);
-					return Status.CANCEL_STATUS;
-				} catch (RuleException e) {
-					WizardMessageDialog.synchronizeWithUIShowError(e);
-					return Status.CANCEL_STATUS;
-
-				} finally {
-					monitor.done();
-				}
-
-				return Status.OK_STATUS;
+				return status;
 			}
 		};
 
@@ -260,7 +245,7 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 		});
 		return refactorJob;
 	}
-
+	
 	/**
 	 * Creates {@link FieldDeclarationASTVisitor} and sets all options selected
 	 * by user from {@link ConfigureRenameFieldsRuleWizardPageModel}.
