@@ -18,7 +18,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.slf4j.Logger;
@@ -47,7 +46,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  * @since 2.3.0
  *
  */
-public class RenamingRulePreviewWizard extends Wizard {
+public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(RenamingRulePreviewWizard.class);
 	private RefactoringPipeline refactoringPipeline;
@@ -58,8 +57,6 @@ public class RenamingRulePreviewWizard extends Wizard {
 
 	private List<ICompilationUnit> targetCompilationUnits;
 	private Map<IPath, Document> originalDocuments;
-	private RefactoringSummaryWizardPage summaryPage;
-
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			List<ICompilationUnit> targetCompilationUnits, PublicFieldsRenamingRule rule) {
@@ -97,8 +94,7 @@ public class RenamingRulePreviewWizard extends Wizard {
 		Map<ICompilationUnit, DocumentChange> changesPerRule = refactoringPipeline.getChangesForRule(rule);
 		RenamingRulePreviewWizardPage page = new RenamingRulePreviewWizardPage(documentChanges, changesPerRule, originalDocuments, rule, model);
 		addPage(page);
-		this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model);
-		addPage(summaryPage);
+		addSummaryPage(refactoringPipeline, model);
 	}
 
 	/**
@@ -234,30 +230,6 @@ public class RenamingRulePreviewWizard extends Wizard {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.Wizard#performCancel()
-	 */
-	@Override
-	public boolean performCancel() {
-		Activator.setRunning(false);
-		return super.performCancel();
-	}
-
-	@Override
-	public boolean canFinish() {
-		if (!LicenseUtil.getInstance()
-			.isFullLicense()) {
-			return false;
-		}
-		return super.canFinish();
-	}
-
-	public RefactoringSummaryWizardPage getSummaryPage() {
-		return summaryPage;
-	}
-	
 	/**
 	 * Called from {@link WizardDialog} when Next button is pressed. Triggers
 	 * recalculation if needed. Disposes control from current page which wont be
@@ -267,12 +239,6 @@ public class RenamingRulePreviewWizard extends Wizard {
 		if (null != getContainer()) {
 			getNextPage(getContainer().getCurrentPage());
 		}
-	}
-	
-	@Override
-	public IWizardPage getNextPage(IWizardPage page) {
-		updateViewsOnNavigation(page);
-		return super.getNextPage(page);
 	}
 	
 	/**
@@ -289,11 +255,6 @@ public class RenamingRulePreviewWizard extends Wizard {
 	}
 	
 	@Override
-	public IWizardPage getPreviousPage(IWizardPage page) {
-		updateViewsOnNavigation(page);
-		return super.getPreviousPage(page);
-	}
-	
 	public void updateViewsOnNavigation(IWizardPage page) {
 		if (page instanceof RenamingRulePreviewWizardPage) {
 			if (!((RenamingRulePreviewWizardPage) page).getUncheckedFields()
