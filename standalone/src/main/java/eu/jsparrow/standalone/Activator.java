@@ -81,27 +81,9 @@ public class Activator implements BundleActivator {
 	}
 
 	private void startRefactoring(BundleContext context) throws YAMLConfigException {
-
-		YAMLConfig config;
 		String loggerInfo;
-
-		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
-
-		if (useDefaultConfig) {
-			logger.info(Messages.Activator_standalone_UsingDefaultConfiguration);
-			config = YAMLConfig.getDefaultConfig();
-		} else {
-			String configFilePath = context.getProperty(CONFIG_FILE_PATH);
-
-			loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
-			logger.info(loggerInfo);
-
-			String profile = context.getProperty(SELECTED_PROFILE);
-			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, profile);
-			logger.info(loggerInfo);
-
-			config = YAMLConfigUtil.readConfig(configFilePath, profile);
-		}
+		
+		YAMLConfig config = getConfiguration(context);
 
 		// get project path and name from context
 		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
@@ -192,6 +174,31 @@ public class Activator implements BundleActivator {
 		logger.info(Messages.Activator_stop);
 	}
 
+	private YAMLConfig getConfiguration(BundleContext context) throws YAMLConfigException {
+		YAMLConfig config = null;
+		String loggerInfo;
+		
+		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
+
+		if (useDefaultConfig) {
+			logger.info(Messages.Activator_standalone_UsingDefaultConfiguration);
+			config = YAMLConfig.getDefaultConfig();
+		} else {
+			String configFilePath = context.getProperty(CONFIG_FILE_PATH);
+
+			loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
+			logger.info(loggerInfo);
+
+			String profile = context.getProperty(SELECTED_PROFILE);
+			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, profile);
+			logger.info(loggerInfo);
+
+			config = YAMLConfigUtil.readConfig(configFilePath, profile);
+		}
+		
+		return config;
+	}
+	
 	/**
 	 * Recursively deletes all sub-folders from received folder.
 	 * 
