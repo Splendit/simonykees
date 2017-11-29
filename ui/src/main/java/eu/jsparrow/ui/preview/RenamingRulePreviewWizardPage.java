@@ -246,6 +246,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	 * Populates change viewer with data.
 	 */
 	public void populatePreviewViewer() {
+		
 		if (this.selectedDocWrapper != null) {
 			ChangePreviewViewerInput viewerInput = TextEditChangePreviewViewer.createInput(getCurrentDocumentChange());
 			currentPreviewViewer.setInput(viewerInput);
@@ -283,20 +284,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	public List<FieldMetaData> getUncheckedFields() {
 		return uncheckedFields;
 	}
-	
-	/**
-	 * Used to dispose control every time preview viewer content changes or page
-	 * gets invisible. New control is created when needed. This way conflicting
-	 * handers are avoided because there is no multiple viewers which would
-	 * register multiple handlers for same action.
-	 */
-	public void disposeControl() {
-		if (null != currentPreviewViewer.getControl()) {
-			currentPreviewViewer.getControl()
-				.dispose();
-		}
-	}
-	
+
 	public void populateViews(boolean forcePreviewViewerUpdate) {
 		populateFileView();
 		if (forcePreviewViewerUpdate) {

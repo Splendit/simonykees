@@ -265,9 +265,14 @@ public class RenamingRulePreviewWizard extends Wizard {
 	 */
 	public void pressedNext() {
 		if (null != getContainer()) {
-			((RenamingRulePreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
 			getNextPage(getContainer().getCurrentPage());
 		}
+	}
+	
+	@Override
+	public IWizardPage getNextPage(IWizardPage page) {
+		updateViewsOnNavigation(page);
+		return super.getNextPage(page);
 	}
 	
 	/**
@@ -276,9 +281,7 @@ public class RenamingRulePreviewWizard extends Wizard {
 	 */
 	public void pressedBack() {
 		if (null != getContainer()) {
-			if (getContainer().getCurrentPage() instanceof RenamingRulePreviewWizardPage) {
-				((RenamingRulePreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
-			} else {
+			if (getContainer().getCurrentPage() instanceof RefactoringSummaryWizardPage) {
 				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
 			}
 			getPreviousPage(getContainer().getCurrentPage());
