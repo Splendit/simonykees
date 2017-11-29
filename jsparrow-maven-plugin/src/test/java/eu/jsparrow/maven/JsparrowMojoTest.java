@@ -68,7 +68,7 @@ public class JsparrowMojoTest extends AbstractMojoTestCase {
 			+ "			<artifactId>maven-compiler-plugin</artifactId> " + "			<version>3.6.2</version> "
 			+ "			<configuration> " + "				<source>1.8</source> "
 			+ "				<target>1.8</target> " + "			</configuration> " + "		</plugin> "
-			+ "		<plugin> " + "			<groupId>eu.jsparrowt</groupId> "
+			+ "		<plugin> " + "			<groupId>eu.jsparrow</groupId> "
 			+ "			<artifactId>jsparrow-maven-plugin</artifactId> "
 			+ "			<version>2.4.0-SNAPSHOT</version> " + "		</plugin> " +
 
