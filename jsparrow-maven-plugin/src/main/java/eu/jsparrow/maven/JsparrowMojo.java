@@ -58,7 +58,7 @@ import org.twdata.maven.mojoexecutor.MojoExecutor;
  *
  */
 @SuppressWarnings("nls")
-@Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, requiresProject = true)
+@Mojo(name = "refactor", defaultPhase = LifecyclePhase.PROCESS_RESOURCES, requiresDependencyResolution = ResolutionScope.NONE, requiresProject = true)
 public class JsparrowMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "${session}")
@@ -110,53 +110,54 @@ public class JsparrowMojo extends AbstractMojo {
 	public static final String DEPENDENCIES_FOLDER_CONSTANT = "deps";
 
 	public void execute() throws MojoExecutionException {
-		try {
-			Runtime.getRuntime()
-				.addShutdownHook(new Thread() {
-					@Override
-					public void run() {
-						super.run();
-						if (null != framework && null != framework.getBundleContext()) {
-							try {
-								// stop jSparrow.logging
-								Bundle standaloneBundle = framework.getBundleContext()
-									.getBundle(standaloneBundleID);
-								if (standaloneBundle.getState() == Bundle.ACTIVE) {
-									standaloneBundle.stop();
+		if (!"pom".equalsIgnoreCase(project.getPackaging())) {
+			try {
+				Runtime.getRuntime()
+					.addShutdownHook(new Thread() {
+						@Override
+						public void run() {
+							super.run();
+							if (null != framework && null != framework.getBundleContext()) {
+								try {
+									// stop jSparrow.logging
+									Bundle standaloneBundle = framework.getBundleContext()
+										.getBundle(standaloneBundleID);
+									if (standaloneBundle.getState() == Bundle.ACTIVE) {
+										standaloneBundle.stop();
+									}
+									framework.stop();
+								} catch (BundleException e) {
+									getLog().error(e.getMessage(), e);
 								}
-								framework.stop();
-							} catch (BundleException e) {
-								getLog().error(e.getMessage(), e);
 							}
-						}
-						// CLEAN
-						if (!standaloneStarted && null != directory) {
-							try {
-								deleteChildren(new File(directory.getAbsolutePath()));
-							} catch (IOException e) {
-								getLog().error(e.getMessage(), e);
+							// CLEAN
+							if (!standaloneStarted && null != directory) {
+								try {
+									deleteChildren(new File(directory.getAbsolutePath()));
+								} catch (IOException e) {
+									getLog().error(e.getMessage(), e);
+								}
+								directory.delete();
 							}
-							directory.delete();
-						}
 
+						}
+					});
+				startOSGI();
+			} catch (BundleException | InterruptedException e) {
+				getLog().error(e.getMessage(), e);
+			} finally {
+
+				// CLEAN
+				if (null != directory) {
+					try {
+						deleteChildren(new File(directory.getAbsolutePath()));
+					} catch (IOException e) {
+						getLog().error(e.getMessage(), e);
 					}
-				});
-			startOSGI();
-		} catch (BundleException | InterruptedException e) {
-			getLog().error(e.getMessage(), e);
-		} finally {
-
-			// CLEAN
-			if (null != directory) {
-				try {
-					deleteChildren(new File(directory.getAbsolutePath()));
-				} catch (IOException e) {
-					getLog().error(e.getMessage(), e);
+					directory.delete();
 				}
-				directory.delete();
 			}
 		}
-
 	}
 
 	/**
