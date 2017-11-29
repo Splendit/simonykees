@@ -20,6 +20,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.PublicFieldsRenamingASTVisitor;
@@ -54,7 +55,10 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 
 	@Override
 	public PublicFieldsRenamingASTVisitor visitorFactory() {
-		return new PublicFieldsRenamingASTVisitor(metaData, todosMetaData);
+		PublicFieldsRenamingASTVisitor visitor = new PublicFieldsRenamingASTVisitor(metaData, todosMetaData);
+		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
+		return visitor;
+		
 	}
 
 	/**
