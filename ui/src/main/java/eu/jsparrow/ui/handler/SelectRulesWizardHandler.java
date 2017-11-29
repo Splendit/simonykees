@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.RefactoringException;
-import eu.jsparrow.core.exception.SimonykeesException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.i18n.ExceptionMessages;
@@ -40,6 +39,7 @@ import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
+import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
  * TODO SIM-103 add class description
@@ -60,6 +60,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 				.getActiveShell(), Messages.SelectRulesWizardHandler_allready_running, MessageDialog.INFORMATION);
 		} else {
 			Activator.setRunning(true);
+
 			if (!LicenseUtil.getInstance()
 				.isValid()) {
 				/*
@@ -102,7 +103,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 									 * See SIM-496
 									 */
 									if (refactoringPipeline.isMultipleProjects()) {
-										synchronizeWithUIShowMultiprojectMessage();
+										WizardMessageDialog.synchronizeWithUIShowMultiprojectMessage();
 									}
 									refactoringPipeline.clearStates();
 									Activator.setRunning(false);
@@ -117,11 +118,11 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 
 							} catch (RefactoringException e) {
 								logger.error(e.getMessage(), e);
-								synchronizeWithUIShowInfo(e);
+								WizardMessageDialog.synchronizeWithUIShowInfo(e);
 								return Status.CANCEL_STATUS;
 							} catch (JavaModelException jme) {
 								logger.error(jme.getMessage(), jme);
-								synchronizeWithUIShowInfo(new RefactoringException(
+								WizardMessageDialog.synchronizeWithUIShowInfo(new RefactoringException(
 										ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
 										ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed,
 										jme));
@@ -137,6 +138,10 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 
 					return true;
 				}
+			} else {
+				// SIM-656 
+				logger.error(Messages.SelectRulesWizardHandler_selectionNotPossible_ubuntuBug);
+				Activator.setRunning(false);
 			}
 
 		}
@@ -213,57 +218,11 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 						synchronizeWithUIShowSelectRulesWizard(event, refactoringPipeline, selectedJavaElements,
 								selectedJavaProjekt);
 					} else {
-						synchronizeWithUIShowWarningNoComlipationUnitDialog();
+						WizardMessageDialog.synchronizeWithUIShowWarningNoComlipationUnitDialog();
 					}
 				} else {
 					Activator.setRunning(false);
 				}
-			});
-	}
-
-	/**
-	 * Method used to open InformationDialog from non UI thread
-	 * RefactoringException is thrown if java element does not exist or if an
-	 * exception occurs while accessing its corresponding resource, or if no
-	 * working copies were found to apply
-	 */
-	private void synchronizeWithUIShowInfo(SimonykeesException exception) {
-		Display.getDefault()
-			.asyncExec(() -> {
-				Shell shell = PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow()
-					.getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell, exception.getUiMessage(), MessageDialog.INFORMATION);
-
-				Activator.setRunning(false);
-			});
-	}
-
-	/**
-	 * Method used to open MessageDialog informing the user that selection
-	 * contains no Java files without compilation error from non UI thread
-	 */
-	private void synchronizeWithUIShowWarningNoComlipationUnitDialog() {
-		Display.getDefault()
-			.asyncExec(() -> {
-				Shell shell = PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow()
-					.getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell, Messages.SelectRulesWizardHandler_noFileWithoutError,
-						MessageDialog.INFORMATION);
-
-				Activator.setRunning(false);
-			});
-	}
-
-	private void synchronizeWithUIShowMultiprojectMessage() {
-		Display.getDefault()
-			.asyncExec(() -> {
-				Shell shell = PlatformUI.getWorkbench()
-					.getActiveWorkbenchWindow()
-					.getShell();
-				SimonykeesMessageDialog.openMessageDialog(shell,
-						Messages.SelectRulesWizardHandler_multipleProjectsWarning, MessageDialog.WARNING);
 			});
 	}
 }

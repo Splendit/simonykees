@@ -1,0 +1,417 @@
+package eu.jsparrow.ui.wizard.semiautomatic;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import eu.jsparrow.core.exception.RefactoringException;
+import eu.jsparrow.core.exception.RuleException;
+import eu.jsparrow.core.refactorer.RefactoringPipeline;
+import eu.jsparrow.core.refactorer.RefactoringState;
+import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
+import eu.jsparrow.core.util.RefactoringUtil;
+import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
+import eu.jsparrow.core.visitor.renaming.FieldMetadata;
+import eu.jsparrow.i18n.ExceptionMessages;
+import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.preview.RenamingRulePreviewWizard;
+import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.ResourceHelper;
+import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
+
+/**
+ * Wizard that holds {@link ConfigureRenameFieldsRuleWizardPage} with
+ * configuration options for {@link PublicFieldsRenamingRule}. On Finish it sets
+ * chosen options on rule and start refactoring process.
+ * 
+ * @author Andreja Sambolec
+ * @since 2.3.0
+ *
+ */
+public class ConfigureRenameFieldsRuleWizard extends Wizard {
+
+	private static final Logger logger = LoggerFactory.getLogger(ConfigureRenameFieldsRuleWizard.class);
+	
+	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
+
+	private ConfigureRenameFieldsRuleWizardPageModel model;
+
+	private IJavaProject selectedJavaProjekt;
+	private List<ICompilationUnit> selectedJavaElements;
+
+	private RefactoringPipeline refactoringPipeline;
+	private List<FieldMetadata> metadata;
+	private PublicFieldsRenamingRule renameFieldsRule;
+
+	private List<ICompilationUnit> targetCompilationUnits = new ArrayList<>();
+
+	private Rectangle rectangle;
+
+	private boolean canRefactor = true;
+
+	public ConfigureRenameFieldsRuleWizard(List<ICompilationUnit> selectedJavaElements) {
+		this.selectedJavaElements = selectedJavaElements;
+		setNeedsProgressMonitor(true);
+		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON)); //$NON-NLS-1$
+	}
+
+	@Override
+	public String getWindowTitle() {
+		return Messages.ConfigureRenameFieldsRuleWizard_WizardTitle_RenameFields;
+	}
+
+	@Override
+	public void addPages() {
+		model = new ConfigureRenameFieldsRuleWizardPageModel();
+		ConfigureRenameFieldsRuleWizardPage page = new ConfigureRenameFieldsRuleWizardPage(model);
+		addPage(page);
+	}
+
+	@Override
+	public boolean performCancel() {
+		Activator.setRunning(false);
+		return super.performCancel();
+	}
+
+	@Override
+	public boolean canFinish() {
+		if (model.getFieldTypes()
+			.isEmpty()) {
+			return false;
+		}
+		return super.canFinish();
+	}
+
+	/**
+	 * On finish rule applying is started.
+	 */
+	@Override
+	public boolean performFinish() {
+
+		selectedJavaProjekt = selectedJavaElements.get(0)
+			.getJavaProject();
+
+		rectangle = Display.getCurrent()
+			.getPrimaryMonitor()
+			.getBounds();
+
+		String message = NLS.bind(Messages.SelectRulesWizard_start_refactoring, this.getClass()
+			.getSimpleName(), selectedJavaProjekt.getElementName());
+		logger.info(message);
+
+		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+
+				FieldDeclarationASTVisitor visitor = createVisitor();
+
+				SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
+
+				SubMonitor child = subMonitor.split(40);
+				child.setWorkRemaining(selectedJavaElements.size());
+				child.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
+				for (ICompilationUnit compilationUnit : selectedJavaElements) {
+					if (!compilationUnit.getJavaProject()
+						.equals(selectedJavaProjekt)) {
+						WizardMessageDialog.synchronizeWithUIShowMultiprojectMessage();
+						return Status.CANCEL_STATUS;
+
+					}
+
+					CompilationUnit cu = RefactoringUtil.parse(compilationUnit);
+					cu.accept(visitor);
+
+					if (child.isCanceled()) {
+						return Status.CANCEL_STATUS;
+					} else {
+						child.worked(1);
+					}
+				}
+
+				SubMonitor childSecondPart = subMonitor.split(50);
+				childSecondPart.setWorkRemaining(100);
+				
+				searchScopeAndPrepareRefactoringStates(childSecondPart, visitor);
+				if (!canRefactor) {
+					return Status.CANCEL_STATUS;
+				}
+				if (childSecondPart.isCanceled()) {
+					return Status.CANCEL_STATUS;
+				}
+				monitor.done();
+				return Status.OK_STATUS;
+			}
+
+		};
+
+		job.setUser(true);
+		job.schedule();
+
+		job.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+
+				if (event.getResult()
+					.isOK() && canRefactor) {
+					Job refactorJob = startRefactoringJob();
+
+					refactorJob.setUser(true);
+					refactorJob.schedule();
+				} else {
+					// do nothing if status is canceled, close
+					Activator.setRunning(false);
+				}
+			}
+		});
+
+		return true;
+	}
+
+	/**
+	 * Creates Job which does refactoring and creates preview wizard.
+	 * 
+	 * @return Job which does refactoring on collected refactoring states.
+	 */
+	private Job startRefactoringJob() {
+		Job refactorJob = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+
+				try {
+					refactoringPipeline.doRefactoring(monitor);
+					if (monitor.isCanceled()) {
+						refactoringPipeline.clearStates();
+						return Status.CANCEL_STATUS;
+					}
+				} catch (RefactoringException e) {
+					WizardMessageDialog.synchronizeWithUIShowInfo(e);
+					return Status.CANCEL_STATUS;
+				} catch (RuleException e) {
+					WizardMessageDialog.synchronizeWithUIShowError(e);
+					return Status.CANCEL_STATUS;
+
+				} finally {
+					monitor.done();
+				}
+
+				return Status.OK_STATUS;
+			}
+		};
+
+		refactorJob.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+
+				if (event.getResult()
+					.isOK()) {
+					if (LicenseUtil.getInstance()
+						.isValid()) {
+						if (refactoringPipeline.hasChanges()) {
+							createAndShowPreviewWizard();
+
+							// when done without interruption
+							Activator.setRunning(false);
+						} else {
+							WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
+						}
+					} else {
+						WizardMessageDialog.synchronizeWithUIShowLicenseError();
+					}
+				} else {
+					// do nothing if status is canceled, close
+					Activator.setRunning(false);
+				}
+			}
+
+		});
+		return refactorJob;
+	}
+
+	/**
+	 * Creates {@link FieldDeclarationASTVisitor} and sets all options selected
+	 * by user from {@link ConfigureRenameFieldsRuleWizardPageModel}.
+	 * 
+	 * @return created and updated {@link FieldDeclarationASTVisitor}
+	 */
+	private FieldDeclarationASTVisitor createVisitor() {
+		FieldDeclarationASTVisitor visitor;
+		if (ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_PROJECT.equals(model.getSearchScope())) {
+			IJavaElement[] scope = { selectedJavaProjekt };
+			visitor = new FieldDeclarationASTVisitor(scope);
+		} else {
+			List<IJavaProject> projectList = new LinkedList<>();
+			try {
+				IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace()
+					.getRoot();
+				IProject[] projects = workspaceRoot.getProjects();
+				for (int i = 0; i < projects.length; i++) {
+					IProject project = projects[i];
+					if (project.isOpen() && project.hasNature(JavaCore.NATURE_ID)) {
+						projectList.add(JavaCore.create(project));
+					}
+				}
+			} catch (CoreException e) {
+				logger.error(e.getMessage(), e);
+			}
+			IJavaElement[] scope = projectList.toArray(new IJavaElement[0]);
+			visitor = new FieldDeclarationASTVisitor(scope);
+		}
+		visitor.setRenamePrivateField(model.getFieldTypes()
+			.contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PRIVATE));
+		visitor.setRenameProtectedField(model.getFieldTypes()
+			.contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PROTECTED));
+		visitor.setRenamePackageProtectedField(model.getFieldTypes()
+			.contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPROTECTED));
+		visitor.setRenamePublicField(model.getFieldTypes()
+			.contains(ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PUBLIC));
+		visitor.setUppercaseAfterUnderscore(model.setUpperCaseForUnderscoreReplacementOption());
+		visitor.setUppercaseAfterDollar(model.setUpperCaseForDollarReplacementOption());
+		visitor.setAddTodo(model.isAddTodoComments());
+		return visitor;
+	}
+
+	/**
+	 * Collects target compilation units and creates refactoring states from
+	 * them.
+	 * 
+	 * @param subMonitor
+	 *            progress monitor
+	 * @param visitor
+	 *            {@link PublicFieldsRenamingRule} visitor
+	 */
+	private void searchScopeAndPrepareRefactoringStates(SubMonitor subMonitor, FieldDeclarationASTVisitor visitor) {
+
+		targetCompilationUnits = new ArrayList<>(visitor.getTargetIJavaElements());
+		if (targetCompilationUnits.isEmpty()) {
+			WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
+			canRefactor = false;
+			return;
+		}
+
+		metadata = visitor.getFieldMetadata();
+		List<FieldMetadata> todosMetadata = visitor.getUnmodifiableFieldMetadata();
+
+		if (subMonitor.isCanceled()) {
+			return;
+		}
+
+		renameFieldsRule = new PublicFieldsRenamingRule(metadata, todosMetadata);
+		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = Arrays.asList(renameFieldsRule);
+
+		refactoringPipeline = new RefactoringPipeline();
+		refactoringPipeline.setRules(rules);
+
+		SubMonitor child = subMonitor.split(80);
+		child.setWorkRemaining(targetCompilationUnits.size());
+		child.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
+		List<RefactoringState> refactoringStates = new ArrayList<>();
+		for (ICompilationUnit compilationUnit : targetCompilationUnits) {
+			try {
+				refactoringStates.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
+			} catch (JavaModelException e) {
+				logger.error(e.getMessage(), e);
+				WizardMessageDialog.synchronizeWithUIShowInfo(
+						new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+								ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
+				canRefactor = false;
+				return;
+			}
+			if (child.isCanceled()) {
+				return;
+			} else {
+				child.worked(1);
+			}
+		}
+
+		refactoringPipeline.setRefactoringStates(refactoringStates);
+	}
+
+	/**
+	 * Creates DocumentChanges and calls method to show preview wizard.
+	 */
+	private void createAndShowPreviewWizard() {
+
+		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes = new HashMap<>();
+		Map<String, FieldMetadata> metaDataMap = new HashMap<>();
+		for (FieldMetadata data : metadata) {
+
+			String newIdentifier = data.getNewIdentifier();
+			data.getCompilationUnit()
+				.getJavaElement();
+			Map<ICompilationUnit, DocumentChange> docsChanges = renameFieldsRule.computeDocumentChangesPerFiled(data);
+			changes.put(data, docsChanges);
+			metaDataMap.put(newIdentifier, data);
+
+		}
+
+		synchronizeWithUIShowRefactoringPreviewWizard(changes);
+	}
+
+	/**
+	 * Open preview wizard containing all changes made by this rule.
+	 * 
+	 * @param changes
+	 *            Map containing changes to be displayed
+	 */
+	private void synchronizeWithUIShowRefactoringPreviewWizard(
+			Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes) {
+
+		String message = NLS.bind(Messages.SelectRulesWizard_end_refactoring, this.getClass()
+			.getSimpleName(), selectedJavaProjekt.getElementName());
+		logger.info(message);
+		message = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, selectedJavaProjekt.getElementName(),
+				renameFieldsRule.getRuleDescription()
+					.getName());
+		logger.info(message);
+
+		Display.getDefault()
+			.asyncExec(() -> {
+				Shell shell = PlatformUI.getWorkbench()
+					.getActiveWorkbenchWindow()
+					.getShell();
+				final WizardDialog dialog = new WizardDialog(shell, new RenamingRulePreviewWizard(refactoringPipeline,
+						metadata, changes, targetCompilationUnits, renameFieldsRule));
+
+				// maximizes the RefactoringPreviewWizard
+				dialog.setPageSize(rectangle.width, rectangle.height);
+				dialog.open();
+			});
+
+	}
+}

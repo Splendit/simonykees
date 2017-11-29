@@ -1,7 +1,6 @@
 package eu.jsparrow.dummies;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Duration;
 
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -11,7 +10,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.rule.RefactoringRuleInterface;
-import eu.jsparrow.core.rule.Tag;
+import eu.jsparrow.core.rule.RuleDescription;
 
 /**
  * This class serves as a dummy for a refactoring rule. Strictly for use in unit
@@ -23,23 +22,8 @@ import eu.jsparrow.core.rule.Tag;
 public class DummyRule implements RefactoringRuleInterface {
 
 	@Override
-	public String getName() {
-		return null;
-	}
-
-	@Override
-	public String getDescription() {
-		return null;
-	}
-
-	@Override
 	public JavaVersion getRequiredJavaVersion() {
 		return null;
-	}
-
-	@Override
-	public List<Tag> getTags() {
-		return new ArrayList<>();
 	}
 
 	@Override
@@ -81,6 +65,11 @@ public class DummyRule implements RefactoringRuleInterface {
 	@Override
 	public boolean isSatisfiedLibraries() {
 		return false;
+	}
+
+	@Override
+	public RuleDescription getRuleDescription() {
+		return new RuleDescription("dummy", "dummyDescription", Duration.ofMinutes(5)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 }

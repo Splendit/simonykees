@@ -135,7 +135,7 @@ public final class RefactoringUtil {
 	 * 
 	 * @param iCompilationUnit
 	 *            file to check
-	 * @return returns true if no error exists, otherwise false
+	 * @return returns {@code false} if NO error exists, otherwise {@code true}
 	 * @since 1.2
 	 * 
 	 */

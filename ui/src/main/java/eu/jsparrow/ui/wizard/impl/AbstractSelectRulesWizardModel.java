@@ -250,8 +250,8 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 			.getAllRules(false);
 		for (int i = 0; i < sortedRules.size(); i++) {
 			if (sortedRules.get(i)
-				.getName()
-				.equals(searchedRule.getName())) {
+				.getRuleDescription().getName()
+				.equals(searchedRule.getRuleDescription().getName())) {
 				return i;
 			}
 		}

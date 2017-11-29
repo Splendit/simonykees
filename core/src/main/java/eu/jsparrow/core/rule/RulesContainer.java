@@ -33,6 +33,7 @@ import eu.jsparrow.core.rule.impl.OrganiseImportsRule;
 import eu.jsparrow.core.rule.impl.OverrideAnnotationRule;
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
+import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
 import eu.jsparrow.core.rule.impl.ReImplementingInterfaceRule;
 import eu.jsparrow.core.rule.impl.RearrangeClassMembersRule;
 import eu.jsparrow.core.rule.impl.RemoveNewStringConstructorRule;
@@ -46,7 +47,7 @@ import eu.jsparrow.core.rule.impl.StringFormatLineSeparatorRule;
 import eu.jsparrow.core.rule.impl.StringLiteralEqualityCheckRule;
 import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
-import eu.jsparrow.core.rule.impl.UseIsEmptyRule;
+import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
@@ -82,7 +83,7 @@ public class RulesContainer {
 				new CollectionRemoveAllRule(), new DiamondOperatorRule(), new OverrideAnnotationRule(),
 				new SerialVersionUidRule(), new RearrangeClassMembersRule(), new BracketsToControlRule(),
 				new FieldNameConventionRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
-				new ReImplementingInterfaceRule(),
+				new ReImplementingInterfaceRule(),new PutIfAbsentRule(),
 
 				new ImmutableStaticFinalCollectionsRule(),
 				/*
@@ -91,7 +92,7 @@ public class RulesContainer {
 				new RemoveNewStringConstructorRule(), new InefficientConstructorRule(),
 				new PrimitiveBoxedForStringRule(), new StringFormatLineSeparatorRule(), new IndexOfToContainsRule(),
 				new RemoveToStringOnStringRule(), new StringUtilsRule(), new StringLiteralEqualityCheckRule(),
-				new StringConcatToPlusRule(), new UseIsEmptyRule(), new ArithmethicAssignmentRule(),
+				new StringConcatToPlusRule(), new UseIsEmptyOnCollectionsRule(), new ArithmethicAssignmentRule(),
 				new StringBufferToBuilderRule(), new PrimitiveObjectUseEqualsRule(),
 				/*
 				 * Loops and streams

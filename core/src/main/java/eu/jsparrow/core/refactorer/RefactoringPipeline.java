@@ -27,7 +27,7 @@ import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.exception.model.NotWorkingRuleModel;
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.RuleApplicationCount;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.ExceptionMessages;
@@ -351,7 +351,7 @@ public class RefactoringPipeline {
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
 
-			subMonitor.subTask(refactoringRule.getName());
+			subMonitor.subTask(refactoringRule.getRuleDescription().getName());
 
 			/*
 			 * Sends new child of subMonitor which takes in progress bar size of
@@ -413,7 +413,7 @@ public class RefactoringPipeline {
 				if (changedCompilationUnits.stream()
 					.anyMatch(unit -> unit.getElementName()
 						.equals(refactoringState.getWorkingCopyName()))) {
-					subMonitor.subTask(refactoringRule.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
+					subMonitor.subTask(refactoringRule.getRuleDescription().getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 					if (refactoringRule.equals(currentRule)) {
 						refactoringState.addRuleToIgnoredRules(currentRule);
 					} else if (!refactoringState.getIgnoredRules()
@@ -422,7 +422,7 @@ public class RefactoringPipeline {
 							refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, false);
 						} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 							logger.error(e.getMessage(), e);
-							notWorkingRules.add(new NotWorkingRuleModel(refactoringRule.getName(),
+							notWorkingRules.add(new NotWorkingRuleModel(refactoringRule.getRuleDescription().getName(),
 									refactoringState.getWorkingCopyName()));
 						}
 					}
@@ -461,8 +461,7 @@ public class RefactoringPipeline {
 		RefactoringState refactoringState = refactoringStates.stream()
 			.filter(s -> newSelection.getElementName()
 				.equals(s.getWorkingCopyName()))
-			.findFirst()
-			.get();
+			.findFirst().orElseThrow(RuleException::new);
 
 		refactoringState.resetWorkingCopy();
 
@@ -480,7 +479,7 @@ public class RefactoringPipeline {
 			} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 				logger.error(e.getMessage(), e);
 				notWorkingRules
-					.add(new NotWorkingRuleModel(refactoringRule.getName(), refactoringState.getWorkingCopyName()));
+					.add(new NotWorkingRuleModel(refactoringRule.getRuleDescription().getName(), refactoringState.getWorkingCopyName()));
 			}
 		}
 
@@ -565,14 +564,14 @@ public class RefactoringPipeline {
 
 		for (RefactoringState refactoringState : refactoringStates) {
 
-			subMonitor.subTask(rule.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
+			subMonitor.subTask(rule.getRuleDescription().getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 
 			try {
 				refactoringState.addRuleAndGenerateDocumentChanges(rule, true);
 			} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 				logger.error(e.getMessage(), e);
 				returnListNotWorkingRules
-					.add(new NotWorkingRuleModel(rule.getName(), refactoringState.getWorkingCopyName()));
+					.add(new NotWorkingRuleModel(rule.getRuleDescription().getName(), refactoringState.getWorkingCopyName()));
 			}
 
 			/*
@@ -585,6 +584,10 @@ public class RefactoringPipeline {
 				monitor.worked(1);
 			}
 		}
+	}
+	
+	public void setRefactoringStates(List<RefactoringState> refactoringStates) {
+		this.refactoringStates = refactoringStates;
 	}
 
 	/**

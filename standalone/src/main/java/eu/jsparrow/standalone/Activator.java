@@ -1,12 +1,14 @@
 package eu.jsparrow.standalone;
 
 import java.io.File;
-import java.util.LinkedList;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -14,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLConfig;
+import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.config.YAMLConfigUtil;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RefactoringException;
@@ -38,27 +41,51 @@ public class Activator implements BundleActivator {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "eu.jsparrow.standalone"; //$NON-NLS-1$
 
-	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
-	public static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
-	public static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
-	public static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
-	public static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
-	public static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
-	public static final String MAVEN_NATURE_CONSTANT = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
-	public static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
-	public static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
-	public static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
-	public static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
+	protected static final String USER_DIR = "user.dir"; //$NON-NLS-1$
+	protected static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
+	protected static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
+	protected static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
+	protected static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
+	protected static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
+	protected static final String MAVEN_NATURE_CONSTANT = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
+	protected static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
+	protected static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
+	protected static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
+	protected static final String LIST_RULES = "LIST.RULES"; //$NON-NLS-1$
+	protected static final String LIST_RULES_SHORT = "LIST.RULES.SHORT"; //$NON-NLS-1$
+	protected static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
+	protected static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 
 	private StandaloneConfig standaloneConfig;
+	private File directory;
 
 	@Override
 	public void start(BundleContext context) throws Exception {
 		logger.info(Messages.Activator_start);
 
+		boolean listRules = Boolean.parseBoolean(context.getProperty(LIST_RULES));
+		boolean listRulesShort = Boolean.parseBoolean(context.getProperty(LIST_RULES_SHORT));
+		String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID);
+
+		if (listRules) {
+			if (listRulesId != null && !listRulesId.isEmpty()) {
+				ListRulesUtil.listRules(listRulesId);
+			} else {
+				ListRulesUtil.listRules();
+			}
+		} else if (listRulesShort) {
+			ListRulesUtil.listRulesShort();
+		} else {
+			startRefactoring(context);
+		}
+	}
+
+	private void startRefactoring(BundleContext context) throws YAMLConfigException {
+
 		YAMLConfig config;
 		String loggerInfo;
 
+		String profile = context.getProperty(SELECTED_PROFILE);
 		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
 
 		if (useDefaultConfig) {
@@ -83,7 +110,7 @@ public class Activator implements BundleActivator {
 
 		// Set working directory to temp_jSparrow in java tmp folder
 		String file = System.getProperty(JAVA_TMP);
-		File directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
+		directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
 		if (directory.exists() || directory.mkdirs()) {
 			System.setProperty(USER_DIR, directory.getAbsolutePath());
 		}
@@ -94,44 +121,46 @@ public class Activator implements BundleActivator {
 			.getRulesForProject(standaloneConfig.getJavaProject(), true);
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil
 			.getSelectedRulesFromConfig(config, projectRules);
-		if (selectedRules == null) {
-			selectedRules = new LinkedList<>();
-		}
 
-		// Create refactoring pipeline and set rules
-		RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
-		refactoringPipeline.setRules(selectedRules);
-		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
-				selectedRules.toString());
-		logger.info(loggerInfo);
+		if (selectedRules != null && !selectedRules.isEmpty()) {
+			// Create refactoring pipeline and set rules
+			RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
+			refactoringPipeline.setRules(selectedRules);
+			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
+					selectedRules.toString());
+			logger.info(loggerInfo);
 
-		logger.info(Messages.Activator_debug_collectCompilationUnits);
-		List<ICompilationUnit> compUnits = standaloneConfig.getCompUnits();
-		loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compUnits.size());
-		logger.debug(loggerInfo);
+			logger.info(Messages.Activator_debug_collectCompilationUnits);
+			List<ICompilationUnit> compUnits = standaloneConfig.getCompUnits();
+			loggerInfo = NLS.bind(Messages.Activator_debug_numCompilationUnits, compUnits.size());
+			logger.debug(loggerInfo);
 
-		logger.debug(Messages.Activator_debug_createRefactoringStates);
-		refactoringPipeline.createRefactoringStates(compUnits);
-		loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates, refactoringPipeline.getRefactoringStates()
-			.size());
-		logger.debug(loggerInfo);
+			logger.debug(Messages.Activator_debug_createRefactoringStates);
+			refactoringPipeline.createRefactoringStates(compUnits);
+			loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates,
+					refactoringPipeline.getRefactoringStates()
+						.size());
+			logger.debug(loggerInfo);
 
-		// Do refactoring
-		try {
-			logger.info(Messages.Activator_debug_startRefactoring);
-			refactoringPipeline.doRefactoring(new NullProgressMonitor());
-		} catch (RefactoringException | RuleException e) {
-			logger.error(e.getMessage(), e);
-			return;
-		}
+			// Do refactoring
+			try {
+				logger.info(Messages.Activator_debug_startRefactoring);
+				refactoringPipeline.doRefactoring(new NullProgressMonitor());
+			} catch (RefactoringException | RuleException e) {
+				logger.error(e.getMessage(), e);
+				return;
+			}
 
-		// Commit refactoring
-		try {
-			logger.info(Messages.Activator_debug_commitRefactoring);
-			refactoringPipeline.commitRefactoring();
-		} catch (RefactoringException | ReconcileException e) {
-			logger.error(e.getMessage(), e);
-			return;
+			// Commit refactoring
+			try {
+				logger.info(Messages.Activator_debug_commitRefactoring);
+				refactoringPipeline.commitRefactoring();
+			} catch (RefactoringException | ReconcileException e) {
+				logger.error(e.getMessage(), e);
+				return;
+			}
+		} else {
+			logger.info(Messages.Activator_standalone_noRulesSelected);
 		}
 	}
 
@@ -149,9 +178,43 @@ public class Activator implements BundleActivator {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} finally {
-			standaloneConfig.cleanUp();
+			try {
+				standaloneConfig.cleanUp();
+			} catch (JavaModelException e) {
+				logger.error(e.getMessage(), e);
+			}
+
+			// CLEAN
+			if (directory.exists()) {
+				deleteChildren(directory);
+			}
 		}
 
 		logger.info(Messages.Activator_stop);
+	}
+
+	/**
+	 * Recursively deletes all sub-folders from received folder.
+	 * 
+	 * @param parentDirectory
+	 *            directory which content is to be deleted
+	 * @throws IOException
+	 */
+	private void deleteChildren(File parentDirectory) {
+		String[] children = parentDirectory.list();
+		if (children != null) {
+			for (String file : Arrays.asList(children)) {
+				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
+				if (currentFile.isDirectory() && !("target".equals(currentFile.getName()))) { //$NON-NLS-1$
+					deleteChildren(currentFile);
+				}
+
+				if (!currentFile.delete()) {
+					String loggerError = NLS.bind(Messages.Activator_couldNotDeleteFileWithPath,
+							currentFile.getAbsolutePath());
+					logger.error(loggerError);
+				}
+			}
+		}
 	}
 }

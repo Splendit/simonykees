@@ -1,5 +1,6 @@
 package eu.jsparrow.core;
 
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,7 +21,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 /**
  * TODO SIM-103 add class description
  * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa
+ * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Ardit Ymeri
  * @since 0.9
  */
 @SuppressWarnings("nls")
@@ -35,7 +36,6 @@ public class AllRulesTest extends AbstractRulesTest {
 	private Path postRule;
 
 	public AllRulesTest(String fileName, Path preRule, Path postRule) {
-		super();
 		this.fileName = fileName;
 		this.preRule = preRule;
 		this.postRule = postRule;
@@ -62,12 +62,15 @@ public class AllRulesTest extends AbstractRulesTest {
 	@Parameters(name = "{index}: test file[{0}]")
 	public static Collection<Object[]> data() throws Exception {
 		List<Object[]> data = new ArrayList<>();
-		for (Path preRulePath : Files.newDirectoryStream(Paths.get(RulesTestUtil.PRERULE_DIRECTORY),
-				RulesTestUtil.RULE_SUFFIX)) {
-			Path postRulePath = Paths.get(POSTRULE_DIRECTORY, preRulePath.getFileName()
-				.toString());
-			data.add(new Object[] { preRulePath.getFileName()
-				.toString(), preRulePath, postRulePath });
+
+		try (DirectoryStream<Path> directoryStream = Files
+			.newDirectoryStream(Paths.get(RulesTestUtil.PRERULE_DIRECTORY), RulesTestUtil.RULE_SUFFIX)) {
+			for (Path preRulePath : directoryStream) {
+				Path postRulePath = Paths.get(POSTRULE_DIRECTORY, preRulePath.getFileName()
+					.toString());
+				data.add(new Object[] { preRulePath.getFileName()
+					.toString(), preRulePath, postRulePath });
+			}
 		}
 		return data;
 	}

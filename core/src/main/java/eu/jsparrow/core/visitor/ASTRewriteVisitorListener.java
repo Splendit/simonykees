@@ -3,12 +3,14 @@ package eu.jsparrow.core.visitor;
 /**
  * Implementors listen on {@link AbstractASTRewriteASTVisitor} for rewrites.
  * 
- * @author Hans-Jörg Schrödl
+ * @author Hans-Jörg Schrödl, Matthias Webhofer
  */
 public interface ASTRewriteVisitorListener {
 
 	/**
-	 * Notify of a change.
+	 * Updates implementor with the given event.
+	 * 
+	 * @param event event published by a {@link AbstractASTRewriteASTVisitor}
 	 */
-	public void update();
+	public void update(ASTRewriteEvent event);
 }

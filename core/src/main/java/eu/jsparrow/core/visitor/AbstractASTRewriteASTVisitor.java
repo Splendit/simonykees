@@ -11,13 +11,15 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
  * Abstract implementation of an {@link ASTVisitor} to assure all used visitors
  * have an field for {@link ASTRewrite} to commit the changes in the tree.
  * 
- * @author Martin Huter, Hans-Jörg Schrödl
+ * @author Martin Huter, Hans-Jörg Schrödl, Matthias Webhofer
  * @since 0.9
  */
 
 public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	protected ASTRewrite astRewrite;
+
+	protected String compilationUnitHandle;
 
 	protected List<ASTRewriteVisitorListener> listeners = new ArrayList<>();
 
@@ -46,6 +48,14 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	 */
 	public void setASTRewrite(ASTRewrite astRewrite) {
 		this.astRewrite = astRewrite;
+	}
+
+	public String getCompilationUnit() {
+		return compilationUnitHandle;
+	}
+
+	public void setCompilationUnit(String compilationUnitHandle) {
+		this.compilationUnitHandle = compilationUnitHandle;
 	}
 
 	/**
@@ -83,7 +93,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	 * Notifies all listeners that a rewrite occurred.
 	 */
 	protected void onRewrite() {
-		listeners.forEach(ASTRewriteVisitorListener::update);
+		listeners.forEach(listener -> listener.update(new ASTRewriteEvent(this.compilationUnitHandle)));
 	}
 
 }

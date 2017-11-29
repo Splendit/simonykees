@@ -21,6 +21,7 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 	private static final String DATE_FORMAT_PATTERN = "MMMM dd, yyyy"; //$NON-NLS-1$
 
 	public NetLicensingLicenseValidationService() {
+		//
 	}
 
 	@Override
@@ -120,5 +121,10 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 			.getValidationData()
 			.getType();
 		return LicenseType.TRY_AND_BUY == licenseType;
+	}
+
+	@Override
+	public void setJSparrowRunning(boolean running) {
+		LicenseManager.setJSparrowRunning(running);
 	}
 }

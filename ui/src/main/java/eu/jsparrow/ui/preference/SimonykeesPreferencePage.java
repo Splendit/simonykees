@@ -90,7 +90,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.ENABLE_INTRO,
 				Messages.SimonykeesPreferencePage_enableIntroText, generalGroup));
 		addField(new BooleanFieldEditor(SimonykeesPreferenceConstants.RESOLVE_PACKAGES_RECURSIVELY,
-				Messages.SimonykeesPreferencePage_resolvePackagesRecursivelyLabel, composite));
+				Messages.SimonykeesPreferencePage_resolvePackagesRecursivelyLabel, generalGroup));
 
 		createProfilesTableView(composite);
 
@@ -116,7 +116,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 		GridData data = new GridData(GridData.FILL_BOTH);
 		viewerComposite.setLayoutData(data);
 
-		profilesTable = new Table(viewerComposite, SWT.BORDER | SWT.MULTI);
+		profilesTable = new Table(viewerComposite, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		data = new GridData(GridData.FILL_BOTH);
 		profilesTable.setLayoutData(data);
 		profilesTable.setFont(font);
@@ -513,7 +513,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 						String newProfileName = addSuffixToProfileName(profile.getName());
 						profile.setName(newProfileName);
 					}
-					List<String> nonExistentRules = YAMLConfigUtil.getNonExistentRules(profile.getRules());
+					List<String> nonExistentRules = YAMLConfigUtil.getNonExistentRules(profile.getRules(), false);
 					if (!nonExistentRules.isEmpty()) {
 						String nonExistentRulesMessage = NLS.bind(Messages.SimonykeesPreferencePage_profileAndName,
 								profile.getName()) + "\n" //$NON-NLS-1$

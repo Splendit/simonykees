@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,7 +28,7 @@ import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * TODO SIM-103 add class description
+ * Base class for Rule Tests.
  * 
  * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
  *         Matthias Webhofer
@@ -36,6 +37,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 public abstract class AbstractRulesTest {
 
 	private static final String UTILITY_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/utilities"; //$NON-NLS-1$
+	protected String packageString = "eu.jsparrow.sample.preRule"; //$NON-NLS-1$
 
 	protected static IPackageFragmentRoot root = null;
 
@@ -83,27 +85,36 @@ public abstract class AbstractRulesTest {
 	 */
 	protected static List<Object[]> load(String postRuleDirectory) throws IOException {
 		List<Object[]> data = new ArrayList<>();
-		for (Path postRulePath : Files.newDirectoryStream(Paths.get(postRuleDirectory), RulesTestUtil.RULE_SUFFIX)) {
-			Path preRulePath = Paths.get(RulesTestUtil.PRERULE_DIRECTORY, postRulePath.getFileName()
-				.toString());
-			data.add(new Object[] { preRulePath.getFileName()
-				.toString(), preRulePath, postRulePath });
+
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(postRuleDirectory),
+				RulesTestUtil.RULE_SUFFIX)) {
+			for (Path postRulePath : directoryStream) {
+				Path preRulePath = Paths.get(RulesTestUtil.PRERULE_DIRECTORY, postRulePath.getFileName()
+					.toString());
+				data.add(new Object[] { preRulePath.getFileName()
+					.toString(), preRulePath, postRulePath });
+			}
 		}
+
 		return data;
 	}
 
 	protected static List<Path> loadUtilityClasses(String utilityDirectory) throws IOException {
 		List<Path> data = new ArrayList<>();
-		for (Path utilityPath : Files.newDirectoryStream(Paths.get(utilityDirectory), "*.java")) { //$NON-NLS-1$
-			data.add(utilityPath);
+
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(utilityDirectory), "*.java")) { //$NON-NLS-1$
+			for (Path utilityPath : directoryStream) {
+				data.add(utilityPath);
+			}
 		}
+
 		return data;
 	}
 
+	
 	protected String processFile(String fileName, String content,
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) throws Exception {
 
-		String packageString = "eu.jsparrow.sample.preRule"; //$NON-NLS-1$
 		IPackageFragment packageFragment = root.createPackageFragment(packageString, true, null);
 
 		ICompilationUnit compilationUnit = packageFragment.createCompilationUnit(fileName, content, true, null);
@@ -142,5 +153,9 @@ public abstract class AbstractRulesTest {
 
 		// TODO check if tabs and newlines make a difference
 		assertEquals(expectedSource, compilationUnitSource);
+	}
+	
+	protected void setPrerulePackage(String prerulePackage) {
+		packageString = prerulePackage;
 	}
 }

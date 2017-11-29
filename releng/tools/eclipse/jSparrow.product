@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="jSparrow" id="org.eclipse.platform.ide" application="org.eclipse.e4.ui.workbench.swt.E4Application" useFeatures="true" includeLaunchers="true">
+<product name="jSparrow" id="org.eclipse.equinox.p2.director.product" application="org.eclipse.e4.ui.workbench.swt.E4Application" useFeatures="true" includeLaunchers="true">
 
    <configIni use="default">
    </configIni>
@@ -19,7 +19,6 @@
    <windowImages/>
 
    <launcher>
-      <solaris/>
       <win useIco="false">
          <bmp/>
       </win>
@@ -32,19 +31,8 @@
    </plugins>
 
    <features>
-      <feature id="eu.jsparrow.3rd.party.feature" version="2.2.1.qualifier"/>
-      <feature id="eu.jsparrow.standalone.feature" version="2.2.1.qualifier"/>
-      <feature id="org.eclipse.e4.rcp" version="1.5.3.v20170228-0512"/>
       <feature id="org.eclipse.emf.ecore"/>
       <feature id="org.eclipse.emf.common"/>
-      <feature id="org.eclipse.jdt" version="3.12.3.v20170301-0400"/>
-      <feature id="org.eclipse.pde" version="3.12.3.v20170301-0400"/>
-      <feature id="org.eclipse.mylyn.commons" version="3.21.0.v20160707-1856"/>
-      <feature id="org.eclipse.mylyn.commons.notifications" version="1.13.0.v20160721-2347"/>
-      <feature id="org.eclipse.help" version="2.2.2.v20170301-0400"/>
-      <feature id="org.eclipse.rcp" version="4.6.3.v20170301-0400"/>
-      <feature id="org.eclipse.help.source" version="2.2.2.v20170301-0400"/>
-      <feature id="org.eclipse.platform" version="4.6.3.v20170301-0400"/>
       <feature id="org.eclipse.equinox.p2.user.ui"/>
       <feature id="org.eclipse.ecf.filetransfer.httpclient4.feature"/>
       <feature id="org.eclipse.ecf.filetransfer.httpclient4.ssl.feature"/>
@@ -55,6 +43,17 @@
       <feature id="org.eclipse.ecf.filetransfer.feature"/>
       <feature id="org.eclipse.ecf.core.ssl.feature"/>
       <feature id="org.eclipse.ecf.filetransfer.ssl.feature"/>
+      <feature id="org.eclipse.jdt" version="3.13.1.v20171009-0410"/>
+      <feature id="org.eclipse.pde" version="3.13.1.v20171009-0537"/>
+      <feature id="org.eclipse.mylyn.commons" version="3.23.0.v20170503-0014"/>
+      <feature id="org.eclipse.mylyn.commons.notifications" version="1.15.0.v20170411-1844"/>
+      <feature id="org.eclipse.help" version="2.2.101.v20171009-0410"/>
+      <feature id="org.eclipse.rcp" version="4.7.1.v20171009-0410"/>
+      <feature id="org.eclipse.help.source" version="2.2.101.v20171009-0410"/>
+      <feature id="org.eclipse.platform" version="4.7.1.v20171009-0410"/>
+      <feature id="org.eclipse.e4.rcp" version="1.6.1.v20170928-1359"/>
+      <feature id="eu.jsparrow.3rd.party.feature" version="2.4.0.qualifier"/>
+      <feature id="eu.jsparrow.standalone.feature" version="2.4.0.qualifier"/>
    </features>
 
    <configurations>
