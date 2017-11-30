@@ -45,14 +45,15 @@ public class YAMLConfig {
 		YAMLConfig config = new YAMLConfig();
 
 		List<String> profileRules = new LinkedList<>();
-		profileRules.add("CodeFormatterRule"); //$NON-NLS-1$
-		profileRules.add("DiamondOperatorRule"); //$NON-NLS-1$
-		profileRules.add("ForToForEachRule"); //$NON-NLS-1$
-		profileRules.add("EnhancedForLoopToStreamForEachRule"); //$NON-NLS-1$
-		profileRules.add("WhileToForEachRule"); //$NON-NLS-1$
-		profileRules.add("MultiCatchRule"); //$NON-NLS-1$
-		profileRules.add("LambdaForEachIfWrapperToFilterRule"); //$NON-NLS-1$
-		profileRules.add("TryWithResourceRule"); //$NON-NLS-1$
+
+		profileRules.add("CodeFormatter"); //$NON-NLS-1$
+		profileRules.add("DiamondOperator"); //$NON-NLS-1$
+		profileRules.add("ForToForEach"); //$NON-NLS-1$
+		profileRules.add("EnhancedForLoopToStreamForEach"); //$NON-NLS-1$
+		profileRules.add("WhileToForEach"); //$NON-NLS-1$
+		profileRules.add("MultiCatch"); //$NON-NLS-1$
+		profileRules.add("LambdaForEachIfWrapperToFilter"); //$NON-NLS-1$
+		profileRules.add("TryWithResource"); //$NON-NLS-1$
 
 		YAMLProfile profile = new YAMLProfile();
 		profile.setName("default"); //$NON-NLS-1$

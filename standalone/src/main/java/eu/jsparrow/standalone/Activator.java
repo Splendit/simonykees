@@ -54,6 +54,7 @@ public class Activator implements BundleActivator {
 	protected static final String LIST_RULES = "LIST.RULES"; //$NON-NLS-1$
 	protected static final String LIST_RULES_SHORT = "LIST.RULES.SHORT"; //$NON-NLS-1$
 	protected static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
+	protected static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 
 	private StandaloneConfig standaloneConfig;
 	private File directory;
@@ -80,18 +81,9 @@ public class Activator implements BundleActivator {
 	}
 
 	private void startRefactoring(BundleContext context) throws YAMLConfigException {
-		String configFilePath = context.getProperty(CONFIG_FILE_PATH);
-
-		String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
-		logger.info(loggerInfo);
-
-		String profile = context.getProperty(SELECTED_PROFILE);
-
-		YAMLConfig config = YAMLConfigUtil.readConfig(configFilePath, profile);
-		String selectedProfile = config.getSelectedProfile();
-		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
-				(selectedProfile == null) ? Messages.Activator_standalone_None : selectedProfile);
-		logger.info(loggerInfo);
+		String loggerInfo;
+		
+		YAMLConfig config = getConfiguration(context);
 
 		// get project path and name from context
 		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
@@ -182,6 +174,32 @@ public class Activator implements BundleActivator {
 		logger.info(Messages.Activator_stop);
 	}
 
+	private YAMLConfig getConfiguration(BundleContext context) throws YAMLConfigException {
+		YAMLConfig config = null;
+		String loggerInfo;
+		
+		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
+
+		if (useDefaultConfig) {
+			logger.info(Messages.Activator_standalone_UsingDefaultConfiguration);
+			config = YAMLConfig.getDefaultConfig();
+		} else {
+			String configFilePath = context.getProperty(CONFIG_FILE_PATH);
+
+			loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
+			logger.info(loggerInfo);
+
+			String profile = context.getProperty(SELECTED_PROFILE);
+
+			config = YAMLConfigUtil.readConfig(configFilePath, profile);
+			
+			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, config.getSelectedProfile());
+			logger.info(loggerInfo);
+		}
+		
+		return config;
+	}
+	
 	/**
 	 * Recursively deletes all sub-folders from received folder.
 	 * 
