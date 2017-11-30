@@ -44,9 +44,11 @@ import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 public class RenamingRulePreviewWizardPage extends WizardPage {
 
 	private Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes;
-
+	
 	private CheckboxTreeViewer viewer;
 	private IChangePreviewViewer currentPreviewViewer;
+	
+	private Composite previewComposite;
 
 	private List<DocumentChangeWrapper> changesWrapperList;
 	private DocumentChangeWrapper selectedDocWrapper;
@@ -63,6 +65,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			.getName());
 		setDescription(rule.getRuleDescription()
 			.getDescription());
+		
 		this.changes = changes;
 		this.originalDocuments = originalDocuments;
 
@@ -232,12 +235,19 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	 */
 	private void createPreviewViewer(SashForm parent) {
 
+		previewComposite = new Composite(parent, SWT.NONE);
 		// GridData works with GridLayout
 		GridData gridData = new GridData(GridData.FILL_BOTH);
 		parent.setLayoutData(gridData);
+		previewComposite.setLayout(new GridLayout());
+		previewComposite.setLayoutData(gridData);
 
 		currentPreviewViewer = new TextEditChangePreviewViewer();
-		currentPreviewViewer.createControl(parent);
+		currentPreviewViewer.createControl(previewComposite);
+
+		currentPreviewViewer.getControl()
+		.getParent()
+		.layout();
 
 		populatePreviewViewer();
 	}
@@ -248,11 +258,47 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	public void populatePreviewViewer() {
 		
 		if (this.selectedDocWrapper != null) {
+			disposeControl();
+
+			currentPreviewViewer.createControl(previewComposite);
+			currentPreviewViewer.getControl()
+				.setLayoutData(new GridData(GridData.FILL_BOTH));
+
 			ChangePreviewViewerInput viewerInput = TextEditChangePreviewViewer.createInput(getCurrentDocumentChange());
 			currentPreviewViewer.setInput(viewerInput);
+			
+			currentPreviewViewer.getControl()
+			.getParent()
+			.layout();
 		}
 	}
-
+	
+	/**
+	 * Used to populate preview viewer only if this page gets visible
+	 */
+	@Override
+	public void setVisible(boolean visible) {
+		if (visible) {
+			populatePreviewViewer();
+		} else {
+			disposeControl();
+		}
+		super.setVisible(visible);
+	}
+	
+	/**
+	 * Used to dispose control every time preview viewer content changes or page
+	 * gets invisible. New control is created when needed. This way conflicting
+	 * handers are avoided because there is no multiple viewers which would
+	 * register multiple handlers for same action.
+	 */
+	public void disposeControl() {
+		if (null != currentPreviewViewer.getControl()) {
+			currentPreviewViewer.getControl()
+				.dispose();
+		}
+	}
+	
 	/**
 	 * Gets the current DocumentChange if checkbox in front of file name is
 	 * selected. Otherwise generates and returns new DocumentChange with empty

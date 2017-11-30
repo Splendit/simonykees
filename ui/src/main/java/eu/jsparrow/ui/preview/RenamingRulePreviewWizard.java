@@ -57,6 +57,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 
 	private List<ICompilationUnit> targetCompilationUnits;
 	private Map<IPath, Document> originalDocuments;
+
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			List<ICompilationUnit> targetCompilationUnits, PublicFieldsRenamingRule rule) {
@@ -77,8 +78,8 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 			return new Document(icu.getSource());
 		} catch (JavaModelException e1) {
 			WizardMessageDialog.synchronizeWithUIShowInfo(
-			new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
-					ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e1));
+					new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+							ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e1));
 			return new Document();
 		}
 	}
@@ -92,7 +93,8 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	public void addPages() {
 		RefactoringPreviewWizardModel model = new RefactoringPreviewWizardModel();
 		Map<ICompilationUnit, DocumentChange> changesPerRule = refactoringPipeline.getChangesForRule(rule);
-		RenamingRulePreviewWizardPage page = new RenamingRulePreviewWizardPage(documentChanges, changesPerRule, originalDocuments, rule, model);
+		RenamingRulePreviewWizardPage page = new RenamingRulePreviewWizardPage(documentChanges, changesPerRule,
+				originalDocuments, rule, model);
 		addPage(page);
 		addSummaryPage(refactoringPipeline, model);
 	}
@@ -237,10 +239,13 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 */
 	public void pressedNext() {
 		if (null != getContainer()) {
+			if (getContainer().getCurrentPage() instanceof RenamingRulePreviewWizardPage) {
+				((RenamingRulePreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
+			}
 			getNextPage(getContainer().getCurrentPage());
 		}
 	}
-	
+
 	/**
 	 * Called from {@link WizardDialog} when Back button is pressed. Disposes
 	 * all controls to be recalculated and created when needed
@@ -253,7 +258,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 			getPreviousPage(getContainer().getCurrentPage());
 		}
 	}
-	
+
 	@Override
 	public void updateViewsOnNavigation(IWizardPage page) {
 		if (page instanceof RenamingRulePreviewWizardPage) {
