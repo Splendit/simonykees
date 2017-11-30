@@ -107,28 +107,29 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 */
 	@Override
 	public boolean performFinish() {
-		if (!((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
-			.getName())).getUncheckedFields()
-				.isEmpty()) {
-			for (FieldMetaData fieldData : ((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
-				.getName())).getUncheckedFields()) {
-				metadata.remove(fieldData);
-			}
-
-			Job recalculationJob = recalculateForUnselected();
-
-			recalculationJob.setUser(true);
-			recalculationJob.schedule();
-
-			recalculationJob.addJobChangeListener(new JobChangeAdapter() {
-				@Override
-				public void done(IJobChangeEvent event) {
-					commitChanges();
-				}
-			});
-		} else {
-			commitChanges();
-		}
+//		if (!((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
+//			.getName())).getUncheckedFields()
+//				.isEmpty()) {
+//			for (FieldMetaData fieldData : ((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
+//				.getName())).getUncheckedFields()) {
+//				metadata.remove(fieldData);
+//			}
+//
+//			Job recalculationJob = recalculateForUnselected();
+//
+//			recalculationJob.setUser(true);
+//			recalculationJob.schedule();
+//
+//			recalculationJob.addJobChangeListener(new JobChangeAdapter() {
+//				@Override
+//				public void done(IJobChangeEvent event) {
+//					commitChanges();
+//				}
+//			});
+//		} else {
+//			commitChanges();
+//		}
+		commitChanges();
 		return true;
 	}
 
@@ -161,7 +162,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 * 
 	 * @return Job for recalculation of changes
 	 */
-	private Job recalculateForUnselected() {
+	public Job recalculateForUnselected() {
 		return new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
 
 			@Override
@@ -268,7 +269,16 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				 * if there are changes in refactoring page, it means that Back
 				 * button was pressed and recalculation is needed
 				 */
-				recalculateForUnselected();
+//				for (FieldMetaData fieldData : ((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
+//					.getName())).getUncheckedFields()) {
+//					metadata.remove(fieldData);
+//				}
+//
+//				Job recalculationJob = recalculateForUnselected();
+//
+//				recalculationJob.setUser(true);
+//				recalculationJob.schedule();
+
 			} else {
 				/*
 				 * if there are no changes in refactoring page, just populate
@@ -277,5 +287,9 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				((RenamingRulePreviewWizardPage) page).populateViews(false);
 			}
 		}
+	}
+
+	public void removeFieldData(FieldMetaData fieldData) {
+		metadata.remove(fieldData);
 	}
 }

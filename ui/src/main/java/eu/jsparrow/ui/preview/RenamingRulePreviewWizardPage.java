@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
@@ -55,6 +56,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 
 	private List<FieldMetaData> uncheckedFields = new ArrayList<>();
 	private Map<IPath, Document> originalDocuments;
+	private PublicFieldsRenamingRule rule;
 
 	public RenamingRulePreviewWizardPage(Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes,
 			Map<ICompilationUnit, DocumentChange> changesPerRule, Map<IPath, Document> originalDocuments,
@@ -65,7 +67,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			.getName());
 		setDescription(rule.getRuleDescription()
 			.getDescription());
-		
+		this.rule = rule;
 		this.changes = changes;
 		this.originalDocuments = originalDocuments;
 
@@ -189,6 +191,14 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 				}
 			} else {
 				uncheckedFields.add(((DocumentChangeWrapper) event.getElement()).getFieldData());
+
+				for (FieldMetaData fieldData : uncheckedFields) {
+					((RenamingRulePreviewWizard) getWizard()).removeFieldData(fieldData);
+				}
+
+				Job job = ((RenamingRulePreviewWizard) getWizard()).recalculateForUnselected();
+				job.setUser(true);
+				job.schedule();
 			}
 			populatePreviewViewer();
 		});
@@ -338,4 +348,6 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		}
 		viewer.setSelection(new StructuredSelection(selectedDocWrapper));
 	}
+	
+	
 }
