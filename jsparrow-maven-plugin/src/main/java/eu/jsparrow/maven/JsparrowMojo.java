@@ -30,7 +30,7 @@ import eu.jsparrow.maven.util.MavenUtil;
  *
  */
 @SuppressWarnings("nls")
-@Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, requiresProject = true)
+@Mojo(name = "refactor", defaultPhase = LifecyclePhase.PROCESS_RESOURCES, requiresDependencyResolution = ResolutionScope.NONE, requiresProject = true)
 public class JsparrowMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "${session}")
@@ -66,29 +66,31 @@ public class JsparrowMojo extends AbstractMojo {
 	public static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG";
 
 	public void execute() throws MojoExecutionException {
-		try {
-			Runtime.getRuntime()
-				.addShutdownHook(createShutdownHook());
-			final Map<String, String> configuration = new HashMap<>();
-			configuration.put(CONFIG_FILE_PATH,
-					(configFile.exists() && !configFile.isDirectory()) ? configFile.getAbsolutePath() : "");
-			configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile);
-			configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
+		if (!"pom".equalsIgnoreCase(project.getPackaging())) {
+			try {
+				Runtime.getRuntime()
+					.addShutdownHook(createShutdownHook());
+				final Map<String, String> configuration = new HashMap<>();
+				configuration.put(CONFIG_FILE_PATH,
+						(configFile.exists() && !configFile.isDirectory()) ? configFile.getAbsolutePath() : "");
+				configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile);
+				configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 
-			MavenUtil.startOSGI(project, mavenHome, getLog(), configuration);
-		} catch (BundleException | InterruptedException e) {
-			getLog().error(e.getMessage(), e);
-		} finally {
+				MavenUtil.startOSGI(project, mavenHome, getLog(), configuration);
+			} catch (BundleException | InterruptedException e) {
+				getLog().error(e.getMessage(), e);
+			} finally {
 
-			// CLEAN
-			if (null != MavenUtil.getDirectory()) {
-				try {
-					deleteChildren(new File(MavenUtil.getDirectory()
-						.getAbsolutePath()));
-					Files.delete(MavenUtil.getDirectory()
-						.toPath());
-				} catch (IOException e) {
-					getLog().error(e.getMessage(), e);
+				// CLEAN
+				if (null != MavenUtil.getDirectory()) {
+					try {
+						deleteChildren(new File(MavenUtil.getDirectory()
+							.getAbsolutePath()));
+						Files.delete(MavenUtil.getDirectory()
+							.toPath());
+					} catch (IOException e) {
+						getLog().error(e.getMessage(), e);
+					}
 				}
 			}
 		}
