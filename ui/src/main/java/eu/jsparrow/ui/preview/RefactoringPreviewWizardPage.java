@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
+import eu.jsparrow.core.rule.statistics.FileChangeCount;
 import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
@@ -209,7 +210,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		techDebtLabel = new CLabel(composite, SWT.NONE);
 		techDebtLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		techDebtLabel.setImage(ResourceHelper.createImage("icons/fa-clock.png")); //$NON-NLS-1$
-		
+
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
@@ -338,6 +339,9 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 					unselectedChange.add(newSelection);
 				}
 				wizardModel.removeFileFromRule(rule, newSelection.getHandleIdentifier());
+				FileChangeCount count = RuleApplicationCount.getFor(rule)
+					.getApplicationsForFile(newSelection.getHandleIdentifier());
+				count.clear();
 			}
 			// This method simply counts checked items in the table. Not very
 			// MVC, and should be replaced with a proper solution
