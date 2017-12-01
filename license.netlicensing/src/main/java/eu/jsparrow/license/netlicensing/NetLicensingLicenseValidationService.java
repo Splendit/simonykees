@@ -20,31 +20,37 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 
 	private static final String DATE_FORMAT_PATTERN = "MMMM dd, yyyy"; //$NON-NLS-1$
 
+	private LicenseManager licenseManager;
+	
 	public NetLicensingLicenseValidationService() {
-		//
+		this.licenseManager = LicenseManager.getInstance();
+	}
+	
+	// Only required to inject mocks
+	void setLicenseManager(LicenseManager licenseManager) {
+		this.licenseManager = licenseManager;
 	}
 
 	@Override
 	public void startValidation() {
-		LicenseManager.getInstance();
+		licenseManager.initManager();
 	}
 
 	@Override
 	public void stopValidation() {
-		LicenseManager.getInstance()
-			.checkIn();
+		licenseManager.checkIn();
 	}
 
 	@Override
 	public boolean isValid() {
-		return LicenseManager.getInstance()
+		return licenseManager
 			.getValidationData()
 			.isValid();
 	}
 
 	@Override
 	public boolean isExpired() {
-		LicenseStatus licenseStatus = LicenseManager.getInstance()
+		LicenseStatus licenseStatus = licenseManager
 			.getValidationData()
 			.getLicenseStatus();
 		return (licenseStatus == LicenseStatus.FLOATING_EXPIRED || licenseStatus == LicenseStatus.NODE_LOCKED_EXPIRED
@@ -53,7 +59,7 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 
 	@Override
 	public boolean updateLicenseeNumber(String licenseKey, String licenseName) {
-		return LicenseManager.getInstance()
+		return licenseManager
 			.updateLicenseeNumber(licenseKey.trim(), licenseName);
 	}
 
@@ -61,8 +67,7 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 	public String getDisplayableLicenseInformation() {
 		StringBuilder displayableLicenseInformation = new StringBuilder();
 
-		LicenseManager licenseManger = LicenseManager.getInstance();
-		LicenseChecker licenseData = licenseManger.getValidationData();
+		LicenseChecker licenseData = licenseManager.getValidationData();
 		LicenseType licenseType = licenseData.getType();
 		ZonedDateTime expireationDate = licenseData.getExpirationDate();
 
@@ -72,7 +77,7 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 			displayableLicenseInformation.append(licenseType.getLicenseName());
 
 			if (LicenseType.TRY_AND_BUY != licenseType) {
-				String licenseKey = licenseManger.getLicensee()
+				String licenseKey = licenseManager.getLicensee()
 					.getLicenseeNumber();
 
 				displayableLicenseInformation.append(" "); //$NON-NLS-1$
@@ -94,9 +99,10 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 		return displayableLicenseInformation.toString();
 	}
 
+	//https://en.wikipedia.org/wiki/Law_of_Demeter
 	@Override
-	public String getLicenseStautsUserMessage() {
-		return LicenseManager.getInstance()
+	public String getLicenseStatusUserMessage() {
+		return licenseManager
 			.getValidationData()
 			.getLicenseStatus()
 			.getUserMessage();
@@ -109,7 +115,7 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 
 	@Override
 	public boolean isFullValidLicense() {
-		LicenseType licenseType = LicenseManager.getInstance()
+		LicenseType licenseType = licenseManager
 			.getValidationData()
 			.getType();
 		return isValid() && (LicenseType.NODE_LOCKED == licenseType || LicenseType.FLOATING == licenseType);
@@ -117,7 +123,7 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 
 	@Override
 	public boolean isDemoType() {
-		LicenseType licenseType = LicenseManager.getInstance()
+		LicenseType licenseType = licenseManager
 			.getValidationData()
 			.getType();
 		return LicenseType.TRY_AND_BUY == licenseType;

@@ -193,7 +193,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			licenseLabel.setText(licenseValidationService.getDisplayableLicenseInformation());
 
 			if (!licenseValidationService.isValid()) {
-				licenseStatusLabel.setText(licenseValidationService.getLicenseStautsUserMessage());
+				licenseStatusLabel.setText(licenseValidationService.getLicenseStatusUserMessage());
 				logoLabel.setImage(jSparrowImageInactive);
 			} else {
 				licenseStatusLabel.setText(""); //$NON-NLS-1$
