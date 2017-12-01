@@ -589,24 +589,18 @@ public class RefactoringPipeline {
 	public void setRefactoringStates(List<RefactoringState> refactoringStates) {
 		this.refactoringStates = refactoringStates;
 	}
-
-	/**
-	 * Method for creating Map with relation from {@link RefactoringState} to
-	 * current source code
-	 * 
-	 */
-	public Map<RefactoringState, String> getRefactoringStatesSourceMap() {
-		Map<RefactoringState, String> sourceMap = new HashMap<>();
-		putAllRefactoringStateSources(sourceMap);
-		return sourceMap;
-	}
 	
 	public void updateInitialSourceMap() {
 		Map<RefactoringState, String> sourceMap = getInitialSourceMap();
 		putAllRefactoringStateSources(sourceMap);
 	}
 	
-	private void putAllRefactoringStateSources(Map<RefactoringState, String> sourceMap) {
+	/**
+	 * Method for creating Map with relation from {@link RefactoringState} to
+	 * current source code
+	 * 
+	 */
+	public void putAllRefactoringStateSources(Map<RefactoringState, String> sourceMap) {
 		refactoringStates.stream()
 		.forEach(refactoringState -> {
 			try {

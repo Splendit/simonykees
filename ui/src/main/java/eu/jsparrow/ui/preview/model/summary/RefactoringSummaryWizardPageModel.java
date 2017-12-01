@@ -102,7 +102,7 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 
 	private void initialize() {
 		initialSource.putAll(refactoringPipeline.getInitialSourceMap());
-		finalSource = refactoringPipeline.getRefactoringStatesSourceMap();
+		refactoringPipeline.putAllRefactoringStateSources(finalSource);
 		addModifiedFiles();
 		addRuleTimes();
 		/*
