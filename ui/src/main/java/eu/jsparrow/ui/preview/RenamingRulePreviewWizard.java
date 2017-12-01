@@ -1,7 +1,6 @@
 package eu.jsparrow.ui.preview;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,9 +9,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -50,7 +47,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(RenamingRulePreviewWizard.class);
 	private RefactoringPipeline refactoringPipeline;
-	private List<FieldMetaData> metadata;
+	private List<FieldMetaData> metaData;
 
 	private Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges;
 	private PublicFieldsRenamingRule rule;
@@ -62,7 +59,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			List<ICompilationUnit> targetCompilationUnits, PublicFieldsRenamingRule rule) {
 		this.refactoringPipeline = refactoringPipeline;
-		this.metadata = metadata;
+		this.metaData = metadata;
 		this.documentChanges = documentChanges;
 		this.targetCompilationUnits = targetCompilationUnits;
 		this.originalDocuments = targetCompilationUnits.stream()
@@ -107,28 +104,6 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 */
 	@Override
 	public boolean performFinish() {
-//		if (!((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
-//			.getName())).getUncheckedFields()
-//				.isEmpty()) {
-//			for (FieldMetaData fieldData : ((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
-//				.getName())).getUncheckedFields()) {
-//				metadata.remove(fieldData);
-//			}
-//
-//			Job recalculationJob = recalculateForUnselected();
-//
-//			recalculationJob.setUser(true);
-//			recalculationJob.schedule();
-//
-//			recalculationJob.addJobChangeListener(new JobChangeAdapter() {
-//				@Override
-//				public void done(IJobChangeEvent event) {
-//					commitChanges();
-//				}
-//			});
-//		} else {
-//			commitChanges();
-//		}
 		commitChanges();
 		return true;
 	}
@@ -173,6 +148,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				}
 
 				refactoringPipeline.setRefactoringStates(refactoringStates);
+				refactoringPipeline.updateInitialSourceMap();
 
 				try {
 					refactoringPipeline.doRefactoring(monitor);
@@ -188,24 +164,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 					return Status.CANCEL_STATUS;
 
 				}
-
-				if (refactoringPipeline.hasChanges()) {
-					Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes = new HashMap<>();
-					Map<String, FieldMetaData> metaDataMap = new HashMap<>();
-					for (FieldMetaData data : metadata) {
-
-						String newIdentifier = data.getNewIdentifier();
-						Map<ICompilationUnit, DocumentChange> docsChanges;
-						try {
-							docsChanges = rule.computeDocumentChangesPerFiled(data);
-							changes.put(data, docsChanges);
-							metaDataMap.put(newIdentifier, data);
-						} catch (JavaModelException e) {
-							logger.error("Cannot create document for displaying changes - " + e.getMessage(), e); //$NON-NLS-1$
-						}
-
-					}
-				}
+				
 				return Status.OK_STATUS;
 			}
 		};
@@ -240,10 +199,34 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 */
 	public void pressedNext() {
 		if (null != getContainer()) {
-			if (getContainer().getCurrentPage() instanceof RenamingRulePreviewWizardPage) {
-				((RenamingRulePreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
+			IWizardPage page = getContainer().getCurrentPage();
+			
+			if(!(page instanceof RenamingRulePreviewWizardPage)) {
+				getNextPage(page);
+				return;
 			}
-			getNextPage(getContainer().getCurrentPage());
+			
+			RenamingRulePreviewWizardPage previewPage = (RenamingRulePreviewWizardPage) page;
+			previewPage.disposeControl();
+			
+			boolean recalculate = previewPage.isRecalculateNeeded();
+			if(!recalculate) {
+				getNextPage(page);
+				return;
+			}
+
+			Job recalculationJob = recalculateForUnselected();
+			recalculationJob.setUser(true);
+			recalculationJob.schedule();
+			
+			try {
+				recalculationJob.join();
+			} catch (InterruptedException e) {
+				logger.warn("Recalculation job was interrupted.", e); //$NON-NLS-1$
+				Thread.currentThread().interrupt();
+			}
+			getNextPage(page);
+
 		}
 	}
 
@@ -260,36 +243,12 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		}
 	}
 
-	@Override
-	public void updateViewsOnNavigation(IWizardPage page) {
-		if (page instanceof RenamingRulePreviewWizardPage) {
-			if (!((RenamingRulePreviewWizardPage) page).getUncheckedFields()
-				.isEmpty()) {
-				/*
-				 * if there are changes in refactoring page, it means that Back
-				 * button was pressed and recalculation is needed
-				 */
-//				for (FieldMetaData fieldData : ((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
-//					.getName())).getUncheckedFields()) {
-//					metadata.remove(fieldData);
-//				}
-//
-//				Job recalculationJob = recalculateForUnselected();
-//
-//				recalculationJob.setUser(true);
-//				recalculationJob.schedule();
-
-			} else {
-				/*
-				 * if there are no changes in refactoring page, just populate
-				 * the view with current updated values
-				 */
-				((RenamingRulePreviewWizardPage) page).populateViews(false);
-			}
-		}
+	public void remove(FieldMetaData fieldData) {
+		this.metaData.remove(fieldData);
 	}
 
-	public void removeFieldData(FieldMetaData fieldData) {
-		metadata.remove(fieldData);
+	public void addMetaData(FieldMetaData fieldData) {
+		this.metaData.add(fieldData);
+		
 	}
 }

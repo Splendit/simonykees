@@ -592,6 +592,7 @@ public class RefactoringPipeline {
 	
 	public void updateInitialSourceMap() {
 		Map<RefactoringState, String> sourceMap = getInitialSourceMap();
+		sourceMap.clear();
 		putAllRefactoringStateSources(sourceMap);
 	}
 	

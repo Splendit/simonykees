@@ -40,7 +40,6 @@ import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RenamingRulePreviewWizard;
-import eu.jsparrow.ui.preview.RenamingRulePreviewWizardPage;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -57,6 +56,8 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 
 	public static final Logger logger = LoggerFactory.getLogger(ConfigureRenameFieldsRuleWizard.class);
+	
+	private static final int SUMMARY_BUTTON_ID = 9;
 
 	private ConfigureRenameFieldsRuleWizardPageModel model;
 
@@ -364,24 +365,17 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 
 					@Override
 					protected void createButtonsForButtonBar(Composite parent) {
-						createButton(parent, 9, Messages.SelectRulesWizard_Summary, false);
+						createButton(parent, SUMMARY_BUTTON_ID, Messages.SelectRulesWizard_Summary, false);
 						super.createButtonsForButtonBar(parent);
 					}
 
 					@Override
 					protected void buttonPressed(int buttonId) {
-						if (buttonId == 9) {
-							summaryButtonPressed();
+						if (buttonId == SUMMARY_BUTTON_ID) {
+							nextPressed();
 						} else {
 							super.buttonPressed(buttonId);
 						}
-					}
-
-					private void summaryButtonPressed() {
-						if (getCurrentPage() instanceof RenamingRulePreviewWizardPage) {
-							renamingPreviewWizard.updateViewsOnNavigation(getCurrentPage());
-						}
-						showPage(renamingPreviewWizard.getSummaryPage());
 					}
 				};
 

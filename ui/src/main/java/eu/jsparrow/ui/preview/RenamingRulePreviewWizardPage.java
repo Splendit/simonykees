@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -55,8 +55,8 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	private DocumentChangeWrapper selectedDocWrapper;
 
 	private List<FieldMetaData> uncheckedFields = new ArrayList<>();
+	private List<FieldMetaData> recheckedFields = new ArrayList<>();
 	private Map<IPath, Document> originalDocuments;
-	private PublicFieldsRenamingRule rule;
 
 	public RenamingRulePreviewWizardPage(Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes,
 			Map<ICompilationUnit, DocumentChange> changesPerRule, Map<IPath, Document> originalDocuments,
@@ -67,7 +67,6 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			.getName());
 		setDescription(rule.getRuleDescription()
 			.getDescription());
-		this.rule = rule;
 		this.changes = changes;
 		this.originalDocuments = originalDocuments;
 
@@ -179,29 +178,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		 * When checkbox state changes, set same for parent, if element it self
 		 * isn't parent, and all it's children
 		 */
-		viewer.addCheckStateListener(event -> {
-			if (null == ((DocumentChangeWrapper) event.getElement()).getParent()) {
-				viewer.setSubtreeChecked(event.getElement(), event.getChecked());
-			} else {
-				viewer.setSubtreeChecked(((DocumentChangeWrapper) event.getElement()).getParent(), event.getChecked());
-			}
-			if (event.getChecked()) {
-				if (uncheckedFields.contains(((DocumentChangeWrapper) event.getElement()).getFieldData())) {
-					uncheckedFields.remove(((DocumentChangeWrapper) event.getElement()).getFieldData());
-				}
-			} else {
-				uncheckedFields.add(((DocumentChangeWrapper) event.getElement()).getFieldData());
-
-				for (FieldMetaData fieldData : uncheckedFields) {
-					((RenamingRulePreviewWizard) getWizard()).removeFieldData(fieldData);
-				}
-
-				Job job = ((RenamingRulePreviewWizard) getWizard()).recalculateForUnselected();
-				job.setUser(true);
-				job.schedule();
-			}
-			populatePreviewViewer();
-		});
+		viewer.addCheckStateListener(this::createCheckListener);
 
 		viewer.addSelectionChangedListener(event -> {
 			IStructuredSelection sel = (IStructuredSelection) event.getSelection();
@@ -223,6 +200,35 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		});
 
 		populateFileView();
+	}
+
+	private void createCheckListener(CheckStateChangedEvent event) {
+		DocumentChangeWrapper selectedWrapper = (DocumentChangeWrapper) event.getElement();
+		if (null == selectedWrapper.getParent()) {
+			viewer.setSubtreeChecked(selectedWrapper, event.getChecked());
+		} else {
+			viewer.setSubtreeChecked(selectedWrapper.getParent(), event.getChecked());
+		}
+		
+		 RenamingRulePreviewWizard wizard = (RenamingRulePreviewWizard) getWizard();
+		
+		if (event.getChecked()) {
+			FieldMetaData recheckedFieldData = selectedWrapper.getFieldData();
+			if (uncheckedFields.contains(recheckedFieldData)) {
+				uncheckedFields.remove(recheckedFieldData);
+			}
+			
+			if(!recheckedFields.contains(recheckedFieldData)) {
+				recheckedFields.add(recheckedFieldData);
+			}
+			wizard.addMetaData(recheckedFieldData);
+			
+		} else {
+			uncheckedFields.add(selectedWrapper.getFieldData());
+			recheckedFields.remove(selectedWrapper.getFieldData());
+			wizard.remove(selectedWrapper.getFieldData());
+		}
+		populatePreviewViewer();
 	}
 
 	/**
@@ -331,14 +337,9 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			return selectedDocWrapper.getDocumentChange();
 		}
 	}
-
-	/**
-	 * Getter for list holding all unchecked Fields.
-	 * 
-	 * @return list with unchecked Fields
-	 */
-	public List<FieldMetaData> getUncheckedFields() {
-		return uncheckedFields;
+	
+	public boolean isRecalculateNeeded() {
+		return !uncheckedFields.isEmpty() || !recheckedFields.isEmpty();
 	}
 
 	public void populateViews(boolean forcePreviewViewerUpdate) {
