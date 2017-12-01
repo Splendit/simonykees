@@ -57,6 +57,6 @@ public class ListAllRulesShortMojo extends AbstractMojo {
 		} catch (BundleException | InterruptedException e) {
 			getLog().debug(e.getMessage(), e);
 			getLog().error(e.getMessage());
-		} 
+		}
 	}
 }

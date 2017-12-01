@@ -155,7 +155,7 @@ public class MavenHelper {
 	public void deleteChildren(File directory) throws IOException {
 
 		String[] children = directory.list();
-		
+
 		if (children != null) {
 			for (String file : Arrays.asList(children)) {
 				File currentFile = new File(directory.getAbsolutePath(), file);
@@ -214,7 +214,8 @@ public class MavenHelper {
 			try {
 				deleteChildren(new File(this.getDirectory()
 					.getAbsolutePath()));
-				Files.delete(this.getDirectory().toPath());
+				Files.delete(this.getDirectory()
+					.toPath());
 			} catch (IOException e) {
 				log.debug(e.getMessage(), e);
 				log.error(e.getMessage());
