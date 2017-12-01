@@ -1,18 +1,23 @@
 package eu.jsparrow.license.netlicensing;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.atLeastOnce;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -30,28 +35,142 @@ public class NetLicensingLicenseValidationServiceTest {
 	}
 
 	@Test
-	public void startValidation_IsCalled_InitializeLicenseManager() {
+	public void startValidation_isCalled_initializeLicenseManager() {
 		netLicensingLicenseValidationService.startValidation();
 
 		verify(licenseManager, times(1)).initManager();
 	}
 
 	@Test
-	public void stopValidation_IsCalled_CheckInIsCalled() {
+	public void stopValidation_isCalled_checkInIsCalled() {
 		netLicensingLicenseValidationService.stopValidation();
 
 		verify(licenseManager, times(1)).checkIn();
 	}
 
 	@Test
-	public void isValid_IsCalled_GetValidationDataAndIsValidIsCalled() {
+	public void isValid_withValidLicense_returnsTrue() {
 		LicenseChecker licenseCheckerMock = mock(LicenseChecker.class);
 		when(licenseManager.getValidationData()).thenReturn(licenseCheckerMock);
 		when(licenseCheckerMock.isValid()).thenReturn(true);
-		
+
 		Boolean result = netLicensingLicenseValidationService.isValid();
 
-		verify(licenseCheckerMock, times(1)).isValid();
 		assertTrue(result);
 	}
+
+	@Test
+	public void isExpired_licenseFreeExpired_returnsTrue() {
+		LicenseChecker licenseCheckerMock = mock(LicenseChecker.class);
+		when(licenseManager.getValidationData()).thenReturn(licenseCheckerMock);
+		when(licenseCheckerMock.getLicenseStatus()).thenReturn(LicenseStatus.FREE_EXPIRED);
+
+		Boolean result = netLicensingLicenseValidationService.isExpired();
+
+		assertTrue(result);
+	}
+
+	@Test
+	public void isExpired_licenseFloatingExpired_returnsTrue() {
+		LicenseChecker licenseCheckerMock = mock(LicenseChecker.class);
+		when(licenseManager.getValidationData()).thenReturn(licenseCheckerMock);
+		when(licenseCheckerMock.getLicenseStatus()).thenReturn(LicenseStatus.FLOATING_EXPIRED);
+
+		Boolean result = netLicensingLicenseValidationService.isExpired();
+
+		assertTrue(result);
+	}
+
+	@Test
+	public void isExpired_licenseNodeLockedExpired_returnsTrue() {
+		LicenseChecker licenseCheckerMock = mock(LicenseChecker.class);
+		when(licenseManager.getValidationData()).thenReturn(licenseCheckerMock);
+		when(licenseCheckerMock.getLicenseStatus()).thenReturn(LicenseStatus.NODE_LOCKED_EXPIRED);
+
+		Boolean result = netLicensingLicenseValidationService.isExpired();
+
+		assertTrue(result);
+	}
+
+	@Test
+	public void isExpired_anyOtherLicense_returnsFalse() {
+		LicenseChecker licenseCheckerMock = mock(LicenseChecker.class);
+		when(licenseManager.getValidationData()).thenReturn(licenseCheckerMock);
+		when(licenseCheckerMock.getLicenseStatus()).thenReturn(LicenseStatus.FREE_REGISTERED);
+
+		Boolean result = netLicensingLicenseValidationService.isExpired();
+
+		assertFalse(result);
+	}
+
+	@Test
+	public void updateLicenseNumber_withAnyParameters_updateCalled() {
+		netLicensingLicenseValidationService.updateLicenseeNumber("key", "name");
+
+		verify(licenseManager).updateLicenseeNumber("key", "name");
+	}
+
+	@Test
+	public void getDisplayableLicenseInformation_noLicenseType_resultEmpty() {
+		LicenseChecker licenseCheckerMock = mock(LicenseChecker.class);
+		when(licenseManager.getValidationData()).thenReturn(licenseCheckerMock);
+		when(licenseCheckerMock.getType()).thenReturn(null);
+
+		String result = netLicensingLicenseValidationService.getDisplayableLicenseInformation();
+
+		assertThat(result, isEmptyString());
+	}
+
+	@Test
+	public void getDisplayableLicenseInformation_anyLicense_resultContainsKey() {
+		LicenseChecker licenseCheckerMock = mock(LicenseChecker.class);
+		when(licenseManager.getValidationData()).thenReturn(licenseCheckerMock);
+		when(licenseCheckerMock.getType()).thenReturn(LicenseType.FLOATING);
+		when(licenseCheckerMock.getExpirationDate())
+			.thenReturn(ZonedDateTime.of(2000, 1, 1, 0, 0, 0, 0, ZoneId.of("GMT+0")));
+		when(licenseManager.getLicensee()
+			.getLicenseeNumber()).thenReturn("1234");
+
+		String result = netLicensingLicenseValidationService.getDisplayableLicenseInformation();
+
+		assertThat(result, containsString("1234"));
+	}
+
+	@Test
+	public void getDisplayableLicenseInformation_withTryAndBuy_noKeyInResult() {
+		LicenseChecker licenseCheckerMock = mock(LicenseChecker.class);
+		when(licenseManager.getValidationData()).thenReturn(licenseCheckerMock);
+		when(licenseCheckerMock.getType()).thenReturn(LicenseType.TRY_AND_BUY);
+		when(licenseCheckerMock.getExpirationDate())
+			.thenReturn(ZonedDateTime.of(2000, 1, 1, 0, 0, 0, 0, ZoneId.of("GMT+0")));
+		when(licenseManager.getLicensee()
+			.getLicenseeNumber()).thenReturn("1234");
+
+		String result = netLicensingLicenseValidationService.getDisplayableLicenseInformation();
+
+		assertThat(result, not(containsString("1234")));
+	}
+	
+	@Test
+	public void isFullValidLicense_isValid_returnsTrue() {
+		when(licenseManager.getValidationData().getType()).thenReturn(LicenseType.FLOATING);
+		when(licenseManager.getValidationData().isValid()).thenReturn(true);
+		
+		Boolean result = netLicensingLicenseValidationService.isFullValidLicense();
+		
+		assertTrue(result);
+	}
+	
+	@Test
+	public void isFullValidLicense_isInvalid_returnsFalse() {
+		when(licenseManager.getValidationData().getType()).thenReturn(LicenseType.FLOATING);
+		when(licenseManager.getValidationData().isValid()).thenReturn(false);
+		
+		Boolean result = netLicensingLicenseValidationService.isFullValidLicense();
+		
+		assertFalse(result);
+	}
+	
+	
+
 }

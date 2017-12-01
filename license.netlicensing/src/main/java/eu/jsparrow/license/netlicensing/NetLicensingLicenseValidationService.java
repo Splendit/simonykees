@@ -99,7 +99,7 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 		return displayableLicenseInformation.toString();
 	}
 
-	//https://en.wikipedia.org/wiki/Law_of_Demeter
+
 	@Override
 	public String getLicenseStatusUserMessage() {
 		return licenseManager
