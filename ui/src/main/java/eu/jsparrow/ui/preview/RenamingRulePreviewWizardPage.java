@@ -60,20 +60,19 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 
 	public RenamingRulePreviewWizardPage(Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes,
 			Map<ICompilationUnit, DocumentChange> changesPerRule, Map<IPath, Document> originalDocuments,
-			PublicFieldsRenamingRule rule, RefactoringPreviewWizardModel model) {
-		super(rule.getRuleDescription()
+			PublicFieldsRenamingRule rule1, RefactoringPreviewWizardModel model1) {
+		super(rule1.getRuleDescription()
 			.getName());
-		setTitle(rule.getRuleDescription()
+		setTitle(rule1.getRuleDescription()
 			.getName());
-		setDescription(rule.getRuleDescription()
+		setDescription(rule1.getRuleDescription()
 			.getDescription());
 		this.changes = changes;
 		this.originalDocuments = originalDocuments;
-
-		model.addRule(rule);
+		model1.addRule(rule1);
 		changesPerRule.keySet()
 			.stream()
-			.forEach(x -> model.addFileToRule(rule, x.getHandleIdentifier()));
+			.forEach(x -> model1.addFileToRule(rule1, x.getHandleIdentifier()));
 
 		convertChangesToDocumentChangeWrappers();
 
@@ -92,7 +91,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			if (!changesForField.isEmpty()) {
 				DocumentChange parent = null;
 				ICompilationUnit parentICU = null;
-				for(Map.Entry<ICompilationUnit, DocumentChange>dcEntry : changesForField.entrySet()) {
+				for (Map.Entry<ICompilationUnit, DocumentChange> dcEntry : changesForField.entrySet()) {
 					ICompilationUnit iCompilationUnit = dcEntry.getKey();
 					if ((fieldData.getDeclarationPath()).equals(iCompilationUnit.getPath())) {
 						parent = changesForField.get(iCompilationUnit);
@@ -100,7 +99,8 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 					}
 				}
 				if (null != parent) {
-					createDocumentChangeWrapperChildren(fieldData, this.originalDocuments.get(parentICU.getPath()), changesForField, parent);
+					createDocumentChangeWrapperChildren(fieldData, this.originalDocuments.get(parentICU.getPath()),
+							changesForField, parent);
 				}
 			}
 		}
