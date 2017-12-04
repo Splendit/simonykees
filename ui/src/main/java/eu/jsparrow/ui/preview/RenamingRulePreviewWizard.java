@@ -243,7 +243,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		}
 	}
 
-	public void remove(FieldMetaData fieldData) {
+	public void removeMetaData(FieldMetaData fieldData) {
 		this.metaData.remove(fieldData);
 	}
 
