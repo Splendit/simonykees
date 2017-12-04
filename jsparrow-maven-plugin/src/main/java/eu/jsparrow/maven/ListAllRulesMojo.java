@@ -39,7 +39,7 @@ public class ListAllRulesMojo extends AbstractMojo {
 	/**
 	 * if set, only the rule with the given id will be listed
 	 */
-	@Parameter(property = "rule")
+	@Parameter(property = "rules")
 	private String ruleId;
 
 	// CONSTANTS
