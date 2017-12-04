@@ -16,40 +16,6 @@
    <url>
       <update label="jSparrow Update Site" url="http://update.jsparrow.eu"/>
    </url>
-   
-   <plugin
-         id="org.eclipse.epp.logging.aeri.ide"
-         download-size="0"
-         install-size="0"
-         version="2.0.4.v20170307-1435"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.epp.logging.aeri.core"
-         download-size="0"
-         install-size="0"
-         version="2.0.4.v20170307-1435"
-         unpack="false"/>
-         
-   <!-- 
-   		for the product export, which is needed for the maven plugin, 
-   		please uncomment the following two plugins and comment the above onse.
-   		Otherwise the export will fail because it can't find the bundles with this version.
-   	-->
-    <!--
-   <plugin
-         id="org.eclipse.epp.logging.aeri.ide"
-         download-size="0"
-         install-size="0"
-         version="2.0.6.v20170906-1226"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.epp.logging.aeri.core"
-         download-size="0"
-         install-size="0"
-         version="2.0.6.v20170906-1226"
-         unpack="false"/>-->
 
    <plugin
          id="com.github.oshi.core"

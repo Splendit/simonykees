@@ -29,6 +29,7 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.ResourceHelper;
 
 /**
  * This {@link Wizard} holds a {@link RefactoringPreviewWizardPage} for every
@@ -40,6 +41,8 @@ import eu.jsparrow.ui.util.LicenseUtil;
  * @since 0.9
  */
 public class RefactoringPreviewWizard extends Wizard {
+
+	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
 
 	private RefactoringPipeline refactoringPipeline;
 
@@ -56,6 +59,12 @@ public class RefactoringPreviewWizard extends Wizard {
 			.getActiveWorkbenchWindow()
 			.getShell();
 		setNeedsProgressMonitor(true);
+		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
+	}
+
+	@Override
+	public String getWindowTitle() {
+		return Messages.SummaryWizardPage_RunSummary;
 	}
 
 	/*
@@ -235,8 +244,7 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	private void tryDoAdditionalRefactoring(IProgressMonitor monitor, IWizardPage page) {
 		try {
-			refactoringPipeline.doAdditionalRefactoring(
-					((RefactoringPreviewWizardPage) page).getUnselectedChange(),
+			refactoringPipeline.doAdditionalRefactoring(((RefactoringPreviewWizardPage) page).getUnselectedChange(),
 					((RefactoringPreviewWizardPage) page).getRule(), monitor);
 			if (monitor.isCanceled()) {
 				refactoringPipeline.clearStates();

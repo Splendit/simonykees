@@ -1,4 +1,4 @@
-package at.splendit.simonykees.maven;
+package eu.jsparrow.maven;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
-import at.splendit.simonykees.maven.util.MavenUtil;
+import eu.jsparrow.maven.util.MavenUtil;
 
 /**
  * 
@@ -19,8 +19,8 @@ import at.splendit.simonykees.maven.util.MavenUtil;
  * @since 2.3.0
  */
 @SuppressWarnings("nls")
-@Mojo(name = "listRulesShort")
-public class ListAllRulesShortMojo extends AbstractMojo {
+@Mojo(name = "listRules")
+public class ListAllRulesMojo extends AbstractMojo {
 
 	/**
 	 * Maven project on which plugin goal is executed
@@ -34,13 +34,20 @@ public class ListAllRulesShortMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${maven.home}", required = true)
 	private String mavenHome;
 
-	private static final String LIST_RULES_SHORT = "LIST.RULES.SHORT";
+	@Parameter(property = "rule")
+	private String ruleId;
+
+	private static final String LIST_RULES = "LIST.RULES";
+	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID";
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		try {
 			final Map<String, String> configuration = new HashMap<>();
-			configuration.put(LIST_RULES_SHORT, Boolean.toString(true));
+			configuration.put(LIST_RULES, Boolean.toString(true));
+			if (ruleId != null && !ruleId.isEmpty()) {
+				configuration.put(LIST_RULES_SELECTED_ID, ruleId);
+			}
 
 			MavenUtil.startOSGI(project, mavenHome, getLog(), configuration);
 		} catch (BundleException | InterruptedException e) {
