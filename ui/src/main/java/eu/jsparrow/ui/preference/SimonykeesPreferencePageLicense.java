@@ -83,6 +83,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		setPreferenceStore(Activator.getDefault()
 			.getPreferenceStore());
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
+		noDefaultAndApplyButton();
 	}
 
 	@PostConstruct
