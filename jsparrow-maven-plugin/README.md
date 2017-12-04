@@ -59,7 +59,7 @@ To use jsparrow-maven-plugin on a project, add the following code snippet to the
 <plugin>
 	<groupId>eu.jsparrow</groupId>
 	<artifactId>jsparrow-maven-plugin</artifactId>
-	<version><VERSION></version>
+	<version>${VERSION}</version>
 </plugin>
 ```
 
@@ -69,7 +69,7 @@ The jsparrow maven configuration file is a YAML file with extensions `*.yml` or 
 The default location is a file in the project's root directory called `jsparrow.yml`.
 It has the following form:
 
-```
+```yaml
 jsparrow.config
 
 # specify one of the profiles declared below as the selected profile.
@@ -110,7 +110,9 @@ $ mvn jsparrow:<goal>
 This goal starts the refactoring process. 
 
 ```bash
-$ mvn jsparrow:refactor [[[-DconfigFile=<config-file-path>] [-Dprofile=<selected-profile-id>]] | -DdefaultConfiguration]
+$ mvn jsparrow:refactor [-DconfigFile=<config-file-path>] [-Dprofile=<selected-profile-id>]
+
+$ mvn jsparrow:refactor [-DdefaultConfiguration]
 ```
 
 Parameters:
@@ -124,7 +126,7 @@ Parameters:
 This goal lists rules with their IDs, names and descriptions.
 
 ```bash
-$ mvn jsparrow:list-rules [-Drules=<list-of-rule-ids>}
+$ mvn jsparrow:list-rules [-Drules=<list-of-rule-ids>]
 ```
 
 Parameters:
