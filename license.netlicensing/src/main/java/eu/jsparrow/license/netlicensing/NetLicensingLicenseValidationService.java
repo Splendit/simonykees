@@ -131,6 +131,9 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 
 	@Override
 	public void setJSparrowRunning(boolean running) {
+		if(running && !LicenseManager.isRunning()) {
+			startValidation();
+		}
 		LicenseManager.setJSparrowRunning(running);
 	}
 }

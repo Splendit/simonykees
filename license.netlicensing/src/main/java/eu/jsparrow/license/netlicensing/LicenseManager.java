@@ -519,6 +519,10 @@ public class LicenseManager {
 	public static void setJSparrowRunning(boolean running) {
 		ValidateExecutor.setJSparrowRunning(running);
 	}
+	
+	public static boolean isRunning() {
+		return !ValidateExecutor.isShutDown();
+	}
 
 	private class CheckerImpl implements LicenseChecker {
 
