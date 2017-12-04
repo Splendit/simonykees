@@ -105,7 +105,7 @@ public class ASTNodeUtil {
 			tempType = ((VariableDeclarationExpression) variableDeclaration).getType();
 		}
 
-		if (ASTNode.PARAMETERIZED_TYPE == tempType.getNodeType()) {
+		if (tempType != null && ASTNode.PARAMETERIZED_TYPE == tempType.getNodeType()) {
 			ParameterizedType parameterizedType = (ParameterizedType) tempType;
 			if (1 == parameterizedType.typeArguments()
 				.size()) {

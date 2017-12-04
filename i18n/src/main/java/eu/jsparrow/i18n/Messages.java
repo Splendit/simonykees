@@ -26,6 +26,7 @@ public class Messages extends NLS {
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
+	public static String Activator_couldNotDeleteFileWithPath;
 	public static String Activator_debug_collectCompilationUnits;
 	public static String Activator_debug_commitRefactoring;
 	public static String Activator_debug_createRefactoringStates;
@@ -381,6 +382,7 @@ public class Messages extends NLS {
 	public static String StringConcatToPlusRule_name;
 	public static String StringLiteralEqualityCheckRule_description;
 	public static String StringLiteralEqualityCheckRule_name;
+	public static String StringUtilsRule_classNotInClassPath;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
 	public static String SummaryWizardPage_Files;

@@ -2,11 +2,11 @@ package eu.jsparrow.license.netlicensing;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.eclipse.equinox.security.storage.StorageException;
+import org.eclipse.osgi.util.NLS;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -14,6 +14,8 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import eu.jsparrow.i18n.Messages;
 
 public class SecureStoreTest {
 
@@ -25,18 +27,24 @@ public class SecureStoreTest {
 	public TestName name = new TestName();
 
 	@Before
-	public void setup() throws MalformedURLException, IOException {
+	public void setup() throws IOException {
 		file = new File(System.getProperty("user.home"), //$NON-NLS-1$
 				".eclipse/org.eclipse.equinox.security/jsparrow_store_" + name.getMethodName()); //$NON-NLS-1$
 		if (file.exists()) {
-			file.delete();
+			if (!file.delete()) {
+				String loggerError = NLS.bind(Messages.Activator_couldNotDeleteFileWithPath, file.getAbsolutePath());
+				logger.error(loggerError);
+			}
 		}
 	}
 
 	@After
-	public void tearDown() throws MalformedURLException, IOException {
+	public void tearDown() throws IOException {
 		if (file.exists()) {
-			file.delete();
+			if (!file.delete()) {
+				String loggerError = NLS.bind(Messages.Activator_couldNotDeleteFileWithPath, file.getAbsolutePath());
+				logger.error(loggerError);
+			}
 		}
 		file = null;
 	}

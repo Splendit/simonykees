@@ -36,6 +36,8 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
+import eu.jsparrow.ui.util.ResourceHelper;
+import eu.jsparrow.ui.util.StopWatchUtil;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 
@@ -55,6 +57,8 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
 
+	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
+
 	private SelectRulesWizardPageModel model;
 
 	private final List<IJavaElement> javaElements;
@@ -69,6 +73,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 		this.refactoringPipeline = refactoringPipeline;
 		this.rules = rules;
 		setNeedsProgressMonitor(true);
+		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
 	}
 
 	@Override
@@ -79,7 +84,8 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 	@Override
 	public void addPages() {
 		model = new SelectRulesWizardPageModel(rules);
-		AbstractSelectRulesWizardPage page = new SelectRulesWizardPage(model, new SelectRulesWizardPageControler(model));
+		AbstractSelectRulesWizardPage page = new SelectRulesWizardPage(model,
+				new SelectRulesWizardPageControler(model));
 		addPage(page);
 	}
 
