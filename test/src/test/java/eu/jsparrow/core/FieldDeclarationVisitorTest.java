@@ -14,9 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
@@ -29,7 +27,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.FieldReferencesSearchEngine;
@@ -79,7 +76,8 @@ public class FieldDeclarationVisitorTest extends AbstractRulesTest {
 	
 	@Before
 	public void setUpCompilationUnits() throws JavaModelException, IOException {
-		compilationUnits = loadCompilationUnits();
+		packageFragment = root.createPackageFragment(ROOT_PACKAGE_NAME, true, null);
+		compilationUnits = loadCompilationUnits(packageFragment, compilationUnitNameContents, ROOT_PACKAGE_NAME);
 	}
 	
 	@Test
@@ -150,18 +148,6 @@ public class FieldDeclarationVisitorTest extends AbstractRulesTest {
 		assertTrue("No references can be found if the type of the field has a $", references.isEmpty());
 	}
 	
-	private List<CompilationUnit> loadCompilationUnits() throws JavaModelException, IOException {
-
-		packageFragment = root.createPackageFragment(ROOT_PACKAGE_NAME, true, null);
-		List<ICompilationUnit> iCompilationUnits = new ArrayList<>();
-		for (Map.Entry<String, String> entry : compilationUnitNameContents.entrySet()) {
-			iCompilationUnits.add(packageFragment.createCompilationUnit(entry.getKey(), entry.getValue(), true, null));
-		}
-		return iCompilationUnits.stream()
-			.map(RefactoringUtil::parse)
-			.collect(Collectors.toList());
-	}
-
 	private List<VariableDeclarationFragment> findDeclarationsWithUnsafeTypeName(
 			List<CompilationUnit> compilationUnits) {
 		List<VariableDeclarationFragment> fragments = new ArrayList<>();
