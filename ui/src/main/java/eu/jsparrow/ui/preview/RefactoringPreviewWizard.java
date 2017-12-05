@@ -49,6 +49,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 	private Shell shell;
 
 	private RefactoringPreviewWizardModel model;
+	protected RefactoringSummaryWizardPage summaryPage;
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
@@ -89,7 +90,8 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			.size() == 1
 				&& refactoringPipeline.getRules()
 					.get(0) instanceof StandardLoggerRule)) {
-			addSummaryPage(refactoringPipeline, model);
+			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model);
+			addPage(summaryPage);
 		}
 	}
 
@@ -325,5 +327,9 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 			model = new RefactoringPreviewWizardModel();
 		}
 		return model;
+	}
+	
+	public RefactoringSummaryWizardPage getSummaryPage() {
+		return this.summaryPage;
 	}
 }

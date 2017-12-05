@@ -17,8 +17,6 @@ import eu.jsparrow.ui.util.LicenseUtil;
  */
 public abstract class AbstractPreviewWizard extends Wizard {
 
-	protected RefactoringSummaryWizardPage summaryPage;
-
 	@Override
 	public boolean performCancel() {
 		Activator.setRunning(false);
@@ -46,14 +44,5 @@ public abstract class AbstractPreviewWizard extends Wizard {
 	public IWizardPage getNextPage(IWizardPage page) {
 		updateViewsOnNavigation(page);
 		return super.getNextPage(page);
-	}
-
-	protected void addSummaryPage(RefactoringPipeline refactoringPipeline, RefactoringPreviewWizardModel model) {
-		this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model);
-		addPage(summaryPage);
-	}
-
-	public RefactoringSummaryWizardPage getSummaryPage() {
-		return summaryPage;
 	}
 }

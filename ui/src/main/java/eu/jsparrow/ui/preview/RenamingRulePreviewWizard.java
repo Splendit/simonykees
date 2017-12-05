@@ -54,6 +54,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 
 	private List<ICompilationUnit> targetCompilationUnits;
 	private Map<IPath, Document> originalDocuments;
+	private RenamingRuleSummaryWizardPage summaryPage;
 
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
@@ -93,7 +94,9 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		RenamingRulePreviewWizardPage page = new RenamingRulePreviewWizardPage(documentChanges, changesPerRule,
 				originalDocuments, rule, model);
 		addPage(page);
-		addSummaryPage(refactoringPipeline, model);
+		
+		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model);
+		addPage(summaryPage);
 	}
 
 	/**
@@ -250,5 +253,9 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	public void addMetaData(FieldMetaData fieldData) {
 		this.metaData.add(fieldData);
 		
+	}
+	
+	public RenamingRuleSummaryWizardPage getSummaryPage() {
+		return this.summaryPage;
 	}
 }
