@@ -3,9 +3,7 @@ package eu.jsparrow.ui.preview;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
-import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.ui.Activator;
-import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
@@ -16,8 +14,6 @@ import eu.jsparrow.ui.util.LicenseUtil;
  *
  */
 public abstract class AbstractPreviewWizard extends Wizard {
-
-	protected RefactoringSummaryWizardPage summaryPage;
 
 	@Override
 	public boolean performCancel() {
@@ -46,14 +42,5 @@ public abstract class AbstractPreviewWizard extends Wizard {
 	public IWizardPage getNextPage(IWizardPage page) {
 		updateViewsOnNavigation(page);
 		return super.getNextPage(page);
-	}
-
-	protected void addSummaryPage(RefactoringPipeline refactoringPipeline, RefactoringPreviewWizardModel model) {
-		this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model);
-		addPage(summaryPage);
-	}
-
-	public RefactoringSummaryWizardPage getSummaryPage() {
-		return summaryPage;
 	}
 }
