@@ -63,8 +63,10 @@ public class RenamingRulePreviewWizard extends Wizard {
 		this.metadata = metadata;
 		this.documentChanges = documentChanges;
 		this.targetCompilationUnits = targetCompilationUnits;
-		this.originalDocuments = targetCompilationUnits.stream().map(ICompilationUnit::getPrimary).collect(Collectors.toMap(ICompilationUnit::getPath, this::createDocument));
-		
+		this.originalDocuments = targetCompilationUnits.stream()
+			.map(ICompilationUnit::getPrimary)
+			.collect(Collectors.toMap(ICompilationUnit::getPath, this::createDocument));
+
 		this.rule = rule;
 		setNeedsProgressMonitor(true);
 	}
@@ -74,8 +76,8 @@ public class RenamingRulePreviewWizard extends Wizard {
 			return new Document(icu.getSource());
 		} catch (JavaModelException e1) {
 			WizardMessageDialog.synchronizeWithUIShowInfo(
-			new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
-					ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e1));
+					new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+							ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e1));
 			return new Document();
 		}
 	}

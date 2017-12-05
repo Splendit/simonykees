@@ -52,8 +52,8 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	private List<FieldMetaData> uncheckedFields = new ArrayList<>();
 	private Map<IPath, Document> originalDocuments;
 
-	public RenamingRulePreviewWizardPage(Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes, Map<IPath, Document> originalDocuments,
-			PublicFieldsRenamingRule rule) {
+	public RenamingRulePreviewWizardPage(Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes,
+			Map<IPath, Document> originalDocuments, PublicFieldsRenamingRule rule) {
 		super(rule.getRuleDescription()
 			.getName());
 		setTitle(rule.getRuleDescription()
@@ -80,7 +80,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			if (!changesForField.isEmpty()) {
 				DocumentChange parent = null;
 				ICompilationUnit parentICU = null;
-				for(Map.Entry<ICompilationUnit, DocumentChange>dcEntry : changesForField.entrySet()) {
+				for (Map.Entry<ICompilationUnit, DocumentChange> dcEntry : changesForField.entrySet()) {
 					ICompilationUnit iCompilationUnit = dcEntry.getKey();
 					if ((fieldData.getDeclarationPath()).equals(iCompilationUnit.getPath())) {
 						parent = changesForField.get(iCompilationUnit);
@@ -88,7 +88,8 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 					}
 				}
 				if (null != parent) {
-					createDocumentChangeWrapperChildren(fieldData, this.originalDocuments.get(parentICU.getPath()), changesForField, parent);
+					createDocumentChangeWrapperChildren(fieldData, this.originalDocuments.get(parentICU.getPath()),
+							changesForField, parent);
 				}
 			}
 		}
