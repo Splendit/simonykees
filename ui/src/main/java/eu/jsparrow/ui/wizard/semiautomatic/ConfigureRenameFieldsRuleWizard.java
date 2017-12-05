@@ -86,7 +86,7 @@ public class ConfigureRenameFieldsRuleWizard extends Wizard {
 	public ConfigureRenameFieldsRuleWizard(List<ICompilationUnit> selectedJavaElements) {
 		this.selectedJavaElements = selectedJavaElements;
 		setNeedsProgressMonitor(true);
-		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON)); //$NON-NLS-1$
+		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
 	}
 
 	@Override

@@ -142,7 +142,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 						&& !isConflictingIdentifier(optNewIdentifier.get(), fieldDeclaration)) {
 					String newIdentifier = optNewIdentifier.get();
 					storeIJavaElement((ICompilationUnit) compilationUnit.getJavaElement());
-
+					
 					searchEngine.findFieldReferences(fragment)
 						.ifPresent(references -> {
 							storeIJavaElement(searchEngine.getTargetIJavaElements());
