@@ -8,6 +8,8 @@ import java.util.Map;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEditGroup;
@@ -18,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * A type for storing information about a field to be renamed and all its
  * references.
  * 
- * @author Ardit Ymeri
+ * @author Ardit Ymeri, Matthias Webhofer
  * @since 2.3.0
  *
  */
@@ -31,6 +33,7 @@ public class FieldMetadata {
 	private String newIdentifier;
 	private Map<ICompilationUnit, TextEditGroup> textEditGroups;
 	private Map<String, Document> documentMap;
+	private JavaAccessModifier fieldModifier;
 
 	public FieldMetadata(CompilationUnit cu, List<ReferenceSearchMatch> references,
 			VariableDeclarationFragment fragment, String newIdentifier) {
@@ -40,6 +43,8 @@ public class FieldMetadata {
 		this.newIdentifier = newIdentifier;
 		this.textEditGroups = new HashMap<>();
 		this.documentMap = new HashMap<>();
+		this.fieldModifier = findFieldModifier();
+
 		try {
 			createDocument((ICompilationUnit) cu.getJavaElement());
 		} catch (JavaModelException e) {
@@ -54,6 +59,38 @@ public class FieldMetadata {
 			}
 		});
 
+	}
+
+	/**
+	 * maps the access modifiers from the {@link VariableDeclarationFragment} to
+	 * {@link JavaModifier}
+	 * 
+	 * @return the access modifier of the field declaration
+	 */
+	private JavaAccessModifier findFieldModifier() {
+		if (this.declarationFragment == null) {
+			return null;
+		}
+
+		IVariableBinding binding = this.declarationFragment.resolveBinding();
+		if (binding == null) {
+			return null;
+		}
+
+		int modifiers = binding.getModifiers();
+		JavaAccessModifier modifier = null;
+
+		if (Modifier.isPrivate(modifiers)) {
+			modifier = JavaAccessModifier.PRIVATE;
+		} else if (Modifier.isProtected(modifiers)) {
+			modifier = JavaAccessModifier.PROTECTED;
+		} else if (Modifier.isPublic(modifiers)) {
+			modifier = JavaAccessModifier.PUBLIC;
+		} else {
+			modifier = JavaAccessModifier.PACKAGE_PRIVATE;
+		}
+
+		return modifier;
 	}
 
 	/**
@@ -137,5 +174,9 @@ public class FieldMetadata {
 	 */
 	public List<ICompilationUnit> getTargetICompilationUnits() {
 		return new ArrayList<>(textEditGroups.keySet());
+	}
+
+	public JavaAccessModifier getFieldModifier() {
+		return fieldModifier;
 	}
 }
