@@ -80,7 +80,7 @@ public class LicenseUtil {
 	public boolean displayLicenseErrorDialog(Shell shell) {
 
 		if (isLicenseValidationServiceAvailable) {
-			String userMessage = licenseValidationService.getLicenseStautsUserMessage();
+			String userMessage = licenseValidationService.getLicenseStatusUserMessage();
 
 			if (licenseValidationService.isExpired()) {
 				BuyLicenseDialog dialog = new BuyLicenseDialog(shell, userMessage);

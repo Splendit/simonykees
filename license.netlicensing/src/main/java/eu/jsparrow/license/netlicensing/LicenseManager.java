@@ -82,7 +82,7 @@ public class LicenseManager {
 	private String uniqueHwId = ""; //$NON-NLS-1$
 
 	private LicenseManager() {
-		initManager();
+		// Hide default constructor
 	}
 
 	public static synchronized LicenseManager getInstance() {
@@ -92,7 +92,7 @@ public class LicenseManager {
 		return instance;
 	}
 
-	void initManager() {
+	public void initManager() {
 		schedulerEntity = new SchedulerModel(VALIDATE_INTERVAL_IN_SECONDS, INITIAL_VALIDATION_DELAY, DO_VALIDATE);
 
 		Instant now = Instant.now();
@@ -518,6 +518,10 @@ public class LicenseManager {
 
 	public static void setJSparrowRunning(boolean running) {
 		ValidateExecutor.setJSparrowRunning(running);
+	}
+	
+	public static boolean isRunning() {
+		return !ValidateExecutor.isShutDown();
 	}
 
 	private class CheckerImpl implements LicenseChecker {

@@ -164,6 +164,9 @@ public class Activator extends AbstractUIPlugin {
 
 	public static void setRunning(boolean isRunning) {
 		running = isRunning;
+		if(isRunning) {
+			licenseValidationService.startValidation();
+		}
 		licenseValidationService.setJSparrowRunning(isRunning);
 	}
 
