@@ -1,5 +1,7 @@
 package eu.jsparrow.core.visitor.renaming;
 
+import static eu.jsparrow.core.util.ASTNodeUtil.hasModifier;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,8 +9,9 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jface.text.Document;
@@ -72,19 +75,21 @@ public class FieldMetadata {
 			return null;
 		}
 
-		IVariableBinding binding = this.declarationFragment.resolveBinding();
-		if (binding == null) {
+		ASTNode parent = declarationFragment.getParent();
+		if (ASTNode.FIELD_DECLARATION != parent.getNodeType()) {
 			return null;
 		}
 
-		int modifiers = binding.getModifiers();
-		JavaAccessModifier modifier = null;
+		FieldDeclaration field = (FieldDeclaration) parent;
+		@SuppressWarnings("rawtypes")
+		List modifiers = field.modifiers();
 
-		if (Modifier.isPrivate(modifiers)) {
+		JavaAccessModifier modifier;
+		if (hasModifier(modifiers, Modifier::isPrivate)) {
 			modifier = JavaAccessModifier.PRIVATE;
-		} else if (Modifier.isProtected(modifiers)) {
+		} else if (hasModifier(modifiers, Modifier::isProtected)) {
 			modifier = JavaAccessModifier.PROTECTED;
-		} else if (Modifier.isPublic(modifiers)) {
+		} else if (hasModifier(modifiers, Modifier::isPublic)) {
 			modifier = JavaAccessModifier.PUBLIC;
 		} else {
 			modifier = JavaAccessModifier.PACKAGE_PRIVATE;
