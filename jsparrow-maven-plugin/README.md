@@ -12,6 +12,7 @@ $ mvn clean verify
 * uncheck "Synchronize before exporting"
 * select a destination directory
 * click "Finish"
+* if some "required items could not be found", have a look [here](http://download.eclipse.org/eclipse/downloads/drops4/R-4.7.1a-201710090410/buildlogs/reporeports/reports/featureNames.html) and if the plugin is listed, install it in Eclipse from [this update site](http://download.eclipse.org/eclipse/updates/4.7/R-4.7.1a-201710090410/)
 
 ## configure jsparrow-maven-plugin
 * create directory `resources` in `src/main`
@@ -19,7 +20,7 @@ $ mvn clean verify
 * change to the destination directory specified in eclipse product export wizard
 * change to subdirectory `repository/plugins`
 * copy all plugins to `jsparrow-maven-plugin/src/main/resources`
-* copy all plguin names to `manifest.standalone`
+* copy all plugin names to `manifest.standalone`
 * download apache maven binaries as zip-file from: <https://maven.apache.org/download.cgi>
 * copy the downloaded zip file to `jsparrow-maven-plugin/src/main/resources`
 
