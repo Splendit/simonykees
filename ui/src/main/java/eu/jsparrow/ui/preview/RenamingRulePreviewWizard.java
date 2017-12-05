@@ -91,13 +91,13 @@ public class RenamingRulePreviewWizard extends Wizard {
 	@Override
 	public void addPages() {
 
-		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(
+		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(
 				JavaAccessModifier.PUBLIC);
-		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> protectedChanges = filterChangesByModifier(
+		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> protectedChanges = filterChangesByModifier(
 				JavaAccessModifier.PROTECTED);
-		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> packagePrivateChanges = filterChangesByModifier(
+		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> packagePrivateChanges = filterChangesByModifier(
 				JavaAccessModifier.PACKAGE_PRIVATE);
-		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> privateChanges = filterChangesByModifier(
+		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> privateChanges = filterChangesByModifier(
 				JavaAccessModifier.PRIVATE);
 
 		if (!publicChanges.isEmpty()) {
@@ -117,7 +117,7 @@ public class RenamingRulePreviewWizard extends Wizard {
 		}
 	}
 
-	private Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> filterChangesByModifier(
+	private Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> filterChangesByModifier(
 			JavaAccessModifier modifier) {
 		return documentChanges.entrySet()
 			.stream()
