@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.runtime.FileWithCompilationErrorException;
 import eu.jsparrow.core.exception.runtime.ICompilationUnitNotFoundException;
 import eu.jsparrow.core.util.RefactoringUtil;
-import eu.jsparrow.i18n.Messages;
 
 /**
  * A class for wrapping a {@link SearchEngine} which is used for finding 
@@ -117,8 +116,7 @@ public class FieldReferencesSearch {
 				ICompilationUnit icu = findCompilationUnit(match);
 				if (icu == null) {
 					references.clear();
-					throw new ICompilationUnitNotFoundException(
-							Messages.FieldDeclarationASTVisitor_compilation_unit_of_search_match_not_found);
+					throw new ICompilationUnitNotFoundException("Compilation unit of the search match was not found"); //$NON-NLS-1$
 				}
 				ReferenceSearchMatch reference = new ReferenceSearchMatch(match, fragmentIdentifier, icu);
 				references.add(reference);

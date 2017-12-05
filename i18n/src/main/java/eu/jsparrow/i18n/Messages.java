@@ -118,7 +118,6 @@ public class Messages extends NLS {
 	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;
 	public static String MultiCatchRule_name;
-	public static String FieldDeclarationASTVisitor_compilation_unit_of_search_match_not_found;
 
 	public static String FieldNameConventionRule_description;
 	public static String FieldNameConventionRule_name;
