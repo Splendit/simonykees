@@ -44,4 +44,40 @@ public class NamingConventionsUtilTest {
 		assertEquals("Expecting the generated id to have upper cases after '$' and '_'", "hasUnderScoreAndDollarSign", newId);
 		
 	}
+	
+	@Test
+	public void complyingConvention_usingUnderscore() {
+		assertFalse(NamingConventionUtil.isComplyingWithConventions("using_underscore"));
+	}
+	
+	@Test
+	public void complyingConvention_startWithUpperCase() {
+		assertFalse(NamingConventionUtil.isComplyingWithConventions("StartingWithUppercase"));
+	}
+	
+	@Test
+	public void complyingConvention_usingDollarSign() {
+		assertFalse(NamingConventionUtil.isComplyingWithConventions("using$DollarSign"));
+	}
+	
+	@Test
+	public void generateIdentifier() {
+		String newIdentifier = NamingConventionUtil.generateNewIdentifier("using$DollarSign").orElse("");
+		assertEquals("usingDollarSign", newIdentifier);
+	}
+	
+	@Test
+	public void generateIdentifier_avoidJavaKeywords() {
+		assertFalse(NamingConventionUtil.generateNewIdentifier("Int").isPresent());
+	}
+	
+	@Test
+	public void generateIdentifier_avoidEmptyIdentifiers() {
+		assertFalse(NamingConventionUtil.generateNewIdentifier("_").isPresent());
+	}
+	
+	@Test
+	public void generateIdentifier_avoidStartingWithDigit() {
+		assertFalse(NamingConventionUtil.generateNewIdentifier("_1startingWithDigit").isPresent());
+	}
 }
