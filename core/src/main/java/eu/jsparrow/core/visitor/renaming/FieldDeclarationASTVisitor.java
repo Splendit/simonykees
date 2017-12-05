@@ -61,10 +61,10 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	private Set<ICompilationUnit> targetIJavaElements = new HashSet<>();
 	private IJavaProject iJavaProject;
 	private List<FieldMetaData> unmodifiableFields = new ArrayList<>();
-	private FieldReferencesSearchEngine searchEngine;
+	private FieldReferencesSearch searchEngine;
 
 	public FieldDeclarationASTVisitor(IJavaElement[] scope) {
-		this.searchEngine = new FieldReferencesSearchEngine(scope);
+		this.searchEngine = new FieldReferencesSearch(scope);
 		activateDefaultOptions();
 	}
 

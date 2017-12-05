@@ -38,9 +38,9 @@ import eu.jsparrow.i18n.Messages;
  * @since 2.3.0
  *
  */
-public class FieldReferencesSearchEngine {
+public class FieldReferencesSearch {
 
-	private static final Logger logger = LoggerFactory.getLogger(FieldReferencesSearchEngine.class);
+	private static final Logger logger = LoggerFactory.getLogger(FieldReferencesSearch.class);
 	
 	private Set<ICompilationUnit> targetIJavaElements = new HashSet<>();
 
@@ -48,7 +48,7 @@ public class FieldReferencesSearchEngine {
 
 	private IJavaElement[] searchScope;
 
-	public FieldReferencesSearchEngine(IJavaElement[] searchScope) {
+	public FieldReferencesSearch(IJavaElement[] searchScope) {
 		this.searchScope = searchScope;
 	}
 
