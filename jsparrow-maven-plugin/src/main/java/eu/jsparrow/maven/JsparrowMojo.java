@@ -35,7 +35,6 @@ public class JsparrowMojo extends AbstractMojo {
 
 	@Parameter(defaultValue = "${session}")
 	private MavenSession mavenSession;
-
 	@Component
 	private BuildPluginManager pluginManager;
 
@@ -71,8 +70,7 @@ public class JsparrowMojo extends AbstractMojo {
 				Runtime.getRuntime()
 					.addShutdownHook(createShutdownHook());
 				final Map<String, String> configuration = new HashMap<>();
-				configuration.put(CONFIG_FILE_PATH,
-						(configFile.exists() && !configFile.isDirectory()) ? configFile.getAbsolutePath() : "");
+				configuration.put(CONFIG_FILE_PATH, configFile.getAbsolutePath());
 				configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile);
 				configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 
