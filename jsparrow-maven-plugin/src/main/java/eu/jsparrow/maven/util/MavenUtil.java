@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
@@ -87,9 +88,10 @@ public class MavenUtil {
 	 *            maven logger instance
 	 * @throws BundleException
 	 * @throws InterruptedException
+	 * @throws MojoExecutionException
 	 */
 	public static void startOSGI(MavenProject project, String mavenHome, Log log)
-			throws BundleException, InterruptedException {
+			throws BundleException, InterruptedException, MojoExecutionException {
 		startOSGI(project, mavenHome, log, null);
 	}
 
@@ -108,9 +110,11 @@ public class MavenUtil {
 	 *            will be added to the standard configuration
 	 * @throws BundleException
 	 * @throws InterruptedException
+	 * @throws MojoExecutionException
 	 */
-	public static void startOSGI(MavenProject project, String mavenHome, Log log, Map<String, String> additionalConfiguration)
-			throws BundleException, InterruptedException {
+	public static void startOSGI(MavenProject project, String mavenHome, Log log,
+			Map<String, String> additionalConfiguration)
+			throws BundleException, InterruptedException, MojoExecutionException {
 
 		final Map<String, String> configuration = new HashMap<>();
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
@@ -199,6 +203,11 @@ public class MavenUtil {
 		// STOP AND WAIT TO STOP WHEN DONE
 		framework.stop();
 		framework.waitForStop(0);
+
+		String exitMessage = ctx.getProperty("eu.jsparrow.standalone.exit.message");
+		if (exitMessage != null && !exitMessage.isEmpty()) {
+			throw new MojoExecutionException(exitMessage);
+		}
 	}
 
 	/**
