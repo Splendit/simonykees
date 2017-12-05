@@ -9,9 +9,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,13 +78,20 @@ public class Activator implements BundleActivator {
 		} else if (listRulesShort) {
 			ListRulesUtil.listRulesShort();
 		} else {
-			startRefactoring(context);
+			try {
+				startRefactoring(context);
+			} catch (YAMLConfigException yce) {
+				logger.debug(yce.getMessage(), yce);
+				logger.error(yce.getMessage());
+				setExitErrorMessage(context, yce.getMessage());
+			}
+
 		}
 	}
 
 	private void startRefactoring(BundleContext context) throws YAMLConfigException {
 		String loggerInfo;
-		
+
 		YAMLConfig config = getConfiguration(context);
 
 		// get project path and name from context
@@ -177,7 +186,7 @@ public class Activator implements BundleActivator {
 	private YAMLConfig getConfiguration(BundleContext context) throws YAMLConfigException {
 		YAMLConfig config = null;
 		String loggerInfo;
-		
+
 		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
 
 		if (useDefaultConfig) {
@@ -192,14 +201,14 @@ public class Activator implements BundleActivator {
 			String profile = context.getProperty(SELECTED_PROFILE);
 
 			config = YAMLConfigUtil.readConfig(configFilePath, profile);
-			
+
 			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile, config.getSelectedProfile());
 			logger.info(loggerInfo);
 		}
-		
+
 		return config;
 	}
-	
+
 	/**
 	 * Recursively deletes all sub-folders from received folder.
 	 * 
@@ -222,6 +231,35 @@ public class Activator implements BundleActivator {
 					logger.error(loggerError);
 				}
 			}
+		}
+	}
+
+	private EnvironmentInfo getEnvironmentInfo(BundleContext ctx) {
+		if (ctx == null) {
+			return null;
+		}
+
+		ServiceReference<?> infoRev = ctx.getServiceReference(EnvironmentInfo.class.getName());
+		if (infoRev == null) {
+			return null;
+		}
+
+		EnvironmentInfo envInfo = (EnvironmentInfo) ctx.getService(infoRev);
+		if (envInfo == null) {
+			return null;
+		}
+		ctx.ungetService(infoRev);
+
+		return envInfo;
+	}
+
+	private void setExitErrorMessage(BundleContext ctx, String exitMessage) {
+		String key = "eu.jsparrow.standalone.exit.message"; //$NON-NLS-1$
+		EnvironmentInfo envInfo = getEnvironmentInfo(ctx);
+		if (envInfo != null) {
+			envInfo.setProperty(key, exitMessage);
+		} else {
+			System.setProperty(key, exitMessage);
 		}
 	}
 }
