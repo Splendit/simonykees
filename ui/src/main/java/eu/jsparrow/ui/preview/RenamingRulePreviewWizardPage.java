@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -17,6 +19,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.ltk.ui.refactoring.ChangePreviewViewerInput;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -27,6 +30,8 @@ import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.util.RefactoringUtil;
+import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 
 /**
@@ -56,8 +61,10 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			Map<IPath, Document> originalDocuments, PublicFieldsRenamingRule rule) {
 		super(rule.getRuleDescription()
 			.getName());
-		setTitle(rule.getRuleDescription()
-			.getName());
+		this.changes = changes;
+
+		String title = NLS.bind(Messages.RenamingRulePreviewWizardPage_RenameFields, getModifierAsString());
+		setTitle(title);
 		setDescription(rule.getRuleDescription()
 			.getDescription());
 		this.changes = changes;
@@ -243,6 +250,25 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			ChangePreviewViewerInput viewerInput = TextEditChangePreviewViewer.createInput(getCurrentDocumentChange());
 			currentPreviewViewer.setInput(viewerInput);
 		}
+	}
+
+	private String getModifierAsString() {
+		StringBuilder sb = new StringBuilder();
+
+		Set<String> modifiers = changes.keySet()
+			.stream()
+			.map(key -> key.getFieldModifier()
+				.toString())
+			.collect(Collectors.toSet());
+
+		modifiers.forEach(modifier -> {
+			if (sb.length() > 0) {
+				sb.append(", "); //$NON-NLS-1$
+			}
+			sb.append(modifier);
+		});
+
+		return sb.toString();
 	}
 
 	/**
