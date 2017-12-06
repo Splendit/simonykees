@@ -310,4 +310,15 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	public RenamingRuleSummaryWizardPage getSummaryPage() {
 		return this.summaryPage;
 	}
+
+	public void summaryButtonPressed() {
+		if (null != getContainer()) {
+			if (getContainer().getCurrentPage() instanceof RefactoringSummaryWizardPage) {
+				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
+			} else {
+				disposePages();
+			}
+		}
+		
+	}
 }
