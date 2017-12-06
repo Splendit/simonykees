@@ -73,7 +73,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 
 		String title = NLS.bind(Messages.RenamingRulePreviewWizardPage_RenameFields, getModifierAsString());
 		setTitle(title);
-		setDescription(rule.getRuleDescription()
+		setDescription(rule1.getRuleDescription()
 			.getDescription());
 		this.changes = changes;
 		this.originalDocuments = originalDocuments;

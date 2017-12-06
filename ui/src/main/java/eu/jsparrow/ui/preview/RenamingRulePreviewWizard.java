@@ -91,6 +91,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	@Override
 	public void addPages() {
 		RefactoringPreviewWizardModel model = new RefactoringPreviewWizardModel();
+		Map<ICompilationUnit, DocumentChange> changesPerRule = refactoringPipeline.getChangesForRule(rule);
 
 		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(
 				JavaAccessModifier.PUBLIC);
@@ -102,19 +103,21 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				JavaAccessModifier.PRIVATE);
 
 		if (!publicChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(publicChanges, originalDocuments, rule));
+			addPage(new RenamingRulePreviewWizardPage(publicChanges, changesPerRule, originalDocuments, rule, model));
 		}
 
 		if (!protectedChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(protectedChanges, originalDocuments, rule));
+			addPage(new RenamingRulePreviewWizardPage(protectedChanges, changesPerRule, originalDocuments, rule,
+					model));
 		}
 
 		if (!packagePrivateChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(packagePrivateChanges, originalDocuments, rule));
+			addPage(new RenamingRulePreviewWizardPage(packagePrivateChanges, changesPerRule, originalDocuments, rule,
+					model));
 		}
 
 		if (!privateChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(privateChanges, originalDocuments, rule));
+			addPage(new RenamingRulePreviewWizardPage(privateChanges, changesPerRule, originalDocuments, rule, model));
 		}
 		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model);
 		addPage(summaryPage);
