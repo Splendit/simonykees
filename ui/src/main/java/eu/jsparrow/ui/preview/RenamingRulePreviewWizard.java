@@ -245,10 +245,10 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				getNextPage(page);
 				return;
 			}
-			
+
+			disposePages();
+
 			RenamingRulePreviewWizardPage previewPage = (RenamingRulePreviewWizardPage) page;
-			previewPage.disposeControl();
-			
 			boolean recalculate = previewPage.isRecalculateNeeded();
 			if(!recalculate) {
 				getNextPage(page);
@@ -271,6 +271,19 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	}
 
 	/**
+	 * Disposes the control of all pages of type
+	 * {@link RenamingRulePreviewWizardPage}.
+	 */
+	private void disposePages() {
+		IWizardPage[] pages = getPages();
+		for (IWizardPage page : pages) {
+			if (page instanceof RenamingRulePreviewWizardPage) {
+				((RenamingRulePreviewWizardPage) page).disposeControl();
+			}
+		}
+	}
+
+	/**
 	 * Called from {@link WizardDialog} when Back button is pressed. Disposes
 	 * all controls to be recalculated and created when needed
 	 */
@@ -278,6 +291,8 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		if (null != getContainer()) {
 			if (getContainer().getCurrentPage() instanceof RefactoringSummaryWizardPage) {
 				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
+			} else {
+				disposePages();
 			}
 			getPreviousPage(getContainer().getCurrentPage());
 		}
