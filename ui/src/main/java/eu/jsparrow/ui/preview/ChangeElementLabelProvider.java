@@ -24,7 +24,8 @@ public class ChangeElementLabelProvider extends LabelProvider implements IFontPr
 	public String getText(Object object) {
 		DocumentChangeWrapper documentChangeWrapper = (DocumentChangeWrapper) object;
 		if (documentChangeWrapper.isParent()) {
-			return documentChangeWrapper.getOldIdentifier() + " -> " + documentChangeWrapper.getNewIdentifier() + "    " //$NON-NLS-1$ //$NON-NLS-2$
+			return documentChangeWrapper.getOldIdentifier() + " -> " //$NON-NLS-1$
+					+ documentChangeWrapper.getNewIdentifier() + "    " //$NON-NLS-1$
 					+ documentChangeWrapper.getDocumentChange()
 						.getName();
 		} else {

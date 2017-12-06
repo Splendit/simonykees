@@ -11,15 +11,17 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
-import eu.jsparrow.maven.util.MavenUtil;
+import eu.jsparrow.maven.util.MavenHelper;
 
 /**
+ * This MOJO lists all rules with id, name and description. By specifying
+ * {@code -Drule=<ruleId>} only the information about this rule is printed.
  * 
  * @author Matthias Webhofer
  * @since 2.3.0
  */
 @SuppressWarnings("nls")
-@Mojo(name = "listRules")
+@Mojo(name = "list-rules")
 public class ListAllRulesMojo extends AbstractMojo {
 
 	/**
@@ -34,14 +36,27 @@ public class ListAllRulesMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${maven.home}", required = true)
 	private String mavenHome;
 
-	@Parameter(property = "rule")
+	/**
+	 * if set, only the rule with the given id will be listed
+	 */
+	@Parameter(property = "rules")
 	private String ruleId;
 
+	// CONSTANTS
 	private static final String LIST_RULES = "LIST.RULES";
 	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID";
 
+	/**
+	 * MOJO entry point. Registers shutdown hook for clean up and starts equinox
+	 * with the given configuration
+	 */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
+		MavenHelper mavenHelper = new MavenHelper(project, mavenHome, getLog());
+
+		Runtime.getRuntime()
+			.addShutdownHook(mavenHelper.createShutdownHook());
+
 		try {
 			final Map<String, String> configuration = new HashMap<>();
 			configuration.put(LIST_RULES, Boolean.toString(true));
@@ -49,9 +64,10 @@ public class ListAllRulesMojo extends AbstractMojo {
 				configuration.put(LIST_RULES_SELECTED_ID, ruleId);
 			}
 
-			MavenUtil.startOSGI(project, mavenHome, getLog(), configuration);
+			mavenHelper.startOSGI(configuration);
 		} catch (BundleException | InterruptedException e) {
-			getLog().error(e.getMessage(), e);
+			getLog().debug(e.getMessage(), e);
+			getLog().error(e.getMessage());
 		}
 	}
 

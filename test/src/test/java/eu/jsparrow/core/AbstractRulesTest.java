@@ -164,15 +164,14 @@ public abstract class AbstractRulesTest {
 		packageString = prerulePackage;
 	}
 
-	protected List<CompilationUnit> loadCompilationUnits(IPackageFragment packageFragment, Map<String, String> compilationUnitNameContents, String packageName)
-			throws JavaModelException, IOException {
-			
-				List<ICompilationUnit> iCompilationUnits = new ArrayList<>();
-				for (Map.Entry<String, String> entry : compilationUnitNameContents.entrySet()) {
-					iCompilationUnits.add(packageFragment.createCompilationUnit(entry.getKey(), entry.getValue(), true, null));
-				}
-				return iCompilationUnits.stream()
-					.map(RefactoringUtil::parse)
-					.collect(Collectors.toList());
-			}
+	protected List<CompilationUnit> loadCompilationUnits(IPackageFragment packageFragment, Map<String, String> compilationUnitNameContents) throws JavaModelException, IOException {
+	
+		List<ICompilationUnit> iCompilationUnits = new ArrayList<>();
+		for (Map.Entry<String, String> entry : compilationUnitNameContents.entrySet()) {
+			iCompilationUnits.add(packageFragment.createCompilationUnit(entry.getKey(), entry.getValue(), true, null));
+		}
+		return iCompilationUnits.stream()
+			.map(RefactoringUtil::parse)
+			.collect(Collectors.toList());
+	}
 }

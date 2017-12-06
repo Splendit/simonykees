@@ -11,15 +11,16 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
-import eu.jsparrow.maven.util.MavenUtil;
+import eu.jsparrow.maven.util.MavenHelper;
 
 /**
+ * This MOJO prints all rules with name and id in a table.
  * 
  * @author Matthias Webhofer
  * @since 2.3.0
  */
 @SuppressWarnings("nls")
-@Mojo(name = "listRulesShort")
+@Mojo(name = "list-rules-short")
 public class ListAllRulesShortMojo extends AbstractMojo {
 
 	/**
@@ -34,18 +35,28 @@ public class ListAllRulesShortMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${maven.home}", required = true)
 	private String mavenHome;
 
+	// CONSTANTS
 	private static final String LIST_RULES_SHORT = "LIST.RULES.SHORT";
 
+	/**
+	 * MOJO entry point. Registers shutdown hook for clean up and starts equinox
+	 * with the given configuration
+	 */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
+		MavenHelper mavenHelper = new MavenHelper(project, mavenHome, getLog());
+
+		Runtime.getRuntime()
+			.addShutdownHook(mavenHelper.createShutdownHook());
+
 		try {
 			final Map<String, String> configuration = new HashMap<>();
 			configuration.put(LIST_RULES_SHORT, Boolean.toString(true));
 
-			MavenUtil.startOSGI(project, mavenHome, getLog(), configuration);
+			mavenHelper.startOSGI(configuration);
 		} catch (BundleException | InterruptedException e) {
-			getLog().error(e.getMessage(), e);
+			getLog().debug(e.getMessage(), e);
+			getLog().error(e.getMessage());
 		}
 	}
-
 }
