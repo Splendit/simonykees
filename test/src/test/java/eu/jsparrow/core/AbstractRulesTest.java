@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -19,11 +21,14 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
@@ -157,5 +162,16 @@ public abstract class AbstractRulesTest {
 	
 	protected void setPrerulePackage(String prerulePackage) {
 		packageString = prerulePackage;
+	}
+
+	protected List<CompilationUnit> loadCompilationUnits(IPackageFragment packageFragment, Map<String, String> compilationUnitNameContents) throws JavaModelException, IOException {
+	
+		List<ICompilationUnit> iCompilationUnits = new ArrayList<>();
+		for (Map.Entry<String, String> entry : compilationUnitNameContents.entrySet()) {
+			iCompilationUnits.add(packageFragment.createCompilationUnit(entry.getKey(), entry.getValue(), true, null));
+		}
+		return iCompilationUnits.stream()
+			.map(RefactoringUtil::parse)
+			.collect(Collectors.toList());
 	}
 }
