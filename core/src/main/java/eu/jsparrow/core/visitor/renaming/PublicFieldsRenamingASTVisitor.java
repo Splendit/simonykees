@@ -107,7 +107,7 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 		/*
 		 * Fields declared in the body of an anonymous class are ignored because
 		 * the search engine does not find their references correctly. 
-		 * FIXME see SIM-934
+		 * see SIM-934
 		 */
 		return false;
 	}
