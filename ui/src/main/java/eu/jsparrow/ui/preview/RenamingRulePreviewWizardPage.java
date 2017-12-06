@@ -338,7 +338,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	/**
 	 * Used to dispose control every time preview viewer content changes or page
 	 * gets invisible. New control is created when needed. This way conflicting
-	 * handers are avoided because there is no multiple viewers which would
+	 * handlers are avoided because there is no multiple viewers which would
 	 * register multiple handlers for same action.
 	 */
 	public void disposeControl() {

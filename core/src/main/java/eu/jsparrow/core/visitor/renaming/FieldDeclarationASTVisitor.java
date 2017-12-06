@@ -1,7 +1,13 @@
 package eu.jsparrow.core.visitor.renaming;
 
 import static eu.jsparrow.core.util.ASTNodeUtil.hasModifier;
-import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.*;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.ADD_COMMENT;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.RENAME_PRIVATE_FIELDS;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.RENAME_PROTECTED_FIELDS;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.RENAME_PUBLIC_FIELDS;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_DOLLAR_SIGN;
+import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.UPPER_CASE_FOLLOWING_UNDERSCORE;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,7 +89,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		modifierOptions.put(UPPER_CASE_FOLLOWING_UNDERSCORE, true);
 		modifierOptions.put(ADD_COMMENT, false);
 	}
-	
+
 	public void updateOptions(Map<String, Boolean> options) {
 		modifierOptions.putAll(options);
 	}
@@ -133,13 +139,13 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 			if (!NamingConventionUtil.isComplyingWithConventions(fragmentName.getIdentifier())) {
 				boolean upperCaseAfterDollar = getUpperCaseAfterDollar();
 				boolean upperCaseAfterUnderscore = getUpperCaseAfterUnderscore();
-				Optional<String> optNewIdentifier = NamingConventionUtil
-					.generateNewIdentifier(fragmentName.getIdentifier(), upperCaseAfterDollar, upperCaseAfterUnderscore);
+				Optional<String> optNewIdentifier = NamingConventionUtil.generateNewIdentifier(
+						fragmentName.getIdentifier(), upperCaseAfterDollar, upperCaseAfterUnderscore);
 				if (optNewIdentifier.isPresent()
 						&& !isConflictingIdentifier(optNewIdentifier.get(), fieldDeclaration)) {
 					String newIdentifier = optNewIdentifier.get();
 					storeIJavaElement((ICompilationUnit) compilationUnit.getJavaElement());
-					
+
 					searchEngine.findFieldReferences(fragment)
 						.ifPresent(references -> {
 							storeIJavaElement(searchEngine.getTargetIJavaElements());
@@ -282,7 +288,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	private void storeIJavaElement(ICompilationUnit iJavaElement) {
 		this.targetIJavaElements.add(iJavaElement);
 	}
-	
+
 	private void storeIJavaElement(Set<ICompilationUnit> targetIJavaElements2) {
 		targetIJavaElements2.forEach(this::storeIJavaElement);
 	}

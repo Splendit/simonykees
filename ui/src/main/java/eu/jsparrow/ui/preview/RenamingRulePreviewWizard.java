@@ -204,7 +204,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 					return Status.CANCEL_STATUS;
 
 				}
-				
+
 				return Status.OK_STATUS;
 			}
 		};
@@ -240,17 +240,15 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	public void pressedNext() {
 		if (null != getContainer()) {
 			IWizardPage page = getContainer().getCurrentPage();
-			
-			if(!(page instanceof RenamingRulePreviewWizardPage)) {
+
+			if (!(page instanceof RenamingRulePreviewWizardPage)) {
 				getNextPage(page);
 				return;
 			}
-
 			disposePages();
-
 			RenamingRulePreviewWizardPage previewPage = (RenamingRulePreviewWizardPage) page;
 			boolean recalculate = previewPage.isRecalculateNeeded();
-			if(!recalculate) {
+			if (!recalculate) {
 				getNextPage(page);
 				return;
 			}
@@ -258,12 +256,13 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 			Job recalculationJob = recalculateForUnselected();
 			recalculationJob.setUser(true);
 			recalculationJob.schedule();
-			
+
 			try {
 				recalculationJob.join();
 			} catch (InterruptedException e) {
 				logger.warn("Recalculation job was interrupted.", e); //$NON-NLS-1$
-				Thread.currentThread().interrupt();
+				Thread.currentThread()
+					.interrupt();
 			}
 			getNextPage(page);
 
@@ -304,9 +303,8 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 
 	public void addMetaData(FieldMetaData fieldData) {
 		this.metaData.add(fieldData);
-		
 	}
-	
+
 	public RenamingRuleSummaryWizardPage getSummaryPage() {
 		return this.summaryPage;
 	}
