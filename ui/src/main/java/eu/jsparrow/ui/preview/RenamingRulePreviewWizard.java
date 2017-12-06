@@ -1,7 +1,6 @@
 package eu.jsparrow.ui.preview;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,14 +9,13 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +31,7 @@ import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
@@ -45,23 +44,24 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  * @since 2.3.0
  *
  */
-public class RenamingRulePreviewWizard extends Wizard {
+public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(RenamingRulePreviewWizard.class);
 	private RefactoringPipeline refactoringPipeline;
-	private List<FieldMetaData> metadata;
+	private List<FieldMetaData> metaData;
 
 	private Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges;
 	private PublicFieldsRenamingRule rule;
 
 	private List<ICompilationUnit> targetCompilationUnits;
 	private Map<IPath, Document> originalDocuments;
+	private RenamingRuleSummaryWizardPage summaryPage;
 
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			List<ICompilationUnit> targetCompilationUnits, PublicFieldsRenamingRule rule) {
 		this.refactoringPipeline = refactoringPipeline;
-		this.metadata = metadata;
+		this.metaData = metadata;
 		this.documentChanges = documentChanges;
 		this.targetCompilationUnits = targetCompilationUnits;
 		this.originalDocuments = targetCompilationUnits.stream()
@@ -90,6 +90,8 @@ public class RenamingRulePreviewWizard extends Wizard {
 	 */
 	@Override
 	public void addPages() {
+		RefactoringPreviewWizardModel model = new RefactoringPreviewWizardModel();
+		Map<ICompilationUnit, DocumentChange> changesPerRule = refactoringPipeline.getChangesForRule(rule);
 
 		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(
 				JavaAccessModifier.PUBLIC);
@@ -99,6 +101,11 @@ public class RenamingRulePreviewWizard extends Wizard {
 				JavaAccessModifier.PACKAGE_PRIVATE);
 		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> privateChanges = filterChangesByModifier(
 				JavaAccessModifier.PRIVATE);
+
+		model.addRule(rule);
+		changesPerRule.keySet()
+			.stream()
+			.forEach(x -> model.addFileToRule(rule, x.getHandleIdentifier()));
 
 		if (!publicChanges.isEmpty()) {
 			addPage(new RenamingRulePreviewWizardPage(publicChanges, originalDocuments, rule));
@@ -115,6 +122,8 @@ public class RenamingRulePreviewWizard extends Wizard {
 		if (!privateChanges.isEmpty()) {
 			addPage(new RenamingRulePreviewWizardPage(privateChanges, originalDocuments, rule));
 		}
+		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model);
+		addPage(summaryPage);
 	}
 
 	private Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> filterChangesByModifier(
@@ -135,28 +144,7 @@ public class RenamingRulePreviewWizard extends Wizard {
 	 */
 	@Override
 	public boolean performFinish() {
-		if (!((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
-			.getName())).getUncheckedFields()
-				.isEmpty()) {
-			for (FieldMetaData fieldData : ((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
-				.getName())).getUncheckedFields()) {
-				metadata.remove(fieldData);
-			}
-
-			Job recalculationJob = recalculateForUnselected();
-
-			recalculationJob.setUser(true);
-			recalculationJob.schedule();
-
-			recalculationJob.addJobChangeListener(new JobChangeAdapter() {
-				@Override
-				public void done(IJobChangeEvent event) {
-					commitChanges();
-				}
-			});
-		} else {
-			commitChanges();
-		}
+		commitChanges();
 		return true;
 	}
 
@@ -189,7 +177,7 @@ public class RenamingRulePreviewWizard extends Wizard {
 	 * 
 	 * @return Job for recalculation of changes
 	 */
-	private Job recalculateForUnselected() {
+	public Job recalculateForUnselected() {
 		return new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
 
 			@Override
@@ -200,6 +188,7 @@ public class RenamingRulePreviewWizard extends Wizard {
 				}
 
 				refactoringPipeline.setRefactoringStates(refactoringStates);
+				refactoringPipeline.updateInitialSourceMap();
 
 				try {
 					refactoringPipeline.doRefactoring(monitor);
@@ -216,23 +205,6 @@ public class RenamingRulePreviewWizard extends Wizard {
 
 				}
 
-				if (refactoringPipeline.hasChanges()) {
-					Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes = new HashMap<>();
-					Map<String, FieldMetaData> metaDataMap = new HashMap<>();
-					for (FieldMetaData data : metadata) {
-
-						String newIdentifier = data.getNewIdentifier();
-						Map<ICompilationUnit, DocumentChange> docsChanges;
-						try {
-							docsChanges = rule.computeDocumentChangesPerFiled(data);
-							changes.put(data, docsChanges);
-							metaDataMap.put(newIdentifier, data);
-						} catch (JavaModelException e) {
-							logger.error("Cannot create document for displaying changes - " + e.getMessage(), e); //$NON-NLS-1$
-						}
-
-					}
-				}
 				return Status.OK_STATUS;
 			}
 		};
@@ -260,23 +232,91 @@ public class RenamingRulePreviewWizard extends Wizard {
 		return true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.jface.wizard.Wizard#performCancel()
+	/**
+	 * Called from {@link WizardDialog} when Next button is pressed. Triggers
+	 * recalculation if needed. Disposes control from current page which wont be
+	 * visible any more
 	 */
-	@Override
-	public boolean performCancel() {
-		Activator.setRunning(false);
-		return super.performCancel();
+	public void pressedNext() {
+		if (null != getContainer()) {
+			IWizardPage page = getContainer().getCurrentPage();
+
+			if (!(page instanceof RenamingRulePreviewWizardPage)) {
+				getNextPage(page);
+				return;
+			}
+			disposePages();
+			RenamingRulePreviewWizardPage previewPage = (RenamingRulePreviewWizardPage) page;
+			boolean recalculate = previewPage.isRecalculateNeeded();
+			if (!recalculate) {
+				getNextPage(page);
+				return;
+			}
+
+			Job recalculationJob = recalculateForUnselected();
+			recalculationJob.setUser(true);
+			recalculationJob.schedule();
+
+			try {
+				recalculationJob.join();
+			} catch (InterruptedException e) {
+				logger.warn("Recalculation job was interrupted.", e); //$NON-NLS-1$
+				Thread.currentThread()
+					.interrupt();
+			}
+			getNextPage(page);
+
+		}
 	}
 
-	@Override
-	public boolean canFinish() {
-		if (!LicenseUtil.getInstance()
-			.isFullLicense()) {
-			return false;
+	/**
+	 * Disposes the control of all pages of type
+	 * {@link RenamingRulePreviewWizardPage}.
+	 */
+	private void disposePages() {
+		IWizardPage[] pages = getPages();
+		for (IWizardPage page : pages) {
+			if (page instanceof RenamingRulePreviewWizardPage) {
+				((RenamingRulePreviewWizardPage) page).disposeControl();
+			}
 		}
-		return super.canFinish();
+	}
+
+	/**
+	 * Called from {@link WizardDialog} when Back button is pressed. Disposes
+	 * all controls to be recalculated and created when needed
+	 */
+	public void pressedBack() {
+		if (null != getContainer()) {
+			if (getContainer().getCurrentPage() instanceof RefactoringSummaryWizardPage) {
+				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
+			} else {
+				disposePages();
+			}
+			getPreviousPage(getContainer().getCurrentPage());
+		}
+	}
+
+	public void removeMetaData(FieldMetaData fieldData) {
+		this.metaData.remove(fieldData);
+	}
+
+	public void addMetaData(FieldMetaData fieldData) {
+		this.metaData.add(fieldData);
+	}
+
+	public RenamingRuleSummaryWizardPage getSummaryPage() {
+		return this.summaryPage;
+	}
+
+	public void summaryButtonPressed() {
+		if (null != getContainer()) {
+			if (getContainer().getCurrentPage() instanceof RefactoringSummaryWizardPage) {
+				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
+			} else {
+				disposePages();
+			}
+		}
+		
 	}
 }

@@ -1,6 +1,5 @@
 package eu.jsparrow.core;
 
-import static eu.jsparrow.core.util.ASTNodeUtil.convertToTypedList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -11,19 +10,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.renaming.FieldReferencesSearch;
 import eu.jsparrow.core.visitor.renaming.ReferenceSearchMatch;
 
@@ -58,26 +53,56 @@ public class FieldReferencesSearchTest extends AbstractRulesTest {
 			"	}\n" + 
 			"}";
 	
+	private static final String FIELDS_IN_ANONYMOUS_CLASSES = CORE_PACKAGE + "\n"
+			+ "public class FieldsInAnonymousClasses {\n" 
+			+ "	public void avoidAnonymousClasses() {\n"
+			+ "		Foo foo = new Foo() {\n" 
+			+ "			\n" 
+			+ "			public String foo_field;\n" 
+			+ "			\n"
+			+ "			@Override\n" 
+			+ "			public void foo() {\n" 
+			+ "				this.foo_field = \"\";\n"
+			+ "			}\n" 
+			+ "		};\n" 
+			+ "		Foo foo2 = new Foo() {\n"
+			+ "			public String foo_field;\n" 
+			+ "			\n" 
+			+ "			@Override\n"
+			+ "			public void foo() {\n" 
+			+ "				this.foo_field = \"\";\n" 
+			+ "			}\n"
+			+ "		};\n" 
+			+ "	}\n" 
+			+ "	abstract class Foo {\n" 
+			+ "		public abstract void foo();\n" 
+			+ "	}\n"
+			+ "}";
+
+	private static final Map<String, String> compilationUnitHavingAnonymousClasses;
 	private static final Map<String, String> compilationUnitNameContents;
 	static {
 		Map<String, String> nameContents = new HashMap<>();
 		nameContents.put("UsingBadClass.java", USING_CLASS_WITH_DOLLAR_SIGN_NAME);
 		nameContents.put("BadClassName$.java", CLASS_WITH_DOLLAR_SIGN_NAME);
 		compilationUnitNameContents = Collections.unmodifiableMap(nameContents);
+		
+		nameContents = new HashMap<>();
+		nameContents.put("FieldsInAnonymousClasses.java", FIELDS_IN_ANONYMOUS_CLASSES);
+		compilationUnitHavingAnonymousClasses = Collections.unmodifiableMap(nameContents);
 	}
 	
 	private IPackageFragment packageFragment;
-	private List<CompilationUnit> compilationUnits;
 	
 	@Before
-	public void setUpCompilationUnits() throws JavaModelException, IOException {
+	public void setUpCompilationUnits() throws JavaModelException {
 		packageFragment = root.createPackageFragment(ROOT_PACKAGE_NAME, true, null);
-		compilationUnits = loadCompilationUnits(packageFragment, compilationUnitNameContents);
 	}
 	
 	@Test
 	public void findReferences() throws JavaModelException, IOException {
 
+		List<CompilationUnit> compilationUnits = loadCompilationUnits(packageFragment, compilationUnitNameContents);
 		/*
 		 * Having a FieldDeclarationASTVisitor and a field with unsafe type name
 		 * (i.e. having a $ in its name).
@@ -105,6 +130,7 @@ public class FieldReferencesSearchTest extends AbstractRulesTest {
 	@Test
 	public void findReferences_typeHavingDollarSign() throws JavaModelException, IOException {
 
+		List<CompilationUnit> compilationUnits = loadCompilationUnits(packageFragment, compilationUnitNameContents); 
 		/*
 		 * Having a FieldDeclarationASTVisitor and a field with 
 		 * unsafe type name (i.e. having a $ in its name).
@@ -132,13 +158,33 @@ public class FieldReferencesSearchTest extends AbstractRulesTest {
 		assertTrue("No references can be found if the type of the field has a $", references.isEmpty());
 	}
 	
-	private List<VariableDeclarationFragment> findFieldDeclarations(
-			List<CompilationUnit> compilationUnits) {
-		return compilationUnits.stream()
-			.flatMap(cu -> convertToTypedList(cu.types(), TypeDeclaration.class).stream())
-			.flatMap(type -> convertToTypedList(type.bodyDeclarations(), FieldDeclaration.class).stream())
-			.flatMap(field -> ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class).stream())
-			.collect(Collectors.toList());
+	@Test
+	public void referencesOfFields_anonymousClasses() throws JavaModelException, IOException {
+		
+		List<CompilationUnit> compilationUntis = loadCompilationUnits(packageFragment, compilationUnitHavingAnonymousClasses);
+		/*
+		 * Having loaded two anonymous classes of the same type, both declaring
+		 * a field with the same name
+		 */
+		List<VariableDeclarationFragment> declInAnonymousClasses = findDeclarationsInAnonymousClass(compilationUntis);
+		assertEquals(2, declInAnonymousClasses.size());
 
+		/*
+		 * When searching for the references of the first field
+		 */
+		VariableDeclarationFragment fragment = declInAnonymousClasses.get(0);
+		FieldReferencesSearch searchEngine = new FieldReferencesSearch(new IJavaElement[] { packageFragment });
+
+		List<ReferenceSearchMatch> references = searchEngine.findFieldReferences(fragment)
+			.orElse(Collections.emptyList());
+
+		/*
+		 * Expecting references to be found...
+		 * 
+		 * SIM-934 - indeed there is only one reference. But the search
+		 * engine is confusing the references of the field in the second
+		 * anonymous class with the ones in the first.
+		 */
+		assertEquals(2, references.size());
 	}
 }
