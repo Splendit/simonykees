@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -17,6 +19,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangePreviewViewer;
 import org.eclipse.ltk.ui.refactoring.ChangePreviewViewerInput;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -29,7 +32,7 @@ import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.renaming.FieldMetadata;
-import eu.jsparrow.i18n.ExceptionMessages;
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -58,11 +61,12 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			PublicFieldsRenamingRule rule) {
 		super(rule.getRuleDescription()
 			.getName());
-		setTitle(rule.getRuleDescription()
-			.getName());
+		this.changes = changes;
+
+		String title = NLS.bind(Messages.RenamingRulePreviewWizardPage_RenameFields, getModifierAsString());
+		setTitle(title);
 		setDescription(rule.getRuleDescription()
 			.getDescription());
-		this.changes = changes;
 
 		convertChangesToDocumentChangeWrappers();
 
@@ -120,8 +124,8 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			changesWrapperList.add(dcw);
 		} catch (JavaModelException e) {
 			WizardMessageDialog.synchronizeWithUIShowInfo(
-					new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
-							ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
+					new RefactoringException(Messages.RefactoringPipeline_java_element_resolution_failed,
+							Messages.RefactoringPipeline_user_java_element_resolution_failed, e));
 			return;
 		}
 	}
@@ -249,6 +253,25 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			ChangePreviewViewerInput viewerInput = TextEditChangePreviewViewer.createInput(getCurrentDocumentChange());
 			currentPreviewViewer.setInput(viewerInput);
 		}
+	}
+
+	private String getModifierAsString() {
+		StringBuilder sb = new StringBuilder();
+
+		Set<String> modifiers = changes.keySet()
+			.stream()
+			.map(key -> key.getFieldModifier()
+				.toString())
+			.collect(Collectors.toSet());
+
+		modifiers.forEach(modifier -> {
+			if (sb.length() > 0) {
+				sb.append(", "); //$NON-NLS-1$
+			}
+			sb.append(modifier);
+		});
+
+		return sb.toString();
 	}
 
 	/**

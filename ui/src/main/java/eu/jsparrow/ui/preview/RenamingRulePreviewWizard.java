@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -24,6 +25,7 @@ import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldMetadata;
+import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
@@ -35,7 +37,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  * {@link PublicFieldsRenamingRule}. On Finish it commits all wanted renaming
  * changes to {@link CompilationUnit}s.
  * 
- * @author Andreja Sambolec
+ * @author Andreja Sambolec, Matthias Webhofer
  * @since 2.3.0
  *
  */
@@ -67,7 +69,41 @@ public class RenamingRulePreviewWizard extends Wizard {
 	 */
 	@Override
 	public void addPages() {
-		addPage(new RenamingRulePreviewWizardPage(documentChanges, rule));
+
+		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(
+				JavaAccessModifier.PUBLIC);
+		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> protectedChanges = filterChangesByModifier(
+				JavaAccessModifier.PROTECTED);
+		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> packagePrivateChanges = filterChangesByModifier(
+				JavaAccessModifier.PACKAGE_PRIVATE);
+		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> privateChanges = filterChangesByModifier(
+				JavaAccessModifier.PRIVATE);
+
+		if (!publicChanges.isEmpty()) {
+			addPage(new RenamingRulePreviewWizardPage(publicChanges, rule));
+		}
+
+		if (!protectedChanges.isEmpty()) {
+			addPage(new RenamingRulePreviewWizardPage(protectedChanges, rule));
+		}
+
+		if (!packagePrivateChanges.isEmpty()) {
+			addPage(new RenamingRulePreviewWizardPage(packagePrivateChanges, rule));
+		}
+
+		if (!privateChanges.isEmpty()) {
+			addPage(new RenamingRulePreviewWizardPage(privateChanges, rule));
+		}
+	}
+
+	private Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> filterChangesByModifier(
+			JavaAccessModifier modifier) {
+		return documentChanges.entrySet()
+			.stream()
+			.filter(e -> e.getKey()
+				.getFieldModifier()
+				.equals(modifier))
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 	/**

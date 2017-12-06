@@ -54,7 +54,7 @@ public interface LicenseValidationService {
 	 * 
 	 * @return human readable status information
 	 */
-	String getLicenseStautsUserMessage();
+	String getLicenseStatusUserMessage();
 
 	/**
 	 * checks if type is demo/free

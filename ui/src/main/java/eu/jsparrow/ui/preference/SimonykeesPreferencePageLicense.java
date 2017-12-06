@@ -79,9 +79,11 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	public SimonykeesPreferencePageLicense() {
 		super();
+		Activator.setRunning(true);
 		setPreferenceStore(Activator.getDefault()
 			.getPreferenceStore());
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
+		noDefaultAndApplyButton();
 	}
 
 	@PostConstruct
@@ -193,7 +195,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			licenseLabel.setText(licenseValidationService.getDisplayableLicenseInformation());
 
 			if (!licenseValidationService.isValid()) {
-				licenseStatusLabel.setText(licenseValidationService.getLicenseStautsUserMessage());
+				licenseStatusLabel.setText(licenseValidationService.getLicenseStatusUserMessage());
 				logoLabel.setImage(jSparrowImageInactive);
 			} else {
 				licenseStatusLabel.setText(""); //$NON-NLS-1$
@@ -208,6 +210,18 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			.pack();
 		licenseLabel.getParent()
 			.layout(true);
+	}
+	
+	@Override
+	public boolean performOk() {
+		Activator.setRunning(false);
+		return super.performOk();
+	}
+	
+	@Override
+	public boolean performCancel() {
+		Activator.setRunning(false);
+		return super.performCancel();
 	}
 
 }
