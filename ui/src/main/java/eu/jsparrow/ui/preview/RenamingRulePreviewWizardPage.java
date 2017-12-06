@@ -36,7 +36,6 @@ import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
-import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 
 /**
  * {@link WizardPage} containing view for preview of renaming changes. The
@@ -65,8 +64,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	private Map<IPath, Document> originalDocuments;
 
 	public RenamingRulePreviewWizardPage(Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes,
-			Map<ICompilationUnit, DocumentChange> changesPerRule, Map<IPath, Document> originalDocuments,
-			PublicFieldsRenamingRule rule1, RefactoringPreviewWizardModel model1) {
+			Map<IPath, Document> originalDocuments, PublicFieldsRenamingRule rule1) {
 		super(rule1.getRuleDescription()
 			.getName());
 		this.changes = changes;
@@ -77,10 +75,6 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			.getDescription());
 		this.changes = changes;
 		this.originalDocuments = originalDocuments;
-		model1.addRule(rule1);
-		changesPerRule.keySet()
-			.stream()
-			.forEach(x -> model1.addFileToRule(rule1, x.getHandleIdentifier()));
 
 		convertChangesToDocumentChangeWrappers();
 

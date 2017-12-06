@@ -102,22 +102,25 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> privateChanges = filterChangesByModifier(
 				JavaAccessModifier.PRIVATE);
 
+		model.addRule(rule);
+		changesPerRule.keySet()
+			.stream()
+			.forEach(x -> model.addFileToRule(rule, x.getHandleIdentifier()));
+
 		if (!publicChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(publicChanges, changesPerRule, originalDocuments, rule, model));
+			addPage(new RenamingRulePreviewWizardPage(publicChanges, originalDocuments, rule));
 		}
 
 		if (!protectedChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(protectedChanges, changesPerRule, originalDocuments, rule,
-					model));
+			addPage(new RenamingRulePreviewWizardPage(protectedChanges, originalDocuments, rule));
 		}
 
 		if (!packagePrivateChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(packagePrivateChanges, changesPerRule, originalDocuments, rule,
-					model));
+			addPage(new RenamingRulePreviewWizardPage(packagePrivateChanges, originalDocuments, rule));
 		}
 
 		if (!privateChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(privateChanges, changesPerRule, originalDocuments, rule, model));
+			addPage(new RenamingRulePreviewWizardPage(privateChanges, originalDocuments, rule));
 		}
 		this.summaryPage = new RenamingRuleSummaryWizardPage(refactoringPipeline, model);
 		addPage(summaryPage);
