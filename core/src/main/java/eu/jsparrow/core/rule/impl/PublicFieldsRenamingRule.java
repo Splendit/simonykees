@@ -42,7 +42,7 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 		this.metaData = metaData;
 		this.todosMetaData = todosMetaData;
 		this.ruleDescription = new RuleDescription(Messages.PublicFieldsRenamingRule_name,
-				Messages.PublicFieldsRenamingRule_description, Duration.ofMinutes(5), // FIXME value for duration
+				Messages.PublicFieldsRenamingRule_description, Duration.ofMinutes(15),
 				TagUtil.getTagsForRule(this.getClass()));
 	}
 
