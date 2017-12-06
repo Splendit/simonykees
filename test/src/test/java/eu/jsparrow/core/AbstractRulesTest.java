@@ -203,6 +203,7 @@ public abstract class AbstractRulesTest {
 	class AnonymousClassFieldsVisitor extends ASTVisitor {
 		private List<VariableDeclarationFragment> fragments = new ArrayList<>();
 
+		@Override
 		public boolean visit(FieldDeclaration field) {
 			if (ASTNode.ANONYMOUS_CLASS_DECLARATION == field.getParent()
 				.getNodeType()) {

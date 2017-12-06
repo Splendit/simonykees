@@ -95,7 +95,7 @@ public class FieldReferencesSearchTest extends AbstractRulesTest {
 	private IPackageFragment packageFragment;
 	
 	@Before
-	public void setUpCompilationUnits() throws JavaModelException, IOException {
+	public void setUpCompilationUnits() throws JavaModelException {
 		packageFragment = root.createPackageFragment(ROOT_PACKAGE_NAME, true, null);
 	}
 	
