@@ -27,7 +27,7 @@ import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
-import eu.jsparrow.core.visitor.renaming.FieldMetadata;
+import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 
 /**
  * Testing the renaming of the public fields which are directly referenced
@@ -46,8 +46,8 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 	private static final String PRERULE_RENAMING_PACKAGE_NAME = "eu.jsparrow.sample.preRule." + RENAMING;
 
 	private Path path;
-	private static List<FieldMetadata> metaData;
-	private static List<FieldMetadata> todosMetaData;
+	private static List<FieldMetaData> metaData;
+	private static List<FieldMetaData> todosMetaData;
 
 	public PublicFieldsRenamingRuleTest(Path preRule) {
 		this.path = preRule;
@@ -62,7 +62,8 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 		 */
 		List<ICompilationUnit> iCompilationUnits = new ArrayList<>();
 		for (Path renamingPath : loadUtilityClasses(RulesTestUtil.PRERULE_DIRECTORY + "/" + RENAMING)) {
-			String renamingClassName = renamingPath.getFileName().toString();
+			String renamingClassName = renamingPath.getFileName()
+				.toString();
 			String renamingSource = new String(Files.readAllBytes(renamingPath), StandardCharsets.UTF_8);
 			ICompilationUnit iCompilationUnit = packageFragment.createCompilationUnit(renamingClassName, renamingSource,
 					true, null);
@@ -70,7 +71,8 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 		}
 
 		/*
-		 * Parse each iCompilationUnit and visit them with FieldDeclarationASTVisitor
+		 * Parse each iCompilationUnit and visit them with
+		 * FieldDeclarationASTVisitor
 		 */
 		FieldDeclarationASTVisitor referencesVisitor = new FieldDeclarationASTVisitor(
 				new IJavaElement[] { packageFragment });
@@ -81,14 +83,18 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 		}
 
 		/*
-		 * Store the references metadata and the paths of all compilation units
-		 * having at least one declaration/reference to be renamed. 
+		 * Store the references metaData and the paths of all compilation units
+		 * having at least one declaration/reference to be renamed.
 		 */
-		metaData = referencesVisitor.getFieldMetadata();
-		todosMetaData = referencesVisitor.getUnmodifiableFieldMetadata();
+		metaData = referencesVisitor.getFieldMetaData();
+		todosMetaData = referencesVisitor.getUnmodifiableFieldMetaData();
 		Set<ICompilationUnit> targetICUs = referencesVisitor.getTargetIJavaElements();
-		
-		return targetICUs.stream().map(ICompilationUnit::getPath).map(iPath -> new Path[] { Paths.get(iPath.toFile().getPath()) }).collect(Collectors.toList());
+
+		return targetICUs.stream()
+			.map(ICompilationUnit::getPath)
+			.map(iPath -> new Path[] { Paths.get(iPath.toFile()
+				.getPath()) })
+			.collect(Collectors.toList());
 	}
 	
 

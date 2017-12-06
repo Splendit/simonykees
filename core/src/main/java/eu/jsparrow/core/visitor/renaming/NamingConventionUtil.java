@@ -47,8 +47,8 @@ public class NamingConventionUtil {
 	 * Converts the given string to camelCase by removing the non-alphanumeric
 	 * symbols '$' and '_' and capitalizing the character which is following
 	 * them, unless it is the fist character of the string. Furthermore, checks
-	 * whether the new string is eligible for being used as a variable name (i.e. it
-	 * doesn't start with a digit and is not a java key word).
+	 * whether the new string is eligible for being used as a variable name
+	 * (i.e. it doesn't start with a digit and is not a java key word).
 	 * <p>
 	 * For instance, the following string:
 	 * <p>
@@ -64,46 +64,57 @@ public class NamingConventionUtil {
 	 * @return Optional of a camel-cased string if it is a valid variable name,
 	 *         or an empty optional otherwise.
 	 */
-	public static Optional<String> generateNewIdetifier(String identifier) {
+	public static Optional<String> generateNewIdentifier(String identifier) {
 		// split by $ or by _ or by upper-case letters
 		String[] parts = identifier.split("\\$|_|(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])"); //$NON-NLS-1$
-	
-		List<String> partsList = Arrays.asList(parts).stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
-	
-		String newName = null;
-		if (!partsList.isEmpty()) {
-			// the prefix has to start with lower case
-			String prefix = partsList.remove(0);
-			String lowerCasePrefix = prefix.toLowerCase();
-	
-			// convert the other parts to Title case.
-			String suffix = partsList.stream().filter(s -> !s.isEmpty()).map(String::toLowerCase)
-					.map(input -> input.substring(0, 1).toUpperCase() + input.substring(1))
-					.collect(Collectors.joining());
-	
-			// the final identifier
-			String camelCasedIdenitfier = lowerCasePrefix + suffix;
-	
-			// check if it is eligible variable name
-			if (!JavaReservedKeyWords.isKeyWord(camelCasedIdenitfier)
-					&& !Character.isDigit(camelCasedIdenitfier.charAt(0))) {
-				newName = camelCasedIdenitfier;
-			}
+
+		List<String> partsList = Arrays.asList(parts)
+			.stream()
+			.filter(s -> !s.isEmpty())
+			.collect(Collectors.toList());
+
+		if (partsList.isEmpty()) {
+			return Optional.empty();
 		}
-	
-		return Optional.ofNullable(newName).filter(s -> !s.isEmpty());
+
+		String newName = null;
+
+		// the prefix has to start with lower case
+		String prefix = partsList.remove(0);
+		String lowerCasePrefix = prefix.toLowerCase();
+
+		// convert the other parts to Title case.
+		String suffix = partsList.stream()
+			.filter(s -> !s.isEmpty())
+			.map(String::toLowerCase)
+			.map(input -> input.substring(0, 1)
+				.toUpperCase() + input.substring(1))
+			.collect(Collectors.joining());
+
+		// the final identifier
+		String camelCasedIdenitfier = lowerCasePrefix + suffix;
+
+		// check if it is eligible variable name
+		if (!JavaReservedKeyWords.isKeyWord(camelCasedIdenitfier)
+				&& !Character.isDigit(camelCasedIdenitfier.charAt(0))) {
+			newName = camelCasedIdenitfier;
+		}
+
+		return Optional.ofNullable(newName)
+			.filter(s -> !s.isEmpty());
 	}
 	
-	public static Optional<String> generateNewIdetifier(String identifier, boolean upperCaseAfterDollar, boolean upperCaseAfterUScore) {
+	public static Optional<String> generateNewIdentifier(String identifier, boolean upperCaseAfterDollar,
+			boolean upperCaseAfterUScore) {
 		String charFreeId = identifier;
-		if(!upperCaseAfterDollar) {
-			charFreeId = charFreeId.replace("$", "");  //$NON-NLS-1$//$NON-NLS-2$
+		if (!upperCaseAfterDollar) {
+			charFreeId = charFreeId.replace("$", ""); //$NON-NLS-1$//$NON-NLS-2$
 		}
-		
-		if(!upperCaseAfterUScore) {
-			charFreeId = charFreeId.replace("_", "");  //$NON-NLS-1$//$NON-NLS-2$
+
+		if (!upperCaseAfterUScore) {
+			charFreeId = charFreeId.replace("_", ""); //$NON-NLS-1$//$NON-NLS-2$
 		}
-		return generateNewIdetifier(charFreeId);
+		return generateNewIdentifier(charFreeId);
 	}
 
 	/**

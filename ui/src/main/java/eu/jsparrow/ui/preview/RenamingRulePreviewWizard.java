@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -15,8 +16,11 @@ import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RefactoringException;
@@ -24,7 +28,7 @@ import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
-import eu.jsparrow.core.visitor.renaming.FieldMetadata;
+import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
@@ -43,23 +47,40 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
  */
 public class RenamingRulePreviewWizard extends Wizard {
 
+	private static final Logger logger = LoggerFactory.getLogger(RenamingRulePreviewWizard.class);
 	private RefactoringPipeline refactoringPipeline;
-	private List<FieldMetadata> metadata;
+	private List<FieldMetaData> metadata;
 
-	private Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> documentChanges;
+	private Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges;
 	private PublicFieldsRenamingRule rule;
 
 	private List<ICompilationUnit> targetCompilationUnits;
+	private Map<IPath, Document> originalDocuments;
 
-	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetadata> metadata,
-			Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> documentChanges,
+	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
+			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			List<ICompilationUnit> targetCompilationUnits, PublicFieldsRenamingRule rule) {
 		this.refactoringPipeline = refactoringPipeline;
 		this.metadata = metadata;
 		this.documentChanges = documentChanges;
 		this.targetCompilationUnits = targetCompilationUnits;
+		this.originalDocuments = targetCompilationUnits.stream()
+			.map(ICompilationUnit::getPrimary)
+			.collect(Collectors.toMap(ICompilationUnit::getPath, this::createDocument));
+
 		this.rule = rule;
 		setNeedsProgressMonitor(true);
+	}
+
+	private Document createDocument(ICompilationUnit icu) {
+		try {
+			return new Document(icu.getSource());
+		} catch (JavaModelException e1) {
+			WizardMessageDialog.synchronizeWithUIShowInfo(
+					new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+							ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e1));
+			return new Document();
+		}
 	}
 
 	/*
@@ -70,33 +91,33 @@ public class RenamingRulePreviewWizard extends Wizard {
 	@Override
 	public void addPages() {
 
-		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(
+		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> publicChanges = filterChangesByModifier(
 				JavaAccessModifier.PUBLIC);
-		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> protectedChanges = filterChangesByModifier(
+		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> protectedChanges = filterChangesByModifier(
 				JavaAccessModifier.PROTECTED);
-		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> packagePrivateChanges = filterChangesByModifier(
+		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> packagePrivateChanges = filterChangesByModifier(
 				JavaAccessModifier.PACKAGE_PRIVATE);
-		Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> privateChanges = filterChangesByModifier(
+		Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> privateChanges = filterChangesByModifier(
 				JavaAccessModifier.PRIVATE);
 
 		if (!publicChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(publicChanges, rule));
+			addPage(new RenamingRulePreviewWizardPage(publicChanges, originalDocuments, rule));
 		}
 
 		if (!protectedChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(protectedChanges, rule));
+			addPage(new RenamingRulePreviewWizardPage(protectedChanges, originalDocuments, rule));
 		}
 
 		if (!packagePrivateChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(packagePrivateChanges, rule));
+			addPage(new RenamingRulePreviewWizardPage(packagePrivateChanges, originalDocuments, rule));
 		}
 
 		if (!privateChanges.isEmpty()) {
-			addPage(new RenamingRulePreviewWizardPage(privateChanges, rule));
+			addPage(new RenamingRulePreviewWizardPage(privateChanges, originalDocuments, rule));
 		}
 	}
 
-	private Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> filterChangesByModifier(
+	private Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> filterChangesByModifier(
 			JavaAccessModifier modifier) {
 		return documentChanges.entrySet()
 			.stream()
@@ -117,7 +138,7 @@ public class RenamingRulePreviewWizard extends Wizard {
 		if (!((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
 			.getName())).getUncheckedFields()
 				.isEmpty()) {
-			for (FieldMetadata fieldData : ((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
+			for (FieldMetaData fieldData : ((RenamingRulePreviewWizardPage) getPage(rule.getRuleDescription()
 				.getName())).getUncheckedFields()) {
 				metadata.remove(fieldData);
 			}
@@ -196,16 +217,19 @@ public class RenamingRulePreviewWizard extends Wizard {
 				}
 
 				if (refactoringPipeline.hasChanges()) {
-					Map<FieldMetadata, Map<ICompilationUnit, DocumentChange>> changes = new HashMap<>();
-					Map<String, FieldMetadata> metaDataMap = new HashMap<>();
-					for (FieldMetadata data : metadata) {
+					Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes = new HashMap<>();
+					Map<String, FieldMetaData> metaDataMap = new HashMap<>();
+					for (FieldMetaData data : metadata) {
 
 						String newIdentifier = data.getNewIdentifier();
-						data.getCompilationUnit()
-							.getJavaElement();
-						Map<ICompilationUnit, DocumentChange> docsChanges = rule.computeDocumentChangesPerFiled(data);
-						changes.put(data, docsChanges);
-						metaDataMap.put(newIdentifier, data);
+						Map<ICompilationUnit, DocumentChange> docsChanges;
+						try {
+							docsChanges = rule.computeDocumentChangesPerFiled(data);
+							changes.put(data, docsChanges);
+							metaDataMap.put(newIdentifier, data);
+						} catch (JavaModelException e) {
+							logger.error("Cannot create document for displaying changes - " + e.getMessage(), e); //$NON-NLS-1$
+						}
 
 					}
 				}
