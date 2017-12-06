@@ -11,7 +11,7 @@ public class RenamingRuleSummaryWizardPage extends AbstractSummaryWizardPage {
 			RefactoringPreviewWizardModel wizardModel) {
 		super(refactoringPipeline, wizardModel);
 	}
-	
+
 	/**
 	 * Create contents of the wizard.
 	 * 

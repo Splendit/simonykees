@@ -58,7 +58,7 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 		PublicFieldsRenamingASTVisitor visitor = new PublicFieldsRenamingASTVisitor(metaData, todosMetaData);
 		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
 		return visitor;
-		
+
 	}
 
 	/**

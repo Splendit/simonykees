@@ -22,7 +22,7 @@ import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.i18n.Messages;
 
 /**
- * A factory for creating instances of {@link FieldDeclarationASTVisitor} and 
+ * A factory for creating instances of {@link FieldDeclarationASTVisitor} and
  * for visiting the list of compilation units with it.
  * 
  * @author Ardit Ymeri
@@ -30,9 +30,9 @@ import eu.jsparrow.i18n.Messages;
  *
  */
 public class FieldDeclarationVisitorFactory {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(FieldDeclarationVisitorFactory.class);
-	
+
 	public static final String SCOPE_PROJECT = Messages.RenameFieldsRuleWizardPageModel_scopeOption_project;
 
 	private FieldDeclarationVisitorFactory() {
@@ -43,11 +43,11 @@ public class FieldDeclarationVisitorFactory {
 
 	public static FieldDeclarationASTVisitor visitorFactory(IJavaProject iProject, Map<String, Boolean> options,
 			String modelSearchScope) {
-	
+
 		IJavaElement[] scope;
 		if (SCOPE_PROJECT.equals(modelSearchScope)) {
 			scope = new IJavaElement[] { iProject };
-	
+
 		} else {
 			List<IJavaProject> projectList = new LinkedList<>();
 			try {
@@ -65,10 +65,10 @@ public class FieldDeclarationVisitorFactory {
 			}
 			scope = projectList.toArray(new IJavaElement[0]);
 		}
-	
+
 		FieldDeclarationASTVisitor visitor = new FieldDeclarationASTVisitor(scope);
 		visitor.updateOptions(options);
-	
+
 		return visitor;
 	}
 
@@ -92,6 +92,5 @@ public class FieldDeclarationVisitorFactory {
 
 		return Status.OK;
 	}
-	
-	
+
 }

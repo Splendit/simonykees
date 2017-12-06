@@ -328,7 +328,7 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 		}
 		return model;
 	}
-	
+
 	public RefactoringSummaryWizardPage getSummaryPage() {
 		return this.summaryPage;
 	}

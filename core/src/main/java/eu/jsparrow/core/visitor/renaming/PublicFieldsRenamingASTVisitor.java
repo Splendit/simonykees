@@ -101,12 +101,12 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 		}
 		return true;
 	}
-	
+
 	@Override
 	public boolean visit(AnonymousClassDeclaration anonymousClass) {
 		/*
-		 * Fields declared in the body of an anonymous class are ignored
-		 * because the search engine does not find their references correctly.
+		 * Fields declared in the body of an anonymous class are ignored because
+		 * the search engine does not find their references correctly. 
 		 * FIXME see SIM-934
 		 */
 		return false;
@@ -291,8 +291,8 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	}
 
 	/**
-	 * Uses {@link #calculateIdentifier(SimpleName)} to compute a unique key for a
-	 * given simple name, and checks whether there is an object with the
+	 * Uses {@link #calculateIdentifier(SimpleName)} to compute a unique key for
+	 * a given simple name, and checks whether there is an object with the
 	 * computed key in the map {@link #cuRelatedReplacements}.
 	 * 
 	 * @param simpleName

@@ -57,7 +57,7 @@ import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConfigureRenameFieldsRuleWizard.class);
-	
+
 	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
 	private static final int SUMMARY_BUTTON_ID = 9;
 
@@ -194,7 +194,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 
 		return true;
 	}
-	
+
 	/**
 	 * Creates Job which does refactoring and creates preview wizard.
 	 * 
@@ -240,7 +240,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 		});
 		return refactorJob;
 	}
-	
+
 	/**
 	 * Creates {@link FieldDeclarationASTVisitor} and sets all options selected
 	 * by user from {@link ConfigureRenameFieldsRuleWizardPageModel}.
@@ -353,7 +353,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 					.getShell();
 				RenamingRulePreviewWizard renamingPreviewWizard = new RenamingRulePreviewWizard(refactoringPipeline,
 						metadata, changes, targetCompilationUnits, renameFieldsRule);
-				final WizardDialog dialog = new WizardDialog(shell, renamingPreviewWizard ) {
+				final WizardDialog dialog = new WizardDialog(shell, renamingPreviewWizard) {
 					@Override
 					protected void nextPressed() {
 						((RenamingRulePreviewWizard) getWizard()).pressedNext();

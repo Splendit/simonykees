@@ -33,9 +33,8 @@ import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.util.RefactoringUtil;
-import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * {@link WizardPage} containing view for preview of renaming changes. The
@@ -50,10 +49,10 @@ import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 public class RenamingRulePreviewWizardPage extends WizardPage {
 
 	private Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> changes;
-	
+
 	private CheckboxTreeViewer viewer;
 	private IChangePreviewViewer currentPreviewViewer;
-	
+
 	private Composite previewComposite;
 
 	private List<DocumentChangeWrapper> changesWrapperList;
@@ -213,13 +212,13 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		} else {
 			viewer.setSubtreeChecked(selectedWrapper.getParent(), checked);
 		}
-		
+
 		RenamingRulePreviewWizard wizard = (RenamingRulePreviewWizard) getWizard();
-		
+
 		FieldMetaData selectedFieldData = selectedWrapper.getFieldData();
 		if (checked) {
 			uncheckedFields.remove(selectedFieldData);
-			if(!recheckedFields.contains(selectedFieldData)) {
+			if (!recheckedFields.contains(selectedFieldData)) {
 				recheckedFields.add(selectedFieldData);
 			}
 			wizard.addMetaData(selectedFieldData);
@@ -262,8 +261,8 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		currentPreviewViewer.createControl(previewComposite);
 
 		currentPreviewViewer.getControl()
-		.getParent()
-		.layout();
+			.getParent()
+			.layout();
 
 		populatePreviewViewer();
 	}
@@ -272,7 +271,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 	 * Populates change viewer with data.
 	 */
 	public void populatePreviewViewer() {
-		
+
 		if (this.selectedDocWrapper != null) {
 			disposeControl();
 
@@ -282,10 +281,10 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 
 			ChangePreviewViewerInput viewerInput = TextEditChangePreviewViewer.createInput(getCurrentDocumentChange());
 			currentPreviewViewer.setInput(viewerInput);
-			
+
 			currentPreviewViewer.getControl()
-			.getParent()
-			.layout();
+				.getParent()
+				.layout();
 		}
 	}
 
@@ -320,11 +319,11 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		}
 		super.setVisible(visible);
 	}
-	
+
 	/**
 	 * Used to dispose control every time preview viewer content changes or page
 	 * gets invisible. New control is created when needed. This way conflicting
-	 * handers are avoided because there is no multiple viewers which would
+	 * handlers are avoided because there is no multiple viewers which would
 	 * register multiple handlers for same action.
 	 */
 	public void disposeControl() {
@@ -333,7 +332,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 				.dispose();
 		}
 	}
-	
+
 	/**
 	 * Gets the current DocumentChange if checkbox in front of file name is
 	 * selected. Otherwise generates and returns new DocumentChange with empty
@@ -356,7 +355,7 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			return selectedDocWrapper.getDocumentChange();
 		}
 	}
-	
+
 	public boolean isRecalculateNeeded() {
 		return !uncheckedFields.isEmpty() || !recheckedFields.isEmpty();
 	}
@@ -368,6 +367,5 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		}
 		viewer.setSelection(new StructuredSelection(selectedDocWrapper));
 	}
-	
-	
+
 }

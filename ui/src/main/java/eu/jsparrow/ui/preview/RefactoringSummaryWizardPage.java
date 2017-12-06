@@ -25,7 +25,7 @@ public class RefactoringSummaryWizardPage extends AbstractSummaryWizardPage {
 		addFilesSection();
 		initializeDataBindings();
 	}
-	
+
 	@Override
 	protected void initializeDataBindings() {
 		super.initializeDataBindings();

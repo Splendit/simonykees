@@ -36,9 +36,8 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
-import eu.jsparrow.ui.util.ResourceHelper;
-import eu.jsparrow.ui.util.StopWatchUtil;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
+import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 
 /**
