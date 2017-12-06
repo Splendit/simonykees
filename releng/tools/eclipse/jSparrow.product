@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="jSparrow" id="org.eclipse.equinox.p2.director.product" application="org.eclipse.e4.ui.workbench.swt.E4Application" useFeatures="true" includeLaunchers="true">
+<product name="jSparrow" id="org.eclipse.equinox.p2.director.product" application="org.eclipse.equinox.p2.artifact.repository.mirrorApplication" useFeatures="true" includeLaunchers="true">
 
    <configIni use="default">
    </configIni>

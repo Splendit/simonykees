@@ -76,6 +76,7 @@ public class MavenHelper {
 	private boolean standaloneStarted = false;
 	private long standaloneBundleID = 0;
 	private Framework framework = null;
+	private BundleContext bundleContext = null;
 	private String mavenHomeUnzipped = "";
 	private File directory;
 	private static final int BUFFER_SIZE = 4096;
@@ -107,7 +108,7 @@ public class MavenHelper {
 	 * 
 	 * @throws BundleException
 	 * @throws InterruptedException
-	 * @throws MojoExecutionException 
+	 * @throws MojoExecutionException
 	 */
 	public void startOSGI() throws BundleException, InterruptedException, MojoExecutionException {
 		startOSGI(null);
@@ -122,9 +123,10 @@ public class MavenHelper {
 	 *            will be added to the standard configuration
 	 * @throws BundleException
 	 * @throws InterruptedException
-	 * @throws MojoExecutionException 
+	 * @throws MojoExecutionException
 	 */
-	public void startOSGI(Map<String, String> additionalConfiguration) throws BundleException, InterruptedException, MojoExecutionException {
+	public void startOSGI(Map<String, String> additionalConfiguration)
+			throws BundleException, InterruptedException, MojoExecutionException {
 
 		final Map<String, String> configuration = prepareConfiguration(additionalConfiguration);
 
@@ -330,8 +332,7 @@ public class MavenHelper {
 		framework.waitForStop(0);
 		standaloneStarted = false;
 
-		String exitMessage = framework.getBundleContext()
-			.getProperty("eu.jsparrow.standalone.exit.message");
+		String exitMessage = bundleContext.getProperty("eu.jsparrow.standalone.exit.message");
 		if (exitMessage != null && !exitMessage.isEmpty()) {
 			throw new MojoExecutionException(exitMessage);
 		}
@@ -345,7 +346,7 @@ public class MavenHelper {
 	 * @throws BundleException
 	 */
 	private List<Bundle> loadBundles() throws BundleException {
-		final BundleContext ctx = framework.getBundleContext();
+		bundleContext = framework.getBundleContext();
 		final List<Bundle> bundles = new ArrayList<>();
 
 		try (InputStream is = getClass().getResourceAsStream("/" + JSPARROW_MANIFEST);
@@ -355,7 +356,7 @@ public class MavenHelper {
 			if (is != null) {
 				while ((line = reader.readLine()) != null) {
 					InputStream fileStream = getClass().getResourceAsStream("/" + line);
-					bundles.add(ctx.installBundle("file://" + line, fileStream));
+					bundles.add(bundleContext.installBundle("file://" + line, fileStream));
 				}
 			}
 		} catch (IOException e) {
