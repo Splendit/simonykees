@@ -1,19 +1,19 @@
 package eu.jsparrow.ui.preview;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
@@ -31,6 +31,7 @@ import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
+import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -170,42 +171,36 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	}
 
 	/**
-	 * Creates job which creates and sets to refactoringPipeline new
+	 * Creates a runnable which creates and sets to refactoringPipeline new
 	 * RefactoringStates without unchecked Fields. Than calls doRefactoring on
 	 * refactoringPipeline to recalculate all changes. At the end it computes
 	 * all documentChanges for each field.
 	 * 
-	 * @return Job for recalculation of changes
+	 * @return IRunnableWithProgress for recalculation of changes
 	 */
-	private Job createRecalculationJob() {
-		return new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
+	private IRunnableWithProgress createRecalculationJob() {
+		return monitor -> {
 
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				List<RefactoringState> refactoringStates = new ArrayList<>();
-				if (!createRefactoringStates(refactoringStates)) {
-					return Status.CANCEL_STATUS;
+			List<RefactoringState> refactoringStates = new ArrayList<>();
+			if (!createRefactoringStates(refactoringStates)) {
+				return;
+			}
+
+			refactoringPipeline.setRefactoringStates(refactoringStates);
+			refactoringPipeline.updateInitialSourceMap();
+			try {
+				refactoringPipeline.doRefactoring(monitor);
+				if (monitor.isCanceled()) {
+					refactoringPipeline.clearStates();
 				}
-
-				refactoringPipeline.setRefactoringStates(refactoringStates);
-				refactoringPipeline.updateInitialSourceMap();
-
-				try {
-					refactoringPipeline.doRefactoring(monitor);
-					if (monitor.isCanceled()) {
-						refactoringPipeline.clearStates();
-						return Status.CANCEL_STATUS;
-					}
-				} catch (RefactoringException e) {
-					WizardMessageDialog.synchronizeWithUIShowInfo(e);
-					return Status.CANCEL_STATUS;
-				} catch (RuleException e) {
-					WizardMessageDialog.synchronizeWithUIShowError(e);
-					return Status.CANCEL_STATUS;
-
-				}
-
-				return Status.OK_STATUS;
+			} catch (RuleException e) {
+				logger.error(e.getMessage(), e);
+				WizardMessageDialog.synchronizeWithUIShowError(e);
+			} catch (RefactoringException e) {
+				WizardMessageDialog.synchronizeWithUIShowInfo(e);
+				logger.warn(e.getMessage(), e);
+			} finally {
+				monitor.done();
 			}
 		};
 	}
@@ -238,50 +233,61 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 * visible any more
 	 */
 	public void pressedNext() {
-		if (null != getContainer()) {
-			IWizardPage page = getContainer().getCurrentPage();
+		IWizardContainer container = getContainer();
+		if (null == container) {
+			return;
+		}
+		IWizardPage page = container.getCurrentPage();
 
-			if (!(page instanceof RenamingRulePreviewWizardPage)) {
-				getNextPage(page);
-				return;
-			}
-			disposePages();
-			RenamingRulePreviewWizardPage previewPage = (RenamingRulePreviewWizardPage) page;
-			boolean recalculate = previewPage.isRecalculateNeeded();
-			if (!recalculate) {
-				getNextPage(page);
-				return;
-			}
-
-			performRecalculation();
+		if (!(page instanceof RenamingRulePreviewWizardPage)) {
 			getNextPage(page);
-
+			return;
 		}
+		disposePages();
+		RenamingRulePreviewWizardPage previewPage = (RenamingRulePreviewWizardPage) page;
+		boolean recalculate = previewPage.isRecalculateNeeded();
+		if (!recalculate) {
+			getNextPage(page);
+			return;
+		}
+
+		performRecalculation(container);
+		previewPage.clearNewSelections();
+		getNextPage(page);
 	}
-	
+
 	public void summaryButtonPressed() {
-		if (null != getContainer()) {
-			if (getContainer().getCurrentPage() instanceof RefactoringSummaryWizardPage) {
-				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
-			} else {
-				disposePages();
-			}
-			
-			performRecalculation();
+		IWizardContainer container = getContainer();
+		if (container == null) {
+			return;
+		}
+
+		IWizardPage currentPage = container.getCurrentPage();
+		if (currentPage instanceof RefactoringSummaryWizardPage) {
+			((RefactoringSummaryWizardPage) currentPage).disposeCompareInputControl();
+		} else {
+			disposePages();
+		}
+
+		if (!(currentPage instanceof RenamingRulePreviewWizardPage)) {
+			return;
+		}
+
+		RenamingRulePreviewWizardPage previewPage = (RenamingRulePreviewWizardPage) currentPage;
+		if (previewPage.isRecalculateNeeded()) {
+			performRecalculation(container);
+			previewPage.clearNewSelections();
 		}
 	}
 
-	private void performRecalculation() {
-		Job recalculationJob = createRecalculationJob();
-		recalculationJob.setUser(true);
-		recalculationJob.schedule();
-
+	private void performRecalculation(IWizardContainer container) {
+		IRunnableWithProgress runnable = createRecalculationJob();
 		try {
-			recalculationJob.join();
-		} catch (InterruptedException e) {
-			logger.warn("Recalculation job was interrupted.", e); //$NON-NLS-1$
-			Thread.currentThread()
-				.interrupt();
+			container.run(true, true, runnable);
+		} catch (InvocationTargetException | InterruptedException e1) {
+			SimonykeesMessageDialog.openMessageDialog(getShell(),
+					Messages.RefactoringPreviewWizard_err_runnableWithProgress, MessageDialog.ERROR);
+			Activator.setRunning(false);
 		}
 	}
 
@@ -324,6 +330,5 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	public RenamingRuleSummaryWizardPage getSummaryPage() {
 		return this.summaryPage;
 	}
-
 
 }

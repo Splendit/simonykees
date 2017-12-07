@@ -217,17 +217,29 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 
 		FieldMetaData selectedFieldData = selectedWrapper.getFieldData();
 		if (checked) {
-			uncheckedFields.remove(selectedFieldData);
-			if (!recheckedFields.contains(selectedFieldData)) {
-				recheckedFields.add(selectedFieldData);
-			}
+			markAsNewCheck(selectedFieldData);
 			wizard.addMetaData(selectedFieldData);
 		} else {
-			uncheckedFields.add(selectedFieldData);
-			recheckedFields.remove(selectedFieldData);
+			markAsNewUncheck(selectedFieldData);
 			wizard.removeMetaData(selectedFieldData);
 		}
 		populatePreviewViewer();
+	}
+
+	private void markAsNewUncheck(FieldMetaData selectedFieldData) {
+		if(recheckedFields.contains(selectedFieldData)) {				
+			recheckedFields.remove(selectedFieldData);
+		} else if(!uncheckedFields.contains(selectedFieldData)) {				
+			uncheckedFields.add(selectedFieldData);
+		}
+	}
+
+	private void markAsNewCheck(FieldMetaData selectedFieldData) {
+		if(uncheckedFields.contains(selectedFieldData)) {
+			uncheckedFields.remove(selectedFieldData);
+		} else if (!recheckedFields.contains(selectedFieldData)) {
+			recheckedFields.add(selectedFieldData);
+		}
 	}
 
 	/**
@@ -381,6 +393,15 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			populatePreviewViewer();
 		}
 		viewer.setSelection(new StructuredSelection(selectedDocWrapper));
+	}
+
+	/**
+	 * Clears the flags which indicate whether new recalculation is needed as a
+	 * result of new un/selections.
+	 */
+	public void clearNewSelections() {
+		uncheckedFields.clear();
+		recheckedFields.clear();
 	}
 
 }
