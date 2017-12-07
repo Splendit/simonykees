@@ -6,6 +6,7 @@ import org.eclipse.swt.events.MouseTrackAdapter;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -52,7 +53,7 @@ public class LoggerRuleWizardCheckBoxTrackAdapter extends MouseTrackAdapter {
 	
 	@Override
 	public void mouseEnter(MouseEvent e) {
-		showPopup(popupDescription, before, after, parent);
+		showPopup(e);
 	}
 	
 	@Override
@@ -60,7 +61,7 @@ public class LoggerRuleWizardCheckBoxTrackAdapter extends MouseTrackAdapter {
 		closePopup();
 	}
 	
-	private void showPopup(String popupDescription, String before, String after, Control parent) {
+	private void showPopup(MouseEvent e) {
 		if (popup != null) {
 			return;
 		}
@@ -115,6 +116,9 @@ public class LoggerRuleWizardCheckBoxTrackAdapter extends MouseTrackAdapter {
 		codeExampleAfter.setEnabled(false);
 		codeExampleAfter.setBackground(new Color(Display.getCurrent(), rgbWhite));
 		codeExampleAfter.setForeground(new Color(Display.getCurrent(), rgbBlack));
+		
+		Point cursorLoc = e.display.getCursorLocation();
+		popup.setLocation(cursorLoc.x +20, cursorLoc.y + 20);
 
 		popup.setFocus();
 		popup.pack();
