@@ -48,8 +48,8 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 		this.visitorClass = StringUtilsASTVisitor.class;
 		this.supportedVersion.add(VERSION_3_1);
 		this.id = "StringUtils"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription(Messages.StringLiteralEqualityCheckRule_name,
-				Messages.StringLiteralEqualityCheckRule_description, Duration.ofMinutes(10),
+		this.ruleDescription = new RuleDescription(Messages.StringUtilsRule_name,
+				Messages.StringUtilsRule_description, Duration.ofMinutes(10),
 				TagUtil.getTagsForRule(this.getClass()));
 	}
 
