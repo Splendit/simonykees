@@ -177,7 +177,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 * 
 	 * @return Job for recalculation of changes
 	 */
-	public Job recalculateForUnselected() {
+	private Job createRecalculationJob() {
 		return new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
 
 			@Override
@@ -253,19 +253,35 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				return;
 			}
 
-			Job recalculationJob = recalculateForUnselected();
-			recalculationJob.setUser(true);
-			recalculationJob.schedule();
-
-			try {
-				recalculationJob.join();
-			} catch (InterruptedException e) {
-				logger.warn("Recalculation job was interrupted.", e); //$NON-NLS-1$
-				Thread.currentThread()
-					.interrupt();
-			}
+			performRecalculation();
 			getNextPage(page);
 
+		}
+	}
+	
+	public void summaryButtonPressed() {
+		if (null != getContainer()) {
+			if (getContainer().getCurrentPage() instanceof RefactoringSummaryWizardPage) {
+				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
+			} else {
+				disposePages();
+			}
+			
+			performRecalculation();
+		}
+	}
+
+	private void performRecalculation() {
+		Job recalculationJob = createRecalculationJob();
+		recalculationJob.setUser(true);
+		recalculationJob.schedule();
+
+		try {
+			recalculationJob.join();
+		} catch (InterruptedException e) {
+			logger.warn("Recalculation job was interrupted.", e); //$NON-NLS-1$
+			Thread.currentThread()
+				.interrupt();
 		}
 	}
 
@@ -309,14 +325,5 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		return this.summaryPage;
 	}
 
-	public void summaryButtonPressed() {
-		if (null != getContainer()) {
-			if (getContainer().getCurrentPage() instanceof RefactoringSummaryWizardPage) {
-				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
-			} else {
-				disposePages();
-			}
-		}
-		
-	}
+
 }
