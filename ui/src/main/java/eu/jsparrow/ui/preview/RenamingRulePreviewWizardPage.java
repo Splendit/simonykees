@@ -217,8 +217,9 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 
 		FieldMetaData selectedFieldData = selectedWrapper.getFieldData();
 		if (checked) {
-			uncheckedFields.remove(selectedFieldData);
-			if (!recheckedFields.contains(selectedFieldData)) {
+			if(uncheckedFields.contains(selectedFieldData)) {
+				uncheckedFields.remove(selectedFieldData);
+			} else if (!recheckedFields.contains(selectedFieldData)) {
 				recheckedFields.add(selectedFieldData);
 			}
 			wizard.addMetaData(selectedFieldData);
