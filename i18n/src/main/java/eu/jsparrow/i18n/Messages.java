@@ -279,7 +279,7 @@ public class Messages extends NLS {
 	public static String RenameFieldsRuleWizardPageModel_dollarSignReplacementOption_upperCase;
 	public static String RenameFieldsRuleWizardPageModel_scopeOption_project;
 	public static String RenameFieldsRuleWizardPageModel_scopeOption_workspace;
-	public static String RenameFieldsRuleWizardPageModel_typeOption_packageProtectedFields;
+	public static String RenameFieldsRuleWizardPageModel_typeOption_packagePrivateFields;
 	public static String RenameFieldsRuleWizardPageModel_typeOption_privateFields;
 	public static String RenameFieldsRuleWizardPageModel_typeOption_protectedFields;
 	public static String RenameFieldsRuleWizardPageModel_typeOption_publicFields;
