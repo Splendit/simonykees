@@ -182,7 +182,7 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	 */
 	private boolean hasSkippedModifier(FieldDeclaration fieldDeclaration) {
 		List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(fieldDeclaration.modifiers(), Modifier.class);
-		return (modifiers.isEmpty() && !getRenamePackageProtectedField())
+		return (ASTNodeUtil.isPackageProtected(modifiers) && !getRenamePackageProtectedField())
 				|| (hasModifier(modifiers, Modifier::isPublic) && !getRenamePublicField())
 				|| (hasModifier(modifiers, Modifier::isProtected) && !getRenameProtectedField())
 				|| (hasModifier(modifiers, Modifier::isPrivate) && !getRenamePrivateField())

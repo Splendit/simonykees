@@ -292,6 +292,20 @@ public class ASTNodeUtil {
 			.stream()
 			.anyMatch(predicate);
 	}
+	
+	/**
+	 * Checks if the list of modifiers represents a package-private modifier.
+	 * 
+	 * @param modifiers
+	 *            list of modifiers
+	 * @return {@code true} if the given list has no {@code public},
+	 *         {@code protected} or {@code private} modifiers, or {@code false}
+	 *         otherwise.
+	 */
+	public static boolean isPackageProtected(@SuppressWarnings("rawtypes") List modifiers) {
+		return modifiers.isEmpty() || (!hasModifier(modifiers, Modifier::isPrivate)
+				&& !hasModifier(modifiers, Modifier::isProtected) && !hasModifier(modifiers, Modifier::isPublic));
+	}
 
 	/**
 	 * Checks if the given type binding corresponds to either of the primitives:
