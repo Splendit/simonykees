@@ -383,4 +383,13 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		viewer.setSelection(new StructuredSelection(selectedDocWrapper));
 	}
 
+	/**
+	 * Clears the flags which indicate whether new recalculation is needed as a
+	 * result of new un/selections.
+	 */
+	public void clearNewSelections() {
+		uncheckedFields.clear();
+		recheckedFields.clear();
+	}
+
 }

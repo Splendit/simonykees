@@ -252,6 +252,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		}
 
 		performRecalculation(container);
+		previewPage.clearNewSelections();
 		getNextPage(page);
 	}
 
@@ -275,6 +276,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		RenamingRulePreviewWizardPage previewPage = (RenamingRulePreviewWizardPage) currentPage;
 		if (previewPage.isRecalculateNeeded()) {
 			performRecalculation(container);
+			previewPage.clearNewSelections();
 		}
 	}
 
