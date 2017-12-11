@@ -381,7 +381,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 							super.buttonPressed(buttonId);
 						}
 					}
-					
+
 					private void summaryButtonPressed() {
 						if (getCurrentPage() instanceof RenamingRulePreviewWizardPage) {
 							renamingPreviewWizard.updateViewsOnNavigation(getCurrentPage());

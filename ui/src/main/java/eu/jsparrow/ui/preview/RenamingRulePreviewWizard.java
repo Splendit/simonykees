@@ -233,6 +233,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		if (null == container) {
 			return;
 		}
+
 		if (page instanceof RenamingRulePreviewWizardPage) {
 			RenamingRulePreviewWizardPage previewPage = (RenamingRulePreviewWizardPage) page;
 			boolean recalculate = previewPage.isRecalculateNeeded();
