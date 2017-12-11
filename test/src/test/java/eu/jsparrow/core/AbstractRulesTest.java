@@ -159,8 +159,7 @@ public abstract class AbstractRulesTest {
 		String compilationUnitSource = processFile(fileName, content, rulesList);
 
 		// Replace the package for comparison
-		compilationUnitSource = StringUtils.replace(compilationUnitSource, getPreRulePackage(),
-				postRulePackage);
+		compilationUnitSource = StringUtils.replace(compilationUnitSource, getPreRulePackage(), postRulePackage);
 
 		// TODO check if tabs and newlines make a difference
 		assertEquals(expectedSource, compilationUnitSource);

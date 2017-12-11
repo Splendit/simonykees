@@ -31,7 +31,7 @@ import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 
 /**
  * Testing the renaming of the public fields which are directly referenced
- * outside the class. 
+ * outside the class.
  * 
  * @author Ardit Ymeri
  * @since 2.3.0
@@ -41,8 +41,10 @@ import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 @SuppressWarnings("nls")
 public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 	protected static final String RENAMING = "renaming";
-	protected static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule."+ RENAMING + ".publicFieldRenaming";
-	protected static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/" + RENAMING + "/publicFieldRenaming";
+	protected static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule." + RENAMING
+			+ ".publicFieldRenaming";
+	protected static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/" + RENAMING
+			+ "/publicFieldRenaming";
 	protected static final String PRERULE_RENAMING_PACKAGE_NAME = "eu.jsparrow.sample.preRule." + RENAMING;
 
 	private Path path;
@@ -57,7 +59,8 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 	public static List<Object[]> loadCompilationUnits() throws JavaModelException, IOException {
 
 		IPackageFragment packageFragment = root.createPackageFragment(PRERULE_RENAMING_PACKAGE_NAME, true, null);
-		List<CompilationUnit> compilationUnits = loadCompilationUnits(packageFragment, RulesTestUtil.PRERULE_DIRECTORY + "/" + RENAMING);
+		List<CompilationUnit> compilationUnits = loadCompilationUnits(packageFragment,
+				RulesTestUtil.PRERULE_DIRECTORY + "/" + RENAMING);
 
 		/*
 		 * Parse each iCompilationUnit and visit them with
@@ -96,11 +99,12 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 		}
 		return compilationUnits;
 	}
-	
+
 	public static List<Object[]> collectPaths(Set<ICompilationUnit> targetICUs) {
 		return targetICUs.stream()
 			.map(ICompilationUnit::getPath)
-			.map(iPath -> new Path[] { Paths.get(iPath.toFile().getPath()) })
+			.map(iPath -> new Path[] { Paths.get(iPath.toFile()
+				.getPath()) })
 			.collect(Collectors.toList());
 	}
 
@@ -112,7 +116,8 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 
 	@Test
 	public void testTransformation() throws Exception {
-		String fileName = path.getFileName().toString();
+		String fileName = path.getFileName()
+			.toString();
 		Path postRule = Paths.get(POSTRULE_DIRECTORY, fileName);
 		Path preRule = Paths.get(RulesTestUtil.PRERULE_DIRECTORY, RENAMING, fileName);
 		super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
@@ -124,7 +129,7 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 		setPrerulePackage(PRERULE_RENAMING_PACKAGE_NAME);
 		return super.processFile(fileName, content, rules);
 	}
-	
+
 	@Override
 	protected String getPreRulePackage() {
 		return super.getPreRulePackage() + "." + RENAMING;

@@ -47,6 +47,10 @@ public class ASTNodeUtil {
 	private static final String STREAM_MAP_TO_LONG_METHOD_NAME = "mapToLong"; //$NON-NLS-1$
 	private static final String STREAM_MAP_TO_DOUBLE_METHOD_NAME = "mapToDouble"; //$NON-NLS-1$
 
+	private ASTNodeUtil() {
+		// private constructor to hide the implicit public one
+	}
+
 	/**
 	 * Finds the surrounding Block node if there is one, otherwise returns null
 	 * 
@@ -292,7 +296,7 @@ public class ASTNodeUtil {
 			.stream()
 			.anyMatch(predicate);
 	}
-	
+
 	/**
 	 * Checks if the list of modifiers represents a package-private modifier.
 	 * 

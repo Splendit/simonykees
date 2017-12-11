@@ -28,10 +28,10 @@ import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 public class PublicFieldsRenamingSkippedModifiersTest extends AbstractRulesTest {
 
 	private static final String RENAMING = "renaming";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY
-			+ "/postRule/" + RENAMING + "/publicFieldRenamingSkippedModifiers";
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE
-			+ ".postRule." + RENAMING + ".publicFieldRenamingSkippedModifiers";
+	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/" + RENAMING
+			+ "/publicFieldRenamingSkippedModifiers";
+	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule." + RENAMING
+			+ ".publicFieldRenamingSkippedModifiers";
 	protected static final String PRERULE_RENAMING_PACKAGE_NAME = "eu.jsparrow.sample.preRule." + RENAMING;
 
 	private Path path;
@@ -82,7 +82,7 @@ public class PublicFieldsRenamingSkippedModifiersTest extends AbstractRulesTest 
 		setPrerulePackage(PRERULE_RENAMING_PACKAGE_NAME);
 		return super.processFile(fileName, content, rules);
 	}
-	
+
 	@Override
 	protected String getPreRulePackage() {
 		return super.getPreRulePackage() + "." + RENAMING;
