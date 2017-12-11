@@ -1,4 +1,4 @@
-package eu.jsparrow.sample.postRule.publicFieldRenaming.renaming;
+package eu.jsparrow.sample.postRule.renaming.publicFieldRenaming;
 
 @SuppressWarnings("nls")
 public class ClassWithUnreferencedFields {
