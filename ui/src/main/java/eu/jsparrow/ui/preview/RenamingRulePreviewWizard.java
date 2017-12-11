@@ -260,28 +260,23 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	}
 
 	/**
-	 * Disposes the control of all pages of type
-	 * {@link RenamingRulePreviewWizardPage}.
-	 */
-	private void disposePages() {
-		IWizardPage[] pages = getPages();
-		for (IWizardPage page : pages) {
-			if (page instanceof RenamingRulePreviewWizardPage) {
-				((RenamingRulePreviewWizardPage) page).disposeControl();
-			}
-		}
-	}
-
-	/**
 	 * Called from {@link WizardDialog} when Next button is pressed. Triggers
 	 * recalculation if needed. Disposes control from current page which wont be
 	 * visible any more
 	 */
 	public void pressedNext() {
-		if (null != getContainer()) {
-			((RenamingRulePreviewWizardPage) getContainer().getCurrentPage()).disposeControl();
+		IWizardContainer container = getContainer();
+		if(container == null) {
+			return;
 		}
-		getNextPage(getContainer().getCurrentPage());
+		
+		IWizardPage currentPage = container.getCurrentPage();
+		if(currentPage instanceof RenamingRulePreviewWizardPage) {
+			((RenamingRulePreviewWizardPage) currentPage).disposeControl();
+		}
+
+		getNextPage(currentPage);
+
 	}
 
 	/**
@@ -289,14 +284,17 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 * all controls to be recalculated and created when needed
 	 */
 	public void pressedBack() {
-		if (null != getContainer()) {
-			if (getContainer().getCurrentPage() instanceof RefactoringSummaryWizardPage) {
-				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
-			} else {
-				disposePages();
-			}
-			getPreviousPage(getContainer().getCurrentPage());
+		IWizardContainer container = getContainer();
+		if(container == null) {
+			return;
 		}
+
+		IWizardPage currentPage = container.getCurrentPage();
+		if (currentPage instanceof RefactoringSummaryWizardPage) {
+			((RefactoringSummaryWizardPage) currentPage).disposeCompareInputControl();
+		}
+		
+		getPreviousPage(currentPage);
 	}
 
 	public void removeMetaData(FieldMetaData fieldData) {
