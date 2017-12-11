@@ -267,17 +267,16 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 */
 	public void pressedNext() {
 		IWizardContainer container = getContainer();
-		if(container == null) {
+		if (container == null) {
 			return;
 		}
-		
+
 		IWizardPage currentPage = container.getCurrentPage();
-		if(currentPage instanceof RenamingRulePreviewWizardPage) {
+		if (currentPage instanceof RenamingRulePreviewWizardPage) {
 			((RenamingRulePreviewWizardPage) currentPage).disposeControl();
 		}
 
 		getNextPage(currentPage);
-
 	}
 
 	/**
@@ -286,7 +285,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 */
 	public void pressedBack() {
 		IWizardContainer container = getContainer();
-		if(container == null) {
+		if (container == null) {
 			return;
 		}
 
@@ -294,7 +293,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		if (currentPage instanceof RefactoringSummaryWizardPage) {
 			((RefactoringSummaryWizardPage) currentPage).disposeCompareInputControl();
 		}
-		
+
 		getPreviousPage(currentPage);
 	}
 
