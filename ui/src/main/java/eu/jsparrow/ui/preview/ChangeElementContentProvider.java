@@ -1,5 +1,8 @@
 package eu.jsparrow.ui.preview;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
 /**
@@ -50,6 +53,19 @@ public class ChangeElementContentProvider implements ITreeContentProvider {
 	 */
 	public Object[] getElements(Object element) {
 		if (element instanceof DocumentChangeWrapper[]) {
+			Arrays.asList((DocumentChangeWrapper[]) element)
+				.sort(new Comparator<DocumentChangeWrapper>() {
+					@Override
+					public int compare(DocumentChangeWrapper e1, DocumentChangeWrapper e2) {
+						if (e1.getOldIdentifier()
+							.equals(e2.getOldIdentifier())) {
+							return e1.getCompilationUnitName()
+								.compareTo(e2.getCompilationUnitName());
+						}
+						return e1.getOldIdentifier()
+							.compareTo(e2.getOldIdentifier());
+					}
+				});
 			return (DocumentChangeWrapper[]) element;
 		}
 		return new Object[] {};

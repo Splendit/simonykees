@@ -40,6 +40,7 @@ import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RenamingRulePreviewWizard;
+import eu.jsparrow.ui.preview.RenamingRulePreviewWizardPage;
 import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
@@ -382,7 +383,10 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 					}
 					
 					private void summaryButtonPressed() {
-						renamingPreviewWizard.summaryButtonPressed();
+						if (getCurrentPage() instanceof RenamingRulePreviewWizardPage) {
+							renamingPreviewWizard.updateViewsOnNavigation(getCurrentPage());
+							((RenamingRulePreviewWizardPage) getCurrentPage()).disposeControl();
+						}
 						showPage(renamingPreviewWizard.getSummaryPage());
 					}
 				};
