@@ -303,8 +303,8 @@ public class ASTNodeUtil {
 	 *         otherwise.
 	 */
 	public static boolean isPackageProtected(@SuppressWarnings("rawtypes") List modifiers) {
-		return modifiers.isEmpty() || (!hasModifier(modifiers, Modifier::isPrivate)
-				&& !hasModifier(modifiers, Modifier::isProtected) && !hasModifier(modifiers, Modifier::isPublic));
+		return modifiers.isEmpty() || (!hasModifier(modifiers, Modifier::isPublic)
+				&& !hasModifier(modifiers, Modifier::isProtected) && !hasModifier(modifiers, Modifier::isPrivate));
 	}
 
 	/**
