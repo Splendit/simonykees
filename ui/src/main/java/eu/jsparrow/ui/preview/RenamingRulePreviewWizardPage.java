@@ -404,9 +404,9 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		}
 		viewer.setSelection(new StructuredSelection(selectedDocWrapper));
 	}
-	
+
 	public void setSelection() {
-		viewer.setSelection(new StructuredSelection(selectedDocWrapper));		
+		viewer.setSelection(new StructuredSelection(selectedDocWrapper));
 	}
 
 	/**
