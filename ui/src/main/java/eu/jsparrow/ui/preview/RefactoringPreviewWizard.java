@@ -29,6 +29,7 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.ResourceHelper;
 
 /**
  * This {@link Wizard} holds a {@link RefactoringPreviewWizardPage} for every
@@ -39,15 +40,16 @@ import eu.jsparrow.ui.util.LicenseUtil;
  * @author Ludwig Werzowa, Andreja Sambolec
  * @since 0.9
  */
-public class RefactoringPreviewWizard extends Wizard {
+public class RefactoringPreviewWizard extends AbstractPreviewWizard {
+
+	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
 
 	private RefactoringPipeline refactoringPipeline;
 
 	private Shell shell;
 
-	private RefactoringSummaryWizardPage summaryPage;
-
 	private RefactoringPreviewWizardModel model;
+	protected RefactoringSummaryWizardPage summaryPage;
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
@@ -56,6 +58,12 @@ public class RefactoringPreviewWizard extends Wizard {
 			.getActiveWorkbenchWindow()
 			.getShell();
 		setNeedsProgressMonitor(true);
+		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
+	}
+
+	@Override
+	public String getWindowTitle() {
+		return Messages.SummaryWizardPage_RunSummary;
 	}
 
 	/*
@@ -78,21 +86,16 @@ public class RefactoringPreviewWizard extends Wizard {
 					addPage(previewPage);
 				}
 			});
-		summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model);
 		if (!(refactoringPipeline.getRules()
 			.size() == 1
 				&& refactoringPipeline.getRules()
 					.get(0) instanceof StandardLoggerRule)) {
+			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model);
 			addPage(summaryPage);
 		}
 	}
 
 	@Override
-	public IWizardPage getPreviousPage(IWizardPage page) {
-		updateViewsOnNavigation(page);
-		return super.getPreviousPage(page);
-	}
-
 	public void updateViewsOnNavigation(IWizardPage page) {
 		if (page instanceof RefactoringPreviewWizardPage) {
 			if (!((RefactoringPreviewWizardPage) page).getUnselectedChange()
@@ -110,12 +113,6 @@ public class RefactoringPreviewWizard extends Wizard {
 				((RefactoringPreviewWizardPage) page).populateViews(false);
 			}
 		}
-	}
-
-	@Override
-	public IWizardPage getNextPage(IWizardPage page) {
-		updateViewsOnNavigation(page);
-		return super.getNextPage(page);
 	}
 
 	/**
@@ -235,8 +232,7 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	private void tryDoAdditionalRefactoring(IProgressMonitor monitor, IWizardPage page) {
 		try {
-			refactoringPipeline.doAdditionalRefactoring(
-					((RefactoringPreviewWizardPage) page).getUnselectedChange(),
+			refactoringPipeline.doAdditionalRefactoring(((RefactoringPreviewWizardPage) page).getUnselectedChange(),
 					((RefactoringPreviewWizardPage) page).getRule(), monitor);
 			if (monitor.isCanceled()) {
 				refactoringPipeline.clearStates();
@@ -254,7 +250,6 @@ public class RefactoringPreviewWizard extends Wizard {
 	@Override
 	public boolean performCancel() {
 		refactoringPipeline.clearStates();
-		Activator.setRunning(false);
 		return super.performCancel();
 	}
 
@@ -327,23 +322,14 @@ public class RefactoringPreviewWizard extends Wizard {
 		}
 	}
 
-	@Override
-	public boolean canFinish() {
-		if (!LicenseUtil.getInstance()
-			.isFullLicense()) {
-			return false;
-		}
-		return super.canFinish();
-	}
-
-	public RefactoringSummaryWizardPage getSummaryPage() {
-		return summaryPage;
-	}
-
 	public RefactoringPreviewWizardModel getModel() {
 		if (model == null) {
 			model = new RefactoringPreviewWizardModel();
 		}
 		return model;
+	}
+
+	public RefactoringSummaryWizardPage getSummaryPage() {
+		return this.summaryPage;
 	}
 }

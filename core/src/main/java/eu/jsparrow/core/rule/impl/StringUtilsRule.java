@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ import eu.jsparrow.i18n.Messages;
  */
 public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 
-	private final String version31 = "3.1"; //$NON-NLS-1$
+	private static final String VERSION_3_1 = "3.1"; //$NON-NLS-1$
 
 	Logger logger = LoggerFactory.getLogger(StringUtilsRule.class);
 
@@ -45,10 +46,11 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 	public StringUtilsRule() {
 		super();
 		this.visitorClass = StringUtilsASTVisitor.class;
-		this.supportedVersion.add(version31);
+		this.supportedVersion.add(VERSION_3_1);
 		this.id = "StringUtils"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription(Messages.StringUtilsRule_name, Messages.StringUtilsRule_description,
-				Duration.ofMinutes(10), TagUtil.getTagsForRule(this.getClass()));
+		this.ruleDescription = new RuleDescription(Messages.StringUtilsRule_name,
+				Messages.StringUtilsRule_description, Duration.ofMinutes(10),
+				TagUtil.getTagsForRule(this.getClass()));
 	}
 
 	@Override
@@ -64,30 +66,16 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 			if (classtype != null) {
 
 				IPackageFragmentRoot commonsLangLib = getProject(classtype.getParent());
-				// file with path to libary jar
-				File file = new File(commonsLangLib.getPath()
-					.toString());
+				if (commonsLangLib != null) {
+					// file with path to libary jar
+					File file = new File(commonsLangLib.getPath()
+						.toString());
 
-				try (JarFile jar = new java.util.jar.JarFile(file)) {
-
-					Manifest manifest = jar.getManifest();
-					Attributes attributes = manifest.getMainAttributes();
-
-					return attributes != null && attributes.keySet()
-						.stream()
-						.anyMatch(attribute -> {
-							Name key = (Name) attribute;
-							String keyword = key.toString();
-							return "Implementation-Version".equals(keyword) && supportedVersion.stream() //$NON-NLS-1$
-								.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s));
-						});
-
-				} catch (IOException e) {
-					logger.debug("Jar Manifest load error in:", e); //$NON-NLS-1$
-					// Resolving version failed, rule cant be executed
+					return isImplementationVersionValid(file);
 				}
 			} else {
-				logger.debug(String.format("Class not in classpath [%s]", fullyQuallifiedClassName)); //$NON-NLS-1$
+				String loggerDebug = NLS.bind(Messages.StringUtilsRule_classNotInClassPath, fullyQuallifiedClassName);
+				logger.debug(loggerDebug);
 			}
 		} catch (JavaModelException e) {
 			logger.error(e.getMessage(), new ITypeNotFoundRuntimeException());
@@ -109,5 +97,28 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 			return (IPackageFragmentRoot) parent;
 		}
 		return getProject(parent);
+	}
+
+	private boolean isImplementationVersionValid(File file) {
+		try (JarFile jar = new java.util.jar.JarFile(file)) {
+
+			Manifest manifest = jar.getManifest();
+			Attributes attributes = manifest.getMainAttributes();
+
+			if (attributes != null) {
+				for (Object attribute : attributes.keySet()) {
+					Name key = (Name) attribute;
+					String keyword = key.toString();
+					if ("Implementation-Version".equals(keyword)) { //$NON-NLS-1$
+						return (supportedVersion.stream()
+							.anyMatch(s -> StringUtils.startsWith(attributes.getValue(key), s))) ? true : false;
+					}
+				}
+			}
+		} catch (IOException e) {
+			logger.debug("Jar Manifest load error in:", e); //$NON-NLS-1$
+			// Resolving version failed, rule cant be executed
+		}
+		return false;
 	}
 }

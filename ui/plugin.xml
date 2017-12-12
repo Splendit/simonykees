@@ -3,7 +3,10 @@
 <plugin>
 	<extension point="org.eclipse.ui.menus">
 		<menuContribution locationURI="popup:org.eclipse.jdt.ui.PackageExplorer?after=org.eclipse.jdt.ui.refactoring.menu">
-			<menu label="%menu.label">
+			<menu
+         icon="icons/jSparrow_active_icon_16.png"
+         id="jsparrow.menu"
+         label="%menu.label">
 				<visibleWhen>
 		           <with variable="activeMenuSelection">
 		            <iterate
@@ -21,25 +24,38 @@
 				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
 					style="push"/>
+				<command commandId="eu.jsparrow.ui.RenameFieldsRuleWizardHandler" 
+					label="%command.label.rename_fields_rule_wizard" 
+					style="push"/>
 			</menu>
 		</menuContribution>
 		<menuContribution locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu?after=org.eclipse.jdt.ui.refactoring.menu">
-			<menu label="%menu.label">
+			<menu
+         icon="icons/jSparrow_active_icon_16.png"
+         label="%menu.label">
 				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler" 
 					label="%command.label.select_rules_wizard" 
 					style="push"/>
 				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
+					style="push"/>
+				<command commandId="eu.jsparrow.ui.RenameFieldsRuleWizardHandler" 
+					label="%command.label.rename_fields_rule_wizard" 
 					style="push"/>
 			</menu>
 		</menuContribution>
 		<menuContribution locationURI="popup:#CompilationUnitEditorContext?after=org.eclipse.jdt.ui.refactoring.menu">
-			<menu label="%menu.label">
+			<menu
+         icon="icons/jSparrow_active_icon_16.png"
+         label="%menu.label">
 				<command commandId="eu.jsparrow.ui.SelectRulesWizardHandler" 
 					label="%command.label.select_rules_wizard" 
 					style="push"/>
 				<command commandId="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 					label="%command.label.logger_rule_wizard" 
+					style="push"/>
+				<command commandId="eu.jsparrow.ui.RenameFieldsRuleWizardHandler" 
+					label="%command.label.rename_fields_rule_wizard" 
 					style="push"/>
 			</menu>
 		</menuContribution>
@@ -51,6 +67,9 @@
 		<command defaultHandler="eu.jsparrow.ui.handler.LoggerRuleWizardHandler" 
 			id="eu.jsparrow.ui.LoggerRuleWizardHandler" 
 			name="%command.name.logger_rule_wizard_handler"/>
+		<command defaultHandler="eu.jsparrow.ui.handler.RenameFieldsRuleWizardHandler" 
+			id="eu.jsparrow.ui.RenameFieldsRuleWizardHandler" 
+			name="%command.name.rename_fields_wizard_handler"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page class="eu.jsparrow.ui.preference.SimonykeesPreferencePage" 

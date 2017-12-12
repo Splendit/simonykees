@@ -26,6 +26,7 @@ public class Messages extends NLS {
 	public static String AbstractSimonykeesHandler_error_activePartId_unknown;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_editor;
 	public static String AbstractSimonykeesHandler_error_unexpected_object_explorer;
+	public static String Activator_couldNotDeleteFileWithPath;
 	public static String Activator_debug_collectCompilationUnits;
 	public static String Activator_debug_commitRefactoring;
 	public static String Activator_debug_createRefactoringStates;
@@ -117,6 +118,7 @@ public class Messages extends NLS {
 	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;
 	public static String MultiCatchRule_name;
+
 	public static String FieldNameConventionRule_description;
 	public static String FieldNameConventionRule_name;
 	public static String FlatMapInsteadOfNestedLoopsRule_description;
@@ -277,12 +279,13 @@ public class Messages extends NLS {
 	public static String RenameFieldsRuleWizardPageModel_dollarSignReplacementOption_upperCase;
 	public static String RenameFieldsRuleWizardPageModel_scopeOption_project;
 	public static String RenameFieldsRuleWizardPageModel_scopeOption_workspace;
-	public static String RenameFieldsRuleWizardPageModel_typeOption_packageProtectedFields;
+	public static String RenameFieldsRuleWizardPageModel_typeOption_packagePrivateFields;
 	public static String RenameFieldsRuleWizardPageModel_typeOption_privateFields;
 	public static String RenameFieldsRuleWizardPageModel_typeOption_protectedFields;
 	public static String RenameFieldsRuleWizardPageModel_typeOption_publicFields;
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_leaveAsIs;
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_upperCase;
+	public static String RenamingRulePreviewWizardPage_RenameFields;
 	public static String SelectRulesWizardHandler_allready_running;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
 	public static String SelectRulesWizardHandler_noFileWithoutError;
@@ -379,6 +382,7 @@ public class Messages extends NLS {
 	public static String StringConcatToPlusRule_name;
 	public static String StringLiteralEqualityCheckRule_description;
 	public static String StringLiteralEqualityCheckRule_name;
+	public static String StringUtilsRule_classNotInClassPath;
 	public static String StringUtilsRule_description;
 	public static String StringUtilsRule_name;
 	public static String SummaryWizardPage_Files;

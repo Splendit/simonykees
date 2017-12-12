@@ -20,8 +20,9 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RuleDescription;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.util.TagUtil;
-import eu.jsparrow.core.visitor.renaming.FieldMetadata;
+import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.PublicFieldsRenamingASTVisitor;
 import eu.jsparrow.i18n.Messages;
 
@@ -34,15 +35,16 @@ import eu.jsparrow.i18n.Messages;
  */
 public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenamingASTVisitor> {
 
-	private List<FieldMetadata> metaData;
-	private List<FieldMetadata> todosMetaData;
+	private List<FieldMetaData> metaData;
+	private List<FieldMetaData> todosMetaData;
 
-	public PublicFieldsRenamingRule(List<FieldMetadata> metaData, List<FieldMetadata> todosMetaData) {
+	public PublicFieldsRenamingRule(List<FieldMetaData> metaData, List<FieldMetaData> todosMetaData) {
 		this.visitorClass = PublicFieldsRenamingASTVisitor.class;
 		this.metaData = metaData;
 		this.todosMetaData = todosMetaData;
+		this.id = "PublicFieldRenaming"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.PublicFieldsRenamingRule_name,
-				Messages.PublicFieldsRenamingRule_description, Duration.ofMinutes(5), // FIXME value for duration
+				Messages.PublicFieldsRenamingRule_description, Duration.ofMinutes(15),
 				TagUtil.getTagsForRule(this.getClass()));
 	}
 
@@ -53,20 +55,25 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 
 	@Override
 	public PublicFieldsRenamingASTVisitor visitorFactory() {
-		return new PublicFieldsRenamingASTVisitor(metaData, todosMetaData);
+		PublicFieldsRenamingASTVisitor visitor = new PublicFieldsRenamingASTVisitor(metaData, todosMetaData);
+		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
+		return visitor;
+
 	}
 
 	/**
 	 * Computes the list of document changes related to the renaming of a field
-	 * represented by the given {@link FieldMetadata}.
+	 * represented by the given {@link FieldMetaData}.
 	 * 
 	 * @param metaData
-	 *            the metadata containing information about a field being
+	 *            the metaData containing information about a field being
 	 *            renamed.
 	 * @return the list of document changes for all compilation units that are
 	 *         affected by the renaming of the field.
+	 * @throws JavaModelException
 	 */
-	public Map<ICompilationUnit, DocumentChange> computeDocumentChangesPerFiled(FieldMetadata metaData) {
+	public Map<ICompilationUnit, DocumentChange> computeDocumentChangesPerFiled(FieldMetaData metaData)
+			throws JavaModelException {
 		List<ICompilationUnit> targetCompilationUnits = metaData.getTargetICompilationUnits();
 		Map<ICompilationUnit, DocumentChange> documentChanges = new HashMap<>();
 		for (ICompilationUnit iCompilationUnit : targetCompilationUnits) {
@@ -75,7 +82,8 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 				String newIdentifier = metaData.getNewIdentifier();
 				int newIdentifierLength = newIdentifier.length();
 				VariableDeclarationFragment oldFragment = metaData.getFieldDeclaration();
-				Document doc = metaData.getDocument(iCompilationUnit);
+				Document doc = new Document(iCompilationUnit.getPrimary()
+					.getSource());
 				DocumentChange documentChange = new DocumentChange(
 						iCompilationUnit.getElementName() + " - " + getPathString(iCompilationUnit), doc); //$NON-NLS-1$
 				TextEdit rootEdit = new MultiTextEdit();
@@ -84,9 +92,7 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 					.getLength() - newIdentifierLength;
 				if (iCompilationUnit.getPath()
 					.toString()
-					.equals(metaData.getCompilationUnit()
-						.getJavaElement()
-						.getPath()
+					.equals(metaData.getDeclarationPath()
 						.toString())) {
 					int declOffset = oldFragment.getStartPosition();
 					InsertEdit declInsertEdit = new InsertEdit(declOffset, newIdentifier);
@@ -127,20 +133,6 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 			.getPath()
 			.toString();
 		return temp.startsWith("/") ? temp.substring(1) : temp; //$NON-NLS-1$
-	}
-
-	/**
-	 * Clears all the text edits related to the renaming of a field.
-	 * 
-	 * @param metaData
-	 *            the metadata representing the field being renamed.
-	 */
-	public void clearTextEdits(FieldMetadata metaData) {
-		List<ICompilationUnit> targetCompilationUnits = metaData.getTargetICompilationUnits();
-		for (ICompilationUnit iCompilationUnit : targetCompilationUnits) {
-			TextEditGroup editGroup = metaData.getTextEditGroup(iCompilationUnit);
-			editGroup.clearTextEdits();
-		}
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package eu.jsparrow.core;
 
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -61,12 +62,15 @@ public class AllRulesTest extends AbstractRulesTest {
 	@Parameters(name = "{index}: test file[{0}]")
 	public static Collection<Object[]> data() throws Exception {
 		List<Object[]> data = new ArrayList<>();
-		for (Path preRulePath : Files.newDirectoryStream(Paths.get(RulesTestUtil.PRERULE_DIRECTORY),
-				RulesTestUtil.RULE_SUFFIX)) {
-			Path postRulePath = Paths.get(POSTRULE_DIRECTORY, preRulePath.getFileName()
-				.toString());
-			data.add(new Object[] { preRulePath.getFileName()
-				.toString(), preRulePath, postRulePath });
+
+		try (DirectoryStream<Path> directoryStream = Files
+			.newDirectoryStream(Paths.get(RulesTestUtil.PRERULE_DIRECTORY), RulesTestUtil.RULE_SUFFIX)) {
+			for (Path preRulePath : directoryStream) {
+				Path postRulePath = Paths.get(POSTRULE_DIRECTORY, preRulePath.getFileName()
+					.toString());
+				data.add(new Object[] { preRulePath.getFileName()
+					.toString(), preRulePath, postRulePath });
+			}
 		}
 		return data;
 	}

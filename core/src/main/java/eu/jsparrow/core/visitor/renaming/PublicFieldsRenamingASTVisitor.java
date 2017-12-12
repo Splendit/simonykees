@@ -11,6 +11,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -26,7 +27,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * A visitor for renaming the name of a field and its references. Requires a
- * list of {@link FieldMetadata} for providing information about the fields to
+ * list of {@link FieldMetaData} for providing information about the fields to
  * be renamed and the compilation units containing references of it.
  * <p/>
  * Creates a {@link TextEditGroup} for storing the all the updates related to
@@ -45,11 +46,11 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	private static final String TODO_TAG = "TODO"; //$NON-NLS-1$
 	private static final String STARTING_POSITION = "field-starting-position"; //$NON-NLS-1$
 
-	private Map<String, FieldMetadata> cuRelatedReplacements;
+	private Map<String, FieldMetaData> cuRelatedReplacements;
 	private Map<String, List<String>> cuRelatedUnmodifiable;
-	private List<FieldMetadata> metaData;
+	private List<FieldMetaData> metaData;
 	private ICompilationUnit iCompilationUnit;
-	private List<FieldMetadata> unmodifiableFields;
+	private List<FieldMetaData> unmodifiableFields;
 	private Map<ICompilationUnit, TextEditGroup> todosEditGroups;
 
 	/**
@@ -62,7 +63,7 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 * @param unmodifiableFields
 	 *            metadata for the fields to insert comments to
 	 */
-	public PublicFieldsRenamingASTVisitor(List<FieldMetadata> metaData, List<FieldMetadata> unmodifiableFields) {
+	public PublicFieldsRenamingASTVisitor(List<FieldMetaData> metaData, List<FieldMetaData> unmodifiableFields) {
 		this.metaData = metaData;
 		this.unmodifiableFields = unmodifiableFields;
 		this.todosEditGroups = new HashMap<>();
@@ -71,9 +72,9 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.iCompilationUnit = (ICompilationUnit) compilationUnit.getJavaElement();
-		this.cuRelatedReplacements = findCuRelatedData(compilationUnit);
-		this.cuRelatedReplacements.putAll(findRelatedCuDeclarationFragments(compilationUnit));
-		this.cuRelatedUnmodifiable = findCuRelatedUnmodifiable(iCompilationUnit);
+		this.cuRelatedReplacements = findCURelatedData(compilationUnit);
+		this.cuRelatedReplacements.putAll(findRelatedCUDeclarationFragments(compilationUnit));
+		this.cuRelatedUnmodifiable = findCURelatedUnmodifiable(iCompilationUnit);
 		return true;
 	}
 
@@ -93,12 +94,22 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 
 	@Override
 	public boolean visit(FieldDeclaration fieldDeclaration) {
-		String fieldKeyId = calcFieldIdentifier(fieldDeclaration);
+		String fieldKeyId = calculateFieldIdentifier(fieldDeclaration);
 		if (cuRelatedUnmodifiable.containsKey(fieldKeyId)) {
 			List<String> identifiers = cuRelatedUnmodifiable.get(fieldKeyId);
 			insertJavadocNode(fieldDeclaration, identifiers);
 		}
 		return true;
+	}
+
+	@Override
+	public boolean visit(AnonymousClassDeclaration anonymousClass) {
+		/*
+		 * Fields declared in the body of an anonymous class are ignored because
+		 * the search engine does not find their references correctly. 
+		 * see SIM-934
+		 */
+		return false;
 	}
 
 	/**
@@ -164,25 +175,20 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 *            the compilation unit to search for.
 	 * @return a map representing the all the meta data that are related to the
 	 *         fields declared in the given compilation unit. Makes use of
-	 *         {@link #calcIdentifier(SimpleName)} for computing a unique
+	 *         {@link #calculateIdentifier(SimpleName)} for computing a unique
 	 *         identifier of a field.
 	 */
-	private Map<String, FieldMetadata> findRelatedCuDeclarationFragments(CompilationUnit compilationUnit) {
+	private Map<String, FieldMetaData> findRelatedCUDeclarationFragments(CompilationUnit compilationUnit) {
 
-		Map<String, FieldMetadata> declarations = new HashMap<>();
+		IPath path = compilationUnit.getJavaElement()
+			.getPath();
+		Map<String, FieldMetaData> declarations = new HashMap<>();
 		metaData.stream()
-			.filter(mData -> {
-				IPath originDeclarationPath = mData.getCompilationUnit()
-					.getJavaElement()
-					.getPath();
-				IPath path = compilationUnit.getJavaElement()
-					.getPath();
-				return matchingIPaths(originDeclarationPath, path);
-			})
+			.filter(mData -> matchingIPaths(mData.getDeclarationPath(), path))
 			.forEach(mData -> {
 				VariableDeclarationFragment fragment = mData.getFieldDeclaration();
 				SimpleName oldName = fragment.getName();
-				declarations.put(calcIdentifier(oldName), mData);
+				declarations.put(calculateIdentifier(oldName), mData);
 			});
 
 		return declarations;
@@ -211,22 +217,22 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 *            compilation unit to search for.
 	 * @return a map representing the all the meta data that are related to the
 	 *         fields referenced in the given compilation unit. Makes use of
-	 *         {@link #calcIdentifier(SimpleName)} for computing a unique
+	 *         {@link #calculateIdentifier(SimpleName)} for computing a unique
 	 *         identifier of a field.
 	 */
-	private Map<String, FieldMetadata> findCuRelatedData(CompilationUnit cu) {
+	private Map<String, FieldMetaData> findCURelatedData(CompilationUnit cu) {
+
 		IResource cuResource = cu.getJavaElement()
 			.getResource();
-		List<ReferenceSearchMatch> relatedcuReferences = metaData.stream()
-			.flatMap(mData -> mData.getReferences()
-				.stream())
-			.filter(match -> isMatchingResource(cuResource, match))
-			.collect(Collectors.toList());
-		Map<String, FieldMetadata> oldToNewKeys = new HashMap<>();
-		relatedcuReferences.forEach(match -> {
-			FieldMetadata relatedMatchData = match.getMetadata();
-			String oldName = match.getMatchedName();
-			oldToNewKeys.put(calcIdentifier(oldName, match.getOffset()), relatedMatchData);
+		Map<String, FieldMetaData> oldToNewKeys = new HashMap<>();
+		metaData.forEach(mData -> {
+			List<ReferenceSearchMatch> references = mData.getReferences();
+			references.stream()
+				.filter(reference -> isMatchingResource(cuResource, reference))
+				.forEach(match -> {
+					String oldName = match.getMatchedName();
+					oldToNewKeys.put(calculateIdentifier(oldName, match.getOffset()), mData);
+				});
 		});
 
 		return oldToNewKeys;
@@ -242,20 +248,16 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 *         list of the declared identifiers that need to be mentioned in the
 	 *         comment node.
 	 */
-	private Map<String, List<String>> findCuRelatedUnmodifiable(ICompilationUnit compilationUnit) {
+	private Map<String, List<String>> findCURelatedUnmodifiable(ICompilationUnit compilationUnit) {
 		IPath currentPath = compilationUnit.getPath();
 		Map<String, List<String>> data = new HashMap<>();
 
 		unmodifiableFields.stream()
-			.filter(mData -> {
-				CompilationUnit cu = mData.getCompilationUnit();
-				return matchingIPaths(cu.getJavaElement()
-					.getPath(), currentPath);
-			})
+			.filter(mData -> matchingIPaths(mData.getDeclarationPath(), currentPath))
 			.forEach(mData -> {
 				FieldDeclaration field = (FieldDeclaration) mData.getFieldDeclaration()
 					.getParent();
-				String key = calcFieldIdentifier(field);
+				String key = calculateFieldIdentifier(field);
 				if (data.containsKey(key)) {
 					List<String> fragmentNames = data.get(key);
 					fragmentNames.add(mData.getNewIdentifier());
@@ -289,28 +291,28 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	}
 
 	/**
-	 * Uses {@link #calcIdentifier(SimpleName)} to compute a unique key for a
-	 * given simple name, and checks whether there is an object with the
+	 * Uses {@link #calculateIdentifier(SimpleName)} to compute a unique key for
+	 * a given simple name, and checks whether there is an object with the
 	 * computed key in the map {@link #cuRelatedReplacements}.
 	 * 
 	 * @param simpleName
 	 *            a simple name to check if there is a replacement recorded for
 	 *            it.
-	 * @return an optional of {@link FieldMetadata} that contains the relevant
+	 * @return an optional of {@link FieldMetaData} that contains the relevant
 	 *         information for the replacement, or an empty optional if no
 	 *         replacement information is stored for the given simple name.
 	 */
-	private Optional<FieldMetadata> findReplacement(SimpleName simpleName) {
-		String nameIdentifier = calcIdentifier(simpleName);
+	private Optional<FieldMetaData> findReplacement(SimpleName simpleName) {
+		String nameIdentifier = calculateIdentifier(simpleName);
 		if (cuRelatedReplacements.containsKey(nameIdentifier)) {
-			FieldMetadata replacement = cuRelatedReplacements.get(nameIdentifier);
+			FieldMetaData replacement = cuRelatedReplacements.get(nameIdentifier);
 			return Optional.of(replacement);
 		}
 		return Optional.empty();
 	}
 
 	/**
-	 * Uses {@link #calcIdentifier(String, int)} for computing a unique key
+	 * Uses {@link #calculateIdentifier(String, int)} for computing a unique key
 	 * identifier for a given simple name. The identifier will be unique per
 	 * compilation unit.
 	 * 
@@ -318,8 +320,8 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 *            a simple name to generate a key identifier for.
 	 * @return a key identifier
 	 */
-	private String calcIdentifier(SimpleName name) {
-		return calcIdentifier(name.getIdentifier(), name.getStartPosition());
+	private String calculateIdentifier(SimpleName name) {
+		return calculateIdentifier(name.getIdentifier(), name.getStartPosition());
 	}
 
 	/**
@@ -333,15 +335,15 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 	 *            compilation unit.
 	 * @return the joined string.
 	 */
-	private String calcIdentifier(String identifier, int startingPosition) {
+	private String calculateIdentifier(String identifier, int startingPosition) {
 		return identifier + DASH + startingPosition;
 	}
 
-	private String calcFieldIdentifier(int startingPosition) {
+	private String calculateFieldIdentifier(int startingPosition) {
 		return STARTING_POSITION + ":" + startingPosition; //$NON-NLS-1$
 	}
 
-	private String calcFieldIdentifier(FieldDeclaration field) {
-		return calcFieldIdentifier(field.getStartPosition());
+	private String calculateFieldIdentifier(FieldDeclaration field) {
+		return calculateFieldIdentifier(field.getStartPosition());
 	}
 }
