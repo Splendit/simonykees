@@ -84,7 +84,6 @@ public class TestCornerCasesTryWithResourceRule {
 
 		if (record.getThrown() != null) {
 			try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
-				// CHECKSTYLE:OFF
 				record.getThrown()
 					.printStackTrace(pw);
 				sb.append(sw.toString());
@@ -109,7 +108,6 @@ public class TestCornerCasesTryWithResourceRule {
 
 		if (record.getThrown() != null) {
 			try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
-				// CHECKSTYLE:OFF
 				record.getThrown()
 					.printStackTrace(pw);
 				sb.append(sw.toString());

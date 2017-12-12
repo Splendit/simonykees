@@ -81,12 +81,12 @@ public class TestCornerCasesTryWithResourceRule {
 		if (record.getThrown() != null) {
 			try (final StringWriter sw = new StringWriter();
 					final PrintWriter pw = new PrintWriter(sw)) {
-	            //CHECKSTYLE:OFF
-	            record.getThrown().printStackTrace(pw);
-	            sb.append(sw.toString());
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	        }
+				record.getThrown()
+					.printStackTrace(pw);
+				sb.append(sw.toString());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -105,12 +105,12 @@ public class TestCornerCasesTryWithResourceRule {
 		if (record.getThrown() != null) {
 			try (final StringWriter sw = new StringWriter();
 					final PrintWriter pw = new PrintWriter(sw)) {
-	            //CHECKSTYLE:OFF
-	            record.getThrown().printStackTrace(pw);
-	            sb.append(sw.toString());
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	        }
+				record.getThrown()
+					.printStackTrace(pw);
+				sb.append(sw.toString());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
