@@ -152,6 +152,11 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		createFileView(sashForm);
 		createPreviewViewer(sashForm);
 
+		if (!changesWrapperList.isEmpty()) {
+			this.selectedDocWrapper = (DocumentChangeWrapper) ((ChangeElementContentProvider) viewer
+				.getContentProvider()).getElements(viewer.getInput())[0];
+		}
+
 		/*
 		 * sets height relation between children to be 1:3 when it has two
 		 * children
@@ -185,6 +190,11 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 		viewer.setComparator(new ViewerComparator() {
 			@Override
 			public int compare(Viewer viewer, Object e1, Object e2) {
+				if (((DocumentChangeWrapper) e1).getOldIdentifier()
+					.equals(((DocumentChangeWrapper) e2).getOldIdentifier())) {
+					return ((DocumentChangeWrapper) e1).getCompilationUnitName()
+						.compareTo(((DocumentChangeWrapper) e2).getCompilationUnitName());
+				}
 				return ((DocumentChangeWrapper) e1).getOldIdentifier()
 					.compareTo(((DocumentChangeWrapper) e2).getOldIdentifier());
 			}
@@ -217,17 +227,29 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 
 		FieldMetaData selectedFieldData = selectedWrapper.getFieldData();
 		if (checked) {
-			uncheckedFields.remove(selectedFieldData);
-			if (!recheckedFields.contains(selectedFieldData)) {
-				recheckedFields.add(selectedFieldData);
-			}
+			markAsNewCheck(selectedFieldData);
 			wizard.addMetaData(selectedFieldData);
 		} else {
-			uncheckedFields.add(selectedFieldData);
-			recheckedFields.remove(selectedFieldData);
+			markAsNewUncheck(selectedFieldData);
 			wizard.removeMetaData(selectedFieldData);
 		}
 		populatePreviewViewer();
+	}
+
+	private void markAsNewUncheck(FieldMetaData selectedFieldData) {
+		if (recheckedFields.contains(selectedFieldData)) {
+			recheckedFields.remove(selectedFieldData);
+		} else if (!uncheckedFields.contains(selectedFieldData)) {
+			uncheckedFields.add(selectedFieldData);
+		}
+	}
+
+	private void markAsNewCheck(FieldMetaData selectedFieldData) {
+		if (uncheckedFields.contains(selectedFieldData)) {
+			uncheckedFields.remove(selectedFieldData);
+		} else if (!recheckedFields.contains(selectedFieldData)) {
+			recheckedFields.add(selectedFieldData);
+		}
 	}
 
 	/**
@@ -381,6 +403,19 @@ public class RenamingRulePreviewWizardPage extends WizardPage {
 			populatePreviewViewer();
 		}
 		viewer.setSelection(new StructuredSelection(selectedDocWrapper));
+	}
+
+	public void setSelection() {
+		viewer.setSelection(new StructuredSelection(selectedDocWrapper));
+	}
+
+	/**
+	 * Clears the flags which indicate whether new recalculation is needed as a
+	 * result of new un/selections.
+	 */
+	public void clearNewSelections() {
+		uncheckedFields.clear();
+		recheckedFields.clear();
 	}
 
 }

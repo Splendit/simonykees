@@ -31,7 +31,7 @@ import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 
 /**
  * Testing the renaming of the public fields which are directly referenced
- * outside the class. 
+ * outside the class.
  * 
  * @author Ardit Ymeri
  * @since 2.3.0
@@ -40,10 +40,12 @@ import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 @RunWith(Parameterized.class)
 @SuppressWarnings("nls")
 public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
-	private static final String RENAMING = "renaming";
-	private static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule.publicFieldRenaming";
-	private static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/publicFieldRenaming";
-	private static final String PRERULE_RENAMING_PACKAGE_NAME = "eu.jsparrow.sample.preRule." + RENAMING;
+	protected static final String RENAMING = "renaming";
+	protected static final String POSTRULE_PACKAGE = RulesTestUtil.BASE_PACKAGE + ".postRule." + RENAMING
+			+ ".publicFieldRenaming";
+	protected static final String POSTRULE_DIRECTORY = RulesTestUtil.BASE_DIRECTORY + "/postRule/" + RENAMING
+			+ "/publicFieldRenaming";
+	protected static final String PRERULE_RENAMING_PACKAGE_NAME = "eu.jsparrow.sample.preRule." + RENAMING;
 
 	private Path path;
 	private static List<FieldMetaData> metaData;
@@ -57,18 +59,8 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 	public static List<Object[]> loadCompilationUnits() throws JavaModelException, IOException {
 
 		IPackageFragment packageFragment = root.createPackageFragment(PRERULE_RENAMING_PACKAGE_NAME, true, null);
-		/*
-		 * Load iCompilationUnits on the prerule.renaming package
-		 */
-		List<ICompilationUnit> iCompilationUnits = new ArrayList<>();
-		for (Path renamingPath : loadUtilityClasses(RulesTestUtil.PRERULE_DIRECTORY + "/" + RENAMING)) {
-			String renamingClassName = renamingPath.getFileName()
-				.toString();
-			String renamingSource = new String(Files.readAllBytes(renamingPath), StandardCharsets.UTF_8);
-			ICompilationUnit iCompilationUnit = packageFragment.createCompilationUnit(renamingClassName, renamingSource,
-					true, null);
-			iCompilationUnits.add(iCompilationUnit);
-		}
+		List<CompilationUnit> compilationUnits = loadCompilationUnits(packageFragment,
+				RulesTestUtil.PRERULE_DIRECTORY + "/" + RENAMING);
 
 		/*
 		 * Parse each iCompilationUnit and visit them with
@@ -77,8 +69,7 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 		FieldDeclarationASTVisitor referencesVisitor = new FieldDeclarationASTVisitor(
 				new IJavaElement[] { packageFragment });
 		referencesVisitor.setAddTodo(true);
-		for (ICompilationUnit iCompilationUnit : iCompilationUnits) {
-			CompilationUnit compilationUnit = RefactoringUtil.parse(iCompilationUnit);
+		for (CompilationUnit compilationUnit : compilationUnits) {
 			compilationUnit.accept(referencesVisitor);
 		}
 
@@ -88,15 +79,34 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 		 */
 		metaData = referencesVisitor.getFieldMetaData();
 		todosMetaData = referencesVisitor.getUnmodifiableFieldMetaData();
-		Set<ICompilationUnit> targetICUs = referencesVisitor.getTargetIJavaElements();
 
+		return collectPaths(referencesVisitor.getTargetIJavaElements());
+	}
+
+	public static List<CompilationUnit> loadCompilationUnits(IPackageFragment packageFragment, String packagePath)
+			throws IOException, JavaModelException {
+		/*
+		 * Load iCompilationUnits on the prerule.renaming package
+		 */
+		List<CompilationUnit> compilationUnits = new ArrayList<>();
+		for (Path renamingPath : loadUtilityClasses(packagePath)) {
+			String renamingClassName = renamingPath.getFileName()
+				.toString();
+			String renamingSource = new String(Files.readAllBytes(renamingPath), StandardCharsets.UTF_8);
+			ICompilationUnit iCompilationUnit = packageFragment.createCompilationUnit(renamingClassName, renamingSource,
+					true, null);
+			compilationUnits.add(RefactoringUtil.parse(iCompilationUnit));
+		}
+		return compilationUnits;
+	}
+
+	public static List<Object[]> collectPaths(Set<ICompilationUnit> targetICUs) {
 		return targetICUs.stream()
 			.map(ICompilationUnit::getPath)
 			.map(iPath -> new Path[] { Paths.get(iPath.toFile()
 				.getPath()) })
 			.collect(Collectors.toList());
 	}
-	
 
 	@Parameters(name = "{index}: test file[{0}]")
 	public static Collection<Object[]> data() throws Exception {
@@ -106,8 +116,9 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 
 	@Test
 	public void testTransformation() throws Exception {
-		String fileName = path.getFileName().toString();
-		Path postRule = Paths.get(POSTRULE_DIRECTORY, RENAMING, fileName);
+		String fileName = path.getFileName()
+			.toString();
+		Path postRule = Paths.get(POSTRULE_DIRECTORY, fileName);
 		Path preRule = Paths.get(RulesTestUtil.PRERULE_DIRECTORY, RENAMING, fileName);
 		super.testTransformation(postRule, preRule, fileName, POSTRULE_PACKAGE);
 	}
@@ -117,5 +128,10 @@ public class PublicFieldsRenamingRuleTest extends AbstractRulesTest {
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules) throws Exception {
 		setPrerulePackage(PRERULE_RENAMING_PACKAGE_NAME);
 		return super.processFile(fileName, content, rules);
+	}
+
+	@Override
+	protected String getPreRulePackage() {
+		return super.getPreRulePackage() + "." + RENAMING;
 	}
 }

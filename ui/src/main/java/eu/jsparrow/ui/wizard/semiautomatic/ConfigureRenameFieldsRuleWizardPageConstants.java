@@ -25,7 +25,7 @@ public class ConfigureRenameFieldsRuleWizardPageConstants {
 
 	public static final String TYPE_PRIVATE = Messages.RenameFieldsRuleWizardPageModel_typeOption_privateFields;
 	public static final String TYPE_PROTECTED = Messages.RenameFieldsRuleWizardPageModel_typeOption_protectedFields;
-	public static final String TYPE_PACKAGEPROTECTED = Messages.RenameFieldsRuleWizardPageModel_typeOption_packageProtectedFields;
+	public static final String TYPE_PACKAGEPRIVATE = Messages.RenameFieldsRuleWizardPageModel_typeOption_packagePrivateFields;
 	public static final String TYPE_PUBLIC = Messages.RenameFieldsRuleWizardPageModel_typeOption_publicFields;
 
 }

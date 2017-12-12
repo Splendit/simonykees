@@ -4,7 +4,7 @@ import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizar
 import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.DOLLAR_UPPER;
 import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_PROJECT;
 import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.SCOPE_WORKSPACE;
-import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPROTECTED;
+import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PACKAGEPRIVATE;
 import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PRIVATE;
 import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PROTECTED;
 import static eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizardPageConstants.TYPE_PUBLIC;
@@ -81,7 +81,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 		List<String> fieldTypesOptions = new ArrayList<>();
 		fieldTypesOptions.add(TYPE_PRIVATE);
 		fieldTypesOptions.add(TYPE_PROTECTED);
-		fieldTypesOptions.add(TYPE_PACKAGEPROTECTED);
+		fieldTypesOptions.add(TYPE_PACKAGEPRIVATE);
 		fieldTypesOptions.add(TYPE_PUBLIC);
 		return fieldTypesOptions;
 	}
@@ -252,7 +252,7 @@ public class ConfigureRenameFieldsRuleWizardPageModel {
 		
 		boolean renamePrivate = fields.contains(TYPE_PRIVATE);
 		boolean renameProtected = fields.contains(TYPE_PROTECTED);
-		boolean renamePackageProtected = fields.contains(TYPE_PACKAGEPROTECTED);
+		boolean renamePackageProtected = fields.contains(TYPE_PACKAGEPRIVATE);
 		boolean renamePublic = fields.contains(TYPE_PUBLIC);
 		boolean uppercaseAfterUnderscore = setUpperCaseForUnderscoreReplacementOption();
 		boolean uppercaseAfterDollar = setUpperCaseForDollarReplacementOption();
