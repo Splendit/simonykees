@@ -5,7 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+
 import eu.jsparrow.core.rule.RefactoringRuleInterface;
+import eu.jsparrow.core.rule.statistics.FileChangeCount;
+import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 
 public class RefactoringPreviewWizardModel extends BaseModel {
 
@@ -35,6 +39,16 @@ public class RefactoringPreviewWizardModel extends BaseModel {
 	public void addFileToRule(RefactoringRuleInterface rule, String compilationUnitHandle) {
 		changedFilesPerRule.get(rule)
 			.add(compilationUnitHandle);
+	}
+
+	public void clearCounterForChangedFile(ICompilationUnit newSelection) {
+		for (RefactoringRuleInterface rule : changedFilesPerRule.keySet()) {
+			if (getFilesForRule(rule).contains(newSelection.getHandleIdentifier())) {
+				FileChangeCount count = RuleApplicationCount.getFor(rule)
+					.getApplicationsForFile(newSelection.getHandleIdentifier());
+				count.clear();
+			}
+		}
 	}
 
 }

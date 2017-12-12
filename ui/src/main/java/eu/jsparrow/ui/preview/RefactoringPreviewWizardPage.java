@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
-import eu.jsparrow.core.rule.statistics.FileChangeCount;
 import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
@@ -331,6 +330,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				if (unselectedChange.contains(newSelection)) {
 					unselectedChange.remove(newSelection);
 				}
+				wizardModel.clearCounterForChangedFile(newSelection);
 				wizardModel.addFileToRule(rule, newSelection.getHandleIdentifier());
 				immediatelyUpdateForSelected(newSelection);
 			} else {
@@ -338,10 +338,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				if (!unselected.containsKey(newSelection.getElementName())) {
 					unselectedChange.add(newSelection);
 				}
+				wizardModel.clearCounterForChangedFile(newSelection);
 				wizardModel.removeFileFromRule(rule, newSelection.getHandleIdentifier());
-				FileChangeCount count = RuleApplicationCount.getFor(rule)
-					.getApplicationsForFile(newSelection.getHandleIdentifier());
-				count.clear();
 			}
 			// This method simply counts checked items in the table. Not very
 			// MVC, and should be replaced with a proper solution
