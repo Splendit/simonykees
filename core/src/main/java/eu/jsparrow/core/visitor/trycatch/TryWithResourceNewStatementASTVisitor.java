@@ -1,0 +1,69 @@
+package eu.jsparrow.core.visitor.trycatch;
+
+import java.util.List;
+
+import org.eclipse.jdt.core.dom.ASTMatcher;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+
+/**
+ * A visitor for deleting the nodes that are matching with any member of lists
+ * provided in the constructor.
+ * 
+ * @author Ardit Ymeri
+ * @since 2.4.0
+ *
+ */
+class TryWithResourceNewStatementASTVisitor extends ASTVisitor {
+	private List<VariableDeclarationFragment> toBeRemoved;
+	private List<MethodInvocation> closeStatements;
+	private ASTMatcher matcher;
+
+	public TryWithResourceNewStatementASTVisitor(List<VariableDeclarationFragment> toBeRemoved,
+			List<MethodInvocation> closeStatemetns) {
+		this.toBeRemoved = toBeRemoved;
+		this.closeStatements = closeStatemetns;
+		this.matcher = new ASTMatcher();
+	}
+
+	@Override
+	public boolean visit(VariableDeclarationFragment fragment) {
+		if (!matchesRemoveFragments(fragment)) {
+			return false;
+		}
+
+		ASTNode parent = fragment.getParent();
+		if (ASTNode.VARIABLE_DECLARATION_STATEMENT == parent.getNodeType()
+				&& ((VariableDeclarationStatement) parent).fragments()
+					.size() == 1) {
+			parent.delete();
+		} else {
+			fragment.delete();
+		}
+
+		return true;
+	}
+
+	@Override
+	public boolean visit(MethodInvocation node) {
+		ASTNode parent = node.getParent();
+		if (matchesRemoveCloseStatements(node) && parent instanceof Statement) {
+			parent.delete();
+		}
+		return true;
+	}
+
+	private boolean matchesRemoveCloseStatements(MethodInvocation node) {
+		return closeStatements.stream()
+			.anyMatch(methodInvocation -> matcher.match(node, methodInvocation));
+	}
+
+	private boolean matchesRemoveFragments(VariableDeclarationFragment fragment) {
+		return toBeRemoved.stream()
+			.anyMatch(markedForRemoval -> matcher.match(markedForRemoval, fragment));
+	}
+}
