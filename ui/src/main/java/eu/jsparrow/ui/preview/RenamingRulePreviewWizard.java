@@ -227,56 +227,25 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 		return true;
 	}
 
-	/**
-	 * Called from {@link WizardDialog} when Next button is pressed. Triggers
-	 * recalculation if needed. Disposes control from current page which wont be
-	 * visible any more
-	 */
-	public void pressedNext() {
+	@Override
+	public void updateViewsOnNavigation(IWizardPage page) {
 		IWizardContainer container = getContainer();
 		if (null == container) {
 			return;
 		}
-		IWizardPage page = container.getCurrentPage();
 
-		if (!(page instanceof RenamingRulePreviewWizardPage)) {
-			getNextPage(page);
-			return;
-		}
-		disposePages();
-		RenamingRulePreviewWizardPage previewPage = (RenamingRulePreviewWizardPage) page;
-		boolean recalculate = previewPage.isRecalculateNeeded();
-		if (!recalculate) {
-			getNextPage(page);
-			return;
-		}
-
-		performRecalculation(container);
-		previewPage.clearNewSelections();
-		getNextPage(page);
-	}
-
-	public void summaryButtonPressed() {
-		IWizardContainer container = getContainer();
-		if (container == null) {
-			return;
-		}
-
-		IWizardPage currentPage = container.getCurrentPage();
-		if (currentPage instanceof RefactoringSummaryWizardPage) {
-			((RefactoringSummaryWizardPage) currentPage).disposeCompareInputControl();
-		} else {
-			disposePages();
-		}
-
-		if (!(currentPage instanceof RenamingRulePreviewWizardPage)) {
-			return;
-		}
-
-		RenamingRulePreviewWizardPage previewPage = (RenamingRulePreviewWizardPage) currentPage;
-		if (previewPage.isRecalculateNeeded()) {
-			performRecalculation(container);
-			previewPage.clearNewSelections();
+		if (page instanceof RenamingRulePreviewWizardPage) {
+			RenamingRulePreviewWizardPage previewPage = (RenamingRulePreviewWizardPage) page;
+			boolean recalculate = previewPage.isRecalculateNeeded();
+			if (recalculate) {
+				performRecalculation(container);
+				previewPage.clearNewSelections();
+			}
+			/*
+			 * if there are no changes in refactoring page, just populate the
+			 * view with current updated values
+			 */
+			previewPage.setSelection();
 		}
 	}
 
@@ -292,16 +261,22 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	}
 
 	/**
-	 * Disposes the control of all pages of type
-	 * {@link RenamingRulePreviewWizardPage}.
+	 * Called from {@link WizardDialog} when Next button is pressed. Triggers
+	 * recalculation if needed. Disposes control from current page which wont be
+	 * visible any more
 	 */
-	private void disposePages() {
-		IWizardPage[] pages = getPages();
-		for (IWizardPage page : pages) {
-			if (page instanceof RenamingRulePreviewWizardPage) {
-				((RenamingRulePreviewWizardPage) page).disposeControl();
-			}
+	public void pressedNext() {
+		IWizardContainer container = getContainer();
+		if (container == null) {
+			return;
 		}
+
+		IWizardPage currentPage = container.getCurrentPage();
+		if (currentPage instanceof RenamingRulePreviewWizardPage) {
+			((RenamingRulePreviewWizardPage) currentPage).disposeControl();
+		}
+
+		getNextPage(currentPage);
 	}
 
 	/**
@@ -309,14 +284,17 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 * all controls to be recalculated and created when needed
 	 */
 	public void pressedBack() {
-		if (null != getContainer()) {
-			if (getContainer().getCurrentPage() instanceof RefactoringSummaryWizardPage) {
-				((RefactoringSummaryWizardPage) getContainer().getCurrentPage()).disposeCompareInputControl();
-			} else {
-				disposePages();
-			}
-			getPreviousPage(getContainer().getCurrentPage());
+		IWizardContainer container = getContainer();
+		if (container == null) {
+			return;
 		}
+
+		IWizardPage currentPage = container.getCurrentPage();
+		if (currentPage instanceof RefactoringSummaryWizardPage) {
+			((RefactoringSummaryWizardPage) currentPage).disposeCompareInputControl();
+		}
+
+		getPreviousPage(currentPage);
 	}
 
 	public void removeMetaData(FieldMetaData fieldData) {

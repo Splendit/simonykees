@@ -30,7 +30,7 @@ public abstract class AbstractPreviewWizard extends Wizard {
 		return super.canFinish();
 	}
 	
-	public void updateViewsOnNavigation(IWizardPage page) {}
+	public abstract void updateViewsOnNavigation(IWizardPage page);
 
 	@Override
 	public IWizardPage getPreviousPage(IWizardPage page) {
