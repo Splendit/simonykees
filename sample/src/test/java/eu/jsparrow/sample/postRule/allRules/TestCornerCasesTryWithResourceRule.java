@@ -56,6 +56,18 @@ public class TestCornerCasesTryWithResourceRule {
 		}
 	}
 
+	static void readFirstLineFromFile_withFinalBlock(String path) {
+
+		try (BufferedReader br = new BufferedReader(new FileReader(path));
+				BufferedReader br2 = new BufferedReader(new FileReader(path));
+				Closeable cl = new BufferedReader(new FileReader(path))) {
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		} finally {
+			logger.info("Done");
+		}
+	}
+
 	public void morphiaCornerCase() {
 
 		final LogRecord record = null;
