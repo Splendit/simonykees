@@ -11,6 +11,8 @@ import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -23,8 +25,10 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
@@ -44,18 +48,15 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String CLOSE = "close"; //$NON-NLS-1$
 
 	// TODO improvement for suppressed deprecation needed, see SIM-878
-	@SuppressWarnings({ "unchecked", "deprecation" })
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean visit(TryStatement node) {
 		List<VariableDeclarationExpression> resourceList = new ArrayList<>();
 		List<SimpleName> resourceNameList = new ArrayList<>();
-		boolean exit = false;
 
-		List<VariableDeclarationStatement> varDeclarationStatements = ((List<Object>) node.getBody()
-			.statements()).stream()
-				.filter(VariableDeclarationStatement.class::isInstance)
-				.map(VariableDeclarationStatement.class::cast)
-				.collect(Collectors.toList());
+		List<VariableDeclarationStatement> varDeclarationStatements = ASTNodeUtil.convertToTypedList(node.getBody()
+			.statements(), VariableDeclarationStatement.class);
+
 		List<VariableDeclarationFragment> toBeMovedToResources = new ArrayList<>();
 
 		for (VariableDeclarationStatement varDeclStatmentNode : varDeclarationStatements) {
@@ -64,84 +65,165 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 			 * after first non resource object
 			 */
 			ITypeBinding typeBind = varDeclStatmentNode.getType()
-				.resolveBinding();
-			if (ClassRelationUtil.isInheritingContentOfTypes(typeBind, generateFullyQualifiedNameList(
+					.resolveBinding();
+			if (!ClassRelationUtil.isInheritingContentOfTypes(typeBind, generateFullyQualifiedNameList(
 					AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME, CLOSEABLE_FULLY_QUALLIFIED_NAME))) {
-
-				List<VariableDeclarationFragment> fragments = ((List<Object>) varDeclStatmentNode.fragments()).stream()
-					.filter(VariableDeclarationFragment.class::isInstance)
-					.map(VariableDeclarationFragment.class::cast)
-					.collect(Collectors.toList());
-				int numFragments = fragments.size();
-
-				for (VariableDeclarationFragment variableDeclarationFragment : fragments) {
-
-					SimpleName varName = variableDeclarationFragment.getName();
-
-					VerifyRuleConditionVisitor visitor = new VerifyRuleConditionVisitor(varName, toBeMovedToResources);
-					node.accept(visitor);
-
-					if (variableDeclarationFragment.getInitializer() != null && visitor.safeToGo()) {
-
-						toBeMovedToResources.add(variableDeclarationFragment);
-						VariableDeclarationExpression variableDeclarationExpression = varDeclStatmentNode.getAST()
-							.newVariableDeclarationExpression((VariableDeclarationFragment) ASTNode
-								.copySubtree(variableDeclarationFragment.getAST(), variableDeclarationFragment));
-						variableDeclarationExpression.setType((Type) ASTNode.copySubtree(varDeclStatmentNode.getAST(),
-								varDeclStatmentNode.getType()));
-
-						List<Modifier> modifierList = varDeclStatmentNode.modifiers();
-						Function<Modifier, Modifier> cloneModifier = modifier -> (Modifier) ASTNode
-							.copySubtree(modifier.getAST(), modifier);
-						variableDeclarationExpression.modifiers()
-							.addAll(modifierList.stream()
-								.map(cloneModifier)
-								.collect(Collectors.toList()));
-
-						resourceList.add(variableDeclarationExpression);
-						resourceNameList.add(variableDeclarationFragment.getName());
-
-						if (numFragments > 1) {
-							astRewrite.remove(variableDeclarationFragment, null);
-							numFragments--;
-						} else {
-							astRewrite.remove(varDeclStatmentNode, null);
-						}
-					}
-
-					// FIXME dirty hack!
-					if (!resourceList.isEmpty() && node.resources()
-						.isEmpty()) {
-						exit = true;
-						break;
-					}
-				}
-			} else {
 				break;
 			}
 
-			// FIXME dirty hack!
-			if (exit) {
-				break;
+			List<VariableDeclarationFragment> fragments = ASTNodeUtil
+				.convertToTypedList(varDeclStatmentNode.fragments(), VariableDeclarationFragment.class);
+
+			int numFragments = fragments.size();
+
+			for (VariableDeclarationFragment variableDeclarationFragment : fragments) {
+
+				SimpleName varName = variableDeclarationFragment.getName();
+
+				VerifyRuleConditionVisitor visitor = new VerifyRuleConditionVisitor(varName, toBeMovedToResources);
+				node.accept(visitor);
+
+				if (variableDeclarationFragment.getInitializer() != null && visitor.safeToGo()) {
+
+					toBeMovedToResources.add(variableDeclarationFragment);
+					VariableDeclarationExpression variableDeclarationExpression = varDeclStatmentNode.getAST()
+						.newVariableDeclarationExpression((VariableDeclarationFragment) ASTNode
+							.copySubtree(variableDeclarationFragment.getAST(), variableDeclarationFragment));
+					variableDeclarationExpression.setType((Type) ASTNode.copySubtree(varDeclStatmentNode.getAST(),
+							varDeclStatmentNode.getType()));
+
+					List<Modifier> modifierList = ASTNodeUtil.convertToTypedList(varDeclStatmentNode.modifiers(),
+							Modifier.class);
+					Function<Modifier, Modifier> cloneModifier = modifier -> (Modifier) ASTNode
+						.copySubtree(modifier.getAST(), modifier);
+
+					variableDeclarationExpression.modifiers()
+						.addAll(modifierList.stream()
+							.map(cloneModifier)
+							.collect(Collectors.toList()));
+
+					resourceList.add(variableDeclarationExpression);
+					resourceNameList.add(variableDeclarationFragment.getName());
+
+					if (numFragments > 1) {
+						astRewrite.remove(variableDeclarationFragment, null);
+						numFragments--;
+					} else {
+						astRewrite.remove(varDeclStatmentNode, null);
+					}
+				}
 			}
 		}
 
+
 		if (!resourceList.isEmpty()) {
-			resourceList.forEach(iteratorNode -> astRewrite.getListRewrite(node, TryStatement.RESOURCES_PROPERTY)
-				.insertLast(iteratorNode, null));
-			onRewrite();
-
-			// remove all close operations on the found resources
-			Function<SimpleName, MethodInvocation> mapper = simpleName -> NodeBuilder.newMethodInvocation(node.getAST(),
-					(SimpleName) ASTNode.copySubtree(simpleName.getAST(), simpleName),
-					NodeBuilder.newSimpleName(node.getAST(), CLOSE));
-
-			node.accept(new RemoveCloseASTVisitor(resourceNameList.stream()
-				.map(mapper)
-				.collect(Collectors.toList())));
+			replaceTryStatement(node, resourceList, resourceNameList, toBeMovedToResources);
 
 		}
 		return true;
+	}
+
+	@SuppressWarnings("deprecation")
+	private void replaceTryStatement(TryStatement node, List<VariableDeclarationExpression> resourceList,
+			List<SimpleName> resourceNameList, List<VariableDeclarationFragment> toBeMovedToResources) {
+		// remove all close operations on the found resources
+		Function<SimpleName, MethodInvocation> mapper = simpleName -> NodeBuilder.newMethodInvocation(node.getAST(),
+				(SimpleName) ASTNode.copySubtree(simpleName.getAST(), simpleName),
+				NodeBuilder.newSimpleName(node.getAST(), CLOSE));
+
+		List<MethodInvocation> closeInvocations = resourceNameList.stream()
+			.map(mapper)
+			.collect(Collectors.toList());
+
+		if (node.resources().isEmpty() && resourceList.size() != 1) {
+
+			TryStatement tryStatement = createNewTryStatement(node, resourceList, toBeMovedToResources,
+					closeInvocations);
+
+			astRewrite.replace(node, tryStatement, null);
+			// remove all close operations on the found resources
+
+		} else {
+			ListRewrite listRewrite = astRewrite.getListRewrite(node, TryStatement.RESOURCES_PROPERTY);
+			resourceList.forEach(iteratorNode -> listRewrite.insertLast(iteratorNode, null));
+			node.accept(new RemoveCloseASTVisitor(closeInvocations));
+		}
+
+		onRewrite();
+	}
+
+	@SuppressWarnings("unchecked")
+	private TryStatement createNewTryStatement(TryStatement node, List<VariableDeclarationExpression> resourceList,
+			List<VariableDeclarationFragment> toBeMovedToResources, List<MethodInvocation> closeInvocations) {
+		
+		TryStatement tryStatement = getASTRewrite().getAST()
+			.newTryStatement();
+		tryStatement.resources()
+			.addAll(resourceList);
+		Block newBody = (Block) ASTNode.copySubtree(node.getAST(), node.getBody());
+		NewTryStatementBodyVisitor visitor = new NewTryStatementBodyVisitor(toBeMovedToResources, closeInvocations);
+		newBody.accept(visitor);
+
+		List<CatchClause> newCatchClauses = ASTNodeUtil.convertToTypedList(node.catchClauses(), CatchClause.class)
+			.stream()
+			.map(clause -> (CatchClause) ASTNode.copySubtree(node.getAST(), clause))
+			.collect(Collectors.toList());
+
+		tryStatement.setBody(newBody);
+		tryStatement.catchClauses()
+			.addAll(newCatchClauses);
+		tryStatement.setFinally((Block) ASTNode.copySubtree(node.getAST(), node.getFinally()));
+		
+		return tryStatement;
+	}
+	
+	private class NewTryStatementBodyVisitor extends ASTVisitor {
+		private List<VariableDeclarationFragment> toBeRemoved;
+		private List<MethodInvocation> closeStatements;
+		private ASTMatcher matcher;
+
+		public NewTryStatementBodyVisitor(List<VariableDeclarationFragment> toBeRemoved, List<MethodInvocation> closeStatemetns) {
+			this.toBeRemoved = toBeRemoved;
+			this.closeStatements = closeStatemetns;
+			this.matcher = new ASTMatcher();
+		}
+
+		@Override
+		public boolean visit(VariableDeclarationFragment fragment) {
+			if (!matchesRemoveFragments(fragment)) {
+				return false;
+			}
+
+			ASTNode parent = fragment.getParent();
+			if (ASTNode.VARIABLE_DECLARATION_STATEMENT == parent.getNodeType()
+					&& ((VariableDeclarationStatement) parent).fragments()
+						.size() == 1) {
+				parent.delete();
+			} else {
+				fragment.delete();
+			}
+
+			return true;
+		}
+
+		@Override
+		public boolean visit(MethodInvocation node) {
+			ASTNode parent = node.getParent();
+			if (matchesRemoveCloseStatements(node) && parent instanceof Statement) {
+				parent.delete();
+			}
+			return true;
+		}
+
+		private boolean matchesRemoveCloseStatements(MethodInvocation node) {
+			return closeStatements.stream()
+				.anyMatch(methodInvocation -> matcher.match(node, methodInvocation));
+		}
+
+		private boolean matchesRemoveFragments(VariableDeclarationFragment fragment) {
+			return toBeRemoved.stream()
+				.anyMatch(markedForRemoval -> matcher.match(markedForRemoval, fragment));
+		}
 	}
 
 	private class ReferencedVariablesASTVisitor extends ASTVisitor {
