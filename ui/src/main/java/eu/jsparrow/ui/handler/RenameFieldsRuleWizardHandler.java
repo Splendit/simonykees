@@ -61,9 +61,20 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 		} else {
 			Activator.setRunning(true);
 
-			if (LicenseUtil.getInstance()
+			if (!LicenseUtil.getInstance()
 				.isValid()) {
-				List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
+				/*
+				 * show License message before Wizard if the license is invalid
+				 */
+				final Shell shell = HandlerUtil.getActiveShell(event);
+				if (!LicenseUtil.getInstance()
+					.displayLicenseErrorDialog(shell)) {
+					Activator.setRunning(false);
+					return null;
+				}
+			}
+			List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
+			if (!selectedJavaElements.isEmpty()) {
 
 				Job job = new Job(Messages.RenameFieldsRuleWizardHandler_performFinish_jobName) {
 					@Override
@@ -101,15 +112,13 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 				job.setUser(true);
 				job.schedule();
 
+				return true;
 			} else {
-				/*
-				 * do not display the Wizard if the license is invalid
-				 */
-				final Shell shell = HandlerUtil.getActiveShell(event);
-				LicenseUtil.getInstance()
-					.displayLicenseErrorDialog(shell);
+				// SIM-656
+				logger.error(Messages.SelectRulesWizardHandler_selectionNotPossible_ubuntuBug);
 				Activator.setRunning(false);
 			}
+
 		}
 		return null;
 
