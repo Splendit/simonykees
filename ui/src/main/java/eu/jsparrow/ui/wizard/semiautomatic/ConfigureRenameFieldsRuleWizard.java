@@ -41,7 +41,6 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preview.RenamingRulePreviewWizard;
 import eu.jsparrow.ui.preview.RenamingRulePreviewWizardPage;
-import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.ResourceHelper;
 import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -219,18 +218,13 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 
 				if (event.getResult()
 					.isOK()) {
-					if (LicenseUtil.getInstance()
-						.isValid()) {
-						if (refactoringPipeline.hasChanges()) {
-							createAndShowPreviewWizard();
+					if (refactoringPipeline.hasChanges()) {
+						createAndShowPreviewWizard();
 
-							// when done without interruption
-							Activator.setRunning(false);
-						} else {
-							WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
-						}
+						// when done without interruption
+						Activator.setRunning(false);
 					} else {
-						WizardMessageDialog.synchronizeWithUIShowLicenseError();
+						WizardMessageDialog.synchronizeWithUIShowWarningNoRefactoringDialog();
 					}
 				} else {
 					// do nothing if status is canceled, close
