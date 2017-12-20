@@ -11,8 +11,10 @@ import eu.jsparrow.core.visitor.impl.PrimitiveObjectUseEqualsASTVisitor;
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 
 @SuppressWarnings({ "nls" })
-public class PrimitiveObjectUseEqualsASTVisitorTest extends AbstractASTVisitorTest {
+public class PrimitiveObjectUseEqualsASTVisitorTest extends UsesJDTUnitFixture {
 
+	private PrimitiveObjectUseEqualsASTVisitor visitor;
+	
 	private String template = "Integer a = new Integer(1);Integer b = new Integer(2);if (%s) {}";
 
 	@Before

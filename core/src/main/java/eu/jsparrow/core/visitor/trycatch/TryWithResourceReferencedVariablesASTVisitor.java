@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 /**
- * A visitor for collecting the names of the referenced variables. 
+ * A visitor for collecting the names of the referenced variables.
  * 
  * @author Ardit Ymeri
  * @since 1.0
@@ -23,7 +23,7 @@ class TryWithResourceReferencedVariablesASTVisitor extends ASTVisitor {
 
 	@Override
 	public boolean visit(SimpleName simpleName) {
-		if (simpleName.resolveBinding()
+		if (simpleName.resolveBinding() != null && simpleName.resolveBinding()
 			.getKind() == IBinding.VARIABLE) {
 			referencedVariables.add(simpleName);
 		}
