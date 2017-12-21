@@ -13,5 +13,9 @@
 	<packaging>pom</packaging>
 	<name>jSparrow :: releng</name>
 	<description>jSparrow Release Engineering Plugin</description>
-
+	
+	
+	<modules>
+		<module>eu.jsparrow.product</module>
+	</modules>
 </project>
