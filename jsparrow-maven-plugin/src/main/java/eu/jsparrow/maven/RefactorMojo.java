@@ -78,8 +78,7 @@ public class RefactorMojo extends AbstractMojo {
 		try {
 
 			final Map<String, String> configuration = new HashMap<>();
-			configuration.put(CONFIG_FILE_PATH,
-					(configFile.exists() && !configFile.isDirectory()) ? configFile.getAbsolutePath() : "");
+			configuration.put(CONFIG_FILE_PATH, configFile.getAbsolutePath());
 			configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile);
 
 			mavenHelper.startOSGI(configuration);

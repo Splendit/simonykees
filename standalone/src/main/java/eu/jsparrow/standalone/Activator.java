@@ -1,11 +1,14 @@
 package eu.jsparrow.standalone;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -41,7 +44,13 @@ public class Activator implements BundleActivator {
 		} else if (listRulesShort) {
 			ListRulesUtil.listRulesShort();
 		} else {
+			try {
 			RefactorUtil.startRefactoring(context);
+			} catch (YAMLConfigException yce) {
+				logger.debug(yce.getMessage(), yce);
+				logger.error(yce.getMessage());
+				setExitErrorMessage(context, yce.getMessage());
+			}
 		}
 	}
 
@@ -62,5 +71,34 @@ public class Activator implements BundleActivator {
 		}
 
 		logger.info(Messages.Activator_stop);
+	}
+
+	private EnvironmentInfo getEnvironmentInfo(BundleContext ctx) {
+		if (ctx == null) {
+			return null;
+		}
+
+		ServiceReference<?> infoRev = ctx.getServiceReference(EnvironmentInfo.class.getName());
+		if (infoRev == null) {
+			return null;
+		}
+
+		EnvironmentInfo envInfo = (EnvironmentInfo) ctx.getService(infoRev);
+		if (envInfo == null) {
+			return null;
+		}
+		ctx.ungetService(infoRev);
+
+		return envInfo;
+	}
+
+	private void setExitErrorMessage(BundleContext ctx, String exitMessage) {
+		String key = "eu.jsparrow.standalone.exit.message"; //$NON-NLS-1$
+		EnvironmentInfo envInfo = getEnvironmentInfo(ctx);
+		if (envInfo != null) {
+			envInfo.setProperty(key, exitMessage);
+		} else {
+			System.setProperty(key, exitMessage);
+		}
 	}
 }
