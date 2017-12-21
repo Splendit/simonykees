@@ -489,8 +489,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	}
 
 	protected void doStatusUpdate() {
-		if (LicenseUtil.getInstance()
-			.isFree()) {
+		if (!LicenseUtil.getInstance()
+			.isFullLicense()) {
 			((StatusInfo) fSelectionStatus)
 				.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
 		} else {

@@ -111,8 +111,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
-			summaryWizardPageModel.setIsFreeLicense(LicenseUtil.getInstance()
-				.isFree());
+			setStatusInfo();
 			summaryWizardPageModel.updateData();
 			createCompareInputControl();
 			// We must wait to set selection until control is visible
@@ -243,19 +242,13 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 			}
 		});
 
-		IObservableValue isFreeLicenseObservableValue = BeanProperties
-			.value(RefactoringSummaryWizardPageModel.class, "isFreeLicense") //$NON-NLS-1$
-			.observe(summaryWizardPageModel);
-		isFreeLicenseObservableValue.addValueChangeListener(e -> {
-			Boolean isFreeLicense = (Boolean) e.getObservableValue()
-				.getValue();
-			setStatusInfo(isFreeLicense);
-		});
+		
 	}
 
-	private void setStatusInfo(Boolean isFreeLicense) {
+	private void setStatusInfo() {
 		StatusInfo statusInfo = new StatusInfo();
-		if (isFreeLicense) {
+		if (!LicenseUtil.getInstance()
+				.isFullLicense()) {
 			statusInfo.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
 		}
 		StatusUtil.applyToStatusLine(this, statusInfo);
