@@ -250,13 +250,13 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.standalone.feature</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.standalone.feature</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.site</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.site</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -265,13 +265,13 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.standalone</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.standalone</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.ui</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
