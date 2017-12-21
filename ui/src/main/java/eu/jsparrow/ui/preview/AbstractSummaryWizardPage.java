@@ -222,7 +222,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		sashForm.setWeights(new int[] { 1, 3 });
 	}
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("unchecked")
 	protected void initializeDataBindings() {
 		DataBindingContext bindingContext = new DataBindingContext();
 
