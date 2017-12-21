@@ -292,7 +292,7 @@
 				<configuration>
 					<resolver>p2</resolver>
 					<pomDependencies>consider</pomDependencies>
-					<ignoreTychoRepositories>true</ignoreTychoRepositories>
+					<!-- <ignoreTychoRepositories>true</ignoreTychoRepositories> -->
 					<environments>
 						<environment>
 							<os>linux</os>

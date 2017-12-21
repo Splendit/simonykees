@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="eu.jsparrow.product" uid="Jsparrow Standallone Product" id="org.eclipse.equinox.p2.director.product" application="org.eclipse.e4.ui.workbench.swt.E4Application" version="2.5.0.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="eu.jsparrow.product" uid="Jsparrow Standalone Product" id="org.eclipse.equinox.p2.director.product" application="org.eclipse.e4.ui.workbench.swt.E4Application" version="2.5.0.qualifier" useFeatures="true" includeLaunchers="true">
+
 
    <configIni use="default">
    </configIni>
@@ -18,14 +19,17 @@
 
    <windowImages/>
 
+
    <launcher>
       <win useIco="false">
          <bmp/>
       </win>
    </launcher>
 
+
    <vm>
    </vm>
+
 
    <plugins>
    </plugins>
