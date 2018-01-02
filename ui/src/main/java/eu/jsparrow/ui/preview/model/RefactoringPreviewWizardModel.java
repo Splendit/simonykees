@@ -40,15 +40,4 @@ public class RefactoringPreviewWizardModel extends BaseModel {
 		changedFilesPerRule.get(rule)
 			.add(compilationUnitHandle);
 	}
-
-	public void clearCounterForChangedFile(ICompilationUnit newSelection) {
-		for (RefactoringRuleInterface rule : changedFilesPerRule.keySet()) {
-			if (getFilesForRule(rule).contains(newSelection.getHandleIdentifier())) {
-				FileChangeCount count = RuleApplicationCount.getFor(rule)
-					.getApplicationsForFile(newSelection.getHandleIdentifier());
-				count.clear();
-			}
-		}
-	}
-
 }
