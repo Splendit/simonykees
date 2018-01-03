@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -29,8 +28,6 @@ import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.exception.RefactoringException;
-import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.util.ASTNodeUtil;
@@ -39,9 +36,9 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizard;
-import eu.jsparrow.ui.util.ResourceHelper;
-import eu.jsparrow.ui.util.StopWatchUtil;
 import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
+import eu.jsparrow.ui.util.ResourceHelper;
+import eu.jsparrow.ui.wizard.AbstractRuleWizard;
 
 /**
  * {@link Wizard} holding the {@link AbstractSelectRulesWizardPage}, which
@@ -55,7 +52,7 @@ import eu.jsparrow.ui.preview.RefactoringPreviewWizardPage;
  *         Matthias Webhofer
  * @since 0.9
  */
-public class SelectRulesWizard extends Wizard {
+public class SelectRulesWizard extends AbstractRuleWizard {
 
 	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizard.class);
 
@@ -115,7 +112,7 @@ public class SelectRulesWizard extends Wizard {
 		final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = model.getSelectionAsList();
 
 		refactoringPipeline.setRules(selectedRules);
-		refactoringPipeline.setSourceMap(refactoringPipeline.getInitialSourceMap());
+		refactoringPipeline.updateInitialSourceMap();
 
 		Rectangle rectangle = Display.getCurrent()
 			.getPrimaryMonitor()
@@ -126,7 +123,7 @@ public class SelectRulesWizard extends Wizard {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				preRefactoring();
-				IStatus refactoringStatus = doRefactoring(monitor);
+				IStatus refactoringStatus = doRefactoring(monitor, refactoringPipeline);
 				postRefactoring();
 
 				return refactoringStatus;
@@ -156,36 +153,6 @@ public class SelectRulesWizard extends Wizard {
 		job.schedule();
 
 		return true;
-	}
-
-	private IStatus doRefactoring(IProgressMonitor monitor) {
-		try {
-			refactoringPipeline.doRefactoring(monitor);
-			if (monitor.isCanceled()) {
-				refactoringPipeline.clearStates();
-				return Status.CANCEL_STATUS;
-			}
-		} catch (RefactoringException e) {
-			WizardMessageDialog.synchronizeWithUIShowInfo(e);
-			return Status.CANCEL_STATUS;
-		} catch (RuleException e) {
-			WizardMessageDialog.synchronizeWithUIShowError(e);
-			return Status.CANCEL_STATUS;
-
-		} finally {
-			monitor.done();
-		}
-
-		return Status.OK_STATUS;
-
-	}
-
-	private void preRefactoring() {
-		StopWatchUtil.start();
-	}
-
-	private void postRefactoring() {
-		StopWatchUtil.stop();
 	}
 
 	/**

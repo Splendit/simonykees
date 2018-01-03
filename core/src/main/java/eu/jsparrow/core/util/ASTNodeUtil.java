@@ -47,6 +47,10 @@ public class ASTNodeUtil {
 	private static final String STREAM_MAP_TO_LONG_METHOD_NAME = "mapToLong"; //$NON-NLS-1$
 	private static final String STREAM_MAP_TO_DOUBLE_METHOD_NAME = "mapToDouble"; //$NON-NLS-1$
 
+	private ASTNodeUtil() {
+		// private constructor to hide the implicit public one
+	}
+
 	/**
 	 * Finds the surrounding Block node if there is one, otherwise returns null
 	 * 
@@ -291,6 +295,20 @@ public class ASTNodeUtil {
 		return ASTNodeUtil.convertToTypedList(modifiers, Modifier.class)
 			.stream()
 			.anyMatch(predicate);
+	}
+
+	/**
+	 * Checks if the list of modifiers represents a package-private modifier.
+	 * 
+	 * @param modifiers
+	 *            list of modifiers
+	 * @return {@code true} if the given list has no {@code public},
+	 *         {@code protected} or {@code private} modifiers, or {@code false}
+	 *         otherwise.
+	 */
+	public static boolean isPackageProtected(@SuppressWarnings("rawtypes") List modifiers) {
+		return modifiers.isEmpty() || (!hasModifier(modifiers, Modifier::isPublic)
+				&& !hasModifier(modifiers, Modifier::isProtected) && !hasModifier(modifiers, Modifier::isPrivate));
 	}
 
 	/**

@@ -118,6 +118,7 @@ public class Messages extends NLS {
 	public static String HelpMessageDialog_homepage_url;
 	public static String MultiCatchRule_description;
 	public static String MultiCatchRule_name;
+
 	public static String FieldNameConventionRule_description;
 	public static String FieldNameConventionRule_name;
 	public static String FlatMapInsteadOfNestedLoopsRule_description;
@@ -278,12 +279,13 @@ public class Messages extends NLS {
 	public static String RenameFieldsRuleWizardPageModel_dollarSignReplacementOption_upperCase;
 	public static String RenameFieldsRuleWizardPageModel_scopeOption_project;
 	public static String RenameFieldsRuleWizardPageModel_scopeOption_workspace;
-	public static String RenameFieldsRuleWizardPageModel_typeOption_packageProtectedFields;
+	public static String RenameFieldsRuleWizardPageModel_typeOption_packagePrivateFields;
 	public static String RenameFieldsRuleWizardPageModel_typeOption_privateFields;
 	public static String RenameFieldsRuleWizardPageModel_typeOption_protectedFields;
 	public static String RenameFieldsRuleWizardPageModel_typeOption_publicFields;
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_leaveAsIs;
 	public static String RenameFieldsRuleWizardPageModel_underscoreReplacementOption_upperCase;
+	public static String RenamingRulePreviewWizardPage_RenameFields;
 	public static String SelectRulesWizardHandler_allready_running;
 	public static String SelectRulesWizardHandler_multipleProjectsWarning;
 	public static String SelectRulesWizardHandler_noFileWithoutError;

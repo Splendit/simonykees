@@ -40,7 +40,7 @@ import eu.jsparrow.ui.util.ResourceHelper;
  * @author Ludwig Werzowa, Andreja Sambolec
  * @since 0.9
  */
-public class RefactoringPreviewWizard extends Wizard {
+public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 
 	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
 
@@ -48,9 +48,8 @@ public class RefactoringPreviewWizard extends Wizard {
 
 	private Shell shell;
 
-	private RefactoringSummaryWizardPage summaryPage;
-
 	private RefactoringPreviewWizardModel model;
+	protected RefactoringSummaryWizardPage summaryPage;
 
 	public RefactoringPreviewWizard(RefactoringPipeline refactoringPipeline) {
 		super();
@@ -87,21 +86,16 @@ public class RefactoringPreviewWizard extends Wizard {
 					addPage(previewPage);
 				}
 			});
-		summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model);
 		if (!(refactoringPipeline.getRules()
 			.size() == 1
 				&& refactoringPipeline.getRules()
 					.get(0) instanceof StandardLoggerRule)) {
+			this.summaryPage = new RefactoringSummaryWizardPage(refactoringPipeline, model);
 			addPage(summaryPage);
 		}
 	}
 
 	@Override
-	public IWizardPage getPreviousPage(IWizardPage page) {
-		updateViewsOnNavigation(page);
-		return super.getPreviousPage(page);
-	}
-
 	public void updateViewsOnNavigation(IWizardPage page) {
 		if (page instanceof RefactoringPreviewWizardPage) {
 			if (!((RefactoringPreviewWizardPage) page).getUnselectedChange()
@@ -119,12 +113,6 @@ public class RefactoringPreviewWizard extends Wizard {
 				((RefactoringPreviewWizardPage) page).populateViews(false);
 			}
 		}
-	}
-
-	@Override
-	public IWizardPage getNextPage(IWizardPage page) {
-		updateViewsOnNavigation(page);
-		return super.getNextPage(page);
 	}
 
 	/**
@@ -262,7 +250,6 @@ public class RefactoringPreviewWizard extends Wizard {
 	@Override
 	public boolean performCancel() {
 		refactoringPipeline.clearStates();
-		Activator.setRunning(false);
 		return super.performCancel();
 	}
 
@@ -335,23 +322,14 @@ public class RefactoringPreviewWizard extends Wizard {
 		}
 	}
 
-	@Override
-	public boolean canFinish() {
-		if (!LicenseUtil.getInstance()
-			.isFullLicense()) {
-			return false;
-		}
-		return super.canFinish();
-	}
-
-	public RefactoringSummaryWizardPage getSummaryPage() {
-		return summaryPage;
-	}
-
 	public RefactoringPreviewWizardModel getModel() {
 		if (model == null) {
 			model = new RefactoringPreviewWizardModel();
 		}
 		return model;
+	}
+
+	public RefactoringSummaryWizardPage getSummaryPage() {
+		return this.summaryPage;
 	}
 }

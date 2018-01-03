@@ -26,8 +26,6 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 
 	private Long runDuration;
 
-	private Boolean isFreeLicense;
-
 	private Integer issuesFixed;
 
 	private Duration timeSaved;
@@ -47,7 +45,6 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 		this.refactoringPipeline = refactoringPipeline;
 		this.wizardModel = wizardModel;
 		initialize();
-		isFreeLicense = false;
 	}
 
 	public Long getRunDuration() {
@@ -82,14 +79,6 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 		firePropertyChange("timeSaved", this.timeSaved, this.timeSaved = timeSaved); //$NON-NLS-1$
 	}
 
-	public Boolean getIsFreeLicense() {
-		return isFreeLicense;
-	}
-
-	public void setIsFreeLicense(Boolean validLicense) {
-		firePropertyChange("isFreeLicense", this.isFreeLicense, isFreeLicense = validLicense); //$NON-NLS-1$
-	}
-
 	// Needed because we don't have full databinding/models yet, so we need to
 	// update the data manually :(
 	public void updateData() {
@@ -101,8 +90,8 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 	}
 
 	private void initialize() {
-		initialSource.putAll(refactoringPipeline.getInitialSourceMap());
-		refactoringPipeline.setSourceMap(finalSource);
+		initialSource = refactoringPipeline.getInitialSourceMap();
+		refactoringPipeline.putAllRefactoringStateSources(finalSource);
 		addModifiedFiles();
 		addRuleTimes();
 		/*
@@ -204,6 +193,8 @@ public class RefactoringSummaryWizardPageModel extends BaseModel {
 
 	private void updateChangedFiles() {
 		changedFiles.clear();
+		finalSource.clear();
+		refactoringPipeline.putAllRefactoringStateSources(finalSource);
 		addModifiedFiles();
 	}
 

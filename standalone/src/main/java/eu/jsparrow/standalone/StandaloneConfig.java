@@ -1,6 +1,8 @@
 package eu.jsparrow.standalone;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -89,15 +91,15 @@ public class StandaloneConfig {
 		logger.debug(Messages.StandaloneConfig_debug_createWorkspace);
 
 		IProjectDescription description = null;
-		File projectDescription = new File(path + File.separator + Activator.PROJECT_DESCRIPTION_CONSTANT);
+		File projectDescription = new File(path + File.separator + RefactorUtil.PROJECT_DESCRIPTION_CONSTANT);
 		if (!projectDescription.exists()) {
 			description = workspace.newProjectDescription(name);
 
 			String[] oldNatures = description.getNatureIds();
+
 			String[] newNatures = Arrays.copyOf(oldNatures, oldNatures.length + 2);
 			newNatures[newNatures.length - 2] = JavaCore.NATURE_ID;
-			// add maven nature to the project
-			newNatures[newNatures.length - 1] = Activator.MAVEN_NATURE_CONSTANT;
+			newNatures[newNatures.length - 1] = RefactorUtil.MAVEN_NATURE_CONSTANT;
 
 			description.setNatureIds(newNatures);
 
@@ -106,7 +108,7 @@ public class StandaloneConfig {
 			descriptionGenerated = true;
 		} else {
 			description = workspace
-				.loadProjectDescription(new Path(path + File.separator + Activator.PROJECT_DESCRIPTION_CONSTANT));
+				.loadProjectDescription(new Path(path + File.separator + RefactorUtil.PROJECT_DESCRIPTION_CONSTANT));
 		}
 
 		IProject project = workspace.getRoot()
@@ -169,8 +171,9 @@ public class StandaloneConfig {
 	 */
 	private void addMavenDependenciesToClasspath() {
 		logger.debug(Messages.StandaloneConfig_debug_collectDependencies);
+
 		File depsFolder = new File(
-				System.getProperty(Activator.USER_DIR) + File.separator + Activator.DEPENDENCIES_FOLDER_CONSTANT);
+				System.getProperty(RefactorUtil.USER_DIR) + File.separator + RefactorUtil.DEPENDENCIES_FOLDER_CONSTANT);
 		File[] listOfFiles = depsFolder.listFiles();
 		List<IClasspathEntry> collectedEntries = new ArrayList<>();
 
@@ -183,6 +186,7 @@ public class StandaloneConfig {
 			IClasspathEntry jarEntry = JavaCore.newLibraryEntry(new Path(jarPath), null, null);
 			collectedEntries.add(jarEntry);
 		}
+
 		try {
 			addToClasspath(javaProject, collectedEntries);
 		} catch (JavaModelException e) {
@@ -201,9 +205,11 @@ public class StandaloneConfig {
 	 */
 	public void addToClasspath(IJavaProject javaProject, List<IClasspathEntry> classpathEntries)
 			throws JavaModelException {
+
 		if (!classpathEntries.isEmpty()) {
 			oldEntries = javaProject.getRawClasspath();
 			IClasspathEntry[] newEntries;
+
 			if (oldEntries.length != 0) {
 				Set<IClasspathEntry> set = new HashSet<>(Arrays.asList(oldEntries));
 				set.addAll(classpathEntries);
@@ -211,6 +217,7 @@ public class StandaloneConfig {
 			} else {
 				newEntries = classpathEntries.toArray(new IClasspathEntry[classpathEntries.size()]);
 			}
+
 			javaProject.setRawClasspath(newEntries, null);
 		}
 	}
@@ -219,22 +226,17 @@ public class StandaloneConfig {
 	 * On stop, checks if .project file was programmatically generated and
 	 * deletes it if it is.
 	 * 
-	 * @return true if .project deleted, is not programmatically generated or
-	 *         doesn't exist any more, false otherwise
 	 * @throws JavaModelException
+	 * @throws IOException
 	 */
-	public boolean cleanUp() throws JavaModelException {
+	public void cleanUp() throws JavaModelException, IOException {
 		logger.debug(Messages.StandaloneConfig_debug_cleanUp);
 		revertClasspath();
 		if (descriptionGenerated) {
-			File projectDescription = new File(path + File.separator + Activator.PROJECT_DESCRIPTION_CONSTANT);
+			File projectDescription = new File(path + File.separator + RefactorUtil.PROJECT_DESCRIPTION_CONSTANT);
 			if (projectDescription.exists()) {
-				return projectDescription.delete();
-			} else {
-				return true;
+				Files.delete(projectDescription.toPath());
 			}
-		} else {
-			return true;
 		}
 	}
 

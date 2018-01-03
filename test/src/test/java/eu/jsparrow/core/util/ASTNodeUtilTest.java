@@ -23,4 +23,5 @@ public class ASTNodeUtilTest {
 
 		assertFalse(ASTNodeUtil.containsWildCards(astNode));
 	}
+	
 }

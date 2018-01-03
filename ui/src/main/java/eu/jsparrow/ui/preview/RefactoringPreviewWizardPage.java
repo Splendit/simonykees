@@ -209,7 +209,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		techDebtLabel = new CLabel(composite, SWT.NONE);
 		techDebtLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		techDebtLabel.setImage(ResourceHelper.createImage("icons/fa-clock.png")); //$NON-NLS-1$
-		
+
 		Label label = new Label(rootComposite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
@@ -489,8 +489,8 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	}
 
 	protected void doStatusUpdate() {
-		if (LicenseUtil.getInstance()
-			.isFree()) {
+		if (!LicenseUtil.getInstance()
+			.isFullLicense()) {
 			((StatusInfo) fSelectionStatus)
 				.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
 		} else {
