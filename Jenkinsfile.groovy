@@ -35,21 +35,7 @@ timestamps {
 				def mvnCommand = 'clean verify -DskipTests'
 				sh "'${mvnHome}/bin/mvn' ${mvnCommand}"
 			}
-
-
-			stage('Test obfuscation') {
-				def mvnCommand = 'clean verify -DskipTests -B'
-				// extract the qualifier from the build to generate the obfuscated build with the same buildnumber
-				// grep returns result with an \n therefore we need to trim
-				def qualifier = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu.jsparrow\\.feature\\.feature\\.group' range='\\[.*,.*(\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
-				def buildNumber = sh(returnStdout: true, script: "pcregrep -o1 \"name='eu.jsparrow\\.feature\\.feature\\.group' range='\\[.*,((\\d*\\.){3}\\d{8}-\\d{4})\" site/target/p2content.xml").trim()
-				stage('Deploy obfuscation') {
-					def mvnOptions = "-Dproguard -DforceContextQualifier=${qualifier}_test"
-					sh "'${mvnHome}/bin/mvn' ${mvnCommand} ${mvnOptions} -P${env.BRANCH_NAME}-test-proguard"
-					uploadMappingFiles("${buildNumber}_test")
-				}
-			}
-			
+	
 			wrap([$class: 'Xvfb', additionalOptions: '', assignedLabels: '', autoDisplayName: true, debug: true, screen: '1366x768x24', shutdownWithBuild: true, timeout: 10]) {
 			// X virtual framebuffer (virtual X window display) is needed for plugin tests
 			// wrap([$class: 'Xvfb']) {
