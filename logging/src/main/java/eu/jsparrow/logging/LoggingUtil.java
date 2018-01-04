@@ -58,16 +58,30 @@ public class LoggingUtil {
 	}
 
 	/**
+	 * @see {@link #configureLoggerForTesting(boolean)}
+	 * @return
+	 * @throws JoranException
+	 * @throws IOException
+	 */
+	public static boolean configureLoggerForTesting() throws JoranException, IOException {
+		return configureLoggerForTesting(false);
+	}
+
+	/**
 	 * Triggers the logging configuration for plug in tests
 	 * 
+	 * @param useDebugLogLevel
+	 *            if true, the default log level of the root logger is set to
+	 *            "DEBUG" instead of "INFO"
 	 * @return true, if the configuration was successful, false otherwise
 	 * @throws JoranException
 	 *             from {@link #configureLogback(Bundle)}
 	 * @throws IOException
 	 *             from {@link #configureLogback(Bundle)}
 	 */
-	public static boolean configureLoggerForTesting() throws JoranException, IOException {
-		boolean returnValue = initLogger(getTestLogFilePath(LOG_FILE_NAME), getTestLogFilePath(JUL_LOG_FILE_NAME));
+	public static boolean configureLoggerForTesting(boolean useDebugLogLevel) throws JoranException, IOException {
+		boolean returnValue = initLogger(getTestLogFilePath(LOG_FILE_NAME), getTestLogFilePath(JUL_LOG_FILE_NAME),
+				useDebugLogLevel);
 		/**
 		 * ignoring logging from eu.jsparrow.core for automated testing.
 		 */
@@ -77,16 +91,29 @@ public class LoggingUtil {
 	}
 
 	/**
+	 * @see {@link #configureLogger(boolean)}
+	 * @return
+	 * @throws JoranException
+	 * @throws IOException
+	 */
+	public static boolean configureLogger() throws JoranException, IOException {
+		return configureLogger(false);
+	}
+
+	/**
 	 * Triggers the standard logging configuration
 	 * 
+	 * @param useDebugLogLevel
+	 *            if true, the default log level of the root logger is set to
+	 *            "DEBUG" instead of "INFO"
 	 * @return true, if the configuration was successful, false otherwise
 	 * @throws JoranException
 	 *             from {@link #configureLogback(Bundle)}
 	 * @throws IOException
 	 *             from {@link #configureLogback(Bundle)}
 	 */
-	public static boolean configureLogger() throws JoranException, IOException {
-		return initLogger(getLogFilePath(LOG_FILE_NAME), getLogFilePath(JUL_LOG_FILE_NAME));
+	public static boolean configureLogger(boolean useDebugLogLevel) throws JoranException, IOException {
+		return initLogger(getLogFilePath(LOG_FILE_NAME), getLogFilePath(JUL_LOG_FILE_NAME), useDebugLogLevel);
 	}
 
 	/**
@@ -98,10 +125,12 @@ public class LoggingUtil {
 	 * @throws JoranException
 	 * @throws IOException
 	 */
-	private static boolean initLogger(String mainLogFilePath, String julLogFilePath)
+	private static boolean initLogger(String mainLogFilePath, String julLogFilePath, boolean useDebugLogLevel)
 			throws JoranException, IOException {
 		if (bundle != null) {
 			configureLogback(bundle);
+			if (useDebugLogLevel)
+				setDebugLogLevel();
 			removeAppenderFromRootLogger(ROLLING_FILE_APPENDER_NAME);
 			removeAppenderFromLogger(JUL_ROLLING_FILE_APPENDER_NAME, JUL_LOGGER_NAME);
 			configureRollingFileAppender(ROLLING_FILE_APPENDER_NAME, mainLogFilePath, ROOT_LOGGER_NAME);
@@ -140,6 +169,13 @@ public class LoggingUtil {
 			configureJulToSlf4jBridge();
 
 			isLogbackConfigured = true;
+		}
+	}
+
+	private static void setDebugLogLevel() {
+		if (isLogbackConfigured) {
+			Logger rootLogger = (Logger) LoggerFactory.getLogger(ROOT_LOGGER_NAME);
+			rootLogger.setLevel(ch.qos.logback.classic.Level.DEBUG);
 		}
 	}
 
