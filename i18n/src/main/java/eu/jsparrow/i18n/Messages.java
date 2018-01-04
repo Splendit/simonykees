@@ -162,6 +162,10 @@ public class Messages extends NLS {
 	public static String LicenseValidator_cannot_reach_license_provider_on_validation_call;
 	public static String LicenseValidator_invalid_licensee_number;
 	public static String LicenseValidator_received_validation_response;
+	public static String ListRulesUtil_Description;
+	public static String ListRulesUtil_ID;
+	public static String ListRulesUtil_Name;
+	public static String ListRulesUtil_NoRulesAvailable;
 	public static String LoggerRuleWizard_title;
 	public static String LoggerRuleWizardHandler_info_supportedFrameworkFound;
 	public static String LoggerRuleWizardHandler_noLogger;
