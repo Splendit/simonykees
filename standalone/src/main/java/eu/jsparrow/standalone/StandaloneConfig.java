@@ -88,25 +88,35 @@ public class StandaloneConfig {
 	public void setUp() throws CoreException {
 
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		logger.debug(Messages.StandaloneConfig_debug_createWorkspace);
+		String loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createWorkspace, workspace.getRoot()
+			.getLocation()
+			.toString());
+		logger.debug(loggerInfo);
 
 		IProjectDescription description = null;
 		File projectDescription = new File(path + File.separator + RefactorUtil.PROJECT_DESCRIPTION_CONSTANT);
 		if (!projectDescription.exists()) {
+			logger.debug(Messages.StandaloneConfig_CreateNewProjectDescription);
+
 			description = workspace.newProjectDescription(name);
 
 			String[] oldNatures = description.getNatureIds();
 
+			logger.debug(Messages.StandaloneConfig_AddProjectNaturesToProjectDescription);
 			String[] newNatures = Arrays.copyOf(oldNatures, oldNatures.length + 2);
 			newNatures[newNatures.length - 2] = JavaCore.NATURE_ID;
 			newNatures[newNatures.length - 1] = RefactorUtil.MAVEN_NATURE_CONSTANT;
 
 			description.setNatureIds(newNatures);
 
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_SetProjectLocation, path);
+			logger.debug(loggerInfo);
+
 			description.setLocation(new Path(path));
 
 			descriptionGenerated = true;
 		} else {
+			logger.debug(Messages.StandaloneConfig_UseExistingProjectDescription);
 			description = workspace
 				.loadProjectDescription(new Path(path + File.separator + RefactorUtil.PROJECT_DESCRIPTION_CONSTANT));
 		}
@@ -115,14 +125,12 @@ public class StandaloneConfig {
 			.getProject(description.getName());
 		project.create(description, new NullProgressMonitor());
 
-		String loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createProject, description.getName());
+		loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createProject, description.getName());
 		logger.debug(loggerInfo);
 
 		project.open(new NullProgressMonitor());
 
 		compUnits = getCompilationUnits(project);
-
-		logger.debug(Messages.StandaloneConfig_debug_createdProject);
 	}
 
 	/**
@@ -148,6 +156,9 @@ public class StandaloneConfig {
 		javaProject.setOption(JavaCore.COMPILER_COMPLIANCE, compilerCompliance);
 		javaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, compilerCompliance);
 		javaProject.setOption(JavaCore.COMPILER_SOURCE, compilerCompliance);
+
+		String loggerInfo = NLS.bind(Messages.StandaloneConfig_CompilerComplianceSetTo, compilerCompliance);
+		logger.debug(loggerInfo);
 
 		javaProject.open(new NullProgressMonitor());
 
@@ -181,6 +192,7 @@ public class StandaloneConfig {
 			return;
 		}
 
+		logger.debug(Messages.StandaloneConfig_CreateClasspathEntriesForDependencies);
 		for (File file : listOfFiles) {
 			String jarPath = file.toString();
 			IClasspathEntry jarEntry = JavaCore.newLibraryEntry(new Path(jarPath), null, null);
@@ -205,6 +217,8 @@ public class StandaloneConfig {
 	 */
 	public void addToClasspath(IJavaProject javaProject, List<IClasspathEntry> classpathEntries)
 			throws JavaModelException {
+
+		logger.debug(Messages.StandaloneConfig_ConfigureClasspath);
 
 		if (!classpathEntries.isEmpty()) {
 			oldEntries = javaProject.getRawClasspath();
@@ -241,6 +255,7 @@ public class StandaloneConfig {
 	}
 
 	private void revertClasspath() throws JavaModelException {
+		logger.debug(Messages.StandaloneConfig_RevertClasspath);
 		if (null != oldEntries) {
 			javaProject.setRawClasspath(oldEntries, null);
 		}
