@@ -47,6 +47,7 @@ import org.osgi.framework.launch.FrameworkFactory;
 import org.twdata.maven.mojoexecutor.MojoExecutor;
 
 import eu.jsparrow.maven.RefactorMojo;
+import eu.jsparrow.maven.i18n.Messages;
 
 /**
  * {@code MavenHelper} is a helper class which provides methods for handling
