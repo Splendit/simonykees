@@ -37,6 +37,7 @@ import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -56,28 +57,28 @@ import eu.jsparrow.maven.RefactorMojo;
  * @since 2.3.0
  *
  */
-@SuppressWarnings("nls")
 public class MavenHelper {
 
 	// CONSTANTS
-	private static final String USER_DIR = "user.dir";
-	private static final String JAVA_TMP = "java.io.tmpdir";
-	private static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone";
-	private static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default";
-	private static final String FRAMEWORK_STORAGE_VALUE = "target/bundlecache";
-	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH";
-	private static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME";
-	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow";
-	private static final String JSPARROW_MANIFEST = "manifest.standalone";
-	private static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory";
-	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps";
-	private static final String OSGI_INSTANCE_AREA_CONSTANT = "osgi.instance.area";
+	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
+	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
+	private static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone"; //$NON-NLS-1$
+	private static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default"; //$NON-NLS-1$
+	private static final String FRAMEWORK_STORAGE_VALUE = "target/bundlecache"; //$NON-NLS-1$
+	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
+	private static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
+	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
+	private static final String JSPARROW_MANIFEST = "manifest.standalone"; //$NON-NLS-1$
+	private static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory"; //$NON-NLS-1$
+	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
+	private static final String OSGI_INSTANCE_AREA_CONSTANT = "osgi.instance.area"; //$NON-NLS-1$
+	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 
 	private boolean standaloneStarted = false;
 	private long standaloneBundleID = 0;
 	private Framework framework = null;
 	private BundleContext bundleContext = null;
-	private String mavenHomeUnzipped = "";
+	private String mavenHomeUnzipped = ""; //$NON-NLS-1$
 	private File directory;
 	private static final int BUFFER_SIZE = 4096;
 
@@ -98,7 +99,6 @@ public class MavenHelper {
 		this(project, mavenHome, log);
 		this.mavenSession = mavenSession;
 		this.pluginManager = pluginManager;
-
 	}
 
 	/**
@@ -188,6 +188,7 @@ public class MavenHelper {
 		};
 	}
 
+	// TODO: check if this method could be merged with stopEquinoxFramework()
 	/**
 	 * shuts down the standalone bundle and equinox
 	 */
@@ -216,6 +217,8 @@ public class MavenHelper {
 	public void cleanUp() {
 		if (!this.isStandaloneStarted() && null != this.getDirectory()) {
 			try {
+				log.debug(Messages.MavenHelper_CleanTemporaryDirectories);
+
 				deleteChildren(new File(this.getDirectory()
 					.getAbsolutePath()));
 				Files.delete(this.getDirectory()
@@ -230,6 +233,7 @@ public class MavenHelper {
 	/*** HELPER METHODS ***/
 
 	private Map<String, String> prepareConfiguration(Map<String, String> additionalConfiguration) {
+		log.debug(Messages.MavenHelper_PrepareConfiguration);
 
 		final Map<String, String> configuration = new HashMap<>();
 
@@ -239,6 +243,7 @@ public class MavenHelper {
 		configuration.put(PROJECT_PATH_CONSTANT, project.getBasedir()
 			.getAbsolutePath());
 		configuration.put(PROJECT_NAME_CONSTANT, project.getName());
+		configuration.put(DEBUG_ENABLED, Boolean.toString(log.isDebugEnabled()));
 
 		if (additionalConfiguration != null) {
 			configuration.putAll(additionalConfiguration);
@@ -263,16 +268,20 @@ public class MavenHelper {
 				.size() == 1) {
 				System.setProperty(USER_DIR, directory.getAbsolutePath());
 				configuration.put(OSGI_INSTANCE_AREA_CONSTANT, directory.getAbsolutePath());
-				log.info("Set user.dir to " + directory.getAbsolutePath());
+
+				String loggerInfo = NLS.bind(Messages.MavenHelper_SetUserDirTo, directory.getAbsolutePath());
+				log.info(loggerInfo);
 			} else {
-				throw new InterruptedException("jSparrow already running");
+				throw new InterruptedException(Messages.MavenHelper_jSparrowIsAlreadyRunning);
 			}
 		} else if (directory.mkdirs()) {
 			System.setProperty(USER_DIR, directory.getAbsolutePath());
 			configuration.put(OSGI_INSTANCE_AREA_CONSTANT, directory.getAbsolutePath());
-			log.info("Set user.dir to " + directory.getAbsolutePath());
+
+			String loggerInfo = NLS.bind(Messages.MavenHelper_SetUserDirTo, directory.getAbsolutePath());
+			log.info(loggerInfo);
 		} else {
-			throw new InterruptedException("Could not create temp folder");
+			throw new InterruptedException(Messages.MavenHelper_CouldNotCreateTempFolder);
 		}
 	}
 
@@ -284,14 +293,16 @@ public class MavenHelper {
 	private String prepareMaven() {
 		String newMavenHome = null;
 
-		if (null != mavenHome && !mavenHome.isEmpty() && !mavenHome.endsWith("EMBEDDED")) {
+		if (null != mavenHome && !mavenHome.isEmpty() && !mavenHome.endsWith("EMBEDDED")) { //$NON-NLS-1$
 			newMavenHome = mavenHome;
 		} else {
-			String tempZipPath = directory.getAbsolutePath() + File.separator + "maven";
+			log.debug(Messages.MavenHelper_EmbeddedMavenDetected);
+
+			String tempZipPath = directory.getAbsolutePath() + File.separator + "maven"; //$NON-NLS-1$
 
 			// TODO: find a better way to load maven
 			try (InputStream mavenZipInputStream = RefactorMojo.class
-				.getResourceAsStream("/apache-maven-3.5.2-bin.zip")) {
+				.getResourceAsStream("/apache-maven-3.5.2-bin.zip")) { //$NON-NLS-1$
 				mavenHomeUnzipped += tempZipPath;
 				unzip(mavenZipInputStream, tempZipPath);
 				newMavenHome = mavenHomeUnzipped;
@@ -311,6 +322,8 @@ public class MavenHelper {
 	 * @throws BundleException
 	 */
 	private void startEquinoxFramework(Map<String, String> configuration) throws BundleException {
+		log.debug(Messages.MavenHelper_StartEquinox);
+
 		ServiceLoader<FrameworkFactory> ffs = ServiceLoader.load(FrameworkFactory.class);
 		FrameworkFactory frameworkFactory = ffs.iterator()
 			.next();
@@ -332,7 +345,9 @@ public class MavenHelper {
 		framework.waitForStop(0);
 		standaloneStarted = false;
 
-		String exitMessage = bundleContext.getProperty("eu.jsparrow.standalone.exit.message");
+		log.debug(Messages.MavenHelper_EquinoxStopped);
+
+		String exitMessage = bundleContext.getProperty("eu.jsparrow.standalone.exit.message"); //$NON-NLS-1$
 		if (exitMessage != null && !exitMessage.isEmpty()) {
 			throw new MojoExecutionException(exitMessage);
 		}
@@ -346,17 +361,19 @@ public class MavenHelper {
 	 * @throws BundleException
 	 */
 	private List<Bundle> loadBundles() throws BundleException {
+		log.debug(Messages.MavenHelper_LoadOsgiBundles);
+
 		bundleContext = framework.getBundleContext();
 		final List<Bundle> bundles = new ArrayList<>();
 
-		try (InputStream is = getClass().getResourceAsStream("/" + JSPARROW_MANIFEST);
+		try (InputStream is = getClass().getResourceAsStream("/" + JSPARROW_MANIFEST); //$NON-NLS-1$
 				BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-			String line = "";
+			String line = ""; //$NON-NLS-1$
 
 			if (is != null) {
 				while ((line = reader.readLine()) != null) {
-					InputStream fileStream = getClass().getResourceAsStream("/" + line);
-					bundles.add(bundleContext.installBundle("file://" + line, fileStream));
+					InputStream fileStream = getClass().getResourceAsStream("/" + line); //$NON-NLS-1$
+					bundles.add(bundleContext.installBundle("file://" + line, fileStream)); //$NON-NLS-1$
 				}
 			}
 		} catch (IOException e) {
@@ -383,7 +400,9 @@ public class MavenHelper {
 				.startsWith(STANDALONE_BUNDLE_NAME))
 			.forEach(bundle -> {
 				try {
-					log.info("Starting BUNDLE: " + bundle.getSymbolicName() + ", resolution: " + bundle.getState());
+					String loggerInfo = NLS.bind(Messages.MavenHelper_StartingBundle, bundle.getSymbolicName(),
+							bundle.getState());
+					log.debug(loggerInfo);
 					bundle.start();
 					standaloneBundleID = bundle.getBundleId();
 					standaloneStarted = true;
@@ -399,10 +418,12 @@ public class MavenHelper {
 	 * needed dependencies to the temp folder for use from bundles.
 	 */
 	private void extractAndCopyDependencies(String preparedMavenHome) {
+		log.debug(Messages.MavenHelper_ExtractAndCopyDependencies);
+
 		final InvocationRequest request = new DefaultInvocationRequest();
 		request.setPomFile(new File(project.getBasedir()
-			.getAbsolutePath() + File.separator + "pom.xml"));
-		request.setGoals(Collections.singletonList("dependency:copy-dependencies "));
+			.getAbsolutePath() + File.separator + "pom.xml")); //$NON-NLS-1$
+		request.setGoals(Collections.singletonList("dependency:copy-dependencies ")); //$NON-NLS-1$
 
 		final Properties props = new Properties();
 		props.setProperty(OUTPUT_DIRECTORY_CONSTANT,
@@ -420,15 +441,17 @@ public class MavenHelper {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private void copyDepsWithMavenExecutor() {
-		log.info("Session: " + mavenSession);
+		String loggerInfo = NLS.bind(Messages.MavenHelper_Session, mavenSession);
+		log.info(loggerInfo);
 
 		// TODO fix output directory and scope to test to include junit
 		Plugin execPlugin = createMavenDepsPlugin();
 		Xpp3Dom configuration = MojoExecutor.configuration();
 		configureExecPlugin(configuration);
 		try {
-			executeMojo(execPlugin, "copy-dependencies", configuration,
+			executeMojo(execPlugin, "copy-dependencies", configuration, //$NON-NLS-1$
 					executionEnvironment(project, mavenSession, pluginManager));
 		} catch (MojoExecutionException e) {
 			log.debug(e.getMessage(), e);
@@ -438,9 +461,9 @@ public class MavenHelper {
 
 	private Plugin createMavenDepsPlugin() {
 		Plugin dependenciesPlugin = new Plugin();
-		dependenciesPlugin.setGroupId("org.apache.maven.plugins");
-		dependenciesPlugin.setArtifactId("maven-dependency-plugin");
-		dependenciesPlugin.setVersion("3.0.2");
+		dependenciesPlugin.setGroupId("org.apache.maven.plugins"); //$NON-NLS-1$
+		dependenciesPlugin.setArtifactId("maven-dependency-plugin"); //$NON-NLS-1$
+		dependenciesPlugin.setVersion("3.0.2"); //$NON-NLS-1$
 
 		return dependenciesPlugin;
 	}
@@ -464,6 +487,9 @@ public class MavenHelper {
 			destDir.mkdir();
 		}
 
+		String loggerInfo = NLS.bind(Messages.MavenHelper_UnzipTemporaryMavenInstallation, destDir.toString());
+		log.debug(loggerInfo);
+
 		ZipInputStream zipIn = new ZipInputStream(zipInputStream);
 		ZipEntry entry = zipIn.getNextEntry();
 		mavenHomeUnzipped += File.separator + entry.getName();
@@ -478,11 +504,12 @@ public class MavenHelper {
 				// if the entry is a directory, make the directory
 				File dir = new File(filePath);
 				dir.mkdir();
-				log.info("create dir : " + dir.getAbsoluteFile());
+				log.debug(Messages.MavenHelper_CreateDir + dir.getAbsoluteFile());
 			}
 			zipIn.closeEntry();
 			entry = zipIn.getNextEntry();
 		}
+
 		zipIn.close();
 	}
 
@@ -494,7 +521,9 @@ public class MavenHelper {
 	 * @throws IOException
 	 */
 	private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
-		log.info("file unzip : " + filePath);
+		String loggerInfo = NLS.bind(Messages.MavenHelper_FileUnzip, filePath);
+		log.debug(loggerInfo);
+
 		try (FileOutputStream fos = new FileOutputStream(filePath);
 				BufferedOutputStream bos = new BufferedOutputStream(fos)) {
 			byte[] bytesIn = new byte[BUFFER_SIZE];
