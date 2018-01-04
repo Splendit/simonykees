@@ -3,7 +3,7 @@ package eu.jsparrow.maven.i18n;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "eu.jsparrow.maven.util.messages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "eu.jsparrow.maven.i18n.messages"; //$NON-NLS-1$
 	public static String MavenHelper_CleanTemporaryDirectories;
 	public static String MavenHelper_CouldNotCreateTempFolder;
 	public static String MavenHelper_CreateDir;
