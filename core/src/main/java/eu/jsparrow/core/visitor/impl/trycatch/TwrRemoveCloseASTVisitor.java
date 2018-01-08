@@ -10,12 +10,9 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 class TwrRemoveCloseASTVisitor extends ASTVisitor {
 
-	/**
-	 * 
-	 */
-	List<MethodInvocation> methodInvocationList;
-	ASTMatcher astMatcher;
-	ASTRewrite astRewrite;
+	private List<MethodInvocation> methodInvocationList;
+	private ASTMatcher astMatcher;
+	private ASTRewrite astRewrite;
 
 	public TwrRemoveCloseASTVisitor(ASTRewrite astRewrite, List<MethodInvocation> methodInvocationList) {
 		this.astRewrite = astRewrite;
