@@ -19,20 +19,20 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 /**
  * Verifies the following condition for the given {@code SimpleName}:
  * 
- * - resource is not assigned in the try block. - resource is not closed
- * inside some other nested try block but directly inside the body. -
- * resource is not used after it is closed. - resource initializer does not
- * use values that could be potentially manipulated between the opening of
- * the try block and its occurrence.
+ * - resource is not assigned in the try block. - resource is not closed inside
+ * some other nested try block but directly inside the body. - resource is not
+ * used after it is closed. - resource initializer does not use values that
+ * could be potentially manipulated between the opening of the try block and its
+ * occurrence.
  * 
  * @author Ardit Ymeri
  * @since 1.0
  */
-class TryWithResourcePreconditionASTVisitor extends ASTVisitor {
+class TwrPreconditionASTVisitor extends ASTVisitor {
 	private SimpleName targetName;
 	private boolean assigned = false;
 	private boolean closeOccurred = false;
-	private boolean closeOccuredInNestedTry = false;
+	private boolean closeOccurredInNestedTry = false;
 	private boolean referencedAfterClose = false;
 	private int nestedTryLevel = 0;
 	private boolean reachedTargetName = false;
@@ -42,7 +42,7 @@ class TryWithResourcePreconditionASTVisitor extends ASTVisitor {
 
 	private MethodInvocation closeStatement = null;
 
-	public TryWithResourcePreconditionASTVisitor(SimpleName targetName,
+	public TwrPreconditionASTVisitor(SimpleName targetName,
 			List<VariableDeclarationFragment> toBeMovedToResources) {
 		this.targetName = targetName;
 		this.toBeMovedToResources = toBeMovedToResources;
@@ -88,8 +88,7 @@ class TryWithResourcePreconditionASTVisitor extends ASTVisitor {
 		// proceeding simple
 		// names
 
-		return !assigned && !initializerIsDirty() && !referencedAfterClose && !closeOccuredInNestedTry
-				&& closeOccurred;
+		return !assigned && !initializerIsDirty() && !referencedAfterClose && !closeOccurredInNestedTry && closeOccurred;
 	}
 
 	private boolean initializerIsDirty() {
@@ -118,7 +117,7 @@ class TryWithResourcePreconditionASTVisitor extends ASTVisitor {
 					if (nestedTryLevel == 1) {
 						closeOccurred = true;
 					} else if (nestedTryLevel > 1) {
-						closeOccuredInNestedTry = true;
+						closeOccurredInNestedTry = true;
 					}
 					closeStatement = invocation;
 				}
@@ -134,19 +133,12 @@ class TryWithResourcePreconditionASTVisitor extends ASTVisitor {
 		if (binding != null && binding.getKind() == IBinding.VARIABLE) {
 			if (simpleName == targetName) {
 				reachedTargetName = true;
-				ASTNode parent = simpleName.getParent();
-				if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()) {
-					VariableDeclarationFragment fragment = (VariableDeclarationFragment) parent;
-					Expression initExpression = fragment.getInitializer();
-					if (initExpression != null) {
-						referencedByInitializer = findReferencedVariables(initExpression);
-					}
-				}
+				referencedByInitializer = findReferencedVariables(simpleName);
 			} else if (!reachedTargetName) {
 				proceedingSimpleNames.add(simpleName);
 			}
 
-			if ((closeOccurred || closeOccuredInNestedTry) && simpleName.getParent() != closeStatement
+			if ((closeOccurred || closeOccurredInNestedTry) && simpleName.getParent() != closeStatement
 					&& targetName.getIdentifier()
 						.equals(simpleName.getIdentifier())) {
 				referencedAfterClose = true;
@@ -156,10 +148,19 @@ class TryWithResourcePreconditionASTVisitor extends ASTVisitor {
 		return true;
 	}
 
-	private List<SimpleName> findReferencedVariables(Expression initExpression) {
-		TryWithResourceReferencedVariablesASTVisitor visitor = new TryWithResourceReferencedVariablesASTVisitor();
-		initExpression.accept(visitor);
-		return visitor.getReferencedVariables();
+	private static List<SimpleName> findReferencedVariables(SimpleName simpleName) {
+		List<SimpleName> result = new ArrayList<>();
+		ASTNode parent = simpleName.getParent();
+		if (ASTNode.VARIABLE_DECLARATION_FRAGMENT == parent.getNodeType()) {
+			VariableDeclarationFragment fragment = (VariableDeclarationFragment) parent;
+			Expression initExpression = fragment.getInitializer();
+			if (initExpression != null) {
+				TwrReferencedVariablesASTVisitor visitor = new TwrReferencedVariablesASTVisitor();
+				initExpression.accept(visitor);
+				result.addAll(visitor.getReferencedVariables());
+			}
+		}
+		return result;
 	}
 
 	@Override
@@ -176,6 +177,6 @@ class TryWithResourcePreconditionASTVisitor extends ASTVisitor {
 	@Override
 	public boolean preVisit2(ASTNode node) {
 		// stop if any of the following...
-		return !assigned && !referencedAfterClose && !closeOccuredInNestedTry;
+		return !assigned && !referencedAfterClose && !closeOccurredInNestedTry;
 	}
 }

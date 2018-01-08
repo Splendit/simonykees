@@ -6,16 +6,13 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -76,7 +73,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 
 				SimpleName varName = variableDeclarationFragment.getName();
 
-				TryWithResourcePreconditionASTVisitor visitor = new TryWithResourcePreconditionASTVisitor(varName, toBeMovedToResources);
+				TwrPreconditionASTVisitor visitor = new TwrPreconditionASTVisitor(varName, toBeMovedToResources);
 				node.accept(visitor);
 
 				if (variableDeclarationFragment.getInitializer() != null && visitor.safeToGo()) {
@@ -142,7 +139,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		} else {
 			ListRewrite listRewrite = astRewrite.getListRewrite(node, TryStatement.RESOURCES_PROPERTY);
 			resourceList.forEach(iteratorNode -> listRewrite.insertLast(iteratorNode, null));
-			node.accept(new RemoveCloseASTVisitor(closeInvocations));
+			node.accept(new TwrRemoveCloseASTVisitor(astRewrite, closeInvocations));
 		}
 
 		onRewrite();
@@ -157,7 +154,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		tryStatement.resources()
 			.addAll(resourceList);
 		Block newBody = (Block) ASTNode.copySubtree(node.getAST(), node.getBody());
-		TryWithResourceNewStatementASTVisitor visitor = new TryWithResourceNewStatementASTVisitor(toBeMovedToResources, closeInvocations);
+		TwrNewStatementASTVisitor visitor = new TwrNewStatementASTVisitor(toBeMovedToResources, closeInvocations);
 		newBody.accept(visitor);
 
 		List<CatchClause> newCatchClauses = ASTNodeUtil.convertToTypedList(node.catchClauses(), CatchClause.class)
@@ -171,29 +168,5 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		tryStatement.setFinally((Block) ASTNode.copySubtree(node.getAST(), node.getFinally()));
 		
 		return tryStatement;
-	}
-
-	private class RemoveCloseASTVisitor extends ASTVisitor {
-
-		List<MethodInvocation> methodInvocationList;
-		ASTMatcher astMatcher;
-
-		public RemoveCloseASTVisitor(List<MethodInvocation> methodInvocationList) {
-			this.methodInvocationList = methodInvocationList;
-			this.astMatcher = new ASTMatcher();
-		}
-
-		@Override
-		public boolean visit(MethodInvocation node) {
-			if (methodInvocationList.stream()
-				.anyMatch(methodInvocation -> astMatcher.match(node, methodInvocation)
-						&& node.getParent() instanceof Statement)) {
-				node.resolveMethodBinding()
-					.getExceptionTypes();
-				getASTRewrite().remove(node.getParent(), null);
-			}
-			return false;
-		}
-
 	}
 }

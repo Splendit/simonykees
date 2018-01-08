@@ -8,13 +8,13 @@ import org.junit.Test;
 
 import eu.jsparrow.core.visitor.impl.UsesJDTUnitFixture;
 
-public class TryWithResourceReferencedVariablesASTVisitorTest extends UsesJDTUnitFixture {
+public class TwrReferencedVariablesASTVisitorTest extends UsesJDTUnitFixture {
 	
-	private TryWithResourceReferencedVariablesASTVisitor visitor;
+	private TwrReferencedVariablesASTVisitor visitor;
 	
 	@Before
 	public void setUp() {
-		visitor = new TryWithResourceReferencedVariablesASTVisitor();
+		visitor = new TwrReferencedVariablesASTVisitor();
 	}
 
 	@Test

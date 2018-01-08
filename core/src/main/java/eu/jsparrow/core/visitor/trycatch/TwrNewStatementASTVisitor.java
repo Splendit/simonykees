@@ -18,15 +18,15 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
  * @since 2.4.0
  *
  */
-class TryWithResourceNewStatementASTVisitor extends ASTVisitor {
+class TwrNewStatementASTVisitor extends ASTVisitor {
 	private List<VariableDeclarationFragment> toBeRemoved;
 	private List<MethodInvocation> closeStatements;
 	private ASTMatcher matcher;
 
-	public TryWithResourceNewStatementASTVisitor(List<VariableDeclarationFragment> toBeRemoved,
-			List<MethodInvocation> closeStatemetns) {
+	public TwrNewStatementASTVisitor(List<VariableDeclarationFragment> toBeRemoved,
+			List<MethodInvocation> closeStatements) {
 		this.toBeRemoved = toBeRemoved;
-		this.closeStatements = closeStatemetns;
+		this.closeStatements = closeStatements;
 		this.matcher = new ASTMatcher();
 	}
 

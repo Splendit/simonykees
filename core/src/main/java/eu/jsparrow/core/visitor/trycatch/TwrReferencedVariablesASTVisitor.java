@@ -14,10 +14,10 @@ import org.eclipse.jdt.core.dom.SimpleName;
  * @since 1.0
  *
  */
-class TryWithResourceReferencedVariablesASTVisitor extends ASTVisitor {
+class TwrReferencedVariablesASTVisitor extends ASTVisitor {
 	private List<SimpleName> referencedVariables;
 
-	public TryWithResourceReferencedVariablesASTVisitor() {
+	public TwrReferencedVariablesASTVisitor() {
 		referencedVariables = new ArrayList<>();
 	}
 
