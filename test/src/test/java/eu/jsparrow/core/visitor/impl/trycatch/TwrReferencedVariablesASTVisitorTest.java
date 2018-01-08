@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.trycatch;
+package eu.jsparrow.core.visitor.impl.trycatch;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
