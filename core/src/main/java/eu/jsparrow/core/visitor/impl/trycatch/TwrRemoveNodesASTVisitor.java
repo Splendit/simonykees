@@ -7,23 +7,26 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 /**
  * A visitor for deleting the nodes that are matching with any member of lists
- * provided in the constructor.
+ * provided in the constructor. Intended to be used when a new
+ * {@link TryStatement} is created as a copy of the old one, and therefore the
+ * close statements and the resource declaration are to be removed.
  * 
  * @author Ardit Ymeri
  * @since 2.4.0
  *
  */
-class TwrNewStatementASTVisitor extends ASTVisitor {
+class TwrRemoveNodesASTVisitor extends ASTVisitor {
 	private List<VariableDeclarationFragment> toBeRemoved;
 	private List<MethodInvocation> closeStatements;
 	private ASTMatcher matcher;
 
-	public TwrNewStatementASTVisitor(List<VariableDeclarationFragment> toBeRemoved,
+	public TwrRemoveNodesASTVisitor(List<VariableDeclarationFragment> toBeRemoved,
 			List<MethodInvocation> closeStatements) {
 		this.toBeRemoved = toBeRemoved;
 		this.closeStatements = closeStatements;

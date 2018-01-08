@@ -36,8 +36,8 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 
-	private static final String AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME = java.lang.AutoCloseable.class.getName();
-	private static final String CLOSEABLE_FULLY_QUALLIFIED_NAME = java.io.Closeable.class.getName();
+	private static final String AUTO_CLOSEABLE_FULLY_QUALIFIED_NAME = java.lang.AutoCloseable.class.getName();
+	private static final String CLOSEABLE_FULLY_QUALIFIED_NAME = java.io.Closeable.class.getName();
 	static final String CLOSE = "close"; //$NON-NLS-1$
 
 	// TODO improvement for suppressed deprecation needed, see SIM-878
@@ -60,7 +60,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 			ITypeBinding typeBind = varDeclStatmentNode.getType()
 					.resolveBinding();
 			if (!ClassRelationUtil.isInheritingContentOfTypes(typeBind, generateFullyQualifiedNameList(
-					AUTO_CLOSEABLE_FULLY_QUALLIFIED_NAME, CLOSEABLE_FULLY_QUALLIFIED_NAME))) {
+					AUTO_CLOSEABLE_FULLY_QUALIFIED_NAME, CLOSEABLE_FULLY_QUALIFIED_NAME))) {
 				break;
 			}
 
@@ -154,7 +154,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		tryStatement.resources()
 			.addAll(resourceList);
 		Block newBody = (Block) ASTNode.copySubtree(node.getAST(), node.getBody());
-		TwrNewStatementASTVisitor visitor = new TwrNewStatementASTVisitor(toBeMovedToResources, closeInvocations);
+		TwrRemoveNodesASTVisitor visitor = new TwrRemoveNodesASTVisitor(toBeMovedToResources, closeInvocations);
 		newBody.accept(visitor);
 
 		List<CatchClause> newCatchClauses = ASTNodeUtil.convertToTypedList(node.catchClauses(), CatchClause.class)
