@@ -19,11 +19,14 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 /**
  * Verifies the following condition for the given {@code SimpleName}:
  * 
- * - resource is not assigned in the try block. - resource is not closed inside
- * some other nested try block but directly inside the body. - resource is not
- * used after it is closed. - resource initializer does not use values that
- * could be potentially manipulated between the opening of the try block and its
- * occurrence.
+ * <ul>
+ * <li>resource is not assigned in the try block.</li>
+ * <li>resource is not closed inside some other nested try block but directly
+ * inside the body.</li>
+ * <li>resource is not used after it is closed.</li>
+ * <li>resource initializer does not use values that could be potentially
+ * manipulated between the opening of the try block and its occurrence.</li>
+ * </ul>
  * 
  * @author Ardit Ymeri
  * @since 1.0
@@ -42,8 +45,7 @@ class TwrPreconditionASTVisitor extends ASTVisitor {
 
 	private MethodInvocation closeStatement = null;
 
-	public TwrPreconditionASTVisitor(SimpleName targetName,
-			List<VariableDeclarationFragment> toBeMovedToResources) {
+	public TwrPreconditionASTVisitor(SimpleName targetName, List<VariableDeclarationFragment> toBeMovedToResources) {
 		this.targetName = targetName;
 		this.toBeMovedToResources = toBeMovedToResources;
 		proceedingSimpleNames = new ArrayList<>();
@@ -88,7 +90,8 @@ class TwrPreconditionASTVisitor extends ASTVisitor {
 		// proceeding simple
 		// names
 
-		return !assigned && !initializerIsDirty() && !referencedAfterClose && !closeOccurredInNestedTry && closeOccurred;
+		return !assigned && !initializerIsDirty() && !referencedAfterClose && !closeOccurredInNestedTry
+				&& closeOccurred;
 	}
 
 	private boolean initializerIsDirty() {
