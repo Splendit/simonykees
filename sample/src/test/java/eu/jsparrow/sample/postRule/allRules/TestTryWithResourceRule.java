@@ -65,7 +65,6 @@ public class TestTryWithResourceRule {
 			br003.readLine();
 			br004.readLine();
 			br4.read();
-
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -80,7 +79,6 @@ public class TestTryWithResourceRule {
 			br2.readLine();
 			br3.readLine();
 			br4.read();
-
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -93,7 +91,6 @@ public class TestTryWithResourceRule {
 			br.readLine();
 			br2.readLine();
 			br4.read();
-
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -161,14 +158,15 @@ public class TestTryWithResourceRule {
 
 		try (BufferedReader br = new BufferedReader(new FileReader(path));
 				BufferedReader br2 = new BufferedReader(new FileReader(path))) {
-			try (BufferedReader br3 = new BufferedReader(new FileReader(path))) {
+			try {
+				BufferedReader br3 = new BufferedReader(new FileReader(path));
 				br3.read();
+				br3.close();
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
 			}
 			br2.readLine();
 			br.readLine();
-
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 		}
