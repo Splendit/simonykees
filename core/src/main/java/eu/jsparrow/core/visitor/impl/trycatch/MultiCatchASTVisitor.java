@@ -1,4 +1,4 @@
-package eu.jsparrow.core.visitor.trycatch;
+package eu.jsparrow.core.visitor.impl.trycatch;
 
 import java.util.ArrayList;
 import java.util.Iterator;
