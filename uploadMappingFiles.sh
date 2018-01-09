@@ -49,7 +49,7 @@ if [ -d "$origin_dir" ]; then
 	
 	# then: zip and upload to deobfuscation service
 	zip -r "$target_dir".zip "$target_dir"
-	curl -F file=@"$target_dir".zip http://docker.splendit.loc:8080/upload
+	curl -F file=@"$target_dir".zip http://stacktrace.splendit.loc/upload
 
 	if [ $? -gt 0 ]; then
 		exitCopyError
