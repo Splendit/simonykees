@@ -11,7 +11,9 @@ import eu.jsparrow.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 
 @SuppressWarnings({ "nls" })
-public class ArithmeticAssignmentASTVisitorTest extends AbstractASTVisitorTest {
+public class ArithmeticAssignmentASTVisitorTest extends UsesJDTUnitFixture {
+
+	private ArithmethicAssignmentASTVisitor visitor;
 
 	@Before
 	public void setUp() {

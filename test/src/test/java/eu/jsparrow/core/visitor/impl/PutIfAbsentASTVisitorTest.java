@@ -10,8 +10,10 @@ import org.junit.Test;
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 
 @SuppressWarnings("nls")
-public class PutIfAbsentASTVisitorTest extends AbstractASTVisitorTest {
+public class PutIfAbsentASTVisitorTest extends UsesJDTUnitFixture {
 
+	private PutIfAbsentASTVisitor visitor;
+	
 	@Before
 	public void setUp() {
 		visitor = new PutIfAbsentASTVisitor();

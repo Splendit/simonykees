@@ -10,9 +10,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.jdtunit.JdtUnitFixture;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 
-public abstract class AbstractASTVisitorTest {
-
-	protected AbstractASTRewriteASTVisitor visitor;
+public abstract class UsesJDTUnitFixture {
 
 	protected static JdtUnitFixture fixture;
 
