@@ -15,7 +15,7 @@
 	<description>jSparrow Release Engineering Plugin</description>
 	
 	
-<!-- 	<modules>
+ 	<modules>
 		<module>eu.jsparrow.product</module>
-	</modules> -->
+	</modules>
 </project>
