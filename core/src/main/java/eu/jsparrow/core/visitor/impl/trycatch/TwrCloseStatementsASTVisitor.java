@@ -1,23 +1,23 @@
 package eu.jsparrow.core.visitor.impl.trycatch;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-class TwrRemoveCloseASTVisitor extends ASTVisitor {
+class TwrCloseStatementsASTVisitor extends ASTVisitor {
 
 	private List<MethodInvocation> methodInvocationList;
 	private ASTMatcher astMatcher;
-	private ASTRewrite astRewrite;
+	private List<Statement> closeInvocations;
 
-	public TwrRemoveCloseASTVisitor(ASTRewrite astRewrite, List<MethodInvocation> methodInvocationList) {
-		this.astRewrite = astRewrite;
+	public TwrCloseStatementsASTVisitor(List<MethodInvocation> methodInvocationList) {
 		this.methodInvocationList = methodInvocationList;
 		this.astMatcher = new ASTMatcher();
+		this.closeInvocations = new ArrayList<>();
 	}
 
 	@Override
@@ -25,11 +25,13 @@ class TwrRemoveCloseASTVisitor extends ASTVisitor {
 		if (methodInvocationList.stream()
 			.anyMatch(methodInvocation -> astMatcher.match(node, methodInvocation)
 					&& node.getParent() instanceof Statement)) {
-			node.resolveMethodBinding()
-				.getExceptionTypes();
-			this.astRewrite.remove(node.getParent(), null);
+			closeInvocations.add((Statement)node.getParent());
 		}
 		return false;
+	}
+	
+	public List<Statement> getCloseInvocationStatements() {
+		return this.closeInvocations;
 	}
 
 }
