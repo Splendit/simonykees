@@ -182,4 +182,23 @@ public class TestCornerCasesTryWithResourceRule {
         	
         }
 	}
+	
+	public void savingComments() {
+		String path = "some/Funny/Path";
+		try {
+			/*
+			 * Block comment on resource
+			 */
+			OutputStream uniqueName001 =
+					// inline comment inside the resource
+					new FileOutputStream(path); // training line comment
+            // Flush and close the stream.
+        	uniqueName001.flush();
+        	// comment on close
+            uniqueName001.close();
+
+        } catch (IOException fileNotFoundException) {
+        	
+        }
+	}
 }
