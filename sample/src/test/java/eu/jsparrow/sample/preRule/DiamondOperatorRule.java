@@ -215,6 +215,10 @@ public class DiamondOperatorRule {
 		List<GenericSample> result2 = foo.genericOverloaded(new ArrayList<GenericSample>(), input, 0);
 	}
 	
+	public void savingComments() {
+		List<String> myList = new ArrayList</* Some comment here */String>();
+	}
+	
 	/**
 	 * SIM-820 - if a diamond operator is used, eclipse will not indicate a compile error but the code will not compile.  
 	 */

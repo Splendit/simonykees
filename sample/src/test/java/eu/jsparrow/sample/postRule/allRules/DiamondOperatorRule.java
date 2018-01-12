@@ -142,6 +142,11 @@ public class DiamondOperatorRule {
 		List<GenericSample> result2 = foo.genericOverloaded(new ArrayList<>(), input, 0);
 	}
 
+	public void savingComments() {
+		/* Some comment here */
+		List<String> myList = new ArrayList<>();
+	}
+
 	private class GenericSample<T> {
 		private T t;
 
