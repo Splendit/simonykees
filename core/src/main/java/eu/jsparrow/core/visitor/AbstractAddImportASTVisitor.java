@@ -55,6 +55,7 @@ public abstract class AbstractAddImportASTVisitor extends AbstractASTRewriteASTV
 						.insertLast(newImport, null);
 				}
 			});
+		super.endVisit(node);
 	}
 
 	/**

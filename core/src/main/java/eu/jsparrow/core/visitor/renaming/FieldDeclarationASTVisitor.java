@@ -101,12 +101,14 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 			iJavaProject = compilationUnit.getJavaElement()
 				.getJavaProject();
 		}
+		super.visit(compilationUnit);
 		return true;
 	}
 
 	@Override
 	public void endVisit(CompilationUnit compilationUnit) {
 		declaredNamesPerNode.clear();
+		super.endVisit(compilationUnit);
 	}
 
 	@Override

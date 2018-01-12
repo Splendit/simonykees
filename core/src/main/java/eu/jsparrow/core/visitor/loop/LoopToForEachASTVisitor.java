@@ -76,6 +76,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		compilationUnit.accept(declaredTypesVisitor);
 		innerTypesMap = declaredTypesVisitor.getDeclaredTypes();
 		topLevelTypes = declaredTypesVisitor.getTopLevelTypes();
+		super.visit(compilationUnit);
 		return true;
 	}
 

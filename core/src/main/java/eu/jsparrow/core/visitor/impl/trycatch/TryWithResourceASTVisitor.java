@@ -9,12 +9,11 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
-import org.eclipse.jdt.core.dom.Comment;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -26,7 +25,6 @@ import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.core.visitor.CommentsASTVisitor;
 
 /**
  * The {@link TryWithResourceASTVisitor} is used to find resources in an
@@ -42,16 +40,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String AUTO_CLOSEABLE_FULLY_QUALIFIED_NAME = java.lang.AutoCloseable.class.getName();
 	private static final String CLOSEABLE_FULLY_QUALIFIED_NAME = java.io.Closeable.class.getName();
 	static final String CLOSE = "close"; //$NON-NLS-1$
-	private CompilationUnit compilationUnit;
-	private List<Comment> comments;
 
-	@Override
-	public boolean visit(CompilationUnit cu) {
-		this.compilationUnit = cu;
-		comments = ASTNodeUtil.convertToTypedList(cu.getCommentList(), Comment.class);
-
-		return true;
-	}
 
 	// TODO improvement for suppressed deprecation needed, see SIM-878
 	@SuppressWarnings("unchecked")
@@ -110,21 +99,15 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 
 					resourceList.add(variableDeclarationExpression);
 					resourceNameList.add(variableDeclarationFragment.getName());
-					List<Comment> relatedComments;
 
 					if (numFragments > 1) {
+						saveRelatedComments(variableDeclarationFragment, node);
 						astRewrite.remove(variableDeclarationFragment, null);
-						relatedComments = findRelatedComments(variableDeclarationFragment, this.compilationUnit, this.comments);
 						numFragments--;
 					} else {
+						saveRelatedComments(varDeclStatmentNode, node);
 						astRewrite.remove(varDeclStatmentNode, null);
-						relatedComments = findRelatedComments(varDeclStatmentNode, this.compilationUnit, this.comments);
 					}
-					
-					CommentsASTVisitor commentsVisitor = new CommentsASTVisitor();
-					commentsVisitor.parseSource(compilationUnit);
-					relatedComments.forEach(comment -> comment.accept(commentsVisitor));
-					commentsVisitor.getComments().forEach((key, value) -> addComment(node, value));
 				}
 			}
 		}
@@ -160,9 +143,14 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		} else {
 			ListRewrite listRewrite = astRewrite.getListRewrite(node, TryStatement.RESOURCES_PROPERTY);
 			resourceList.forEach(iteratorNode -> listRewrite.insertLast(iteratorNode, null));
-			node.accept(new TwrRemoveCloseASTVisitor(astRewrite, closeInvocations));
+			TwrCloseStatementsASTVisitor visitor = new TwrCloseStatementsASTVisitor(closeInvocations);
+			node.accept(visitor);
+			List<Statement> invocations = visitor.getCloseInvocationStatements();
+			invocations.forEach(invocation -> {
+				saveRelatedComments(invocation);
+				astRewrite.remove(invocation, null);
+			});
 		}
-
 		onRewrite();
 	}
 

@@ -55,6 +55,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	@Override
 	public boolean visit(CompilationUnit cu) {
 		this.compilationUnit = cu;
+		super.visit(cu);
 		return true;
 	}
 

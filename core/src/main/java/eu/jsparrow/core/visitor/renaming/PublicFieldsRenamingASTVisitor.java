@@ -75,6 +75,7 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 		this.cuRelatedReplacements = findCURelatedData(compilationUnit);
 		this.cuRelatedReplacements.putAll(findRelatedCUDeclarationFragments(compilationUnit));
 		this.cuRelatedUnmodifiable = findCURelatedUnmodifiable(iCompilationUnit);
+		super.visit(compilationUnit);
 		return true;
 	}
 
