@@ -2,25 +2,19 @@ package eu.jsparrow.core.visitor.impl.trycatch;
 
 import java.io.Closeable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.LineComment;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -120,19 +114,17 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 
 					if (numFragments > 1) {
 						astRewrite.remove(variableDeclarationFragment, null);
-						relatedComments = findComments(variableDeclarationFragment);
+						relatedComments = findRelatedComments(variableDeclarationFragment, this.compilationUnit, this.comments);
 						numFragments--;
 					} else {
 						astRewrite.remove(varDeclStatmentNode, null);
-						relatedComments = findComments(varDeclStatmentNode);
+						relatedComments = findRelatedComments(varDeclStatmentNode, this.compilationUnit, this.comments);
 					}
 					
 					CommentsASTVisitor commentsVisitor = new CommentsASTVisitor();
 					commentsVisitor.parseSource(compilationUnit);
 					relatedComments.forEach(comment -> comment.accept(commentsVisitor));
-					commentsVisitor.getLineComments().forEach((key, value) -> addLineComment(node, value));
-					commentsVisitor.getBlockComments().forEach((key, value) -> addBlockComment(node, value));
-					
+					commentsVisitor.getComments().forEach((key, value) -> addComment(node, value));
 				}
 			}
 		}
@@ -143,52 +135,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 		return true;
 	}
-
-	private void addBlockComment(TryStatement node, String value) {
-		Block block = ASTNodeUtil.getSpecificAncestor(node, Block.class);
-		
-		value = StringUtils.replace(value, "\\n\\t", "\\n");
-		ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-		Statement placeHolder = (Statement) astRewrite.createStringPlaceholder(value,
-				ASTNode.EMPTY_STATEMENT);
-		listRewrite.insertBefore(placeHolder, node, null);
-	}
 	
-	private void addLineComment(TryStatement node, String content) {
-
-		Block block = ASTNodeUtil.getSpecificAncestor(node, Block.class);
-
-		ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-		Statement placeHolder = (Statement) astRewrite.createStringPlaceholder(content,
-				ASTNode.EMPTY_STATEMENT);
-		listRewrite.insertBefore(placeHolder, node, null);
-	}
-
-	private List<Comment> findComments(ASTNode node) {
-		List<Comment> relatedComments = new ArrayList<>();
-		relatedComments.addAll(findInternalComments(node));
-		int leadingCommentIndex = this.compilationUnit.firstLeadingCommentIndex(node);
-		if (leadingCommentIndex >= 0) {
-			relatedComments.add(0, comments.get(leadingCommentIndex));
-		}
-		
-		int trailCommentIndex = this.compilationUnit.lastTrailingCommentIndex(node);
-		if (trailCommentIndex >= 0) {
-			relatedComments.add(comments.get(trailCommentIndex));
-		}
-
-		return relatedComments;
-	}
-
-	private Collection<? extends Comment> findInternalComments(ASTNode node) {
-		int nodeStartPos = node.getStartPosition();
-		int nodeEndPos = nodeStartPos + node.getLength();
-
-		return comments.stream()
-			.filter(comment -> comment.getStartPosition() > nodeStartPos && comment.getStartPosition() < nodeEndPos)
-			.collect(Collectors.toList());
-	}
-
 	@SuppressWarnings("deprecation")
 	private void replaceTryStatement(TryStatement node, List<VariableDeclarationExpression> resourceList,
 			List<SimpleName> resourceNameList, List<VariableDeclarationFragment> toBeMovedToResources) {

@@ -1,8 +1,6 @@
 package eu.jsparrow.core.visitor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+	import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -26,14 +24,8 @@ public class CommentsASTVisitor extends ASTVisitor {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommentsASTVisitor.class);
 
-	private Map<LineComment, String> lineComments = new HashMap<>();
-	private Map<BlockComment, String> blockComments = new HashMap<>();
-	private Map<Javadoc, String> javadocs = new HashMap<>();
+	private Map<Comment, String> comments = new HashMap<>();
 	private String source;
-
-	public CommentsASTVisitor() {
-
-	}
 
 	public void parseSource(CompilationUnit compilationUnit) {
 		try {
@@ -51,32 +43,24 @@ public class CommentsASTVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(LineComment lineComment) {
 		String content = findContent(lineComment);
-		lineComments.put(lineComment, content);
+		comments.put(lineComment, content);
 		return true;
 	}
 
 	@Override
 	public boolean visit(BlockComment blockComment) {
-		blockComments.put(blockComment, findContent(blockComment));
+		comments.put(blockComment, findContent(blockComment));
 		return true;
 	}
 
 	@Override
 	public boolean visit(Javadoc javaDoc) {
-		javadocs.put(javaDoc, findContent(javaDoc));
+		comments.put(javaDoc, findContent(javaDoc));
 		return true;
 	}
 
-	public Map<LineComment, String> getLineComments() {
-		return this.lineComments;
-	}
-
-	public Map<BlockComment, String> getBlockComments() {
-		return this.blockComments;
-	}
-
-	public Map<Javadoc, String> getJavadocs() {
-		return this.javadocs;
+	public Map<Comment, String> getComments() {
+		return this.comments;
 	}
 	
 	private String findContent(Comment comment) {

@@ -2,10 +2,20 @@ package eu.jsparrow.core.visitor;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
+import eu.jsparrow.core.util.ASTNodeUtil;
 
 /**
  * Abstract implementation of an {@link ASTVisitor} to assure all used visitors
@@ -94,6 +104,41 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	 */
 	protected void onRewrite() {
 		listeners.forEach(listener -> listener.update(new ASTRewriteEvent(this.compilationUnitHandle)));
+	}
+
+	protected List<Comment> findRelatedComments(ASTNode node, CompilationUnit compilationUnit, List<Comment>comments) {
+		List<Comment> relatedComments = new ArrayList<>();
+		relatedComments.addAll(findInternalComments(node, comments));
+		int leadingCommentIndex = compilationUnit.firstLeadingCommentIndex(node);
+		if (leadingCommentIndex >= 0) {
+			relatedComments.add(0, comments.get(leadingCommentIndex));
+		}
+		
+		int trailCommentIndex = compilationUnit.lastTrailingCommentIndex(node);
+		if (trailCommentIndex >= 0) {
+			relatedComments.add(comments.get(trailCommentIndex));
+		}
+	
+		return relatedComments;
+	}
+
+	private Collection<Comment> findInternalComments(ASTNode node, List<Comment> comments) {
+		int nodeStartPos = node.getStartPosition();
+		int nodeEndPos = nodeStartPos + node.getLength();
+	
+		return comments.stream()
+			.filter(comment -> comment.getStartPosition() > nodeStartPos && comment.getStartPosition() < nodeEndPos)
+			.collect(Collectors.toList());
+	}
+
+	protected void addComment(Statement node, String content) {
+	
+		Block block = ASTNodeUtil.getSpecificAncestor(node, Block.class);
+	
+		ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+		Statement placeHolder = (Statement) astRewrite.createStringPlaceholder(content,
+				ASTNode.EMPTY_STATEMENT);
+		listRewrite.insertBefore(placeHolder, node, null);
 	}
 
 }
