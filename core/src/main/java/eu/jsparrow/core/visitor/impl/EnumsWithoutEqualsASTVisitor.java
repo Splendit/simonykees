@@ -7,8 +7,10 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -75,6 +77,7 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		astRewrite.replace(replacedNode, replacementNode, null);
+		saveRelatedComments(replacedNode, ASTNodeUtil.getSpecificAncestor(replacedNode, Statement.class));
 		onRewrite();
 		return false;
 	}

@@ -2,7 +2,6 @@ package eu.jsparrow.sample.postRule.allRules;
 
 import java.math.RoundingMode;
 
-@SuppressWarnings({ "nls" })
 public class TestEnumsWithoutEqualsRule {
 
 	public void replaceEqualsWithInfix(RoundingMode roundingMode) {
@@ -22,6 +21,10 @@ public class TestEnumsWithoutEqualsRule {
 			return;
 		}
 		if (RoundingMode.UP == roundingMode && true) {
+			return;
+		}
+		/* saving comments */
+		if (RoundingMode.UP == roundingMode) {
 			return;
 		}
 	}
