@@ -242,4 +242,21 @@ public class TestCollectionRemoveAllRule {
 
 		return sb.toString();
 	}
+
+	public String testSavingComments(String input) {
+		List<String> resultList = generateList(input);
+
+		// to not be lost
+		resultList.clear();
+
+		// to not be lost
+		resultList.clear();
+
+		StringBuilder sb = new StringBuilder();
+
+		resultList.stream()
+			.forEach(sb::append);
+
+		return sb.toString();
+	}
 }

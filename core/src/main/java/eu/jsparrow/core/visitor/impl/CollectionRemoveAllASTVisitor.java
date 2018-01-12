@@ -8,10 +8,12 @@ import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
@@ -50,6 +52,11 @@ public class CollectionRemoveAllASTVisitor extends AbstractASTRewriteASTVisitor 
 						(Expression) astRewrite.createMoveTarget(node.getExpression()), clear);
 				astRewrite.replace(node, newMI, null);
 				onRewrite();
+				
+				Statement parentStmt = ASTNodeUtil.getSpecificAncestor(node, Statement.class);
+				if(parentStmt != null) {					
+					saveRelatedComments(node, parentStmt);
+				}
 			}
 		}
 		return true;

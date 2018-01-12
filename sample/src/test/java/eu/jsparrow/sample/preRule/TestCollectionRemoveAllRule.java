@@ -230,4 +230,22 @@ public class TestCollectionRemoveAllRule {
 		
 		return sb.toString();
 	}
+	
+	public String testSavingComments(String input){
+		List<String> resultList = generateList(input);
+		
+		resultList
+		// to not be lost
+		.removeAll(resultList);
+		
+		resultList.removeAll(
+				// to not be lost
+				resultList);
+		
+		StringBuilder sb = new StringBuilder();
+		
+		resultList.stream().forEach((s)->sb.append(s));
+		
+		return sb.toString();
+	}
 }
