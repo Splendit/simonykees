@@ -23,34 +23,51 @@ public class Activator implements BundleActivator {
 
 	public static final String PLUGIN_ID = "eu.jsparrow.standalone"; //$NON-NLS-1$
 
-	private static final String LIST_RULES = "LIST.RULES"; //$NON-NLS-1$
-	private static final String LIST_RULES_SHORT = "LIST.RULES.SHORT"; //$NON-NLS-1$
-	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
+	private static final String LIST_RULES_SELECTED_ID_KEY = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
+	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 
 	@Override
 	public void start(BundleContext context) throws Exception {
 		logger.info(Messages.Activator_start);
 
-		boolean listRules = Boolean.parseBoolean(context.getProperty(LIST_RULES));
-		boolean listRulesShort = Boolean.parseBoolean(context.getProperty(LIST_RULES_SHORT));
-		String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID);
+		String modeName = context.getProperty(STANDALONE_MODE_KEY);
+		if (modeName != null && !modeName.isEmpty()) {
 
-		if (listRules) {
-			if (listRulesId != null && !listRulesId.isEmpty()) {
-				ListRulesUtil.listRules(listRulesId);
-			} else {
+			StandaloneMode mode = StandaloneMode.valueOf(modeName);
+			String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID_KEY);
+
+			switch (mode) {
+			case REFACTOR:
+				try {
+					RefactorUtil.startRefactoring(context);
+				} catch (YAMLConfigException yce) {
+					logger.debug(yce.getMessage(), yce);
+					logger.error(yce.getMessage());
+					setExitErrorMessage(context, yce.getMessage());
+				}
+				break;
+			case LIST_RULES:
 				ListRulesUtil.listRules();
+				break;
+			case LIST_RULES_SHORT:
+				ListRulesUtil.listRulesShort();
+				break;
+			case LIST_RULES_WITH_SELECTED_ID:
+				if (listRulesId != null && !listRulesId.isEmpty()) {
+					ListRulesUtil.listRules(listRulesId);
+				} else {
+					String errorMsg = "Please specify rule IDs for this mode!"; //$NON-NLS-1$
+					logger.error(errorMsg);
+					setExitErrorMessage(context, errorMsg);
+				}
+				break;
+			case TEST:
+				break;
 			}
-		} else if (listRulesShort) {
-			ListRulesUtil.listRulesShort();
 		} else {
-			try {
-			RefactorUtil.startRefactoring(context);
-			} catch (YAMLConfigException yce) {
-				logger.debug(yce.getMessage(), yce);
-				logger.error(yce.getMessage());
-				setExitErrorMessage(context, yce.getMessage());
-			}
+			String errorMsg = "No mode has been selected!"; //$NON-NLS-1$
+			logger.error(errorMsg);
+			setExitErrorMessage(context, errorMsg);
 		}
 	}
 
