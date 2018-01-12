@@ -127,13 +127,15 @@ public class RefactorUtil {
 	 */
 	public static void cleanUp() {
 		try {
-			standaloneConfig.cleanUp();
+			if (standaloneConfig != null) {
+				standaloneConfig.cleanUp();
+			}
 		} catch (JavaModelException | IOException e) {
 			logger.error(e.getMessage(), e);
 		}
 
 		// CLEAN
-		if (directory.exists()) {
+		if (directory != null && directory.exists()) {
 			deleteChildren(directory);
 		}
 	}
