@@ -19,6 +19,7 @@ public class TestStringConcatToPlusRule {
 	}
 
 	public String testConcatWithLiteral(String input) {
+		// save me
 		return input + "abc";
 	}
 
@@ -39,6 +40,7 @@ public class TestStringConcatToPlusRule {
 	}
 
 	public String testConcatRecursionWithParamAndCast(String input, String param) {
+		/* save me */
 		return input + (String) param + param;
 	}
 
@@ -123,5 +125,11 @@ public class TestStringConcatToPlusRule {
 	public String testConcatInMethodInvocationParam(String input, String param) {
 		boolean startsWitParam = input.startsWith((param + "a"), 0);
 		return input + Boolean.toString(startsWitParam);
+	}
+	
+	public String testConcatRecursionWithLiteral_saveComments(String input) {
+		// save comment 1
+		// save comment 2
+		return input + "abc" + "def";
 	}
 }

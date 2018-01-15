@@ -11,8 +11,10 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
@@ -76,6 +78,7 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 					replacementNode = NodeBuilder.newParenthesizedExpression(node.getAST(), replacementNode);
 				}
 				astRewrite.replace(node, replacementNode, null);
+				saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
 				onRewrite();
 			}
 			modifyMethodInvocation.remove(node);
@@ -84,6 +87,7 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 				alreadyReplacedExpression.keySet()
 					.forEach(key -> {
 						astRewrite.replace(key, alreadyReplacedExpression.remove(key), null);
+						saveRelatedComments(key, ASTNodeUtil.getSpecificAncestor(key, Statement.class));
 						onRewrite();
 					});
 			}
