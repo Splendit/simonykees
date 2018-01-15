@@ -101,4 +101,10 @@ public class TestUseIsEmptyRule {
 		if (s.length() == -0.1f) {
 		}
 	}
+	
+	public void withDefaultInteger_savingComments() {
+		Map<String, String> m = new HashMap<>();
+		if (/* save me */ m.size() == 0) {
+		}
+	}
 }
