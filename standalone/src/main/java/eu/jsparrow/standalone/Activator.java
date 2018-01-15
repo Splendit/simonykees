@@ -90,7 +90,7 @@ public class Activator implements BundleActivator {
 		logger.info(Messages.Activator_stop);
 	}
 
-	private EnvironmentInfo getEnvironmentInfo(BundleContext ctx) {
+	private static EnvironmentInfo getEnvironmentInfo(BundleContext ctx) {
 		if (ctx == null) {
 			return null;
 		}
@@ -109,7 +109,7 @@ public class Activator implements BundleActivator {
 		return envInfo;
 	}
 
-	private void setExitErrorMessage(BundleContext ctx, String exitMessage) {
+	public static void setExitErrorMessage(BundleContext ctx, String exitMessage) {
 		String key = "eu.jsparrow.standalone.exit.message"; //$NON-NLS-1$
 		EnvironmentInfo envInfo = getEnvironmentInfo(ctx);
 		if (envInfo != null) {
