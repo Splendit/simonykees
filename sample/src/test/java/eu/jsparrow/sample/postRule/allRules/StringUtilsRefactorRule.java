@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 public class StringUtilsRefactorRule {
 
 	public boolean testEmpty(String testString) {
+		// save me
 		return StringUtils.isEmpty(testString);
 	}
 

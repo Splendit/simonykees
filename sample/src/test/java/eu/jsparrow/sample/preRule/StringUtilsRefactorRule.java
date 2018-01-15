@@ -12,7 +12,8 @@ import java.util.Locale;
 public class StringUtilsRefactorRule {
 
 	public boolean testEmpty(String testString) {
-		return testString.isEmpty();
+		return testString // save me
+				.isEmpty();
 	}
 
 	public String testTrim(String testString) {
