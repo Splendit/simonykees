@@ -6,6 +6,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
@@ -82,6 +83,7 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTV
 			} while (arguments != null);
 			if (replacement != null) {
 				astRewrite.replace(node, replacement, null);
+				saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
 				onRewrite();
 			}
 		}

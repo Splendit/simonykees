@@ -27,6 +27,10 @@ public class TestRemoveNewStringConstructorRule {
 	public String testNewStringOfLiteralWithParentheses() {
 		return new String(("StringLiteral"));
 	}
+	
+	public String testNewStringOfLiteralWithComments() {
+		return /* save comments */new String("StringLiteral");
+	}
 
 	public String testNewStringOfOtherString(String s) {
 		return new String(s);
