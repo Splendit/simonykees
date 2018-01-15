@@ -35,6 +35,9 @@ public class TestFunctionalInterfaceRule {
 
 		@Override
 		public void method(int a) {
+			/*
+			 * Using initialized field
+			 */
 			String s = FINAL_INITIALIZED_STRING_FIELD;
 		}
 		
