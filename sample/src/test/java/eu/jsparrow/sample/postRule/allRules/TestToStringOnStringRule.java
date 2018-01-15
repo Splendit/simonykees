@@ -34,6 +34,15 @@ public class TestToStringOnStringRule {
 
 	}
 
+	public String testToStringOnStringVariable_saveComments() {
+		String s = "theStringS";
+		/* save me */
+		s = StringUtils.substring(s, 0);
+		/* save me */
+		return s;
+
+	}
+
 	public String testToStringOnStringFunctionThatReturnsString() {
 
 		return StringUtils.abbreviate("makeMeShorter", 4);

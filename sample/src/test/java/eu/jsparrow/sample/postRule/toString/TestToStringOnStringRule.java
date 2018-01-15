@@ -33,6 +33,15 @@ public class TestToStringOnStringRule {
 		return s;
 
 	}
+	
+	public String testToStringOnStringVariable_saveComments() {
+		String s = "theStringS";
+		/* save me */
+		s = s.substring(0);
+		/* save me */
+		return s;
+
+	}
 
 	public String testToStringOnStringFunctionThatReturnsString() {
 

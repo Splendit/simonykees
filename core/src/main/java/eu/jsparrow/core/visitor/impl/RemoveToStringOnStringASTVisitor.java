@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.constants.ReservedNames;
 import eu.jsparrow.core.util.ASTNodeUtil;
@@ -79,6 +80,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 			} while (unwrapped);
 
 			astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(variableExpression), null);
+			saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
 			onRewrite();
 
 		}
