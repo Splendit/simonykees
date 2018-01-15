@@ -190,7 +190,7 @@ public class RefactorUtil {
 				}
 
 				try {
-					if (!"target".equals(currentFile.getName())) {
+					if (!"target".equals(currentFile.getName())) { //$NON-NLS-1$
 						Files.delete(currentFile.toPath());
 					}
 				} catch (IOException e) {
