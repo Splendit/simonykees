@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.dom.LambdaExpression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
 
+import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -58,9 +59,11 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 		if (statement instanceof ReturnStatement) {
 			ReturnStatement returnStatement = (ReturnStatement) statement;
 			astRewrite.replace(block, returnStatement.getExpression(), null);
+			saveRelatedComments(block, ASTNodeUtil.getSpecificAncestor(block, Statement.class));
 		} else if (statement instanceof ExpressionStatement) {
 			ExpressionStatement expressionStatemnet = (ExpressionStatement) statement;
 			astRewrite.replace(block, expressionStatemnet.getExpression(), null);
+			saveRelatedComments(block, ASTNodeUtil.getSpecificAncestor(block, Statement.class));
 		}
 	}
 
