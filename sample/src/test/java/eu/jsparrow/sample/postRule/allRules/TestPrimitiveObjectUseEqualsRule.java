@@ -26,6 +26,10 @@ public class TestPrimitiveObjectUseEqualsRule {
 		if (!Integer.valueOf(1)
 			.equals(Integer.valueOf(2))) {
 		}
+
+		/* saving comments */
+		if (a.equals(b)) {
+		}
 	}
 
 	public void testStringShouldRefactor() {

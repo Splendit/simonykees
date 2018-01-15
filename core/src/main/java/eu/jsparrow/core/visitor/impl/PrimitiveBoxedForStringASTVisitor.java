@@ -11,10 +11,12 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.constants.ReservedNames;
+import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -196,6 +198,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 							toStringSimpleName, valueParameter);
 
 					astRewrite.replace(node, methodInvocation, null);
+					saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
 					onRewrite();
 				}
 			}

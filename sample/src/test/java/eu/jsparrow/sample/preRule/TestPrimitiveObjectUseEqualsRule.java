@@ -24,6 +24,9 @@ public class TestPrimitiveObjectUseEqualsRule {
 
 		if (new Integer(1) != new Integer(2)) {
 		}
+		
+		if (/* saving comments */a == b) {
+		}
 	}
 
 	public void testStringShouldRefactor() {

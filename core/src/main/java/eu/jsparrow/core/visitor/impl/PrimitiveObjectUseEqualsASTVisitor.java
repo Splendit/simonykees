@@ -10,8 +10,10 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
@@ -63,6 +65,7 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 
 		Expression replaceNode = createReplacementNode(infixExpression);
 		astRewrite.replace(infixExpression, replaceNode, null);
+		saveRelatedComments(infixExpression, ASTNodeUtil.getSpecificAncestor(infixExpression, Statement.class));
 		onRewrite();
 		return true;
 	}
