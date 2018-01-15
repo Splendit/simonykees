@@ -14,4 +14,3 @@ Require-Bundle: org.eclipse.jdt.core;bundle-version="[3.11.0,4.0.0)",
  eu.jsparrow.core,
  org.apache.commons.lang3;bundle-version="[3.1.0,4.0.0)"
 Bundle-Vendor: Splendit IT-Consulting GmbH
-Import-Package: org.osgi.framework;version="1.5.0"
