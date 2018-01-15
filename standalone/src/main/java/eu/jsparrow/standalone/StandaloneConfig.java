@@ -32,7 +32,7 @@ import eu.jsparrow.i18n.Messages;
  * Class that contains all configuration needed to run headless version of
  * jSparrow Eclipse plugin.
  * 
- * @author Andreja Sambolec
+ * @author Andreja Sambolec, Matthias Webhofer
  * @since 2.1.1
  */
 public class StandaloneConfig {
@@ -60,11 +60,21 @@ public class StandaloneConfig {
 	 *            to the folder of the project
 	 */
 	public StandaloneConfig(String name, String path) {
+		init(name, path, false);
+	}
+
+	public StandaloneConfig(String name, String path, boolean testMode) {
+		init(name, path, testMode);
+	}
+
+	private void init(String name, String path, boolean testMode) {
 		try {
 			this.name = name;
 			this.path = path;
-			setUp();
-		} catch (Exception e) {
+			if (!testMode) {
+				setUp();
+			}
+		} catch (CoreException e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
@@ -86,7 +96,14 @@ public class StandaloneConfig {
 	 * @throws CoreException
 	 */
 	public void setUp() throws CoreException {
+		IProject project = this.initProject();
+		this.initJavaProject(project);
+		List<IClasspathEntry> mavenClasspathEntries = this.collectMavenDependenciesAsClasspathEntries();
+		this.addToClasspath(mavenClasspathEntries);
+		compUnits = getCompilationUnits();
+	}
 
+	private IProject initProject() throws CoreException {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		logger.debug(Messages.StandaloneConfig_debug_createWorkspace);
 
@@ -120,9 +137,23 @@ public class StandaloneConfig {
 
 		project.open(new NullProgressMonitor());
 
-		compUnits = getCompilationUnits(project);
-
 		logger.debug(Messages.StandaloneConfig_debug_createdProject);
+
+		return project;
+	}
+
+	private IJavaProject initJavaProject(IProject project) throws JavaModelException {
+		javaProject = JavaCore.create(project);
+
+		// set compiler compliance level from the project
+		String compilerCompliance = javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		javaProject.setOption(JavaCore.COMPILER_COMPLIANCE, compilerCompliance);
+		javaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, compilerCompliance);
+		javaProject.setOption(JavaCore.COMPILER_SOURCE, compilerCompliance);
+
+		javaProject.open(new NullProgressMonitor());
+
+		return javaProject;
 	}
 
 	/**
@@ -136,22 +167,10 @@ public class StandaloneConfig {
 	 * @return list of {@link ICompilationUnit}s on project
 	 * @throws JavaModelException
 	 */
-	public List<ICompilationUnit> getCompilationUnits(IProject project) throws JavaModelException {
+	private List<ICompilationUnit> getCompilationUnits() throws JavaModelException {
 		List<ICompilationUnit> units = new ArrayList<>();
 
 		logger.debug(Messages.StandaloneConfig_debug_createJavaProject);
-
-		javaProject = JavaCore.create(project);
-
-		// set compiler compliance level from the project
-		String compilerCompliance = javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-		javaProject.setOption(JavaCore.COMPILER_COMPLIANCE, compilerCompliance);
-		javaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, compilerCompliance);
-		javaProject.setOption(JavaCore.COMPILER_SOURCE, compilerCompliance);
-
-		javaProject.open(new NullProgressMonitor());
-
-		addMavenDependenciesToClasspath();
 
 		List<IPackageFragment> packages = Arrays.asList(javaProject.getPackageFragments());
 		for (IPackageFragment mypackage : packages) {
@@ -166,32 +185,27 @@ public class StandaloneConfig {
 
 	/**
 	 * Collects all jars from tmp folder in which maven plugin copied
-	 * dependencies. Creates {@link IClasspathEntry} for each jar and adds them
-	 * all to project classpath.
+	 * dependencies. Creates {@link IClasspathEntry} for each jar and returns
+	 * them.
 	 */
-	private void addMavenDependenciesToClasspath() {
+	private List<IClasspathEntry> collectMavenDependenciesAsClasspathEntries() {
 		logger.debug(Messages.StandaloneConfig_debug_collectDependencies);
+
+		List<IClasspathEntry> collectedEntries = new ArrayList<>();
 
 		File depsFolder = new File(
 				System.getProperty(RefactorUtil.USER_DIR) + File.separator + RefactorUtil.DEPENDENCIES_FOLDER_CONSTANT);
 		File[] listOfFiles = depsFolder.listFiles();
-		List<IClasspathEntry> collectedEntries = new ArrayList<>();
 
-		if (null == listOfFiles || listOfFiles.length == 0) {
-			return;
+		if (null != listOfFiles) {
+			for (File file : listOfFiles) {
+				String jarPath = file.toString();
+				IClasspathEntry jarEntry = JavaCore.newLibraryEntry(new Path(jarPath), null, null);
+				collectedEntries.add(jarEntry);
+			}
 		}
 
-		for (File file : listOfFiles) {
-			String jarPath = file.toString();
-			IClasspathEntry jarEntry = JavaCore.newLibraryEntry(new Path(jarPath), null, null);
-			collectedEntries.add(jarEntry);
-		}
-
-		try {
-			addToClasspath(javaProject, collectedEntries);
-		} catch (JavaModelException e) {
-			logger.error(e.getMessage(), e);
-		}
+		return collectedEntries;
 	}
 
 	/**
@@ -203,8 +217,7 @@ public class StandaloneConfig {
 	 *            new entries to be added to classpath
 	 * @throws JavaModelException
 	 */
-	public void addToClasspath(IJavaProject javaProject, List<IClasspathEntry> classpathEntries)
-			throws JavaModelException {
+	private void addToClasspath(List<IClasspathEntry> classpathEntries) throws JavaModelException {
 
 		if (!classpathEntries.isEmpty()) {
 			oldEntries = javaProject.getRawClasspath();
