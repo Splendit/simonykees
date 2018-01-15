@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
@@ -171,6 +172,7 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 					if (doTransformation) {
 						this.transform(methodInvocationNode.getExpression(), methodArgumentExpression, parent, option);
+						saveRelatedComments(methodInvocationNode.getParent(), ASTNodeUtil.getSpecificAncestor(methodInvocationNode, Statement.class));
 						onRewrite();
 					}
 				}
