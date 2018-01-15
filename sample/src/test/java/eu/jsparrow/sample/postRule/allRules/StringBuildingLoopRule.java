@@ -14,6 +14,7 @@ public class StringBuildingLoopRule {
 
 	public String collectionOfStrings(String input) {
 		List<String> collectionOfStrings = generateStringList(input);
+		// save me
 		String result = collectionOfStrings.stream()
 			.collect(Collectors.joining());
 		return result;
@@ -157,6 +158,10 @@ public class StringBuildingLoopRule {
 	}
 
 	public String handleText(char[] txt, int position) {
+		/*
+		 * corner case in cc.mallet.pipe.CharSequenceRemoveHTML.java Using
+		 * StringBuilder if conversion to stream is not possible
+		 */
 		StringBuilder textSb = new StringBuilder();
 		for (char aTxt : txt) {
 			textSb.append(aTxt);
@@ -290,6 +295,10 @@ public class StringBuildingLoopRule {
 
 	public int distinguishBetweenMathPlusAndConcat(String input) {
 		List<Integer> collectionOfints = new ArrayList<>();
+		/*
+		 * The operator in the loop is not concatenation, but is a normal
+		 * arithmetic operation
+		 */
 		int result = collectionOfints.stream()
 			.mapToInt(Integer::intValue)
 			.sum();
