@@ -1,12 +1,16 @@
 package eu.jsparrow.core.visitor.lambdaforeach;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -134,6 +138,8 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 
 							// rewrite the AST
 							astRewrite.replace(methodInvocationNode, forEachMethodInvocation, null);
+							List<Comment> comments = findSurroundingComments(ifStatement);
+							saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(methodInvocationNode, Statement.class), comments);
 							onRewrite();
 						}
 					}
@@ -143,6 +149,36 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 		}
 
 		return true;
+	}
+
+	private List<Comment> findSurroundingComments(IfStatement ifStatement) {
+		List<Comment> comments = getCompilationUnitComments();
+		ASTNode parent = ifStatement.getParent();
+		int parentStartPos = parent.getStartPosition();
+		int parentEndPos = parentStartPos + parent.getLength();
+
+		int ifStartPos = ifStatement.getStartPosition();
+		int ifEndPos = ifStartPos + ifStatement.getLength();
+		
+		return comments.stream()
+			.filter(comment -> {
+				int startPos = comment.getStartPosition();
+				return (startPos > parentStartPos && startPos < ifStartPos)
+						|| (startPos > ifEndPos && startPos < parentEndPos && !isTrailing(comment, ifStatement));
+			})
+			.collect(Collectors.toList());
+	}
+
+	private boolean isTrailing(Comment comment, IfStatement ifStatement) {
+		List<Comment> comments = getCompilationUnitComments();
+		CompilationUnit cu = getCompilationUnit();
+		int lastCommentIndex = cu.lastTrailingCommentIndex(ifStatement);
+		if(lastCommentIndex < 0) {
+			return false;
+
+		}
+		Comment trailingComment = comments.get(lastCommentIndex);
+		return trailingComment == comment;
 	}
 
 	/**

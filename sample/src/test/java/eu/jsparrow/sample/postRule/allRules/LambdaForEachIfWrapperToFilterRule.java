@@ -21,17 +21,22 @@ public class LambdaForEachIfWrapperToFilterRule {
 	public List<Boolean> booleanList = Arrays.asList(true, false, true, true, false);
 
 	public void doSomething() {
+		// save me
 		list.stream()
 			.filter(s -> s.length() > 3)
 			.forEach(s -> {
+				// save me 2
 				logger.info(s);
+				// save me 3
 				logger.info(s + s);
 			});
 
+		// i'm last but not least
 		list.parallelStream()
 			.filter(s -> "asdf".equals(s))
 			.forEach(logger::info);
 
+		// i'm last but not least
 		list.parallelStream()
 			.filter(s -> "asdf".equals(s))
 			.forEach(logger::info);

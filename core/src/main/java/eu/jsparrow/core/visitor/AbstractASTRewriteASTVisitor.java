@@ -83,8 +83,8 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 		this.astRewrite = astRewrite;
 	}
 
-	public String getCompilationUnit() {
-		return compilationUnitHandle;
+	public CompilationUnit getCompilationUnit() {
+		return compilationUnit;
 	}
 
 	public void setCompilationUnit(String compilationUnitHandle) {
@@ -130,7 +130,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	}
 
 	protected List<Comment> findRelatedComments(ASTNode node) {
-		List<Comment> comments = ASTNodeUtil.convertToTypedList(compilationUnit.getCommentList(), Comment.class);
+		List<Comment> comments = getCompilationUnitComments();
 		List<Comment> relatedComments = new ArrayList<>();
 		relatedComments.addAll(findInternalComments(node, comments));
 		int leadingCommentIndex = compilationUnit.firstLeadingCommentIndex(node);
@@ -144,6 +144,10 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 		}
 	
 		return relatedComments;
+	}
+
+	protected List<Comment> getCompilationUnitComments() {
+		return ASTNodeUtil.convertToTypedList(compilationUnit.getCommentList(), Comment.class);
 	}
 
 	private Collection<Comment> findInternalComments(ASTNode node, List<Comment> comments) {
@@ -216,6 +220,10 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	protected void saveRelatedComments(ASTNode node, Statement statement) {
 		List<Comment> invocationComments = findRelatedComments(node);
+		saveBeforeStatement(statement, invocationComments);
+	}
+	
+	protected void saveBeforeStatement(Statement statement, List<Comment> invocationComments) {
 		invocationComments.stream()
 			.map(this::findCommentContent)
 			.forEach(content -> addComment(statement, content));

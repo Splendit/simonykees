@@ -17,8 +17,11 @@ public class LambdaForEachIfWrapperToFilterRule {
 
 	public void doSomething() {
 		list.stream().forEach(s -> {
+			// save me
 			if (s.length() > 3) {
+				// save me 2
 				System.out.println(s);
+				// save me 3
 				System.out.println(s + s);
 			}
 		});
@@ -26,13 +29,16 @@ public class LambdaForEachIfWrapperToFilterRule {
 		list.parallelStream().forEach(s -> {
 			if (s.equals("asdf")) {
 				System.out.println(s);
-			}
+			} 
+			
+			// i'm last but not least
+			
 		});
 
 		list.parallelStream().forEach(s -> {
 			if ("asdf".equals(s)) {
 				System.out.println(s);
-			}
+			} // i'm last but not least
 		});
 
 		list.forEach(s -> {
