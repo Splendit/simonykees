@@ -85,17 +85,19 @@
 		<module>ui.test</module>
 		<!-- OSGi feature + site deployment -->
 		<module>feature.3rd.party</module>
+		<!-- standalone -->
+		<module>standalone</module>
+		<module>standalone.test</module>
 		<module>feature.standalone</module>
 		<module>feature</module>
 		<module>site</module>
 		<!-- release engineering -->
 		<module>releng</module>
-		<!-- standalone -->
-		<module>standalone</module>
-
+		
 		<!-- The jsparrow-maven-plugin cannot be deployed alongside jSparrow. SIM-877 
 			will improve/fix this. -->
 		<!-- <module>jsparrow-maven-plugin</module> -->
+
 	</modules>
 
 	<scm>
@@ -178,10 +180,10 @@
 		<sonar.junit.reportPaths>${project.basedir}/target/surefire-reports</sonar.junit.reportPaths>
 		<sonar.coverage.exclusions>**/jsparrow/ui/**/*</sonar.coverage.exclusions>
 		<sonar.issue.ignore.multicriteria>e1,e2</sonar.issue.ignore.multicriteria>
-        <sonar.issue.ignore.multicriteria.e1.ruleKey>squid:S00100</sonar.issue.ignore.multicriteria.e1.ruleKey>
-        <sonar.issue.ignore.multicriteria.e1.resourceKey>**/*Test.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
-        <sonar.issue.ignore.multicriteria.e2.ruleKey>squid:S3008</sonar.issue.ignore.multicriteria.e2.ruleKey>
-        <sonar.issue.ignore.multicriteria.e2.resourceKey>**/i18n/*Messages.java</sonar.issue.ignore.multicriteria.e2.resourceKey>
+		<sonar.issue.ignore.multicriteria.e1.ruleKey>squid:S00100</sonar.issue.ignore.multicriteria.e1.ruleKey>
+		<sonar.issue.ignore.multicriteria.e1.resourceKey>**/*Test.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
+		<sonar.issue.ignore.multicriteria.e2.ruleKey>squid:S3008</sonar.issue.ignore.multicriteria.e2.ruleKey>
+		<sonar.issue.ignore.multicriteria.e2.resourceKey>**/i18n/*Messages.java</sonar.issue.ignore.multicriteria.e2.resourceKey>
 
 		<!-- Workaround for surefire-argline bug. Required to make Jacoco work -->
 		<test-argline>${tycho.test.jvmArgs} -Dfile.encoding=UTF-8</test-argline>
