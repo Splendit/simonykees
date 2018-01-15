@@ -16,6 +16,7 @@ public class LambdaForEachCollectRule {
 		
 		objectList.stream().map(o -> o.substring(0))
 		.forEach( oString -> {
+			// save me
 			oStrings.add(oString);
 		});
 		
