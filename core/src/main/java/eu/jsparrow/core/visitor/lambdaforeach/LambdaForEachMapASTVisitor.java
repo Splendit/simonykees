@@ -139,7 +139,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		 * replace the parameter of the forEach lambda expression
 		 */
 		astRewrite.replace(parameter, newForEachParamName, null);
-
+		saveComments(methodInvocation, analyzer);
 		onRewrite();
 
 		/*
@@ -162,6 +162,15 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		}
 
 		return true;
+	}
+
+	private void saveComments(MethodInvocation methodInvocation, ForEachBodyAnalyzer analyzer) {
+		Statement parentStatement = ASTNodeUtil.getSpecificAncestor(methodInvocation, Statement.class);
+		saveRelatedComments(analyzer.getMapVariableDeclaration(), parentStatement);
+		List<Statement> remainingStatements = analyzer.getRemainingStatements();
+		if (remainingStatements.size() == 1) {
+			saveRelatedComments(remainingStatements.get(0), parentStatement);
+		}
 	}
 
 	/**
@@ -331,6 +340,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		private Modifier modifier;
 		private boolean primitiveTarget = false;
 		private String mappingMethodName = MAP;
+		private VariableDeclarationStatement mapVariableDeclaration;
 
 		public ForEachBodyAnalyzer(SimpleName parameter, Block block) {
 			List<Statement> statements = ASTNodeUtil.returnTypedList(block.statements(), Statement.class);
@@ -374,6 +384,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 								newForEachVarName = fragmentName;
 								parameterType = declStatement.getType();
 								mapExpression = initializer;
+								this.mapVariableDeclaration = declStatement;
 								storeModifier(declStatement);
 							} else {
 								storeDeclaredName(statement, fragments);
@@ -576,6 +587,14 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 		public Expression getMapExpression() {
 			return this.mapExpression;
+		}
+		
+		public VariableDeclarationStatement getMapVariableDeclaration() {
+			return this.mapVariableDeclaration;
+		}
+		
+		public List<Statement> getRemainingStatements() {
+			return this.remainingStatements;
 		}
 
 		public ASTNode getExtractableBlock() {

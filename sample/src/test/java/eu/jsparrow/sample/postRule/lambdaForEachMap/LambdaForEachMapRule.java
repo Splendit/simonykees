@@ -18,6 +18,8 @@ public class LambdaForEachMapRule {
 		List<String> list = Arrays.asList(input + "non", "non-empty");
 		StringBuilder sb = new StringBuilder();
 		
+		// save me 1
+		// save me 2
 		list.stream()
 			.map(s -> s.substring(1)).forEach(subString -> sb.append(subString));
 		
@@ -28,6 +30,8 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 		
+		// save me 1
+		// save me 2
 		list.stream().filter(s -> !s.isEmpty()).map(s -> s.substring(1)).forEach(subString -> sb.append(subString));
 		
 		return sb.toString();
@@ -64,11 +68,15 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 		
+		// save me 2
 		list.stream().filter(s -> !s.isEmpty()).map(s -> {
+			// save me 1
 			int i = 10;
 			return s.substring(1) + i;
 		}).forEach(subString -> {
+			// save me 3
 			String lower = subString.toLowerCase();
+			// save me 4
 			sb.append(lower);
 		});
 		
