@@ -148,6 +148,7 @@ public class EnhancedForLoopToStreamSumASTVisitor extends AbstractEnhancedForLoo
 				sumDeclarationFragment, streamSumInvocation);
 
 		astRewrite.replace(loopNode, newSumVariableDeclaration, null);
+		saveRelatedComments(loopNode);
 		onRewrite();
 
 		removeOldSumDeclaration(sumDeclStatement, sumDeclarationFragment);

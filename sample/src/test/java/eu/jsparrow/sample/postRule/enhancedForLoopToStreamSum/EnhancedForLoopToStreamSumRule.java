@@ -8,6 +8,8 @@ public class EnhancedForLoopToStreamSumRule {
 
 	public int forToStreamSum(String input) {
 		List<Integer> numbers = generateIntList(input);
+		// comment before
+		// comment inside the loop
 		int sum = numbers.stream()
 			.mapToInt(Integer::intValue)
 			.sum();
