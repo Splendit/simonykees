@@ -24,15 +24,12 @@ public class ListRulesUtil {
 	private static final String LINE_SEPARATOR_EQUAL = "================================================================================\n"; //$NON-NLS-1$
 	private static final String LINE_SEPARATOR_HIPHEN = "--------------------------------------------------------------------------------\n"; //$NON-NLS-1$
 
-	private ListRulesUtil() {
-
-	}
 
 	/**
 	 * writes all rules available in {@link RulesContainer} to the logger in a
 	 * readable form
 	 */
-	public static void listRules() {
+	public void listRules() {
 		listRules(null);
 	}
 
@@ -45,7 +42,7 @@ public class ListRulesUtil {
 	 *            rules should be printed
 	 */
 	@SuppressWarnings("nls")
-	public static void listRules(String ruleId) {
+	public void listRules(String ruleId) {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules;
 
 		if (ruleId != null) {
@@ -101,7 +98,7 @@ public class ListRulesUtil {
 	 * writes a table with each rule's ID and name to the logger
 	 */
 	@SuppressWarnings("nls")
-	public static void listRulesShort() {
+	public void listRulesShort() {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules = RulesContainer.getAllRules(true);
 
 		Optional<Integer> maxWordLength = allRules.stream()
@@ -141,7 +138,7 @@ public class ListRulesUtil {
 		logger.info(result);
 	}
 
-	private static String calculateWhitespace(int currentWordLength, int maxWordLength) {
+	private String calculateWhitespace(int currentWordLength, int maxWordLength) {
 		int whitespaceLength = maxWordLength - currentWordLength;
 
 		StringBuilder sb = new StringBuilder();

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.config.YAMLConfigException;
+import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
 
 /**
@@ -26,6 +27,18 @@ public class Activator implements BundleActivator {
 	private static final String LIST_RULES_SELECTED_ID_KEY = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 
+	private RefactorUtil refactorUtil;
+	private ListRulesUtil listRulesUtil;
+
+	public Activator() {
+		this(new RefactorUtil(), new ListRulesUtil());
+	}
+
+	public Activator(RefactorUtil refactorUtil, ListRulesUtil listRulesUtil) {
+		this.refactorUtil = refactorUtil;
+		this.listRulesUtil = listRulesUtil;
+	}
+
 	@Override
 	public void start(BundleContext context) throws Exception {
 		logger.info(Messages.Activator_start);
@@ -39,7 +52,7 @@ public class Activator implements BundleActivator {
 			switch (mode) {
 			case REFACTOR:
 				try {
-					RefactorUtil.startRefactoring(context);
+					refactorUtil.startRefactoring(context, new RefactoringPipeline());
 				} catch (YAMLConfigException yce) {
 					logger.debug(yce.getMessage(), yce);
 					logger.error(yce.getMessage());
@@ -47,14 +60,14 @@ public class Activator implements BundleActivator {
 				}
 				break;
 			case LIST_RULES:
-				ListRulesUtil.listRules();
+				listRulesUtil.listRules();
 				break;
 			case LIST_RULES_SHORT:
-				ListRulesUtil.listRulesShort();
+				listRulesUtil.listRulesShort();
 				break;
 			case LIST_RULES_WITH_SELECTED_ID:
 				if (listRulesId != null && !listRulesId.isEmpty()) {
-					ListRulesUtil.listRules(listRulesId);
+					listRulesUtil.listRules(listRulesId);
 				} else {
 					String errorMsg = "Please specify rule IDs for this mode!"; //$NON-NLS-1$
 					logger.error(errorMsg);
@@ -84,7 +97,7 @@ public class Activator implements BundleActivator {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		} finally {
-			RefactorUtil.cleanUp();
+			refactorUtil.cleanUp();
 		}
 
 		logger.info(Messages.Activator_stop);

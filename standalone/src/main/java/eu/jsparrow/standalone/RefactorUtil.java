@@ -46,10 +46,18 @@ public class RefactorUtil {
 	protected static final String MAVEN_NATURE_CONSTANT = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
 	protected static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
 
-	private static StandaloneConfig standaloneConfig;
-	private static File directory;
+	protected StandaloneConfig standaloneConfig;
+	private File directory;
 
-	private RefactorUtil() {
+	protected void loadStandaloneConfig(BundleContext context) {
+
+		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
+		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
+
+		standaloneConfig = new StandaloneConfig(projectName, projectPath);
+	}
+
+	private void doRefactoring() {
 
 	}
 
@@ -59,25 +67,20 @@ public class RefactorUtil {
 	 * @param context
 	 * @throws YAMLConfigException
 	 */
-	public static void startRefactoring(BundleContext context) throws YAMLConfigException {
+	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline) throws YAMLConfigException {
 		String loggerInfo;
 
 		YAMLConfig config = getConfiguration(context);
 		prepareWorkingDirectory();
 
-		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
-		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
+		loadStandaloneConfig(context);
 
-		standaloneConfig = new StandaloneConfig(projectName, projectPath);
-
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
-			.getRulesForProject(standaloneConfig.getJavaProject(), true);
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil
-			.getSelectedRulesFromConfig(config, projectRules);
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = getProjectRules();
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = getSelectedRules(config,
+				projectRules);
 
 		if (selectedRules != null && !selectedRules.isEmpty()) {
 			// Create refactoring pipeline and set rules
-			RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 			refactoringPipeline.setRules(selectedRules);
 
 			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
@@ -122,10 +125,19 @@ public class RefactorUtil {
 		}
 	}
 
+	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules() {
+		return RulesContainer.getRulesForProject(standaloneConfig.getJavaProject(), true);
+	}
+
+	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRules(YAMLConfig config,
+			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules) throws YAMLConfigException {
+		return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
+	}
+
 	/**
 	 * cleans classpath and temp directory
 	 */
-	public static void cleanUp() {
+	public void cleanUp() {
 		try {
 			if (standaloneConfig != null) {
 				standaloneConfig.cleanUp();
@@ -147,14 +159,14 @@ public class RefactorUtil {
 	 * @return the read configuration
 	 * @throws YAMLConfigException
 	 */
-	private static YAMLConfig getConfiguration(BundleContext context) throws YAMLConfigException {
+	private YAMLConfig getConfiguration(BundleContext context) throws YAMLConfigException {
 		String configFilePath = context.getProperty(CONFIG_FILE_PATH);
 		String profile = context.getProperty(SELECTED_PROFILE);
 
 		String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
 		logger.info(loggerInfo);
 
-		YAMLConfig config = YAMLConfigUtil.readConfig(configFilePath, profile);
+		YAMLConfig config = getYamlConfig(configFilePath, profile);
 
 		String selectedProfile = config.getSelectedProfile();
 		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
@@ -164,7 +176,12 @@ public class RefactorUtil {
 		return config;
 	}
 
-	private static void prepareWorkingDirectory() {
+	protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws YAMLConfigException {
+		return YAMLConfigUtil.readConfig(configFilePath, profile);
+
+	}
+
+	private void prepareWorkingDirectory() {
 		String file = System.getProperty(JAVA_TMP);
 		directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
 
@@ -180,7 +197,7 @@ public class RefactorUtil {
 	 *            directory which content is to be deleted
 	 * @throws IOException
 	 */
-	private static void deleteChildren(File parentDirectory) {
+	private void deleteChildren(File parentDirectory) {
 		String[] children = parentDirectory.list();
 		if (children != null) {
 			for (String file : Arrays.asList(children)) {
