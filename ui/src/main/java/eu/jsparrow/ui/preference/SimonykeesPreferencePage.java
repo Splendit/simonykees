@@ -480,7 +480,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 					logger.error(Messages.SimonykeesPreferencePage_DefaultProfileNotReplacable);
 					SimonykeesMessageDialog.openMessageDialog(getShell(),
 							Messages.SimonykeesPreferencePage_DefaultProfileNotReplacable, MessageDialog.ERROR);
-					continue;
+					return;
 				}
 
 				// check if the profile already exists
@@ -502,7 +502,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 						mode = ProfileImportMode.RENAME;
 						break;
 					default:
-						mode = ProfileImportMode.IMPORT;
+						mode = ProfileImportMode.SKIP;
 					}
 				}
 
