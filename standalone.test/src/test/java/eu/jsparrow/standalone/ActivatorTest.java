@@ -1,31 +1,100 @@
-package eu.jsparrow.standalone.test;
+package eu.jsparrow.standalone;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 
 import eu.jsparrow.core.config.YAMLConfigException;
+import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.standalone.Activator;
 import eu.jsparrow.standalone.StandaloneMode;
 
-public class StandaloneTest {
+@RunWith(MockitoJUnitRunner.class)
+public class ActivatorTest {
 
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
+	private static final String LIST_RULES_SELECTED_ID_KEY = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
 	
-	private Map<String, String> configuration;
-	private BundleContext context;
+	protected static Map<String, String> configuration;
+
+	private Activator activator;
 	
-	@Before
-	public void setUpClass() {
+	@Mock
+	BundleContext context;
+	
+	@Mock
+	private RefactorUtil refactorUtil;
+	
+	@Mock
+	private ListRulesUtil listRulesUtil;
+	
+	@BeforeClass
+	public static void setUpClass() {
 		configuration = new HashMap<>();
 		configuration.put(STANDALONE_MODE_KEY, StandaloneMode.TEST.name());
-		context = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
+	}
+	
+	@Before
+	public void setUp() {
+		activator = new Activator(refactorUtil, listRulesUtil);
+	}
+	
+	@Test
+	public void start_withListRules_invokesListRules() throws Exception {
+		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("LIST_RULES"); //$NON-NLS-1$
+		
+		activator.start(context);
+		
+		verify(listRulesUtil).listRules();
+	}
+	
+	@Test
+	public void start_withListRulesShort_invokesListRulesShort() throws Exception {
+		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("LIST_RULES_SHORT"); //$NON-NLS-1$
+		
+		activator.start(context);
+		
+		verify(listRulesUtil).listRulesShort();
+	}
+	
+	@Test
+	public void start_withListRulesWithoutSelectedId_doesNotInvokeListSelectedId() throws Exception {
+		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("LIST_RULES_WITH_SELECTED_ID"); //$NON-NLS-1$
+		
+		activator.start(context);
+		
+		verifyZeroInteractions(listRulesUtil);
+	}
+	
+	@Test
+	public void start_withListRulesWithSelectedId_invokesListSelectedId() throws Exception {
+		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("LIST_RULES_WITH_SELECTED_ID"); //$NON-NLS-1$
+		String ruleId = "doesntMatter"; //$NON-NLS-1$
+		when(context.getProperty(LIST_RULES_SELECTED_ID_KEY)).thenReturn(ruleId);
+		
+		activator.start(context);
+		
+		verify(listRulesUtil).listRules(ruleId);
+	}
+	
+	@Test
+	public void start_withRefactor_invokesRefactorUtil() throws Exception {
+		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("REFACTOR"); //$NON-NLS-1$
+		
+		activator.start(context);
+		
+		verify(refactorUtil).startRefactoring(any(), any(RefactoringPipeline.class));
 	}
 	
 	@Test
@@ -38,15 +107,5 @@ public class StandaloneTest {
 		String result = System.getProperty(key);
 		
 		assertEquals(testMessage, result);
-	}
-	
-	@Test
-	public void loadConfiguration_selectedProfileExists() {
-		
-	}
-	
-	@Test(expected = YAMLConfigException.class)
-	public void loadConfiguration_selectedProfileDoesNotExist() {
-		
 	}
 }
