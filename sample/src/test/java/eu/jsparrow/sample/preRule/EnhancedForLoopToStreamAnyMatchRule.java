@@ -15,12 +15,15 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	
 	public void usingAnyMatch(List<String> strings) {
 		boolean containsEmpty = false;
+		// comment before
 	    for(String value : strings) {
+	    	// comment inside 1
 	        if(value.isEmpty()) {
+	        	// comment inside 2
 	            containsEmpty = true;
 	            break;
 	        }
-	    }
+	    }// comment after
 	}
 	
 	public void statementsInBetween(List<String> strings) {
@@ -216,11 +219,14 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	
 	public boolean loopWithReturnStatement(List<String> strings) {
 		String emptyString = "";
+		// comment before the for loop
 	    for(String value : strings) {
 	        if(emptyString.equals(value)) {
 	        	return true;
 	        }
 	    }
+	    
+	    // comment before return statement
 	    return false;
 	}
 	

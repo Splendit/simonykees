@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -356,6 +357,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 		// replace the existing for loop with
 		astRewrite.replace(loop, newFor, null);
+		saveLeadingComment(loop);
 		onRewrite();
 	}
 

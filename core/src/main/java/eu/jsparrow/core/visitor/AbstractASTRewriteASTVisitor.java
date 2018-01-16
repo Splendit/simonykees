@@ -146,7 +146,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 		return relatedComments;
 	}
 
-	protected List<Comment> getCompilationUnitComments() {
+	public List<Comment> getCompilationUnitComments() {
 		return ASTNodeUtil.convertToTypedList(compilationUnit.getCommentList(), Comment.class);
 	}
 
@@ -223,9 +223,20 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 		saveBeforeStatement(statement, invocationComments);
 	}
 	
-	protected void saveBeforeStatement(Statement statement, List<Comment> invocationComments) {
+	public void saveBeforeStatement(Statement statement, List<Comment> invocationComments) {
 		invocationComments.stream()
 			.map(this::findCommentContent)
 			.forEach(content -> addComment(statement, content));
+	}
+	
+	protected void saveLeadingComment(Statement node) {
+		List<Comment> leadingComments = new ArrayList<>();
+		List<Comment> compilatinUnitComments = getCompilationUnitComments();
+		CompilationUnit cu = getCompilationUnit();
+		int leadingCommentIndex = cu.firstLeadingCommentIndex(node);
+		if(leadingCommentIndex >= 0) {
+			leadingComments.add(compilatinUnitComments.get(leadingCommentIndex));
+			saveBeforeStatement(node, leadingComments);
+		}
 	}
 }

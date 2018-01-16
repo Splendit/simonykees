@@ -39,9 +39,11 @@ public class EnhancedForLoopToStreamForEachRule {
 
 	public String doSomething() throws ClassNotFoundException, FileNotFoundException {
 
+		// save me
 		for (String s : stringList1) {
+			// internal comment
 			System.out.println(s);
-		}
+		} // comment after
 
 		for (String s : stringList1)
 			System.out.println(s);

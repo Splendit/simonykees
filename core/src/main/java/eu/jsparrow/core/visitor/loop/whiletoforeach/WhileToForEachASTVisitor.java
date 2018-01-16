@@ -69,6 +69,7 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 
 				if (iteratorDefinitionAstVisior.allParametersFound()) {
 					replaceInformationASTVisitorList.put(node, iteratorDefinitionAstVisior);
+					saveLeadingComment(node);
 					onRewrite();
 				}
 			}

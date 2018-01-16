@@ -70,6 +70,7 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 
 				if (iteratorDefinitionAstVisior.allParametersFound()) {
 					replaceInformationASTVisitorList.put(node, iteratorDefinitionAstVisior);
+					saveLeadingComment(node);
 					onRewrite();
 				}
 			}

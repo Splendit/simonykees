@@ -14,6 +14,7 @@ public class TestWhileToForEachListRule {
 	public String loopingOverLists(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String>list = generateList(input);
+		// save leading comments
 		for (String t : list) {
 			System.out.println(t);
 			sb.append(t);

@@ -29,6 +29,10 @@ public class TestForToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 		String aL = "I am here to confuse you ~_^ ";
+
+		// comment inside
+		// comment after
+		// comment before
 		l.forEach(sb::append);
 		return sb.toString();
 	}

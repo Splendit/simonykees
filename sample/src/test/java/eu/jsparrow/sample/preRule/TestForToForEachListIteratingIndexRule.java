@@ -23,9 +23,11 @@ public class TestForToForEachListIteratingIndexRule {
 	Runnable r = () -> {
 		List<String> fInterfaceRule = generateList("");
 		StringBuilder sb = new StringBuilder();
+		// comment before
 		for(int i = 0; i< fInterfaceRule.size(); i++) {
+			// comment inside
 			sb.append(fInterfaceRule.get(i));
-		}
+		} // comment after
 	};
 	
 	@interface MyFooAnnotation {

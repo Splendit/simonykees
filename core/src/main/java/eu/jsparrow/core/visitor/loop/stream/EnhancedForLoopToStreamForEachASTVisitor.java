@@ -44,7 +44,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
-		return true;
+		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -124,6 +124,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				ExpressionStatement expressionStatement = astRewrite.getAST()
 					.newExpressionStatement(forEachMethodInvocation);
 				astRewrite.replace(enhancedForStatementNode, expressionStatement, null);
+				saveLeadingComment(enhancedForStatementNode);
 				onRewrite();
 			}
 		}

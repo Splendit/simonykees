@@ -12,6 +12,9 @@ public class TestForToForEachListIteratingIndexRule {
 	Runnable r = () -> {
 		List<String> fInterfaceRule = generateList("");
 		StringBuilder sb = new StringBuilder();
+		// comment inside
+		// comment after
+		// comment before
 		fInterfaceRule.forEach(sb::append);
 	};
 
