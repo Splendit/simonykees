@@ -13,9 +13,13 @@ public class FlatMapInsteadOfNestedLoopsRule {
 	
 	public void test() {
 		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
+		// outer comment
 		matrix2.stream().filter(row -> !row.isEmpty()).forEach(row -> {
+			// inner comment one
 			row.stream().filter(col -> !col.isEmpty()).forEach(col -> {
+				// inner comment two
 				col.stream().filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1)).forEach(element -> {
+					// inner comment three
 					System.out.print(element);
 				});
 			});
@@ -48,6 +52,9 @@ public class FlatMapInsteadOfNestedLoopsRule {
 		matrix.stream().filter(row -> !row.isEmpty()).forEach(row -> {
 			row.stream().filter(element -> !element.isEmpty()).map(element -> element.substring(0, 1))
 					.forEach(element -> {
+
+						System.out.print(element);
+						// some comment here
 						System.out.print(element);
 					});
 		});
