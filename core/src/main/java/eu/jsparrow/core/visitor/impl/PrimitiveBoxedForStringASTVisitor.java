@@ -123,6 +123,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 					.insertLast(moveTargetArgument, null);
 				SimpleName staticClassType = (SimpleName) astRewrite.createCopyTarget(refactorPrimitiveType);
 				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, staticClassType, null);
+				saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
 				onRewrite();
 			}
 

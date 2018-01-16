@@ -4,11 +4,11 @@ package eu.jsparrow.sample.preRule;
 public class TestInefficientConstructorBooleanRule {
 
 	public Boolean booleanTrueTest() {
-		return new Boolean(true);
+		return /* save me */ new Boolean(true);
 	}
 
 	public Boolean booleanTrueLiteralTest() {
-		return new Boolean("true");
+		return new Boolean( /* save me */"true");
 	}
 
 	public Boolean booleanFalseTest() {

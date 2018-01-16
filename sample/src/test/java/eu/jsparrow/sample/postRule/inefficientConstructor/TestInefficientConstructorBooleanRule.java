@@ -4,10 +4,12 @@ package eu.jsparrow.sample.postRule.inefficientConstructor;
 public class TestInefficientConstructorBooleanRule {
 
 	public Boolean booleanTrueTest() {
+		/* save me */
 		return Boolean.valueOf(true);
 	}
 
 	public Boolean booleanTrueLiteralTest() {
+		/* save me */
 		return Boolean.valueOf(true);
 	}
 
