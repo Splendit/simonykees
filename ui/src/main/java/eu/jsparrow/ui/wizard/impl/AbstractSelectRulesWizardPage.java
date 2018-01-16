@@ -1,5 +1,6 @@
 package eu.jsparrow.ui.wizard.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -298,7 +299,7 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 			@Override
 			public Object[] getChildren(Object parentElement) {
-				return null;
+				return new Object[] {};
 			}
 
 			@Override
@@ -313,19 +314,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 				return list.toArray();
 			}
 
-			/**
-			 * Needed here because of Eclipse Mars
-			 */
-			@Override
-			public void dispose() {
-			}
-
-			/**
-			 * Needed here because of Eclipse Mars
-			 */
-			@Override
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			}
 		});
 		tree.setLabelProvider(new TreeLabelProvider());
 		tree.setComparator(new JavaElementComparator());
@@ -333,22 +321,12 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 
 	protected void configureTable(TableViewer table) {
 		rightTableViewer.setContentProvider(new IStructuredContentProvider() {
-
 			@Override
 			@SuppressWarnings("unchecked")
 			public Object[] getElements(Object inputElement) {
 				Set<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> list = (Set<RefactoringRule<? extends AbstractASTRewriteASTVisitor>>) inputElement;
 				return list.toArray();
 			}
-
-			@Override
-			public void dispose() {
-			}
-
-			@Override
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			}
-
 		});
 		table.setLabelProvider(new TableLabelProvider());
 		table.setComparator(new ViewerComparator() {
@@ -357,10 +335,11 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			public int compare(Viewer viewer, Object e1, Object e2) {
 				RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule1 = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) e1;
 				RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule2 = (RefactoringRule<? extends AbstractASTRewriteASTVisitor>) e2;
-				return rule1.getRuleDescription().getName()
-					.compareTo(rule2.getRuleDescription().getName());
-			};
-
+				return rule1.getRuleDescription()
+					.getName()
+					.compareTo(rule2.getRuleDescription()
+						.getName());
+			}
 		});
 	}
 
@@ -433,16 +412,20 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 			model.resetChanged();
 		}
 		populateDescriptionTextViewer();
+		updateButtons();
+		doStatusUpdate();
+	}
 
+	@SuppressWarnings("unchecked")
+	private void updateButtons() {
 		addButton.setEnabled(!leftTreeViewer.getSelection()
 			.isEmpty()
 				&& selectionContainsEnabledEntry(((IStructuredSelection) leftTreeViewer.getSelection()).toList()));
-		addAllButton.setEnabled(!((Set<Object>) leftTreeViewer.getInput()).isEmpty());
+		addAllButton.setEnabled(!((Set<Object>) leftTreeViewer.getInput()).isEmpty()
+				&& selectionContainsEnabledEntry(new ArrayList<Object>((Set<Object>) leftTreeViewer.getInput())));
 		removeButton.setEnabled(!rightTableViewer.getSelection()
 			.isEmpty());
 		removeAllButton.setEnabled(!((Set<Object>) rightTableViewer.getInput()).isEmpty());
-
-		doStatusUpdate();
 	}
 
 	/**
@@ -470,8 +453,10 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	 */
 	private void createTextForDescription(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule) {
 		String lineDelimiter = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_lineDelimiter;
-		String name = rule.getRuleDescription().getName();
-		String description = rule.getRuleDescription().getDescription();
+		String name = rule.getRuleDescription()
+			.getName();
+		String description = rule.getRuleDescription()
+			.getDescription();
 		String requirementsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_requirementsLabel;
 		String minJavaVersionLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_minJavaVersionLabel;
 		String minJavaVersionValue = rule.getRequiredJavaVersion()
@@ -480,7 +465,8 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 		String requiredLibrariesValue = (null != rule.requiredLibraries()) ? rule.requiredLibraries()
 				: Messages.AbstractSelectRulesWizardPage_descriptionStyledText_librariesNoneLabel;
 		String tagsLabel = Messages.AbstractSelectRulesWizardPage_descriptionStyledText_tagsLabel;
-		String tagsValue = StringUtils.join(rule.getRuleDescription().getTags()
+		String tagsValue = StringUtils.join(rule.getRuleDescription()
+			.getTags()
 			.stream()
 			.map(Tag::getTagNames)
 			.collect(Collectors.toList()), "  "); //$NON-NLS-1$
