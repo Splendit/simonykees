@@ -258,8 +258,8 @@ public class EnhancedForLoopToStreamForEachRule {
 		}
 
 		/*
-				 * SIM-472 bugfix
-				 */
+		 * SIM-472 bugfix
+		 */
 		stringList1.forEach(s -> {
 			TestClass tc = new TestClass();
 		});

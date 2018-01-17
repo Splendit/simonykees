@@ -178,10 +178,10 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 		int length = comment.getLength();
 		int end = start + length;
 		if(source.length() < end) {
-			return null;
+			return EMPTY_STRING;
 		}
-		
-		return source.substring(start, end);
+		String content = source.substring(start, end);
+		return content.replaceAll("\\t", EMPTY_STRING); //$NON-NLS-1$
 	}
 	
 	protected String readCompilationUnitSource() {

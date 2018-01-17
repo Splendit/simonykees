@@ -172,8 +172,8 @@ public class TestCornerCasesTryWithResourceRule {
 	public void savingComments() {
 		String path = "some/Funny/Path";
 		/*
-					 * Block comment on resource
-					 */
+		 * Block comment on resource
+		 */
 		// inline comment inside the resource
 		// training line comment
 		try (OutputStream uniqueName001 = new FileOutputStream(path)) {

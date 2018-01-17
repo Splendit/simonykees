@@ -162,8 +162,8 @@ public class FlatMapInsteadOfNestedLoopsRule {
 	public void testQuartedNestedStreams() {
 		List<List<List<List<String>>>> matrix3 = Arrays.asList(Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl"))));
 		/*
-						 * Some statement just to avoid transformation
-						 */
+		 * Some statement just to avoid transformation
+		 */
 		matrix3.stream().flatMap(first -> first.stream())
 			.forEach(second -> {
 				int size = matrix3.size();
