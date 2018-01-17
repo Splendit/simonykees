@@ -167,9 +167,13 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 		}
 	
 		ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-		Statement placeHolder = (Statement) astRewrite.createStringPlaceholder(content,
-				ASTNode.EMPTY_STATEMENT);
+		Statement placeHolder = createPlaceHolder(content);
 		listRewrite.insertBefore(placeHolder, node, null);
+	}
+
+	protected Statement createPlaceHolder(String content) {
+		return (Statement) astRewrite.createStringPlaceholder(content,
+				ASTNode.EMPTY_STATEMENT);
 	}
 	
 	protected String findCommentContent(Comment comment) {
