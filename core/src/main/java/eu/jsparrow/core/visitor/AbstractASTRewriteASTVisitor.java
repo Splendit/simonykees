@@ -30,7 +30,7 @@ import eu.jsparrow.core.util.ASTNodeUtil;
  */
 
 public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(AbstractASTRewriteASTVisitor.class);
 
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
@@ -40,9 +40,9 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	protected String compilationUnitHandle;
 
 	protected List<ASTRewriteVisitorListener> listeners = new ArrayList<>();
-	
+
 	protected String compilationUnitSource = EMPTY_STRING;
-	
+
 	private CompilationUnit compilationUnit;
 
 	public AbstractASTRewriteASTVisitor() {
@@ -52,13 +52,13 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	public AbstractASTRewriteASTVisitor(boolean visitDocTags) {
 		super(visitDocTags);
 	}
-	
+
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
 		return true;
 	}
-	
+
 	@Override
 	public void endVisit(CompilationUnit compilationUnit) {
 		resetCompilationUnitSource();
@@ -129,6 +129,14 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 		listeners.forEach(listener -> listener.update(new ASTRewriteEvent(this.compilationUnitHandle)));
 	}
 
+	/**
+	 * Finds the leading, the trailing and the internal comments of the given
+	 * node.
+	 * 
+	 * @param node
+	 *            an {@link ASTNode} to find the comments for.
+	 * @return a list the found {@link Comment}s in the order that they occur.
+	 */
 	protected List<Comment> findRelatedComments(ASTNode node) {
 		List<Comment> comments = getCompilationUnitComments();
 		List<Comment> relatedComments = new ArrayList<>();
@@ -137,77 +145,114 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 		if (leadingCommentIndex >= 0) {
 			relatedComments.add(0, comments.get(leadingCommentIndex));
 		}
-		
+
 		int trailCommentIndex = compilationUnit.lastTrailingCommentIndex(node);
 		if (trailCommentIndex >= 0) {
 			relatedComments.add(comments.get(trailCommentIndex));
 		}
-	
+
 		return relatedComments;
 	}
 
-	public List<Comment> getCompilationUnitComments() {
+	/**
+	 * 
+	 * @return the list of the comments in the compilation unit which is
+	 *         currently being visited.
+	 */
+	protected List<Comment> getCompilationUnitComments() {
 		return ASTNodeUtil.convertToTypedList(compilationUnit.getCommentList(), Comment.class);
 	}
 
+	/**
+	 * Finds the list of comments whose starting position falls between the
+	 * starting and ending position of the given node.
+	 * 
+	 * @param node
+	 *            the {@link ASTNode} to find be checked for internal comments.
+	 * @param comments
+	 *            the list of all existing comments
+	 * @return the list of internal comments of the node in the order that they
+	 *         occur.
+	 */
 	private Collection<Comment> findInternalComments(ASTNode node, List<Comment> comments) {
 		int nodeStartPos = node.getStartPosition();
 		int nodeEndPos = nodeStartPos + node.getLength();
-	
+
 		return comments.stream()
 			.filter(comment -> comment.getStartPosition() > nodeStartPos && comment.getStartPosition() < nodeEndPos)
 			.collect(Collectors.toList());
 	}
 
+	/**
+	 * Creates a new {@link Statement} with the given content and inserts it
+	 * before the given node.
+	 * 
+	 * @param node
+	 *            the node which will be proceeded by the comment.
+	 * @param content
+	 *            the contet of the comment to be inserted.
+	 */
 	protected void addComment(Statement node, String content) {
-	
+
 		Block block = ASTNodeUtil.getSpecificAncestor(node, Block.class);
-		if(block == null) {
+		if (block == null) {
 			return;
 		}
-	
+
 		ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
 		Statement placeHolder = createPlaceHolder(content);
 		listRewrite.insertBefore(placeHolder, node, null);
 	}
 
 	protected Statement createPlaceHolder(String content) {
-		return (Statement) astRewrite.createStringPlaceholder(content,
-				ASTNode.EMPTY_STATEMENT);
+		return (Statement) astRewrite.createStringPlaceholder(content, ASTNode.EMPTY_STATEMENT);
 	}
-	
+
+	/**
+	 * Find the content of the given comment from the {@link ICompilationUnit}. 
+	 * 
+	 * @param comment an node representing the comment.
+	 * @return the formatted content of the comment
+	 */
 	protected String findCommentContent(Comment comment) {
 		String source = readCompilationUnitSource();
 		int start = comment.getStartPosition();
 		int length = comment.getLength();
 		int end = start + length;
-		if(source.length() < end) {
+		if (source.length() < end) {
 			return EMPTY_STRING;
 		}
 		String content = source.substring(start, end);
 		return content.replaceAll("\\t", EMPTY_STRING); //$NON-NLS-1$
 	}
-	
+
+	/**
+	 * A lazy read of the source of the {@link ICompilationUnit} being visitied.
+	 * Note that the source of the {@link ICompilationUnit} contains also the
+	 * comments, wheras the source of the {@link CompilationUnit} does not
+	 * contain them.
+	 * 
+	 * @return the read content of the {@link ICompilationUnit}.
+	 */
 	protected String readCompilationUnitSource() {
 		String source = getCompilationUnitSource();
-		if(!source.isEmpty()) {
+		if (!source.isEmpty()) {
 			return source;
 		}
-		
+
 		try {
 			source = ((ICompilationUnit) compilationUnit.getJavaElement()).getSource();
 		} catch (JavaModelException e) {
 			logger.error("Cannot read the source of the compilation unit", e); //$NON-NLS-1$
 		}
-		
+
 		setCompilationUnitSource(source);
-		
+
 		return source;
 	}
 
 	private void setCompilationUnitSource(String source) {
 		this.compilationUnitSource = source;
-		
 	}
 
 	private void resetCompilationUnitSource() {
@@ -222,23 +267,45 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 		saveRelatedComments(statement, statement);
 	}
 
+	/**
+	 * Inserts a copy of the comments related to the given {@link ASTNode} 
+	 * before the given {@link Statement}. 
+	 * 
+	 * @param node a node whose comments will be saved
+	 * @param statement a statement which will be proceeded by the new comments. 
+	 */
 	protected void saveRelatedComments(ASTNode node, Statement statement) {
-		List<Comment> invocationComments = findRelatedComments(node);
-		saveBeforeStatement(statement, invocationComments);
+		List<Comment> comments = findRelatedComments(node);
+		saveBeforeStatement(statement, comments);
 	}
-	
-	public void saveBeforeStatement(Statement statement, List<Comment> invocationComments) {
-		invocationComments.stream()
+
+	/**
+	 * Inserts a copy of the given comments before the given statement.
+	 * 
+	 * @param statement
+	 *            the statement to be proceeded by the comments.
+	 * @param comments
+	 *            a list of comments to be inserted.
+	 */
+	protected void saveBeforeStatement(Statement statement, List<Comment> comments) {
+		comments.stream()
 			.map(this::findCommentContent)
 			.forEach(content -> addComment(statement, content));
 	}
-	
+
+	/**
+	 * Creates a new statement and inserts it right before the given node. 
+	 * Uses the contents of the leading comments as the body of the 
+	 * new statement. If no leading comment is found, no new statement
+	 * is created. 
+	 * @param node the node to check for leading comments. 
+	 */
 	protected void saveLeadingComment(Statement node) {
 		List<Comment> leadingComments = new ArrayList<>();
 		List<Comment> compilatinUnitComments = getCompilationUnitComments();
 		CompilationUnit cu = getCompilationUnit();
 		int leadingCommentIndex = cu.firstLeadingCommentIndex(node);
-		if(leadingCommentIndex >= 0) {
+		if (leadingCommentIndex >= 0) {
 			leadingComments.add(compilatinUnitComments.get(leadingCommentIndex));
 			saveBeforeStatement(node, leadingComments);
 		}
