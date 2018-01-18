@@ -23,6 +23,15 @@ public class LambdaForEachMapRule {
 		list.stream()
 			.map(s -> s.substring(1)).forEach(subString -> sb.append(subString));
 		
+		// I could get lost in the map
+		list.stream()
+			.map(s -> s.substring(1)).forEach(subString -> {
+			if(!subString.isEmpty()) {
+				// I am safer here
+				sb.append(subString);
+			}
+		});
+		
 		return sb.toString();
 	}
 

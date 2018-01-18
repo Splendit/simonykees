@@ -26,6 +26,16 @@ public class LambdaForEachMapRule {
 			.map(s -> StringUtils.substring(s, 1))
 			.forEach(sb::append);
 
+		// I could get lost in the map
+		list.stream()
+			.map(s -> StringUtils.substring(s, 1))
+			.forEach(subString -> {
+				if (!StringUtils.isEmpty(subString)) {
+					// I am safer here
+					sb.append(subString);
+				}
+			});
+
 		return sb.toString();
 	}
 

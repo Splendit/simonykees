@@ -168,7 +168,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		Statement parentStatement = ASTNodeUtil.getSpecificAncestor(methodInvocation, Statement.class);
 		saveRelatedComments(analyzer.getMapVariableDeclaration(), parentStatement);
 		List<Statement> remainingStatements = analyzer.getRemainingStatements();
-		if (remainingStatements.size() == 1) {
+		if (remainingStatements.size() == 1 && ASTNode.EXPRESSION_STATEMENT == remainingStatements.get(0).getNodeType() ) {
 			saveRelatedComments(remainingStatements.get(0), parentStatement);
 		}
 	}

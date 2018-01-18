@@ -25,6 +25,15 @@ public class LambdaForEachMapRule {
 			sb.append(subString);
 		});
 		
+		list.forEach(s -> {
+			// I could get lost in the map
+			String subString = s.substring(1);
+			if(!subString.isEmpty()) {
+				// I am safer here
+				sb.append(subString);
+			}
+		});
+		
 		return sb.toString();
 	}
 
