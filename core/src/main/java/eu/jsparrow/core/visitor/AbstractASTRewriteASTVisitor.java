@@ -11,9 +11,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.slf4j.Logger;
@@ -194,12 +197,13 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	 */
 	protected void addComment(Statement node, String content) {
 
-		Block block = ASTNodeUtil.getSpecificAncestor(node, Block.class);
-		if (block == null) {
+		StructuralPropertyDescriptor locationInParent = node.getLocationInParent();
+		if(!locationInParent.isChildListProperty()) {
 			return;
 		}
 
-		ListRewrite listRewrite = astRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+		ListRewrite listRewrite = astRewrite.getListRewrite(node.getParent(),
+				(ChildListPropertyDescriptor) locationInParent);
 		Statement placeHolder = createPlaceHolder(content);
 		listRewrite.insertBefore(placeHolder, node, null);
 	}
