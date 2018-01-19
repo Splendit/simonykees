@@ -49,25 +49,14 @@ public class RefactorUtil {
 	protected StandaloneConfig standaloneConfig;
 	private File directory;
 
-	protected void loadStandaloneConfig(BundleContext context) {
-
-		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
-		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
-
-		standaloneConfig = new StandaloneConfig(projectName, projectPath);
-	}
-
-	private void doRefactoring() {
-
-	}
-
 	/**
 	 * prepare and start the refactoring process
 	 * 
 	 * @param context
 	 * @throws YAMLConfigException
 	 */
-	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline) throws YAMLConfigException {
+	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
+			throws YAMLConfigException {
 		String loggerInfo;
 
 		YAMLConfig config = getConfiguration(context);
@@ -125,15 +114,6 @@ public class RefactorUtil {
 		}
 	}
 
-	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules() {
-		return RulesContainer.getRulesForProject(standaloneConfig.getJavaProject(), true);
-	}
-
-	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRules(YAMLConfig config,
-			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules) throws YAMLConfigException {
-		return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
-	}
-
 	/**
 	 * cleans classpath and temp directory
 	 */
@@ -176,11 +156,6 @@ public class RefactorUtil {
 		return config;
 	}
 
-	protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws YAMLConfigException {
-		return YAMLConfigUtil.readConfig(configFilePath, profile);
-
-	}
-
 	private void prepareWorkingDirectory() {
 		String file = System.getProperty(JAVA_TMP);
 		directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
@@ -216,5 +191,25 @@ public class RefactorUtil {
 				}
 			}
 		}
+	}
+
+	protected void loadStandaloneConfig(BundleContext context) {
+		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
+		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
+
+		standaloneConfig = new StandaloneConfig(projectName, projectPath);
+	}
+
+	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules() {
+		return RulesContainer.getRulesForProject(standaloneConfig.getJavaProject(), true);
+	}
+
+	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRules(YAMLConfig config,
+			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules) throws YAMLConfigException {
+		return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
+	}
+
+	protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws YAMLConfigException {
+		return YAMLConfigUtil.readConfig(configFilePath, profile);
 	}
 }
