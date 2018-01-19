@@ -19,6 +19,12 @@ import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
+/**
+ * test class for {@link RefactorUtil}
+ * 
+ * @author Matthias Webhofer, Hans-Jörg Schrödl
+ * @since 2.5.0
+ */
 public class RefactorUtilTest {
 
 	private final RefactorUtil refactorUtil = new TestableRefactorUtil();
@@ -28,9 +34,9 @@ public class RefactorUtilTest {
 	public void startRefactoring() throws Exception {
 		BundleContext context = mock(BundleContext.class);
 		RefactoringPipeline refactoringPipeline = mock(RefactoringPipeline.class);
-		
+
 		refactorUtil.startRefactoring(context, refactoringPipeline);
-		
+
 		verify(refactoringPipeline).createRefactoringStates(anyList());
 		verify(refactoringPipeline).doRefactoring(any(NullProgressMonitor.class));
 		verify(refactoringPipeline).commitRefactoring();
@@ -40,7 +46,6 @@ public class RefactorUtilTest {
 
 		@Override
 		protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws YAMLConfigException {
-			// TODO Auto-generated method stub
 			return new YAMLConfig();
 		}
 
@@ -48,7 +53,7 @@ public class RefactorUtilTest {
 		protected void loadStandaloneConfig(BundleContext context) {
 			standaloneConfig = mock(StandaloneConfig.class);
 		}
-		
+
 		@Override
 		protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules() {
 			return Collections.emptyList();
