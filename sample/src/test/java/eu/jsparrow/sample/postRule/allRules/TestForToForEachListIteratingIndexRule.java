@@ -541,6 +541,9 @@ public class TestForToForEachListIteratingIndexRule {
 			String iterator;
 			List<String> fInterfaceRule = new ArrayList<>();
 			StringBuilder sb = new StringBuilder();
+			// multiple
+			// line
+			// comment
 			fInterfaceRule.forEach(sb::append);
 		};
 	}

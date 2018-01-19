@@ -34,6 +34,18 @@ public class LambdaForEachMapRule {
 			}
 		});
 		
+		list.forEach(s -> {
+			// save me 1
+			String subString = s.substring(1);
+			// save me 2
+			list.forEach(s2 -> {
+				// save me 3
+				String subString2 = s2.substring(1);
+				// save me 4
+				sb.append(subString2);
+			});
+		});
+		
 		return sb.toString();
 	}
 

@@ -32,6 +32,14 @@ public class LambdaForEachMapRule {
 			}
 		});
 		
+		// save me 1
+		// save me 2
+		// save me 3
+		// save me 4
+		list.stream()
+			.map(s -> s.substring(1)).forEach(subString -> list.stream()
+			.map(s2 -> s2.substring(1)).forEach(subString2 -> sb.append(subString2)));
+		
 		return sb.toString();
 	}
 

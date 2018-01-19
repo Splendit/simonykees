@@ -57,6 +57,13 @@ public class StatementLambdaToExpressionRule {
 			doSomething(element);
 			return;
 		});
+		
+		list.forEach(element -> {
+			new Integer(1);
+		}
+		 
+		// i'm here
+		);
 	}
 
 	private void doSomething(int element) {

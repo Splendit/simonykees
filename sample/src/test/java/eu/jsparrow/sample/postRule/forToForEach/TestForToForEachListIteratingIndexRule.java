@@ -36,6 +36,9 @@ public class TestForToForEachListIteratingIndexRule {
 			String iterator;
 			List<String> fInterfaceRule = new ArrayList<>();
 			StringBuilder sb = new StringBuilder();
+			// multiple
+			// line
+			// comment
 			for (String aFInterfaceRule : fInterfaceRule) {
 				sb.append(aFInterfaceRule);
 			}

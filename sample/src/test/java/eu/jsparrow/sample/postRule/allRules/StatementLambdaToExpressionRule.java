@@ -47,6 +47,11 @@ public class StatementLambdaToExpressionRule {
 
 		// save me
 		list.forEach(this::doSomething);
+
+		list.forEach(element -> Integer.valueOf(1)
+
+		// i'm here
+		);
 	}
 
 	private void doSomething(int element) {
