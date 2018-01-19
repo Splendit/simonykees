@@ -3,6 +3,7 @@ package eu.jsparrow.core.visitor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -141,17 +142,9 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	protected List<Comment> findRelatedComments(ASTNode node) {
 		List<Comment> comments = getCompilationUnitComments();
 		List<Comment> relatedComments = new ArrayList<>();
+		relatedComments.addAll(findLeadingComments(node));
 		relatedComments.addAll(findInternalComments(node, comments));
-		int leadingCommentIndex = compilationUnit.firstLeadingCommentIndex(node);
-		if (leadingCommentIndex >= 0) {
-			relatedComments.add(0, comments.get(leadingCommentIndex));
-		}
-
-		int trailCommentIndex = compilationUnit.lastTrailingCommentIndex(node);
-		if (trailCommentIndex >= 0) {
-			relatedComments.add(comments.get(trailCommentIndex));
-		}
-
+		relatedComments.addAll(findTrailingComments(node));
 		return relatedComments;
 	}
 
@@ -296,20 +289,59 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	}
 
 	/**
-	 * Creates a new statement and inserts it right before the given node. 
-	 * Uses the contents of the leading comments as the body of the 
-	 * new statement. If no leading comment is found, no new statement
-	 * is created. 
-	 * @param node the node to check for leading comments. 
+	 * Creates a new statement and inserts it right before the given node. Uses
+	 * the contents of the leading comments as the body of the new statement. If
+	 * no leading comment is found, no new statement is created.
+	 * 
+	 * @param node
+	 *            the node to check for leading comments.
 	 */
 	protected void saveLeadingComment(Statement node) {
+		List<Comment> leadingComments = findLeadingComments(node);
+		saveBeforeStatement(node, leadingComments);
+
+	}
+
+	protected List<Comment> findLeadingComments(ASTNode node) {
 		List<Comment> leadingComments = new ArrayList<>();
 		List<Comment> compilatinUnitComments = getCompilationUnitComments();
 		CompilationUnit cu = getCompilationUnit();
 		int leadingCommentIndex = cu.firstLeadingCommentIndex(node);
-		if (leadingCommentIndex >= 0) {
-			leadingComments.add(compilatinUnitComments.get(leadingCommentIndex));
-			saveBeforeStatement(node, leadingComments);
+		if (leadingCommentIndex < 0) {
+			return Collections.emptyList();
 		}
+		leadingComments.add(compilatinUnitComments.get(leadingCommentIndex));
+		for (int i = leadingCommentIndex + 1; i < compilatinUnitComments.size(); i++) {
+			Comment comment = compilatinUnitComments.get(i);
+			if (comment.getStartPosition() < node.getStartPosition()) {
+				leadingComments.add(comment);
+			} else {
+				break;
+			}
+		}
+		return leadingComments;
+	}
+	
+	protected List<Comment> findTrailingComments(ASTNode node) {
+		CompilationUnit cu = getCompilationUnit();
+		int trailCommentIndex = cu.lastTrailingCommentIndex(node);
+		if (trailCommentIndex < 0) {
+			return Collections.emptyList();
+		}
+		
+		List<Comment> cuComments = getCompilationUnitComments();
+		List<Comment> trailingComment = new ArrayList<>();
+		trailingComment.add(cuComments.get(trailCommentIndex));
+		int nodeEndPos = node.getStartPosition() + node.getLength();
+		for(int i = trailCommentIndex-1; i>= 0 ; i--) {
+			Comment comment = cuComments.get(i);
+			if(comment.getStartPosition() > nodeEndPos) {
+				trailingComment.add(comment);
+			} else {
+				break;
+			}
+		}
+		
+		return trailingComment;
 	}
 }
