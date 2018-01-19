@@ -2,43 +2,43 @@ package eu.jsparrow.standalone;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
-import java.awt.image.PackedColorModel;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IModularClassFile;
-import org.eclipse.jdt.core.IOpenable;
-import org.eclipse.jdt.core.IOrdinaryClassFile;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+/**
+ * test class for {@link StandaloneConfig}
+ * 
+ * @author Matthias Webhofer
+ * @since 2.5.0
+ */
 public class StandaloneConfigTest {
 
 	private static Path path;
@@ -182,6 +182,45 @@ public class StandaloneConfigTest {
 		List<IClasspathEntry> entries = standaloneConfig.collectMavenDependenciesAsClasspathEntries();
 
 		assertFalse(entries.isEmpty());
+	}
+	
+	@Test
+	public void addToClasspath_emptyClasspathList_doesNotCallAnyMethods() throws Exception {
+		standaloneConfig.setJavaProject(javaProject);
+		
+		standaloneConfig.addToClasspath(Collections.emptyList());
+		
+		verifyZeroInteractions(javaProject);
+	}
+	
+	@Test
+	public void addToClasspath_nonEmptyClasspathList_oldEntriesIsEmpty_setRawClasspathCalled() throws Exception {
+		standaloneConfig.setJavaProject(javaProject);
+		when(javaProject.getRawClasspath()).thenReturn(new IClasspathEntry[] {});
+		
+		standaloneConfig.addToClasspath(Collections.singletonList(classpathEntry));
+		
+		verify(javaProject).getRawClasspath();
+		
+		ArgumentCaptor<IClasspathEntry[]> captor = ArgumentCaptor.forClass(IClasspathEntry[].class);
+		verify(javaProject).setRawClasspath(captor.capture(), any());
+		assertTrue(captor.getValue().length == 1);
+	}
+	
+	@Test
+	public void addToClasspath_nonEmptyClasspathList_oldEntriesIsNotEmpty_setRawClasspathCalled() throws Exception {
+		IClasspathEntry oldEntry = mock(IClasspathEntry.class);
+		
+		standaloneConfig.setJavaProject(javaProject);
+		when(javaProject.getRawClasspath()).thenReturn(new IClasspathEntry[] {oldEntry});
+		
+		standaloneConfig.addToClasspath(Collections.singletonList(classpathEntry));
+		
+		verify(javaProject).getRawClasspath();
+		
+		ArgumentCaptor<IClasspathEntry[]> captor = ArgumentCaptor.forClass(IClasspathEntry[].class);
+		verify(javaProject).setRawClasspath(captor.capture(), any());
+		assertTrue(captor.getValue().length > 1);
 	}
 
 	class TestableStandaloneConfig extends StandaloneConfig {
