@@ -47,11 +47,12 @@ public class DiamondOperatorRule {
 		}
 		
 		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar>typeVariable) {
-			return new ArrayList<TypeVar>();
+			return new ArrayList</*save me */TypeVar>();
 		}
 		
 		public ArrayList<String> genericOverloaded(ArrayList<String>typeVariable) {
-			return new ArrayList<String>();
+			return new ArrayList<// line comment doesn't change
+					String>();
 		}
 		
 		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar>typeVariable, int i) {
