@@ -158,21 +158,10 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 		saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(methodInvocationNode, Statement.class), comments);
 	}
 
-	private List<Comment> findSurroundingComments(ASTNode node) {
-		List<Comment> comments = getCompilationUnitComments();
-		ASTNode parent = node.getParent();
-		int parentStartPos = parent.getStartPosition();
-		int parentEndPos = parentStartPos + parent.getLength();
-
-		int ifStartPos = node.getStartPosition();
-		int ifEndPos = ifStartPos + node.getLength();
-		
-		return comments.stream()
-			.filter(comment -> {
-				int startPos = comment.getStartPosition();
-				return (startPos > parentStartPos && startPos < ifStartPos)
-						|| (startPos > ifEndPos && startPos < parentEndPos && !isTrailing(comment, node));
-			})
+	@Override
+	protected List<Comment> findSurroundingComments(ASTNode node) {
+		return super.findSurroundingComments(node).stream()
+			.filter(comment -> !isTrailing(comment, node))
 			.collect(Collectors.toList());
 	}
 

@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -44,6 +45,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 	private int depthCount = 0;
 	LinkedList<MethodInvocation> methodInvocationExpressionList = new LinkedList<>();
+	LinkedList<Comment> forEachRelatedComments = new LinkedList<>();
 	MethodInvocation innerMostMethodInvocation = null;
 	private List<MethodInvocation> toBeSkipped = new ArrayList<>();
 
@@ -105,6 +107,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		MethodInvocation flatMapMethodInvocation = createFlatMapMethodInvocation(null, flatMapLambda);
 		methodInvocationExpressionList.add(flatMapMethodInvocation);
 
+		storeRelatedComments(methodArgumentLambda, innerMethodInvocation);
 		MethodInvocation expression = createExpressionForInnerLoop(innerMethodInvocation.getExpression());
 
 		if (expression != null) {
@@ -114,6 +117,16 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		innerMostMethodInvocation = innerMethodInvocation;
 
 		return true;
+	}
+
+	protected void storeRelatedComments(LambdaExpression methodArgumentLambda, MethodInvocation innerMethodInvocation) {
+		ASTNode miParent = innerMethodInvocation.getParent();
+		forEachRelatedComments.addAll(findSurroundingComments(miParent));
+		ASTNode miGParent = miParent.getParent();
+		if (miGParent != null && ASTNode.BLOCK == miGParent.getNodeType()) {
+			forEachRelatedComments.addAll(findSurroundingComments(miGParent));
+		}
+		forEachRelatedComments.addAll(findSurroundingComments(methodArgumentLambda));
 	}
 
 	/**
@@ -249,13 +262,26 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 				astRewrite.replace(methodInvocationNode, newMethodInvocation, null);
 				onRewrite();
-				saveRelatedComments(methodInvocationNode, ASTNodeUtil.getSpecificAncestor(methodInvocationNode, Statement.class));
+				saveComments(methodInvocationNode);
 
 				innerMostMethodInvocation = null;
 				methodInvocationExpressionList.clear();
+				forEachRelatedComments.clear();
 			}
 		}
 		toBeSkipped.remove(methodInvocationNode);
+	}
+
+	private void saveComments(MethodInvocation methodInvocationNode) {
+		Statement statement = ASTNodeUtil.getSpecificAncestor(methodInvocationNode, Statement.class);
+		List<Expression> args = ASTNodeUtil.convertToTypedList(innerMostMethodInvocation.arguments(), Expression.class);
+		if (args.isEmpty()) {
+			return;
+		}
+		List<Comment> comments = new ArrayList<>();
+		comments.addAll(forEachRelatedComments);
+		comments.addAll(findRelatedComments(args.get(0)));
+		saveBeforeStatement(statement, comments);
 	}
 
 	/**

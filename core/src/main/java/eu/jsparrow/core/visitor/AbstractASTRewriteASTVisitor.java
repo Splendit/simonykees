@@ -344,4 +344,20 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 		
 		return trailingComment;
 	}
+	
+	protected List<Comment> findSurroundingComments(ASTNode node) {
+		ASTNode parent = node.getParent();
+		int parentStartPos = parent.getStartPosition();
+		int parentEndPOs = parentStartPos + parent.getLength();
+		int nodeStartPos = node.getStartPosition();
+		int nodeEndPos = nodeStartPos + node.getLength();
+
+		return getCompilationUnitComments().stream()
+			.filter(comment -> {
+				int startPos = comment.getStartPosition();
+				return (startPos > parentStartPos && startPos < nodeStartPos)
+						|| (startPos > nodeEndPos && startPos < parentEndPOs);
+			})
+			.collect(Collectors.toList());
+	}
 }
