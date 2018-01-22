@@ -140,10 +140,9 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	 * @return a list the found {@link Comment}s in the order that they occur.
 	 */
 	protected List<Comment> findRelatedComments(ASTNode node) {
-		List<Comment> comments = getCompilationUnitComments();
 		List<Comment> relatedComments = new ArrayList<>();
 		relatedComments.addAll(findLeadingComments(node));
-		relatedComments.addAll(findInternalComments(node, comments));
+		relatedComments.addAll(findInternalComments(node));
 		relatedComments.addAll(findTrailingComments(node));
 		return relatedComments;
 	}
@@ -168,9 +167,10 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	 * @return the list of internal comments of the node in the order that they
 	 *         occur.
 	 */
-	private Collection<Comment> findInternalComments(ASTNode node, List<Comment> comments) {
+	protected List<Comment> findInternalComments(ASTNode node) {
 		int nodeStartPos = node.getStartPosition();
 		int nodeEndPos = nodeStartPos + node.getLength();
+		List<Comment> comments = getCompilationUnitComments();
 
 		return comments.stream()
 			.filter(comment -> comment.getStartPosition() > nodeStartPos && comment.getStartPosition() < nodeEndPos)
@@ -224,7 +224,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	/**
 	 * A lazy read of the source of the {@link ICompilationUnit} being visitied.
 	 * Note that the source of the {@link ICompilationUnit} contains also the
-	 * comments, wheras the source of the {@link CompilationUnit} does not
+	 * comments, whereas the source of the {@link CompilationUnit} does not
 	 * contain them.
 	 * 
 	 * @return the read content of the {@link ICompilationUnit}.
