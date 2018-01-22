@@ -16,7 +16,11 @@ public class LambdaForEachIfWrapperToFilterRule {
 	public List<Boolean> booleanList = Arrays.asList(true, false, true, true, false);
 
 	public void doSomething() {
-		// save me
+		/* save me 5 - leading lambda */
+		// save me 7 - trailing lambda 2
+		/* save me 6 - leading lambda body */
+		// save me - leading if statement
+		// save me 4 - trailing lambda 1
 		list.stream().filter(s -> s.length() > 3)
 			.forEach(s -> {
 				// save me 2

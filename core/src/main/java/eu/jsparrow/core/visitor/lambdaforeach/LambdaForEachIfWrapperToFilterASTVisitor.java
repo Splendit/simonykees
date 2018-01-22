@@ -137,8 +137,7 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 
 							// rewrite the AST
 							astRewrite.replace(methodInvocationNode, forEachMethodInvocation, null);
-							List<Comment> comments = findSurroundingComments(ifStatement);
-							saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(methodInvocationNode, Statement.class), comments);
+							saveComments(methodInvocationNode, lambdaExpression, block, ifStatement);
 							onRewrite();
 						}
 					}
@@ -150,28 +149,37 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 		return true;
 	}
 
-	private List<Comment> findSurroundingComments(IfStatement ifStatement) {
+	protected void saveComments(MethodInvocation methodInvocationNode, LambdaExpression lambdaExpression, Block block,
+			IfStatement ifStatement) {
+		List<Comment> comments = findSurroundingComments(lambdaExpression);
+		comments.addAll(findLeadingComments(block));
+		comments.addAll(findSurroundingComments(ifStatement));
+		comments.addAll(findTrailingComments(block));
+		saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(methodInvocationNode, Statement.class), comments);
+	}
+
+	private List<Comment> findSurroundingComments(ASTNode node) {
 		List<Comment> comments = getCompilationUnitComments();
-		ASTNode parent = ifStatement.getParent();
+		ASTNode parent = node.getParent();
 		int parentStartPos = parent.getStartPosition();
 		int parentEndPos = parentStartPos + parent.getLength();
 
-		int ifStartPos = ifStatement.getStartPosition();
-		int ifEndPos = ifStartPos + ifStatement.getLength();
+		int ifStartPos = node.getStartPosition();
+		int ifEndPos = ifStartPos + node.getLength();
 		
 		return comments.stream()
 			.filter(comment -> {
 				int startPos = comment.getStartPosition();
 				return (startPos > parentStartPos && startPos < ifStartPos)
-						|| (startPos > ifEndPos && startPos < parentEndPos && !isTrailing(comment, ifStatement));
+						|| (startPos > ifEndPos && startPos < parentEndPos && !isTrailing(comment, node));
 			})
 			.collect(Collectors.toList());
 	}
 
-	private boolean isTrailing(Comment comment, IfStatement ifStatement) {
+	private boolean isTrailing(Comment comment, ASTNode node) {
 		List<Comment> comments = getCompilationUnitComments();
 		CompilationUnit cu = getCompilationUnit();
-		int lastCommentIndex = cu.lastTrailingCommentIndex(ifStatement);
+		int lastCommentIndex = cu.lastTrailingCommentIndex(node);
 		if(lastCommentIndex < 0) {
 			return false;
 
