@@ -6,30 +6,57 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.*;
 
 import java.awt.image.DirectColorModel;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.discovery.AbstractComponentDiscoverer;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.launch.Framework;
 
 import com.google.common.io.Files;
 
 public class MavenHelperTest {
 
-	private MavenProject project = mock(MavenProject.class);
-	private Log log = mock(Log.class);
+	private MavenProject project;
+	private Log log;
 	
-	File workingDirectory = mock(File.class);
+	private File workingDirectory;
+	private BundleContext bundleContext;
+	private InputStream bundleInputStream;
+	private BufferedReader bundleBufferedReader;
+	private InputStream resourceInputStream;
 	
 	private MavenHelper mavenHelper;
 	
+	private boolean isInputStreamNull;
+	
 	@Before
 	public void setUp() {
+		project = mock(MavenProject.class);
+		log = mock(Log.class);
+		workingDirectory = mock(File.class);
+		bundleContext = mock(BundleContext.class);
+		bundleInputStream = mock(InputStream.class);
+		bundleBufferedReader = mock(BufferedReader.class);
+		resourceInputStream = mock(InputStream.class);
+		
 		mavenHelper = new TestableMavenHelper(project, "mavenHome", log); //$NON-NLS-1$
 	}
 	
@@ -106,6 +133,48 @@ public class MavenHelperTest {
 		verify(workingDirectory, times(3)).getAbsolutePath();
 		verify(configuration).put(anyString(), eq(apsolutePath));
 	}
+	
+	@Test
+	public void loadBundles_inputStreamIsNotNull_bundlesInstalledAndAdded() throws Exception {
+		Bundle bundle = mock(Bundle.class);
+		
+		isInputStreamNull = false;
+		String line1 = "line1"; //$NON-NLS-1$
+				
+		doAnswer(new Answer<String>() {
+			
+			private int counter = 0;
+			
+			@Override
+			public String answer(InvocationOnMock invocation) throws Throwable {
+				if(counter > 0) {
+					return null;
+				} else {
+					counter++;
+					return line1;
+				}
+			} 
+		}).when(bundleBufferedReader).readLine();
+		
+		when(bundleContext.installBundle(anyString(), eq(resourceInputStream))).thenReturn(bundle);
+		
+		List<Bundle> bundles = mavenHelper.loadBundles();
+		
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(bundleContext).installBundle(captor.capture(), eq(resourceInputStream));
+		assertTrue(captor.getValue().contains(line1));
+		
+		assertTrue(bundles.size() == 1);
+	}
+	
+	@Test(expected = MojoExecutionException.class)
+	public void loadBundles_inputStreamIsNull_noInteractionWithReaderOrBundleContext() throws Exception {
+		isInputStreamNull = true;
+		
+		mavenHelper.loadBundles();
+		
+		assertTrue(false);
+	}
 
 	@SuppressWarnings("nls")
 	class TestableMavenHelper extends MavenHelper {
@@ -128,5 +197,29 @@ public class MavenHelperTest {
 		protected void setWorkingDirectory() {
 			setDirectory(workingDirectory);
 		}
+		
+		@Override
+		protected BundleContext getBundleContext() {
+			return bundleContext;
+		}
+		
+		@Override
+		protected InputStream getManifestInputStream() {
+			if(isInputStreamNull) {
+				return null;
+			}
+			return bundleInputStream;
+		}
+		
+		@Override
+		protected BufferedReader getBufferedReaderFromInputStream(InputStream is) {
+			return bundleBufferedReader;
+		}
+		
+		@Override
+		protected InputStream getBundleResourceInputStream(String resouceName) {
+			return resourceInputStream;
+		}
+		
 	}
 }
