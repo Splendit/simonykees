@@ -39,7 +39,7 @@ class TwrPreconditionASTVisitor extends ASTVisitor {
 	private boolean referencedAfterClose = false;
 	private int nestedTryLevel = 0;
 	private boolean reachedTargetName = false;
-	private List<SimpleName> proceedingSimpleNames;
+	private List<SimpleName> precedingSimpleNames;
 	private List<SimpleName> referencedByInitializer;
 	private List<VariableDeclarationFragment> toBeMovedToResources;
 
@@ -48,7 +48,7 @@ class TwrPreconditionASTVisitor extends ASTVisitor {
 	public TwrPreconditionASTVisitor(SimpleName targetName, List<VariableDeclarationFragment> toBeMovedToResources) {
 		this.targetName = targetName;
 		this.toBeMovedToResources = toBeMovedToResources;
-		proceedingSimpleNames = new ArrayList<>();
+		precedingSimpleNames = new ArrayList<>();
 	}
 
 	@Override
@@ -87,7 +87,7 @@ class TwrPreconditionASTVisitor extends ASTVisitor {
 
 	public boolean safeToGo() {
 		// check whether the variables used initializer do not show in
-		// proceeding simple
+		// preceding simple
 		// names
 
 		return !assigned && !initializerIsDirty() && !referencedAfterClose && !closeOccurredInNestedTry
@@ -95,13 +95,13 @@ class TwrPreconditionASTVisitor extends ASTVisitor {
 	}
 
 	private boolean initializerIsDirty() {
-		List<String> proceedingsNames = proceedingSimpleNames.stream()
+		List<String> precedingsNames = precedingSimpleNames.stream()
 			.map(SimpleName::getIdentifier)
 			.collect(Collectors.toList());
 
 		return referencedByInitializer.stream()
 			.map(SimpleName::getIdentifier)
-			.anyMatch(proceedingsNames::contains);
+			.anyMatch(precedingsNames::contains);
 
 	}
 
@@ -138,7 +138,7 @@ class TwrPreconditionASTVisitor extends ASTVisitor {
 				reachedTargetName = true;
 				referencedByInitializer = findReferencedVariables(simpleName);
 			} else if (!reachedTargetName) {
-				proceedingSimpleNames.add(simpleName);
+				precedingSimpleNames.add(simpleName);
 			}
 
 			if ((closeOccurred || closeOccurredInNestedTry) && simpleName.getParent() != closeStatement

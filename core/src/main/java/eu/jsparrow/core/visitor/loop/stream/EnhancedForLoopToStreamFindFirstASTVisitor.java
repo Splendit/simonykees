@@ -123,7 +123,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			}
 
 			/*
-			 * if the type of the stream proceeding findFirst() does not match
+			 * if the type of the stream preceding findFirst() does not match
 			 * with the type of the orElse() expression, then an explicit
 			 * casting should be add by using a findFirst().map() The
 			 * boxingExpresions list, is used for storing the mapping
