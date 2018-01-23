@@ -189,9 +189,8 @@ public class MavenHelper {
 		};
 	}
 
-	// TODO: check if this method could be merged with stopEquinoxFramework()
 	/**
-	 * shuts down the standalone bundle and equinox
+	 * shuts down the standalone bundle and equinox in case of an interrupt
 	 */
 	public void shutdownFramework() {
 		if (null != this.getFramework() && null != this.getFramework()
@@ -335,7 +334,7 @@ public class MavenHelper {
 	}
 
 	/**
-	 * stops the equinox framework
+	 * stops the equinox framework the normal way
 	 * 
 	 * @throws InterruptedException
 	 * @throws BundleException
