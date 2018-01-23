@@ -231,21 +231,19 @@ public class MavenHelper {
 
 	protected Map<String, String> prepareConfiguration(Map<String, String> additionalConfiguration) {
 
-		final Map<String, String> configuration = new HashMap<>();
-
-		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
-		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
-		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
-		configuration.put(PROJECT_PATH_CONSTANT, getProjectPath());
-		configuration.put(PROJECT_NAME_CONSTANT, getProjectName());
-
-		if (additionalConfiguration != null) {
-			configuration.putAll(additionalConfiguration);
+		if (additionalConfiguration == null) {
+			additionalConfiguration = new HashMap<>();
 		}
 
-		return configuration;
-	}
+		additionalConfiguration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
+		additionalConfiguration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
+		additionalConfiguration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
+		additionalConfiguration.put(PROJECT_PATH_CONSTANT, getProjectPath());
+		additionalConfiguration.put(PROJECT_NAME_CONSTANT, getProjectName());
 
+		return additionalConfiguration;
+	}
+	
 	protected String getProjectName() {
 		return project.getName();
 	}
@@ -263,7 +261,7 @@ public class MavenHelper {
 	 * @throws InterruptedException
 	 */
 	protected void prepareWorkingDirectory(Map<String, String> configuration) throws InterruptedException {
-		setDirectory();
+		setWorkingDirectory();
 
 		if (directory.exists()) {
 			if (Arrays.asList(directory.list())
@@ -283,7 +281,7 @@ public class MavenHelper {
 		}
 	}
 
-	protected void setDirectory() {
+	protected void setWorkingDirectory() {
 		String file = System.getProperty(JAVA_TMP);
 		directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
 	}
@@ -550,4 +548,7 @@ public class MavenHelper {
 		return directory;
 	}
 
+	public void setDirectory(File directory) {
+		this.directory = directory;
+	}
 }
