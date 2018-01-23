@@ -243,7 +243,7 @@ public class MavenHelper {
 
 		return additionalConfiguration;
 	}
-	
+
 	protected String getProjectName() {
 		return project.getName();
 	}
@@ -355,19 +355,23 @@ public class MavenHelper {
 	 * @return a list of the installed bundles
 	 * @throws BundleException
 	 */
-	private List<Bundle> loadBundles() throws BundleException {
-		bundleContext = framework.getBundleContext();
+	protected List<Bundle> loadBundles() throws BundleException, MojoExecutionException  {
+		bundleContext = getBundleContext();
 		final List<Bundle> bundles = new ArrayList<>();
 
-		try (InputStream is = getClass().getResourceAsStream("/" + JSPARROW_MANIFEST);
-				BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-			String line = "";
-
+		try (InputStream is = getManifestInputStream()) {
 			if (is != null) {
-				while ((line = reader.readLine()) != null) {
-					InputStream fileStream = getClass().getResourceAsStream("/" + line);
-					bundles.add(bundleContext.installBundle("file://" + line, fileStream));
+				try (BufferedReader reader = getBufferedReaderFromInputStream(is)) {
+
+					String line = "";
+					while ((line = reader.readLine()) != null) {
+						InputStream fileStream = getBundleResourceInputStream(line);
+						Bundle bundle = bundleContext.installBundle("file://" + line, fileStream);
+						bundles.add(bundle);
+					}
 				}
+			} else {
+				throw new MojoExecutionException("The standalone manifest file could not be found. Please read the readme-file.");
 			}
 		} catch (IOException e) {
 			log.debug(e.getMessage(), e);
@@ -375,6 +379,22 @@ public class MavenHelper {
 		}
 
 		return bundles;
+	}
+
+	protected InputStream getBundleResourceInputStream(String resouceName) {
+		return getClass().getResourceAsStream("/" + resouceName);
+	}
+
+	protected BufferedReader getBufferedReaderFromInputStream(InputStream is) {
+		return new BufferedReader(new InputStreamReader(is));
+	}
+
+	protected InputStream getManifestInputStream() {
+		return getClass().getResourceAsStream("/" + JSPARROW_MANIFEST);
+	}
+
+	protected BundleContext getBundleContext() {
+		return framework.getBundleContext();
 	}
 
 	/**
