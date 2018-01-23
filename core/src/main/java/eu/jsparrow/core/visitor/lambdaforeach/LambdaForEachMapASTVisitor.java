@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.CommentHelper;
 import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
 
 /**
@@ -178,14 +179,15 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 	private void saveComments(MethodInvocation methodInvocation, ForEachBodyAnalyzer analyzer) {
 		Statement parentStatement = findParentStatement(methodInvocation); 
-		saveRelatedComments(analyzer.getMapVariableDeclaration(), parentStatement);
+		CommentHelper helper = getCommentHelper();
+		helper.saveRelatedComments(analyzer.getMapVariableDeclaration(), parentStatement);
 		List<Statement> remainingStatements = analyzer.getRemainingStatements();
 		if (remainingStatements.size() == 1 && ASTNode.EXPRESSION_STATEMENT == remainingStatements.get(0).getNodeType()) {
 			Statement rs = remainingStatements.get(0);
 			List<Comment> rsComments = new ArrayList<>();
-			rsComments.addAll(findLeadingComments(rs));
-			rsComments.addAll(findTrailingComments(rs));
-			saveBeforeStatement(parentStatement, rsComments);
+			rsComments.addAll(helper.findLeadingComments(rs));
+			rsComments.addAll(helper.findTrailingComments(rs));
+			helper.saveBeforeStatement(parentStatement, rsComments);
 		}
 	}
 

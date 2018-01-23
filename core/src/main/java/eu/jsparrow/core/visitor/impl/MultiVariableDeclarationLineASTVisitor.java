@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.core.visitor.CommentHelper;
 
 /**
  * Declaring multiple variables on one line is difficult to read. This Visitor
@@ -89,7 +90,7 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 
 			writeNewDeclaration(variableDeclarationStatement, newVariableDeclarationStatements);
 			List<Comment> nonRelatedComments = findInternalUnlinkedComments(variableDeclarationStatement, fragments);
-			saveBeforeStatement(variableDeclarationStatement, nonRelatedComments);
+			getCommentHelper().saveBeforeStatement(variableDeclarationStatement, nonRelatedComments);
 		}
 
 		return true;
@@ -97,11 +98,12 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 
 	private List<Comment> findInternalUnlinkedComments(VariableDeclarationStatement variableDeclarationStatement,
 			List<VariableDeclarationFragment> fragments) {
+		CommentHelper helper = getCommentHelper();
 		List<Comment> linkedComments = fragments.stream()
-			.flatMap(fragment -> findRelatedComments(fragment).stream())
+			.flatMap(fragment -> helper.findRelatedComments(fragment).stream())
 			.collect(Collectors.toList());
 
-		return findInternalComments(variableDeclarationStatement).stream()
+		return helper.findInternalComments(variableDeclarationStatement).stream()
 			.filter(comment -> !linkedComments.contains(comment))
 			.collect(Collectors.toList());
 	}

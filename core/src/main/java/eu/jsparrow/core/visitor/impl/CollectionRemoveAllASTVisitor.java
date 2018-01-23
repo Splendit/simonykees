@@ -54,7 +54,7 @@ public class CollectionRemoveAllASTVisitor extends AbstractASTRewriteASTVisitor 
 				onRewrite();
 				
 				Statement parentStmt = ASTNodeUtil.getSpecificAncestor(node, Statement.class);
-				saveRelatedComments(node, parentStmt);
+				getCommentHelper().saveRelatedComments(node, parentStmt);
 			}
 		}
 		return true;

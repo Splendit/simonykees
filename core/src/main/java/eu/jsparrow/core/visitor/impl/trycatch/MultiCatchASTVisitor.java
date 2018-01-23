@@ -11,15 +11,14 @@ import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.UnionType;
 
 import eu.jsparrow.core.matcher.BijectiveSimpleNameASTMatcher;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.core.visitor.CommentHelper;
 
 /**
  * This visitor finds duplicated catch-blocks and combines it to a
@@ -46,7 +45,8 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 			 * one.
 			 */
 			Block reference = blockList.remove(blockList.size() - 1);
-			List<Comment>relatedComments = findRelatedComments(reference);
+			CommentHelper helper = getCommentHelper();
+			List<Comment>relatedComments = helper.findRelatedComments(reference);
 			SingleVariableDeclaration referenceException = ((CatchClause) reference.getParent()).getException();
 			Type referenceExceptionType = referenceException.getType();
 
@@ -70,7 +70,7 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 					combined = true;
 					addTypesFromBlock(allNewTypes, compareExceptionType);
 					astRewrite.remove(compareCatch, null);
-					relatedComments.addAll(findRelatedComments(compareCatch));
+					relatedComments.addAll(helper.findRelatedComments(compareCatch));
 					blockList.remove(i);
 				} else {
 					jumpedTypes.add(compareExceptionType);
@@ -86,7 +86,7 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 				astRewrite.replace(referenceExceptionType, uniontype, null);
 				if (!onRewriteTriggered) {
 					onRewrite();
-					saveCommentsInBlock(reference, relatedComments);
+					helper.saveCommentsInBlock(reference, relatedComments);
 					relatedComments.clear();
 					onRewriteTriggered = true;
 				}
@@ -95,22 +95,6 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		return true;
-	}
-
-	private void saveCommentsInBlock(Block reference, List<Comment> relatedComments) {
-		List<String> referenceBlockComments = findRelatedComments(reference).stream()
-			.map(this::findCommentContent)
-			.collect(Collectors.toList());
-		
-		List<Statement> filteredComments = relatedComments.stream()
-			.map(this::findCommentContent)
-			.distinct()
-			.filter(comment -> !referenceBlockComments.contains(comment))
-			.map(this::createPlaceHolder)
-			.collect(Collectors.toList());
-		
-		ListRewrite listRewrite = astRewrite.getListRewrite(reference, Block.STATEMENTS_PROPERTY);
-		filteredComments.forEach(comment -> listRewrite.insertFirst(comment, null));
 	}
 
 	private boolean jumpsSuperType(Type compareExceptionType, List<Type> jumpedTypes) {

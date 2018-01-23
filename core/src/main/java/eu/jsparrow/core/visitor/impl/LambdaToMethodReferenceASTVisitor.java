@@ -178,7 +178,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 						SimpleName methodName = (SimpleName) astRewrite.createCopyTarget(methodInvocation.getName());
 						ref.setName(methodName);
 						astRewrite.replace(lambdaExpressionNode, ref, null);
-						saveRelatedComments(lambdaExpressionNode, ASTNodeUtil.getSpecificAncestor(lambdaExpressionNode, Statement.class));
+						getCommentHelper().saveRelatedComments(lambdaExpressionNode,
+								ASTNodeUtil.getSpecificAncestor(lambdaExpressionNode, Statement.class));
 						onRewrite();
 					}
 				}
@@ -224,7 +225,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 								ref.setName(methodName);
 
 								astRewrite.replace(lambdaExpressionNode, ref, null);
-								saveRelatedComments(lambdaExpressionNode, ASTNodeUtil.getSpecificAncestor(lambdaExpressionNode, Statement.class));
+								getCommentHelper().saveRelatedComments(lambdaExpressionNode,
+										ASTNodeUtil.getSpecificAncestor(lambdaExpressionNode, Statement.class));
 								onRewrite();
 
 							}
@@ -266,7 +268,8 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 					}
 
 					astRewrite.replace(lambdaExpressionNode, ref, null);
-					saveRelatedComments(lambdaExpressionNode, ASTNodeUtil.getSpecificAncestor(lambdaExpressionNode, Statement.class));
+					getCommentHelper().saveRelatedComments(lambdaExpressionNode,
+							ASTNodeUtil.getSpecificAncestor(lambdaExpressionNode, Statement.class));
 					onRewrite();
 				}
 			}

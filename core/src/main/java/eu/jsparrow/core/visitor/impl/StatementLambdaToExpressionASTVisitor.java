@@ -59,11 +59,11 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 		if (statement instanceof ReturnStatement) {
 			ReturnStatement returnStatement = (ReturnStatement) statement;
 			astRewrite.replace(block, returnStatement.getExpression(), null);
-			saveRelatedComments(block, ASTNodeUtil.getSpecificAncestor(block, Statement.class));
+			getCommentHelper().saveRelatedComments(block, ASTNodeUtil.getSpecificAncestor(block, Statement.class));
 		} else if (statement instanceof ExpressionStatement) {
 			ExpressionStatement expressionStatemnet = (ExpressionStatement) statement;
 			astRewrite.replace(block, expressionStatemnet.getExpression(), null);
-			saveRelatedComments(block, ASTNodeUtil.getSpecificAncestor(block, Statement.class));
+			getCommentHelper().saveRelatedComments(block, ASTNodeUtil.getSpecificAncestor(block, Statement.class));
 		}
 	}
 

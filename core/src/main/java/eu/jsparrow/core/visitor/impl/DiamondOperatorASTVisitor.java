@@ -313,7 +313,7 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		Statement statement = ASTNodeUtil.getSpecificAncestor(parameterizedType, Statement.class);
 		rhsTypeArguments.stream()
 			.forEach(type -> {
-				saveRelatedComments(type, statement);
+				getCommentHelper().saveRelatedComments(type, statement);
 				typeArgumentsListRewrite.remove(type, null);
 			});
 	}

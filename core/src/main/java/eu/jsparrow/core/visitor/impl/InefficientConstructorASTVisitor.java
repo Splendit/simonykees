@@ -71,7 +71,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 						.newBooleanLiteral(false);
 				}
 				astRewrite.replace(refactorCandidateParameter, replaceParameter, null);
-				saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
+				getCommentHelper().saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
 				onRewrite();
 			}
 		}
@@ -170,7 +170,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 			}
 			if (replacement != null) {
 				astRewrite.replace(node, replacement, null);
-				saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
+				getCommentHelper().saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
 				onRewrite();
 			}
 		}

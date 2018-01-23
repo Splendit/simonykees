@@ -80,7 +80,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 			} while (unwrapped);
 
 			astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(variableExpression), null);
-			saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
+			getCommentHelper().saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
 			onRewrite();
 
 		}

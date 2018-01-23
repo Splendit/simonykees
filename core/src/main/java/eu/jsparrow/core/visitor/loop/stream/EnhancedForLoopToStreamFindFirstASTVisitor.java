@@ -142,7 +142,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 
 			astRewrite.replace(varDeclFragment.getInitializer(), methodInvocation, null);
 			replaceLoopWithFragment(forLoop, varDeclFragment);
-			saveRelatedComments(forLoop);
+			getCommentHelper().saveRelatedComments(forLoop);
 			onRewrite();
 
 		} else if ((returnStatement = isConvertableWithReturn(thenStatement, forLoop, loopParameter.getName(),
@@ -161,7 +161,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 					loopParameter, orElseExpression, mapCopyTargets);
 			astRewrite.replace(returnStatement.getExpression(), methodInvocation, null);
 			astRewrite.remove(forLoop, null);
-			saveRelatedComments(forLoop);
+			getCommentHelper().saveRelatedComments(forLoop);
 			onRewrite();
 		}
 

@@ -41,7 +41,6 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 	private static final String CLOSEABLE_FULLY_QUALIFIED_NAME = java.io.Closeable.class.getName();
 	static final String CLOSE = "close"; //$NON-NLS-1$
 
-
 	// TODO improvement for suppressed deprecation needed, see SIM-878
 	@SuppressWarnings("unchecked")
 	@Override
@@ -101,11 +100,11 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 					resourceNameList.add(variableDeclarationFragment.getName());
 
 					if (numFragments > 1) {
-						saveRelatedComments(variableDeclarationFragment, node);
+						getCommentHelper().saveRelatedComments(variableDeclarationFragment, node);
 						astRewrite.remove(variableDeclarationFragment, null);
 						numFragments--;
 					} else {
-						saveRelatedComments(varDeclStatmentNode, node);
+						getCommentHelper().saveRelatedComments(varDeclStatmentNode, node);
 						astRewrite.remove(varDeclStatmentNode, null);
 					}
 				}
@@ -118,7 +117,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 		return true;
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	private void replaceTryStatement(TryStatement node, List<VariableDeclarationExpression> resourceList,
 			List<SimpleName> resourceNameList, List<VariableDeclarationFragment> toBeMovedToResources) {
@@ -147,7 +146,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 			node.accept(visitor);
 			List<Statement> invocations = visitor.getCloseInvocationStatements();
 			invocations.forEach(invocation -> {
-				saveRelatedComments(invocation);
+				getCommentHelper().saveRelatedComments(invocation);
 				astRewrite.remove(invocation, null);
 			});
 		}

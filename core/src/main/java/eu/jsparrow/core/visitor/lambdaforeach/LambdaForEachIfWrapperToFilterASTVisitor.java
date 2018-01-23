@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Comment;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -22,6 +21,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
+import eu.jsparrow.core.visitor.CommentHelper;
 import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
 
 /**
@@ -151,30 +151,20 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 
 	protected void saveComments(MethodInvocation methodInvocationNode, LambdaExpression lambdaExpression, Block block,
 			IfStatement ifStatement) {
+		CommentHelper helper = getCommentHelper();
 		List<Comment> comments = findSurroundingComments(lambdaExpression);
-		comments.addAll(findLeadingComments(block));
+		comments.addAll(helper.findLeadingComments(block));
 		comments.addAll(findSurroundingComments(ifStatement));
-		comments.addAll(findTrailingComments(block));
-		saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(methodInvocationNode, Statement.class), comments);
+		comments.addAll(helper.findTrailingComments(block));
+		helper.saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(methodInvocationNode, Statement.class), comments);
 	}
 
-	@Override
-	protected List<Comment> findSurroundingComments(ASTNode node) {
-		return super.findSurroundingComments(node).stream()
-			.filter(comment -> !isTrailing(comment, node))
+	private List<Comment> findSurroundingComments(ASTNode node) {
+		CommentHelper helper = getCommentHelper();
+		return helper.findSurroundingComments(node)
+			.stream()
+			.filter(comment -> !helper.isTrailing(comment, node))
 			.collect(Collectors.toList());
-	}
-
-	private boolean isTrailing(Comment comment, ASTNode node) {
-		List<Comment> comments = getCompilationUnitComments();
-		CompilationUnit cu = getCompilationUnit();
-		int lastCommentIndex = cu.lastTrailingCommentIndex(node);
-		if(lastCommentIndex < 0) {
-			return false;
-
-		}
-		Comment trailingComment = comments.get(lastCommentIndex);
-		return trailingComment == comment;
 	}
 
 	/**

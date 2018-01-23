@@ -164,7 +164,7 @@ public class StringBufferToBuilderASTVisitor extends AbstractASTRewriteASTVisito
 						VariableDeclarationStatement newDeclaration = createVariableDeclarationStatement(fragments);
 
 						astRewrite.replace(declaration, newDeclaration, null);
-						saveRelatedComments(declaration);
+						getCommentHelper().saveRelatedComments(declaration);
 						onRewrite();
 					}
 				}

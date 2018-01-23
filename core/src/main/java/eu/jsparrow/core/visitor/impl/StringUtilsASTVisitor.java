@@ -160,7 +160,7 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 					.newSimpleName(replacementOperation), null);
 				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY)
 					.insertFirst((Expression) ASTNode.copySubtree(currentAST, node.getExpression()), null);
-				saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
+				getCommentHelper().saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
 				onRewrite();
 			}
 		}

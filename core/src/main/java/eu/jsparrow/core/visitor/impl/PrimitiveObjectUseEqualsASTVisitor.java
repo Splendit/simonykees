@@ -65,7 +65,8 @@ public class PrimitiveObjectUseEqualsASTVisitor extends AbstractASTRewriteASTVis
 
 		Expression replaceNode = createReplacementNode(infixExpression);
 		astRewrite.replace(infixExpression, replaceNode, null);
-		saveRelatedComments(infixExpression, ASTNodeUtil.getSpecificAncestor(infixExpression, Statement.class));
+		getCommentHelper().saveRelatedComments(infixExpression,
+				ASTNodeUtil.getSpecificAncestor(infixExpression, Statement.class));
 		onRewrite();
 		return true;
 	}

@@ -77,7 +77,8 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		astRewrite.replace(replacedNode, replacementNode, null);
-		saveRelatedComments(replacedNode, ASTNodeUtil.getSpecificAncestor(replacedNode, Statement.class));
+		getCommentHelper().saveRelatedComments(replacedNode,
+				ASTNodeUtil.getSpecificAncestor(replacedNode, Statement.class));
 		onRewrite();
 		return false;
 	}

@@ -24,6 +24,7 @@ import eu.jsparrow.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.CommentHelper;
 import eu.jsparrow.core.visitor.lambdaforeach.AbstractLambdaForEachASTVisitor;
 import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
 
@@ -120,13 +121,14 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	}
 
 	protected void storeRelatedComments(LambdaExpression methodArgumentLambda, MethodInvocation innerMethodInvocation) {
+		CommentHelper helper = getCommentHelper();
 		ASTNode miParent = innerMethodInvocation.getParent();
-		forEachRelatedComments.addAll(findSurroundingComments(miParent));
+		forEachRelatedComments.addAll(helper.findSurroundingComments(miParent));
 		ASTNode miGParent = miParent.getParent();
 		if (miGParent != null && ASTNode.BLOCK == miGParent.getNodeType()) {
-			forEachRelatedComments.addAll(findSurroundingComments(miGParent));
+			forEachRelatedComments.addAll(helper.findSurroundingComments(miGParent));
 		}
-		forEachRelatedComments.addAll(findSurroundingComments(methodArgumentLambda));
+		forEachRelatedComments.addAll(helper.findSurroundingComments(methodArgumentLambda));
 	}
 
 	/**
@@ -273,6 +275,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 	}
 
 	private void saveComments(MethodInvocation methodInvocationNode) {
+		CommentHelper helper = getCommentHelper();
 		Statement statement = ASTNodeUtil.getSpecificAncestor(methodInvocationNode, Statement.class);
 		List<Expression> args = ASTNodeUtil.convertToTypedList(innerMostMethodInvocation.arguments(), Expression.class);
 		if (args.isEmpty()) {
@@ -280,8 +283,8 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		}
 		List<Comment> comments = new ArrayList<>();
 		comments.addAll(forEachRelatedComments);
-		comments.addAll(findRelatedComments(args.get(0)));
-		saveBeforeStatement(statement, comments);
+		comments.addAll(helper.findRelatedComments(args.get(0)));
+		helper.saveBeforeStatement(statement, comments);
 	}
 
 	/**
