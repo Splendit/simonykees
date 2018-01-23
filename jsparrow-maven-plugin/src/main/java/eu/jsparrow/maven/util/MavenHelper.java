@@ -229,22 +229,30 @@ public class MavenHelper {
 
 	/*** HELPER METHODS ***/
 
-	private Map<String, String> prepareConfiguration(Map<String, String> additionalConfiguration) {
+	protected Map<String, String> prepareConfiguration(Map<String, String> additionalConfiguration) {
 
 		final Map<String, String> configuration = new HashMap<>();
 
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
 		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
-		configuration.put(PROJECT_PATH_CONSTANT, project.getBasedir()
-			.getAbsolutePath());
-		configuration.put(PROJECT_NAME_CONSTANT, project.getName());
+		configuration.put(PROJECT_PATH_CONSTANT, getProjectPath());
+		configuration.put(PROJECT_NAME_CONSTANT, getProjectName());
 
 		if (additionalConfiguration != null) {
 			configuration.putAll(additionalConfiguration);
 		}
 
 		return configuration;
+	}
+
+	protected String getProjectName() {
+		return project.getName();
+	}
+
+	protected String getProjectPath() {
+		return project.getBasedir()
+			.getAbsolutePath();
 	}
 
 	/**
@@ -254,9 +262,8 @@ public class MavenHelper {
 	 * @param configuration
 	 * @throws InterruptedException
 	 */
-	private void prepareWorkingDirectory(Map<String, String> configuration) throws InterruptedException {
-		String file = System.getProperty(JAVA_TMP);
-		directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
+	protected void prepareWorkingDirectory(Map<String, String> configuration) throws InterruptedException {
+		setDirectory();
 
 		if (directory.exists()) {
 			if (Arrays.asList(directory.list())
@@ -274,6 +281,11 @@ public class MavenHelper {
 		} else {
 			throw new InterruptedException("Could not create temp folder");
 		}
+	}
+
+	protected void setDirectory() {
+		String file = System.getProperty(JAVA_TMP);
+		directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
 	}
 
 	/**
@@ -400,8 +412,7 @@ public class MavenHelper {
 	 */
 	private void extractAndCopyDependencies(String preparedMavenHome) {
 		final InvocationRequest request = new DefaultInvocationRequest();
-		request.setPomFile(new File(project.getBasedir()
-			.getAbsolutePath() + File.separator + "pom.xml"));
+		request.setPomFile(new File(getProjectPath() + File.separator + "pom.xml"));
 		request.setGoals(Collections.singletonList("dependency:copy-dependencies "));
 
 		final Properties props = new Properties();

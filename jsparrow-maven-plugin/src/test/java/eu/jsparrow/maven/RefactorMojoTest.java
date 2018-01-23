@@ -2,14 +2,22 @@ package eu.jsparrow.maven;
 
 import java.io.File;
 
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.it.Verifier;
 import org.apache.maven.plugin.Mojo;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.apache.maven.plugin.testing.stubs.MavenProjectStub;
 import org.codehaus.plexus.util.ReaderFactory;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.codehaus.plexus.util.xml.Xpp3DomBuilder;
 
+import eu.jsparrow.maven.stubs.RefactorProjectStub;
+
 @SuppressWarnings("nls")
 public class RefactorMojoTest extends AbstractMojoTestCase {
+
+	private RefactorMojo mojo;
+	private MavenProjectStub project;
 
 	/**
 	 * @see junit.framework.TestCase#setUp()
@@ -17,6 +25,22 @@ public class RefactorMojoTest extends AbstractMojoTestCase {
 	protected void setUp() throws Exception {
 		// required for mojo lookups to work
 		super.setUp();
+
+		project = new RefactorProjectStub();
+		MavenSession session = newMavenSession(project);
+
+		mojo = new RefactorMojo();
+		mojo = (RefactorMojo) configureMojo(mojo, extractPluginConfiguration("jsparrow-maven-plugin", ((RefactorProjectStub) project).getPom()));
+
+		setVariableValueToObject(mojo, "project", project);
+		setVariableValueToObject(mojo, "mavenHome", "");
+		setVariableValueToObject(mojo, "mavenSession", session);
+	}
+
+	/** {@inheritDoc} */
+	protected void tearDown() throws Exception {
+		// required
+		super.tearDown();
 	}
 
 	@Override
@@ -60,17 +84,75 @@ public class RefactorMojoTest extends AbstractMojoTestCase {
 		return elementDom.getValue();
 	}
 
-	/**
-	 * @throws Exception
-	 */
-	public void testMojoGoal() throws Exception {
-		File testPom = new File(getBasedir(), "src/test/resources/plugin-config.xml");
-		assertNotNull(testPom);
-		assertTrue(testPom.exists());
+//	public void testErrorFreeRefactorGoal() throws Exception {
+//		assertNotNull(mojo);
+//
+//		((RefactorProjectStub) project).createYamlFile();
+//
+//		File configFile = new File(((RefactorProjectStub) project).getBasedir() + "/jsparrow.yml");
+//		setVariableValueToObject(mojo, "configFile", configFile);
+//		setVariableValueToObject(mojo, "profile", "");
+//
+////		File testDir = ResourceExtractor.simpleExtractResources(getClass(), "/jsparrow-maven-test");
+//
+//		Verifier verifier;
+//
+//		// verifier = new Verifier(testDir.getAbsolutePath());
+//		verifier = new Verifier(((RefactorProjectStub) project).getBasedir()
+//			.getAbsolutePath());
+//		verifier.executeGoal("eclipse:eclipse");
+//		verifier.verifyTextInLog("BUILD SUCCESS");
+//
+//		verifier.executeGoal("jsparrow:refactor");
+//		verifier.verifyTextInLog("BUILD SUCCESS");
+//		verifier.verifyTextInLog("Selected Profile: profile1");
+//	}
+//
+//	public void testRefactorGoal_errorYaml() throws Exception {
+//		assertNotNull(mojo);
+//
+//		((RefactorProjectStub) project).createYamlFileWithError();
+//
+//		File configFile = new File(((RefactorProjectStub) project).getBasedir() + "/jsparrow.yml");
+//		setVariableValueToObject(mojo, "configFile", configFile);
+//		setVariableValueToObject(mojo, "profile", "");
+//
+//		Verifier verifier;
+//
+//		verifier = new Verifier(((RefactorProjectStub) project).getBasedir()
+//			.getAbsolutePath());
+//		verifier.executeGoal("eclipse:eclipse");
+//		verifier.verifyTextInLog("BUILD SUCCESS");
+//
+//		try {
+//			verifier.executeGoal("jsparrow:refactor");
+//		} catch (VerificationException e) {
+//
+//		}
+//		verifier.verifyTextInLog("BUILD FAILURE");
+//	}
 
-		RefactorMojo mojo = (RefactorMojo) lookupMojo("refactor", testPom);
+	public void testRefactorMojo_parameter() throws Exception {
 		assertNotNull(mojo);
-		assertNotNull(mojo);
+
+//		((RefactorProjectStub) project).createYamlFile();
+
+//		File configFile = new File(((RefactorProjectStub) project).getBasedir() + "/jsparrow.yml");
+//		setVariableValueToObject(mojo, "configFile", configFile);
+//		setVariableValueToObject(mojo, "profile", "");
+
+		((RefactorProjectStub) project).createYamlFile();
+
+		Verifier verifier = new Verifier(((RefactorProjectStub) project).getBasedir()
+			.getAbsolutePath());
+
+//		Properties props = new Properties(System.getProperties());
+//		props.put("configFile", "conf.yml");
+//		props.put("profile", "profile2");
+
+//		verifier.getCliOptions().add("-DconfigFile=conf.yml");
+		verifier.getCliOptions().add("-DdefaultConfiguration");
+		verifier.executeGoal("jsparrow:refactor");
+
 	}
-
 }
