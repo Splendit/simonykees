@@ -23,6 +23,8 @@ public class LambdaForEachMapRule {
 			String subString = s.substring(1);
 			// save me 2
 			sb.append(subString);
+			// trailing comment in rs 1
+			// trailing comment in rs 2
 		});
 		
 		list.forEach(s -> {

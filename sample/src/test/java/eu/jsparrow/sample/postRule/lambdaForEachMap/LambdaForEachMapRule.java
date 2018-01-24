@@ -20,6 +20,8 @@ public class LambdaForEachMapRule {
 		
 		// save me 1
 		// save me 2
+		// trailing comment in rs 2
+		// trailing comment in rs 1
 		list.stream()
 			.map(s -> s.substring(1)).forEach(subString -> sb.append(subString));
 		
