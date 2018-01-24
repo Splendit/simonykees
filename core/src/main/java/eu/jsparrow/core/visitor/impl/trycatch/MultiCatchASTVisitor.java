@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.dom.UnionType;
 import eu.jsparrow.core.matcher.BijectiveSimpleNameASTMatcher;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.core.visitor.CommentHelper;
+import eu.jsparrow.core.visitor.CommentRewriter;
 
 /**
  * This visitor finds duplicated catch-blocks and combines it to a
@@ -45,7 +45,7 @@ public class MultiCatchASTVisitor extends AbstractASTRewriteASTVisitor {
 			 * one.
 			 */
 			Block reference = blockList.remove(blockList.size() - 1);
-			CommentHelper helper = getCommentHelper();
+			CommentRewriter helper = getCommentRewriter();
 			List<Comment>relatedComments = helper.findRelatedComments(reference);
 			SingleVariableDeclaration referenceException = ((CatchClause) reference.getParent()).getException();
 			Type referenceExceptionType = referenceException.getType();

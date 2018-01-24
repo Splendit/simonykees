@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
-import eu.jsparrow.core.visitor.CommentHelper;
+import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
 
 /**
@@ -179,7 +179,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 	private void saveComments(MethodInvocation methodInvocation, ForEachBodyAnalyzer analyzer) {
 		Statement parentStatement = findParentStatement(methodInvocation); 
-		CommentHelper helper = getCommentHelper();
+		CommentRewriter helper = getCommentRewriter();
 		helper.saveRelatedComments(analyzer.getMapVariableDeclaration(), parentStatement);
 		List<Statement> remainingStatements = analyzer.getRemainingStatements();
 		if (remainingStatements.size() == 1 && ASTNode.EXPRESSION_STATEMENT == remainingStatements.get(0).getNodeType()) {

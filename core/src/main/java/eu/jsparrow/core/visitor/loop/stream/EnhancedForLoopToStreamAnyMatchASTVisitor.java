@@ -110,7 +110,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 					enhancedForParameter);
 			astRewrite.replace(booleanDeclFragment.getInitializer(), methodInvocation, null);
 			replaceLoopWithFragment(enhancedForStatement, booleanDeclFragment);
-			getCommentHelper().saveRelatedComments(enhancedForStatement);
+			getCommentRewriter().saveRelatedComments(enhancedForStatement);
 			onRewrite();
 
 		} else if ((returnStatement = isReturnBlock(thenStatement, enhancedForStatement)) != null) {
@@ -119,7 +119,7 @@ public class EnhancedForLoopToStreamAnyMatchASTVisitor extends AbstractEnhancedF
 					enhancedForParameter);
 			astRewrite.replace(returnStatement.getExpression(), methodInvocation, null);
 			astRewrite.remove(enhancedForStatement, null);
-			getCommentHelper().saveRelatedComments(enhancedForStatement);
+			getCommentRewriter().saveRelatedComments(enhancedForStatement);
 			onRewrite();
 		}
 

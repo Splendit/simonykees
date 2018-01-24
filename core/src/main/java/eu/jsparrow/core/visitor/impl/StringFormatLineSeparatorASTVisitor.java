@@ -6,11 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.builder.NodeBuilder;
-import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
@@ -70,8 +68,7 @@ public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVi
 				if (!formatedString.equals(formatString.getEscapedValue())) {
 					StringLiteral newFormatString = NodeBuilder.newStringLiteral(node.getAST(), formatedString);
 					astRewrite.replace(formatString, newFormatString, null);
-					getCommentHelper().saveRelatedComments(formatString,
-							ASTNodeUtil.getSpecificAncestor(formatString, Statement.class));
+					getCommentRewriter().saveCommentsInParentStatement(formatString);
 					onRewrite();
 				}
 			}

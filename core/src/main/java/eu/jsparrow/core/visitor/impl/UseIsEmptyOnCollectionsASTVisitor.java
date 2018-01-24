@@ -10,10 +10,8 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.builder.NodeBuilder;
-import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
@@ -75,7 +73,7 @@ public class UseIsEmptyOnCollectionsASTVisitor extends AbstractASTRewriteASTVisi
 		MethodInvocation replaceNode = NodeBuilder.newMethodInvocation(methodInvocation.getAST(),
 				(Expression) astRewrite.createMoveTarget(varExpression), isEmptyMethod);
 		astRewrite.replace(parent, replaceNode, null);
-		getCommentHelper().saveRelatedComments(parent, ASTNodeUtil.getSpecificAncestor(parent, Statement.class));
+		getCommentRewriter().saveCommentsInParentStatement(parent);
 		onRewrite();
 		return true;
 	}

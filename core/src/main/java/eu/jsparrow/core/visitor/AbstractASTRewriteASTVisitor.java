@@ -29,11 +29,11 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	protected String compilationUnitSource = EMPTY_STRING;
 
 	private CompilationUnit compilationUnit;
-	private CommentHelper commentHelper;
+	private CommentRewriter commentRewriter;
 
 	public AbstractASTRewriteASTVisitor() {
 		super();
-		commentHelper = new CommentHelper();
+		commentRewriter = new CommentRewriter();
 	}
 
 	public AbstractASTRewriteASTVisitor(boolean visitDocTags) {
@@ -43,13 +43,13 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
-		this.commentHelper.initCommentHelper(compilationUnit, astRewrite);
+		this.commentRewriter.initCommentHelper(compilationUnit, astRewrite);
 		return true;
 	}
 
 	@Override
 	public void endVisit(CompilationUnit compilationUnit) {
-		this.commentHelper.resetCommentHelper();
+		this.commentRewriter.resetCommentHelper();
 	}
 
 	/**
@@ -117,7 +117,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 		listeners.forEach(listener -> listener.update(new ASTRewriteEvent(this.compilationUnitHandle)));
 	}
 	
-	protected CommentHelper getCommentHelper() {
-		return this.commentHelper;
+	protected CommentRewriter getCommentRewriter() {
+		return this.commentRewriter;
 	}
 }

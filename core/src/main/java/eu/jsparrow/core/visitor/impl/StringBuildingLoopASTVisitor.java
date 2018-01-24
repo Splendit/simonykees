@@ -232,7 +232,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 		}
 
 		astRewrite.replace(loopNode, newStatement, null);
-		getCommentHelper().saveRelatedComments(loopNode);
+		getCommentRewriter().saveRelatedComments(loopNode);
 		onRewrite();
 	}
 
@@ -573,7 +573,7 @@ public class StringBuildingLoopASTVisitor extends AbstractEnhancedForLoopToStrea
 
 		ExpressionStatement expressionStatement = ast.newExpressionStatement(append);
 		astRewrite.replace(singleBodyStatement, expressionStatement, null);
-		getCommentHelper().saveRelatedComments(singleBodyStatement);
+		getCommentRewriter().saveRelatedComments(singleBodyStatement);
 	}
 
 	/**

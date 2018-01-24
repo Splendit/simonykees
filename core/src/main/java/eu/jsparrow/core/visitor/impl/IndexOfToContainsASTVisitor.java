@@ -172,7 +172,7 @@ public class IndexOfToContainsASTVisitor extends AbstractASTRewriteASTVisitor {
 
 					if (doTransformation) {
 						this.transform(methodInvocationNode.getExpression(), methodArgumentExpression, parent, option);
-						getCommentHelper().saveRelatedComments(methodInvocationNode.getParent(),
+						getCommentRewriter().saveRelatedComments(methodInvocationNode.getParent(),
 								ASTNodeUtil.getSpecificAncestor(methodInvocationNode, Statement.class));
 						onRewrite();
 					}

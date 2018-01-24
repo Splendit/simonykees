@@ -29,9 +29,9 @@ import eu.jsparrow.core.util.ASTNodeUtil;
  * @since 2.4.2
  *
  */
-public class CommentHelper {
+public class CommentRewriter {
 
-	private static final Logger logger = LoggerFactory.getLogger(CommentHelper.class);
+	private static final Logger logger = LoggerFactory.getLogger(CommentRewriter.class);
 
 	private CompilationUnit compilationUnit;
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
@@ -173,6 +173,13 @@ public class CommentHelper {
 		return this.compilationUnitSource;
 	}
 
+	/**
+	 * Inserts a copy of the comments related to the given {@link Statement}
+	 * above itself
+	 * 
+	 * @param statement
+	 *            a {@link Statement} to be checked for comments.
+	 */
 	public void saveRelatedComments(Statement statement) {
 		saveRelatedComments(statement, statement);
 	}
@@ -182,13 +189,25 @@ public class CommentHelper {
 	 * before the given {@link Statement}.
 	 * 
 	 * @param node
-	 *            a node whose comments will be saved
+	 *            a node whose comments will be saved.
 	 * @param statement
 	 *            a statement which will be preceded by the new comments.
 	 */
 	public void saveRelatedComments(ASTNode node, Statement statement) {
 		List<Comment> comments = findRelatedComments(node);
 		saveBeforeStatement(statement, comments);
+	}
+
+	/**
+	 * Inserts the comments related to the given node before its first parent of
+	 * type {@link Statement}.
+	 * 
+	 * @param node
+	 *            an {@link ASTNode} to be checked for comments.
+	 */
+	public void saveCommentsInParentStatement(ASTNode node) {
+		Statement statement = ASTNodeUtil.getSpecificAncestor(node, Statement.class);
+		saveRelatedComments(node, statement);
 	}
 
 	/**

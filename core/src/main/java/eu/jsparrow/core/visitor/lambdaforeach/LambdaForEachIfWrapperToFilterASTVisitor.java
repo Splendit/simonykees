@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
-import eu.jsparrow.core.visitor.CommentHelper;
+import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
 
 /**
@@ -151,7 +151,7 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 
 	protected void saveComments(MethodInvocation methodInvocationNode, LambdaExpression lambdaExpression, Block block,
 			IfStatement ifStatement) {
-		CommentHelper helper = getCommentHelper();
+		CommentRewriter helper = getCommentRewriter();
 		List<Comment> comments = findSurroundingComments(lambdaExpression);
 		comments.addAll(helper.findLeadingComments(block));
 		comments.addAll(findSurroundingComments(ifStatement));
@@ -160,7 +160,7 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 	}
 
 	private List<Comment> findSurroundingComments(ASTNode node) {
-		CommentHelper helper = getCommentHelper();
+		CommentRewriter helper = getCommentRewriter();
 		return helper.findSurroundingComments(node)
 			.stream()
 			.filter(comment -> !helper.isTrailing(comment, node))

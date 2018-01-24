@@ -10,12 +10,10 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.constants.ReservedNames;
-import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 
@@ -71,7 +69,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 						.newBooleanLiteral(false);
 				}
 				astRewrite.replace(refactorCandidateParameter, replaceParameter, null);
-				getCommentHelper().saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
+				getCommentRewriter().saveCommentsInParentStatement(node);
 				onRewrite();
 			}
 		}
@@ -170,7 +168,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 			}
 			if (replacement != null) {
 				astRewrite.replace(node, replacement, null);
-				getCommentHelper().saveRelatedComments(node, ASTNodeUtil.getSpecificAncestor(node, Statement.class));
+				getCommentRewriter().saveCommentsInParentStatement(node);
 				onRewrite();
 			}
 		}

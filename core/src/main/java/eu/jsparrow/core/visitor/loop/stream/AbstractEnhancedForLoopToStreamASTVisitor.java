@@ -468,10 +468,10 @@ public abstract class AbstractEnhancedForLoopToStreamASTVisitor extends Abstract
 				VariableDeclarationFragment.class);
 		if (fragmetns.size() == 1) {
 			astRewrite.remove(declStatement, null);
-			getCommentHelper().saveRelatedComments(declStatement);
+			getCommentRewriter().saveRelatedComments(declStatement);
 		} else {
 			astRewrite.remove(fragment, null);
-			getCommentHelper().saveRelatedComments(fragment, ASTNodeUtil.getSpecificAncestor(fragment, Statement.class));
+			getCommentRewriter().saveCommentsInParentStatement(fragment);
 		}
 	}
 }

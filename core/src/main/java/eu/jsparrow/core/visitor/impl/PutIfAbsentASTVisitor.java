@@ -82,7 +82,7 @@ public class PutIfAbsentASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		ExpressionStatement statement = createPutIfAbsent(methodInvocation);
 		astRewrite.replace(ifStatement, statement, null);
-		getCommentHelper().saveRelatedComments(ifStatement);
+		getCommentRewriter().saveRelatedComments(ifStatement);
 		onRewrite();
 
 		return true;

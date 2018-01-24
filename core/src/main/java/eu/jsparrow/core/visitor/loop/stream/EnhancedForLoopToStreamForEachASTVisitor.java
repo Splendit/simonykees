@@ -124,7 +124,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				ExpressionStatement expressionStatement = astRewrite.getAST()
 					.newExpressionStatement(forEachMethodInvocation);
 				astRewrite.replace(enhancedForStatementNode, expressionStatement, null);
-				getCommentHelper().saveLeadingComment(enhancedForStatementNode);
+				getCommentRewriter().saveLeadingComment(enhancedForStatementNode);
 				onRewrite();
 			}
 		}

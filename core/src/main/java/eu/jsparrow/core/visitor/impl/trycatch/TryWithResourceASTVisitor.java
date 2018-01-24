@@ -100,11 +100,11 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 					resourceNameList.add(variableDeclarationFragment.getName());
 
 					if (numFragments > 1) {
-						getCommentHelper().saveRelatedComments(variableDeclarationFragment, node);
+						getCommentRewriter().saveRelatedComments(variableDeclarationFragment, node);
 						astRewrite.remove(variableDeclarationFragment, null);
 						numFragments--;
 					} else {
-						getCommentHelper().saveRelatedComments(varDeclStatmentNode, node);
+						getCommentRewriter().saveRelatedComments(varDeclStatmentNode, node);
 						astRewrite.remove(varDeclStatmentNode, null);
 					}
 				}
@@ -146,7 +146,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 			node.accept(visitor);
 			List<Statement> invocations = visitor.getCloseInvocationStatements();
 			invocations.forEach(invocation -> {
-				getCommentHelper().saveRelatedComments(invocation);
+				getCommentRewriter().saveRelatedComments(invocation);
 				astRewrite.remove(invocation, null);
 			});
 		}

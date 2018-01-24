@@ -113,7 +113,7 @@ public class LambdaForEachCollectASTVisitor extends AbstractLambdaForEachASTVisi
 						 */
 						Expression targetDecl = createTargetExpression(methodInvocation, collection);
 						astRewrite.replace(methodInvocation, targetDecl, null);
-						getCommentHelper().saveRelatedComments(bodyExpression.getParent(),
+						getCommentRewriter().saveRelatedComments(bodyExpression.getParent(),
 								ASTNodeUtil.getSpecificAncestor(methodInvocation, Statement.class));
 						onRewrite();
 					}
