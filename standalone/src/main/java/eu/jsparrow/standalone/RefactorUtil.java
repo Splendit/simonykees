@@ -70,8 +70,11 @@ public class RefactorUtil {
 
 		standaloneConfig = new StandaloneConfig(projectName, projectPath);
 
+		logger.debug(Messages.RefactorUtil_GetEnabledRulesForProject);
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
 			.getRulesForProject(standaloneConfig.getJavaProject(), true);
+
+		logger.debug(Messages.RefactorUtil_GetSelectedRules);
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil
 			.getSelectedRulesFromConfig(config, projectRules);
 
@@ -94,10 +97,10 @@ public class RefactorUtil {
 			logger.debug(Messages.Activator_debug_createRefactoringStates);
 
 			refactoringPipeline.createRefactoringStates(compUnits);
+
 			loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates,
 					refactoringPipeline.getRefactoringStates()
 						.size());
-
 			logger.debug(loggerInfo);
 
 			// Do refactoring
@@ -105,16 +108,22 @@ public class RefactorUtil {
 				logger.info(Messages.Activator_debug_startRefactoring);
 				refactoringPipeline.doRefactoring(new NullProgressMonitor());
 			} catch (RefactoringException | RuleException e) {
-				logger.error(e.getMessage(), e);
+				logger.debug(e.getMessage(), e);
+				logger.error(e.getMessage());
 				return;
 			}
+
+			loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, standaloneConfig.getJavaProject()
+				.getElementName(), refactoringPipeline.getRulesWithChangesAsString());
+			logger.info(loggerInfo);
 
 			// Commit refactoring
 			try {
 				logger.info(Messages.Activator_debug_commitRefactoring);
 				refactoringPipeline.commitRefactoring();
 			} catch (RefactoringException | ReconcileException e) {
-				logger.error(e.getMessage(), e);
+				logger.debug(e.getMessage(), e);
+				logger.error(e.getMessage());
 				return;
 			}
 		} else {
@@ -129,7 +138,8 @@ public class RefactorUtil {
 		try {
 			standaloneConfig.cleanUp();
 		} catch (JavaModelException | IOException e) {
-			logger.error(e.getMessage(), e);
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
 		}
 
 		// CLEAN
@@ -155,6 +165,7 @@ public class RefactorUtil {
 		YAMLConfig config = YAMLConfigUtil.readConfig(configFilePath, profile);
 
 		String selectedProfile = config.getSelectedProfile();
+
 		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
 				(selectedProfile == null) ? Messages.Activator_standalone_None : selectedProfile);
 		logger.info(loggerInfo);
@@ -188,7 +199,7 @@ public class RefactorUtil {
 				}
 
 				try {
-					if (!"target".equals(currentFile.getName())) {
+					if (!"target".equals(currentFile.getName())) { //$NON-NLS-1$
 						Files.delete(currentFile.toPath());
 					}
 				} catch (IOException e) {

@@ -263,11 +263,6 @@ public class YAMLConfigUtil {
 				if ("yml".equalsIgnoreCase(configFileExtension) //$NON-NLS-1$
 						|| "yaml".equalsIgnoreCase(configFileExtension)) { //$NON-NLS-1$
 					config = YAMLConfigUtil.loadConfiguration(configFile);
-					String loggerInfo = NLS.bind(Messages.Activator_standalone_ConfigFileReadSuccessfully,
-							configFilePath);
-					logger.info(loggerInfo);
-					String debugInfo = config.toString();
-					logger.debug(debugInfo);
 				}
 			}
 		}
