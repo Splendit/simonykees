@@ -43,15 +43,15 @@
       <feature id="org.eclipse.ecf.filetransfer.feature"/>
       <feature id="org.eclipse.ecf.core.ssl.feature"/>
       <feature id="org.eclipse.ecf.filetransfer.ssl.feature"/>
-      <feature id="org.eclipse.jdt" version="3.13.1.v20171009-0410"/>
-      <feature id="org.eclipse.pde" version="3.13.1.v20171009-0537"/>
-      <feature id="org.eclipse.mylyn.commons" version="3.23.0.v20170503-0014"/>
-      <feature id="org.eclipse.mylyn.commons.notifications" version="1.15.0.v20170411-1844"/>
-      <feature id="org.eclipse.help" version="2.2.101.v20171009-0410"/>
-      <feature id="org.eclipse.rcp" version="4.7.1.v20171009-0410"/>
-      <feature id="org.eclipse.help.source" version="2.2.101.v20171009-0410"/>
-      <feature id="org.eclipse.platform" version="4.7.1.v20171009-0410"/>
-      <feature id="org.eclipse.e4.rcp" version="1.6.1.v20170928-1359"/>
+      <feature id="org.eclipse.jdt"/>
+      <feature id="org.eclipse.pde"/>
+      <feature id="org.eclipse.mylyn.commons"/>
+      <feature id="org.eclipse.mylyn.commons.notifications"/>
+      <feature id="org.eclipse.help"/>
+      <feature id="org.eclipse.rcp"/>
+      <feature id="org.eclipse.help.source"/>
+      <feature id="org.eclipse.platform"/>
+      <feature id="org.eclipse.e4.rcp"/>
       <feature id="eu.jsparrow.3rd.party.feature"/>
       <feature id="eu.jsparrow.standalone.feature"/>
    </features>
