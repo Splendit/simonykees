@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -306,7 +307,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	 * @param iteratorType
 	 *            the type binding of the elements of the iterable object.
 	 */
-	protected void replaceWithEnhancedFor(Statement loop, Statement loopBody, SimpleName iterableNode,
+	protected void replaceWithEnhancedFor(T loop, Statement loopBody, SimpleName iterableNode,
 			LoopIteratingIndexASTVisitor indexVisitor, Type iteratorType) {
 		/*
 		 * invocations of List::get to be replaced with the iterator object
@@ -357,8 +358,11 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		// replace the existing for loop with
 		astRewrite.replace(loop, newFor, null);
 		getCommentRewriter().saveLeadingComment(loop);
+		getCommentRewriter().saveBeforeStatement(loop, getHeaderComments(loop));
 		onRewrite();
 	}
+	
+	protected abstract List<Comment> getHeaderComments(T loop);
 
 	/**
 	 * Checks whether a qualified name is needed for the declaration of a

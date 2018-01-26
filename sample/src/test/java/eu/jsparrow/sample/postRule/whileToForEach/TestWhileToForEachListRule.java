@@ -15,6 +15,7 @@ public class TestWhileToForEachListRule {
 		StringBuilder sb = new StringBuilder();
 		List<String>list = generateList(input);
 		// save leading comments
+		/* expression comment */
 		for (String t : list) {
 			System.out.println(t);
 			sb.append(t);

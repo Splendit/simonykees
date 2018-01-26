@@ -1,10 +1,13 @@
 package eu.jsparrow.core.visitor.loop.whiletoforeach;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -14,6 +17,7 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.core.visitor.loop.IteratingIndexVisitorFactory;
 import eu.jsparrow.core.visitor.loop.LoopOptimizationASTVisior;
 import eu.jsparrow.core.visitor.loop.LoopToForEachASTVisitor;
@@ -121,5 +125,15 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 		}
 
 		clearTempItroducedNames(node);
+	}
+
+	@Override
+	protected List<Comment> getHeaderComments(WhileStatement loop) {
+		CommentRewriter commRewriter = getCommentRewriter();
+		List<Comment> headComments = new ArrayList<>();
+
+		headComments.addAll(commRewriter.findRelatedComments(loop.getExpression()));
+
+		return headComments;
 	}
 }

@@ -24,6 +24,9 @@ public class TestForToForEachListIteratingIndexRule {
 		List<String> fInterfaceRule = generateList("");
 		StringBuilder sb = new StringBuilder();
 		// comment before
+		/* init 2 */
+		/* init 1 */
+		/* inc */
 		for (String aFInterfaceRule : fInterfaceRule) {
 			// comment inside
 			sb.append(aFInterfaceRule);

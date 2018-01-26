@@ -15,6 +15,9 @@ public class TestForToForEachListIteratingIndexRule {
 		// comment inside
 		// comment after
 		// comment before
+		/* init 2 */
+		/* init 1 */
+		/* inc */
 		fInterfaceRule.forEach(sb::append);
 	};
 

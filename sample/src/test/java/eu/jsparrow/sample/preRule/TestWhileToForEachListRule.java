@@ -16,7 +16,7 @@ public class TestWhileToForEachListRule {
 		List<String>list = generateList(input);
 		int i = 0;
 		// save leading comments
-		while (i < list.size()) {
+		while (/* expression comment */i < list.size()) {
 			// internal comment
 			String t = list.get(i);
 			System.out.println(t);

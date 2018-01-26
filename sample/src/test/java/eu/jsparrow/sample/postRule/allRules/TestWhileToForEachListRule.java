@@ -20,6 +20,7 @@ public class TestWhileToForEachListRule {
 		StringBuilder sb = new StringBuilder();
 		List<String> list = generateList(input);
 		// save leading comments
+		/* expression comment */
 		list.forEach(t -> {
 			logger.info(t);
 			sb.append(t);
