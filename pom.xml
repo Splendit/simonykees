@@ -178,10 +178,10 @@
 		<sonar.junit.reportPaths>${project.basedir}/target/surefire-reports</sonar.junit.reportPaths>
 		<sonar.coverage.exclusions>**/jsparrow/ui/**/*</sonar.coverage.exclusions>
 		<sonar.issue.ignore.multicriteria>e1,e2</sonar.issue.ignore.multicriteria>
-        <sonar.issue.ignore.multicriteria.e1.ruleKey>squid:S00100</sonar.issue.ignore.multicriteria.e1.ruleKey>
-        <sonar.issue.ignore.multicriteria.e1.resourceKey>**/*Test.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
-        <sonar.issue.ignore.multicriteria.e2.ruleKey>squid:S3008</sonar.issue.ignore.multicriteria.e2.ruleKey>
-        <sonar.issue.ignore.multicriteria.e2.resourceKey>**/i18n/*Messages.java</sonar.issue.ignore.multicriteria.e2.resourceKey>
+		<sonar.issue.ignore.multicriteria.e1.ruleKey>squid:S00100</sonar.issue.ignore.multicriteria.e1.ruleKey>
+		<sonar.issue.ignore.multicriteria.e1.resourceKey>**/*Test.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
+		<sonar.issue.ignore.multicriteria.e2.ruleKey>squid:S3008</sonar.issue.ignore.multicriteria.e2.ruleKey>
+		<sonar.issue.ignore.multicriteria.e2.resourceKey>**/i18n/*Messages.java</sonar.issue.ignore.multicriteria.e2.resourceKey>
 
 		<!-- Workaround for surefire-argline bug. Required to make Jacoco work -->
 		<test-argline>${tycho.test.jvmArgs} -Dfile.encoding=UTF-8</test-argline>
@@ -250,13 +250,13 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.standalone.feature</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.standalone.feature</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.site</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.site</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -265,13 +265,13 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.standalone</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.standalone</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.ui</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
@@ -292,31 +292,11 @@
 				<configuration>
 					<resolver>p2</resolver>
 					<pomDependencies>consider</pomDependencies>
-					<ignoreTychoRepositories>true</ignoreTychoRepositories>
+					<!-- <ignoreTychoRepositories>true</ignoreTychoRepositories> -->
 					<environments>
 						<environment>
 							<os>linux</os>
 							<ws>gtk</ws>
-							<arch>x86</arch>
-						</environment>
-						<environment>
-							<os>linux</os>
-							<ws>gtk</ws>
-							<arch>x86_64</arch>
-						</environment>
-						<environment>
-							<os>win32</os>
-							<ws>win32</ws>
-							<arch>x86</arch>
-						</environment>
-						<environment>
-							<os>win32</os>
-							<ws>win32</ws>
-							<arch>x86_64</arch>
-						</environment>
-						<environment>
-							<os>macosx</os>
-							<ws>cocoa</ws>
 							<arch>x86_64</arch>
 						</environment>
 					</environments>
