@@ -12,6 +12,9 @@
    <bundle id="org.eclipse.update.configurator" version="3.3.400.v20160506-0750">
       <category name="splendit"/>
    </bundle>
+   <bundle id="org.eclipse.equinox.launcher" version="1.4.0.v20161219-1356">
+      <category name="splendit"/>
+   </bundle>
    <category-def name="splendit" label="splendit">
       <description>
          Eclipse plugins by Splendit IT-Consulting GmbH
