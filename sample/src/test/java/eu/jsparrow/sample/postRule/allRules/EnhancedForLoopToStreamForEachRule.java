@@ -43,7 +43,8 @@ public class EnhancedForLoopToStreamForEachRule {
 		// internal comment
 		// comment after
 		// save me
-		stringList1.forEach(logger::info);
+		/* comment on expression */
+		stringList1 /* comment on expression */.forEach(logger::info);
 
 		stringList1.forEach(logger::info);
 

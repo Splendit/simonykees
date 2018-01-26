@@ -40,7 +40,8 @@ public class EnhancedForLoopToStreamForEachRule {
 	public String doSomething() throws ClassNotFoundException, FileNotFoundException {
 
 		// save me
-		stringList1.forEach(s -> {
+		/* comment on expression */
+		stringList1 /* comment on expression */.forEach(s -> {
 			// internal comment
 			System.out.println(s);
 		} // comment after
