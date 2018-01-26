@@ -15,7 +15,7 @@ public class LambdaForEachCollectRule {
 		List<String> objectList = new ArrayList<>();
 		
 		objectList.stream().map(o -> o.substring(0))
-		.forEach( oString -> {
+		.forEach( /* lambda param comment */ oString -> /* lambda body */ {
 			// save me
 			oStrings.add(oString);
 		});
