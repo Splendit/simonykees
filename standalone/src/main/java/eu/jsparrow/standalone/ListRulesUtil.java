@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.i18n.Messages;
 
 /**
  * 
@@ -44,14 +45,13 @@ public class ListRulesUtil {
 	 *            a comma-separated string of rule IDs or {@code null}, if all
 	 *            rules should be printed
 	 */
-	@SuppressWarnings("nls")
 	public static void listRules(String ruleId) {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules;
 
 		if (ruleId != null) {
-			String newRuleId = ruleId.replace(" ", "");
-			newRuleId = newRuleId.replace("\t", "");
-			List<String> ruleIds = Arrays.asList(newRuleId.split(","));
+			String newRuleId = ruleId.replace(" ", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			newRuleId = newRuleId.replace("\t", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			List<String> ruleIds = Arrays.asList(newRuleId.split(",")); //$NON-NLS-1$
 
 			allRules = RulesContainer.getAllRules(true)
 				.stream()
@@ -62,33 +62,36 @@ public class ListRulesUtil {
 		}
 
 		StringBuilder sb = new StringBuilder();
-		sb.append("\n");
+		sb.append("\n"); //$NON-NLS-1$
 
 		if (!allRules.isEmpty()) {
 			allRules.forEach(rule -> {
 				sb.append(LINE_SEPARATOR_EQUAL);
 
-				sb.append("ID: ");
+				sb.append(Messages.ListRulesUtil_ID);
+				sb.append(": "); //$NON-NLS-1$
 				sb.append(rule.getId());
-				sb.append("\n");
+				sb.append("\n"); //$NON-NLS-1$
 
 				sb.append(LINE_SEPARATOR_HIPHEN);
 
-				sb.append("Name: ");
+				sb.append(Messages.ListRulesUtil_Name);
+				sb.append(": "); //$NON-NLS-1$
 				sb.append(rule.getRuleDescription()
 					.getName());
-				sb.append("\n");
+				sb.append("\n"); //$NON-NLS-1$
 
 				sb.append(LINE_SEPARATOR_HIPHEN);
 
-				sb.append("Description: ");
+				sb.append(Messages.ListRulesUtil_Description);
+				sb.append(": "); //$NON-NLS-1$
 				sb.append(rule.getRuleDescription()
 					.getDescription());
-				sb.append("\n");
+				sb.append("\n"); //$NON-NLS-1$
 			});
 		} else {
 			sb.append(LINE_SEPARATOR_EQUAL);
-			sb.append("No rules available!");
+			sb.append(Messages.ListRulesUtil_NoRulesAvailable);
 		}
 
 		sb.append(LINE_SEPARATOR_EQUAL);
@@ -100,7 +103,6 @@ public class ListRulesUtil {
 	/**
 	 * writes a table with each rule's ID and name to the logger
 	 */
-	@SuppressWarnings("nls")
 	public static void listRulesShort() {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules = RulesContainer.getAllRules(true);
 
@@ -111,28 +113,31 @@ public class ListRulesUtil {
 
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("\n");
+		sb.append("\n"); //$NON-NLS-1$
 		sb.append(LINE_SEPARATOR_EQUAL);
 
 		if (!allRules.isEmpty()) {
-			sb.append("| ID");
+			sb.append("| "); //$NON-NLS-1$
+			sb.append(Messages.ListRulesUtil_ID);
 			sb.append(calculateWhitespace(2, maxWordLength.orElse(1)));
-			sb.append("| Name\n");
+			sb.append("| "); //$NON-NLS-1$
+			sb.append(Messages.ListRulesUtil_Name);
+			sb.append("\n"); //$NON-NLS-1$
 
 			sb.append(LINE_SEPARATOR_HIPHEN);
 
 			allRules.forEach(rule -> {
-				sb.append("| ");
+				sb.append("| "); //$NON-NLS-1$
 				sb.append(rule.getId());
 				sb.append(calculateWhitespace(rule.getId()
 					.length(), maxWordLength.orElse(1)));
-				sb.append("| ");
+				sb.append("| "); //$NON-NLS-1$
 				sb.append(rule.getRuleDescription()
 					.getName());
-				sb.append("\n");
+				sb.append("\n"); //$NON-NLS-1$
 			});
 		} else {
-			sb.append("No rules available!");
+			sb.append(Messages.ListRulesUtil_NoRulesAvailable);
 		}
 
 		sb.append(LINE_SEPARATOR_EQUAL);

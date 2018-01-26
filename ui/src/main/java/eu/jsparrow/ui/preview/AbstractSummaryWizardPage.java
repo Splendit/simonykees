@@ -52,7 +52,7 @@ import eu.jsparrow.ui.util.ResourceHelper;
 
 @SuppressWarnings({ "restriction" })
 public abstract class AbstractSummaryWizardPage extends WizardPage {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(AbstractSummaryWizardPage.class);
 
 	private Composite rootComposite;
@@ -84,7 +84,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 			.getPrimaryMonitor()
 			.getBounds().height;
 	}
-	
+
 	/**
 	 * Create contents of the wizard.
 	 * 
@@ -96,7 +96,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 		setControl(rootComposite);
 		rootComposite.setLayout(new GridLayout(1, false));
 	}
-	
+
 	public void disposeCompareInputControl() {
 		if (compareInputControl != null) {
 			compareInputControl.dispose();
@@ -111,8 +111,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	@Override
 	public void setVisible(boolean visible) {
 		if (visible) {
-			summaryWizardPageModel.setIsFreeLicense(LicenseUtil.getInstance()
-				.isFree());
+			setStatusInfo();
 			summaryWizardPageModel.updateData();
 			createCompareInputControl();
 			// We must wait to set selection until control is visible
@@ -222,8 +221,8 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 		sashForm.setWeights(new int[] { 1, 3 });
 	}
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+
+	@SuppressWarnings("unchecked")
 	protected void initializeDataBindings() {
 		DataBindingContext bindingContext = new DataBindingContext();
 
@@ -243,19 +242,12 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 			}
 		});
 
-		IObservableValue isFreeLicenseObservableValue = BeanProperties
-			.value(RefactoringSummaryWizardPageModel.class, "isFreeLicense") //$NON-NLS-1$
-			.observe(summaryWizardPageModel);
-		isFreeLicenseObservableValue.addValueChangeListener(e -> {
-			Boolean isFreeLicense = (Boolean) e.getObservableValue()
-				.getValue();
-			setStatusInfo(isFreeLicense);
-		});
 	}
 
-	private void setStatusInfo(Boolean isFreeLicense) {
+	private void setStatusInfo() {
 		StatusInfo statusInfo = new StatusInfo();
-		if (isFreeLicense) {
+		if (!LicenseUtil.getInstance()
+			.isFullLicense()) {
 			statusInfo.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
 		}
 		StatusUtil.applyToStatusLine(this, statusInfo);
@@ -321,8 +313,8 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	}
 
 	private void createControlsIfNoneExist(CompareInput compareInput) {
-		//Condition fixes SIM-902
-		if(compareInputContainer.getChildren().length == 0) {
+		// Condition fixes SIM-902
+		if (compareInputContainer.getChildren().length == 0) {
 			compareInputControl = compareInput.createContents(compareInputContainer);
 			compareInputControl.setSize(compareInputControl.computeSize(SWT.DEFAULT, SWT.DEFAULT, true));
 			compareInputControl.setLayoutData(new GridData(GridData.FILL_BOTH));
