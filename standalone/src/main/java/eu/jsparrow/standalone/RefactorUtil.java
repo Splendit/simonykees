@@ -67,7 +67,6 @@ public class RefactorUtil {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = getProjectRules();
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = getSelectedRules(config,
 				projectRules);
-
 		if (selectedRules != null && !selectedRules.isEmpty()) {
 			// Create refactoring pipeline and set rules
 			refactoringPipeline.setRules(selectedRules);
@@ -86,10 +85,10 @@ public class RefactorUtil {
 			logger.debug(Messages.Activator_debug_createRefactoringStates);
 
 			refactoringPipeline.createRefactoringStates(compUnits);
+
 			loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates,
 					refactoringPipeline.getRefactoringStates()
 						.size());
-
 			logger.debug(loggerInfo);
 
 			// Do refactoring
@@ -97,16 +96,22 @@ public class RefactorUtil {
 				logger.info(Messages.Activator_debug_startRefactoring);
 				refactoringPipeline.doRefactoring(new NullProgressMonitor());
 			} catch (RefactoringException | RuleException e) {
-				logger.error(e.getMessage(), e);
+				logger.debug(e.getMessage(), e);
+				logger.error(e.getMessage());
 				return;
 			}
+
+			loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, standaloneConfig.getJavaProject()
+				.getElementName(), refactoringPipeline.getRulesWithChangesAsString());
+			logger.info(loggerInfo);
 
 			// Commit refactoring
 			try {
 				logger.info(Messages.Activator_debug_commitRefactoring);
 				refactoringPipeline.commitRefactoring();
 			} catch (RefactoringException | ReconcileException e) {
-				logger.error(e.getMessage(), e);
+				logger.debug(e.getMessage(), e);
+				logger.error(e.getMessage());
 				return;
 			}
 		} else {
@@ -123,7 +128,8 @@ public class RefactorUtil {
 				standaloneConfig.cleanUp();
 			}
 		} catch (JavaModelException | IOException e) {
-			logger.error(e.getMessage(), e);
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
 		}
 
 		// CLEAN
@@ -149,6 +155,7 @@ public class RefactorUtil {
 		YAMLConfig config = getYamlConfig(configFilePath, profile);
 
 		String selectedProfile = config.getSelectedProfile();
+
 		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
 				(selectedProfile == null) ? Messages.Activator_standalone_None : selectedProfile);
 		logger.info(loggerInfo);

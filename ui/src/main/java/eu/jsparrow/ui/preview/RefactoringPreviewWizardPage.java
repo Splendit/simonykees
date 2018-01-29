@@ -46,7 +46,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.rule.RefactoringRule;
+import eu.jsparrow.core.rule.RefactoringRuleInterface;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
+import eu.jsparrow.core.rule.statistics.FileChangeCount;
 import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
@@ -330,6 +332,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				if (unselectedChange.contains(newSelection)) {
 					unselectedChange.remove(newSelection);
 				}
+				clearCounterForChangedFile(newSelection);
 				wizardModel.addFileToRule(rule, newSelection.getHandleIdentifier());
 				immediatelyUpdateForSelected(newSelection);
 			} else {
@@ -337,6 +340,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 				if (!unselected.containsKey(newSelection.getElementName())) {
 					unselectedChange.add(newSelection);
 				}
+				clearCounterForChangedFile(newSelection);
 				wizardModel.removeFileFromRule(rule, newSelection.getHandleIdentifier());
 			}
 			// This method simply counts checked items in the table. Not very
@@ -355,7 +359,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		model.setTimeSaved(timeSaved);
 
 	}
-
+	
 	/**
 	 * Used to populate preview viewer only if this page gets visible
 	 */
@@ -503,7 +507,7 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 		 */
 		updateStatus(fSelectionStatus);
 	}
-
+	
 	/**
 	 * Updates the status line and the OK button according to the given status
 	 *
@@ -512,6 +516,16 @@ public class RefactoringPreviewWizardPage extends WizardPage {
 	 */
 	protected void updateStatus(IStatus status) {
 		StatusUtil.applyToStatusLine(this, status);
+	}
+	
+	private void clearCounterForChangedFile(ICompilationUnit newSelection) {
+		for (RefactoringRuleInterface changedFileRule : wizardModel.getChangedFilesPerRule().keySet()) {
+			if (wizardModel.getFilesForRule(changedFileRule).contains(newSelection.getHandleIdentifier())) {
+				FileChangeCount count = RuleApplicationCount.getFor(changedFileRule)
+					.getApplicationsForFile(newSelection.getHandleIdentifier());
+				count.clear();
+			}
+		}
 	}
 
 }

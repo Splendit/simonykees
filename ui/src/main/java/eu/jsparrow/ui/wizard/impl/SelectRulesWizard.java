@@ -171,15 +171,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 							.getElementName()));
 				logger.info(NLS.bind(Messages.SelectRulesWizard_rules_with_changes, javaElements.get(0)
 					.getJavaProject()
-					.getElementName(),
-						refactoringPipeline.getRules()
-							.stream()
-							.filter(rule -> null != refactoringPipeline.getChangesForRule(rule)
-									&& !refactoringPipeline.getChangesForRule(rule)
-										.isEmpty())
-							.map(rule -> rule.getRuleDescription()
-								.getName())
-							.collect(Collectors.joining("; ")))); //$NON-NLS-1$
+					.getElementName(), refactoringPipeline.getRulesWithChangesAsString()));
 
 				Shell shell = PlatformUI.getWorkbench()
 					.getActiveWorkbenchWindow()

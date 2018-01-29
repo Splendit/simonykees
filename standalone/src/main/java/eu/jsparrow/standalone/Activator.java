@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.logging.LoggingUtil;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -26,6 +27,7 @@ public class Activator implements BundleActivator {
 
 	private static final String LIST_RULES_SELECTED_ID_KEY = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
+	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 
 	private RefactorUtil refactorUtil;
 	private ListRulesUtil listRulesUtil;
@@ -46,6 +48,8 @@ public class Activator implements BundleActivator {
 		String modeName = context.getProperty(STANDALONE_MODE_KEY);
 		if (modeName != null && !modeName.isEmpty()) {
 
+		boolean debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
+		LoggingUtil.configureLogger(debugEnabled);
 			StandaloneMode mode = StandaloneMode.valueOf(modeName);
 			String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID_KEY);
 
@@ -95,7 +99,8 @@ public class Activator implements BundleActivator {
 					.removeSaveParticipant(PLUGIN_ID);
 			}
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
 		} finally {
 			refactorUtil.cleanUp();
 		}

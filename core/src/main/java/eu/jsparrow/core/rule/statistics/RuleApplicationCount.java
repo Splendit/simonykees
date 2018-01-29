@@ -71,11 +71,12 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 		return changesPerCompilationUnit.get(compilationUnitHandle);
 	}
 
-	
 	/**
 	 * Returns the number of changes for the given file handles.
 	 * 
-	 * @param compilationUnitHandles compilation unit file handles for the files to track changes for
+	 * @param compilationUnitHandles
+	 *            compilation unit file handles for the files to track changes
+	 *            for
 	 * @return the total number of changes in the given files
 	 */
 	public int getApplicationsForFiles(List<String> compilationUnitHandles) {
@@ -96,7 +97,6 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 	@Override
 	public void update(ASTRewriteEvent event) {
 		FileChangeCount count = getApplicationsForFile(event.getCompilationUnit());
-		count.clear();
 		count.update();
 	}
 }

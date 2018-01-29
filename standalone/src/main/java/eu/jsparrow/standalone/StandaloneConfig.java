@@ -105,20 +105,27 @@ public class StandaloneConfig {
 		IProjectDescription description = null;
 		File projectDescription = new File(getProjectDescriptionPath());
 		if (!projectDescription.exists()) {
+			logger.debug(Messages.StandaloneConfig_CreateNewProjectDescription);
+
 			description = workspace.newProjectDescription(name);
 
 			String[] oldNatures = description.getNatureIds();
 
+			logger.debug(Messages.StandaloneConfig_AddProjectNaturesToProjectDescription);
 			String[] newNatures = Arrays.copyOf(oldNatures, oldNatures.length + 2);
 			newNatures[newNatures.length - 2] = JavaCore.NATURE_ID;
 			newNatures[newNatures.length - 1] = RefactorUtil.MAVEN_NATURE_CONSTANT;
 
 			description.setNatureIds(newNatures);
 
+			loggerInfo = NLS.bind(Messages.StandaloneConfig_SetProjectLocation, path);
+			logger.debug(loggerInfo);
+
 			description.setLocation(new Path(path));
 
 			descriptionGenerated = true;
 		} else {
+			logger.debug(Messages.StandaloneConfig_UseExistingProjectDescription);
 			description = workspace.loadProjectDescription(new Path(getProjectDescriptionPath()));
 		}
 
@@ -139,7 +146,7 @@ public class StandaloneConfig {
 		IProject project = getProject(workspace, description.getName());
 		project.create(description, new NullProgressMonitor());
 
-		String loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createProject, description.getName());
+		loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createProject, description.getName());
 		logger.debug(loggerInfo);
 
 		project.open(new NullProgressMonitor());
@@ -187,7 +194,6 @@ public class StandaloneConfig {
 		List<ICompilationUnit> units = new ArrayList<>();
 
 		logger.debug(Messages.StandaloneConfig_debug_createJavaProject);
-
 		List<IPackageFragment> packages = Arrays.asList(javaProject.getPackageFragments());
 		for (IPackageFragment mypackage : packages) {
 			if (mypackage.containsJavaResources() && 0 != mypackage.getCompilationUnits().length) {
@@ -212,6 +218,7 @@ public class StandaloneConfig {
 		File depsFolder = getMavenDependencyFolder();
 		File[] listOfFiles = depsFolder.listFiles();
 
+		logger.debug(Messages.StandaloneConfig_CreateClasspathEntriesForDependencies);
 		if (null != listOfFiles) {
 			for (File file : listOfFiles) {
 				String jarPath = file.toString();
@@ -233,6 +240,8 @@ public class StandaloneConfig {
 	 * @throws JavaModelException
 	 */
 	void addToClasspath(List<IClasspathEntry> classpathEntries) throws JavaModelException {
+
+		logger.debug(Messages.StandaloneConfig_ConfigureClasspath);
 
 		if (!classpathEntries.isEmpty()) {
 			oldEntries = javaProject.getRawClasspath();
@@ -269,6 +278,7 @@ public class StandaloneConfig {
 	}
 
 	private void revertClasspath() throws JavaModelException {
+		logger.debug(Messages.StandaloneConfig_RevertClasspath);
 		if (null != oldEntries) {
 			javaProject.setRawClasspath(oldEntries, null);
 		}
