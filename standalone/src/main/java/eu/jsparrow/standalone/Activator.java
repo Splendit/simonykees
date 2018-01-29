@@ -43,13 +43,14 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
+		boolean debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
+		LoggingUtil.configureLogger(debugEnabled);
+
 		logger.info(Messages.Activator_start);
 
 		String modeName = context.getProperty(STANDALONE_MODE_KEY);
 		if (modeName != null && !modeName.isEmpty()) {
 
-		boolean debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
-		LoggingUtil.configureLogger(debugEnabled);
 			StandaloneMode mode = StandaloneMode.valueOf(modeName);
 			String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID_KEY);
 

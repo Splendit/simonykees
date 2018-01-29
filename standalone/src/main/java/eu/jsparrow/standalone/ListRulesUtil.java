@@ -44,6 +44,7 @@ public class ListRulesUtil {
 	 */
 	public String listRules(String ruleId) {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules = getAllRulesFilteredById(ruleId);
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n"); //$NON-NLS-1$
 
@@ -75,6 +76,7 @@ public class ListRulesUtil {
 		} else {
 			sb.append(LINE_SEPARATOR_EQUAL);
 			sb.append(Messages.ListRulesUtil_NoRulesAvailable);
+			sb.append("\n"); //$NON-NLS-1$
 		}
 
 		sb.append(LINE_SEPARATOR_EQUAL);
@@ -119,6 +121,7 @@ public class ListRulesUtil {
 			});
 		} else {
 			sb.append(Messages.ListRulesUtil_NoRulesAvailable);
+			sb.append("\n"); //$NON-NLS-1$
 		}
 
 		sb.append(LINE_SEPARATOR_EQUAL);

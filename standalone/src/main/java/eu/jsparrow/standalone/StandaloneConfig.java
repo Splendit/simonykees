@@ -118,7 +118,7 @@ public class StandaloneConfig {
 
 			description.setNatureIds(newNatures);
 
-			loggerInfo = NLS.bind(Messages.StandaloneConfig_SetProjectLocation, path);
+			String loggerInfo = NLS.bind(Messages.StandaloneConfig_SetProjectLocation, path);
 			logger.debug(loggerInfo);
 
 			description.setLocation(new Path(path));
@@ -146,7 +146,7 @@ public class StandaloneConfig {
 		IProject project = getProject(workspace, description.getName());
 		project.create(description, new NullProgressMonitor());
 
-		loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createProject, description.getName());
+		String loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createProject, description.getName());
 		logger.debug(loggerInfo);
 
 		project.open(new NullProgressMonitor());
@@ -166,6 +166,8 @@ public class StandaloneConfig {
 	 * @throws JavaModelException
 	 */
 	IJavaProject initJavaProject(IProject project) throws JavaModelException {
+		logger.debug(Messages.StandaloneConfig_debug_createJavaProject);
+
 		javaProject = createJavaProject(project);
 
 		// set compiler compliance level from the project
@@ -173,6 +175,9 @@ public class StandaloneConfig {
 		javaProject.setOption(JavaCore.COMPILER_COMPLIANCE, compilerCompliance);
 		javaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, compilerCompliance);
 		javaProject.setOption(JavaCore.COMPILER_SOURCE, compilerCompliance);
+
+		String loggerInfo = NLS.bind(Messages.StandaloneConfig_CompilerComplianceSetTo, compilerCompliance);
+		logger.debug(loggerInfo);
 
 		javaProject.open(new NullProgressMonitor());
 
@@ -193,7 +198,7 @@ public class StandaloneConfig {
 	List<ICompilationUnit> getCompilationUnits() throws JavaModelException {
 		List<ICompilationUnit> units = new ArrayList<>();
 
-		logger.debug(Messages.StandaloneConfig_debug_createJavaProject);
+		logger.debug(Messages.StandaloneConfig_collectCompilationUnits);
 		List<IPackageFragment> packages = Arrays.asList(javaProject.getPackageFragments());
 		for (IPackageFragment mypackage : packages) {
 			if (mypackage.containsJavaResources() && 0 != mypackage.getCompilationUnits().length) {
@@ -218,8 +223,8 @@ public class StandaloneConfig {
 		File depsFolder = getMavenDependencyFolder();
 		File[] listOfFiles = depsFolder.listFiles();
 
-		logger.debug(Messages.StandaloneConfig_CreateClasspathEntriesForDependencies);
 		if (null != listOfFiles) {
+			logger.debug(Messages.StandaloneConfig_CreateClasspathEntriesForDependencies);
 			for (File file : listOfFiles) {
 				String jarPath = file.toString();
 				IClasspathEntry jarEntry = createLibraryClasspathEntry(jarPath);
@@ -285,7 +290,14 @@ public class StandaloneConfig {
 	}
 
 	protected IWorkspace getWorkspace() {
-		return ResourcesPlugin.getWorkspace();
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+
+		String loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createWorkspace, workspace.getRoot()
+			.getLocation()
+			.toString());
+		logger.debug(loggerInfo);
+
+		return workspace;
 	}
 
 	protected String getProjectDescriptionPath() {
