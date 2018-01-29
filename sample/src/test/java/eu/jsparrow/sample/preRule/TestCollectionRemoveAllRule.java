@@ -15,7 +15,7 @@ public class TestCollectionRemoveAllRule {
 	public String testIfCollectionIsEmpty(String input){
 		List<String> resultList = generateList(input);
 		
-		resultList.removeAll(resultList);
+		resultList /* expression comment */ . /* invocation comment */ removeAll( /* param comment */ resultList) /* trailing comment */;
 		
 		StringBuilder sb = new StringBuilder();
 		
@@ -236,6 +236,10 @@ public class TestCollectionRemoveAllRule {
 		
 		resultList
 		// to not be lost
+		.removeAll(resultList);
+		
+		resultList 
+		/* trailing comments */
 		.removeAll(resultList);
 		
 		resultList.removeAll(
