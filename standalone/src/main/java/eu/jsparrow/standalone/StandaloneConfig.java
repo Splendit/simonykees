@@ -32,7 +32,7 @@ import eu.jsparrow.i18n.Messages;
  * Class that contains all configuration needed to run headless version of
  * jSparrow Eclipse plugin.
  * 
- * @author Andreja Sambolec
+ * @author Andreja Sambolec, Matthias Webhofer
  * @since 2.1.1
  */
 public class StandaloneConfig {
@@ -60,41 +60,50 @@ public class StandaloneConfig {
 	 *            to the folder of the project
 	 */
 	public StandaloneConfig(String name, String path) {
+		this(name, path, false);
+	}
+
+	public StandaloneConfig(String name, String path, boolean testMode) {
 		try {
 			this.name = name;
 			this.path = path;
-			setUp();
-		} catch (Exception e) {
+			if (!testMode) {
+				setUp();
+			}
+		} catch (CoreException e) {
 			logger.error(e.getMessage(), e);
 		}
 	}
 
 	/**
-	 * Getter method for list of {@link ICompilationUnit}s collected from the
-	 * project.
-	 * 
-	 * @return list of {@link ICompilationUnit}s collected from the project
-	 */
-	public List<ICompilationUnit> getCompUnits() {
-		return compUnits;
-	}
-
-	/**
-	 * Create workspace and load project into it. If .project file does not
+	 * Create workspace and load project into it. If a .project file does not
 	 * exist, one is generated with Java and maven natures.
 	 * 
 	 * @throws CoreException
 	 */
 	public void setUp() throws CoreException {
+		IProjectDescription projectDescription = getProjectDescription();
+		IProject project = this.initProject(projectDescription);
+		this.initJavaProject(project);
+		List<IClasspathEntry> mavenClasspathEntries = this.collectMavenDependenciesAsClasspathEntries();
+		this.addToClasspath(mavenClasspathEntries);
+		compUnits = getCompilationUnits();
+	}
 
-		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		String loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createWorkspace, workspace.getRoot()
-			.getLocation()
-			.toString());
-		logger.debug(loggerInfo);
+	/**
+	 * if a project description already exists, it is already an eclipse project
+	 * and the project description gets loaded. otherwise a project description
+	 * for an eclipse project is created from the source code.
+	 * 
+	 * @return a project description for an eclipse project
+	 * @throws CoreException
+	 */
+	IProjectDescription getProjectDescription() throws CoreException {
+		IWorkspace workspace = getWorkspace();
+		logger.debug(Messages.StandaloneConfig_debug_createWorkspace);
 
 		IProjectDescription description = null;
-		File projectDescription = new File(path + File.separator + RefactorUtil.PROJECT_DESCRIPTION_CONSTANT);
+		File projectDescription = new File(getProjectDescriptionPath());
 		if (!projectDescription.exists()) {
 			logger.debug(Messages.StandaloneConfig_CreateNewProjectDescription);
 
@@ -109,7 +118,7 @@ public class StandaloneConfig {
 
 			description.setNatureIds(newNatures);
 
-			loggerInfo = NLS.bind(Messages.StandaloneConfig_SetProjectLocation, path);
+			String loggerInfo = NLS.bind(Messages.StandaloneConfig_SetProjectLocation, path);
 			logger.debug(loggerInfo);
 
 			description.setLocation(new Path(path));
@@ -117,20 +126,62 @@ public class StandaloneConfig {
 			descriptionGenerated = true;
 		} else {
 			logger.debug(Messages.StandaloneConfig_UseExistingProjectDescription);
-			description = workspace
-				.loadProjectDescription(new Path(path + File.separator + RefactorUtil.PROJECT_DESCRIPTION_CONSTANT));
+			description = workspace.loadProjectDescription(new Path(getProjectDescriptionPath()));
 		}
 
-		IProject project = workspace.getRoot()
-			.getProject(description.getName());
+		return description;
+	}
+
+	/**
+	 * this method creates and opens a new {@link IProject}
+	 * 
+	 * @param description
+	 *            project description of the new project
+	 * @return a newly created and opened project
+	 * @throws CoreException
+	 */
+	IProject initProject(IProjectDescription description) throws CoreException {
+		IWorkspace workspace = getWorkspace();
+
+		IProject project = getProject(workspace, description.getName());
 		project.create(description, new NullProgressMonitor());
 
-		loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createProject, description.getName());
+		String loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createProject, description.getName());
 		logger.debug(loggerInfo);
 
 		project.open(new NullProgressMonitor());
 
-		compUnits = getCompilationUnits(project);
+		logger.debug(Messages.StandaloneConfig_debug_createdProject);
+
+		return project;
+	}
+
+	/**
+	 * takes an {@link IProject} and converts it in a java project of type
+	 * {@link IJavaProject}. The java version is set here.
+	 * 
+	 * @param project
+	 *            project to convert in a java project
+	 * @return a java project
+	 * @throws JavaModelException
+	 */
+	IJavaProject initJavaProject(IProject project) throws JavaModelException {
+		logger.debug(Messages.StandaloneConfig_debug_createJavaProject);
+
+		javaProject = createJavaProject(project);
+
+		// set compiler compliance level from the project
+		String compilerCompliance = javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		javaProject.setOption(JavaCore.COMPILER_COMPLIANCE, compilerCompliance);
+		javaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, compilerCompliance);
+		javaProject.setOption(JavaCore.COMPILER_SOURCE, compilerCompliance);
+
+		String loggerInfo = NLS.bind(Messages.StandaloneConfig_CompilerComplianceSetTo, compilerCompliance);
+		logger.debug(loggerInfo);
+
+		javaProject.open(new NullProgressMonitor());
+
+		return javaProject;
 	}
 
 	/**
@@ -144,26 +195,10 @@ public class StandaloneConfig {
 	 * @return list of {@link ICompilationUnit}s on project
 	 * @throws JavaModelException
 	 */
-	public List<ICompilationUnit> getCompilationUnits(IProject project) throws JavaModelException {
+	List<ICompilationUnit> getCompilationUnits() throws JavaModelException {
 		List<ICompilationUnit> units = new ArrayList<>();
 
-		logger.debug(Messages.StandaloneConfig_debug_createJavaProject);
-
-		javaProject = JavaCore.create(project);
-
-		// set compiler compliance level from the project
-		String compilerCompliance = javaProject.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-		javaProject.setOption(JavaCore.COMPILER_COMPLIANCE, compilerCompliance);
-		javaProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, compilerCompliance);
-		javaProject.setOption(JavaCore.COMPILER_SOURCE, compilerCompliance);
-
-		String loggerInfo = NLS.bind(Messages.StandaloneConfig_CompilerComplianceSetTo, compilerCompliance);
-		logger.debug(loggerInfo);
-
-		javaProject.open(new NullProgressMonitor());
-
-		addMavenDependenciesToClasspath();
-
+		logger.debug(Messages.StandaloneConfig_collectCompilationUnits);
 		List<IPackageFragment> packages = Arrays.asList(javaProject.getPackageFragments());
 		for (IPackageFragment mypackage : packages) {
 			if (mypackage.containsJavaResources() && 0 != mypackage.getCompilationUnits().length) {
@@ -177,33 +212,27 @@ public class StandaloneConfig {
 
 	/**
 	 * Collects all jars from tmp folder in which maven plugin copied
-	 * dependencies. Creates {@link IClasspathEntry} for each jar and adds them
-	 * all to project classpath.
+	 * dependencies. Creates {@link IClasspathEntry} for each jar and returns
+	 * them.
 	 */
-	private void addMavenDependenciesToClasspath() {
+	List<IClasspathEntry> collectMavenDependenciesAsClasspathEntries() {
 		logger.debug(Messages.StandaloneConfig_debug_collectDependencies);
 
-		File depsFolder = new File(
-				System.getProperty(RefactorUtil.USER_DIR) + File.separator + RefactorUtil.DEPENDENCIES_FOLDER_CONSTANT);
-		File[] listOfFiles = depsFolder.listFiles();
 		List<IClasspathEntry> collectedEntries = new ArrayList<>();
 
-		if (null == listOfFiles || listOfFiles.length == 0) {
-			return;
+		File depsFolder = getMavenDependencyFolder();
+		File[] listOfFiles = depsFolder.listFiles();
+
+		if (null != listOfFiles) {
+			logger.debug(Messages.StandaloneConfig_CreateClasspathEntriesForDependencies);
+			for (File file : listOfFiles) {
+				String jarPath = file.toString();
+				IClasspathEntry jarEntry = createLibraryClasspathEntry(jarPath);
+				collectedEntries.add(jarEntry);
+			}
 		}
 
-		logger.debug(Messages.StandaloneConfig_CreateClasspathEntriesForDependencies);
-		for (File file : listOfFiles) {
-			String jarPath = file.toString();
-			IClasspathEntry jarEntry = JavaCore.newLibraryEntry(new Path(jarPath), null, null);
-			collectedEntries.add(jarEntry);
-		}
-
-		try {
-			addToClasspath(javaProject, collectedEntries);
-		} catch (JavaModelException e) {
-			logger.error(e.getMessage(), e);
-		}
+		return collectedEntries;
 	}
 
 	/**
@@ -215,8 +244,7 @@ public class StandaloneConfig {
 	 *            new entries to be added to classpath
 	 * @throws JavaModelException
 	 */
-	public void addToClasspath(IJavaProject javaProject, List<IClasspathEntry> classpathEntries)
-			throws JavaModelException {
+	void addToClasspath(List<IClasspathEntry> classpathEntries) throws JavaModelException {
 
 		logger.debug(Messages.StandaloneConfig_ConfigureClasspath);
 
@@ -247,7 +275,7 @@ public class StandaloneConfig {
 		logger.debug(Messages.StandaloneConfig_debug_cleanUp);
 		revertClasspath();
 		if (descriptionGenerated) {
-			File projectDescription = new File(path + File.separator + RefactorUtil.PROJECT_DESCRIPTION_CONSTANT);
+			File projectDescription = new File(getProjectDescriptionPath());
 			if (projectDescription.exists()) {
 				Files.delete(projectDescription.toPath());
 			}
@@ -261,6 +289,39 @@ public class StandaloneConfig {
 		}
 	}
 
+	protected IWorkspace getWorkspace() {
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+
+		String loggerInfo = NLS.bind(Messages.StandaloneConfig_debug_createWorkspace, workspace.getRoot()
+			.getLocation()
+			.toString());
+		logger.debug(loggerInfo);
+
+		return workspace;
+	}
+
+	protected String getProjectDescriptionPath() {
+		return path + File.separator + RefactorUtil.PROJECT_DESCRIPTION_CONSTANT;
+	}
+
+	protected IProject getProject(IWorkspace workspace, String name) {
+		return workspace.getRoot()
+			.getProject(name);
+	}
+
+	protected IJavaProject createJavaProject(IProject project) {
+		return JavaCore.create(project);
+	}
+
+	protected File getMavenDependencyFolder() {
+		return new File(
+				System.getProperty(RefactorUtil.USER_DIR) + File.separator + RefactorUtil.DEPENDENCIES_FOLDER_CONSTANT);
+	}
+
+	protected IClasspathEntry createLibraryClasspathEntry(String jarPath) {
+		return JavaCore.newLibraryEntry(new Path(jarPath), null, null);
+	}
+
 	/**
 	 * Getter for IJavaProject
 	 * 
@@ -268,5 +329,23 @@ public class StandaloneConfig {
 	 */
 	public IJavaProject getJavaProject() {
 		return javaProject;
+	}
+
+	protected void setJavaProject(IJavaProject javaProject) {
+		this.javaProject = javaProject;
+	}
+
+	protected boolean isDescriptionGenerated() {
+		return descriptionGenerated;
+	}
+
+	/**
+	 * Getter method for list of {@link ICompilationUnit}s collected from the
+	 * project.
+	 * 
+	 * @return list of {@link ICompilationUnit}s collected from the project
+	 */
+	public List<ICompilationUnit> getCompUnits() {
+		return compUnits;
 	}
 }

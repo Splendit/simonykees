@@ -16,6 +16,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
+import eu.jsparrow.maven.enums.StandaloneMode;
 import eu.jsparrow.maven.util.MavenHelper;
 
 /**
@@ -39,31 +40,32 @@ public class RefactorMojo extends AbstractMojo {
 	 * Maven project on which plugin goal is executed
 	 */
 	@Parameter(defaultValue = "${project}", required = true)
-	MavenProject project;
+	private MavenProject project;
 
 	/**
 	 * Value of maven home environment variable
 	 */
 	@Parameter(defaultValue = "${maven.home}")
-	String mavenHome;
+	private String mavenHome;
 
 	/**
 	 * path to the configuration file. defaults to jsparrow.yml in the current
 	 * directory.
 	 */
 	@Parameter(defaultValue = "jsparrow.yml", property = "configFile")
-	protected File configFile;
+	private File configFile;
 
 	/**
 	 * selected profile. overrides the settings in the configuration file, if
 	 * set by user.
 	 */
 	@Parameter(defaultValue = "", property = "profile")
-	protected String profile;
+	private String profile;
 
 	// CONSTANTS
-	public static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH";
-	public static final String SELECTED_PROFILE = "PROFILE.SELECTED";
+	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH";
+	private static final String SELECTED_PROFILE = "PROFILE.SELECTED";
+	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 
 	/**
 	 * MOJO entry point. Registers shutdown hook for clean up and starts equinox
@@ -78,6 +80,8 @@ public class RefactorMojo extends AbstractMojo {
 		try {
 
 			final Map<String, String> configuration = new HashMap<>();
+			configuration.put(STANDALONE_MODE_KEY, StandaloneMode.REFACTOR.name());
+			
 			configuration.put(CONFIG_FILE_PATH, configFile.getAbsolutePath());
 			configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile);
 

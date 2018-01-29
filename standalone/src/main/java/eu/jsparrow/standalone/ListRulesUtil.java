@@ -1,12 +1,13 @@
 package eu.jsparrow.standalone;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Splitter;
 
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RulesContainer;
@@ -25,16 +26,12 @@ public class ListRulesUtil {
 	private static final String LINE_SEPARATOR_EQUAL = "================================================================================\n"; //$NON-NLS-1$
 	private static final String LINE_SEPARATOR_HIPHEN = "--------------------------------------------------------------------------------\n"; //$NON-NLS-1$
 
-	private ListRulesUtil() {
-
-	}
-
 	/**
 	 * writes all rules available in {@link RulesContainer} to the logger in a
 	 * readable form
 	 */
-	public static void listRules() {
-		listRules(null);
+	public String listRules() {
+		return listRules(null);
 	}
 
 	/**
@@ -45,21 +42,8 @@ public class ListRulesUtil {
 	 *            a comma-separated string of rule IDs or {@code null}, if all
 	 *            rules should be printed
 	 */
-	public static void listRules(String ruleId) {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules;
-
-		if (ruleId != null) {
-			String newRuleId = ruleId.replace(" ", ""); //$NON-NLS-1$ //$NON-NLS-2$
-			newRuleId = newRuleId.replace("\t", ""); //$NON-NLS-1$ //$NON-NLS-2$
-			List<String> ruleIds = Arrays.asList(newRuleId.split(",")); //$NON-NLS-1$
-
-			allRules = RulesContainer.getAllRules(true)
-				.stream()
-				.filter(rule -> ruleIds.contains(rule.getId()))
-				.collect(Collectors.toList());
-		} else {
-			allRules = RulesContainer.getAllRules(true);
-		}
+	public String listRules(String ruleId) {
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules = getAllRulesFilteredById(ruleId);
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n"); //$NON-NLS-1$
@@ -92,24 +76,23 @@ public class ListRulesUtil {
 		} else {
 			sb.append(LINE_SEPARATOR_EQUAL);
 			sb.append(Messages.ListRulesUtil_NoRulesAvailable);
+			sb.append("\n"); //$NON-NLS-1$
 		}
 
 		sb.append(LINE_SEPARATOR_EQUAL);
 
 		String result = sb.toString();
 		logger.info(result);
+
+		return result;
 	}
 
 	/**
 	 * writes a table with each rule's ID and name to the logger
 	 */
-	public static void listRulesShort() {
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules = RulesContainer.getAllRules(true);
-
-		Optional<Integer> maxWordLength = allRules.stream()
-			.map(rule -> rule.getId()
-				.length())
-			.max(Integer::compare);
+	public String listRulesShort() {
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules = getAllRules();
+		Optional<Integer> maxWordLength = getMaxWordLength(allRules);
 
 		StringBuilder sb = new StringBuilder();
 
@@ -138,15 +121,48 @@ public class ListRulesUtil {
 			});
 		} else {
 			sb.append(Messages.ListRulesUtil_NoRulesAvailable);
+			sb.append("\n"); //$NON-NLS-1$
 		}
 
 		sb.append(LINE_SEPARATOR_EQUAL);
 
 		String result = sb.toString();
 		logger.info(result);
+
+		return result;
 	}
 
-	private static String calculateWhitespace(int currentWordLength, int maxWordLength) {
+	List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules() {
+		return getAllRulesFilteredById(null);
+	}
+
+	List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRulesFilteredById(String ruleId) {
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules;
+
+		if (ruleId != null) {
+			List<String> ruleIds = Splitter.on(",") //$NON-NLS-1$
+				.trimResults()
+				.omitEmptyStrings()
+				.splitToList(ruleId);
+
+			allRules = getAllRulesFromContainer().stream()
+				.filter(rule -> ruleIds.contains(rule.getId()))
+				.collect(Collectors.toList());
+		} else {
+			allRules = getAllRulesFromContainer();
+		}
+
+		return allRules;
+	}
+
+	Optional<Integer> getMaxWordLength(List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> allRules) {
+		return allRules.stream()
+			.map(rule -> rule.getId()
+				.length())
+			.max(Integer::compare);
+	}
+
+	String calculateWhitespace(int currentWordLength, int maxWordLength) {
 		int whitespaceLength = maxWordLength - currentWordLength;
 
 		StringBuilder sb = new StringBuilder();
@@ -155,5 +171,9 @@ public class ListRulesUtil {
 		}
 
 		return sb.toString();
+	}
+
+	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRulesFromContainer() {
+		return RulesContainer.getAllRules(true);
 	}
 }

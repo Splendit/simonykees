@@ -85,17 +85,19 @@
 		<module>ui.test</module>
 		<!-- OSGi feature + site deployment -->
 		<module>feature.3rd.party</module>
+		<!-- standalone -->
+		<module>standalone</module>
+		<module>standalone.test</module>
 		<module>feature.standalone</module>
 		<module>feature</module>
 		<module>site</module>
 		<!-- release engineering -->
 		<module>releng</module>
-		<!-- standalone -->
-		<module>standalone</module>
-
+		
 		<!-- The jsparrow-maven-plugin cannot be deployed alongside jSparrow. SIM-877 
 			will improve/fix this. -->
 		<!-- <module>jsparrow-maven-plugin</module> -->
+
 	</modules>
 
 	<scm>

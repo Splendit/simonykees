@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
@@ -46,12 +47,8 @@ public class RefactorUtil {
 	protected static final String MAVEN_NATURE_CONSTANT = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
 	protected static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
 
-	private static StandaloneConfig standaloneConfig;
-	private static File directory;
-
-	private RefactorUtil() {
-
-	}
+	protected StandaloneConfig standaloneConfig;
+	private File directory;
 
 	/**
 	 * prepare and start the refactoring process
@@ -59,28 +56,20 @@ public class RefactorUtil {
 	 * @param context
 	 * @throws YAMLConfigException
 	 */
-	public static void startRefactoring(BundleContext context) throws YAMLConfigException {
+	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
+			throws YAMLConfigException {
 		String loggerInfo;
 
 		YAMLConfig config = getConfiguration(context);
 		prepareWorkingDirectory();
 
-		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
-		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
+		loadStandaloneConfig(context);
 
-		standaloneConfig = new StandaloneConfig(projectName, projectPath);
-
-		logger.debug(Messages.RefactorUtil_GetEnabledRulesForProject);
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
-			.getRulesForProject(standaloneConfig.getJavaProject(), true);
-
-		logger.debug(Messages.RefactorUtil_GetSelectedRules);
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil
-			.getSelectedRulesFromConfig(config, projectRules);
-
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = getProjectRules();
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = getSelectedRules(config,
+				projectRules);
 		if (selectedRules != null && !selectedRules.isEmpty()) {
 			// Create refactoring pipeline and set rules
-			RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 			refactoringPipeline.setRules(selectedRules);
 
 			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
@@ -113,8 +102,8 @@ public class RefactorUtil {
 				return;
 			}
 
-			loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, standaloneConfig.getJavaProject()
-				.getElementName(), refactoringPipeline.getRulesWithChangesAsString());
+			loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, getJavaProject().getElementName(),
+					refactoringPipeline.getRulesWithChangesAsString());
 			logger.info(loggerInfo);
 
 			// Commit refactoring
@@ -134,16 +123,18 @@ public class RefactorUtil {
 	/**
 	 * cleans classpath and temp directory
 	 */
-	public static void cleanUp() {
+	public void cleanUp() {
 		try {
-			standaloneConfig.cleanUp();
+			if (standaloneConfig != null) {
+				standaloneConfig.cleanUp();
+			}
 		} catch (JavaModelException | IOException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
 		}
 
 		// CLEAN
-		if (directory.exists()) {
+		if (directory != null && directory.exists()) {
 			deleteChildren(directory);
 		}
 	}
@@ -155,14 +146,14 @@ public class RefactorUtil {
 	 * @return the read configuration
 	 * @throws YAMLConfigException
 	 */
-	private static YAMLConfig getConfiguration(BundleContext context) throws YAMLConfigException {
+	private YAMLConfig getConfiguration(BundleContext context) throws YAMLConfigException {
 		String configFilePath = context.getProperty(CONFIG_FILE_PATH);
 		String profile = context.getProperty(SELECTED_PROFILE);
 
 		String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
 		logger.info(loggerInfo);
 
-		YAMLConfig config = YAMLConfigUtil.readConfig(configFilePath, profile);
+		YAMLConfig config = getYamlConfig(configFilePath, profile);
 
 		String selectedProfile = config.getSelectedProfile();
 
@@ -173,7 +164,7 @@ public class RefactorUtil {
 		return config;
 	}
 
-	private static void prepareWorkingDirectory() {
+	private void prepareWorkingDirectory() {
 		String file = System.getProperty(JAVA_TMP);
 		directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
 
@@ -189,7 +180,7 @@ public class RefactorUtil {
 	 *            directory which content is to be deleted
 	 * @throws IOException
 	 */
-	private static void deleteChildren(File parentDirectory) {
+	private void deleteChildren(File parentDirectory) {
 		String[] children = parentDirectory.list();
 		if (children != null) {
 			for (String file : Arrays.asList(children)) {
@@ -208,5 +199,31 @@ public class RefactorUtil {
 				}
 			}
 		}
+	}
+
+	protected void loadStandaloneConfig(BundleContext context) {
+		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
+		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
+
+		standaloneConfig = new StandaloneConfig(projectName, projectPath);
+	}
+
+	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules() {
+		logger.debug(Messages.RefactorUtil_GetEnabledRulesForProject);
+		return RulesContainer.getRulesForProject(standaloneConfig.getJavaProject(), true);
+	}
+
+	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRules(YAMLConfig config,
+			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules) throws YAMLConfigException {
+		logger.debug(Messages.RefactorUtil_GetSelectedRules);
+		return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
+	}
+
+	protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws YAMLConfigException {
+		return YAMLConfigUtil.readConfig(configFilePath, profile);
+	}
+
+	protected IJavaProject getJavaProject() {
+		return standaloneConfig.getJavaProject();
 	}
 }
