@@ -385,6 +385,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
+		// FIXME SIM-212
 		foo.forEach(s -> sb.append(s.toString()));
 
 		return sb.toString();

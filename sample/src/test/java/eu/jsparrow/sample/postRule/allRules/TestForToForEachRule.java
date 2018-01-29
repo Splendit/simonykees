@@ -64,6 +64,15 @@ public class TestForToForEachRule {
 		return sb.toString();
 	}
 
+	public String testConvertIteratorToForEachTemp2(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		foo.forEach(sb::append);
+
+		return sb.toString();
+	}
+
 	public String testConvertIteratorToForEach(String input) {
 		List<String> foo = generateList(input);
 		StringBuilder sb = new StringBuilder();

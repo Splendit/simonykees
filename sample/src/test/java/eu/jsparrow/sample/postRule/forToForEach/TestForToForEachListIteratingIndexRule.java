@@ -406,6 +406,7 @@ public class TestForToForEachListIteratingIndexRule {
 		StringBuilder sb = new StringBuilder();
 
 		for (Number s : foo) {
+			// FIXME SIM-212
 			sb.append(s.toString());
 		}
 

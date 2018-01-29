@@ -60,6 +60,21 @@ public class TestForToForEachRule {
 		}
 		return sb.toString();
 	}
+	
+	public String testConvertIteratorToForEachTemp2(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		// iterator declaration
+		Iterator<String> iterator = foo.iterator();
+		for (; iterator.hasNext();) {
+			// I have my comments
+			String s = iterator.next();
+			sb.append(s);
+		}
+		
+		return sb.toString();
+	}
 
 	public String testConvertIteratorToForEach(String input) {
 		List<String> foo = generateList(input);

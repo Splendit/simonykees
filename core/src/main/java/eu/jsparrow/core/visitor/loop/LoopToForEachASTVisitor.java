@@ -37,6 +37,7 @@ import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractAddImportASTVisitor;
+import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.core.visitor.renaming.JavaReservedKeyWords;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 
@@ -329,14 +330,18 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 		// remove the redundant nodes
 		toBeRemoved.forEach(remove -> {
+			CommentRewriter comRewrite = getCommentRewriter();
+			List<Comment> relatedComments = comRewrite.findRelatedComments(remove);
 			if (remove.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
 				VariableDeclarationStatement declStatement = (VariableDeclarationStatement) remove.getParent();
 				if (declStatement.fragments()
 					.size() == 1) {
 					astRewrite.remove(declStatement, null);
+					relatedComments = comRewrite.findRelatedComments(declStatement);
 				}
 			}
 			astRewrite.remove(remove, null);
+			comRewrite.saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(remove, Statement.class), relatedComments);
 		});
 
 		AST ast = astRewrite.getAST();

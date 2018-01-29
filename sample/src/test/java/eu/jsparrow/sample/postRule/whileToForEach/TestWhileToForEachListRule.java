@@ -17,6 +17,7 @@ public class TestWhileToForEachListRule {
 		// save leading comments
 		/* expression comment */
 		for (String t : list) {
+			// internal comment
 			System.out.println(t);
 			sb.append(t);
 		}

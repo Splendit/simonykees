@@ -22,6 +22,7 @@ public class TestWhileToForEachListRule {
 		// save leading comments
 		/* expression comment */
 		list.forEach(t -> {
+			// internal comment
 			logger.info(t);
 			sb.append(t);
 		});
