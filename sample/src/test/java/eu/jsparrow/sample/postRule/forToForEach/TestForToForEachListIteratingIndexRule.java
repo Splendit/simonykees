@@ -27,7 +27,7 @@ public class TestForToForEachListIteratingIndexRule {
 		/* init 2 */
 		/* init 1 */
 		/* inc */
-		for (String aFInterfaceRule : fInterfaceRule) {
+		for (String aFInterfaceRule : fInterfaceRule) /* between head and body */ {
 			// comment inside
 			sb.append(aFInterfaceRule);
 		} // comment after
