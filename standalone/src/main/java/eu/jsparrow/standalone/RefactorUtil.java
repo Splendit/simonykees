@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
@@ -101,8 +102,8 @@ public class RefactorUtil {
 				return;
 			}
 
-			loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, standaloneConfig.getJavaProject()
-				.getElementName(), refactoringPipeline.getRulesWithChangesAsString());
+			loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, getJavaProject().getElementName(),
+					refactoringPipeline.getRulesWithChangesAsString());
 			logger.info(loggerInfo);
 
 			// Commit refactoring
@@ -208,15 +209,21 @@ public class RefactorUtil {
 	}
 
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules() {
+		logger.debug(Messages.RefactorUtil_GetEnabledRulesForProject);
 		return RulesContainer.getRulesForProject(standaloneConfig.getJavaProject(), true);
 	}
 
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRules(YAMLConfig config,
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules) throws YAMLConfigException {
+		logger.debug(Messages.RefactorUtil_GetSelectedRules);
 		return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
 	}
 
 	protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws YAMLConfigException {
 		return YAMLConfigUtil.readConfig(configFilePath, profile);
+	}
+
+	protected IJavaProject getJavaProject() {
+		return standaloneConfig.getJavaProject();
 	}
 }

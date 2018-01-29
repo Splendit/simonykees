@@ -4,11 +4,14 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IJavaProject;
+import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 
@@ -27,13 +30,24 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
  */
 public class RefactorUtilTest {
 
-	private final RefactorUtil refactorUtil = new TestableRefactorUtil();
+	private IJavaProject javaProject;
+
+	private RefactorUtil refactorUtil;
+
+	@Before
+	public void setUp() {
+		javaProject = mock(IJavaProject.class);
+		refactorUtil = new TestableRefactorUtil();
+	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void startRefactoring() throws Exception {
 		BundleContext context = mock(BundleContext.class);
 		RefactoringPipeline refactoringPipeline = mock(RefactoringPipeline.class);
+
+		when(javaProject.getElementName()).thenReturn(""); //$NON-NLS-1$
+		when(refactoringPipeline.getRulesWithChangesAsString()).thenReturn(""); //$NON-NLS-1$
 
 		refactorUtil.startRefactoring(context, refactoringPipeline);
 
@@ -63,6 +77,11 @@ public class RefactorUtilTest {
 		protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRules(YAMLConfig config,
 				List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules) throws YAMLConfigException {
 			return Collections.singletonList(new CodeFormatterRule());
+		}
+
+		@Override
+		protected IJavaProject getJavaProject() {
+			return javaProject;
 		}
 	}
 }
