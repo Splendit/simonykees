@@ -30,6 +30,16 @@ public class TestPrimitiveObjectUseEqualsRule {
 		/* saving comments */
 		if (a.equals(b)) {
 		}
+
+		if (a.equals(/* saving comments */ b)) {
+		}
+
+		if (a.equals(b /* saving comments */)) {
+		}
+
+		if (// save comments
+		a.equals(b /* saving comments */)) {
+		}
 	}
 
 	public void testStringShouldRefactor() {
