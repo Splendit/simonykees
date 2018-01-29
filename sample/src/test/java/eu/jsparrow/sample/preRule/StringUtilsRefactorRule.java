@@ -12,11 +12,12 @@ import java.util.Locale;
 public class StringUtilsRefactorRule {
 
 	public boolean testEmpty(String testString) {
-		return testString // save me
-				.isEmpty();
+		return  /* test */ testString // save me
+				.isEmpty() /* trailing comment */;
 	}
 
 	public String testTrim(String testString) {
+		String val = /* test */testString.trim();
 		return testString.trim();
 	}
 

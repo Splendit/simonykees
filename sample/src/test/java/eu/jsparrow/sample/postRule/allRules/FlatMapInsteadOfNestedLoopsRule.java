@@ -62,7 +62,6 @@ public class FlatMapInsteadOfNestedLoopsRule {
 					.forEach(logger::info);
 			});
 
-		/* some comment inside map */
 		/* comment inside filter */
 		/* some comment inside map */
 		// some comment here

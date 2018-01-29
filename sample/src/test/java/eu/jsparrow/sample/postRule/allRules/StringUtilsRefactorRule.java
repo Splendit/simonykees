@@ -15,10 +15,11 @@ public class StringUtilsRefactorRule {
 
 	public boolean testEmpty(String testString) {
 		// save me
-		return StringUtils.isEmpty(testString);
+		return /* test */ StringUtils.isEmpty(testString) /* trailing comment */;
 	}
 
 	public String testTrim(String testString) {
+		String val = /* test */StringUtils.trim(testString);
 		return StringUtils.trim(testString);
 	}
 
