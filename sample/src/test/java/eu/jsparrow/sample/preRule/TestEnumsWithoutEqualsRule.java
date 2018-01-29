@@ -45,4 +45,15 @@ public class TestEnumsWithoutEqualsRule {
 			return;
 		}
 	}
+	
+	public void savingComments(RoundingMode roundingMode) {
+		
+		if (RoundingMode.UP. /* saving comments */ equals(roundingMode)) {
+			return;
+		}
+		
+		if ( /* leading comment */ RoundingMode.UP /* expression comment */ . /* invocation comment */ equals(/* param comment */ roundingMode) /* trailing comments */) {
+			return;
+		}
+	}
 }

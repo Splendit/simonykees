@@ -46,4 +46,19 @@ public class TestEnumsWithoutEqualsRule {
 			return;
 		}
 	}
+
+	public void savingComments(RoundingMode roundingMode) {
+
+		/* saving comments */
+		if (RoundingMode.UP == roundingMode) {
+			return;
+		}
+
+		/* invocation comment */
+		/* leading comment */
+		/* trailing comments */
+		if (RoundingMode.UP /* expression comment */ == /* param comment */ roundingMode) {
+			return;
+		}
+	}
 }
