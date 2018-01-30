@@ -52,8 +52,8 @@
       <feature id="org.eclipse.help.source" version="2.2.101.v20171009-0410"/>
       <feature id="org.eclipse.platform" version="4.7.1.v20171009-0410"/>
       <feature id="org.eclipse.e4.rcp" version="1.6.1.v20170928-1359"/>
-      <feature id="eu.jsparrow.3rd.party.feature" version="2.4.2.qualifier"/>
-      <feature id="eu.jsparrow.standalone.feature" version="2.4.2.qualifier"/>
+      <feature id="eu.jsparrow.3rd.party.feature" version="2.4.1.qualifier"/>
+      <feature id="eu.jsparrow.standalone.feature" version="2.4.1.qualifier"/>
    </features>
 
    <configurations>
