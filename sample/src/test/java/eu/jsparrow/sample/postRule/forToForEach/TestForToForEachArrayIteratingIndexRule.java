@@ -39,6 +39,24 @@ public class TestForToForEachArrayIteratingIndexRule {
 		return sb.toString();
 	}
 	
+	public String testingComments(String input) {
+
+		List<String> foo = generateList(input);
+		String[] ms = (String[]) foo.toArray();
+		StringBuilder sb = new StringBuilder();
+
+		/* leading comment */
+		/* condition */
+		/* initialization */
+		/* incrementing */
+		for (String s : ms) {
+			// iterator assignment
+			sb.append(s);
+		}
+
+		return sb.toString();
+	}
+	
 	public String emptyInitStatement(String input) {
 
 		List<String> foo = generateList(input);

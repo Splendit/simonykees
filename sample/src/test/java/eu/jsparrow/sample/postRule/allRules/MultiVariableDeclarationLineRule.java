@@ -40,6 +40,20 @@ public class MultiVariableDeclarationLineRule {
 		return "";
 	}
 
+	public void saveComments() {
+		// unlinked comment
+		int a;
+		int b;
+
+		// unlinked comment after c
+		int c; // trailing comment
+		int d // comment after d
+		;
+		int e
+		// comment after e
+		;
+	}
+
 	enum Foo {
 		ASD,
 		DFG;

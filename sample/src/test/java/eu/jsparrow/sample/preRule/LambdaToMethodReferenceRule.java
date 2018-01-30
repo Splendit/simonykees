@@ -43,13 +43,18 @@ public class LambdaToMethodReferenceRule {
 			return Person.compareByAge(a, b);
 		});
 
-		Collections.sort(personList, (Person a, Person b) -> Person.compareByAge(a, b));
+		Collections.sort(personList, (Person a, Person b) -> /* save me */  
+		
+		Person.compareByAge(a, b));
 
-		Collections.sort(personList, (a, b) -> Person.compareByAge(a, b));
+		Collections.sort(personList, /* save me */  (a, b) -> Person.compareByAge(a, b));
 
 		Collections.sort(personList, Person::compareByAge);
 
 		personList.forEach(element -> {
+			/* 
+			 * save me 
+			 * */
 			System.out.println(element);
 		});
 

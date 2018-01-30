@@ -12,6 +12,13 @@ public class TestForToForEachListIteratingIndexRule {
 	Runnable r = () -> {
 		List<String> fInterfaceRule = generateList("");
 		StringBuilder sb = new StringBuilder();
+		/* between head and body */
+		// comment inside
+		// comment after
+		// comment before
+		/* init 2 */
+		/* init 1 */
+		/* inc */
 		fInterfaceRule.forEach(sb::append);
 	};
 
@@ -378,6 +385,7 @@ public class TestForToForEachListIteratingIndexRule {
 
 		StringBuilder sb = new StringBuilder();
 
+		// FIXME SIM-212
 		foo.forEach(s -> sb.append(s.toString()));
 
 		return sb.toString();
@@ -538,6 +546,9 @@ public class TestForToForEachListIteratingIndexRule {
 			String iterator;
 			List<String> fInterfaceRule = new ArrayList<>();
 			StringBuilder sb = new StringBuilder();
+			// multiple
+			// line
+			// comment
 			fInterfaceRule.forEach(sb::append);
 		};
 	}

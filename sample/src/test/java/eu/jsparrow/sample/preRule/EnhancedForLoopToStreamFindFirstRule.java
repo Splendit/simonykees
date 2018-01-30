@@ -19,12 +19,15 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		StringBuilder sb = new StringBuilder();
 		String key = "";
 		List<String> values = generateList(input);
+		// comment before loop
 		for(String value : values) {
+			// comment inside 1
 		    if(value.length() > 4) {
+		    	// comment inside 2
 		    	key = value;
 		        break;
 		    }
-		}
+		} // comment after
 		sb.append(key);
 		
 		return sb.toString();
@@ -306,7 +309,9 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		double defaultValue = -1.0;
 		double defaultIndex = defaultValue;
 		List<Double> values = new ArrayList<>();
+		// comment before loop
 		for(double value : values) {
+			// comment inside
 		    if(value > 4) {
 		    	return value;
 		    }

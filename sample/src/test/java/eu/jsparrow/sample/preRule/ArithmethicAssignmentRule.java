@@ -31,7 +31,19 @@ public class ArithmethicAssignmentRule {
 	}
 
 	public int testC(int i) {
-		i = i + 3;
+		
+		i = //save me
+				
+				i + 3;
+		
+		i = //save me
+				i + 3;
+		
+		i = /* save me */ 
+				i + 3;
+		
+		i = 
+				/* save me */ i + 3;
 		return i;
 	}
 	

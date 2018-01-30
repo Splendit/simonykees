@@ -44,12 +44,17 @@ public class LambdaToMethodReferenceRule {
 			return Person.compareByAge(a, b);
 		});
 
+		/* save me */
+		Collections.sort(personList, Person::compareByAge);
+
+		/* save me */
 		Collections.sort(personList, Person::compareByAge);
 
 		Collections.sort(personList, Person::compareByAge);
 
-		Collections.sort(personList, Person::compareByAge);
-
+		/* 
+		 * save me 
+		 * */
 		personList.forEach(System.out::println);
 
 		personList.forEach(System.out::println);

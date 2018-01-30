@@ -25,9 +25,12 @@ public class TestForToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 		String aL = "I am here to confuse you ~_^ ";
+		
+		// comment before
 		for (String aL1 : l) {
+			// comment inside
 			sb.append(aL1);
-		}
+		} // comment after
 		return sb.toString();
 	}
 	
@@ -55,6 +58,17 @@ public class TestForToForEachRule {
 				sb.append(s);
 			}
 		}
+		return sb.toString();
+	}
+	
+	public String testConvertIteratorToForEachTemp2(String input) {
+		List<String> foo = generateList(input);
+		StringBuilder sb = new StringBuilder();
+
+		for (String s : foo) {
+			sb.append(s);
+		}
+		
 		return sb.toString();
 	}
 

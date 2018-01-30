@@ -42,6 +42,39 @@ public class StatementLambdaToExpressionRule {
 			doSomething(element);
 			return;
 		});
+		
+		/*
+		 * Saving comments
+		 */
+		
+		list.forEach(element -> {
+			// save me
+			new Integer(1);
+		});
+		
+		list.forEach(element -> {
+			new Integer(1);
+			// save trailing comment
+		});
+		
+		list.forEach(element -> {
+			new Integer(1);
+			
+		}// save lambda-exp trailing comment 
+		);
+		
+		list.forEach(element -> {
+			//save me
+			doSomething(element);
+			return;
+		});
+		
+		list.forEach(element -> {
+			new Integer(1);
+		}
+		 
+		// i'm here
+		);
 	}
 
 	private void doSomething(int element) {

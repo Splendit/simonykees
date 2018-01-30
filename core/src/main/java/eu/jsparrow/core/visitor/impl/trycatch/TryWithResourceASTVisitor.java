@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -58,7 +59,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 			 * after first non resource object
 			 */
 			ITypeBinding typeBind = varDeclStatmentNode.getType()
-					.resolveBinding();
+				.resolveBinding();
 			if (!ClassRelationUtil.isInheritingContentOfTypes(typeBind, generateFullyQualifiedNameList(
 					AUTO_CLOSEABLE_FULLY_QUALIFIED_NAME, CLOSEABLE_FULLY_QUALIFIED_NAME))) {
 				break;
@@ -82,8 +83,8 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 					VariableDeclarationExpression variableDeclarationExpression = varDeclStatmentNode.getAST()
 						.newVariableDeclarationExpression((VariableDeclarationFragment) ASTNode
 							.copySubtree(variableDeclarationFragment.getAST(), variableDeclarationFragment));
-					variableDeclarationExpression.setType((Type) ASTNode.copySubtree(varDeclStatmentNode.getAST(),
-							varDeclStatmentNode.getType()));
+					variableDeclarationExpression.setType(
+							(Type) ASTNode.copySubtree(varDeclStatmentNode.getAST(), varDeclStatmentNode.getType()));
 
 					List<Modifier> modifierList = ASTNodeUtil.convertToTypedList(varDeclStatmentNode.modifiers(),
 							Modifier.class);
@@ -99,15 +100,16 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 					resourceNameList.add(variableDeclarationFragment.getName());
 
 					if (numFragments > 1) {
+						getCommentRewriter().saveRelatedComments(variableDeclarationFragment, node);
 						astRewrite.remove(variableDeclarationFragment, null);
 						numFragments--;
 					} else {
+						getCommentRewriter().saveRelatedComments(varDeclStatmentNode, node);
 						astRewrite.remove(varDeclStatmentNode, null);
 					}
 				}
 			}
 		}
-
 
 		if (!resourceList.isEmpty()) {
 			replaceTryStatement(node, resourceList, resourceNameList, toBeMovedToResources);
@@ -128,7 +130,8 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 			.map(mapper)
 			.collect(Collectors.toList());
 
-		if (node.resources().isEmpty() && resourceList.size() != 1) {
+		if (node.resources()
+			.isEmpty() && resourceList.size() != 1) {
 
 			TryStatement tryStatement = createNewTryStatement(node, resourceList, toBeMovedToResources,
 					closeInvocations);
@@ -139,16 +142,21 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		} else {
 			ListRewrite listRewrite = astRewrite.getListRewrite(node, TryStatement.RESOURCES_PROPERTY);
 			resourceList.forEach(iteratorNode -> listRewrite.insertLast(iteratorNode, null));
-			node.accept(new TwrRemoveCloseASTVisitor(astRewrite, closeInvocations));
+			TwrCloseStatementsASTVisitor visitor = new TwrCloseStatementsASTVisitor(closeInvocations);
+			node.accept(visitor);
+			List<Statement> invocations = visitor.getCloseInvocationStatements();
+			invocations.forEach(invocation -> {
+				getCommentRewriter().saveRelatedComments(invocation);
+				astRewrite.remove(invocation, null);
+			});
 		}
-
 		onRewrite();
 	}
 
 	@SuppressWarnings("unchecked")
 	private TryStatement createNewTryStatement(TryStatement node, List<VariableDeclarationExpression> resourceList,
 			List<VariableDeclarationFragment> toBeMovedToResources, List<MethodInvocation> closeInvocations) {
-		
+
 		TryStatement tryStatement = getASTRewrite().getAST()
 			.newTryStatement();
 		tryStatement.resources()
@@ -166,7 +174,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		tryStatement.catchClauses()
 			.addAll(newCatchClauses);
 		tryStatement.setFinally((Block) ASTNode.copySubtree(node.getAST(), node.getFinally()));
-		
+
 		return tryStatement;
 	}
 }

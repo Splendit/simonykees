@@ -82,6 +82,7 @@ public class RemoveNewStringConstructorASTVisitor extends AbstractASTRewriteASTV
 			} while (arguments != null);
 			if (replacement != null) {
 				astRewrite.replace(node, replacement, null);
+				getCommentRewriter().saveCommentsInParentStatement(node);
 				onRewrite();
 			}
 		}
