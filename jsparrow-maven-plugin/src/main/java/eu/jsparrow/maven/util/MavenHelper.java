@@ -62,14 +62,14 @@ public class MavenHelper {
 	// CONSTANTS
 	private static final String USER_DIR = "user.dir";
 	private static final String JAVA_TMP = "java.io.tmpdir";
-	private static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone";
+	protected static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone";
 	private static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default";
 	private static final String FRAMEWORK_STORAGE_VALUE = "target/bundlecache";
 	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH";
 	private static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME";
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow";
 	private static final String JSPARROW_MANIFEST = "manifest.standalone";
-	private static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory";
+	protected static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory";
 	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps";
 	private static final String OSGI_INSTANCE_AREA_CONSTANT = "osgi.instance.area";
 
@@ -244,15 +244,6 @@ public class MavenHelper {
 		return additionalConfiguration;
 	}
 
-	protected String getProjectName() {
-		return project.getName();
-	}
-
-	protected String getProjectPath() {
-		return project.getBasedir()
-			.getAbsolutePath();
-	}
-
 	/**
 	 * creates and prepares the temporary working directory and sets its path in
 	 * system properties and equinox configuration
@@ -355,7 +346,7 @@ public class MavenHelper {
 	 * @return a list of the installed bundles
 	 * @throws BundleException
 	 */
-	protected List<Bundle> loadBundles() throws BundleException, MojoExecutionException  {
+	protected List<Bundle> loadBundles() throws BundleException, MojoExecutionException {
 		bundleContext = getBundleContext();
 		final List<Bundle> bundles = new ArrayList<>();
 
@@ -371,7 +362,8 @@ public class MavenHelper {
 					}
 				}
 			} else {
-				throw new MojoExecutionException("The standalone manifest file could not be found. Please read the readme-file.");
+				throw new MojoExecutionException(
+						"The standalone manifest file could not be found. Please read the readme-file.");
 			}
 		} catch (IOException e) {
 			log.debug(e.getMessage(), e);
@@ -381,22 +373,6 @@ public class MavenHelper {
 		return bundles;
 	}
 
-	protected InputStream getBundleResourceInputStream(String resouceName) {
-		return getClass().getResourceAsStream("/" + resouceName);
-	}
-
-	protected BufferedReader getBufferedReaderFromInputStream(InputStream is) {
-		return new BufferedReader(new InputStreamReader(is));
-	}
-
-	protected InputStream getManifestInputStream() {
-		return getClass().getResourceAsStream("/" + JSPARROW_MANIFEST);
-	}
-
-	protected BundleContext getBundleContext() {
-		return framework.getBundleContext();
-	}
-
 	/**
 	 * Starts eu.jsparrow.standalone bundle which starts all the other needed
 	 * bundles.
@@ -404,7 +380,7 @@ public class MavenHelper {
 	 * @param bundles
 	 *            list of bundles
 	 */
-	private void startBundles(List<Bundle> bundles) {
+	protected void startBundles(List<Bundle> bundles) {
 		bundles.stream()
 			.filter(bundle -> bundle.getHeaders()
 				.get(Constants.FRAGMENT_HOST) == null)
@@ -430,15 +406,25 @@ public class MavenHelper {
 	 */
 	private void extractAndCopyDependencies(String preparedMavenHome) {
 		final InvocationRequest request = new DefaultInvocationRequest();
+		final Properties props = new Properties();
+
+		prepareDefaultRequest(request, props);
+
+		final Invoker invoker = new DefaultInvoker();
+
+		invokeMaven(invoker, request, preparedMavenHome);
+	}
+
+	protected void prepareDefaultRequest(InvocationRequest request, Properties props) {
 		request.setPomFile(new File(getProjectPath() + File.separator + "pom.xml"));
 		request.setGoals(Collections.singletonList("dependency:copy-dependencies "));
 
-		final Properties props = new Properties();
 		props.setProperty(OUTPUT_DIRECTORY_CONSTANT,
 				System.getProperty(USER_DIR) + File.separator + DEPENDENCIES_FOLDER_CONSTANT);
 		request.setProperties(props);
+	}
 
-		final Invoker invoker = new DefaultInvoker();
+	protected void invokeMaven(Invoker invoker, InvocationRequest request, String preparedMavenHome) {
 		invoker.setMavenHome(new File(preparedMavenHome));
 
 		try {
@@ -570,5 +556,30 @@ public class MavenHelper {
 
 	public void setDirectory(File directory) {
 		this.directory = directory;
+	}
+
+	protected InputStream getBundleResourceInputStream(String resouceName) {
+		return getClass().getResourceAsStream("/" + resouceName);
+	}
+
+	protected BufferedReader getBufferedReaderFromInputStream(InputStream is) {
+		return new BufferedReader(new InputStreamReader(is));
+	}
+
+	protected InputStream getManifestInputStream() {
+		return getClass().getResourceAsStream("/" + JSPARROW_MANIFEST);
+	}
+
+	protected BundleContext getBundleContext() {
+		return framework.getBundleContext();
+	}
+
+	protected String getProjectName() {
+		return project.getName();
+	}
+
+	protected String getProjectPath() {
+		return project.getBasedir()
+			.getAbsolutePath();
 	}
 }
