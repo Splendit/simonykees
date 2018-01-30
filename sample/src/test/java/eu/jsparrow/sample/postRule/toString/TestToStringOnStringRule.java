@@ -45,6 +45,7 @@ public class TestToStringOnStringRule {
 				s;
 		/* save me */
 		s = s.substring(0);
+		
 		/* leading comment */
 		/* invocation comment */
 		/* trailing comment */
