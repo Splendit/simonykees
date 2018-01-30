@@ -36,6 +36,11 @@ public class TestToStringOnStringRule {
 	
 	public String testToStringOnStringVariable_saveComments() {
 		String s = "theStringS";
+		// save me
+		String uselsessToString =  /* save me */ s.toString();
+		uselsessToString = /* save me */ s.toString();
+		uselsessToString = // save me
+				s.toString();
 		s = s.substring(0). /* save me */ toString();
 		return /* save me */s.toString();
 

@@ -8,11 +8,11 @@ public class TestInefficientConstructorBooleanRule {
 	}
 
 	public Boolean booleanTrueLiteralTest() {
-		return new Boolean( /* save me */"true");
+		return /* leading comment */ new /* internal comment */ Boolean( /* argument comment */"true") /* trailing comment */;
 	}
 
 	public Boolean booleanFalseTest() {
-		return new Boolean(false);
+		return /* leading comment */ new /* internal comment */ Boolean( /* argument comment */ false) /* trailing comment */ ;
 	}
 
 	public Boolean booleanFalseLiteralTest() {
@@ -24,11 +24,11 @@ public class TestInefficientConstructorBooleanRule {
 	}
 
 	public Boolean booleanVariableBooleanTest(boolean input) {
-		return new Boolean(input);
+		return new Boolean(/* save me */ input);
 	}
 
 	public Boolean booleanVariableStringTest(String input) {
-		return new Boolean(input);
+		return new Boolean(/* save me */ input);
 	}
 
 	public Boolean booleanTrueValueOfTest() {

@@ -44,7 +44,6 @@ public class TestPrimitiveBoxedForStringWithExpressionsRule {
 	public String testIntegerBoxingOnExpression(int input) {
 
 		/* declaration comment */
-		/* ctor arg comment */
 		/* toString expression comment */
 		String savingCmments = /* leading comment */ Integer
 			.toString(/* ctor arg comment */ 5 + input
