@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodReference;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -309,7 +310,11 @@ public class DiamondOperatorASTVisitor extends AbstractASTRewriteASTVisitor {
 		logger.debug(Messages.DiamondOperatorASTVisitor_using_diamond_operator);
 		ListRewrite typeArgumentsListRewrite = astRewrite.getListRewrite(parameterizedType,
 				ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
+		Statement statement = ASTNodeUtil.getSpecificAncestor(parameterizedType, Statement.class);
 		rhsTypeArguments.stream()
-			.forEach(type -> typeArgumentsListRewrite.remove(type, null));
+			.forEach(type -> {
+				getCommentRewriter().saveRelatedComments(type, statement);
+				typeArgumentsListRewrite.remove(type, null);
+			});
 	}
 }

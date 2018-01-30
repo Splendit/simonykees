@@ -28,6 +28,17 @@ public class MultiVariableDeclarationLineRule {
 		}
 		return "";
 	}
+	
+	public void saveComments() {
+		int a, // unlinked comment 
+		b;
+		
+		int c, // unlinked comment after c
+		d // comment after d
+		, e
+		// comment after e
+		; // trailing comment
+	}
 
 	enum Foo {
 		ASD, DFG;

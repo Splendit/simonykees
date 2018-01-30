@@ -123,7 +123,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 			}
 
 			/*
-			 * if the type of the stream proceeding findFirst() does not match
+			 * if the type of the stream preceding findFirst() does not match
 			 * with the type of the orElse() expression, then an explicit
 			 * casting should be add by using a findFirst().map() The
 			 * boxingExpresions list, is used for storing the mapping
@@ -142,6 +142,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 
 			astRewrite.replace(varDeclFragment.getInitializer(), methodInvocation, null);
 			replaceLoopWithFragment(forLoop, varDeclFragment);
+			getCommentRewriter().saveRelatedComments(forLoop);
 			onRewrite();
 
 		} else if ((returnStatement = isConvertableWithReturn(thenStatement, forLoop, loopParameter.getName(),
@@ -160,6 +161,7 @@ public class EnhancedForLoopToStreamFindFirstASTVisitor extends AbstractEnhanced
 					loopParameter, orElseExpression, mapCopyTargets);
 			astRewrite.replace(returnStatement.getExpression(), methodInvocation, null);
 			astRewrite.remove(forLoop, null);
+			getCommentRewriter().saveRelatedComments(forLoop);
 			onRewrite();
 		}
 

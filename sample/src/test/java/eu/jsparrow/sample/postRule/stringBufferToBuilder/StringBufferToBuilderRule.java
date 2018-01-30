@@ -19,6 +19,10 @@ public class StringBufferToBuilderRule {
 	}
 
 	private void test1() {
+		//a comment here
+		/* internal comment in declaration */
+		/* internal comment in initializer */
+		// trailing comment
 		StringBuilder localStringBuffer1 = new StringBuilder();
 		StringBuilder localStringBuffer2 = null;
 		StringBuilder localStringBuffer3, localStringBuffer4 = new StringBuilder();

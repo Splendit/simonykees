@@ -14,6 +14,7 @@ public class StringBuildingLoopRule {
 		List<String> collectionOfStrings = generateStringList(input);
 		String result = "";
 		for(String val : collectionOfStrings) {
+			// save me
 			result = result + val;
 		}
 		return result;

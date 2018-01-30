@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.CommentRewriter;
 
 /**
  * this rule visits all enhanced for loops and checks if the corresponding loop
@@ -44,7 +45,7 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
-		return true;
+		return super.visit(compilationUnit);
 	}
 
 	@Override
@@ -124,9 +125,16 @@ public class EnhancedForLoopToStreamForEachASTVisitor extends AbstractEnhancedFo
 				ExpressionStatement expressionStatement = astRewrite.getAST()
 					.newExpressionStatement(forEachMethodInvocation);
 				astRewrite.replace(enhancedForStatementNode, expressionStatement, null);
+				saveComments(enhancedForStatementNode);
 				onRewrite();
 			}
 		}
+	}
+
+	protected void saveComments(EnhancedForStatement node) {
+		CommentRewriter commRewriter = getCommentRewriter();
+		commRewriter.saveLeadingComment(node);
+		commRewriter.saveCommentsInParentStatement(node.getExpression());
 	}
 
 	/**

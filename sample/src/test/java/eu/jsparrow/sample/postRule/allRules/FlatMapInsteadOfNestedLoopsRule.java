@@ -19,6 +19,16 @@ public class FlatMapInsteadOfNestedLoopsRule {
 
 	public void test() {
 		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
+		// inner comment one
+		/* lambda leading comment */
+		/* lambda-body leading comment */
+		// inner comment two
+		// inner comment three
+		/* inner comment four */
+		/* lambda-body trailing comment */
+		// trailing comment two
+		// trailing comment one
+		// outer comment
 		matrix2.stream()
 			.filter(row -> !row.isEmpty())
 			.flatMap(List::stream)
@@ -52,12 +62,18 @@ public class FlatMapInsteadOfNestedLoopsRule {
 					.forEach(logger::info);
 			});
 
+		/* comment inside filter */
+		/* some comment inside map */
+		// some comment here
 		matrix.stream()
 			.filter(row -> !row.isEmpty())
 			.flatMap(List::stream)
 			.filter(element -> !StringUtils.isEmpty(element))
 			.map(element -> StringUtils.substring(element, 0, 1))
-			.forEach(logger::info);
+			.forEach(element -> {
+				logger.info(element);
+				logger.info(element);
+			});
 
 		matrix.stream()
 			.flatMap(List::stream)
@@ -153,6 +169,9 @@ public class FlatMapInsteadOfNestedLoopsRule {
 	public void testQuartedNestedStreams() {
 		List<List<List<List<String>>>> matrix3 = Arrays
 			.asList(Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl"))));
+		/*
+		 * Some statement just to avoid transformation
+		 */
 		matrix3.stream()
 			.flatMap(List::stream)
 			.forEach(second -> {

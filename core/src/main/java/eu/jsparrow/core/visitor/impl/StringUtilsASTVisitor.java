@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -13,11 +14,13 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractAddImportASTVisitor;
+import eu.jsparrow.core.visitor.CommentRewriter;
 
 /**
  * This ASTVisitor finds the usage of specified string operation and wraps it in
@@ -159,10 +162,18 @@ public class StringUtilsASTVisitor extends AbstractAddImportASTVisitor {
 					.newSimpleName(replacementOperation), null);
 				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY)
 					.insertFirst((Expression) ASTNode.copySubtree(currentAST, node.getExpression()), null);
+				saveComments(node);
 				onRewrite();
 			}
 		}
 		return true;
+	}
+	
+	private void saveComments(MethodInvocation node) {
+		CommentRewriter commRewrite = getCommentRewriter();
+		Statement parent = ASTNodeUtil.getSpecificAncestor(node, Statement.class);
+		List<Comment> internalComments = commRewrite.findInternalComments(node);
+		commRewrite.saveBeforeStatement(parent, internalComments);
 	}
 
 	/**

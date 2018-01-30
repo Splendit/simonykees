@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -23,6 +24,7 @@ import eu.jsparrow.core.rule.impl.LambdaForEachIfWrapperToFilterRule;
 import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.core.visitor.lambdaforeach.AbstractLambdaForEachASTVisitor;
 import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
 
@@ -44,6 +46,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 	private int depthCount = 0;
 	LinkedList<MethodInvocation> methodInvocationExpressionList = new LinkedList<>();
+	LinkedList<Comment> forEachRelatedComments = new LinkedList<>();
 	MethodInvocation innerMostMethodInvocation = null;
 	private List<MethodInvocation> toBeSkipped = new ArrayList<>();
 
@@ -105,6 +108,7 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		MethodInvocation flatMapMethodInvocation = createFlatMapMethodInvocation(null, flatMapLambda);
 		methodInvocationExpressionList.add(flatMapMethodInvocation);
 
+		storeRelatedComments(methodArgumentLambda, innerMethodInvocation);
 		MethodInvocation expression = createExpressionForInnerLoop(innerMethodInvocation.getExpression());
 
 		if (expression != null) {
@@ -114,6 +118,17 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 		innerMostMethodInvocation = innerMethodInvocation;
 
 		return true;
+	}
+
+	protected void storeRelatedComments(LambdaExpression methodArgumentLambda, MethodInvocation innerMethodInvocation) {
+		CommentRewriter helper = getCommentRewriter();
+		ASTNode miParent = innerMethodInvocation.getParent();
+		forEachRelatedComments.addAll(helper.findSurroundingComments(miParent));
+		ASTNode miGParent = miParent.getParent();
+		if (miGParent != null && ASTNode.BLOCK == miGParent.getNodeType()) {
+			forEachRelatedComments.addAll(helper.findSurroundingComments(miGParent));
+		}
+		forEachRelatedComments.addAll(helper.findSurroundingComments(methodArgumentLambda));
 	}
 
 	/**
@@ -249,12 +264,27 @@ public class FlatMapInsteadOfNestedLoopsASTVisitor extends AbstractLambdaForEach
 
 				astRewrite.replace(methodInvocationNode, newMethodInvocation, null);
 				onRewrite();
+				saveComments(methodInvocationNode);
 
 				innerMostMethodInvocation = null;
 				methodInvocationExpressionList.clear();
+				forEachRelatedComments.clear();
 			}
 		}
 		toBeSkipped.remove(methodInvocationNode);
+	}
+
+	private void saveComments(MethodInvocation methodInvocationNode) {
+		CommentRewriter helper = getCommentRewriter();
+		Statement statement = ASTNodeUtil.getSpecificAncestor(methodInvocationNode, Statement.class);
+		List<Expression> args = ASTNodeUtil.convertToTypedList(innerMostMethodInvocation.arguments(), Expression.class);
+		if (args.isEmpty()) {
+			return;
+		}
+		List<Comment> comments = new ArrayList<>();
+		comments.addAll(forEachRelatedComments);
+		comments.addAll(helper.findRelatedComments(args.get(0)));
+		helper.saveBeforeStatement(statement, comments);
 	}
 
 	/**

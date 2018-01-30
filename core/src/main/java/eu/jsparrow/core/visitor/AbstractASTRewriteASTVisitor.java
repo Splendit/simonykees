@@ -5,17 +5,20 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 /**
  * Abstract implementation of an {@link ASTVisitor} to assure all used visitors
  * have an field for {@link ASTRewrite} to commit the changes in the tree.
  * 
- * @author Martin Huter, Hans-Jörg Schrödl, Matthias Webhofer
+ * @author Martin Huter, Hans-Jörg Schrödl, Matthias Webhofer, Ardit Ymeri
  * @since 0.9
  */
 
 public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
+
+	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
 	protected ASTRewrite astRewrite;
 
@@ -23,12 +26,30 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 
 	protected List<ASTRewriteVisitorListener> listeners = new ArrayList<>();
 
+	protected String compilationUnitSource = EMPTY_STRING;
+
+	private CompilationUnit compilationUnit;
+	private CommentRewriter commentRewriter;
+
 	public AbstractASTRewriteASTVisitor() {
 		super();
+		commentRewriter = new CommentRewriter();
 	}
 
 	public AbstractASTRewriteASTVisitor(boolean visitDocTags) {
 		super(visitDocTags);
+	}
+
+	@Override
+	public boolean visit(CompilationUnit compilationUnit) {
+		this.compilationUnit = compilationUnit;
+		this.commentRewriter.initCommentHelper(compilationUnit, astRewrite);
+		return true;
+	}
+
+	@Override
+	public void endVisit(CompilationUnit compilationUnit) {
+		this.commentRewriter.resetCommentHelper();
 	}
 
 	/**
@@ -50,8 +71,8 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 		this.astRewrite = astRewrite;
 	}
 
-	public String getCompilationUnit() {
-		return compilationUnitHandle;
+	public CompilationUnit getCompilationUnit() {
+		return compilationUnit;
 	}
 
 	public void setCompilationUnit(String compilationUnitHandle) {
@@ -95,5 +116,8 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	protected void onRewrite() {
 		listeners.forEach(listener -> listener.update(new ASTRewriteEvent(this.compilationUnitHandle)));
 	}
-
+	
+	protected CommentRewriter getCommentRewriter() {
+		return this.commentRewriter;
+	}
 }

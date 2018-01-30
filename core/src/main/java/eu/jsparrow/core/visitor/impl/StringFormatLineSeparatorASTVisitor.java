@@ -35,7 +35,8 @@ public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVi
 	@Override
 	public boolean visit(MethodInvocation node) {
 		if (StringUtils.equals("format", node.getName() //$NON-NLS-1$
-			.getFullyQualifiedName()) && node.getExpression() instanceof SimpleName && ClassRelationUtil.isContentOfTypes(node.getExpression()
+			.getFullyQualifiedName()) && node.getExpression() instanceof SimpleName
+				&& ClassRelationUtil.isContentOfTypes(node.getExpression()
 					.resolveTypeBinding(), generateFullyQualifiedNameList(stringFullyQualifiedName))) {
 
 			@SuppressWarnings("rawtypes")
@@ -67,6 +68,7 @@ public class StringFormatLineSeparatorASTVisitor extends AbstractASTRewriteASTVi
 				if (!formatedString.equals(formatString.getEscapedValue())) {
 					StringLiteral newFormatString = NodeBuilder.newStringLiteral(node.getAST(), formatedString);
 					astRewrite.replace(formatString, newFormatString, null);
+					getCommentRewriter().saveCommentsInParentStatement(formatString);
 					onRewrite();
 				}
 			}

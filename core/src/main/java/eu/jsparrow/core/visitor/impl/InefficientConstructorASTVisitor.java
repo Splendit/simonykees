@@ -1,21 +1,27 @@
 package eu.jsparrow.core.visitor.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.constants.ReservedNames;
+import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.core.visitor.CommentRewriter;
 
 /**
  * Primitives should not use the constructor for construction of new Variables.
@@ -69,6 +75,7 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 						.newBooleanLiteral(false);
 				}
 				astRewrite.replace(refactorCandidateParameter, replaceParameter, null);
+				getCommentRewriter().saveCommentsInParentStatement(node);
 				onRewrite();
 			}
 		}
@@ -89,6 +96,8 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 				.get(0);
 			ITypeBinding refactorCandidateTypeBinding = refactorCandidateParameter.resolveTypeBinding();
 			Expression replacement = null;
+			List<Comment> relatedComments = new ArrayList<>();
+			CommentRewriter commentRewriter = getCommentRewriter(); 
 
 			if (null == refactorCandidateTypeBinding || null == refactorPrimitiveTypeBinding) {
 				return true;
@@ -113,17 +122,20 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 						replacement = node.getAST()
 							.newBooleanLiteral(false);
 					}
+					relatedComments = commentRewriter.findRelatedComments(node);
 				}
 
 				/* wrapping string variables into Boolean.valueOf(...) */
 				else if (ClassRelationUtil.isContentOfTypes(refactorCandidateTypeBinding,
 						generateFullyQualifiedNameList(STRING_FULLY_QUALLIFIED_NAME))) {
 					replacement = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
+					relatedComments = findRelatedComments(node, refactorCandidateParameter);
 				}
 
 				/* primitive booleans */
 				else if (isBooleanClass(refactorCandidateTypeBinding.getName())) {
 					replacement = (Expression) astRewrite.createMoveTarget(refactorCandidateParameter);
+					relatedComments = findRelatedComments(node, refactorCandidateParameter);
 				}
 
 				/* wrap object */
@@ -163,14 +175,23 @@ public class InefficientConstructorASTVisitor extends AbstractASTRewriteASTVisit
 					replacement = NodeBuilder.newMethodInvocation(node.getAST(),
 							(SimpleName) astRewrite.createMoveTarget(refactorPrimitiveType), valueOfInvocation,
 							(Expression) astRewrite.createMoveTarget(refactorCandidateParameter));
+					relatedComments = findRelatedComments(node, refactorCandidateParameter);
 				}
 			}
 			if (replacement != null) {
 				astRewrite.replace(node, replacement, null);
+				commentRewriter.saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(node, Statement.class), relatedComments);
 				onRewrite();
 			}
 		}
 		return true;
+	}
+	
+	private List<Comment> findRelatedComments(ClassInstanceCreation node, Expression parameter) {
+		CommentRewriter cr = getCommentRewriter();
+		List<Comment> relatedComments = cr.findRelatedComments(node);
+		relatedComments.removeAll(cr.findRelatedComments(parameter));
+		return relatedComments;
 	}
 
 	private boolean isPrimitiveTypeClass(String simpleName) {

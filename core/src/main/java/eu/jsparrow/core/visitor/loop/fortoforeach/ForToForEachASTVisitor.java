@@ -1,10 +1,14 @@
 package eu.jsparrow.core.visitor.loop.fortoforeach;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
@@ -14,6 +18,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.core.visitor.loop.LoopOptimizationASTVisior;
 import eu.jsparrow.core.visitor.loop.LoopToForEachASTVisitor;
 
@@ -70,6 +75,7 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 
 				if (iteratorDefinitionAstVisior.allParametersFound()) {
 					replaceInformationASTVisitorList.put(node, iteratorDefinitionAstVisior);
+					getCommentRewriter().saveLeadingComment(node);
 					onRewrite();
 				}
 			}
@@ -119,6 +125,28 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 		}
 
 		clearTempItroducedNames(node);
+	}
+
+	@Override
+	protected List<Comment> getHeaderComments(ForStatement loop) {
+		CommentRewriter commRewriter = getCommentRewriter();
+		List<Comment> headComments = new ArrayList<>();
+
+		headComments.addAll(commRewriter.findRelatedComments(loop.getExpression()));
+
+		List<Expression> initializers = ASTNodeUtil.convertToTypedList(loop.initializers(), Expression.class);
+		headComments.addAll(initializers.stream()
+			.flatMap(init -> commRewriter.findRelatedComments(init)
+				.stream())
+			.collect(Collectors.toList()));
+
+		List<Expression> updaters = ASTNodeUtil.convertToTypedList(loop.updaters(), Expression.class);
+		headComments.addAll(updaters.stream()
+			.flatMap(updater -> commRewriter.findRelatedComments(updater)
+				.stream())
+			.collect(Collectors.toList()));
+
+		return headComments;
 	}
 
 }

@@ -3,10 +3,12 @@ package eu.jsparrow.core.visitor.lambdaforeach;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -19,6 +21,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
+import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
 
 /**
@@ -134,6 +137,7 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 
 							// rewrite the AST
 							astRewrite.replace(methodInvocationNode, forEachMethodInvocation, null);
+							saveComments(methodInvocationNode, lambdaExpression, block, ifStatement);
 							onRewrite();
 						}
 					}
@@ -143,6 +147,24 @@ public class LambdaForEachIfWrapperToFilterASTVisitor extends AbstractLambdaForE
 		}
 
 		return true;
+	}
+
+	protected void saveComments(MethodInvocation methodInvocationNode, LambdaExpression lambdaExpression, Block block,
+			IfStatement ifStatement) {
+		CommentRewriter helper = getCommentRewriter();
+		List<Comment> comments = findSurroundingComments(lambdaExpression);
+		comments.addAll(helper.findLeadingComments(block));
+		comments.addAll(findSurroundingComments(ifStatement));
+		comments.addAll(helper.findTrailingComments(block));
+		helper.saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(methodInvocationNode, Statement.class), comments);
+	}
+
+	private List<Comment> findSurroundingComments(ASTNode node) {
+		CommentRewriter helper = getCommentRewriter();
+		return helper.findSurroundingComments(node)
+			.stream()
+			.filter(comment -> !helper.isTrailing(comment, node))
+			.collect(Collectors.toList());
 	}
 
 	/**

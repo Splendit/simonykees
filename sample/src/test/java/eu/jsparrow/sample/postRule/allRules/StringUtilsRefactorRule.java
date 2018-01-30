@@ -14,10 +14,12 @@ import org.apache.commons.lang3.StringUtils;
 public class StringUtilsRefactorRule {
 
 	public boolean testEmpty(String testString) {
-		return StringUtils.isEmpty(testString);
+		// save me
+		return /* test */ StringUtils.isEmpty(testString) /* trailing comment */;
 	}
 
 	public String testTrim(String testString) {
+		String val = /* test */StringUtils.trim(testString);
 		return StringUtils.trim(testString);
 	}
 

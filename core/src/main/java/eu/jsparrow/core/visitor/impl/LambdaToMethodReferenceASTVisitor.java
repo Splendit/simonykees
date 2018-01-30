@@ -55,6 +55,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 	@Override
 	public boolean visit(CompilationUnit cu) {
 		this.compilationUnit = cu;
+		super.visit(cu);
 		return true;
 	}
 
@@ -177,6 +178,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 						SimpleName methodName = (SimpleName) astRewrite.createCopyTarget(methodInvocation.getName());
 						ref.setName(methodName);
 						astRewrite.replace(lambdaExpressionNode, ref, null);
+						getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
 						onRewrite();
 					}
 				}
@@ -222,6 +224,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 								ref.setName(methodName);
 
 								astRewrite.replace(lambdaExpressionNode, ref, null);
+								getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
 								onRewrite();
 
 							}
@@ -263,6 +266,7 @@ public class LambdaToMethodReferenceASTVisitor extends AbstractAddImportASTVisit
 					}
 
 					astRewrite.replace(lambdaExpressionNode, ref, null);
+					getCommentRewriter().saveCommentsInParentStatement(lambdaExpressionNode);
 					onRewrite();
 				}
 			}

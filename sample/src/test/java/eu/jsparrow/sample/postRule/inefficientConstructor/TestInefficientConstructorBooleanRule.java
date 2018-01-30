@@ -4,15 +4,23 @@ package eu.jsparrow.sample.postRule.inefficientConstructor;
 public class TestInefficientConstructorBooleanRule {
 
 	public Boolean booleanTrueTest() {
+		/* save me */
 		return Boolean.valueOf(true);
 	}
 
 	public Boolean booleanTrueLiteralTest() {
+		/* leading comment */
+		/* internal comment */
+		/* argument comment */
+		/* trailing comment */
 		return Boolean.valueOf(true);
 	}
 
 	public Boolean booleanFalseTest() {
-		return Boolean.valueOf(false);
+		/* leading comment */
+		/* internal comment */
+		/* trailing comment */
+		return Boolean.valueOf(/* argument comment */ false) ;
 	}
 
 	public Boolean booleanFalseLiteralTest() {
@@ -24,11 +32,11 @@ public class TestInefficientConstructorBooleanRule {
 	}
 
 	public Boolean booleanVariableBooleanTest(boolean input) {
-		return Boolean.valueOf(input);
+		return Boolean.valueOf(/* save me */ input);
 	}
 
 	public Boolean booleanVariableStringTest(String input) {
-		return Boolean.valueOf(input);
+		return Boolean.valueOf(/* save me */ input);
 	}
 
 	public Boolean booleanTrueValueOfTest() {
