@@ -42,6 +42,8 @@ public class TestToStringOnStringRule {
 		uselsessToString = // save me
 				s.toString();
 		s = s.substring(0). /* save me */ toString();
+		
+		uselsessToString = /* leading comment */ "uselessToString"/* expression comment */. /* invocation comment */ toString() /* trailing comment */;
 		return /* save me */s.toString();
 
 	}

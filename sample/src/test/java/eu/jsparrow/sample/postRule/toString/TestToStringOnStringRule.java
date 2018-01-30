@@ -45,6 +45,10 @@ public class TestToStringOnStringRule {
 				s;
 		/* save me */
 		s = s.substring(0);
+		/* leading comment */
+		/* invocation comment */
+		/* trailing comment */
+		uselsessToString = "uselessToString"/* expression comment */;
 		/* save me */
 		return s;
 
