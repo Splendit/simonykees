@@ -4,6 +4,7 @@ package eu.jsparrow.sample.postRule.allRules;
 public class TestPrimitiveBoxedForStringWithConstantsRule {
 
 	public String testIntegerLiteralConcat() {
+		/* save me */
 		return Integer.toString(4);
 	}
 
@@ -20,6 +21,7 @@ public class TestPrimitiveBoxedForStringWithConstantsRule {
 	}
 
 	public String testLongLongNewLiteralTostring() {
+		/* save me */
 		return Long.toString(4L);
 	}
 

@@ -8,23 +8,29 @@ public class TestInefficientConstructorPrimitiveRule {
 	}
 
 	public Integer stringToIntegerTest() {
-		return Integer.valueOf("1");
+		/* leading comment */
+		/* internal comment */
+		/* trailing comment */
+		return Integer.valueOf(/* argument */ "1");
 	}
 
 	public Double primDoubleToDoubleTest() {
-		return Double.valueOf(1.0);
+		/* leading comment */
+		/* internal comment */
+		/* trailing comment */
+		return  Double.valueOf(/* one . o */ 1.0);
 	}
 
 	public Double stringToDoubleTest() {
-		return Double.valueOf("1.0");
+		return Double.valueOf(/* string one dot zero */ "1.0");
 	}
 
 	public Float primFloatToFloatTest() {
-		return Float.valueOf(1.0f);
+		return Float.valueOf(/* float one dot zero */1.0f);
 	}
 
 	public Float primDoubleToFloatTest() {
-		return new Float(1.0);
+		return new Float(/* float one dot zero */ 1.0);
 	}
 
 	public Float stringToFloatTest() {
@@ -32,7 +38,7 @@ public class TestInefficientConstructorPrimitiveRule {
 	}
 
 	public Long primLongToLongTest() {
-		return Long.valueOf(1L);
+		return Long.valueOf(/* One Long */1L);
 	}
 
 	public Long stringToLongTest() {

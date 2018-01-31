@@ -9,7 +9,9 @@ public class EnhancedForLoopToStreamSumRule {
 	public int forToStreamSum(String input) {
 		List<Integer> numbers = generateIntList(input);
 		int sum = 0;
+		// comment before
 		for(int n : numbers) {
+			// comment inside the loop
 			sum += n;
 		}
 		return sum;

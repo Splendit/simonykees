@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -14,6 +15,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.core.visitor.CommentRewriter;
 
 /**
  * Declaring multiple variables on one line is difficult to read. This Visitor
@@ -63,6 +65,7 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 	public boolean visit(VariableDeclarationStatement variableDeclarationStatement) {
 		List<VariableDeclarationFragment> fragments = ASTNodeUtil
 			.convertToTypedList(variableDeclarationStatement.fragments(), VariableDeclarationFragment.class);
+		
 
 		if (fragments.size() > 1) {
 
@@ -86,9 +89,23 @@ public class MultiVariableDeclarationLineASTVisitor extends AbstractASTRewriteAS
 				.collect(Collectors.toList());
 
 			writeNewDeclaration(variableDeclarationStatement, newVariableDeclarationStatements);
+			List<Comment> nonRelatedComments = findInternalUnlinkedComments(variableDeclarationStatement, fragments);
+			getCommentRewriter().saveBeforeStatement(variableDeclarationStatement, nonRelatedComments);
 		}
 
 		return true;
+	}
+
+	private List<Comment> findInternalUnlinkedComments(VariableDeclarationStatement variableDeclarationStatement,
+			List<VariableDeclarationFragment> fragments) {
+		CommentRewriter helper = getCommentRewriter();
+		List<Comment> linkedComments = fragments.stream()
+			.flatMap(fragment -> helper.findRelatedComments(fragment).stream())
+			.collect(Collectors.toList());
+
+		return helper.findInternalComments(variableDeclarationStatement).stream()
+			.filter(comment -> !linkedComments.contains(comment))
+			.collect(Collectors.toList());
 	}
 
 	/**

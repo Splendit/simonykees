@@ -1,15 +1,21 @@
 package eu.jsparrow.core.visitor.impl;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.core.visitor.CommentRewriter;
 
 /**
  * Looks for occurrences of equals(..) that refer to an Enumeration.
@@ -75,7 +81,16 @@ public class EnumsWithoutEqualsASTVisitor extends AbstractASTRewriteASTVisitor {
 		}
 
 		astRewrite.replace(replacedNode, replacementNode, null);
+		saveComments(methodInvocation);
 		onRewrite();
 		return false;
+	}
+
+	protected void saveComments(MethodInvocation methodInvocation) {
+		CommentRewriter commentRewriter = getCommentRewriter();
+		commentRewriter.saveCommentsInParentStatement(methodInvocation.getName());
+		List<Comment> leadingComments = commentRewriter.findSurroundingComments(methodInvocation);
+		Statement parentStm = ASTNodeUtil.getSpecificAncestor(methodInvocation, Statement.class);
+		commentRewriter.saveBeforeStatement(parentStm, leadingComments);
 	}
 }

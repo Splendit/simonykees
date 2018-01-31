@@ -15,7 +15,7 @@ public class TestCollectionRemoveAllRule {
 	public String testIfCollectionIsEmpty(String input){
 		List<String> resultList = generateList(input);
 		
-		resultList.removeAll(resultList);
+		resultList /* expression comment */ . /* invocation comment */ removeAll( /* param comment */ resultList) /* trailing comment */;
 		
 		StringBuilder sb = new StringBuilder();
 		
@@ -227,6 +227,28 @@ public class TestCollectionRemoveAllRule {
 		
 		numericList.stream().forEach((n)->sb.append(n));
 		resultList.stream().forEach((s) -> sb.append(s));
+		
+		return sb.toString();
+	}
+	
+	public String testSavingComments(String input){
+		List<String> resultList = generateList(input);
+		
+		resultList
+		// to not be lost
+		.removeAll(resultList);
+		
+		resultList 
+		/* trailing comments */
+		.removeAll(resultList);
+		
+		resultList.removeAll(
+				// to not be lost
+				resultList);
+		
+		StringBuilder sb = new StringBuilder();
+		
+		resultList.stream().forEach((s)->sb.append(s));
 		
 		return sb.toString();
 	}

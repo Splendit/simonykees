@@ -73,6 +73,7 @@ public class UseIsEmptyOnCollectionsASTVisitor extends AbstractASTRewriteASTVisi
 		MethodInvocation replaceNode = NodeBuilder.newMethodInvocation(methodInvocation.getAST(),
 				(Expression) astRewrite.createMoveTarget(varExpression), isEmptyMethod);
 		astRewrite.replace(parent, replaceNode, null);
+		getCommentRewriter().saveCommentsInParentStatement(parent);
 		onRewrite();
 		return true;
 	}

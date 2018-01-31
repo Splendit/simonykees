@@ -230,6 +230,12 @@ public class TestWhileToForEachRule {
 		l.forEach(outerVal -> {
 			sb.append(outerVal);
 
+			// FIXME SIM-173: RuleException is thrown
+			// Iterator<String> mIterator = m.iterator();
+			// while (mIterator.hasNext()) {
+			// String mVal = mIterator.next();
+			// sb.append(mVal);
+			// }
 			k.forEach(sb::append);
 		});
 

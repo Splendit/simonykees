@@ -18,6 +18,10 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	public String convertToFindFirstBreak(String input) {
 		StringBuilder sb = new StringBuilder();
 		List<String> values = generateList(input);
+		// comment before loop
+		// comment inside 1
+		// comment inside 2
+		// comment after
 		String key = values.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
@@ -282,6 +286,8 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		double defaultValue = -1.0;
 		double defaultIndex = defaultValue;
 		List<Double> values = new ArrayList<>();
+		// comment before loop
+		// comment inside
 		return values.stream()
 			.filter(value -> value > 4)
 			.findFirst()

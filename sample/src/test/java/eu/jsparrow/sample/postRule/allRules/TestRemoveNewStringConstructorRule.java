@@ -30,6 +30,11 @@ public class TestRemoveNewStringConstructorRule {
 		return "StringLiteral";
 	}
 
+	public String testNewStringOfLiteralWithComments() {
+		/* save comments */
+		return "StringLiteral";
+	}
+
 	public String testNewStringOfOtherString(String s) {
 		return s;
 	}

@@ -8,8 +8,6 @@ import org.eclipse.jdt.core.dom.Block;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.core.visitor.arithmetic.ArithmethicAssignmentASTVisitor;
-import eu.jsparrow.core.visitor.impl.EnumsWithoutEqualsASTVisitor;
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 
 @SuppressWarnings({ "nls" })

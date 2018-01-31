@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -36,6 +37,7 @@ import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractAddImportASTVisitor;
+import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.core.visitor.renaming.JavaReservedKeyWords;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 
@@ -76,6 +78,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		compilationUnit.accept(declaredTypesVisitor);
 		innerTypesMap = declaredTypesVisitor.getDeclaredTypes();
 		topLevelTypes = declaredTypesVisitor.getTopLevelTypes();
+		super.visit(compilationUnit);
 		return true;
 	}
 
@@ -305,7 +308,7 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	 * @param iteratorType
 	 *            the type binding of the elements of the iterable object.
 	 */
-	protected void replaceWithEnhancedFor(Statement loop, Statement loopBody, SimpleName iterableNode,
+	protected void replaceWithEnhancedFor(T loop, Statement loopBody, SimpleName iterableNode,
 			LoopIteratingIndexASTVisitor indexVisitor, Type iteratorType) {
 		/*
 		 * invocations of List::get to be replaced with the iterator object
@@ -327,14 +330,18 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 		// remove the redundant nodes
 		toBeRemoved.forEach(remove -> {
+			CommentRewriter comRewrite = getCommentRewriter();
+			List<Comment> relatedComments = comRewrite.findRelatedComments(remove);
 			if (remove.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
 				VariableDeclarationStatement declStatement = (VariableDeclarationStatement) remove.getParent();
 				if (declStatement.fragments()
 					.size() == 1) {
 					astRewrite.remove(declStatement, null);
+					relatedComments = comRewrite.findRelatedComments(declStatement);
 				}
 			}
 			astRewrite.remove(remove, null);
+			comRewrite.saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(remove, Statement.class), relatedComments);
 		});
 
 		AST ast = astRewrite.getAST();
@@ -355,8 +362,12 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 
 		// replace the existing for loop with
 		astRewrite.replace(loop, newFor, null);
+		getCommentRewriter().saveLeadingComment(loop);
+		getCommentRewriter().saveBeforeStatement(loop, getHeaderComments(loop));
 		onRewrite();
 	}
+	
+	protected abstract List<Comment> getHeaderComments(T loop);
 
 	/**
 	 * Checks whether a qualified name is needed for the declaration of a

@@ -32,6 +32,9 @@ public class TestFunctionalInterfaceRule {
 	};
 
 	private AFunctionalInterface usingInitializedField = (int a) -> {
+		/*
+		 * Using initialized field
+		 */
 		String s = finalInitializedStringField;
 	};
 

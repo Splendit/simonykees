@@ -19,6 +19,8 @@ public class TestMultiCatchRule {
 				.newInstance("aa");
 		} catch (SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException
 				| IllegalAccessException | InstantiationException e) {
+			// keep me
+			// dont duplicate me
 			log.trace(e.getLocalizedMessage(), e);
 		}
 	}

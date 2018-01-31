@@ -110,6 +110,15 @@ public class IndexOfToContainsRule {
 
 		int index = l.indexOf(s);
 		System.out.println("object found at index: " + index);
+		
+		/*
+		 * Some cases with comments
+		 */
+		
+		/* saving comments */
+		if (!l.contains(s)) {
+			l.add(s);
+		}
 	}
 
 	public void testString() {
@@ -169,6 +178,11 @@ public class IndexOfToContainsRule {
 			System.out.println(s);
 		}
 
+		if (s.contains("ello")) {
+			System.out.println(s);
+		}
+		
+		/* save me */
 		if (s.contains("ello")) {
 			System.out.println(s);
 		}

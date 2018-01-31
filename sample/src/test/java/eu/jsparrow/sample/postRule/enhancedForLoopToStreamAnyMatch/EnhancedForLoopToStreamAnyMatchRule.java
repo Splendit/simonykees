@@ -14,6 +14,10 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	boolean missingBoolDecl = false;
 	
 	public void usingAnyMatch(List<String> strings) {
+		// comment before
+		// comment inside 1
+		// comment inside 2
+		// comment after
 		boolean containsEmpty = strings.stream()
 			.anyMatch(value -> value.isEmpty());
 	}
@@ -183,6 +187,8 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	
 	public boolean loopWithReturnStatement(List<String> strings) {
 		String emptyString = "";
+		// comment before the for loop
+		// comment before return statement
 	    return strings.stream()
 			.anyMatch(value -> emptyString.equals(value));
 	}

@@ -51,6 +51,7 @@ public class StringLiteralEqualityCheckASTVisitor extends AbstractASTRewriteASTV
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		comments = ASTNodeUtil.convertToTypedList(compilationUnit.getCommentList(), Comment.class);
+		super.visit(compilationUnit);
 		return true;
 	}
 
