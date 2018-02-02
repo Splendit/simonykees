@@ -290,7 +290,6 @@ public class MavenHelper {
 		} else {
 			String tempZipPath = directory.getAbsolutePath() + File.separator + "maven";
 
-			// TODO: find a better way to load maven
 			try (InputStream mavenZipInputStream = RefactorMojo.class
 				.getResourceAsStream("/apache-maven-3.5.2-bin.zip")) {
 				mavenHomeUnzipped += tempZipPath;
@@ -419,7 +418,6 @@ public class MavenHelper {
 		request.setPomFile(new File(getProjectPath() + File.separator + "pom.xml"));
 		request.setGoals(Collections.singletonList("dependency:copy-dependencies "));
 
-		final Properties props = new Properties();
 		props.setProperty(OUTPUT_DIRECTORY_CONSTANT,
 				System.getProperty(USER_DIR) + File.separator + DEPENDENCIES_FOLDER_CONSTANT);
 		request.setProperties(props);
