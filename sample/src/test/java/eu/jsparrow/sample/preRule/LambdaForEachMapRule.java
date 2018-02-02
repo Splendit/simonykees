@@ -19,8 +19,33 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 		
 		list.forEach(s -> {
+			// save me 1
 			String subString = s.substring(1);
+			// save me 2
 			sb.append(subString);
+			// trailing comment in rs 1
+			// trailing comment in rs 2
+		});
+		
+		list.forEach(s -> {
+			// I could get lost in the map
+			String subString = s.substring(1);
+			if(!subString.isEmpty()) {
+				// I am safer here
+				sb.append(subString);
+			}
+		});
+		
+		list.forEach(s -> {
+			// save me 1
+			String subString = s.substring(1);
+			// save me 2
+			list.forEach(s2 -> {
+				// save me 3
+				String subString2 = s2.substring(1);
+				// save me 4
+				sb.append(subString2);
+			});
 		});
 		
 		return sb.toString();
@@ -31,7 +56,9 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 		
 		list.stream().filter(s -> !s.isEmpty()).forEach(s -> {
+			// save me 1
 			String subString = s.substring(1);
+			// save me 2
 			sb.append(subString);
 		});
 		
@@ -79,9 +106,13 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 		
 		list.stream().filter(s -> !s.isEmpty()).forEach(s -> {
+			// save me 1
 			int i = 10;
+			// save me 2
 			String subString = s.substring(1) + i;
+			// save me 3
 			String lower = subString.toLowerCase();
+			// save me 4
 			sb.append(lower);
 		});
 		

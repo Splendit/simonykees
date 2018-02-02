@@ -62,6 +62,7 @@ public class FunctionalInterfaceASTVisitor extends AbstractASTRewriteASTVisitor 
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
+		super.visit(compilationUnit);
 		return true;
 	}
 

@@ -1,21 +1,28 @@
 package eu.jsparrow.core.visitor.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.constants.ReservedNames;
+import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.core.visitor.CommentRewriter;
 
 /**
  * Primitives should not be boxed just for "String" conversion
@@ -47,6 +54,8 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 			.getFullyQualifiedName())
 				&& 1 >= node.arguments()
 					.size()) {
+			
+			List<Comment> relatedComments = new ArrayList<>();
 
 			/*
 			 * First case: Integer.valueOf(myInt).toString()
@@ -73,6 +82,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 					refactorCandidateExpression = (Expression) expetedValueOf.arguments()
 						.get(0);
 					refactorCandidateTypeBinding = refactorCandidateExpression.resolveTypeBinding();
+					relatedComments.addAll(findRemovedComments(expetedValueOf));
 				}
 			}
 
@@ -93,6 +103,8 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 					refactorCandidateExpression = (Expression) expectedPrimitiveNumberClass.arguments()
 						.get(0);
 					refactorCandidateTypeBinding = refactorCandidateExpression.resolveTypeBinding();
+					
+					relatedComments = findRelatedComments(expectedPrimitiveNumberClass);
 
 					/*
 					 * new Float(4D).toString() is not transformable to
@@ -121,12 +133,39 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 					.insertLast(moveTargetArgument, null);
 				SimpleName staticClassType = (SimpleName) astRewrite.createCopyTarget(refactorPrimitiveType);
 				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, staticClassType, null);
+				
+				getCommentRewriter().saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(node, Statement.class), relatedComments);
+				
 				onRewrite();
 			}
 
 		}
 
 		return true;
+	}
+
+	private List<Comment> findRelatedComments(ClassInstanceCreation expectedPrimitiveNumberClass) {
+		CommentRewriter cRewriter = getCommentRewriter();
+		List<Comment> relatedComments = cRewriter.findRelatedComments(expectedPrimitiveNumberClass);
+		List<Comment> argComments = ASTNodeUtil.convertToTypedList(expectedPrimitiveNumberClass.arguments(), Expression.class).stream()
+				.map(cRewriter::findRelatedComments)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+		relatedComments.removeAll(argComments);
+		return relatedComments;
+	}
+
+	private List<Comment> findRemovedComments(MethodInvocation expetedValueOf) {
+		CommentRewriter cRewriter = getCommentRewriter();
+		List<Comment> relatedComments = cRewriter.findInternalComments(expetedValueOf);
+		List<Comment> argComments = ASTNodeUtil.convertToTypedList(expetedValueOf.arguments(), Expression.class).stream()
+				.map(cRewriter::findRelatedComments)
+				.flatMap(List::stream)
+				.collect(Collectors.toList());
+		relatedComments.removeAll(argComments);
+		relatedComments.removeAll(cRewriter.findRelatedComments(expetedValueOf.getExpression()));
+		
+		return relatedComments;
 	}
 
 	private boolean isPrimitiveNumberClass(String simpleName) {
@@ -196,6 +235,7 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 							toStringSimpleName, valueParameter);
 
 					astRewrite.replace(node, methodInvocation, null);
+					getCommentRewriter().saveCommentsInParentStatement(node);
 					onRewrite();
 				}
 			}

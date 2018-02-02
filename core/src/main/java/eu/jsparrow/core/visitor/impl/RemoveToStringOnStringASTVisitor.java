@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.constants.ReservedNames;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.core.visitor.CommentRewriter;
 
 /**
  * Every usage of the function {@link Object#toString()} on a Java Object is
@@ -79,10 +82,19 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 			} while (unwrapped);
 
 			astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(variableExpression), null);
+			saveComments(node, variableExpression);
 			onRewrite();
 
 		}
 		return true;
+	}
+
+	private void saveComments(MethodInvocation node, Expression variableExpression) {
+		CommentRewriter cr = getCommentRewriter();
+		List<Comment> relatedComments = cr.findRelatedComments(node);
+		relatedComments.removeAll(cr.findRelatedComments(variableExpression));
+		Statement parentStm = ASTNodeUtil.getSpecificAncestor(node, Statement.class);
+		cr.saveBeforeStatement(parentStm, relatedComments);
 	}
 
 	@Override

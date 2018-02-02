@@ -58,9 +58,11 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 		if (statement instanceof ReturnStatement) {
 			ReturnStatement returnStatement = (ReturnStatement) statement;
 			astRewrite.replace(block, returnStatement.getExpression(), null);
+			getCommentRewriter().saveCommentsInParentStatement(block);
 		} else if (statement instanceof ExpressionStatement) {
 			ExpressionStatement expressionStatemnet = (ExpressionStatement) statement;
 			astRewrite.replace(block, expressionStatemnet.getExpression(), null);
+			getCommentRewriter().saveCommentsInParentStatement(block);
 		}
 	}
 

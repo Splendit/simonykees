@@ -11,6 +11,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
+import eu.jsparrow.maven.enums.StandaloneMode;
 import eu.jsparrow.maven.util.MavenHelper;
 
 /**
@@ -20,7 +21,6 @@ import eu.jsparrow.maven.util.MavenHelper;
  * @author Matthias Webhofer
  * @since 2.3.0
  */
-@SuppressWarnings("nls")
 @Mojo(name = "list-rules")
 public class ListAllRulesMojo extends AbstractMojo {
 
@@ -43,8 +43,8 @@ public class ListAllRulesMojo extends AbstractMojo {
 	private String ruleId;
 
 	// CONSTANTS
-	private static final String LIST_RULES = "LIST.RULES";
-	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID";
+	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
+	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 
 	/**
 	 * MOJO entry point. Registers shutdown hook for clean up and starts equinox
@@ -59,7 +59,7 @@ public class ListAllRulesMojo extends AbstractMojo {
 
 		try {
 			final Map<String, String> configuration = new HashMap<>();
-			configuration.put(LIST_RULES, Boolean.toString(true));
+			configuration.put(STANDALONE_MODE_KEY, StandaloneMode.LIST_RULES.name());
 			if (ruleId != null && !ruleId.isEmpty()) {
 				configuration.put(LIST_RULES_SELECTED_ID, ruleId);
 			}

@@ -40,7 +40,11 @@ public class EnhancedForLoopToStreamForEachRule {
 
 	public String doSomething() throws ClassNotFoundException, FileNotFoundException {
 
-		stringList1.forEach(logger::info);
+		// internal comment
+		// comment after
+		// save me
+		/* comment on expression */
+		stringList1 /* comment on expression */.forEach(logger::info);
 
 		stringList1.forEach(logger::info);
 
@@ -233,6 +237,9 @@ public class EnhancedForLoopToStreamForEachRule {
 			}
 		}
 
+		/*
+		 * SIM-472 bugfix
+		 */
 		stringList1.forEach(s -> {
 			TestClass tc = new TestClass();
 		});

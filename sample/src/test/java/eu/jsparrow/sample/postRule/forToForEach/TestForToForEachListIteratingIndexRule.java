@@ -23,9 +23,14 @@ public class TestForToForEachListIteratingIndexRule {
 	Runnable r = () -> {
 		List<String> fInterfaceRule = generateList("");
 		StringBuilder sb = new StringBuilder();
-		for (String aFInterfaceRule : fInterfaceRule) {
+		// comment before
+		/* init 2 */
+		/* init 1 */
+		/* inc */
+		for (String aFInterfaceRule : fInterfaceRule) /* between head and body */ {
+			// comment inside
 			sb.append(aFInterfaceRule);
-		}
+		} // comment after
 	};
 	
 	@interface MyFooAnnotation {
@@ -34,6 +39,9 @@ public class TestForToForEachListIteratingIndexRule {
 			String iterator;
 			List<String> fInterfaceRule = new ArrayList<>();
 			StringBuilder sb = new StringBuilder();
+			// multiple
+			// line
+			// comment
 			for (String aFInterfaceRule : fInterfaceRule) {
 				sb.append(aFInterfaceRule);
 			}
@@ -398,6 +406,7 @@ public class TestForToForEachListIteratingIndexRule {
 		StringBuilder sb = new StringBuilder();
 
 		for (Number s : foo) {
+			// FIXME SIM-212
 			sb.append(s.toString());
 		}
 

@@ -11,11 +11,14 @@ public class TestPrimitiveBoxedForStringWithExpressionsRule {
 	}
 	
 	public String testIntegerValueOfExpressionToString(int input) {
+		// test
 		return Integer.toString(input + 3);
 	}
 	
 	public String testIntegerValueOfExpressionWithMethodInvoke(int input) {
-		return Integer.toString(intSampleMethod() + input); 
+		// test
+		/* invocation comment */
+		return Integer /* expression comment */.toString(/* internal arg comment */ intSampleMethod() + input); 
 	}
 	
 	public String testIntegerValueOfMixedTypeExpression(int input) {
@@ -37,6 +40,11 @@ public class TestPrimitiveBoxedForStringWithExpressionsRule {
 	}
 	
 	public String testIntegerBoxingOnExpression(int input) {
+		
+		/* declaration comment */
+		/* toString expression comment */
+		String savingCmments = /* leading comment */ Integer .toString(/* ctor arg comment */ 5 + input + intSampleMethod("2")) /* trailing comment */ ;
+		
 		String result =  Integer.toString(5 + input + intSampleMethod("2"))
 				+ Integer.toString(input + intSampleMethod());
 		return result;

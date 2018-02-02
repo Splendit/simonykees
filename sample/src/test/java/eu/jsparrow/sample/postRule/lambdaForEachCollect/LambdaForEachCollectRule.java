@@ -14,6 +14,9 @@ public class LambdaForEachCollectRule {
 		List<String> oStrings = new ArrayList<>();
 		List<String> objectList = new ArrayList<>();
 		
+		/* lambda param comment */
+		/* lambda body */
+		// save me
 		oStrings.addAll(objectList.stream().map(o -> o.substring(0)).collect(Collectors.toList()));
 		
 		return oStrings.stream().collect(Collectors.joining(","));

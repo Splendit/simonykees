@@ -419,6 +419,7 @@ public class MavenHelper {
 		request.setPomFile(new File(getProjectPath() + File.separator + "pom.xml"));
 		request.setGoals(Collections.singletonList("dependency:copy-dependencies "));
 
+		final Properties props = new Properties();
 		props.setProperty(OUTPUT_DIRECTORY_CONSTANT,
 				System.getProperty(USER_DIR) + File.separator + DEPENDENCIES_FOLDER_CONSTANT);
 		request.setProperties(props);

@@ -59,6 +59,7 @@ public class RearrangeClassMembersASTVisitor extends AbstractASTRewriteASTVisito
 	@Override
 	public boolean visit(CompilationUnit compilationUnit) {
 		this.compilationUnit = compilationUnit;
+		super.visit(compilationUnit);
 		return true;
 	}
 

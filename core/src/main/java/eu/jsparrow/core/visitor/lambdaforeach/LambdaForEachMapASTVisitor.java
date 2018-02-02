@@ -13,6 +13,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.Comment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -31,6 +33,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
 
 /**
@@ -69,6 +72,14 @@ import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
  *
  */
 public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor {
+	
+	private List<Statement> replacedStatements = new ArrayList<>();
+	
+	@Override
+	public void endVisit(CompilationUnit cu) {
+		replacedStatements.clear();
+		super.endVisit(cu);
+	}
 
 	@Override
 	public boolean visit(MethodInvocation methodInvocation) {
@@ -106,6 +117,8 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		ASTNode extractableBlock = analyzer.getExtractableBlock();
 		ASTNode remainingBlock = analyzer.getRemainingBlock();
 		SimpleName newForEachParamName = analyzer.getNewForEachParameterName();
+		
+		this.replacedStatements.add(analyzer.getReplacedRemainingStatement());
 
 		// introduce a Stream::map
 		Expression streamExpression = methodInvocation.getExpression();
@@ -139,7 +152,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		 * replace the parameter of the forEach lambda expression
 		 */
 		astRewrite.replace(parameter, newForEachParamName, null);
-
+		saveComments(methodInvocation, analyzer);
 		onRewrite();
 
 		/*
@@ -162,6 +175,28 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		}
 
 		return true;
+	}
+
+	private void saveComments(MethodInvocation methodInvocation, ForEachBodyAnalyzer analyzer) {
+		Statement parentStatement = findParentStatement(methodInvocation); 
+		CommentRewriter helper = getCommentRewriter();
+		helper.saveRelatedComments(analyzer.getMapVariableDeclaration(), parentStatement);
+		List<Statement> remainingStatements = analyzer.getRemainingStatements();
+		if (remainingStatements.size() == 1 && ASTNode.EXPRESSION_STATEMENT == remainingStatements.get(0).getNodeType()) {
+			Statement rs = remainingStatements.get(0);
+			List<Comment> rsComments = new ArrayList<>();
+			rsComments.addAll(helper.findLeadingComments(rs));
+			rsComments.addAll(helper.findTrailingComments(rs));
+			helper.saveBeforeStatement(parentStatement, rsComments);
+		}
+	}
+
+	private Statement findParentStatement(MethodInvocation methodInvocation) {
+		ExpressionStatement parent = ASTNodeUtil.getSpecificAncestor(methodInvocation, ExpressionStatement.class);
+		while(parent != null && this.replacedStatements.contains(parent)) {
+			parent = ASTNodeUtil.getSpecificAncestor(parent, ExpressionStatement.class);
+		}
+		return parent;
 	}
 
 	/**
@@ -331,6 +366,8 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		private Modifier modifier;
 		private boolean primitiveTarget = false;
 		private String mappingMethodName = MAP;
+		private VariableDeclarationStatement mapVariableDeclaration;
+		private ExpressionStatement replacedRemainingStatement;
 
 		public ForEachBodyAnalyzer(SimpleName parameter, Block block) {
 			List<Statement> statements = ASTNodeUtil.returnTypedList(block.statements(), Statement.class);
@@ -374,6 +411,7 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 								newForEachVarName = fragmentName;
 								parameterType = declStatement.getType();
 								mapExpression = initializer;
+								this.mapVariableDeclaration = declStatement;
 								storeModifier(declStatement);
 							} else {
 								storeDeclaredName(statement, fragments);
@@ -561,8 +599,10 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 			ASTNode block;
 			if (this.remainingStatements.size() == 1 && ASTNode.EXPRESSION_STATEMENT == remainingStatements.get(0)
 				.getNodeType()) {
-				Expression expression = ((ExpressionStatement) remainingStatements.get(0)).getExpression();
+				ExpressionStatement remainingStm = (ExpressionStatement)remainingStatements.get(0);
+				Expression expression = remainingStm.getExpression();
 				block = astRewrite.createCopyTarget(expression);
+				replacedRemainingStatement = remainingStm;
 
 			} else {
 				block = ast.newBlock();
@@ -577,6 +617,14 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 		public Expression getMapExpression() {
 			return this.mapExpression;
 		}
+		
+		public VariableDeclarationStatement getMapVariableDeclaration() {
+			return this.mapVariableDeclaration;
+		}
+		
+		public List<Statement> getRemainingStatements() {
+			return this.remainingStatements;
+		}
 
 		public ASTNode getExtractableBlock() {
 			return this.extractableBlock;
@@ -584,6 +632,10 @@ public class LambdaForEachMapASTVisitor extends AbstractLambdaForEachASTVisitor 
 
 		public ASTNode getRemainingBlock() {
 			return this.remainingBlock;
+		}
+		
+		public ExpressionStatement getReplacedRemainingStatement() {
+			return this.replacedRemainingStatement;
 		}
 
 		private boolean referencesNames(Statement statement, List<SimpleName> declaredNames2) {

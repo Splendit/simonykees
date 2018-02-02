@@ -16,23 +16,34 @@ public class LambdaForEachIfWrapperToFilterRule {
 	public List<Boolean> booleanList = Arrays.asList(true, false, true, true, false);
 
 	public void doSomething() {
-		list.stream().forEach(s -> {
+		list.stream().forEach(/* save me 5 - leading lambda */ s -> /* save me 6 - leading lambda body */ {
+			
+			// save me - leading if statement
 			if (s.length() > 3) {
+				// save me 2
 				System.out.println(s);
+				// save me 3
 				System.out.println(s + s);
 			}
-		});
+		}
+		// save me 4 - trailing lambda 1
+		
+		// save me 7 - trailing lambda 2
+				);
 
 		list.parallelStream().forEach(s -> {
 			if (s.equals("asdf")) {
 				System.out.println(s);
-			}
+			} 
+			
+			// i'm last but not least
+			
 		});
 
 		list.parallelStream().forEach(s -> {
 			if ("asdf".equals(s)) {
 				System.out.println(s);
-			}
+			} // i'm last but not least
 		});
 
 		list.forEach(s -> {

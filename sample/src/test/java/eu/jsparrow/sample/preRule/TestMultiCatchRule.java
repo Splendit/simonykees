@@ -19,10 +19,13 @@ public class TestMultiCatchRule {
 		} catch (InstantiationException e) {
 			log.trace(e.getLocalizedMessage(), e);
 		} catch (IllegalAccessException e) {
+			// keep me
 			log.trace(e.getLocalizedMessage(), e);
 		} catch (IllegalArgumentException e) {
+			// dont duplicate me
 			log.trace(e.getLocalizedMessage(), e);
 		} catch (InvocationTargetException e) {
+			// dont duplicate me
 			log.trace(e.getLocalizedMessage(), e);
 		} catch (NoSuchMethodException e) {
 			log.trace(e.getLocalizedMessage(), e);

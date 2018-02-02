@@ -2,7 +2,6 @@ package eu.jsparrow.sample.preRule;
 
 import java.math.RoundingMode;
 
-@SuppressWarnings({ "nls" })
 public class TestEnumsWithoutEqualsRule {
 
 	public void replaceEqualsWithInfix(RoundingMode roundingMode) {
@@ -24,6 +23,9 @@ public class TestEnumsWithoutEqualsRule {
 		if (RoundingMode.UP.equals(roundingMode) && true) {
 			return;
 		}
+		if (RoundingMode.UP. /* saving comments */ equals(roundingMode)) {
+			return;
+		}
 	}
 
 	public void noEnumsShouldNotBeReplaced(String item) {
@@ -40,6 +42,17 @@ public class TestEnumsWithoutEqualsRule {
 			return;
 		}
 		if (RoundingMode.UP.compareTo(roundingMode) < 0) {
+			return;
+		}
+	}
+	
+	public void savingComments(RoundingMode roundingMode) {
+		
+		if (RoundingMode.UP. /* saving comments */ equals(roundingMode)) {
+			return;
+		}
+		
+		if ( /* leading comment */ RoundingMode.UP /* expression comment */ . /* invocation comment */ equals(/* param comment */ roundingMode) /* trailing comments */) {
 			return;
 		}
 	}

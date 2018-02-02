@@ -47,11 +47,13 @@ public class DiamondOperatorRule {
 		}
 		
 		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar>typeVariable) {
+			/*save me */
 			return new ArrayList<>();
 		}
 		
 		public ArrayList<String> genericOverloaded(ArrayList<String>typeVariable) {
-			return new ArrayList<>();
+			return new ArrayList<// line comment doesn't change
+					>();
 		}
 		
 		public <TypeVar> List<TypeVar> genericOverloaded(List<TypeVar>typeVariable, int i) {
@@ -213,6 +215,11 @@ public class DiamondOperatorRule {
 		Foo<String> foo = new Foo<String>(input){};
 		List<GenericSample> result = foo.genericOverloaded(new ArrayList<>(), input);
 		List<GenericSample> result2 = foo.genericOverloaded(new ArrayList<>(), input, 0);
+	}
+	
+	public void savingComments() {
+		/* Some comment here */
+		List<String> myList = new ArrayList<>();
 	}
 	
 	/**

@@ -20,9 +20,33 @@ public class LambdaForEachMapRule {
 		List<String> list = Arrays.asList(input + "non", "non-empty");
 		StringBuilder sb = new StringBuilder();
 
+		// save me 1
+		// save me 2
+		// trailing comment in rs 2
+		// trailing comment in rs 1
 		list.stream()
 			.map(s -> StringUtils.substring(s, 1))
 			.forEach(sb::append);
+
+		// I could get lost in the map
+		list.stream()
+			.map(s -> StringUtils.substring(s, 1))
+			.forEach(subString -> {
+				if (!StringUtils.isEmpty(subString)) {
+					// I am safer here
+					sb.append(subString);
+				}
+			});
+
+		// save me 1
+		// save me 2
+		// save me 3
+		// save me 4
+		list.stream()
+			.map(s -> StringUtils.substring(s, 1))
+			.forEach(subString -> list.stream()
+				.map(s2 -> StringUtils.substring(s2, 1))
+				.forEach(sb::append));
 
 		return sb.toString();
 	}
@@ -31,6 +55,8 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
+		// save me 1
+		// save me 2
 		list.stream()
 			.filter(s -> !StringUtils.isEmpty(s))
 			.map(s -> StringUtils.substring(s, 1))
@@ -79,14 +105,18 @@ public class LambdaForEachMapRule {
 		List<String> list = generateList(input);
 		StringBuilder sb = new StringBuilder();
 
+		// save me 2
 		list.stream()
 			.filter(s -> !StringUtils.isEmpty(s))
 			.map(s -> {
+				// save me 1
 				int i = 10;
 				return StringUtils.substring(s, 1) + i;
 			})
 			.forEach(subString -> {
+				// save me 3
 				String lower = StringUtils.lowerCase(subString);
+				// save me 4
 				sb.append(lower);
 			});
 

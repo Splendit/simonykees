@@ -7,7 +7,7 @@ public class TestStringFormatLineSeparatorRule {
 
 	public String testStringFormatLineSeparator01() {
 
-		return String.format("\n\n");
+		return String.format(/* save me */"\n\n");
 
 	}
 

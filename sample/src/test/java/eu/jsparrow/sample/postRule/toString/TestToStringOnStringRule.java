@@ -33,6 +33,27 @@ public class TestToStringOnStringRule {
 		return s;
 
 	}
+	
+	public String testToStringOnStringVariable_saveComments() {
+		String s = "theStringS";
+		/* save me */
+		// save me
+		String uselsessToString =  s;
+		/* save me */
+		uselsessToString = s;
+		uselsessToString = // save me
+				s;
+		/* save me */
+		s = s.substring(0);
+		
+		/* leading comment */
+		/* invocation comment */
+		/* trailing comment */
+		uselsessToString = "uselessToString"/* expression comment */;
+		/* save me */
+		return s;
+
+	}
 
 	public String testToStringOnStringFunctionThatReturnsString() {
 

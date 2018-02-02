@@ -4,7 +4,7 @@ package eu.jsparrow.sample.preRule;
 public class TestPrimitiveBoxedForStringWithConstantsRule {
 
 	public String testIntegerLiteralConcat() {
-		return "" + 4;
+		return "" /* save me */ +  4;
 	}
 
 	public String testIntegerNewLiteralTostring() {
@@ -20,7 +20,7 @@ public class TestPrimitiveBoxedForStringWithConstantsRule {
 	}
 
 	public String testLongLongNewLiteralTostring() {
-		return new Long(4L).toString();
+		return new Long(4L)/* save me */.toString();
 	}
 
 	public String testLongIntegerNewLiteralTostring() {
