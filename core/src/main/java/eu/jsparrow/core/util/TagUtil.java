@@ -175,7 +175,7 @@ public class TagUtil {
 			return Arrays.asList(Tag.JAVA_1_5, Tag.LOOP, Tag.OLD_LANGUAGE_CONSTRUCTS);
 
 		} else if (StandardLoggerRule.class == clazz) {
-			return Arrays.asList(Tag.JAVA_1_1, Tag.LOGGING, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS);
+			return Arrays.asList(Tag.JAVA_1_1, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS);
 
 		} else if (FlatMapInsteadOfNestedLoopsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP);
