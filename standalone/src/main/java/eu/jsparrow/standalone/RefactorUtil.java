@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.maven.shared.invoker.MavenInvocationException;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -46,6 +48,8 @@ public class RefactorUtil {
 	protected static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
 	protected static final String MAVEN_NATURE_CONSTANT = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
 	protected static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
+	protected static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
+	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
 
 	protected StandaloneConfig standaloneConfig;
 	private File directory;
@@ -55,9 +59,11 @@ public class RefactorUtil {
 	 * 
 	 * @param context
 	 * @throws YAMLConfigException
+	 * @throws MavenInvocationException 
+	 * @throws CoreException 
 	 */
 	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
-			throws YAMLConfigException {
+			throws YAMLConfigException, CoreException, MavenInvocationException {
 		String loggerInfo;
 
 		YAMLConfig config = getConfiguration(context);
@@ -128,14 +134,20 @@ public class RefactorUtil {
 			if (standaloneConfig != null) {
 				standaloneConfig.cleanUp();
 			}
-		} catch (JavaModelException | IOException e) {
+		} catch (JavaModelException | MavenInvocationException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
 		}
 
 		// CLEAN
 		if (directory != null && directory.exists()) {
-			deleteChildren(directory);
+			try {
+				deleteChildren(directory);
+				Files.delete(directory.toPath());
+			} catch (IOException e) {
+				logger.debug(e.getMessage(), e);
+				logger.error(e.getMessage());
+			}
 		}
 	}
 
@@ -185,14 +197,12 @@ public class RefactorUtil {
 		if (children != null) {
 			for (String file : Arrays.asList(children)) {
 				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
-				if (currentFile.isDirectory() && !("target".equals(currentFile.getName()))) { //$NON-NLS-1$
+				if (currentFile.isDirectory()) {
 					deleteChildren(currentFile);
 				}
 
 				try {
-					if (!"target".equals(currentFile.getName())) { //$NON-NLS-1$
 						Files.delete(currentFile.toPath());
-					}
 				} catch (IOException e) {
 					logger.debug(e.getMessage(), e);
 					logger.error(e.getMessage());
@@ -201,11 +211,13 @@ public class RefactorUtil {
 		}
 	}
 
-	protected void loadStandaloneConfig(BundleContext context) {
+	protected void loadStandaloneConfig(BundleContext context) throws CoreException, MavenInvocationException {
 		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
 		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
+		String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION);
+		String mavenHome = context.getProperty(MAVEN_HOME_KEY);
 
-		standaloneConfig = new StandaloneConfig(projectName, projectPath);
+		standaloneConfig = new StandaloneConfig(projectName, projectPath, compilerCompliance, mavenHome);
 	}
 
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules() {
