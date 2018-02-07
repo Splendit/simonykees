@@ -32,47 +32,52 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 		ASTNode lambdaBody = lambdaExpression.getBody();
 		if (lambdaBody instanceof Block) {
 			Block block = (Block) lambdaBody;
-			boolean hasExplicitReturnStatement = false;
-			if (block.statements()
-				.size() == 2) {
-				hasExplicitReturnStatement = this.checkForExplicitReutrnStatement(block);
+			if (!isApplicableTo(block)) {
+				return true;
 			}
-			if (block.statements()
-				.size() == 1 || hasExplicitReturnStatement) {
-				this.replaceNode(block);
-				onRewrite();
+			Statement statement = (Statement) block.statements()
+				.get(0);
+			Expression expressionToUse = null;
+			if (statement instanceof ReturnStatement) {
+				ReturnStatement returnStatement = (ReturnStatement) statement;
+				expressionToUse = returnStatement.getExpression();
 			}
+			if (statement instanceof ExpressionStatement) {
+				ExpressionStatement expressionStatemnet = (ExpressionStatement) statement;
+				expressionToUse = expressionStatemnet.getExpression();
+			}
+			astRewrite.replace(block, expressionToUse, null);
+			getCommentRewriter().saveCommentsInParentStatement(block);
+			onRewrite();
 		}
-
 		return true;
 	}
 
-	/**
-	 * replaces the given block by the newly calculated expression
-	 * 
-	 * @param block
-	 */
-	private void replaceNode(Block block) {
+	private boolean isApplicableTo(Block block) {
+		int blockSize = block.statements()
+			.size();
+		if (!(blockSize == 1 || blockSize == 2)) {
+			return false;
+		}
+		if (blockSize == 2) {
+			boolean hasExplicitReturnStatement = this.checkForExplicitReturnStatement(block);
+			if (!hasExplicitReturnStatement) {
+				return false;
+			}
+		}
 		Statement statement = (Statement) block.statements()
 			.get(0);
-		if (statement instanceof ReturnStatement) {
-			ReturnStatement returnStatement = (ReturnStatement) statement;
-			astRewrite.replace(block, returnStatement.getExpression(), null);
-			getCommentRewriter().saveCommentsInParentStatement(block);
-		} else if (statement instanceof ExpressionStatement) {
-			ExpressionStatement expressionStatemnet = (ExpressionStatement) statement;
-			astRewrite.replace(block, expressionStatemnet.getExpression(), null);
-			getCommentRewriter().saveCommentsInParentStatement(block);
-		}
+		return statement instanceof ReturnStatement || statement instanceof ExpressionStatement;
 	}
 
+
 	/**
-	 * checks if the given {@link Block} has an explicit return statement in it
+	 * Checks if the given {@link Block} has an explicit return statement in it
 	 * 
 	 * @param block
 	 * @return true, if an explicit return statement is present, false otherwise
 	 */
-	private boolean checkForExplicitReutrnStatement(Block block) {
+	private boolean checkForExplicitReturnStatement(Block block) {
 		boolean hasExplicitReturnStatement = false;
 		Statement statement = (Statement) block.statements()
 			.get(1);
