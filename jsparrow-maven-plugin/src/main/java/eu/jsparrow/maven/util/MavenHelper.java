@@ -72,6 +72,7 @@ public class MavenHelper {
 	protected static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory";
 	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps";
 	private static final String OSGI_INSTANCE_AREA_CONSTANT = "osgi.instance.area";
+	private static final String MAVEN_HOME_KEY = "MAVEN.HOME";
 
 	private boolean standaloneStarted = false;
 	private long standaloneBundleID = 0;
@@ -127,18 +128,17 @@ public class MavenHelper {
 	 */
 	public void startOSGI(Map<String, String> additionalConfiguration)
 			throws BundleException, InterruptedException, MojoExecutionException {
-
-		final Map<String, String> configuration = prepareConfiguration(additionalConfiguration);
-
-		prepareWorkingDirectory(configuration);
-
 		// TODO improve with this approach
 		// copyDepsWithMavenExecutor();
 
-		String newMavenHome = prepareMaven();
+		mavenHome = prepareMaven();
 
-		if (newMavenHome != null) {
-			extractAndCopyDependencies(newMavenHome);
+		if (mavenHome != null) {
+			final Map<String, String> configuration = prepareConfiguration(additionalConfiguration, mavenHome);
+
+			prepareWorkingDirectory(configuration);
+
+			extractAndCopyDependencies(mavenHome);
 
 			startEquinoxFramework(configuration);
 
@@ -188,7 +188,8 @@ public class MavenHelper {
 
 	/*** HELPER METHODS ***/
 
-	protected Map<String, String> prepareConfiguration(Map<String, String> additionalConfiguration) {
+	protected Map<String, String> prepareConfiguration(Map<String, String> additionalConfiguration, String mavenHome) {
+		log.debug(Messages.MavenHelper_PrepareConfiguration);
 
 		if (additionalConfiguration == null) {
 			additionalConfiguration = new HashMap<>();
@@ -199,6 +200,7 @@ public class MavenHelper {
 		additionalConfiguration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
 		additionalConfiguration.put(PROJECT_PATH_CONSTANT, getProjectPath());
 		additionalConfiguration.put(PROJECT_NAME_CONSTANT, getProjectName());
+		additionalConfiguration.put(MAVEN_HOME_KEY, mavenHome);
 
 		return additionalConfiguration;
 	}
