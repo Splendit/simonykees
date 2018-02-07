@@ -94,26 +94,17 @@ public class CommentRewriter {
 			.collect(Collectors.toList());
 	}
 
-	/**
-	 * Creates a new {@link Statement} with the given content and inserts it
-	 * before the given node.
-	 * 
-	 * @param node
-	 *            the node which will be preceded by the comment.
-	 * @param content
-	 *            the contet of the comment to be inserted.
-	 */
-	private void addComment(Statement node, String content) {
-
+	protected ListRewrite findListRewrite(Statement node) {
+		if(node == null) {
+			return null;
+		}
+		
 		StructuralPropertyDescriptor locationInParent = node.getLocationInParent();
 		if (!locationInParent.isChildListProperty()) {
-			return;
+			return null;
 		}
 
-		ListRewrite listRewrite = astRewrite.getListRewrite(node.getParent(),
-				(ChildListPropertyDescriptor) locationInParent);
-		Statement placeHolder = createPlaceHolder(content);
-		listRewrite.insertBefore(placeHolder, node, null);
+		return astRewrite.getListRewrite(node.getParent(), (ChildListPropertyDescriptor) locationInParent);
 	}
 
 	private Statement createPlaceHolder(String content) {
@@ -219,9 +210,40 @@ public class CommentRewriter {
 	 *            a list of comments to be inserted.
 	 */
 	public void saveBeforeStatement(Statement statement, List<Comment> comments) {
+		if(statement == null) {
+			return;
+		}
+		
+		ListRewrite listRewrite = findListRewrite(statement);
+		if (listRewrite == null) {
+			return;
+		}
+
 		comments.stream()
 			.map(this::findCommentContent)
-			.forEach(content -> addComment(statement, content));
+			.forEach(content -> listRewrite.insertBefore(createPlaceHolder(content), statement, null));
+	}
+
+	/**
+	 * Inserts a copy of the given comments after the given statement.
+	 * 
+	 * @param statement
+	 *            the statement to be followed by the comments.
+	 * @param comments
+	 *            a list of comments to be inserted.
+	 */
+	public void saveAfterStatement(Statement statement, List<Comment> comments) {
+		if(statement == null) {
+			return;
+		}
+		
+		ListRewrite listRewrite = findListRewrite(statement);
+		if (listRewrite == null) {
+			return;
+		}
+		comments.stream()
+			.map(this::findCommentContent)
+			.forEach(content -> listRewrite.insertAfter(createPlaceHolder(content), statement, null));
 	}
 
 	/**
@@ -244,7 +266,7 @@ public class CommentRewriter {
 	 * @param node
 	 *            a node on the current compilation unit being visited
 	 * @return list of the leading comments, i.e. the comments which are
-	 *         immediatelly preceding the node.
+	 *         immediately preceding the node.
 	 */
 	public List<Comment> findLeadingComments(ASTNode node) {
 		List<Comment> leadingComments = new ArrayList<>();
@@ -272,7 +294,7 @@ public class CommentRewriter {
 	 * @param node
 	 *            a node on the current compilation unit being visited
 	 * @return list of the trailing comments, i.e. the comments which are
-	 *         immediatelly succedding the node.
+	 *         immediately succedding the node.
 	 */
 	public List<Comment> findTrailingComments(ASTNode node) {
 		CompilationUnit cu = getCompilationUnit();
