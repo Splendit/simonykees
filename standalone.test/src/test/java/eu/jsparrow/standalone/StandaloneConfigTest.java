@@ -65,14 +65,14 @@ public class StandaloneConfigTest {
 	}
 
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
 		workspace = mock(IWorkspace.class);
 		projectDescription = mock(IProjectDescription.class);
 		project = mock(IProject.class);
 		javaProject = mock(IJavaProject.class);
 		mavenDepsFolder = mock(File.class);
 		classpathEntry = mock(IClasspathEntry.class);
-		standaloneConfig = new TestableStandaloneConfig("standaloneTest", path.toString(), true); //$NON-NLS-1$
+		standaloneConfig = new TestableStandaloneConfig("standaloneTest", path.toString(), "1.8", true); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Test
@@ -225,12 +225,12 @@ public class StandaloneConfigTest {
 
 	class TestableStandaloneConfig extends StandaloneConfig {
 
-		public TestableStandaloneConfig(String name, String path) {
-			this(name, path, false);
+		public TestableStandaloneConfig(String name, String path, String compilerCompliance) throws Exception {
+			this(name, path, compilerCompliance, false);
 		}
 
-		public TestableStandaloneConfig(String name, String path, boolean testMode) {
-			super(name, path, testMode);
+		public TestableStandaloneConfig(String name, String path, String compilerCompliance, boolean testMode) throws Exception {
+			super(name, path, compilerCompliance, "", testMode); //$NON-NLS-1$
 		}
 
 		@Override
