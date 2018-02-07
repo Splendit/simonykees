@@ -95,10 +95,21 @@ public class TestCornerCasesTryWithResourceRule {
 		final StringBuilder sb = new StringBuilder();
 
 		if (record.getThrown() != null) {
+			// comment before resource
 			try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
+				// CHECKSTYLE:OFF
 				record.getThrown()
 					.printStackTrace(pw);
+				/*
+				 * Unconnected comment
+				 */
+				// CHECKSTYLE:ON
+				// trailing comment after append
 				sb.append(sw.toString());
+				// comment before close
+				// comment before println
+				logger.info(String.valueOf(sb));
+				// comment in the end of the body
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
@@ -120,8 +131,10 @@ public class TestCornerCasesTryWithResourceRule {
 
 		if (record.getThrown() != null) {
 			try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
+				// CHECKSTYLE:OFF
 				record.getThrown()
 					.printStackTrace(pw);
+				// CHECKSTYLE:ON
 				sb.append(sw.toString());
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
