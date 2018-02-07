@@ -166,7 +166,7 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 	private TryStatement createNewTryStatement(TryStatement node, List<VariableDeclarationExpression> resourceList,
 			List<VariableDeclarationFragment> toBeMovedToResources, List<MethodInvocation> closeInvocations) {
 
-		CommentRewriter cRewriter = getCommentRewriter();
+		CommentRewriter commentRewriter = getCommentRewriter();
 
 		TryStatement tryStatement = getASTRewrite().getAST()
 			.newTryStatement();
@@ -182,13 +182,13 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		comments.forEach((key, value) -> {
 			int newBodySize = newBodyStatements.size();
 			if (newBodySize > key) {
-				Statement stm = newBodyStatements.get(key);
-				cRewriter.saveBeforeStatement(stm, value);
+				Statement statement = newBodyStatements.get(key);
+				commentRewriter.saveBeforeStatement(statement, value);
 			} else if (!newBodyStatements.isEmpty()) {
-				Statement stm = newBodyStatements.get(newBodySize - 1);
-				cRewriter.saveAfterStatement(stm, value);
+				Statement statement = newBodyStatements.get(newBodySize - 1);
+				commentRewriter.saveAfterStatement(statement, value);
 			} else {
-				cRewriter.saveBeforeStatement(node, value);
+				commentRewriter.saveBeforeStatement(node, value);
 			}
 		});
 
@@ -224,38 +224,38 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 			List<VariableDeclarationFragment> toBeMovedToResources, List<MethodInvocation> closeInvocations) {
 		List<Statement> stmsToBeRemoved = new ArrayList<>();
 		stmsToBeRemoved.addAll(toBeMovedToResources.stream()
-			.map(mi -> getSpecificAncestor(mi, Statement.class))
+			.map(methodInvocation -> getSpecificAncestor(methodInvocation, Statement.class))
 			.collect(toList()));
 		Block body = node.getBody();
 		Map<Integer, List<Comment>> bodyComments = new HashMap<>();
-		CommentRewriter cRewriter = getCommentRewriter();
+		CommentRewriter commentRewriter = getCommentRewriter();
 		List<Statement> statements = convertToTypedList(body.statements(), Statement.class);
 		List<Comment> connectedComments = new ArrayList<>();
 		List<Comment> skippedComments = new ArrayList<>();
 		int key = 0;
 		for (int i = 0; i < statements.size(); i++) {
-			Statement stm = statements.get(i);
-			List<Comment> ithStmComments = cRewriter.findRelatedComments(stm);
-			if (!stmsToBeRemoved.contains(stm)) {
+			Statement statement = statements.get(i);
+			List<Comment> ithStatementComments = commentRewriter.findRelatedComments(statement);
+			if (!stmsToBeRemoved.contains(statement)) {
 				if (bodyComments.containsKey(key)) {
-					ithStmComments.addAll(0, bodyComments.get(key));
+					ithStatementComments.addAll(0, bodyComments.get(key));
 				}
-				if (!ithStmComments.isEmpty()) {
-					bodyComments.put(key, ithStmComments);
-					connectedComments.addAll(ithStmComments);
+				if (!ithStatementComments.isEmpty()) {
+					bodyComments.put(key, ithStatementComments);
+					connectedComments.addAll(ithStatementComments);
 				}
-				if (!isCloseInvocation(stm, closeInvocations)) {
+				if (!isCloseInvocation(statement, closeInvocations)) {
 					key++;
 				}
 			} else {
-				skippedComments.addAll(ithStmComments);
+				skippedComments.addAll(ithStatementComments);
 			}
 		}
 
 		/*
 		 * comments in the body that are not related with any node.
 		 */
-		List<Comment> unconnected = cRewriter.findRelatedComments(body);
+		List<Comment> unconnected = commentRewriter.findRelatedComments(body);
 
 		unconnected.removeAll(connectedComments);
 		unconnected.removeAll(skippedComments);
@@ -263,21 +263,21 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		return bodyComments;
 	}
 
-	private boolean isCloseInvocation(Statement stm, List<MethodInvocation> closeInvocations) {
-		if (ASTNode.EXPRESSION_STATEMENT != stm.getNodeType()) {
+	private boolean isCloseInvocation(Statement statement, List<MethodInvocation> closeInvocations) {
+		if (ASTNode.EXPRESSION_STATEMENT != statement.getNodeType()) {
 			return false;
 		}
-		ExpressionStatement estm = (ExpressionStatement) stm;
-		Expression e = estm.getExpression();
-		if (ASTNode.METHOD_INVOCATION != e.getNodeType()) {
+		ExpressionStatement expressionStatement = (ExpressionStatement) statement;
+		Expression expression = expressionStatement.getExpression();
+		if (ASTNode.METHOD_INVOCATION != expression.getNodeType()) {
 			return false;
 		}
 
 		ASTMatcher matcher = new ASTMatcher();
 
-		MethodInvocation mi = (MethodInvocation) e;
+		MethodInvocation methodInvocation = (MethodInvocation) expression;
 		return closeInvocations.stream()
-			.anyMatch(closeInvocation -> matcher.match(mi, closeInvocation));
+			.anyMatch(closeInvocation -> matcher.match(methodInvocation, closeInvocation));
 	}
 
 	/**
@@ -298,8 +298,8 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 
 		if (keySet.size() == 1) {
 			int key = keySet.get(0);
-			List<Comment> cl = bodyComments.get(key);
-			cl.addAll(unconnectedComments);
+			List<Comment> commentList = bodyComments.get(key);
+			commentList.addAll(unconnectedComments);
 			unconnectedComments.clear();
 			return;
 		}
@@ -308,19 +308,19 @@ public class TryWithResourceASTVisitor extends AbstractASTRewriteASTVisitor {
 		for (Comment comment : unconnectedComments) {
 			int startPos = comment.getStartPosition();
 			Integer key = keySet.get(index);
-			List<Comment> cl = bodyComments.get(key);
-			while (cl.get(0)
+			List<Comment> commentList = bodyComments.get(key);
+			while (commentList.get(0)
 				.getStartPosition() < startPos && index < keySet.size()) {
 				index++;
 				key = keySet.get(index);
-				cl = bodyComments.get(key);
+				commentList = bodyComments.get(key);
 			}
 
 			if (index >= keySet.size()) {
 				break;
 			}
 
-			cl.add(0, comment);
+			commentList.add(0, comment);
 			unconnectedComments.remove(comment);
 		}
 
