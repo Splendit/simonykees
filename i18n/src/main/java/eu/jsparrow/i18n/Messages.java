@@ -380,6 +380,9 @@ public class Messages extends NLS {
 	public static String StandaloneConfig_debug_createJavaProject;
 	public static String StandaloneConfig_debug_createProject;
 	public static String StandaloneConfig_debug_createWorkspace;
+	public static String StandaloneConfig_executeMavenEclipseEclipseGoal;
+	public static String StandaloneConfig_projectDescriptionDoesNotExist;
+	public static String StandaloneConfig_projectIsNotAnEclipseProjectAndCouldNotConvert;
 	public static String StandaloneConfig_RevertClasspath;
 	public static String StandaloneConfig_SetProjectLocation;
 	public static String StandaloneConfig_UseExistingProjectDescription;
