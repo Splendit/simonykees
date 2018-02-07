@@ -128,6 +128,37 @@ public class TestCornerCasesTryWithResourceRule {
 		}
 	}
 	
+	public void morphiaCornerCaseWithClosedResources_emptyTryStatement() {
+		
+		final LogRecord record = null;
+		final StringBuilder sb = new StringBuilder();
+		
+		if (record.getThrown() != null) {
+			try {
+				
+				// comment before resource
+	            final StringWriter sw = new StringWriter();
+	            final PrintWriter pw = new PrintWriter(sw);
+	            
+	            
+	            
+				/*
+				 * Unconnected comment
+				 */
+	            
+	            //CHECKSTYLE:ON
+	            pw.close();
+	            
+	            // comment before close 
+	            sw.close();
+	            
+	            // comment in the end of the body
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+		}
+	}
+	
 	public void wekaNotInitialized() {
 		try (ByteArrayInputStream istream = new ByteArrayInputStream(null)) {
 			ObjectInputStream p;
