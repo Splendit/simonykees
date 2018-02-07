@@ -95,6 +95,10 @@ public class CommentRewriter {
 	}
 
 	protected ListRewrite findListRewrite(Statement node) {
+		if(node == null) {
+			return null;
+		}
+		
 		StructuralPropertyDescriptor locationInParent = node.getLocationInParent();
 		if (!locationInParent.isChildListProperty()) {
 			return null;
@@ -206,6 +210,10 @@ public class CommentRewriter {
 	 *            a list of comments to be inserted.
 	 */
 	public void saveBeforeStatement(Statement statement, List<Comment> comments) {
+		if(statement == null) {
+			return;
+		}
+		
 		ListRewrite listRewrite = findListRewrite(statement);
 		if (listRewrite == null) {
 			return;
@@ -225,6 +233,10 @@ public class CommentRewriter {
 	 *            a list of comments to be inserted.
 	 */
 	public void saveAfterStatement(Statement statement, List<Comment> comments) {
+		if(statement == null) {
+			return;
+		}
+		
 		ListRewrite listRewrite = findListRewrite(statement);
 		if (listRewrite == null) {
 			return;
