@@ -59,8 +59,8 @@ public class RefactorUtil {
 	 * 
 	 * @param context
 	 * @throws YAMLConfigException
-	 * @throws MavenInvocationException 
-	 * @throws CoreException 
+	 * @throws MavenInvocationException
+	 * @throws CoreException
 	 */
 	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
 			throws YAMLConfigException, CoreException, MavenInvocationException {
@@ -202,7 +202,7 @@ public class RefactorUtil {
 				}
 
 				try {
-						Files.delete(currentFile.toPath());
+					Files.delete(currentFile.toPath());
 				} catch (IOException e) {
 					logger.debug(e.getMessage(), e);
 					logger.error(e.getMessage());

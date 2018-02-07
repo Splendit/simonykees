@@ -368,7 +368,7 @@ public class MavenHelper {
 					String loggerInfo = NLS.bind(Messages.MavenHelper_StartingBundle, bundle.getSymbolicName(),
 							bundle.getState());
 					log.debug(loggerInfo);
-					
+
 					bundle.start();
 					standaloneBundleID = bundle.getBundleId();
 					standaloneStarted = true;
@@ -385,7 +385,7 @@ public class MavenHelper {
 	 */
 	private void extractAndCopyDependencies(String preparedMavenHome) {
 		log.debug(Messages.MavenHelper_ExtractAndCopyDependencies);
-		
+
 		final InvocationRequest request = new DefaultInvocationRequest();
 		final Properties props = new Properties();
 
@@ -460,7 +460,7 @@ public class MavenHelper {
 		if (!destDir.exists()) {
 			destDir.mkdir();
 		}
-		
+
 		String loggerInfo = NLS.bind(Messages.MavenHelper_UnzipTemporaryMavenInstallation, destDir.toString());
 		log.debug(loggerInfo);
 
@@ -496,7 +496,7 @@ public class MavenHelper {
 	private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
 		String loggerInfo = NLS.bind(Messages.MavenHelper_FileUnzip, filePath);
 		log.debug(loggerInfo);
-		
+
 		try (FileOutputStream fos = new FileOutputStream(filePath);
 				BufferedOutputStream bos = new BufferedOutputStream(fos)) {
 			byte[] bytesIn = new byte[BUFFER_SIZE];
