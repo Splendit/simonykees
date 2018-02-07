@@ -8,9 +8,8 @@
 		<version>2.5.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>bundles</artifactId>
+	<artifactId>tests</artifactId>
 	<packaging>pom</packaging>
-	<name>jSparrow :: bundles</name>
-	<description>jSparrow OSGi bundle container</description>
+	<name>jSparrow :: tests</name>
+	<description>jSparrow OSGi test container</description>
 </project>
-	
