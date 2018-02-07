@@ -131,10 +131,13 @@ public class PrimitiveBoxedForStringASTVisitor extends AbstractASTRewriteASTVisi
 				Expression moveTargetArgument = (Expression) astRewrite.createMoveTarget(refactorCandidateExpression);
 				astRewrite.getListRewrite(node, MethodInvocation.ARGUMENTS_PROPERTY)
 					.insertLast(moveTargetArgument, null);
-				SimpleName staticClassType = (SimpleName) astRewrite.createCopyTarget(refactorPrimitiveType);
+
+				CommentRewriter commentRewriter = getCommentRewriter();
+				SimpleName staticClassType = astRewrite.getAST().newSimpleName(refactorPrimitiveType.getIdentifier());
+				relatedComments.addAll(commentRewriter.findRelatedComments(refactorPrimitiveType));
 				astRewrite.set(node, MethodInvocation.EXPRESSION_PROPERTY, staticClassType, null);
 				
-				getCommentRewriter().saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(node, Statement.class), relatedComments);
+				commentRewriter.saveBeforeStatement(ASTNodeUtil.getSpecificAncestor(node, Statement.class), relatedComments);
 				
 				onRewrite();
 			}

@@ -23,6 +23,12 @@ public class TestPrimitiveBoxedForStringWithExpressionsRule {
 				. /* invocation comment */ valueOf( /* internal arg comment */ intSampleMethod() + input).toString(); 
 	}
 	
+	public String test_lineCommentFollowingExpression(int input) {
+		
+		return Integer //test
+			.valueOf(intSampleMethod() + input).toString();
+	}
+	
 	public String testIntegerValueOfMixedTypeExpression(int input) {
 		return Integer.valueOf(input + new Integer(1) + intSampleMethod()).toString();
 	}
