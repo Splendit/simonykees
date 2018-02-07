@@ -81,9 +81,7 @@ public class StandaloneConfig {
 		this.compilerCompliance = compilerCompliance;
 		this.mavenHome = mavenHome;
 
-		File mavenHomeFile = new File(this.mavenHome);
-		File pomFile = new File(getPomFilePath());
-		this.mavenInovker = new MavenInvoker(mavenHomeFile, pomFile);
+		this.mavenInovker = getMavenInvoker();
 
 		if (!testMode) {
 			setUp();
@@ -348,6 +346,12 @@ public class StandaloneConfig {
 
 	protected boolean isDescriptionGenerated() {
 		return descriptionGenerated;
+	}
+	
+	protected MavenInvoker getMavenInvoker() {
+		File mavenHomeFile = new File(this.mavenHome);
+		File pomFile = new File(getPomFilePath());
+		return new MavenInvoker(mavenHomeFile, pomFile);
 	}
 
 	/**

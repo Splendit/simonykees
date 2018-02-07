@@ -20,23 +20,22 @@ public class MavenInvoker {
 		this.mavenHome = mavenHome;
 		this.pomFile = pomFile;
 
-		this.invoker = new DefaultInvoker();
+		this.invoker = getDefaultInvoker();
 	}
 
 	public void invoke(String plugin, String goal, String version) throws MavenInvocationException {
 		String goalString = this.createGoalsString(plugin, goal, version);
-		
-		InvocationRequest request = new DefaultInvocationRequest();
+
+		InvocationRequest request = getDefaultInvocationRequest();
 		request.setBatchMode(true);
 		request.setPomFile(pomFile);
 		request.setGoals(Collections.singletonList(goalString));
 
-		invoker = new DefaultInvoker();
 		invoker.setMavenHome(mavenHome);
 		invoker.execute(request);
 	}
 
-	private String createGoalsString(String plugin, String goal, String version) {
+	protected String createGoalsString(String plugin, String goal, String version) {
 		String separator = ":"; //$NON-NLS-1$
 
 		StringBuilder sb = new StringBuilder();
@@ -54,5 +53,13 @@ public class MavenInvoker {
 		}
 
 		return sb.toString();
+	}
+
+	protected Invoker getDefaultInvoker() {
+		return new DefaultInvoker();
+	}
+
+	protected InvocationRequest getDefaultInvocationRequest() {
+		return new DefaultInvocationRequest();
 	}
 }
