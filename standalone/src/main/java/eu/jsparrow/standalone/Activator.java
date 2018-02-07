@@ -1,6 +1,8 @@
 package eu.jsparrow.standalone;
 
+import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -57,8 +59,11 @@ public class Activator implements BundleActivator {
 			switch (mode) {
 			case REFACTOR:
 				try {
+					Runtime.getRuntime()
+						.addShutdownHook(new Thread(() -> refactorUtil.cleanUp()));
+
 					refactorUtil.startRefactoring(context, new RefactoringPipeline());
-				} catch (YAMLConfigException yce) {
+				} catch (YAMLConfigException | CoreException | MavenInvocationException yce) {
 					logger.debug(yce.getMessage(), yce);
 					logger.error(yce.getMessage());
 					setExitErrorMessage(context, yce.getMessage());
