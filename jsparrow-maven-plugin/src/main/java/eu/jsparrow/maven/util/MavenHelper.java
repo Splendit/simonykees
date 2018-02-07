@@ -150,30 +150,7 @@ public class MavenHelper {
 	}
 
 	/**
-	 * walks through all files and subdirectories and removes them.
-	 * 
-	 * @param directory
-	 *            directory which has to be deleted
-	 * @throws IOException
-	 */
-	public void deleteChildren(File directory) throws IOException {
-
-		String[] children = directory.list();
-
-		if (children != null) {
-			for (String file : Arrays.asList(children)) {
-				File currentFile = new File(directory.getAbsolutePath(), file);
-				if (currentFile.isDirectory()) {
-					deleteChildren(currentFile);
-				}
-				Files.delete(currentFile.toPath());
-			}
-		}
-	}
-
-	/**
-	 * creates a new shutdown hook for stopping equinox and cleaning the temp
-	 * directory
+	 * creates a new shutdown hook for stopping equinox
 	 * 
 	 * @return
 	 */
@@ -183,7 +160,6 @@ public class MavenHelper {
 			public void run() {
 				super.run();
 				shutdownFramework();
-				cleanUp();
 			}
 		};
 	}
@@ -204,23 +180,6 @@ public class MavenHelper {
 				this.getFramework()
 					.stop();
 			} catch (BundleException e) {
-				log.debug(e.getMessage(), e);
-				log.error(e.getMessage());
-			}
-		}
-	}
-
-	/**
-	 * removes the temp directory
-	 */
-	public void cleanUp() {
-		if (!this.isStandaloneStarted() && null != this.getDirectory()) {
-			try {
-				deleteChildren(new File(this.getDirectory()
-					.getAbsolutePath()));
-				Files.delete(this.getDirectory()
-					.toPath());
-			} catch (IOException e) {
 				log.debug(e.getMessage(), e);
 				log.error(e.getMessage());
 			}
