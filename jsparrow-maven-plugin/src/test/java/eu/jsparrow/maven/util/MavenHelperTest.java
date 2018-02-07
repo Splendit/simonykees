@@ -79,9 +79,9 @@ public class MavenHelperTest {
 	@Test
 	public void prepareConfiguration_additionalConfigurationNull() throws Exception {
 
-		final Map<String, String> configuration = mavenHelper.prepareConfiguration(null);
+		final Map<String, String> configuration = mavenHelper.prepareConfiguration(null, ""); //$NON-NLS-1$
 
-		assertTrue(configuration.size() == 5);
+		assertTrue(configuration.size() == 7);
 	}
 
 	@Test
@@ -89,12 +89,12 @@ public class MavenHelperTest {
 		@SuppressWarnings("unchecked")
 		final Map<String, String> additionalConfiguration = mock(HashMap.class);
 
-		mavenHelper.prepareConfiguration(additionalConfiguration);
+		mavenHelper.prepareConfiguration(additionalConfiguration, ""); //$NON-NLS-1$
 
 		verify(additionalConfiguration).put(eq(Constants.FRAMEWORK_STORAGE_CLEAN),
 				eq(Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT));
 		verify(additionalConfiguration).put(eq(Constants.FRAMEWORK_STORAGE), anyString());
-		verify(additionalConfiguration, times(5)).put(anyString(), anyString());
+		verify(additionalConfiguration, times(7)).put(anyString(), anyString());
 	}
 
 	@Test(expected = InterruptedException.class)
