@@ -73,8 +73,6 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 
 				if (iteratorDefinitionAstVisior.allParametersFound()) {
 					replaceInformationASTVisitorList.put(node, iteratorDefinitionAstVisior);
-					getCommentRewriter().saveLeadingComment(node);
-					onRewrite();
 				}
 			}
 		} else if (ASTNode.INFIX_EXPRESSION == loopCondition.getNodeType()) {
@@ -116,7 +114,10 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 			String newName = newNameMap.keySet()
 				.iterator()
 				.next();
-			iteratorDefinitionAstVisior.replaceLoop(node, node.getBody(), multipleIteratorUse, newName);
+			if(iteratorDefinitionAstVisior.replaceLoop(node, node.getBody(), multipleIteratorUse, newName)) {
+				getCommentRewriter().saveLeadingComment(node);
+				onRewrite();
+			};
 
 			// clear the variableIterator if no other loop is present
 			if (replaceInformationASTVisitorList.isEmpty()) {

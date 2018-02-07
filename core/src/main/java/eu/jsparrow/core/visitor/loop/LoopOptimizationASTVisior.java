@@ -214,7 +214,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		}
 	}
 
-	public void replaceLoop(Statement loopStatement, Statement loopBody, Map<String, Integer> multipleIteratorUse,
+	public boolean replaceLoop(Statement loopStatement, Statement loopBody, Map<String, Integer> multipleIteratorUse,
 			String iteratorName) {
 		Type iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 
@@ -223,7 +223,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		 * applied
 		 */
 		if (null == iteratorType) {
-			return;
+			return false;
 		} else {
 			iteratorType = (Type) astRewrite.createMoveTarget(iteratorType);
 		}
@@ -277,7 +277,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(loopStatement, newFor, null);
 
 		astRewrite.remove(getIteratorDeclaration(), null);
-		onRewrite();
+		return true;
 	}
 
 	/**
