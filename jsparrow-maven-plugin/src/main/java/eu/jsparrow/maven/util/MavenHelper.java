@@ -108,7 +108,7 @@ public class MavenHelper {
 	/**
 	 * Creates Equinox framework, collects all bundles from src/main/resources,
 	 * specified in manifest.standalone file and starts the framework. When
-	 * done, stops framework and cleans created temp_jSparrow folder.
+	 * done, the framework is stopped.
 	 * 
 	 * @throws BundleException
 	 * @throws InterruptedException
@@ -121,7 +121,7 @@ public class MavenHelper {
 	/**
 	 * Creates Equinox framework, collects all bundles from src/main/resources,
 	 * specified in manifest.standalone file and starts the framework. When
-	 * done, stops framework and cleans created temp_jSparrow folder.
+	 * done, the framework is stopped.
 	 * 
 	 * @param additionalConfiguration
 	 *            will be added to the standard configuration

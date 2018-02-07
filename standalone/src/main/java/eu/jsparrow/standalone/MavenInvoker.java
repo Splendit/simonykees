@@ -9,6 +9,12 @@ import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 
+/**
+ * this is a small helper class to execute a maven plugin
+ * 
+ * @author Matthias Webhofer
+ * @since 2.5.0
+ */
 public class MavenInvoker {
 
 	private Invoker invoker;
@@ -23,6 +29,14 @@ public class MavenInvoker {
 		this.invoker = getDefaultInvoker();
 	}
 
+	/**
+	 * invokes the given maven plugin with the given goal
+	 * 
+	 * @param plugin
+	 * @param goal
+	 * @param version
+	 * @throws MavenInvocationException
+	 */
 	public void invoke(String plugin, String goal, String version) throws MavenInvocationException {
 		String goalString = this.createGoalsString(plugin, goal, version);
 
@@ -35,6 +49,14 @@ public class MavenInvoker {
 		invoker.execute(request);
 	}
 
+	/**
+	 * creates a plugin identifier string for maven. i.e. "eclipse:clean"
+	 * 
+	 * @param plugin
+	 * @param goal
+	 * @param version
+	 * @return
+	 */
 	protected String createGoalsString(String plugin, String goal, String version) {
 		String separator = ":"; //$NON-NLS-1$
 
