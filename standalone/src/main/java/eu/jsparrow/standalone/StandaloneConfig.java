@@ -43,7 +43,6 @@ public class StandaloneConfig {
 	private static final String ECLIPSE_CLEAN_GOAL = "clean"; //$NON-NLS-1$
 
 	private String path;
-	private String name;
 	private String compilerCompliance;
 	private String mavenHome;
 
@@ -69,14 +68,13 @@ public class StandaloneConfig {
 	 * @throws MavenInvocationException
 	 * @throws CoreException
 	 */
-	public StandaloneConfig(String name, String path, String compilerCompliance, String mavenHome)
+	public StandaloneConfig(String path, String compilerCompliance, String mavenHome)
 			throws CoreException, MavenInvocationException {
-		this(name, path, compilerCompliance, mavenHome, false);
+		this(path, compilerCompliance, mavenHome, false);
 	}
 
-	public StandaloneConfig(String name, String path, String compilerCompliance, String mavenHome, boolean testMode)
+	public StandaloneConfig(String path, String compilerCompliance, String mavenHome, boolean testMode)
 			throws CoreException, MavenInvocationException {
-		this.name = name;
 		this.path = path;
 		this.compilerCompliance = compilerCompliance;
 		this.mavenHome = mavenHome;

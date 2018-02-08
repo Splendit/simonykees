@@ -23,6 +23,9 @@ import org.mockito.ArgumentCaptor;
 @SuppressWarnings("nls")
 public class MavenInvokerTest {
 
+	private static final String ECLIPSE = "eclipse";
+	private static final String CLEAN = "clean";
+
 	private File mavenHome;
 	private File pomFile;
 
@@ -45,8 +48,8 @@ public class MavenInvokerTest {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void invoke() throws Exception {
-		String plugin = "eclipse";
-		String goal = "clean";
+		String plugin = ECLIPSE;
+		String goal = CLEAN;
 		String goalString = plugin + ":" + goal;
 
 		mavenInvoker.invoke(plugin, goal, null);
@@ -65,8 +68,8 @@ public class MavenInvokerTest {
 
 	@Test
 	public void createGoalsString_pluginGoalVersionProvided_shouldReturnGoalString() {
-		String plugin = "eclipse";
-		String goal = "clean";
+		String plugin = ECLIPSE;
+		String goal = CLEAN;
 		String version = "1.0";
 		String expectedResult = plugin + ":" + goal + ":" + version;
 
@@ -77,8 +80,8 @@ public class MavenInvokerTest {
 
 	@Test
 	public void createGoalsString_pluginGoalProvided_shouldReturnGoalString() {
-		String plugin = "eclipse";
-		String goal = "clean";
+		String plugin = ECLIPSE;
+		String goal = CLEAN;
 		String expectedResult = plugin + ":" + goal;
 
 		String result = mavenInvoker.createGoalsString(plugin, goal, null);
@@ -88,8 +91,8 @@ public class MavenInvokerTest {
 
 	@Test
 	public void createGoalsString_pluginGoalAndEmptyVersionProvided_shouldReturnGoalString() {
-		String plugin = "eclipse";
-		String goal = "clean";
+		String plugin = ECLIPSE;
+		String goal = CLEAN;
 		String expectedResult = plugin + ":" + goal;
 
 		String result = mavenInvoker.createGoalsString(plugin, goal, "");
@@ -118,7 +121,7 @@ public class MavenInvokerTest {
 
 	@Test
 	public void createGoalsString_pluginProvided_shouldReturnGoalString() {
-		String plugin = "eclipse";
+		String plugin = ECLIPSE;
 		String expectedResult = plugin;
 
 		String result = mavenInvoker.createGoalsString(plugin, null, null);
@@ -128,7 +131,7 @@ public class MavenInvokerTest {
 
 	@Test
 	public void createGoalsString_pluginAndEmptyGoalProvided_shouldReturnGoalString() {
-		String plugin = "eclipse";
+		String plugin = ECLIPSE;
 		String goal = "";
 		String expectedResult = plugin;
 

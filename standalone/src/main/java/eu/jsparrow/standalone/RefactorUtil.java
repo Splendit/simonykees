@@ -41,7 +41,6 @@ public class RefactorUtil {
 	protected static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
 	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
-	private static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
@@ -213,11 +212,10 @@ public class RefactorUtil {
 
 	protected void loadStandaloneConfig(BundleContext context) throws CoreException, MavenInvocationException {
 		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
-		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
 		String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION);
 		String mavenHome = context.getProperty(MAVEN_HOME_KEY);
 
-		standaloneConfig = new StandaloneConfig(projectName, projectPath, compilerCompliance, mavenHome);
+		standaloneConfig = new StandaloneConfig(projectPath, compilerCompliance, mavenHome);
 	}
 
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules() {

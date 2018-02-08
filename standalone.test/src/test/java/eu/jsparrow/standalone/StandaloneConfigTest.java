@@ -41,7 +41,7 @@ import org.mockito.ArgumentCaptor;
 public class StandaloneConfigTest {
 
 	private static Path path;
-	private static Path tempFilePath;
+	private Path tempFilePath;
 
 	private IWorkspace workspace;
 	private IProjectDescription projectDescription;
@@ -75,7 +75,7 @@ public class StandaloneConfigTest {
 		mavenDepsFolder = mock(File.class);
 		classpathEntry = mock(IClasspathEntry.class);
 		mavenInvoker = mock(MavenInvoker.class);
-		standaloneConfig = new TestableStandaloneConfig("standaloneTest", path.toString(), "1.8", true); //$NON-NLS-1$ //$NON-NLS-2$
+		standaloneConfig = new TestableStandaloneConfig(path.toString(), "1.8", true); //$NON-NLS-1$
 	}
 
 	@Test
@@ -218,13 +218,12 @@ public class StandaloneConfigTest {
 
 	class TestableStandaloneConfig extends StandaloneConfig {
 
-		public TestableStandaloneConfig(String name, String path, String compilerCompliance) throws Exception {
-			this(name, path, compilerCompliance, false);
+		public TestableStandaloneConfig(String path, String compilerCompliance) throws Exception {
+			this(path, compilerCompliance, false);
 		}
 
-		public TestableStandaloneConfig(String name, String path, String compilerCompliance, boolean testMode)
-				throws Exception {
-			super(name, path, compilerCompliance, "", testMode); //$NON-NLS-1$
+		public TestableStandaloneConfig(String path, String compilerCompliance, boolean testMode) throws Exception {
+			super(path, compilerCompliance, "", testMode); //$NON-NLS-1$
 		}
 
 		@Override
