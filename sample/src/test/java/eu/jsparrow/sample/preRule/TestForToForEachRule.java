@@ -27,7 +27,8 @@ public class TestForToForEachRule {
 		String aL = "I am here to confuse you ~_^ ";
 		
 		// comment before
-		for (Iterator<String> iterator = l.iterator(); iterator.hasNext();) {
+		for (Iterator<String> iterator = l //
+				.iterator(); iterator.hasNext();) {
 			// comment inside
 			sb.append(iterator.next());
 		} // comment after
