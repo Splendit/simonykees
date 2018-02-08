@@ -70,7 +70,6 @@ public class StatementLambdaToExpressionASTVisitor extends AbstractASTRewriteAST
 		return statement instanceof ReturnStatement || statement instanceof ExpressionStatement;
 	}
 
-
 	/**
 	 * Checks if the given {@link Block} has an explicit return statement in it
 	 * 
