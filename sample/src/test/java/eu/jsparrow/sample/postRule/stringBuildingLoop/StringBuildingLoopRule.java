@@ -12,8 +12,11 @@ public class StringBuildingLoopRule {
 	
 	public String collectionOfStrings(String input) {
 		List<String> collectionOfStrings = generateStringList(input);
+		// I don't want to break the result initializer
+		// I don't want to break anything
 		// save me
-		String result = collectionOfStrings.stream()
+		String result = collectionOfStrings // I don't want to break anything
+.stream()
 			.collect(Collectors.joining());
 		return result;
 	}
