@@ -27,7 +27,8 @@ public class LambdaForEachIfWrapperToFilterRule {
 		// save me - leading if statement
 		// save me 4 - trailing lambda 1
 		list.stream()
-			.filter(s -> s.length() > 3)
+			.filter(s -> s.length() > 3 // comment after if condition
+			)
 			.forEach(s -> {
 				// save me 2
 				logger.info(s);
