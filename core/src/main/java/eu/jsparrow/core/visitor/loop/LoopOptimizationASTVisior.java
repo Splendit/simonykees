@@ -46,6 +46,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 	private Statement loopStatement;
 	private Name listName = null;
 	private ASTNode iteratorDeclaration = null;
+	private Type iteratorType = null;
 	private MethodInvocation iteratorNextCall = null;
 	private boolean outsideWhile = true;
 
@@ -123,6 +124,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		if (preconditionForVariableDeclaration(node.fragments())) {
 
 			iteratorDeclaration = node;
+			iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 		}
 	}
 
@@ -133,6 +135,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 	public void endVisit(VariableDeclarationExpression node) {
 		if (preconditionForVariableDeclaration(node.fragments())) {
 			iteratorDeclaration = node;
+			iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 		}
 	}
 
@@ -216,18 +219,9 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 
 	public boolean replaceLoop(Statement loopStatement, Statement loopBody, Map<String, Integer> multipleIteratorUse,
 			String iteratorName) {
-		Type iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 
-		/*
-		 * iterator has no type-parameter therefore an optimization could not be
-		 * applied
-		 */
-		if (null == iteratorType) {
-			return false;
-		} else {
-			iteratorType = (Type) astRewrite.createMoveTarget(iteratorType);
-		}
-
+		iteratorType = (Type) astRewrite.createMoveTarget(iteratorType);
+		
 		// find LoopvariableName
 		MethodInvocation nextCall = getIteratorNextCall();
 		SingleVariableDeclaration singleVariableDeclaration = null;
@@ -289,11 +283,12 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		loopStatement = null;
 		listName = null;
 		iteratorDeclaration = null;
+		iteratorType = null;
 		iteratorNextCall = null;
 	}
 
 	public boolean allParametersFound() {
-		return null != listName && null != iteratorDeclaration && null != iteratorNextCall;
+		return null != listName && null != iteratorDeclaration && null != iteratorNextCall && null != iteratorType;
 	}
 
 	public ASTNode getIteratorDeclaration() {

@@ -114,10 +114,10 @@ public class WhileToForEachASTVisitor extends LoopToForEachASTVisitor<WhileState
 			String newName = newNameMap.keySet()
 				.iterator()
 				.next();
-			if(iteratorDefinitionAstVisior.replaceLoop(node, node.getBody(), multipleIteratorUse, newName)) {
-				getCommentRewriter().saveLeadingComment(node);
-				onRewrite();
-			};
+			iteratorDefinitionAstVisior.replaceLoop(node, node.getBody(), multipleIteratorUse, newName);
+			getCommentRewriter().saveLeadingComment(node);
+			onRewrite();
+			
 
 			// clear the variableIterator if no other loop is present
 			if (replaceInformationASTVisitorList.isEmpty()) {
