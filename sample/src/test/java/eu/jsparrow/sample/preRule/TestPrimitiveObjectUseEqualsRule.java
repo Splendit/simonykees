@@ -39,7 +39,8 @@ public class TestPrimitiveObjectUseEqualsRule {
 		}
 		
 		if (a // save comments
-				 == b /* saving comments */) {
+				 == b // save comments
+				 ) {
 		}
 	}
 
