@@ -17,10 +17,12 @@ public class EnhancedForLoopToStreamFindFirstRule {
 	
 	public String convertToFindFirstBreak(String input) {
 		StringBuilder sb = new StringBuilder();
-		String key = "";
+		String key = "" // comment after key init ""
+				;
 		List<String> values = generateList(input);
 		// comment before loop
-		for(String value : values) {
+		for(String value : values // comment after loop head
+				) {
 			// comment inside 1
 		    if(value.length() > 4) {
 		    	// comment inside 2
