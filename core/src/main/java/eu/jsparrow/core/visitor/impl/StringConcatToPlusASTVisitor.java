@@ -7,14 +7,20 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Comment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.builder.NodeBuilder;
+import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.core.visitor.CommentRewriter;
 
 /**
  * Removes all occurrences of StringVariable.concat(Parameter) and transforms
@@ -22,7 +28,7 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
  * 
  * ex.: a.concat(b) -> a + b a.concat(b.concat(c) -> a + b + c
  * 
- * @author Martin Huter
+ * @author Martin Huter, Ardit Ymeri
  * @since 0.9.2
  */
 public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
@@ -45,10 +51,30 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 				&& node.arguments()
 					.size() == 1
 				&& ClassRelationUtil.isContentOfTypes(((Expression) node.arguments()
-					.get(0)).resolveTypeBinding(), fullyQualifiedStringName)) {
+					.get(0)).resolveTypeBinding(), fullyQualifiedStringName) 
+				&& !hasBreakingLineComment(node)) {
+			
 			modifyMethodInvocation.add(node);
 		}
 		return true;
+	}
+
+	private boolean hasBreakingLineComment(MethodInvocation node) {
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Expression> arguments = ASTNodeUtil.convertToTypedList(node.arguments(), Expression.class);
+		if(arguments.size() != 1) {
+			return false;
+		}
+		
+		Expression argument = arguments.get(0);
+		
+		List<Comment> trailingComments = commentRewriter.findTrailingComments(argument);
+		if(trailingComments.isEmpty()) {
+			return false;
+		}
+		
+		Comment lastTrailingComment = trailingComments.get(0);
+		return lastTrailingComment.isLineComment();
 	}
 
 	@Override
@@ -57,7 +83,7 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 			Expression optionalExpression = node.getExpression();
 			Expression argument = (Expression) node.arguments()
 				.get(0);
-
+			
 			Expression left = alreadyReplacedExpression.remove(optionalExpression);
 			if (null == left) {
 				left = (Expression) astRewrite.createMoveTarget(optionalExpression);
@@ -65,7 +91,7 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 
 			Expression right = alreadyReplacedExpression.remove(argument);
 			if (null == right) {
-				right = (Expression) astRewrite.createMoveTarget(argument);
+				right = (Expression) astRewrite.createCopyTarget(argument);
 			}
 
 			Expression replacementNode = NodeBuilder.newInfixExpression(node.getAST(), InfixExpression.Operator.PLUS,
@@ -78,7 +104,7 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 					replacementNode = NodeBuilder.newParenthesizedExpression(node.getAST(), replacementNode);
 				}
 				astRewrite.replace(node, replacementNode, null);
-				getCommentRewriter().saveCommentsInParentStatement(node);
+				saveComments(node, optionalExpression, argument);
 				onRewrite();
 			}
 			modifyMethodInvocation.remove(node);
@@ -92,5 +118,18 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 					});
 			}
 		}
+	}
+
+	private void saveComments(MethodInvocation node, Expression expression, Expression argument) {
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Comment> nodeComments = commentRewriter.findRelatedComments(node);
+		List<Comment> argumentComments = commentRewriter.findRelatedComments(argument);
+		List<Comment> expressionComments = commentRewriter.findRelatedComments(expression);
+		
+		nodeComments.removeAll(argumentComments);
+		nodeComments.removeAll(expressionComments);
+		
+		Statement parentStatement = ASTNodeUtil.getSpecificAncestor(node, Statement.class);
+		commentRewriter.saveBeforeStatement(parentStatement, nodeComments);
 	}
 }

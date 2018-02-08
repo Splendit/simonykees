@@ -19,8 +19,33 @@ public class TestStringConcatToPlusRule {
 	}
 
 	public String testConcatWithLiteral(String input) {
-		// save me
-		return input + "abc";
+
+		// 1. --------------- --------------- --------------- ---------------
+
+		String string = input.concat("abc" // don't break the semicolon
+		/* */
+		// c2
+		);
+
+		// 2. --------------- --------------- --------------- ---------------
+
+		string = input + string // don't break the semicolon
+		/* */;
+
+		// 3. --------------- --------------- --------------- ---------------
+
+		int b = "".compareTo(input.concat("abc" // don't break the semicolon
+		));
+
+		String c = input.concat("abc" // don't break the semicolon
+		) + "";
+
+		// 4. --------------- --------------- --------------- ---------------
+
+		return input // I don't want to break anything
+			. // save me
+			concat("abc" // don't break the semicolon
+		);
 	}
 
 	public String testConcatWithVariable(String input, String param) {
@@ -132,7 +157,6 @@ public class TestStringConcatToPlusRule {
 
 	public String testConcatRecursionWithLiteral_saveComments(String input) {
 		// save comment 1
-		// save comment 2
 		return input + "abc" + "def";
 	}
 }
