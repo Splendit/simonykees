@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.CommentRewriter;
-import eu.jsparrow.core.visitor.loop.LoopOptimizationASTVisior;
+import eu.jsparrow.core.visitor.loop.LoopOptimizationASTVisitor;
 import eu.jsparrow.core.visitor.loop.LoopToForEachASTVisitor;
 
 /**
@@ -30,7 +30,7 @@ import eu.jsparrow.core.visitor.loop.LoopToForEachASTVisitor;
  */
 public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement> {
 
-	private Map<ForStatement, LoopOptimizationASTVisior> replaceInformationASTVisitorList;
+	private Map<ForStatement, LoopOptimizationASTVisitor> replaceInformationASTVisitorList;
 	private Map<String, Integer> multipleIteratorUse;
 
 	public ForToForEachASTVisitor() {
@@ -68,7 +68,7 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 					 */
 					return false;
 				}
-				LoopOptimizationASTVisior iteratorDefinitionAstVisior = new LoopOptimizationASTVisior(
+				LoopOptimizationASTVisitor iteratorDefinitionAstVisior = new LoopOptimizationASTVisitor(
 						(SimpleName) iteratorName, node);
 				iteratorDefinitionAstVisior.setASTRewrite(this.astRewrite);
 				parentNode.accept(iteratorDefinitionAstVisior);
@@ -110,7 +110,7 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 	public void endVisit(ForStatement node) {
 		// Do the replacement
 		if (replaceInformationASTVisitorList.containsKey(node)) {
-			LoopOptimizationASTVisior iteratorDefinitionAstVisior = replaceInformationASTVisitorList.remove(node);
+			LoopOptimizationASTVisitor iteratorDefinitionAstVisior = replaceInformationASTVisitorList.remove(node);
 			Map<String, Boolean> newNameMap = generateNewIteratorName(null, node,
 					iteratorDefinitionAstVisior.getListName());
 			String newName = newNameMap.keySet()
