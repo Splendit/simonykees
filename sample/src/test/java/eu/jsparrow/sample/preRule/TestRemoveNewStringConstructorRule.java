@@ -31,9 +31,19 @@ public class TestRemoveNewStringConstructorRule {
 	public String testNewStringOfLiteralWithComments() {
 		return /* save comments */new String("StringLiteral");
 	}
+	
+	public String testNewStringOfLiteral_lineComments() {
+		return new String("StringLiteral" // I don't want to break anything
+				);
+	}
 
 	public String testNewStringOfOtherString(String s) {
 		return new String(s);
+	}
+	
+	public String testNewStringOfOtherString_lineComments(String s) {
+		return new String(s // I don't want to break anything 
+				);
 	}
 
 	public String testNewStringOnNonStringElement(StringBuilder sb) {
