@@ -43,6 +43,9 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 		if (methodInvocationSkipList.contains(node)) {
 			return true;
 		}
+		
+
+
 
 		List<String> stringFullyQualifiedNameList = generateFullyQualifiedNameList(stringFullyQualifiedName);
 
@@ -56,8 +59,11 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 				.isEmpty()
 				&& (node.getExpression() != null && ClassRelationUtil.isContentOfTypes(node.getExpression()
 					.resolveTypeBinding(), stringFullyQualifiedNameList))) {
-
+			
 			Expression variableExpression = node.getExpression();
+			if(hasLineBreakingComment(variableExpression)) {
+				return true;
+			}
 
 			boolean unwrapped = false;
 			do {
@@ -80,13 +86,25 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 					}
 				}
 			} while (unwrapped);
-
+			
 			astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(variableExpression), null);
 			saveComments(node, variableExpression);
 			onRewrite();
 
 		}
 		return true;
+	}
+
+	private boolean hasLineBreakingComment(Expression variableExpression) {
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Comment> trailingComments = commentRewriter.findTrailingComments(variableExpression);
+		if(trailingComments.isEmpty()) {
+			return false;
+		}
+		
+		Comment lastTrailingComment = trailingComments.get(0);
+		lastTrailingComment.getAlternateRoot().delete();
+		return lastTrailingComment.isLineComment();
 	}
 
 	private void saveComments(MethodInvocation node, Expression variableExpression) {
