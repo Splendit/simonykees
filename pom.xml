@@ -93,11 +93,11 @@
 		<module>site</module>
 		<!-- release engineering -->
 		<module>releng</module>
-		
+
 		<module>bundles</module>
 		<module>features</module>
 		<module>tests</module>
-		
+
 		<!-- The jsparrow-maven-plugin cannot be deployed alongside jSparrow. SIM-877 
 			will improve/fix this. -->
 		<!-- <module>jsparrow-maven-plugin</module> -->
@@ -524,6 +524,8 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
+								<!-- Plugin will be ignored for the m2e connector which can not handle 
+									it -->
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>
