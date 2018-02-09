@@ -29,6 +29,10 @@ public class StatementLambdaToExpressionRule {
 		list.stream().map(element -> {
 			return element * 2;
 		});
+		list.stream().map(element -> // I don't want to break anything
+		{
+			return element * 2;
+		});
 		list.forEach(element -> {
 			doSomething(element);
 		});
