@@ -51,6 +51,11 @@ public class MultiVariableDeclarationLineRule {
 		int e
 		// comment after e
 ;
+		
+		// I don't want to break anything...
+		int // I don't want to break anything...
+		f;
+		int g;
 	}
 
 	enum Foo {
