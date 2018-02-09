@@ -35,6 +35,10 @@ public class TestPrimitiveObjectUseEqualsRule {
 		if (a.equals(b /* saving comments */)) {
 		}
 		
+		if (// save comments
+				a.equals(b /* saving comments */)) {
+		}
+		
 		if (a // save comments
 .equals(b // save comments
 )

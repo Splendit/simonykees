@@ -35,7 +35,6 @@ public class TestRemoveNewStringConstructorRule {
 	
 	public String testNewStringOfLiteral_lineComments() {
 		// I don't want to break anything
-		// I don't want to break anything
 		return "StringLiteral";
 	}
 

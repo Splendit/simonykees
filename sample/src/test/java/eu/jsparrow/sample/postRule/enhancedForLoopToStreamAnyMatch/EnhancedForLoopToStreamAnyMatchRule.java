@@ -23,7 +23,7 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 		= strings // test 
 .stream()
 			.anyMatch(value -> value.isEmpty());
-	}	
+	}
 	
 	public void statementsInBetween(List<String> strings) {
 	    String b = "b";
