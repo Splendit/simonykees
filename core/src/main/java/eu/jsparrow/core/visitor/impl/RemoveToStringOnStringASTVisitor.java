@@ -61,7 +61,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 					.resolveTypeBinding(), stringFullyQualifiedNameList))) {
 			
 			Expression variableExpression = node.getExpression();
-			if(hasLineBreakingComment(variableExpression)) {
+			if(ASTNodeUtil.isFollowedByLineComment(variableExpression, getCommentRewriter())) {
 				return true;
 			}
 
@@ -93,18 +93,6 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 
 		}
 		return true;
-	}
-
-	private boolean hasLineBreakingComment(Expression variableExpression) {
-		CommentRewriter commentRewriter = getCommentRewriter();
-		List<Comment> trailingComments = commentRewriter.findTrailingComments(variableExpression);
-		if(trailingComments.isEmpty()) {
-			return false;
-		}
-		
-		Comment lastTrailingComment = trailingComments.get(0);
-		lastTrailingComment.getAlternateRoot().delete();
-		return lastTrailingComment.isLineComment();
 	}
 
 	private void saveComments(MethodInvocation node, Expression variableExpression) {

@@ -52,29 +52,11 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 					.size() == 1
 				&& ClassRelationUtil.isContentOfTypes(((Expression) node.arguments()
 					.get(0)).resolveTypeBinding(), fullyQualifiedStringName) 
-				&& !hasBreakingLineComment(node)) {
+				&& !ASTNodeUtil.hasArgumentFollowedByLineComment(node, getCommentRewriter())) {
 			
 			modifyMethodInvocation.add(node);
 		}
 		return true;
-	}
-
-	private boolean hasBreakingLineComment(MethodInvocation node) {
-		CommentRewriter commentRewriter = getCommentRewriter();
-		List<Expression> arguments = ASTNodeUtil.convertToTypedList(node.arguments(), Expression.class);
-		if(arguments.size() != 1) {
-			return false;
-		}
-		
-		Expression argument = arguments.get(0);
-		
-		List<Comment> trailingComments = commentRewriter.findTrailingComments(argument);
-		if(trailingComments.isEmpty()) {
-			return false;
-		}
-		
-		Comment lastTrailingComment = trailingComments.get(0);
-		return lastTrailingComment.isLineComment();
 	}
 
 	@Override

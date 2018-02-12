@@ -13,10 +13,12 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.LineComment;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -32,6 +34,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
+import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.core.visitor.helper.WildCardTypeASTVisitor;
 
 /**
@@ -487,5 +490,48 @@ public class ASTNodeUtil {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Checks whether the last trailing comment of the given expression is a
+	 * line comment.
+	 * 
+	 * @param expression
+	 *            expression to be checked.
+	 * @param commentRewriter
+	 *            an instance of {@link CommentRewriter} initialized with the
+	 *            AST which is currently being visites
+	 * @return {@code true} if the last trailing comment is a
+	 *         {@link LineComment} or {@code false} otherwise.
+	 */
+	public static boolean isFollowedByLineComment(Expression expression, CommentRewriter commentRewriter) {
+		List<Comment> trailingComments = commentRewriter.findTrailingComments(expression);
+		if (trailingComments.isEmpty()) {
+			return false;
+		}
+
+		Comment lastTrailingComment = trailingComments.get(0);
+		lastTrailingComment.getAlternateRoot()
+			.delete();
+		return lastTrailingComment.isLineComment();
+	}
+
+	/**
+	 * Checks if any of the arguments of the given method invocation is followed
+	 * by line comment.
+	 * 
+	 * @param node
+	 *            an instancfe of a {@link MethodInvocation} to be checked.
+	 * @param commentRewriter
+	 *            an instance of {@link CommentRewriter} initialized with the
+	 *            AST which is currently being visites
+	 * @return {@code true} if the last trailing comment of any of the arguments
+	 *         is a {@link LineComment} or {@code false} otherwise.
+	 */
+	public static boolean hasArgumentFollowedByLineComment(MethodInvocation node, CommentRewriter commentRewriter) {
+		List<Expression> arguments = convertToTypedList(node.arguments(), Expression.class);
+
+		return arguments.stream()
+			.anyMatch(argument -> isFollowedByLineComment(argument, commentRewriter));
 	}
 }
