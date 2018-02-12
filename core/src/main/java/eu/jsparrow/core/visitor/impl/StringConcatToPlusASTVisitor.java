@@ -7,10 +7,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Comment;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -51,9 +49,16 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 				&& node.arguments()
 					.size() == 1
 				&& ClassRelationUtil.isContentOfTypes(((Expression) node.arguments()
-					.get(0)).resolveTypeBinding(), fullyQualifiedStringName) 
+					.get(0)).resolveTypeBinding(), fullyQualifiedStringName)
 				&& !ASTNodeUtil.hasArgumentFollowedByLineComment(node, getCommentRewriter())) {
-			
+			/*
+			 * If any of the arguments of the method invocation has a trailing
+			 * line comment (i.e. the last following comment related to it is a
+			 * line comment), then the transformation is avoided as eclipse is
+			 * placing the rest of the code in the line which is already
+			 * commented out.
+			 */
+
 			modifyMethodInvocation.add(node);
 		}
 		return true;
@@ -65,7 +70,7 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 			Expression optionalExpression = node.getExpression();
 			Expression argument = (Expression) node.arguments()
 				.get(0);
-			
+
 			Expression left = alreadyReplacedExpression.remove(optionalExpression);
 			if (null == left) {
 				left = (Expression) astRewrite.createMoveTarget(optionalExpression);
@@ -107,10 +112,10 @@ public class StringConcatToPlusASTVisitor extends AbstractASTRewriteASTVisitor {
 		List<Comment> nodeComments = commentRewriter.findRelatedComments(node);
 		List<Comment> argumentComments = commentRewriter.findRelatedComments(argument);
 		List<Comment> expressionComments = commentRewriter.findRelatedComments(expression);
-		
+
 		nodeComments.removeAll(argumentComments);
 		nodeComments.removeAll(expressionComments);
-		
+
 		Statement parentStatement = ASTNodeUtil.getSpecificAncestor(node, Statement.class);
 		commentRewriter.saveBeforeStatement(parentStatement, nodeComments);
 	}
