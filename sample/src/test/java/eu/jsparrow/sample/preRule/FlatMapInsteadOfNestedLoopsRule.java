@@ -14,7 +14,8 @@ public class FlatMapInsteadOfNestedLoopsRule {
 	public void test() {
 		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
 		// outer comment
-		matrix2.stream().filter(row -> !row.isEmpty()).forEach(row -> {
+		matrix2.stream().filter(row -> !row.isEmpty()) // I don't want to break anything
+		.forEach(row -> {
 			// inner comment one
 			row.stream().filter(col -> !col.isEmpty()).forEach( /* lambda leading comment */ col -> /* lambda-body leading comment */ {
 				// inner comment two

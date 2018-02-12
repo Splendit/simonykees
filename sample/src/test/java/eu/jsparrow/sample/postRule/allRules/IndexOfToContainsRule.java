@@ -125,6 +125,18 @@ public class IndexOfToContainsRule {
 		if (!l.contains(s)) {
 			l.add(s);
 		}
+
+		// index of
+		if (!l // index of
+			.contains(s)) {
+			l.add(s);
+		}
+
+		// I don't want to break anything
+		if (!l // I don't want to break anything
+			.contains(s)) {
+			l.add(s);
+		}
 	}
 
 	public void testString() {

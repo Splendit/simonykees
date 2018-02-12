@@ -14,9 +14,11 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	boolean missingBoolDecl = false;
 	
 	public void usingAnyMatch(List<String> strings) {
-		boolean containsEmpty = false;
+		boolean containsEmpty // comment after declaration name
+		= false;
 		// comment before
-	    for(String value : strings) {
+	    for(String value : strings // test 
+	    		) {
 	    	// comment inside 1
 	        if(value.isEmpty()) {
 	        	// comment inside 2

@@ -16,9 +16,11 @@ public class TestMultiCatchRule {
 		// TODO meaningful Asserts?
 		try {
 			String.class.getConstructor(String.class).newInstance("aa");
-		} catch (SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException | IllegalAccessException | InstantiationException e) {
+		} catch (SecurityException | NoSuchMethodException | InvocationTargetException // I don't want to break anything...
+ | IllegalArgumentException | IllegalAccessException | InstantiationException e) {
 			// keep me
 			// dont duplicate me
+			// I don't want to break anything...
 			log.trace(e.getLocalizedMessage(), e);
 		}
 	}

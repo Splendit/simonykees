@@ -12,7 +12,8 @@ import java.util.Observer;
  */
 @SuppressWarnings("serial")
 public class ReImplementingInterfaceRule<E> extends SuperClass3<E>
-		implements List<E>, Iterable<E>, Comparable<E>, Observer {
+		implements List<E>, Iterable<E> // 
+		, Comparable<E>, Observer {
 	@Override
 	public int compareTo(E o) {
 		// TODO Auto-generated method stub

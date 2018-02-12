@@ -92,6 +92,7 @@ public class TestCornerCasesTryWithResourceRule {
 		
 		if (record.getThrown() != null) {
 			// comment before resource
+			// I don't want to break anything
 			try (final StringWriter sw = new StringWriter();
 					final PrintWriter pw = new PrintWriter(sw)) {
 				//CHECKSTYLE:OFF

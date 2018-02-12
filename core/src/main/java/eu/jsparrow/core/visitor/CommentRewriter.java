@@ -269,6 +269,9 @@ public class CommentRewriter {
 	 *         immediately preceding the node.
 	 */
 	public List<Comment> findLeadingComments(ASTNode node) {
+		if(node == null) {
+			return Collections.emptyList();
+		}
 		List<Comment> leadingComments = new ArrayList<>();
 		List<Comment> compilatinUnitComments = getCompilationUnitComments();
 		CompilationUnit cu = getCompilationUnit();
@@ -297,6 +300,10 @@ public class CommentRewriter {
 	 *         immediately succedding the node.
 	 */
 	public List<Comment> findTrailingComments(ASTNode node) {
+		if(node == null) {
+			return Collections.emptyList();
+		}
+		
 		CompilationUnit cu = getCompilationUnit();
 		int trailCommentIndex = cu.lastTrailingCommentIndex(node);
 		if (trailCommentIndex < 0) {
@@ -329,6 +336,10 @@ public class CommentRewriter {
 	 *         its parent.
 	 */
 	public List<Comment> findSurroundingComments(ASTNode node) {
+		if(node == null) {
+			return Collections.emptyList();
+		}
+		
 		ASTNode parent = node.getParent();
 		int parentStartPos = parent.getStartPosition();
 		int parentEndPOs = parentStartPos + parent.getLength();

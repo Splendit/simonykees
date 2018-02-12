@@ -118,6 +118,16 @@ public class IndexOfToContainsRule {
 		if (/* saving comments */ l.indexOf(s) == -1) {
 			l.add(s);
 		}
+		
+		if (l // index of
+				.indexOf(s) == -1) {
+			l.add(s);
+		}
+		
+		if (l // I don't want to break anything
+				.indexOf(s) < 0) {
+			l.add(s);
+		}
 	}
 
 	public void testString() {

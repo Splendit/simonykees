@@ -12,7 +12,9 @@ public class StringLiteralEqualityCheckRule {
 	public boolean swapExpressionWithStringLiteral(String input) {
 		"StringLiteralEqualityCheckRule".equals(getClass().getName());
 		
-		boolean swap = "input".equals(input);
+		boolean swap = input // don't break the semicolon
+				.equals("input" // don't break the line
+				);
 		return swap;
 	}
 	

@@ -24,7 +24,8 @@ public class TestMultiCatchRule {
 		} catch (IllegalArgumentException e) {
 			// dont duplicate me
 			log.trace(e.getLocalizedMessage(), e);
-		} catch (InvocationTargetException e) {
+		} catch (InvocationTargetException // I don't want to break anything...
+				e) {
 			// dont duplicate me
 			log.trace(e.getLocalizedMessage(), e);
 		} catch (NoSuchMethodException e) {

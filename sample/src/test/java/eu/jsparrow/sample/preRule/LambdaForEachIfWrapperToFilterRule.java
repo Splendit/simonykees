@@ -19,7 +19,8 @@ public class LambdaForEachIfWrapperToFilterRule {
 		list.stream().forEach(/* save me 5 - leading lambda */ s -> /* save me 6 - leading lambda body */ {
 			
 			// save me - leading if statement
-			if (s.length() > 3) {
+			if (s.length() > 3 // comment after if condition
+					) {
 				// save me 2
 				System.out.println(s);
 				// save me 3

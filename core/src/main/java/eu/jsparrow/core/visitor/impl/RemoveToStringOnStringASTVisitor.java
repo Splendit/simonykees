@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.Type;
 
 import eu.jsparrow.core.constants.ReservedNames;
 import eu.jsparrow.core.util.ASTNodeUtil;
@@ -44,6 +46,7 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 			return true;
 		}
 
+		Expression variableExpression = node.getExpression();
 		List<String> stringFullyQualifiedNameList = generateFullyQualifiedNameList(stringFullyQualifiedName);
 
 		/*
@@ -51,42 +54,60 @@ public class RemoveToStringOnStringASTVisitor extends AbstractASTRewriteASTVisit
 		 * zero arguments. The expressions type where the toString is used on
 		 * needs to be a String or a StringLiteral
 		 */
-		if (StringUtils.equals(ReservedNames.MI_TO_STRING, node.getName()
-			.getFullyQualifiedName()) && !(node.getParent() instanceof ExpressionStatement) && node.typeArguments()
-				.isEmpty()
-				&& (node.getExpression() != null && ClassRelationUtil.isContentOfTypes(node.getExpression()
-					.resolveTypeBinding(), stringFullyQualifiedNameList))) {
+		if (!checkSemanticPrecondition(node, variableExpression, stringFullyQualifiedNameList)) {
+			return true;
+		}
 
-			Expression variableExpression = node.getExpression();
+		if (ASTNodeUtil.isFollowedByLineComment(variableExpression, getCommentRewriter())) {
+			/*
+			 * If the last trailing comment of the expression is a line comment,
+			 * then the transformation is avoided as eclipse is placing the rest
+			 * of the method invocation in the in the line which is already
+			 * commented out.
+			 */
+			return true;
+		}
 
-			boolean unwrapped = false;
-			do {
-				unwrapped = false;
-				if (variableExpression instanceof ParenthesizedExpression) {
-					variableExpression = ASTNodeUtil.unwrapParenthesizedExpression(variableExpression);
+		boolean unwrapped = false;
+		do {
+			unwrapped = false;
+			if (variableExpression instanceof ParenthesizedExpression) {
+				variableExpression = ASTNodeUtil.unwrapParenthesizedExpression(variableExpression);
+				unwrapped = true;
+			}
+
+			if (variableExpression instanceof MethodInvocation) {
+				MethodInvocation mI = (MethodInvocation) variableExpression;
+				if (StringUtils.equals(ReservedNames.MI_TO_STRING, mI.getName()
+					.getFullyQualifiedName()) && mI.typeArguments()
+						.isEmpty()
+						&& (mI.getExpression() != null && ClassRelationUtil.isContentOfTypes(mI.getExpression()
+							.resolveTypeBinding(), stringFullyQualifiedNameList))) {
+					variableExpression = mI.getExpression();
+					methodInvocationSkipList.add(mI);
 					unwrapped = true;
 				}
+			}
+		} while (unwrapped);
 
-				if (variableExpression instanceof MethodInvocation) {
-					MethodInvocation mI = (MethodInvocation) variableExpression;
-					if (StringUtils.equals(ReservedNames.MI_TO_STRING, mI.getName()
-						.getFullyQualifiedName()) && mI.typeArguments()
-							.isEmpty()
-							&& (mI.getExpression() != null && ClassRelationUtil.isContentOfTypes(mI.getExpression()
-								.resolveTypeBinding(), stringFullyQualifiedNameList))) {
-						variableExpression = mI.getExpression();
-						methodInvocationSkipList.add(mI);
-						unwrapped = true;
-					}
-				}
-			} while (unwrapped);
+		astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(variableExpression), null);
+		saveComments(node, variableExpression);
+		onRewrite();
 
-			astRewrite.replace(node, (Expression) astRewrite.createMoveTarget(variableExpression), null);
-			saveComments(node, variableExpression);
-			onRewrite();
-
-		}
 		return true;
+	}
+
+	protected boolean checkSemanticPrecondition(MethodInvocation node, Expression methodInvocationexpression,
+			List<String> stringFullyQualifiedNameList) {
+		ASTNode parent = node.getParent();
+		SimpleName name = node.getName();
+
+		List<Type> types = ASTNodeUtil.convertToTypedList(node.typeArguments(), Type.class);
+
+		return StringUtils.equals(ReservedNames.MI_TO_STRING, name.getFullyQualifiedName())
+				&& ASTNode.EXPRESSION_STATEMENT != parent.getNodeType() && types.isEmpty()
+				&& (methodInvocationexpression != null && ClassRelationUtil
+					.isContentOfTypes(methodInvocationexpression.resolveTypeBinding(), stringFullyQualifiedNameList));
 	}
 
 	private void saveComments(MethodInvocation node, Expression variableExpression) {

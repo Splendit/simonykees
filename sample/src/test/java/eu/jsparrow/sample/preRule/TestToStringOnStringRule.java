@@ -43,6 +43,15 @@ public class TestToStringOnStringRule {
 				s.toString();
 		s = s.substring(0). /* save me */ toString();
 		
+		s = s.substring(0)// save me
+				.toString();
+		
+		String input = "noInput";
+		s = s.substring(0) // save me
+				.toString() + (input.toString() + ("some-other-nasty-string" // skip me
+						.toString()) + "abc" // you dont want to break the code
+						.toString() + 'c').toString();
+		
 		uselsessToString = /* leading comment */ "uselessToString"/* expression comment */. /* invocation comment */ toString() /* trailing comment */;
 		return /* save me */s.toString();
 

@@ -12,8 +12,10 @@ public class StringBuildingLoopRule {
 	
 	public String collectionOfStrings(String input) {
 		List<String> collectionOfStrings = generateStringList(input);
-		String result = "";
-		for(String val : collectionOfStrings) {
+		String result // I don't want to break the result initializer
+		 = "";
+		for(String val : collectionOfStrings // I don't want to break anything
+				) {
 			// save me
 			result = result + val;
 		}

@@ -45,7 +45,8 @@ public class LambdaToMethodReferenceRule {
 
 		Collections.sort(personList, (Person a, Person b) -> /* save me */  
 		
-		Person.compareByAge(a, b));
+		Person // I don't want to break anything...
+		.compareByAge(a, b));
 
 		Collections.sort(personList, /* save me */  (a, b) -> Person.compareByAge(a, b));
 

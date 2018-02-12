@@ -17,7 +17,10 @@ public class LambdaForEachCollectRule {
 		/* lambda param comment */
 		/* lambda body */
 		// save me
-		oStrings.addAll(objectList.stream().map(o -> o.substring(0)).collect(Collectors.toList()));
+		// comment after oStrings
+		oStrings // comment after oStrings
+.addAll(objectList.stream().map(o -> o.substring(0)) // comment after map
+.collect(Collectors.toList()));
 		
 		return oStrings.stream().collect(Collectors.joining(","));
 	}

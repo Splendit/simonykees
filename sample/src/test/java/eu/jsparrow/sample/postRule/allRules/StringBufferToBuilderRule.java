@@ -23,9 +23,11 @@ public class StringBufferToBuilderRule {
 	private void test1() {
 		// a comment here
 		/* internal comment in declaration */
+		// I don't want to break anything
 		/* internal comment in initializer */
 		// trailing comment
-		StringBuilder localStringBuffer1 = new StringBuilder();
+		StringBuilder localStringBuffer1 // I don't want to break anything
+				= new StringBuilder();
 		StringBuilder localStringBuffer2 = null;
 		StringBuilder localStringBuffer3;
 		StringBuilder localStringBuffer4 = new StringBuilder();

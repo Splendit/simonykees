@@ -16,6 +16,9 @@ public class TestCollectionRemoveAllRule {
 		List<String> resultList = generateList(input);
 		
 		resultList /* expression comment */ . /* invocation comment */ removeAll( /* param comment */ resultList) /* trailing comment */;
+
+		resultList // I don't want to break anything
+			.removeAll(resultList);
 		
 		StringBuilder sb = new StringBuilder();
 		

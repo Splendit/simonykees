@@ -19,7 +19,8 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 		String aL = "I am here to confuse you!";
-		for (String aL1 : l) {
+		for (String aL1 : l //
+) {
 			sb.append(aL1);
 		}
 		return sb.toString();

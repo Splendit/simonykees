@@ -17,9 +17,12 @@ public class TestForToForEachListIteratingIndexRule {
 		// comment after
 		// comment before
 		/* init 2 */
+		// comment after fInterfaceRule
 		/* init 1 */
 		/* inc */
-		fInterfaceRule.forEach(sb::append);
+		// comment after fInterfaceRule
+		fInterfaceRule // comment after fInterfaceRule
+			.forEach(sb::append);
 	};
 
 	private List<String> generateList(String input) {
