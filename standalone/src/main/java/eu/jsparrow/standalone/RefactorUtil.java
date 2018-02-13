@@ -60,9 +60,10 @@ public class RefactorUtil {
 	 * @throws YAMLConfigException
 	 * @throws MavenInvocationException
 	 * @throws CoreException
+	 * @throws IOException
 	 */
 	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
-			throws YAMLConfigException, CoreException, MavenInvocationException {
+			throws YAMLConfigException, CoreException, MavenInvocationException, IOException {
 		String loggerInfo;
 
 		YAMLConfig config = getConfiguration(context);
@@ -127,8 +128,10 @@ public class RefactorUtil {
 
 	/**
 	 * cleans classpath and temp directory
+	 * 
+	 * @throws IOException
 	 */
-	public void cleanUp() {
+	public void cleanUp() throws IOException {
 		try {
 			if (standaloneConfig != null) {
 				standaloneConfig.cleanUp();
@@ -210,7 +213,17 @@ public class RefactorUtil {
 		}
 	}
 
-	protected void loadStandaloneConfig(BundleContext context) throws CoreException, MavenInvocationException {
+	/**
+	 * loads a new {@link StandaloneConfig} with the properties found in
+	 * {@link BundleContext}
+	 * 
+	 * @param context
+	 * @throws CoreException
+	 * @throws MavenInvocationException
+	 * @throws IOException
+	 */
+	protected void loadStandaloneConfig(BundleContext context)
+			throws CoreException, MavenInvocationException, IOException {
 		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
 		String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION);
 		String mavenHome = context.getProperty(MAVEN_HOME_KEY);
