@@ -7,8 +7,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.equinox.util,
  org.eclipse.equinox.ds,
  org.eclipse.osgi.services,
- eu.jsparrow.rules.api;bundle-version="2.5.0",
- eu.jsparrow.core;bundle-version="2.5.0"
+ eu.jsparrow.rules.api;bundle-version="2.5.0"
 Service-Component: OSGI-INF/eu.jsparrow.rules.imports.ImportsRuleServiceImpl.xml
 Bundle-ActivationPolicy: lazy
 

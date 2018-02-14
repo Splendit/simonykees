@@ -1,10 +1,14 @@
 package eu.jsparrow.core.rule;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 
 import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
@@ -50,6 +54,7 @@ import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.api.RuleService;
 
 /**
  * {@link RulesContainer} is a HelperClass that holds a static list of all
@@ -59,11 +64,21 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
  *         Hans-Jörg Schrödl
  * @since 0.9
  */
+@Component
 public class RulesContainer {
 
-	private RulesContainer() {
-		// hiding the default constructor
+
+	private List<RuleService> services = new ArrayList<>();
+	
+	@Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE)
+	public void bindService(RuleService service) {
+	    services.add(service);
 	}
+	 
+	public void unbindService(RuleService service) {
+		services.remove(service);
+	}
+	
 
 	/**
 	 * This {@link List} holds all implemented rules and returns them in a
