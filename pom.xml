@@ -102,6 +102,7 @@
 			will improve/fix this. -->
 		<!-- <module>jsparrow-maven-plugin</module> -->
 
+		<module>rules.api</module>
 	</modules>
 
 	<scm>
