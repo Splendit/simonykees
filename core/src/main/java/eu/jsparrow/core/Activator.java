@@ -7,8 +7,11 @@ import java.util.List;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import eu.jsparrow.rules.api.RuleService;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -39,6 +42,13 @@ public class Activator implements BundleActivator {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		plugin = this;
+		// This is how to get all the services. Properly.
+		ServiceReference<?> serviceReference = context.
+			    getServiceReference(RuleService.class.getName());
+		RuleService service = (RuleService) context.
+			    getService(serviceReference);
+		List<String> asdf = service.loadRules();
+
 	}
 
 	@Override
