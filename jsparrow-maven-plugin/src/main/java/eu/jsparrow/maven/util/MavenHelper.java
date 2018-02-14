@@ -91,6 +91,8 @@ public class MavenHelper {
 	private BuildPluginManager pluginManager;
 	private Log log;
 
+	private boolean jsparrowAlreadyRunningError = false;
+
 	public MavenHelper(MavenProject project, String mavenHome, Log log) {
 		this.project = project;
 		this.mavenHome = mavenHome;
@@ -163,7 +165,9 @@ public class MavenHelper {
 			public void run() {
 				super.run();
 				shutdownFramework();
-				cleanUp();
+				if (!jsparrowAlreadyRunningError) {
+					cleanUp();
+				}
 			}
 		};
 	}
@@ -208,7 +212,7 @@ public class MavenHelper {
 			}
 		}
 	}
-	
+
 	/**
 	 * Recursively deletes all sub-folders from received folder.
 	 * 
@@ -234,7 +238,7 @@ public class MavenHelper {
 			}
 		}
 	}
-	
+
 	/*** HELPER METHODS ***/
 
 	protected Map<String, String> prepareConfiguration(Map<String, String> additionalConfiguration, String mavenHome) {
@@ -274,6 +278,7 @@ public class MavenHelper {
 				String loggerInfo = NLS.bind(Messages.MavenHelper_SetUserDirTo, directory.getAbsolutePath());
 				log.info(loggerInfo);
 			} else {
+				jsparrowAlreadyRunningError = true;
 				throw new InterruptedException(Messages.MavenHelper_jSparrowIsAlreadyRunning);
 			}
 		} else if (directory.mkdirs()) {
