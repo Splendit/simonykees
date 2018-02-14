@@ -53,6 +53,10 @@ public class RefactorUtil {
 	protected StandaloneConfig standaloneConfig;
 	private File directory;
 
+	public RefactorUtil() {
+		prepareWorkingDirectory();
+	}
+
 	/**
 	 * prepare and start the refactoring process
 	 * 
@@ -67,7 +71,6 @@ public class RefactorUtil {
 		String loggerInfo;
 
 		YAMLConfig config = getConfiguration(context);
-		prepareWorkingDirectory();
 
 		loadStandaloneConfig(context);
 
@@ -145,7 +148,7 @@ public class RefactorUtil {
 		if (directory != null && directory.exists()) {
 			try {
 				deleteChildren(directory);
-				Files.delete(directory.toPath());
+				Files.deleteIfExists(directory.toPath());
 			} catch (IOException e) {
 				logger.debug(e.getMessage(), e);
 				logger.error(e.getMessage());
@@ -204,7 +207,7 @@ public class RefactorUtil {
 				}
 
 				try {
-					Files.delete(currentFile.toPath());
+					Files.deleteIfExists(currentFile.toPath());
 				} catch (IOException e) {
 					logger.debug(e.getMessage(), e);
 					logger.error(e.getMessage());

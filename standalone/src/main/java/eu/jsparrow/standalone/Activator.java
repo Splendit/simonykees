@@ -51,6 +51,8 @@ public class Activator implements BundleActivator {
 		LoggingUtil.configureLogger(debugEnabled);
 
 		logger.info(Messages.Activator_start);
+		
+		registerShutdownHook(context);
 
 		String modeName = context.getProperty(STANDALONE_MODE_KEY);
 		if (modeName != null && !modeName.isEmpty()) {
@@ -61,8 +63,6 @@ public class Activator implements BundleActivator {
 			switch (mode) {
 			case REFACTOR:
 				try {
-					registerShutdownHook(context);
-
 					refactorUtil.startRefactoring(context, new RefactoringPipeline());
 				} catch (YAMLConfigException | CoreException | MavenInvocationException | IOException yce) {
 					logger.debug(yce.getMessage(), yce);
@@ -134,7 +134,7 @@ public class Activator implements BundleActivator {
 			}));
 	}
 
-	private static EnvironmentInfo getEnvironmentInfo(BundleContext ctx) {
+	private EnvironmentInfo getEnvironmentInfo(BundleContext ctx) {
 		if (ctx == null) {
 			return null;
 		}
@@ -153,7 +153,7 @@ public class Activator implements BundleActivator {
 		return envInfo;
 	}
 
-	public static void setExitErrorMessage(BundleContext ctx, String exitMessage) {
+	public void setExitErrorMessage(BundleContext ctx, String exitMessage) {
 		String key = "eu.jsparrow.standalone.exit.message"; //$NON-NLS-1$
 		EnvironmentInfo envInfo = getEnvironmentInfo(ctx);
 		if (envInfo != null) {
