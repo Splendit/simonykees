@@ -103,6 +103,7 @@
 		<!-- <module>jsparrow-maven-plugin</module> -->
 
 		<module>rules.api</module>
+		<module>rules.imports</module>
 	</modules>
 
 	<scm>
