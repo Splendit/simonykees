@@ -163,6 +163,7 @@ public class MavenHelper {
 			public void run() {
 				super.run();
 				shutdownFramework();
+				cleanUp();
 			}
 		};
 	}
@@ -189,6 +190,51 @@ public class MavenHelper {
 		}
 	}
 
+	/**
+	 * cleans classpath and temp directory
+	 * 
+	 * @throws IOException
+	 */
+	public void cleanUp() {
+
+		// CLEAN
+		if (directory != null && directory.exists()) {
+			try {
+				deleteChildren(directory);
+				Files.deleteIfExists(directory.toPath());
+			} catch (IOException e) {
+				log.debug(e.getMessage(), e);
+				log.error(e.getMessage());
+			}
+		}
+	}
+	
+	/**
+	 * Recursively deletes all sub-folders from received folder.
+	 * 
+	 * @param parentDirectory
+	 *            directory which content is to be deleted
+	 * @throws IOException
+	 */
+	private void deleteChildren(File parentDirectory) {
+		String[] children = parentDirectory.list();
+		if (children != null) {
+			for (String file : Arrays.asList(children)) {
+				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
+				if (currentFile.isDirectory()) {
+					deleteChildren(currentFile);
+				}
+
+				try {
+					Files.deleteIfExists(currentFile.toPath());
+				} catch (IOException e) {
+					log.debug(e.getMessage(), e);
+					log.error(e.getMessage());
+				}
+			}
+		}
+	}
+	
 	/*** HELPER METHODS ***/
 
 	protected Map<String, String> prepareConfiguration(Map<String, String> additionalConfiguration, String mavenHome) {
