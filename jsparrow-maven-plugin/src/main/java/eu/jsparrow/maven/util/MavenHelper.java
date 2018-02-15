@@ -185,9 +185,9 @@ public class MavenHelper {
 				if (standaloneBundle.getState() == Bundle.ACTIVE) {
 					standaloneBundle.stop();
 				}
-				this.getFramework()
-					.stop();
-			} catch (BundleException e) {
+
+				this.stopEquinoxFramework();
+			} catch (BundleException | InterruptedException | MojoExecutionException e) {
 				log.debug(e.getMessage(), e);
 				log.error(e.getMessage());
 			}

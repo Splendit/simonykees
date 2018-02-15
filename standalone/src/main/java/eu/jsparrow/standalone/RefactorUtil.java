@@ -2,8 +2,6 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.maven.shared.invoker.MavenInvocationException;
@@ -51,7 +49,6 @@ public class RefactorUtil {
 	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
 
 	protected StandaloneConfig standaloneConfig;
-	private File directory;
 
 	public RefactorUtil() {
 		prepareWorkingDirectory();
@@ -143,17 +140,6 @@ public class RefactorUtil {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
 		}
-
-		// CLEAN
-		if (directory != null && directory.exists()) {
-			try {
-				deleteChildren(directory);
-				Files.deleteIfExists(directory.toPath());
-			} catch (IOException e) {
-				logger.debug(e.getMessage(), e);
-				logger.error(e.getMessage());
-			}
-		}
 	}
 
 	/**
@@ -183,36 +169,10 @@ public class RefactorUtil {
 
 	private void prepareWorkingDirectory() {
 		String file = System.getProperty(JAVA_TMP);
-		directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
+		File directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
 
 		if (directory.exists() || directory.mkdirs()) {
 			System.setProperty(USER_DIR, directory.getAbsolutePath());
-		}
-	}
-
-	/**
-	 * Recursively deletes all sub-folders from received folder.
-	 * 
-	 * @param parentDirectory
-	 *            directory which content is to be deleted
-	 * @throws IOException
-	 */
-	private void deleteChildren(File parentDirectory) {
-		String[] children = parentDirectory.list();
-		if (children != null) {
-			for (String file : Arrays.asList(children)) {
-				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
-				if (currentFile.isDirectory()) {
-					deleteChildren(currentFile);
-				}
-
-				try {
-					Files.deleteIfExists(currentFile.toPath());
-				} catch (IOException e) {
-					logger.debug(e.getMessage(), e);
-					logger.error(e.getMessage());
-				}
-			}
 		}
 	}
 

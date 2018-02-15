@@ -51,7 +51,7 @@ public class Activator implements BundleActivator {
 		LoggingUtil.configureLogger(debugEnabled);
 
 		logger.info(Messages.Activator_start);
-		
+
 		registerShutdownHook(context);
 
 		String modeName = context.getProperty(STANDALONE_MODE_KEY);
