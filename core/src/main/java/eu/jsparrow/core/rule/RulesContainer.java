@@ -1,14 +1,22 @@
 package eu.jsparrow.core.rule;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
@@ -64,21 +72,25 @@ import eu.jsparrow.rules.api.RuleService;
  *         Hans-Jörg Schrödl
  * @since 0.9
  */
-@Component
 public class RulesContainer {
 
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
+		.lookupClass());
 
-	private List<RuleService> services = new ArrayList<>();
-	
-	@Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE)
-	public void bindService(RuleService service) {
-	    services.add(service);
+	private static List<RuleService> getExternalRuleServices() {
+		BundleContext bundleContext = FrameworkUtil.getBundle(RulesContainer.class)
+			.getBundleContext();
+		ServiceReference<?>[] serviceReferences = new ServiceReference<?>[0];
+		try {
+			serviceReferences = bundleContext.getServiceReferences(RuleService.class.getName(), null);
+		} catch (InvalidSyntaxException e) {
+			logger.error("Failed to load external rules due to bad filter expression.", e);
+		}
+		return Arrays.asList(serviceReferences)
+			.stream()
+			.map(x -> (RuleService) bundleContext.getService(x))
+			.collect(Collectors.toList());
 	}
-	 
-	public void unbindService(RuleService service) {
-		services.remove(service);
-	}
-	
 
 	/**
 	 * This {@link List} holds all implemented rules and returns them in a
@@ -89,6 +101,11 @@ public class RulesContainer {
 	 *         returned.
 	 */
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules(boolean isStandalone) {
+		List<RuleService> services = getExternalRuleServices();
+		String result = services.get(0)
+			.loadRules()
+			.get(0);
+
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = new LinkedList<>();
 		rules.addAll(Arrays.asList(
 				/*
@@ -98,7 +115,7 @@ public class RulesContainer {
 				new CollectionRemoveAllRule(), new DiamondOperatorRule(), new OverrideAnnotationRule(),
 				new SerialVersionUidRule(), new RearrangeClassMembersRule(), new BracketsToControlRule(),
 				new FieldNameConventionRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
-				new ReImplementingInterfaceRule(),new PutIfAbsentRule(),
+				new ReImplementingInterfaceRule(), new PutIfAbsentRule(),
 
 				new ImmutableStaticFinalCollectionsRule(),
 				/*

@@ -11,6 +11,7 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.rules.api.RuleService;
 
 /**
@@ -42,13 +43,6 @@ public class Activator implements BundleActivator {
 	@Override
 	public void start(BundleContext context) throws Exception {
 		plugin = this;
-		// This is how to get all the services. Properly.
-		ServiceReference<?> serviceReference = context.
-			    getServiceReference(RuleService.class.getName());
-		RuleService service = (RuleService) context.
-			    getService(serviceReference);
-		List<String> asdf = service.loadRules();
-
 	}
 
 	@Override

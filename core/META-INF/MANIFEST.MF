@@ -37,5 +37,4 @@ Export-Package: eu.jsparrow.core;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalo
  eu.jsparrow.core.visitor.renaming
 Bundle-ClassPath: lib/snakeyaml.jar,
  .
-Service-Component: OSGI-INF/eu.jsparrow.core.rule.RulesContainer.xml
 
