@@ -133,7 +133,7 @@ public class TagUtil {
 
 		} else if (PrimitiveBoxedForStringRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE);
-			
+
 		} else if (PublicFieldsRenamingRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY);
 
@@ -196,6 +196,8 @@ public class TagUtil {
 
 		} else if (PrimitiveObjectUseEqualsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.STRING_MANIPULATION);
+		} else if (OrganiseImportsRule.class == clazz) {
+			return Arrays.asList(Tag.JAVA_1_1, Tag.FORMATTING, Tag.READABILITY);
 
 		} else if (ImmutableStaticFinalCollectionsRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_2, Tag.CODING_CONVENTIONS);
