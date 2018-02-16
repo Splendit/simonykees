@@ -4,4 +4,5 @@ Bundle-Name: jsparrow::rules.api
 Bundle-SymbolicName: eu.jsparrow.rules.api
 Bundle-Version: 2.5.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: eu.jsparrow.rules.api
+Export-Package: eu.jsparrow.rules.api, 
+ eu.jsparrow.rules.common

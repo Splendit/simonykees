@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.Tag;
+import eu.jsparrow.rules.common.*;
 import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;

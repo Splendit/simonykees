@@ -1,10 +1,8 @@
-package eu.jsparrow.core.rule;
+package eu.jsparrow.rules.common;
 
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
-
-import eu.jsparrow.rules.common.*;
 
 /**
  * This class contains the description for a rule. A description includes the
