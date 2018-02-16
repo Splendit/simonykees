@@ -16,15 +16,15 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
-
-import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.RuleDescription;
-import eu.jsparrow.core.rule.Tag;
-import eu.jsparrow.core.rule.statistics.FileChangeCount;
-import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
-import eu.jsparrow.core.util.RefactoringUtil;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.rules.common.statistics.FileChangeCount;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
+import eu.jsparrow.rules.common.util.RefactoringUtil;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+
 
 /**
  * Organise imports in a Java class, the rule does not use an

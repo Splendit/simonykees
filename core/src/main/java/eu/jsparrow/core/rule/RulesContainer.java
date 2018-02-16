@@ -102,10 +102,7 @@ public class RulesContainer {
 	 */
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules(boolean isStandalone) {
 		List<RuleService> services = getExternalRuleServices();
-		String result = services.get(0)
-			.loadRules()
-			.get(0);
-
+		
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = new LinkedList<>();
 		rules.addAll(Arrays.asList(
 				/*
