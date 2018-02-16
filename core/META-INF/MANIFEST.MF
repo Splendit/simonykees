@@ -24,7 +24,7 @@ Require-Bundle: eu.jsparrow.logging,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH
-Export-Package: eu.jsparrow.core;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
+Export-Package: eu.jsparrow.core;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone,eu.jsparrow.rules.imports",
  eu.jsparrow.core.config,
  eu.jsparrow.core.exception;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",
  eu.jsparrow.core.refactorer;x-friends:="eu.jsparrow.ui,eu.jsparrow.standalone",

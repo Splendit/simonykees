@@ -4,5 +4,12 @@ Bundle-Name: jsparrow::rules.api
 Bundle-SymbolicName: eu.jsparrow.rules.api
 Bundle-Version: 2.5.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: eu.jsparrow.rules.api, 
- eu.jsparrow.rules.common
+Export-Package: eu.jsparrow.rules.api
+Require-Bundle: org.eclipse.jdt.core,
+ org.eclipse.ltk.core.refactoring,
+ org.eclipse.text,
+ org.eclipse.core.resources,
+ org.eclipse.equinox.registry,
+ org.eclipse.core.runtime;bundle-version="3.13.0",
+ eu.jsparrow.logging,
+ org.apache.commons.lang3

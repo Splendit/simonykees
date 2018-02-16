@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.rules.common.*;
+import eu.jsparrow.core.rule.Tag;
 import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
@@ -128,10 +128,6 @@ public class TagUtil {
 
 		} else if (MultiVariableDeclarationLineRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_1, Tag.READABILITY, Tag.CODING_CONVENTIONS);
-
-		} else if (OrganiseImportsRule.class == clazz) {
-			return Arrays.asList(Tag.JAVA_1_1, Tag.FORMATTING, Tag.READABILITY);
-
 		} else if (OverrideAnnotationRule.class == clazz) {
 			return Arrays.asList(Tag.JAVA_1_6, Tag.READABILITY, Tag.CODING_CONVENTIONS);
 

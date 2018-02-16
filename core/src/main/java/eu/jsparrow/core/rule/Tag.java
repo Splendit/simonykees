@@ -1,4 +1,4 @@
-package eu.jsparrow.rules.common;
+package eu.jsparrow.core.rule;
 
 import java.util.Arrays;
 import java.util.List;
