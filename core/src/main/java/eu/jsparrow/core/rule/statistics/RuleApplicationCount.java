@@ -6,6 +6,7 @@ import java.util.Map;
 
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RefactoringRuleInterface;
+import eu.jsparrow.rules.common.statistics.FileChangeCount;
 import eu.jsparrow.rules.common.visitor.ASTRewriteEvent;
 import eu.jsparrow.rules.common.visitor.ASTRewriteVisitorListener;
 

@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import eu.jsparrow.dummies.DummyRule;
+import eu.jsparrow.rules.common.statistics.FileChangeCount;
 import eu.jsparrow.rules.common.visitor.ASTRewriteEvent;
 
 @SuppressWarnings("nls")
