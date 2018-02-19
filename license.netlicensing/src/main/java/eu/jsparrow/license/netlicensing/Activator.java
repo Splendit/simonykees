@@ -12,7 +12,7 @@ public class Activator extends Plugin {
 	public static final Logger logger = LoggerFactory.getLogger(Activator.class);
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "jSparrow.core"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "eu.jsparrow.license.netlicensing"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Activator plugin;
@@ -51,7 +51,7 @@ public class Activator extends Plugin {
 
 		// start jSparrow logging bundle
 		for (Bundle bundle : context.getBundles()) {
-			if ("jSparrow.logging".equals(bundle.getSymbolicName()) //$NON-NLS-1$
+			if ("eu.jsparrow.logging".equals(bundle.getSymbolicName()) //$NON-NLS-1$
 					&& bundle.getState() != Bundle.ACTIVE) {
 				bundle.start();
 				break;

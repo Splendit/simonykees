@@ -4,7 +4,7 @@
 
 	<groupId>at.splendit</groupId>
 	<artifactId>eu.jsparrow</artifactId>
-	<version>2.4.2-SNAPSHOT</version>
+	<version>2.5.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>jSparrow :: parent</name>
 	<description>jSparrow Parent</description>
@@ -85,17 +85,23 @@
 		<module>ui.test</module>
 		<!-- OSGi feature + site deployment -->
 		<module>feature.3rd.party</module>
+		<!-- standalone -->
+		<module>standalone</module>
+		<module>standalone.test</module>
 		<module>feature.standalone</module>
 		<module>feature</module>
 		<module>site</module>
 		<!-- release engineering -->
 		<module>releng</module>
-		<!-- standalone -->
-		<module>standalone</module>
+
+		<module>bundles</module>
+		<module>features</module>
+		<module>tests</module>
 
 		<!-- The jsparrow-maven-plugin cannot be deployed alongside jSparrow. SIM-877 
 			will improve/fix this. -->
 		<!-- <module>jsparrow-maven-plugin</module> -->
+
 	</modules>
 
 	<scm>
@@ -115,11 +121,6 @@
 	</ciManagement>
 
 	<distributionManagement>
-		<site>
-			<id>nexus</id>
-			<name>Nexus Simonykees Site</name>
-			<url>https://jenkins.splendit.loc/view/simonykees/job/simonykees%20master/site/</url>
-		</site>
 		<repository>
 			<id>pdrone</id>
 			<url>http://packagedrone-vm-01.splendit.loc:8080/maven/85838837-477a-445f-aee1-757e4a362481</url>
@@ -164,11 +165,6 @@
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.compiler.source>1.8</maven.compiler.source>
 
-		<basedir>/simonykees</basedir>
-
-		<!-- returns a valid parent directory path for all (child) modules -->
-		<keystore.directory>${project.basedir}/..</keystore.directory>
-
 		<jsparrow.qualifier.quotes></jsparrow.qualifier.quotes>
 		<jsparrow.qualifier.noProguard></jsparrow.qualifier.noProguard>
 		<jsparrow.qualifier.production></jsparrow.qualifier.production>
@@ -177,11 +173,13 @@
 		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
 		<sonar.junit.reportPaths>${project.basedir}/target/surefire-reports</sonar.junit.reportPaths>
 		<sonar.coverage.exclusions>**/jsparrow/ui/**/*</sonar.coverage.exclusions>
-		<sonar.issue.ignore.multicriteria>e1,e2,e4</sonar.issue.ignore.multicriteria>
+		<sonar.issue.ignore.multicriteria>e1,e2,e3,e4</sonar.issue.ignore.multicriteria>
 		<sonar.issue.ignore.multicriteria.e1.ruleKey>squid:S00100</sonar.issue.ignore.multicriteria.e1.ruleKey>
 		<sonar.issue.ignore.multicriteria.e1.resourceKey>**/*Test.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
 		<sonar.issue.ignore.multicriteria.e2.ruleKey>squid:S3008</sonar.issue.ignore.multicriteria.e2.ruleKey>
 		<sonar.issue.ignore.multicriteria.e2.resourceKey>**/i18n/*Messages.java</sonar.issue.ignore.multicriteria.e2.resourceKey>
+		<sonar.issue.ignore.multicriteria.e3.ruleKey>squid:S00112</sonar.issue.ignore.multicriteria.e3.ruleKey>
+		<sonar.issue.ignore.multicriteria.e3.resourceKey>**/*Test.java</sonar.issue.ignore.multicriteria.e3.resourceKey>
 		<sonar.issue.ignore.multicriteria.e4.ruleKey>squid:S3516</sonar.issue.ignore.multicriteria.e4.ruleKey>
 		<sonar.issue.ignore.multicriteria.e4.resourceKey>**/*ASTVisitor.java</sonar.issue.ignore.multicriteria.e4.resourceKey>
 
@@ -252,13 +250,13 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.standalone.feature</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.standalone.feature</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.site</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.site</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -267,13 +265,13 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.standalone</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.standalone</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>at.splendit.jSparrow</groupId>
-				<artifactId>jSparrow.ui</artifactId>
+				<groupId>at.splendit</groupId>
+				<artifactId>eu.jsparrow.ui</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 		</dependencies>
@@ -281,6 +279,27 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<!-- https://github.com/jdcasey/directory-maven-plugin#directory-of-goal -->
+				<groupId>org.commonjava.maven.plugins</groupId>
+				<artifactId>directory-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>directories</id>
+						<goals>
+							<goal>directory-of</goal>
+						</goals>
+						<phase>initialize</phase>
+						<configuration>
+							<property>keystore.directory</property>
+							<project>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow</artifactId>
+							</project>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-maven-plugin</artifactId>
@@ -294,31 +313,11 @@
 				<configuration>
 					<resolver>p2</resolver>
 					<pomDependencies>consider</pomDependencies>
-					<ignoreTychoRepositories>true</ignoreTychoRepositories>
+					<!-- <ignoreTychoRepositories>true</ignoreTychoRepositories> -->
 					<environments>
 						<environment>
 							<os>linux</os>
 							<ws>gtk</ws>
-							<arch>x86</arch>
-						</environment>
-						<environment>
-							<os>linux</os>
-							<ws>gtk</ws>
-							<arch>x86_64</arch>
-						</environment>
-						<environment>
-							<os>win32</os>
-							<ws>win32</ws>
-							<arch>x86</arch>
-						</environment>
-						<environment>
-							<os>win32</os>
-							<ws>win32</ws>
-							<arch>x86_64</arch>
-						</environment>
-						<environment>
-							<os>macosx</os>
-							<ws>cocoa</ws>
 							<arch>x86_64</arch>
 						</environment>
 					</environments>
@@ -529,9 +528,36 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
+								<!-- Plugin will be ignored for the m2e connector which can not handle 
+									it -->
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.commonjava.maven.plugins
+										</groupId>
+										<artifactId>
+											directory-maven-plugin
+										</artifactId>
+										<versionRange>
+											[0.3,)
+										</versionRange>
+										<goals>
+											<goal>directory-of</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
 							</pluginExecutions>
 						</lifecycleMappingMetadata>
 					</configuration>
+				</plugin>
+				<plugin>
+					<!-- https://github.com/jdcasey/directory-maven-plugin#directory-of-goal -->
+					<groupId>org.commonjava.maven.plugins</groupId>
+					<artifactId>directory-maven-plugin</artifactId>
+					<version>0.3</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

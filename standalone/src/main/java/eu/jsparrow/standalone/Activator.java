@@ -1,12 +1,21 @@
 package eu.jsparrow.standalone;
 
+import java.io.IOException;
+
+import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.core.config.YAMLConfigException;
+import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.logging.LoggingUtil;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -20,28 +29,69 @@ public class Activator implements BundleActivator {
 
 	public static final String PLUGIN_ID = "eu.jsparrow.standalone"; //$NON-NLS-1$
 
-	private static final String LIST_RULES = "LIST.RULES"; //$NON-NLS-1$
-	private static final String LIST_RULES_SHORT = "LIST.RULES.SHORT"; //$NON-NLS-1$
-	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
+	private static final String LIST_RULES_SELECTED_ID_KEY = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
+	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
+	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
+
+	private RefactorUtil refactorUtil;
+	private ListRulesUtil listRulesUtil;
+
+	public Activator() {
+		this(new RefactorUtil(), new ListRulesUtil());
+	}
+
+	public Activator(RefactorUtil refactorUtil, ListRulesUtil listRulesUtil) {
+		this.refactorUtil = refactorUtil;
+		this.listRulesUtil = listRulesUtil;
+	}
 
 	@Override
 	public void start(BundleContext context) throws Exception {
+		boolean debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
+		LoggingUtil.configureLogger(debugEnabled);
+
 		logger.info(Messages.Activator_start);
 
-		boolean listRules = Boolean.parseBoolean(context.getProperty(LIST_RULES));
-		boolean listRulesShort = Boolean.parseBoolean(context.getProperty(LIST_RULES_SHORT));
-		String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID);
+		registerShutdownHook(context);
 
-		if (listRules) {
-			if (listRulesId != null && !listRulesId.isEmpty()) {
-				ListRulesUtil.listRules(listRulesId);
-			} else {
-				ListRulesUtil.listRules();
+		String modeName = context.getProperty(STANDALONE_MODE_KEY);
+		if (modeName != null && !modeName.isEmpty()) {
+
+			StandaloneMode mode = StandaloneMode.valueOf(modeName);
+			String listRulesId = context.getProperty(LIST_RULES_SELECTED_ID_KEY);
+
+			switch (mode) {
+			case REFACTOR:
+				try {
+					refactorUtil.startRefactoring(context, new RefactoringPipeline());
+				} catch (YAMLConfigException | CoreException | MavenInvocationException | IOException yce) {
+					logger.debug(yce.getMessage(), yce);
+					logger.error(yce.getMessage());
+					setExitErrorMessage(context, yce.getMessage());
+				}
+				break;
+			case LIST_RULES:
+				listRulesUtil.listRules();
+				break;
+			case LIST_RULES_SHORT:
+				listRulesUtil.listRulesShort();
+				break;
+			case LIST_RULES_WITH_SELECTED_ID:
+				if (listRulesId != null && !listRulesId.isEmpty()) {
+					listRulesUtil.listRules(listRulesId);
+				} else {
+					String errorMsg = "Please specify rule IDs for this mode!"; //$NON-NLS-1$
+					logger.error(errorMsg);
+					setExitErrorMessage(context, errorMsg);
+				}
+				break;
+			case TEST:
+				break;
 			}
-		} else if (listRulesShort) {
-			ListRulesUtil.listRulesShort();
 		} else {
-			RefactorUtil.startRefactoring(context);
+			String errorMsg = "No mode has been selected!"; //$NON-NLS-1$
+			logger.error(errorMsg);
+			setExitErrorMessage(context, errorMsg);
 		}
 	}
 
@@ -56,11 +106,60 @@ public class Activator implements BundleActivator {
 					.removeSaveParticipant(PLUGIN_ID);
 			}
 		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
 		} finally {
-			RefactorUtil.cleanUp();
+			try {
+				refactorUtil.cleanUp();
+			} catch (IOException e) {
+				logger.debug(e.getMessage(), e);
+				logger.error(e.getMessage());
+				setExitErrorMessage(context, e.getMessage());
+			}
 		}
 
 		logger.info(Messages.Activator_stop);
+	}
+
+	private void registerShutdownHook(BundleContext context) {
+		Runtime.getRuntime()
+			.addShutdownHook(new Thread(() -> {
+				try {
+					refactorUtil.cleanUp();
+				} catch (IOException e) {
+					logger.debug(e.getMessage(), e);
+					logger.error(e.getMessage());
+					setExitErrorMessage(context, e.getMessage());
+				}
+			}));
+	}
+
+	private EnvironmentInfo getEnvironmentInfo(BundleContext ctx) {
+		if (ctx == null) {
+			return null;
+		}
+
+		ServiceReference<?> infoRev = ctx.getServiceReference(EnvironmentInfo.class.getName());
+		if (infoRev == null) {
+			return null;
+		}
+
+		EnvironmentInfo envInfo = (EnvironmentInfo) ctx.getService(infoRev);
+		if (envInfo == null) {
+			return null;
+		}
+		ctx.ungetService(infoRev);
+
+		return envInfo;
+	}
+
+	public void setExitErrorMessage(BundleContext ctx, String exitMessage) {
+		String key = "eu.jsparrow.standalone.exit.message"; //$NON-NLS-1$
+		EnvironmentInfo envInfo = getEnvironmentInfo(ctx);
+		if (envInfo != null) {
+			envInfo.setProperty(key, exitMessage);
+		} else {
+			System.setProperty(key, exitMessage);
+		}
 	}
 }

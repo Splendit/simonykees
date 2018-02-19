@@ -138,6 +138,20 @@ public class RefactoringPipeline {
 	}
 
 	/**
+	 * this is a helper method mainly for logging purposes.
+	 * 
+	 * @return a semicolon-separated string with all rules, that have changes
+	 */
+	public String getRulesWithChangesAsString() {
+		return this.getRules()
+			.stream()
+			.filter(rule -> null != this.getChangesForRule(rule) && !this.getChangesForRule(rule)
+				.isEmpty())
+			.map(RefactoringRule::toString)
+			.collect(Collectors.joining(", ")); //$NON-NLS-1$
+	}
+
+	/**
 	 * Check if any {@link RefactoringRule} lead to changes in any
 	 * {@link RefactoringState}.
 	 * 
@@ -351,7 +365,8 @@ public class RefactoringPipeline {
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
 
-			subMonitor.subTask(refactoringRule.getRuleDescription().getName());
+			subMonitor.subTask(refactoringRule.getRuleDescription()
+				.getName());
 
 			/*
 			 * Sends new child of subMonitor which takes in progress bar size of
@@ -413,7 +428,8 @@ public class RefactoringPipeline {
 				if (changedCompilationUnits.stream()
 					.anyMatch(unit -> unit.getElementName()
 						.equals(refactoringState.getWorkingCopyName()))) {
-					subMonitor.subTask(refactoringRule.getRuleDescription().getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
+					subMonitor.subTask(refactoringRule.getRuleDescription()
+						.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 					if (refactoringRule.equals(currentRule)) {
 						refactoringState.addRuleToIgnoredRules(currentRule);
 					} else if (!refactoringState.getIgnoredRules()
@@ -422,8 +438,8 @@ public class RefactoringPipeline {
 							refactoringState.addRuleAndGenerateDocumentChanges(refactoringRule, false);
 						} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 							logger.error(e.getMessage(), e);
-							notWorkingRules.add(new NotWorkingRuleModel(refactoringRule.getRuleDescription().getName(),
-									refactoringState.getWorkingCopyName()));
+							notWorkingRules.add(new NotWorkingRuleModel(refactoringRule.getRuleDescription()
+								.getName(), refactoringState.getWorkingCopyName()));
 						}
 					}
 					if (subMonitor.isCanceled()) {
@@ -461,7 +477,8 @@ public class RefactoringPipeline {
 		RefactoringState refactoringState = refactoringStates.stream()
 			.filter(s -> newSelection.getElementName()
 				.equals(s.getWorkingCopyName()))
-			.findFirst().orElseThrow(RuleException::new);
+			.findFirst()
+			.orElseThrow(RuleException::new);
 
 		refactoringState.resetWorkingCopy();
 
@@ -478,8 +495,8 @@ public class RefactoringPipeline {
 
 			} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 				logger.error(e.getMessage(), e);
-				notWorkingRules
-					.add(new NotWorkingRuleModel(refactoringRule.getRuleDescription().getName(), refactoringState.getWorkingCopyName()));
+				notWorkingRules.add(new NotWorkingRuleModel(refactoringRule.getRuleDescription()
+					.getName(), refactoringState.getWorkingCopyName()));
 			}
 		}
 
@@ -564,14 +581,15 @@ public class RefactoringPipeline {
 
 		for (RefactoringState refactoringState : refactoringStates) {
 
-			subMonitor.subTask(rule.getRuleDescription().getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
+			subMonitor.subTask(rule.getRuleDescription()
+				.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 
 			try {
 				refactoringState.addRuleAndGenerateDocumentChanges(rule, true);
 			} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 				logger.error(e.getMessage(), e);
-				returnListNotWorkingRules
-					.add(new NotWorkingRuleModel(rule.getRuleDescription().getName(), refactoringState.getWorkingCopyName()));
+				returnListNotWorkingRules.add(new NotWorkingRuleModel(rule.getRuleDescription()
+					.getName(), refactoringState.getWorkingCopyName()));
 			}
 
 			/*
@@ -585,17 +603,17 @@ public class RefactoringPipeline {
 			}
 		}
 	}
-	
+
 	public void setRefactoringStates(List<RefactoringState> refactoringStates) {
 		this.refactoringStates = refactoringStates;
 	}
-	
+
 	public void updateInitialSourceMap() {
 		Map<RefactoringState, String> sourceMap = getInitialSourceMap();
 		sourceMap.clear();
 		putAllRefactoringStateSources(sourceMap);
 	}
-	
+
 	/**
 	 * Method for creating Map with relation from {@link RefactoringState} to
 	 * current source code
@@ -603,14 +621,14 @@ public class RefactoringPipeline {
 	 */
 	public void putAllRefactoringStateSources(Map<RefactoringState, String> sourceMap) {
 		refactoringStates.stream()
-		.forEach(refactoringState -> {
-			try {
-				sourceMap.put(refactoringState, refactoringState.getWorkingCopy()
-					.getSource());
-			} catch (JavaModelException e) {
-				logger.error(e.getMessage(), e);
-			}
-		});
+			.forEach(refactoringState -> {
+				try {
+					sourceMap.put(refactoringState, refactoringState.getWorkingCopy()
+						.getSource());
+				} catch (JavaModelException e) {
+					logger.error(e.getMessage(), e);
+				}
+			});
 	}
 
 	/**

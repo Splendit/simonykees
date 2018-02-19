@@ -2,12 +2,13 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.List;
 
+import org.apache.maven.shared.invoker.MavenInvocationException;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleContext;
@@ -38,19 +39,19 @@ public class RefactorUtil {
 	protected static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
 	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
-	private static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 	protected static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
 	protected static final String MAVEN_NATURE_CONSTANT = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
 	protected static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
+	protected static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
+	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
 
-	private static StandaloneConfig standaloneConfig;
-	private static File directory;
+	protected StandaloneConfig standaloneConfig;
 
-	private RefactorUtil() {
-
+	public RefactorUtil() {
+		prepareWorkingDirectory();
 	}
 
 	/**
@@ -58,26 +59,23 @@ public class RefactorUtil {
 	 * 
 	 * @param context
 	 * @throws YAMLConfigException
+	 * @throws MavenInvocationException
+	 * @throws CoreException
+	 * @throws IOException
 	 */
-	public static void startRefactoring(BundleContext context) throws YAMLConfigException {
+	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
+			throws YAMLConfigException, CoreException, MavenInvocationException, IOException {
 		String loggerInfo;
 
 		YAMLConfig config = getConfiguration(context);
-		prepareWorkingDirectory();
 
-		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
-		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
+		loadStandaloneConfig(context);
 
-		standaloneConfig = new StandaloneConfig(projectName, projectPath);
-
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = RulesContainer
-			.getRulesForProject(standaloneConfig.getJavaProject(), true);
-		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = YAMLConfigUtil
-			.getSelectedRulesFromConfig(config, projectRules);
-
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = getProjectRules();
+		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = getSelectedRules(config,
+				projectRules);
 		if (selectedRules != null && !selectedRules.isEmpty()) {
 			// Create refactoring pipeline and set rules
-			RefactoringPipeline refactoringPipeline = new RefactoringPipeline();
 			refactoringPipeline.setRules(selectedRules);
 
 			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedRules, selectedRules.size(),
@@ -94,10 +92,10 @@ public class RefactorUtil {
 			logger.debug(Messages.Activator_debug_createRefactoringStates);
 
 			refactoringPipeline.createRefactoringStates(compUnits);
+
 			loggerInfo = NLS.bind(Messages.Activator_debug_numRefactoringStates,
 					refactoringPipeline.getRefactoringStates()
 						.size());
-
 			logger.debug(loggerInfo);
 
 			// Do refactoring
@@ -105,16 +103,22 @@ public class RefactorUtil {
 				logger.info(Messages.Activator_debug_startRefactoring);
 				refactoringPipeline.doRefactoring(new NullProgressMonitor());
 			} catch (RefactoringException | RuleException e) {
-				logger.error(e.getMessage(), e);
+				logger.debug(e.getMessage(), e);
+				logger.error(e.getMessage());
 				return;
 			}
+
+			loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, getJavaProject().getElementName(),
+					refactoringPipeline.getRulesWithChangesAsString());
+			logger.info(loggerInfo);
 
 			// Commit refactoring
 			try {
 				logger.info(Messages.Activator_debug_commitRefactoring);
 				refactoringPipeline.commitRefactoring();
 			} catch (RefactoringException | ReconcileException e) {
-				logger.error(e.getMessage(), e);
+				logger.debug(e.getMessage(), e);
+				logger.error(e.getMessage());
 				return;
 			}
 		} else {
@@ -124,17 +128,17 @@ public class RefactorUtil {
 
 	/**
 	 * cleans classpath and temp directory
+	 * 
+	 * @throws IOException
 	 */
-	public static void cleanUp() {
+	public void cleanUp() throws IOException {
 		try {
-			standaloneConfig.cleanUp();
-		} catch (JavaModelException | IOException e) {
-			logger.error(e.getMessage(), e);
-		}
-
-		// CLEAN
-		if (directory.exists()) {
-			deleteChildren(directory);
+			if (standaloneConfig != null) {
+				standaloneConfig.cleanUp();
+			}
+		} catch (JavaModelException | MavenInvocationException e) {
+			logger.debug(e.getMessage(), e);
+			logger.error(e.getMessage());
 		}
 	}
 
@@ -145,16 +149,17 @@ public class RefactorUtil {
 	 * @return the read configuration
 	 * @throws YAMLConfigException
 	 */
-	private static YAMLConfig getConfiguration(BundleContext context) throws YAMLConfigException {
+	private YAMLConfig getConfiguration(BundleContext context) throws YAMLConfigException {
 		String configFilePath = context.getProperty(CONFIG_FILE_PATH);
 		String profile = context.getProperty(SELECTED_PROFILE);
 
 		String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
 		logger.info(loggerInfo);
 
-		YAMLConfig config = YAMLConfigUtil.readConfig(configFilePath, profile);
+		YAMLConfig config = getYamlConfig(configFilePath, profile);
 
 		String selectedProfile = config.getSelectedProfile();
+
 		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
 				(selectedProfile == null) ? Messages.Activator_standalone_None : selectedProfile);
 		logger.info(loggerInfo);
@@ -162,9 +167,9 @@ public class RefactorUtil {
 		return config;
 	}
 
-	private static void prepareWorkingDirectory() {
+	private void prepareWorkingDirectory() {
 		String file = System.getProperty(JAVA_TMP);
-		directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
+		File directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
 
 		if (directory.exists() || directory.mkdirs()) {
 			System.setProperty(USER_DIR, directory.getAbsolutePath());
@@ -172,30 +177,39 @@ public class RefactorUtil {
 	}
 
 	/**
-	 * Recursively deletes all sub-folders from received folder.
+	 * loads a new {@link StandaloneConfig} with the properties found in
+	 * {@link BundleContext}
 	 * 
-	 * @param parentDirectory
-	 *            directory which content is to be deleted
+	 * @param context
+	 * @throws CoreException
+	 * @throws MavenInvocationException
 	 * @throws IOException
 	 */
-	private static void deleteChildren(File parentDirectory) {
-		String[] children = parentDirectory.list();
-		if (children != null) {
-			for (String file : Arrays.asList(children)) {
-				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
-				if (currentFile.isDirectory() && !("target".equals(currentFile.getName()))) { //$NON-NLS-1$
-					deleteChildren(currentFile);
-				}
+	protected void loadStandaloneConfig(BundleContext context)
+			throws CoreException, MavenInvocationException, IOException {
+		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
+		String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION);
+		String mavenHome = context.getProperty(MAVEN_HOME_KEY);
 
-				try {
-					if (!"target".equals(currentFile.getName())) {
-						Files.delete(currentFile.toPath());
-					}
-				} catch (IOException e) {
-					logger.debug(e.getMessage(), e);
-					logger.error(e.getMessage());
-				}
-			}
-		}
+		standaloneConfig = new StandaloneConfig(projectPath, compilerCompliance, mavenHome);
+	}
+
+	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules() {
+		logger.debug(Messages.RefactorUtil_GetEnabledRulesForProject);
+		return RulesContainer.getRulesForProject(standaloneConfig.getJavaProject(), true);
+	}
+
+	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRules(YAMLConfig config,
+			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules) throws YAMLConfigException {
+		logger.debug(Messages.RefactorUtil_GetSelectedRules);
+		return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
+	}
+
+	protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws YAMLConfigException {
+		return YAMLConfigUtil.readConfig(configFilePath, profile);
+	}
+
+	protected IJavaProject getJavaProject() {
+		return standaloneConfig.getJavaProject();
 	}
 }

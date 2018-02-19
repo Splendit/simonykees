@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: jSparrow Standalone
 Bundle-SymbolicName: eu.jsparrow.standalone;singleton:=true
-Bundle-Version: 2.4.2.qualifier
+Bundle-Version: 2.5.0.qualifier
 Bundle-Activator: eu.jsparrow.standalone.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
@@ -12,6 +12,9 @@ Require-Bundle: org.eclipse.jdt.core;bundle-version="[3.11.0,4.0.0)",
  eu.jsparrow.logging,
  eu.jsparrow.i18n,
  eu.jsparrow.core,
- org.apache.commons.lang3;bundle-version="[3.1.0,4.0.0)"
+ org.apache.commons.lang3;bundle-version="[3.1.0,4.0.0)",
+ com.google.guava;bundle-version="21.0.0"
 Bundle-Vendor: Splendit IT-Consulting GmbH
-Import-Package: org.osgi.framework;version="1.5.0"
+Bundle-ClassPath: lib/plexus-utils.jar,
+ lib/maven-invoker.jar,
+ .

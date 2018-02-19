@@ -2,7 +2,7 @@
 #author: Matthias Webhofer, Hans-Jörg Schrödl
 
 exitPrintUsage() {
-	echo "Usage: $0 <originDirectory> <destinationRoot> <buildNumber>"
+	echo "Usage: $0 <originDirectory> <targetDirectory>"
 	exit 1
 }
 
@@ -17,29 +17,25 @@ exitDirectoryCreationError() {
 }
 
 exitCopyError() {
-	echo "Error copying mapping files!"
+	echo "Error uploading mapping files!"
 	exit 4
 }
 
 # check argument count
-if [ "$#" -ne "3" ]; then
+if [ "$#" -ne "2" ]; then
 	exitPrintUsage
 fi
 
 origin_dir=$1
-
-# remove last '/' of the path, if there is any
-destination_root_dir=${2%/}
-build_nr_dir=$3
+target_dir=$2
 
 # check if the directory, in which all build numbers are stored
 # (as directories themselves), exists. exit on failure 
 if [ -d "$origin_dir" ]; then
 	
-
 	# create a temporary directory, if it doesn't exist yet
-	if [ ! -d "$build_nr_dir" ]; then
-		mkdir "$build_nr_dir"
+	if [ ! -d "$target_dir" ]; then
+		mkdir "$target_dir"
 		if [ $? -gt 0 ]; then
 			exitDirectoryCreationError
 		fi
@@ -49,18 +45,20 @@ if [ -d "$origin_dir" ]; then
 	# find: find all files ending with *.out recursively from the given directory
 	# xargs: takes the stdout of find and applies cp to each entry of the list
 	# {} is the placeholder for the list items
-	find "$origin_dir" -name "*.out" | xargs -i cp {} "$build_nr_dir"
+	find "$origin_dir" -name "*.out" | xargs -i cp {} "$target_dir"
 	
-	# then: copy all files from temp to remote
-	scp -r -i ~/.ssh/slave_rsa "$build_nr_dir" "jenkins.splendit.loc:$destination_root_dir"
+	# then: zip and upload to deobfuscation service
+	zip -r "$target_dir".zip "$target_dir"
+	curl -F file=@"$target_dir".zip http://stacktrace.splendit.loc/upload
 
 	if [ $? -gt 0 ]; then
 		exitCopyError
 	fi
 	
-	rm -rf "$build_nr_dir"
+	# remove tempdir and zipfile
+	rm -rf "$target_dir" "$target_dir.zip"
 
-	echo "mapping files copied successfully from \"$origin_dir\" to remote \"$destination_root_dir\""
+	echo "Mapping files uploaded successfully"
 else
 	exitDirectoryNotExisting
 fi
