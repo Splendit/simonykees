@@ -23,13 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.ReconcileException;
-import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.exception.model.NotWorkingRuleModel;
-import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleInterface;
+import eu.jsparrow.rules.common.exception.RefactoringException;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 

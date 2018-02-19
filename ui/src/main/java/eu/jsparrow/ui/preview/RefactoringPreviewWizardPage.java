@@ -45,12 +45,12 @@ import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.RefactoringRuleInterface;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
-import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RefactoringRuleInterface;
 import eu.jsparrow.rules.common.statistics.FileChangeCount;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;

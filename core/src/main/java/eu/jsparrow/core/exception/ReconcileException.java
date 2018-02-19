@@ -1,5 +1,7 @@
 package eu.jsparrow.core.exception;
 
+import eu.jsparrow.rules.common.exception.SimonykeesException;
+
 /**
  * TODO SIM-103 add class description
  * 

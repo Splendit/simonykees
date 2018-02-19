@@ -12,9 +12,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.refactorer.RefactoringState;
-import eu.jsparrow.core.rule.RefactoringRuleInterface;
-import eu.jsparrow.core.rule.statistics.EliminatedTechnicalDebt;
-import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
+import eu.jsparrow.rules.common.RefactoringRuleInterface;
+import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.ui.preview.model.BaseModel;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;

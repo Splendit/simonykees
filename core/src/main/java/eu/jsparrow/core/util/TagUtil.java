@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.Tag;
 import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
@@ -51,6 +49,8 @@ import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.Tag;
 
 /**
  * Tags for our rules.

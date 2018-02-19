@@ -38,9 +38,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.Tag;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 

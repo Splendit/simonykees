@@ -13,12 +13,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
-import eu.jsparrow.core.rule.RuleDescription;
-import eu.jsparrow.core.rule.SemiAutomaticRefactoringRule;
-import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.logger.StandardLoggerASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.SemiAutomaticRefactoringRule;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 
 /**
  * This rule replaces the System.out/err.print calls and the

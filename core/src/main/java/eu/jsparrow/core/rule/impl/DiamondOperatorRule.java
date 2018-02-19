@@ -6,12 +6,12 @@ import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.RuleDescription;
-import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
 import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.DiamondOperatorASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.PropertyUtil;
 
 /**

@@ -22,11 +22,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
-import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.RuleDescription;
 import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.StringUtilsASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RuleDescription;
 
 /**
  * @see StringUtilsASTVisitor

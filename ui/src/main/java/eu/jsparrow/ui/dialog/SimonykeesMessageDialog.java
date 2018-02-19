@@ -20,8 +20,8 @@ import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.exception.SimonykeesException;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.exception.SimonykeesException;
 
 /**
  * Simple help dialog that gets populated with default values

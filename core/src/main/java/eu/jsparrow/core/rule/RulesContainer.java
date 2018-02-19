@@ -38,7 +38,6 @@ import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
 import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
-import eu.jsparrow.core.rule.impl.OrganiseImportsRule;
 import eu.jsparrow.core.rule.impl.OverrideAnnotationRule;
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
@@ -59,6 +58,7 @@ import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
 import eu.jsparrow.rules.api.RuleService;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -71,6 +71,9 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  */
 public class RulesContainer {
 
+	private RulesContainer() {
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
@@ -81,7 +84,7 @@ public class RulesContainer {
 		try {
 			serviceReferences = bundleContext.getServiceReferences(RuleService.class.getName(), null);
 		} catch (InvalidSyntaxException e) {
-			logger.error("Failed to load external rules due to bad filter expression.", e);
+			logger.error("Failed to load external rules due to bad filterexpression.", e);
 		}
 		// BundleContext returns null if no services are found,
 		return serviceReferences == null ? Collections.emptyList()
@@ -137,9 +140,9 @@ public class RulesContainer {
 				 */
 				new CodeFormatterRule()));
 
-		if (!isStandalone) {
-//			rules.add(services.get(0).loadRules());
-			rules.add(new OrganiseImportsRule());
+		if (!isStandalone && services != null) {
+			services.stream()
+				.forEach(service -> rules.addAll(service.loadRules()));
 		}
 
 		return rules;

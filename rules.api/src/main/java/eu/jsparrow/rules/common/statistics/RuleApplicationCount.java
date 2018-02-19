@@ -23,7 +23,7 @@ public class RuleApplicationCount implements ASTRewriteVisitorListener {
 	private Map<String, FileChangeCount> changesPerCompilationUnit = new HashMap<>();
 
 	// Internal visibility for usage in unit tests
-	RuleApplicationCount() {
+	public RuleApplicationCount() {
 	}
 
 	/**

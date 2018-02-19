@@ -4,8 +4,8 @@ import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.i18n.ExceptionMessages;
+import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
