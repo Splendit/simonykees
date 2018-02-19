@@ -1,6 +1,6 @@
 package eu.jsparrow.core;
 
-import static eu.jsparrow.core.util.ASTNodeUtil.convertToTypedList;
+import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
@@ -34,10 +34,10 @@ import org.junit.BeforeClass;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.util.ASTNodeUtil;
-import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.util.RulesTestUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
  * Base class for Rule Tests.

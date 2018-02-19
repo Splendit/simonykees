@@ -15,8 +15,8 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.visitor.loop.LoopIteratingIndexASTVisitor;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * A visitor for investigating the replace precondition of a for loop with an

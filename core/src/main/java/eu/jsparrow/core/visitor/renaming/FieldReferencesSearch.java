@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.FileWithCompilationErrorException;
 import eu.jsparrow.core.exception.runtime.ICompilationUnitNotFoundException;
-import eu.jsparrow.core.util.RefactoringUtil;
+import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
  * A class for wrapping a {@link SearchEngine} which is used for finding 

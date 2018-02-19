@@ -16,11 +16,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
-import eu.jsparrow.core.util.ASTNodeUtil;
-import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.core.visitor.loop.LoopOptimizationASTVisior;
 import eu.jsparrow.core.visitor.loop.LoopToForEachASTVisitor;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * For loops with an iterator can be replaced with a forEach loop since 1.7

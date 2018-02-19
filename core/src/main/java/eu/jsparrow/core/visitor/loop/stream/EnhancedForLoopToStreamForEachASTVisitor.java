@@ -23,8 +23,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.CommentRewriter;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * this rule visits all enhanced for loops and checks if the corresponding loop

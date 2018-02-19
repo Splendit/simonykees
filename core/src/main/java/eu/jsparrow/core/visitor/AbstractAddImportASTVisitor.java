@@ -14,7 +14,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 
-import eu.jsparrow.core.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * Extended {@link AbstractASTRewriteASTVisitor} where a list of java classes

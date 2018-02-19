@@ -16,8 +16,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.rule.impl.PutIfAbsentRule;
-import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * Looks for occurrences of map.put(key, value) where the following conditions

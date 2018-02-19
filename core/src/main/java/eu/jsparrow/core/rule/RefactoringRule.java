@@ -16,10 +16,10 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.RefactoringException;
 import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
-import eu.jsparrow.core.util.PropertyUtil;
-import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.util.RefactoringUtil;
+import eu.jsparrow.rules.common.util.PropertyUtil;
 
 /**
  * Wrapper Class for {@link AbstractASTRewriteASTVisitor} that holds UI name,

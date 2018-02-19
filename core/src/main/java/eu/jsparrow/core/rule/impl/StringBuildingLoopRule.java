@@ -9,10 +9,10 @@ import org.eclipse.jdt.core.JavaCore;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RuleDescription;
 import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
-import eu.jsparrow.core.util.PropertyUtil;
 import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.StringBuildingLoopASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.util.PropertyUtil;
 
 /**
  * @see StringBuildingLoopASTVisitor

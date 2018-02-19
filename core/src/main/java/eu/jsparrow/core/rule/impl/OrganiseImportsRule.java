@@ -20,10 +20,10 @@ import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RuleDescription;
 import eu.jsparrow.core.rule.statistics.FileChangeCount;
 import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
-import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
  * Organise imports in a Java class, the rule does not use an

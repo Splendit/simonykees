@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * A helper class for writing comments which can be lost after the refactoring
