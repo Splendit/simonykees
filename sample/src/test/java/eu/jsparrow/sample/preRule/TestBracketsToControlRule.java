@@ -15,7 +15,7 @@ public class TestBracketsToControlRule {
 	}
 
 	public static void testforLoop() {
-		for (int i = 1; i < 2; i++)
+		for (int i = 1; i < 2; i++)// 
 			;
 		for (Integer i : Arrays.asList(1, 2, 3))
 			System.out.println(i);
@@ -23,17 +23,17 @@ public class TestBracketsToControlRule {
 
 	public static void thestWhileLoop() {
 		String st = null;
-		while (st != null)
+		while (st != null) //
 			;
-		do
+		do // 
 			; while (st != null);
 	}
 
 	public static void testIf() {
 		String s = "a";
 		String t = "bb";
-		if (s == "a")
-			if (t == "b")
+		if (s == "a") //
+			if (t == "b") //
 				do
 					; while (t != null);
 			else if (s == "aaa")

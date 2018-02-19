@@ -35,7 +35,17 @@ public class TestRemoveNewStringConstructorRule {
 		return "StringLiteral";
 	}
 
+	public String testNewStringOfLiteral_lineComments() {
+		// I don't want to break anything
+		return "StringLiteral";
+	}
+
 	public String testNewStringOfOtherString(String s) {
+		return s;
+	}
+
+	public String testNewStringOfOtherString_lineComments(String s) {
+		// I don't want to break anything
 		return s;
 	}
 

@@ -54,6 +54,11 @@ public class TestEnumsWithoutEqualsRule {
 			return;
 		}
 
+		if (RoundingMode.UP // I don't want to break anything
+		== roundingMode) {
+			return;
+		}
+
 		/* invocation comment */
 		/* leading comment */
 		/* trailing comments */

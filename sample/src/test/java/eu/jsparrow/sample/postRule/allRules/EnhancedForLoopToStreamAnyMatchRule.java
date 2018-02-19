@@ -17,11 +17,14 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 
 	public void usingAnyMatch(List<String> strings) {
 		// comment before
+		// test
 		// comment inside 1
 		// comment inside 2
 		// comment after
-		boolean containsEmpty = strings.stream()
-			.anyMatch(StringUtils::isEmpty);
+		boolean containsEmpty // comment after declaration name
+				= strings // test
+					.stream()
+					.anyMatch(StringUtils::isEmpty);
 	}
 
 	public void statementsInBetween(List<String> strings) {

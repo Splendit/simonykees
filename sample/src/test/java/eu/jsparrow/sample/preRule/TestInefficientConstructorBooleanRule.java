@@ -8,6 +8,8 @@ public class TestInefficientConstructorBooleanRule {
 	}
 
 	public Boolean booleanTrueLiteralTest() {
+		Boolean t = new Boolean // I don't want to break anything
+				("true");
 		return /* leading comment */ new /* internal comment */ Boolean( /* argument comment */"true") /* trailing comment */;
 	}
 

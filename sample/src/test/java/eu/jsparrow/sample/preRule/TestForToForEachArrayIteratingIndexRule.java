@@ -20,7 +20,8 @@ public class TestForToForEachArrayIteratingIndexRule {
 		for (i = 0; i < ms.length; i = i + 1) {
 			String []inner = ms[i];
 			String []another = ms[i];
-			for(int j = 0; j<inner.length; j++) {
+			for(int j = 0; j<inner // comment after inner
+					.length; j++) {
 				sb.append(inner[j]);
 			}
 		}

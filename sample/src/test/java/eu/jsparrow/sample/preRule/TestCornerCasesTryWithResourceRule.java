@@ -96,14 +96,63 @@ public class TestCornerCasesTryWithResourceRule {
 		
 		if (record.getThrown() != null) {
 			try {
-	            final StringWriter sw = new StringWriter();
+				// comment before resource
+	            final StringWriter sw = // I don't want to break anything
+	            		new StringWriter();
 	            final PrintWriter pw = new PrintWriter(sw);
+	            
+	            
+	            
 	            //CHECKSTYLE:OFF
 	            record.getThrown().printStackTrace(pw);
+	            
+	            
+				/*
+				 * Unconnected comment
+				 */
+	            
 	            //CHECKSTYLE:ON
 	            pw.close();
-	            sb.append(sw.toString());
+	            sb.append(sw.toString()); // trailing comment after append
+	            
+	            // comment before close 
 	            sw.close();
+	            
+	            // comment before println
+	            System.out.println(sb);
+	            
+	            // comment in the end of the body
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+		}
+	}
+	
+	public void morphiaCornerCaseWithClosedResources_emptyTryStatement() {
+		
+		final LogRecord record = null;
+		final StringBuilder sb = new StringBuilder();
+		
+		if (record.getThrown() != null) {
+			try {
+				
+				// comment before resource
+	            final StringWriter sw = new StringWriter();
+	            final PrintWriter pw = new PrintWriter(sw);
+	            
+	            
+	            
+				/*
+				 * Unconnected comment
+				 */
+	            
+	            //CHECKSTYLE:ON
+	            pw.close();
+	            
+	            // comment before close 
+	            sw.close();
+	            
+	            // comment in the end of the body
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	        }

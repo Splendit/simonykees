@@ -20,7 +20,8 @@ public class StringBufferToBuilderRule {
 
 	private void test1() {
 		//a comment here
-		StringBuffer /* internal comment in declaration */ localStringBuffer1 = new /* internal comment in initializer */ StringBuffer(); // trailing comment
+		StringBuffer /* internal comment in declaration */ localStringBuffer1 // I don't want to break anything
+		= new /* internal comment in initializer */ StringBuffer(); // trailing comment
 		StringBuffer localStringBuffer2 = null;
 		StringBuffer localStringBuffer3, localStringBuffer4 = new StringBuffer();
 

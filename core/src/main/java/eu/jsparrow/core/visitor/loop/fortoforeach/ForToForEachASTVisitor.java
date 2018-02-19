@@ -3,11 +3,9 @@ package eu.jsparrow.core.visitor.loop.fortoforeach;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -19,7 +17,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import eu.jsparrow.core.util.ASTNodeUtil;
 import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.CommentRewriter;
-import eu.jsparrow.core.visitor.loop.LoopOptimizationASTVisior;
 import eu.jsparrow.core.visitor.loop.LoopToForEachASTVisitor;
 
 /**
@@ -30,10 +27,7 @@ import eu.jsparrow.core.visitor.loop.LoopToForEachASTVisitor;
  */
 public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement> {
 
-	private Map<ForStatement, LoopOptimizationASTVisior> replaceInformationASTVisitorList;
-	private Map<String, Integer> multipleIteratorUse;
-
-	public ForToForEachASTVisitor() {
+public ForToForEachASTVisitor() {
 		this.replaceInformationASTVisitorList = new HashMap<>();
 		this.multipleIteratorUse = new HashMap<>();
 	}
@@ -59,25 +53,7 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 			}
 			if (ClassRelationUtil.isContentOfTypes(iteratorName.resolveTypeBinding(),
 					generateFullyQualifiedNameList(ITERATOR_FULLY_QUALLIFIED_NAME))) {
-				Block parentNode = ASTNodeUtil.getSpecificAncestor(node, Block.class);
-				if (parentNode == null) {
-					/*
-					 * No surrounding parent block found should not happen,
-					 * because the Iterator has to be defined in an parent
-					 * block.
-					 */
-					return false;
-				}
-				LoopOptimizationASTVisior iteratorDefinitionAstVisior = new LoopOptimizationASTVisior(
-						(SimpleName) iteratorName, node);
-				iteratorDefinitionAstVisior.setASTRewrite(this.astRewrite);
-				parentNode.accept(iteratorDefinitionAstVisior);
-
-				if (iteratorDefinitionAstVisior.allParametersFound()) {
-					replaceInformationASTVisitorList.put(node, iteratorDefinitionAstVisior);
-					getCommentRewriter().saveLeadingComment(node);
-					onRewrite();
-				}
+				handleLoopWithIterator(node, iteratorName);
 			}
 
 		} else if (ASTNode.INFIX_EXPRESSION == nodeExpression.getNodeType()) {
@@ -108,23 +84,7 @@ public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement
 
 	@Override
 	public void endVisit(ForStatement node) {
-		// Do the replacement
-		if (replaceInformationASTVisitorList.containsKey(node)) {
-			LoopOptimizationASTVisior iteratorDefinitionAstVisior = replaceInformationASTVisitorList.remove(node);
-			Map<String, Boolean> newNameMap = generateNewIteratorName(null, node,
-					iteratorDefinitionAstVisior.getListName());
-			String newName = newNameMap.keySet()
-				.iterator()
-				.next();
-			iteratorDefinitionAstVisior.replaceLoop(node, node.getBody(), multipleIteratorUse, newName);
-
-			// clear the variableIterator if no other loop is present
-			if (replaceInformationASTVisitorList.isEmpty()) {
-				multipleIteratorUse.clear();
-			}
-		}
-
-		clearTempItroducedNames(node);
+		handleLoopWithIteratorReplacement(node, node.getBody());
 	}
 
 	@Override

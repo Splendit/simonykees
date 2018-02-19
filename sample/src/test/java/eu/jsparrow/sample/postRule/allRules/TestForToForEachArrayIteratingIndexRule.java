@@ -19,7 +19,9 @@ public class TestForToForEachArrayIteratingIndexRule {
 		if (sb != null) {
 			for (String[] inner : ms) {
 				String[] another = inner;
-				for (String anInner : inner) {
+				// comment after inner
+				for (String anInner : inner // comment after inner
+				) {
 					sb.append(anInner);
 				}
 			}

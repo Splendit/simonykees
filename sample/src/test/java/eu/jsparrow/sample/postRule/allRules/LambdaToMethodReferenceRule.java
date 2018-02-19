@@ -57,7 +57,9 @@ public class LambdaToMethodReferenceRule {
 		Collections.sort(personList, Person::compareByAge);
 
 		/* save me */
-		Collections.sort(personList, Person::compareByAge);
+		// I don't want to break anything...
+		Collections.sort(personList, Person // I don't want to break anything...
+		::compareByAge);
 
 		/* save me */
 		Collections.sort(personList, Person::compareByAge);
