@@ -3,6 +3,7 @@ package eu.jsparrow.core.rule;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -80,16 +81,18 @@ public class RulesContainer {
 	private static List<RuleService> getExternalRuleServices() {
 		BundleContext bundleContext = FrameworkUtil.getBundle(RulesContainer.class)
 			.getBundleContext();
-		ServiceReference<?>[] serviceReferences = new ServiceReference<?>[0];
+		ServiceReference<?>[] serviceReferences = null;
 		try {
 			serviceReferences = bundleContext.getServiceReferences(RuleService.class.getName(), null);
 		} catch (InvalidSyntaxException e) {
 			logger.error("Failed to load external rules due to bad filter expression.", e);
 		}
-		return Arrays.asList(serviceReferences)
-			.stream()
-			.map(x -> (RuleService) bundleContext.getService(x))
-			.collect(Collectors.toList());
+		// BundleContext returns null if no services are found,
+		return serviceReferences == null ? Collections.emptyList()
+				: Arrays.asList(serviceReferences)
+					.stream()
+					.map(x -> (RuleService) bundleContext.getService(x))
+					.collect(Collectors.toList());
 	}
 
 	/**
@@ -102,7 +105,7 @@ public class RulesContainer {
 	 */
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules(boolean isStandalone) {
 		List<RuleService> services = getExternalRuleServices();
-		
+
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = new LinkedList<>();
 		rules.addAll(Arrays.asList(
 				/*
