@@ -46,6 +46,18 @@ public class TestToStringOnStringRule {
 		/* save me */
 		s = StringUtils.substring(s, 0);
 
+		s = StringUtils.substring(s, 0)// save me
+			.toString();
+
+		String input = "noInput";
+		s = StringUtils.substring(s, 0) // save me
+			.toString() + input
+				+ ("some-other-nasty-string" // skip me
+					.toString())
+				+ "abc" // you dont want to break the code
+					.toString()
+				+ 'c';
+
 		/* leading comment */
 		/* invocation comment */
 		/* trailing comment */

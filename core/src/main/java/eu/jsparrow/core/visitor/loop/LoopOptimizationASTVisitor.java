@@ -33,10 +33,10 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
  * Finds the definition of the given {@link Iterator} and it next calls. Handles
  * the replacement of the While or For Loop
  * 
- * @author Martin Huter
+ * @author Martin Huter, Hans-Jörg Schrödl
  * @since 0.9.2
  */
-public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
+public class LoopOptimizationASTVisitor extends AbstractASTRewriteASTVisitor {
 
 	/*
 	 * is initialized in constructor and set to null again if condition is
@@ -46,10 +46,11 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 	private Statement loopStatement;
 	private Name listName = null;
 	private ASTNode iteratorDeclaration = null;
+	private Type iteratorType = null;
 	private MethodInvocation iteratorNextCall = null;
 	private boolean outsideWhile = true;
 
-	public LoopOptimizationASTVisior(SimpleName iteratorName, Statement loopStatement) {
+	public LoopOptimizationASTVisitor(SimpleName iteratorName, Statement loopStatement) {
 		this.iteratorName = iteratorName;
 		this.loopStatement = loopStatement;
 	}
@@ -123,6 +124,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		if (preconditionForVariableDeclaration(node.fragments())) {
 
 			iteratorDeclaration = node;
+			iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 		}
 	}
 
@@ -133,6 +135,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 	public void endVisit(VariableDeclarationExpression node) {
 		if (preconditionForVariableDeclaration(node.fragments())) {
 			iteratorDeclaration = node;
+			iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 		}
 	}
 
@@ -152,36 +155,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 			}
 
 			if (MethodInvocation.EXPRESSION_PROPERTY == node.getLocationInParent()) {
-				MethodInvocation methodInvocation = (MethodInvocation) node.getParent();
-				if (ReservedNames.MI_NEXT.equals(methodInvocation.getName()
-					.getFullyQualifiedName())) {
-					// next was already called on this iterator
-					if (null != iteratorNextCall) {
-						setNodesToNull();
-						return false;
-					}
-
-					/*
-					 * if 'next()' is called in a nested loop, the
-					 * transformation cannot be done
-					 */
-					Statement eclosingLoopStatement = findEnclosingLoopStatement(node);
-					if (eclosingLoopStatement != loopStatement) {
-						setNodesToNull();
-						return false;
-					}
-
-					iteratorNextCall = methodInvocation;
-					return true;
-				} else if (ReservedNames.MI_HAS_NEXT.equals(methodInvocation.getName()
-					.getFullyQualifiedName()) && methodInvocation.getParent() == loopStatement) {
-					// allowed hasNext in while head
-					return true;
-				} else {
-					// other not allowed iterator access
-					setNodesToNull();
-					return false;
-				}
+				return handleExpressionProperty(node);
 			} else {
 				// other not allowed iterator access
 				setNodesToNull();
@@ -189,6 +163,39 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 			}
 		}
 		return true;
+	}
+
+	private boolean handleExpressionProperty(SimpleName node) {
+		MethodInvocation methodInvocation = (MethodInvocation) node.getParent();
+		if (ReservedNames.MI_NEXT.equals(methodInvocation.getName()
+			.getFullyQualifiedName())) {
+			// next was already called on this iterator
+			if (null != iteratorNextCall) {
+				setNodesToNull();
+				return false;
+			}
+
+			/*
+			 * if 'next()' is called in a nested loop, the transformation cannot
+			 * be done
+			 */
+			Statement eclosingLoopStatement = findEnclosingLoopStatement(node);
+			if (eclosingLoopStatement != loopStatement) {
+				setNodesToNull();
+				return false;
+			}
+
+			iteratorNextCall = methodInvocation;
+			return true;
+		} else if (ReservedNames.MI_HAS_NEXT.equals(methodInvocation.getName()
+			.getFullyQualifiedName()) && methodInvocation.getParent() == loopStatement) {
+			// allowed hasNext in while head
+			return true;
+		} else {
+			// other not allowed iterator access
+			setNodesToNull();
+			return false;
+		}
 	}
 
 	/**
@@ -214,19 +221,10 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		}
 	}
 
-	public void replaceLoop(Statement loopStatement, Statement loopBody, Map<String, Integer> multipleIteratorUse,
+	public boolean replaceLoop(Statement loopStatement, Statement loopBody, Map<String, Integer> multipleIteratorUse,
 			String iteratorName) {
-		Type iteratorType = ASTNodeUtil.getSingleTypeParameterOfVariableDeclaration(getIteratorDeclaration());
 
-		/*
-		 * iterator has no type-parameter therefore an optimization could not be
-		 * applied
-		 */
-		if (null == iteratorType) {
-			return;
-		} else {
-			iteratorType = (Type) astRewrite.createMoveTarget(iteratorType);
-		}
+		iteratorType = (Type) astRewrite.createMoveTarget(iteratorType);
 
 		// find LoopvariableName
 		MethodInvocation nextCall = getIteratorNextCall();
@@ -277,7 +275,7 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		astRewrite.replace(loopStatement, newFor, null);
 
 		astRewrite.remove(getIteratorDeclaration(), null);
-		onRewrite();
+		return true;
 	}
 
 	/**
@@ -289,11 +287,12 @@ public class LoopOptimizationASTVisior extends AbstractASTRewriteASTVisitor {
 		loopStatement = null;
 		listName = null;
 		iteratorDeclaration = null;
+		iteratorType = null;
 		iteratorNextCall = null;
 	}
 
 	public boolean allParametersFound() {
-		return null != listName && null != iteratorDeclaration && null != iteratorNextCall;
+		return null != listName && null != iteratorDeclaration && null != iteratorNextCall && null != iteratorType;
 	}
 
 	public ASTNode getIteratorDeclaration() {

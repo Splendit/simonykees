@@ -110,5 +110,10 @@ public class TestUseIsEmptyRule {
 		/* save me */
 		if (m.isEmpty()) {
 		}
+
+		// I don't want to break anything
+		if (m // I don't want to break anything
+			.isEmpty()) {
+		}
 	}
 }

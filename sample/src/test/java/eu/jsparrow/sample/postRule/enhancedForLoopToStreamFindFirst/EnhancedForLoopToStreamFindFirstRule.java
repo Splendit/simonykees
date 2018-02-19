@@ -19,13 +19,16 @@ public class EnhancedForLoopToStreamFindFirstRule {
 		StringBuilder sb = new StringBuilder();
 		List<String> values = generateList(input);
 		// comment before loop
+		// comment after loop head
 		// comment inside 1
 		// comment inside 2
 		// comment after
-		String key = values.stream()
+		String key = values // comment after loop head
+.stream()
 			.filter(value -> value.length() > 4)
 			.findFirst()
-			.orElse("");
+			.orElse("")
+				;
 		sb.append(key);
 		
 		return sb.toString();

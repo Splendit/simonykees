@@ -20,7 +20,8 @@ public class LambdaForEachMapRule {
 		
 		list.forEach(s -> {
 			// save me 1
-			String subString = s.substring(1);
+			String subString = s.substring(1) // comment after s.substring(1)
+					;
 			// save me 2
 			sb.append(subString);
 			// trailing comment in rs 1

@@ -14,10 +14,11 @@ public class LambdaForEachCollectRule {
 		List<String> oStrings = new ArrayList<>();
 		List<String> objectList = new ArrayList<>();
 		
-		objectList.stream().map(o -> o.substring(0))
+		objectList.stream().map(o -> o.substring(0)) // comment after map
 		.forEach( /* lambda param comment */ oString -> /* lambda body */ {
 			// save me
-			oStrings.add(oString);
+			oStrings // comment after oStrings
+			.add(oString);
 		});
 		
 		return oStrings.stream().collect(Collectors.joining(","));

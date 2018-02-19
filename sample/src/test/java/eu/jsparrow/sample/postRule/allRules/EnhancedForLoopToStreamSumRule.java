@@ -8,9 +8,12 @@ public class EnhancedForLoopToStreamSumRule {
 
 	public int forToStreamSum(String input) {
 		List<Integer> numbers = generateIntList(input);
+		// comment after sum
 		// comment before
+		// comment after numbers
 		// comment inside the loop
-		int sum = numbers.stream()
+		int sum = numbers // comment after numbers
+			.stream()
 			.mapToInt(Integer::intValue)
 			.sum();
 		return sum;

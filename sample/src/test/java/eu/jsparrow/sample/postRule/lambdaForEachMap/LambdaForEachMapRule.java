@@ -19,11 +19,13 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 		
 		// save me 1
+		// comment after s.substring(1)
 		// save me 2
 		// trailing comment in rs 2
 		// trailing comment in rs 1
 		list.stream()
-			.map(s -> s.substring(1)).forEach(subString -> sb.append(subString));
+			.map(s -> s.substring(1) // comment after s.substring(1)
+).forEach(subString -> sb.append(subString));
 		
 		// I could get lost in the map
 		list.stream()
