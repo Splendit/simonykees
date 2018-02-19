@@ -7,12 +7,8 @@ import java.util.List;
 import org.eclipse.core.runtime.jobs.Job;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import eu.jsparrow.core.rule.RulesContainer;
-import eu.jsparrow.rules.api.RuleService;
 
 /**
  * The activator class controls the plug-in life cycle

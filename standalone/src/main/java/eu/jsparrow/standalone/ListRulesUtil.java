@@ -11,8 +11,8 @@ import com.google.common.base.Splitter;
 
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RulesContainer;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * 

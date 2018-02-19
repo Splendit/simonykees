@@ -12,8 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.wizard.IValueChangeListener;
 
 /**

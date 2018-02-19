@@ -13,5 +13,6 @@ Require-Bundle: org.eclipse.jdt.core;bundle-version="[3.11.0,4.0.0)",
  eu.jsparrow.i18n,
  eu.jsparrow.core,
  org.apache.commons.lang3;bundle-version="[3.1.0,4.0.0)",
- com.google.guava;bundle-version="21.0.0"
+ com.google.guava;bundle-version="21.0.0",
+ eu.jsparrow.rules.api;bundle-version="2.5.0"
 Bundle-Vendor: Splendit IT-Consulting GmbH

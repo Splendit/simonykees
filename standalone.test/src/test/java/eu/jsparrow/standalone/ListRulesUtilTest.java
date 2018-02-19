@@ -17,7 +17,7 @@ import org.junit.Test;
 
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RuleDescription;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * test class for {@link ListRulesUtil}

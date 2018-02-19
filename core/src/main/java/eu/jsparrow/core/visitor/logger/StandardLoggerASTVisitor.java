@@ -39,11 +39,11 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerConstants;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
-import eu.jsparrow.core.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
  * Replaces the occurrences of {@code System.out/err.print/ln} and

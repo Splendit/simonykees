@@ -8,8 +8,8 @@ import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.core.visitor.ASTRewriteEvent;
 import eu.jsparrow.dummies.DummyRule;
+import eu.jsparrow.rules.common.visitor.ASTRewriteEvent;
 
 @SuppressWarnings("nls")
 public class EliminatedTechnicalDebtTest {

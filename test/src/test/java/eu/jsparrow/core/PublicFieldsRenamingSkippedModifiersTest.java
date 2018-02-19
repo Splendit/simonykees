@@ -19,9 +19,9 @@ import org.junit.runners.Parameterized.Parameters;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.util.RulesTestUtil;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 @RunWith(Parameterized.class)
 @SuppressWarnings("nls")

@@ -1,6 +1,8 @@
 package eu.jsparrow.core.visitor.renaming;
 
 
+import static eu.jsparrow.rules.common.util.ASTNodeUtil.hasModifier;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,8 +18,6 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.text.edits.TextEditGroup;
-
-import static eu.jsparrow.rules.common.util.ASTNodeUtil.hasModifier;
 
 /**
  * A type for storing information about a field to be renamed and all its

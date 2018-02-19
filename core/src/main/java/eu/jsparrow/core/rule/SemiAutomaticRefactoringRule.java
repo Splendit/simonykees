@@ -2,7 +2,7 @@ package eu.jsparrow.core.rule;
 
 import java.util.Map;
 
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * A super class for all the rules that require some user interaction.

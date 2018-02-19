@@ -15,9 +15,9 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import eu.jsparrow.core.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 
 /**
  * A super class for the visitors targeting {@link Stream#forEach(Consumer)}

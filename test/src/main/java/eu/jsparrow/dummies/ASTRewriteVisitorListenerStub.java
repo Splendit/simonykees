@@ -1,7 +1,7 @@
 package eu.jsparrow.dummies;
 
-import eu.jsparrow.core.visitor.ASTRewriteEvent;
-import eu.jsparrow.core.visitor.ASTRewriteVisitorListener;
+import eu.jsparrow.rules.common.visitor.ASTRewriteEvent;
+import eu.jsparrow.rules.common.visitor.ASTRewriteVisitorListener;
 
 /**
  * This class is a simple stub to verify if a listener was updated by an

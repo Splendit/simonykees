@@ -34,11 +34,11 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import eu.jsparrow.core.builder.NodeBuilder;
-import eu.jsparrow.core.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.core.visitor.renaming.JavaReservedKeyWords;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**

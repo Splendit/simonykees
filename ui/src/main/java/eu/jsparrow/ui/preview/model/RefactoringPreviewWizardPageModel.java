@@ -12,7 +12,7 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.statistics.EliminatedTechnicalDebt;
 import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public class RefactoringPreviewWizardPageModel extends BaseModel {
 

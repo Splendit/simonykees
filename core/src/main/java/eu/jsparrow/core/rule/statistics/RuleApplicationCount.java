@@ -6,8 +6,8 @@ import java.util.Map;
 
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RefactoringRuleInterface;
-import eu.jsparrow.core.visitor.ASTRewriteEvent;
-import eu.jsparrow.core.visitor.ASTRewriteVisitorListener;
+import eu.jsparrow.rules.common.visitor.ASTRewriteEvent;
+import eu.jsparrow.rules.common.visitor.ASTRewriteVisitorListener;
 
 /**
  * A {@link ASTRewriteVisitorListener} that simply increases a counter when

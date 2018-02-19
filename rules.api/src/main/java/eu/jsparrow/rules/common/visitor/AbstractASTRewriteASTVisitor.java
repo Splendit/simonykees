@@ -115,7 +115,7 @@ public abstract class AbstractASTRewriteASTVisitor extends ASTVisitor {
 	/**
 	 * Notifies all listeners that a rewrite occurred.
 	 */
-	protected void onRewrite() {
+	public void onRewrite() {
 		listeners.forEach(listener -> listener.update(new ASTRewriteEvent(this.compilationUnitHandle)));
 	}
 	

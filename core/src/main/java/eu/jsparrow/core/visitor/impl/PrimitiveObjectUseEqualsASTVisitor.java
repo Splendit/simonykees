@@ -15,9 +15,9 @@ import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.builder.NodeBuilder;
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**

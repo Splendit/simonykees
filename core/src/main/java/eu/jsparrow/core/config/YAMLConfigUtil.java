@@ -24,8 +24,8 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.rule.RulesContainer;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * This class provides useful methods to deal with YAML configuration. the used
