@@ -17,8 +17,8 @@ import org.eclipse.jdt.core.dom.UnionType;
 
 import eu.jsparrow.core.matcher.BijectiveSimpleNameASTMatcher;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * This visitor finds duplicated catch-blocks and combines it to a

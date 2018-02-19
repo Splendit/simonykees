@@ -13,9 +13,9 @@ import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.constants.ReservedNames;
 import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * Every usage of the function {@link Object#toString()} on a Java Object is

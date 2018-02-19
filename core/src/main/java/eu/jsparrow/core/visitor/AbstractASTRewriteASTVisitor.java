@@ -8,6 +8,8 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
+
 /**
  * Abstract implementation of an {@link ASTVisitor} to assure all used visitors
  * have an field for {@link ASTRewrite} to commit the changes in the tree.
