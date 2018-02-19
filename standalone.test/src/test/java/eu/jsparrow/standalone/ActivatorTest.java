@@ -107,7 +107,7 @@ public class ActivatorTest {
 		String key = "eu.jsparrow.standalone.exit.message"; //$NON-NLS-1$
 		String testMessage = "Test"; //$NON-NLS-1$
 		
-		Activator.setExitErrorMessage(context, testMessage);
+		activator.setExitErrorMessage(context, testMessage);
 		
 		String result = System.getProperty(key);
 		

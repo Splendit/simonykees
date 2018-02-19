@@ -1,6 +1,10 @@
 package eu.jsparrow.standalone;
 
+import java.io.IOException;
+
+import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -48,6 +52,8 @@ public class Activator implements BundleActivator {
 
 		logger.info(Messages.Activator_start);
 
+		registerShutdownHook(context);
+
 		String modeName = context.getProperty(STANDALONE_MODE_KEY);
 		if (modeName != null && !modeName.isEmpty()) {
 
@@ -58,7 +64,7 @@ public class Activator implements BundleActivator {
 			case REFACTOR:
 				try {
 					refactorUtil.startRefactoring(context, new RefactoringPipeline());
-				} catch (YAMLConfigException yce) {
+				} catch (YAMLConfigException | CoreException | MavenInvocationException | IOException yce) {
 					logger.debug(yce.getMessage(), yce);
 					logger.error(yce.getMessage());
 					setExitErrorMessage(context, yce.getMessage());
@@ -103,13 +109,32 @@ public class Activator implements BundleActivator {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
 		} finally {
-			refactorUtil.cleanUp();
+			try {
+				refactorUtil.cleanUp();
+			} catch (IOException e) {
+				logger.debug(e.getMessage(), e);
+				logger.error(e.getMessage());
+				setExitErrorMessage(context, e.getMessage());
+			}
 		}
 
 		logger.info(Messages.Activator_stop);
 	}
 
-	private static EnvironmentInfo getEnvironmentInfo(BundleContext ctx) {
+	private void registerShutdownHook(BundleContext context) {
+		Runtime.getRuntime()
+			.addShutdownHook(new Thread(() -> {
+				try {
+					refactorUtil.cleanUp();
+				} catch (IOException e) {
+					logger.debug(e.getMessage(), e);
+					logger.error(e.getMessage());
+					setExitErrorMessage(context, e.getMessage());
+				}
+			}));
+	}
+
+	private EnvironmentInfo getEnvironmentInfo(BundleContext ctx) {
 		if (ctx == null) {
 			return null;
 		}
@@ -128,7 +153,7 @@ public class Activator implements BundleActivator {
 		return envInfo;
 	}
 
-	public static void setExitErrorMessage(BundleContext ctx, String exitMessage) {
+	public void setExitErrorMessage(BundleContext ctx, String exitMessage) {
 		String key = "eu.jsparrow.standalone.exit.message"; //$NON-NLS-1$
 		EnvironmentInfo envInfo = getEnvironmentInfo(ctx);
 		if (envInfo != null) {

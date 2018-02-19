@@ -3,7 +3,6 @@ package eu.jsparrow.standalone;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -14,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
@@ -41,8 +39,18 @@ import org.mockito.ArgumentCaptor;
  */
 public class StandaloneConfigTest {
 
+	private boolean callSuperPrepareEclipseMavenPlugin = false;
+	private boolean prepareEclipseMavenPluginReturnValue = false;
+	private int moveFileCallCount;
+
 	private static Path path;
-	private static Path tempFilePath;
+
+	private File projectFile;
+	private File projectFileTmp;
+	private File classpathFile;
+	private File classpathFileTmp;
+	private File settingsDirFile;
+	private File settingsDirFileTmp;
 
 	private IWorkspace workspace;
 	private IProjectDescription projectDescription;
@@ -51,6 +59,9 @@ public class StandaloneConfigTest {
 	private File mavenDepsFolder;
 	private IClasspathEntry classpathEntry;
 	private StandaloneConfig standaloneConfig;
+	private MavenInvoker mavenInvoker;
+
+	private static final String ECLIPSE = "eclipse"; //$NON-NLS-1$
 
 	@BeforeClass
 	public static void setUpClass() throws IOException {
@@ -65,46 +76,129 @@ public class StandaloneConfigTest {
 	}
 
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
+		moveFileCallCount = 0;
+
+		projectFile = mock(File.class);
+		projectFileTmp = mock(File.class);
+		classpathFile = mock(File.class);
+		classpathFileTmp = mock(File.class);
+		settingsDirFile = mock(File.class);
+		settingsDirFileTmp = mock(File.class);
+
 		workspace = mock(IWorkspace.class);
 		projectDescription = mock(IProjectDescription.class);
 		project = mock(IProject.class);
 		javaProject = mock(IJavaProject.class);
 		mavenDepsFolder = mock(File.class);
 		classpathEntry = mock(IClasspathEntry.class);
-		standaloneConfig = new TestableStandaloneConfig("standaloneTest", path.toString(), true); //$NON-NLS-1$
+		mavenInvoker = mock(MavenInvoker.class);
+		standaloneConfig = new TestableStandaloneConfig(path.toString(), "1.8", true); //$NON-NLS-1$
 	}
 
 	@Test
-	public void getProjectDescription_projectDescriptionExists_projectDescriptionLoaded() throws Exception {
-		tempFilePath = Files.createTempFile(path, "jsparrow-standalone-test-", ".tmp"); //$NON-NLS-1$ //$NON-NLS-2$
+	public void getProjectDescription_mavenNotInvoked_projectDescriptionLoaded() throws Exception {
+		callSuperPrepareEclipseMavenPlugin = false;
+		prepareEclipseMavenPluginReturnValue = false;
+
+		when(projectFile.getAbsolutePath()).thenReturn("/jsparrow-test"); //$NON-NLS-1$
 
 		standaloneConfig.getProjectDescription();
 
 		verify(workspace).loadProjectDescription(any(IPath.class));
-
-		Files.deleteIfExists(tempFilePath);
 	}
 
 	@Test
-	public void getProjectDescription_projectDescriptionDoesNotExist_projectDescriptionCreated() throws Exception {
-		tempFilePath = Paths.get("/", ".jsparrow-project"); //$NON-NLS-1$//$NON-NLS-2$
+	public void getProjectDescription_mavenInvoked_projectDescriptionCreated() throws Exception {
+		callSuperPrepareEclipseMavenPlugin = false;
+		prepareEclipseMavenPluginReturnValue = true;
 
-		when(workspace.newProjectDescription(anyString())).thenReturn(projectDescription);
-		when(projectDescription.getNatureIds()).thenReturn(new String[] {});
+		when(projectFile.getAbsolutePath()).thenReturn("/jsparrow-test"); //$NON-NLS-1$
 
 		standaloneConfig.getProjectDescription();
 
-		verify(workspace).newProjectDescription(anyString());
-		verify(projectDescription).getNatureIds();
-
-		ArgumentCaptor<String[]> captor = ArgumentCaptor.forClass(String[].class);
-		verify(projectDescription).setNatureIds(captor.capture());
-		assertTrue(captor.getValue().length == 2);
-
-		verify(projectDescription).setLocation(eq(new org.eclipse.core.runtime.Path(path.toString())));
-
+		verify(mavenInvoker).invoke(eq(ECLIPSE), eq(ECLIPSE), eq(null));
 		assertTrue(standaloneConfig.isDescriptionGenerated());
+	}
+
+	@Test
+	public void prepareEclipseMavenPlugin_projectClasspathSettingsExist_shouldReturnFalse() throws Exception {
+		callSuperPrepareEclipseMavenPlugin = true;
+
+		when(projectFile.exists()).thenReturn(true);
+		when(classpathFile.exists()).thenReturn(true);
+		when(settingsDirFile.exists()).thenReturn(true);
+
+		boolean result = standaloneConfig.prepareEclipseMavenPlugin();
+
+		assertFalse(result);
+	}
+
+	@Test
+	public void prepareEclipseMavenPlugin_projectClasspathSettingsDoNotExist_shouldReturnTrue() throws Exception {
+		callSuperPrepareEclipseMavenPlugin = true;
+
+		when(projectFile.exists()).thenReturn(false);
+		when(classpathFile.exists()).thenReturn(false);
+		when(settingsDirFile.exists()).thenReturn(false);
+
+		boolean result = standaloneConfig.prepareEclipseMavenPlugin();
+
+		assertTrue(result);
+	}
+
+	@Test
+	public void prepareEclipseMavenPlugin_projectExists_shouldReturnTrueAndFlagSet() throws Exception {
+		callSuperPrepareEclipseMavenPlugin = true;
+
+		when(projectFile.exists()).thenReturn(true);
+		when(classpathFile.exists()).thenReturn(false);
+		when(settingsDirFile.exists()).thenReturn(false);
+
+		boolean result = standaloneConfig.prepareEclipseMavenPlugin();
+
+		assertTrue(result);
+		assertTrue(standaloneConfig.isExistingProjectFileMoved());
+		assertFalse(standaloneConfig.isExistingClasspathFileMoved());
+		assertFalse(standaloneConfig.isExistingSettingsDirectoryMoved());
+
+		assertTrue(moveFileCallCount == 1);
+	}
+
+	@Test
+	public void prepareEclipseMavenPlugin_classpathExists_shouldReturnTrueAndFlagSet() throws Exception {
+		callSuperPrepareEclipseMavenPlugin = true;
+
+		when(projectFile.exists()).thenReturn(false);
+		when(classpathFile.exists()).thenReturn(true);
+		when(settingsDirFile.exists()).thenReturn(false);
+
+		boolean result = standaloneConfig.prepareEclipseMavenPlugin();
+
+		assertTrue(result);
+		assertFalse(standaloneConfig.isExistingProjectFileMoved());
+		assertTrue(standaloneConfig.isExistingClasspathFileMoved());
+		assertFalse(standaloneConfig.isExistingSettingsDirectoryMoved());
+
+		assertTrue(moveFileCallCount == 1);
+	}
+
+	@Test
+	public void prepareEclipseMavenPlugin_settingsExists_shouldReturnTrueAndFlagSet() throws Exception {
+		callSuperPrepareEclipseMavenPlugin = true;
+
+		when(projectFile.exists()).thenReturn(false);
+		when(classpathFile.exists()).thenReturn(false);
+		when(settingsDirFile.exists()).thenReturn(true);
+
+		boolean result = standaloneConfig.prepareEclipseMavenPlugin();
+
+		assertTrue(result);
+		assertFalse(standaloneConfig.isExistingProjectFileMoved());
+		assertFalse(standaloneConfig.isExistingClasspathFileMoved());
+		assertTrue(standaloneConfig.isExistingSettingsDirectoryMoved());
+
+		assertTrue(moveFileCallCount == 1);
 	}
 
 	@Test
@@ -173,51 +267,51 @@ public class StandaloneConfigTest {
 
 		assertTrue(entries.isEmpty());
 	}
-	
+
 	@Test
 	public void collectMavenDependenciesAsClasspathEntries_fileListIsNotEmpty_returnsNonEmptyList() {
 		File jarFile = mock(File.class);
-		when(mavenDepsFolder.listFiles()).thenReturn(new File[] {jarFile});
+		when(mavenDepsFolder.listFiles()).thenReturn(new File[] { jarFile });
 
 		List<IClasspathEntry> entries = standaloneConfig.collectMavenDependenciesAsClasspathEntries();
 
 		assertFalse(entries.isEmpty());
 	}
-	
+
 	@Test
 	public void addToClasspath_emptyClasspathList_doesNotCallAnyMethods() throws Exception {
 		standaloneConfig.setJavaProject(javaProject);
-		
+
 		standaloneConfig.addToClasspath(Collections.emptyList());
-		
+
 		verifyZeroInteractions(javaProject);
 	}
-	
+
 	@Test
 	public void addToClasspath_nonEmptyClasspathList_oldEntriesIsEmpty_setRawClasspathCalled() throws Exception {
 		standaloneConfig.setJavaProject(javaProject);
 		when(javaProject.getRawClasspath()).thenReturn(new IClasspathEntry[] {});
-		
+
 		standaloneConfig.addToClasspath(Collections.singletonList(classpathEntry));
-		
+
 		verify(javaProject).getRawClasspath();
-		
+
 		ArgumentCaptor<IClasspathEntry[]> captor = ArgumentCaptor.forClass(IClasspathEntry[].class);
 		verify(javaProject).setRawClasspath(captor.capture(), any());
 		assertTrue(captor.getValue().length == 1);
 	}
-	
+
 	@Test
 	public void addToClasspath_nonEmptyClasspathList_oldEntriesIsNotEmpty_setRawClasspathCalled() throws Exception {
 		IClasspathEntry oldEntry = mock(IClasspathEntry.class);
-		
+
 		standaloneConfig.setJavaProject(javaProject);
-		when(javaProject.getRawClasspath()).thenReturn(new IClasspathEntry[] {oldEntry});
-		
+		when(javaProject.getRawClasspath()).thenReturn(new IClasspathEntry[] { oldEntry });
+
 		standaloneConfig.addToClasspath(Collections.singletonList(classpathEntry));
-		
+
 		verify(javaProject).getRawClasspath();
-		
+
 		ArgumentCaptor<IClasspathEntry[]> captor = ArgumentCaptor.forClass(IClasspathEntry[].class);
 		verify(javaProject).setRawClasspath(captor.capture(), any());
 		assertTrue(captor.getValue().length > 1);
@@ -225,12 +319,26 @@ public class StandaloneConfigTest {
 
 	class TestableStandaloneConfig extends StandaloneConfig {
 
-		public TestableStandaloneConfig(String name, String path) {
-			this(name, path, false);
+		public TestableStandaloneConfig(String path, String compilerCompliance) throws Exception {
+			this(path, compilerCompliance, false);
 		}
 
-		public TestableStandaloneConfig(String name, String path, boolean testMode) {
-			super(name, path, testMode);
+		public TestableStandaloneConfig(String path, String compilerCompliance, boolean testMode) throws Exception {
+			super(path, compilerCompliance, "", testMode); //$NON-NLS-1$
+		}
+
+		@Override
+		protected boolean prepareEclipseMavenPlugin() throws IOException {
+			if (callSuperPrepareEclipseMavenPlugin) {
+				return super.prepareEclipseMavenPlugin();
+			} else {
+				return prepareEclipseMavenPluginReturnValue;
+			}
+		}
+
+		@Override
+		protected void moveFile(File src, File dest) {
+			moveFileCallCount++;
 		}
 
 		@Override
@@ -239,8 +347,33 @@ public class StandaloneConfigTest {
 		}
 
 		@Override
-		protected String getProjectDescriptionPath() {
-			return tempFilePath.toString();
+		protected File getProjectDescriptionFile() {
+			return projectFile;
+		}
+
+		@Override
+		protected File getProjectDescriptionRenameFile() {
+			return projectFileTmp;
+		}
+
+		@Override
+		protected File getClasspathFileRenameFile() {
+			return classpathFileTmp;
+		}
+
+		@Override
+		protected File getClasspathFileFile() {
+			return classpathFile;
+		}
+
+		@Override
+		protected File getSettingsDirectoryRenameFile() {
+			return settingsDirFileTmp;
+		}
+
+		@Override
+		protected File getSettingsDirectoryFile() {
+			return settingsDirFile;
 		}
 
 		@Override
@@ -257,10 +390,15 @@ public class StandaloneConfigTest {
 		protected File getMavenDependencyFolder() {
 			return mavenDepsFolder;
 		}
-		
+
 		@Override
 		protected IClasspathEntry createLibraryClasspathEntry(String jarPath) {
 			return classpathEntry;
+		}
+
+		@Override
+		protected MavenInvoker getMavenInvoker() {
+			return mavenInvoker;
 		}
 	}
 }
