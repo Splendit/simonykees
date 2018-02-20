@@ -19,6 +19,8 @@ public class FlatMapInsteadOfNestedLoopsRule {
 
 	public void test() {
 		List<List<List<String>>> matrix2 = Arrays.asList(Arrays.asList(Arrays.asList("asdf", "jkl")));
+		// I don't want to break anything
+		// I don't want to break anything
 		// inner comment one
 		/* lambda leading comment */
 		/* lambda-body leading comment */
@@ -30,7 +32,7 @@ public class FlatMapInsteadOfNestedLoopsRule {
 		// trailing comment one
 		// outer comment
 		matrix2.stream()
-			.filter(row -> !row.isEmpty())
+			.filter(row -> !row.isEmpty()) // I don't want to break anything
 			.flatMap(List::stream)
 			.filter(col -> !col.isEmpty())
 			.flatMap(List::stream)

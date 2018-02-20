@@ -18,7 +18,14 @@ public class TestPrimitiveBoxedForStringWithExpressionsRule {
 	public String testIntegerValueOfExpressionWithMethodInvoke(int input) {
 		// test
 		/* invocation comment */
-		return Integer /* expression comment */.toString(/* internal arg comment */ intSampleMethod() + input); 
+		/* expression comment */
+		return Integer.toString(/* internal arg comment */ intSampleMethod() + input); 
+	}
+	
+	public String test_lineCommentFollowingExpression(int input) {
+		
+		//test
+		return Integer.toString(intSampleMethod() + input);
 	}
 	
 	public String testIntegerValueOfMixedTypeExpression(int input) {

@@ -12,4 +12,41 @@
 	<packaging>eclipse-plugin</packaging>
 	<name>jSparrow :: standalone</name>
 	<description>jSparrow Plugin for headless start</description>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-libraries</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<item>
+									<groupId>org.apache.maven.shared</groupId>
+									<artifactId>maven-invoker</artifactId>
+									<version>3.0.0</version>
+								</item>
+								<item>
+									<groupId>org.codehaus.plexus</groupId>
+									<artifactId>plexus-utils</artifactId>
+									<version>3.0.17</version>
+								</item>
+							</artifactItems>
+							<outputDirectory>lib</outputDirectory>
+							<stripVersion>true</stripVersion>
+							<overWriteReleases>true</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
 </project>

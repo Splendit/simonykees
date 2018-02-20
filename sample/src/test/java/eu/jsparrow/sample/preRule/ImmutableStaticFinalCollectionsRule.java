@@ -28,7 +28,8 @@ public class ImmutableStaticFinalCollectionsRule {
 			add("foo");
 			add("bar");
 		}
-	};
+	}// I don't want to break anything
+	;
 
 	private static final Collection<String> CONSTANT_COLLECTION = new ArrayList<String>() {
 		{

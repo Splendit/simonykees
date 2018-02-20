@@ -106,5 +106,9 @@ public class TestUseIsEmptyRule {
 		Map<String, String> m = new HashMap<>();
 		if (/* save me */ m.size() == 0) {
 		}
+		
+		if (m // I don't want to break anything
+				.size() == 0) {
+		}
 	}
 }

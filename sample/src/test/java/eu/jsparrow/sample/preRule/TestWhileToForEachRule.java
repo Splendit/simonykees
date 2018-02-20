@@ -19,7 +19,8 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 		String aL = "I am here to confuse you!";
-		Iterator<String> iterator = l.iterator();
+		Iterator<String> iterator = l //
+				.iterator();
 		while (iterator.hasNext()) {
 			sb.append(iterator.next());
 		}

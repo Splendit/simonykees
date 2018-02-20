@@ -25,6 +25,8 @@ public class StatementLambdaToExpressionRule {
 			return element;
 		});
 		list.stream().map(element -> element * 2);
+		list.stream().map(element -> // I don't want to break anything
+		element * 2);
 		list.forEach(element -> doSomething(element));
 		list.forEach(element -> elementString = element.toString());
 		list.forEach(element -> new Integer(1));

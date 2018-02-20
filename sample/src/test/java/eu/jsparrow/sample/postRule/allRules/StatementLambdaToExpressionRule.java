@@ -33,6 +33,9 @@ public class StatementLambdaToExpressionRule {
 			});
 		list.stream()
 			.map(element -> element * 2);
+		list.stream()
+			.map(element -> // I don't want to break anything
+		element * 2);
 		list.forEach(this::doSomething);
 		list.forEach(element -> elementString = element.toString());
 		list.forEach(element -> Integer.valueOf(1));

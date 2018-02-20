@@ -23,7 +23,9 @@ public class TestWhileToForEachRule {
 		List<String> l = generateList(input);
 		StringBuilder sb = new StringBuilder();
 		String aL = "I am here to confuse you!";
-		l.forEach(sb::append);
+		//
+		l //
+			.forEach(sb::append);
 		return sb.toString();
 	}
 

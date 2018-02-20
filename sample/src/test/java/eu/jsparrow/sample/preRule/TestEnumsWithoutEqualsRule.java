@@ -52,6 +52,11 @@ public class TestEnumsWithoutEqualsRule {
 			return;
 		}
 		
+		if (RoundingMode.UP // I don't want to break anything
+				.equals(roundingMode)) {
+			return;
+		}
+		
 		if ( /* leading comment */ RoundingMode.UP /* expression comment */ . /* invocation comment */ equals(/* param comment */ roundingMode) /* trailing comments */) {
 			return;
 		}

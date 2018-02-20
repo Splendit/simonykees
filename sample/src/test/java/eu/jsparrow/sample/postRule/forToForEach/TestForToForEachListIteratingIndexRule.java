@@ -25,12 +25,14 @@ public class TestForToForEachListIteratingIndexRule {
 		StringBuilder sb = new StringBuilder();
 		// comment before
 		/* init 2 */
+		// comment after fInterfaceRule
 		/* init 1 */
 		/* inc */
-		for (String aFInterfaceRule : fInterfaceRule) /* between head and body */ {
-			// comment inside
-			sb.append(aFInterfaceRule);
-		} // comment after
+		for (String aFInterfaceRule : fInterfaceRule // comment after fInterfaceRule
+) /* between head and body */ {
+// comment inside
+sb.append(aFInterfaceRule);
+} // comment after
 	};
 	
 	@interface MyFooAnnotation {

@@ -21,11 +21,14 @@ public class LambdaForEachMapRule {
 		StringBuilder sb = new StringBuilder();
 
 		// save me 1
+		// comment after s.substring(1)
 		// save me 2
 		// trailing comment in rs 2
 		// trailing comment in rs 1
 		list.stream()
-			.map(s -> StringUtils.substring(s, 1))
+			.map(s -> StringUtils.substring(s, 1) // comment after
+													// s.substring(1)
+			)
 			.forEach(sb::append);
 
 		// I could get lost in the map

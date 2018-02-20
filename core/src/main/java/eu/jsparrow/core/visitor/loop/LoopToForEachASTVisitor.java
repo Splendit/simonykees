@@ -66,6 +66,8 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 	private Set<String> newImports = new HashSet<>();
 	private Map<String, List<ITypeBinding>> innerTypesMap = new HashMap<>();
 	private List<ITypeBinding> topLevelTypes = new ArrayList<>();
+	protected Map<T, LoopOptimizationASTVisitor> replaceInformationASTVisitorList;
+	protected Map<String, Integer> multipleIteratorUse;
 
 	protected LoopToForEachASTVisitor() {
 		this.tempIntroducedNames = new HashMap<>();
@@ -566,5 +568,46 @@ public abstract class LoopToForEachASTVisitor<T extends Statement> extends Abstr
 		StructuralPropertyDescriptor locationProperty = node.getLocationInParent();
 
 		return ForStatement.BODY_PROPERTY == locationProperty || WhileStatement.BODY_PROPERTY == locationProperty;
+	}
+
+	protected void handleLoopWithIterator(T loop, SimpleName iteratorName) {
+		Block parentNode = ASTNodeUtil.getSpecificAncestor(loop, Block.class);
+		if (parentNode == null) {
+			/*
+			 * No surrounding parent block found should not happen, because the
+			 * Iterator has to be defined in an parent block.
+			 */
+			return;
+		}
+		LoopOptimizationASTVisitor iteratorDefinitionAstVisior = new LoopOptimizationASTVisitor(
+				(SimpleName) iteratorName, loop);
+		iteratorDefinitionAstVisior.setASTRewrite(this.astRewrite);
+		parentNode.accept(iteratorDefinitionAstVisior);
+
+		if (iteratorDefinitionAstVisior.allParametersFound()) {
+			replaceInformationASTVisitorList.put(loop, iteratorDefinitionAstVisior);
+		}
+	}
+
+	protected void handleLoopWithIteratorReplacement(T loop, Statement body) {
+		// Do the replacement
+		if (replaceInformationASTVisitorList.containsKey(loop)) {
+			LoopOptimizationASTVisitor iteratorDefinitionAstVisior = replaceInformationASTVisitorList.remove(loop);
+			Map<String, Boolean> newNameMap = generateNewIteratorName(null, loop,
+					iteratorDefinitionAstVisior.getListName());
+			String newName = newNameMap.keySet()
+				.iterator()
+				.next();
+			iteratorDefinitionAstVisior.replaceLoop(loop, body, multipleIteratorUse, newName);
+			getCommentRewriter().saveLeadingComment(loop);
+			onRewrite();
+
+			// clear the variableIterator if no other loop is present
+			if (replaceInformationASTVisitorList.isEmpty()) {
+				multipleIteratorUse.clear();
+			}
+		}
+
+		clearTempItroducedNames(loop);
 	}
 }

@@ -33,7 +33,9 @@ public class TestForToForEachRule {
 		// comment inside
 		// comment after
 		// comment before
-		l.forEach(sb::append);
+		//
+		l //
+			.forEach(sb::append);
 		return sb.toString();
 	}
 

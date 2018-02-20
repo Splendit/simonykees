@@ -18,6 +18,9 @@ public class TestCollectionRemoveAllRule {
 		/* param comment */
 		resultList /* expression comment */.clear();
 
+		resultList // I don't want to break anything
+			.clear();
+
 		StringBuilder sb = new StringBuilder();
 
 		resultList.stream()

@@ -2,10 +2,10 @@ package eu.jsparrow.standalone;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.List;
 
+import org.apache.maven.shared.invoker.MavenInvocationException;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -39,29 +39,35 @@ public class RefactorUtil {
 	protected static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
 	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
-	private static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 	protected static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
 	protected static final String MAVEN_NATURE_CONSTANT = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
 	protected static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
+	protected static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
+	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
 
 	protected StandaloneConfig standaloneConfig;
-	private File directory;
+
+	public RefactorUtil() {
+		prepareWorkingDirectory();
+	}
 
 	/**
 	 * prepare and start the refactoring process
 	 * 
 	 * @param context
 	 * @throws YAMLConfigException
+	 * @throws MavenInvocationException
+	 * @throws CoreException
+	 * @throws IOException
 	 */
 	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
-			throws YAMLConfigException {
+			throws YAMLConfigException, CoreException, MavenInvocationException, IOException {
 		String loggerInfo;
 
 		YAMLConfig config = getConfiguration(context);
-		prepareWorkingDirectory();
 
 		loadStandaloneConfig(context);
 
@@ -122,20 +128,17 @@ public class RefactorUtil {
 
 	/**
 	 * cleans classpath and temp directory
+	 * 
+	 * @throws IOException
 	 */
-	public void cleanUp() {
+	public void cleanUp() throws IOException {
 		try {
 			if (standaloneConfig != null) {
 				standaloneConfig.cleanUp();
 			}
-		} catch (JavaModelException | IOException e) {
+		} catch (JavaModelException | MavenInvocationException e) {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
-		}
-
-		// CLEAN
-		if (directory != null && directory.exists()) {
-			deleteChildren(directory);
 		}
 	}
 
@@ -166,7 +169,7 @@ public class RefactorUtil {
 
 	private void prepareWorkingDirectory() {
 		String file = System.getProperty(JAVA_TMP);
-		directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
+		File directory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
 
 		if (directory.exists() || directory.mkdirs()) {
 			System.setProperty(USER_DIR, directory.getAbsolutePath());
@@ -174,38 +177,21 @@ public class RefactorUtil {
 	}
 
 	/**
-	 * Recursively deletes all sub-folders from received folder.
+	 * loads a new {@link StandaloneConfig} with the properties found in
+	 * {@link BundleContext}
 	 * 
-	 * @param parentDirectory
-	 *            directory which content is to be deleted
+	 * @param context
+	 * @throws CoreException
+	 * @throws MavenInvocationException
 	 * @throws IOException
 	 */
-	private void deleteChildren(File parentDirectory) {
-		String[] children = parentDirectory.list();
-		if (children != null) {
-			for (String file : Arrays.asList(children)) {
-				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
-				if (currentFile.isDirectory() && !("target".equals(currentFile.getName()))) { //$NON-NLS-1$
-					deleteChildren(currentFile);
-				}
-
-				try {
-					if (!"target".equals(currentFile.getName())) { //$NON-NLS-1$
-						Files.delete(currentFile.toPath());
-					}
-				} catch (IOException e) {
-					logger.debug(e.getMessage(), e);
-					logger.error(e.getMessage());
-				}
-			}
-		}
-	}
-
-	protected void loadStandaloneConfig(BundleContext context) {
+	protected void loadStandaloneConfig(BundleContext context)
+			throws CoreException, MavenInvocationException, IOException {
 		String projectPath = context.getProperty(PROJECT_PATH_CONSTANT);
-		String projectName = context.getProperty(PROJECT_NAME_CONSTANT);
+		String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION);
+		String mavenHome = context.getProperty(MAVEN_HOME_KEY);
 
-		standaloneConfig = new StandaloneConfig(projectName, projectPath);
+		standaloneConfig = new StandaloneConfig(projectPath, compilerCompliance, mavenHome);
 	}
 
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules() {

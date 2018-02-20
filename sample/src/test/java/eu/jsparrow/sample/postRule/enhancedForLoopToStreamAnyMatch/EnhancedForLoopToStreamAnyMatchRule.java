@@ -15,10 +15,13 @@ public class EnhancedForLoopToStreamAnyMatchRule {
 	
 	public void usingAnyMatch(List<String> strings) {
 		// comment before
+		// test 
 		// comment inside 1
 		// comment inside 2
 		// comment after
-		boolean containsEmpty = strings.stream()
+		boolean containsEmpty // comment after declaration name
+		= strings // test 
+.stream()
 			.anyMatch(value -> value.isEmpty());
 	}
 	
