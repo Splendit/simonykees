@@ -19,5 +19,7 @@ Require-Bundle: org.eclipse.equinox.util,
 Service-Component: OSGI-INF/eu.jsparrow.rules.imports.ImportsRuleServiceImpl.xml
 Bundle-ActivationPolicy: lazy
 Import-Package: eu.jsparrow.i18n
+Export-Package: eu.jsparrow.rules.imports
+
 
 
