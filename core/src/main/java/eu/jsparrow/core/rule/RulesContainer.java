@@ -84,7 +84,7 @@ public class RulesContainer {
 		try {
 			serviceReferences = bundleContext.getServiceReferences(RuleService.class.getName(), null);
 		} catch (InvalidSyntaxException e) {
-			logger.error("Failed to load external rules due to bad filterexpression.", e);
+			logger.error("Failed to load external rules due to bad filterexpression.", e); //$NON-NLS-1$
 		}
 		// BundleContext returns null if no services are found,
 		return serviceReferences == null ? Collections.emptyList()
