@@ -14,10 +14,10 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
-import eu.jsparrow.core.util.ASTNodeUtil;
-import eu.jsparrow.core.util.ClassRelationUtil;
-import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.core.visitor.loop.LoopToForEachASTVisitor;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * For loops with an iterator can be replaced with a forEach loop since 1.7
@@ -27,7 +27,7 @@ import eu.jsparrow.core.visitor.loop.LoopToForEachASTVisitor;
  */
 public class ForToForEachASTVisitor extends LoopToForEachASTVisitor<ForStatement> {
 
-public ForToForEachASTVisitor() {
+	public ForToForEachASTVisitor() {
 		this.replaceInformationASTVisitorList = new HashMap<>();
 		this.multipleIteratorUse = new HashMap<>();
 	}

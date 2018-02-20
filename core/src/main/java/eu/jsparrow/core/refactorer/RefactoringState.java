@@ -12,10 +12,10 @@ import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.exception.RefactoringException;
-import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.i18n.ExceptionMessages;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.exception.RefactoringException;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Manages the transformation state of one {@link ICompilationUnit} and offers

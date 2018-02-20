@@ -10,7 +10,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 
-import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 class ExceptionsASTVisitor extends ASTVisitor {
 	private List<Expression> foundExceptions = new ArrayList<>();

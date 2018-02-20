@@ -12,8 +12,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import eu.jsparrow.core.rule.impl.OrganiseImportsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
+import eu.jsparrow.rules.imports.OrganiseImportsRule;
 
 @SuppressWarnings("nls")
 public class OrganizeImportsRulesTest extends SingleRuleTest {

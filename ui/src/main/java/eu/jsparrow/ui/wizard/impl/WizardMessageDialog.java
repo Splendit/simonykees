@@ -5,8 +5,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
-import eu.jsparrow.core.exception.SimonykeesException;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.exception.SimonykeesException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;

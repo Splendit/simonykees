@@ -1,13 +1,13 @@
 package eu.jsparrow.core.visitor.impl;
 
 import static eu.jsparrow.jdtunit.Matchers.assertMatch;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.eclipse.jdt.core.dom.Block;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.core.visitor.impl.PrimitiveObjectUseEqualsASTVisitor;
 import eu.jsparrow.dummies.ASTRewriteVisitorListenerStub;
 
 @SuppressWarnings({ "nls" })

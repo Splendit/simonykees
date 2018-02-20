@@ -1,7 +1,7 @@
 package eu.jsparrow.core.visitor.impl.trycatch;
 
-import static eu.jsparrow.core.util.ASTNodeUtil.convertToTypedList;
-import static eu.jsparrow.core.util.ASTNodeUtil.getSpecificAncestor;
+import static eu.jsparrow.rules.common.util.ASTNodeUtil.convertToTypedList;
+import static eu.jsparrow.rules.common.util.ASTNodeUtil.getSpecificAncestor;
 import static java.util.stream.Collectors.toList;
 
 import java.io.Closeable;
@@ -31,9 +31,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import eu.jsparrow.core.builder.NodeBuilder;
-import eu.jsparrow.core.util.ClassRelationUtil;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.core.visitor.CommentRewriter;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * The {@link TryWithResourceASTVisitor} is used to find resources in an

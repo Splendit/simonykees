@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
-import eu.jsparrow.core.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * Finds the references of the field whose name is given as a constructor

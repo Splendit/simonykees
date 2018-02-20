@@ -13,9 +13,9 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.Statement;
 
 import eu.jsparrow.core.builder.NodeBuilder;
-import eu.jsparrow.core.util.ASTNodeUtil;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
-import eu.jsparrow.core.visitor.CommentRewriter;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * Looks for occurrences of equals(..) that refer to an Enumeration.

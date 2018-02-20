@@ -1,14 +1,15 @@
 package eu.jsparrow.core.rule.impl;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.apache.commons.lang3.JavaVersion;
 
-import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.RuleDescription;
-import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.StringFormatLineSeparatorASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
 
 /**
  * @see StringFormatLineSeparatorRule
@@ -24,7 +25,7 @@ public class StringFormatLineSeparatorRule extends RefactoringRule<StringFormatL
 		this.id = "StringFormatLineSeparator"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.StringFormatLineSeparatorRule_name,
 				Messages.StringFormatLineSeparatorRule_description, Duration.ofMinutes(1),
-				TagUtil.getTagsForRule(this.getClass()));
+				Arrays.asList(Tag.JAVA_1_5, Tag.STRING_MANIPULATION));
 	}
 
 	@Override

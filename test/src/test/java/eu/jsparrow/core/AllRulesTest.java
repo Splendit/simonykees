@@ -17,6 +17,8 @@ import org.junit.runners.Parameterized.Parameters;
 import eu.jsparrow.core.rule.RulesContainer;
 import eu.jsparrow.core.rule.impl.logger.StandardLoggerRule;
 import eu.jsparrow.core.util.RulesTestUtil;
+import eu.jsparrow.rules.imports.OrganiseImportsRule;
+
 
 /**
  * TODO SIM-103 add class description

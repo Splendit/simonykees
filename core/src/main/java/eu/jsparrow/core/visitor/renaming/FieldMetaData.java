@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.renaming;
 
-import static eu.jsparrow.core.util.ASTNodeUtil.hasModifier;
+
+import static eu.jsparrow.rules.common.util.ASTNodeUtil.hasModifier;
 
 import java.util.ArrayList;
 import java.util.HashMap;

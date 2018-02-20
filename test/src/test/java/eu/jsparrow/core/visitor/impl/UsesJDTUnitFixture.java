@@ -6,7 +6,6 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.jdtunit.JdtUnitFixture;
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
 

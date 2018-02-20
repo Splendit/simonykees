@@ -41,10 +41,10 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.util.ASTNodeUtil;
-import eu.jsparrow.core.util.ClassRelationUtil;
 import eu.jsparrow.core.visitor.loop.stream.AbstractEnhancedForLoopToStreamASTVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
 
 /**
  * Analyzes the occurrences of the {@link EnhancedForStatement}s and checks

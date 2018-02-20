@@ -9,10 +9,10 @@ import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 
-import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.statistics.EliminatedTechnicalDebt;
-import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.statistics.EliminatedTechnicalDebt;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 public class RefactoringPreviewWizardPageModel extends BaseModel {
 

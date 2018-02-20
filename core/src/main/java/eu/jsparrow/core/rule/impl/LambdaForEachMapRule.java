@@ -1,14 +1,15 @@
 package eu.jsparrow.core.rule.impl;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.apache.commons.lang3.JavaVersion;
 
-import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.RuleDescription;
-import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.lambdaforeach.LambdaForEachMapASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
 
 /**
  * @see LambdaForEachMapASTVisitor
@@ -25,7 +26,7 @@ public class LambdaForEachMapRule extends RefactoringRule<LambdaForEachMapASTVis
 		this.id = "LambdaForEachMap"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.LambdaForEachMapRule_name,
 				Messages.LambdaForEachMapRule_description, Duration.ofMinutes(15),
-				TagUtil.getTagsForRule(this.getClass()));
+				Arrays.asList(Tag.JAVA_1_8, Tag.LAMBDA, Tag.LOOP));
 	}
 
 	@Override

@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import eu.jsparrow.core.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * A super class of the visitors that analyzes a loop (@link

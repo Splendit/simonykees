@@ -1,14 +1,15 @@
 package eu.jsparrow.core.rule.impl;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.apache.commons.lang3.JavaVersion;
 
-import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.RuleDescription;
-import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.ReImplementingInterfaceASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
 
 /**
  * 
@@ -23,7 +24,7 @@ public class ReImplementingInterfaceRule extends RefactoringRule<ReImplementingI
 		this.id = "ReImplementingInterface"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.ReImplementingInterfaceRule_name,
 				Messages.ReImplementingInterfaceRule_description, Duration.ofMinutes(2),
-				TagUtil.getTagsForRule(this.getClass()));
+				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS));
 	}
 
 	@Override

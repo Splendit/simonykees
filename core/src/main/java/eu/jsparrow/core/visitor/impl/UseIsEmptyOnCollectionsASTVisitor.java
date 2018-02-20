@@ -12,8 +12,8 @@ import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import eu.jsparrow.core.builder.NodeBuilder;
-import eu.jsparrow.core.util.ClassRelationUtil;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Looks for Collections, Maps and String length operation that are compared to

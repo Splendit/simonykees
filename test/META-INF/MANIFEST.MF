@@ -5,11 +5,12 @@ Bundle-SymbolicName: eu.jsparrow.test
 Bundle-Version: 2.5.0.qualifier
 Fragment-Host: eu.jsparrow.core
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.eclipse.jdt.junit4.runtime;bundle-version="1.1.0",
- org.junit;bundle-version="4.12.0",
- eu.jsparrow.logging,
+Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.license.netlicensing,
  eu.jsparrow.test.framework,
- org.mockito;bundle-version="1.9.5",
- org.hamcrest;bundle-version="1.1.0"
+ eu.jsparrow.rules.imports,
+ org.eclipse.jdt.junit4.runtime;bundle-version="1.1.0",
+ org.junit;bundle-version="4.12.0",
+ org.mockito;bundle-version="[1.8.4,2.0.0)",
+ org.hamcrest;bundle-version="[1.1.0,2.0.0)"
 Bundle-Vendor: Splendit IT-Consulting GmbH

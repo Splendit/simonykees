@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import eu.jsparrow.core.util.PropertyUtil;
+import eu.jsparrow.rules.common.util.PropertyUtil;
 
 /**
  * Tests for getting the JavaVersion

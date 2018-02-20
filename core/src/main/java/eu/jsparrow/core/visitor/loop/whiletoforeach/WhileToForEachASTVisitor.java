@@ -13,11 +13,11 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
-import eu.jsparrow.core.util.ASTNodeUtil;
-import eu.jsparrow.core.util.ClassRelationUtil;
-import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.core.visitor.loop.IteratingIndexVisitorFactory;
 import eu.jsparrow.core.visitor.loop.LoopToForEachASTVisitor;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.util.ClassRelationUtil;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * While-loops over Iterators that could be expressed with a for-loop are

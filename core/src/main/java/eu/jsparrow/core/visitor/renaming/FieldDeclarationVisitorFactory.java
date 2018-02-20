@@ -18,8 +18,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
  * A factory for creating instances of {@link FieldDeclarationASTVisitor} and

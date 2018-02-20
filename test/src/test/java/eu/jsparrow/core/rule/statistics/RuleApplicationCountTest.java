@@ -1,7 +1,6 @@
 package eu.jsparrow.core.rule.statistics;
 
 import static org.junit.Assert.assertEquals;
-
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Arrays;
@@ -10,8 +9,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.core.visitor.ASTRewriteEvent;
 import eu.jsparrow.dummies.DummyRule;
+import eu.jsparrow.rules.common.statistics.FileChangeCount;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
+import eu.jsparrow.rules.common.visitor.ASTRewriteEvent;
 
 @SuppressWarnings("nls")
 public class RuleApplicationCountTest {

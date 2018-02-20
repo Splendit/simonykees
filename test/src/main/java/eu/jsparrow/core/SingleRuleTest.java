@@ -21,8 +21,8 @@ import org.eclipse.jdt.core.JavaCore;
 import org.junit.BeforeClass;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.rule.RefactoringRule;
 import eu.jsparrow.core.util.RulesTestUtil;
+import eu.jsparrow.rules.common.RefactoringRule;
 
 public abstract class SingleRuleTest {
 

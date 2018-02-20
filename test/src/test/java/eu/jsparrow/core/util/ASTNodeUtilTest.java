@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.junit.Test;
 
 import eu.jsparrow.jdtunit.util.ASTNodeBuilder;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 public class ASTNodeUtilTest {
 

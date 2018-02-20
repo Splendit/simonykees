@@ -1,14 +1,15 @@
 package eu.jsparrow.core.rule.impl;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.apache.commons.lang3.JavaVersion;
 
-import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.RuleDescription;
-import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.InefficientConstructorASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
 
 /**
  * @see InefficientConstructorASTVisitor
@@ -24,7 +25,7 @@ public class InefficientConstructorRule extends RefactoringRule<InefficientConst
 		this.id = "InefficientConstructor"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.InefficientConstructorRule_name,
 				Messages.InefficientConstructorRule_description, Duration.ofMinutes(5),
-				TagUtil.getTagsForRule(this.getClass()));
+				Arrays.asList(Tag.JAVA_1_5, Tag.PERFORMANCE, Tag.CODING_CONVENTIONS));
 	}
 
 	@Override

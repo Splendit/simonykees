@@ -2,6 +2,7 @@ package eu.jsparrow.core.rule.impl;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,13 +19,13 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
-import eu.jsparrow.core.rule.RefactoringRule;
-import eu.jsparrow.core.rule.RuleDescription;
-import eu.jsparrow.core.rule.statistics.RuleApplicationCount;
-import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.PublicFieldsRenamingASTVisitor;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 
 /**
  * @see PublicFieldsRenamingASTVisitor
@@ -45,7 +46,7 @@ public class PublicFieldsRenamingRule extends RefactoringRule<PublicFieldsRenami
 		this.id = "PublicFieldRenaming"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.PublicFieldsRenamingRule_name,
 				Messages.PublicFieldsRenamingRule_description, Duration.ofMinutes(15),
-				TagUtil.getTagsForRule(this.getClass()));
+				Arrays.asList(Tag.JAVA_1_1, Tag.CODING_CONVENTIONS, Tag.READABILITY));
 	}
 
 	@Override

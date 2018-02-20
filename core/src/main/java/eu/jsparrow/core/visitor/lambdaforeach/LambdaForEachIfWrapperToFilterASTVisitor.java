@@ -20,9 +20,9 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import eu.jsparrow.core.util.ASTNodeUtil;
-import eu.jsparrow.core.visitor.CommentRewriter;
 import eu.jsparrow.core.visitor.sub.LocalVariableUsagesASTVisitor;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * {@link IfStatement}s, which wrap the whole execution block of a

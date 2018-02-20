@@ -1,6 +1,5 @@
 package eu.jsparrow.core.visitor.renaming;
 
-import static eu.jsparrow.core.util.ASTNodeUtil.hasModifier;
 import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.ADD_COMMENT;
 import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.RENAME_PACKAGE_PROTECTED_FIELDS;
 import static eu.jsparrow.core.visitor.renaming.FieldDeclarationOptionKeys.RENAME_PRIVATE_FIELDS;
@@ -34,9 +33,9 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import eu.jsparrow.core.util.ASTNodeUtil;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * A visitor that searches for fields that do not comply with the naming
@@ -185,10 +184,10 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 	private boolean hasSkippedModifier(FieldDeclaration fieldDeclaration) {
 		List<Modifier> modifiers = ASTNodeUtil.convertToTypedList(fieldDeclaration.modifiers(), Modifier.class);
 		return (ASTNodeUtil.isPackageProtected(modifiers) && !getRenamePackageProtectedField())
-				|| (hasModifier(modifiers, Modifier::isPublic) && !getRenamePublicField())
-				|| (hasModifier(modifiers, Modifier::isProtected) && !getRenameProtectedField())
-				|| (hasModifier(modifiers, Modifier::isPrivate) && !getRenamePrivateField())
-				|| (hasModifier(modifiers, Modifier::isStatic) && hasModifier(modifiers, Modifier::isFinal));
+				|| (ASTNodeUtil.hasModifier(modifiers, Modifier::isPublic) && !getRenamePublicField())
+				|| (ASTNodeUtil.hasModifier(modifiers, Modifier::isProtected) && !getRenameProtectedField())
+				|| (ASTNodeUtil.hasModifier(modifiers, Modifier::isPrivate) && !getRenamePrivateField())
+				|| (ASTNodeUtil.hasModifier(modifiers, Modifier::isStatic) && ASTNodeUtil.hasModifier(modifiers, Modifier::isFinal));
 	}
 
 	/**

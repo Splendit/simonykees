@@ -1,10 +1,19 @@
 package eu.jsparrow.core.rule;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
@@ -29,7 +38,6 @@ import eu.jsparrow.core.rule.impl.LambdaForEachMapRule;
 import eu.jsparrow.core.rule.impl.LambdaToMethodReferenceRule;
 import eu.jsparrow.core.rule.impl.MultiCatchRule;
 import eu.jsparrow.core.rule.impl.MultiVariableDeclarationLineRule;
-import eu.jsparrow.core.rule.impl.OrganiseImportsRule;
 import eu.jsparrow.core.rule.impl.OverrideAnnotationRule;
 import eu.jsparrow.core.rule.impl.PrimitiveBoxedForStringRule;
 import eu.jsparrow.core.rule.impl.PrimitiveObjectUseEqualsRule;
@@ -49,7 +57,9 @@ import eu.jsparrow.core.rule.impl.StringUtilsRule;
 import eu.jsparrow.core.rule.impl.TryWithResourceRule;
 import eu.jsparrow.core.rule.impl.UseIsEmptyOnCollectionsRule;
 import eu.jsparrow.core.rule.impl.WhileToForEachRule;
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.api.RuleService;
+import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * {@link RulesContainer} is a HelperClass that holds a static list of all
@@ -62,7 +72,26 @@ import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
 public class RulesContainer {
 
 	private RulesContainer() {
-		// hiding the default constructor
+	}
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
+		.lookupClass());
+
+	private static List<RuleService> getExternalRuleServices() {
+		BundleContext bundleContext = FrameworkUtil.getBundle(RulesContainer.class)
+			.getBundleContext();
+		ServiceReference<?>[] serviceReferences = null;
+		try {
+			serviceReferences = bundleContext.getServiceReferences(RuleService.class.getName(), null);
+		} catch (InvalidSyntaxException e) {
+			logger.error("Failed to load external rules due to bad filterexpression.", e); //$NON-NLS-1$
+		}
+		// BundleContext returns null if no services are found,
+		return serviceReferences == null ? Collections.emptyList()
+				: Arrays.asList(serviceReferences)
+					.stream()
+					.map(x -> (RuleService) bundleContext.getService(x))
+					.collect(Collectors.toList());
 	}
 
 	/**
@@ -74,6 +103,8 @@ public class RulesContainer {
 	 *         returned.
 	 */
 	public static List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getAllRules(boolean isStandalone) {
+		List<RuleService> services = getExternalRuleServices();
+
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = new LinkedList<>();
 		rules.addAll(Arrays.asList(
 				/*
@@ -83,7 +114,7 @@ public class RulesContainer {
 				new CollectionRemoveAllRule(), new DiamondOperatorRule(), new OverrideAnnotationRule(),
 				new SerialVersionUidRule(), new RearrangeClassMembersRule(), new BracketsToControlRule(),
 				new FieldNameConventionRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
-				new ReImplementingInterfaceRule(),new PutIfAbsentRule(),
+				new ReImplementingInterfaceRule(), new PutIfAbsentRule(),
 
 				new ImmutableStaticFinalCollectionsRule(),
 				/*
@@ -109,8 +140,9 @@ public class RulesContainer {
 				 */
 				new CodeFormatterRule()));
 
-		if (!isStandalone) {
-			rules.add(new OrganiseImportsRule());
+		if (!isStandalone && services != null) {
+			services.stream()
+				.forEach(service -> rules.addAll(service.loadRules()));
 		}
 
 		return rules;

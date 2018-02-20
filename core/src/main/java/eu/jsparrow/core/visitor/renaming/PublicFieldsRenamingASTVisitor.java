@@ -23,7 +23,8 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.text.edits.TextEditGroup;
 
-import eu.jsparrow.core.visitor.AbstractASTRewriteASTVisitor;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+
 
 /**
  * A visitor for renaming the name of a field and its references. Requires a

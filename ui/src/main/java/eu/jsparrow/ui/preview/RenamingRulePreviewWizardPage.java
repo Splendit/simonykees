@@ -33,9 +33,9 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
-import eu.jsparrow.core.util.RefactoringUtil;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
  * {@link WizardPage} containing view for preview of renaming changes. The
