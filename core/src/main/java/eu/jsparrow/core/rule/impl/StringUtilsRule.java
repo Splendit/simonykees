@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.jar.Attributes;
 import java.util.jar.Attributes.Name;
@@ -22,11 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
-import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.StringUtilsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
 
 /**
  * @see StringUtilsASTVisitor
@@ -48,9 +49,8 @@ public class StringUtilsRule extends RefactoringRule<StringUtilsASTVisitor> {
 		this.visitorClass = StringUtilsASTVisitor.class;
 		this.supportedVersion.add(VERSION_3_1);
 		this.id = "StringUtils"; //$NON-NLS-1$
-		this.ruleDescription = new RuleDescription(Messages.StringUtilsRule_name,
-				Messages.StringUtilsRule_description, Duration.ofMinutes(10),
-				TagUtil.getTagsForRule(this.getClass()));
+		this.ruleDescription = new RuleDescription(Messages.StringUtilsRule_name, Messages.StringUtilsRule_description,
+				Duration.ofMinutes(10), Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION));
 	}
 
 	@Override

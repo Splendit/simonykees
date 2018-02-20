@@ -1,16 +1,17 @@
 package eu.jsparrow.core.rule.impl;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
-import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.DiamondOperatorASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.PropertyUtil;
 
@@ -34,7 +35,7 @@ public class DiamondOperatorRule extends RefactoringRule<DiamondOperatorASTVisit
 		this.id = "DiamondOperator"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.DiamondOperatorRule_name,
 				Messages.DiamondOperatorRule_description, Duration.ofMinutes(1),
-				TagUtil.getTagsForRule(this.getClass()));
+				Arrays.asList(Tag.JAVA_1_7, Tag.OLD_LANGUAGE_CONSTRUCTS));
 	}
 
 	@Override

@@ -1,11 +1,5 @@
 package eu.jsparrow.rules.common;
 
-import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.rules.common.exception.RefactoringException;
-import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
-import eu.jsparrow.rules.common.util.RefactoringUtil;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
-
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -20,7 +14,12 @@ import org.eclipse.text.edits.TextEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.rules.common.util.*;
+import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.rules.common.exception.RefactoringException;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
+import eu.jsparrow.rules.common.util.PropertyUtil;
+import eu.jsparrow.rules.common.util.RefactoringUtil;
+import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
  * Wrapper Class for {@link AbstractASTRewriteASTVisitor} that holds UI name,

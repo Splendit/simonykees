@@ -1,6 +1,7 @@
 package eu.jsparrow.core.rule.impl;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.core.runtime.CoreException;
@@ -13,10 +14,10 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.text.edits.TextEdit;
 
-import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.statistics.FileChangeCount;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
@@ -40,7 +41,8 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 		this.visitorClass = AbstractASTRewriteASTVisitor.class;
 		this.id = "CodeFormatter"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.CodeFormatterRule_name,
-				Messages.CodeFormatterRule_description, Duration.ofMinutes(1), TagUtil.getTagsForRule(this.getClass()));
+				Messages.CodeFormatterRule_description, Duration.ofMinutes(1),
+				Arrays.asList(Tag.JAVA_1_1, Tag.FORMATTING, Tag.READABILITY));
 	}
 
 	@Override

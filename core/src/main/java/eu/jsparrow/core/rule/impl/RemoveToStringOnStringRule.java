@@ -1,14 +1,15 @@
 package eu.jsparrow.core.rule.impl;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 import org.apache.commons.lang3.JavaVersion;
 
-import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.impl.RemoveToStringOnStringASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.RuleDescription;
+import eu.jsparrow.rules.common.Tag;
 
 /**
  * @see RemoveToStringOnStringASTVisitor
@@ -24,7 +25,7 @@ public class RemoveToStringOnStringRule extends RefactoringRule<RemoveToStringOn
 		this.id = "RemoveToStringOnString"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.RemoveToStringOnStringRule_name,
 				Messages.RemoveToStringOnStringRule_description, Duration.ofMinutes(2),
-				TagUtil.getTagsForRule(this.getClass()));
+				Arrays.asList(Tag.JAVA_1_1, Tag.STRING_MANIPULATION, Tag.PERFORMANCE));
 	}
 
 	@Override

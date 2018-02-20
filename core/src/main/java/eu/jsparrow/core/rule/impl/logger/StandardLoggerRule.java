@@ -1,6 +1,7 @@
 package eu.jsparrow.core.rule.impl.logger;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,11 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.exception.runtime.ITypeNotFoundRuntimeException;
-import eu.jsparrow.core.util.TagUtil;
 import eu.jsparrow.core.visitor.logger.StandardLoggerASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.SemiAutomaticRefactoringRule;
+import eu.jsparrow.rules.common.Tag;
 import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
 
 /**
@@ -79,7 +80,7 @@ public class StandardLoggerRule extends SemiAutomaticRefactoringRule<StandardLog
 		this.id = "StandardLogger"; //$NON-NLS-1$
 		this.ruleDescription = new RuleDescription(Messages.StandardLoggerRule_name,
 				Messages.StandardLoggerRule_description, Duration.ofMinutes(10),
-				TagUtil.getTagsForRule(this.getClass()));
+				Arrays.asList(Tag.JAVA_1_1, Tag.OLD_LANGUAGE_CONSTRUCTS, Tag.CODING_CONVENTIONS));
 	}
 
 	@Override
