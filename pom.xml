@@ -74,6 +74,7 @@
 		<module>i18n</module>
 		<module>license.api</module>
 		<module>license.netlicensing</module>
+		<module>rules.api</module>
 		<module>core</module>
 		<module>ui</module>
 		<!-- test-data -->
@@ -81,6 +82,7 @@
 		<!-- all integration test modules -->
 		<module>test.framework</module>
 		<module>license.netlicensing.test</module>
+		<module>rules.imports</module>
 		<module>test</module>
 		<module>ui.test</module>
 		<!-- OSGi feature + site deployment -->
@@ -102,8 +104,8 @@
 			will improve/fix this. -->
 		<!-- <module>jsparrow-maven-plugin</module> -->
 
-		<module>rules.api</module>
-		<module>rules.imports</module>
+		
+		
 	</modules>
 
 	<scm>
