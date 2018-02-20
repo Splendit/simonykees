@@ -49,6 +49,7 @@ public class AllRulesTest extends AbstractRulesTest {
 		standardLoggerRule.activateOptions(options);
 		rulesList.add(standardLoggerRule);
 		rulesList.addAll(RulesContainer.getAllRules(false));
+		// TODO: This is a workaround. Rework AllRulesTest to get rid of it. 
 		rulesList.add(new OrganiseImportsRule());
 	}
 
