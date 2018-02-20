@@ -12,5 +12,27 @@
 	<packaging>pom</packaging>
 	<name>jSparrow :: bundles</name>
 	<description>jSparrow OSGi bundle container</description>
+
+
+  <modules>
+		<!-- logging and internationalisation (i18n) -->
+		<module>i18n</module>
+		<module>logging</module>
+		
+		<!-- modular rules -->
+		<module>rules.api</module>
+		<module>rules.imports</module>
+	
+		<!-- licensing -->
+		<module>license.api</module>
+		<module>license.netlicensing</module>
+	
+		<!-- plug-in functionality -->
+		<module>core</module>
+		<module>ui</module>
+
+		<!-- standalone -->
+		<module>standalone</module>
+	</modules>
 </project>
 	
