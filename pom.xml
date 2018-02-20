@@ -69,31 +69,42 @@
 	</prerequisites>
 
 	<modules>
-		<!-- plug-in functionality -->
-		<module>logging</module>
+		<!-- logging and internationalisation (i18n) -->
 		<module>i18n</module>
+		<module>logging</module>
+		
+		<!-- modular rules -->
+		<module>rules.api</module>
+		<module>rules.imports</module>
+	
+		<!-- licensing -->
 		<module>license.api</module>
 		<module>license.netlicensing</module>
-		<module>rules.api</module>
+	
+		<!-- plug-in functionality -->
 		<module>core</module>
 		<module>ui</module>
+		
 		<!-- test-data -->
 		<module>sample</module>
+		
 		<!-- all integration test modules -->
 		<module>test.framework</module>
 		<module>license.netlicensing.test</module>
-		<module>rules.imports</module>
 		<module>test</module>
 		<module>ui.test</module>
+		
 		<!-- OSGi feature + site deployment -->
 		<module>feature.3rd.party</module>
+		
 		<!-- standalone -->
 		<module>standalone</module>
 		<module>standalone.test</module>
 		<module>feature.standalone</module>
+		
+		<!-- release engineering -->
 		<module>feature</module>
 		<module>site</module>
-		<!-- release engineering -->
 		<module>releng</module>
 
 		<module>bundles</module>
