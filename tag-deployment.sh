@@ -25,7 +25,7 @@ completeTag=$dir$subdir$tag-$suffix
 echo completeTag=$completeTag
 
 # tag the build
-#git tag $completeTag
+git tag $completeTag
 
 # push the tage to the remote
-#git push origin $completeTag 
+git push origin $completeTag 
