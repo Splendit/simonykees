@@ -23,6 +23,9 @@ import org.eclipse.jdt.core.dom.Modifier;
  */
 public class ClassRelationUtil {
 
+	private ClassRelationUtil() {
+	}
+
 	private static final String INT = "int"; //$NON-NLS-1$
 	private static final String DOUBLE = "double"; //$NON-NLS-1$
 	private static final String FLOAT = "float"; //$NON-NLS-1$
@@ -75,12 +78,8 @@ public class ClassRelationUtil {
 			return false;
 		}
 
-		if (registeredITypes.contains(iTypeBinding.getErasure()
-			.getQualifiedName())) {
-			return true;
-		}
-
-		return false;
+		return registeredITypes.contains(iTypeBinding.getErasure()
+			.getQualifiedName());
 	}
 
 	/**
@@ -160,11 +159,7 @@ public class ClassRelationUtil {
 
 		String lhsTypeName = firstTypeBinding.getQualifiedName();
 		String rhsTypeName = secondTypeBinging.getQualifiedName();
-		if (lhsTypeName.equals(rhsTypeName)) {
-			return true;
-		}
-
-		return false;
+		return lhsTypeName.equals(rhsTypeName);
 	}
 
 	/**

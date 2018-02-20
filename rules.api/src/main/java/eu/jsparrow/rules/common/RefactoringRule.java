@@ -149,16 +149,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 		final CompilationUnit astRoot = RefactoringUtil.parse(workingCopy);
 
 		final ASTRewrite astRewrite = ASTRewrite.create(astRoot.getAST());
-		// FIXME resolves that comments are manipulated during astrewrite
-		//
-		// Solution from https://bugs.eclipse.org/bugs/show_bug.cgi?id=250142
-		// The best solution for such problems is usually to call
-		// ASTRewrite#setTargetSourceRangeComputer(TargetSourceRangeComputer)
-		// and set a NoCommentSourceRangeComputer or a properly configured
-		// TightSourceRangeComputer.
-
-		// astRewrite.setTargetSourceRangeComputer(new
-		// NoCommentSourceRangeComputer());
 
 		AbstractASTRewriteASTVisitor rule = visitorFactory();
 		rule.setASTRewrite(astRewrite);
@@ -186,8 +176,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 
 			workingCopy.applyTextEdit(edits, null);
 
-			// TODO think about using IProblemRequestor
-			// TODO think about returning the new AST
 			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
 
 			return documentChange;

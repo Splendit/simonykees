@@ -1,7 +1,7 @@
 package eu.jsparrow.rules.common.exception;
 
 /**
- * TODO SIM-103 add class description
+ * Generic exception thrown if something bad happens during refactoring. 
  * 
  * @author Martin Huter
  * @since 0.9

@@ -3,7 +3,7 @@ package eu.jsparrow.rules.common.exception;
 import eu.jsparrow.i18n.ExceptionMessages;
 
 /**
- * TODO SIM-103 add class description
+ * Generic exception used in all of jSparrow. 
  * 
  * @author Martin Huter
  * @since 0.9
@@ -11,26 +11,31 @@ import eu.jsparrow.i18n.ExceptionMessages;
 public class SimonykeesException extends Exception {
 	private static final long serialVersionUID = 4654641184128521329L;
 
-	private String uiMessage = null;
+	private final String uiMessage;
 
 	public SimonykeesException() {
 		super();
+		this.uiMessage = null;
 	}
 
 	public SimonykeesException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
+		this.uiMessage = null;
 	}
 
 	public SimonykeesException(String message, Throwable cause) {
 		super(message, cause);
+		this.uiMessage = null;
 	}
 
 	public SimonykeesException(String message) {
 		super(message);
+		this.uiMessage = null;
 	}
 
 	public SimonykeesException(Throwable cause) {
 		super(cause);
+		this.uiMessage = null;
 	}
 
 	public SimonykeesException(String message, String uiMessage, Throwable cause, boolean enableSuppression,

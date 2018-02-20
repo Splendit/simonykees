@@ -11,6 +11,8 @@ import org.eclipse.jdt.core.dom.InfixExpression;
  * @since 0.9
  */
 public class ArithmeticUtil {
+	
+	private ArithmeticUtil() {}
 
 	/**
 	 * Generates a corresponding arithmetic assignment operator to an arithmetic
