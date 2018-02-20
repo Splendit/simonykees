@@ -19,8 +19,9 @@ Require-Bundle: eu.jsparrow.logging,
  org.eclipse.equinox.util,
  org.eclipse.equinox.ds,
  org.eclipse.osgi.services,
- javax.inject, 
- eu.jsparrow.rules.api;bundle-version="2.5.0"
+ javax.inject,
+ eu.jsparrow.rules.api;bundle-version="2.5.0",
+ eu.jsparrow.rules.imports
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: Splendit IT-Consulting GmbH
