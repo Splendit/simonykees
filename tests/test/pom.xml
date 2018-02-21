@@ -31,7 +31,7 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacoco.plugin.version}</version>
 				<configuration>
-					<destFile>${sonar.jacoco.itReportPath}</destFile>
+					<destFile>${keystore.directory}/target/jacoco-it.exec</destFile>
 				</configuration>
 			</plugin>
 		</plugins>
