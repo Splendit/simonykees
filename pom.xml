@@ -150,7 +150,7 @@
 		
 		<!-- is not referenced with keystore.directory because sonar plugin runs outside of the maven lifecycle. 
 		 Works because currently because every source module is two layers deeper than the parent -->
-		<sonar.jacoco.itReportPath>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.itReportPath>
+		<sonar.jacoco.reportPaths>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.reportPaths>
 		<sonar.junit.reportPaths>${project.basedir}/target/surefire-reports</sonar.junit.reportPaths>
 		<sonar.coverage.exclusions>**/jsparrow/ui/**/*</sonar.coverage.exclusions>
 		<sonar.issue.ignore.multicriteria>e1,e2,e3,e4</sonar.issue.ignore.multicriteria>
