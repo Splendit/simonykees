@@ -135,6 +135,7 @@
 		<maven.release.version>2.5.3</maven.release.version>
 		<maven.resources.version>3.0.2</maven.resources.version>
 		<proguard.plugin.version>2.0.14</proguard.plugin.version>
+		<sonar.plugin.version>3.4.0.905</sonar.plugin.version>
 		<jacoco.plugin.version>0.7.9</jacoco.plugin.version>
 
 		<maven.javadoc.failOnError>false</maven.javadoc.failOnError>
@@ -146,8 +147,10 @@
 		<jsparrow.qualifier.noProguard></jsparrow.qualifier.noProguard>
 		<jsparrow.qualifier.production></jsparrow.qualifier.production>
 		<jsparrow.qualifier.tycho>${jsparrow.qualifier.quotes}${jsparrow.qualifier.noProguard}${jsparrow.qualifier.production}${jsparrow.qualifier.quotes}</jsparrow.qualifier.tycho>
-		<sonar.language>java</sonar.language>
-		<sonar.jacoco.itReportPath>${keystore.directory}/target/jacoco-it.exec</sonar.jacoco.itReportPath>
+		
+		<!-- is not referenced with keystore.directory because sonar plugin runs outside of the maven lifecycle. 
+		 Works because currently because every source module is two layers deeper than the parent -->
+		<sonar.jacoco.reportPaths>${project.basedir}/../../target/jacoco-it.exec</sonar.jacoco.reportPaths>
 		<sonar.junit.reportPaths>${project.basedir}/target/surefire-reports</sonar.junit.reportPaths>
 		<sonar.coverage.exclusions>**/jsparrow/ui/**/*</sonar.coverage.exclusions>
 		<sonar.issue.ignore.multicriteria>e1,e2,e3,e4</sonar.issue.ignore.multicriteria>
@@ -334,6 +337,12 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>${sonar.plugin.version}</version>
+			</plugin>
+
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
