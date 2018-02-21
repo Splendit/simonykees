@@ -147,7 +147,7 @@
 		<jsparrow.qualifier.production></jsparrow.qualifier.production>
 		<jsparrow.qualifier.tycho>${jsparrow.qualifier.quotes}${jsparrow.qualifier.noProguard}${jsparrow.qualifier.production}${jsparrow.qualifier.quotes}</jsparrow.qualifier.tycho>
 		<sonar.language>java</sonar.language>
-		<sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec</sonar.jacoco.itReportPath>
+		<sonar.jacoco.itReportPath>${keystore.directory}/target/jacoco-it.exec</sonar.jacoco.itReportPath>
 		<sonar.junit.reportPaths>${project.basedir}/target/surefire-reports</sonar.junit.reportPaths>
 		<sonar.coverage.exclusions>**/jsparrow/ui/**/*</sonar.coverage.exclusions>
 		<sonar.issue.ignore.multicriteria>e1,e2,e3,e4</sonar.issue.ignore.multicriteria>
