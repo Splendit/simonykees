@@ -20,7 +20,7 @@ public class ASTNodeBuilder {
 		astParser.setKind(ASTParser.K_STATEMENTS);
 		ASTNode result = astParser.createAST(null);
 		if ((result.getFlags() & ASTNode.MALFORMED) == ASTNode.MALFORMED) {
-			throw new Exception(String.format("Failed to parse '%s'.", string)); //$NON-NLS-1$
+			throw new JdtUnitException(String.format("Failed to parse '%s'.", string)); //$NON-NLS-1$
 		}
 		Block block = (Block) result;
 		if (block.statements()

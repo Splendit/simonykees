@@ -8,4 +8,8 @@ public class JdtUnitException extends Exception {
 		super(string);
 	}
 
+	public JdtUnitException(String string, Exception e) {
+		super(string, e);
+	}
+
 }

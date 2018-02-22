@@ -31,6 +31,8 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEdit;
 
+import project.JavaProjectBuilder;
+
 /**
  * <p>
  * Fixture class that stubs a JDT compilation unit. Within that compilation unit
@@ -92,7 +94,9 @@ public class JdtUnitFixture {
 	 * @throws Exception
 	 */
 	public void setUp() throws Exception {
-		createJavaProject();
+		javaProject = new JavaProjectBuilder().name(PROJECT_FIXTURE_NAME)
+			.options(options)
+			.build();
 
 		packageFragment = addPackageFragment(PACKAGE_FIXTURE_NAME);
 
@@ -165,8 +169,8 @@ public class JdtUnitFixture {
 	}
 
 	/**
-	 * Adds statements to the stub method and saves the compilation unit with the
-	 * changes.
+	 * Adds statements to the stub method and saves the compilation unit with
+	 * the changes.
 	 * 
 	 * @param statements
 	 *            the statements to add separated by semicolons
@@ -227,27 +231,6 @@ public class JdtUnitFixture {
 		return astRoot;
 	}
 
-	private void createJavaProject() throws CoreException {
-
-		project = ResourcesPlugin.getWorkspace()
-			.getRoot()
-			.getProject(PROJECT_FIXTURE_NAME);
-		project.create(null);
-		project.open(null);
-
-		IProjectDescription description = project.getDescription();
-		description.setNatureIds(new String[] { JavaCore.NATURE_ID });
-		project.setDescription(description, null);
-
-		javaProject = JavaCore.create(project);
-
-		// build path is: project as source folder and JRE container
-		IClasspathEntry[] cpentry = new IClasspathEntry[] { JavaCore.newSourceEntry(javaProject.getPath()),
-				JavaRuntime.getDefaultJREContainerEntry() };
-		javaProject.setRawClasspath(cpentry, javaProject.getPath(), null);
-		javaProject.setOptions(options);
-	}
-
 	private Block createBlockFromString(String string) throws JdtUnitException {
 		@SuppressWarnings("deprecation") // TODO improvement needed, see SIM-878
 		ASTParser astParser = ASTParser.newParser(AST.JLS8);
@@ -295,7 +278,7 @@ public class JdtUnitFixture {
 		if (packageFragment == null) {
 			throw new JdtUnitException("Package fragment is null");
 		}
-		
+
 		return packageFragment.createCompilationUnit(name, "", false, null);
 	}
 
