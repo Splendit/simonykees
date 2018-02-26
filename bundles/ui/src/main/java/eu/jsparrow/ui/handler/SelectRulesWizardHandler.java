@@ -139,7 +139,7 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 					return true;
 				}
 			} else {
-				// SIM-656 
+				// SIM-656
 				logger.error(Messages.SelectRulesWizardHandler_selectionNotPossible_ubuntuBug);
 				Activator.setRunning(false);
 			}
@@ -182,16 +182,26 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 						monitor.setVisible(false);
 						return monitor;
 					}
+
+					/**
+					 * Creates new shell defined for this wizard. The dialog is
+					 * made as big enough to show rule description vertically
+					 * and horizontally to avoid two scrollers. Minimum size is
+					 * set to avoid loosing components from view.
+					 * 
+					 * @param newShell
+					 */
+					@Override
+					protected void configureShell(Shell newShell) {
+						super.configureShell(newShell);
+						newShell.setSize(1000, 950);
+						newShell.setMinimumSize(630, 600);
+					}
 				};
 				/*
-				 * the dialog is made as big enough to show rule description
-				 * vertically and horizontally to avoid two scrollers
-				 * 
-				 * note: if the size is too big, it will be reduced to the
-				 * maximum possible size.
+				 * Creates new shell and wizard.
 				 */
-				dialog.setPageSize(1200, 1200);
-
+				dialog.create();
 				dialog.open();
 			});
 	}
