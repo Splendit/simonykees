@@ -194,8 +194,8 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 					@Override
 					protected void configureShell(Shell newShell) {
 						super.configureShell(newShell);
-						newShell.setSize(1050, 1000);
-						newShell.setMinimumSize(630, 600);
+						newShell.setSize(1000, 1000);
+						newShell.setMinimumSize(680, 600);
 					}
 				};
 				/*
