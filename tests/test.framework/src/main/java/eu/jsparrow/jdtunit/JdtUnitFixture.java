@@ -1,6 +1,8 @@
 package eu.jsparrow.jdtunit;
 
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -177,6 +179,13 @@ public class JdtUnitFixture {
 
 		methodDeclaration.setBody(block);
 		this.astRoot = this.saveChanges();
+	}
+	
+	/**
+	 * Returns the list of the definded imports
+	 */
+	public List<ImportDeclaration> getImports(){
+		return ASTNodeUtil.convertToTypedList(astRoot.imports(), ImportDeclaration.class);
 	}
 
 	/**

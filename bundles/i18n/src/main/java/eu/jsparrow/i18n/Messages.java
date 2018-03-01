@@ -94,6 +94,10 @@ public class Messages extends NLS {
 	public static String ConfigureProfileSelectRulesWizardPage_nameInputText;
 	public static String ConfigureProfileSelectRulesWizardPageModel_error_NameExists;
 	public static String ConfigureRenameFieldsRuleWizard_WizardTitle_RenameFields;
+	public static String DateDeprecatedRule_description;
+
+	public static String DateDeprecatedRule_name;
+
 	public static String DiamondOperatorASTVisitor_using_diamond_operator;
 	public static String DiamondOperatorRule_description;
 	public static String DiamondOperatorRule_name;

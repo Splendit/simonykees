@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
@@ -56,11 +55,13 @@ public class ASTNodeUtil {
 	}
 
 	/**
-	 * Finds the surrounding Block node if there is one, otherwise returns null
+	 * Finds the surrounding Node of the defined nodeType if there is one, otherwise returns null
 	 * 
 	 * @param node
 	 *            ASTNode where the backward search is started
-	 * @return surrounding {@link Block}, null if non exists
+	 * @param nodeType
+	 *            nodeType of the wanted node as class
+	 * @return surrounding Node, null if non exists
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getSpecificAncestor(ASTNode node, Class<T> nodeType) {
