@@ -47,6 +47,7 @@ public class RefactorUtil {
 	protected static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
 	protected static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
 	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
+	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 
 	protected StandaloneConfig standaloneConfig;
 
@@ -150,21 +151,30 @@ public class RefactorUtil {
 	 * @throws YAMLConfigException
 	 */
 	private YAMLConfig getConfiguration(BundleContext context) throws YAMLConfigException {
-		String configFilePath = context.getProperty(CONFIG_FILE_PATH);
-		String profile = context.getProperty(SELECTED_PROFILE);
+		
+		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
 
-		String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
-		logger.info(loggerInfo);
+		if (!useDefaultConfig) {
+			String configFilePath = context.getProperty(CONFIG_FILE_PATH);
+			String profile = context.getProperty(SELECTED_PROFILE);
+			
+			String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
+			logger.info(loggerInfo);
 
-		YAMLConfig config = getYamlConfig(configFilePath, profile);
+			YAMLConfig config = getYamlConfig(configFilePath, profile);
 
-		String selectedProfile = config.getSelectedProfile();
+			String selectedProfile = config.getSelectedProfile();
 
-		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
-				(selectedProfile == null) ? Messages.Activator_standalone_None : selectedProfile);
-		logger.info(loggerInfo);
+			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
+					(selectedProfile == null) ? Messages.Activator_standalone_None : selectedProfile);
+			logger.info(loggerInfo);
 
-		return config;
+			return config;
+		} else {
+			logger.info(Messages.Activator_standalone_UsingDefaultConfiguration);
+
+			return YAMLConfig.getDefaultConfig();
+		}
 	}
 
 	private void prepareWorkingDirectory() {
