@@ -65,9 +65,13 @@ public class RefactorMojo extends AbstractMojo {
 	@Parameter(defaultValue = "", property = "profile")
 	private String profile;
 
+	@Parameter(property = "defaultConfiguration")
+	protected boolean useDefaultConfig;
+
 	// CONSTANTS
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH";
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED";
+	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG";
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION";
 
@@ -92,6 +96,7 @@ public class RefactorMojo extends AbstractMojo {
 
 			configuration.put(CONFIG_FILE_PATH, configFile.getAbsolutePath());
 			configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile);
+			configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 
 			configuration.put(PROJECT_JAVA_VERSION, getCompilerCompliance());
 
