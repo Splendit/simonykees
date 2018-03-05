@@ -1,5 +1,10 @@
 # Configure and Build jSparrow Maven Plugin
 
+## use bash-script
+
+Execute the `buildMavenPluginWithoutTests.sh` bash-script in the simonykees root directory.
+This will build and install the maven plugin as described below. It won't execute tests on simonykees using the `-DskipTests` flag.
+
 ## build simonykees
 
 ```bash
