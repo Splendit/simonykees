@@ -1,5 +1,5 @@
 #!/bin/bash
-##  bash script for building the jsparrow-maven-plugins
+## bash script for building the jsparrow-maven-plugins
 
 JSPARROW_TARGET_PATH="releng/eu.jsparrow.product/target/repository/plugins"
 PLUGIN_RESOURCES_PATH="jsparrow-maven-plugin/src/main/resources"
@@ -16,7 +16,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# create jsparrow maven plugin resource driectory if it doesn't exist
+# create jsparrow maven plugin resource directory if it doesn't exist
 if [ ! -d $PLUGIN_RESOURCES_PATH ]; then
     mkdir -p $PLUGIN_RESOURCES_PATH
     if [ $? -ne 0 ]; then
@@ -50,3 +50,21 @@ if [ $? -ne 0 ]; then
   echo "maven on jSparrow maven plugin failed!"
   exit 4
 fi
+
+echo
+echo "Plugin dependency to copy:"
+
+# geh the artifact version of the jsparrow-maven-plugin
+MVN_VERSION=$(mvn -q -Dexec.executable="echo" -Dexec.args='${project.version}' --non-recursive org.codehaus.mojo:exec-maven-plugin:1.3.1:exec)
+
+cat <<EOF
+<plugin>
+    <groupId>eu.jsparrow</groupId>
+    <artifactId>jsparrow-maven-plugin</artifactId>
+    <version>${MVN_VERSION}</version>
+</plugin>
+EOF
+
+echo
+echo "Execution example:"
+echo "mvn jsparrow:refactor -DdefaultConfiguration"
