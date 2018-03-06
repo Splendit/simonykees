@@ -19,6 +19,7 @@ import eu.jsparrow.core.rule.impl.ArithmethicAssignmentRule;
 import eu.jsparrow.core.rule.impl.BracketsToControlRule;
 import eu.jsparrow.core.rule.impl.CodeFormatterRule;
 import eu.jsparrow.core.rule.impl.CollectionRemoveAllRule;
+import eu.jsparrow.core.rule.impl.DateDeprecatedRule;
 import eu.jsparrow.core.rule.impl.DiamondOperatorRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamAnyMatchRule;
 import eu.jsparrow.core.rule.impl.EnhancedForLoopToStreamFindFirstRule;
@@ -114,7 +115,7 @@ public class RulesContainer {
 				new CollectionRemoveAllRule(), new DiamondOperatorRule(), new OverrideAnnotationRule(),
 				new SerialVersionUidRule(), new RearrangeClassMembersRule(), new BracketsToControlRule(),
 				new FieldNameConventionRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
-				new ReImplementingInterfaceRule(), new PutIfAbsentRule(),
+				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new DateDeprecatedRule(),
 
 				new ImmutableStaticFinalCollectionsRule(),
 				/*

@@ -125,7 +125,8 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 			name = CALENDAR + suffix;
 			suffix++;
 		}
-		saveIntroducedName(scope, name);
+		List<String> names = localVariableNames.get(scope);
+		names.add(name);
 		return name;
 	}
 
@@ -161,17 +162,6 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 				.collect(Collectors.toList()));
 		}
 		fieldNames.put(typeDeclaration, names);
-	}
-
-	private void saveIntroducedName(ASTNode scope, String name) {
-		List<String> names = localVariableNames.get(scope);
-		if (names != null) {
-			names.add(name);
-		} else {
-			names = new ArrayList<>();
-			names.add(name);
-			localVariableNames.put(scope, names);
-		}
 	}
 
 	private boolean isInScope(String name) {
