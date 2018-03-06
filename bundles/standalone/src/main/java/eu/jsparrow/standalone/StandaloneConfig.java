@@ -422,7 +422,7 @@ public class StandaloneConfig {
 
 	protected File getMavenDependencyFolder() {
 		return new File(
-				System.getProperty(RefactorUtil.USER_DIR) + File.separator + RefactorUtil.DEPENDENCIES_FOLDER_CONSTANT);
+				System.getProperty(RefactoringInvoker.USER_DIR) + File.separator + RefactoringInvoker.DEPENDENCIES_FOLDER_CONSTANT);
 	}
 
 	protected IClasspathEntry createLibraryClasspathEntry(String jarPath) {
