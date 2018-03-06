@@ -23,21 +23,21 @@ import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
- * test class for {@link RefactorUtil}
+ * test class for {@link RefactoringInvoker}
  * 
  * @author Matthias Webhofer, Hans-Jörg Schrödl
  * @since 2.5.0
  */
-public class RefactorUtilTest {
+public class RefactoringInvokerTest {
 
 	private IJavaProject javaProject;
 
-	private RefactorUtil refactorUtil;
+	private RefactoringInvoker refactoringInvoker;
 
 	@Before
 	public void setUp() {
 		javaProject = mock(IJavaProject.class);
-		refactorUtil = new TestableRefactorUtil();
+		refactoringInvoker = new TestableRefactoringInvoker();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -49,14 +49,14 @@ public class RefactorUtilTest {
 		when(javaProject.getElementName()).thenReturn(""); //$NON-NLS-1$
 		when(refactoringPipeline.getRulesWithChangesAsString()).thenReturn(""); //$NON-NLS-1$
 
-		refactorUtil.startRefactoring(context, refactoringPipeline);
+		refactoringInvoker.startRefactoring(context, refactoringPipeline);
 
 		verify(refactoringPipeline).createRefactoringStates(anyList());
 		verify(refactoringPipeline).doRefactoring(any(NullProgressMonitor.class));
 		verify(refactoringPipeline).commitRefactoring();
 	}
 
-	class TestableRefactorUtil extends RefactorUtil {
+	class TestableRefactoringInvoker extends RefactoringInvoker {
 
 		@Override
 		protected YAMLConfig getYamlConfig(String configFilePath, String profile) throws YAMLConfigException {

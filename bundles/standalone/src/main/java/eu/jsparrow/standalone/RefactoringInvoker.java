@@ -32,8 +32,8 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @author Matthias Webhofer
  * @since 2.4.0
  */
-public class RefactorUtil {
-	private static final Logger logger = LoggerFactory.getLogger(RefactorUtil.class);
+public class RefactoringInvoker {
+	private static final Logger logger = LoggerFactory.getLogger(RefactoringInvoker.class);
 
 	// CONSTANTS
 	protected static final String USER_DIR = "user.dir"; //$NON-NLS-1$
@@ -51,7 +51,7 @@ public class RefactorUtil {
 
 	protected StandaloneConfig standaloneConfig;
 
-	public RefactorUtil() {
+	public RefactoringInvoker() {
 		prepareWorkingDirectory();
 	}
 
@@ -205,13 +205,13 @@ public class RefactorUtil {
 	}
 
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules() {
-		logger.debug(Messages.RefactorUtil_GetEnabledRulesForProject);
+		logger.debug(Messages.RefactoringInvoker_GetEnabledRulesForProject);
 		return RulesContainer.getRulesForProject(standaloneConfig.getJavaProject(), true);
 	}
 
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRules(YAMLConfig config,
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules) throws YAMLConfigException {
-		logger.debug(Messages.RefactorUtil_GetSelectedRules);
+		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
 		return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
 	}
 
