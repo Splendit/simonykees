@@ -32,8 +32,8 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
  * @author Matthias Webhofer
  * @since 2.4.0
  */
-public class RefactorUtil {
-	private static final Logger logger = LoggerFactory.getLogger(RefactorUtil.class);
+public class RefactoringInvoker {
+	private static final Logger logger = LoggerFactory.getLogger(RefactoringInvoker.class);
 
 	// CONSTANTS
 	protected static final String USER_DIR = "user.dir"; //$NON-NLS-1$
@@ -47,10 +47,11 @@ public class RefactorUtil {
 	protected static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
 	protected static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
 	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
+	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 
 	protected StandaloneConfig standaloneConfig;
 
-	public RefactorUtil() {
+	public RefactoringInvoker() {
 		prepareWorkingDirectory();
 	}
 
@@ -150,21 +151,30 @@ public class RefactorUtil {
 	 * @throws YAMLConfigException
 	 */
 	private YAMLConfig getConfiguration(BundleContext context) throws YAMLConfigException {
-		String configFilePath = context.getProperty(CONFIG_FILE_PATH);
-		String profile = context.getProperty(SELECTED_PROFILE);
+		
+		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
 
-		String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
-		logger.info(loggerInfo);
+		if (!useDefaultConfig) {
+			String configFilePath = context.getProperty(CONFIG_FILE_PATH);
+			String profile = context.getProperty(SELECTED_PROFILE);
+			
+			String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
+			logger.info(loggerInfo);
 
-		YAMLConfig config = getYamlConfig(configFilePath, profile);
+			YAMLConfig config = getYamlConfig(configFilePath, profile);
 
-		String selectedProfile = config.getSelectedProfile();
+			String selectedProfile = config.getSelectedProfile();
 
-		loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
-				(selectedProfile == null) ? Messages.Activator_standalone_None : selectedProfile);
-		logger.info(loggerInfo);
+			loggerInfo = NLS.bind(Messages.Activator_standalone_SelectedProfile,
+					(selectedProfile == null) ? Messages.Activator_standalone_None : selectedProfile);
+			logger.info(loggerInfo);
 
-		return config;
+			return config;
+		} else {
+			logger.info(Messages.Activator_standalone_UsingDefaultConfiguration);
+
+			return YAMLConfig.getDefaultConfig();
+		}
 	}
 
 	private void prepareWorkingDirectory() {
@@ -195,13 +205,13 @@ public class RefactorUtil {
 	}
 
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules() {
-		logger.debug(Messages.RefactorUtil_GetEnabledRulesForProject);
+		logger.debug(Messages.RefactoringInvoker_GetEnabledRulesForProject);
 		return RulesContainer.getRulesForProject(standaloneConfig.getJavaProject(), true);
 	}
 
 	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getSelectedRules(YAMLConfig config,
 			List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules) throws YAMLConfigException {
-		logger.debug(Messages.RefactorUtil_GetSelectedRules);
+		logger.debug(Messages.RefactoringInvoker_GetSelectedRules);
 		return YAMLConfigUtil.getSelectedRulesFromConfig(config, projectRules);
 	}
 

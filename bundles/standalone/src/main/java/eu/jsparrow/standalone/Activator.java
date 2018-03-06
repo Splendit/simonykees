@@ -33,15 +33,15 @@ public class Activator implements BundleActivator {
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 
-	private RefactorUtil refactorUtil;
+	private RefactoringInvoker refactoringInvoker;
 	private ListRulesUtil listRulesUtil;
 
 	public Activator() {
-		this(new RefactorUtil(), new ListRulesUtil());
+		this(new RefactoringInvoker(), new ListRulesUtil());
 	}
 
-	public Activator(RefactorUtil refactorUtil, ListRulesUtil listRulesUtil) {
-		this.refactorUtil = refactorUtil;
+	public Activator(RefactoringInvoker refactoringInvoker, ListRulesUtil listRulesUtil) {
+		this.refactoringInvoker = refactoringInvoker;
 		this.listRulesUtil = listRulesUtil;
 	}
 
@@ -63,7 +63,7 @@ public class Activator implements BundleActivator {
 			switch (mode) {
 			case REFACTOR:
 				try {
-					refactorUtil.startRefactoring(context, new RefactoringPipeline());
+					refactoringInvoker.startRefactoring(context, new RefactoringPipeline());
 				} catch (YAMLConfigException | CoreException | MavenInvocationException | IOException yce) {
 					logger.debug(yce.getMessage(), yce);
 					logger.error(yce.getMessage());
@@ -110,7 +110,7 @@ public class Activator implements BundleActivator {
 			logger.error(e.getMessage());
 		} finally {
 			try {
-				refactorUtil.cleanUp();
+				refactoringInvoker.cleanUp();
 			} catch (IOException e) {
 				logger.debug(e.getMessage(), e);
 				logger.error(e.getMessage());
@@ -125,7 +125,7 @@ public class Activator implements BundleActivator {
 		Runtime.getRuntime()
 			.addShutdownHook(new Thread(() -> {
 				try {
-					refactorUtil.cleanUp();
+					refactoringInvoker.cleanUp();
 				} catch (IOException e) {
 					logger.debug(e.getMessage(), e);
 					logger.error(e.getMessage());

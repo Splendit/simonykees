@@ -39,7 +39,7 @@ public class ActivatorTest {
 	BundleContext context;
 	
 	@Mock
-	private RefactorUtil refactorUtil;
+	private RefactoringInvoker refactoringInvoker;
 	
 	@Mock
 	private ListRulesUtil listRulesUtil;
@@ -52,7 +52,7 @@ public class ActivatorTest {
 	
 	@Before
 	public void setUp() {
-		activator = new Activator(refactorUtil, listRulesUtil);
+		activator = new Activator(refactoringInvoker, listRulesUtil);
 	}
 	
 	@Test
@@ -94,12 +94,12 @@ public class ActivatorTest {
 	}
 	
 	@Test
-	public void start_withRefactor_invokesRefactorUtil() throws Exception {
+	public void start_withRefactor_invokesRefactoringInvoker() throws Exception {
 		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("REFACTOR"); //$NON-NLS-1$
 		
 		activator.start(context);
 		
-		verify(refactorUtil).startRefactoring(any(), any(RefactoringPipeline.class));
+		verify(refactoringInvoker).startRefactoring(any(), any(RefactoringPipeline.class));
 	}
 	
 	@Test
