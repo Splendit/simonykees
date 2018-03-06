@@ -43,6 +43,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 	
 	private static final String CAL = "cal"; //$NON-NLS-1$
 
+	@Override
 	public boolean visit(ClassInstanceCreation node) {
 		if (ClassRelationUtil.isContentOfType(node.getType()
 			.resolveBinding(), DATE_QUALIFIED_NAME)) {
@@ -73,7 +74,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 				logger.info("I'm a Date!"); //$NON-NLS-1$
 				break;
 			default:
-				return true;
+				break;
 			}
 		}
 		return true;
@@ -111,7 +112,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 				//If number could not be parsed use the expression
 				setMethod.arguments()
 				.add(NodeBuilder.newInfixExpression(ast, InfixExpression.Operator.PLUS, ast.newNumberLiteral("1900"), //$NON-NLS-1$
-						(Expression) astRewrite.createMoveTarget(arguments.remove(0))));
+						(Expression) astRewrite.createMoveTarget(firstArgument)));
 			}
 			
 		}
