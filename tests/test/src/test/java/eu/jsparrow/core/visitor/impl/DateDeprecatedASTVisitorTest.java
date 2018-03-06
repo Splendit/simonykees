@@ -48,7 +48,7 @@ public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 		fixture.accept(visitor);
 
 		Block expected = createBlock(
-				"Calendar cal = Calendar.getInstance(); cal.set(" + dateConfigPost + "); Date d = cal.getTime();");
+				"Calendar calendar = Calendar.getInstance(); calendar.set(" + dateConfigPost + "); Date d = calendar.getTime();");
 		assertMatch(expected, fixture.getMethodBlock());
 		ImportDeclaration expectedAddedImport = fixture.getAstRewrite()
 			.getAST()
@@ -69,7 +69,7 @@ public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 		fixture.accept(visitor);
 
 		Block expected = createBlock(
-				"Calendar cal = Calendar.getInstance(); cal.set(" + dateConfigPost + "); cal.getTime();");
+				"Calendar calendar = Calendar.getInstance(); calendar.set(" + dateConfigPost + "); calendar.getTime();");
 		assertMatch(expected, fixture.getMethodBlock());
 		ImportDeclaration expectedAddedImport = fixture.getAstRewrite()
 			.getAST()
@@ -89,8 +89,8 @@ public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 
-		Block expected = createBlock("new String(\"Hellow\"); Calendar cal = Calendar.getInstance(); cal.set("
-				+ dateConfigPost + "); Date d = cal.getTime();");
+		Block expected = createBlock("new String(\"Hellow\"); Calendar calendar = Calendar.getInstance(); calendar.set("
+				+ dateConfigPost + "); Date d = calendar.getTime();");
 		assertMatch(expected, fixture.getMethodBlock());
 		ImportDeclaration expectedAddedImport = fixture.getAstRewrite()
 			.getAST()
@@ -110,7 +110,7 @@ public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 		visitor.setASTRewrite(fixture.getAstRewrite());
 		fixture.accept(visitor);
 		Block expected = createBlock(
-				"if(true){ Calendar cal = Calendar.getInstance(); cal.set(" + dateConfigPost + "); cal.getTime();}");
+				"if(true){ Calendar calendar = Calendar.getInstance(); calendar.set(" + dateConfigPost + "); calendar.getTime();}");
 		assertMatch(expected, fixture.getMethodBlock());
 		ImportDeclaration expectedAddedImport = fixture.getAstRewrite()
 			.getAST()
@@ -122,5 +122,33 @@ public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 		assertTrue(fixture.getImports()
 			.stream()
 			.anyMatch(i -> astMatcher.match(i, expectedAddedImport)));
+	}
+	
+	@Test
+	public void visit_newDate_YMD_avoidNameConflict() throws Exception {
+		fixture.addMethodBlock("int calendar; double calendar2; Date calendar1 = new Date(" + dateConfigPre + ");");
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+
+		Block expected = createBlock(
+				"int calendar; double calendar2; Calendar calendar3 = Calendar.getInstance(); calendar3.set(" + dateConfigPost + "); Date calendar1 = calendar3.getTime();");
+		assertMatch(expected, fixture.getMethodBlock());
+	}
+	
+	@Test
+	public void visit_newDate_YMD_multiIntroducedNames() throws Exception {
+		fixture.addMethodBlock("Date d = new Date(" + dateConfigPre + "); int calendar1; Date d2 = new Date(" + dateConfigPre + ");");
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+
+		Block expected = createBlock(
+				"Calendar calendar = Calendar.getInstance(); "
+				+ "calendar.set(" + dateConfigPost + "); "
+				+ "Date d = calendar.getTime();"
+				+ "int calendar1;"
+				+ "Calendar calendar2 = Calendar.getInstance();"
+				+ "calendar2.set(" + dateConfigPost +");"
+				+ "Date d2 = calendar2.getTime();");
+		assertMatch(expected, fixture.getMethodBlock());
 	}
 }
