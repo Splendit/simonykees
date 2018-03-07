@@ -79,7 +79,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 				if(scope.getNodeType() == ASTNode.TYPE_DECLARATION) {
 					replaceFiledInstantiation(node, calendarName, expressionList);
 				} else {
-					replaceConstructorInStatement(node, calendarName, expressionList);
+					replaceConstructorInStatement(node, calendarName, expressionList, scope);
 				}
 				
 				addImports.add(CALENDAR_QUALIFIED_NAME);
@@ -127,9 +127,21 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		ListRewrite listRewrite = astRewrite.getListRewrite(typeDeclaration, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertAfter(initializer, fieldDeclaration, null);
 		astRewrite.replace(fragment, astRewrite.createCopyTarget(dateName), null);
+		
+		storeIntroducedName(fieldDeclaration, calendarName);
+		
 	}
 
-	private void replaceConstructorInStatement(ClassInstanceCreation node, String calendarName, List<Expression> arguments) {
+	protected void storeIntroducedName(ASTNode scope, String calendarName) {
+		List<String> storedLocalNames = localVariableNames.get(scope);
+		if(storedLocalNames == null) {
+			storedLocalNames = new ArrayList<>();
+		}
+		storedLocalNames.add(calendarName);
+		localVariableNames.put(scope, storedLocalNames);
+	}
+
+	private void replaceConstructorInStatement(ClassInstanceCreation node, String calendarName, List<Expression> arguments, ASTNode scope) {
 		AST ast = node.getAST();
 		astRewrite.replace(node, getMethodInvocation(ast, calendarName), null);
 		Statement ancestorStatment = ASTNodeUtil.getSpecificAncestor(node, Statement.class);
@@ -147,6 +159,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 			blockStatements.add((Statement) astRewrite.createMoveTarget(ancestorStatment));
 			astRewrite.replace(ancestorStatment, injectionBlock, null);
 		}
+		storeIntroducedName(scope, calendarName);
 	}
 
 	@Override
@@ -158,6 +171,11 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 	@Override
 	public void endVisit(MethodDeclaration methodDeclaration) {
 		localVariableNames.remove(methodDeclaration);
+	}
+	
+	@Override
+	public void endVisit(FieldDeclaration fieldDeclaration) {
+		localVariableNames.remove(fieldDeclaration);
 	}
 
 	@Override
