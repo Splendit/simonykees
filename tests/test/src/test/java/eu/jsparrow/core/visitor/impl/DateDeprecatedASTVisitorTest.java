@@ -21,7 +21,7 @@ public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 
 	@Parameters
 	public static Collection<Object[]> data() {
-		return Arrays.asList(new Object[][] { { "99, 1, 1", "1999, 1, 1" }, { "100, 1, 1", "2000, 1, 1" },
+		return Arrays.asList(new Object[][] { { "99, 1, 1", "1999, 1, 1" }, { "99.00, 1, 1", "1900 + 99.00, 1, 1" }, { "100, 1, 1", "2000, 1, 1" },
 				{ "99, 1, 1, 1, 1", "1999, 1, 1, 1, 1" }, { "99, 1, 1, 1, 1, 1", "1999, 1, 1, 1, 1, 1" } });
 	}
 
