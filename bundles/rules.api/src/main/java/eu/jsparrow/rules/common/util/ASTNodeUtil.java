@@ -1,5 +1,6 @@
 package eu.jsparrow.rules.common.util;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
@@ -29,7 +30,9 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
@@ -535,5 +538,24 @@ public class ASTNodeUtil {
 
 		return arguments.stream()
 			.anyMatch(argument -> isFollowedByLineComment(argument, commentRewriter));
+	}
+
+	/**
+	 * Finds the name of all fields declared in the provided type.
+	 * 
+	 * @param typeDeclaration
+	 *            a type declaration to be searched.
+	 * @return the list of identifiers of the declared fields.
+	 */
+	public static List<String> findFieldNames(TypeDeclaration typeDeclaration) {
+		FieldDeclaration[] fields = typeDeclaration.getFields();
+		List<String> names = new ArrayList<>();
+		for (FieldDeclaration field : fields) {
+			names.addAll(convertToTypedList(field.fragments(), VariableDeclarationFragment.class).stream()
+				.map(VariableDeclarationFragment::getName)
+				.map(SimpleName::getIdentifier)
+				.collect(Collectors.toList()));
+		}
+		return names;
 	}
 }

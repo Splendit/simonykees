@@ -172,23 +172,30 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 			name = CALENDAR + suffix;
 			suffix++;
 		}
-		List<String> names = localVariableNames.get(scope);
-		names.add(name);
 		return name;
 	}
 
 	private void lazyLoadScopeNames(ASTNode scope) {
 
-		if (!localVariableNames.containsKey(scope)) {
+		if (localVariableNames.containsKey(scope)) {
+			return;
+		}
+
+		List<String> declaredInScope;
+		if (ASTNode.TYPE_DECLARATION == scope.getNodeType()) {
+			TypeDeclaration typeDeclaration = (TypeDeclaration) scope;
+			declaredInScope = ASTNodeUtil.findFieldNames(typeDeclaration);
+
+		} else {
 			VariableDeclarationsVisitor declarationsVisitor = new VariableDeclarationsVisitor();
 			scope.accept(declarationsVisitor);
-			List<String> declaredInScope = declarationsVisitor.getVariableDeclarationNames()
+			declaredInScope = declarationsVisitor.getVariableDeclarationNames()
 				.stream()
 				.map(SimpleName::getIdentifier)
 				.collect(Collectors.toList());
-
-			this.localVariableNames.put(scope, declaredInScope);
 		}
+		this.localVariableNames.put(scope, declaredInScope);
+
 
 		if (TypeDeclaration.BODY_DECLARATIONS_PROPERTY != scope.getLocationInParent()) {
 			return;
@@ -199,15 +206,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 			return;
 		}
 
-		FieldDeclaration[] fields = typeDeclaration.getFields();
-		List<String> names = new ArrayList<>();
-		for (FieldDeclaration field : fields) {
-			names.addAll(ASTNodeUtil.convertToTypedList(field.fragments(), VariableDeclarationFragment.class)
-				.stream()
-				.map(VariableDeclarationFragment::getName)
-				.map(SimpleName::getIdentifier)
-				.collect(Collectors.toList()));
-		}
+		List<String> names = ASTNodeUtil.findFieldNames(typeDeclaration);
 		fieldNames.put(typeDeclaration, names);
 	}
 
