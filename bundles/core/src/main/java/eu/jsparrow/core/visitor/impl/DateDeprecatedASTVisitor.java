@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
@@ -74,24 +75,13 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 				}
 				lazyLoadScopeNames(scope);
 				String calendarName = findCalendarName(scope);
-				AST ast = node.getAST();
-				astRewrite.replace(node, getMethodInvocation(ast, calendarName), null);
-				Statement ancestorStatment = ASTNodeUtil.getSpecificAncestor(node, Statement.class);
-				Block surroundingBlock;
-				if (ASTNode.BLOCK == ancestorStatment.getParent()
-					.getNodeType()) {
-					surroundingBlock = (Block) ancestorStatment.getParent();
-					ListRewrite lrw = astRewrite.getListRewrite(surroundingBlock, Block.STATEMENTS_PROPERTY);
-					generateCalendar(ast, calendarName, expressionList)
-						.forEach(s -> lrw.insertBefore(s, ancestorStatment, null));
+				
+				if(scope.getNodeType() == ASTNode.TYPE_DECLARATION) {
+					replaceFiledInstantiation(node, calendarName, expressionList);
 				} else {
-					Block injectionBlock = ast.newBlock();
-					@SuppressWarnings("unchecked")
-					List<Statement> blockStatements = (List<Statement>) injectionBlock.statements();
-					blockStatements.addAll(generateCalendar(ast, calendarName, expressionList));
-					blockStatements.add((Statement) astRewrite.createMoveTarget(ancestorStatment));
-					astRewrite.replace(ancestorStatment, injectionBlock, null);
+					replaceConstructorInStatement(node, calendarName, expressionList);
 				}
+				
 				addImports.add(CALENDAR_QUALIFIED_NAME);
 				logger.info("I'm a Date!"); //$NON-NLS-1$
 				break;
@@ -100,6 +90,63 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 			}
 		}
 		return true;
+	}
+
+	private void replaceFiledInstantiation(ClassInstanceCreation node, String calendarName,
+			List<Expression> expressionList) {
+		VariableDeclarationFragment fragment = ASTNodeUtil.getSpecificAncestor(node, VariableDeclarationFragment.class);
+		if(FieldDeclaration.FRAGMENTS_PROPERTY != fragment.getLocationInParent()) {
+			logger.warn("Not a field declaration!"); //$NON-NLS-1$
+			return;
+		}
+		FieldDeclaration fieldDeclaration = (FieldDeclaration)fragment.getParent();
+		if(fieldDeclaration.getLocationInParent() != TypeDeclaration.BODY_DECLARATIONS_PROPERTY) {
+			logger.warn("Not a field of a type declaration!"); //$NON-NLS-1$
+			return;
+		}
+		TypeDeclaration typeDeclaration = (TypeDeclaration) fieldDeclaration.getParent();
+		AST ast = node.getAST();
+		
+		Block body = ast.newBlock();
+		@SuppressWarnings("unchecked")
+		List<Statement> bodyStatements = (List<Statement>)body.statements();
+		List<Statement> calendarStatemetns = generateCalendar(ast, calendarName, expressionList);
+		bodyStatements.addAll(calendarStatemetns);
+		
+		SimpleName dateName = fragment.getName();
+		MethodInvocation calendarGetTime = getMethodInvocation(ast, calendarName);
+		Assignment assignment = ast.newAssignment();
+		assignment.setLeftHandSide((SimpleName)astRewrite.createCopyTarget(dateName));
+		assignment.setRightHandSide(calendarGetTime);
+		ExpressionStatement assignmentStatement = ast.newExpressionStatement(assignment);
+		bodyStatements.add(assignmentStatement);
+		
+		Initializer initializer = ast.newInitializer();
+		initializer.setBody(body);
+		
+		ListRewrite listRewrite = astRewrite.getListRewrite(typeDeclaration, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+		listRewrite.insertAfter(initializer, fieldDeclaration, null);
+		astRewrite.replace(fragment, astRewrite.createCopyTarget(dateName), null);
+	}
+
+	private void replaceConstructorInStatement(ClassInstanceCreation node, String calendarName, List<Expression> arguments) {
+		AST ast = node.getAST();
+		astRewrite.replace(node, getMethodInvocation(ast, calendarName), null);
+		Statement ancestorStatment = ASTNodeUtil.getSpecificAncestor(node, Statement.class);
+		Block surroundingBlock;
+		if (ancestorStatment.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
+			surroundingBlock = (Block) ancestorStatment.getParent();
+			ListRewrite lrw = astRewrite.getListRewrite(surroundingBlock, Block.STATEMENTS_PROPERTY);
+			generateCalendar(ast, calendarName, arguments)
+				.forEach(s -> lrw.insertBefore(s, ancestorStatment, null));
+		} else {
+			Block injectionBlock = ast.newBlock();
+			@SuppressWarnings("unchecked")
+			List<Statement> blockStatements = (List<Statement>) injectionBlock.statements();
+			blockStatements.addAll(generateCalendar(ast, calendarName, arguments));
+			blockStatements.add((Statement) astRewrite.createMoveTarget(ancestorStatment));
+			astRewrite.replace(ancestorStatment, injectionBlock, null);
+		}
 	}
 
 	@Override
