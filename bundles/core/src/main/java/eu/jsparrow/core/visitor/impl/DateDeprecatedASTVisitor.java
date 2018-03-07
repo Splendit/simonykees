@@ -1,6 +1,7 @@
 package eu.jsparrow.core.visitor.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -36,6 +38,7 @@ import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
+import eu.jsparrow.rules.common.visitor.helper.CommentRewriter;
 
 /**
  * ASTVisitor that searches deprecated Date constructs and replaces it with
@@ -91,6 +94,27 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		}
 		return true;
 	}
+	
+	@Override
+	public void endVisit(TypeDeclaration typeDeclaration) {
+		fieldNames.remove(typeDeclaration);
+		localVariableNames.remove(typeDeclaration);
+	}
+
+	@Override
+	public void endVisit(MethodDeclaration methodDeclaration) {
+		localVariableNames.remove(methodDeclaration);
+	}
+	
+	@Override
+	public void endVisit(FieldDeclaration fieldDeclaration) {
+		localVariableNames.remove(fieldDeclaration);
+	}
+
+	@Override
+	public void endVisit(Initializer initializer) {
+		localVariableNames.remove(initializer);
+	}
 
 	private void replaceFiledInstantiation(ClassInstanceCreation node, String calendarName,
 			List<Expression> expressionList) {
@@ -127,30 +151,26 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		ListRewrite listRewrite = astRewrite.getListRewrite(typeDeclaration, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertAfter(initializer, fieldDeclaration, null);
 		astRewrite.replace(fragment, astRewrite.createCopyTarget(dateName), null);
-		
 		storeIntroducedName(fieldDeclaration, calendarName);
+		onRewrite();
+		CommentRewriter commentRewriter = getCommentRewriter();
+		List<Comment> relatedComments = commentRewriter.findRelatedComments(node); 
+		Collections.reverse(relatedComments);
+		commentRewriter.saveCommentsInBlock(body, relatedComments);
 		
-	}
-
-	protected void storeIntroducedName(ASTNode scope, String calendarName) {
-		List<String> storedLocalNames = localVariableNames.get(scope);
-		if(storedLocalNames == null) {
-			storedLocalNames = new ArrayList<>();
-		}
-		storedLocalNames.add(calendarName);
-		localVariableNames.put(scope, storedLocalNames);
 	}
 
 	private void replaceConstructorInStatement(ClassInstanceCreation node, String calendarName, List<Expression> arguments, ASTNode scope) {
 		AST ast = node.getAST();
 		astRewrite.replace(node, getMethodInvocation(ast, calendarName), null);
 		Statement ancestorStatment = ASTNodeUtil.getSpecificAncestor(node, Statement.class);
-		Block surroundingBlock;
+		CommentRewriter commentRewriter = getCommentRewriter();
 		if (ancestorStatment.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
-			surroundingBlock = (Block) ancestorStatment.getParent();
+			Block surroundingBlock = (Block) ancestorStatment.getParent();
 			ListRewrite lrw = astRewrite.getListRewrite(surroundingBlock, Block.STATEMENTS_PROPERTY);
 			generateCalendar(ast, calendarName, arguments)
 				.forEach(s -> lrw.insertBefore(s, ancestorStatment, null));
+			commentRewriter.saveCommentsInParentStatement(node);
 		} else {
 			Block injectionBlock = ast.newBlock();
 			@SuppressWarnings("unchecked")
@@ -158,29 +178,22 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 			blockStatements.addAll(generateCalendar(ast, calendarName, arguments));
 			blockStatements.add((Statement) astRewrite.createMoveTarget(ancestorStatment));
 			astRewrite.replace(ancestorStatment, injectionBlock, null);
+			List<Comment> relatedComments = commentRewriter.findRelatedComments(node); 
+			Collections.reverse(relatedComments);
+			commentRewriter.saveCommentsInBlock(injectionBlock, relatedComments);
 		}
+
+		onRewrite();
 		storeIntroducedName(scope, calendarName);
 	}
-
-	@Override
-	public void endVisit(TypeDeclaration typeDeclaration) {
-		fieldNames.remove(typeDeclaration);
-		localVariableNames.remove(typeDeclaration);
-	}
-
-	@Override
-	public void endVisit(MethodDeclaration methodDeclaration) {
-		localVariableNames.remove(methodDeclaration);
-	}
 	
-	@Override
-	public void endVisit(FieldDeclaration fieldDeclaration) {
-		localVariableNames.remove(fieldDeclaration);
-	}
-
-	@Override
-	public void endVisit(Initializer initializer) {
-		localVariableNames.remove(initializer);
+	protected void storeIntroducedName(ASTNode scope, String calendarName) {
+		List<String> storedLocalNames = localVariableNames.get(scope);
+		if(storedLocalNames == null) {
+			storedLocalNames = new ArrayList<>();
+		}
+		storedLocalNames.add(calendarName);
+		localVariableNames.put(scope, storedLocalNames);
 	}
 
 	private String findCalendarName(ASTNode scope) {

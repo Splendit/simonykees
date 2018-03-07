@@ -367,6 +367,14 @@ public class CommentRewriter {
 		this.astRewrite = astRewrite;
 	}
 
+	/**
+	 * Inserts the list of comments in the beginning of the of the given block.
+	 * 
+	 * @param reference
+	 *            a block to inject the comment
+	 * @param relatedComments
+	 *            list of comments to be inserted
+	 */
 	public void saveCommentsInBlock(Block reference, List<Comment> relatedComments) {
 		List<String> referenceBlockComments = findRelatedComments(reference).stream()
 			.map(this::findCommentContent)

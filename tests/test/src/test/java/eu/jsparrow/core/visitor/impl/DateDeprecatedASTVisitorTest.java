@@ -151,4 +151,15 @@ public class DateDeprecatedASTVisitorTest extends UsesJDTUnitFixture {
 				+ "Date d2 = calendar2.getTime();");
 		assertMatch(expected, fixture.getMethodBlock());
 	}
+	
+	@Test
+	public void visit_newDate_noParameters() throws Exception {
+		fixture.addMethodBlock("Date date = new Date();");
+		visitor.setASTRewrite(fixture.getAstRewrite());
+		fixture.accept(visitor);
+
+		Block expected = createBlock(
+				"Date date = new Date();");
+		assertMatch(expected, fixture.getMethodBlock());
+	}
 }
