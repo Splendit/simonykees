@@ -1,7 +1,9 @@
 package eu.jsparrow.core.visitor.impl;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +70,9 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 			List<Expression> expressionList = ASTNodeUtil.returnTypedList(node.arguments(), Expression.class);
 
 			switch (expressionList.size()) {
+			/*
+			 * Constructors with 3, 5 and 6 arguments are deprecated.
+			 */
 			case 3:
 			case 5:
 			case 6:
@@ -77,14 +82,14 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 					break;
 				}
 				lazyLoadScopeNames(scope);
-				String calendarName = findCalendarName(scope);
-				
-				if(scope.getNodeType() == ASTNode.TYPE_DECLARATION) {
+				String calendarName = findCalendarName();
+
+				if (scope.getNodeType() == ASTNode.TYPE_DECLARATION) {
 					replaceFiledInstantiation(node, calendarName, expressionList);
 				} else {
 					replaceConstructorInStatement(node, calendarName, expressionList, scope);
 				}
-				
+
 				addImports.add(CALENDAR_QUALIFIED_NAME);
 				logger.info("I'm a Date!"); //$NON-NLS-1$
 				break;
@@ -94,7 +99,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		}
 		return true;
 	}
-	
+
 	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
 		fieldNames.remove(typeDeclaration);
@@ -105,7 +110,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 	public void endVisit(MethodDeclaration methodDeclaration) {
 		localVariableNames.remove(methodDeclaration);
 	}
-	
+
 	@Override
 	public void endVisit(FieldDeclaration fieldDeclaration) {
 		localVariableNames.remove(fieldDeclaration);
@@ -116,51 +121,102 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		localVariableNames.remove(initializer);
 	}
 
+	/**
+	 * Removes the deprecated constructor from the field declaration statement
+	 * and introduces a {@link Initializer} to initialize the field with a
+	 * calendar.
+	 * 
+	 * @param node
+	 *            the node representing a deprecated {@link Date} constructor
+	 * @param calendarName
+	 *            the name of the calendar instance to be introduced
+	 * @param expressionList
+	 *            the list of the arguments in the deprecated constructor.
+	 */
 	private void replaceFiledInstantiation(ClassInstanceCreation node, String calendarName,
 			List<Expression> expressionList) {
+		/*
+		 * get the declaration fragment, e.g. date = new Date(99, 1, 1)
+		 */
 		VariableDeclarationFragment fragment = ASTNodeUtil.getSpecificAncestor(node, VariableDeclarationFragment.class);
-		if(FieldDeclaration.FRAGMENTS_PROPERTY != fragment.getLocationInParent()) {
+		if (FieldDeclaration.FRAGMENTS_PROPERTY != fragment.getLocationInParent()) {
 			logger.warn("Not a field declaration!"); //$NON-NLS-1$
 			return;
 		}
-		FieldDeclaration fieldDeclaration = (FieldDeclaration)fragment.getParent();
-		if(fieldDeclaration.getLocationInParent() != TypeDeclaration.BODY_DECLARATIONS_PROPERTY) {
+
+		/*
+		 * get the whole field declaration statement
+		 */
+		FieldDeclaration fieldDeclaration = (FieldDeclaration) fragment.getParent();
+		if (fieldDeclaration.getLocationInParent() != TypeDeclaration.BODY_DECLARATIONS_PROPERTY) {
 			logger.warn("Not a field of a type declaration!"); //$NON-NLS-1$
 			return;
 		}
+
+		// the class wrapping the declaration
 		TypeDeclaration typeDeclaration = (TypeDeclaration) fieldDeclaration.getParent();
 		AST ast = node.getAST();
-		
+
+		/*
+		 * Creating the body of the initializer
+		 */
 		Block body = ast.newBlock();
 		@SuppressWarnings("unchecked")
-		List<Statement> bodyStatements = (List<Statement>)body.statements();
+		List<Statement> bodyStatements = (List<Statement>) body.statements();
 		List<Statement> calendarStatemetns = generateCalendar(ast, calendarName, expressionList);
 		bodyStatements.addAll(calendarStatemetns);
-		
+
 		SimpleName dateName = fragment.getName();
 		MethodInvocation calendarGetTime = getMethodInvocation(ast, calendarName);
 		Assignment assignment = ast.newAssignment();
-		assignment.setLeftHandSide((SimpleName)astRewrite.createCopyTarget(dateName));
+		assignment.setLeftHandSide((SimpleName) astRewrite.createCopyTarget(dateName));
 		assignment.setRightHandSide(calendarGetTime);
 		ExpressionStatement assignmentStatement = ast.newExpressionStatement(assignment);
 		bodyStatements.add(assignmentStatement);
-		
+
+		/*
+		 * Creating the initializer and setting the body created above
+		 */
 		Initializer initializer = ast.newInitializer();
 		initializer.setBody(body);
-		
-		ListRewrite listRewrite = astRewrite.getListRewrite(typeDeclaration, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+
+		/*
+		 * Insert the Initializer after the field declaration and remove the
+		 * existing deprecated constructor.
+		 */
+		ListRewrite listRewrite = astRewrite.getListRewrite(typeDeclaration,
+				TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertAfter(initializer, fieldDeclaration, null);
 		astRewrite.replace(fragment, astRewrite.createCopyTarget(dateName), null);
 		storeIntroducedName(fieldDeclaration, calendarName);
 		onRewrite();
 		CommentRewriter commentRewriter = getCommentRewriter();
-		List<Comment> relatedComments = commentRewriter.findRelatedComments(node); 
+		List<Comment> relatedComments = commentRewriter.findRelatedComments(node);
 		Collections.reverse(relatedComments);
 		commentRewriter.saveCommentsInBlock(body, relatedComments);
-		
+
 	}
 
-	private void replaceConstructorInStatement(ClassInstanceCreation node, String calendarName, List<Expression> arguments, ASTNode scope) {
+	/**
+	 * Replaces the deprecated {@link Date} constructor with
+	 * {@link Calendar#getTime()}. Covers only the cases where the deprecated
+	 * constructor occurs in a {@link Statement}. The constructors occurring in
+	 * a field declaration are handled by
+	 * {@link #replaceFiledInstantiation(ClassInstanceCreation, String, List)}.
+	 * Introduces an instance of {@link Calendar} and sets the time
+	 * corresponding to the arguments provided in the deprecated constructor.
+	 * 
+	 * @param node
+	 *            representing the deprecated constructor to be replaced.
+	 * @param calendarName
+	 *            the name of the new calendar instance
+	 * @param arguments
+	 *            the list of arguments occurring in the deprecated constructor.
+	 * @param scope
+	 *            containing variables which are currently visible
+	 */
+	private void replaceConstructorInStatement(ClassInstanceCreation node, String calendarName,
+			List<Expression> arguments, ASTNode scope) {
 		AST ast = node.getAST();
 		astRewrite.replace(node, getMethodInvocation(ast, calendarName), null);
 		Statement ancestorStatment = ASTNodeUtil.getSpecificAncestor(node, Statement.class);
@@ -168,8 +224,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		if (ancestorStatment.getLocationInParent() == Block.STATEMENTS_PROPERTY) {
 			Block surroundingBlock = (Block) ancestorStatment.getParent();
 			ListRewrite lrw = astRewrite.getListRewrite(surroundingBlock, Block.STATEMENTS_PROPERTY);
-			generateCalendar(ast, calendarName, arguments)
-				.forEach(s -> lrw.insertBefore(s, ancestorStatment, null));
+			generateCalendar(ast, calendarName, arguments).forEach(s -> lrw.insertBefore(s, ancestorStatment, null));
 			commentRewriter.saveCommentsInParentStatement(node);
 		} else {
 			Block injectionBlock = ast.newBlock();
@@ -178,7 +233,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 			blockStatements.addAll(generateCalendar(ast, calendarName, arguments));
 			blockStatements.add((Statement) astRewrite.createMoveTarget(ancestorStatment));
 			astRewrite.replace(ancestorStatment, injectionBlock, null);
-			List<Comment> relatedComments = commentRewriter.findRelatedComments(node); 
+			List<Comment> relatedComments = commentRewriter.findRelatedComments(node);
 			Collections.reverse(relatedComments);
 			commentRewriter.saveCommentsInBlock(injectionBlock, relatedComments);
 		}
@@ -186,17 +241,33 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		onRewrite();
 		storeIntroducedName(scope, calendarName);
 	}
-	
+
+	/**
+	 * Adds the given variable name in the {@link #localVariableNames}
+	 * 
+	 * @param scope
+	 *            key
+	 * @param calendarName
+	 *            value
+	 */
 	protected void storeIntroducedName(ASTNode scope, String calendarName) {
 		List<String> storedLocalNames = localVariableNames.get(scope);
-		if(storedLocalNames == null) {
+		if (storedLocalNames == null) {
 			storedLocalNames = new ArrayList<>();
 		}
 		storedLocalNames.add(calendarName);
 		localVariableNames.put(scope, storedLocalNames);
 	}
 
-	private String findCalendarName(ASTNode scope) {
+	/**
+	 * Generates a safe variable name having {@value #CALENDAR} as a prefix and
+	 * number suffix to ensure the uniqueness. Makes use of
+	 * {@link #isInScope(String)} to check if the generated name is safe.
+	 * 
+	 * @return a unique identifier w.r.t to variables that are visible in the
+	 *         current scope.
+	 */
+	private String findCalendarName() {
 		String name = CALENDAR;
 		int suffix = 1;
 		while (isInScope(name)) {
@@ -206,6 +277,18 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		return name;
 	}
 
+	/**
+	 * Populates {@link #localVariableNames} and {@link #fieldNames} with the
+	 * variable declarations occurring in the given scope. The scope node is
+	 * used as a key in both cases. Nothing happens if the maps already contain
+	 * the scope key. If the scope represents a {@link TypeDeclaration} then
+	 * only the declared fields are considered. Otherwise, the
+	 * {@link VariableDeclarationsVisitor} visitor is used to find all variables
+	 * declared inside the scope.
+	 * 
+	 * @param scope
+	 *            the node to check (if necessary) for variable declaration.
+	 */
 	private void lazyLoadScopeNames(ASTNode scope) {
 
 		if (localVariableNames.containsKey(scope)) {
@@ -227,7 +310,6 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		}
 		this.localVariableNames.put(scope, declaredInScope);
 
-
 		if (TypeDeclaration.BODY_DECLARATIONS_PROPERTY != scope.getLocationInParent()) {
 			return;
 		}
@@ -241,6 +323,14 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		fieldNames.put(typeDeclaration, names);
 	}
 
+	/**
+	 * Checks whether the given identifier matches the values in
+	 * {@link #fieldNames} or {@link #localVariableNames}.
+	 * 
+	 * @param name
+	 *            identifier to be checked
+	 * @return if a match is found.
+	 */
 	private boolean isInScope(String name) {
 		return fieldNames.values()
 			.stream()
