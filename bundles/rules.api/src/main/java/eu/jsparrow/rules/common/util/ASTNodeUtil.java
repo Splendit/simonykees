@@ -505,7 +505,7 @@ public class ASTNodeUtil {
 	 *            expression to be checked.
 	 * @param commentRewriter
 	 *            an instance of {@link CommentRewriter} initialized with the
-	 *            AST which is currently being visites
+	 *            AST which is currently being visited
 	 * @return {@code true} if the last trailing comment is a
 	 *         {@link LineComment} or {@code false} otherwise.
 	 */
@@ -526,10 +526,10 @@ public class ASTNodeUtil {
 	 * by line comment.
 	 * 
 	 * @param node
-	 *            an instancfe of a {@link MethodInvocation} to be checked.
+	 *            an instance of a {@link MethodInvocation} to be checked.
 	 * @param commentRewriter
 	 *            an instance of {@link CommentRewriter} initialized with the
-	 *            AST which is currently being visites
+	 *            AST which is currently being visited
 	 * @return {@code true} if the last trailing comment of any of the arguments
 	 *         is a {@link LineComment} or {@code false} otherwise.
 	 */
