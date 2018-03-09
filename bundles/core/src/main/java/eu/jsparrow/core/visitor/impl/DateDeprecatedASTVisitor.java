@@ -258,11 +258,16 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 	}
 
 	/**
+	 * Generates one statement for creating a calendar instance and one for
+	 * setting the time corresponding to the provided list of arguments.
 	 * 
 	 * @param ast
+	 *            the ast for genereating the nodes
 	 * @param nameOfCalendar
+	 *            the identifier of the calendar to be introduced
 	 * @param arguments
-	 * @return
+	 *            the list of arguments used for setting the calendar time
+	 * @return the list of generated statements as described above
 	 */
 	@SuppressWarnings("unchecked")
 	private List<Statement> generateCalendar(AST ast, String nameOfCalendar, List<Expression> arguments) {
