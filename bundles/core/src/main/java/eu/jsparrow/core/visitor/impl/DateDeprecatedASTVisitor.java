@@ -4,15 +4,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -36,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.builder.NodeBuilder;
-import eu.jsparrow.core.visitor.sub.VariableDeclarationsVisitor;
+import eu.jsparrow.core.visitor.sub.LiveVariableScope;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.ClassRelationUtil;
 import eu.jsparrow.rules.common.visitor.AbstractAddImportASTVisitor;
@@ -59,9 +54,8 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 	private static final String CALENDAR_NAME = java.util.Calendar.class.getSimpleName();
 
 	private static final String CALENDAR = "calendar"; //$NON-NLS-1$
-
-	private Map<AbstractTypeDeclaration, List<String>> fieldNames = new HashMap<>();
-	private Map<ASTNode, List<String>> localVariableNames = new HashMap<>();
+	
+	private LiveVariableScope scope = new LiveVariableScope();
 
 	@Override
 	public boolean visit(ClassInstanceCreation node) {
@@ -76,22 +70,21 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 			case 3:
 			case 5:
 			case 6:
-				ASTNode scope = findEnclosingScope(node).orElse(null);
-				if (scope == null) {
+				ASTNode enclosingScope = this.scope.findEnclosingScope(node).orElse(null);
+				if (enclosingScope == null) {
 					logger.warn("The scope of the Date declaration cannot be found!"); //$NON-NLS-1$
 					break;
 				}
-				lazyLoadScopeNames(scope);
+				this.scope.lazyLoadScopeNames(enclosingScope);
 				String calendarName = findCalendarName();
 
-				if (scope.getNodeType() == ASTNode.TYPE_DECLARATION) {
+				if (enclosingScope.getNodeType() == ASTNode.TYPE_DECLARATION) {
 					replaceFiledInstantiation(node, calendarName, expressionList);
 				} else {
-					replaceConstructorInStatement(node, calendarName, expressionList, scope);
+					replaceConstructorInStatement(node, calendarName, expressionList, enclosingScope);
 				}
 
 				addImports.add(CALENDAR_QUALIFIED_NAME);
-				logger.info("I'm a Date!"); //$NON-NLS-1$
 				break;
 			default:
 				break;
@@ -102,23 +95,23 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 
 	@Override
 	public void endVisit(TypeDeclaration typeDeclaration) {
-		fieldNames.remove(typeDeclaration);
-		localVariableNames.remove(typeDeclaration);
+		this.scope.clearLocalVariablesScope(typeDeclaration);
+		this.scope.clearFieldScope(typeDeclaration);
 	}
 
 	@Override
 	public void endVisit(MethodDeclaration methodDeclaration) {
-		localVariableNames.remove(methodDeclaration);
+		this.scope.clearLocalVariablesScope(methodDeclaration);
 	}
 
 	@Override
 	public void endVisit(FieldDeclaration fieldDeclaration) {
-		localVariableNames.remove(fieldDeclaration);
+		this.scope.clearLocalVariablesScope(fieldDeclaration);
 	}
 
 	@Override
 	public void endVisit(Initializer initializer) {
-		localVariableNames.remove(initializer);
+		this.scope.clearLocalVariablesScope(initializer);
 	}
 
 	/**
@@ -188,7 +181,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 				TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
 		listRewrite.insertAfter(initializer, fieldDeclaration, null);
 		astRewrite.replace(fragment, astRewrite.createCopyTarget(dateName), null);
-		storeIntroducedName(fieldDeclaration, calendarName);
+		this.scope.storeIntroducedName(fieldDeclaration, calendarName);
 		onRewrite();
 		CommentRewriter commentRewriter = getCommentRewriter();
 		List<Comment> relatedComments = commentRewriter.findRelatedComments(node);
@@ -203,7 +196,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 	 * constructor occurs in a {@link Statement}. The constructors occurring in
 	 * a field declaration are handled by
 	 * {@link #replaceFiledInstantiation(ClassInstanceCreation, String, List)}.
-	 * Introduces an instance of {@link Calendar} and sets the time
+	 * Introduces an instance of {@link Calendar} and sets irs time
 	 * corresponding to the arguments provided in the deprecated constructor.
 	 * 
 	 * @param node
@@ -239,24 +232,7 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		}
 
 		onRewrite();
-		storeIntroducedName(scope, calendarName);
-	}
-
-	/**
-	 * Adds the given variable name in the {@link #localVariableNames}
-	 * 
-	 * @param scope
-	 *            key
-	 * @param calendarName
-	 *            value
-	 */
-	protected void storeIntroducedName(ASTNode scope, String calendarName) {
-		List<String> storedLocalNames = localVariableNames.get(scope);
-		if (storedLocalNames == null) {
-			storedLocalNames = new ArrayList<>();
-		}
-		storedLocalNames.add(calendarName);
-		localVariableNames.put(scope, storedLocalNames);
+		this.scope.storeIntroducedName(scope, calendarName);
 	}
 
 	/**
@@ -270,99 +246,24 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 	private String findCalendarName() {
 		String name = CALENDAR;
 		int suffix = 1;
-		while (isInScope(name)) {
+		while (this.scope.isInScope(name)) {
 			name = CALENDAR + suffix;
 			suffix++;
 		}
 		return name;
 	}
 
-	/**
-	 * Populates {@link #localVariableNames} and {@link #fieldNames} with the
-	 * variable declarations occurring in the given scope. The scope node is
-	 * used as a key in both cases. Nothing happens if the maps already contain
-	 * the scope key. If the scope represents a {@link TypeDeclaration} then
-	 * only the declared fields are considered. Otherwise, the
-	 * {@link VariableDeclarationsVisitor} visitor is used to find all variables
-	 * declared inside the scope.
-	 * 
-	 * @param scope
-	 *            the node to check (if necessary) for variable declaration.
-	 */
-	private void lazyLoadScopeNames(ASTNode scope) {
-
-		if (localVariableNames.containsKey(scope)) {
-			return;
-		}
-
-		List<String> declaredInScope;
-		if (ASTNode.TYPE_DECLARATION == scope.getNodeType()) {
-			TypeDeclaration typeDeclaration = (TypeDeclaration) scope;
-			declaredInScope = ASTNodeUtil.findFieldNames(typeDeclaration);
-
-		} else {
-			VariableDeclarationsVisitor declarationsVisitor = new VariableDeclarationsVisitor();
-			scope.accept(declarationsVisitor);
-			declaredInScope = declarationsVisitor.getVariableDeclarationNames()
-				.stream()
-				.map(SimpleName::getIdentifier)
-				.collect(Collectors.toList());
-		}
-		this.localVariableNames.put(scope, declaredInScope);
-
-		if (TypeDeclaration.BODY_DECLARATIONS_PROPERTY != scope.getLocationInParent()) {
-			return;
-		}
-
-		TypeDeclaration typeDeclaration = (TypeDeclaration) scope.getParent();
-		if (fieldNames.containsKey(typeDeclaration)) {
-			return;
-		}
-
-		List<String> names = ASTNodeUtil.findFieldNames(typeDeclaration);
-		fieldNames.put(typeDeclaration, names);
-	}
-
-	/**
-	 * Checks whether the given identifier matches the values in
-	 * {@link #fieldNames} or {@link #localVariableNames}.
-	 * 
-	 * @param name
-	 *            identifier to be checked
-	 * @return if a match is found.
-	 */
-	private boolean isInScope(String name) {
-		return fieldNames.values()
-			.stream()
-			.anyMatch(names -> names.contains(name))
-				|| localVariableNames.values()
-					.stream()
-					.anyMatch(names -> names.contains(name));
-	}
-
-	private Optional<ASTNode> findEnclosingScope(ClassInstanceCreation node) {
-		Initializer initalizer = ASTNodeUtil.getSpecificAncestor(node, Initializer.class);
-		if (initalizer != null) {
-			return Optional.of(initalizer);
-		}
-
-		MethodDeclaration methodDeclaration = ASTNodeUtil.getSpecificAncestor(node, MethodDeclaration.class);
-		if (methodDeclaration != null) {
-			return Optional.of(methodDeclaration);
-		}
-
-		FieldDeclaration fieldDeclaration = ASTNodeUtil.getSpecificAncestor(node, FieldDeclaration.class);
-		if (fieldDeclaration != null) {
-			return Optional.of(fieldDeclaration.getParent());
-		}
-
-		return Optional.empty();
-	}
-
 	private MethodInvocation getMethodInvocation(AST ast, String nameOfCalendar) {
 		return NodeBuilder.newMethodInvocation(ast, ast.newSimpleName(nameOfCalendar), ast.newSimpleName("getTime")); //$NON-NLS-1$
 	}
 
+	/**
+	 * 
+	 * @param ast
+	 * @param nameOfCalendar
+	 * @param arguments
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	private List<Statement> generateCalendar(AST ast, String nameOfCalendar, List<Expression> arguments) {
 		List<Statement> statementList = new ArrayList<>();
