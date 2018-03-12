@@ -3,10 +3,7 @@ package eu.jsparrow.jdtunit;
 import java.util.HashMap;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -27,11 +24,12 @@ import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEdit;
 
-import project.JavaProjectBuilder;
+import eu.jsparrow.jdtunit.util.CompilationUnitBuilder;
+import eu.jsparrow.jdtunit.util.JavaProjectBuilder;
+import eu.jsparrow.jdtunit.util.PackageFragmentBuilder;
 
 /**
  * <p>
@@ -57,11 +55,7 @@ public class JdtUnitFixture {
 
 	private static final String METHOD_FIXTURE_NAME = "FixtureMethod";
 
-	private IProject project;
-
 	private IJavaProject javaProject;
-
-	private IPackageFragment packageFragment;
 
 	private ICompilationUnit compilationUnit;
 
@@ -98,7 +92,7 @@ public class JdtUnitFixture {
 			.options(options)
 			.build();
 
-		packageFragment = addPackageFragment(PACKAGE_FIXTURE_NAME);
+		IPackageFragment packageFragment = addPackageFragment(PACKAGE_FIXTURE_NAME);
 
 		compilationUnit = addCompilationUnit(packageFragment, FILE_FIXTURE_NAME);
 
@@ -150,7 +144,8 @@ public class JdtUnitFixture {
 	 * @throws CoreException
 	 */
 	public void tearDown() throws CoreException {
-		project.delete(true, null);
+		javaProject.getProject()
+			.delete(true, null);
 	}
 
 	/**
@@ -264,22 +259,15 @@ public class JdtUnitFixture {
 		hasChanged = false;
 	}
 
-	public IPackageFragment addPackageFragment(String name) throws JdtUnitException, JavaModelException {
-		if (javaProject == null) {
-			throw new JdtUnitException("Java project is null");
-		}
-
-		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(project);
-		return root.createPackageFragment(name, false, null);
+	public IPackageFragment addPackageFragment(String name) throws JdtUnitException {
+		return new PackageFragmentBuilder(javaProject).setName(name)
+			.build();
 	}
 
 	public ICompilationUnit addCompilationUnit(IPackageFragment packageFragment, String name)
-			throws JdtUnitException, JavaModelException {
-		if (packageFragment == null) {
-			throw new JdtUnitException("Package fragment is null");
-		}
-
-		return packageFragment.createCompilationUnit(name, "", false, null);
+			throws JdtUnitException {
+		return new CompilationUnitBuilder(packageFragment).setName(name)
+			.build();
 	}
 
 	/**

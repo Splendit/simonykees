@@ -10,7 +10,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -29,11 +31,11 @@ public class SelectRulesWizardTest {
 
 	private static final String PACKAGE_PREFIX = "eu.japsarrow.test";
 
-	private static JdtUnitFixture fixture = new JdtUnitFixture();
-	private static IPackageFragment baseFragment = null;
+	private JdtUnitFixture fixture = new JdtUnitFixture();
+	private IPackageFragment baseFragment = null;
 
-	@BeforeClass
-	public static void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		fixture.setUp();
 
 		baseFragment = fixture.addPackageFragment(PACKAGE_PREFIX);
@@ -49,8 +51,8 @@ public class SelectRulesWizardTest {
 		fixture.addCompilationUnit(sub2Fragment, "Class12.java");
 	}
 
-	@AfterClass
-	public static void tearDown() throws CoreException {
+	@After
+	public void tearDown() throws CoreException {
 		fixture.tearDown();
 	}
 

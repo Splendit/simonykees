@@ -1,4 +1,4 @@
-package project;
+package eu.jsparrow.jdtunit.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ import eu.jsparrow.jdtunit.JdtUnitException;
 
 public class JavaProjectBuilder {
 
-	private String name = "DefaultName"; 
+	private String name = "DefaultProject"; 
 
 	private HashMap<String, String> options = new HashMap<>();
 
