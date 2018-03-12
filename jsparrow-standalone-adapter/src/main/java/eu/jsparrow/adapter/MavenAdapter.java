@@ -45,18 +45,16 @@ public class MavenAdapter {
 
 	private Map<String, String> configuration = new HashMap<>();
 	private MavenProject rootProject;
-	private MavenProject currentProject;
 	private File directory;
 
 	private Map<String, Boolean> sessionProjects = new HashMap<>();
 
 	private boolean jsparrowAlreadyRunningError = false;
 
-	public MavenAdapter(MavenProject project, Log log) {
-		this.rootProject = project;
-		this.currentProject = project;
+	public MavenAdapter(MavenProject rootProject, Log log) {
+		this.rootProject = rootProject;
 		this.log = log;
-		sessionProjects = new HashMap<>();
+		this.sessionProjects = new HashMap<>();
 	}
 
 	public void addProjectConfiguration(MavenProject project) {
@@ -70,7 +68,7 @@ public class MavenAdapter {
 		addConfigurationKeyValue(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
 		addConfigurationKeyValue(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, projcetName);
 
-		markProjectConfigCompleted(project);
+		markProjectConfigurationCompleted(project);
 	}
 
 	public void addInitialConfiguration(String mavenHome) {
@@ -85,7 +83,7 @@ public class MavenAdapter {
 		this.configuration.put(key, value);
 	}
 
-	private void markProjectConfigCompleted(MavenProject project) {
+	private void markProjectConfigurationCompleted(MavenProject project) {
 		String projectIdentifier = findProjectIdentifier(project);
 		sessionProjects.put(projectIdentifier, true);
 	}
@@ -98,40 +96,14 @@ public class MavenAdapter {
 	}
 
 	/**
-	 * Creates Equinox framework, collects all bundles from src/main/resources,
-	 * specified in manifest.standalone file and starts the framework. When
-	 * done, the framework is stopped.
-	 * 
-	 * @param additionalConfiguration
-	 *            will be added to the standard configuration
-	 * @throws InterruptedException
-	 */
-	public void startOSGI(Map<String, String> additionalConfiguration, MavenProject mavenProject,
-			EmbeddedMaven embeddedMaven) throws InterruptedException {
-
-		// String mavenHome = embeddedMaven.prepareMaven(directory);
-
-		// if (mavenHome != null) {
-		// final Map<String, String> configuration =
-		// prepareConfiguration(additionalConfiguration, mavenHome);
-
-		/*
-		 * TODO either move it to the service or do it in the first load of the
-		 * adapter
-		 */
-		// extractAndCopyDependencies(mavenHome);
-		// }
-	}
-
-	/**
 	 * creates and prepares the temporary working directory and sets its path in
 	 * system properties and equinox configuration
 	 * 
 	 * @param configuration
 	 * @throws InterruptedException
 	 */
-	public void prepareWorkingDirectory() throws InterruptedException {
-		createWorkingDirectory();
+	public void prepareWorkingDirectory(MavenProject mavenProject) throws InterruptedException {
+		createWorkingDirectory(mavenProject);
 
 		if (directory.exists()) {
 			if (Arrays.asList(directory.list())
@@ -143,7 +115,7 @@ public class MavenAdapter {
 				log.info(loggerInfo);
 			} else {
 				jsparrowAlreadyRunningError = true;
-				throw new InterruptedException("jSparrow is already running !");
+				throw new InterruptedException(Messages.MavenAdapter_jSparrowIsAlreadyRunning);
 			}
 		} else if (directory.mkdirs()) {
 			System.setProperty(USER_DIR, directory.getAbsolutePath());
@@ -174,7 +146,7 @@ public class MavenAdapter {
 	}
 
 	protected void prepareDefaultRequest(InvocationRequest request, Properties props) {
-		String projectPath = this.currentProject.getBasedir()
+		String projectPath = this.rootProject.getBasedir()
 			.getAbsolutePath();
 		request.setPomFile(new File(projectPath + File.separator + "pom.xml")); //$NON-NLS-1$
 		request.setGoals(Collections.singletonList("dependency:copy-dependencies ")); //$NON-NLS-1$
@@ -195,33 +167,9 @@ public class MavenAdapter {
 		}
 	}
 
-	// protected Map<String, String> prepareConfiguration(Map<String, String>
-	// additionalConfiguration, String mavenHome) {
-	// log.debug(Messages.Adapter_prepareConfiguration);
-	//
-	// if (additionalConfiguration == null) {
-	// additionalConfiguration = new HashMap<>();
-	// }
-	//
-	// additionalConfiguration.put(Constants.FRAMEWORK_STORAGE_CLEAN,
-	// Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
-	// additionalConfiguration.put(Constants.FRAMEWORK_STORAGE,
-	// FRAMEWORK_STORAGE_VALUE);
-	// additionalConfiguration.put(INSTANCE_DATA_LOCATION_CONSTANT,
-	// System.getProperty(USER_DIR));
-	// additionalConfiguration.put(PROJECT_PATH_CONSTANT, getProjectPath());
-	// additionalConfiguration.put(PROJECT_NAME_CONSTANT, getProjectName());
-	// additionalConfiguration.put(MAVEN_HOME_KEY, mavenHome);
-	// additionalConfiguration.put(DEBUG_ENABLED,
-	// Boolean.toString(log.isDebugEnabled()));
-	//
-	// return additionalConfiguration;
-	// }
-
-	protected File createWorkingDirectory() {
-		String file = System.getProperty(JAVA_TMP);
-		// TODO: create a directory for each project...
-		File workingDirectory = new File(file + File.separator + JSPARROW_TEMP_FOLDER).getAbsoluteFile();
+	protected File createWorkingDirectory(MavenProject mavenProject) {
+		String projectIdentifier = findProjectIdentifier(mavenProject);
+		File workingDirectory = new File(calculateJsparrowTempFolderPath() + DOT + projectIdentifier).getAbsoluteFile();
 		setWorkingDirectory(workingDirectory);
 		return workingDirectory;
 	}
@@ -284,7 +232,6 @@ public class MavenAdapter {
 		this.sessionProjects = allProjects.stream()
 			.map(this::findProjectIdentifier)
 			.collect(Collectors.toMap(id -> id, id -> false));
-
 	}
 
 	public boolean isJsparrowRunningFlag() {
@@ -293,5 +240,10 @@ public class MavenAdapter {
 
 	public Map<String, String> getConfiguration() {
 		return configuration;
+	}
+	
+	public static String calculateJsparrowTempFolderPath() {
+		String file = System.getProperty(JAVA_TMP);
+		return file + File.separator + JSPARROW_TEMP_FOLDER;
 	}
 }

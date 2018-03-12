@@ -13,6 +13,7 @@ public class Messages extends NLS {
 	public static String Adapter_start_equinox;
 	public static String Adapter_startingBundle;
 	public static String Adapter_unzipTemporaryMavenInstallation;
+	public static String MavenAdapter_jSparrowIsAlreadyRunning;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

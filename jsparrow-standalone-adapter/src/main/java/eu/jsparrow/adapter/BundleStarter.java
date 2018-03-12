@@ -36,12 +36,12 @@ public class BundleStarter {
 	public void runStandalone(Map<String, String> configuration)
 			throws BundleException, MojoExecutionException, InterruptedException {
 		
-//		startEquinoxFramework(configuration);
-//
-//		List<Bundle> bundles = loadBundles();
-//		startBundles(bundles);
-//
-//		stopEquinoxFramework();
+		startEquinoxFramework(configuration);
+
+		List<Bundle> bundles = loadBundles();
+		startBundles(bundles);
+
+		stopEquinoxFramework();
 	}
 
 	/**
@@ -210,5 +210,9 @@ public class BundleStarter {
 				}
 			}
 		};
+	}
+	
+	public boolean isStandAloneStarted() {
+		return this.standaloneStarted;
 	}
 }

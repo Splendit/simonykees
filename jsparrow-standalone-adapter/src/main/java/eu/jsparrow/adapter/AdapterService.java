@@ -1,6 +1,5 @@
 package eu.jsparrow.adapter;
 
-import java.io.File;
 import java.util.Map;
 
 import org.apache.maven.execution.MavenSession;
@@ -12,17 +11,24 @@ import org.osgi.framework.BundleException;
 public class AdapterService {
 
 	private static MavenAdapter mavenAdapter;
-	private static EmbeddedMaven embaddedMaven;
+	private static EmbeddedMaven embeddedMaven;
 
-	public static synchronized MavenAdapter lazyLoadMavenAdapter(MavenProject project, String mavenHome,
+	private AdapterService() {
+		/*
+		 * Hiding the public constructor
+		 */
+	}
+
+	public static synchronized MavenAdapter lazyLoadMavenAdapter(MavenProject project, String mavenHome2,
 			MavenSession mavenSession, Log log) {
 		if (mavenAdapter == null) {
 			log.info("Creating adapter instance..."); //$NON-NLS-1$
-			embaddedMaven = new EmbeddedMaven(log, mavenHome);
 			mavenAdapter = new MavenAdapter(project, log);
-
 			mavenAdapter.storeProjects(mavenSession);
-			mavenAdapter.addInitialConfiguration(embaddedMaven.getMavenHome());
+			embeddedMaven = new EmbeddedMaven(log, mavenHome2); 
+			embeddedMaven.prepareMaven(MavenAdapter.calculateJsparrowTempFolderPath());
+			mavenAdapter.addInitialConfiguration(embeddedMaven.getMavenHome());
+			
 		}
 		return mavenAdapter;
 	}
@@ -34,19 +40,19 @@ public class AdapterService {
 			return;
 		}
 
+		mavenAdapter.prepareWorkingDirectory(project);
+
 		mavenAdapter.addProjectConfiguration(project);
 		if (mavenAdapter.allProjectConfigurationLoaded()) {
 			log.info("All projects are loaded ... "); //$NON-NLS-1$
-			File directory = mavenAdapter.createWorkingDirectory();
-			embaddedMaven.prepareMaven(directory);
 
 			Map<String, String> bundleConfiguration = mavenAdapter.getConfiguration();
 
 			BundleStarter bundleStarter = new BundleStarter();
 			Runtime.getRuntime()
 				.addShutdownHook(bundleStarter.createShutdownHook(mavenAdapter));
-			mavenAdapter.prepareWorkingDirectory();
-			mavenAdapter.extractAndCopyDependencies(embaddedMaven.getMavenHome());
+			mavenAdapter.prepareWorkingDirectory(project);
+			mavenAdapter.extractAndCopyDependencies(embeddedMaven.getMavenHome());
 			bundleStarter.runStandalone(bundleConfiguration);
 		}
 	}

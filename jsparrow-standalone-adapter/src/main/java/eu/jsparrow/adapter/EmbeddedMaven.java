@@ -31,7 +31,7 @@ public class EmbeddedMaven {
 		this.mavenHome = mavenHome;
 	}
 	
-	public String prepareMaven(File directory) {
+	public String prepareMaven(String jsarrowTempPath) {
 		String newMavenHome = null;
 
 		if (null != mavenHome && !mavenHome.isEmpty() && !mavenHome.endsWith("EMBEDDED")) { //$NON-NLS-1$
@@ -39,12 +39,13 @@ public class EmbeddedMaven {
 		} else {
 			log.debug(Messages.Adapter_embededMavenVersionDetected);
 
-			String tempZipPath = directory.getAbsolutePath() + File.separator + "maven"; //$NON-NLS-1$
+			String tempZipPath = jsarrowTempPath + File.separator + "maven"; //$NON-NLS-1$
 
 			try (InputStream mavenZipInputStream = getClass().getResourceAsStream("/apache-maven-3.5.2-bin.zip")) { //$NON-NLS-1$
 				mavenHomeUnzipped += tempZipPath;
 				unzip(mavenZipInputStream, tempZipPath);
 				newMavenHome = mavenHomeUnzipped;
+				setMavenHome(newMavenHome);
 			} catch (IOException e) {
 				log.debug(e.getMessage(), e);
 				log.error(e.getMessage());
@@ -133,6 +134,10 @@ public class EmbeddedMaven {
 	
 	public String getMavenHome() {
 		return this.mavenHome;
+	}
+	
+	private void setMavenHome(String mavenHome) {
+		this.mavenHome = mavenHome;
 	}
 
 }
