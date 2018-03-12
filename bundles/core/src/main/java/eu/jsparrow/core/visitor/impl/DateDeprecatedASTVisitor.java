@@ -162,7 +162,8 @@ public class DateDeprecatedASTVisitor extends AbstractAddImportASTVisitor {
 		SimpleName dateName = fragment.getName();
 		MethodInvocation calendarGetTime = getMethodInvocation(ast, calendarName);
 		Assignment assignment = ast.newAssignment();
-		assignment.setLeftHandSide((SimpleName) astRewrite.createCopyTarget(dateName));
+		SimpleName dateNameCopy = ast.newSimpleName(dateName.getIdentifier());
+		assignment.setLeftHandSide(dateNameCopy);
 		assignment.setRightHandSide(calendarGetTime);
 		ExpressionStatement assignmentStatement = ast.newExpressionStatement(assignment);
 		bodyStatements.add(assignmentStatement);
