@@ -25,7 +25,7 @@ public class DateDeprecatedRule {
 		/* init trailing comment */
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1999, 1, 1);
-		fieldWithComments /* name trailing comment */ = calendar.getTime();
+		fieldWithComments = calendar.getTime();
 	}
 
 	private Date // name leading comment
@@ -37,9 +37,7 @@ public class DateDeprecatedRule {
 		// init trailing comment
 		Calendar calendar = Calendar.getInstance();
 		calendar.set(1999, 1, 1);
-		fieldWithLineComments
-		// name trailing comment
-				= calendar.getTime();
+		fieldWithLineComments = calendar.getTime();
 	}
 
 	private final Date instantiateMeInInitializerBlock;
