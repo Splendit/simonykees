@@ -134,6 +134,12 @@
 			<artifactId>maven-verifier</artifactId>
 			<version>1.6</version>
 		</dependency>
+		
+		<dependency>
+			<groupId>eu.jsparrow</groupId>
+			<artifactId>jsparrow-standalone-adapter</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 
 	</dependencies>
 

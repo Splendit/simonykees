@@ -19,6 +19,8 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.osgi.framework.BundleException;
 
+import eu.jsparrow.adapter.AdapterService;
+import eu.jsparrow.adapter.MavenAdapter;
 import eu.jsparrow.maven.enums.StandaloneMode;
 import eu.jsparrow.maven.util.MavenHelper;
 
@@ -84,10 +86,11 @@ public class RefactorMojo extends AbstractMojo {
 	 * with the given configuration
 	 */
 	public void execute() throws MojoExecutionException {
-		MavenHelper mavenHelper = new MavenHelper(project, mavenHome, mavenSession, pluginManager, getLog());
+//		MavenHelper mavenHelper = new MavenHelper(project, mavenHome, mavenSession, pluginManager, getLog());
+		MavenAdapter adapter = AdapterService.lazyLoadMavenAdapter(project, mavenHome, mavenSession, getLog());
 
-		Runtime.getRuntime()
-			.addShutdownHook(mavenHelper.createShutdownHook());
+//		Runtime.getRuntime()
+//			.addShutdownHook(adapter.createShutdownHook());
 
 		try {
 
@@ -99,8 +102,9 @@ public class RefactorMojo extends AbstractMojo {
 			configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 
 			configuration.put(PROJECT_JAVA_VERSION, getCompilerCompliance());
+			AdapterService.addProjectConfiguration(project, getLog(), configuration);
 
-			mavenHelper.startOSGI(configuration);
+//			adapter.startOSGI(configuration, project);
 		} catch (BundleException | InterruptedException e) {
 			getLog().debug(e.getMessage(), e);
 			getLog().error(e.getMessage());
