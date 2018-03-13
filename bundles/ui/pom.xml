@@ -30,6 +30,18 @@
 							<options>
 								<option>
 									-libraryjars
+									${project.basedir}/../license.api/target/eu.jsparrow.license.api-${project.version}_proguard_base.jar
+								</option>
+								<option>-applymapping
+									${project.basedir}/../license.api/target/license.api.out</option>
+								<option>
+									-libraryjars
+									${project.basedir}/../rules.api/target/eu.jsparrow.rules.api-${project.version}_proguard_base.jar
+								</option>
+								<option>-applymapping
+									${project.basedir}/../rules.api/target/rules.api.out</option>
+								<option>
+									-libraryjars
 									${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
 								</option>
 								<option>
