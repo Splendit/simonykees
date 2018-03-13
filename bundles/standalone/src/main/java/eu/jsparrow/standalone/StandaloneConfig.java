@@ -139,7 +139,12 @@ public class StandaloneConfig {
 		}
 
 		logger.debug(Messages.StandaloneConfig_UseExistingProjectDescription);
-		description = workspace.loadProjectDescription(new Path(getProjectDescriptionFile().getAbsolutePath()));
+		
+		
+		File descriptionFile = getProjectDescriptionFile();
+		String descriptionFilePathValue = descriptionFile.getAbsolutePath();
+		Path descriptionFilePath = new Path(descriptionFilePathValue);
+		description = workspace.loadProjectDescription(descriptionFilePath);
 
 		return description;
 	}
