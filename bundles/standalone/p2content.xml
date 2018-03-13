@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<units size='1'>
+  <unit id='eu.jsparrow.standalone' version='2.5.0.20180313-1607_test'>
+    <update id='eu.jsparrow.standalone' range='[0.0.0,2.5.0.20180313-1607_test)' severity='0'/>
+    <properties size='5'>
+      <property name='org.eclipse.equinox.p2.name' value='jSparrow Standalone'/>
+      <property name='org.eclipse.equinox.p2.provider' value='Splendit IT-Consulting GmbH'/>
+      <property name='maven-groupId' value='at.splendit'/>
+      <property name='maven-artifactId' value='eu.jsparrow.standalone'/>
+      <property name='maven-version' value='2.5.0-SNAPSHOT'/>
+    </properties>
+    <provides size='3'>
+      <provided namespace='org.eclipse.equinox.p2.iu' name='eu.jsparrow.standalone' version='2.5.0.20180313-1607_test'/>
+      <provided namespace='osgi.bundle' name='eu.jsparrow.standalone' version='2.5.0.20180313-1607_test'/>
+      <provided namespace='org.eclipse.equinox.p2.eclipse.type' name='bundle' version='1.0.0'/>
+    </provides>
+    <requires size='9'>
+      <required namespace='osgi.bundle' name='eu.jsparrow.logging' range='0.0.0'/>
+      <required namespace='osgi.bundle' name='eu.jsparrow.i18n' range='0.0.0'/>
+      <required namespace='osgi.bundle' name='eu.jsparrow.core' range='0.0.0'/>
+      <required namespace='osgi.bundle' name='eu.jsparrow.rules.api' range='0.0.0'/>
+      <required namespace='osgi.bundle' name='org.eclipse.jdt.core' range='[3.11.0,4.0.0)'/>
+      <required namespace='osgi.bundle' name='org.eclipse.core.resources' range='[3.10.0,4.0.0)'/>
+      <required namespace='osgi.bundle' name='org.eclipse.core.runtime' range='[3.11.0,4.0.0)'/>
+      <required namespace='osgi.bundle' name='org.apache.commons.lang3' range='[3.1.0,4.0.0)'/>
+      <required namespace='osgi.bundle' name='com.google.guava' range='21.0.0'/>
+    </requires>
+    <artifacts size='1'>
+      <artifact classifier='osgi.bundle' id='eu.jsparrow.standalone' version='2.5.0.20180313-1607_test'/>
+    </artifacts>
+    <touchpoint id='org.eclipse.equinox.p2.osgi' version='1.0.0'/>
+    <touchpointData size='1'>
+      <instructions size='1'>
+        <instruction key='manifest'>
+          Bundle-SymbolicName: eu.jsparrow.standalone;singleton:=true&#xA;Bundle-Version: 2.5.0.20180313-1607_test&#xA;
+        </instruction>
+      </instructions>
+    </touchpointData>
+  </unit>
+</units>
