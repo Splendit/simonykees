@@ -32,6 +32,11 @@ public class BundleStarter {
 	private Log log;
 	private boolean standaloneStarted = false;
 	private long standaloneBundleID;
+	
+	public BundleStarter(Log log) {
+		this.log = log;
+		standaloneBundleID = 0;
+	}
 
 	public void runStandalone(Map<String, String> configuration)
 			throws BundleException, MojoExecutionException, InterruptedException {

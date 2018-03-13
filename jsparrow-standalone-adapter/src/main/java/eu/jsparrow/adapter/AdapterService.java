@@ -33,7 +33,7 @@ public class AdapterService {
 		return mavenAdapter;
 	}
 
-	public static void addProjectConfiguration(MavenProject project, Log log)
+	public static void addProjectConfiguration(MavenProject project, Log log, Map<String, String> config)
 			throws MojoExecutionException, BundleException, InterruptedException {
 		if (mavenAdapter == null) {
 			log.error("Maven adapter is not created"); //$NON-NLS-1$
@@ -42,16 +42,15 @@ public class AdapterService {
 
 		mavenAdapter.prepareWorkingDirectory(project);
 
-		mavenAdapter.addProjectConfiguration(project);
+		mavenAdapter.addProjectConfiguration(project, config);
 		if (mavenAdapter.allProjectConfigurationLoaded()) {
 			log.info("All projects are loaded ... "); //$NON-NLS-1$
 
 			Map<String, String> bundleConfiguration = mavenAdapter.getConfiguration();
 
-			BundleStarter bundleStarter = new BundleStarter();
+			BundleStarter bundleStarter = new BundleStarter(log);
 			Runtime.getRuntime()
 				.addShutdownHook(bundleStarter.createShutdownHook(mavenAdapter));
-			mavenAdapter.prepareWorkingDirectory(project);
 			mavenAdapter.extractAndCopyDependencies(embeddedMaven.getMavenHome());
 			bundleStarter.runStandalone(bundleConfiguration);
 		}

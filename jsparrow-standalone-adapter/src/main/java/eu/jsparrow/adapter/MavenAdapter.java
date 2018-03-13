@@ -34,6 +34,7 @@ public class MavenAdapter {
 	private static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default"; //$NON-NLS-1$
 	private static final String FRAMEWORK_STORAGE_VALUE = "target/bundlecache"; //$NON-NLS-1$
 	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
+	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
 	private static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME"; //$NON-NLS-1$
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
 	private static final String OSGI_INSTANCE_AREA_CONSTANT = "osgi.instance.area"; //$NON-NLS-1$
@@ -57,18 +58,35 @@ public class MavenAdapter {
 		this.sessionProjects = new HashMap<>();
 	}
 
-	public void addProjectConfiguration(MavenProject project) {
+	public void addProjectConfiguration(MavenProject project, Map<String, String> config) {
 		log.info(String.format("Adding configuration for project %s ...", project.getName())); //$NON-NLS-1$
 
 		File baseDir = project.getBasedir();
 		String projectPath = baseDir.getAbsolutePath();
 		String projcetName = project.getName();
 		String projectIdentifier = findProjectIdentifier(project);
-
+		
+		log.info("Project path is " + projectPath + ".");
+		
+		String allIdentifiers = getAllProjectIdentifiers();
+		addConfigurationKeyValue(ALL_PROJECT_IDENTIFIERS, allIdentifiers + "," + projectIdentifier);
+		log.info(String.format("Adding project identifier %s ...", allIdentifiers + "," + projectIdentifier)); //$NON-NLS-1$
+		
 		addConfigurationKeyValue(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
+		log.info(String.format("Adding project path: %s  -> %s ", PROJECT_PATH_CONSTANT + DOT + projectIdentifier , projectPath)); //$NON-NLS-1$
 		addConfigurationKeyValue(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, projcetName);
 
 		markProjectConfigurationCompleted(project);
+		addConfig(config);
+	}
+
+	private void addConfig(Map<String, String> config) {
+		this.configuration.putAll(config);
+		
+	}
+
+	private String getAllProjectIdentifiers() {
+		return configuration.getOrDefault(ALL_PROJECT_IDENTIFIERS, "");
 	}
 
 	public void addInitialConfiguration(String mavenHome) {
@@ -107,15 +125,16 @@ public class MavenAdapter {
 
 		if (directory.exists()) {
 			if (Arrays.asList(directory.list())
-				.size() == 1) {
+				.size() <= 1) {
 				System.setProperty(USER_DIR, directory.getAbsolutePath());
 				configuration.put(OSGI_INSTANCE_AREA_CONSTANT, directory.getAbsolutePath());
 
 				String loggerInfo = NLS.bind(Messages.Adapter_setUserDirTo, directory.getAbsolutePath());
 				log.info(loggerInfo);
 			} else {
+				log.error("Existing files in " + directory.getAbsolutePath() + ": \n " + convertToConcatAbsolutPaths(directory.listFiles()));
 				jsparrowAlreadyRunningError = true;
-				throw new InterruptedException(Messages.MavenAdapter_jSparrowIsAlreadyRunning);
+				throw new InterruptedException("jSparrow is already running...");
 			}
 		} else if (directory.mkdirs()) {
 			System.setProperty(USER_DIR, directory.getAbsolutePath());
@@ -126,6 +145,15 @@ public class MavenAdapter {
 		} else {
 			throw new InterruptedException("Could not create temp folder"); //$NON-NLS-1$
 		}
+	}
+
+	private String convertToConcatAbsolutPaths(File [] files) {
+		StringBuilder sb = new StringBuilder();
+		for(File file : files) {
+			sb.append(file.getAbsolutePath());
+			sb.append(",");
+		}
+		return sb.toString();
 	}
 
 	/**
@@ -169,7 +197,9 @@ public class MavenAdapter {
 
 	protected File createWorkingDirectory(MavenProject mavenProject) {
 		String projectIdentifier = findProjectIdentifier(mavenProject);
-		File workingDirectory = new File(calculateJsparrowTempFolderPath() + DOT + projectIdentifier).getAbsoluteFile();
+		File workingDirectory = new File(calculateJsparrowTempFolderPath() 
+//				+ DOT + projectIdentifier
+				).getAbsoluteFile();
 		setWorkingDirectory(workingDirectory);
 		return workingDirectory;
 	}
