@@ -69,6 +69,15 @@ public class RefactoringInvoker {
 		String loggerInfo;
 
 		YAMLConfig config = getConfiguration(context);
+		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home"));
+		YAMLStandaloneConfig yamlStandaloneConfig = null;
+		try {
+			yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(filePath));
+		} catch (YAMLStandaloneConfigException e1) {
+			logger.info("Failed to load configuration, syntax error");
+		}
+		
+		String licensekey = yamlStandaloneConfig.getKey();
 
 		loadStandaloneConfig(context);
 
@@ -151,13 +160,13 @@ public class RefactoringInvoker {
 	 * @throws YAMLConfigException
 	 */
 	private YAMLConfig getConfiguration(BundleContext context) throws YAMLConfigException {
-		
+
 		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
 
 		if (!useDefaultConfig) {
 			String configFilePath = context.getProperty(CONFIG_FILE_PATH);
 			String profile = context.getProperty(SELECTED_PROFILE);
-			
+
 			String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
 			logger.info(loggerInfo);
 

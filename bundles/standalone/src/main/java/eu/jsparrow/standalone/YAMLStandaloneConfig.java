@@ -4,16 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.YAMLException;
-
-import com.google.common.base.Strings;
-
-import eu.jsparrow.core.config.YAMLConfig;
-import eu.jsparrow.core.config.YAMLConfigException;
-import eu.jsparrow.core.config.YAMLProfile;
 
 /**
  * File that contains permanent configuration for the standalone. Things like: 
@@ -50,7 +42,7 @@ public class YAMLStandaloneConfig {
 			// Config not created, return default config
 			return new YAMLStandaloneConfig();
 		} catch (YAMLException e) {
-			// Config destroyed
+			// Config malformed
 			throw new YAMLStandaloneConfigException(e.getLocalizedMessage(), e);
 		}
 		return config;
