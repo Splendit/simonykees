@@ -48,6 +48,7 @@ public class MavenAdapter {
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 	private static final String DOT = "."; //$NON-NLS-1$
 	private static final String POM = "pom"; //$NON-NLS-1$
+	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH";
 
 	private static final String LOCK_FILE_NAME = "lock.txt"; //$NON-NLS-1$
 
@@ -60,14 +61,16 @@ public class MavenAdapter {
 	private Map<String, Boolean> sessionProjects = new HashMap<>();
 
 	private boolean jsparrowAlreadyRunningError = false;
+	private File defaultYamlFile;
 
-	public MavenAdapter(MavenProject rootProject, Log log) {
+	public MavenAdapter(MavenProject rootProject, Log log, File defaultYamlFile) {
 		this.rootProject = rootProject;
 		this.log = log;
 		this.sessionProjects = new HashMap<>();
+		this.defaultYamlFile = defaultYamlFile;
 	}
 
-	public void addProjectConfiguration(MavenProject project, Map<String, String> config) {
+	public void addProjectConfiguration(MavenProject project, Map<String, String> config, File configFile) {
 		log.info(String.format("Adding configuration for project %s ...", project.getName())); //$NON-NLS-1$
 
 		markProjectConfigurationCompleted(project);
@@ -86,6 +89,18 @@ public class MavenAdapter {
 		addConfigurationKeyValue(ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
 		addConfigurationKeyValue(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
 		addConfigurationKeyValue(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, projcetName);
+		
+		String yamlFilePath = findYamlFilePath(configFile);
+		addConfigurationKeyValue(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
+		
+	}
+	
+	private String findYamlFilePath(File yamlFile) {
+		if(yamlFile.exists()) {
+			return yamlFile.getAbsolutePath();
+		}
+		
+		return defaultYamlFile.getAbsolutePath();
 	}
 
 	private boolean isAggregateProject(MavenProject project) {

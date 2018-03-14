@@ -1,5 +1,6 @@
 package eu.jsparrow.adapter;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,10 +22,10 @@ public class AdapterService {
 	}
 
 	public static synchronized Optional<MavenAdapter> lazyLoadMavenAdapter(MavenProject project, String mavenHome2,
-			MavenSession mavenSession, Log log) {
+			MavenSession mavenSession, Log log, File defaultYamlFile) {
 		if (mavenAdapter == null) {
 			log.info("Creating adapter instance..."); //$NON-NLS-1$
-			mavenAdapter = new MavenAdapter(project, log);
+			mavenAdapter = new MavenAdapter(project, log, defaultYamlFile);
 			if (mavenAdapter.isJsparrowStarted(project)) {
 				mavenAdapter.setJsparrowRunningFlag();
 				return Optional.empty();
@@ -37,7 +38,7 @@ public class AdapterService {
 		return Optional.of(mavenAdapter);
 	}
 
-	public static void addProjectConfiguration(MavenProject project, Log log, Map<String, String> config)
+	public static void addProjectConfiguration(MavenProject project, Log log, Map<String, String> config, File configFile)
 			throws MojoExecutionException, BundleException, InterruptedException {
 		if (mavenAdapter == null) {
 			log.error("Maven adapter is not created"); //$NON-NLS-1$
@@ -46,7 +47,7 @@ public class AdapterService {
 
 		mavenAdapter.prepareWorkingDirectory(project);
 
-		mavenAdapter.addProjectConfiguration(project, config);
+		mavenAdapter.addProjectConfiguration(project, config, configFile);
 		if (mavenAdapter.allProjectConfigurationLoaded()) {
 			log.info("All projects are loaded ... "); //$NON-NLS-1$
 

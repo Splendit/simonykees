@@ -86,23 +86,22 @@ public class RefactorMojo extends AbstractMojo {
 	 * with the given configuration
 	 */
 	public void execute() throws MojoExecutionException {
-//		MavenHelper mavenHelper = new MavenHelper(project, mavenHome, mavenSession, pluginManager, getLog()); 
-		MavenAdapter adapter = AdapterService.lazyLoadMavenAdapter(project, mavenHome, mavenSession, getLog()).orElseThrow(() -> new MojoExecutionException("jSparrow is already running..."));
 
+		MavenAdapter adapter = AdapterService
+			.lazyLoadMavenAdapter(project, mavenHome, mavenSession, getLog(), configFile)
+			.orElseThrow(() -> new MojoExecutionException("jSparrow is already running..."));
 
 		try {
 
 			final Map<String, String> configuration = new HashMap<>();
 			configuration.put(STANDALONE_MODE_KEY, StandaloneMode.REFACTOR.name());
 
-			configuration.put(CONFIG_FILE_PATH, configFile.getAbsolutePath());
 			configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile);
 			configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 
 			configuration.put(PROJECT_JAVA_VERSION, getCompilerCompliance());
-			AdapterService.addProjectConfiguration(project, getLog(), configuration);
+			AdapterService.addProjectConfiguration(project, getLog(), configuration, configFile);
 
-//			adapter.startOSGI(configuration, project);
 		} catch (BundleException | InterruptedException e) {
 			getLog().debug(e.getMessage(), e);
 			getLog().error(e.getMessage());

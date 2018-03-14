@@ -65,7 +65,8 @@ public class StandaloneConfig {
 	private IClasspathEntry[] oldEntries;
 
 	private MavenInvoker mavenInovker;
-
+	private String projectId;
+	
 	/**
 	 * Constructor that calls setting up of the project and collecting the
 	 * compilation units.
@@ -80,17 +81,17 @@ public class StandaloneConfig {
 	 * @throws MavenInvocationException
 	 * @throws IOException
 	 */
-	public StandaloneConfig(String path, String compilerCompliance, String mavenHome)
+	public StandaloneConfig(String id, String path, String compilerCompliance, String mavenHome)
 			throws CoreException, MavenInvocationException, IOException {
-		this(path, compilerCompliance, mavenHome, false);
+		this(id, path, compilerCompliance, mavenHome, false);
 	}
 
-	public StandaloneConfig(String path, String compilerCompliance, String mavenHome, boolean testMode)
+	public StandaloneConfig(String id, String path, String compilerCompliance, String mavenHome, boolean testMode)
 			throws CoreException, MavenInvocationException, IOException {
+		this.projectId = id;
 		this.path = path;
 		this.compilerCompliance = compilerCompliance;
 		this.mavenHome = mavenHome;
-
 		this.mavenInovker = getMavenInvoker();
 
 		if (!testMode) {
@@ -481,6 +482,10 @@ public class StandaloneConfig {
 
 	protected boolean isExistingSettingsDirectoryMoved() {
 		return existingSettingsDirectoryMoved;
+	}
+	
+	public String getProjectId() {
+		return this.projectId;
 	}
 
 }
