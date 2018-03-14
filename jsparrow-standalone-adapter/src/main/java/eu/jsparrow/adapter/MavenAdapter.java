@@ -33,7 +33,6 @@ import eu.jsparrow.adapter.i18n.Messages;
 public class MavenAdapter {
 
 	protected static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory"; //$NON-NLS-1$
-
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
@@ -48,8 +47,7 @@ public class MavenAdapter {
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 	private static final String DOT = "."; //$NON-NLS-1$
 	private static final String POM = "pom"; //$NON-NLS-1$
-	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH";
-
+	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String LOCK_FILE_NAME = "lock.txt"; //$NON-NLS-1$
 
 	private Log log;
@@ -70,7 +68,7 @@ public class MavenAdapter {
 		this.defaultYamlFile = defaultYamlFile;
 	}
 
-	public void addProjectConfiguration(MavenProject project, Map<String, String> config, File configFile) {
+	public void addProjectConfiguration(MavenProject project, Map<String, String> config, File configFile, String mavenHome) {
 		log.info(String.format("Adding configuration for project %s ...", project.getName())); //$NON-NLS-1$
 
 		markProjectConfigurationCompleted(project);
@@ -89,10 +87,9 @@ public class MavenAdapter {
 		addConfigurationKeyValue(ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
 		addConfigurationKeyValue(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
 		addConfigurationKeyValue(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, projcetName);
-		
 		String yamlFilePath = findYamlFilePath(configFile);
 		addConfigurationKeyValue(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
-		
+		extractAndCopyDependencies(project, mavenHome);
 	}
 	
 	private String findYamlFilePath(File yamlFile) {
@@ -144,7 +141,6 @@ public class MavenAdapter {
 	private String findProjectIdentifier(MavenProject mavenProject) {
 		String groupId = mavenProject.getGroupId();
 		String artifactId = mavenProject.getArtifactId();
-
 		return groupId + DOT + artifactId;
 	}
 
@@ -157,7 +153,6 @@ public class MavenAdapter {
 	 */
 	public void prepareWorkingDirectory(MavenProject mavenProject) throws InterruptedException {
 		createWorkingDirectory(mavenProject);
-
 		if (directory.exists() || directory.mkdirs()) {
 			String directoryAbsolutePath = directory.getAbsolutePath();
 			System.setProperty(USER_DIR, directoryAbsolutePath);
@@ -174,24 +169,24 @@ public class MavenAdapter {
 	 * Executes maven goal copy-dependencies on the project to copy all resolved
 	 * needed dependencies to the temp folder for use from bundles.
 	 */
-	public void extractAndCopyDependencies(String preparedMavenHome) {
+	public void extractAndCopyDependencies(MavenProject project,  String mavenHome) {
 		log.debug(Messages.Adapter_extractAndCopyDependencies);
 
 		final InvocationRequest request = new DefaultInvocationRequest();
 		final Properties props = new Properties();
-		prepareDefaultRequest(request, props);
+		prepareDefaultRequest(project, request, props);
 		final Invoker invoker = new DefaultInvoker();
-		invokeMaven(invoker, request, preparedMavenHome);
+		invokeMaven(invoker, request, mavenHome);
 	}
 
-	protected void prepareDefaultRequest(InvocationRequest request, Properties props) {
-		String projectPath = this.rootProject.getBasedir()
-			.getAbsolutePath();
+	protected void prepareDefaultRequest(MavenProject project, InvocationRequest request, Properties props) {
+		File projectBaseDir = project.getBasedir();
+		String projectPath = projectBaseDir.getAbsolutePath();
 		request.setPomFile(new File(projectPath + File.separator + "pom.xml")); //$NON-NLS-1$
 		request.setGoals(Collections.singletonList("dependency:copy-dependencies ")); //$NON-NLS-1$
 
 		props.setProperty(OUTPUT_DIRECTORY_CONSTANT,
-				System.getProperty(USER_DIR) + File.separator + DEPENDENCIES_FOLDER_CONSTANT);
+				System.getProperty(USER_DIR) + File.separator + DEPENDENCIES_FOLDER_CONSTANT + DOT + findProjectIdentifier(project));
 		request.setProperties(props);
 	}
 

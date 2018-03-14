@@ -47,6 +47,7 @@ public class StandaloneConfig {
 	private static final String CLASSPATH_FILE_NAME = ".classpath"; //$NON-NLS-1$
 	private static final String SETTINGS_DIRECTORY_NAME = ".settings"; //$NON-NLS-1$
 	private static final String TEMP_FILE_EXTENSION = ".tmp"; //$NON-NLS-1$
+	private static final String DOT = "."; //$NON-NLS-1$
 
 	private String path;
 	private String compilerCompliance;
@@ -427,8 +428,9 @@ public class StandaloneConfig {
 	}
 
 	protected File getMavenDependencyFolder() {
-		return new File(
-				System.getProperty(RefactoringInvoker.USER_DIR) + File.separator + RefactoringInvoker.DEPENDENCIES_FOLDER_CONSTANT);
+
+		return new File(System.getProperty(RefactoringInvoker.USER_DIR) + File.separator
+				+ RefactoringInvoker.DEPENDENCIES_FOLDER_CONSTANT + DOT + getProjectId());
 	}
 
 	protected IClasspathEntry createLibraryClasspathEntry(String jarPath) {

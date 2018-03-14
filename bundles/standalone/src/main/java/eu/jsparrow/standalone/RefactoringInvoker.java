@@ -52,7 +52,7 @@ public class RefactoringInvoker {
 	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
-	private static final String DOT = ".";
+	private static final String DOT = ".";  //$NON-NLS-1$
 
 	protected List<StandaloneConfig> standaloneConfigs;
 
@@ -230,9 +230,9 @@ public class RefactoringInvoker {
 	private Map<String, String> findAllProjectPaths(BundleContext context) {
 		String concatenatedIds = context.getProperty(ALL_PROJECT_IDENTIFIERS);
 		Map<String, String> paths = new HashMap<>();
-		String[] allIds = concatenatedIds.split(",");
+		String[] allIds = concatenatedIds.split(","); //$NON-NLS-1$
 		for(String id : allIds) {
-			String propertyKey = PROJECT_PATH_CONSTANT + "." + id;
+			String propertyKey = PROJECT_PATH_CONSTANT + "." + id; //$NON-NLS-1$
 			String path = context.getProperty(propertyKey);
 			paths.put(id, path);
 		}

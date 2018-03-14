@@ -22,7 +22,6 @@ import org.osgi.framework.BundleException;
 import eu.jsparrow.adapter.AdapterService;
 import eu.jsparrow.adapter.MavenAdapter;
 import eu.jsparrow.maven.enums.StandaloneMode;
-import eu.jsparrow.maven.util.MavenHelper;
 
 /**
  * Starts Equinox framework and headless version of jSparrow Eclipse plugin.
@@ -71,7 +70,6 @@ public class RefactorMojo extends AbstractMojo {
 	protected boolean useDefaultConfig;
 
 	// CONSTANTS
-	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH";
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED";
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG";
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$

@@ -47,7 +47,7 @@ public class AdapterService {
 
 		mavenAdapter.prepareWorkingDirectory(project);
 
-		mavenAdapter.addProjectConfiguration(project, config, configFile);
+		mavenAdapter.addProjectConfiguration(project, config, configFile, embeddedMaven.getMavenHome());
 		if (mavenAdapter.allProjectConfigurationLoaded()) {
 			log.info("All projects are loaded ... "); //$NON-NLS-1$
 
@@ -56,7 +56,6 @@ public class AdapterService {
 			BundleStarter bundleStarter = new BundleStarter(log);
 			Runtime.getRuntime()
 				.addShutdownHook(bundleStarter.createShutdownHook(mavenAdapter));
-			mavenAdapter.extractAndCopyDependencies(embeddedMaven.getMavenHome());
 			bundleStarter.runStandalone(bundleConfiguration);
 		}
 	}
