@@ -64,7 +64,6 @@
 					</dependencies>
 					<configuration>
 						<obfuscate>true</obfuscate>
-						<!-- <proguardInclude>${basedir}/../default-proguard.conf</proguardInclude> -->
 						<proguardInclude>${basedir}/proguard.conf</proguardInclude>
 						<libs>
 							<lib>${java.home}/lib/rt.jar</lib>
@@ -112,8 +111,6 @@
 						</options>
 					</configuration>
 				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
-					only. It has no influence on the Maven build itself. -->
 			</plugins>
 		</pluginManagement>
 	</build>
