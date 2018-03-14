@@ -11,35 +11,13 @@
 		<version>2.5.0-SNAPSHOT</version>
 	</parent>
 
-	<profiles>
-		<!-- SIM-361 configure proguard to work with multiple modules -->
-		<profile>
-			<id>proguard</id>
-			<activation>
-				<property>
-					<!-- With this profile active, obfuscation will happen -->
-					<name>proguard</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.github.wvengen</groupId>
-						<artifactId>proguard-maven-plugin</artifactId>
-						<configuration>
-							<options>
-								<option>
-									-libraryjars
-									${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
-								</option>
-								<option>-applymapping
-									${project.basedir}/../logging/target/logging.out</option>
-								<option>-printmapping ${project.build.directory}/rules.api.out</option>
-							</options>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+	<properties>
+		<proguard.extra.options>
+			-libraryjars
+			${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
+			-applymapping ${project.basedir}/../logging/target/logging.out
+			-printmapping ${project.build.directory}/rules.api.out
+			-printconfiguration ${project.build.directory}/rules.api.conf
+		</proguard.extra.options>
+	</properties>
 </project>

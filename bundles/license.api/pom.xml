@@ -14,29 +14,10 @@
 	<description>jSparrow License API Plugin</description>
 
 
-	<profiles>
-		<!-- SIM-361 configure proguard to work with multiple modules -->
-		<profile>
-			<id>proguard</id>
-			<activation>
-				<property>
-					<!-- With this profile active, obfuscation will happen -->
-					<name>proguard</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.github.wvengen</groupId>
-						<artifactId>proguard-maven-plugin</artifactId>
-						<configuration>
-							<options>
-								<option>-printmapping ${project.build.directory}/license.api.out</option>
-							</options>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+	<properties>
+		<proguard.extra.options>-printmapping ${project.build.directory}/license.api.out
+			-printconfiguration
+			${project.build.directory}/license.api.conf</proguard.extra.options>
+	</properties>
+
 </project>

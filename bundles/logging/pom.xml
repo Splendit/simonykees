@@ -16,6 +16,10 @@
 	<properties>
 		<slf4j.version>1.7.25</slf4j.version>
 		<logback.version>1.2.2</logback.version>
+		<proguard.extra.options>
+			-printmapping ${project.build.directory}/logging.out
+			-printconfiguration ${project.build.directory}/logging.conf
+		</proguard.extra.options>
 	</properties>
 
 	<build>
@@ -63,31 +67,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-		<!-- SIM-361 configure proguard to work with multiple modules -->
-		<profile>
-			<id>proguard</id>
-			<activation>
-				<property>
-					<!-- With this profile active, obfuscation will happen -->
-					<name>proguard</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.github.wvengen</groupId>
-						<artifactId>proguard-maven-plugin</artifactId>
-						<configuration>
-							<options>
-								<option>-printmapping ${project.build.directory}/logging.out</option>
-							</options>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
-
 </project>

@@ -11,54 +11,17 @@
 		<version>2.5.0-SNAPSHOT</version>
 	</parent>
 
-	<profiles>
-		<!-- SIM-361 configure proguard to work with multiple modules -->
-		<profile>
-			<id>proguard</id>
-			<activation>
-				<property>
-					<!-- With this profile active, obfuscation will happen -->
-					<name>proguard</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.github.wvengen</groupId>
-						<artifactId>proguard-maven-plugin</artifactId>
-						<configuration>
-							<exclusions>
-								<exclusion>
-									<groupId>at.splendit</groupId>
-									<artifactId>eu.jsparrow.license.api</artifactId>
-								</exclusion>
-							</exclusions>
-							<options>
-								<option>
-									-injars
-									${project.basedir}/../rules.api/target/eu.jsparrow.rules.api-${project.version}_proguard_base.jar
-								</option>
-								<option>
-									-outjars
-									${project.build.directory}/rules.api.duplicate.jar
-								</option>
-								<option>-applymapping
-									${project.basedir}/../rules.api/target/rules.api.out</option>
-								<option>
-									-libraryjars
-									${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
-								</option>
-								<option>-applymapping
-									${project.basedir}/../logging/target/logging.out</option>
-								<option>-printmapping
-									${project.build.directory}/rules.import.out</option>
-								<option>-printconfiguration
-									${project.build.directory}/rules.import.conf</option>
-							</options>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+	<properties>
+		<proguard.extra.options>
+			-injars
+			${project.basedir}/../rules.api/target/eu.jsparrow.rules.api-${project.version}_proguard_base.jar
+			-outjars ${project.build.directory}/rules.api.duplicate.jar
+			-applymapping ${project.basedir}/../rules.api/target/rules.api.out
+			-libraryjars
+			${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
+			-applymapping ${project.basedir}/../logging/target/logging.out
+			-printmapping ${project.build.directory}/rules.import.out
+			-printconfiguration ${project.build.directory}/rules.import.conf
+		</proguard.extra.options>
+	</properties>
 </project>

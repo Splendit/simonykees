@@ -13,20 +13,24 @@
 	<name>jSparrow :: bundles</name>
 	<description>jSparrow OSGi bundle container</description>
 
+	<properties>
+		<proguard.extra.options></proguard.extra.options>
+	</properties>
 
-  <modules>
+
+	<modules>
 		<!-- logging and internationalisation (i18n) -->
 		<module>i18n</module>
 		<module>logging</module>
-		
+
 		<!-- modular rules -->
 		<module>rules.api</module>
 		<module>rules.imports</module>
-	
+
 		<!-- licensing -->
 		<module>license.api</module>
 		<module>license.netlicensing</module>
-	
+
 		<!-- plug-in functionality -->
 		<module>core</module>
 		<module>ui</module>
@@ -34,5 +38,109 @@
 		<!-- standalone -->
 		<module>standalone</module>
 	</modules>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.github.wvengen</groupId>
+					<artifactId>proguard-maven-plugin</artifactId>
+					<version>${proguard.plugin.version}</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>proguard</goal>
+							</goals>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>net.sf.proguard</groupId>
+							<artifactId>proguard-base</artifactId>
+							<version>6.0.1</version>
+							<scope>runtime</scope>
+						</dependency>
+					</dependencies>
+					<configuration>
+						<obfuscate>true</obfuscate>
+						<!-- <proguardInclude>${basedir}/../default-proguard.conf</proguardInclude> -->
+						<proguardInclude>${basedir}/proguard.conf</proguardInclude>
+						<libs>
+							<lib>${java.home}/lib/rt.jar</lib>
+							<lib>${java.home}/lib/jsse.jar</lib>
+						</libs>
+						<options>
+							<!-- Default parameters -->
+							<option>
+								-useuniqueclassmembernames
+							</option>
+							<!-- Otherwise everything that is not used by an kept class would 
+								be thrown away -->
+							<option>
+								-dontshrink
+								-dontoptimize
+								-dontpreverify
+							</option>
+							<!-- The SourceFile attribute is required, because Oracle/Sun's Java 
+								virtual machine otherwise does not include line numbers in stack traces, 
+								which is what you really want -->
+							<!-- https://stackoverflow.com/a/6740226 -->
+							<option>
+								-renamesourcefileattribute SourceFile
+							</option>
+							<!-- Following atributes are kept intact -->
+							<option>
+								-keepattributes
+								*Annotation*,Signature,LineNumberTable,SourceFile
+							</option>
+							<!-- lambdas are processed wrong, 2 variables in the same scope end 
+								as var0 -->
+							<!-- var0 is not really the problem, but only works if not obfuscated 
+								-> reason not found yet -->
+							<!-- helps with lambda errors in obfuscation -->
+							<option>
+								-keepclassmembers class * {
+								synthetic <![CDATA[<methods>]]>;
+								}
+							</option>
+							<!-- Modify the manifest to ensure the export packages are intact -->
+							<option>
+								-adaptresourcefilecontents META-INF/MANIFEST.MF
+							</option>
+							<option>${proguard.extra.options}</option>
+						</options>
+					</configuration>
+				</plugin>
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<profiles>
+		<!-- SIM-361 configure proguard to work with multiple modules -->
+		<profile>
+			<id>proguard</id>
+			<activation>
+				<property>
+					<!-- With this profile active, obfuscation will happen -->
+					<name>proguard</name>
+				</property>
+				<file>
+					<exists>${basedir}/proguard.conf</exists>
+				</file>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.wvengen</groupId>
+						<artifactId>proguard-maven-plugin</artifactId>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>
 	
