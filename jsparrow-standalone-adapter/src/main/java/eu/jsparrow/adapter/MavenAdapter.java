@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.shared.invoker.DefaultInvocationRequest;
@@ -25,6 +26,7 @@ import org.apache.maven.shared.invoker.DefaultInvoker;
 import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
+import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Constants;
 
@@ -33,6 +35,15 @@ import eu.jsparrow.adapter.i18n.Messages;
 public class MavenAdapter {
 
 	protected static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory"; //$NON-NLS-1$
+	private static final String MAVEN_COMPILER_PLUGIN_ARTIFACT_ID = "maven-compiler-plugin"; //$NON-NLS-1$
+	private static final String MAVEN_COMPILER_PLUGIN_CONFIGURATIN_SOURCE_NAME = "source"; //$NON-NLS-1$
+	private static final String MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION = "1.5"; //$NON-NLS-1$
+	
+	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
+	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
+	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
+	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
+	
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
@@ -68,11 +79,10 @@ public class MavenAdapter {
 		this.defaultYamlFile = defaultYamlFile;
 	}
 
-	public void addProjectConfiguration(MavenProject project, Map<String, String> config, File configFile, String mavenHome) {
+	public void addProjectConfiguration(MavenProject project, File configFile, String mavenHome) {
 		log.info(String.format("Adding configuration for project %s ...", project.getName())); //$NON-NLS-1$
 
 		markProjectConfigurationCompleted(project);
-		addAllConfigurationValues(config);
 
 		if (isAggregateProject(project)) {
 			return;
@@ -90,6 +100,7 @@ public class MavenAdapter {
 		String yamlFilePath = findYamlFilePath(configFile);
 		addConfigurationKeyValue(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
 		extractAndCopyDependencies(project, mavenHome);
+		configuration.put(PROJECT_JAVA_VERSION + DOT + projectIdentifier, getCompilerCompliance(project));
 	}
 	
 	private String findYamlFilePath(File yamlFile) {
@@ -113,20 +124,21 @@ public class MavenAdapter {
 		return left + "," + right; //$NON-NLS-1$
 	}
 
-	private void addAllConfigurationValues(Map<String, String> config) {
-		this.configuration.putAll(config);
-	}
-
 	private String getAllProjectIdentifiers() {
 		return configuration.getOrDefault(ALL_PROJECT_IDENTIFIERS, ""); //$NON-NLS-1$
 	}
 
-	public void addInitialConfiguration(String mavenHome) {
+	public void addInitialConfiguration(String mavenHome, String profile, String mode, boolean useDefaultConfig) {
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
 		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
 		configuration.put(MAVEN_HOME_KEY, mavenHome);
 		configuration.put(DEBUG_ENABLED, Boolean.toString(log.isDebugEnabled()));
+		
+		
+		configuration.put(STANDALONE_MODE_KEY, mode);
+		configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile); //$NON-NLS-1$
+		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 	}
 
 	private void addConfigurationKeyValue(String key, String value) {
@@ -324,5 +336,34 @@ public class MavenAdapter {
 		} catch (IOException e) {
 			log.warn("Cannot read the jsparrow lock file...", e);
 		}
+	}
+	
+	/**
+	 * Reads the current java source version from the maven-compiler-plugin
+	 * configuration in the pom.xml. If no configuration is found, the java
+	 * version is 1.5 by default (as stated in the documentation of
+	 * maven-compiler-plugin:
+	 * https://maven.apache.org/plugins/maven-compiler-plugin/).
+	 * 
+	 * @return the project's java version
+	 */
+	private String getCompilerCompliance(MavenProject project) {
+		List<Plugin> buildPlugins = project.getBuildPlugins();
+
+		for (Plugin plugin : buildPlugins) {
+			if (MAVEN_COMPILER_PLUGIN_ARTIFACT_ID.equals(plugin.getArtifactId())) {
+				Xpp3Dom pluginConfig = (Xpp3Dom) plugin.getConfiguration();
+				if (pluginConfig != null) {
+					for (Xpp3Dom child : pluginConfig.getChildren()) {
+						if (MAVEN_COMPILER_PLUGIN_CONFIGURATIN_SOURCE_NAME.equals(child.getName())) {
+							return child.getValue();
+						}
+					}
+				}
+				break;
+			}
+		}
+
+		return MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION;
 	}
 }

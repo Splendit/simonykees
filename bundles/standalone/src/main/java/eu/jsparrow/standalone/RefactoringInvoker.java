@@ -61,7 +61,7 @@ public class RefactoringInvoker {
 	}
 
 	/**
-	 * prepare and start the refactoring process
+	 * Prepare and start the refactoring process
 	 * 
 	 * @param context
 	 * @throws YAMLConfigException
@@ -201,7 +201,7 @@ public class RefactoringInvoker {
 	}
 
 	/**
-	 * loads a new {@link StandaloneConfig} with the properties found in
+	 * Loads a new {@link StandaloneConfig} with the properties found in
 	 * {@link BundleContext}
 	 * 
 	 * @param context
@@ -213,13 +213,13 @@ public class RefactoringInvoker {
 			throws CoreException, MavenInvocationException, IOException {
 		
 		Map<String, String> projectPaths = findAllProjectPaths(context);
-		String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION);
 		String mavenHome = context.getProperty(MAVEN_HOME_KEY);
 		
 		List<StandaloneConfig> configs = new ArrayList<>();
-		for(Map.Entry<String, String> entry : projectPaths.entrySet()) {	
+		for(Map.Entry<String, String> entry : projectPaths.entrySet()) {
 			String id = entry.getKey();
 			String path = entry.getValue();
+			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
 			StandaloneConfig standaloneConfig = new StandaloneConfig(id, path, compilerCompliance, mavenHome);
 			configs.add(standaloneConfig);
 		}

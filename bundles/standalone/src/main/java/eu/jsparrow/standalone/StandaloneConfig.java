@@ -112,7 +112,7 @@ public class StandaloneConfig {
 		IProjectDescription projectDescription = getProjectDescription();
 		IProject project = this.initProject(projectDescription);
 		this.initJavaProject(project);
-		List<IClasspathEntry> mavenClasspathEntries = this.collectMavenDependenciesAsClasspathEntries();
+		List<IClasspathEntry> mavenClasspathEntries = collectMavenDependenciesAsClasspathEntries();
 		this.addToClasspath(mavenClasspathEntries);
 		compUnits = getCompilationUnits();
 	}
