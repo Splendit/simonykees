@@ -1,27 +1,24 @@
 package org.eu.jsparrow.rules.api.common;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-
-import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import eu.jsparrow.jdtunit.util.CompilationUnitBuilder;
 import eu.jsparrow.jdtunit.util.JavaProjectBuilder;
 import eu.jsparrow.jdtunit.util.PackageFragmentBuilder;
+import eu.jsparrow.rules.api.test.dummies.DummyRefactoringRule;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.RuleDescription;
-import eu.jsparrow.rules.common.exception.RefactoringException;
-import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
+
 
 public class RefactoringRuleTest {
 
@@ -29,10 +26,13 @@ public class RefactoringRuleTest {
 
 	private IJavaProject project;
 
+	private IPackageFragment fragment;
+
 	@Before
 	public void setUp() throws Exception {
-		rule = new RefactoringRuleImpl();
+		rule = new DummyRefactoringRule();
 		project = new JavaProjectBuilder().build();
+		fragment = new PackageFragmentBuilder(project).build();
 	}
 
 	@After
@@ -59,19 +59,14 @@ public class RefactoringRuleTest {
 		assertFalse(rule.isEnabled());
 	}
 
+	@Test
+	public void appyRuleImpl_whenVisitorDoesNothing_shouldReturnNull() throws Exception {
+		ICompilationUnit workingCopy = new CompilationUnitBuilder(fragment).setContent("")
+			.build();
 
-	class RefactoringRuleImpl extends RefactoringRule<AbstractASTRewriteASTVisitor> {
+		DocumentChange result = rule.applyRule(workingCopy);
 
-		RefactoringRuleImpl() {
-			super();
-			this.ruleDescription = new RuleDescription("dummy", "dummy", null, new ArrayList<>());
-		}
-
-		@Override
-		protected JavaVersion provideRequiredJavaVersion() {
-			return JavaVersion.JAVA_1_7;
-		}
-
+		assertNull(result);
 	}
 
 }
