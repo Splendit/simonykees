@@ -32,7 +32,7 @@ public class BundleStarter {
 	private Log log;
 	private boolean standaloneStarted = false;
 	private long standaloneBundleID;
-	
+
 	public BundleStarter(Log log) {
 		this.log = log;
 		standaloneBundleID = 0;
@@ -40,7 +40,7 @@ public class BundleStarter {
 
 	public void runStandalone(Map<String, String> configuration)
 			throws BundleException, MojoExecutionException, InterruptedException {
-		
+
 		startEquinoxFramework(configuration);
 
 		List<Bundle> bundles = loadBundles();
@@ -50,10 +50,12 @@ public class BundleStarter {
 	}
 
 	/**
-	 * starts the equinox framework with the given configuration
+	 * Starts the equinox framework with the given configuration
 	 * 
 	 * @param configuration
+	 *            the configuration to start the framework with
 	 * @throws BundleException
+	 *             if the framework cannot be started.
 	 */
 	private void startEquinoxFramework(Map<String, String> configuration) throws BundleException {
 		log.debug(Messages.Adapter_start_equinox);
@@ -63,7 +65,6 @@ public class BundleStarter {
 			.next();
 
 		framework = frameworkFactory.newFramework(configuration);
-
 		framework.start();
 	}
 
@@ -216,7 +217,7 @@ public class BundleStarter {
 			}
 		};
 	}
-	
+
 	public boolean isStandAloneStarted() {
 		return this.standaloneStarted;
 	}

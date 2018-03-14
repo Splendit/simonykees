@@ -86,11 +86,9 @@ public class RefactorMojo extends AbstractMojo {
 	 * with the given configuration
 	 */
 	public void execute() throws MojoExecutionException {
-//		MavenHelper mavenHelper = new MavenHelper(project, mavenHome, mavenSession, pluginManager, getLog());
-		MavenAdapter adapter = AdapterService.lazyLoadMavenAdapter(project, mavenHome, mavenSession, getLog());
+//		MavenHelper mavenHelper = new MavenHelper(project, mavenHome, mavenSession, pluginManager, getLog()); 
+		MavenAdapter adapter = AdapterService.lazyLoadMavenAdapter(project, mavenHome, mavenSession, getLog()).orElseThrow(() -> new MojoExecutionException("jSparrow is already running..."));
 
-//		Runtime.getRuntime()
-//			.addShutdownHook(adapter.createShutdownHook());
 
 		try {
 

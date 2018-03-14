@@ -3,13 +3,19 @@ package eu.jsparrow.adapter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.logging.Log;
@@ -43,6 +49,8 @@ public class MavenAdapter {
 	private static final String DOT = "."; //$NON-NLS-1$
 	private static final String POM = "pom"; //$NON-NLS-1$
 
+	private static final String LOCK_FILE_NAME = "lock.txt"; //$NON-NLS-1$
+
 	private Log log;
 
 	private Map<String, String> configuration = new HashMap<>();
@@ -63,7 +71,7 @@ public class MavenAdapter {
 		log.info(String.format("Adding configuration for project %s ...", project.getName())); //$NON-NLS-1$
 
 		markProjectConfigurationCompleted(project);
-		addConfig(config);
+		addAllConfigurationValues(config);
 
 		if (isAggregateProject(project)) {
 			return;
@@ -93,9 +101,8 @@ public class MavenAdapter {
 		return left + "," + right; //$NON-NLS-1$
 	}
 
-	private void addConfig(Map<String, String> config) {
+	private void addAllConfigurationValues(Map<String, String> config) {
 		this.configuration.putAll(config);
-
 	}
 
 	private String getAllProjectIdentifiers() {
@@ -127,7 +134,7 @@ public class MavenAdapter {
 	}
 
 	/**
-	 * creates and prepares the temporary working directory and sets its path in
+	 * Creates and prepares the temporary working directory and sets its path in
 	 * system properties and equinox configuration
 	 * 
 	 * @param configuration
@@ -136,23 +143,12 @@ public class MavenAdapter {
 	public void prepareWorkingDirectory(MavenProject mavenProject) throws InterruptedException {
 		createWorkingDirectory(mavenProject);
 
-		if (directory.exists()) {
-			if (Arrays.asList(directory.list())
-				.size() <= 2) {
-				System.setProperty(USER_DIR, directory.getAbsolutePath());
-				configuration.put(OSGI_INSTANCE_AREA_CONSTANT, directory.getAbsolutePath());
+		if (directory.exists() || directory.mkdirs()) {
+			String directoryAbsolutePath = directory.getAbsolutePath();
+			System.setProperty(USER_DIR, directoryAbsolutePath);
+			addConfigurationKeyValue(OSGI_INSTANCE_AREA_CONSTANT, directoryAbsolutePath);
 
-				String loggerInfo = NLS.bind(Messages.Adapter_setUserDirTo, directory.getAbsolutePath());
-				log.info(loggerInfo);
-			} else {
-				jsparrowAlreadyRunningError = true;
-				throw new InterruptedException("jSparrow is already running..."); //$NON-NLS-1$
-			}
-		} else if (directory.mkdirs()) {
-			System.setProperty(USER_DIR, directory.getAbsolutePath());
-			configuration.put(OSGI_INSTANCE_AREA_CONSTANT, directory.getAbsolutePath());
-
-			String loggerInfo = NLS.bind(Messages.Adapter_setUserDirTo, directory.getAbsolutePath());
+			String loggerInfo = NLS.bind(Messages.Adapter_setUserDirTo, directoryAbsolutePath);
 			log.info(loggerInfo);
 		} else {
 			throw new InterruptedException("Could not create temp folder"); //$NON-NLS-1$
@@ -168,11 +164,8 @@ public class MavenAdapter {
 
 		final InvocationRequest request = new DefaultInvocationRequest();
 		final Properties props = new Properties();
-
 		prepareDefaultRequest(request, props);
-
 		final Invoker invoker = new DefaultInvoker();
-
 		invokeMaven(invoker, request, preparedMavenHome);
 	}
 
@@ -210,7 +203,7 @@ public class MavenAdapter {
 	}
 
 	/**
-	 * cleans classpath and temp directory
+	 * Cleans classpath and temp directory
 	 * 
 	 * @throws IOException
 	 */
@@ -221,6 +214,7 @@ public class MavenAdapter {
 			try {
 				deleteChildren(directory);
 				Files.deleteIfExists(directory.toPath());
+				clearLockFile();
 			} catch (IOException e) {
 				log.debug(e.getMessage(), e);
 				log.error(e.getMessage());
@@ -262,11 +256,33 @@ public class MavenAdapter {
 		List<MavenProject> allProjects = mavenSession2.getAllProjects();
 		this.sessionProjects = allProjects.stream()
 			.map(this::findProjectIdentifier)
-			.collect(Collectors.toMap(id -> id, id -> false));
+			.collect(Collectors.toMap(Function.identity(), id -> false));
+	}
+
+	public void lockProjects() {
+		Set<String> projectIds = sessionProjects.keySet();
+		String lockFilePath = calculateJsparrowLockFilePath();
+		Path path = Paths.get(lockFilePath);
+		String conntent = projectIds.stream()
+			.collect(Collectors.joining("\n")); //$NON-NLS-1$
+		
+		try {			
+			Files.write(path, conntent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+		} catch (IOException e) {
+			log.warn("Cannot write to jsparrow lock file...", e);
+		}
+	}
+
+	protected String calculateJsparrowLockFilePath() {
+		return calculateJsparrowTempFolderPath() + File.separator + LOCK_FILE_NAME;
 	}
 
 	public boolean isJsparrowRunningFlag() {
 		return jsparrowAlreadyRunningError;
+	}
+	
+	public void setJsparrowRunningFlag() {
+		this.jsparrowAlreadyRunningError = true;
 	}
 
 	public Map<String, String> getConfiguration() {
@@ -276,5 +292,27 @@ public class MavenAdapter {
 	public static String calculateJsparrowTempFolderPath() {
 		String file = System.getProperty(JAVA_TMP);
 		return file + File.separator + JSPARROW_TEMP_FOLDER;
+	}
+
+	public boolean isJsparrowStarted(MavenProject mavenProject) {
+		String projectId = findProjectIdentifier(mavenProject);
+		try (Stream<String> linesStream = Files.lines(Paths.get(calculateJsparrowLockFilePath()))) {
+			return linesStream.anyMatch(line -> line.equals(projectId));
+		} catch (IOException e) {
+			log.warn("Cannot read the jsparrow lock file...", e);
+		}
+
+		return false;
+	}
+
+	private void clearLockFile() {
+		Path path = Paths.get(calculateJsparrowLockFilePath());
+		try (Stream<String> linesStream = Files.lines(path)) {
+			String newContent = linesStream.filter(line -> !sessionProjects.containsKey(line))
+				.collect(Collectors.joining("\n"));
+			Files.write(path, newContent.getBytes());
+		} catch (IOException e) {
+			log.warn("Cannot read the jsparrow lock file...", e);
+		}
 	}
 }

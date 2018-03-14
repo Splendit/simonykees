@@ -1,6 +1,7 @@
 package eu.jsparrow.adapter;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -19,18 +20,21 @@ public class AdapterService {
 		 */
 	}
 
-	public static synchronized MavenAdapter lazyLoadMavenAdapter(MavenProject project, String mavenHome2,
+	public static synchronized Optional<MavenAdapter> lazyLoadMavenAdapter(MavenProject project, String mavenHome2,
 			MavenSession mavenSession, Log log) {
 		if (mavenAdapter == null) {
 			log.info("Creating adapter instance..."); //$NON-NLS-1$
 			mavenAdapter = new MavenAdapter(project, log);
+			if (mavenAdapter.isJsparrowStarted(project)) {
+				mavenAdapter.setJsparrowRunningFlag();
+				return Optional.empty();
+			}
 			mavenAdapter.storeProjects(mavenSession);
-			embeddedMaven = new EmbeddedMaven(log, mavenHome2); 
+			embeddedMaven = new EmbeddedMaven(log, mavenHome2);
 			embeddedMaven.prepareMaven(MavenAdapter.calculateJsparrowTempFolderPath());
 			mavenAdapter.addInitialConfiguration(embeddedMaven.getMavenHome());
-			
 		}
-		return mavenAdapter;
+		return Optional.of(mavenAdapter);
 	}
 
 	public static void addProjectConfiguration(MavenProject project, Log log, Map<String, String> config)
