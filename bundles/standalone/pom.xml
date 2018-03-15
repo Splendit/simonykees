@@ -13,6 +13,11 @@
 	<name>jSparrow :: standalone</name>
 	<description>jSparrow Plugin for headless start</description>
 
+	<properties>
+		<snakeyaml.version>1.18</snakeyaml.version>
+	</properties>
+
+
 	<build>
 		<plugins>
 			<plugin>
@@ -36,6 +41,11 @@
 									<groupId>org.codehaus.plexus</groupId>
 									<artifactId>plexus-utils</artifactId>
 									<version>3.0.17</version>
+								</item>
+								<item>
+									<groupId>org.yaml</groupId>
+									<artifactId>snakeyaml</artifactId>
+									<version>${snakeyaml.version}</version>
 								</item>
 							</artifactItems>
 							<outputDirectory>lib</outputDirectory>
