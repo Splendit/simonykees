@@ -45,12 +45,12 @@ public class AdapterService {
 			return false;
 		}
 		mavenAdapter.storeProjects(mavenSession);
+		mavenAdapter.lockProjects();
 		embeddedMaven = new EmbeddedMaven(log, mavenHome2);
 		embeddedMaven.prepareMaven(MavenAdapter.calculateJsparrowTempFolderPath());
 		mavenAdapter.addInitialConfiguration(embeddedMaven.getMavenHome(), profile, mode, useDefaultConfig);
 
 		return true;
-
 	}
 
 	public void addProjectConfiguration(MavenProject project, Log log, File configFile)

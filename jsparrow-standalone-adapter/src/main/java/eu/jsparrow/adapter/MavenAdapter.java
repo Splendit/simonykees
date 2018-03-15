@@ -30,8 +30,6 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Constants;
 
-import eu.jsparrow.adapter.i18n.Messages;
-
 public class MavenAdapter {
 
 	protected static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory"; //$NON-NLS-1$
@@ -170,7 +168,7 @@ public class MavenAdapter {
 			System.setProperty(USER_DIR, directoryAbsolutePath);
 			addConfigurationKeyValue(OSGI_INSTANCE_AREA_CONSTANT, directoryAbsolutePath);
 
-			String loggerInfo = NLS.bind(Messages.Adapter_setUserDirTo, directoryAbsolutePath);
+			String loggerInfo = NLS.bind("Set user.dir to {0}", directoryAbsolutePath);
 			log.info(loggerInfo);
 		} else {
 			throw new InterruptedException("Could not create temp folder"); //$NON-NLS-1$
@@ -182,7 +180,7 @@ public class MavenAdapter {
 	 * needed dependencies to the temp folder for use from bundles.
 	 */
 	public void extractAndCopyDependencies(MavenProject project,  String mavenHome) {
-		log.debug(Messages.Adapter_extractAndCopyDependencies);
+		log.debug("Extract and copy dependencies");
 
 		final InvocationRequest request = new DefaultInvocationRequest();
 		final Properties props = new Properties();
@@ -281,7 +279,7 @@ public class MavenAdapter {
 			.collect(Collectors.toMap(Function.identity(), id -> false));
 	}
 
-	public void lockProjects() {
+	public synchronized void lockProjects() {
 		Set<String> projectIds = sessionProjects.keySet();
 		String lockFilePath = calculateJsparrowLockFilePath();
 		Path path = Paths.get(lockFilePath);
