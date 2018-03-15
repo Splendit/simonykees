@@ -15,9 +15,6 @@
 		<proguard.extra.options>
 			-libraryjars
 			${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
-			-applymapping ${project.basedir}/../logging/target/logging.out
-			-printmapping ${project.build.directory}/rules.api.out
-			-printconfiguration ${project.build.directory}/rules.api.conf
 		</proguard.extra.options>
 	</properties>
 </project>

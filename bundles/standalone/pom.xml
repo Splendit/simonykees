@@ -19,15 +19,10 @@
 				</option> <option>-applymapping ${project.basedir}/../license.api/target/license.api.out</option> -->
 			-libraryjars
 			${project.basedir}/../rules.api/target/eu.jsparrow.rules.api-${project.version}_proguard_base.jar
-			-applymapping ${project.basedir}/../rules.api/target/rules.api.out
 			-libraryjars
 			${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
 			-libraryjars
 			${project.basedir}/../core/target/eu.jsparrow.core-${project.version}_proguard_base.jar
-			-applymapping ${project.basedir}/../logging/target/logging.out
-			-applymapping ${project.basedir}/../core/target/core.out
-			-printmapping ${project.build.directory}/standalone.out
-			-printconfiguration ${project.build.directory}/standalone.conf
 		</proguard.extra.options>
 	</properties>
 

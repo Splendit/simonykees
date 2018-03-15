@@ -12,12 +12,4 @@
 	<packaging>eclipse-plugin</packaging>
 	<name>jSparrow :: license API</name>
 	<description>jSparrow License API Plugin</description>
-
-
-	<properties>
-		<proguard.extra.options>-printmapping ${project.build.directory}/license.api.out
-			-printconfiguration
-			${project.build.directory}/license.api.conf</proguard.extra.options>
-	</properties>
-
 </project>

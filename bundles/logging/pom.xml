@@ -16,10 +16,6 @@
 	<properties>
 		<slf4j.version>1.7.25</slf4j.version>
 		<logback.version>1.2.2</logback.version>
-		<proguard.extra.options>
-			-printmapping ${project.build.directory}/logging.out
-			-printconfiguration ${project.build.directory}/logging.conf
-		</proguard.extra.options>
 	</properties>
 
 	<build>

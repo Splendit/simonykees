@@ -14,7 +14,9 @@
 	<description>jSparrow OSGi bundle container</description>
 
 	<properties>
-		<proguard.extra.options></proguard.extra.options>
+		<!-- a proguard option can not be empty, because the property is interpreted 
+			as null which results in a wrong proguard configuration -->
+		<proguard.extra.options>#comment</proguard.extra.options>
 	</properties>
 
 
@@ -107,6 +109,19 @@
 							<option>
 								-adaptresourcefilecontents META-INF/MANIFEST.MF
 							</option>
+							<!-- default location of mapping out -->
+							<option>
+								-printmapping
+								${project.basedir}/../target/${project.artifactId}.out
+							</option>
+							<option>
+								-applymapping ${project.basedir}/../target/mapping.in
+							</option>
+							<!-- default location of proguard configuration -->
+							<option>
+								-printconfiguration
+								${project.build.directory}/${project.artifactId}.conf
+							</option>
 							<option>${proguard.extra.options}</option>
 						</options>
 					</configuration>
@@ -133,6 +148,23 @@
 					<plugin>
 						<groupId>com.github.wvengen</groupId>
 						<artifactId>proguard-maven-plugin</artifactId>
+					</plugin>
+					<plugin>
+						<artifactId>exec-maven-plugin</artifactId>
+						<groupId>org.codehaus.mojo</groupId>
+						<version>1.6.0</version>
+						<executions>
+							<execution><!-- Run our version calculation script -->
+								<id>Version Calculation</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>${basedir}/../merge-proguard-out.sh</executable>
+								</configuration>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>

@@ -16,12 +16,8 @@
 			-injars
 			${project.basedir}/../rules.api/target/eu.jsparrow.rules.api-${project.version}_proguard_base.jar
 			-outjars ${project.build.directory}/rules.api.duplicate.jar
-			-applymapping ${project.basedir}/../rules.api/target/rules.api.out
 			-libraryjars
 			${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
-			-applymapping ${project.basedir}/../logging/target/logging.out
-			-printmapping ${project.build.directory}/rules.import.out
-			-printconfiguration ${project.build.directory}/rules.import.conf
 		</proguard.extra.options>
 	</properties>
 

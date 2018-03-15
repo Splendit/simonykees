@@ -29,11 +29,7 @@
 		<snakeyaml.version>1.18</snakeyaml.version>
 		<proguard.extra.options>
 			-libraryjars ${project.basedir}/../rules.api/target/eu.jsparrow.rules.api-${project.version}_proguard_base.jar
-			-applymapping ${project.basedir}/../rules.api/target/rules.api.out
 			-libraryjars ${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
-			-applymapping ${project.basedir}/../logging/target/logging.out
-			-printmapping ${project.build.directory}/core.out
-			-printconfiguration ${project.build.directory}/core.conf
 		</proguard.extra.options>
 	</properties>
 
