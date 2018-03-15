@@ -23,11 +23,10 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 	private LicenseManager licenseManager;
 	
 	public NetLicensingLicenseValidationService() {
-		this.licenseManager = LicenseManager.getInstance();
+		this(LicenseManager.getInstance());
 	}
 	
-	// Only required to inject mocks
-	void setLicenseManager(LicenseManager licenseManager) {
+	public NetLicensingLicenseValidationService(LicenseManager licenseManager) {
 		this.licenseManager = licenseManager;
 	}
 
