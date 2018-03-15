@@ -3,7 +3,6 @@ package eu.jsparrow.adapter;
 import java.io.File;
 import java.util.Map;
 
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
@@ -13,6 +12,7 @@ public class AdapterService {
 
 	private MavenAdapter mavenAdapter;
 	private EmbeddedMaven embeddedMaven;
+	private DependencyManager dependencyManager;
 
 	private AdapterService() {
 		/*
@@ -29,9 +29,12 @@ public class AdapterService {
 		return adapterService;
 	}
 
-	public synchronized boolean lazyLoadMavenAdapter(MavenProject project, Log log, String mavenHome2,
-			MavenSession mavenSession, File defaultYamlFile, String profile, String mode, boolean useDefaultConfig)
-			throws InterruptedException {
+	public synchronized boolean isAdapterInitialized() {
+		return mavenAdapter != null;
+	}
+
+	public synchronized boolean lazyLoadMavenAdapter(MavenArguments configuration) throws InterruptedException {
+		Log log = configuration.getLog();
 
 		if (mavenAdapter != null) {
 			log.debug("Adapter instance is already created..."); //$NON-NLS-1$
@@ -39,20 +42,27 @@ public class AdapterService {
 		}
 
 		log.info("Creating adapter instance..."); //$NON-NLS-1$
-		mavenAdapter = new MavenAdapter(project, log, defaultYamlFile);
+		MavenProject project = configuration.getProject();
+		mavenAdapter = new MavenAdapter(project, log, configuration.getDefaultYamlFile());
+		
 		if (mavenAdapter.isJsparrowStarted(project)) {
 			mavenAdapter.setJsparrowRunningFlag();
 			log.error("jSparrow is already running!"); //$NON-NLS-1$
 			return false;
 		}
 		mavenAdapter.prepareWorkingDirectory();
-		mavenAdapter.storeProjects(mavenSession);
+		mavenAdapter.storeProjects(configuration.getMavenSession());
 		mavenAdapter.lockProjects();
-		embeddedMaven = new EmbeddedMaven(log, mavenHome2);
+		embeddedMaven = new EmbeddedMaven(log, configuration.getMavenHome().orElse(""));
 		embeddedMaven.prepareMaven(MavenAdapter.calculateJsparrowTempFolderPath());
-		mavenAdapter.addInitialConfiguration(embeddedMaven.getMavenHome(), profile, mode, useDefaultConfig);
-
+		mavenAdapter.addInitialConfiguration(configuration, embeddedMaven.getMavenHome());
+		dependencyManager = new DependencyManager(log);
 		return true;
+	}
+
+	protected void setMavenAdapter(MavenAdapter mavenAdapter2) {
+		this.mavenAdapter = mavenAdapter2;
+
 	}
 
 	public void addProjectConfiguration(MavenProject project, Log log, File configFile)
@@ -61,8 +71,9 @@ public class AdapterService {
 			log.error("Maven adapter is not created"); //$NON-NLS-1$
 			return;
 		}
-
-		mavenAdapter.addProjectConfiguration(project, configFile, embeddedMaven.getMavenHome());
+		
+		mavenAdapter.addProjectConfiguration(project, configFile);
+		dependencyManager.extractAndCopyDependencies(project, embeddedMaven.getMavenHome(), mavenAdapter.findProjectIdentifier(project));
 		if (mavenAdapter.allProjectConfigurationLoaded()) {
 			log.info("All projects are loaded ... "); //$NON-NLS-1$
 
@@ -73,5 +84,9 @@ public class AdapterService {
 				.addShutdownHook(bundleStarter.createShutdownHook(mavenAdapter));
 			bundleStarter.runStandalone(bundleConfiguration);
 		}
+	}
+
+	public MavenAdapter getMavenAdapterInstance() {
+		return this.mavenAdapter;
 	}
 }

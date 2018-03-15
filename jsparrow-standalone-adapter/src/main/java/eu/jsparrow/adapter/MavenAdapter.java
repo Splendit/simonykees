@@ -6,12 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -21,29 +18,21 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Plugin;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.shared.invoker.DefaultInvocationRequest;
-import org.apache.maven.shared.invoker.DefaultInvoker;
-import org.apache.maven.shared.invoker.InvocationRequest;
-import org.apache.maven.shared.invoker.Invoker;
-import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Constants;
 
 public class MavenAdapter {
 
-	protected static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory"; //$NON-NLS-1$
+	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
+	public static final String DOT = "."; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_ARTIFACT_ID = "maven-compiler-plugin"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_CONFIGURATIN_SOURCE_NAME = "source"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION = "1.5"; //$NON-NLS-1$
-
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
-
-	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
-	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
 	private static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default"; //$NON-NLS-1$
 	private static final String FRAMEWORK_STORAGE_VALUE = "target/bundlecache"; //$NON-NLS-1$
@@ -54,19 +43,15 @@ public class MavenAdapter {
 	private static final String OSGI_INSTANCE_AREA_CONSTANT = "osgi.instance.area"; //$NON-NLS-1$
 	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
-	private static final String DOT = "."; //$NON-NLS-1$
 	private static final String POM = "pom"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String LOCK_FILE_NAME = "lock.txt"; //$NON-NLS-1$
 
 	private Log log;
-
 	private Map<String, String> configuration = new HashMap<>();
 	private MavenProject rootProject;
 	private File directory;
-
 	private Map<String, Boolean> sessionProjects = new HashMap<>();
-
 	private boolean jsparrowAlreadyRunningError = false;
 	private File defaultYamlFile;
 
@@ -77,7 +62,7 @@ public class MavenAdapter {
 		this.defaultYamlFile = defaultYamlFile;
 	}
 
-	public void addProjectConfiguration(MavenProject project, File configFile, String mavenHome) {
+	public void addProjectConfiguration(MavenProject project, File configFile) {
 		log.info(String.format("Adding configuration for project %s ...", project.getName())); //$NON-NLS-1$
 
 		markProjectConfigurationCompleted(project);
@@ -90,20 +75,28 @@ public class MavenAdapter {
 		String projectPath = baseDir.getAbsolutePath();
 		String projcetName = project.getName();
 		String projectIdentifier = findProjectIdentifier(project);
-
 		String allIdentifiers = getAllProjectIdentifiers();
 		addConfigurationKeyValue(ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
 		addConfigurationKeyValue(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
 		addConfigurationKeyValue(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, projcetName);
-		String yamlFilePath = findYamlFilePath(configFile);
+		String yamlFilePath = findYamlFilePath(project, configFile);
+		log.info("jSparrow configuration file: " + yamlFilePath);
 		addConfigurationKeyValue(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
-		extractAndCopyDependencies(project, mavenHome);
 		addConfigurationKeyValue(PROJECT_JAVA_VERSION + DOT + projectIdentifier, getCompilerCompliance(project));
 	}
 
-	private String findYamlFilePath(File yamlFile) {
+	private String findYamlFilePath(MavenProject project, File yamlFile) {
 		if (yamlFile.exists()) {
 			return yamlFile.getAbsolutePath();
+		}
+		
+		MavenProject parent;
+		while ((parent = project.getParent()) != null && parent != rootProject) {
+			File parentBaseDir = parent.getBasedir();
+			Path parentYamlPath = Paths.get(parentBaseDir.getAbsolutePath(), yamlFile.getPath());
+			if(parentYamlPath.toFile().exists()) {
+				return parentYamlPath.toString();
+			}
 		}
 
 		return defaultYamlFile.getAbsolutePath();
@@ -125,15 +118,16 @@ public class MavenAdapter {
 	private String getAllProjectIdentifiers() {
 		return configuration.getOrDefault(ALL_PROJECT_IDENTIFIERS, ""); //$NON-NLS-1$
 	}
-
-	public void addInitialConfiguration(String mavenHome, String profile, String mode, boolean useDefaultConfig) {
+	
+	public void addInitialConfiguration(MavenArguments config, String mavenHome) {
+		boolean useDefaultConfig = config.getUseDefaultConfig().orElse(false);
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
 		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
 		configuration.put(MAVEN_HOME_KEY, mavenHome);
 		configuration.put(DEBUG_ENABLED, Boolean.toString(log.isDebugEnabled()));
-		configuration.put(STANDALONE_MODE_KEY, mode);
-		configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile); //$NON-NLS-1$
+		configuration.put(STANDALONE_MODE_KEY, config.getMode());
+		configuration.put(SELECTED_PROFILE, config.getProfile().orElse("")); //$NON-NLS-1$
 		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
 	}
 
@@ -146,7 +140,7 @@ public class MavenAdapter {
 		sessionProjects.put(projectIdentifier, true);
 	}
 
-	private String findProjectIdentifier(MavenProject mavenProject) {
+	public String findProjectIdentifier(MavenProject mavenProject) {
 		String groupId = mavenProject.getGroupId();
 		String artifactId = mavenProject.getArtifactId();
 		return groupId + DOT + artifactId;
@@ -162,8 +156,10 @@ public class MavenAdapter {
 	 */
 	public void prepareWorkingDirectory() throws InterruptedException {
 		createWorkingDirectory();
-		if (directory.exists() || directory.mkdirs()) {
-			String directoryAbsolutePath = directory.getAbsolutePath();
+		File workingDirectory = new File(calculateJsparrowTempFolderPath()).getAbsoluteFile();
+		setWorkingDirectory(workingDirectory);
+		if (workingDirectory.exists() || workingDirectory.mkdirs()) {
+			String directoryAbsolutePath = workingDirectory.getAbsolutePath();
 			System.setProperty(USER_DIR, directoryAbsolutePath);
 			addConfigurationKeyValue(OSGI_INSTANCE_AREA_CONSTANT, directoryAbsolutePath);
 
@@ -174,46 +170,9 @@ public class MavenAdapter {
 		}
 	}
 
-	/**
-	 * Executes maven goal copy-dependencies on the project to copy all resolved
-	 * needed dependencies to the temp folder for use from bundles.
-	 */
-	public void extractAndCopyDependencies(MavenProject project, String mavenHome) {
-		log.debug("Extract and copy dependencies");
-
-		final InvocationRequest request = new DefaultInvocationRequest();
-		final Properties props = new Properties();
-		prepareDefaultRequest(project, request, props);
-		final Invoker invoker = new DefaultInvoker();
-		invokeMaven(invoker, request, mavenHome);
-	}
-
-	protected void prepareDefaultRequest(MavenProject project, InvocationRequest request, Properties props) {
-		File projectBaseDir = project.getBasedir();
-		String projectPath = projectBaseDir.getAbsolutePath();
-		request.setPomFile(new File(projectPath + File.separator + "pom.xml")); //$NON-NLS-1$
-		request.setGoals(Collections.singletonList("dependency:copy-dependencies ")); //$NON-NLS-1$
-
-		props.setProperty(OUTPUT_DIRECTORY_CONSTANT, System.getProperty(USER_DIR) + File.separator
-				+ DEPENDENCIES_FOLDER_CONSTANT + DOT + findProjectIdentifier(project));
-		request.setProperties(props);
-	}
-
-	protected void invokeMaven(Invoker invoker, InvocationRequest request, String preparedMavenHome) {
-		invoker.setMavenHome(new File(preparedMavenHome));
-
-		try {
-			invoker.execute(request);
-		} catch (final MavenInvocationException e) {
-			log.debug(e.getMessage(), e);
-			log.error(e.getMessage());
-		}
-	}
-
-	protected File createWorkingDirectory() {
+	protected void createWorkingDirectory() {
 		File workingDirectory = new File(calculateJsparrowTempFolderPath()).getAbsoluteFile();
 		setWorkingDirectory(workingDirectory);
-		return workingDirectory;
 	}
 
 	private void setWorkingDirectory(File directory2) {

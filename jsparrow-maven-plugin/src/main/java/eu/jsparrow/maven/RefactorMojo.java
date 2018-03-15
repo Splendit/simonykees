@@ -16,6 +16,7 @@ import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
 import eu.jsparrow.adapter.AdapterService;
+import eu.jsparrow.adapter.MavenArguments;
 import eu.jsparrow.maven.enums.StandaloneMode;
 
 /**
@@ -75,21 +76,26 @@ public class RefactorMojo extends AbstractMojo {
 		String mode = StandaloneMode.REFACTOR.name();
 		boolean adapterLoadad = false;
 		try {
-			adapterLoadad = serviceInstance.lazyLoadMavenAdapter(project, log, mavenHome, mavenSession, configFile, profile, mode, useDefaultConfig);
-		} catch (InterruptedException e1) {
+			if(!serviceInstance.isAdapterInitialized()) {
+				MavenArguments config = new MavenArguments(project, log, configFile, mavenSession, mode);
+				config.setMavenHome(mavenHome);
+				config.setProfile(profile);
+				config.setUseDefaultConfig(useDefaultConfig);
+				
+				adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
+				if (!adapterLoadad) {
+					throw new MojoExecutionException("jSparrow is already running...");
+				}
+			}
+
+
+
+			serviceInstance.addProjectConfiguration(project, log, configFile);
+
+		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());
 		}
-		
-		if(!adapterLoadad) {
-			throw new MojoExecutionException("jSparrow is already running...");
-		}
 
-		try {
-			serviceInstance.addProjectConfiguration(project, log, configFile);
-		} catch (BundleException | InterruptedException e) {
-			log.debug(e.getMessage(), e);
-			log.error(e.getMessage());
-		}
 	}
 }
