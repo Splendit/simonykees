@@ -36,12 +36,12 @@ public class MavenAdapter {
 	private static final String MAVEN_COMPILER_PLUGIN_ARTIFACT_ID = "maven-compiler-plugin"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_CONFIGURATIN_SOURCE_NAME = "source"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION = "1.5"; //$NON-NLS-1$
-	
+
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
-	
+
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
@@ -98,14 +98,14 @@ public class MavenAdapter {
 		String yamlFilePath = findYamlFilePath(configFile);
 		addConfigurationKeyValue(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
 		extractAndCopyDependencies(project, mavenHome);
-		configuration.put(PROJECT_JAVA_VERSION + DOT + projectIdentifier, getCompilerCompliance(project));
+		addConfigurationKeyValue(PROJECT_JAVA_VERSION + DOT + projectIdentifier, getCompilerCompliance(project));
 	}
-	
+
 	private String findYamlFilePath(File yamlFile) {
-		if(yamlFile.exists()) {
+		if (yamlFile.exists()) {
 			return yamlFile.getAbsolutePath();
 		}
-		
+
 		return defaultYamlFile.getAbsolutePath();
 	}
 
@@ -132,8 +132,6 @@ public class MavenAdapter {
 		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
 		configuration.put(MAVEN_HOME_KEY, mavenHome);
 		configuration.put(DEBUG_ENABLED, Boolean.toString(log.isDebugEnabled()));
-		
-		
 		configuration.put(STANDALONE_MODE_KEY, mode);
 		configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile); //$NON-NLS-1$
 		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
@@ -159,10 +157,11 @@ public class MavenAdapter {
 	 * system properties and equinox configuration
 	 * 
 	 * @param configuration
+	 * 
 	 * @throws InterruptedException
 	 */
-	public void prepareWorkingDirectory(MavenProject mavenProject) throws InterruptedException {
-		createWorkingDirectory(mavenProject);
+	public void prepareWorkingDirectory() throws InterruptedException {
+		createWorkingDirectory();
 		if (directory.exists() || directory.mkdirs()) {
 			String directoryAbsolutePath = directory.getAbsolutePath();
 			System.setProperty(USER_DIR, directoryAbsolutePath);
@@ -179,7 +178,7 @@ public class MavenAdapter {
 	 * Executes maven goal copy-dependencies on the project to copy all resolved
 	 * needed dependencies to the temp folder for use from bundles.
 	 */
-	public void extractAndCopyDependencies(MavenProject project,  String mavenHome) {
+	public void extractAndCopyDependencies(MavenProject project, String mavenHome) {
 		log.debug("Extract and copy dependencies");
 
 		final InvocationRequest request = new DefaultInvocationRequest();
@@ -195,8 +194,8 @@ public class MavenAdapter {
 		request.setPomFile(new File(projectPath + File.separator + "pom.xml")); //$NON-NLS-1$
 		request.setGoals(Collections.singletonList("dependency:copy-dependencies ")); //$NON-NLS-1$
 
-		props.setProperty(OUTPUT_DIRECTORY_CONSTANT,
-				System.getProperty(USER_DIR) + File.separator + DEPENDENCIES_FOLDER_CONSTANT + DOT + findProjectIdentifier(project));
+		props.setProperty(OUTPUT_DIRECTORY_CONSTANT, System.getProperty(USER_DIR) + File.separator
+				+ DEPENDENCIES_FOLDER_CONSTANT + DOT + findProjectIdentifier(project));
 		request.setProperties(props);
 	}
 
@@ -211,9 +210,8 @@ public class MavenAdapter {
 		}
 	}
 
-	protected File createWorkingDirectory(MavenProject mavenProject) {
-		String projectIdentifier = findProjectIdentifier(mavenProject);
-		File workingDirectory = new File(calculateJsparrowTempFolderPath() + DOT + projectIdentifier).getAbsoluteFile();
+	protected File createWorkingDirectory() {
+		File workingDirectory = new File(calculateJsparrowTempFolderPath()).getAbsoluteFile();
 		setWorkingDirectory(workingDirectory);
 		return workingDirectory;
 	}
@@ -230,16 +228,57 @@ public class MavenAdapter {
 	public void cleanUp() {
 
 		// CLEAN
-		if (directory != null && directory.exists()) {
-			try {
+		if(directory == null || !directory.exists()) {
+			return;
+		}
+		
+		try {
+			deleteSessionRelatedFiles(directory);
+			boolean emptyLockFile = cleanLockFile();
+			if(emptyLockFile) {
 				deleteChildren(directory);
 				Files.deleteIfExists(directory.toPath());
-				clearLockFile();
-			} catch (IOException e) {
-				log.debug(e.getMessage(), e);
-				log.error(e.getMessage());
+			}
+		} catch (IOException e) {
+			log.debug(e.getMessage(), e);
+			log.error(e.getMessage());
+		}
+	}
+	
+	private void deleteSessionRelatedFiles(File parentDirectory) {
+		String[] children = parentDirectory.list();
+		if (children == null) {
+			return;
+		}
+
+		for (String file : children) {
+			if (isSessionRelated(file)) {
+				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
+				deleteChildren(currentFile);
 			}
 		}
+	}
+
+	private boolean cleanLockFile() {
+		Set<String> sessionIds = sessionProjects.keySet();
+		Path path = Paths.get(calculateJsparrowLockFilePath());
+
+		if (!path.toFile()
+			.exists()) {
+			return true;
+		}
+
+		String remainingContent = "";
+		try (Stream<String> linesStream = Files.lines(path)) {
+			remainingContent = linesStream.filter(id -> !sessionIds.contains(id))
+				.collect(Collectors.joining("\n"));
+			Files.write(path, remainingContent.getBytes());
+
+		} catch (IOException e) {
+			log.warn("Cannot read the jsparrow lock file...", e);
+		}
+
+		return remainingContent.isEmpty();
 	}
 
 	/**
@@ -252,7 +291,7 @@ public class MavenAdapter {
 	private void deleteChildren(File parentDirectory) {
 		String[] children = parentDirectory.list();
 		if (children != null) {
-			for (String file : Arrays.asList(children)) {
+			for (String file : children) {
 				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
 				if (currentFile.isDirectory()) {
 					deleteChildren(currentFile);
@@ -266,6 +305,10 @@ public class MavenAdapter {
 				}
 			}
 		}
+	}
+
+	private boolean isSessionRelated(String file) {
+		return sessionProjects.keySet().stream().anyMatch(file::contains);
 	}
 
 	public boolean allProjectConfigurationLoaded() {
@@ -284,9 +327,9 @@ public class MavenAdapter {
 		String lockFilePath = calculateJsparrowLockFilePath();
 		Path path = Paths.get(lockFilePath);
 		String conntent = projectIds.stream()
-			.collect(Collectors.joining("\n")); //$NON-NLS-1$
-		
-		try {			
+			.collect(Collectors.joining("\n", "\n", "")); //$NON-NLS-1$
+
+		try {
 			Files.write(path, conntent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (IOException e) {
 			log.warn("Cannot write to jsparrow lock file...", e);
@@ -300,7 +343,7 @@ public class MavenAdapter {
 	public boolean isJsparrowRunningFlag() {
 		return jsparrowAlreadyRunningError;
 	}
-	
+
 	public void setJsparrowRunningFlag() {
 		this.jsparrowAlreadyRunningError = true;
 	}
@@ -316,7 +359,12 @@ public class MavenAdapter {
 
 	public boolean isJsparrowStarted(MavenProject mavenProject) {
 		String projectId = findProjectIdentifier(mavenProject);
-		try (Stream<String> linesStream = Files.lines(Paths.get(calculateJsparrowLockFilePath()))) {
+		Path path = Paths.get(calculateJsparrowLockFilePath());
+
+		if(!path.toFile().exists()) {
+			return false;
+		}
+		try (Stream<String> linesStream = Files.lines(path)) {
 			return linesStream.anyMatch(line -> line.equals(projectId));
 		} catch (IOException e) {
 			log.warn("Cannot read the jsparrow lock file...", e);
@@ -325,17 +373,6 @@ public class MavenAdapter {
 		return false;
 	}
 
-	private void clearLockFile() {
-		Path path = Paths.get(calculateJsparrowLockFilePath());
-		try (Stream<String> linesStream = Files.lines(path)) {
-			String newContent = linesStream.filter(line -> !sessionProjects.containsKey(line))
-				.collect(Collectors.joining("\n"));
-			Files.write(path, newContent.getBytes());
-		} catch (IOException e) {
-			log.warn("Cannot read the jsparrow lock file...", e);
-		}
-	}
-	
 	/**
 	 * Reads the current java source version from the maven-compiler-plugin
 	 * configuration in the pom.xml. If no configuration is found, the java

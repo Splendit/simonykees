@@ -80,7 +80,7 @@ public class RefactoringInvoker {
 	}
 	
 	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline, StandaloneConfig standaloneConfig)
-			throws YAMLConfigException, CoreException, MavenInvocationException, IOException {
+			throws YAMLConfigException {
 		String loggerInfo;
 
 		YAMLConfig config = getConfiguration(context, standaloneConfig.getProjectId());
@@ -148,7 +148,7 @@ public class RefactoringInvoker {
 	 */
 	public void cleanUp() throws IOException {
 		try {
-			for(StandaloneConfig standaloneConfig : this.standaloneConfigs) {
+			for(StandaloneConfig standaloneConfig : standaloneConfigs) {
 				standaloneConfig.cleanUp();
 			}
 		} catch (JavaModelException | MavenInvocationException e) {

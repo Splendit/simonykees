@@ -30,7 +30,8 @@ public class AdapterService {
 	}
 
 	public synchronized boolean lazyLoadMavenAdapter(MavenProject project, Log log, String mavenHome2,
-			MavenSession mavenSession, File defaultYamlFile, String profile, String mode, boolean useDefaultConfig) {
+			MavenSession mavenSession, File defaultYamlFile, String profile, String mode, boolean useDefaultConfig)
+			throws InterruptedException {
 
 		if (mavenAdapter != null) {
 			log.debug("Adapter instance is already created..."); //$NON-NLS-1$
@@ -44,6 +45,7 @@ public class AdapterService {
 			log.error("jSparrow is already running!"); //$NON-NLS-1$
 			return false;
 		}
+		mavenAdapter.prepareWorkingDirectory();
 		mavenAdapter.storeProjects(mavenSession);
 		mavenAdapter.lockProjects();
 		embeddedMaven = new EmbeddedMaven(log, mavenHome2);
@@ -59,8 +61,6 @@ public class AdapterService {
 			log.error("Maven adapter is not created"); //$NON-NLS-1$
 			return;
 		}
-
-		mavenAdapter.prepareWorkingDirectory(project);
 
 		mavenAdapter.addProjectConfiguration(project, configFile, embeddedMaven.getMavenHome());
 		if (mavenAdapter.allProjectConfigurationLoaded()) {
