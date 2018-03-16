@@ -15,7 +15,7 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
-import eu.jsparrow.adapter.AdapterService;
+import eu.jsparrow.adapter.StandaloneAdapter;
 import eu.jsparrow.adapter.MavenParameters;
 import eu.jsparrow.maven.enums.StandaloneMode;
 
@@ -72,7 +72,7 @@ public class RefactorMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 
 		Log log = getLog();
-		AdapterService serviceInstance = AdapterService.getInstance();
+		StandaloneAdapter serviceInstance = StandaloneAdapter.getInstance();
 		String mode = StandaloneMode.REFACTOR.name();
 		boolean adapterLoadad = false;
 		try {

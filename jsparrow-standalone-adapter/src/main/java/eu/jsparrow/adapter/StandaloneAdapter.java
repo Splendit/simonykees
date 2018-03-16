@@ -14,25 +14,25 @@ import org.osgi.framework.BundleException;
  * @since 2.5.0
  *
  */
-public class AdapterService {
+public class StandaloneAdapter {
 
 	private MavenAdapter mavenAdapter;
 	private EmbeddedMaven embeddedMaven;
 	private DependencyManager dependencyManager;
 
-	private AdapterService() {
+	private StandaloneAdapter() {
 		/*
 		 * Hiding the public constructor
 		 */
 	}
 
-	private static AdapterService adapterService;
+	private static StandaloneAdapter standaloneAdapter;
 
-	public static synchronized AdapterService getInstance() {
-		if (adapterService == null) {
-			adapterService = new AdapterService();
+	public static synchronized StandaloneAdapter getInstance() {
+		if (standaloneAdapter == null) {
+			standaloneAdapter = new StandaloneAdapter();
 		}
-		return adapterService;
+		return standaloneAdapter;
 	}
 
 	public synchronized boolean isAdapterInitialized() {

@@ -119,7 +119,7 @@ public class MavenAdapter {
 	 *            expected yaml file
 	 * @return the path of the corresponding yaml file
 	 */
-	private String findYamlFilePath(MavenProject project, File yamlFile) {
+	protected String findYamlFilePath(MavenProject project, File yamlFile) {
 		if (yamlFile.exists()) {
 			return yamlFile.getAbsolutePath();
 		}
@@ -129,13 +129,17 @@ public class MavenAdapter {
 				break;
 			}
 			File parentBaseDir = parent.getBasedir();
-			Path parentYamlPath = Paths.get(parentBaseDir.getAbsolutePath(), yamlFile.getPath());
+			Path parentYamlPath = joinPaths(yamlFile, parentBaseDir);
 			if (parentYamlPath.toFile()
 				.exists()) {
 				return parentYamlPath.toString();
 			}
 		}
 		return defaultYamlFile.getAbsolutePath();
+	}
+
+	protected Path joinPaths(File yamlFile, File parentBaseDir) {
+		return Paths.get(parentBaseDir.getAbsolutePath(), yamlFile.getPath());
 	}
 
 	/**
@@ -208,8 +212,8 @@ public class MavenAdapter {
 	 * @throws InterruptedException
 	 */
 	public void prepareWorkingDirectory() throws InterruptedException {
-		createWorkingDirectory();
-		File workingDirectory = new File(calculateJsparrowTempFolderPath()).getAbsoluteFile();
+
+		File workingDirectory = createWorkingDirectory();
 		setWorkingDirectory(workingDirectory);
 		if (workingDirectory.exists() || workingDirectory.mkdirs()) {
 			String directoryAbsolutePath = workingDirectory.getAbsolutePath();
@@ -223,9 +227,8 @@ public class MavenAdapter {
 		}
 	}
 
-	protected void createWorkingDirectory() {
-		File workingDirectory = new File(calculateJsparrowTempFolderPath()).getAbsoluteFile();
-		setWorkingDirectory(workingDirectory);
+	protected File createWorkingDirectory() {
+		return new File(calculateJsparrowTempFolderPath()).getAbsoluteFile();
 	}
 
 	private void setWorkingDirectory(File directory2) {
@@ -404,7 +407,7 @@ public class MavenAdapter {
 	}
 
 	/**
-	 * Checks whether the lock file contains the id of the givn project.
+	 * Checks whether the lock file contains the id of the given project.
 	 * 
 	 * @param mavenProject
 	 *            a maven project to be checked.
@@ -420,7 +423,7 @@ public class MavenAdapter {
 			return false;
 		}
 		try (Stream<String> linesStream = Files.lines(path)) {
-			return linesStream.anyMatch(line -> line.equals(projectId));
+			return linesStream.anyMatch(projectId::equals);
 		} catch (IOException e) {
 			log.warn("Cannot read the jsparrow lock file...", e);
 		}

@@ -19,6 +19,12 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
+/**
+ * 
+ * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
+ * @since 2.5.0
+ *
+ */
 public class BundleStarter {
 
 	protected static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone"; //$NON-NLS-1$
