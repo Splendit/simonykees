@@ -16,7 +16,7 @@ import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
 import eu.jsparrow.adapter.AdapterService;
-import eu.jsparrow.adapter.MavenArguments;
+import eu.jsparrow.adapter.MavenParameters;
 import eu.jsparrow.maven.enums.StandaloneMode;
 
 /**
@@ -77,7 +77,7 @@ public class RefactorMojo extends AbstractMojo {
 		boolean adapterLoadad = false;
 		try {
 			if(!serviceInstance.isAdapterInitialized()) {
-				MavenArguments config = new MavenArguments(project, log, configFile, mavenSession, mode);
+				MavenParameters config = new MavenParameters(project, log, configFile, mavenSession, mode);
 				config.setMavenHome(mavenHome);
 				config.setProfile(profile);
 				config.setUseDefaultConfig(useDefaultConfig);

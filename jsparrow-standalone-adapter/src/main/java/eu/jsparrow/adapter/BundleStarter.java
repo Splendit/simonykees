@@ -36,6 +36,15 @@ public class BundleStarter {
 		standaloneBundleID = 0;
 	}
 
+	/**
+	 * Starts the equinox framework with the given configuration, starts the
+	 * related bundles and stops the framework afterwards.
+	 * 
+	 * @param configuration the configuration to start the framework with. 
+	 * @throws BundleException 
+	 * @throws MojoExecutionException
+	 * @throws InterruptedException
+	 */
 	public void runStandalone(Map<String, String> configuration)
 			throws BundleException, MojoExecutionException, InterruptedException {
 
@@ -97,7 +106,7 @@ public class BundleStarter {
 	}
 
 	/**
-	 * loads the manifest.standalone file, reads the names of the needed bundles
+	 * Loads the manifest.standalone file, reads the names of the needed bundles
 	 * and installs them in the framework's bundle context
 	 * 
 	 * @return a list of the installed bundles
@@ -133,7 +142,7 @@ public class BundleStarter {
 	}
 
 	/**
-	 * stops the equinox framework
+	 * Stops the equinox framework
 	 * 
 	 * @throws InterruptedException
 	 * @throws BundleException
@@ -153,7 +162,7 @@ public class BundleStarter {
 	}
 
 	/**
-	 * shuts down the standalone bundle and equinox
+	 * Shuts down the standalone bundle and equinox
 	 */
 	public void shutdownFramework() {
 		if (null != this.getFramework() && null != this.getFramework()
@@ -199,9 +208,10 @@ public class BundleStarter {
 	}
 
 	/**
-	 * creates a new shutdown hook for stopping equinox
+	 * Creates a new shutdown hook for stopping equinox
 	 * 
 	 * @return
+	 * 
 	 */
 	public Thread createShutdownHook(MavenAdapter mavenAdapter) {
 		return new Thread() {

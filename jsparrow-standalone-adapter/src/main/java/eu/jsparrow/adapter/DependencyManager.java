@@ -2,6 +2,7 @@ package eu.jsparrow.adapter;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.maven.plugin.logging.Log;
@@ -13,16 +14,18 @@ import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 
 public class DependencyManager {
-	
-	protected static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory"; //$NON-NLS-1$
-	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
-	
+
+	private static final String OUTPUT_DIRECTORY_OPTION_KEY = "outputDirectory"; //$NON-NLS-1$
+	private static final String OUTPUT_DIRECTORY_PREFIX = "deps"; //$NON-NLS-1$
+	private static final String DEPENDENCY_PLUGIN_ID = "dependency";
+	private static final String COPY_DEPENDENCIES_GOAL = "copy-dependencies";
+
 	private Log log;
-	
+
 	public DependencyManager(Log log) {
 		this.log = log;
 	}
-	
+
 	/**
 	 * Executes maven goal copy-dependencies on the project to copy all resolved
 	 * needed dependencies to the temp folder for use from bundles.
@@ -37,14 +40,35 @@ public class DependencyManager {
 		invokeMaven(invoker, request, mavenHome);
 	}
 
-	protected void prepareDefaultRequest(MavenProject project, InvocationRequest request, Properties props, String suffix) {
+	/**
+	 * Sets the pom file, goals and properties to the provided
+	 * {@link InvocationRequest} for running:
+	 * {@code mvn depedency:copy-dependencies outputDirectory=[user.dir]/deps.[suffix]}.
+	 * 
+	 * @see <a href=
+	 *      "https://maven.apache.org/plugins/maven-dependency-plugin/copy-dependencies-mojo.html">
+	 *      Apache Maven Dependency Plugin </a>.
+	 * 
+	 * 
+	 * @param project
+	 *            the project to take the pom file from.
+	 * @param request
+	 *            the {@link InvocationRequest} to be updated.
+	 * @param props
+	 *            properties to be added to the invocation request.
+	 * @param suffix
+	 *            a suffix of the output directory name
+	 */
+	protected void prepareDefaultRequest(MavenProject project, InvocationRequest request, Properties props,
+			String suffix) {
 		File projectBaseDir = project.getBasedir();
 		String projectPath = projectBaseDir.getAbsolutePath();
 		request.setPomFile(new File(projectPath + File.separator + "pom.xml")); //$NON-NLS-1$
-		request.setGoals(Collections.singletonList("dependency:copy-dependencies ")); //$NON-NLS-1$
-
-		props.setProperty(OUTPUT_DIRECTORY_CONSTANT, System.getProperty(MavenAdapter.USER_DIR) + File.separator
-				+ DEPENDENCIES_FOLDER_CONSTANT + MavenAdapter.DOT + suffix);
+		List<String> goals = Collections.singletonList(DEPENDENCY_PLUGIN_ID + ":" + COPY_DEPENDENCIES_GOAL + " "); //$NON-NLS-1$ , //$NON-NLS-2$
+		request.setGoals(goals);
+		String outputDirectoryPath = System.getProperty(MavenAdapter.USER_DIR) + File.separator
+				+ OUTPUT_DIRECTORY_PREFIX + MavenAdapter.DOT + suffix;
+		props.setProperty(OUTPUT_DIRECTORY_OPTION_KEY, outputDirectoryPath);
 		request.setProperties(props);
 	}
 

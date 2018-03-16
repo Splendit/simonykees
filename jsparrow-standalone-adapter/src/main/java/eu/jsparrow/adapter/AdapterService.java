@@ -8,6 +8,12 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
+/**
+ * 
+ * @author Ardit Ymeri
+ * @since 2.5.0
+ *
+ */
 public class AdapterService {
 
 	private MavenAdapter mavenAdapter;
@@ -33,7 +39,13 @@ public class AdapterService {
 		return mavenAdapter != null;
 	}
 
-	public synchronized boolean lazyLoadMavenAdapter(MavenArguments configuration) throws InterruptedException {
+	/**
+	 * 
+	 * @param configuration
+	 * @return
+	 * @throws InterruptedException
+	 */
+	public synchronized boolean lazyLoadMavenAdapter(MavenParameters configuration) throws InterruptedException {
 		Log log = configuration.getLog();
 
 		if (mavenAdapter != null) {
@@ -53,7 +65,7 @@ public class AdapterService {
 		mavenAdapter.prepareWorkingDirectory();
 		mavenAdapter.storeProjects(configuration.getMavenSession());
 		mavenAdapter.lockProjects();
-		embeddedMaven = new EmbeddedMaven(log, configuration.getMavenHome().orElse(""));
+		embeddedMaven = new EmbeddedMaven(log, configuration.getMavenHome().orElse("")); //$NON-NLS-1$
 		embeddedMaven.prepareMaven(MavenAdapter.calculateJsparrowTempFolderPath());
 		mavenAdapter.addInitialConfiguration(configuration, embeddedMaven.getMavenHome());
 		dependencyManager = new DependencyManager(log);
@@ -65,6 +77,15 @@ public class AdapterService {
 
 	}
 
+	/**
+	 * 
+	 * @param project
+	 * @param log
+	 * @param configFile
+	 * @throws MojoExecutionException
+	 * @throws BundleException
+	 * @throws InterruptedException
+	 */
 	public void addProjectConfiguration(MavenProject project, Log log, File configFile)
 			throws MojoExecutionException, BundleException, InterruptedException {
 		if (mavenAdapter == null) {

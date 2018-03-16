@@ -31,6 +31,11 @@ public class EmbeddedMaven {
 		this.mavenHome = mavenHome;
 	}
 	
+	/**
+	 * If maven home from parameter is usable, use it, otherwise extract maven
+	 * from resources to temp folder, set execute rights and use its maven home
+	 * location.
+	 */
 	public String prepareMaven(String jsarrowTempPath) {
 		String newMavenHome = null;
 

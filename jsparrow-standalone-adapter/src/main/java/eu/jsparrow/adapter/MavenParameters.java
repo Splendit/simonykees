@@ -7,7 +7,14 @@ import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
-public class MavenArguments {
+/**
+ * A class for wrapping the parameters injected in the maven plugin. 
+ * 
+ * @author Ardit Ymeri
+ * @since 2.5.0
+ *
+ */
+public class MavenParameters {
 	
 	private Log log;
 	private MavenProject project;
@@ -18,7 +25,7 @@ public class MavenArguments {
 	private String mode;
 	private boolean useDefaultConfig;
 	
-	public MavenArguments(MavenProject project, Log log, File defaultYamlFile, MavenSession mavenSession, String mode) {
+	public MavenParameters(MavenProject project, Log log, File defaultYamlFile, MavenSession mavenSession, String mode) {
 		this.project = project;
 		this.log = log;
 		this.defaultYamlFile = defaultYamlFile;
