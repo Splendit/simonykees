@@ -1,5 +1,6 @@
 package eu.jsparrow.adapter;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -7,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Map;
+import java.util.Collections;
 import java.util.Optional;
 
 import org.apache.maven.plugin.logging.Log;
@@ -17,6 +18,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+@SuppressWarnings("nls")
 public class MavenAdapterTest {
 
 	private MavenProject project;
@@ -27,9 +29,6 @@ public class MavenAdapterTest {
 
 	private MavenAdapter mavenAdapter;
 	private Path path;
-
-	@Rule
-	public TemporaryFolder folder = new TemporaryFolder();
 
 	@Before
 	public void setUp() {
@@ -68,10 +67,8 @@ public class MavenAdapterTest {
 
 	@Test
 	public void prepareWorkingDirectory_directoryDoesNotExistAndMkdirsIsWorking() throws Exception {
-		@SuppressWarnings("unchecked")
-		Map<String, String> configuration = mock(Map.class);
 
-		String absolutePath = "somePath"; //$NON-NLS-1$
+		String absolutePath = "somePath";
 
 		when(workingDirectory.exists()).thenReturn(false);
 		when(workingDirectory.mkdirs()).thenReturn(true);
@@ -80,7 +77,7 @@ public class MavenAdapterTest {
 		mavenAdapter.prepareWorkingDirectory();
 
 		verify(workingDirectory).getAbsolutePath();
-		assertTrue(mavenAdapter.getConfiguration().getOrDefault("osgi.instance.area", "asdf").equals(absolutePath));
+		assertTrue(mavenAdapter.getConfiguration().getOrDefault("osgi.instance.area", "asdf").equals(absolutePath)); //$NON-NLS-1$  //$NON-NLS-2$
 	}
 	
 	@Test
@@ -111,14 +108,13 @@ public class MavenAdapterTest {
 	}
 	
 	@Test
-	public void findYamlFilePath_yamlFileDoesntExists_shouldReturnFilePath() {
+	public void findYamlFilePath_yamlFileDoesntExists_shouldReturnParentFilePath() {
 		MavenProject project = mock(MavenProject.class);
 		File yamlFile = mock(File.class);
 		File parentBaseDir = mock(File.class);
 		File parentYmlFile = mock(File.class);
 		
 		String expectedPath = "parent/dir/file.yml";
-		
 		
 		when(yamlFile.exists()).thenReturn(false);
 		when(project.getParent()).thenReturn(project);
@@ -131,6 +127,63 @@ public class MavenAdapterTest {
 		
 		String actualPath = mavenAdapter.findYamlFilePath(project, yamlFile);
 		assertTrue(actualPath.equals(expectedPath));
+	}
+	
+	
+	@Test
+	public void findYamlFilePath_parentIsRootProject_shouldReturnFilePath() {
+		MavenProject project = mock(MavenProject.class);
+		File yamlFile = mock(File.class);
+		File parentYmlFile = mock(File.class);
+		
+		String expectedPath = "parent/dir/file.yml";
+		
+		mavenAdapter.setRootProject(project);
+		mavenAdapter.setDefaultYamlFile(parentYmlFile);
+		when(yamlFile.exists()).thenReturn(false);
+		when(project.getParent()).thenReturn(project);
+		when(yamlFile.getPath()).thenReturn("file.yml");
+		when(parentYmlFile.getAbsolutePath()).thenReturn(expectedPath);
+		
+		String actualPath = mavenAdapter.findYamlFilePath(project, yamlFile);
+		assertTrue(actualPath.equals(expectedPath));
+	}
+	
+	@Test
+	public void isAggregateProject_hasPomPckage() {
+		MavenProject project = mock(MavenProject.class);
+		when(project.getPackaging()).thenReturn("pom");
+		assertTrue(mavenAdapter.isAggregateProject(project));
+	}
+	
+	@Test
+	public void isAggregateProject_hasListOfModules() {
+		MavenProject project = mock(MavenProject.class);
+		when(project.getPackaging()).thenReturn("");
+		when(project.getModules()).thenReturn(Collections.singletonList("module"));
+		assertTrue(mavenAdapter.isAggregateProject(project));
+	}
+	
+	@Test
+	public void isAggregateProject_shouldReturnFalse_jarPackagingNoModules() {
+		MavenProject project = mock(MavenProject.class);
+		when(project.getPackaging()).thenReturn("jar");
+		when(project.getModules()).thenReturn(Collections.emptyList());
+		assertFalse(mavenAdapter.isAggregateProject(project));
+	}
+	
+	@Test
+	public void joinWithComma_emptyLeftSide() {
+		String expected = "right";
+		String actual = mavenAdapter.joinWithComma("", expected);
+		assertTrue(expected.equals(actual));
+	}
+	
+	@Test
+	public void joinWithComma_shouldReturnCommaConcatenated() {
+		String expected = "project.one.id,project.two.id";
+		String actual = mavenAdapter.joinWithComma("project.one.id", "project.two.id");
+		assertTrue(expected.equals(actual));
 	}
 
 

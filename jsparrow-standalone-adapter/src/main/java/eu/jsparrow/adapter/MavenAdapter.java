@@ -55,7 +55,7 @@ public class MavenAdapter {
 	private File defaultYamlFile;
 
 	public MavenAdapter(MavenProject rootProject, Log log, File defaultYamlFile) {
-		this.rootProject = rootProject;
+		setRootProject(rootProject);
 		this.log = log;
 		this.sessionProjects = new HashMap<>();
 		this.defaultYamlFile = defaultYamlFile;
@@ -125,7 +125,7 @@ public class MavenAdapter {
 		}
 		MavenProject parent = project;
 		while ((parent = parent.getParent()) != null) {
-			if (parent == rootProject) {
+			if (parent == getRootProject()) {
 				break;
 			}
 			File parentBaseDir = parent.getBasedir();
@@ -135,7 +135,7 @@ public class MavenAdapter {
 				return parentYamlPath.toString();
 			}
 		}
-		return defaultYamlFile.getAbsolutePath();
+		return getDefaultYamlFile().getAbsolutePath();
 	}
 
 	protected Path joinPaths(File yamlFile, File parentBaseDir) {
@@ -150,13 +150,13 @@ public class MavenAdapter {
 	 * @return if the packaging of the project is {@code pom} or the list of
 	 *         modules is not empty
 	 */
-	private boolean isAggregateProject(MavenProject project) {
+	protected boolean isAggregateProject(MavenProject project) {
 		List<String> modules = project.getModules();
 		String packaging = project.getPackaging();
 		return "pom".equalsIgnoreCase(packaging) || !modules.isEmpty(); //$NON-NLS-1$
 	}
 
-	private String joinWithComma(String left, String right) {
+	protected String joinWithComma(String left, String right) {
 		if (left.isEmpty()) {
 			return right;
 		}
@@ -404,6 +404,22 @@ public class MavenAdapter {
 	public static String calculateJsparrowTempFolderPath() {
 		String file = System.getProperty(JAVA_TMP);
 		return file + File.separator + JSPARROW_TEMP_FOLDER;
+	}
+	
+	protected MavenProject getRootProject() {
+		return this.rootProject;
+	}
+	
+	protected void setRootProject(MavenProject project) {
+		this.rootProject = project;
+	}
+	
+	protected File getDefaultYamlFile() {
+		return this.defaultYamlFile;
+	}
+	
+	protected void setDefaultYamlFile(File file) {
+		this.defaultYamlFile = file;
 	}
 
 	/**

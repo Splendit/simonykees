@@ -28,7 +28,7 @@ public class EmbeddedMaven {
 	
 	public EmbeddedMaven(Log log, String mavenHome) {
 		this.log = log;
-		this.mavenHome = mavenHome;
+		setMavenHome(mavenHome);
 	}
 	
 	/**
@@ -36,17 +36,18 @@ public class EmbeddedMaven {
 	 * from resources to temp folder, set execute rights and use its maven home
 	 * location.
 	 */
-	public String prepareMaven(String jsarrowTempPath) {
+	public String prepareMaven() {
+		String jsarrowTempPath = MavenAdapter.calculateJsparrowTempFolderPath();
 		String newMavenHome = null;
-
-		if (null != mavenHome && !mavenHome.isEmpty() && !mavenHome.endsWith("EMBEDDED")) { //$NON-NLS-1$
-			newMavenHome = mavenHome;
+		String home = getMavenHome();
+		if (null != home && !home.isEmpty() && !home.endsWith("EMBEDDED")) { //$NON-NLS-1$
+			newMavenHome = home;
 		} else {
 			log.debug(Messages.Adapter_embededMavenVersionDetected);
 
 			String tempZipPath = jsarrowTempPath + File.separator + "maven"; //$NON-NLS-1$
 
-			try (InputStream mavenZipInputStream = getClass().getResourceAsStream("/apache-maven-3.5.2-bin.zip")) { //$NON-NLS-1$
+			try (InputStream mavenZipInputStream = getMavenZipInputStream()) {
 				mavenHomeUnzipped += tempZipPath;
 				unzip(mavenZipInputStream, tempZipPath);
 				newMavenHome = mavenHomeUnzipped;
@@ -58,6 +59,10 @@ public class EmbeddedMaven {
 		}
 
 		return newMavenHome;
+	}
+
+	protected InputStream getMavenZipInputStream() {
+		return getClass().getResourceAsStream("/apache-maven-3.5.2-bin.zip"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -141,8 +146,7 @@ public class EmbeddedMaven {
 		return this.mavenHome;
 	}
 	
-	private void setMavenHome(String mavenHome) {
+	protected void setMavenHome(String mavenHome) {
 		this.mavenHome = mavenHome;
 	}
-
 }

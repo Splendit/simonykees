@@ -232,7 +232,7 @@ public class BundleStarter {
 		};
 	}
 
-	public boolean isStandAloneStarted() {
+	public boolean isStandaloneStarted() {
 		return this.standaloneStarted;
 	}
 }

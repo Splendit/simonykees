@@ -88,8 +88,6 @@ public class RefactorMojo extends AbstractMojo {
 				}
 			}
 
-
-
 			serviceInstance.addProjectConfiguration(project, log, configFile);
 
 		} catch (BundleException | InterruptedException e1) {
