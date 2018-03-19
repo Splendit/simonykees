@@ -9,6 +9,8 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
+import eu.jsparrow.adapter.i18n.Messages;
+
 /**
  * 
  * @author Ardit Ymeri
@@ -52,11 +54,11 @@ public class StandaloneAdapter {
 		MavenAdapter adapterInstance = getMavenAdapterInstance();
 
 		if (adapterInstance != null) {
-			log.debug("Adapter instance is already created..."); //$NON-NLS-1$
+			log.warn(Messages.StandaloneAdapter_adapterInstanceAlreadyCreated);
 			return true;
 		}
 
-		log.info("Creating adapter instance..."); //$NON-NLS-1$
+		log.debug(Messages.StandaloneAdapter_creatingAdapterInstance);
 		MavenProject project = configuration.getProject();
 		Optional<File> defaultYamlFile = configuration.getDefaultYamlFile();
 		if(defaultYamlFile.isPresent()) {			
@@ -67,7 +69,7 @@ public class StandaloneAdapter {
 
 		if (adapterInstance.isJsparrowStarted(project)) {
 			adapterInstance.setJsparrowRunningFlag();
-			log.error("jSparrow is already running!"); //$NON-NLS-1$
+			log.error(Messages.StandaloneAdapter_jsparrowAlreadyRunning);
 			return false;
 		}
 		adapterInstance.prepareWorkingDirectory();
@@ -121,7 +123,7 @@ public class StandaloneAdapter {
 	public void addProjectConfiguration(MavenProject project, Log log, File configFile) {
 		MavenAdapter mavenAdapterInstance = getMavenAdapterInstance();
 		if (mavenAdapterInstance == null) {
-			log.error("Maven adapter is not created"); //$NON-NLS-1$
+			log.error(Messages.StandaloneAdapter_mavenAdapterAlreadyCreated);
 			return;
 		}
 
@@ -135,7 +137,7 @@ public class StandaloneAdapter {
 	public void startStandaloneBundle(Log log) throws BundleException, MojoExecutionException, InterruptedException {
 		MavenAdapter mavenAdapterInstance = getMavenAdapterInstance();
 		if (mavenAdapterInstance == null) {
-			log.error("Maven adapter is not created");
+			log.error(Messages.StandaloneAdapter_mavenAdapterInstanceNotCreated);
 			return;
 		}
 		Map<String, String> bundleConfiguration = mavenAdapterInstance.getConfiguration();

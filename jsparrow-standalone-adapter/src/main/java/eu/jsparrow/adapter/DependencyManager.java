@@ -13,6 +13,14 @@ import org.apache.maven.shared.invoker.InvocationRequest;
 import org.apache.maven.shared.invoker.Invoker;
 import org.apache.maven.shared.invoker.MavenInvocationException;
 
+import eu.jsparrow.adapter.i18n.Messages;
+
+/**
+ * 
+ * @author Ardit Ymeri
+ * 
+ *
+ */
 public class DependencyManager {
 
 	protected static final String OUTPUT_DIRECTORY_OPTION_KEY = "outputDirectory"; //$NON-NLS-1$
@@ -31,7 +39,7 @@ public class DependencyManager {
 	 * needed dependencies to the temp folder for use from bundles.
 	 */
 	public void extractAndCopyDependencies(MavenProject project, String mavenHome, String outputDirectorySuffix) {
-		log.debug("Extract and copy dependencies");
+		log.debug(Messages.DependencyManager_extractAndCopyDependencies);
 
 		final InvocationRequest request = new DefaultInvocationRequest();
 		final Properties props = new Properties();

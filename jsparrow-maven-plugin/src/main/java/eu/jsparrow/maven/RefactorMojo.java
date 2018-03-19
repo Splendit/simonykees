@@ -18,6 +18,7 @@ import org.osgi.framework.BundleException;
 import eu.jsparrow.adapter.StandaloneAdapter;
 import eu.jsparrow.adapter.MavenParameters;
 import eu.jsparrow.maven.enums.StandaloneMode;
+import eu.jsparrow.maven.i18n.Messages;
 
 /**
  * Starts Equinox framework and headless version of jSparrow Eclipse plugin.
@@ -26,7 +27,6 @@ import eu.jsparrow.maven.enums.StandaloneMode;
  * @since 2.2.1
  *
  */
-@SuppressWarnings("nls")
 @Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, requiresProject = true)
 public class RefactorMojo extends AbstractMojo {
 
@@ -83,12 +83,12 @@ public class RefactorMojo extends AbstractMojo {
 
 				boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
 				if (!adapterLoadad) {
-					throw new MojoExecutionException("jSparrow is already running...");
+					throw new MojoExecutionException(Messages.RefactorMojo_jsparrowAlreadyRunning);
 				}
 			}
 			serviceInstance.addProjectConfiguration(project, log, configFile);
 			if (serviceInstance.allProjectsLoaded()) {
-				log.info("All projects are loaded ... "); //$NON-NLS-1$
+				log.info(Messages.RefactorMojo_allProjectsLoaded);
 				serviceInstance.startStandaloneBundle(log);
 			}
 

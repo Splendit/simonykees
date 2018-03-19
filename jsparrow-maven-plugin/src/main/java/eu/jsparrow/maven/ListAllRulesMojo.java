@@ -12,6 +12,7 @@ import org.osgi.framework.BundleException;
 import eu.jsparrow.adapter.MavenParameters;
 import eu.jsparrow.adapter.StandaloneAdapter;
 import eu.jsparrow.maven.enums.StandaloneMode;
+import eu.jsparrow.maven.i18n.Messages;
 
 /**
  * This MOJO lists all rules with id, name and description. By specifying
@@ -59,7 +60,7 @@ public class ListAllRulesMojo extends AbstractMojo {
 				
 				boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
 				if (!adapterLoadad) {
-					throw new MojoExecutionException("jSparrow is already running...");
+					throw new MojoExecutionException(Messages.ListAllRulesMojo_jsparrowAlreadyRunning);
 				}
 				
 				serviceInstance.startStandaloneBundle(log);

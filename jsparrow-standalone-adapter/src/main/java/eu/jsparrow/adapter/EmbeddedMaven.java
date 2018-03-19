@@ -17,6 +17,11 @@ import org.eclipse.osgi.util.NLS;
 
 import eu.jsparrow.adapter.i18n.Messages;
 
+/**
+ * 
+ * @author Ardit Ymeri
+ *
+ */
 public class EmbeddedMaven {
 	
 	private static final int BUFFER_SIZE = 4096;
@@ -73,7 +78,7 @@ public class EmbeddedMaven {
 	 * @throws IOException
 	 */
 	private void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
-		String loggerInfo = NLS.bind("file unzip: {0}", filePath); //$NON-NLS-1$
+		String loggerInfo = NLS.bind(Messages.EmbeddedMaven_fileUnzip, filePath);
 		log.debug(loggerInfo);
 
 		try (FileOutputStream fos = new FileOutputStream(filePath);
@@ -117,7 +122,7 @@ public class EmbeddedMaven {
 			destDir.mkdir();
 		}
 
-		String loggerInfo = NLS.bind("Unzip temporary maven installation to: {0}", destDir.toString()); //$NON-NLS-1$
+		String loggerInfo = NLS.bind(Messages.EmbeddedMaven_unzipTemporaryMavenInstallation, destDir.toString()); 
 		log.debug(loggerInfo);
 
 		ZipInputStream zipIn = new ZipInputStream(zipInputStream);
@@ -134,7 +139,7 @@ public class EmbeddedMaven {
 				// if the entry is a directory, make the directory
 				File dir = new File(filePath);
 				dir.mkdir();
-				log.debug("create dir: {0}" + dir.getAbsoluteFile()); //$NON-NLS-1$
+				log.debug(Messages.EmbeddedMaven_createDir + dir.getAbsoluteFile());
 			}
 			zipIn.closeEntry();
 			entry = zipIn.getNextEntry();

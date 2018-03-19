@@ -22,6 +22,13 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Constants;
 
+import eu.jsparrow.adapter.i18n.Messages;
+
+/**
+ * 
+ * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
+ *
+ */
 public class MavenAdapter {
 
 	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
@@ -107,7 +114,7 @@ public class MavenAdapter {
 		addConfigurationKeyValue(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
 		addConfigurationKeyValue(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, projcetName);
 		String yamlFilePath = findYamlFilePath(project, configFile);
-		log.info("jSparrow configuration file: " + yamlFilePath);
+		log.info(Messages.MavenAdapter_jsparrowConfigurationFile + yamlFilePath);
 		addConfigurationKeyValue(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
 		addConfigurationKeyValue(PROJECT_JAVA_VERSION + DOT + projectIdentifier, getCompilerCompliance(project));
 	}
@@ -226,7 +233,7 @@ public class MavenAdapter {
 			System.setProperty(USER_DIR, directoryAbsolutePath);
 			addConfigurationKeyValue(OSGI_INSTANCE_AREA_CONSTANT, directoryAbsolutePath);
 
-			String loggerInfo = NLS.bind("Set user.dir to {0}", directoryAbsolutePath);
+			String loggerInfo = NLS.bind(Messages.MavenAdapter_setUserDir, directoryAbsolutePath);
 			log.info(loggerInfo);
 		} else {
 			throw new InterruptedException("Could not create temp folder"); //$NON-NLS-1$
@@ -313,21 +320,21 @@ public class MavenAdapter {
 			return true;
 		}
 
-		String remainingContent = "";
+		String remainingContent = ""; //$NON-NLS-1$
 		try (Stream<String> linesStream = Files.lines(path)) {
 			remainingContent = linesStream.filter(id -> !sessionIds.contains(id))
-				.collect(Collectors.joining("\n"))
+				.collect(Collectors.joining("\n")) //$NON-NLS-1$
 				.trim();
 
 		} catch (IOException e) {
-			log.warn("Cannot read the jsparrow lock file...", e);
+			log.warn(Messages.MavenAdapter_cannotReadJsparrowLockFile, e);
 		}
 
 		try {
 			Files.write(path, remainingContent.getBytes());
 			return remainingContent.isEmpty();
 		} catch (IOException e) {
-			log.warn("Cannot write to the jsparrow lock file...", e);
+			log.warn(Messages.MavenAdapter_cannotWriteToJsparrowLockFile, e);
 		}
 
 		return false;
@@ -387,7 +394,7 @@ public class MavenAdapter {
 		try {
 			Files.write(path, conntent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (IOException e) {
-			log.warn("Cannot write to jsparrow lock file...", e);
+			log.warn(Messages.MavenAdapter_cannotWriteToJsparrowLockFile, e);
 		}
 	}
 
@@ -447,7 +454,7 @@ public class MavenAdapter {
 		try (Stream<String> linesStream = Files.lines(path)) {
 			return linesStream.anyMatch(projectId::equals);
 		} catch (IOException e) {
-			log.warn("Cannot read the jsparrow lock file...", e);
+			log.warn(Messages.MavenAdapter_cannotReadJsparrowLockFile, e);
 		}
 
 		return false;

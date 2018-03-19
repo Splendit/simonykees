@@ -19,6 +19,8 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
+import eu.jsparrow.adapter.i18n.Messages;
+
 /**
  * 
  * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
@@ -71,7 +73,7 @@ public class BundleStarter {
 	 *             if the framework cannot be started.
 	 */
 	private void startEquinoxFramework(Map<String, String> configuration) throws BundleException {
-		log.debug("Start equinox");
+		log.debug(Messages.BundleStarter_startEquinox);
 
 		ServiceLoader<FrameworkFactory> ffs = ServiceLoader.load(FrameworkFactory.class);
 		FrameworkFactory frameworkFactory = ffs.iterator()
@@ -97,7 +99,7 @@ public class BundleStarter {
 				.startsWith(STANDALONE_BUNDLE_NAME))
 			.forEach(bundle -> {
 				try {
-					String loggerInfo = NLS.bind("Starting BUNDLE: {0}, resolution: {1}", bundle.getSymbolicName(),
+					String loggerInfo = NLS.bind(Messages.BundleStarter_startingBundle, bundle.getSymbolicName(),
 							bundle.getState());
 					log.debug(loggerInfo);
 
@@ -119,7 +121,7 @@ public class BundleStarter {
 	 * @throws BundleException
 	 */
 	protected List<Bundle> loadBundles() throws BundleException, MojoExecutionException {
-		log.debug("Load OSGi bundles");
+		log.debug(Messages.BundleStarter_loadOsgiBundles);
 
 		bundleContext = getBundleContext();
 		final List<Bundle> bundles = new ArrayList<>();
@@ -159,7 +161,7 @@ public class BundleStarter {
 		framework.waitForStop(0);
 		standaloneStarted = false;
 
-		log.debug("Equinox stopped");
+		log.debug(Messages.BundleStarter_equinoxStopped);
 
 		String exitMessage = bundleContext.getProperty("eu.jsparrow.standalone.exit.message"); //$NON-NLS-1$
 		if (exitMessage != null && !exitMessage.isEmpty()) {
