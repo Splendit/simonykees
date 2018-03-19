@@ -19,7 +19,7 @@ public class ASTNodeBuilder {
 
 	}
 
-	public static Block createBlock(String string) throws Exception {
+	public static Block createBlock(String string) throws JdtUnitException {
 		@SuppressWarnings("deprecation") // TODO improvement needed, see SIM-878
 		ASTParser astParser = ASTParser.newParser(AST.JLS8);
 		astParser.setSource(string.toCharArray());

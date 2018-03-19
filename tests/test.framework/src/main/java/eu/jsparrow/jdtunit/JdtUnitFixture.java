@@ -86,9 +86,11 @@ public class JdtUnitFixture {
 	 * <li>A class containing a single method within that file
 	 * </ul>
 	 * 
+	 * @throws JdtUnitException
+	 * 
 	 * @throws Exception
 	 */
-	public void setUp() throws Exception {
+	public void setUp() throws JdtUnitException {
 		javaProject = new JavaProjectBuilder().name(PROJECT_FIXTURE_NAME)
 			.options(options)
 			.build();
@@ -128,9 +130,12 @@ public class JdtUnitFixture {
 	/**
 	 * Resets the Fixture to its default state
 	 * 
+	 * @throws BadLocationException
+	 * @throws JavaModelException
+	 * 
 	 * @throws Exception
 	 */
-	public void clear() throws Exception {
+	public void clear() throws JavaModelException, BadLocationException {
 		astRoot.imports()
 			.clear();
 		methodDeclaration.getBody()
@@ -154,9 +159,11 @@ public class JdtUnitFixture {
 	 * 
 	 * @param name
 	 *            the import as fully qualified string, e.g. at.splendit.MyClass
+	 * @throws BadLocationException
+	 * @throws JavaModelException
 	 * @throws Exception
 	 */
-	public void addImport(String name) throws Exception {
+	public void addImport(String name) throws JavaModelException, BadLocationException {
 		ImportDeclaration im = ast.newImportDeclaration();
 		im.setName(ast.newName(name));
 		astRoot.imports()
@@ -170,9 +177,12 @@ public class JdtUnitFixture {
 	 * 
 	 * @param statements
 	 *            the statements to add separated by semicolons
+	 * @throws BadLocationException
+	 * @throws JavaModelException
+	 * @throws JdtUnitException
 	 * @throws Exception
 	 */
-	public void addMethodBlock(String statements) throws Exception {
+	public void addMethodBlock(String statements) throws JavaModelException, BadLocationException, JdtUnitException {
 		ASTNode convertedAstNodeWithMethodBody = ASTNode.copySubtree(ast, createBlockFromString(statements));
 		Block block = (Block) convertedAstNodeWithMethodBody;
 
@@ -196,7 +206,7 @@ public class JdtUnitFixture {
 		return methodDeclaration.getBody();
 	}
 
-	private CompilationUnit saveChanges() throws Exception {
+	private CompilationUnit saveChanges() throws JavaModelException, BadLocationException {
 		Document document = new Document(compilationUnit.getSource());
 		TextEdit res = astRoot.rewrite(document, options);
 		res.apply(document);
@@ -213,9 +223,12 @@ public class JdtUnitFixture {
 	 * 
 	 * @param visitor
 	 *            The visitor to accept
+	 * @throws IllegalArgumentException
+	 * @throws JavaModelException
+	 * @throws BadLocationException
 	 * @throws Exception
 	 */
-	public void accept(ASTVisitor visitor) throws Exception {
+	public void accept(ASTVisitor visitor) throws JavaModelException, BadLocationException {
 		astRoot.accept(visitor);
 		TextEdit edit = astRewrite.rewriteAST();
 		if (edit.hasChildren()) {
@@ -224,7 +237,7 @@ public class JdtUnitFixture {
 		astRoot = saveChanges(edit);
 	}
 
-	private CompilationUnit saveChanges(TextEdit textEdit) throws Exception {
+	private CompilationUnit saveChanges(TextEdit textEdit) throws JavaModelException, BadLocationException {
 		Document document = new Document(compilationUnit.getSource());
 		textEdit.apply(document);
 		compilationUnit.getBuffer()
