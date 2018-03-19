@@ -57,6 +57,7 @@
 						</execution>
 					</executions>
 					<dependencies>
+						<!-- used maven obfuscation library -->
 						<dependency>
 							<groupId>net.sf.proguard</groupId>
 							<artifactId>proguard-base</artifactId>
@@ -66,6 +67,8 @@
 					</dependencies>
 					<configuration>
 						<obfuscate>true</obfuscate>
+						<!-- defines a proguard configuration that is loaded addition to the 
+							options and libs definition in the pom -->
 						<proguardInclude>${basedir}/proguard.conf</proguardInclude>
 						<libs>
 							<lib>${java.home}/lib/rt.jar</lib>
@@ -120,6 +123,9 @@
 								-printconfiguration
 								${project.build.directory}/${project.artifactId}.conf
 							</option>
+							<!-- is used to add additional options that can not be defined within 
+								the proguard.conf, because overriding the options section within a plugin 
+								definition replaces the whole options definition (i.e.: references to files) -->
 							<option>${proguard.extra.options}</option>
 						</options>
 					</configuration>
@@ -181,6 +187,5 @@
 			</build>
 		</profile>
 	</profiles>
-
 </project>
 	
