@@ -92,7 +92,7 @@
 							<option>
 								-renamesourcefileattribute SourceFile
 							</option>
-							<!-- Following atributes are kept intact -->
+							<!-- Following attributes are kept intact -->
 							<option>
 								-keepattributes
 								*Annotation*,Signature,LineNumberTable,SourceFile
@@ -129,19 +129,6 @@
 							<option>${proguard.extra.options}</option>
 						</options>
 					</configuration>
-				</plugin>
-				<plugin>
-					<artifactId>maven-clean-plugin</artifactId>
-					<version>2.6.1</version>
-					<executions>
-						<execution>
-							<id>default-clean</id>
-							<phase>clean</phase>
-							<goals>
-								<goal>clean</goal>
-							</goals>
-						</execution>
-					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -188,4 +175,3 @@
 		</profile>
 	</profiles>
 </project>
-	
