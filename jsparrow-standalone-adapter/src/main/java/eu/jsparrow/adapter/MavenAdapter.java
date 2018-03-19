@@ -44,6 +44,7 @@ public class MavenAdapter {
 	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
+	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
 	private static final String LOCK_FILE_NAME = "lock.txt"; //$NON-NLS-1$
 
 	private Log log;
@@ -55,10 +56,14 @@ public class MavenAdapter {
 	private File defaultYamlFile;
 
 	public MavenAdapter(MavenProject rootProject, Log log, File defaultYamlFile) {
+		this(rootProject, log);
+		this.defaultYamlFile = defaultYamlFile;
+	}
+	
+	public MavenAdapter(MavenProject rootProject, Log log) {
 		setRootProject(rootProject);
 		this.log = log;
 		this.sessionProjects = new HashMap<>();
-		this.defaultYamlFile = defaultYamlFile;
 	}
 
 	/**
@@ -179,6 +184,7 @@ public class MavenAdapter {
 		configuration.put(SELECTED_PROFILE, config.getProfile()
 			.orElse("")); //$NON-NLS-1$
 		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
+		config.getRuleId().ifPresent(ruleId -> configuration.put(LIST_RULES_SELECTED_ID, ruleId));
 	}
 
 	private void addConfigurationKeyValue(String key, String value) {

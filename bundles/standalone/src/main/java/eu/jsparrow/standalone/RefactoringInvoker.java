@@ -54,7 +54,7 @@ public class RefactoringInvoker {
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
 	private static final String DOT = ".";  //$NON-NLS-1$
 
-	protected List<StandaloneConfig> standaloneConfigs;
+	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
 
 	public RefactoringInvoker() {
 		prepareWorkingDirectory();

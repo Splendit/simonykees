@@ -8,14 +8,14 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 
 /**
- * A class for wrapping the parameters injected in the maven plugin. 
+ * A class for wrapping the parameters injected in the maven plugin.
  * 
  * @author Ardit Ymeri
  * @since 2.5.0
  *
  */
 public class MavenParameters {
-	
+
 	private Log log;
 	private MavenProject project;
 	private File defaultYamlFile;
@@ -24,25 +24,35 @@ public class MavenParameters {
 	private String profile;
 	private String mode;
 	private boolean useDefaultConfig;
-	
-	public MavenParameters(MavenProject project, Log log, File defaultYamlFile, MavenSession mavenSession, String mode) {
-		this.project = project;
-		this.log = log;
+	private String ruleId;
+
+	public MavenParameters(MavenProject project, Log log, File defaultYamlFile, MavenSession mavenSession,
+			String mode) {
+		this(project, log, mode);
 		this.defaultYamlFile = defaultYamlFile;
 		this.mavenSession = mavenSession;
+	}
+
+	public MavenParameters(MavenProject project, Log log, String mode) {
+		this.project = project;
+		this.log = log;
 		this.mode = mode;
 	}
-	
+
 	public void setProfile(String profile) {
 		this.profile = profile;
 	}
-	
+
 	public void setUseDefaultConfig(boolean useDefaultConfig) {
 		this.useDefaultConfig = useDefaultConfig;
 	}
-	
+
 	public void setMavenHome(String mavenHome) {
 		this.mavenHome = mavenHome;
+	}
+
+	public void setRuleId(String ruleId) {
+		this.ruleId = ruleId;
 	}
 
 	public Log getLog() {
@@ -53,12 +63,12 @@ public class MavenParameters {
 		return project;
 	}
 
-	public File getDefaultYamlFile() {
-		return defaultYamlFile;
+	public Optional<File> getDefaultYamlFile() {
+		return Optional.ofNullable(defaultYamlFile);
 	}
 
-	public MavenSession getMavenSession() {
-		return mavenSession;
+	public Optional<MavenSession> getMavenSession() {
+		return Optional.ofNullable(mavenSession);
 	}
 
 	public Optional<String> getMavenHome() {
@@ -75,5 +85,10 @@ public class MavenParameters {
 
 	public Optional<Boolean> getUseDefaultConfig() {
 		return Optional.ofNullable(useDefaultConfig);
+	}
+
+	public Optional<String> getRuleId() {
+		return Optional.ofNullable(ruleId)
+			.filter(s -> !s.isEmpty());
 	}
 }

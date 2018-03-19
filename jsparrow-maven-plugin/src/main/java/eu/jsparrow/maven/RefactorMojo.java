@@ -74,7 +74,6 @@ public class RefactorMojo extends AbstractMojo {
 		Log log = getLog();
 		StandaloneAdapter serviceInstance = StandaloneAdapter.getInstance();
 		String mode = StandaloneMode.REFACTOR.name();
-		boolean adapterLoadad = false;
 		try {
 			if (!serviceInstance.isAdapterInitialized()) {
 				MavenParameters config = new MavenParameters(project, log, configFile, mavenSession, mode);
@@ -82,12 +81,11 @@ public class RefactorMojo extends AbstractMojo {
 				config.setProfile(profile);
 				config.setUseDefaultConfig(useDefaultConfig);
 
-				adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
+				boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
 				if (!adapterLoadad) {
 					throw new MojoExecutionException("jSparrow is already running...");
 				}
 			}
-
 			serviceInstance.addProjectConfiguration(project, log, configFile);
 			if (serviceInstance.allProjectsLoaded()) {
 				log.info("All projects are loaded ... "); //$NON-NLS-1$

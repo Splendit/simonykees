@@ -2,6 +2,7 @@ package eu.jsparrow.adapter;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -57,7 +58,12 @@ public class StandaloneAdapter {
 
 		log.info("Creating adapter instance..."); //$NON-NLS-1$
 		MavenProject project = configuration.getProject();
-		adapterInstance = createMavenAdapterInstance(configuration, log, project);
+		Optional<File> defaultYamlFile = configuration.getDefaultYamlFile();
+		if(defaultYamlFile.isPresent()) {			
+			adapterInstance = createMavenAdapterInstance(defaultYamlFile.get(), log, project);
+		} else {
+			adapterInstance = createMavenAdapterInstance(log, project);
+		}
 
 		if (adapterInstance.isJsparrowStarted(project)) {
 			adapterInstance.setJsparrowRunningFlag();
@@ -65,7 +71,7 @@ public class StandaloneAdapter {
 			return false;
 		}
 		adapterInstance.prepareWorkingDirectory();
-		adapterInstance.storeProjects(configuration.getMavenSession());
+		configuration.getMavenSession().ifPresent(adapterInstance::storeProjects);
 		adapterInstance.lockProjects();
 
 		EmbeddedMaven embeddedMavenInstance = createEmbeddedMavenInstance(configuration, log);
@@ -94,8 +100,12 @@ public class StandaloneAdapter {
 			.orElse("")); //$NON-NLS-1$
 	}
 
-	protected MavenAdapter createMavenAdapterInstance(MavenParameters configuration, Log log, MavenProject project) {
-		return new MavenAdapter(project, log, configuration.getDefaultYamlFile());
+	protected MavenAdapter createMavenAdapterInstance(File defaultYamlFile, Log log, MavenProject project) {
+		return new MavenAdapter(project, log, defaultYamlFile);
+	}
+	
+	protected MavenAdapter createMavenAdapterInstance(Log log, MavenProject project) {
+		return new MavenAdapter(project, log);
 	}
 
 	protected void setMavenAdapter(MavenAdapter mavenAdapter2) {
@@ -131,6 +141,7 @@ public class StandaloneAdapter {
 		Map<String, String> bundleConfiguration = mavenAdapterInstance.getConfiguration();
 		BundleStarter bundleStarter = createNewBundleStarter(log);
 		addShutDownHook(mavenAdapterInstance, bundleStarter);
+		
 		bundleStarter.runStandalone(bundleConfiguration);
 	}
 

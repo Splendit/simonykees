@@ -1,18 +1,17 @@
 package eu.jsparrow.maven;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
+import eu.jsparrow.adapter.MavenParameters;
+import eu.jsparrow.adapter.StandaloneAdapter;
 import eu.jsparrow.maven.enums.StandaloneMode;
-import eu.jsparrow.maven.util.MavenHelper;
 
 /**
  * This MOJO lists all rules with id, name and description. By specifying
@@ -42,33 +41,32 @@ public class ListAllRulesMojo extends AbstractMojo {
 	@Parameter(property = "rules")
 	private String ruleId;
 
-	// CONSTANTS
-	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
-	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
-
 	/**
 	 * MOJO entry point. Registers shutdown hook for clean up and starts equinox
 	 * with the given configuration
 	 */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		MavenHelper mavenHelper = new MavenHelper(project, mavenHome, getLog());
-
-		Runtime.getRuntime()
-			.addShutdownHook(mavenHelper.createShutdownHook());
-
+		
+		Log log = getLog();
+		StandaloneAdapter serviceInstance = StandaloneAdapter.getInstance();
+		String mode = StandaloneMode.LIST_RULES.name();
+		
 		try {
-			final Map<String, String> configuration = new HashMap<>();
-			configuration.put(STANDALONE_MODE_KEY, StandaloneMode.LIST_RULES.name());
-			if (ruleId != null && !ruleId.isEmpty()) {
-				configuration.put(LIST_RULES_SELECTED_ID, ruleId);
+			if(!serviceInstance.isAdapterInitialized()) {
+				MavenParameters config = new MavenParameters(project, log, mode);
+				config.setRuleId(ruleId);
+				
+				boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
+				if (!adapterLoadad) {
+					throw new MojoExecutionException("jSparrow is already running...");
+				}
+				
+				serviceInstance.startStandaloneBundle(log);
 			}
-
-			mavenHelper.startOSGI(configuration);
-		} catch (BundleException | InterruptedException e) {
-			getLog().debug(e.getMessage(), e);
-			getLog().error(e.getMessage());
-		}
+		} catch (BundleException | InterruptedException e1) {
+			log.debug(e1.getMessage(), e1);
+			log.error(e1.getMessage());
+		} 
 	}
-
 }

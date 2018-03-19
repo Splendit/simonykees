@@ -15,12 +15,10 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -62,8 +60,7 @@ public class EmbeddedMavenTest {
 		embeddedMaven.unzip(new FileInputStream(zipInputStream), folder.getRoot()
 			.getAbsolutePath());
 
-		List<String> fileList = Files.list(folder.getRoot()
-			.toPath())
+		List<String> fileList = Files.list(folder.getRoot().toPath())
 			.map(x -> x.getFileName()
 				.toString())
 			.collect(Collectors.toList());

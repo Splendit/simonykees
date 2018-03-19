@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -40,9 +41,12 @@ public class StandAloneAdapterTest {
 		MavenParameters configuration = mock(MavenParameters.class);
 		MavenProject project = mock(MavenProject.class);
 		Log log = mock(Log.class);
+		File file = mock(File.class);
 
 		when(configuration.getLog()).thenReturn(log);
 		when(configuration.getProject()).thenReturn(project);
+		when(configuration.getDefaultYamlFile()).thenReturn(Optional.of(file));
+		when(configuration.getMavenSession()).thenReturn(Optional.empty());
 		when(mavenAdapter.isJsparrowStarted(project)).thenReturn(false);
 
 		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(configuration);
@@ -71,9 +75,11 @@ public class StandAloneAdapterTest {
 		MavenParameters configuration = mock(MavenParameters.class);
 		MavenProject project = mock(MavenProject.class);
 		Log log = mock(Log.class);
+		File file = mock(File.class);
 
 		when(configuration.getLog()).thenReturn(log);
 		when(configuration.getProject()).thenReturn(project);
+		when(configuration.getDefaultYamlFile()).thenReturn(Optional.of(file));
 		when(mavenAdapter.isJsparrowStarted(project)).thenReturn(true);
 
 		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(configuration);
@@ -101,12 +107,12 @@ public class StandAloneAdapterTest {
 		MavenProject project = mock(MavenProject.class);
 		Log log = mock(Log.class);
 
-		when(embaddedMaven.getMavenHome()).thenReturn("maven-home");
+		when(embaddedMaven.getMavenHome()).thenReturn("maven-home"); //$NON-NLS-1$
 		when(mavenAdapter.allProjectConfigurationLoaded()).thenReturn(false);
-		when(mavenAdapter.findProjectIdentifier(project)).thenReturn("projectId");
+		when(mavenAdapter.findProjectIdentifier(project)).thenReturn("projectId"); //$NON-NLS-1$
 		standaloneAdapter.addProjectConfiguration(project, log, configFile);
 
-		verify(dependencyManager).extractAndCopyDependencies(project, "maven-home", "projectId");
+		verify(dependencyManager).extractAndCopyDependencies(project, "maven-home", "projectId"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Test
@@ -138,7 +144,7 @@ public class StandAloneAdapterTest {
 			throws MojoExecutionException, BundleException, InterruptedException {
 		Log log = mock(Log.class);
 		standaloneAdapter.startStandaloneBundle(log);
-		verify(log).error("Maven adapter is not created");
+		verify(log).error("Maven adapter is not created"); //$NON-NLS-1$
 	}
 
 	@Test
@@ -148,8 +154,6 @@ public class StandAloneAdapterTest {
 		@SuppressWarnings("unchecked")
 		Map<String, String> configuration = mock(Map.class);
 		Log log = mock(Log.class);
-		MavenProject project = mock(MavenProject.class);
-		File file = mock(File.class);
 
 		when(mavenAdapter.getConfiguration()).thenReturn(configuration);
 		standaloneAdapter.startStandaloneBundle(log);
@@ -160,8 +164,7 @@ public class StandAloneAdapterTest {
 	class TestableStandaloneAdapter extends StandaloneAdapter {
 
 		@Override
-		protected MavenAdapter createMavenAdapterInstance(MavenParameters configuration, Log log,
-				MavenProject project) {
+		protected MavenAdapter createMavenAdapterInstance(File file, Log log, MavenProject project) {
 			return mavenAdapter;
 		}
 
