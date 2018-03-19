@@ -189,11 +189,11 @@ public class JdtUnitFixture {
 		methodDeclaration.setBody(block);
 		this.astRoot = this.saveChanges();
 	}
-	
+
 	/**
 	 * Returns the list of the definded imports
 	 */
-	public List<ImportDeclaration> getImports(){
+	public List<ImportDeclaration> getImports() {
 		return ASTNodeUtil.convertToTypedList(astRoot.imports(), ImportDeclaration.class);
 	}
 
@@ -285,8 +285,7 @@ public class JdtUnitFixture {
 			.build();
 	}
 
-	public ICompilationUnit addCompilationUnit(IPackageFragment packageFragment, String name)
-			throws JdtUnitException {
+	public ICompilationUnit addCompilationUnit(IPackageFragment packageFragment, String name) throws JdtUnitException {
 		return new CompilationUnitBuilder(packageFragment).setName(name)
 			.build();
 	}

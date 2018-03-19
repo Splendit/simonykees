@@ -23,7 +23,7 @@ import eu.jsparrow.jdtunit.JdtUnitException;
 @SuppressWarnings("nls")
 public class JavaProjectBuilder {
 
-	private String name = "DefaultProject"; 
+	private String name = "DefaultProject";
 
 	private HashMap<String, String> options = new HashMap<>();
 
@@ -44,7 +44,7 @@ public class JavaProjectBuilder {
 
 	public IJavaProject build() throws JdtUnitException {
 		IProject project = createIProject();
-		
+
 		IProjectDescription description;
 		try {
 			description = project.getDescription();
@@ -69,7 +69,7 @@ public class JavaProjectBuilder {
 		}
 		return project;
 	}
-	
+
 	private IJavaProject createJavaProject(IProject project) throws JdtUnitException {
 		IJavaProject javaProject = JavaCore.create(project);
 

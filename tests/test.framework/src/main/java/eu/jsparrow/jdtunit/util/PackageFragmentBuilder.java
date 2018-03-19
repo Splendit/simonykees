@@ -18,7 +18,7 @@ public class PackageFragmentBuilder {
 	private String packageName = "DefaultPackage";
 
 	private IJavaProject javaProject;
-	
+
 	public PackageFragmentBuilder(IJavaProject javaProject) {
 		this.javaProject = javaProject;
 	}

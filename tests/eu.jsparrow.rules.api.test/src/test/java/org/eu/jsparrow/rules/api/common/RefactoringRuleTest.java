@@ -19,7 +19,6 @@ import eu.jsparrow.jdtunit.util.PackageFragmentBuilder;
 import eu.jsparrow.rules.api.test.dummies.DummyRefactoringRule;
 import eu.jsparrow.rules.common.RefactoringRule;
 
-
 /**
  * 
  * @author Hans-Jörg Schnedlitz
