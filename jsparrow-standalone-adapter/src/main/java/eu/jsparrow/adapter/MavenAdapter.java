@@ -25,8 +25,11 @@ import org.osgi.framework.Constants;
 import eu.jsparrow.adapter.i18n.Messages;
 
 /**
+ * Sets up the configuration used for starting the equinox framework.
+ * Distinguishes the properties of different projects.  
  * 
  * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
+ * @since 2.5.0
  *
  */
 public class MavenAdapter {

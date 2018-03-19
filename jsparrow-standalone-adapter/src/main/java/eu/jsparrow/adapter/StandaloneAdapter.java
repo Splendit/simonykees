@@ -12,6 +12,7 @@ import org.osgi.framework.BundleException;
 import eu.jsparrow.adapter.i18n.Messages;
 
 /**
+ * An adapter between the maven plugin and the standalone bundle. 
  * 
  * @author Ardit Ymeri
  * @since 2.5.0
@@ -43,9 +44,11 @@ public class StandaloneAdapter {
 	}
 
 	/**
+	 * Creates instances of {@link MavenAdapter}, {@link EmbeddedMaven} and {@link DependencyManager} and
+	 * sets the state of this object. 
 	 * 
-	 * @param configuration
-	 * @return
+	 * @param configuration expected maven parameters.
+	 * @return {@code true} if initialization of the state finishes successfully, or {@code false} otherwise. 
 	 * @throws InterruptedException
 	 */
 	public synchronized boolean lazyLoadMavenAdapter(MavenParameters configuration) throws InterruptedException {
@@ -115,10 +118,11 @@ public class StandaloneAdapter {
 	}
 
 	/**
+	 * Adds the configuration related to the given project in the session. 
 	 * 
-	 * @param project
-	 * @param log
-	 * @param configFile
+	 * @param project project whose configuration has to be added.
+	 * @param log maven log
+	 * @param configFile the default yaml configuration file
 	 */
 	public void addProjectConfiguration(MavenProject project, Log log, File configFile) {
 		MavenAdapter mavenAdapterInstance = getMavenAdapterInstance();
@@ -134,6 +138,10 @@ public class StandaloneAdapter {
 				mavenAdapterInstance.findProjectIdentifier(project));
 	}
 
+	/**
+	 * Runs the standalone bundle with the configuration stored in the instance 
+	 * of the current {@link MavenAdapter}. 
+	 */
 	public void startStandaloneBundle(Log log) throws BundleException, MojoExecutionException, InterruptedException {
 		MavenAdapter mavenAdapterInstance = getMavenAdapterInstance();
 		if (mavenAdapterInstance == null) {
@@ -147,6 +155,9 @@ public class StandaloneAdapter {
 		bundleStarter.runStandalone(bundleConfiguration);
 	}
 
+	/**
+	 * @return if the configuration of all projects in the session are loaded; 
+	 */
 	public boolean allProjectsLoaded() {
 
 		MavenAdapter adapterInstance = getMavenAdapterInstance();

@@ -22,6 +22,8 @@ import org.osgi.framework.launch.FrameworkFactory;
 import eu.jsparrow.adapter.i18n.Messages;
 
 /**
+ * A class containing functionalities for starting/stopping the equinox framework,
+ * and loading/starting OSGi bundles.  
  * 
  * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
  * @since 2.5.0

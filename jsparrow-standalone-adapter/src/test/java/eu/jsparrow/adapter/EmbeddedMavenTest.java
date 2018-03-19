@@ -23,6 +23,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+@SuppressWarnings("nls")
 public class EmbeddedMavenTest {
 
 	private Log log;
@@ -35,12 +36,12 @@ public class EmbeddedMavenTest {
 	@Before
 	public void setUp() throws Exception {
 		log = mock(Log.class);
-		embeddedMaven = new TestableEmbeddedMaven(log, "mavenHome"); //$NON-NLS-1$
+		embeddedMaven = new TestableEmbeddedMaven(log, "mavenHome"); 
 	}
 
 	@Test
 	public void unzip_isFile() throws Exception {
-		File zipInputStream = createDummyZip("test.txt", false); //$NON-NLS-1$
+		File zipInputStream = createDummyZip("test.txt", false);
 
 		embeddedMaven.unzip(new FileInputStream(zipInputStream), folder.getRoot()
 			.getAbsolutePath());
@@ -50,12 +51,12 @@ public class EmbeddedMavenTest {
 			.map(x -> x.getFileName()
 				.toString())
 			.collect(Collectors.toList());
-		assertThat(fileList, hasItem("test.txt")); //$NON-NLS-1$
+		assertThat(fileList, hasItem("test.txt"));
 	}
 
 	@Test
 	public void unzip_isDirectoryTrue() throws Exception {
-		File zipInputStream = createDummyZip("test/", true); //$NON-NLS-1$
+		File zipInputStream = createDummyZip("test/", true); 
 
 		embeddedMaven.unzip(new FileInputStream(zipInputStream), folder.getRoot()
 			.getAbsolutePath());
@@ -64,7 +65,7 @@ public class EmbeddedMavenTest {
 			.map(x -> x.getFileName()
 				.toString())
 			.collect(Collectors.toList());
-		assertThat(fileList, hasItem("test")); //$NON-NLS-1$
+		assertThat(fileList, hasItem("test"));
 	}
 	
 	@Test
@@ -96,7 +97,7 @@ public class EmbeddedMavenTest {
 
 		if (!isDirectory) {
 			StringBuilder sb = new StringBuilder();
-			sb.append("Test String"); //$NON-NLS-1$
+			sb.append("Test String");
 			byte[] data = sb.toString()
 				.getBytes();
 			out.write(data, 0, data.length);

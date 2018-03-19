@@ -18,8 +18,10 @@ import org.eclipse.osgi.util.NLS;
 import eu.jsparrow.adapter.i18n.Messages;
 
 /**
+ * Sets up an embedded maven installation if necessary. 
  * 
- * @author Ardit Ymeri
+ * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
+ * @since 2.5.0
  *
  */
 public class EmbeddedMaven {

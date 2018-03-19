@@ -21,7 +21,7 @@ import org.osgi.framework.BundleException;
 public class StandAloneAdapterTest {
 
 	private StandaloneAdapter standaloneAdapter;
-	private EmbeddedMaven embaddedMaven;
+	private EmbeddedMaven embeddedMaven;
 	private DependencyManager dependencyManager;
 	private MavenAdapter mavenAdapter;
 	private BundleStarter bundleStarter;
@@ -29,7 +29,7 @@ public class StandAloneAdapterTest {
 	@Before
 	public void setUp() {
 		standaloneAdapter = new TestableStandaloneAdapter();
-		embaddedMaven = mock(EmbeddedMaven.class);
+		embeddedMaven = mock(EmbeddedMaven.class);
 		dependencyManager = mock(DependencyManager.class);
 		mavenAdapter = mock(MavenAdapter.class);
 		bundleStarter = mock(BundleStarter.class);
@@ -63,7 +63,7 @@ public class StandAloneAdapterTest {
 
 		when(configuration.getLog()).thenReturn(log);
 		when(mavenAdapter.isJsparrowStarted(project)).thenReturn(false);
-		standaloneAdapter.setState(mavenAdapter, embaddedMaven, dependencyManager);
+		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
 		boolean expected = standaloneAdapter.lazyLoadMavenAdapter(configuration);
 
 		assertTrue(expected);
@@ -102,12 +102,12 @@ public class StandAloneAdapterTest {
 
 	@Test
 	public void addProjectConfiguration() throws MojoExecutionException, BundleException, InterruptedException {
-		standaloneAdapter.setState(mavenAdapter, embaddedMaven, dependencyManager);
+		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
 		File configFile = mock(File.class);
 		MavenProject project = mock(MavenProject.class);
 		Log log = mock(Log.class);
 
-		when(embaddedMaven.getMavenHome()).thenReturn("maven-home"); //$NON-NLS-1$
+		when(embeddedMaven.getMavenHome()).thenReturn("maven-home"); //$NON-NLS-1$
 		when(mavenAdapter.allProjectConfigurationLoaded()).thenReturn(false);
 		when(mavenAdapter.findProjectIdentifier(project)).thenReturn("projectId"); //$NON-NLS-1$
 		standaloneAdapter.addProjectConfiguration(project, log, configFile);
@@ -117,7 +117,7 @@ public class StandAloneAdapterTest {
 
 	@Test
 	public void allProjectsLoaded_shouldReturnTrue() {
-		standaloneAdapter.setState(mavenAdapter, embaddedMaven, dependencyManager);
+		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
 
 		when(mavenAdapter.allProjectConfigurationLoaded()).thenReturn(true);
 		boolean actual = standaloneAdapter.allProjectsLoaded();
@@ -127,7 +127,7 @@ public class StandAloneAdapterTest {
 
 	@Test
 	public void allProjectsLoaded_shouldReturnFalse() {
-		standaloneAdapter.setState(mavenAdapter, embaddedMaven, dependencyManager);
+		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
 		when(mavenAdapter.allProjectConfigurationLoaded()).thenReturn(false);
 		boolean actual = standaloneAdapter.allProjectsLoaded();
 		assertFalse(actual);
@@ -149,7 +149,7 @@ public class StandAloneAdapterTest {
 
 	@Test
 	public void startStandaloneBundle() throws MojoExecutionException, BundleException, InterruptedException {
-		standaloneAdapter.setState(mavenAdapter, embaddedMaven, dependencyManager);
+		standaloneAdapter.setState(mavenAdapter, embeddedMaven, dependencyManager);
 
 		@SuppressWarnings("unchecked")
 		Map<String, String> configuration = mock(Map.class);
@@ -169,7 +169,7 @@ public class StandAloneAdapterTest {
 		}
 
 		protected EmbeddedMaven createEmbeddedMavenInstance(MavenParameters configuration, Log log) {
-			return embaddedMaven;
+			return embeddedMaven;
 		}
 
 		@Override
