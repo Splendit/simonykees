@@ -100,7 +100,8 @@
 								-> reason not found yet -->
 							<!-- helps with lambda errors in obfuscation -->
 							<option>
-								-keepclassmembers, includedescriptorclasses, allowobfuscation class * {synthetic <![CDATA[<methods>]]>;}
+								-keepclassmembers, includedescriptorclasses, allowobfuscation
+								class * {synthetic <![CDATA[<methods>]]>;}
 							</option>
 							<!-- Modify the manifest to ensure the export packages are intact -->
 							<option>
@@ -122,6 +123,19 @@
 							<option>${proguard.extra.options}</option>
 						</options>
 					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-clean-plugin</artifactId>
+					<version>2.6.1</version>
+					<executions>
+						<execution>
+							<id>default-clean</id>
+							<phase>clean</phase>
+							<goals>
+								<goal>clean</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>
 			</plugins>
 		</pluginManagement>
