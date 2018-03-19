@@ -21,18 +21,18 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 	private static final String DATE_FORMAT_PATTERN = "MMMM dd, yyyy"; //$NON-NLS-1$
 
 	private LicenseManager licenseManager;
-	
+
 	public NetLicensingLicenseValidationService() {
 		this(LicenseManager.getInstance());
 	}
-	
+
 	public NetLicensingLicenseValidationService(LicenseManager licenseManager) {
 		this.licenseManager = licenseManager;
 	}
 
 	@Override
 	public void startValidation() {
-		if(!LicenseManager.isRunning()) {
+		if (!LicenseManager.isRunning()) {
 			licenseManager.initManager();
 		}
 	}
@@ -44,15 +44,13 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 
 	@Override
 	public boolean isValid() {
-		return licenseManager
-			.getValidationData()
+		return licenseManager.getValidationData()
 			.isValid();
 	}
 
 	@Override
 	public boolean isExpired() {
-		LicenseStatus licenseStatus = licenseManager
-			.getValidationData()
+		LicenseStatus licenseStatus = licenseManager.getValidationData()
 			.getLicenseStatus();
 		return (licenseStatus == LicenseStatus.FLOATING_EXPIRED || licenseStatus == LicenseStatus.NODE_LOCKED_EXPIRED
 				|| licenseStatus == LicenseStatus.FREE_EXPIRED);
@@ -60,8 +58,7 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 
 	@Override
 	public boolean updateLicenseeNumber(String licenseKey, String licenseName) {
-		return licenseManager
-			.updateLicenseeNumber(licenseKey.trim(), licenseName);
+		return licenseManager.updateLicenseeNumber(licenseKey.trim(), licenseName);
 	}
 
 	@Override
@@ -100,11 +97,9 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 		return displayableLicenseInformation.toString();
 	}
 
-
 	@Override
 	public String getLicenseStatusUserMessage() {
-		return licenseManager
-			.getValidationData()
+		return licenseManager.getValidationData()
 			.getLicenseStatus()
 			.getUserMessage();
 	}
@@ -116,16 +111,14 @@ public class NetLicensingLicenseValidationService implements LicenseValidationSe
 
 	@Override
 	public boolean isFullValidLicense() {
-		LicenseType licenseType = licenseManager
-			.getValidationData()
+		LicenseType licenseType = licenseManager.getValidationData()
 			.getType();
 		return isValid() && (LicenseType.NODE_LOCKED == licenseType || LicenseType.FLOATING == licenseType);
 	}
 
 	@Override
 	public boolean isDemoType() {
-		LicenseType licenseType = licenseManager
-			.getValidationData()
+		LicenseType licenseType = licenseManager.getValidationData()
 			.getType();
 		return LicenseType.TRY_AND_BUY == licenseType;
 	}
