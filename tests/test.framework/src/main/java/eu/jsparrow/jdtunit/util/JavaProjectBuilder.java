@@ -15,6 +15,12 @@ import org.eclipse.jdt.launching.JavaRuntime;
 
 import eu.jsparrow.jdtunit.JdtUnitException;
 
+/**
+ * 
+ * @author Hans-Jörg Schnedlitz
+ * @since 2.5.0
+ */
+@SuppressWarnings("nls")
 public class JavaProjectBuilder {
 
 	private String name = "DefaultProject"; 

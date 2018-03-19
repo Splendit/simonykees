@@ -20,6 +20,12 @@ import eu.jsparrow.rules.api.test.dummies.DummyRefactoringRule;
 import eu.jsparrow.rules.common.RefactoringRule;
 
 
+/**
+ * 
+ * @author Hans-Jörg Schnedlitz
+ * @since 2.5.0
+ */
+@SuppressWarnings("nls")
 public class RefactoringRuleTest {
 
 	private RefactoringRule<?> rule;

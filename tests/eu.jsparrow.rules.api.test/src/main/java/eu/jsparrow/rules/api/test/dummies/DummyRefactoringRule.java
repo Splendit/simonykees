@@ -7,6 +7,12 @@ import org.apache.commons.lang3.JavaVersion;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.RuleDescription;
 
+/**
+ * 
+ * @author Hans-Jörg Schnedlitz
+ * @since 2.5.0
+ */
+@SuppressWarnings("nls")
 public class DummyRefactoringRule extends RefactoringRule<DummyVisitor> {
 
 	public DummyRefactoringRule() {

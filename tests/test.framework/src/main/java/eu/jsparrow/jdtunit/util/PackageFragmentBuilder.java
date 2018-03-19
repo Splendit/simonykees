@@ -7,6 +7,12 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import eu.jsparrow.jdtunit.JdtUnitException;
 
+/**
+ * 
+ * @author Hans-Jörg Schnedlitz
+ * @since 2.5.0
+ */
+@SuppressWarnings("nls")
 public class PackageFragmentBuilder {
 
 	private String packageName = "DefaultPackage";

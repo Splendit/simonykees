@@ -6,6 +6,12 @@ import org.eclipse.jdt.core.IPackageFragment;
 
 import eu.jsparrow.jdtunit.JdtUnitException;
 
+/**
+ * 
+ * @author Hans-Jörg Schnedlitz
+ * @since 2.5.0
+ */
+@SuppressWarnings("nls")
 public class CompilationUnitBuilder {
 
 	private IPackageFragment packageFragment;
