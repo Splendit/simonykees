@@ -81,7 +81,6 @@
 							<option>
 								-dontshrink
 								-dontoptimize
-								-dontpreverify
 							</option>
 							<!-- The SourceFile attribute is required, because Oracle/Sun's Java 
 								virtual machine otherwise does not include line numbers in stack traces, 
@@ -101,9 +100,7 @@
 								-> reason not found yet -->
 							<!-- helps with lambda errors in obfuscation -->
 							<option>
-								-keepclassmembers class * {
-								synthetic <![CDATA[<methods>]]>;
-								}
+								-keepclassmembers, includedescriptorclasses, allowobfuscation class * {synthetic <![CDATA[<methods>]]>;}
 							</option>
 							<!-- Modify the manifest to ensure the export packages are intact -->
 							<option>
