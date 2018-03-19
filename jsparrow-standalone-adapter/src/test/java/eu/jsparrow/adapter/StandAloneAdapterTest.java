@@ -143,8 +143,11 @@ public class StandAloneAdapterTest {
 	public void startStandaloneBundle_missingState()
 			throws MojoExecutionException, BundleException, InterruptedException {
 		Log log = mock(Log.class);
+		@SuppressWarnings("unchecked")
+		Map<String, String> map = mock(Map.class);
 		standaloneAdapter.startStandaloneBundle(log);
-		verify(log).error("Maven adapter is not created"); //$NON-NLS-1$
+		
+		verify(bundleStarter, never()).runStandalone(map);
 	}
 
 	@Test
