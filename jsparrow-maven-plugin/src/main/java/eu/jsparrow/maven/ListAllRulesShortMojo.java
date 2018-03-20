@@ -20,7 +20,7 @@ import eu.jsparrow.maven.i18n.Messages;
  * @author Matthias Webhofer
  * @since 2.3.0
  */
-@Mojo(name = "list-rules-short")
+@Mojo(name = "list-rules-short", aggregator = true)
 public class ListAllRulesShortMojo extends AbstractMojo {
 
 	/**

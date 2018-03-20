@@ -1,7 +1,5 @@
 package eu.jsparrow.maven;
 
-import javax.xml.ws.soap.Addressing;
-
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -23,7 +21,7 @@ import eu.jsparrow.maven.i18n.Messages;
  * @author Matthias Webhofer
  * @since 2.3.0
  */
-@Mojo(name = "list-rules")
+@Mojo(name = "list-rules", aggregator = true)
 public class ListAllRulesMojo extends AbstractMojo {
 
 	/**
@@ -50,26 +48,26 @@ public class ListAllRulesMojo extends AbstractMojo {
 	 */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		
+
 		Log log = getLog();
 		StandaloneAdapter serviceInstance = StandaloneAdapter.getInstance();
 		String mode = StandaloneMode.LIST_RULES.name();
-		
+
 		try {
-			if(!serviceInstance.isAdapterInitialized()) {
+			if (!serviceInstance.isAdapterInitialized()) {
 				MavenParameters config = new MavenParameters(project, log, mode);
 				config.setRuleId(ruleId);
-				
+
 				boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
 				if (!adapterLoadad) {
 					throw new MojoExecutionException(Messages.ListAllRulesMojo_jsparrowAlreadyRunning);
 				}
-				
+
 				serviceInstance.startStandaloneBundle(log);
 			}
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());
-		} 
+		}
 	}
 }
