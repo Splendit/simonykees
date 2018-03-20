@@ -19,7 +19,7 @@ public class TwrReferencedVariablesASTVisitorTest extends UsesJDTUnitFixture {
 
 	@Test
 	public void visit_AssignmentWithAdd_ShouldReplaceAddAssignment() throws Exception {
-		fixture.addMethodBlock("int a,b; someMethod(a); someMethod(b);");
+		fixture.addMethodBlock("int a,b; someMethod(a); someMethod(b);"); //$NON-NLS-1$
 
 		fixture.accept(visitor);
 

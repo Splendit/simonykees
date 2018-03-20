@@ -369,7 +369,6 @@ public abstract class AbstractSelectRulesWizardPage extends WizardPage {
 	/**
 	 * Updates entire view with data every time something is changed in model.
 	 */
-	@SuppressWarnings("unchecked")
 	protected void updateData() {
 		/*
 		 * check if model has changed to update table and tree view or is just

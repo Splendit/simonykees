@@ -63,31 +63,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-		<!-- SIM-361 configure proguard to work with multiple modules -->
-		<profile>
-			<id>proguard</id>
-			<activation>
-				<property>
-					<!-- With this profile active, obfuscation will happen -->
-					<name>proguard</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.github.wvengen</groupId>
-						<artifactId>proguard-maven-plugin</artifactId>
-						<configuration>
-							<options>
-								<option>-printmapping ${project.build.directory}/logging.out</option>
-							</options>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
-
 </project>
