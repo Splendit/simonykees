@@ -12,5 +12,4 @@
 	<packaging>eclipse-plugin</packaging>
 	<name>jSparrow :: license API</name>
 	<description>jSparrow License API Plugin</description>
-
 </project>

@@ -60,6 +60,27 @@ public class ClassRelationUtil {
 			.anyMatch(fullyQuallifiedTargetnames::contains);
 
 	}
+	
+	/**
+	 * Checks whether the erasure of the given type binding coincides with any
+	 * of the given registered type.
+	 * 
+	 * @param iTypeBinding
+	 *            type binding to be checked
+	 * @param registeredIType
+	 *            list of qualified names of target types
+	 * 
+	 * @return if the erasure of the type binding equals the registeredType
+	 */
+	public static boolean isContentOfType(ITypeBinding iTypeBinding, String registeredIType) {
+
+		if (iTypeBinding == null) {
+			return false;
+		}
+
+		return registeredIType.equals(iTypeBinding.getErasure()
+			.getQualifiedName());
+	}
 
 	/**
 	 * Checks whether the erasure of the given type binding coincides with any

@@ -28,34 +28,35 @@
 		<javaLicenseProductionPropertiesClass>src/main/config-files/java-license-properties-production.txt</javaLicenseProductionPropertiesClass>
 		<!-- Target Java class -->
 		<targetJavaLicenseProperties>src/main/java/eu/jsparrow/license/netlicensing/LicenseProperties.java</targetJavaLicenseProperties>
+
+		<proguard.extra.options>
+			-injars
+			${project.basedir}/../license.api/target/eu.jsparrow.license.api-${project.version}_proguard_base.jar
+			-outjars
+			${project.build.directory}/license.api.duplicate.jar
+		</proguard.extra.options>
 	</properties>
 
-	<profiles>
-		<!-- SIM-361 configure proguard to work with multiple modules -->
-		<profile>
-			<id>proguard</id>
-			<activation>
-				<property>
-					<!-- With this profile active, obfuscation will happen -->
-					<name>proguard</name>
-				</property>
-			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.github.wvengen</groupId>
-						<artifactId>proguard-maven-plugin</artifactId>
-						<configuration>
-							<options>
-								<option>-printmapping
-									${project.build.directory}/license.netlicensing.out</option>
-							</options>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.github.wvengen</groupId>
+					<artifactId>proguard-maven-plugin</artifactId>
+					<configuration>
+						<exclusions>
+							<exclusion>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow.license.api</artifactId>
+							</exclusion>
+						</exclusions>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 
+	<profiles>
 		<profile>
 			<id>test</id>
 			<activation>

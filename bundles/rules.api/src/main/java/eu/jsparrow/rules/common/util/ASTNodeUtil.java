@@ -1,5 +1,6 @@
 package eu.jsparrow.rules.common.util;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
@@ -11,7 +12,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Comment;
 import org.eclipse.jdt.core.dom.Expression;
@@ -30,7 +30,9 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WildcardType;
 
@@ -56,11 +58,13 @@ public class ASTNodeUtil {
 	}
 
 	/**
-	 * Finds the surrounding Block node if there is one, otherwise returns null
+	 * Finds the surrounding Node of the defined nodeType if there is one, otherwise returns null
 	 * 
 	 * @param node
 	 *            ASTNode where the backward search is started
-	 * @return surrounding {@link Block}, null if non exists
+	 * @param nodeType
+	 *            nodeType of the wanted node as class
+	 * @return surrounding Node, null if non exists
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getSpecificAncestor(ASTNode node, Class<T> nodeType) {
@@ -501,7 +505,7 @@ public class ASTNodeUtil {
 	 *            expression to be checked.
 	 * @param commentRewriter
 	 *            an instance of {@link CommentRewriter} initialized with the
-	 *            AST which is currently being visites
+	 *            AST which is currently being visited
 	 * @return {@code true} if the last trailing comment is a
 	 *         {@link LineComment} or {@code false} otherwise.
 	 */
@@ -522,10 +526,10 @@ public class ASTNodeUtil {
 	 * by line comment.
 	 * 
 	 * @param node
-	 *            an instancfe of a {@link MethodInvocation} to be checked.
+	 *            an instance of a {@link MethodInvocation} to be checked.
 	 * @param commentRewriter
 	 *            an instance of {@link CommentRewriter} initialized with the
-	 *            AST which is currently being visites
+	 *            AST which is currently being visited
 	 * @return {@code true} if the last trailing comment of any of the arguments
 	 *         is a {@link LineComment} or {@code false} otherwise.
 	 */
@@ -534,5 +538,24 @@ public class ASTNodeUtil {
 
 		return arguments.stream()
 			.anyMatch(argument -> isFollowedByLineComment(argument, commentRewriter));
+	}
+
+	/**
+	 * Finds the name of all fields declared in the provided type.
+	 * 
+	 * @param typeDeclaration
+	 *            a type declaration to be searched.
+	 * @return the list of identifiers of the declared fields.
+	 */
+	public static List<String> findFieldNames(TypeDeclaration typeDeclaration) {
+		FieldDeclaration[] fields = typeDeclaration.getFields();
+		List<String> names = new ArrayList<>();
+		for (FieldDeclaration field : fields) {
+			names.addAll(convertToTypedList(field.fragments(), VariableDeclarationFragment.class).stream()
+				.map(VariableDeclarationFragment::getName)
+				.map(SimpleName::getIdentifier)
+				.collect(Collectors.toList()));
+		}
+		return names;
 	}
 }
