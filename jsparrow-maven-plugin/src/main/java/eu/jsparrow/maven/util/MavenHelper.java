@@ -62,16 +62,16 @@ import eu.jsparrow.maven.i18n.Messages;
 public class MavenHelper {
 
 	// CONSTANTS
+	protected static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone";
+	protected static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory";
 	private static final String USER_DIR = "user.dir";
 	private static final String JAVA_TMP = "java.io.tmpdir";
-	protected static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone";
 	private static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default";
 	private static final String FRAMEWORK_STORAGE_VALUE = "target/bundlecache";
 	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH";
 	private static final String PROJECT_NAME_CONSTANT = "PROJECT.NAME";
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow";
 	private static final String JSPARROW_MANIFEST = "manifest.standalone";
-	protected static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory";
 	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps";
 	private static final String OSGI_INSTANCE_AREA_CONSTANT = "osgi.instance.area";
 	private static final String MAVEN_HOME_KEY = "MAVEN.HOME";

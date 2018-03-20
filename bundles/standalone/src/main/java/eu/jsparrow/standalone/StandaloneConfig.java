@@ -47,6 +47,7 @@ public class StandaloneConfig {
 	private static final String CLASSPATH_FILE_NAME = ".classpath"; //$NON-NLS-1$
 	private static final String SETTINGS_DIRECTORY_NAME = ".settings"; //$NON-NLS-1$
 	private static final String TEMP_FILE_EXTENSION = ".tmp"; //$NON-NLS-1$
+	private static final String DOT = "."; //$NON-NLS-1$
 
 	private String path;
 	private String compilerCompliance;
@@ -65,7 +66,8 @@ public class StandaloneConfig {
 	private IClasspathEntry[] oldEntries;
 
 	private MavenInvoker mavenInovker;
-
+	private String projectId;
+	
 	/**
 	 * Constructor that calls setting up of the project and collecting the
 	 * compilation units.
@@ -80,17 +82,17 @@ public class StandaloneConfig {
 	 * @throws MavenInvocationException
 	 * @throws IOException
 	 */
-	public StandaloneConfig(String path, String compilerCompliance, String mavenHome)
+	public StandaloneConfig(String id, String path, String compilerCompliance, String mavenHome)
 			throws CoreException, MavenInvocationException, IOException {
-		this(path, compilerCompliance, mavenHome, false);
+		this(id, path, compilerCompliance, mavenHome, false);
 	}
 
-	public StandaloneConfig(String path, String compilerCompliance, String mavenHome, boolean testMode)
+	public StandaloneConfig(String id, String path, String compilerCompliance, String mavenHome, boolean testMode)
 			throws CoreException, MavenInvocationException, IOException {
+		this.projectId = id;
 		this.path = path;
 		this.compilerCompliance = compilerCompliance;
 		this.mavenHome = mavenHome;
-
 		this.mavenInovker = getMavenInvoker();
 
 		if (!testMode) {
@@ -110,7 +112,7 @@ public class StandaloneConfig {
 		IProjectDescription projectDescription = getProjectDescription();
 		IProject project = this.initProject(projectDescription);
 		this.initJavaProject(project);
-		List<IClasspathEntry> mavenClasspathEntries = this.collectMavenDependenciesAsClasspathEntries();
+		List<IClasspathEntry> mavenClasspathEntries = collectMavenDependenciesAsClasspathEntries();
 		this.addToClasspath(mavenClasspathEntries);
 		compUnits = getCompilationUnits();
 	}
@@ -139,7 +141,12 @@ public class StandaloneConfig {
 		}
 
 		logger.debug(Messages.StandaloneConfig_UseExistingProjectDescription);
-		description = workspace.loadProjectDescription(new Path(getProjectDescriptionFile().getAbsolutePath()));
+		
+		
+		File descriptionFile = getProjectDescriptionFile();
+		String descriptionFilePathValue = descriptionFile.getAbsolutePath();
+		Path descriptionFilePath = new Path(descriptionFilePathValue);
+		description = workspace.loadProjectDescription(descriptionFilePath);
 
 		return description;
 	}
@@ -421,8 +428,9 @@ public class StandaloneConfig {
 	}
 
 	protected File getMavenDependencyFolder() {
-		return new File(
-				System.getProperty(RefactoringInvoker.USER_DIR) + File.separator + RefactoringInvoker.DEPENDENCIES_FOLDER_CONSTANT);
+
+		return new File(System.getProperty(RefactoringInvoker.USER_DIR) + DOT + getProjectId() + File.separator
+				+ RefactoringInvoker.DEPENDENCIES_FOLDER_CONSTANT + DOT + getProjectId());
 	}
 
 	protected IClasspathEntry createLibraryClasspathEntry(String jarPath) {
@@ -476,6 +484,10 @@ public class StandaloneConfig {
 
 	protected boolean isExistingSettingsDirectoryMoved() {
 		return existingSettingsDirectoryMoved;
+	}
+	
+	public String getProjectId() {
+		return this.projectId;
 	}
 
 }
