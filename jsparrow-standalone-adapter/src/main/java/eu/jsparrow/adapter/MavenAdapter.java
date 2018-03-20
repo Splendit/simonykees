@@ -26,7 +26,7 @@ import eu.jsparrow.adapter.i18n.Messages;
 
 /**
  * Sets up the configuration used for starting the equinox framework.
- * Distinguishes the properties of different projects.  
+ * Distinguishes the properties of different projects.
  * 
  * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
  * @since 2.5.0
@@ -69,7 +69,7 @@ public class MavenAdapter {
 		this(rootProject, log);
 		this.defaultYamlFile = defaultYamlFile;
 	}
-	
+
 	public MavenAdapter(MavenProject rootProject, Log log) {
 		setRootProject(rootProject);
 		this.log = log;
@@ -194,7 +194,8 @@ public class MavenAdapter {
 		configuration.put(SELECTED_PROFILE, config.getProfile()
 			.orElse("")); //$NON-NLS-1$
 		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
-		config.getRuleId().ifPresent(ruleId -> configuration.put(LIST_RULES_SELECTED_ID, ruleId));
+		config.getRuleId()
+			.ifPresent(ruleId -> configuration.put(LIST_RULES_SELECTED_ID, ruleId));
 	}
 
 	private void addConfigurationKeyValue(String key, String value) {
@@ -233,7 +234,7 @@ public class MavenAdapter {
 		setWorkingDirectory(workingDirectory);
 		if (workingDirectory.exists() || workingDirectory.mkdirs()) {
 			String directoryAbsolutePath = workingDirectory.getAbsolutePath();
-			System.setProperty(USER_DIR, directoryAbsolutePath);
+			setSystemProperty(USER_DIR, directoryAbsolutePath);
 			addConfigurationKeyValue(OSGI_INSTANCE_AREA_CONSTANT, directoryAbsolutePath);
 
 			String loggerInfo = NLS.bind(Messages.MavenAdapter_setUserDir, directoryAbsolutePath);
@@ -241,6 +242,10 @@ public class MavenAdapter {
 		} else {
 			throw new InterruptedException("Could not create temp folder"); //$NON-NLS-1$
 		}
+	}
+
+	protected void setSystemProperty(String key, String directoryAbsolutePath) {
+		System.setProperty(key, directoryAbsolutePath);
 	}
 
 	protected File createWorkingDirectory() {
@@ -421,19 +426,19 @@ public class MavenAdapter {
 		String file = System.getProperty(JAVA_TMP);
 		return file + File.separator + JSPARROW_TEMP_FOLDER;
 	}
-	
+
 	protected MavenProject getRootProject() {
 		return this.rootProject;
 	}
-	
+
 	protected void setRootProject(MavenProject project) {
 		this.rootProject = project;
 	}
-	
+
 	protected File getDefaultYamlFile() {
 		return this.defaultYamlFile;
 	}
-	
+
 	protected void setDefaultYamlFile(File file) {
 		this.defaultYamlFile = file;
 	}

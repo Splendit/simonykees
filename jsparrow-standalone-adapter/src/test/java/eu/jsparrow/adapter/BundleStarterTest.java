@@ -19,16 +19,13 @@ import java.util.List;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-
 
 public class BundleStarterTest {
 	
@@ -42,9 +39,6 @@ public class BundleStarterTest {
 	private BundleStarter bundleStarter;
 
 	private boolean isInputStreamNull;
-
-	@Rule
-	public TemporaryFolder folder = new TemporaryFolder();
 
 	@Before
 	public void setUp() {

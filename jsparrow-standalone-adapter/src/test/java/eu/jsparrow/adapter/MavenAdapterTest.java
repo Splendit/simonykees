@@ -199,6 +199,10 @@ public class MavenAdapterTest {
 		protected Path joinPaths(File parent, File child) {
 			return path;
 		}
+		
+		protected void setSystemProperty(String key, String value) {
+			
+		}
 
 	}
 }
