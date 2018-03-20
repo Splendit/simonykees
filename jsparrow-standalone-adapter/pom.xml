@@ -6,6 +6,8 @@
 	<packaging>jar</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 
+	<name>jSparrow Standalone Adapter</name>
+
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -21,16 +23,16 @@
 		</dependency>
 
 		<dependency>
-		  <groupId>org.apache.maven.shared</groupId>
-		  <artifactId>maven-invoker</artifactId>
-		  <version>3.0.0</version>
+			<groupId>org.apache.maven.shared</groupId>
+			<artifactId>maven-invoker</artifactId>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.platform</groupId>
 			<artifactId>org.eclipse.osgi</artifactId>
 			<version>3.11.2</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -54,29 +56,40 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	
-	
-	    <build>
-   		<plugins>
-		    <plugin>
-			    <groupId>org.apache.maven.plugins</groupId>
-			    <artifactId>maven-assembly-plugin</artifactId>
-			    <executions>
-			        <execution>
-			            <phase>package</phase>
-			            <goals>
-			                <goal>single</goal>
-			            </goals>
-			            <configuration>
-			                <archive>
-			                </archive>
-			                <descriptorRefs>
-			                    <descriptorRef>jar-with-dependencies</descriptorRef>
-			                </descriptorRefs>
-			            </configuration>
-			        </execution>
-			    </executions>
+
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.properties</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<archive>
+							</archive>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
-    </build>
+	</build>
 </project>
