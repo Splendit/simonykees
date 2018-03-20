@@ -71,19 +71,14 @@ public class Activator implements BundleActivator {
 				}
 				break;
 			case LIST_RULES:
-				listRulesUtil.listRules();
+				if(listRulesId != null && !listRulesId.isEmpty()) {
+					listRulesUtil.listRules(listRulesId);
+				} else {					
+					listRulesUtil.listRules();
+				}
 				break;
 			case LIST_RULES_SHORT:
 				listRulesUtil.listRulesShort();
-				break;
-			case LIST_RULES_WITH_SELECTED_ID:
-				if (listRulesId != null && !listRulesId.isEmpty()) {
-					listRulesUtil.listRules(listRulesId);
-				} else {
-					String errorMsg = "Please specify rule IDs for this mode!"; //$NON-NLS-1$
-					logger.error(errorMsg);
-					setExitErrorMessage(context, errorMsg);
-				}
 				break;
 			case TEST:
 				break;

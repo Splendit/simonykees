@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashSet;
 import java.util.Set;
@@ -101,13 +102,14 @@ public class EmbeddedMaven {
 
 		perms.add(PosixFilePermission.OTHERS_READ);
 		perms.add(PosixFilePermission.OTHERS_WRITE);
-		perms.add(PosixFilePermission.OWNER_EXECUTE);
+		perms.add(PosixFilePermission.OTHERS_EXECUTE);
 
 		perms.add(PosixFilePermission.GROUP_READ);
 		perms.add(PosixFilePermission.GROUP_WRITE);
 		perms.add(PosixFilePermission.GROUP_EXECUTE);
 
-		Files.setPosixFilePermissions(file.toPath(), perms);
+		Path path = file.toPath();
+		Files.setPosixFilePermissions(path, perms);
 	}
 	
 	/**
@@ -141,7 +143,7 @@ public class EmbeddedMaven {
 				// if the entry is a directory, make the directory
 				File dir = new File(filePath);
 				dir.mkdir();
-				log.debug(Messages.EmbeddedMaven_createDir + dir.getAbsoluteFile());
+				log.debug(NLS.bind(Messages.EmbeddedMaven_createDir, dir.getAbsoluteFile()));
 			}
 			zipIn.closeEntry();
 			entry = zipIn.getNextEntry();

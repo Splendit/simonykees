@@ -3,7 +3,6 @@ package eu.jsparrow.standalone;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -74,17 +73,8 @@ public class ActivatorTest {
 	}
 	
 	@Test
-	public void start_withListRulesWithoutSelectedId_doesNotInvokeListSelectedId() throws Exception {
-		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("LIST_RULES_WITH_SELECTED_ID"); //$NON-NLS-1$
-		
-		activator.start(context);
-		
-		verifyZeroInteractions(listRulesUtil);
-	}
-	
-	@Test
 	public void start_withListRulesWithSelectedId_invokesListSelectedId() throws Exception {
-		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("LIST_RULES_WITH_SELECTED_ID"); //$NON-NLS-1$
+		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("LIST_RULES"); //$NON-NLS-1$
 		String ruleId = "doesntMatter"; //$NON-NLS-1$
 		when(context.getProperty(LIST_RULES_SELECTED_ID_KEY)).thenReturn(ruleId);
 		

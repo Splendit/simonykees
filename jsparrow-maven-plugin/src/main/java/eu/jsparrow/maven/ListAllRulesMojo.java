@@ -1,5 +1,7 @@
 package eu.jsparrow.maven;
 
+import javax.xml.ws.soap.Addressing;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
