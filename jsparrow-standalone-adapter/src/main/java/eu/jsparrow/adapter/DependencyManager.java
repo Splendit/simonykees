@@ -25,9 +25,9 @@ import eu.jsparrow.adapter.i18n.Messages;
 public class DependencyManager {
 
 	protected static final String OUTPUT_DIRECTORY_OPTION_KEY = "outputDirectory"; //$NON-NLS-1$
-	protected static final String OUTPUT_DIRECTORY_PREFIX = "deps"; //$NON-NLS-1$
-	protected static final String DEPENDENCY_PLUGIN_ID = "dependency"; //$NON-NLS-1$
-	protected static final String COPY_DEPENDENCIES_GOAL = "copy-dependencies"; //$NON-NLS-1$
+	private static final String OUTPUT_DIRECTORY_PREFIX = "deps"; //$NON-NLS-1$
+	private static final String DEPENDENCY_PLUGIN_ID = "dependency"; //$NON-NLS-1$
+	private static final String COPY_DEPENDENCIES_GOAL = "copy-dependencies"; //$NON-NLS-1$
 
 	private Log log;
 

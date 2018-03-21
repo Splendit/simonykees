@@ -100,7 +100,7 @@ public class MavenAdapter {
 	 *            the expected jsparrow.yml file
 	 */
 	public void addProjectConfiguration(MavenProject project, File configFile) {
-		log.info(String.format("Adding configuration for project %s ...", project.getName())); //$NON-NLS-1$
+		log.info(String.format(Messages.MavenAdapter_addingProjectConfiguration, project.getName()));
 
 		markProjectConfigurationCompleted(project);
 
@@ -117,7 +117,7 @@ public class MavenAdapter {
 		addConfigurationKeyValue(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
 		addConfigurationKeyValue(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, projcetName);
 		String yamlFilePath = findYamlFilePath(project, configFile);
-		log.info(Messages.MavenAdapter_jsparrowConfigurationFile + yamlFilePath);
+		log.info(Messages.MavenAdapter_jSparrowConfigurationFile + yamlFilePath);
 		addConfigurationKeyValue(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
 		addConfigurationKeyValue(PROJECT_JAVA_VERSION + DOT + projectIdentifier, getCompilerCompliance(project));
 	}
@@ -240,7 +240,7 @@ public class MavenAdapter {
 			String loggerInfo = NLS.bind(Messages.MavenAdapter_setUserDir, directoryAbsolutePath);
 			log.info(loggerInfo);
 		} else {
-			throw new InterruptedException("Could not create temp folder"); //$NON-NLS-1$
+			throw new InterruptedException(Messages.MavenAdapter_couldnotCreateTempFolder);
 		}
 	}
 
@@ -335,14 +335,14 @@ public class MavenAdapter {
 				.trim();
 
 		} catch (IOException e) {
-			log.warn(Messages.MavenAdapter_cannotReadJsparrowLockFile, e);
+			log.warn(Messages.MavenAdapter_cannotReadJSparrowLockFile, e);
 		}
 
 		try {
 			Files.write(path, remainingContent.getBytes());
 			return remainingContent.isEmpty();
 		} catch (IOException e) {
-			log.warn(Messages.MavenAdapter_cannotWriteToJsparrowLockFile, e);
+			log.warn(Messages.MavenAdapter_cannotWriteToJSparrowLockFile, e);
 		}
 
 		return false;
@@ -402,7 +402,7 @@ public class MavenAdapter {
 		try {
 			Files.write(path, conntent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (IOException e) {
-			log.warn(Messages.MavenAdapter_cannotWriteToJsparrowLockFile, e);
+			log.warn(Messages.MavenAdapter_cannotWriteToJSparrowLockFile, e);
 		}
 	}
 
@@ -462,7 +462,7 @@ public class MavenAdapter {
 		try (Stream<String> linesStream = Files.lines(path)) {
 			return linesStream.anyMatch(projectId::equals);
 		} catch (IOException e) {
-			log.warn(Messages.MavenAdapter_cannotReadJsparrowLockFile, e);
+			log.warn(Messages.MavenAdapter_cannotReadJSparrowLockFile, e);
 		}
 
 		return false;

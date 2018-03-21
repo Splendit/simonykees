@@ -72,7 +72,7 @@ public class StandaloneAdapter {
 
 		if (adapterInstance.isJsparrowStarted(project)) {
 			adapterInstance.setJsparrowRunningFlag();
-			log.error(Messages.StandaloneAdapter_jsparrowAlreadyRunning);
+			log.error(Messages.StandaloneAdapter_jSparrowAlreadyRunning);
 			return false;
 		}
 		adapterInstance.prepareWorkingDirectory();
@@ -127,7 +127,7 @@ public class StandaloneAdapter {
 	public void addProjectConfiguration(MavenProject project, Log log, File configFile) {
 		MavenAdapter mavenAdapterInstance = getMavenAdapterInstance();
 		if (mavenAdapterInstance == null) {
-			log.error(Messages.StandaloneAdapter_mavenAdapterAlreadyCreated);
+			log.error(Messages.StandaloneAdapter_mavenAdapterInstanceNotCreated);
 			return;
 		}
 

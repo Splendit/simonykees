@@ -23,11 +23,15 @@ public class Messages extends NLS {
 
 	public static String EmbeddedMaven_unzipTemporaryMavenInstallation;
 
-	public static String MavenAdapter_cannotReadJsparrowLockFile;
+	public static String MavenAdapter_addingProjectConfiguration;
 
-	public static String MavenAdapter_cannotWriteToJsparrowLockFile;
+	public static String MavenAdapter_cannotReadJSparrowLockFile;
 
-	public static String MavenAdapter_jsparrowConfigurationFile;
+	public static String MavenAdapter_cannotWriteToJSparrowLockFile;
+
+	public static String MavenAdapter_couldnotCreateTempFolder;
+
+	public static String MavenAdapter_jSparrowConfigurationFile;
 
 	public static String MavenAdapter_setUserDir;
 
@@ -35,9 +39,7 @@ public class Messages extends NLS {
 
 	public static String StandaloneAdapter_creatingAdapterInstance;
 
-	public static String StandaloneAdapter_jsparrowAlreadyRunning;
-
-	public static String StandaloneAdapter_mavenAdapterAlreadyCreated;
+	public static String StandaloneAdapter_jSparrowAlreadyRunning;
 
 	public static String StandaloneAdapter_mavenAdapterInstanceNotCreated;
 
