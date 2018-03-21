@@ -39,11 +39,8 @@ public class RefactoringInvoker {
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringInvoker.class);
 
 	// CONSTANTS
-	protected static final String USER_DIR = "user.dir"; //$NON-NLS-1$
-	protected static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
-	protected static final String MAVEN_NATURE_CONSTANT = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
-	protected static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
-	protected static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
+	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
+	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
 	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
@@ -52,7 +49,7 @@ public class RefactoringInvoker {
 	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
-	private static final String DOT = ".";  //$NON-NLS-1$
+	private static final String DOT = "."; //$NON-NLS-1$
 
 	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
 
@@ -71,20 +68,19 @@ public class RefactoringInvoker {
 	 */
 	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline)
 			throws YAMLConfigException, CoreException, MavenInvocationException, IOException {
-		
+
 		List<StandaloneConfig> configs = loadStandaloneConfig(context);
 		setStandaloneConfigurations(configs);
-		for(StandaloneConfig config : configs) {			
+		for (StandaloneConfig config : configs) {
 			startRefactoring(context, refactoringPipeline, config);
 		}
 	}
-	
-	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline, StandaloneConfig standaloneConfig)
-			throws YAMLConfigException {
+
+	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline,
+			StandaloneConfig standaloneConfig) throws YAMLConfigException {
 		String loggerInfo;
 
 		YAMLConfig config = getConfiguration(context, standaloneConfig.getProjectId());
-		
 
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = getProjectRules(standaloneConfig);
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = getSelectedRules(config,
@@ -123,7 +119,8 @@ public class RefactoringInvoker {
 				return;
 			}
 
-			loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes, getJavaProject(standaloneConfig).getElementName(),
+			loggerInfo = NLS.bind(Messages.SelectRulesWizard_rules_with_changes,
+					getJavaProject(standaloneConfig).getElementName(),
 					refactoringPipeline.getRulesWithChangesAsString());
 			logger.info(loggerInfo);
 
@@ -148,7 +145,7 @@ public class RefactoringInvoker {
 	 */
 	public void cleanUp() throws IOException {
 		try {
-			for(StandaloneConfig standaloneConfig : standaloneConfigs) {
+			for (StandaloneConfig standaloneConfig : standaloneConfigs) {
 				standaloneConfig.cleanUp();
 			}
 		} catch (JavaModelException | MavenInvocationException e) {
@@ -165,13 +162,13 @@ public class RefactoringInvoker {
 	 * @throws YAMLConfigException
 	 */
 	private YAMLConfig getConfiguration(BundleContext context, String projectId) throws YAMLConfigException {
-		
+
 		boolean useDefaultConfig = Boolean.parseBoolean(context.getProperty(USE_DEFAULT_CONFIGURATION));
 
 		if (!useDefaultConfig) {
 			String configFilePath = context.getProperty(CONFIG_FILE_PATH + DOT + projectId);
 			String profile = context.getProperty(SELECTED_PROFILE);
-			
+
 			String loggerInfo = NLS.bind(Messages.Activator_standalone_LoadingConfiguration, configFilePath);
 			logger.info(loggerInfo);
 
@@ -211,12 +208,12 @@ public class RefactoringInvoker {
 	 */
 	protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context)
 			throws CoreException, MavenInvocationException, IOException {
-		
+
 		Map<String, String> projectPaths = findAllProjectPaths(context);
 		String mavenHome = context.getProperty(MAVEN_HOME_KEY);
-		
+
 		List<StandaloneConfig> configs = new ArrayList<>();
-		for(Map.Entry<String, String> entry : projectPaths.entrySet()) {
+		for (Map.Entry<String, String> entry : projectPaths.entrySet()) {
 			String id = entry.getKey();
 			String path = entry.getValue();
 			String compilerCompliance = context.getProperty(PROJECT_JAVA_VERSION + DOT + id);
@@ -231,7 +228,7 @@ public class RefactoringInvoker {
 		String concatenatedIds = context.getProperty(ALL_PROJECT_IDENTIFIERS);
 		Map<String, String> paths = new HashMap<>();
 		String[] allIds = concatenatedIds.split(","); //$NON-NLS-1$
-		for(String id : allIds) {
+		for (String id : allIds) {
 			String propertyKey = PROJECT_PATH_CONSTANT + "." + id; //$NON-NLS-1$
 			String path = context.getProperty(propertyKey);
 			paths.put(id, path);
@@ -239,7 +236,8 @@ public class RefactoringInvoker {
 		return paths;
 	}
 
-	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules(StandaloneConfig standaloneConfig) {
+	protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules(
+			StandaloneConfig standaloneConfig) {
 		logger.debug(Messages.RefactoringInvoker_GetEnabledRulesForProject);
 		return RulesContainer.getRulesForProject(standaloneConfig.getJavaProject(), true);
 	}
@@ -257,7 +255,7 @@ public class RefactoringInvoker {
 	protected IJavaProject getJavaProject(StandaloneConfig standaloneConfig) {
 		return standaloneConfig.getJavaProject();
 	}
-	
+
 	private void setStandaloneConfigurations(List<StandaloneConfig> configs) {
 		this.standaloneConfigs = configs;
 	}
