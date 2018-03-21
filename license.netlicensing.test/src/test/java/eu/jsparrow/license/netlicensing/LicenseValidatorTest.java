@@ -193,18 +193,9 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 
 		// when sending a validate call...
 		LicenseValidator.doValidate(licensee);
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 
-		// expecting the validation state to be parsed properly...
-		assertFalse("Expecting cache to contain received validation data", cache.isEmpty());
-		ResponseParser checker = new ResponseParser(cache.getCachedValidationResult(), cache.getValidationTimestamp(),
-				cache.getLicenseName(), ValidationAction.NONE);
-
-		assertEquals(LicenseStatus.FREE_EXPIRED, checker.getLicenseStatus());
-		assertFalse(checker.isValid());
-		assertNotNull(checker.getEvaluationExpiresDate());
-		assertTrue(checker.getEvaluationExpiresDate()
-			.isBefore(ZonedDateTime.now()));
+		// doValidate should not write anything to the cache
+		assertTrue(cache.isEmpty());
 	}
 
 	@Test
