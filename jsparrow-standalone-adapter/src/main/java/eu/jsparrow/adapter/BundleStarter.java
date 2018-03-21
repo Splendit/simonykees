@@ -22,8 +22,8 @@ import org.osgi.framework.launch.FrameworkFactory;
 import eu.jsparrow.adapter.i18n.Messages;
 
 /**
- * A class containing functionalities for starting/stopping the equinox framework,
- * and loading/starting OSGi bundles.  
+ * A class containing functionalities for starting/stopping the equinox
+ * framework, and loading/starting OSGi bundles.
  * 
  * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
  * @since 2.5.0
@@ -50,8 +50,9 @@ public class BundleStarter {
 	 * Starts the equinox framework with the given configuration, starts the
 	 * related bundles and stops the framework afterwards.
 	 * 
-	 * @param configuration the configuration to start the framework with. 
-	 * @throws BundleException 
+	 * @param configuration
+	 *            the configuration to start the framework with.
+	 * @throws BundleException
 	 * @throws MojoExecutionException
 	 * @throws InterruptedException
 	 */

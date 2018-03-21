@@ -19,26 +19,26 @@ import org.eclipse.osgi.util.NLS;
 import eu.jsparrow.adapter.i18n.Messages;
 
 /**
- * Sets up an embedded maven installation if necessary. 
+ * Sets up an embedded maven installation if necessary.
  * 
  * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
  * @since 2.5.0
  *
  */
 public class EmbeddedMaven {
-	
+
 	private static final int BUFFER_SIZE = 4096;
-	
+
 	private Log log;
-	
+
 	private String mavenHome;
 	private String mavenHomeUnzipped = ""; //$NON-NLS-1$
-	
+
 	public EmbeddedMaven(Log log, String mavenHome) {
 		this.log = log;
 		setMavenHome(mavenHome);
 	}
-	
+
 	/**
 	 * If maven home from parameter is usable, use it, otherwise extract maven
 	 * from resources to temp folder, set execute rights and use its maven home
@@ -72,7 +72,7 @@ public class EmbeddedMaven {
 	protected InputStream getMavenZipInputStream() {
 		return getClass().getResourceAsStream("/apache-maven-3.5.2-bin.zip"); //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Extracts a zip entry (file entry)
 	 * 
@@ -111,7 +111,7 @@ public class EmbeddedMaven {
 		Path path = file.toPath();
 		Files.setPosixFilePermissions(path, perms);
 	}
-	
+
 	/**
 	 * Extracts a zip file from zipInputStream to a directory specified by
 	 * destDirectory which is created if does not exists
@@ -126,7 +126,7 @@ public class EmbeddedMaven {
 			destDir.mkdir();
 		}
 
-		String loggerInfo = NLS.bind(Messages.EmbeddedMaven_unzipTemporaryMavenInstallation, destDir.toString()); 
+		String loggerInfo = NLS.bind(Messages.EmbeddedMaven_unzipTemporaryMavenInstallation, destDir.toString());
 		log.debug(loggerInfo);
 
 		ZipInputStream zipIn = new ZipInputStream(zipInputStream);
@@ -150,11 +150,11 @@ public class EmbeddedMaven {
 		}
 		zipIn.close();
 	}
-	
+
 	public String getMavenHome() {
 		return this.mavenHome;
 	}
-	
+
 	protected void setMavenHome(String mavenHome) {
 		this.mavenHome = mavenHome;
 	}

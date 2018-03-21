@@ -29,14 +29,14 @@ public class EmbeddedMavenTest {
 	private Log log;
 	private EmbeddedMaven embeddedMaven;
 	private InputStream inputStream;
-	
+
 	@Rule
 	public TemporaryFolder folder = new TemporaryFolder();
 
 	@Before
 	public void setUp() throws Exception {
 		log = mock(Log.class);
-		embeddedMaven = new TestableEmbeddedMaven(log, "mavenHome"); 
+		embeddedMaven = new TestableEmbeddedMaven(log, "mavenHome");
 	}
 
 	@Test
@@ -56,28 +56,29 @@ public class EmbeddedMavenTest {
 
 	@Test
 	public void unzip_isDirectoryTrue() throws Exception {
-		File zipInputStream = createDummyZip("test/", true); 
+		File zipInputStream = createDummyZip("test/", true);
 
 		embeddedMaven.unzip(new FileInputStream(zipInputStream), folder.getRoot()
 			.getAbsolutePath());
 
-		List<String> fileList = Files.list(folder.getRoot().toPath())
+		List<String> fileList = Files.list(folder.getRoot()
+			.toPath())
 			.map(x -> x.getFileName()
 				.toString())
 			.collect(Collectors.toList());
 		assertThat(fileList, hasItem("test"));
 	}
-	
+
 	@Test
 	public void prepareMaven_shouldReturnExistingMavenHome() {
 		String expectedMavenHome = "expected/maven/home";
 		embeddedMaven.setMavenHome(expectedMavenHome);
-		
+
 		String actualMavenHome = embeddedMaven.prepareMaven();
-		
+
 		assertTrue(expectedMavenHome.equals(actualMavenHome));
 	}
-	
+
 	@Test
 	public void prepareMaven_shouldReturnNewMavenHome() throws Exception {
 		String providedMavenHome = "expected/maven/home/EMBEDDED";
@@ -85,7 +86,7 @@ public class EmbeddedMavenTest {
 		File zipInputStream = createDummyZip("/newmaven/", true);
 		inputStream = new FileInputStream(zipInputStream);
 		String actualMavenHome = embeddedMaven.prepareMaven();
-		
+
 		assertFalse(actualMavenHome.equals(providedMavenHome));
 	}
 
@@ -113,7 +114,7 @@ public class EmbeddedMavenTest {
 		public TestableEmbeddedMaven(Log log, String mavenHome) {
 			super(log, mavenHome);
 		}
-		
+
 		@Override
 		protected InputStream getMavenZipInputStream() {
 			return inputStream;

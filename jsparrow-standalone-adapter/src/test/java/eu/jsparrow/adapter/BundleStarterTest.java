@@ -28,7 +28,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 
 public class BundleStarterTest {
-	
+
 	private Log log;
 
 	private BundleContext bundleContext;
