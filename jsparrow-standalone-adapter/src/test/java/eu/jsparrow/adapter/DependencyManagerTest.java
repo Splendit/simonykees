@@ -27,7 +27,7 @@ public class DependencyManagerTest {
 	@Before
 	public void setUp() {
 		log = mock(Log.class);
-		dependencyManager = new TestableDependencyManager(log);
+		dependencyManager = new DependencyManager(log);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -58,12 +58,5 @@ public class DependencyManagerTest {
 		verify(props).setProperty(eq(DependencyManager.OUTPUT_DIRECTORY_OPTION_KEY), anyString());
 
 		verify(request).setProperties(eq(props));
-	}
-
-	class TestableDependencyManager extends DependencyManager {
-
-		public TestableDependencyManager(Log log) {
-			super(log);
-		}
 	}
 }
