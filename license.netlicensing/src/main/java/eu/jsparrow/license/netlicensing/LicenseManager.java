@@ -4,7 +4,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.Calendar;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -17,7 +16,6 @@ import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.service.LicenseeService;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
 import eu.jsparrow.license.netlicensing.model.FloatingModel;
 import eu.jsparrow.license.netlicensing.model.LicenseModel;
 import eu.jsparrow.license.netlicensing.model.LicenseeModel;

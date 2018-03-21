@@ -1,18 +1,15 @@
 package eu.jsparrow.license.netlicensing;
 
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
-import org.eclipse.equinox.security.storage.StorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,34 +129,6 @@ public class PersistenceManager {
 		} catch (Exception exception) {
 			logger.warn(ExceptionMessages.PersistenceManager_encryption_error, exception);
 		}
-	}
-
-	public byte[] readDataAsBytes() throws Exception {
-		PersistenceModel persistence = null;
-
-		ISecurePreferences iSecurePreferences = SecurePreferencesFactory.getDefault();
-		ISecurePreferences simonykeesNode = iSecurePreferences.node(SIMONYKEES_KEY);
-		byte[] inputBytes = null;
-		try {
-			inputBytes = simonykeesNode.getByteArray(LICENSEE_CREDENTIALS_NODE_KEY, new byte[0]);
-		} catch (StorageException e) {
-			// Failed to access storage on this key, rethrow exception for
-			// handling elsewhere
-			throw new Exception();
-		}
-
-		Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
-		Cipher cipher;
-		try {
-			cipher = Cipher.getInstance(TRANSFORMATION);
-			cipher.init(Cipher.DECRYPT_MODE, secretKey);
-			return cipher.doFinal(inputBytes);
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			// These are programmer errors, nothing the user can do, so handle
-			// that accordingly
-			throw new Exception();
-		}
-
 	}
 
 	/**
