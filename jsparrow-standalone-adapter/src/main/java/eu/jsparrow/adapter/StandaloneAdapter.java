@@ -12,7 +12,7 @@ import org.osgi.framework.BundleException;
 import eu.jsparrow.adapter.i18n.Messages;
 
 /**
- * An adapter between the maven plugin and the standalone bundle. 
+ * An adapter between the maven plugin and the standalone bundle.
  * 
  * @author Ardit Ymeri
  * @since 2.5.0
@@ -44,11 +44,13 @@ public class StandaloneAdapter {
 	}
 
 	/**
-	 * Creates instances of {@link MavenAdapter}, {@link EmbeddedMaven} and {@link DependencyManager} and
-	 * sets the state of this object. 
+	 * Creates instances of {@link MavenAdapter}, {@link EmbeddedMaven} and
+	 * {@link DependencyManager} and sets the state of this object.
 	 * 
-	 * @param configuration expected maven parameters.
-	 * @return {@code true} if initialization of the state finishes successfully, or {@code false} otherwise. 
+	 * @param configuration
+	 *            expected maven parameters.
+	 * @return {@code true} if initialization of the state finishes
+	 *         successfully, or {@code false} otherwise.
 	 * @throws InterruptedException
 	 */
 	public synchronized boolean lazyLoadMavenAdapter(MavenParameters configuration) throws InterruptedException {
@@ -64,7 +66,7 @@ public class StandaloneAdapter {
 		log.debug(Messages.StandaloneAdapter_creatingAdapterInstance);
 		MavenProject project = configuration.getProject();
 		Optional<File> defaultYamlFile = configuration.getDefaultYamlFile();
-		if(defaultYamlFile.isPresent()) {			
+		if (defaultYamlFile.isPresent()) {
 			adapterInstance = createMavenAdapterInstance(defaultYamlFile.get(), log, project);
 		} else {
 			adapterInstance = createMavenAdapterInstance(log, project);
@@ -76,7 +78,8 @@ public class StandaloneAdapter {
 			return false;
 		}
 		adapterInstance.prepareWorkingDirectory();
-		configuration.getMavenSession().ifPresent(adapterInstance::storeProjects);
+		configuration.getMavenSession()
+			.ifPresent(adapterInstance::storeProjects);
 		adapterInstance.lockProjects();
 
 		EmbeddedMaven embeddedMavenInstance = createEmbeddedMavenInstance(configuration, log);
@@ -108,7 +111,7 @@ public class StandaloneAdapter {
 	protected MavenAdapter createMavenAdapterInstance(File defaultYamlFile, Log log, MavenProject project) {
 		return new MavenAdapter(project, log, defaultYamlFile);
 	}
-	
+
 	protected MavenAdapter createMavenAdapterInstance(Log log, MavenProject project) {
 		return new MavenAdapter(project, log);
 	}
@@ -118,11 +121,14 @@ public class StandaloneAdapter {
 	}
 
 	/**
-	 * Adds the configuration related to the given project in the session. 
+	 * Adds the configuration related to the given project in the session.
 	 * 
-	 * @param project project whose configuration has to be added.
-	 * @param log maven log
-	 * @param configFile the default yaml configuration file
+	 * @param project
+	 *            project whose configuration has to be added.
+	 * @param log
+	 *            maven log
+	 * @param configFile
+	 *            the default yaml configuration file
 	 */
 	public void addProjectConfiguration(MavenProject project, Log log, File configFile) {
 		MavenAdapter mavenAdapterInstance = getMavenAdapterInstance();
@@ -139,8 +145,8 @@ public class StandaloneAdapter {
 	}
 
 	/**
-	 * Runs the standalone bundle with the configuration stored in the instance 
-	 * of the current {@link MavenAdapter}. 
+	 * Runs the standalone bundle with the configuration stored in the instance
+	 * of the current {@link MavenAdapter}.
 	 */
 	public void startStandaloneBundle(Log log) throws BundleException, MojoExecutionException, InterruptedException {
 		MavenAdapter mavenAdapterInstance = getMavenAdapterInstance();
@@ -151,12 +157,12 @@ public class StandaloneAdapter {
 		Map<String, String> bundleConfiguration = mavenAdapterInstance.getConfiguration();
 		BundleStarter bundleStarter = createNewBundleStarter(log);
 		addShutDownHook(mavenAdapterInstance, bundleStarter);
-		
+
 		bundleStarter.runStandalone(bundleConfiguration);
 	}
 
 	/**
-	 * @return if the configuration of all projects in the session are loaded; 
+	 * @return if the configuration of all projects in the session are loaded;
 	 */
 	public boolean allProjectsLoaded() {
 

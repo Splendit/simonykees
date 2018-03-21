@@ -93,7 +93,7 @@ public class StandaloneConfigTest {
 		mavenDepsFolder = mock(File.class);
 		classpathEntry = mock(IClasspathEntry.class);
 		mavenInvoker = mock(MavenInvoker.class);
-		standaloneConfig = new TestableStandaloneConfig("id", path.toString(), "1.8", true); //$NON-NLS-1$, //$NON-NLS-2$
+		standaloneConfig = new TestableStandaloneConfig("id", path.toString(), "1.8", true); //$NON-NLS-1$ , //$NON-NLS-2$
 	}
 
 	@Test
@@ -323,8 +323,9 @@ public class StandaloneConfigTest {
 			this(id, path, compilerCompliance, false);
 		}
 
-		public TestableStandaloneConfig(String id, String path, String compilerCompliance, boolean testMode) throws Exception {
-			super("", path, compilerCompliance, "", testMode); //$NON-NLS-1$, //$NON-NLS-2$
+		public TestableStandaloneConfig(String id, String path, String compilerCompliance, boolean testMode)
+				throws Exception {
+			super("", path, compilerCompliance, "", testMode); //$NON-NLS-1$ , //$NON-NLS-2$
 		}
 
 		@Override

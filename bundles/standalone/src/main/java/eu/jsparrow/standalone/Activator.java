@@ -71,9 +71,9 @@ public class Activator implements BundleActivator {
 				}
 				break;
 			case LIST_RULES:
-				if(listRulesId != null && !listRulesId.isEmpty()) {
+				if (listRulesId != null && !listRulesId.isEmpty()) {
 					listRulesUtil.listRules(listRulesId);
-				} else {					
+				} else {
 					listRulesUtil.listRules();
 				}
 				break;

@@ -67,7 +67,7 @@ public class StandaloneConfig {
 
 	private MavenInvoker mavenInovker;
 	private String projectId;
-	
+
 	/**
 	 * Constructor that calls setting up of the project and collecting the
 	 * compilation units.
@@ -141,8 +141,7 @@ public class StandaloneConfig {
 		}
 
 		logger.debug(Messages.StandaloneConfig_UseExistingProjectDescription);
-		
-		
+
 		File descriptionFile = getProjectDescriptionFile();
 		String descriptionFilePathValue = descriptionFile.getAbsolutePath();
 		Path descriptionFilePath = new Path(descriptionFilePathValue);
@@ -485,7 +484,7 @@ public class StandaloneConfig {
 	protected boolean isExistingSettingsDirectoryMoved() {
 		return existingSettingsDirectoryMoved;
 	}
-	
+
 	public String getProjectId() {
 		return this.projectId;
 	}

@@ -16,7 +16,8 @@ import org.apache.maven.shared.invoker.MavenInvocationException;
 import eu.jsparrow.adapter.i18n.Messages;
 
 /**
- * Contains functionalities for running {@code mvn dependency:copy-dependencies} plugin. 
+ * Contains functionalities for running {@code mvn dependency:copy-dependencies}
+ * plugin.
  * 
  * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
  * @since 2.5.0
