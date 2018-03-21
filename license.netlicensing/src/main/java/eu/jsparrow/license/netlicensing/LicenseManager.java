@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Calendar;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -41,7 +42,8 @@ public class LicenseManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(LicenseManager.class);
 
-	private static final String DEFAULT_LICENSEE_NUMBER_PREFIX = LicenseProperties.DEFAULT_LICENSEE_NUMBER_PREFIX;
+	public static final String DEMO_LICENSE_NUMBER = "demo"; //$NON-NLS-1$
+	
 	private static final String PRODUCT_NUMBER = LicenseProperties.LICENSE_PRODUCT_NUMBER;
 	public static final String VERSION = PRODUCT_NUMBER;
 
@@ -120,28 +122,33 @@ public class LicenseManager {
 			.orElse(calcDemoLicenseeName());
 		String number = persistedData.flatMap(PersistenceModel::getLicenseeNumber)
 			.filter(s -> !s.isEmpty())
-			.orElse(calcDemoLicenseeNumber());
+			.orElse(DEMO_LICENSE_NUMBER);
 		setLicenseeName(name);
 		setLicenseeNumber(number);
 
-		// New install, no license information. Create demo persistence model.
 		if (!persistedData.isPresent()) {
+			// New install, no license information. Create demo persistence model.
 
 			ValidationResultCache cache = ValidationResultCache.getInstance();
-			cache.updateCachedResult(new ValidationResult(), name, number, now, ValidationAction.CHECK_OUT, VERSION);
-			persistenceManager.persistCachedData();
-		}
-
-		if (number.startsWith("_demo")) {
+			cache.updateCachedResult(null, name, number, now, ValidationAction.CHECK_OUT, VERSION);
+			evaluationExpiresDate = getFiveDaysFromNow();
+			persistenceManager.persistDemoLicense(evaluationExpiresDate, true);
+			
+			 persistedData = persistenceManager.readPersistedData();
+		} 
+		
+		if (number.contains(DEMO_LICENSE_NUMBER)) {
 			licenseType = persistedData.flatMap(PersistenceModel::getLicenseType)
 				.orElse(LicenseType.TRY_AND_BUY);
 			evaluationExpiresDate = persistedData.flatMap(PersistenceModel::getDemoExpirationDate)
 				.orElse(null);
 			expirationTimeStamp = persistedData.flatMap(PersistenceModel::getExpirationTimeStamp)
 				.orElse(null);
+			boolean lastValidationStatus = persistedData.flatMap(PersistenceModel::getLastValidationStatus)
+					.orElse(false);
 			ValidationResultCache cache = ValidationResultCache.getInstance();
-			cache.updateCachedResult(new ValidationResult(), name, number, now, ValidationAction.CHECK_OUT, VERSION);
-			persistenceManager.persistCachedData();
+			cache.updateCachedResult(null, name, number, now, ValidationAction.CHECK_OUT, VERSION);
+			persistenceManager.persistDemoLicense(evaluationExpiresDate, lastValidationStatus);
 		} else {
 			try {
 				/*
@@ -188,6 +195,11 @@ public class LicenseManager {
 		ValidateExecutor.validationAttempt();
 		ValidateExecutor.startSchedule(schedulerEntity, licensee1);
 
+	}
+
+	private ZonedDateTime getFiveDaysFromNow() {
+		ZonedDateTime date = ZonedDateTime.now();
+		return date.plusDays(5);
 	}
 
 	void setLicensee(LicenseeModel licensee) {
@@ -307,25 +319,6 @@ public class LicenseManager {
 	}
 
 	@SuppressWarnings("nls")
-	private String calcDemoLicenseeNumber() {
-		String demoLicenseeName = "";
-
-		SystemInfo systemInfo = new SystemInfo();
-
-		HardwareAbstractionLayer hal = systemInfo.getHardware();
-		HWDiskStore[] diskStores = hal.getDiskStores();
-
-		String diskSerial = "";
-		if (diskStores.length > 0) {
-			diskSerial = diskStores[0].getSerial();
-		}
-
-		demoLicenseeName = DEFAULT_LICENSEE_NUMBER_PREFIX + diskSerial;
-
-		return demoLicenseeName;
-	}
-
-	@SuppressWarnings("nls")
 	private String calcDemoLicenseeName() {
 		String demoLicenseeName = "";
 
@@ -352,7 +345,7 @@ public class LicenseManager {
 		ValidateExecutor.validationAttempt();
 		// if there is a cached validation result...
 
-		if (!cache.isEmpty()) {
+		if (!cache.isEmpty() && cache.getCachedValidationResult() != null) {
 
 			/*
 			 * create an instance of LicenseChecker from the parser and last
@@ -380,13 +373,16 @@ public class LicenseManager {
 				}
 
 				// and reconstruct an instance of type LicenseChecker
-				if (!cache.isEmpty()) {
+				if (!cache.isEmpty() && cache.getCachedValidationResult() != null) {
 					checker = validateUsingCache();
 				} else {
 					checker = persistenceManager.vlidateUsingPersistedData();
 				}
 			}
-
+			
+		} else if (!cache.isEmpty()) {
+			checker = persistenceManager.vlidateUsingPersistedData();
+			
 		} else {
 
 			
@@ -396,7 +392,7 @@ public class LicenseManager {
 			 */
 			LicenseValidator.doValidate(getLicensee());
 
-			if (!cache.isEmpty()) {
+			if (!cache.isEmpty() && cache.getCachedValidationResult() != null) {
 				checker = validateUsingCache();
 
 			} else {

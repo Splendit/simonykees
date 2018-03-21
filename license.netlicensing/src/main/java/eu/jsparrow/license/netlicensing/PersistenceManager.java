@@ -267,9 +267,15 @@ public class PersistenceManager {
 		}
 
 		private LicenseStatus calcLicenseStatus() {
-			LicenseStatus status = LicenseStatus.CONNECTION_FAILURE;
-			if (getType() == null) {
-				status = LicenseStatus.CONNECTION_FAILURE_UNREGISTERED;
+			LicenseStatus status;
+			if (getType() == LicenseType.TRY_AND_BUY) {
+				if(valid) {					
+					status = LicenseStatus.FREE_REGISTERED;
+				} else {
+					status = LicenseStatus.FREE_EXPIRED;
+				}
+			} else {
+				status = LicenseStatus.CONNECTION_FAILURE;
 			}
 			return status;
 		}
@@ -300,6 +306,23 @@ public class PersistenceManager {
 			Instant now = Instant.now();
 			boolean lastValidationStatus = persistence.getLastValidationStatus()
 				.orElse(false);
+			
+			
+			
+			if (persistence.getLicenseType().filter(t -> t == LicenseType.TRY_AND_BUY).isPresent()) {
+				// the stored license type was TryAndBuy. A further
+				// check is needed for the expiration date.
+				Optional<ZonedDateTime> demoExpiration = persistence.getDemoExpirationDate();
+				if (demoExpiration.isPresent() && demoExpiration.get()
+					.isAfter(ZonedDateTime.now())) {
+					// demo time period was stored and it is not expired
+					// yet
+					return true;
+				}
+
+			}
+			
+			
 
 			if (lastValidationTimestamp.isPresent() && lastValidationTimestamp.get()
 				.isAfter(now.minusSeconds(OFFLINE_EXPIRATION_TIME_PERIOD)) && lastValidationStatus) {
@@ -336,6 +359,7 @@ public class PersistenceManager {
 							// expired yet.
 							status = true;
 						}
+						
 					}
 				}
 			}
@@ -363,5 +387,37 @@ public class PersistenceManager {
 			return expirationDate;
 		}
 
+	}
+
+	public void persistDemoLicense(ZonedDateTime demoExpirationDate, boolean lastValidationStatus) {
+		
+		ValidationResultCache cache = ValidationResultCache.getInstance();
+		Instant timestamp = cache.getValidationTimestamp();
+		String licenseeName = cache.getLicenseName();
+		String licenseeNumber = cache.getLicenseeNumber();
+		String version = cache.getVersion();
+
+		LicenseType licenseType = LicenseType.TRY_AND_BUY;
+		boolean subscriptionStatus = false;
+
+		Instant lastSuccessTimestamp;
+		LicenseType lastSuccessType;
+		if (lastValidationStatus) {
+			lastSuccessTimestamp = timestamp;
+			lastSuccessType = licenseType;
+		} else {
+			Optional<PersistenceModel> optPersistedData = readPersistedData();
+			lastSuccessTimestamp = optPersistedData.flatMap(PersistenceModel::getLastSuccessTimestamp)
+				.orElse(null);
+			lastSuccessType = optPersistedData.flatMap(PersistenceModel::getLastSuccessLicenseType)
+				.orElse(null);
+		}
+
+		PersistenceModel persistence = new PersistenceModel(licenseeNumber, licenseeName, lastValidationStatus,
+				licenseType, timestamp, demoExpirationDate, null, null,
+				subscriptionStatus, lastSuccessTimestamp, lastSuccessType, version);
+		setPersistenceModel(persistence);
+		persist();
+		
 	}
 }

@@ -34,7 +34,7 @@ public class LicenseValidator {
 	public static void doValidate(LicenseeModel licensee) {
 
 		if (licensee.getLicenseeNumber()
-			.startsWith("_demo")) {
+			.contains(LicenseManager.DEMO_LICENSE_NUMBER)) {
 			return;
 		}
 
