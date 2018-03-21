@@ -55,7 +55,7 @@ public class MavenAdapter {
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
-	private static final String LOCK_FILE_NAME = "lock.txt"; //$NON-NLS-1$
+	private static final String LOCK_FILE_NAME = "lock"; //$NON-NLS-1$
 
 	private Log log;
 	private Map<String, String> configuration = new HashMap<>();
