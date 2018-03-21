@@ -54,17 +54,17 @@ public class ListAllRulesMojo extends AbstractMojo {
 		String mode = StandaloneMode.LIST_RULES.name();
 
 		try {
-			if (!serviceInstance.isAdapterInitialized()) {
-				MavenParameters config = new MavenParameters(project, log, mode);
-				config.setRuleId(ruleId);
 
-				boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
-				if (!adapterLoadad) {
-					throw new MojoExecutionException(Messages.ListAllRulesMojo_jsparrowAlreadyRunning);
-				}
+			MavenParameters config = new MavenParameters(project, log, mode);
+			config.setRuleId(ruleId);
 
-				serviceInstance.startStandaloneBundle(log);
+			boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
+			if (!adapterLoadad) {
+				throw new MojoExecutionException(Messages.ListAllRulesMojo_jsparrowAlreadyRunning);
 			}
+
+			serviceInstance.startStandaloneBundle(log);
+
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());

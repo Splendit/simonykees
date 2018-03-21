@@ -41,25 +41,24 @@ public class ListAllRulesShortMojo extends AbstractMojo {
 	 */
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException {
-		
+
 		Log log = getLog();
 		StandaloneAdapter serviceInstance = StandaloneAdapter.getInstance();
 		String mode = StandaloneMode.LIST_RULES_SHORT.name();
-		
+
 		try {
-			if(!serviceInstance.isAdapterInitialized()) {
-				MavenParameters config = new MavenParameters(project, log, mode);
-				
-				boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
-				if (!adapterLoadad) {
-					throw new MojoExecutionException(Messages.ListAllRulesShortMojo_jsparrowAlreadyRunning);
-				}
-				
-				serviceInstance.startStandaloneBundle(log);
+
+			MavenParameters config = new MavenParameters(project, log, mode);
+
+			boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
+			if (!adapterLoadad) {
+				throw new MojoExecutionException(Messages.ListAllRulesShortMojo_jsparrowAlreadyRunning);
 			}
+
+			serviceInstance.startStandaloneBundle(log);
 		} catch (BundleException | InterruptedException e1) {
 			log.debug(e1.getMessage(), e1);
 			log.error(e1.getMessage());
-		} 
+		}
 	}
 }
