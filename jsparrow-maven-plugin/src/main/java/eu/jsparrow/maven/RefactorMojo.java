@@ -83,7 +83,7 @@ public class RefactorMojo extends AbstractMojo {
 
 				boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
 				if (!adapterLoadad) {
-					throw new MojoExecutionException(Messages.RefactorMojo_jsparrowAlreadyRunning);
+					throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
 				}
 			}
 			serviceInstance.addProjectConfiguration(project, log, configFile);

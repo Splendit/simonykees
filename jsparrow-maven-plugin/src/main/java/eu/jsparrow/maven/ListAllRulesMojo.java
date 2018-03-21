@@ -60,7 +60,7 @@ public class ListAllRulesMojo extends AbstractMojo {
 
 			boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
 			if (!adapterLoadad) {
-				throw new MojoExecutionException(Messages.ListAllRulesMojo_jsparrowAlreadyRunning);
+				throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
 			}
 
 			serviceInstance.startStandaloneBundle(log);
