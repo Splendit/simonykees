@@ -11,6 +11,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
+import eu.jsparrow.maven.enums.StandaloneMode;
 import eu.jsparrow.maven.util.MavenHelper;
 
 /**
@@ -19,7 +20,6 @@ import eu.jsparrow.maven.util.MavenHelper;
  * @author Matthias Webhofer
  * @since 2.3.0
  */
-@SuppressWarnings("nls")
 @Mojo(name = "list-rules-short")
 public class ListAllRulesShortMojo extends AbstractMojo {
 
@@ -36,7 +36,7 @@ public class ListAllRulesShortMojo extends AbstractMojo {
 	private String mavenHome;
 
 	// CONSTANTS
-	private static final String LIST_RULES_SHORT = "LIST.RULES.SHORT";
+	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 
 	/**
 	 * MOJO entry point. Registers shutdown hook for clean up and starts equinox
@@ -51,7 +51,7 @@ public class ListAllRulesShortMojo extends AbstractMojo {
 
 		try {
 			final Map<String, String> configuration = new HashMap<>();
-			configuration.put(LIST_RULES_SHORT, Boolean.toString(true));
+			configuration.put(STANDALONE_MODE_KEY, StandaloneMode.LIST_RULES_SHORT.name());
 
 			mavenHelper.startOSGI(configuration);
 		} catch (BundleException | InterruptedException e) {

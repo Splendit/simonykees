@@ -1,0 +1,64 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>at.splendit</groupId>
+		<artifactId>bundles</artifactId>
+		<version>2.5.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>eu.jsparrow.standalone</artifactId>
+	<packaging>eclipse-plugin</packaging>
+	<name>jSparrow :: standalone</name>
+	<description>jSparrow Plugin for headless start</description>
+
+	<properties>
+		<proguard.extra.options>
+			<!-- <option> -libraryjars ${project.basedir}/../license.api/target/eu.jsparrow.license.api-${project.version}_proguard_base.jar 
+				</option> <option>-applymapping ${project.basedir}/../license.api/target/license.api.out</option> -->
+			-libraryjars
+			${project.basedir}/../rules.api/target/eu.jsparrow.rules.api-${project.version}_proguard_base.jar
+			-libraryjars
+			${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
+			-libraryjars
+			${project.basedir}/../core/target/eu.jsparrow.core-${project.version}_proguard_base.jar
+		</proguard.extra.options>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-libraries</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<item>
+									<groupId>org.apache.maven.shared</groupId>
+									<artifactId>maven-invoker</artifactId>
+									<version>3.0.0</version>
+								</item>
+								<item>
+									<groupId>org.codehaus.plexus</groupId>
+									<artifactId>plexus-utils</artifactId>
+									<version>3.0.17</version>
+								</item>
+							</artifactItems>
+							<outputDirectory>lib</outputDirectory>
+							<stripVersion>true</stripVersion>
+							<overWriteReleases>true</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

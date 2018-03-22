@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/eu.jsparrow.standalone.feature_2.5.0.qualifier.jar" id="eu.jsparrow.standalone.feature" version="2.5.0.qualifier">
+      <category name="splendit"/>
+   </feature>
+   <bundle id="org.eclipse.osgi" version="3.12.50.v20170928-1321">
+      <category name="splendit"/>
+   </bundle>
+   <bundle id="org.eclipse.equinox.common" version="3.9.0.v20170207-1454">
+      <category name="splendit"/>
+   </bundle>
+   <bundle id="org.eclipse.update.configurator" version="3.3.400.v20160506-0750">
+      <category name="splendit"/>
+   </bundle>
+   <bundle id="org.eclipse.equinox.launcher" version="1.4.0.v20161219-1356">
+      <category name="splendit"/>
+   </bundle>
+   <category-def name="splendit" label="splendit">
+      <description>
+         Eclipse plugins by Splendit IT-Consulting GmbH
+      </description>
+   </category-def>
+</site>
