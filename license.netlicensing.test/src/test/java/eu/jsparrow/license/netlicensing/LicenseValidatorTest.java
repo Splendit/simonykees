@@ -9,6 +9,7 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import eu.jsparrow.license.netlicensing.model.LicenseeModel;
@@ -75,6 +76,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	}
 
 	@Test
+	@Ignore
 	public void validateNodeLockedLicenseWrongSecret() throws InterruptedException {
 		// having a licensee with a node locked license and with incorrect
 		// secret id...
@@ -118,6 +120,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	}
 
 	@Test
+	@Ignore
 	public void validateNodeLockedHwIdFailureStatus() throws InterruptedException {
 		// having a licensee with a node locked license...
 		persistNodeLockedLicensee();
