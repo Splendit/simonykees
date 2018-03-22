@@ -40,7 +40,8 @@ public class LicenseManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(LicenseManager.class);
 
-	private static final String DEFAULT_LICENSEE_NUMBER_PREFIX = LicenseProperties.DEFAULT_LICENSEE_NUMBER_PREFIX;
+	public static final String DEMO_LICENSE_NUMBER = "demo"; //$NON-NLS-1$
+	
 	private static final String PRODUCT_NUMBER = LicenseProperties.LICENSE_PRODUCT_NUMBER;
 	public static final String VERSION = PRODUCT_NUMBER;
 
@@ -102,46 +103,80 @@ public class LicenseManager {
 		ZonedDateTime evaluationExpiresDate;
 		ZonedDateTime expirationTimeStamp;
 
+		/**
+		 * Load persisted data: If no data is there persist demo license with
+		 * current timestamp. If there is demo data, check if license is still
+		 * "valid". Otherwise, make call if validation is fine.
+		 * 
+		 **/
+
 		Optional<PersistenceModel> persistedData = persistenceManager.readPersistedData()
 			.filter(pm -> pm.getLastPersistedVersion()
 				.filter(LicenseManager.VERSION::equals)
 				.isPresent());
+
 		String name = persistedData.flatMap(PersistenceModel::getLicenseeName)
 			.filter(s -> !s.isEmpty())
 			.orElse(calcDemoLicenseeName());
 		String number = persistedData.flatMap(PersistenceModel::getLicenseeNumber)
 			.filter(s -> !s.isEmpty())
-			.orElse(calcDemoLicenseeNumber());
+			.orElse(DEMO_LICENSE_NUMBER);
 		setLicenseeName(name);
 		setLicenseeNumber(number);
 
-		try {
-			/*
-			 * make a pre-validate call to get the information for the relevant
-			 * license model
-			 */
-			ValidationResult validationResult = preValidate(PRODUCT_NUMBER, PRODUCT_MODULE_NUMBER, number, name);
-			ResponseParser parser = new ResponseParser(validationResult, now, name, ValidationAction.CHECK_OUT);
+		if (!persistedData.isPresent()) {
+			// New install, no license information. Create demo persistence model.
 
-			// cash and persist pre-validation...
 			ValidationResultCache cache = ValidationResultCache.getInstance();
-			cache.updateCachedResult(validationResult, name, number, now, ValidationAction.CHECK_OUT, VERSION);
-			persistenceManager.persistCachedData();
-
-			// extract pre-validation result
-			licenseType = parser.getType();
-			evaluationExpiresDate = parser.getEvaluationExpiresDate();
-			expirationTimeStamp = parser.getExpirationTimeStamp();
-
-		} catch (NetLicensingException e) {
-
-			logger.warn(Messages.LicenseManager_cannot_reach_licensing_provider_on_checkin);
+			cache.updateCachedResult(null, name, number, now, ValidationAction.CHECK_OUT, VERSION);
+			evaluationExpiresDate = getFiveDaysFromNow();
+			persistenceManager.persistDemoLicense(evaluationExpiresDate, true);
+			
+			 persistedData = persistenceManager.readPersistedData();
+		} 
+		
+		if (number.contains(DEMO_LICENSE_NUMBER)) {
 			licenseType = persistedData.flatMap(PersistenceModel::getLicenseType)
 				.orElse(LicenseType.TRY_AND_BUY);
 			evaluationExpiresDate = persistedData.flatMap(PersistenceModel::getDemoExpirationDate)
 				.orElse(null);
 			expirationTimeStamp = persistedData.flatMap(PersistenceModel::getExpirationTimeStamp)
 				.orElse(null);
+			boolean lastValidationStatus = persistedData.flatMap(PersistenceModel::getLastValidationStatus)
+					.orElse(false);
+			ValidationResultCache cache = ValidationResultCache.getInstance();
+			cache.updateCachedResult(null, name, number, now, ValidationAction.CHECK_OUT, VERSION);
+			persistenceManager.persistDemoLicense(evaluationExpiresDate, lastValidationStatus);
+		} else {
+			try {
+				/*
+				 * make a pre-validate call to get the information for the
+				 * relevant license model
+				 */
+				ValidationResult validationResult = preValidate(PRODUCT_NUMBER, PRODUCT_MODULE_NUMBER, number, name);
+				ResponseParser parser = new ResponseParser(validationResult, now, name, ValidationAction.CHECK_OUT);
+
+				// cash and persist pre-validation...
+				ValidationResultCache cache = ValidationResultCache.getInstance();
+				cache.updateCachedResult(validationResult, name, number, now, ValidationAction.CHECK_OUT, VERSION);
+				persistenceManager.persistCachedData();
+
+				// extract pre-validation result
+				licenseType = parser.getType();
+				evaluationExpiresDate = parser.getEvaluationExpiresDate();
+				expirationTimeStamp = parser.getExpirationTimeStamp();
+
+			} catch (NetLicensingException e) {
+
+				logger.warn(Messages.LicenseManager_cannot_reach_licensing_provider_on_checkin);
+				licenseType = persistedData.flatMap(PersistenceModel::getLicenseType)
+					.orElse(LicenseType.TRY_AND_BUY);
+				evaluationExpiresDate = persistedData.flatMap(PersistenceModel::getDemoExpirationDate)
+					.orElse(null);
+				expirationTimeStamp = persistedData.flatMap(PersistenceModel::getExpirationTimeStamp)
+					.orElse(null);
+
+			}
 
 		}
 
@@ -158,6 +193,11 @@ public class LicenseManager {
 		ValidateExecutor.validationAttempt();
 		ValidateExecutor.startSchedule(schedulerEntity, licensee1);
 
+	}
+
+	private ZonedDateTime getFiveDaysFromNow() {
+		ZonedDateTime date = ZonedDateTime.now();
+		return date.plusDays(5);
 	}
 
 	void setLicensee(LicenseeModel licensee) {
@@ -277,25 +317,6 @@ public class LicenseManager {
 	}
 
 	@SuppressWarnings("nls")
-	private String calcDemoLicenseeNumber() {
-		String demoLicenseeName = "";
-
-		SystemInfo systemInfo = new SystemInfo();
-
-		HardwareAbstractionLayer hal = systemInfo.getHardware();
-		HWDiskStore[] diskStores = hal.getDiskStores();
-
-		String diskSerial = "";
-		if (diskStores.length > 0) {
-			diskSerial = diskStores[0].getSerial();
-		}
-
-		demoLicenseeName = DEFAULT_LICENSEE_NUMBER_PREFIX + diskSerial;
-
-		return demoLicenseeName;
-	}
-
-	@SuppressWarnings("nls")
 	private String calcDemoLicenseeName() {
 		String demoLicenseeName = "";
 
@@ -320,9 +341,9 @@ public class LicenseManager {
 		LicenseChecker checker;
 
 		ValidateExecutor.validationAttempt();
-
 		// if there is a cached validation result...
-		if (!cache.isEmpty()) {
+
+		if (!cache.isEmpty() && cache.getCachedValidationResult() != null) {
 
 			/*
 			 * create an instance of LicenseChecker from the parser and last
@@ -350,22 +371,26 @@ public class LicenseManager {
 				}
 
 				// and reconstruct an instance of type LicenseChecker
-				if (!cache.isEmpty()) {
+				if (!cache.isEmpty() && cache.getCachedValidationResult() != null) {
 					checker = validateUsingCache();
 				} else {
 					checker = persistenceManager.vlidateUsingPersistedData();
 				}
 			}
-
+			
+		} else if (!cache.isEmpty()) {
+			checker = persistenceManager.vlidateUsingPersistedData();
+			
 		} else {
 
+			
 			/*
 			 * Try to make a validation call. Here is the case that the previous
 			 * validation call failed due to internet connection.
 			 */
 			LicenseValidator.doValidate(getLicensee());
 
-			if (!cache.isEmpty()) {
+			if (!cache.isEmpty() && cache.getCachedValidationResult() != null) {
 				checker = validateUsingCache();
 
 			} else {
@@ -519,11 +544,12 @@ public class LicenseManager {
 	public static void setJSparrowRunning(boolean running) {
 		ValidateExecutor.setJSparrowRunning(running);
 	}
-	
+
 	public static boolean isRunning() {
 		return !ValidateExecutor.isShutDown();
 	}
 
+	
 	private class CheckerImpl implements LicenseChecker {
 
 		private LicenseType parsedLicenseType;

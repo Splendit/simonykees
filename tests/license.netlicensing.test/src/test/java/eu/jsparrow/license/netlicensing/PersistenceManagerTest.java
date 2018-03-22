@@ -176,7 +176,7 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 	}
 
 	@Test
-	public void validateTryAndBuy() {
+	public void validateTryAndBuy_connectionFailureShouldNotOccur() {
 		// having stored a valid persistence model of some demo license...
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		Instant nowMin30sec = Instant.now()
@@ -203,7 +203,7 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 
 		// expecting license to be valid...
 		assertTrue(checker.isValid());
-		assertEquals(LicenseStatus.CONNECTION_FAILURE, checker.getLicenseStatus());
+		assertEquals(LicenseStatus.FREE_REGISTERED, checker.getLicenseStatus());
 		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
 		assertEquals(demoExpireDate, checker.getExpirationDate());
 		assertEquals("floating test-name", checker.getLicenseeName());
@@ -211,7 +211,7 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 	}
 
 	@Test
-	public void validateTryAndBuyExiredDemo() {
+	public void validateTryAndBuyExiredDemo_connectionFailureStatusShouldNotOccur() {
 		// having stored an expired persistence model of some demo license...
 		PersistenceManager persistenceMng = PersistenceManager.getInstance();
 		Instant nowMin1300sec = Instant.now()
@@ -236,7 +236,7 @@ public class PersistenceManagerTest extends LicenseCommonTest {
 
 		// expecting license to NOT be valid...
 		assertFalse(checker.isValid());
-		assertEquals(LicenseStatus.CONNECTION_FAILURE, checker.getLicenseStatus());
+		assertEquals(LicenseStatus.FREE_EXPIRED, checker.getLicenseStatus());
 		assertEquals(LicenseType.TRY_AND_BUY, checker.getType());
 		assertEquals(demoExpireDate, checker.getExpirationDate());
 		assertEquals("floating test-name", checker.getLicenseeName());

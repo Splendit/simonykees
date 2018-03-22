@@ -339,7 +339,7 @@ public class ResponseParser implements LicenseChecker {
 	private LicenseStatus calcLicenseStatus() {
 		LicenseType type = getType();
 		LicenseStatus status;
-
+		
 		switch (type) {
 		case TRY_AND_BUY:
 			if (isValid()) {
