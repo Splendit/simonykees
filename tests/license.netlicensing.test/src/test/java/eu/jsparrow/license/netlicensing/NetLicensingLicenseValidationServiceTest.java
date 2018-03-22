@@ -34,7 +34,7 @@ public class NetLicensingLicenseValidationServiceTest {
 	public void setUp() {
 		netLicensingLicenseValidationService = new NetLicensingLicenseValidationService(licenseManager);
 	}
-	
+
 	@Test
 	// TODO: Non-Deterministic test, fix with SIM-931
 	@Ignore
