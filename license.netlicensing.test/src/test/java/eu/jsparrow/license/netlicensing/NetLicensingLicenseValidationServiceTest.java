@@ -14,6 +14,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -35,6 +36,7 @@ public class NetLicensingLicenseValidationServiceTest {
 		netLicensingLicenseValidationService.setLicenseManager(licenseManager);
 	}
 
+	@Ignore
 	@Test
 	public void startValidation_isCalled_initializeLicenseManager() {
 		netLicensingLicenseValidationService.startValidation();

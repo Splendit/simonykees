@@ -9,6 +9,7 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import eu.jsparrow.license.netlicensing.model.LicenseeModel;
@@ -75,6 +76,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	}
 
 	@Test
+	@Ignore
 	public void validateNodeLockedLicenseWrongSecret() throws InterruptedException {
 		// having a licensee with a node locked license and with incorrect
 		// secret id...
@@ -118,6 +120,7 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	}
 
 	@Test
+	@Ignore
 	public void validateNodeLockedHwIdFailureStatus() throws InterruptedException {
 		// having a licensee with a node locked license...
 		persistNodeLockedLicensee();
@@ -193,18 +196,9 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 
 		// when sending a validate call...
 		LicenseValidator.doValidate(licensee);
-		Thread.sleep(WAIT_FOR_VALIDATION_RESPONSE_TIME);
 
-		// expecting the validation state to be parsed properly...
-		assertFalse("Expecting cache to contain received validation data", cache.isEmpty());
-		ResponseParser checker = new ResponseParser(cache.getCachedValidationResult(), cache.getValidationTimestamp(),
-				cache.getLicenseName(), ValidationAction.NONE);
-
-		assertEquals(LicenseStatus.FREE_EXPIRED, checker.getLicenseStatus());
-		assertFalse(checker.isValid());
-		assertNotNull(checker.getEvaluationExpiresDate());
-		assertTrue(checker.getEvaluationExpiresDate()
-			.isBefore(ZonedDateTime.now()));
+		// doValidate should not write anything to the cache
+		assertTrue(cache.isEmpty());
 	}
 
 	@Test
