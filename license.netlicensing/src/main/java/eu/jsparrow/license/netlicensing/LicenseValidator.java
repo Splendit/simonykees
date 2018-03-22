@@ -33,6 +33,11 @@ public class LicenseValidator {
 
 	public static void doValidate(LicenseeModel licensee) {
 
+		if (licensee.getLicenseeNumber()
+			.contains(LicenseManager.DEMO_LICENSE_NUMBER)) {
+			return;
+		}
+
 		try {
 			// preparing validation parameters...
 			ValidationParameters validationParameters = licensee.getValidationParams();
