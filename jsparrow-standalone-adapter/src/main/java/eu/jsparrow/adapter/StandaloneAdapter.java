@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
+import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.BundleException;
 
 import eu.jsparrow.adapter.i18n.Messages;
@@ -74,7 +75,8 @@ public class StandaloneAdapter {
 
 		if (adapterInstance.isJsparrowStarted(project)) {
 			adapterInstance.setJsparrowRunningFlag();
-			log.error(Messages.StandaloneAdapter_jSparrowAlreadyRunning);
+			String projectId = adapterInstance.findProjectIdentifier(project);
+			log.error(NLS.bind(Messages.StandaloneAdapter_jSparrowAlreadyRunning, projectId));
 			return false;
 		}
 		adapterInstance.prepareWorkingDirectory();
