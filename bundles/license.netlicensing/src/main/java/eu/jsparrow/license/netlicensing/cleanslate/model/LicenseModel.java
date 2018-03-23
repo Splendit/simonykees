@@ -1,6 +1,7 @@
 package eu.jsparrow.license.netlicensing.cleanslate.model;
 
-public interface LicenseModel {
-	
-	
+import java.io.Serializable;
+
+public interface LicenseModel extends Serializable {
+
 }

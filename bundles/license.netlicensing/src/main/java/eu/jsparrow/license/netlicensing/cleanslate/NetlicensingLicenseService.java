@@ -1,6 +1,11 @@
 package eu.jsparrow.license.netlicensing.cleanslate;
 
+import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
+
 import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseModel;
+import eu.jsparrow.license.netlicensing.cleanslate.model.ValidationException;
+import eu.jsparrow.license.netlicensing.cleanslate.persistence.AESEncryption;
+import eu.jsparrow.license.netlicensing.cleanslate.persistence.SecureStoragePersistence;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.LicenseValidation;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.LicenseValidationFactory;
 
@@ -10,7 +15,7 @@ public class NetlicensingLicenseService implements LicenseService {
 	private LicenseValidationFactory validationFactory;
 	
 	public NetlicensingLicenseService() {
-		this.persistence = new SecureStoragePersistence();
+		this.persistence = new SecureStoragePersistence(SecurePreferencesFactory.getDefault(), new AESEncryption());
 		this.validationFactory = new LicenseValidationFactory();
 	}
 	
@@ -21,7 +26,7 @@ public class NetlicensingLicenseService implements LicenseService {
 	}
 
 	@Override
-	public LicenseValidationResult validateLicense() {
+	public LicenseValidationResult validateLicense() throws ValidationException {
 		LicenseModel model = persistence.load();
 		
 		LicenseValidation validation = validationFactory.create(model);
