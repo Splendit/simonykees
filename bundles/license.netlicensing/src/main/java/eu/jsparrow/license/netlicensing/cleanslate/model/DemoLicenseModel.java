@@ -4,17 +4,18 @@ import java.time.ZonedDateTime;
 
 public class DemoLicenseModel implements LicenseModel {
 
-	private ZonedDateTime expireDate;
+	private ZonedDateTime expirationDate;
 
-	public DemoLicenseModel(ZonedDateTime expireDate) {
-		setExpireDate(expireDate);
+	public void setExpirationDate(ZonedDateTime expirationDate) {
+		this.expirationDate = expirationDate;
 	}
 
-	private void setExpireDate(ZonedDateTime expireDate2) {
-		this.expireDate = expireDate2;
+	public DemoLicenseModel(ZonedDateTime expirationDate) {
+		this.expirationDate = expirationDate;
+	}
+	
+	public ZonedDateTime getExpirationDate() {
+		return expirationDate;
 	}
 
-	public ZonedDateTime getExpireDate() {
-		return expireDate;
-	}
 }

@@ -11,8 +11,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Matchers.*;
-
 import eu.jsparrow.license.netlicensing.cleanslate.DummyLicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.model.ValidationException;
