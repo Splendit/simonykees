@@ -1,6 +1,24 @@
 #!/bin/bash
 ## bash script for building the jsparrow-maven-plugins
 
+function printUsage {
+  echo -e "\tUsage:"
+  echo -e "\t\t$0 [-t]"
+  echo -e "\n\tParameters:"
+  echo -e "\t\t-t\t\trun tests while building"
+}
+
+TEST=false
+
+# parse arguments
+while getopts :t option
+do
+  case "${option}" in
+    t) TEST=true;;
+    ?) printUsage;;
+  esac
+done
+
 JSPARROW_TARGET_PATH="releng/eu.jsparrow.product/target/repository/plugins"
 PLUGIN_RESOURCES_PATH="jsparrow-maven-plugin/src/main/resources"
 MANIFEST_FILE_NAME="manifest.standalone"
@@ -8,13 +26,36 @@ MANIFEST_FILE_NAME="manifest.standalone"
 echo "Building jSparrow"
 
 # build jsparrow without tests
-mvn clean verify -DskipTests
+if [ $TEST = true ]; then
+  mvn clean verify
+else
+  mvn clean verify -DskipTests
+fi
 
 # check maven result and exit if necessary
 if [ $? -ne 0 ]; then
   echo "maven on jsparrow failed!"
   exit 1
 fi
+
+# build jsparrow-standalone-adapter  and install it to the .m2 repo
+echo "Building jsparrow-standalone-adapter"
+
+cd jsparrow-standalone-adapter
+
+if [ $TEST = true ]; then
+  mvn clean install
+else
+  mvn clean install -DskipTests
+fi
+
+# check maven result and exit if necessary
+if [ $? -ne 0 ]; then
+  echo "maven on jsparrow-standalone-adapter failed!"
+  exit 5
+fi
+
+cd ..
 
 # create jsparrow maven plugin resource directory if it doesn't exist
 if [ ! -d $PLUGIN_RESOURCES_PATH ]; then
@@ -44,7 +85,12 @@ ls $JSPARROW_TARGET_PATH > $PLUGIN_RESOURCES_PATH/$MANIFEST_FILE_NAME
 cd jsparrow-maven-plugin
 
 echo "Building jSparrow Maven Plugin"
-mvn clean install
+
+if [ $TEST = true ]; then
+  mvn clean install
+else
+  mvn clean install -DskipTests
+fi
 
 if [ $? -ne 0 ]; then
   echo "maven on jSparrow maven plugin failed!"
