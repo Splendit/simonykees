@@ -11,6 +11,12 @@ This will build and install the maven plugin as described below. It won't execut
 $ mvn clean verify
 ```
 
+## build jsparrow-standalone-adapter
+
+```bash
+$ mvn clean install
+```
+
 ## configure jsparrow-maven-plugin
 * create directory `resources` in `src/main`
 * in `src/main/resources` create file named `manifest.standalone`
