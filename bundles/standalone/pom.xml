@@ -15,6 +15,16 @@
 
 	<properties>
 		<snakeyaml.version>1.18</snakeyaml.version>
+		<proguard.extra.options>
+			<!-- <option> -libraryjars ${project.basedir}/../license.api/target/eu.jsparrow.license.api-${project.version}_proguard_base.jar 
+				</option> <option>-applymapping ${project.basedir}/../license.api/target/license.api.out</option> -->
+			-libraryjars
+			${project.basedir}/../rules.api/target/eu.jsparrow.rules.api-${project.version}_proguard_base.jar
+			-libraryjars
+			${project.basedir}/../logging/target/eu.jsparrow.logging-${project.version}_proguard_base.jar
+			-libraryjars
+			${project.basedir}/../core/target/eu.jsparrow.core-${project.version}_proguard_base.jar
+		</proguard.extra.options>
 	</properties>
 
 

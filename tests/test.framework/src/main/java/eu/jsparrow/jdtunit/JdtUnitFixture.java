@@ -1,18 +1,12 @@
 package eu.jsparrow.jdtunit;
 
-import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import java.util.HashMap;
 import java.util.List;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -29,9 +23,14 @@ import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.text.edits.TextEdit;
+
+import eu.jsparrow.jdtunit.util.CompilationUnitBuilder;
+import eu.jsparrow.jdtunit.util.JavaProjectBuilder;
+import eu.jsparrow.jdtunit.util.PackageFragmentBuilder;
+import eu.jsparrow.rules.common.util.ASTNodeUtil;
 
 /**
  * <p>
@@ -57,11 +56,7 @@ public class JdtUnitFixture {
 
 	private static final String METHOD_FIXTURE_NAME = "FixtureMethod";
 
-	private IProject project;
-
 	private IJavaProject javaProject;
-
-	private IPackageFragment packageFragment;
 
 	private ICompilationUnit compilationUnit;
 
@@ -91,12 +86,16 @@ public class JdtUnitFixture {
 	 * <li>A class containing a single method within that file
 	 * </ul>
 	 * 
+	 * @throws JdtUnitException
+	 * 
 	 * @throws Exception
 	 */
-	public void setUp() throws Exception {
-		createJavaProject();
+	public void setUp() throws JdtUnitException {
+		javaProject = new JavaProjectBuilder().name(PROJECT_FIXTURE_NAME)
+			.options(options)
+			.build();
 
-		packageFragment = addPackageFragment(PACKAGE_FIXTURE_NAME);
+		IPackageFragment packageFragment = addPackageFragment(PACKAGE_FIXTURE_NAME);
 
 		compilationUnit = addCompilationUnit(packageFragment, FILE_FIXTURE_NAME);
 
@@ -131,9 +130,12 @@ public class JdtUnitFixture {
 	/**
 	 * Resets the Fixture to its default state
 	 * 
+	 * @throws BadLocationException
+	 * @throws JavaModelException
+	 * 
 	 * @throws Exception
 	 */
-	public void clear() throws Exception {
+	public void clear() throws JavaModelException, BadLocationException {
 		astRoot.imports()
 			.clear();
 		methodDeclaration.getBody()
@@ -148,7 +150,8 @@ public class JdtUnitFixture {
 	 * @throws CoreException
 	 */
 	public void tearDown() throws CoreException {
-		project.delete(true, null);
+		javaProject.getProject()
+			.delete(true, null);
 	}
 
 	/**
@@ -156,9 +159,11 @@ public class JdtUnitFixture {
 	 * 
 	 * @param name
 	 *            the import as fully qualified string, e.g. at.splendit.MyClass
+	 * @throws BadLocationException
+	 * @throws JavaModelException
 	 * @throws Exception
 	 */
-	public void addImport(String name) throws Exception {
+	public void addImport(String name) throws JavaModelException, BadLocationException {
 		ImportDeclaration im = ast.newImportDeclaration();
 		im.setName(ast.newName(name));
 		astRoot.imports()
@@ -167,25 +172,28 @@ public class JdtUnitFixture {
 	}
 
 	/**
-	 * Adds statements to the stub method and saves the compilation unit with the
-	 * changes.
+	 * Adds statements to the stub method and saves the compilation unit with
+	 * the changes.
 	 * 
 	 * @param statements
 	 *            the statements to add separated by semicolons
+	 * @throws BadLocationException
+	 * @throws JavaModelException
+	 * @throws JdtUnitException
 	 * @throws Exception
 	 */
-	public void addMethodBlock(String statements) throws Exception {
+	public void addMethodBlock(String statements) throws JavaModelException, BadLocationException, JdtUnitException {
 		ASTNode convertedAstNodeWithMethodBody = ASTNode.copySubtree(ast, createBlockFromString(statements));
 		Block block = (Block) convertedAstNodeWithMethodBody;
 
 		methodDeclaration.setBody(block);
 		this.astRoot = this.saveChanges();
 	}
-	
+
 	/**
 	 * Returns the list of the definded imports
 	 */
-	public List<ImportDeclaration> getImports(){
+	public List<ImportDeclaration> getImports() {
 		return ASTNodeUtil.convertToTypedList(astRoot.imports(), ImportDeclaration.class);
 	}
 
@@ -198,7 +206,7 @@ public class JdtUnitFixture {
 		return methodDeclaration.getBody();
 	}
 
-	private CompilationUnit saveChanges() throws Exception {
+	private CompilationUnit saveChanges() throws JavaModelException, BadLocationException {
 		Document document = new Document(compilationUnit.getSource());
 		TextEdit res = astRoot.rewrite(document, options);
 		res.apply(document);
@@ -215,9 +223,12 @@ public class JdtUnitFixture {
 	 * 
 	 * @param visitor
 	 *            The visitor to accept
+	 * @throws IllegalArgumentException
+	 * @throws JavaModelException
+	 * @throws BadLocationException
 	 * @throws Exception
 	 */
-	public void accept(ASTVisitor visitor) throws Exception {
+	public void accept(ASTVisitor visitor) throws JavaModelException, BadLocationException {
 		astRoot.accept(visitor);
 		TextEdit edit = astRewrite.rewriteAST();
 		if (edit.hasChildren()) {
@@ -226,7 +237,7 @@ public class JdtUnitFixture {
 		astRoot = saveChanges(edit);
 	}
 
-	private CompilationUnit saveChanges(TextEdit textEdit) throws Exception {
+	private CompilationUnit saveChanges(TextEdit textEdit) throws JavaModelException, BadLocationException {
 		Document document = new Document(compilationUnit.getSource());
 		textEdit.apply(document);
 		compilationUnit.getBuffer()
@@ -234,27 +245,6 @@ public class JdtUnitFixture {
 
 		refreshFixtures();
 		return astRoot;
-	}
-
-	private void createJavaProject() throws CoreException {
-
-		project = ResourcesPlugin.getWorkspace()
-			.getRoot()
-			.getProject(PROJECT_FIXTURE_NAME);
-		project.create(null);
-		project.open(null);
-
-		IProjectDescription description = project.getDescription();
-		description.setNatureIds(new String[] { JavaCore.NATURE_ID });
-		project.setDescription(description, null);
-
-		javaProject = JavaCore.create(project);
-
-		// build path is: project as source folder and JRE container
-		IClasspathEntry[] cpentry = new IClasspathEntry[] { JavaCore.newSourceEntry(javaProject.getPath()),
-				JavaRuntime.getDefaultJREContainerEntry() };
-		javaProject.setRawClasspath(cpentry, javaProject.getPath(), null);
-		javaProject.setOptions(options);
 	}
 
 	private Block createBlockFromString(String string) throws JdtUnitException {
@@ -290,22 +280,14 @@ public class JdtUnitFixture {
 		hasChanged = false;
 	}
 
-	public IPackageFragment addPackageFragment(String name) throws JdtUnitException, JavaModelException {
-		if (javaProject == null) {
-			throw new JdtUnitException("Java project is null");
-		}
-
-		IPackageFragmentRoot root = javaProject.getPackageFragmentRoot(project);
-		return root.createPackageFragment(name, false, null);
+	public IPackageFragment addPackageFragment(String name) throws JdtUnitException {
+		return new PackageFragmentBuilder(javaProject).setName(name)
+			.build();
 	}
 
-	public ICompilationUnit addCompilationUnit(IPackageFragment packageFragment, String name)
-			throws JdtUnitException, JavaModelException {
-		if (packageFragment == null) {
-			throw new JdtUnitException("Package fragment is null");
-		}
-		
-		return packageFragment.createCompilationUnit(name, "", false, null);
+	public ICompilationUnit addCompilationUnit(IPackageFragment packageFragment, String name) throws JdtUnitException {
+		return new CompilationUnitBuilder(packageFragment).setName(name)
+			.build();
 	}
 
 	/**
