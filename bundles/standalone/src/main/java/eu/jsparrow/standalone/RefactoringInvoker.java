@@ -80,32 +80,16 @@ public class RefactoringInvoker {
 			startRefactoring(context, refactoringPipeline, config);
 		}
 	}
+	
 
 	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline,
 			StandaloneConfig standaloneConfig) throws YAMLConfigException {
 		String loggerInfo;
 
-		YAMLConfig config = getConfiguration(context, standaloneConfig.getProjectId());
-		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home"));
-		YAMLStandaloneConfig yamlStandaloneConfig = null;
-		try {
-			yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(filePath));
-		} catch (YAMLStandaloneConfigException e1) {
-			logger.info("Failed to load configuration, syntax error.");
-		}
-		
-		String licenseKey = "";
-		if(yamlStandaloneConfig != null) {
-			licenseKey = yamlStandaloneConfig.getKey();
-		}
-		String cmdlineLicenseKey = context.getProperty(LICENSE_KEY);
-		if(cmdlineLicenseKey != null) {
-			logger.info("Overriding config license key with command line parameter");
-			licenseKey = cmdlineLicenseKey;
-		}
-		
+		String licenseKey = getLicenseKey(context);
 		logger.debug(licenseKey);
 
+		YAMLConfig config = getConfiguration(context, standaloneConfig.getProjectId());
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = getProjectRules(standaloneConfig);
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = getSelectedRules(config,
 				projectRules);
@@ -282,4 +266,26 @@ public class RefactoringInvoker {
 	private void setStandaloneConfigurations(List<StandaloneConfig> configs) {
 		this.standaloneConfigs = configs;
 	}
+	
+	private String getLicenseKey(BundleContext context) {
+		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
+		YAMLStandaloneConfig yamlStandaloneConfig = null;
+		try {
+			yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(filePath));
+		} catch (YAMLStandaloneConfigException e) {
+			logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
+		}
+		
+		String licenseKey = ""; //$NON-NLS-1$
+		if(yamlStandaloneConfig != null) {
+			licenseKey = yamlStandaloneConfig.getKey();
+		}
+		String cmdlineLicenseKey = context.getProperty(LICENSE_KEY);
+		if(cmdlineLicenseKey != null) {
+			logger.info(Messages.RefactoringInvoker_OverridingConfigWithCommandLine);
+			licenseKey = cmdlineLicenseKey;
+		}
+		return licenseKey;
+	}
+
 }

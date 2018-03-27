@@ -58,7 +58,7 @@ public class MavenAdapter {
 	private static final String POM = "pom"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String LOCK_FILE_NAME = "lock.txt"; //$NON-NLS-1$
-	private static final String LICENSE_KEY = "LICENSE";
+	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 
 	private Log log;
 
