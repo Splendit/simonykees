@@ -1,8 +1,5 @@
 package eu.jsparrow.license.netlicensing.cleanslate.validation.impl;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.SecurityMode;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
@@ -14,10 +11,6 @@ import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.persistence.SecureStoragePersistence;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.LicenseValidation;
-import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.Parser;
-import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.Floating;
-import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.MultiFeature;
-import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.Subscription;
 
 public class NetlicensingLicenseValidation implements LicenseValidation {
 
@@ -26,62 +19,44 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 	private static final String REST_API_AUTHENTICATION_TOKEN = ""; // LicenseManager.PASS_APIKEY
 
 	private NetlicensingLicenseCache licenseCache;
-
 	private SecureStoragePersistence persistence;
-
 	private NetlicensingLicenseModel model;
 	private NetlicensingValidationParametersFactory parametersFactory;
 	private Context restApiContext;
-	private Parser parser;
 	private ResponseEvaluator responseEvaluator;
 
 	public NetlicensingLicenseValidation(NetlicensingLicenseModel model) {
 		this.model = model;
+		this.licenseCache = getLicenseCacheInstance();
 		this.parametersFactory = new NetlicensingValidationParametersFactory(FLOATING_PRODUCT_MODULE_NUMBER);
 		this.restApiContext = createAPIContextCall();
-		this.parser = new Parser();
-		this.responseEvaluator = new ResponseEvaluator();
+		this.responseEvaluator = createResponseEvaluator(model);
 	}
 
 	@Override
 	public LicenseValidationResult validate() {
 		if (licenseCache.isInvalid()) {
-			LicenseValidationResult newValidationResult;
+
 			try {
-				newValidationResult = executeNewValidation();
+				ValidationResult netLicensingRespone = executeNewValidation();
+				LicenseValidationResult newValidationResult = responseEvaluator.evaluateResult(netLicensingRespone);
 				licenseCache.updateCache(newValidationResult);
 			} catch (NetLicensingException e) {
-				// TODO check the exception type. Set the status properly. or
-				// throw a validation exception
+				// TODO check the exception type. Set the status properly. or throw a validation exception
 				e.printStackTrace();
 			}
 
 		}
-		LicenseValidationResult result = licenseCache.getLastResult();
-
-		return null;
+		return licenseCache.getLastResult();
 	}
 
-	private LicenseValidationResult executeNewValidation() throws NetLicensingException {
+	protected ValidationResult executeNewValidation() throws NetLicensingException {
 
 		NetlicensingLicenseModel license = getNetlicensingLicenseModel();
 		String licenseeNumber = license.getKey();
 		ValidationParameters validationParameters = parametersFactory.createValidationParameters(model);
 
-		ValidationResult response = sendValidationRequest(licenseeNumber, validationParameters, restApiContext);
-
-		return parseValidationResult(response);
-	}
-
-	private LicenseValidationResult parseValidationResult(ValidationResult response) {
-
-		List<Subscription> subscriptions = parser.extractModels(response, Subscription.LICENSING_MODEL,
-				parser::buildSubscription);
-		List<MultiFeature> multiFeatures = parser.extractModels(response, MultiFeature.LICENSING_MODEL,
-				parser::buildMultiFeature);
-		List<Floating> floatings = parser.extractModels(response, Floating.LICENSING_MODEL, parser::buildFloating);
-
-		return responseEvaluator.evaluate(subscriptions, multiFeatures, floatings);
+		return sendValidationRequest(licenseeNumber, validationParameters, restApiContext);
 	}
 
 	protected ValidationResult sendValidationRequest(String licenseeNumber, ValidationParameters validationParameters,
@@ -99,5 +74,13 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 
 	private NetlicensingLicenseModel getNetlicensingLicenseModel() {
 		return this.model;
+	}
+
+	protected ResponseEvaluator createResponseEvaluator(NetlicensingLicenseModel model) {
+		return new ResponseEvaluator(model);
+	}
+
+	protected NetlicensingLicenseCache getLicenseCacheInstance() {
+		return new NetlicensingLicenseCache();
 	}
 }
