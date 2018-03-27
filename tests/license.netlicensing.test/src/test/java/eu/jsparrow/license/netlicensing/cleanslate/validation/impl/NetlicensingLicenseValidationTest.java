@@ -32,6 +32,7 @@ public class NetlicensingLicenseValidationTest {
 	@Mock
 	ResponseEvaluator evaluator;
 
+	@SuppressWarnings("nls")
 	@Before
 	public void setUp() {
 		model = new NetlicensingLicenseModel(LicenseType.NODE_LOCKED, "key", "name", "product", "secret",

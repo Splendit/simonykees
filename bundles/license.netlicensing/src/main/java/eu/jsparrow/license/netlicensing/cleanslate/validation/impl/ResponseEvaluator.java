@@ -1,7 +1,6 @@
 package eu.jsparrow.license.netlicensing.cleanslate.validation.impl;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
@@ -22,64 +21,53 @@ public class ResponseEvaluator {
 
 	public ResponseEvaluator(NetlicensingLicenseModel model) {
 		this.netlicensingModel = model;
-		this.parser = createParser();
+		this.parser = new Parser();
 	}
 	
 	public LicenseValidationResult evaluateResult(ValidationResult response) {
 
-		List<Subscription> subscriptions = parser.extractModels(response, Subscription.LICENSING_MODEL,
-				parser::buildSubscription);
-		List<MultiFeature> multiFeatures = parser.extractModels(response, MultiFeature.LICENSING_MODEL,
-				parser::buildMultiFeature);
-		List<Floating> floatings = parser.extractModels(response, Floating.LICENSING_MODEL, parser::buildFloating);
+		parser.parseValidationResult(response);
 
-		subscriptions.sort((s1, s2) -> s1.getExpires().compareTo(s2.getExpires()));
-		Subscription subscription = subscriptions.get(0);
+		Subscription subscription = parser.getSubscription();
 
 		if (subscription.isValid()) {
-			return evaluateNonExpiredLicense(multiFeatures, floatings, subscription.getExpires());
+			return evaluateNonExpiredLicense();
 		} else {
-			return evaluateExpiredLicense(multiFeatures, floatings, subscription.getExpires());
+			return evaluateExpiredLicense();
 		}
 	}
 
-	protected LicenseValidationResult evaluateExpiredLicense(List<MultiFeature> multiFeatures, List<Floating> floatings,
-			ZonedDateTime expires) {
-		MultiFeature multiFeature = multiFeatures.stream()
-			.filter(MultiFeature::isValid)
-			.findAny()
-			.orElse(null);
-		if (multiFeature != null) {
+	private LicenseValidationResult evaluateExpiredLicense() {
+		
+		MultiFeature multiFeature = parser.getMultiFeature();
+		Subscription subscription = parser.getSubscription();
+		ZonedDateTime expireDate = subscription.getExpires();
+		
+		
+		if (multiFeature != null && multiFeature.isValid()) {
 			// nodeLocked expired
-			return createValidationResult(LicenseType.NODE_LOCKED, false, expires, "Expired Node-locked");
+			return createValidationResult(LicenseType.NODE_LOCKED, false, expireDate, "Expired Node-locked");
 		}
 
-		Floating floating = floatings.stream()
-			.filter(Floating::isValid)
-			.findAny()
-			.orElse(null);
-		if (floating != null) {
-			return createValidationResult(LicenseType.FLOATING, false, expires, "Expired Floating");// expired Floating
+		Floating floating = parser.getFloating();
+		if (floating != null && floating.isValid()) {
+			return createValidationResult(LicenseType.FLOATING, false, expireDate, "Expired Floating");// expired Floating
 		}
 
-		return createValidationResult(LicenseType.NONE, false, expires, "Undefined"); // undefined
+		return createValidationResult(LicenseType.NONE, false, expireDate, "Undefined"); // undefined
 	}
 
-	protected LicenseValidationResult evaluateNonExpiredLicense(List<MultiFeature> multiFeatures, List<Floating> floatings,
-			ZonedDateTime expireDate) {
-		MultiFeature validMultifeature = multiFeatures.stream()
-			.filter(MultiFeature::isValid)
-			.findAny()
-			.orElse(null);
-		if (validMultifeature != null) {
+	private LicenseValidationResult evaluateNonExpiredLicense() {
+		MultiFeature multiFeature = parser.getMultiFeature();
+		Subscription subscription = parser.getSubscription();
+		ZonedDateTime expireDate = subscription.getExpires();
+		
+		if (multiFeature != null && multiFeature.isValid()) {
 			return createValidationResult(LicenseType.NODE_LOCKED, true, expireDate, "Valid node-locked");
 		}
 
-		Floating floating = floatings.stream()
-			.filter(Floating::isValid)
-			.findAny()
-			.orElse(null);
-		if (floating != null) {
+		Floating floating = parser.getFloating();
+		if (floating != null && floating.isValid()) {
 			return createValidationResult(LicenseType.FLOATING, true, expireDate, "Valid floating");
 		}
 
@@ -98,10 +86,6 @@ public class ResponseEvaluator {
 		ValidationStatus status = new ValidationStatus(b, string);
 
 		return new LicenseValidationResult(model, status);
-	}
-	
-	private Parser createParser() {
-		return new Parser();
 	}
 
 }

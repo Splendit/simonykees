@@ -9,8 +9,12 @@ public class Subscription extends LicensingModel {
 
 	private ZonedDateTime expires;
 	
-	public Subscription(ZonedDateTime expires, boolean valid) {
+	public Subscription(boolean valid) {
 		super(valid);
+	}
+	
+	public Subscription(ZonedDateTime expires, boolean valid) {
+		this(valid);
 		this.expires = expires;
 	}
 

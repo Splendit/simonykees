@@ -10,8 +10,12 @@ public class Floating extends LicensingModel {
 	
 	private ZonedDateTime expirationTimeStamp;
 	
-	public Floating(ZonedDateTime expirationTimeStamp, boolean valid) {
+	public Floating(boolean valid) {
 		super(valid);
+	}
+	
+	public Floating(ZonedDateTime expirationTimeStamp, boolean valid) {
+		this(valid);
 		this.expirationTimeStamp = expirationTimeStamp;
 	}
 	
