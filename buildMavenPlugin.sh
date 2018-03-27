@@ -64,6 +64,12 @@ if [ ! -d $PLUGIN_RESOURCES_PATH ]; then
       echo "mkdir failed for $PLUGIN_RESOURCES_PATH!"
       exit 2
     fi
+else
+    rm -rf $PLUGIN_RESOURCES_PATH/*
+    if [ $? -ne 0 ]; then
+      echo "error removing files from $PLUGIN_RESOURCES_PATH"
+      exit 6
+    fi
 fi
 
 echo "Copying Resource Files"
