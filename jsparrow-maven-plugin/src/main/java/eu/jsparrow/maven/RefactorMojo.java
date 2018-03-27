@@ -63,6 +63,9 @@ public class RefactorMojo extends AbstractMojo {
 
 	@Parameter(property = "defaultConfiguration")
 	protected boolean useDefaultConfig;
+	
+	@Parameter(property = "license")
+	private String license;
 
 	/**
 	 * MOJO entry point. Registers shutdown hook for clean up and starts equinox
@@ -73,7 +76,7 @@ public class RefactorMojo extends AbstractMojo {
 		Log log = getLog();
 		AdapterService serviceInstance = AdapterService.getInstance();
 		String mode = StandaloneMode.REFACTOR.name();
-		boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(project, log, mavenHome, mavenSession, configFile, profile, mode, useDefaultConfig);
+		boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(project, log, mavenHome, mavenSession, configFile, profile, mode, useDefaultConfig, license);
 		
 		if(!adapterLoadad) {
 			throw new MojoExecutionException("jSparrow is already running...");

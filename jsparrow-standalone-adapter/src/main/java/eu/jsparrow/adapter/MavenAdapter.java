@@ -36,12 +36,12 @@ public class MavenAdapter {
 	private static final String MAVEN_COMPILER_PLUGIN_ARTIFACT_ID = "maven-compiler-plugin"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_CONFIGURATIN_SOURCE_NAME = "source"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION = "1.5"; //$NON-NLS-1$
-	
+
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
-	
+
 	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
@@ -58,6 +58,7 @@ public class MavenAdapter {
 	private static final String POM = "pom"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String LOCK_FILE_NAME = "lock.txt"; //$NON-NLS-1$
+	private static final String LICENSE_KEY = "LICENSE";
 
 	private Log log;
 
@@ -100,12 +101,12 @@ public class MavenAdapter {
 		extractAndCopyDependencies(project, mavenHome);
 		configuration.put(PROJECT_JAVA_VERSION + DOT + projectIdentifier, getCompilerCompliance(project));
 	}
-	
+
 	private String findYamlFilePath(File yamlFile) {
-		if(yamlFile.exists()) {
+		if (yamlFile.exists()) {
 			return yamlFile.getAbsolutePath();
 		}
-		
+
 		return defaultYamlFile.getAbsolutePath();
 	}
 
@@ -126,7 +127,7 @@ public class MavenAdapter {
 		return configuration.getOrDefault(ALL_PROJECT_IDENTIFIERS, ""); //$NON-NLS-1$
 	}
 
-	public void addInitialConfiguration(String mavenHome, String profile, String mode, boolean useDefaultConfig) {
+	public void addInitialConfiguration(String mavenHome, String profile, String mode, boolean useDefaultConfig, String licenseKey) {
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
 		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
@@ -137,6 +138,7 @@ public class MavenAdapter {
 		configuration.put(STANDALONE_MODE_KEY, mode);
 		configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile); //$NON-NLS-1$
 		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
+		configuration.put(LICENSE_KEY, licenseKey);
 	}
 
 	private void addConfigurationKeyValue(String key, String value) {
@@ -179,7 +181,7 @@ public class MavenAdapter {
 	 * Executes maven goal copy-dependencies on the project to copy all resolved
 	 * needed dependencies to the temp folder for use from bundles.
 	 */
-	public void extractAndCopyDependencies(MavenProject project,  String mavenHome) {
+	public void extractAndCopyDependencies(MavenProject project, String mavenHome) {
 		log.debug("Extract and copy dependencies");
 
 		final InvocationRequest request = new DefaultInvocationRequest();
@@ -195,8 +197,8 @@ public class MavenAdapter {
 		request.setPomFile(new File(projectPath + File.separator + "pom.xml")); //$NON-NLS-1$
 		request.setGoals(Collections.singletonList("dependency:copy-dependencies ")); //$NON-NLS-1$
 
-		props.setProperty(OUTPUT_DIRECTORY_CONSTANT,
-				System.getProperty(USER_DIR) + File.separator + DEPENDENCIES_FOLDER_CONSTANT + DOT + findProjectIdentifier(project));
+		props.setProperty(OUTPUT_DIRECTORY_CONSTANT, System.getProperty(USER_DIR) + File.separator
+				+ DEPENDENCIES_FOLDER_CONSTANT + DOT + findProjectIdentifier(project));
 		request.setProperties(props);
 	}
 
@@ -285,8 +287,8 @@ public class MavenAdapter {
 		Path path = Paths.get(lockFilePath);
 		String conntent = projectIds.stream()
 			.collect(Collectors.joining("\n")); //$NON-NLS-1$
-		
-		try {			
+
+		try {
 			Files.write(path, conntent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (IOException e) {
 			log.warn("Cannot write to jsparrow lock file...", e);
@@ -300,7 +302,7 @@ public class MavenAdapter {
 	public boolean isJsparrowRunningFlag() {
 		return jsparrowAlreadyRunningError;
 	}
-	
+
 	public void setJsparrowRunningFlag() {
 		this.jsparrowAlreadyRunningError = true;
 	}
@@ -335,7 +337,7 @@ public class MavenAdapter {
 			log.warn("Cannot read the jsparrow lock file...", e);
 		}
 	}
-	
+
 	/**
 	 * Reads the current java source version from the maven-compiler-plugin
 	 * configuration in the pom.xml. If no configuration is found, the java

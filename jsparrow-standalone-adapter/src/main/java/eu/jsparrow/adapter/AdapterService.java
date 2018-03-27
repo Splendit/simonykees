@@ -30,7 +30,7 @@ public class AdapterService {
 	}
 
 	public synchronized boolean lazyLoadMavenAdapter(MavenProject project, Log log, String mavenHome2,
-			MavenSession mavenSession, File defaultYamlFile, String profile, String mode, boolean useDefaultConfig) {
+			MavenSession mavenSession, File defaultYamlFile, String profile, String mode, boolean useDefaultConfig, String license) {
 
 		if (mavenAdapter != null) {
 			log.debug("Adapter instance is already created..."); //$NON-NLS-1$
@@ -48,7 +48,7 @@ public class AdapterService {
 		mavenAdapter.lockProjects();
 		embeddedMaven = new EmbeddedMaven(log, mavenHome2);
 		embeddedMaven.prepareMaven(MavenAdapter.calculateJsparrowTempFolderPath());
-		mavenAdapter.addInitialConfiguration(embeddedMaven.getMavenHome(), profile, mode, useDefaultConfig);
+		mavenAdapter.addInitialConfiguration(embeddedMaven.getMavenHome(), profile, mode, useDefaultConfig, license);
 
 		return true;
 	}

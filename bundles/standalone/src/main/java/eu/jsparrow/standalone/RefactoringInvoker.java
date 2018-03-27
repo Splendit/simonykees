@@ -53,6 +53,8 @@ public class RefactoringInvoker {
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
 	private static final String DOT = "."; //$NON-NLS-1$
+	
+	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 
 	protected List<StandaloneConfig> standaloneConfigs;
 
@@ -89,8 +91,20 @@ public class RefactoringInvoker {
 		try {
 			yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(filePath));
 		} catch (YAMLStandaloneConfigException e1) {
-			logger.info("Failed to load configuration, syntax error");
+			logger.info("Failed to load configuration, syntax error.");
 		}
+		
+		String licenseKey = "";
+		if(yamlStandaloneConfig != null) {
+			licenseKey = yamlStandaloneConfig.getKey();
+		}
+		String cmdlineLicenseKey = context.getProperty(LICENSE_KEY);
+		if(cmdlineLicenseKey != null) {
+			logger.info("Overriding config license key with command line parameter");
+			licenseKey = cmdlineLicenseKey;
+		}
+		
+		logger.debug(licenseKey);
 
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = getProjectRules(standaloneConfig);
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = getSelectedRules(config,
