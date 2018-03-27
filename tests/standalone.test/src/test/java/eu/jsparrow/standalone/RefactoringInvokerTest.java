@@ -70,7 +70,8 @@ public class RefactoringInvokerTest {
 		}
 
 		@Override
-		protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules(StandaloneConfig config) {
+		protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules(
+				StandaloneConfig config) {
 			return Collections.emptyList();
 		}
 

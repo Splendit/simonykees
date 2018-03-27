@@ -19,6 +19,16 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
+import eu.jsparrow.adapter.i18n.Messages;
+
+/**
+ * A class containing functionalities for starting/stopping the equinox
+ * framework, and loading/starting OSGi bundles.
+ * 
+ * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
+ * @since 2.5.0
+ *
+ */
 public class BundleStarter {
 
 	protected static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone"; //$NON-NLS-1$
@@ -36,6 +46,16 @@ public class BundleStarter {
 		standaloneBundleID = 0;
 	}
 
+	/**
+	 * Starts the equinox framework with the given configuration, starts the
+	 * related bundles and stops the framework afterwards.
+	 * 
+	 * @param configuration
+	 *            the configuration to start the framework with.
+	 * @throws BundleException
+	 * @throws MojoExecutionException
+	 * @throws InterruptedException
+	 */
 	public void runStandalone(Map<String, String> configuration)
 			throws BundleException, MojoExecutionException, InterruptedException {
 
@@ -56,7 +76,7 @@ public class BundleStarter {
 	 *             if the framework cannot be started.
 	 */
 	private void startEquinoxFramework(Map<String, String> configuration) throws BundleException {
-		log.debug("Start equinox");
+		log.debug(Messages.BundleStarter_startEquinox);
 
 		ServiceLoader<FrameworkFactory> ffs = ServiceLoader.load(FrameworkFactory.class);
 		FrameworkFactory frameworkFactory = ffs.iterator()
@@ -82,7 +102,7 @@ public class BundleStarter {
 				.startsWith(STANDALONE_BUNDLE_NAME))
 			.forEach(bundle -> {
 				try {
-					String loggerInfo = NLS.bind("Starting BUNDLE: {0}, resolution: {1}", bundle.getSymbolicName(),
+					String loggerInfo = NLS.bind(Messages.BundleStarter_startingBundle, bundle.getSymbolicName(),
 							bundle.getState());
 					log.debug(loggerInfo);
 
@@ -97,14 +117,14 @@ public class BundleStarter {
 	}
 
 	/**
-	 * loads the manifest.standalone file, reads the names of the needed bundles
+	 * Loads the manifest.standalone file, reads the names of the needed bundles
 	 * and installs them in the framework's bundle context
 	 * 
 	 * @return a list of the installed bundles
 	 * @throws BundleException
 	 */
 	protected List<Bundle> loadBundles() throws BundleException, MojoExecutionException {
-		log.debug("Load OSGi bundles");
+		log.debug(Messages.BundleStarter_loadOsgiBundles);
 
 		bundleContext = getBundleContext();
 		final List<Bundle> bundles = new ArrayList<>();
@@ -133,7 +153,7 @@ public class BundleStarter {
 	}
 
 	/**
-	 * stops the equinox framework
+	 * Stops the equinox framework
 	 * 
 	 * @throws InterruptedException
 	 * @throws BundleException
@@ -144,7 +164,7 @@ public class BundleStarter {
 		framework.waitForStop(0);
 		standaloneStarted = false;
 
-		log.debug("Equinox stopped");
+		log.debug(Messages.BundleStarter_equinoxStopped);
 
 		String exitMessage = bundleContext.getProperty("eu.jsparrow.standalone.exit.message"); //$NON-NLS-1$
 		if (exitMessage != null && !exitMessage.isEmpty()) {
@@ -153,7 +173,7 @@ public class BundleStarter {
 	}
 
 	/**
-	 * shuts down the standalone bundle and equinox
+	 * Shuts down the standalone bundle and equinox
 	 */
 	public void shutdownFramework() {
 		if (null != this.getFramework() && null != this.getFramework()
@@ -199,9 +219,10 @@ public class BundleStarter {
 	}
 
 	/**
-	 * creates a new shutdown hook for stopping equinox
+	 * Creates a new shutdown hook for stopping equinox
 	 * 
 	 * @return
+	 * 
 	 */
 	public Thread createShutdownHook(MavenAdapter mavenAdapter) {
 		return new Thread() {
@@ -216,7 +237,7 @@ public class BundleStarter {
 		};
 	}
 
-	public boolean isStandAloneStarted() {
+	public boolean isStandaloneStarted() {
 		return this.standaloneStarted;
 	}
 }

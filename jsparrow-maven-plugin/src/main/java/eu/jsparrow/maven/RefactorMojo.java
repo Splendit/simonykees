@@ -15,8 +15,10 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 import org.osgi.framework.BundleException;
 
-import eu.jsparrow.adapter.AdapterService;
+import eu.jsparrow.adapter.StandaloneAdapter;
+import eu.jsparrow.adapter.MavenParameters;
 import eu.jsparrow.maven.enums.StandaloneMode;
+import eu.jsparrow.maven.i18n.Messages;
 
 /**
  * Starts Equinox framework and headless version of jSparrow Eclipse plugin.
@@ -74,19 +76,30 @@ public class RefactorMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 
 		Log log = getLog();
-		AdapterService serviceInstance = AdapterService.getInstance();
+		StandaloneAdapter serviceInstance = StandaloneAdapter.getInstance();
 		String mode = StandaloneMode.REFACTOR.name();
-		boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(project, log, mavenHome, mavenSession, configFile, profile, mode, useDefaultConfig, license);
-		
-		if(!adapterLoadad) {
-			throw new MojoExecutionException("jSparrow is already running...");
+		try {
+			if (!serviceInstance.isAdapterInitialized()) {
+				MavenParameters config = new MavenParameters(project, log, configFile, mavenSession, mode, license);
+				config.setMavenHome(mavenHome);
+				config.setProfile(profile);
+				config.setUseDefaultConfig(useDefaultConfig);
+
+				boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
+				if (!adapterLoadad) {
+					throw new MojoExecutionException(Messages.Mojo_jSparrowIsAlreadyRunning);
+				}
+			}
+			serviceInstance.addProjectConfiguration(project, log, configFile);
+			if (serviceInstance.allProjectsLoaded()) {
+				log.info(Messages.RefactorMojo_allProjectsLoaded);
+				serviceInstance.startStandaloneBundle(log);
+			}
+
+		} catch (BundleException | InterruptedException e1) {
+			log.debug(e1.getMessage(), e1);
+			log.error(e1.getMessage());
 		}
 
-		try {
-			serviceInstance.addProjectConfiguration(project, log, configFile);
-		} catch (BundleException | InterruptedException e) {
-			log.debug(e.getMessage(), e);
-			log.error(e.getMessage());
-		}
 	}
 }

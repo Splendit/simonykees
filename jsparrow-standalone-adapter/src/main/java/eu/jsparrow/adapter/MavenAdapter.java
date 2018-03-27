@@ -30,19 +30,29 @@ import org.codehaus.plexus.util.xml.Xpp3Dom;
 import org.eclipse.osgi.util.NLS;
 import org.osgi.framework.Constants;
 
+import eu.jsparrow.adapter.i18n.Messages;
+
+/**
+ * Sets up the configuration used for starting the equinox framework.
+ * Distinguishes the properties of different projects.
+ * 
+ * @author Andreja Sambolec, Matthias Webhofer, Ardit Ymeri
+ * @since 2.5.0
+ *
+ */
 public class MavenAdapter {
 
-	protected static final String OUTPUT_DIRECTORY_CONSTANT = "outputDirectory"; //$NON-NLS-1$
+	public static final String USER_DIR = "user.dir"; //$NON-NLS-1$
+	public static final String DOT = "."; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_ARTIFACT_ID = "maven-compiler-plugin"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_CONFIGURATIN_SOURCE_NAME = "source"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION = "1.5"; //$NON-NLS-1$
-
+	
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
-
-	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
+	
 	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
 	private static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default"; //$NON-NLS-1$
@@ -54,11 +64,11 @@ public class MavenAdapter {
 	private static final String OSGI_INSTANCE_AREA_CONSTANT = "osgi.instance.area"; //$NON-NLS-1$
 	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
-	private static final String DOT = "."; //$NON-NLS-1$
 	private static final String POM = "pom"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
-	private static final String LOCK_FILE_NAME = "lock.txt"; //$NON-NLS-1$
-	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
+	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
+	private static final String LOCK_FILE_NAME = "lock"; //$NON-NLS-1$
+	private static final String LICENSE_KEY= "LICENSE"; //$NON-NLS-1$
 
 	private Log log;
 
@@ -72,14 +82,42 @@ public class MavenAdapter {
 	private File defaultYamlFile;
 
 	public MavenAdapter(MavenProject rootProject, Log log, File defaultYamlFile) {
-		this.rootProject = rootProject;
+		this(rootProject, log);
+		this.defaultYamlFile = defaultYamlFile;
+	}
+
+	public MavenAdapter(MavenProject rootProject, Log log) {
+		setRootProject(rootProject);
 		this.log = log;
 		this.sessionProjects = new HashMap<>();
 		this.defaultYamlFile = defaultYamlFile;
 	}
 
-	public void addProjectConfiguration(MavenProject project, File configFile, String mavenHome) {
-		log.info(String.format("Adding configuration for project %s ...", project.getName())); //$NON-NLS-1$
+	/**
+	 * Adds the following values to the configuration
+	 * <ul>
+	 * <li>project identifier computed by
+	 * {@link #joinWithComma(String, String)}</li>
+	 * <li>project path</li>
+	 * <li>project name</li>
+	 * <li>yml file path</li>
+	 * <li>compiler compliance java version of the project</li>
+	 * </ul>
+	 * 
+	 * Updates the {@link #sessionProjects} to indicate that the related
+	 * configurations for the given project are stored.
+	 * 
+	 * <b>Note:</b> if the project represents and aggregate project, then no
+	 * configuration is stored. Only the cofiguration of child projects need to
+	 * be stored.
+	 * 
+	 * @param project
+	 *            the maven project to store the configuration for
+	 * @param configFile
+	 *            the expected jsparrow.yml file
+	 */
+	public void addProjectConfiguration(MavenProject project, File configFile) {
+		log.info(String.format(Messages.MavenAdapter_addingProjectConfiguration, project.getName()));
 
 		markProjectConfigurationCompleted(project);
 
@@ -96,27 +134,62 @@ public class MavenAdapter {
 		addConfigurationKeyValue(ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
 		addConfigurationKeyValue(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
 		addConfigurationKeyValue(PROJECT_NAME_CONSTANT + DOT + projectIdentifier, projcetName);
-		String yamlFilePath = findYamlFilePath(configFile);
+		String yamlFilePath = findYamlFilePath(project, configFile);
+		log.info(Messages.MavenAdapter_jSparrowConfigurationFile + yamlFilePath);
 		addConfigurationKeyValue(CONFIG_FILE_PATH + DOT + projectIdentifier, yamlFilePath);
-		extractAndCopyDependencies(project, mavenHome);
-		configuration.put(PROJECT_JAVA_VERSION + DOT + projectIdentifier, getCompilerCompliance(project));
+		addConfigurationKeyValue(PROJECT_JAVA_VERSION + DOT + projectIdentifier, getCompilerCompliance(project));
 	}
 
-	private String findYamlFilePath(File yamlFile) {
+	/**
+	 * Finds the path of the corresponding yaml configuration file of the
+	 * project. If the provided yamlFile exists, its path is immediately
+	 * returned. Otherwise, finds the yaml file in the closest ancestor until
+	 * reaching the {@link rootProject}.
+	 * 
+	 * @param project
+	 *            the project to find the configuration file for.
+	 * @param yamlFile
+	 *            expected yaml file
+	 * @return the path of the corresponding yaml file
+	 */
+	protected String findYamlFilePath(MavenProject project, File yamlFile) {
 		if (yamlFile.exists()) {
 			return yamlFile.getAbsolutePath();
 		}
-
-		return defaultYamlFile.getAbsolutePath();
+		MavenProject parent = project;
+		while ((parent = parent.getParent()) != null) {
+			if (parent == getRootProject()) {
+				break;
+			}
+			File parentBaseDir = parent.getBasedir();
+			Path parentYamlPath = joinPaths(yamlFile, parentBaseDir);
+			if (parentYamlPath.toFile()
+				.exists()) {
+				return parentYamlPath.toString();
+			}
+		}
+		return getDefaultYamlFile().getAbsolutePath();
 	}
 
-	private boolean isAggregateProject(MavenProject project) {
+	protected Path joinPaths(File yamlFile, File parentBaseDir) {
+		return Paths.get(parentBaseDir.getAbsolutePath(), yamlFile.getPath());
+	}
+
+	/**
+	 * Checks whether the given projects represents an aggregation of projects.
+	 * 
+	 * @param project
+	 *            the maven project to be checked.
+	 * @return if the packaging of the project is {@code pom} or the list of
+	 *         modules is not empty
+	 */
+	protected boolean isAggregateProject(MavenProject project) {
 		List<String> modules = project.getModules();
 		String packaging = project.getPackaging();
-		return POM.equalsIgnoreCase(packaging) || !modules.isEmpty();
+		return "pom".equalsIgnoreCase(packaging) || !modules.isEmpty(); //$NON-NLS-1$
 	}
 
-	private String joinWithComma(String left, String right) {
+	protected String joinWithComma(String left, String right) {
 		if (left.isEmpty()) {
 			return right;
 		}
@@ -127,18 +200,21 @@ public class MavenAdapter {
 		return configuration.getOrDefault(ALL_PROJECT_IDENTIFIERS, ""); //$NON-NLS-1$
 	}
 
-	public void addInitialConfiguration(String mavenHome, String profile, String mode, boolean useDefaultConfig, String licenseKey) {
+	public void addInitialConfiguration(MavenParameters config, String mavenHome) {
+		boolean useDefaultConfig = config.getUseDefaultConfig()
+			.orElse(false);
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
 		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
 		configuration.put(MAVEN_HOME_KEY, mavenHome);
 		configuration.put(DEBUG_ENABLED, Boolean.toString(log.isDebugEnabled()));
-		
-		
-		configuration.put(STANDALONE_MODE_KEY, mode);
-		configuration.put(SELECTED_PROFILE, (profile == null) ? "" : profile); //$NON-NLS-1$
+		configuration.put(STANDALONE_MODE_KEY, config.getMode());
+		configuration.put(SELECTED_PROFILE, config.getProfile()
+			.orElse("")); //$NON-NLS-1$
 		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
-		configuration.put(LICENSE_KEY, licenseKey);
+		configuration.put(LICENSE_KEY, config.getLicense());
+		config.getRuleId()
+			.ifPresent(ruleId -> configuration.put(LIST_RULES_SELECTED_ID, ruleId));
 	}
 
 	private void addConfigurationKeyValue(String key, String value) {
@@ -150,7 +226,14 @@ public class MavenAdapter {
 		sessionProjects.put(projectIdentifier, true);
 	}
 
-	private String findProjectIdentifier(MavenProject mavenProject) {
+	/**
+	 * Concatenates the groupId and the artifactId of the project.
+	 * 
+	 * @param mavenProject
+	 *            project to generate identifier for.
+	 * @return the computed identifier.
+	 */
+	public String findProjectIdentifier(MavenProject mavenProject) {
 		String groupId = mavenProject.getGroupId();
 		String artifactId = mavenProject.getArtifactId();
 		return groupId + DOT + artifactId;
@@ -161,63 +244,31 @@ public class MavenAdapter {
 	 * system properties and equinox configuration
 	 * 
 	 * @param configuration
+	 * 
 	 * @throws InterruptedException
 	 */
-	public void prepareWorkingDirectory(MavenProject mavenProject) throws InterruptedException {
-		createWorkingDirectory(mavenProject);
-		if (directory.exists() || directory.mkdirs()) {
-			String directoryAbsolutePath = directory.getAbsolutePath();
-			System.setProperty(USER_DIR, directoryAbsolutePath);
+	public void prepareWorkingDirectory() throws InterruptedException {
+
+		File workingDirectory = createWorkingDirectory();
+		setWorkingDirectory(workingDirectory);
+		if (workingDirectory.exists() || workingDirectory.mkdirs()) {
+			String directoryAbsolutePath = workingDirectory.getAbsolutePath();
+			setSystemProperty(USER_DIR, directoryAbsolutePath);
 			addConfigurationKeyValue(OSGI_INSTANCE_AREA_CONSTANT, directoryAbsolutePath);
 
-			String loggerInfo = NLS.bind("Set user.dir to {0}", directoryAbsolutePath);
+			String loggerInfo = NLS.bind(Messages.MavenAdapter_setUserDir, directoryAbsolutePath);
 			log.info(loggerInfo);
 		} else {
-			throw new InterruptedException("Could not create temp folder"); //$NON-NLS-1$
+			throw new InterruptedException(Messages.MavenAdapter_couldnotCreateTempFolder);
 		}
 	}
 
-	/**
-	 * Executes maven goal copy-dependencies on the project to copy all resolved
-	 * needed dependencies to the temp folder for use from bundles.
-	 */
-	public void extractAndCopyDependencies(MavenProject project, String mavenHome) {
-		log.debug("Extract and copy dependencies");
-
-		final InvocationRequest request = new DefaultInvocationRequest();
-		final Properties props = new Properties();
-		prepareDefaultRequest(project, request, props);
-		final Invoker invoker = new DefaultInvoker();
-		invokeMaven(invoker, request, mavenHome);
+	protected void setSystemProperty(String key, String directoryAbsolutePath) {
+		System.setProperty(key, directoryAbsolutePath);
 	}
 
-	protected void prepareDefaultRequest(MavenProject project, InvocationRequest request, Properties props) {
-		File projectBaseDir = project.getBasedir();
-		String projectPath = projectBaseDir.getAbsolutePath();
-		request.setPomFile(new File(projectPath + File.separator + "pom.xml")); //$NON-NLS-1$
-		request.setGoals(Collections.singletonList("dependency:copy-dependencies ")); //$NON-NLS-1$
-
-		props.setProperty(OUTPUT_DIRECTORY_CONSTANT, System.getProperty(USER_DIR) + File.separator
-				+ DEPENDENCIES_FOLDER_CONSTANT + DOT + findProjectIdentifier(project));
-		request.setProperties(props);
-	}
-
-	protected void invokeMaven(Invoker invoker, InvocationRequest request, String preparedMavenHome) {
-		invoker.setMavenHome(new File(preparedMavenHome));
-
-		try {
-			invoker.execute(request);
-		} catch (final MavenInvocationException e) {
-			log.debug(e.getMessage(), e);
-			log.error(e.getMessage());
-		}
-	}
-
-	protected File createWorkingDirectory(MavenProject mavenProject) {
-		String projectIdentifier = findProjectIdentifier(mavenProject);
-		File workingDirectory = new File(calculateJsparrowTempFolderPath() + DOT + projectIdentifier).getAbsoluteFile();
-		setWorkingDirectory(workingDirectory);
-		return workingDirectory;
+	protected File createWorkingDirectory() {
+		return new File(calculateJsparrowTempFolderPath()).getAbsoluteFile();
 	}
 
 	private void setWorkingDirectory(File directory2) {
@@ -232,16 +283,88 @@ public class MavenAdapter {
 	public void cleanUp() {
 
 		// CLEAN
-		if (directory != null && directory.exists()) {
-			try {
+		if (directory == null || !directory.exists()) {
+			return;
+		}
+
+		try {
+			deleteSessionRelatedFiles(directory);
+			boolean emptyLockFile = cleanLockFile();
+			if (emptyLockFile) {
 				deleteChildren(directory);
 				Files.deleteIfExists(directory.toPath());
-				clearLockFile();
-			} catch (IOException e) {
-				log.debug(e.getMessage(), e);
-				log.error(e.getMessage());
+			}
+		} catch (IOException e) {
+			log.debug(e.getMessage(), e);
+			log.error(e.getMessage());
+		}
+	}
+
+	/**
+	 * Deletes the children files related to the projects on the current
+	 * session.
+	 * 
+	 * @param parentDirectory
+	 *            the file representing the parent directory containing session
+	 *            related files.
+	 */
+	private void deleteSessionRelatedFiles(File parentDirectory) {
+		String[] children = parentDirectory.list();
+		if (children == null) {
+			return;
+		}
+
+		for (String file : children) {
+			if (isSessionRelated(file)) {
+				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
+				deleteChildren(currentFile);
+				deleteIfExists(currentFile);
 			}
 		}
+	}
+
+	protected void deleteIfExists(File currentFile) {
+		try {
+			Files.deleteIfExists(currentFile.toPath());
+		} catch (IOException e) {
+			log.debug(e.getMessage(), e);
+			log.error(e.getMessage());
+		}
+	}
+
+	/**
+	 * Removes the lines in the lock file that are related to the projects of
+	 * the given session.
+	 * 
+	 * @return if the resulting content of the lock file is empty.
+	 */
+	private boolean cleanLockFile() {
+		Set<String> sessionIds = sessionProjects.keySet();
+		Path path = Paths.get(calculateJsparrowLockFilePath());
+
+		if (!path.toFile()
+			.exists()) {
+			return true;
+		}
+
+		String remainingContent = ""; //$NON-NLS-1$
+		try (Stream<String> linesStream = Files.lines(path)) {
+			remainingContent = linesStream.filter(id -> !sessionIds.contains(id))
+				.collect(Collectors.joining("\n")) //$NON-NLS-1$
+				.trim();
+
+		} catch (IOException e) {
+			log.warn(Messages.MavenAdapter_cannotReadJSparrowLockFile, e);
+		}
+
+		try {
+			Files.write(path, remainingContent.getBytes());
+			return remainingContent.isEmpty();
+		} catch (IOException e) {
+			log.warn(Messages.MavenAdapter_cannotWriteToJSparrowLockFile, e);
+		}
+
+		return false;
 	}
 
 	/**
@@ -254,20 +377,21 @@ public class MavenAdapter {
 	private void deleteChildren(File parentDirectory) {
 		String[] children = parentDirectory.list();
 		if (children != null) {
-			for (String file : Arrays.asList(children)) {
+			for (String file : children) {
 				File currentFile = new File(parentDirectory.getAbsolutePath(), file);
 				if (currentFile.isDirectory()) {
 					deleteChildren(currentFile);
 				}
 
-				try {
-					Files.deleteIfExists(currentFile.toPath());
-				} catch (IOException e) {
-					log.debug(e.getMessage(), e);
-					log.error(e.getMessage());
-				}
+				deleteIfExists(currentFile);
 			}
 		}
+	}
+
+	private boolean isSessionRelated(String file) {
+		return sessionProjects.keySet()
+			.stream()
+			.anyMatch(file::contains);
 	}
 
 	public boolean allProjectConfigurationLoaded() {
@@ -281,17 +405,23 @@ public class MavenAdapter {
 			.collect(Collectors.toMap(Function.identity(), id -> false));
 	}
 
+	/**
+	 * Appends the project id-s of the current session in the lock file. Creates
+	 * the lock file it does not exist. Uses
+	 * {@link #calculateJsparrowLockFilePath()} for computing the path of the
+	 * lock file.
+	 */
 	public synchronized void lockProjects() {
 		Set<String> projectIds = sessionProjects.keySet();
 		String lockFilePath = calculateJsparrowLockFilePath();
 		Path path = Paths.get(lockFilePath);
 		String conntent = projectIds.stream()
-			.collect(Collectors.joining("\n")); //$NON-NLS-1$
+			.collect(Collectors.joining("\n", "\n", "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		try {
 			Files.write(path, conntent.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
 		} catch (IOException e) {
-			log.warn("Cannot write to jsparrow lock file...", e);
+			log.warn(Messages.MavenAdapter_cannotWriteToJSparrowLockFile, e);
 		}
 	}
 
@@ -316,12 +446,42 @@ public class MavenAdapter {
 		return file + File.separator + JSPARROW_TEMP_FOLDER;
 	}
 
+	protected MavenProject getRootProject() {
+		return this.rootProject;
+	}
+
+	protected void setRootProject(MavenProject project) {
+		this.rootProject = project;
+	}
+
+	protected File getDefaultYamlFile() {
+		return this.defaultYamlFile;
+	}
+
+	protected void setDefaultYamlFile(File file) {
+		this.defaultYamlFile = file;
+	}
+
+	/**
+	 * Checks whether the lock file contains the id of the given project.
+	 * 
+	 * @param mavenProject
+	 *            a maven project to be checked.
+	 * @return {@code true}if the lock file contains the project id, or
+	 *         {@code false} otherwise.
+	 */
 	public boolean isJsparrowStarted(MavenProject mavenProject) {
 		String projectId = findProjectIdentifier(mavenProject);
-		try (Stream<String> linesStream = Files.lines(Paths.get(calculateJsparrowLockFilePath()))) {
-			return linesStream.anyMatch(line -> line.equals(projectId));
+		Path path = Paths.get(calculateJsparrowLockFilePath());
+
+		if (!path.toFile()
+			.exists()) {
+			return false;
+		}
+		try (Stream<String> linesStream = Files.lines(path)) {
+			return linesStream.anyMatch(projectId::equals);
 		} catch (IOException e) {
-			log.warn("Cannot read the jsparrow lock file...", e);
+			log.warn(Messages.MavenAdapter_cannotReadJSparrowLockFile, e);
 		}
 
 		return false;
@@ -337,7 +497,7 @@ public class MavenAdapter {
 			log.warn("Cannot read the jsparrow lock file...", e);
 		}
 	}
-
+	
 	/**
 	 * Reads the current java source version from the maven-compiler-plugin
 	 * configuration in the pom.xml. If no configuration is found, the java

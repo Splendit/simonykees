@@ -42,12 +42,13 @@ public class StandaloneConfig {
 
 	private static final String ECLIPSE_MAVEN_NAME = "eclipse"; //$NON-NLS-1$
 	private static final String ECLIPSE_CLEAN_GOAL = "clean"; //$NON-NLS-1$
-
+	private static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
 	private static final String PROJECT_FILE_NAME = ".project"; //$NON-NLS-1$
 	private static final String CLASSPATH_FILE_NAME = ".classpath"; //$NON-NLS-1$
 	private static final String SETTINGS_DIRECTORY_NAME = ".settings"; //$NON-NLS-1$
 	private static final String TEMP_FILE_EXTENSION = ".tmp"; //$NON-NLS-1$
 	private static final String DOT = "."; //$NON-NLS-1$
+	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
 
 	private String path;
 	private String compilerCompliance;
@@ -67,7 +68,7 @@ public class StandaloneConfig {
 
 	private MavenInvoker mavenInovker;
 	private String projectId;
-	
+
 	/**
 	 * Constructor that calls setting up of the project and collecting the
 	 * compilation units.
@@ -141,8 +142,7 @@ public class StandaloneConfig {
 		}
 
 		logger.debug(Messages.StandaloneConfig_UseExistingProjectDescription);
-		
-		
+
 		File descriptionFile = getProjectDescriptionFile();
 		String descriptionFilePathValue = descriptionFile.getAbsolutePath();
 		Path descriptionFilePath = new Path(descriptionFilePathValue);
@@ -429,8 +429,8 @@ public class StandaloneConfig {
 
 	protected File getMavenDependencyFolder() {
 
-		return new File(System.getProperty(RefactoringInvoker.USER_DIR) + DOT + getProjectId() + File.separator
-				+ RefactoringInvoker.DEPENDENCIES_FOLDER_CONSTANT + DOT + getProjectId());
+		return new File(System.getProperty(USER_DIR) + File.separator
+				+ DEPENDENCIES_FOLDER_CONSTANT + DOT + getProjectId());
 	}
 
 	protected IClasspathEntry createLibraryClasspathEntry(String jarPath) {
@@ -485,7 +485,7 @@ public class StandaloneConfig {
 	protected boolean isExistingSettingsDirectoryMoved() {
 		return existingSettingsDirectoryMoved;
 	}
-	
+
 	public String getProjectId() {
 		return this.projectId;
 	}

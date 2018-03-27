@@ -39,16 +39,13 @@ public class RefactoringInvoker {
 	private static final Logger logger = LoggerFactory.getLogger(RefactoringInvoker.class);
 
 	// CONSTANTS
-	protected static final String USER_DIR = "user.dir"; //$NON-NLS-1$
+	private static final String USER_DIR = "user.dir"; //$NON-NLS-1$
+	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
 	private static final String PROJECT_PATH_CONSTANT = "PROJECT.PATH"; //$NON-NLS-1$
 	private static final String JSPARROW_TEMP_FOLDER = "temp_jSparrow"; //$NON-NLS-1$
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
-	protected static final String DEPENDENCIES_FOLDER_CONSTANT = "deps"; //$NON-NLS-1$
-	protected static final String MAVEN_NATURE_CONSTANT = "org.eclipse.m2e.core.maven2Nature"; //$NON-NLS-1$
-	protected static final String PROJECT_DESCRIPTION_CONSTANT = ".project"; //$NON-NLS-1$
-	protected static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
 	private static final String MAVEN_HOME_KEY = "MAVEN.HOME"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
@@ -56,7 +53,7 @@ public class RefactoringInvoker {
 	
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 
-	protected List<StandaloneConfig> standaloneConfigs;
+	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
 
 	public RefactoringInvoker() {
 		prepareWorkingDirectory();
@@ -80,7 +77,6 @@ public class RefactoringInvoker {
 			startRefactoring(context, refactoringPipeline, config);
 		}
 	}
-	
 
 	public void startRefactoring(BundleContext context, RefactoringPipeline refactoringPipeline,
 			StandaloneConfig standaloneConfig) throws YAMLConfigException {
@@ -90,6 +86,7 @@ public class RefactoringInvoker {
 		logger.debug(licenseKey);
 
 		YAMLConfig config = getConfiguration(context, standaloneConfig.getProjectId());
+
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> projectRules = getProjectRules(standaloneConfig);
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> selectedRules = getSelectedRules(config,
 				projectRules);
@@ -153,7 +150,7 @@ public class RefactoringInvoker {
 	 */
 	public void cleanUp() throws IOException {
 		try {
-			for (StandaloneConfig standaloneConfig : this.standaloneConfigs) {
+			for (StandaloneConfig standaloneConfig : standaloneConfigs) {
 				standaloneConfig.cleanUp();
 			}
 		} catch (JavaModelException | MavenInvocationException e) {
@@ -229,6 +226,7 @@ public class RefactoringInvoker {
 			configs.add(standaloneConfig);
 		}
 		return configs;
+
 	}
 
 	private Map<String, String> findAllProjectPaths(BundleContext context) {
