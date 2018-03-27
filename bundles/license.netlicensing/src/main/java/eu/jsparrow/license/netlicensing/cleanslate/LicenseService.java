@@ -1,11 +1,13 @@
 package eu.jsparrow.license.netlicensing.cleanslate;
 
-import eu.jsparrow.license.netlicensing.cleanslate.model.ValidationException;
+import eu.jsparrow.license.netlicensing.cleanslate.exception.PersistenceException;
+import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseModel;
 
 public interface LicenseService {
 	
-	LicenseValidationResult updateLicense(String licenceKey);
-	
-	LicenseValidationResult validateLicense() throws ValidationException;
+	public LicenseValidationResult validateLicense(LicenseModel model);
 
+	public LicenseModel loadFromPersistence() throws PersistenceException;
+
+	public void saveToPersistence(LicenseModel model) throws PersistenceException;
 }

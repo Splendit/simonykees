@@ -12,8 +12,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import eu.jsparrow.license.netlicensing.cleanslate.DummyLicenseModel;
+import eu.jsparrow.license.netlicensing.cleanslate.exception.PersistenceException;
+import eu.jsparrow.license.netlicensing.cleanslate.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseModel;
-import eu.jsparrow.license.netlicensing.cleanslate.model.ValidationException;
 
 @SuppressWarnings("nls")
 @RunWith(MockitoJUnitRunner.class)
@@ -62,8 +63,8 @@ public class SecureStoragePersistenceTest {
 		assertNotNull(result);
 	}
 
-	@Test(expected = ValidationException.class)
-	public void save_withCorruptedSecureStorage_throwsValidationException() throws Exception {
+	@Test(expected = PersistenceException.class)
+	public void save_withCorruptedSecureStorage_throwsPersistenceException() throws Exception {
 		byte[] modelBytes = "model".getBytes();
 		byte[] encryptedModelBytes = "encryptedModel".getBytes();
 		when(encryption.encrypt(eq(modelBytes))).thenReturn(encryptedModelBytes);
