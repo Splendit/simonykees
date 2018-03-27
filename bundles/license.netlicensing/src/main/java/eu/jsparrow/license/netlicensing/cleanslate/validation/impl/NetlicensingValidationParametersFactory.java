@@ -22,31 +22,37 @@ public class NetlicensingValidationParametersFactory {
 
 	public ValidationParameters createValidationParameters(NetlicensingLicenseModel model) {
 		LicenseType type = model.getType();
+		ValidationParameters parameters;
+		String secret = model.getSecret();
 		if (LicenseType.FLOATING == type) {
-			return createFloatingParameters(model, ACTION_CHECK_OUT_VAL);
+			parameters = createFloatingParameters(secret, ACTION_CHECK_OUT_VAL);
 		} else {
-			return createNodeLockedParameters(model);
+			parameters = createNodeLockedParameters(secret);
 		}
+		parameters.setProductNumber(model.getProduct());
+		parameters.setLicenseeName(model.getName());
+		return parameters;
 	}
 	
 	public ValidationParameters createFloatingCheckingParameters(NetlicensingLicenseModel model) {
-		return createFloatingParameters(model, ACTION_CHECK_IN_VAL);
+		ValidationParameters parameters = createFloatingParameters(model.getSecret(), ACTION_CHECK_IN_VAL);
+		parameters.setProductNumber(model.getProduct());
+		parameters.setLicenseeName(model.getName());
+		return parameters;
 	}
 
-	protected ValidationParameters createFloatingParameters(NetlicensingLicenseModel model, String action) {
+	protected ValidationParameters createFloatingParameters(String sessionId, String action) {
 		ValidationParameters parameters = new ValidationParameters();
-		String secretKey = model.getSecret();
 		HashMap<String, String> params = new HashMap<>();
-		params.put(SESSION_ID_KEY, secretKey);
+		params.put(SESSION_ID_KEY, sessionId);
 		params.put(ACTION_KEY, action);
 		parameters.setProductModuleValidationParameters(floatingProductModule, params);
 		return parameters;
 
 	}
 
-	public ValidationParameters createNodeLockedParameters(NetlicensingLicenseModel model) {
+	public ValidationParameters createNodeLockedParameters(String secretKey) {
 		ValidationParameters parameters = new ValidationParameters();
-		String secretKey = model.getSecret();
 		parameters.setLicenseeSecret(secretKey);
 		return parameters;
 	}
