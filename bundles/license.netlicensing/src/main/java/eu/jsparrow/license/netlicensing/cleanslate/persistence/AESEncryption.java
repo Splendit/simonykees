@@ -10,7 +10,8 @@ import javax.crypto.spec.SecretKeySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.license.netlicensing.cleanslate.model.ValidationException;
+import eu.jsparrow.license.netlicensing.cleanslate.exception.PersistenceException;
+import eu.jsparrow.license.netlicensing.cleanslate.exception.ValidationException;
 
 
 @SuppressWarnings("nls")
@@ -25,7 +26,7 @@ public class AESEncryption implements IEncryption {
 
 	private static final String KEY = "SOME_SECRET_KEY_";
 
-	public byte[] encrypt(byte[] data) throws ValidationException {
+	public byte[] encrypt(byte[] data) throws PersistenceException {
 		Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
 		Cipher cipher;
 		try {
@@ -34,11 +35,11 @@ public class AESEncryption implements IEncryption {
 			return cipher.doFinal(data);
 		} catch (GeneralSecurityException e) {
 			logger.error("Failed to encrypt data", e);
-			throw new ValidationException(e);
+			throw new PersistenceException(e);
 		}
 	}
 
-	public byte[] decrypt(byte[] encryptedData) throws ValidationException {
+	public byte[] decrypt(byte[] encryptedData) throws PersistenceException {
 		Cipher cipher;
 		try {
 			Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
@@ -47,7 +48,7 @@ public class AESEncryption implements IEncryption {
 			return cipher.doFinal(encryptedData);
 		} catch (GeneralSecurityException e) {
 			logger.error("Failed decrypt secure data", e);
-			throw new ValidationException(e);
+			throw new PersistenceException(e);
 		}
 	}
 }

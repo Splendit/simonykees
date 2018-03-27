@@ -9,8 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.license.netlicensing.cleanslate.LicensePersistence;
+import eu.jsparrow.license.netlicensing.cleanslate.exception.PersistenceException;
+import eu.jsparrow.license.netlicensing.cleanslate.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseModel;
-import eu.jsparrow.license.netlicensing.cleanslate.model.ValidationException;
 
 @SuppressWarnings("nls")
 public class SecureStoragePersistence implements LicensePersistence {
@@ -38,18 +39,18 @@ public class SecureStoragePersistence implements LicensePersistence {
 	}
 	
 	@Override
-	public LicenseModel load() throws ValidationException {
+	public LicenseModel load() throws PersistenceException {
 		byte[] encryptedModel = loadFromSecureStorage();
 		return ModelSerializer.deserialize(encryption.decrypt(encryptedModel));
 	}
 
 	@Override
-	public void save(LicenseModel model) throws ValidationException {
+	public void save(LicenseModel model) throws PersistenceException {
 		byte[] modelAsBytes = ModelSerializer.serialize(model);
 		saveToSecureStorage(encryption.encrypt(modelAsBytes));
 	}
 
-	private void saveToSecureStorage(byte[] data) throws ValidationException {
+	private void saveToSecureStorage(byte[] data) throws PersistenceException {
 		ISecurePreferences simonykeesNode = securePreferences.node(SECURE_PREFERENCES_KEY);
 		simonykeesNode.clear();
 		try {
@@ -58,17 +59,17 @@ public class SecureStoragePersistence implements LicensePersistence {
 			simonykeesNode.flush();
 		} catch (IOException | StorageException e) {
 			logger.error("Failed to write to secure storage", e);
-			throw new ValidationException(e);
+			throw new PersistenceException(e);
 		}
 	}
 
-	private byte[] loadFromSecureStorage() throws ValidationException {
+	private byte[] loadFromSecureStorage() throws PersistenceException {
 		try {
 			ISecurePreferences simonykeesNode = securePreferences.node(SECURE_PREFERENCES_KEY);
 			return simonykeesNode.getByteArray(NODE_KEY, new byte[0]);
 		} catch (StorageException e) {
 			logger.error("Failed to read from secure storage", e);
-			throw new ValidationException(e);
+			throw new PersistenceException(e);
 		}
 	}
 

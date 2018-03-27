@@ -1,4 +1,4 @@
-package eu.jsparrow.license.netlicensing.cleanslate.model;
+package eu.jsparrow.license.netlicensing.cleanslate.exception;
 
 public class ValidationException extends Exception{
 	
