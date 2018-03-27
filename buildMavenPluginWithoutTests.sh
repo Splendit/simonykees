@@ -40,6 +40,13 @@ echo "Creating $MANIFEST_FILE_NAME"
 # list the contents of the build jsparrow plugins and redirect it to the necessary manifest.standalone in the maven plugins
 ls $JSPARROW_TARGET_PATH > $PLUGIN_RESOURCES_PATH/$MANIFEST_FILE_NAME
 
+# build and instlal the jsparrow-standalone-adapter
+cd jsparrow-standalone-adapter
+
+mvn clean install
+
+cd ..
+
 # build and install the jsparrow-maven-plugin
 cd jsparrow-maven-plugin
 
