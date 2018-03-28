@@ -9,9 +9,9 @@ public class NetlicensingLicenseModel implements LicenseModel{
 	private ZonedDateTime expireDate;
 	private String product;
 	private String secret;
-	private LicenseType type;
+	private NetlicensingLicenseType type;
 
-	public NetlicensingLicenseModel(LicenseType type, String key, String name, String product, String secret, ZonedDateTime expireDate) {
+	public NetlicensingLicenseModel(NetlicensingLicenseType type, String key, String name, String product, String secret, ZonedDateTime expireDate) {
 		setType(type);
 		setKey(key);
 		setName(name);
@@ -20,7 +20,7 @@ public class NetlicensingLicenseModel implements LicenseModel{
 		setSecret(secret);
 	}
 
-	private void setType(LicenseType type2) {
+	private void setType(NetlicensingLicenseType type2) {
 		this.type = type2;
 	}
 
@@ -64,7 +64,7 @@ public class NetlicensingLicenseModel implements LicenseModel{
 		return secret;
 	}
 	
-	public LicenseType getType() {
+	public NetlicensingLicenseType getType() {
 		return this.type;
 	}
 }

@@ -1,6 +1,6 @@
 package eu.jsparrow.license.netlicensing.cleanslate.model;
 
-public enum LicenseType {
+public enum NetlicensingLicenseType {
 	FLOATING, NODE_LOCKED, NONE;
 
 }

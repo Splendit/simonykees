@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
-import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseType;
+import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseModel;
 
 public class NetlicensingValidationParametersFactory {
@@ -21,10 +21,10 @@ public class NetlicensingValidationParametersFactory {
 	}
 
 	public ValidationParameters createValidationParameters(NetlicensingLicenseModel model) {
-		LicenseType type = model.getType();
+		NetlicensingLicenseType type = model.getType();
 		ValidationParameters parameters;
 		String secret = model.getSecret();
-		if (LicenseType.FLOATING == type) {
+		if (NetlicensingLicenseType.FLOATING == type) {
 			parameters = createFloatingParameters(secret, ACTION_CHECK_OUT_VAL);
 		} else {
 			parameters = createNodeLockedParameters(secret);

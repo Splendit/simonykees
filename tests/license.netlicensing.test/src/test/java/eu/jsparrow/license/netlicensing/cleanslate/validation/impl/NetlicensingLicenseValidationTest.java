@@ -1,12 +1,15 @@
 package eu.jsparrow.license.netlicensing.cleanslate.validation.impl;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 import java.time.ZonedDateTime;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
@@ -15,76 +18,58 @@ import com.labs64.netlicensing.exception.NetLicensingException;
 
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
 
-import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseType;
+import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.ValidationStatus;
 
+@RunWith(MockitoJUnitRunner.class)
 public class NetlicensingLicenseValidationTest {
-
-	private NetlicensingLicenseValidation validation;
-	private NetlicensingLicenseModel model;
-	private ValidationResult netlicensingResponse;
-	private LicenseValidationResult validationResult;
 
 	@Mock
 	NetlicensingLicenseCache cache;
-
-	@Mock
-	ResponseEvaluator evaluator;
-
+	
+	@Mock 
+	NetlicensingValidationParametersFactory parametersFactory;
+	
+	@Mock 
+	NetlicensingValidationRequest request;
+	
+	private NetlicensingLicenseModel model;
+	
+	private NetlicensingLicenseValidation netlicensingValidation;
+	
 	@SuppressWarnings("nls")
 	@Before
 	public void setUp() {
-		model = new NetlicensingLicenseModel(LicenseType.NODE_LOCKED, "key", "name", "product", "secret",
+		model = new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key", "name", "product", "secret",
 				ZonedDateTime.now());
-		validationResult = new LicenseValidationResult(model, new ValidationStatus(true));
-		netlicensingResponse = new ValidationResult();
-		cache = mock(NetlicensingLicenseCache.class);
-		evaluator = mock(ResponseEvaluator.class);
-		validation = new TestableNetlicensingLicenseValidation(model);
+		netlicensingValidation = new NetlicensingLicenseValidation(model, cache, parametersFactory, request);
 	}
 
 	@Test
-	public void validate_invalidCache() {
-
+	public void validate_withInvalidCache_shouldSendRequestAndSaveToCache() {
+		LicenseValidationResult validationResult = new LicenseValidationResult(model, new ValidationStatus(true));
+		ValidationParameters valiationParameters = new ValidationParameters();
+		
 		when(cache.isInvalid()).thenReturn(true);
-		when(evaluator.evaluateResult(netlicensingResponse)).thenReturn(validationResult);
-		validation.validate();
+		when(parametersFactory.createValidationParameters(eq(model))).thenReturn(valiationParameters);
+		when(request.send(eq(model.getKey()),eq(valiationParameters))).thenReturn(validationResult);
+
+		LicenseValidationResult result =netlicensingValidation.validate();
+		
+		
 		verify(cache).updateCache(validationResult);
+		assertEquals(validationResult,result);
 	}
 
 	@Test
-	public void validate_validCache() {
-
-		ValidationResult netlicensingResponse = new ValidationResult();
+	public void validate_withValidCache_shouldGetLastResultFromCache() {
 		when(cache.isInvalid()).thenReturn(false);
 
-		validation.validate();
+		netlicensingValidation.validate();
 
-		verify(evaluator, never()).evaluateResult(netlicensingResponse);
 		verify(cache).getLastResult();
 	}
 
-	class TestableNetlicensingLicenseValidation extends NetlicensingLicenseValidation {
-		public TestableNetlicensingLicenseValidation(NetlicensingLicenseModel model) {
-			super(model);
-		}
-
-		@Override
-		protected NetlicensingLicenseCache getLicenseCacheInstance() {
-			return cache;
-		}
-
-		@Override
-		protected ResponseEvaluator createResponseEvaluator(NetlicensingLicenseModel model) {
-			return evaluator;
-		}
-
-		@Override
-		protected ValidationResult sendValidationRequest(String licenseeNumber,
-				ValidationParameters validationParameters, Context context) throws NetLicensingException {
-			return netlicensingResponse;
-		}
-
-	}
+	
 }
