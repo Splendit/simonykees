@@ -34,6 +34,10 @@ public class ResponseEvaluator {
 		parser.parseValidationResult(response);
 
 		Subscription subscription = parser.getSubscription();
+		
+		if(subscription == null) {
+			return createValidationResult(NetlicensingLicenseType.NONE, false, null, LicenseStatus.UNDEFINED);
+		}
 
 		if (subscription.isValid()) {
 			return evaluateNonExpiredLicense();
@@ -55,7 +59,13 @@ public class ResponseEvaluator {
 
 		Floating floating = parser.getFloating();
 		if (floating != null && floating.isValid()) {
-			return createValidationResult(NetlicensingLicenseType.FLOATING, false, expireDate, LicenseStatus.FLOATING_EXPIRED);
+			return createValidationResult(NetlicensingLicenseType.FLOATING, false, expireDate,
+					LicenseStatus.FLOATING_EXPIRED);
+		}
+
+		if (multiFeature != null && ZonedDateTime.now().isBefore(expireDate)) {
+			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, false, expireDate,
+					LicenseStatus.NODE_LOCKED_HARDWARE_MISMATCH);
 		}
 
 		return createValidationResult(NetlicensingLicenseType.NONE, false, expireDate, LicenseStatus.UNDEFINED);
@@ -91,5 +101,7 @@ public class ResponseEvaluator {
 
 		return new LicenseValidationResult(model, status);
 	}
+	
+	
 
 }

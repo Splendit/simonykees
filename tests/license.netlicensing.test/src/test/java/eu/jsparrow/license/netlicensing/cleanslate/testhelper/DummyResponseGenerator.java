@@ -2,11 +2,10 @@ package eu.jsparrow.license.netlicensing.cleanslate.testhelper;
 
 import static java.util.Arrays.asList;
 
-import java.time.ZonedDateTime;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 
 import com.labs64.netlicensing.domain.vo.Composition;
@@ -14,10 +13,6 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 @SuppressWarnings("nls")
 public class DummyResponseGenerator {
-
-	private ZonedDateTime now = ZonedDateTime.now();
-	private ZonedDateTime expiresDate = now.plusYears(1);
-	private ZonedDateTime expiresTimeStamp = now.plusDays(1);
 
 	public Map<String, Composition> createMultiFeatureProperties(String featureKey, String valid) {
 		Map<String, Composition> featureProeprties = createCompositionProperties(
@@ -42,12 +37,16 @@ public class DummyResponseGenerator {
 		return createValidationResult(floating, nodeLocked, subscription);
 	}
 	
-	public ValidationResult createNodeLockedResponse(String featureKey, String valid, String expiresDate) {
+	public ValidationResult createNodeLockedResponse(String nodeLockedValid, String featureKey, String valid, String expiresDate) {
 
-		Composition nodeLocked = createMultiFeatureComposition(featureKey, "true");
+		Composition nodeLocked = createMultiFeatureComposition(featureKey, nodeLockedValid);
 		Composition subscription = createSubscriptionComposition(expiresDate, valid);
 
 		return createValidationResult(nodeLocked, subscription);
+	}
+	
+	public ValidationResult createNodeLockedResponse(String featureKey, String valid, String expiresDate) {
+		return createNodeLockedResponse("true", featureKey, valid, expiresDate);
 	}
 
 	protected ValidationResult createValidationResult(Composition floating, Composition nodeLocked,

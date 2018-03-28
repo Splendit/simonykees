@@ -1,7 +1,9 @@
 package eu.jsparrow.license.netlicensing.cleanslate.validation.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.ZonedDateTime;
 
@@ -11,15 +13,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.labs64.netlicensing.domain.vo.Context;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
-import com.labs64.netlicensing.domain.vo.ValidationResult;
-import com.labs64.netlicensing.exception.NetLicensingException;
 
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
-
-import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseModel;
+import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.ValidationStatus;
 
 @RunWith(MockitoJUnitRunner.class)
