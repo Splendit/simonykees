@@ -30,10 +30,14 @@ public class ParserTest {
 
 	private Parser parser;
 	private DummyResponseGenerator responseGenerator;
+	ZonedDateTime now = ZonedDateTime.now();
+	ZonedDateTime expireDate = ZonedDateTime.now().plusDays(1);
 
 	@Before
 	public void setUp() {
 		parser = new Parser();
+		now = ZonedDateTime.now();
+		expireDate = ZonedDateTime.now().plusDays(1);
 		responseGenerator = new DummyResponseGenerator();
 	}
 
@@ -43,21 +47,21 @@ public class ParserTest {
 
 	@Test
 	public void extractModels_shouldReturnFloating() {
-		ValidationResult response = responseGenerator.createValidFloatingResponse();
+		ValidationResult response = responseGenerator.createFloatingResponse(now.toString(), "true", expireDate.toString());
 		Floating floatingModel = parser.extractModels(response, "Floating", parser::buildFloating);
 		assertNotNull(floatingModel);
 	}
 
 	@Test
 	public void extractModels_shouldReturnNodeLocked() {
-		ValidationResult response = responseGenerator.createValidFloatingResponse();
+		ValidationResult response = responseGenerator.createFloatingResponse(now.toString(), "true", expireDate.toString());
 		MultiFeature multiFeatureModel = parser.extractModels(response, "MultiFeature", parser::buildMultiFeature);
 		assertNotNull(multiFeatureModel);
 	}
 
 	@Test
 	public void extractModels_shouldReturnSubscriptions() {
-		ValidationResult response = responseGenerator.createValidFloatingResponse();
+		ValidationResult response = responseGenerator.createFloatingResponse(now.toString(), "true", expireDate.toString());
 		Subscription subscription = parser.extractModels(response, "Subscription", parser::buildSubscription);
 		assertNotNull(subscription);
 	}

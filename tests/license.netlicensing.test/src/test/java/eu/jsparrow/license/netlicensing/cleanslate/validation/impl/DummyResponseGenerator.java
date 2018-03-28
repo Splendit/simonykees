@@ -28,15 +28,41 @@ public class DummyResponseGenerator {
 		properties.put("licensingModel", new Composition("MultiFeature"));
 		return properties;
 	}
+	
+	public ValidationResult createFloatingResponse(String timeStamp, String valid, String expiresDate) {
+		return createFloatingResponse("true", timeStamp, valid, expiresDate);
+	}
+	
+	public ValidationResult createFloatingResponse(String floatingValid, String timeStamp, String valid, String expiresDate) {
 
-	public ValidationResult createValidFloatingResponse() {
-
-		Composition floating = createFloatingComposition(expiresTimeStamp.toString(), "true");
+		Composition floating = createFloatingComposition(timeStamp, floatingValid);
 		Composition nodeLocked = createMultiFeatureComposition("featureKey", "false");
-		Composition subscription = createSubscriptionComposition(expiresDate.toString(), "true");
+		Composition subscription = createSubscriptionComposition(expiresDate, valid);
 
+		return createValidationResult(floating, nodeLocked, subscription);
+	}
+	
+	public ValidationResult createNodeLockedResponse(String featureKey, String valid, String expiresDate) {
+
+		Composition nodeLocked = createMultiFeatureComposition(featureKey, "true");
+		Composition subscription = createSubscriptionComposition(expiresDate, valid);
+
+		return createValidationResult(nodeLocked, subscription);
+	}
+
+	protected ValidationResult createValidationResult(Composition floating, Composition nodeLocked,
+			Composition subscription) {
 		Map<String, Composition> content = new HashMap<>();
 		content.put("floaing-pmn", floating);
+		content.put("subscription-pmn", subscription);
+		content.put("multifeature-pmn", nodeLocked);
+
+		return crateValidationResult(content);
+	}
+	
+	protected ValidationResult createValidationResult(Composition nodeLocked,
+			Composition subscription) {
+		Map<String, Composition> content = new HashMap<>();
 		content.put("subscription-pmn", subscription);
 		content.put("multifeature-pmn", nodeLocked);
 

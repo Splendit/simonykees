@@ -75,7 +75,7 @@ public class ResponseEvaluator {
 	}
 
 	private LicenseValidationResult createValidationResult(LicenseType nodeLocked, boolean b, ZonedDateTime expireDate,
-			String string) {
+			String statusInfo) {
 
 		String key = netlicensingModel.getKey();
 		String name = netlicensingModel.getName();
@@ -83,7 +83,7 @@ public class ResponseEvaluator {
 		String secret = netlicensingModel.getSecret();
 
 		LicenseModel model = new NetlicensingLicenseModel(nodeLocked, key, name, product, secret, expireDate);
-		ValidationStatus status = new ValidationStatus(b, string);
+		ValidationStatus status = new ValidationStatus(b, statusInfo);
 
 		return new LicenseValidationResult(model, status);
 	}
