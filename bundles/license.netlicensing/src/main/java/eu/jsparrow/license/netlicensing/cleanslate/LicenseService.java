@@ -4,7 +4,7 @@ import eu.jsparrow.license.netlicensing.cleanslate.exception.PersistenceExceptio
 import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseModel;
 
 public interface LicenseService {
-	
+
 	public LicenseValidationResult validateLicense(LicenseModel model);
 
 	public LicenseModel loadFromPersistence() throws PersistenceException;

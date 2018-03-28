@@ -1,4 +1,4 @@
-package eu.jsparrow.license.netlicensing.cleanslate;
+package eu.jsparrow.license.netlicensing.cleanslate.testhelper;
 
 import java.io.Serializable;
 

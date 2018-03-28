@@ -1,4 +1,4 @@
-package eu.jsparrow.license.netlicensing.cleanslate.validation.impl;
+package eu.jsparrow.license.netlicensing.cleanslate.testhelper;
 
 import static java.util.Arrays.asList;
 

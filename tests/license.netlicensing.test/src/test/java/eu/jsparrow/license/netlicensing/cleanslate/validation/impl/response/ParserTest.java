@@ -20,7 +20,7 @@ import org.junit.Test;
 import com.labs64.netlicensing.domain.vo.Composition;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
-import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.DummyResponseGenerator;
+import eu.jsparrow.license.netlicensing.cleanslate.testhelper.DummyResponseGenerator;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.Floating;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.MultiFeature;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.Subscription;

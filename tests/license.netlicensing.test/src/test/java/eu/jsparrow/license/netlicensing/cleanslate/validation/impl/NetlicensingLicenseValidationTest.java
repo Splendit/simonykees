@@ -27,17 +27,17 @@ public class NetlicensingLicenseValidationTest {
 
 	@Mock
 	NetlicensingLicenseCache cache;
-	
-	@Mock 
+
+	@Mock
 	NetlicensingValidationParametersFactory parametersFactory;
-	
-	@Mock 
+
+	@Mock
 	NetlicensingValidationRequest request;
-	
+
 	private NetlicensingLicenseModel model;
-	
+
 	private NetlicensingLicenseValidation netlicensingValidation;
-	
+
 	@SuppressWarnings("nls")
 	@Before
 	public void setUp() {
@@ -50,16 +50,15 @@ public class NetlicensingLicenseValidationTest {
 	public void validate_withInvalidCache_shouldSendRequestAndSaveToCache() {
 		LicenseValidationResult validationResult = new LicenseValidationResult(model, new ValidationStatus(true));
 		ValidationParameters valiationParameters = new ValidationParameters();
-		
+
 		when(cache.isInvalid()).thenReturn(true);
 		when(parametersFactory.createValidationParameters(eq(model))).thenReturn(valiationParameters);
-		when(request.send(eq(model.getKey()),eq(valiationParameters))).thenReturn(validationResult);
+		when(request.send(eq(model.getKey()), eq(valiationParameters))).thenReturn(validationResult);
 
-		LicenseValidationResult result =netlicensingValidation.validate();
-		
-		
+		LicenseValidationResult result = netlicensingValidation.validate();
+
 		verify(cache).updateCache(validationResult);
-		assertEquals(validationResult,result);
+		assertEquals(validationResult, result);
 	}
 
 	@Test
@@ -71,5 +70,4 @@ public class NetlicensingLicenseValidationTest {
 		verify(cache).getLastResult();
 	}
 
-	
 }

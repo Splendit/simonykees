@@ -20,6 +20,7 @@ import eu.jsparrow.license.netlicensing.cleanslate.exception.PersistenceExceptio
 import eu.jsparrow.license.netlicensing.cleanslate.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.cleanslate.model.DemoLicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseModel;
+import eu.jsparrow.license.netlicensing.cleanslate.testhelper.DummyLicenseModel;
 
 @SuppressWarnings("nls")
 @RunWith(MockitoJUnitRunner.class)
