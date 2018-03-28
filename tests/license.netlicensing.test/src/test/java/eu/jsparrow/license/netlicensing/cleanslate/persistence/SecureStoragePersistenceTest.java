@@ -1,7 +1,11 @@
 package eu.jsparrow.license.netlicensing.cleanslate.persistence;
 
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
+
+import java.time.ZonedDateTime;
 
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.StorageException;
@@ -11,9 +15,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import eu.jsparrow.license.netlicensing.cleanslate.DummyLicenseModel;
+import eu.jsparrow.license.netlicensing.cleanslate.*;
 import eu.jsparrow.license.netlicensing.cleanslate.exception.PersistenceException;
 import eu.jsparrow.license.netlicensing.cleanslate.exception.ValidationException;
+import eu.jsparrow.license.netlicensing.cleanslate.model.DemoLicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseModel;
 
 @SuppressWarnings("nls")
@@ -35,8 +40,7 @@ public class SecureStoragePersistenceTest {
 
 		this.secureStoragePersistence = new SecureStoragePersistence(securePreferences, encryption);
 	}
-
-
+	
 	@Test
 	public void save_validModel_encryptsAndSavesData() throws Exception {
 		byte[] modelBytes = ModelSerializer.serialize(new DummyLicenseModel());
@@ -54,13 +58,22 @@ public class SecureStoragePersistenceTest {
 		LicenseModel model = new DummyLicenseModel();
 		byte[] encryptedModelBytes = "encryptedModel".getBytes();
 		byte[] decryptedModel = ModelSerializer.serialize(model);
-		when(simonykeesNode.getByteArray(eq("credentials"), any(byte[].class))).thenReturn(encryptedModelBytes);
+		when(simonykeesNode.getByteArray(any(), any())).thenReturn(encryptedModelBytes);
 		when(encryption.decrypt(encryptedModelBytes)).thenReturn(decryptedModel);
 
 		LicenseModel result= secureStoragePersistence.load();
 		
 		// assertEquals fails as the deserialized object is not the same as the original but a clone
 		assertNotNull(result);
+	}
+	
+	@Test
+	public void load_withNothingInStorage_returnsDemoLicenseModel() throws Exception {
+		when(simonykeesNode.getByteArray(any(), any())).thenReturn(null);
+		
+		LicenseModel result= secureStoragePersistence.load();
+		
+		assertThat(result, instanceOf(DemoLicenseModel.class));
 	}
 
 	@Test(expected = PersistenceException.class)
@@ -70,7 +83,7 @@ public class SecureStoragePersistenceTest {
 		when(encryption.encrypt(eq(modelBytes))).thenReturn(encryptedModelBytes);
 
 		doThrow(StorageException.class).when(simonykeesNode)
-			.putByteArray(anyString(), any(byte[].class), anyBoolean());
+			.putByteArray(anyString(), any(), anyBoolean());
 
 		secureStoragePersistence.save(new DummyLicenseModel());
 	}

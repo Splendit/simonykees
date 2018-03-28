@@ -34,3 +34,5 @@ Require-Bundle: eu.jsparrow.i18n,
  org.eclipse.core.databinding.property;bundle-version="[1.6.0,2.0.0)",
  org.eclipse.jface.databinding;bundle-version="[1.8.0,2.0.0)"
 Bundle-Vendor: Splendit IT-Consulting GmbH
+Import-Package: oshi;version="3.4.3",
+ oshi.hardware

@@ -8,6 +8,7 @@ import org.eclipse.equinox.security.storage.StorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.license.netlicensing.cleanslate.LicenseModelFactory;
 import eu.jsparrow.license.netlicensing.cleanslate.LicensePersistence;
 import eu.jsparrow.license.netlicensing.cleanslate.exception.PersistenceException;
 import eu.jsparrow.license.netlicensing.cleanslate.exception.ValidationException;
@@ -35,6 +36,10 @@ public class SecureStoragePersistence implements LicensePersistence {
 	@Override
 	public LicenseModel load() throws PersistenceException {
 		byte[] encryptedModel = loadFromSecureStorage();
+		if(encryptedModel == null) {
+			logger.info("Could not find existing license in storage, returning default license");
+			return new LicenseModelFactory().createDemoLicenseModel();
+		}
 		return ModelSerializer.deserialize(encryption.decrypt(encryptedModel));
 	}
 
@@ -60,7 +65,7 @@ public class SecureStoragePersistence implements LicensePersistence {
 	private byte[] loadFromSecureStorage() throws PersistenceException {
 		try {
 			ISecurePreferences simonykeesNode = securePreferences.node(SECURE_PREFERENCES_KEY);
-			return simonykeesNode.getByteArray(NODE_KEY, new byte[0]);
+			return simonykeesNode.getByteArray(NODE_KEY, null);
 		} catch (StorageException e) {
 			logger.error("Failed to read from secure storage", e);
 			throw new PersistenceException(e);

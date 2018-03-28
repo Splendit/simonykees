@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.license.netlicensing.cleanslate.exception.PersistenceException;
-import eu.jsparrow.license.netlicensing.cleanslate.exception.ValidationException;
 
 
 @SuppressWarnings("nls")
@@ -25,11 +24,12 @@ public class AESEncryption implements IEncryption {
 	private static final String TRANSFORMATION = "AES";
 
 	private static final String KEY = "SOME_SECRET_KEY_";
-
+	
 	public byte[] encrypt(byte[] data) throws PersistenceException {
 		Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
 		Cipher cipher;
 		try {
+			// Cipher loads slowly the first time
 			cipher = Cipher.getInstance(TRANSFORMATION);
 			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 			return cipher.doFinal(data);
@@ -51,4 +51,6 @@ public class AESEncryption implements IEncryption {
 			throw new PersistenceException(e);
 		}
 	}
+	
+
 }

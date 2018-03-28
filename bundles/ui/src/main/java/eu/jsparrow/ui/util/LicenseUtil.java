@@ -33,8 +33,6 @@ public class LicenseUtil {
 	@Inject
 	private LicenseValidationService licenseValidationService;
 	
-	private LicenseService service;
-	
 	private boolean isLicenseValidationServiceAvailable = false;
 
 	private LicenseUtil() {

@@ -28,47 +28,4 @@ public enum LicenseStatus {
 	public String getUserMessage() {
 		return this.userMessage;
 	}
-
-	public static LicenseStatus fromString(String value) {
-		LicenseStatus status = UNDEFINED;
-
-		if (value != null) {
-			switch (value.toLowerCase()) {
-			case "conncection-failure": //$NON-NLS-1$
-				status = LicenseStatus.CONNECTION_FAILURE;
-				break;
-			case "free-registered": //$NON-NLS-1$
-				status = LicenseStatus.DEMO;
-				break;
-			case "free-expired": //$NON-NLS-1$
-				status = LicenseStatus.DEMO_EXPIRED;
-				break;
-			case "node-locked-registered": //$NON-NLS-1$
-				status = LicenseStatus.NODE_LOCKED;
-				break;
-			case "node-locked-expired": //$NON-NLS-1$
-				status = LicenseStatus.NODE_LOCKED_EXPIRED;
-				break;
-			case "node-locked-hw-id-failure": //$NON-NLS-1$
-				status = NODE_LOCKED_HARDWARE_MISMATCH;
-				break;
-			case "floating-checked-out": //$NON-NLS-1$
-				status = LicenseStatus.FLOATING;
-				break;
-			case "floating-expired": //$NON-NLS-1$
-				status = LicenseStatus.FLOATING_EXPIRED;
-				break;
-			case "floating-out-of-session": //$NON-NLS-1$
-				status = LicenseStatus.FLOATING_OUT_OF_SESSIONS;
-				break;
-			case "floating-checked-in": //$NON-NLS-1$
-				status = LicenseStatus.FLOATING_CHECKED_IN;
-				break;
-			default:
-				status = UNDEFINED;
-			}
-		}
-
-		return status;
-	}
 }
