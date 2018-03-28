@@ -34,6 +34,7 @@ public class NetlicensingValidationRequest {
 			ValidationResult netLicensingResponse = licenseeService.validate(restApiContext, key, validationParameters);
 			return responseEvaluator.evaluateResult(netLicensingResponse);
 		} catch (NetLicensingException e) {
+			// TODO: Distinguish between no connection and licensee doesnt exist
 			ValidationStatus validationStatus = new ValidationStatus(false, "Failed to connect to license server");
 			return new LicenseValidationResult(responseEvaluator.getLicensingModel(), validationStatus);
 		}

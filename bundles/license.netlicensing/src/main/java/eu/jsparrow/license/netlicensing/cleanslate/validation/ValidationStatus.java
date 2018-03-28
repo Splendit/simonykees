@@ -1,7 +1,7 @@
 package eu.jsparrow.license.netlicensing.cleanslate.validation;
 
-public class ValidationStatus {
 	
+public class ValidationStatus {
 	private boolean valid;
 	
 	private String info;

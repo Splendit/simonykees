@@ -17,3 +17,7 @@ Service-Component: OSGI-INF/eu.jsparrow.license.netlicensing.NetLicensingLicense
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: eu.jsparrow.license.netlicensing.Activator
 Bundle-Vendor: Splendit IT-Consulting GmbH
+Export-Package: eu.jsparrow.license.netlicensing.cleanslate,
+ eu.jsparrow.license.netlicensing.cleanslate.exception,
+ eu.jsparrow.license.netlicensing.cleanslate.model,
+ eu.jsparrow.license.netlicensing.cleanslate.validation
