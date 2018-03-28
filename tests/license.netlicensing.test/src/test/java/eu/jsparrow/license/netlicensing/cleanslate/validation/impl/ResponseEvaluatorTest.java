@@ -96,10 +96,23 @@ public class ResponseEvaluatorTest {
 	}
 	
 	@Test
-	public void evaluateResult_undefinedLicense() {
+	public void evaluateResult_hardwareIdMismatch() {
+		ZonedDateTime now = ZonedDateTime.now();
+		ZonedDateTime expireDate = ZonedDateTime.now().plusDays(1);
+		ValidationResult response = responseGenerator.createNodeLockedResponse("false", now.toString(), "false", expireDate.toString());
+
+		LicenseValidationResult result = responseEvaluator.evaluateResult(response);
+
+		ValidationStatus status = result.getStatus();
+		assertFalse(status.isValid());
+		assertEquals(StatusDetail.NODE_LOCKED_HARDWARE_MISMATCH, status.getStatusDetail());
+	}
+	
+	@Test
+	public void evaluateResult_undefined() {
 		ZonedDateTime now = ZonedDateTime.now();
 		ZonedDateTime expireDate = ZonedDateTime.now().minusDays(1);
-		ValidationResult response = responseGenerator.createFloatingResponse("false", now.toString(), "false", expireDate.toString());
+		ValidationResult response = responseGenerator.createNodeLockedResponse("false", now.toString(), "false", expireDate.toString());
 
 		LicenseValidationResult result = responseEvaluator.evaluateResult(response);
 
@@ -107,5 +120,15 @@ public class ResponseEvaluatorTest {
 		assertFalse(status.isValid());
 		assertEquals(StatusDetail.UNDEFINED, status.getStatusDetail());
 	}
+	
+	@Test
+	public void evaluateResult_undefined_incompleteResponse() {
+		ValidationResult response = new ValidationResult();
 
+		LicenseValidationResult result = responseEvaluator.evaluateResult(response);
+
+		ValidationStatus status = result.getStatus();
+		assertFalse(status.isValid());
+		assertEquals(StatusDetail.UNDEFINED, status.getStatusDetail());
+	}
 }

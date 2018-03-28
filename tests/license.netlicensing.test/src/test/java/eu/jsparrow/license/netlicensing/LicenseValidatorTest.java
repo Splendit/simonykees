@@ -120,7 +120,6 @@ public class LicenseValidatorTest extends LicenseCommonTest {
 	}
 
 	@Test
-	@Ignore
 	public void validateNodeLockedHwIdFailureStatus() throws InterruptedException {
 		// having a licensee with a node locked license...
 		persistNodeLockedLicensee();
