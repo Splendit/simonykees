@@ -51,7 +51,7 @@ public class SecureStoragePersistenceTest {
 
 		secureStoragePersistence.save(new DummyLicenseModel());
 
-		verify(simonykeesNode).putByteArray(eq("credentials"), eq(encryptedModelBytes), eq(false));
+		verify(simonykeesNode).putByteArray(eq("license-model"), eq(encryptedModelBytes), eq(false));
 	}
 
 	@Test

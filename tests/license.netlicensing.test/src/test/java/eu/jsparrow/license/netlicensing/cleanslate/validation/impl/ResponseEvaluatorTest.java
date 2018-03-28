@@ -12,7 +12,7 @@ import org.junit.Test;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
-import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseStatus;
+import eu.jsparrow.license.netlicensing.cleanslate.model.StatusDetail;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.cleanslate.testhelper.DummyResponseGenerator;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseModel;
@@ -41,7 +41,7 @@ public class ResponseEvaluatorTest {
 
 		ValidationStatus status = result.getStatus();
 		assertTrue(status.isValid());
-		assertEquals(LicenseStatus.FLOATING, status.getStatus());
+		assertEquals(StatusDetail.FLOATING, status.getStatusDetail());
 	}
 	
 	@Test
@@ -54,7 +54,7 @@ public class ResponseEvaluatorTest {
 
 		ValidationStatus status = result.getStatus();
 		assertFalse(status.isValid());
-		assertEquals(LicenseStatus.FLOATING_OUT_OF_SESSIONS, status.getStatus());
+		assertEquals(StatusDetail.FLOATING_OUT_OF_SESSIONS, status.getStatusDetail());
 	}
 
 	@Test
@@ -68,7 +68,7 @@ public class ResponseEvaluatorTest {
 
 		ValidationStatus status = result.getStatus();
 		assertFalse(status.isValid());
-		assertEquals(LicenseStatus.FLOATING_EXPIRED, status.getStatus());
+		assertEquals(StatusDetail.FLOATING_EXPIRED, status.getStatusDetail());
 	}
 
 	@Test
@@ -80,7 +80,7 @@ public class ResponseEvaluatorTest {
 
 		ValidationStatus status = result.getStatus();
 		assertTrue(status.isValid());
-		assertEquals(LicenseStatus.NODE_LOCKED, status.getStatus());
+		assertEquals(StatusDetail.NODE_LOCKED, status.getStatusDetail());
 	}
 
 	@Test
@@ -92,7 +92,7 @@ public class ResponseEvaluatorTest {
 
 		ValidationStatus status = result.getStatus();
 		assertFalse(status.isValid());
-		assertEquals(LicenseStatus.NODE_LOCKED_EXPIRED, status.getStatus());
+		assertEquals(StatusDetail.NODE_LOCKED_EXPIRED, status.getStatusDetail());
 	}
 	
 	@Test
@@ -105,7 +105,7 @@ public class ResponseEvaluatorTest {
 
 		ValidationStatus status = result.getStatus();
 		assertFalse(status.isValid());
-		assertEquals(LicenseStatus.UNDEFINED, status.getStatus());
+		assertEquals(StatusDetail.UNDEFINED, status.getStatusDetail());
 	}
 
 }

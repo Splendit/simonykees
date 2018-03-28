@@ -2,7 +2,7 @@ package eu.jsparrow.license.netlicensing.cleanslate.model;
 
 import eu.jsparrow.i18n.Messages;
 
-public enum LicenseStatus {
+public enum StatusDetail {
 
 	DEMO(Messages.LicenseStatus_userMessage_FREE_REGISTERED),
 	DEMO_EXPIRED(Messages.LicenseStatus_userMessage_FREE_EXPIRED),
@@ -21,7 +21,7 @@ public enum LicenseStatus {
 
 	private String userMessage;
 
-	private LicenseStatus(String userMessage) {
+	private StatusDetail(String userMessage) {
 		this.userMessage = userMessage;
 	}
 

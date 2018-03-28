@@ -22,7 +22,7 @@ public class SecureStoragePersistence implements LicensePersistence {
 
 	private static final String SECURE_PREFERENCES_KEY = "simonykees";
 
-	private static final String NODE_KEY = "credentials";
+	private static final String NODE_KEY = "license-model";
 
 	private ISecurePreferences securePreferences;
 	

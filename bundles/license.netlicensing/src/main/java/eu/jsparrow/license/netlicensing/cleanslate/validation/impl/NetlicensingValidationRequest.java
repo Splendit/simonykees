@@ -5,7 +5,7 @@ import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.service.LicenseeService;
 
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
-import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseStatus;
+import eu.jsparrow.license.netlicensing.cleanslate.model.StatusDetail;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.ValidationStatus;
 
 public class NetlicensingValidationRequest {
@@ -36,7 +36,7 @@ public class NetlicensingValidationRequest {
 			return responseEvaluator.evaluateResult(netLicensingResponse);
 		} catch (NetLicensingException e) {
 			// TODO: Distinguish between no connection and licensee doesnt exist
-			ValidationStatus validationStatus = new ValidationStatus(false, LicenseStatus.CONNECTION_FAILURE);
+			ValidationStatus validationStatus = new ValidationStatus(false, StatusDetail.CONNECTION_FAILURE);
 			return new LicenseValidationResult(responseEvaluator.getLicensingModel(), validationStatus);
 		}
 	}
