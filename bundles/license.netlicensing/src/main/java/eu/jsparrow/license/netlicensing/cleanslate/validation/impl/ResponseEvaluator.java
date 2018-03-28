@@ -6,6 +6,7 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseModel;
+import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseStatus;
 import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseType;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.ValidationStatus;
@@ -23,7 +24,7 @@ public class ResponseEvaluator {
 		this.netlicensingModel = model;
 		this.parser = new Parser();
 	}
-	
+
 	public LicenseValidationResult evaluateResult(ValidationResult response) {
 
 		parser.parseValidationResult(response);
@@ -38,44 +39,43 @@ public class ResponseEvaluator {
 	}
 
 	private LicenseValidationResult evaluateExpiredLicense() {
-		
+
 		MultiFeature multiFeature = parser.getMultiFeature();
 		Subscription subscription = parser.getSubscription();
 		ZonedDateTime expireDate = subscription.getExpires();
-		
-		
+
 		if (multiFeature != null && multiFeature.isValid()) {
-			// nodeLocked expired
-			return createValidationResult(LicenseType.NODE_LOCKED, false, expireDate, "Expired Node-locked");
+			return createValidationResult(LicenseType.NODE_LOCKED, false, expireDate,
+					LicenseStatus.NODE_LOCKED_EXPIRED);
 		}
 
 		Floating floating = parser.getFloating();
 		if (floating != null && floating.isValid()) {
-			return createValidationResult(LicenseType.FLOATING, false, expireDate, "Expired Floating");// expired Floating
+			return createValidationResult(LicenseType.FLOATING, false, expireDate, LicenseStatus.FLOATING_EXPIRED);
 		}
 
-		return createValidationResult(LicenseType.NONE, false, expireDate, "Undefined"); // undefined
+		return createValidationResult(LicenseType.NONE, false, expireDate, LicenseStatus.UNDEFINED);
 	}
 
 	private LicenseValidationResult evaluateNonExpiredLicense() {
 		MultiFeature multiFeature = parser.getMultiFeature();
 		Subscription subscription = parser.getSubscription();
 		ZonedDateTime expireDate = subscription.getExpires();
-		
+
 		if (multiFeature != null && multiFeature.isValid()) {
-			return createValidationResult(LicenseType.NODE_LOCKED, true, expireDate, "Valid node-locked");
+			return createValidationResult(LicenseType.NODE_LOCKED, true, expireDate, LicenseStatus.NODE_LOCKED);
 		}
 
 		Floating floating = parser.getFloating();
 		if (floating != null && floating.isValid()) {
-			return createValidationResult(LicenseType.FLOATING, true, expireDate, "Valid floating");
+			return createValidationResult(LicenseType.FLOATING, true, expireDate, LicenseStatus.FLOATING);
 		}
 
-		return createValidationResult(LicenseType.FLOATING, false, expireDate, "Floating out of sessions");
+		return createValidationResult(LicenseType.FLOATING, false, expireDate, LicenseStatus.FLOATING_OUT_OF_SESSIONS);
 	}
 
 	private LicenseValidationResult createValidationResult(LicenseType nodeLocked, boolean b, ZonedDateTime expireDate,
-			String statusInfo) {
+			LicenseStatus statusInfo) {
 
 		String key = netlicensingModel.getKey();
 		String name = netlicensingModel.getName();

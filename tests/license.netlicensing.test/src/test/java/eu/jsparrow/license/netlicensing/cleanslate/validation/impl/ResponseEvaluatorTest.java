@@ -12,6 +12,7 @@ import org.junit.Test;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
+import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseStatus;
 import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseType;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.ValidationStatus;
@@ -38,9 +39,8 @@ public class ResponseEvaluatorTest {
 		LicenseValidationResult result = responseEvaluator.evaluateResult(response);
 
 		ValidationStatus status = result.getStatus();
-		String info = status.getInfo();
 		assertTrue(status.isValid());
-		assertEquals("Valid floating", info);
+		assertEquals(LicenseStatus.FLOATING, status.getStatus());
 	}
 	
 	@Test
@@ -52,9 +52,8 @@ public class ResponseEvaluatorTest {
 		LicenseValidationResult result = responseEvaluator.evaluateResult(response);
 
 		ValidationStatus status = result.getStatus();
-		String info = status.getInfo();
 		assertFalse(status.isValid());
-		assertEquals("Floating out of sessions", info);
+		assertEquals(LicenseStatus.FLOATING_OUT_OF_SESSIONS, status.getStatus());
 	}
 
 	@Test
@@ -67,9 +66,8 @@ public class ResponseEvaluatorTest {
 		LicenseValidationResult result = responseEvaluator.evaluateResult(response);
 
 		ValidationStatus status = result.getStatus();
-		String info = status.getInfo();
 		assertFalse(status.isValid());
-		assertEquals("Expired Floating", info);
+		assertEquals(LicenseStatus.FLOATING_EXPIRED, status.getStatus());
 	}
 
 	@Test
@@ -80,9 +78,8 @@ public class ResponseEvaluatorTest {
 		LicenseValidationResult result = responseEvaluator.evaluateResult(response);
 
 		ValidationStatus status = result.getStatus();
-		String info = status.getInfo();
 		assertTrue(status.isValid());
-		assertEquals("Valid node-locked", info);
+		assertEquals(LicenseStatus.NODE_LOCKED, status.getStatus());
 	}
 
 	@Test
@@ -93,9 +90,8 @@ public class ResponseEvaluatorTest {
 		LicenseValidationResult result = responseEvaluator.evaluateResult(response);
 
 		ValidationStatus status = result.getStatus();
-		String info = status.getInfo();
 		assertFalse(status.isValid());
-		assertEquals("Expired Node-locked", info);
+		assertEquals(LicenseStatus.NODE_LOCKED_EXPIRED, status.getStatus());
 	}
 	
 	@Test
@@ -107,9 +103,8 @@ public class ResponseEvaluatorTest {
 		LicenseValidationResult result = responseEvaluator.evaluateResult(response);
 
 		ValidationStatus status = result.getStatus();
-		String info = status.getInfo();
 		assertFalse(status.isValid());
-		assertEquals("Undefined", info);
+		assertEquals(LicenseStatus.UNDEFINED, status.getStatus());
 	}
 
 }
