@@ -4,46 +4,29 @@ import java.time.ZonedDateTime;
 
 public class NetlicensingLicenseModel implements LicenseModel{
 
+	private static final long serialVersionUID = 7047162817207967199L;
+	
 	private String key;
 	private String name;
-	private ZonedDateTime expireDate;
 	private String product;
 	private String secret;
-	private LicenseType type;
+	private NetlicensingLicenseType type;
+	private ZonedDateTime expireDate;
 
-	public NetlicensingLicenseModel(LicenseType type, String key, String name, String product, String secret, ZonedDateTime expireDate) {
-		setType(type);
-		setKey(key);
-		setName(name);
-		setProduct(product);
-		setExpireDate(expireDate);
-		setSecret(secret);
-	}
-
-	private void setType(LicenseType type2) {
-		this.type = type2;
-	}
-
-	private void setKey(String key) {
+	public NetlicensingLicenseModel(NetlicensingLicenseType type, String key, String secret) {
+		this.type = type;
 		this.key = key;
+		this.secret = secret;
 	}
-
-	private void setName(String name) {
+	
+	public NetlicensingLicenseModel(NetlicensingLicenseType type, String key, String name, String product, String secret, ZonedDateTime expireDate) {
+		this(type, key, secret);
 		this.name = name;
-	}
-
-	private void setExpireDate(ZonedDateTime expireDate) {
+		this.product = product;
 		this.expireDate = expireDate;
 	}
 
-	private void setProduct(String product) {
-		this.product = product;
-	}
 	
-	private void setSecret(String secret) {
-		this.secret = secret;
-	}
-
 	public String getKey() {
 		return key;
 	}
@@ -64,7 +47,7 @@ public class NetlicensingLicenseModel implements LicenseModel{
 		return secret;
 	}
 	
-	public LicenseType getType() {
+	public NetlicensingLicenseType getType() {
 		return this.type;
 	}
 }

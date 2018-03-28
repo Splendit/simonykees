@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.license.api.LicenseValidationService;
+import eu.jsparrow.license.netlicensing.cleanslate.LicenseService;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
@@ -31,6 +32,9 @@ public class LicenseUtil {
 
 	@Inject
 	private LicenseValidationService licenseValidationService;
+	
+	private LicenseService service;
+	
 	private boolean isLicenseValidationServiceAvailable = false;
 
 	private LicenseUtil() {

@@ -13,7 +13,7 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseStatus;
-import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseType;
+import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.ValidationStatus;
 
@@ -26,7 +26,7 @@ public class ResponseEvaluatorTest {
 	@Before
 	public void setUp() {
 		responseGenerator = new DummyResponseGenerator();
-		NetlicensingLicenseModel model = new NetlicensingLicenseModel(LicenseType.NODE_LOCKED, "key", "name", "product", "secret", ZonedDateTime.now());
+		NetlicensingLicenseModel model = new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key", "name", "product", "secret", ZonedDateTime.now());
 		responseEvaluator = new ResponseEvaluator(model);
 	}
 

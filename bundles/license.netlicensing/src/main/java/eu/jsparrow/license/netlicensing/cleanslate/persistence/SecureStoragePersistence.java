@@ -19,12 +19,6 @@ public class SecureStoragePersistence implements LicensePersistence {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	private static final String ALGORITHM = "AES";
-
-	private static final String TRANSFORMATION = "AES";
-
-	private static final String KEY = "SOME_SECRET_KEY_";
-
 	private static final String SECURE_PREFERENCES_KEY = "simonykees";
 
 	private static final String NODE_KEY = "credentials";

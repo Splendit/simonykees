@@ -3,7 +3,6 @@ package eu.jsparrow.license.netlicensing.cleanslate.validation;
 import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseStatus;
 
 public class ValidationStatus {
-
 	private boolean valid;
 
 	private LicenseStatus status;
