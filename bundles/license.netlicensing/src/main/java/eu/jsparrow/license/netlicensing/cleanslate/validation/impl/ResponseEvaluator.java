@@ -24,19 +24,19 @@ public class ResponseEvaluator {
 		this.netlicensingModel = model;
 		this.parser = new Parser();
 	}
-	
+
 	public NetlicensingLicenseModel getLicensingModel() {
 		return this.netlicensingModel;
 	}
-	
+
 	public LicenseValidationResult evaluateResult(ValidationResult response) {
 
 		parser.parseValidationResult(response);
 
 		Subscription subscription = parser.getSubscription();
-		
-		if(subscription == null) {
-			return createValidationResult(NetlicensingLicenseType.NONE, false, null, StatusDetail.UNDEFINED);
+
+		if (subscription == null) {
+			return createValidationResult(NetlicensingLicenseType.NONE, false, null, null, StatusDetail.UNDEFINED);
 		}
 
 		if (subscription.isValid()) {
@@ -53,22 +53,22 @@ public class ResponseEvaluator {
 		ZonedDateTime expireDate = subscription.getExpires();
 
 		if (multiFeature != null && multiFeature.isValid()) {
-			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, false, expireDate,
+			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, false, expireDate, null,
 					StatusDetail.NODE_LOCKED_EXPIRED);
 		}
 
 		Floating floating = parser.getFloating();
 		if (floating != null && floating.isValid()) {
-			return createValidationResult(NetlicensingLicenseType.FLOATING, false, expireDate,
+			return createValidationResult(NetlicensingLicenseType.FLOATING, false, expireDate, floating.getExpirationTimeStamp(),
 					StatusDetail.FLOATING_EXPIRED);
 		}
 
 		if (multiFeature != null && ZonedDateTime.now().isBefore(expireDate)) {
-			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, false, expireDate,
+			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, false, expireDate,ZonedDateTime.now().plusHours(1),
 					StatusDetail.NODE_LOCKED_HARDWARE_MISMATCH);
 		}
 
-		return createValidationResult(NetlicensingLicenseType.NONE, false, expireDate, StatusDetail.UNDEFINED);
+		return createValidationResult(NetlicensingLicenseType.NONE, false, expireDate, null, StatusDetail.UNDEFINED);
 	}
 
 	private LicenseValidationResult evaluateNonExpiredLicense() {
@@ -77,26 +77,30 @@ public class ResponseEvaluator {
 		ZonedDateTime expireDate = subscription.getExpires();
 
 		if (multiFeature != null && multiFeature.isValid()) {
-			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, true, expireDate, StatusDetail.NODE_LOCKED);
+			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, true, expireDate, ZonedDateTime.now()
+				.plusHours(1), StatusDetail.NODE_LOCKED);
 		}
 
 		Floating floating = parser.getFloating();
 		if (floating != null && floating.isValid()) {
-			return createValidationResult(NetlicensingLicenseType.FLOATING, true, expireDate, StatusDetail.FLOATING);
+			return createValidationResult(NetlicensingLicenseType.FLOATING, true, expireDate,
+					floating.getExpirationTimeStamp(), StatusDetail.FLOATING);
 		}
 
-		return createValidationResult(NetlicensingLicenseType.FLOATING, false, expireDate, StatusDetail.FLOATING_OUT_OF_SESSIONS);
+		return createValidationResult(NetlicensingLicenseType.FLOATING, false, expireDate, null,
+				StatusDetail.FLOATING_OUT_OF_SESSIONS);
 	}
 
-	private LicenseValidationResult createValidationResult(NetlicensingLicenseType licenseType, boolean valid, ZonedDateTime expireDate,
-			StatusDetail statusInfo) {
+	private LicenseValidationResult createValidationResult(NetlicensingLicenseType licenseType, boolean valid,
+			ZonedDateTime expireDate, ZonedDateTime offlineExpire, StatusDetail statusInfo) {
 
 		String key = netlicensingModel.getKey();
 		String name = netlicensingModel.getName();
 		String product = netlicensingModel.getProduct();
 		String secret = netlicensingModel.getSecret();
 
-		LicenseModel model = new NetlicensingLicenseModel(licenseType, key, name, product, secret, expireDate);
+		LicenseModel model = new NetlicensingLicenseModel(licenseType, key, name, product, secret, expireDate,
+				offlineExpire);
 		ValidationStatus status = new ValidationStatus(valid, statusInfo);
 
 		return new LicenseValidationResult(model, status);

@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
+import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseModel;
 
 public class NetlicensingLicenseCache {
 
@@ -25,13 +26,29 @@ public class NetlicensingLicenseCache {
 		}
 		return instance;
 	}
-
+	
+	public boolean requiresNewRequest(NetlicensingLicenseModel model) {
+		if(model.getExpirationDate() != null && model.getExpirationDate().isBefore(ZonedDateTime.now())) {
+			return true;
+		}
+		if(model.getExpirationDate().isBefore(ZonedDateTime.now())) {
+			return true;
+		}
+		return false;
+		
+	}
 	public boolean isInvalid() {
 		if (lastUpdate == null) {
 			return true;
 		}
-		return ZonedDateTime.now()
-			.isAfter(lastUpdate.plus(EXPIRATION_DURATION));
+		NetlicensingLicenseModel model = (NetlicensingLicenseModel) cachedValidationResult.getModel();
+		if(model.getExpirationDate() == null) {
+			return true;
+		}
+		if(model.getExpirationDate().isBefore(ZonedDateTime.now())) {
+			return true;
+		}
+		return false;
 	}
 
 	public LicenseValidationResult getLastResult() {
