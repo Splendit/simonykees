@@ -2,12 +2,20 @@ package eu.jsparrow.standalone;
 
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 import org.apache.maven.shared.invoker.MavenInvocationException;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.osgi.service.environment.EnvironmentInfo;
+import org.eclipse.osgi.util.NLS;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.license.api.LicenseValidationService;
 import eu.jsparrow.logging.LoggingUtil;
 
 /**
@@ -33,8 +42,13 @@ public class Activator implements BundleActivator {
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 
+	private static final String EQUINOX_DS_BUNDLE_NAME = "org.eclipse.equinox.ds"; //$NON-NLS-1$
+
 	private RefactoringInvoker refactoringInvoker;
 	private ListRulesUtil listRulesUtil;
+
+	@Inject
+	LicenseValidationService licenseService;
 
 	public Activator() {
 		this(new RefactoringInvoker(), new ListRulesUtil());
@@ -47,6 +61,11 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
+		startDeclarativeServices(context);
+
+		IEclipseContext eclipseContext = EclipseContextFactory.getServiceContext(context);
+		ContextInjectionFactory.inject(this, eclipseContext);
+
 		boolean debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
 		LoggingUtil.configureLogger(debugEnabled);
 
@@ -63,7 +82,11 @@ public class Activator implements BundleActivator {
 			switch (mode) {
 			case REFACTOR:
 				try {
-					refactoringInvoker.startRefactoring(context, new RefactoringPipeline());
+					if (licenseService.isFullValidLicense()) {
+						refactoringInvoker.startRefactoring(context, new RefactoringPipeline());
+					} else {
+						setExitErrorMessage(context, "No valid license has been found!");
+					}
 				} catch (YAMLConfigException | CoreException | MavenInvocationException | IOException yce) {
 					logger.debug(yce.getMessage(), yce);
 					logger.error(yce.getMessage());
@@ -127,6 +150,23 @@ public class Activator implements BundleActivator {
 					setExitErrorMessage(context, e.getMessage());
 				}
 			}));
+	}
+
+	private void startDeclarativeServices(BundleContext context) throws BundleException {
+		for (Bundle b : context.getBundles()) {
+			if (b.getSymbolicName()
+				.startsWith(EQUINOX_DS_BUNDLE_NAME)) {
+
+				String loggerInfo = NLS.bind(Messages.StandaloneActivator_startingBundle, b.getSymbolicName(),
+						b.getState());
+				logger.debug(loggerInfo);
+
+				b.start();
+
+				loggerInfo = NLS.bind(Messages.StandaloneActivator_bundleStarted, b.getSymbolicName(), b.getState());
+				logger.debug(loggerInfo);
+			}
+		}
 	}
 
 	private EnvironmentInfo getEnvironmentInfo(BundleContext ctx) {
