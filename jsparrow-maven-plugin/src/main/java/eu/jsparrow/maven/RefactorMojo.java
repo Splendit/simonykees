@@ -27,7 +27,6 @@ import eu.jsparrow.maven.i18n.Messages;
  * @since 2.2.1
  *
  */
-@SuppressWarnings("nls")
 @Mojo(name = "refactor", defaultPhase = LifecyclePhase.INSTALL, requiresDependencyResolution = ResolutionScope.COMPILE, requiresProject = true)
 public class RefactorMojo extends AbstractMojo {
 
