@@ -1,6 +1,5 @@
 package eu.jsparrow.license.netlicensing.cleanslate.validation.impl;
 
-import java.time.Duration;
 import java.time.ZonedDateTime;
 
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
@@ -8,16 +7,12 @@ import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseMode
 
 public class NetlicensingLicenseCache {
 
-	private static final Duration EXPIRATION_DURATION = Duration.ofHours(1);
-
 	private static NetlicensingLicenseCache instance;
-
-	private ZonedDateTime lastUpdate;
 
 	private LicenseValidationResult cachedValidationResult;
 
-	private NetlicensingLicenseCache() {
-
+	NetlicensingLicenseCache() {
+		// Use only for testing
 	}
 
 	public static NetlicensingLicenseCache get() {
@@ -27,42 +22,21 @@ public class NetlicensingLicenseCache {
 		return instance;
 	}
 	
-	public boolean requiresNewRequest(NetlicensingLicenseModel model) {
-		if(model.getExpirationDate() == null) {
-			return true;
+	private boolean validationResultIsUpToDate(NetlicensingLicenseModel model) {
+		if(model.getOfflineExpireDate() == null) {
+			return false;
 		}
-		if(model.getExpirationDate().isBefore(ZonedDateTime.now())) {
-			return true;
-		}
-		return false;
-		
+		return model.getOfflineExpireDate().isAfter(ZonedDateTime.now());
 	}
-	public boolean isInvalid() {
-		if (lastUpdate == null) {
-			return true;
+	
+	public LicenseValidationResult getValidationResultFor(NetlicensingLicenseModel model) {
+		if(!validationResultIsUpToDate(model)) {
+			return null;
 		}
-		NetlicensingLicenseModel model = (NetlicensingLicenseModel) cachedValidationResult.getModel();
-		if(model.getExpirationDate() == null) {
-			return true;
-		}
-		if(model.getExpirationDate().isBefore(ZonedDateTime.now())) {
-			return true;
-		}
-		return false;
-	}
-
-	public LicenseValidationResult getLastResult() {
 		return cachedValidationResult;
 	}
 
 	public void updateCache(LicenseValidationResult newValidationResult) {
 		this.cachedValidationResult = newValidationResult;
-		lastUpdate = ZonedDateTime.now();
 	}
-
-	// Only used for tests
-	void setLastUpdate(ZonedDateTime lastUpdate) {
-		this.lastUpdate = lastUpdate;
-	}
-
 }

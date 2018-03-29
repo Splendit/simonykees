@@ -35,13 +35,14 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 
 	@Override
 	public LicenseValidationResult validate() {
-		if(!licenseCache.requiresNewRequest(model)){
-			return licenseCache.getLastResult();
+		LicenseValidationResult licensingValidationResult = licenseCache.getValidationResultFor(model);
+		if(licensingValidationResult != null) {
+			return licensingValidationResult;
 		}
 		
 		ValidationParameters validationParameters = parametersFactory.createValidationParameters(model);
 		String licenseeNumber = model.getKey();
-		LicenseValidationResult licensingValidationResult = validationRequest.send(licenseeNumber,
+		licensingValidationResult = validationRequest.send(licenseeNumber,
 				validationParameters);
 		licenseCache.updateCache(licensingValidationResult);
 		return licensingValidationResult;

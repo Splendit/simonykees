@@ -27,8 +27,7 @@ public class ResponseEvaluatorTest {
 	@Before
 	public void setUp() {
 		responseGenerator = new DummyResponseGenerator();
-		ZonedDateTime now = ZonedDateTime.now();
-		NetlicensingLicenseModel model = new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key", "name", "product", "secret", now, now);
+		NetlicensingLicenseModel model = new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key", "name", "product", "secret", ZonedDateTime.now(), null);
 		responseEvaluator = new ResponseEvaluator(model);
 	}
 
