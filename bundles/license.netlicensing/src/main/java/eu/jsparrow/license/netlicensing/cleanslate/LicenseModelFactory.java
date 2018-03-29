@@ -1,5 +1,7 @@
 package eu.jsparrow.license.netlicensing.cleanslate;
 
+import java.time.ZonedDateTime;
+
 import eu.jsparrow.license.netlicensing.cleanslate.model.*;
 
 public class LicenseModelFactory {
@@ -14,6 +16,11 @@ public class LicenseModelFactory {
 
 	public NetlicensingLicenseModel createNewFloatingModel(String key, String secret) {
 		return new NetlicensingLicenseModel(NetlicensingLicenseType.FLOATING, key, secret);
+	}
+
+	public NetlicensingLicenseModel createNewNetlicensingModel(NetlicensingLicenseType type, String key, String name,
+			String product, String secret, ZonedDateTime expireDate, ZonedDateTime offlineExpireDate) {
+		return new NetlicensingLicenseModel(type, key, name, product, secret, expireDate, offlineExpireDate);
 	}
 
 }

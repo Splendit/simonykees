@@ -1,52 +1,63 @@
 package eu.jsparrow.license.netlicensing.cleanslate.validation.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
+import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseModel;
 
 public class NetlicensingLicenseCacheTest {
 
 	private NetlicensingLicenseCache licenseCache;
-	
+
 	@Before
 	public void setUp() {
 		licenseCache = new NetlicensingLicenseCache();
 	}
 	
 	@Test
-	public void isInvalid_withNewCache_returnsTrue() {
-		assertTrue(licenseCache.isInvalid());
+	public void getValidationResultFor_withNewModel_returnsNull() {
+		NetlicensingLicenseModel model = createWithOfflineExpire(null);
+
+		assertNull(licenseCache.getValidationResultFor(model));
+	}
+
+	@Test
+	public void getValidationResultFor_withOfflineExpiredModel_returnsNull() {
+		NetlicensingLicenseModel model = createWithOfflineExpire(ZonedDateTime.now()
+			.minusDays(1));
+
+		assertNull(licenseCache.getValidationResultFor(model));
 	}
 	
 	@Test
-	public void isInvalid_withLastAccessLongAgo_returnsTrue() {
-		licenseCache.setLastUpdate(ZonedDateTime.now().minus(61, ChronoUnit.MINUTES));
-		
-		assertTrue(licenseCache.isInvalid());
-	}
-	
-	@Test
-	public void isInvalid_withLastAccessLessThanHourAgo_returnsFalse() {
-		licenseCache.setLastUpdate(ZonedDateTime.now().minus(59, ChronoUnit.MINUTES));
-		
-		assertFalse(licenseCache.isInvalid());
-	}
-	
-	@Test
-	public void updateCache_withValidationResult_makesCacheValid() {
+	public void getValidationResultFor_withExistingResultAndOfflineInvalidModel_returnsNull() {
+		NetlicensingLicenseModel model = createWithOfflineExpire(ZonedDateTime.now().minusDays(1));
 		LicenseValidationResult result = new LicenseValidationResult(null, null);
+		
 		licenseCache.updateCache(result);
-		
-		assertFalse(licenseCache.isInvalid());
-		
-		assertEquals(result, licenseCache.getLastResult());
+
+		assertNull(licenseCache.getValidationResultFor(model));
 	}
 	
+	@Test
+	public void getValidationResultFor_withExistingResultAndOfflineValidModel_returnsValidationResult() {
+		NetlicensingLicenseModel model = createWithOfflineExpire(ZonedDateTime.now().plusDays(1));
+		LicenseValidationResult expected = new LicenseValidationResult(null, null);
+		
+		licenseCache.updateCache(expected);
+
+		assertEquals(expected, licenseCache.getValidationResultFor(model));
+	}
+
+
+	private NetlicensingLicenseModel createWithOfflineExpire(ZonedDateTime offlineExpire) {
+		return new NetlicensingLicenseModel(null, "", "", "", "", null, offlineExpire);
+	}
+
 }

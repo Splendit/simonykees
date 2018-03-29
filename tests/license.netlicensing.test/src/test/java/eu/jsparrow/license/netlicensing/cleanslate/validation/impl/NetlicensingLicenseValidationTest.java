@@ -1,7 +1,7 @@
 package eu.jsparrow.license.netlicensing.cleanslate.validation.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +18,7 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseType;
+import eu.jsparrow.license.netlicensing.cleanslate.testhelper.DummyLicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.ValidationStatus;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,7 +41,7 @@ public class NetlicensingLicenseValidationTest {
 	@Before
 	public void setUp() {
 		model = new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key", "name", "product", "secret",
-				ZonedDateTime.now());
+				ZonedDateTime.now(), null);
 		netlicensingValidation = new NetlicensingLicenseValidation(model, cache, parametersFactory, request);
 	}
 
@@ -49,7 +50,7 @@ public class NetlicensingLicenseValidationTest {
 		LicenseValidationResult validationResult = new LicenseValidationResult(model, new ValidationStatus(true));
 		ValidationParameters valiationParameters = new ValidationParameters();
 
-		when(cache.isInvalid()).thenReturn(true);
+		when(cache.getValidationResultFor(any())).thenReturn(null);
 		when(parametersFactory.createValidationParameters(eq(model))).thenReturn(valiationParameters);
 		when(request.send(eq(model.getKey()), eq(valiationParameters))).thenReturn(validationResult);
 
@@ -61,11 +62,12 @@ public class NetlicensingLicenseValidationTest {
 
 	@Test
 	public void validate_withValidCache_shouldGetLastResultFromCache() {
-		when(cache.isInvalid()).thenReturn(false);
+		LicenseValidationResult expected = new LicenseValidationResult(null, null);
+		when(cache.getValidationResultFor(eq(model))).thenReturn(expected);
 
-		netlicensingValidation.validate();
+		LicenseValidationResult result = netlicensingValidation.validate();
 
-		verify(cache).getLastResult();
+		assertEquals(expected, result);
 	}
 
 }

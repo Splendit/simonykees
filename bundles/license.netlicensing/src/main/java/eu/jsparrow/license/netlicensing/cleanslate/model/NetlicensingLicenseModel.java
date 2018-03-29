@@ -53,4 +53,9 @@ public class NetlicensingLicenseModel implements LicenseModel{
 	public NetlicensingLicenseType getType() {
 		return this.type;
 	}
+
+	public ZonedDateTime getOfflineExpireDate() {
+		return offlineExpireDate;
+	}
+
 }
