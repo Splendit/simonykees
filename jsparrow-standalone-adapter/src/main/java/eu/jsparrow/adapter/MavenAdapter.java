@@ -47,7 +47,7 @@ public class MavenAdapter {
 	private static final String MAVEN_COMPILER_PLUGIN_ARTIFACT_ID = "maven-compiler-plugin"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_CONFIGURATIN_SOURCE_NAME = "source"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION = "1.5"; //$NON-NLS-1$
-	
+
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
@@ -68,7 +68,7 @@ public class MavenAdapter {
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
 	private static final String LOCK_FILE_NAME = "lock"; //$NON-NLS-1$
-	private static final String LICENSE_KEY= "LICENSE"; //$NON-NLS-1$
+	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 
 	private Log log;
 
@@ -497,7 +497,7 @@ public class MavenAdapter {
 			log.warn("Cannot read the jsparrow lock file...", e);
 		}
 	}
-	
+
 	/**
 	 * Reads the current java source version from the maven-compiler-plugin
 	 * configuration in the pom.xml. If no configuration is found, the java

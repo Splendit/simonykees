@@ -50,7 +50,7 @@ public class RefactoringInvoker {
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String ALL_PROJECT_IDENTIFIERS = "ALL.PROJECT.IDENTIFIERS"; //$NON-NLS-1$
 	private static final String DOT = "."; //$NON-NLS-1$
-	
+
 	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 
 	protected List<StandaloneConfig> standaloneConfigs = new ArrayList<>();
@@ -264,7 +264,7 @@ public class RefactoringInvoker {
 	private void setStandaloneConfigurations(List<StandaloneConfig> configs) {
 		this.standaloneConfigs = configs;
 	}
-	
+
 	private String getLicenseKey(BundleContext context) {
 		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
 		YAMLStandaloneConfig yamlStandaloneConfig = null;
@@ -273,13 +273,13 @@ public class RefactoringInvoker {
 		} catch (YAMLStandaloneConfigException e) {
 			logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
 		}
-		
+
 		String licenseKey = ""; //$NON-NLS-1$
-		if(yamlStandaloneConfig != null) {
+		if (yamlStandaloneConfig != null) {
 			licenseKey = yamlStandaloneConfig.getKey();
 		}
 		String cmdlineLicenseKey = context.getProperty(LICENSE_KEY);
-		if(cmdlineLicenseKey != null) {
+		if (cmdlineLicenseKey != null) {
 			logger.info(Messages.RefactoringInvoker_OverridingConfigWithCommandLine);
 			licenseKey = cmdlineLicenseKey;
 		}

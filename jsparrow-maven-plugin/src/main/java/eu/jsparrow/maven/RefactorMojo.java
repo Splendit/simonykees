@@ -65,7 +65,7 @@ public class RefactorMojo extends AbstractMojo {
 
 	@Parameter(property = "defaultConfiguration")
 	protected boolean useDefaultConfig;
-	
+
 	@Parameter(property = "license")
 	private String license;
 

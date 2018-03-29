@@ -8,18 +8,19 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 
 /**
- * File that contains permanent configuration for the standalone. Things like: 
+ * File that contains permanent configuration for the standalone. Things like:
  * <ul>
  * <li>which license mode to use</li>
  * <li>which license key to use</li>
- * </ul>  
+ * </ul>
+ * 
  * @author Hans-Jörg Schrödl
  *
  */
 public class YAMLStandaloneConfig {
-		
+
 	private String key;
-	
+
 	public YAMLStandaloneConfig() {
 		key = ""; //$NON-NLS-1$
 	}
@@ -31,14 +32,13 @@ public class YAMLStandaloneConfig {
 	public String getKey() {
 		return key;
 	}
-	
-	public static YAMLStandaloneConfig load(File file) throws YAMLStandaloneConfigException{
+
+	public static YAMLStandaloneConfig load(File file) throws YAMLStandaloneConfigException {
 		YAMLStandaloneConfig config = null;
 		try (FileInputStream fis = new FileInputStream(file)) {
 			Yaml yaml = new Yaml();
 			config = yaml.loadAs(fis, YAMLStandaloneConfig.class);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			// Config not created, return default config
 			return new YAMLStandaloneConfig();
 		} catch (YAMLException e) {
