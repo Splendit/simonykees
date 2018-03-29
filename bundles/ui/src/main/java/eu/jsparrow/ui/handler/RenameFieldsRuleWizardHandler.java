@@ -53,7 +53,7 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(RenameFieldsRuleWizardHandler.class);
 
-	private NewLicenseUtil newLicenseUtil = NewLicenseUtil.get();
+	private LicenseUtil newLicenseUtil = LicenseUtil.get();
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {

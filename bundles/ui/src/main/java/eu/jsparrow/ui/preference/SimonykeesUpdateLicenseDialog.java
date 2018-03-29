@@ -25,8 +25,8 @@ import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.ValidationStatus;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.util.NewLicenseUtil;
-import eu.jsparrow.ui.util.NewLicenseUtil.LicenseUpdateResult;
+import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtil.LicenseUpdateResult;
 
 /**
  * Dialog for updating license key.
@@ -52,7 +52,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	private Image scaledTickmarkGreenIconImage;
 	private Image scaledCloseRedIconImage;
 
-	private NewLicenseUtil licenseUtil = NewLicenseUtil.get();
+	private LicenseUtil licenseUtil = LicenseUtil.get();
 
 	protected SimonykeesUpdateLicenseDialog(Shell parentShell) {
 		super(parentShell);
@@ -122,7 +122,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 			public void widgetSelected(SelectionEvent arg0) {
 				BusyIndicator.showWhile(Display.getDefault(), () -> {
 					
-					LicenseUpdateResult result = NewLicenseUtil.get().update(licenseKey);
+					LicenseUpdateResult result = LicenseUtil.get().update(licenseKey);
 					if (!result.wasSuccessful()) {
 						updatedLabel.setImage(scaledCloseRedIconImage);
 						updatedIconLabel.setImage(scaledJSparrowImageInactive);

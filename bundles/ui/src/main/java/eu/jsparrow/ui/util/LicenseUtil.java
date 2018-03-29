@@ -18,24 +18,24 @@ import oshi.SystemInfo;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HardwareAbstractionLayer;
 
-public class NewLicenseUtil {
+public class LicenseUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	private static NewLicenseUtil instance;
+	private static LicenseUtil instance;
 
 	private LicenseService service;
 
 	private LicenseValidationResult result = null;
 
-	private NewLicenseUtil() {
+	private LicenseUtil() {
 		service = new NetlicensingLicenseService();
 	}
 
-	public static NewLicenseUtil get() {
+	public static LicenseUtil get() {
 		if (instance == null) {
-			instance = new NewLicenseUtil();
+			instance = new LicenseUtil();
 		}
 		return instance;
 	}

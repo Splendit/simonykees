@@ -64,7 +64,7 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 
 			
 			final Shell shell = HandlerUtil.getActiveShell(event);
-			if(!NewLicenseUtil.get().checkAtStartUp(shell)) {
+			if(!LicenseUtil.get().checkAtStartUp(shell)) {
 				Activator.setRunning(false);
 				return null;
 			}

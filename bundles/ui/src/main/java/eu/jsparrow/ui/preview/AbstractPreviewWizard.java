@@ -4,7 +4,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
 import eu.jsparrow.ui.Activator;
-import eu.jsparrow.ui.util.NewLicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * A parent class for all preview wizards.
@@ -23,7 +23,7 @@ public abstract class AbstractPreviewWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		if (NewLicenseUtil.get()
+		if (LicenseUtil.get()
 			.isFreeLicense()) {
 			return false;
 		}

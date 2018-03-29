@@ -74,7 +74,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 	private int displayHeight;
 	
-	private NewLicenseUtil newLicenseUtil = NewLicenseUtil.get();
+	private LicenseUtil newLicenseUtil = LicenseUtil.get();
 
 	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel) {

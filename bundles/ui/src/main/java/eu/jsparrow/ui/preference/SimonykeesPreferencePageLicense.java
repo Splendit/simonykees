@@ -25,7 +25,7 @@ import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.cleanslate.model.*;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.ValidationStatus;
 import eu.jsparrow.ui.Activator;
-import eu.jsparrow.ui.util.NewLicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * Preference page for displaying license information and updating license key.
@@ -56,7 +56,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private Label logoLabel;
 
-	private NewLicenseUtil newLicenseUtil = NewLicenseUtil.get();
+	private LicenseUtil newLicenseUtil = LicenseUtil.get();
 
 	public SimonykeesPreferencePageLicense() {
 		super();
