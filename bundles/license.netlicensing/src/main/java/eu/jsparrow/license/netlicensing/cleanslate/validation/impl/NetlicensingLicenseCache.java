@@ -28,7 +28,7 @@ public class NetlicensingLicenseCache {
 	}
 	
 	public boolean requiresNewRequest(NetlicensingLicenseModel model) {
-		if(model.getExpirationDate() != null && model.getExpirationDate().isBefore(ZonedDateTime.now())) {
+		if(model.getExpirationDate() == null) {
 			return true;
 		}
 		if(model.getExpirationDate().isBefore(ZonedDateTime.now())) {
