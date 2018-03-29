@@ -61,13 +61,13 @@ public class Activator implements BundleActivator {
 
 	@Override
 	public void start(BundleContext context) throws Exception {
+		boolean debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
+		LoggingUtil.configureLogger(debugEnabled);
+
 		startDeclarativeServices(context);
 
 		IEclipseContext eclipseContext = EclipseContextFactory.getServiceContext(context);
 		ContextInjectionFactory.inject(this, eclipseContext);
-
-		boolean debugEnabled = Boolean.parseBoolean(context.getProperty(DEBUG_ENABLED));
-		LoggingUtil.configureLogger(debugEnabled);
 
 		logger.info(Messages.Activator_start);
 
