@@ -372,6 +372,8 @@ public class Messages extends NLS {
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_title;
 	public static String SimonykeesUpdateLicenseDialog_update_llicense_dialog_button;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_group_title;
+	public static String StandaloneActivator_bundleStarted;
+	public static String StandaloneActivator_startingBundle;
 	public static String StandaloneConfig_AddProjectNaturesToProjectDescription;
 	public static String StandaloneConfig_collectCompilationUnits;
 	public static String StandaloneConfig_CompilerComplianceSetTo;
