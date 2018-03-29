@@ -35,7 +35,7 @@ public class NetlicensingLicenseModel implements LicenseModel{
 		return name;
 	}
 
-	public ZonedDateTime getExpireDate() {
+	public ZonedDateTime getExpirationDate() {
 		return expireDate;
 	}
 

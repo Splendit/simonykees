@@ -36,8 +36,7 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.WizardHandlerUtil;
+import eu.jsparrow.ui.util.*;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
@@ -61,19 +60,12 @@ public class SelectRulesWizardHandler extends AbstractHandler {
 		} else {
 			Activator.setRunning(true);
 
-			if (!LicenseUtil.getInstance()
-				.isValid()) {
-				/*
-				 * do not display the SelectRulesWizard if the license is
-				 * invalid
-				 */
-				final Shell shell = HandlerUtil.getActiveShell(event);
-				if (!LicenseUtil.getInstance()
-					.displayLicenseErrorDialog(shell)) {
-					Activator.setRunning(false);
-					return null;
-				}
+			final Shell shell = HandlerUtil.getActiveShell(event);
+			if(!NewLicenseUtil.get().checkAtStartUp(shell)) {
+				Activator.setRunning(false);
+				return null;
 			}
+			
 			List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
 			if (!selectedJavaElements.isEmpty()) {
 				IJavaProject selectedJavaProjekt = selectedJavaElements.get(0)

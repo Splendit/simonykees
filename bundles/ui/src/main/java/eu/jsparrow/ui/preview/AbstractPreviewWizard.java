@@ -4,7 +4,6 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
 import eu.jsparrow.ui.Activator;
-import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.NewLicenseUtil;
 
 /**

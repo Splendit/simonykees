@@ -46,6 +46,8 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseValidationService;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
+import eu.jsparrow.ui.util.NewLicenseUtil;
+import eu.jsparrow.ui.util.NewLicenseUtil.LicenseUpdateResult;
 
 /**
  * Dialog for updating license key.
@@ -74,6 +76,8 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	@Inject
 	private LicenseValidationService licenseValidationService;
 	private boolean isLicenseValidationServiceAvailable = false;
+	
+	private NewLicenseUtil licenseUtil = NewLicenseUtil.get();
 
 	protected SimonykeesUpdateLicenseDialog(Shell parentShell) {
 		super(parentShell);
@@ -155,15 +159,23 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				BusyIndicator.showWhile(Display.getDefault(), () -> {
-					if (isLicenseValidationServiceAvailable) {
-						String licenseKey = getLicenseKey();
-						boolean updated = licenseValidationService.updateLicenseeNumber(licenseKey,
-								DEFAULT_LICENSEE_NAME);
-						updateWarningInformation(updated);
+					
+					LicenseUpdateResult result = NewLicenseUtil.get().update(licenseKey);
+					if (!result.wasSuccessful()) {
+						updatedLabel.setImage(scaledCloseRedIconImage);
+						updatedIconLabel.setImage(scaledJSparrowImageInactive);
+
 					} else {
-						// TODO: proper error handling
-						logger.error(ExceptionMessages.SimonykeesUpdateLicenseDialog_license_service_unavailable);
+						updatedLabel.setImage(scaledTickmarkGreenIconImage);
+						updatedIconLabel.setImage(scaledJSparrowImageActive);
+						
 					}
+					updatedLabel.setText(result.getDetailMessage());
+					updatedLabel.setVisible(true);
+					updatedIconLabel.setVisible(true);
+
+					updatedIconLabel.getParent()
+						.layout();
 				});
 			}
 		});
@@ -189,17 +201,15 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		ImageData imageDataInactive = jSparrowImageInactive.getImageData();
 		scaledJSparrowImageInactive = new Image(container.getDisplay(), imageDataInactive);
 
-		if (isLicenseValidationServiceAvailable) {
-			if (licenseValidationService.isValid()) {
-				updatedIconLabel.setImage(scaledJSparrowImageActive);
-			} else {
-				updatedIconLabel.setImage(scaledJSparrowImageInactive);
-			}
-			updatedIconLabel.setVisible(true);
-		} else {
-			updatedIconLabel.setVisible(false);
+		LicenseUpdateResult result = NewLicenseUtil.get().update(licenseKey);
+		if (result.wasSuccessful()) {
+			updatedIconLabel.setImage(scaledJSparrowImageActive);
 		}
-
+		else {
+			updatedIconLabel.setImage(scaledJSparrowImageInactive);
+		}
+		updatedIconLabel.setVisible(true);
+		
 		updatedLabel = new CLabel(container, SWT.NONE);
 		gridData = new GridData(SWT.LEFT, SWT.CENTER, true, true);
 		gridData.verticalIndent = 5;
