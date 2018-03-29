@@ -39,8 +39,9 @@ public class NetlicensingLicenseValidationTest {
 	@SuppressWarnings("nls")
 	@Before
 	public void setUp() {
+		ZonedDateTime now = ZonedDateTime.now();
 		model = new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key", "name", "product", "secret",
-				ZonedDateTime.now());
+				now, now);
 		netlicensingValidation = new NetlicensingLicenseValidation(model, cache, parametersFactory, request);
 	}
 

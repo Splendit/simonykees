@@ -12,7 +12,6 @@ public class NetlicensingLicenseModel implements LicenseModel{
 	private String secret;
 	private NetlicensingLicenseType type;
 	private ZonedDateTime expireDate;
-	
 	private ZonedDateTime offlineExpireDate;
 
 	public NetlicensingLicenseModel(NetlicensingLicenseType type, String key, String secret) {
@@ -40,6 +39,10 @@ public class NetlicensingLicenseModel implements LicenseModel{
 
 	public ZonedDateTime getExpirationDate() {
 		return expireDate;
+	}
+	
+	public ZonedDateTime getOfflineExpireDate() {
+		return offlineExpireDate;
 	}
 
 	public String getProduct() {

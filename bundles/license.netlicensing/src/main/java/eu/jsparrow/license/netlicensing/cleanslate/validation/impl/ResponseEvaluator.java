@@ -17,6 +17,8 @@ import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.mode
 
 public class ResponseEvaluator {
 
+	private static final int OFFLINE_VALIDITY_DURATION_MINUTES = 60;
+	
 	private NetlicensingLicenseModel netlicensingModel;
 	private Parser parser;
 
@@ -36,7 +38,7 @@ public class ResponseEvaluator {
 		Subscription subscription = parser.getSubscription();
 
 		if (subscription == null) {
-			return createValidationResult(NetlicensingLicenseType.NONE, false, null, null, StatusDetail.UNDEFINED);
+			return createUndefinedValidationResult();
 		}
 
 		if (subscription.isValid()) {
@@ -53,7 +55,7 @@ public class ResponseEvaluator {
 		ZonedDateTime expireDate = subscription.getExpires();
 
 		if (multiFeature != null && multiFeature.isValid()) {
-			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, false, expireDate, null,
+			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, false, expireDate,
 					StatusDetail.NODE_LOCKED_EXPIRED);
 		}
 
@@ -64,11 +66,11 @@ public class ResponseEvaluator {
 		}
 
 		if (multiFeature != null && ZonedDateTime.now().isBefore(expireDate)) {
-			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, false, expireDate,ZonedDateTime.now().plusHours(1),
+			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, false, expireDate,
 					StatusDetail.NODE_LOCKED_HARDWARE_MISMATCH);
 		}
 
-		return createValidationResult(NetlicensingLicenseType.NONE, false, expireDate, null, StatusDetail.UNDEFINED);
+		return createUndefinedValidationResult();
 	}
 
 	private LicenseValidationResult evaluateNonExpiredLicense() {
@@ -77,17 +79,20 @@ public class ResponseEvaluator {
 		ZonedDateTime expireDate = subscription.getExpires();
 
 		if (multiFeature != null && multiFeature.isValid()) {
-			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, true, expireDate, ZonedDateTime.now()
-				.plusHours(1), StatusDetail.NODE_LOCKED);
+			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, true, expireDate, StatusDetail.NODE_LOCKED);
+		}
+		
+		Floating floating = parser.getFloating();
+		if(floating == null) {
+			return createUndefinedValidationResult();
 		}
 
-		Floating floating = parser.getFloating();
-		if (floating != null && floating.isValid()) {
+		if (floating.isValid()) {
 			return createValidationResult(NetlicensingLicenseType.FLOATING, true, expireDate,
 					floating.getExpirationTimeStamp(), StatusDetail.FLOATING);
 		}
 
-		return createValidationResult(NetlicensingLicenseType.FLOATING, false, expireDate, null,
+		return createValidationResult(NetlicensingLicenseType.FLOATING, false, expireDate, floating.getExpirationTimeStamp(),
 				StatusDetail.FLOATING_OUT_OF_SESSIONS);
 	}
 
@@ -105,5 +110,17 @@ public class ResponseEvaluator {
 
 		return new LicenseValidationResult(model, status);
 	}
+	
+	private LicenseValidationResult createValidationResult(NetlicensingLicenseType licenseType, boolean valid,
+			ZonedDateTime expireDate, StatusDetail statusInfo) {
 
+		return createValidationResult(licenseType, valid, expireDate, ZonedDateTime.now().plusMinutes(OFFLINE_VALIDITY_DURATION_MINUTES), statusInfo);
+	}
+	
+	private LicenseValidationResult createUndefinedValidationResult() {
+		
+		ValidationStatus status = new ValidationStatus(false, StatusDetail.UNDEFINED);
+		LicenseModel model = new NetlicensingLicenseModel(netlicensingModel.getType(), netlicensingModel.getKey(), netlicensingModel.getSecret());
+		return new LicenseValidationResult(model, status);
+	}
 }

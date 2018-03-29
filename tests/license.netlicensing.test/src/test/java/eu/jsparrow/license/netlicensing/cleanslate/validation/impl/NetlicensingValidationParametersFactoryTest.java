@@ -19,6 +19,7 @@ public class NetlicensingValidationParametersFactoryTest {
 
 	private NetlicensingValidationParametersFactory parametersFactory;
 	private ZonedDateTime expireDate;
+	private ZonedDateTime offlineExpireDate;
 	private final String FLOATING_MODULE_NUMBER = "ProductModuleNumber";
 
 	@Before
@@ -26,6 +27,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		parametersFactory = new NetlicensingValidationParametersFactory(FLOATING_MODULE_NUMBER);
 		expireDate = ZonedDateTime.now()
 			.plusDays(5);
+		offlineExpireDate = ZonedDateTime.now().plusHours(1);
 	}
 
 	@Test
@@ -33,7 +35,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		String expectedSessionId = "secret";
 		String expectedAction = "checkIn";
 		NetlicensingLicenseModel model = new NetlicensingLicenseModel(NetlicensingLicenseType.FLOATING, "key", "name", "product",
-				expectedSessionId, expireDate);
+				expectedSessionId, expireDate, offlineExpireDate);
 
 		ValidationParameters parameters = parametersFactory.createFloatingCheckingParameters(model);
 
@@ -51,7 +53,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		String expectedProduct = "product";
 		String expectedName = "name";
 		NetlicensingLicenseModel model = new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key", expectedName,
-				expectedProduct, expectedSecret, expireDate);
+				expectedProduct, expectedSecret, expireDate, offlineExpireDate);
 
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
 
@@ -66,7 +68,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		String expectedAction = "checkOut";
 
 		NetlicensingLicenseModel model = new NetlicensingLicenseModel(NetlicensingLicenseType.FLOATING, "key", "name", "product",
-				expectedSessionId, expireDate);
+				expectedSessionId, expireDate, offlineExpireDate);
 
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
 
