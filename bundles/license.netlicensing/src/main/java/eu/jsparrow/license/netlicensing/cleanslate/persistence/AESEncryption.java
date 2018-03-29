@@ -34,8 +34,7 @@ public class AESEncryption implements IEncryption {
 			cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 			return cipher.doFinal(data);
 		} catch (GeneralSecurityException e) {
-			logger.error("Failed to encrypt data", e);
-			throw new PersistenceException(e);
+			throw new PersistenceException("Failed to encrypt model",e);
 		}
 	}
 
@@ -47,8 +46,7 @@ public class AESEncryption implements IEncryption {
 			cipher.init(Cipher.DECRYPT_MODE, secretKey);
 			return cipher.doFinal(encryptedData);
 		} catch (GeneralSecurityException e) {
-			logger.error("Failed decrypt secure data", e);
-			throw new PersistenceException(e);
+			throw new PersistenceException("Failed decrypt secure data", e);
 		}
 	}
 	

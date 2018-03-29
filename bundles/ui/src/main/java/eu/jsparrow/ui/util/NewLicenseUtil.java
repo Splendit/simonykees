@@ -49,8 +49,7 @@ public class NewLicenseUtil {
 		try {
 			model = service.loadFromPersistence();
 		} catch (PersistenceException e) {
-			String message = "Error while loading stored license. Falling back to free license.\nPlease view the jSparrow logs for more information.";
-			SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
+			handleStartUpPersistenceFailure(shell, e);
 			model = new LicenseModelFactory().createDemoLicenseModel();
 		}
 		result = service.validateLicense(model);
@@ -59,6 +58,18 @@ public class NewLicenseUtil {
 			return dialog.open() == 0;
 		}
 		return true;
+	}
+	
+	public boolean isFreeLicense() {
+		LicenseModel model = null;
+		try {
+			model = service.loadFromPersistence();
+		} catch (PersistenceException e) {
+			logger.error("Error while loading stored license, using demo license",e);
+			model = new LicenseModelFactory().createDemoLicenseModel();
+		}
+		result = service.validateLicense(model);
+		return result.getModel() instanceof DemoLicenseModel;
 	}
 
 	public void update(String key) {
@@ -79,6 +90,13 @@ public class NewLicenseUtil {
 			// TODO: Display that we did not update the license, because its not
 			// valid and such.
 		}
+	}
+	
+	private void handleStartUpPersistenceFailure(Shell shell, PersistenceException e) {
+		String partMessage = "Failed to load stored license. Falling back to free license";
+		logger.error(partMessage,e);
+		String message = partMessage+"\nPlease view the jSparrow logs for more information.";
+		SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
 	}
 
 	private String createSecretFromHardware() {

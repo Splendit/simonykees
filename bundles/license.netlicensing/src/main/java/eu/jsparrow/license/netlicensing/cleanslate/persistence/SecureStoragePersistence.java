@@ -37,8 +37,10 @@ public class SecureStoragePersistence implements LicensePersistence {
 	public LicenseModel load() throws PersistenceException {
 		byte[] encryptedModel = loadFromSecureStorage();
 		if(encryptedModel == null) {
-			logger.info("Could not find existing license in storage, returning default license");
-			return new LicenseModelFactory().createDemoLicenseModel();
+			logger.warn("Could not find existing license in storage, saving and returning default license");
+			LicenseModel defaultModel = new LicenseModelFactory().createDemoLicenseModel();
+			save(defaultModel);
+			return defaultModel;
 		}
 		return ModelSerializer.deserialize(encryption.decrypt(encryptedModel));
 	}
@@ -57,8 +59,7 @@ public class SecureStoragePersistence implements LicensePersistence {
 			simonykeesNode.putByteArray(NODE_KEY, data, false);
 			simonykeesNode.flush();
 		} catch (IOException | StorageException e) {
-			logger.error("Failed to write to secure storage", e);
-			throw new PersistenceException(e);
+			throw new PersistenceException("Failed to save license in storage", e);
 		}
 	}
 
@@ -67,8 +68,7 @@ public class SecureStoragePersistence implements LicensePersistence {
 			ISecurePreferences simonykeesNode = securePreferences.node(SECURE_PREFERENCES_KEY);
 			return simonykeesNode.getByteArray(NODE_KEY, null);
 		} catch (StorageException e) {
-			logger.error("Failed to read from secure storage", e);
-			throw new PersistenceException(e);
+			throw new PersistenceException("Failed to load license from storage",e);
 		}
 	}
 

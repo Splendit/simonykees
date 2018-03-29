@@ -47,8 +47,7 @@ import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
-import eu.jsparrow.ui.util.LicenseUtil;
-import eu.jsparrow.ui.util.ResourceHelper;
+import eu.jsparrow.ui.util.*;
 
 @SuppressWarnings({ "restriction" })
 public abstract class AbstractSummaryWizardPage extends WizardPage {
@@ -74,6 +73,8 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	private RefactoringSummaryWizardPageModel summaryWizardPageModel;
 
 	private int displayHeight;
+	
+	private NewLicenseUtil newLicenseUtil = NewLicenseUtil.get();
 
 	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel) {
@@ -246,8 +247,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 	private void setStatusInfo() {
 		StatusInfo statusInfo = new StatusInfo();
-		if (!LicenseUtil.getInstance()
-			.isFullLicense()) {
+		if (newLicenseUtil.isFreeLicense()) {
 			statusInfo.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
 		}
 		StatusUtil.applyToStatusLine(this, statusInfo);
