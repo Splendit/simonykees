@@ -31,6 +31,7 @@ import eu.jsparrow.adapter.i18n.Messages;
  */
 public class BundleStarter {
 
+	private static final String JSPARROW_BUNDLE_PREFIX = "eu.jsparrow."; //$NON-NLS-1$
 	protected static final String STANDALONE_BUNDLE_NAME = "eu.jsparrow.standalone"; //$NON-NLS-1$
 	private static final String JSPARROW_MANIFEST = "manifest.standalone"; //$NON-NLS-1$
 
@@ -99,7 +100,7 @@ public class BundleStarter {
 				.get(Constants.FRAGMENT_HOST) == null)
 			.filter(bundle -> bundle.getSymbolicName() != null)
 			.filter(bundle -> bundle.getSymbolicName()
-				.startsWith(STANDALONE_BUNDLE_NAME))
+				.startsWith(JSPARROW_BUNDLE_PREFIX))
 			.forEach(bundle -> {
 				try {
 					String loggerInfo = NLS.bind(Messages.BundleStarter_startingBundle, bundle.getSymbolicName(),
@@ -107,8 +108,11 @@ public class BundleStarter {
 					log.debug(loggerInfo);
 
 					bundle.start();
-					standaloneBundleID = bundle.getBundleId();
-					standaloneStarted = true;
+					if (bundle.getSymbolicName()
+						.startsWith(STANDALONE_BUNDLE_NAME)) {
+						standaloneBundleID = bundle.getBundleId();
+						standaloneStarted = true;
+					}
 				} catch (Exception e) {
 					log.debug(e.getMessage(), e);
 					log.error(e.getMessage());
