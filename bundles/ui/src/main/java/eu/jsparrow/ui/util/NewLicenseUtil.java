@@ -93,13 +93,7 @@ public class NewLicenseUtil {
 	}
 
 	public LicenseValidationResult getValidationResult() {
-		LicenseModel model = null;
-		try {
-			model = service.loadFromPersistence();
-		} catch (PersistenceException e) {
-			logger.error("Error while loading stored license, using demo license", e);
-			model = new LicenseModelFactory().createDemoLicenseModel();
-		}
+		LicenseModel model = tryLoadModelFromPersistence();
 		result = service.validateLicense(model);
 		return result;
 	}
@@ -109,7 +103,7 @@ public class NewLicenseUtil {
 		try {
 			model = service.loadFromPersistence();
 		} catch (PersistenceException e) {
-			logger.error("Error while loading stored license, using demo license", e);
+			logger.error("Error while loading stored license, using default demo license", e);
 			model = new LicenseModelFactory().createDemoLicenseModel();
 		}
 		return model;

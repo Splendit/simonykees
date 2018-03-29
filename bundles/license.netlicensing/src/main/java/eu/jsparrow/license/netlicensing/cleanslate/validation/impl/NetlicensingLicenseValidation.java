@@ -20,7 +20,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 
 	public NetlicensingLicenseValidation(NetlicensingLicenseModel model) {
 		this.model = model;
-		this.licenseCache = new NetlicensingLicenseCache();
+		this.licenseCache = NetlicensingLicenseCache.get();
 		this.parametersFactory = new NetlicensingValidationParametersFactory(FLOATING_PRODUCT_MODULE_NUMBER);
 		this.validationRequest = new NetlicensingValidationRequest(new ResponseEvaluator(model));
 	}

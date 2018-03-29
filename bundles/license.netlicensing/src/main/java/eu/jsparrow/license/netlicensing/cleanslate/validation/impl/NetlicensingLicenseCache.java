@@ -8,16 +8,30 @@ import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
 public class NetlicensingLicenseCache {
 
 	private static final Duration EXPIRATION_DURATION = Duration.ofHours(1);
-	
-	private ZonedDateTime lastUpdate; 
-	
+
+	private static NetlicensingLicenseCache instance;
+
+	private ZonedDateTime lastUpdate;
+
 	private LicenseValidationResult cachedValidationResult;
-	
+
+	private NetlicensingLicenseCache() {
+
+	}
+
+	public static NetlicensingLicenseCache get() {
+		if (instance == null) {
+			instance = new NetlicensingLicenseCache();
+		}
+		return instance;
+	}
+
 	public boolean isInvalid() {
-		if(lastUpdate == null) {
+		if (lastUpdate == null) {
 			return true;
 		}
-		return ZonedDateTime.now().isAfter(lastUpdate.plus(EXPIRATION_DURATION));
+		return ZonedDateTime.now()
+			.isAfter(lastUpdate.plus(EXPIRATION_DURATION));
 	}
 
 	public LicenseValidationResult getLastResult() {
@@ -28,10 +42,10 @@ public class NetlicensingLicenseCache {
 		this.cachedValidationResult = newValidationResult;
 		lastUpdate = ZonedDateTime.now();
 	}
-	
-	//Only used for tests
+
+	// Only used for tests
 	void setLastUpdate(ZonedDateTime lastUpdate) {
-		this.lastUpdate = lastUpdate; 
+		this.lastUpdate = lastUpdate;
 	}
 
 }

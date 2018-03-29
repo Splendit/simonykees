@@ -45,9 +45,6 @@ public class Activator extends AbstractUIPlugin {
 
 	private long loggingBundleID = 0;
 
-	@Inject
-	private static LicenseValidationService licenseValidationService;
-
 	/**
 	 * The constructor
 	 */
@@ -164,10 +161,6 @@ public class Activator extends AbstractUIPlugin {
 
 	public static void setRunning(boolean isRunning) {
 		running = isRunning;
-		if(isRunning) {
-			licenseValidationService.startValidation();
-		}
-		licenseValidationService.setJSparrowRunning(isRunning);
 	}
 
 	public static BundleContext getBundleContext() {

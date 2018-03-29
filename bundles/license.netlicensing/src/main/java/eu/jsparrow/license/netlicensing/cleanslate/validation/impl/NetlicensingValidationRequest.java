@@ -4,14 +4,12 @@ import com.labs64.netlicensing.domain.vo.*;
 import com.labs64.netlicensing.exception.NetLicensingException;
 import com.labs64.netlicensing.service.LicenseeService;
 
+import eu.jsparrow.license.netlicensing.LicenseProperties;
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.cleanslate.model.StatusDetail;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.ValidationStatus;
 
 public class NetlicensingValidationRequest {
-
-	private static final String NETLICENSING_VALIDATION_BASE_URL = "https://go.netlicensing.io/core/v2/rest";
-	private static final String REST_API_AUTHENTICATION_TOKEN = ""; // LicenseManager.PASS_APIKEY
 
 	private Context restApiContext;
 	
@@ -43,9 +41,9 @@ public class NetlicensingValidationRequest {
 
 	private Context createAPIContextCall() {
 		Context context = new Context();
-		context.setBaseUrl(NETLICENSING_VALIDATION_BASE_URL);
+		context.setBaseUrl(NetlicensingProperties.VALIDATION_BASE_URL);
 		context.setSecurityMode(SecurityMode.APIKEY_IDENTIFICATION);
-		context.setApiKey(REST_API_AUTHENTICATION_TOKEN);
+		context.setApiKey(NetlicensingProperties.API_KEY);
 		return context;
 	}
 

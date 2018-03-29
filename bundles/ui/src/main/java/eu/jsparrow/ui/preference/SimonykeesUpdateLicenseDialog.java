@@ -3,47 +3,26 @@ package eu.jsparrow.ui.preference;
 import java.net.URL;
 import java.util.HashMap;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.*;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.dialogs.*;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.HelpEvent;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.events.*;
+import org.eclipse.swt.graphics.*;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.api.LicenseValidationService;
+import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
+import eu.jsparrow.license.netlicensing.cleanslate.validation.ValidationStatus;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.NewLicenseUtil;
@@ -66,34 +45,18 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	private static final String CLOSE_RED_ICON_PATH = "icons/if_Close_Icon_20px.png"; //$NON-NLS-1$
 	private Text licenseKeyText;
 	private String licenseKey = ""; //$NON-NLS-1$
-	private Button updateButton;
 	private CLabel updatedLabel;
 	private Label updatedIconLabel;
 	private Image scaledJSparrowImageActive;
 	private Image scaledJSparrowImageInactive;
 	private Image scaledTickmarkGreenIconImage;
 	private Image scaledCloseRedIconImage;
-	@Inject
-	private LicenseValidationService licenseValidationService;
-	private boolean isLicenseValidationServiceAvailable = false;
-	
+
 	private NewLicenseUtil licenseUtil = NewLicenseUtil.get();
 
 	protected SimonykeesUpdateLicenseDialog(Shell parentShell) {
 		super(parentShell);
 		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
-	}
-
-	@PostConstruct
-	private void postConstruct() {
-		if (licenseValidationService != null) {
-			isLicenseValidationServiceAvailable = true;
-		}
-	}
-
-	@PreDestroy
-	private void preDestroy() {
-		isLicenseValidationServiceAvailable = false;
 	}
 
 	@Override
@@ -143,15 +106,14 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		licenseKeyText = new Text(newKeyGroup, SWT.BORDER);
 		licenseKeyText.setLayoutData(groupGridData);
 		licenseKeyText.addModifyListener((ModifyEvent event) -> {
-			updatedIconLabel.setVisible(false);
-			updatedLabel.setVisible(false);
 			Text textWidget = (Text) event.getSource();
 			licenseKey = textWidget.getText();
 		});
 
 		groupGridData = new GridData(SWT.CENTER, SWT.FILL, false, false);
 		groupGridData.horizontalIndent = 20;
-		updateButton = new Button(newKeyGroup, SWT.PUSH);
+
+		Button updateButton = new Button(newKeyGroup, SWT.PUSH);
 		updateButton.setLayoutData(groupGridData);
 		updateButton.setText(Messages.SimonykeesUpdateLicenseDialog_update_llicense_dialog_button);
 		updateButton.addSelectionListener(new SelectionAdapter() {
@@ -201,13 +163,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		ImageData imageDataInactive = jSparrowImageInactive.getImageData();
 		scaledJSparrowImageInactive = new Image(container.getDisplay(), imageDataInactive);
 
-		LicenseUpdateResult result = NewLicenseUtil.get().update(licenseKey);
-		if (result.wasSuccessful()) {
-			updatedIconLabel.setImage(scaledJSparrowImageActive);
-		}
-		else {
-			updatedIconLabel.setImage(scaledJSparrowImageInactive);
-		}
+		updatedIconLabel.setImage(scaledJSparrowImageActive);
 		updatedIconLabel.setVisible(true);
 		
 		updatedLabel = new CLabel(container, SWT.NONE);
