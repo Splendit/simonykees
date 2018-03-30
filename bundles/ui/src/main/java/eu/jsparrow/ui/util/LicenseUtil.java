@@ -28,9 +28,12 @@ public class LicenseUtil {
 	private LicenseService service;
 
 	private LicenseValidationResult result = null;
+	private Scheduler scheduler;
 
 	private LicenseUtil() {
 		service = new NetlicensingLicenseService();
+		scheduler = new Scheduler();
+		scheduler.start();
 	}
 
 	public static LicenseUtil get() {
@@ -95,6 +98,7 @@ public class LicenseUtil {
 	public void stop() {
 		LicenseModel model = tryLoadModelFromPersistence();
 		service.quitValidation(model);
+		scheduler.shutDown();
 	}
 
 	public LicenseValidationResult getValidationResult() {
