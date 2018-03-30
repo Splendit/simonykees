@@ -7,35 +7,35 @@ import java.util.function.Function;
 import com.labs64.netlicensing.domain.vo.Composition;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
-import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.Floating;
-import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.LicensingModel;
-import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.MultiFeature;
-import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.Subscription;
+import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.FloatingResponse;
+import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.NetlicensingResponse;
+import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.MultiFeatureResponse;
+import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.SubscriptionResponse;
 
 public class Parser {
 	private static final String LICENSING_MODEL_KEY = "licensingModel"; //$NON-NLS-1$
 	
-	private Subscription subscription;
-	private Floating floating;
-	private MultiFeature multiFeature;
+	private SubscriptionResponse subscription;
+	private FloatingResponse floating;
+	private MultiFeatureResponse multiFeature;
 	
 	public void parseValidationResult(ValidationResult validationResult) {
-		subscription = extractModels(validationResult, Subscription.LICENSING_MODEL,
+		subscription = extractModels(validationResult, SubscriptionResponse.LICENSING_MODEL,
 				this::buildSubscription);
-		multiFeature = extractModels(validationResult, MultiFeature.LICENSING_MODEL,
+		multiFeature = extractModels(validationResult, MultiFeatureResponse.LICENSING_MODEL,
 				this::buildMultiFeature);
-		floating = extractModels(validationResult, Floating.LICENSING_MODEL, this::buildFloating);
+		floating = extractModels(validationResult, FloatingResponse.LICENSING_MODEL, this::buildFloating);
 	}
 
-	public <T extends LicensingModel> T extractModels(ValidationResult response, String model,
-			Function<Map<String, Composition>, T> modelBuilder) {
+	public <T extends NetlicensingResponse> T extractModels(ValidationResult response, String model,
+			Function<Map<String, Composition>, T> responseModelBuilder) {
 
 		return response.getValidations()
 			.values()
 			.stream()
 			.map(Composition::getProperties)
 			.filter(properties -> isLicenseModel(properties, model))
-			.map(modelBuilder)
+			.map(responseModelBuilder)
 			.findFirst()
 			.orElse(null);
 	}
@@ -49,42 +49,42 @@ public class Parser {
 		return licensingModel.equals(value);
 	}
 
-	public Subscription buildSubscription(Map<String, Composition> properties) {
+	public SubscriptionResponse buildSubscription(Map<String, Composition> properties) {
 		
-		if (!properties.containsKey(LicensingModel.VALID_KEY)) {
+		if (!properties.containsKey(NetlicensingResponse.VALID_KEY)) {
 			return null;
 		}
-		Composition validComposition = properties.get(LicensingModel.VALID_KEY);
+		Composition validComposition = properties.get(NetlicensingResponse.VALID_KEY);
 		boolean valid = Boolean.parseBoolean(validComposition.getValue());
 		
-		if (!properties.containsKey(Subscription.EXPIRES_KEY)) {
-			return new Subscription(valid);
+		if (!properties.containsKey(SubscriptionResponse.EXPIRES_KEY)) {
+			return new SubscriptionResponse(valid);
 		}
 
-		Composition expiresComposition = properties.get(Subscription.EXPIRES_KEY);
+		Composition expiresComposition = properties.get(SubscriptionResponse.EXPIRES_KEY);
 		ZonedDateTime expires = ZonedDateTime.parse(expiresComposition.getValue());
 
-		return new Subscription(expires, valid);
+		return new SubscriptionResponse(expires, valid);
 	}
 
-	public Floating buildFloating(Map<String, Composition> properties) {
-		if (!properties.containsKey(LicensingModel.VALID_KEY)) {
+	public FloatingResponse buildFloating(Map<String, Composition> properties) {
+		if (!properties.containsKey(NetlicensingResponse.VALID_KEY)) {
 			return null;
 		}
-		Composition validComposition = properties.get(LicensingModel.VALID_KEY);
+		Composition validComposition = properties.get(NetlicensingResponse.VALID_KEY);
 		boolean valid = Boolean.parseBoolean(validComposition.getValue());
 		
-		if (!properties.containsKey(Floating.EXPIRATION_TIME_STAMP_KEY)) {
-			return new Floating(valid);
+		if (!properties.containsKey(FloatingResponse.EXPIRATION_TIME_STAMP_KEY)) {
+			return new FloatingResponse(valid);
 		}
 
-		Composition expiresTimeStampComposition = properties.get(Floating.EXPIRATION_TIME_STAMP_KEY);
+		Composition expiresTimeStampComposition = properties.get(FloatingResponse.EXPIRATION_TIME_STAMP_KEY);
 		ZonedDateTime expiresTimeStamp = ZonedDateTime.parse(expiresTimeStampComposition.getValue());
 
-		return new Floating(expiresTimeStamp, valid);
+		return new FloatingResponse(expiresTimeStamp, valid);
 	}
 
-	public MultiFeature buildMultiFeature(Map<String, Composition> properties) {
+	public MultiFeatureResponse buildMultiFeature(Map<String, Composition> properties) {
 
 		String feature = ""; //$NON-NLS-1$
 		boolean valid = false;
@@ -93,7 +93,7 @@ public class Parser {
 			Composition value = entry.getValue();
 			Map<String, Composition> valueProperties = value.getProperties();
 			if (!valueProperties.isEmpty()) {
-				Composition validValue = valueProperties.get(LicensingModel.VALID_KEY);
+				Composition validValue = valueProperties.get(NetlicensingResponse.VALID_KEY);
 				valid = Boolean.parseBoolean(validValue.getValue());
 				feature = entry.getKey();
 				break;
@@ -104,18 +104,18 @@ public class Parser {
 			return null;
 		}
 
-		return new MultiFeature(feature, valid);
+		return new MultiFeatureResponse(feature, valid);
 	}
 	
-	public Subscription getSubscription() {
+	public SubscriptionResponse getSubscription() {
 		return subscription;
 	}
 
-	public Floating getFloating() {
+	public FloatingResponse getFloating() {
 		return floating;
 	}
 
-	public MultiFeature getMultiFeature() {
+	public MultiFeatureResponse getMultiFeature() {
 		return multiFeature;
 	}
 

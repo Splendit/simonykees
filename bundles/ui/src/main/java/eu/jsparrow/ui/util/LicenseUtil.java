@@ -94,7 +94,7 @@ public class LicenseUtil {
 	
 	public void stop() {
 		LicenseModel model = tryLoadModelFromPersistence();
-		service.stopValidation(model);
+		service.quitValidation(model);
 	}
 
 	public LicenseValidationResult getValidationResult() {

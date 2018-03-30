@@ -2,7 +2,7 @@ package eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.mod
 
 import java.time.ZonedDateTime;
 
-public class Floating extends LicensingModel {
+public class FloatingResponse extends NetlicensingResponse {
 	
 	public static final String LICENSING_MODEL = "Floating"; //$NON-NLS-1$
 	public static final String EXPIRATION_TIME_STAMP_KEY = "expirationTimestamp"; //$NON-NLS-1$
@@ -10,11 +10,11 @@ public class Floating extends LicensingModel {
 	
 	private ZonedDateTime expirationTimeStamp;
 	
-	public Floating(boolean valid) {
+	public FloatingResponse(boolean valid) {
 		super(valid);
 	}
 	
-	public Floating(ZonedDateTime expirationTimeStamp, boolean valid) {
+	public FloatingResponse(ZonedDateTime expirationTimeStamp, boolean valid) {
 		this(valid);
 		this.expirationTimeStamp = expirationTimeStamp;
 	}

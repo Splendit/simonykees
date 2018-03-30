@@ -37,7 +37,7 @@ public class NetlicensingLicenseService implements LicenseService {
 	}
 
 	@Override
-	public void stopValidation(LicenseModel licenseModel) {
+	public void quitValidation(LicenseModel licenseModel) {
 		LicenseValidation validation = validationFactory.create(licenseModel);
 		
 		validation.checkIn();

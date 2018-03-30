@@ -11,5 +11,5 @@ public interface LicenseService {
 
 	public void saveToPersistence(LicenseModel model) throws PersistenceException;
 	
-	public void stopValidation(LicenseModel model);
+	public void quitValidation(LicenseModel model);
 }

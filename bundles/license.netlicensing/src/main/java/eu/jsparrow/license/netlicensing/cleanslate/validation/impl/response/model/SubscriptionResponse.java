@@ -2,18 +2,18 @@ package eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.mod
 
 import java.time.ZonedDateTime;
 
-public class Subscription extends LicensingModel {
+public class SubscriptionResponse extends NetlicensingResponse {
 	
 	public static final String LICENSING_MODEL = "Subscription"; //$NON-NLS-1$
 	public static final String EXPIRES_KEY = "expires"; //$NON-NLS-1$
 
 	private ZonedDateTime expires;
 	
-	public Subscription(boolean valid) {
+	public SubscriptionResponse(boolean valid) {
 		super(valid);
 	}
 	
-	public Subscription(ZonedDateTime expires, boolean valid) {
+	public SubscriptionResponse(ZonedDateTime expires, boolean valid) {
 		this(valid);
 		this.expires = expires;
 	}

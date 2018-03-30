@@ -21,9 +21,9 @@ import com.labs64.netlicensing.domain.vo.Composition;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 import eu.jsparrow.license.netlicensing.cleanslate.testhelper.DummyResponseGenerator;
-import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.Floating;
-import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.MultiFeature;
-import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.Subscription;
+import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.FloatingResponse;
+import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.MultiFeatureResponse;
+import eu.jsparrow.license.netlicensing.cleanslate.validation.impl.response.model.SubscriptionResponse;
 
 @SuppressWarnings("nls")
 public class ParserTest {
@@ -48,21 +48,21 @@ public class ParserTest {
 	@Test
 	public void extractModels_shouldReturnFloating() {
 		ValidationResult response = responseGenerator.createFloatingResponse(now.toString(), "true", expireDate.toString());
-		Floating floatingModel = parser.extractModels(response, "Floating", parser::buildFloating);
+		FloatingResponse floatingModel = parser.extractModels(response, "Floating", parser::buildFloating);
 		assertNotNull(floatingModel);
 	}
 
 	@Test
 	public void extractModels_shouldReturnNodeLocked() {
 		ValidationResult response = responseGenerator.createFloatingResponse(now.toString(), "true", expireDate.toString());
-		MultiFeature multiFeatureModel = parser.extractModels(response, "MultiFeature", parser::buildMultiFeature);
+		MultiFeatureResponse multiFeatureModel = parser.extractModels(response, "MultiFeature", parser::buildMultiFeature);
 		assertNotNull(multiFeatureModel);
 	}
 
 	@Test
 	public void extractModels_shouldReturnSubscriptions() {
 		ValidationResult response = responseGenerator.createFloatingResponse(now.toString(), "true", expireDate.toString());
-		Subscription subscription = parser.extractModels(response, "Subscription", parser::buildSubscription);
+		SubscriptionResponse subscription = parser.extractModels(response, "Subscription", parser::buildSubscription);
 		assertNotNull(subscription);
 	}
 
@@ -114,7 +114,7 @@ public class ParserTest {
 				new SimpleEntry<>("valid", "true"));
 		Map<String, Composition> properties = responseGenerator.createCompositionProperties(propertyValues);
 
-		Subscription subscription = parser.buildSubscription(properties);
+		SubscriptionResponse subscription = parser.buildSubscription(properties);
 
 		assertTrue(subscription.isValid());
 		assertEquals(nextYear, subscription.getExpires());
@@ -125,7 +125,7 @@ public class ParserTest {
 		Map<String, Composition> properties = responseGenerator
 			.createCompositionProperties(asList(new SimpleEntry<>("valid", "false")));
 
-		Subscription subscription = parser.buildSubscription(properties);
+		SubscriptionResponse subscription = parser.buildSubscription(properties);
 
 		assertFalse(subscription.isValid());
 		assertNull(subscription.getExpires());
@@ -134,7 +134,7 @@ public class ParserTest {
 	@Test
 	public void buildSubscription_missingValid() {
 		Map<String, Composition> properties = new HashMap<>();
-		Subscription subscription = parser.buildSubscription(properties);
+		SubscriptionResponse subscription = parser.buildSubscription(properties);
 		assertNull(subscription);
 	}
 
@@ -150,7 +150,7 @@ public class ParserTest {
 				new SimpleEntry<>("expirationTimestamp", nextDay.toString()), new SimpleEntry<>("valid", "true"));
 		Map<String, Composition> properties = responseGenerator.createCompositionProperties(propertyValues);
 
-		Floating floating = parser.buildFloating(properties);
+		FloatingResponse floating = parser.buildFloating(properties);
 
 		assertTrue(floating.isValid());
 		assertEquals(nextDay, floating.getExpirationTimeStamp());
@@ -161,7 +161,7 @@ public class ParserTest {
 		Map<String, Composition> properties = responseGenerator
 			.createCompositionProperties(asList(new SimpleEntry<>("valid", "false")));
 
-		Floating floating = parser.buildFloating(properties);
+		FloatingResponse floating = parser.buildFloating(properties);
 
 		assertFalse(floating.isValid());
 		assertNull(floating.getExpirationTimeStamp());
@@ -170,7 +170,7 @@ public class ParserTest {
 	@Test
 	public void buildFloating_missingValidKey() {
 		Map<String, Composition> properties = new HashMap<>();
-		Floating floating = parser.buildFloating(properties);
+		FloatingResponse floating = parser.buildFloating(properties);
 		assertNull(floating);
 	}
 
@@ -184,7 +184,7 @@ public class ParserTest {
 		String valid = "true";
 		Map<String, Composition> properties = responseGenerator.createMultiFeatureProperties(featureKey, valid);
 
-		MultiFeature multifeature = parser.buildMultiFeature(properties);
+		MultiFeatureResponse multifeature = parser.buildMultiFeature(properties);
 
 		assertNotNull(multifeature);
 		assertEquals(featureKey, multifeature.getFeatureName());
@@ -195,7 +195,7 @@ public class ParserTest {
 	public void buildMultiFeature_missingFeature() {
 		Map<String, Composition> properties = responseGenerator
 			.createCompositionProperties(asList(new SimpleEntry<>("valid", "false")));
-		MultiFeature multifeature = parser.buildMultiFeature(properties);
+		MultiFeatureResponse multifeature = parser.buildMultiFeature(properties);
 		assertNull(multifeature);
 	}
 
