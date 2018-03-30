@@ -266,8 +266,12 @@ public class Messages extends NLS {
 	public static String RefactoringSummaryWizardPage_eliminated_technical_debt;
 	public static String RefactoringSummaryWizardPage_title;
 	public static String RefactoringSummaryWizardPage_warn_disableFinishWhenFree;
+	public static String RefactoringInvoker_ConfigContainsInvalidSyntax;
+
 	public static String RefactoringInvoker_GetEnabledRulesForProject;
 	public static String RefactoringInvoker_GetSelectedRules;
+
+	public static String RefactoringInvoker_OverridingConfigWithCommandLine;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;

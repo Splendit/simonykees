@@ -25,12 +25,14 @@ public class MavenParameters {
 	private String mode;
 	private boolean useDefaultConfig;
 	private String ruleId;
+	private String license;
 
-	public MavenParameters(MavenProject project, Log log, File defaultYamlFile, MavenSession mavenSession,
-			String mode) {
+	public MavenParameters(MavenProject project, Log log, File defaultYamlFile, MavenSession mavenSession, String mode,
+			String license) {
 		this(project, log, mode);
 		this.defaultYamlFile = defaultYamlFile;
 		this.mavenSession = mavenSession;
+		this.license = license;
 	}
 
 	public MavenParameters(MavenProject project, Log log, String mode) {
@@ -90,5 +92,9 @@ public class MavenParameters {
 	public Optional<String> getRuleId() {
 		return Optional.ofNullable(ruleId)
 			.filter(s -> !s.isEmpty());
+	}
+
+	public String getLicense() {
+		return license;
 	}
 }
