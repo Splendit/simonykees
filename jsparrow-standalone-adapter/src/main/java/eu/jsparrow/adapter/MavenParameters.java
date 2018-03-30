@@ -25,6 +25,7 @@ public class MavenParameters {
 	private String mode;
 	private boolean useDefaultConfig;
 	private String ruleId;
+	private boolean devMode;
 
 	public MavenParameters(MavenProject project, Log log, File defaultYamlFile, MavenSession mavenSession,
 			String mode) {
@@ -91,4 +92,13 @@ public class MavenParameters {
 		return Optional.ofNullable(ruleId)
 			.filter(s -> !s.isEmpty());
 	}
+
+	public boolean isDevMode() {
+		return devMode;
+	}
+
+	public void setDevMode(boolean devMode) {
+		this.devMode = devMode;
+	}
+
 }
