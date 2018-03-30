@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseValidationService;
+import eu.jsparrow.ui.util.LicenseUtil;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -113,6 +114,8 @@ public class Activator extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 
 		setRunning(false);
+		
+		LicenseUtil.get().stop();
 
 		// FIXME (see SIM-331) figure out better logging configuration
 		logger.info(Messages.Activator_stop);

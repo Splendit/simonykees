@@ -19,18 +19,28 @@ public class NetlicensingLicenseService implements LicenseService {
 		this.validationFactory = new LicenseValidationFactory();
 	}
 
+	@Override
 	public LicenseValidationResult validateLicense(LicenseModel model) {
 		LicenseValidation validation = validationFactory.create(model);
 
 		return validation.validate();
 	}
 
+	@Override
 	public LicenseModel loadFromPersistence() throws PersistenceException {
 		return persistence.load();
 	}
 
+	@Override
 	public void saveToPersistence(LicenseModel model) throws PersistenceException {
 		persistence.save(model);
+	}
+
+	@Override
+	public void stopValidation(LicenseModel licenseModel) {
+		LicenseValidation validation = validationFactory.create(licenseModel);
+		
+		validation.checkIn();
 	}
 
 }

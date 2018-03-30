@@ -5,5 +5,7 @@ import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
 public interface LicenseValidation {
 	
 	LicenseValidationResult validate();
+	
+	default void checkIn() {}
 
 }

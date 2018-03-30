@@ -4,6 +4,7 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseModel;
+import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.LicenseValidation;
 
 public class NetlicensingLicenseValidation implements LicenseValidation {
@@ -46,5 +47,15 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 				validationParameters);
 		licenseCache.updateCache(licensingValidationResult);
 		return licensingValidationResult;
+	}
+
+	@Override
+	public void checkIn() {
+		if (model.getType() != NetlicensingLicenseType.FLOATING) {
+			return;
+		}
+		ValidationParameters validationParameters = parametersFactory.createFloatingCheckingParameters(model);
+		LicenseValidationResult checkInResult = validationRequest.send(model.getKey(), validationParameters);
+		licenseCache.updateCache(checkInResult);
 	}
 }

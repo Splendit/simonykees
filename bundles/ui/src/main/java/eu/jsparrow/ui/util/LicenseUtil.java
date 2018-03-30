@@ -72,7 +72,7 @@ public class LicenseUtil {
 
 	public LicenseUpdateResult update(String key) {
 		String secret = createSecretFromHardware();
-		LicenseModel model = new LicenseModelFactory().createNewNodeLockedModel(key, secret);
+		LicenseModel model = new LicenseModelFactory().createNewFloatingModel(key, secret);
 		LicenseValidationResult validationResult = service.validateLicense(model);
 
 		if (validationResult.getStatus()
@@ -90,6 +90,11 @@ public class LicenseUtil {
 			return new LicenseUpdateResult(false, message);
 		}
 		return new LicenseUpdateResult(true, Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
+	}
+	
+	public void stop() {
+		LicenseModel model = tryLoadModelFromPersistence();
+		service.stopValidation(model);
 	}
 
 	public LicenseValidationResult getValidationResult() {
