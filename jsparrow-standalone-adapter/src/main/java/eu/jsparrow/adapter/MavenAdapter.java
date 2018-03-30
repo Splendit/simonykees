@@ -80,7 +80,6 @@ public class MavenAdapter {
 		setRootProject(rootProject);
 		this.log = log;
 		this.sessionProjects = new HashMap<>();
-		this.defaultYamlFile = defaultYamlFile;
 	}
 
 	/**
@@ -475,17 +474,6 @@ public class MavenAdapter {
 		}
 
 		return false;
-	}
-
-	private void clearLockFile() {
-		Path path = Paths.get(calculateJsparrowLockFilePath());
-		try (Stream<String> linesStream = Files.lines(path)) {
-			String newContent = linesStream.filter(line -> !sessionProjects.containsKey(line))
-				.collect(Collectors.joining("\n")); //$NON-NLS-1$
-			Files.write(path, newContent.getBytes());
-		} catch (IOException e) {
-			log.warn("Cannot read the jsparrow lock file...", e);
-		}
 	}
 
 	/**
