@@ -17,7 +17,7 @@ public class NetlicensingLicenseCacheTest {
 
 	@Before
 	public void setUp() {
-		licenseCache = NetlicensingLicenseCache.get();
+		licenseCache = new NetlicensingLicenseCache();
 	}
 	
 	@Test
