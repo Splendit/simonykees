@@ -34,7 +34,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 	}
 
 	@Override
-	public LicenseValidationResult validate() {
+	public LicenseValidationResult validate() throws ValidationException {
 		LicenseValidationResult licensingValidationResult = licenseCache.getValidationResultFor(model);
 		if(licensingValidationResult != null) {
 			return licensingValidationResult;

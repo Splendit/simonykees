@@ -21,7 +21,7 @@ public class NetlicensingLicenseService implements LicenseService {
 	}
 
 	@Override
-	public LicenseValidationResult validateLicense(LicenseModel model) throws ValidationException {
+	public LicenseValidationResult validate(LicenseModel model) throws ValidationException {
 		LicenseValidation validation = validationFactory.create(model);
 
 		return validation.validate();

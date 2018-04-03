@@ -48,7 +48,7 @@ public class NetlicensingLicenseValidationTest {
 	}
 
 	@Test
-	public void validate_withInvalidCache_shouldSendRequestAndSaveToCache() {
+	public void validate_withInvalidCache_shouldSendRequestAndSaveToCache() throws ValidationException {
 		LicenseValidationResult validationResult = new LicenseValidationResult(model, new ValidationStatus(true));
 		ValidationParameters valiationParameters = new ValidationParameters();
 
@@ -63,7 +63,7 @@ public class NetlicensingLicenseValidationTest {
 	}
 
 	@Test
-	public void validate_withValidCache_shouldGetLastResultFromCache() {
+	public void validate_withValidCache_shouldGetLastResultFromCache() throws ValidationException {
 		LicenseValidationResult expected = new LicenseValidationResult(null, null);
 		when(cache.getValidationResultFor(eq(model))).thenReturn(expected);
 

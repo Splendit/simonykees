@@ -6,7 +6,7 @@ import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseModel;
 
 public interface LicenseService {
 
-	public LicenseValidationResult validateLicense(LicenseModel model) throws ValidationException;
+	public LicenseValidationResult validate(LicenseModel model) throws ValidationException;
 	
 	public void checkIn(LicenseModel model) throws ValidationException;
 

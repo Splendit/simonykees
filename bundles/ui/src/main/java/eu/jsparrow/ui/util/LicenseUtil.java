@@ -60,9 +60,9 @@ public class LicenseUtil {
 			model = new LicenseModelFactory().createDemoLicenseModel();
 		}
 		try {
-			result = service.validateLicense(model);
+			result = service.validate(model);
 		} catch (ValidationException e) {
-			// TODO Auto-generated catch block
+			return true;
 		}
 		if (result.getModel() instanceof DemoLicenseModel && !result.getStatus()
 			.isValid()) {
@@ -75,10 +75,10 @@ public class LicenseUtil {
 	public boolean isFreeLicense() {
 		LicenseModel model = tryLoadModelFromPersistence();
 		try {
-			result = service.validateLicense(model);
+			result = service.validate(model);
 		} catch (ValidationException e) {
-			// TODO Auto-generated catch block
-
+			logger.error(e.getMessage());
+			return true;
 		}
 		return result.getModel() instanceof DemoLicenseModel;
 	}
@@ -88,10 +88,10 @@ public class LicenseUtil {
 		LicenseModel model = new LicenseModelFactory().createNewFloatingModel(key, secret);
 		LicenseValidationResult validationResult = null;
 		try {
-			validationResult = service.validateLicense(model);
+			validationResult = service.validate(model);
 		} catch (ValidationException e) {
-			// TODO Auto-generated catch block
-
+			logger.error("License could not be validated", e);
+			return new LicenseUpdateResult(false, "License could not be validated.\\nPlease see the log for details.");
 		}
 
 		if (validationResult.getStatus()
@@ -110,7 +110,7 @@ public class LicenseUtil {
 		}
 		return new LicenseUpdateResult(true, Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
 	}
-	
+
 	public void stop() {
 		LicenseModel model = tryLoadModelFromPersistence();
 		try {
@@ -124,7 +124,7 @@ public class LicenseUtil {
 	public LicenseValidationResult getValidationResult() {
 		LicenseModel model = tryLoadModelFromPersistence();
 		try {
-			result = service.validateLicense(model);
+			result = service.validate(model);
 		} catch (ValidationException e) {
 			logger.error("Failed to validate license", e);
 		}

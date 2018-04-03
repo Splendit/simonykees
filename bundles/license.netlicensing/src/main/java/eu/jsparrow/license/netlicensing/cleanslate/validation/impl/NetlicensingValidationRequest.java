@@ -6,6 +6,7 @@ import com.labs64.netlicensing.service.LicenseeService;
 
 import eu.jsparrow.license.netlicensing.LicenseProperties;
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
+import eu.jsparrow.license.netlicensing.cleanslate.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.cleanslate.model.StatusDetail;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.ValidationStatus;
 
@@ -28,14 +29,12 @@ public class NetlicensingValidationRequest {
 		this.licenseeService = licenseeService;
 	}
 
-	public LicenseValidationResult send(String key, ValidationParameters validationParameters) {
+	public LicenseValidationResult send(String key, ValidationParameters validationParameters) throws ValidationException {
 		try {
 			ValidationResult netLicensingResponse = licenseeService.validate(restApiContext, key, validationParameters);
 			return responseEvaluator.evaluateResult(netLicensingResponse);
 		} catch (NetLicensingException e) {
-			// TODO: Distinguish between no connection and licensee doesnt exist
-			ValidationStatus validationStatus = new ValidationStatus(false, StatusDetail.CONNECTION_FAILURE);
-			return new LicenseValidationResult(responseEvaluator.getLicensingModel(), validationStatus);
+			throw new ValidationException("Failed to send request to netlicensing", e);
 		}
 	}
 
