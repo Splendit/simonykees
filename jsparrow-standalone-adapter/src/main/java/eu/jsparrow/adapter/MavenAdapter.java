@@ -39,10 +39,12 @@ public class MavenAdapter {
 	private static final String MAVEN_COMPILER_PLUGIN_ARTIFACT_ID = "maven-compiler-plugin"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_CONFIGURATIN_SOURCE_NAME = "source"; //$NON-NLS-1$
 	private static final String MAVEN_COMPILER_PLUGIN_DEFAULT_JAVA_VERSION = "1.5"; //$NON-NLS-1$
+
 	private static final String SELECTED_PROFILE = "PROFILE.SELECTED"; //$NON-NLS-1$
 	private static final String USE_DEFAULT_CONFIGURATION = "DEFAULT.CONFIG"; //$NON-NLS-1$
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 	private static final String PROJECT_JAVA_VERSION = "PROJECT.JAVA.VERSION"; //$NON-NLS-1$
+
 	private static final String JAVA_TMP = "java.io.tmpdir"; //$NON-NLS-1$
 	private static final String INSTANCE_DATA_LOCATION_CONSTANT = "osgi.instance.area.default"; //$NON-NLS-1$
 	private static final String FRAMEWORK_STORAGE_VALUE = "target/bundlecache"; //$NON-NLS-1$
@@ -56,13 +58,17 @@ public class MavenAdapter {
 	private static final String CONFIG_FILE_PATH = "CONFIG.FILE.PATH"; //$NON-NLS-1$
 	private static final String LIST_RULES_SELECTED_ID = "LIST.RULES.SELECTED.ID"; //$NON-NLS-1$
 	private static final String LOCK_FILE_NAME = "lock"; //$NON-NLS-1$
+	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 	private static final String DEV_MODE_KEY = "dev.mode.enabled"; //$NON-NLS-1$
 
 	private Log log;
+
 	private Map<String, String> configuration = new HashMap<>();
 	private MavenProject rootProject;
 	private File directory;
+
 	private Map<String, Boolean> sessionProjects = new HashMap<>();
+
 	private boolean jsparrowAlreadyRunningError = false;
 	private File defaultYamlFile;
 
@@ -113,6 +119,7 @@ public class MavenAdapter {
 		String projectPath = baseDir.getAbsolutePath();
 		String projcetName = project.getName();
 		String projectIdentifier = findProjectIdentifier(project);
+
 		String allIdentifiers = getAllProjectIdentifiers();
 		addConfigurationKeyValue(ALL_PROJECT_IDENTIFIERS, joinWithComma(allIdentifiers, projectIdentifier));
 		addConfigurationKeyValue(PROJECT_PATH_CONSTANT + DOT + projectIdentifier, projectPath);
@@ -195,6 +202,7 @@ public class MavenAdapter {
 		configuration.put(SELECTED_PROFILE, config.getProfile()
 			.orElse("")); //$NON-NLS-1$
 		configuration.put(USE_DEFAULT_CONFIGURATION, Boolean.toString(useDefaultConfig));
+		configuration.put(LICENSE_KEY, config.getLicense());
 		config.getRuleId()
 			.ifPresent(ruleId -> configuration.put(LIST_RULES_SELECTED_ID, ruleId));
 		configuration.put(DEV_MODE_KEY, Boolean.toString(config.isDevMode()));

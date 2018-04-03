@@ -65,6 +65,9 @@ public class RefactorMojo extends AbstractMojo {
 	@Parameter(property = "defaultConfiguration")
 	protected boolean useDefaultConfig;
 
+	@Parameter(property = "license")
+	private String license;
+
 	@Parameter(property = "devMode")
 	private boolean devMode;
 
@@ -79,7 +82,7 @@ public class RefactorMojo extends AbstractMojo {
 		String mode = StandaloneMode.REFACTOR.name();
 		try {
 			if (!serviceInstance.isAdapterInitialized()) {
-				MavenParameters config = new MavenParameters(project, log, configFile, mavenSession, mode);
+				MavenParameters config = new MavenParameters(project, log, configFile, mavenSession, mode, license);
 				config.setMavenHome(mavenHome);
 				config.setProfile(profile);
 				config.setUseDefaultConfig(useDefaultConfig);

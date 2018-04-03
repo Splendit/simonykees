@@ -23,4 +23,5 @@ Require-Bundle: eu.jsparrow.logging,
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Bundle-ClassPath: lib/plexus-utils.jar,
  lib/maven-invoker.jar,
+ lib/snakeyaml.jar,
  .
