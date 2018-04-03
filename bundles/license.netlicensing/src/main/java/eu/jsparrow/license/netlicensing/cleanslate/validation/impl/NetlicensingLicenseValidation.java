@@ -9,8 +9,6 @@ import eu.jsparrow.license.netlicensing.cleanslate.validation.LicenseValidation;
 
 public class NetlicensingLicenseValidation implements LicenseValidation {
 
-	private static final String FLOATING_PRODUCT_MODULE_NUMBER = ""; // LicenseManager.PRODUCT_MODULE_NUMBER
-
 	private NetlicensingLicenseModel model;
 	
 	private NetlicensingLicenseCache licenseCache;
@@ -22,7 +20,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 	public NetlicensingLicenseValidation(NetlicensingLicenseModel model) {
 		this.model = model;
 		this.licenseCache = NetlicensingLicenseCache.get();
-		this.parametersFactory = new NetlicensingValidationParametersFactory(FLOATING_PRODUCT_MODULE_NUMBER);
+		this.parametersFactory = new NetlicensingValidationParametersFactory();
 		this.validationRequest = new NetlicensingValidationRequest(new ResponseEvaluator(model));
 	}
 

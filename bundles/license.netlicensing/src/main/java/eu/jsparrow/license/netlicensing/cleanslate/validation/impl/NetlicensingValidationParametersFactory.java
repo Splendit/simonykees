@@ -14,12 +14,6 @@ public class NetlicensingValidationParametersFactory {
 	private static final String ACTION_CHECK_OUT_VAL = "checkOut"; //$NON-NLS-1$
 	private static final String ACTION_CHECK_IN_VAL = "checkIn"; //$NON-NLS-1$
 
-	private String floatingProductModule;
-
-	public NetlicensingValidationParametersFactory(String floatingProductModule) {
-		this.floatingProductModule = floatingProductModule;
-	}
-
 	public ValidationParameters createValidationParameters(NetlicensingLicenseModel model) {
 		NetlicensingLicenseType type = model.getType();
 		ValidationParameters parameters;
@@ -46,7 +40,7 @@ public class NetlicensingValidationParametersFactory {
 		HashMap<String, String> params = new HashMap<>();
 		params.put(SESSION_ID_KEY, sessionId);
 		params.put(ACTION_KEY, action);
-		parameters.setProductModuleValidationParameters(floatingProductModule, params);
+		parameters.setProductModuleValidationParameters(NetlicensingProperties.FLOATING_PRODUCT_MODULE_NUMBER, params);
 		return parameters;
 
 	}

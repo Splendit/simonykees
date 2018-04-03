@@ -19,15 +19,12 @@ public class NetlicensingValidationParametersFactoryTest {
 
 	private NetlicensingValidationParametersFactory parametersFactory;
 	private ZonedDateTime expireDate;
-	private ZonedDateTime offlineExpireDate;
-	private final String FLOATING_MODULE_NUMBER = "ProductModuleNumber";
 
 	@Before
 	public void setUp() {
-		parametersFactory = new NetlicensingValidationParametersFactory(FLOATING_MODULE_NUMBER);
+		parametersFactory = new NetlicensingValidationParametersFactory();
 		expireDate = ZonedDateTime.now()
 			.plusDays(5);
-		offlineExpireDate = ZonedDateTime.now().plusHours(1);
 	}
 
 	@Test
@@ -39,7 +36,7 @@ public class NetlicensingValidationParametersFactoryTest {
 
 		ValidationParameters parameters = parametersFactory.createFloatingCheckingParameters(model);
 
-		Map<String, String> map = parameters.getProductModuleValidationParameters(FLOATING_MODULE_NUMBER);
+		Map<String, String> map = parameters.getProductModuleValidationParameters(NetlicensingProperties.FLOATING_PRODUCT_MODULE_NUMBER);
 		assertTrue(map.containsKey("sessionId"));
 		assertTrue(map.containsKey("action"));
 		assertTrue(expectedSessionId.equals(map.get("sessionId")));
@@ -72,7 +69,7 @@ public class NetlicensingValidationParametersFactoryTest {
 
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
 
-		Map<String, String> map = parameters.getProductModuleValidationParameters(FLOATING_MODULE_NUMBER);
+		Map<String, String> map = parameters.getProductModuleValidationParameters(NetlicensingProperties.FLOATING_PRODUCT_MODULE_NUMBER);
 		assertTrue(map.containsKey("sessionId"));
 		assertTrue(map.containsKey("action"));
 		assertTrue(expectedSessionId.equals(map.get("sessionId")));
