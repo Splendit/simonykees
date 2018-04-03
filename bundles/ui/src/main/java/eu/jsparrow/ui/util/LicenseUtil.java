@@ -8,11 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.netlicensing.cleanslate.*;
-import eu.jsparrow.license.netlicensing.cleanslate.exception.PersistenceException;
-import eu.jsparrow.license.netlicensing.cleanslate.exception.ValidationException;
-import eu.jsparrow.license.netlicensing.cleanslate.model.DemoLicenseModel;
-import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseModel;
+import eu.jsparrow.license.netlicensing.*;
+import eu.jsparrow.license.netlicensing.exception.PersistenceException;
+import eu.jsparrow.license.netlicensing.exception.ValidationException;
+import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
+import eu.jsparrow.license.netlicensing.model.LicenseModel;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import oshi.SystemInfo;

@@ -16,7 +16,8 @@ Require-Bundle: eu.jsparrow.license.api,
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: eu.jsparrow.license.netlicensing.Activator
 Bundle-Vendor: Splendit IT-Consulting GmbH
-Export-Package: eu.jsparrow.license.netlicensing.cleanslate,
- eu.jsparrow.license.netlicensing.cleanslate.exception,
- eu.jsparrow.license.netlicensing.cleanslate.model,
- eu.jsparrow.license.netlicensing.cleanslate.validation
+Export-Package: 
+ eu.jsparrow.license.netlicensing,
+ eu.jsparrow.license.netlicensing.exception,
+ eu.jsparrow.license.netlicensing.model,
+ eu.jsparrow.license.netlicensing.validation

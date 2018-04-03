@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.netlicensing.cleanslate.exception.PersistenceException;
+import eu.jsparrow.license.netlicensing.exception.PersistenceException;
 import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.ui.Activator;
