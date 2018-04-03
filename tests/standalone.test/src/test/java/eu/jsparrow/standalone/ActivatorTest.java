@@ -137,7 +137,7 @@ public class ActivatorTest {
 
 		@Override
 		void injectDependencies(BundleContext context) {
-			// do nothing
+			return;
 		}
 	}
 }

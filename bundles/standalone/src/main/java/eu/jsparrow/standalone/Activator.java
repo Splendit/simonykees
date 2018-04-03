@@ -75,8 +75,6 @@ public class Activator implements BundleActivator {
 
 		startDeclarativeServices(context);
 
-		injectDependencies(context);
-
 		logger.info(Messages.Activator_start);
 
 		registerShutdownHook(context);
@@ -90,6 +88,7 @@ public class Activator implements BundleActivator {
 			switch (mode) {
 			case REFACTOR:
 				try {
+					injectDependencies(context);
 					licenseService.startValidation();
 					if (licenseService.isFullValidLicense() || devModeEnabled) {
 						refactoringInvoker.startRefactoring(context, new RefactoringPipeline());
