@@ -21,9 +21,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.netlicensing.LicenseValidationResult;
-import eu.jsparrow.license.netlicensing.model.*;
-import eu.jsparrow.license.netlicensing.validation.ValidationStatus;
+import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.LicenseValidationResult;
+import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
+import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.util.LicenseUtil;
 
@@ -160,8 +161,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		String licenseModelInfo = getLicenseModelString(result.getModel());
 		licenseLabel.setText(licenseModelInfo);
 
-		ValidationStatus status = result.getStatus();
-		setLicenseStatusMessage(status);
+		setLicenseStatusMessage(result);
 
 		licenseLabel.getParent()
 			.pack();
@@ -169,13 +169,12 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			.layout(true);
 	}
 
-	private void setLicenseStatusMessage(ValidationStatus status) {
-		if (status.isValid()) {
+	private void setLicenseStatusMessage(LicenseValidationResult result) {
+		if (result.isValid()) {
 			licenseStatusLabel.setText("");
 			logoLabel.setImage(jSparrowImageActive);
 		} else {
-			String invalidReason = "Your license is invalid. Reason:" + status.getStatusDetail()
-				.getUserMessage();
+			String invalidReason = "Your license is invalid. Reason:" + result.getDetail();
 			licenseStatusLabel.setText(invalidReason);
 			logoLabel.setImage(jSparrowImageInactive);
 		}
@@ -219,7 +218,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 	@Override
 	public void init(IWorkbench workbench) {
 		// Required by super class
-		
+
 	}
 
 }

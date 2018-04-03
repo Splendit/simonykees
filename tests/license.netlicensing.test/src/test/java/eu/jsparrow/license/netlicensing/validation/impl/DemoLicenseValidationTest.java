@@ -7,9 +7,8 @@ import java.time.ZonedDateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.license.netlicensing.LicenseValidationResult;
+import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
-import eu.jsparrow.license.netlicensing.validation.impl.DemoLicenseValidation;
 
 public class DemoLicenseValidationTest {
 
@@ -30,7 +29,7 @@ public class DemoLicenseValidationTest {
 		LicenseValidationResult result = validation.validate();
 		
 		assertEquals(model, result.getModel());
-		assertTrue(result.getStatus().isValid());
+		assertTrue(result.isValid());
 	}
 
 	@Test
@@ -40,7 +39,7 @@ public class DemoLicenseValidationTest {
 		LicenseValidationResult result = validation.validate();
 		
 		assertEquals(model, result.getModel());
-		assertFalse(result.getStatus().isValid());
+		assertFalse(result.isValid());
 		
 	}
 }

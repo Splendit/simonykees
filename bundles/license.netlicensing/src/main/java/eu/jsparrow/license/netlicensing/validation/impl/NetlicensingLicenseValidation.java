@@ -2,8 +2,8 @@ package eu.jsparrow.license.netlicensing.validation.impl;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
-import eu.jsparrow.license.netlicensing.LicenseValidationResult;
-import eu.jsparrow.license.netlicensing.exception.ValidationException;
+import eu.jsparrow.license.api.LicenseValidationResult;
+import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidation;

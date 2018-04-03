@@ -1,7 +1,7 @@
 package eu.jsparrow.license.netlicensing.validation.impl;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -13,8 +13,6 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseType;
-import eu.jsparrow.license.netlicensing.validation.impl.NetlicensingProperties;
-import eu.jsparrow.license.netlicensing.validation.impl.NetlicensingValidationParametersFactory;
 
 @SuppressWarnings("nls")
 public class NetlicensingValidationParametersFactoryTest {

@@ -17,12 +17,10 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 
-import eu.jsparrow.license.netlicensing.LicenseValidationResult;
-import eu.jsparrow.license.netlicensing.exception.ValidationException;
+import eu.jsparrow.license.api.LicenseValidationResult;
+import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseType;
-import eu.jsparrow.license.netlicensing.validation.ValidationStatus;
-import eu.jsparrow.license.netlicensing.validation.impl.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NetlicensingLicenseValidationTest {
@@ -50,7 +48,7 @@ public class NetlicensingLicenseValidationTest {
 
 	@Test
 	public void validate_withInvalidCache_shouldSendRequestAndSaveToCache() throws ValidationException {
-		LicenseValidationResult validationResult = new LicenseValidationResult(model, new ValidationStatus(true));
+		LicenseValidationResult validationResult = new LicenseValidationResult(model, true);
 		ValidationParameters valiationParameters = new ValidationParameters();
 
 		when(cache.getValidationResultFor(any())).thenReturn(null);
@@ -65,7 +63,7 @@ public class NetlicensingLicenseValidationTest {
 
 	@Test
 	public void validate_withValidCache_shouldGetLastResultFromCache() throws ValidationException {
-		LicenseValidationResult expected = new LicenseValidationResult(null, null);
+		LicenseValidationResult expected = new LicenseValidationResult();
 		when(cache.getValidationResultFor(eq(model))).thenReturn(expected);
 
 		LicenseValidationResult result = netlicensingValidation.validate();

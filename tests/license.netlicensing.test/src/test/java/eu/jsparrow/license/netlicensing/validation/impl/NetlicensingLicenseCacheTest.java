@@ -8,9 +8,8 @@ import java.time.ZonedDateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import eu.jsparrow.license.netlicensing.LicenseValidationResult;
+import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
-import eu.jsparrow.license.netlicensing.validation.impl.NetlicensingLicenseCache;
 
 public class NetlicensingLicenseCacheTest {
 
@@ -39,7 +38,7 @@ public class NetlicensingLicenseCacheTest {
 	@Test
 	public void getValidationResultFor_withExistingResultAndOfflineInvalidModel_returnsNull() {
 		NetlicensingLicenseModel model = createWithOfflineExpire(ZonedDateTime.now().minusDays(1));
-		LicenseValidationResult result = new LicenseValidationResult(null, null);
+		LicenseValidationResult result = new LicenseValidationResult();
 		
 		licenseCache.updateCache(result);
 
@@ -49,7 +48,7 @@ public class NetlicensingLicenseCacheTest {
 	@Test
 	public void getValidationResultFor_withExistingResultAndOfflineValidModel_returnsValidationResult() {
 		NetlicensingLicenseModel model = createWithOfflineExpire(ZonedDateTime.now().plusDays(1));
-		LicenseValidationResult expected = new LicenseValidationResult(null, null);
+		LicenseValidationResult expected = new LicenseValidationResult();
 		
 		licenseCache.updateCache(expected);
 

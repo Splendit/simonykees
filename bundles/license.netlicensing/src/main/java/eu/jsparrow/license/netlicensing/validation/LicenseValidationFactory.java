@@ -1,6 +1,8 @@
 package eu.jsparrow.license.netlicensing.validation;
 
-import eu.jsparrow.license.netlicensing.model.*;
+import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
+import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.validation.impl.DemoLicenseValidation;
 import eu.jsparrow.license.netlicensing.validation.impl.NetlicensingLicenseValidation;
 

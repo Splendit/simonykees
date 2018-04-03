@@ -1,8 +1,7 @@
-package eu.jsparrow.license.netlicensing;
+package eu.jsparrow.license.api;
 
-import eu.jsparrow.license.netlicensing.exception.PersistenceException;
-import eu.jsparrow.license.netlicensing.exception.ValidationException;
-import eu.jsparrow.license.netlicensing.model.LicenseModel;
+import eu.jsparrow.license.api.exception.PersistenceException;
+import eu.jsparrow.license.api.exception.ValidationException;
 
 public interface LicenseService {
 

@@ -2,7 +2,7 @@ package eu.jsparrow.license.netlicensing.validation.impl;
 
 import java.time.ZonedDateTime;
 
-import eu.jsparrow.license.netlicensing.LicenseValidationResult;
+import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 
 public class NetlicensingLicenseCache {

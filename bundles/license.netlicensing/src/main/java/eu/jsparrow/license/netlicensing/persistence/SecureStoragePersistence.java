@@ -8,11 +8,10 @@ import org.eclipse.equinox.security.storage.StorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.netlicensing.LicenseModelFactory;
 import eu.jsparrow.license.netlicensing.LicensePersistence;
-import eu.jsparrow.license.netlicensing.exception.PersistenceException;
-import eu.jsparrow.license.netlicensing.exception.ValidationException;
-import eu.jsparrow.license.netlicensing.model.LicenseModel;
 
 @SuppressWarnings("nls")
 public class SecureStoragePersistence implements LicensePersistence {

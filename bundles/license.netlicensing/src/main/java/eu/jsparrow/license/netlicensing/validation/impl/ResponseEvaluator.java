@@ -4,16 +4,17 @@ import java.time.ZonedDateTime;
 
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
-import eu.jsparrow.license.netlicensing.LicenseValidationResult;
+import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.LicenseValidationResult;
+import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.model.*;
-import eu.jsparrow.license.netlicensing.validation.ValidationStatus;
 import eu.jsparrow.license.netlicensing.validation.impl.response.Parser;
 import eu.jsparrow.license.netlicensing.validation.impl.response.model.*;
 
 public class ResponseEvaluator {
 
 	private static final int OFFLINE_VALIDITY_DURATION_MINUTES = 60;
-	
+
 	private NetlicensingLicenseModel netlicensingModel;
 	private Parser parser;
 
@@ -26,14 +27,14 @@ public class ResponseEvaluator {
 		return this.netlicensingModel;
 	}
 
-	public LicenseValidationResult evaluateResult(ValidationResult response) {
+	public LicenseValidationResult evaluateResult(ValidationResult response) throws ValidationException {
 
 		parser.parseValidationResult(response);
 
 		SubscriptionResponse subscription = parser.getSubscription();
 
 		if (subscription == null) {
-			return createUndefinedValidationResult();
+			throw new ValidationException("No subscription received from license server.");
 		}
 
 		if (subscription.isValid()) {
@@ -43,7 +44,7 @@ public class ResponseEvaluator {
 		}
 	}
 
-	private LicenseValidationResult evaluateExpiredLicense() {
+	private LicenseValidationResult evaluateExpiredLicense() throws ValidationException {
 
 		MultiFeatureResponse multiFeature = parser.getMultiFeature();
 		SubscriptionResponse subscription = parser.getSubscription();
@@ -56,30 +57,32 @@ public class ResponseEvaluator {
 
 		FloatingResponse floating = parser.getFloating();
 		if (floating != null && floating.isValid()) {
-			return createValidationResult(NetlicensingLicenseType.FLOATING, false, expireDate, floating.getExpirationTimeStamp(),
-					StatusDetail.FLOATING_EXPIRED);
+			return createValidationResult(NetlicensingLicenseType.FLOATING, false, expireDate,
+					floating.getExpirationTimeStamp(), StatusDetail.FLOATING_EXPIRED);
 		}
 
-		if (multiFeature != null && ZonedDateTime.now().isBefore(expireDate)) {
+		if (multiFeature != null && ZonedDateTime.now()
+			.isBefore(expireDate)) {
 			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, false, expireDate,
 					StatusDetail.NODE_LOCKED_HARDWARE_MISMATCH);
 		}
-
-		return createUndefinedValidationResult();
+		
+		throw new ValidationException("Unexpected response from license server.");
 	}
 
-	private LicenseValidationResult evaluateNonExpiredLicense() {
+	private LicenseValidationResult evaluateNonExpiredLicense() throws ValidationException {
 		MultiFeatureResponse multiFeature = parser.getMultiFeature();
 		SubscriptionResponse subscription = parser.getSubscription();
 		ZonedDateTime expireDate = subscription.getExpires();
 
 		if (multiFeature != null && multiFeature.isValid()) {
-			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, true, expireDate, StatusDetail.NODE_LOCKED);
+			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, true, expireDate,
+					StatusDetail.NODE_LOCKED);
 		}
-		
+
 		FloatingResponse floating = parser.getFloating();
-		if(floating == null) {
-			return createUndefinedValidationResult();
+		if (floating == null) {
+			throw new ValidationException("License server response does not contain floating license.");
 		}
 
 		if (floating.isValid()) {
@@ -87,8 +90,8 @@ public class ResponseEvaluator {
 					floating.getExpirationTimeStamp(), StatusDetail.FLOATING);
 		}
 
-		return createValidationResult(NetlicensingLicenseType.FLOATING, false, expireDate, floating.getExpirationTimeStamp(),
-				StatusDetail.FLOATING_OUT_OF_SESSIONS);
+		return createValidationResult(NetlicensingLicenseType.FLOATING, false, expireDate,
+				floating.getExpirationTimeStamp(), StatusDetail.FLOATING_OUT_OF_SESSIONS);
 	}
 
 	private LicenseValidationResult createValidationResult(NetlicensingLicenseType licenseType, boolean valid,
@@ -101,21 +104,14 @@ public class ResponseEvaluator {
 
 		LicenseModel model = new NetlicensingLicenseModel(licenseType, key, name, product, secret, expireDate,
 				offlineExpire);
-		ValidationStatus status = new ValidationStatus(valid, statusInfo);
-
-		return new LicenseValidationResult(model, status);
+		return new LicenseValidationResult(model, valid, statusInfo.getUserMessage());
 	}
-	
+
 	private LicenseValidationResult createValidationResult(NetlicensingLicenseType licenseType, boolean valid,
 			ZonedDateTime expireDate, StatusDetail statusInfo) {
 
-		return createValidationResult(licenseType, valid, expireDate, ZonedDateTime.now().plusMinutes(OFFLINE_VALIDITY_DURATION_MINUTES), statusInfo);
+		return createValidationResult(licenseType, valid, expireDate, ZonedDateTime.now()
+			.plusMinutes(OFFLINE_VALIDITY_DURATION_MINUTES), statusInfo);
 	}
-	
-	private LicenseValidationResult createUndefinedValidationResult() {
-		
-		ValidationStatus status = new ValidationStatus(false, StatusDetail.UNDEFINED);
-		LicenseModel model = new NetlicensingLicenseModel(netlicensingModel.getType(), netlicensingModel.getKey(), netlicensingModel.getSecret());
-		return new LicenseValidationResult(model, status);
-	}
+
 }

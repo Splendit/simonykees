@@ -15,10 +15,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.mockito.Matchers.*;
 
-import eu.jsparrow.license.netlicensing.exception.PersistenceException;
+import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
-import eu.jsparrow.license.netlicensing.model.LicenseModel;
-import eu.jsparrow.license.netlicensing.persistence.*;
 import eu.jsparrow.license.netlicensing.testhelper.DummyLicenseModel;
 
 @SuppressWarnings("nls")

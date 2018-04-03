@@ -1,4 +1,4 @@
-package eu.jsparrow.license.netlicensing.exception;
+package eu.jsparrow.license.api.exception;
 
 public class PersistenceException extends Exception {
 

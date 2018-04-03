@@ -12,12 +12,13 @@ Require-Bundle: eu.jsparrow.license.api,
  org.eclipse.equinox.ds;bundle-version="[1.4.300,2.0.0)",
  org.eclipse.osgi.services;bundle-version="[3.5.0,4.0.0)",
  org.eclipse.equinox.security;bundle-version="[1.2.0,1.3.0)",
- org.eclipse.core.runtime;bundle-version="[3.11.0,4.0.0)"
+ org.eclipse.core.runtime;bundle-version="[3.11.0,4.0.0)",
+ org.eclipse.equinox.util
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: eu.jsparrow.license.netlicensing.Activator
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Export-Package: 
  eu.jsparrow.license.netlicensing,
- eu.jsparrow.license.netlicensing.exception,
  eu.jsparrow.license.netlicensing.model,
  eu.jsparrow.license.netlicensing.validation
+Service-Component: OSGI-INF/eu.jsparrow.license.netlicensing.NetlicensingLicenseService.xml

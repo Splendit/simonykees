@@ -2,7 +2,7 @@ package eu.jsparrow.license.netlicensing.testhelper;
 
 import java.time.ZonedDateTime;
 
-import eu.jsparrow.license.netlicensing.model.LicenseModel;
+import eu.jsparrow.license.api.LicenseModel;
 
 public class DummyLicenseModel implements LicenseModel{
 

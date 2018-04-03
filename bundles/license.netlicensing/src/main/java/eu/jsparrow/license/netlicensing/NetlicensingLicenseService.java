@@ -1,15 +1,17 @@
 package eu.jsparrow.license.netlicensing;
 
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
+import org.osgi.service.component.annotations.Component;
 
-import eu.jsparrow.license.netlicensing.exception.PersistenceException;
-import eu.jsparrow.license.netlicensing.exception.ValidationException;
-import eu.jsparrow.license.netlicensing.model.LicenseModel;
+import eu.jsparrow.license.api.*;
+import eu.jsparrow.license.api.exception.PersistenceException;
+import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.persistence.AESEncryption;
 import eu.jsparrow.license.netlicensing.persistence.SecureStoragePersistence;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidation;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidationFactory;
 
+@Component
 public class NetlicensingLicenseService implements LicenseService {
 
 	private LicensePersistence persistence;

@@ -1,4 +1,4 @@
-package eu.jsparrow.license.netlicensing.model;
+package eu.jsparrow.license.api;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;

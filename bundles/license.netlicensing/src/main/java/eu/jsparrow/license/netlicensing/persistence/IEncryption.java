@@ -1,7 +1,6 @@
 package eu.jsparrow.license.netlicensing.persistence;
 
-import eu.jsparrow.license.netlicensing.exception.PersistenceException;
-import eu.jsparrow.license.netlicensing.exception.ValidationException;
+import eu.jsparrow.license.api.exception.PersistenceException;
 
 public interface IEncryption {
 

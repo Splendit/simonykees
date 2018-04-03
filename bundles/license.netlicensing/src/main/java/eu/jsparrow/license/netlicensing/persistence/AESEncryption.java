@@ -10,7 +10,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.license.netlicensing.exception.PersistenceException;
+import eu.jsparrow.license.api.exception.PersistenceException;
 
 
 @SuppressWarnings("nls")

@@ -2,6 +2,8 @@ package eu.jsparrow.license.netlicensing.model;
 
 import java.time.ZonedDateTime;
 
+import eu.jsparrow.license.api.LicenseModel;
+
 public class DemoLicenseModel implements LicenseModel {
 
 	private static final long serialVersionUID = 5753428747671948588L;

@@ -6,8 +6,8 @@ import java.lang.invoke.MethodHandles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.jsparrow.license.netlicensing.exception.PersistenceException;
-import eu.jsparrow.license.netlicensing.model.LicenseModel;
+import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.exception.PersistenceException;
 
 public class ModelSerializer {
 

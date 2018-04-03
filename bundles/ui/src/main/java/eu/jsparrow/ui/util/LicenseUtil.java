@@ -8,11 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.netlicensing.*;
-import eu.jsparrow.license.netlicensing.exception.PersistenceException;
-import eu.jsparrow.license.netlicensing.exception.ValidationException;
+import eu.jsparrow.license.api.*;
+import eu.jsparrow.license.api.exception.PersistenceException;
+import eu.jsparrow.license.api.exception.ValidationException;
+import eu.jsparrow.license.netlicensing.LicenseModelFactory;
+import eu.jsparrow.license.netlicensing.NetlicensingLicenseService;
 import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
-import eu.jsparrow.license.netlicensing.model.LicenseModel;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import oshi.SystemInfo;
@@ -64,8 +65,7 @@ public class LicenseUtil {
 		} catch (ValidationException e) {
 			return true;
 		}
-		if (result.getModel() instanceof DemoLicenseModel && !result.getStatus()
-			.isValid()) {
+		if (result.getModel() instanceof DemoLicenseModel && !result.isValid()) {
 			BuyLicenseDialog dialog = new BuyLicenseDialog(shell, "Your free license has expired.");
 			return dialog.open() == 0;
 		}
@@ -91,11 +91,10 @@ public class LicenseUtil {
 			validationResult = service.validate(model);
 		} catch (ValidationException e) {
 			logger.error("License could not be validated", e);
-			return new LicenseUpdateResult(false, "License could not be validated.\\nPlease see the log for details.");
+			return new LicenseUpdateResult(false, "Invalid license.");
 		}
 
-		if (validationResult.getStatus()
-			.isValid()) {
+		if (validationResult.isValid()) {
 			try {
 				service.saveToPersistence(validationResult.getModel());
 			} catch (PersistenceException e) {

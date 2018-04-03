@@ -1,7 +1,7 @@
 package eu.jsparrow.license.netlicensing.validation;
 
-import eu.jsparrow.license.netlicensing.LicenseValidationResult;
-import eu.jsparrow.license.netlicensing.exception.ValidationException;
+import eu.jsparrow.license.api.LicenseValidationResult;
+import eu.jsparrow.license.api.exception.ValidationException;
 
 public interface LicenseValidation {
 	

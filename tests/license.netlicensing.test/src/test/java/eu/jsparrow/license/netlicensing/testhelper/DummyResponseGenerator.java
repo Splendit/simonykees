@@ -2,10 +2,8 @@ package eu.jsparrow.license.netlicensing.testhelper;
 
 import static java.util.Arrays.asList;
 
+import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import com.labs64.netlicensing.domain.vo.Composition;

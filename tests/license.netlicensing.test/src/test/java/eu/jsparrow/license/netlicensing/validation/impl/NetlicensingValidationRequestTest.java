@@ -15,9 +15,8 @@ import com.labs64.netlicensing.exception.RestException;
 
 import static org.mockito.Matchers.*;
 
-import eu.jsparrow.license.netlicensing.LicenseValidationResult;
-import eu.jsparrow.license.netlicensing.exception.ValidationException;
-import eu.jsparrow.license.netlicensing.validation.impl.*;
+import eu.jsparrow.license.api.LicenseValidationResult;
+import eu.jsparrow.license.api.exception.ValidationException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NetlicensingValidationRequestTest {
@@ -39,7 +38,7 @@ public class NetlicensingValidationRequestTest {
 	public void validate_withRequestToNetlicensing_returnsValidationResult() throws Exception {
 		ValidationParameters validationParameters = new ValidationParameters();
 		ValidationResult validationResult = new ValidationResult();
-		LicenseValidationResult expected = new LicenseValidationResult(null, null);
+		LicenseValidationResult expected = new LicenseValidationResult();
 		when(licenseeService.validate(any(), anyString(), eq(validationParameters))).thenReturn(validationResult);
 		when(responseEvaluator.evaluateResult(validationResult)).thenReturn(expected);
 
