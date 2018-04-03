@@ -3,6 +3,7 @@ package eu.jsparrow.license.netlicensing.cleanslate.validation.impl;
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
+import eu.jsparrow.license.netlicensing.cleanslate.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.LicenseValidation;
@@ -48,9 +49,9 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 	}
 
 	@Override
-	public void checkIn() {
+	public void checkIn() throws ValidationException {
 		if (model.getType() != NetlicensingLicenseType.FLOATING) {
-			return;
+			throw new ValidationException(String.format("Failed to check in license. Invalid license type '%s'", model.getType()));
 		}
 		ValidationParameters validationParameters = parametersFactory.createFloatingCheckingParameters(model);
 		LicenseValidationResult checkInResult = validationRequest.send(model.getKey(), validationParameters);

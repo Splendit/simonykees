@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.netlicensing.cleanslate.*;
 import eu.jsparrow.license.netlicensing.cleanslate.exception.PersistenceException;
+import eu.jsparrow.license.netlicensing.cleanslate.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.cleanslate.model.DemoLicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseModel;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
@@ -58,7 +59,11 @@ public class LicenseUtil {
 			handleStartUpPersistenceFailure(shell, e);
 			model = new LicenseModelFactory().createDemoLicenseModel();
 		}
-		result = service.validateLicense(model);
+		try {
+			result = service.validateLicense(model);
+		} catch (ValidationException e) {
+			// TODO Auto-generated catch block
+		}
 		if (result.getModel() instanceof DemoLicenseModel && !result.getStatus()
 			.isValid()) {
 			BuyLicenseDialog dialog = new BuyLicenseDialog(shell, "Your free license has expired.");
@@ -69,14 +74,25 @@ public class LicenseUtil {
 
 	public boolean isFreeLicense() {
 		LicenseModel model = tryLoadModelFromPersistence();
-		result = service.validateLicense(model);
+		try {
+			result = service.validateLicense(model);
+		} catch (ValidationException e) {
+			// TODO Auto-generated catch block
+
+		}
 		return result.getModel() instanceof DemoLicenseModel;
 	}
 
 	public LicenseUpdateResult update(String key) {
 		String secret = createSecretFromHardware();
 		LicenseModel model = new LicenseModelFactory().createNewFloatingModel(key, secret);
-		LicenseValidationResult validationResult = service.validateLicense(model);
+		LicenseValidationResult validationResult = null;
+		try {
+			validationResult = service.validateLicense(model);
+		} catch (ValidationException e) {
+			// TODO Auto-generated catch block
+
+		}
 
 		if (validationResult.getStatus()
 			.isValid()) {
@@ -97,13 +113,21 @@ public class LicenseUtil {
 	
 	public void stop() {
 		LicenseModel model = tryLoadModelFromPersistence();
-		service.quitValidation(model);
+		try {
+			service.checkIn(model);
+		} catch (ValidationException e) {
+			logger.error("Failed to check in license", e);
+		}
 		scheduler.shutDown();
 	}
 
 	public LicenseValidationResult getValidationResult() {
 		LicenseModel model = tryLoadModelFromPersistence();
-		result = service.validateLicense(model);
+		try {
+			result = service.validateLicense(model);
+		} catch (ValidationException e) {
+			logger.error("Failed to validate license", e);
+		}
 		return result;
 	}
 

@@ -1,7 +1,6 @@
 package eu.jsparrow.license.netlicensing.cleanslate.validation.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,10 +14,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+
 import eu.jsparrow.license.netlicensing.cleanslate.LicenseValidationResult;
+import eu.jsparrow.license.netlicensing.cleanslate.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.model.NetlicensingLicenseType;
-import eu.jsparrow.license.netlicensing.cleanslate.testhelper.DummyLicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.validation.ValidationStatus;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,7 +42,6 @@ public class NetlicensingLicenseValidationTest {
 	@SuppressWarnings("nls")
 	@Before
 	public void setUp() {
-		ZonedDateTime now = ZonedDateTime.now();
 		model = new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key", "name", "product", "secret",
 				ZonedDateTime.now(), null);
 		netlicensingValidation = new NetlicensingLicenseValidation(model, cache, parametersFactory, request);
@@ -69,6 +70,27 @@ public class NetlicensingLicenseValidationTest {
 		LicenseValidationResult result = netlicensingValidation.validate();
 
 		assertEquals(expected, result);
+	}
+	
+	@Test(expected = ValidationException.class)
+	public void checkIn_withBadLicenseType_shouldThrowException() throws ValidationException {
+		model = new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key", "name", "product", "secret",
+				ZonedDateTime.now(), null);
+	
+		netlicensingValidation.checkIn();
+
+	}
+	
+	@Test
+	public void checkIn_withFloatingLicensetype_shouldSendRequestAndSaveToCache() throws ValidationException {
+		model = new NetlicensingLicenseModel(NetlicensingLicenseType.FLOATING, "key", "name", "product", "secret",
+				ZonedDateTime.now(), null);
+		netlicensingValidation = new NetlicensingLicenseValidation(model, cache, parametersFactory, request);
+		
+		netlicensingValidation.checkIn();
+		
+		verify(request).send(eq(model.getKey()), any());
+		verify(cache).updateCache(null);
 	}
 
 }

@@ -3,6 +3,7 @@ package eu.jsparrow.license.netlicensing.cleanslate;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 
 import eu.jsparrow.license.netlicensing.cleanslate.exception.PersistenceException;
+import eu.jsparrow.license.netlicensing.cleanslate.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.cleanslate.model.LicenseModel;
 import eu.jsparrow.license.netlicensing.cleanslate.persistence.AESEncryption;
 import eu.jsparrow.license.netlicensing.cleanslate.persistence.SecureStoragePersistence;
@@ -20,7 +21,7 @@ public class NetlicensingLicenseService implements LicenseService {
 	}
 
 	@Override
-	public LicenseValidationResult validateLicense(LicenseModel model) {
+	public LicenseValidationResult validateLicense(LicenseModel model) throws ValidationException {
 		LicenseValidation validation = validationFactory.create(model);
 
 		return validation.validate();
@@ -37,9 +38,11 @@ public class NetlicensingLicenseService implements LicenseService {
 	}
 
 	@Override
-	public void quitValidation(LicenseModel licenseModel) {
+	public void checkIn(LicenseModel licenseModel) throws ValidationException{
 		LicenseValidation validation = validationFactory.create(licenseModel);
-		
+
+		// TODO: Move this out of validation, or refactor validation
+		// License management (checkin, checkout, invalidate...) is not the same as validation.
 		validation.checkIn();
 	}
 
