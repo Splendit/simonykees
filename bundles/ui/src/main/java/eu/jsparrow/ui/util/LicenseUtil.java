@@ -4,15 +4,20 @@ import java.lang.invoke.MethodHandles;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.api.*;
+import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.LicenseService;
+import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.LicenseModelFactory;
-import eu.jsparrow.license.netlicensing.NetlicensingLicenseService;
 import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
@@ -20,29 +25,29 @@ import oshi.SystemInfo;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HardwareAbstractionLayer;
 
+@Component
 public class LicenseUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	private static LicenseUtil instance;
-
-	private LicenseService service;
+	@Reference(cardinality = ReferenceCardinality.MANDATORY)
+	private LicenseService licenseService;
 
 	private LicenseValidationResult result = null;
 
 	private Scheduler scheduler;
 
-	private LicenseUtil() {
-		service = new NetlicensingLicenseService();
+	private static LicenseUtil instance;
+
+	@Activate
+	public void activate() {
 		scheduler = new Scheduler();
 		scheduler.start();
+		instance = this;
 	}
 
 	public static LicenseUtil get() {
-		if (instance == null) {
-			instance = new LicenseUtil();
-		}
 		return instance;
 	}
 
@@ -56,13 +61,13 @@ public class LicenseUtil {
 	public boolean checkAtStartUp(Shell shell) {
 		LicenseModel model = null;
 		try {
-			model = service.loadFromPersistence();
+			model = licenseService.loadFromPersistence();
 		} catch (PersistenceException e) {
 			handleStartUpPersistenceFailure(shell, e);
 			model = new LicenseModelFactory().createDemoLicenseModel();
 		}
 		try {
-			result = service.validate(model);
+			result = licenseService.validate(model);
 		} catch (ValidationException e) {
 			handleStartUpValidationFailure(shell, e);
 			return true;
@@ -86,7 +91,7 @@ public class LicenseUtil {
 		LicenseModel model = new LicenseModelFactory().createNewFloatingModel(key, secret);
 		LicenseValidationResult validationResult = null;
 		try {
-			validationResult = service.validate(model);
+			validationResult = licenseService.validate(model);
 		} catch (ValidationException e) {
 			logger.error("Could not validate license", e);
 			return new LicenseUpdateResult(false, "Could not validate license.\n" + e.getMessage());
@@ -104,7 +109,7 @@ public class LicenseUtil {
 	public void stop() {
 		LicenseModel model = tryLoadModelFromPersistence();
 		try {
-			service.checkIn(model);
+			licenseService.checkIn(model);
 		} catch (ValidationException e) {
 			logger.error("Failed to check in license.", e);
 		}
@@ -114,7 +119,7 @@ public class LicenseUtil {
 	public LicenseValidationResult getValidationResult() {
 		LicenseModel model = tryLoadModelFromPersistence();
 		try {
-			result = service.validate(model);
+			result = licenseService.validate(model);
 		} catch (ValidationException e) {
 			logger.error("Failed to validate license", e);
 		}
@@ -124,7 +129,7 @@ public class LicenseUtil {
 	private LicenseModel tryLoadModelFromPersistence() {
 		LicenseModel model = null;
 		try {
-			model = service.loadFromPersistence();
+			model = licenseService.loadFromPersistence();
 		} catch (PersistenceException e) {
 			logger.error("Error while loading stored license, using default demo license", e);
 			model = new LicenseModelFactory().createDemoLicenseModel();
@@ -148,7 +153,7 @@ public class LicenseUtil {
 
 	private LicenseUpdateResult trySaveToPersistence(LicenseValidationResult validationResult) {
 		try {
-			service.saveToPersistence(validationResult.getModel());
+			licenseService.saveToPersistence(validationResult.getModel());
 		} catch (PersistenceException e) {
 			String message = "License is valid but could not be persisted";
 			logger.error(message, e);

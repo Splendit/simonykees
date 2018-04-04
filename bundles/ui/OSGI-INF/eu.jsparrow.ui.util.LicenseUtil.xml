@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.3.0" activate="activate" name="eu.jsparrow.ui.util.LicenseUtil">
+   <reference cardinality="1..1" field="licenseService" interface="eu.jsparrow.license.api.LicenseService" name="licenseService"/>
+   <implementation class="eu.jsparrow.ui.util.LicenseUtil"/>
+</scr:component>
