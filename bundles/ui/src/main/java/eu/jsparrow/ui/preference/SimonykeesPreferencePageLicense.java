@@ -174,7 +174,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			licenseStatusLabel.setText("");
 			logoLabel.setImage(jSparrowImageActive);
 		} else {
-			String invalidReason = "Your license is invalid. Reason:" + result.getDetail();
+			String invalidReason = "Your license is invalid. " + result.getDetail();
 			licenseStatusLabel.setText(invalidReason);
 			logoLabel.setImage(jSparrowImageInactive);
 		}
@@ -192,7 +192,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			licenseModelString.append("full license ");
 			licenseModelString.append(Messages.SimonykeesPreferencePageLicense_under_key_label);
 			licenseModelString.append(netLicenseModel.getKey());
-			licenseModelString.append("."); //$NON-NLS-1$
+			licenseModelString.append(". "); //$NON-NLS-1$
 		}
 		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_valid_until);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);

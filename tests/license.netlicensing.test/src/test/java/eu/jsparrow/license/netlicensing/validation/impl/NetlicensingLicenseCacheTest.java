@@ -48,12 +48,23 @@ public class NetlicensingLicenseCacheTest {
 	@Test
 	public void getValidationResultFor_withExistingResultAndOfflineValidModel_returnsValidationResult() {
 		NetlicensingLicenseModel model = createWithOfflineExpire(ZonedDateTime.now().plusDays(1));
-		LicenseValidationResult expected = new LicenseValidationResult();
+		LicenseValidationResult expected = new LicenseValidationResult(null, true);
 		
 		licenseCache.updateCache(expected);
 
 		assertEquals(expected, licenseCache.getValidationResultFor(model));
 	}
+	
+	@Test
+	public void updateCache_withInvalidResult_notCached() {
+		NetlicensingLicenseModel model = createWithOfflineExpire(ZonedDateTime.now().plusDays(1));
+		LicenseValidationResult expected = new LicenseValidationResult(model, false);
+		
+		licenseCache.updateCache(expected);
+
+		assertEquals(null, licenseCache.getValidationResultFor(model));
+	}
+
 
 
 	private NetlicensingLicenseModel createWithOfflineExpire(ZonedDateTime offlineExpire) {

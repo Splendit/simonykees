@@ -19,7 +19,11 @@ public class DemoLicenseValidation implements LicenseValidation {
 		ZonedDateTime expirationDate = demoLicenseModel.getExpirationDate();
 		boolean valid = ZonedDateTime.now()
 			.isBefore(expirationDate);
-		return new LicenseValidationResult(demoLicenseModel, valid);
+		String detail = "";
+		if (!valid) {
+			detail = "The free license has expired.";
+		}
+		return new LicenseValidationResult(demoLicenseModel, valid, detail);
 	}
 
 }

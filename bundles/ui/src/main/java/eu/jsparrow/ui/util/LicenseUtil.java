@@ -90,8 +90,8 @@ public class LicenseUtil {
 		try {
 			validationResult = service.validate(model);
 		} catch (ValidationException e) {
-			logger.error("License could not be validated", e);
-			return new LicenseUpdateResult(false, "Invalid license.");
+			logger.error("Could not validate license", e);
+			return new LicenseUpdateResult(false, "Could not validate license.\n" + e.getMessage());
 		}
 
 		if (validationResult.isValid()) {

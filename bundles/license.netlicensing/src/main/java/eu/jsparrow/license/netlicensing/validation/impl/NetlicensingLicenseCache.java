@@ -37,6 +37,9 @@ public class NetlicensingLicenseCache {
 	}
 
 	public void updateCache(LicenseValidationResult newValidationResult) {
-		this.cachedValidationResult = newValidationResult;
+		if(newValidationResult.isValid()) {
+			// Only cache valid results!
+			this.cachedValidationResult = newValidationResult;
+		}
 	}
 }

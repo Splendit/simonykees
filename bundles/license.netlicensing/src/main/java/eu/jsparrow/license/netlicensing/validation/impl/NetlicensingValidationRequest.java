@@ -1,7 +1,7 @@
 package eu.jsparrow.license.netlicensing.validation.impl;
 
 import com.labs64.netlicensing.domain.vo.*;
-import com.labs64.netlicensing.exception.NetLicensingException;
+import com.labs64.netlicensing.exception.*;
 
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
@@ -29,8 +29,15 @@ public class NetlicensingValidationRequest {
 		try {
 			ValidationResult netLicensingResponse = licenseeService.validate(restApiContext, key, validationParameters);
 			return responseEvaluator.evaluateResult(netLicensingResponse);
-		} catch (NetLicensingException e) {
-			throw new ValidationException("Failed to send request to netlicensing", e);
+		}
+		catch(RestException e) {
+			throw new ValidationException("Failed to connect to license server.", e);
+		}
+		catch (ServiceException e) {
+			throw new ValidationException("Licensee or product number does not exist.", e);
+		}
+		catch (NetLicensingException e) {
+			throw new ValidationException("Unknown error when contacting license server.", e);
 		}
 	}
 

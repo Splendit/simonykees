@@ -9,6 +9,10 @@ public class LicenseModelFactory {
 	public DemoLicenseModel createDemoLicenseModel() {
 		return new DemoLicenseModel();
 	}
+	
+	public DemoLicenseModel createDemoLicenseModel(ZonedDateTime expirationDate) {
+		return new DemoLicenseModel(expirationDate);
+	}
 
 	public NetlicensingLicenseModel createNewNodeLockedModel(String key, String secret) {
 		return new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, key, secret);
