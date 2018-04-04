@@ -16,6 +16,7 @@ import eu.jsparrow.license.netlicensing.validation.LicenseValidation;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidationFactory;
 
 @Component
+@SuppressWarnings("nls")
 public class NetlicensingLicenseService implements LicenseService {
 	
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
@@ -54,8 +55,6 @@ public class NetlicensingLicenseService implements LicenseService {
 		logger.debug("Checkin {}", licenseModel);
 		LicenseValidation validation = validationFactory.create(licenseModel);
 
-		// TODO: Move this out of validation, or refactor validation
-		// License management (checkin, checkout, invalidate...) is not the same as validation.
 		validation.checkIn();
 	}
 

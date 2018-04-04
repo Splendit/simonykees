@@ -26,6 +26,7 @@ public class AESEncryption implements IEncryption {
 	private static final String KEY = "SOME_SECRET_KEY_";
 	
 	public byte[] encrypt(byte[] data) throws PersistenceException {
+		logger.debug("Encrypting data '{}'", data);
 		Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);
 		Cipher cipher;
 		try {
@@ -39,6 +40,7 @@ public class AESEncryption implements IEncryption {
 	}
 
 	public byte[] decrypt(byte[] encryptedData) throws PersistenceException {
+		logger.debug("Decrypting data");
 		Cipher cipher;
 		try {
 			Key secretKey = new SecretKeySpec(KEY.getBytes(), ALGORITHM);

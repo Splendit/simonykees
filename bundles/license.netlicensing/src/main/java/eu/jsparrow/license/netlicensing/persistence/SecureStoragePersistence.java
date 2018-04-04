@@ -51,6 +51,7 @@ public class SecureStoragePersistence implements LicensePersistence {
 	}
 
 	private void saveToSecureStorage(byte[] data) throws PersistenceException {
+		logger.debug("Saving data '{}' to sercure storage", data);
 		ISecurePreferences simonykeesNode = securePreferences.node(SECURE_PREFERENCES_KEY);
 		simonykeesNode.clear();
 		try {
@@ -58,11 +59,12 @@ public class SecureStoragePersistence implements LicensePersistence {
 			simonykeesNode.putByteArray(NODE_KEY, data, false);
 			simonykeesNode.flush();
 		} catch (IOException | StorageException e) {
-			throw new PersistenceException("Failed to save license in storage", e);
+			throw new PersistenceException("Failed to save license in storage.", e);
 		}
 	}
 
 	private byte[] loadFromSecureStorage() throws PersistenceException {
+		logger.debug("Loading data from secure storage");
 		try {
 			ISecurePreferences simonykeesNode = securePreferences.node(SECURE_PREFERENCES_KEY);
 			return simonykeesNode.getByteArray(NODE_KEY, null);
