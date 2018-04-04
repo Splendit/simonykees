@@ -30,6 +30,7 @@ public class LicenseUtil {
 	private LicenseService service;
 
 	private LicenseValidationResult result = null;
+
 	private Scheduler scheduler;
 
 	private LicenseUtil() {
@@ -63,6 +64,7 @@ public class LicenseUtil {
 		try {
 			result = service.validate(model);
 		} catch (ValidationException e) {
+			handleStartUpValidationFailure(shell, e);
 			return true;
 		}
 		if (result.getModel() instanceof DemoLicenseModel && !result.isValid()) {
@@ -73,11 +75,7 @@ public class LicenseUtil {
 	}
 
 	public boolean isFreeLicense() {
-		LicenseModel model = tryLoadModelFromPersistence();
-		try {
-			result = service.validate(model);
-		} catch (ValidationException e) {
-			logger.error(e.getMessage());
+		if (result == null) {
 			return true;
 		}
 		return result.getModel() instanceof DemoLicenseModel;
@@ -94,20 +92,13 @@ public class LicenseUtil {
 			return new LicenseUpdateResult(false, "Could not validate license.\n" + e.getMessage());
 		}
 
-		if (validationResult.isValid()) {
-			try {
-				service.saveToPersistence(validationResult.getModel());
-			} catch (PersistenceException e) {
-				String message = "License is valid but could not be persisted";
-				logger.error(message, e);
-				return new LicenseUpdateResult(false, message + ".\nPlease see the log for details.");
-			}
-		} else {
+		if (!validationResult.isValid()) {
 			String message = String.format("License with key '%s' is not valid. License not saved.", key);
 			logger.warn(message);
 			return new LicenseUpdateResult(false, message);
+
 		}
-		return new LicenseUpdateResult(true, Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
+		return trySaveToPersistence(validationResult);
 	}
 
 	public void stop() {
@@ -115,7 +106,7 @@ public class LicenseUtil {
 		try {
 			service.checkIn(model);
 		} catch (ValidationException e) {
-			logger.error("Failed to check in license", e);
+			logger.error("Failed to check in license.", e);
 		}
 		scheduler.shutDown();
 	}
@@ -146,6 +137,25 @@ public class LicenseUtil {
 		logger.error(partMessage, e);
 		String message = partMessage + "\nPlease view the jSparrow logs for more information.";
 		SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
+	}
+
+	private void handleStartUpValidationFailure(Shell shell, ValidationException e) {
+		String partMessage = "Failed to validate license. " + e.getMessage();
+		logger.error(partMessage, e);
+		String message = partMessage + "\nPlease view the jSparrow logs for more information.";
+		SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
+	}
+
+	private LicenseUpdateResult trySaveToPersistence(LicenseValidationResult validationResult) {
+		try {
+			service.saveToPersistence(validationResult.getModel());
+		} catch (PersistenceException e) {
+			String message = "License is valid but could not be persisted";
+			logger.error(message, e);
+			return new LicenseUpdateResult(false, message + ".\nPlease see the log for details.");
+		}
+
+		return new LicenseUpdateResult(true, Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
 	}
 
 	private String createSecretFromHardware() {
