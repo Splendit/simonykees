@@ -1,45 +1,39 @@
 package eu.jsparrow.license.netlicensing.validation.impl;
 
-import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 import eu.jsparrow.license.api.LicenseValidationResult;
-import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 
 public class NetlicensingLicenseCache {
 
-	private static NetlicensingLicenseCache instance;
-
-	private LicenseValidationResult cachedValidationResult;
+	private static Map<String, NetlicensingValidationResult> entries = new HashMap<>();
 
 	NetlicensingLicenseCache() {
 		// Use only for testing
 	}
 
-	public static NetlicensingLicenseCache get() {
-		if (instance == null) {
-			instance = new NetlicensingLicenseCache();
+	public void updateCache(String key, NetlicensingValidationResult newValidationResult) {
+		NetlicensingValidationResult entry = entries.putIfAbsent(key, newValidationResult);
+		if (entry == null) {
+			return;
 		}
-		return instance;
-	}
-	
-	private boolean validationResultIsUpToDate(NetlicensingLicenseModel model) {
-		if(model.getOfflineExpireDate() == null) {
-			return false;
-		}
-		return model.getOfflineExpireDate().isAfter(ZonedDateTime.now());
-	}
-	
-	public LicenseValidationResult getValidationResultFor(NetlicensingLicenseModel model) {
-		if(!validationResultIsUpToDate(model)) {
-			return null;
-		}
-		return cachedValidationResult;
+		entries.replace(key, newValidationResult);
 	}
 
-	public void updateCache(LicenseValidationResult newValidationResult) {
-		if(newValidationResult.isValid()) {
-			// Only cache valid results!
-			this.cachedValidationResult = newValidationResult;
+	public LicenseValidationResult get(String key) {
+		NetlicensingValidationResult entry = entries.get(key);
+		if (entry == null) {
+			return null;
 		}
+		if (entry.isExpired()) {
+			return null;
+		}
+		return entry;
 	}
+
+	Map<String, NetlicensingValidationResult> getEntries() {
+		return entries;
+	}
+
 }

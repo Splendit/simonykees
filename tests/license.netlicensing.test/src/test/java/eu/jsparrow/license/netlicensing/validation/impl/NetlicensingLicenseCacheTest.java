@@ -2,15 +2,17 @@ package eu.jsparrow.license.netlicensing.validation.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.reset;
 
 import java.time.ZonedDateTime;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
+import eu.jsparrow.license.netlicensing.testhelper.NetlicensingValidationResultFactory;
 
+@SuppressWarnings("nls")
 public class NetlicensingLicenseCacheTest {
 
 	private NetlicensingLicenseCache licenseCache;
@@ -19,56 +21,65 @@ public class NetlicensingLicenseCacheTest {
 	public void setUp() {
 		licenseCache = new NetlicensingLicenseCache();
 	}
-	
-	@Test
-	public void getValidationResultFor_withNewModel_returnsNull() {
-		NetlicensingLicenseModel model = createWithOfflineExpire(null);
 
-		assertNull(licenseCache.getValidationResultFor(model));
+	@After
+	public void tearDown() {
+		licenseCache.getEntries()
+			.clear();
 	}
 
 	@Test
-	public void getValidationResultFor_withOfflineExpiredModel_returnsNull() {
-		NetlicensingLicenseModel model = createWithOfflineExpire(ZonedDateTime.now()
-			.minusDays(1));
-
-		assertNull(licenseCache.getValidationResultFor(model));
+	public void get_withNewKey_returnsNull() {
+		assertNull(licenseCache.get("key"));
 	}
-	
+
 	@Test
-	public void getValidationResultFor_withExistingResultAndOfflineInvalidModel_returnsNull() {
-		NetlicensingLicenseModel model = createWithOfflineExpire(ZonedDateTime.now().minusDays(1));
-		LicenseValidationResult result = new LicenseValidationResult();
+	public void get_withExpiredEntry_returnsNull() {
+		NetlicensingValidationResult result = NetlicensingValidationResultFactory.create(ZonedDateTime.now()
+			.minusDays(5));
+		String key = "key";
+		licenseCache.getEntries()
+			.put(key, result);
+
+		assertNull(licenseCache.get(key));
+	}
+
+	@Test
+	public void get_withExistingEntry_returnsEntry() {
+		String key = "key";
+		NetlicensingValidationResult expected = NetlicensingValidationResultFactory.create(ZonedDateTime.now()
+			.plusDays(5));
+		licenseCache.getEntries()
+			.put(key, expected);
+
+		LicenseValidationResult result = licenseCache.get(key);
+
+		assertEquals(expected, result);
+	}
+
+	@Test
+	public void update_withExistingEntry_replacesOldEntry() {
+		String key = "key";
+		licenseCache.getEntries().put(key, NetlicensingValidationResultFactory.create());
+
+		NetlicensingValidationResult newResult = NetlicensingValidationResultFactory.create();
 		
-		licenseCache.updateCache(result);
+		licenseCache.updateCache(key, newResult);
 
-		assertNull(licenseCache.getValidationResultFor(model));
+		LicenseValidationResult result = licenseCache.getEntries()
+			.get(key);
+		assertEquals(newResult, result);
 	}
-	
+
 	@Test
-	public void getValidationResultFor_withExistingResultAndOfflineValidModel_returnsValidationResult() {
-		NetlicensingLicenseModel model = createWithOfflineExpire(ZonedDateTime.now().plusDays(1));
-		LicenseValidationResult expected = new LicenseValidationResult(null, true);
-		
-		licenseCache.updateCache(expected);
+	public void update_withEmptyCache_addsNewEntry() {
+		NetlicensingValidationResult expected = NetlicensingValidationResultFactory.create();
 
-		assertEquals(expected, licenseCache.getValidationResultFor(model));
-	}
-	
-	@Test
-	public void updateCache_withInvalidResult_notCached() {
-		NetlicensingLicenseModel model = createWithOfflineExpire(ZonedDateTime.now().plusDays(1));
-		LicenseValidationResult expected = new LicenseValidationResult(model, false);
-		
-		licenseCache.updateCache(expected);
+		licenseCache.updateCache("key", expected);
 
-		assertEquals(null, licenseCache.getValidationResultFor(model));
-	}
+		assertEquals(1, licenseCache.getEntries()
+			.size());
 
-
-
-	private NetlicensingLicenseModel createWithOfflineExpire(ZonedDateTime offlineExpire) {
-		return new NetlicensingLicenseModel(null, "", "", "", "", null, offlineExpire);
 	}
 
 }

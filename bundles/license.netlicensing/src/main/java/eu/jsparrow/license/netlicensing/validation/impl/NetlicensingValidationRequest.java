@@ -3,7 +3,6 @@ package eu.jsparrow.license.netlicensing.validation.impl;
 import com.labs64.netlicensing.domain.vo.*;
 import com.labs64.netlicensing.exception.*;
 
-import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
 
 public class NetlicensingValidationRequest {
@@ -25,7 +24,7 @@ public class NetlicensingValidationRequest {
 		this.licenseeService = licenseeService;
 	}
 
-	public LicenseValidationResult send(String key, ValidationParameters validationParameters) throws ValidationException {
+	public NetlicensingValidationResult send(String key, ValidationParameters validationParameters) throws ValidationException {
 		try {
 			ValidationResult netLicensingResponse = licenseeService.validate(restApiContext, key, validationParameters);
 			return responseEvaluator.evaluateResult(netLicensingResponse);

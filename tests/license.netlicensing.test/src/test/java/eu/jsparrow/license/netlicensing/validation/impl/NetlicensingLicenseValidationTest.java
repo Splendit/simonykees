@@ -48,48 +48,47 @@ public class NetlicensingLicenseValidationTest {
 
 	@Test
 	public void validate_withInvalidCache_shouldSendRequestAndSaveToCache() throws ValidationException {
-		LicenseValidationResult validationResult = new LicenseValidationResult(model, true);
-		ValidationParameters valiationParameters = new ValidationParameters();
+		NetlicensingValidationResult validationResult = new NetlicensingValidationResult(model, true, null);
+		ValidationParameters validationParameters = new ValidationParameters();
 
-		when(cache.getValidationResultFor(any())).thenReturn(null);
-		when(parametersFactory.createValidationParameters(eq(model))).thenReturn(valiationParameters);
-		when(request.send(eq(model.getKey()), eq(valiationParameters))).thenReturn(validationResult);
+		when(cache.get(any())).thenReturn(null);
+		when(parametersFactory.createValidationParameters(eq(model))).thenReturn(validationParameters);
+		when(request.send(eq(model.getKey()), eq(validationParameters))).thenReturn(validationResult);
 
 		LicenseValidationResult result = netlicensingValidation.validate();
 
-		verify(cache).updateCache(validationResult);
+		verify(cache).updateCache(eq(model.getKey()), eq(validationResult));
 		assertEquals(validationResult, result);
 	}
 
 	@Test
 	public void validate_withValidCache_shouldGetLastResultFromCache() throws ValidationException {
 		LicenseValidationResult expected = new LicenseValidationResult();
-		when(cache.getValidationResultFor(eq(model))).thenReturn(expected);
+		when(cache.get(eq(model.getKey()))).thenReturn(expected);
 
 		LicenseValidationResult result = netlicensingValidation.validate();
 
 		assertEquals(expected, result);
 	}
-	
+
 	@Test(expected = ValidationException.class)
 	public void checkIn_withBadLicenseType_shouldThrowException() throws ValidationException {
 		model = new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key", "name", "product", "secret",
 				ZonedDateTime.now(), null);
-	
+
 		netlicensingValidation.checkIn();
 
 	}
-	
+
 	@Test
-	public void checkIn_withFloatingLicensetype_shouldSendRequestAndSaveToCache() throws ValidationException {
+	public void checkIn_withFloatingLicensetype_shouldSendRequest() throws ValidationException {
 		model = new NetlicensingLicenseModel(NetlicensingLicenseType.FLOATING, "key", "name", "product", "secret",
 				ZonedDateTime.now(), null);
 		netlicensingValidation = new NetlicensingLicenseValidation(model, cache, parametersFactory, request);
-		
+
 		netlicensingValidation.checkIn();
-		
+
 		verify(request).send(eq(model.getKey()), any());
-		verify(cache).updateCache(null);
 	}
 
 }

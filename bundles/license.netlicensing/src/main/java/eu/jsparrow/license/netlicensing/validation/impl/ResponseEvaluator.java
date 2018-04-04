@@ -5,7 +5,6 @@ import java.time.ZonedDateTime;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 import eu.jsparrow.license.api.LicenseModel;
-import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.model.*;
 import eu.jsparrow.license.netlicensing.validation.impl.response.Parser;
@@ -27,7 +26,7 @@ public class ResponseEvaluator {
 		return this.netlicensingModel;
 	}
 
-	public LicenseValidationResult evaluateResult(ValidationResult response) throws ValidationException {
+	public NetlicensingValidationResult evaluateResult(ValidationResult response) throws ValidationException {
 
 		parser.parseValidationResult(response);
 
@@ -44,7 +43,7 @@ public class ResponseEvaluator {
 		}
 	}
 
-	private LicenseValidationResult evaluateExpiredLicense() throws ValidationException {
+	private NetlicensingValidationResult evaluateExpiredLicense() throws ValidationException {
 
 		MultiFeatureResponse multiFeature = parser.getMultiFeature();
 		SubscriptionResponse subscription = parser.getSubscription();
@@ -66,11 +65,11 @@ public class ResponseEvaluator {
 			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, false, expireDate,
 					StatusDetail.NODE_LOCKED_HARDWARE_MISMATCH);
 		}
-		
+
 		throw new ValidationException("Unexpected response from license server.");
 	}
 
-	private LicenseValidationResult evaluateNonExpiredLicense() throws ValidationException {
+	private NetlicensingValidationResult evaluateNonExpiredLicense() throws ValidationException {
 		MultiFeatureResponse multiFeature = parser.getMultiFeature();
 		SubscriptionResponse subscription = parser.getSubscription();
 		ZonedDateTime expireDate = subscription.getExpires();
@@ -94,7 +93,7 @@ public class ResponseEvaluator {
 				floating.getExpirationTimeStamp(), StatusDetail.FLOATING_OUT_OF_SESSIONS);
 	}
 
-	private LicenseValidationResult createValidationResult(NetlicensingLicenseType licenseType, boolean valid,
+	private NetlicensingValidationResult createValidationResult(NetlicensingLicenseType licenseType, boolean valid,
 			ZonedDateTime expireDate, ZonedDateTime offlineExpire, StatusDetail statusInfo) {
 
 		String key = netlicensingModel.getKey();
@@ -104,10 +103,10 @@ public class ResponseEvaluator {
 
 		LicenseModel model = new NetlicensingLicenseModel(licenseType, key, name, product, secret, expireDate,
 				offlineExpire);
-		return new LicenseValidationResult(model, valid, statusInfo.getUserMessage());
+		return new NetlicensingValidationResult(model, valid, statusInfo.getUserMessage(), offlineExpire);
 	}
 
-	private LicenseValidationResult createValidationResult(NetlicensingLicenseType licenseType, boolean valid,
+	private NetlicensingValidationResult createValidationResult(NetlicensingLicenseType licenseType, boolean valid,
 			ZonedDateTime expireDate, StatusDetail statusInfo) {
 
 		return createValidationResult(licenseType, valid, expireDate, ZonedDateTime.now()
