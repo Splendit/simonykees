@@ -1,5 +1,6 @@
 package eu.jsparrow.license.api;
 
+@SuppressWarnings("nls")
 public class LicenseValidationResult {
 
 	private boolean valid;
@@ -37,4 +38,10 @@ public class LicenseValidationResult {
 	public void setModel(LicenseModel model) {
 		this.model = model;
 	}
+	
+	@Override
+	public String toString() {
+		return "LicenseValidationResult [valid=" + valid + ", detail=" + detail + ", model=" + model + "]";
+	}
+
 }

@@ -25,5 +25,10 @@ public class DemoLicenseModel implements LicenseModel {
 	public ZonedDateTime getExpirationDate() {
 		return expirationDate;
 	}
+	
+	@Override
+	public String toString() {
+		return "DemoLicenseModel [expirationDate=" + expirationDate + "]";
+	}
 
 }

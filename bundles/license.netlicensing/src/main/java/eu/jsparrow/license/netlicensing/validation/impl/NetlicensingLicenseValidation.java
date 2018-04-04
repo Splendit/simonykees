@@ -13,6 +13,7 @@ import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidation;
 
+@SuppressWarnings("nls")
 public class NetlicensingLicenseValidation implements LicenseValidation {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
@@ -43,9 +44,11 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 
 	@Override
 	public LicenseValidationResult validate() throws ValidationException {
+		logger.debug("Validating netlicensing license");
 		String licenseeNumber = model.getKey();
 		LicenseValidationResult result = licenseCache.get(licenseeNumber);
 		if (result != null) {
+			logger.debug("Found existing result {}", result);
 			return result;
 		}
 
@@ -55,6 +58,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		if (licensingValidationResult.isValid()) {
 			licenseCache.updateCache(licenseeNumber, licensingValidationResult);
 		}
+		logger.debug("Returning {}", licensingValidationResult);
 		return licensingValidationResult;
 	}
 

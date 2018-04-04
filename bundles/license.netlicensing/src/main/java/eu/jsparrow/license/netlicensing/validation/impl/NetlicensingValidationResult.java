@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.LicenseValidationResult;
 
+@SuppressWarnings("nls")
 public class NetlicensingValidationResult extends LicenseValidationResult {
 
 	private ZonedDateTime expirationTime;

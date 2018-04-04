@@ -52,4 +52,12 @@ public class NetlicensingLicenseModel implements LicenseModel {
 	public NetlicensingLicenseType getType() {
 		return this.type;
 	}
+
+	@Override
+	@SuppressWarnings("nls")
+	public String toString() {
+		return "NetlicensingLicenseModel [key=" + key + ", name=" + name + ", product=" + product + ", secret=" + secret
+				+ ", type=" + type + ", expireDate=" + expireDate + "]";
+	}
+
 }
