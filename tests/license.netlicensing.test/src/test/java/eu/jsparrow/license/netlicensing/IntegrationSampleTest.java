@@ -38,7 +38,5 @@ public class IntegrationSampleTest {
 	public void whenSaving_validDemoLicense() throws PersistenceException {
 		LicenseModel model = new LicenseModelFactory().createDemoLicenseModel(ZonedDateTime.now().plusDays(5));
 		licenseService.saveToPersistence(model);
-		
-		
 	}
 }
