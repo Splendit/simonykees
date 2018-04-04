@@ -71,14 +71,6 @@ public class NetlicensingLicenseValidationTest {
 		assertEquals(expected, result);
 	}
 
-	@Test(expected = ValidationException.class)
-	public void checkIn_withBadLicenseType_shouldThrowException() throws ValidationException {
-		model = NetlicensingLicenseModelFactory.create(NetlicensingLicenseType.NODE_LOCKED);
-
-		netlicensingValidation.checkIn();
-
-	}
-
 	@Test
 	public void checkIn_withFloatingLicensetype_shouldSendRequest() throws ValidationException {
 		model = NetlicensingLicenseModelFactory.create(NetlicensingLicenseType.FLOATING);
