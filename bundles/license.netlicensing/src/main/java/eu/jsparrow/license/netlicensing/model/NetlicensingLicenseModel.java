@@ -14,7 +14,6 @@ public class NetlicensingLicenseModel implements LicenseModel {
 	private String secret;
 	private NetlicensingLicenseType type;
 	private ZonedDateTime expireDate;
-	private ZonedDateTime offlineExpireDate;
 
 	public NetlicensingLicenseModel(NetlicensingLicenseType type, String key, String secret) {
 		this.type = type;
@@ -23,12 +22,11 @@ public class NetlicensingLicenseModel implements LicenseModel {
 	}
 
 	public NetlicensingLicenseModel(NetlicensingLicenseType type, String key, String name, String product,
-			String secret, ZonedDateTime expireDate, ZonedDateTime offlineExpireDate) {
+			String secret, ZonedDateTime expireDate) {
 		this(type, key, secret);
 		this.name = name;
 		this.product = product;
 		this.expireDate = expireDate;
-		this.offlineExpireDate = offlineExpireDate;
 	}
 
 	public String getKey() {
@@ -41,10 +39,6 @@ public class NetlicensingLicenseModel implements LicenseModel {
 
 	public ZonedDateTime getExpirationDate() {
 		return expireDate;
-	}
-
-	public ZonedDateTime getOfflineExpireDate() {
-		return offlineExpireDate;
 	}
 
 	public String getProduct() {

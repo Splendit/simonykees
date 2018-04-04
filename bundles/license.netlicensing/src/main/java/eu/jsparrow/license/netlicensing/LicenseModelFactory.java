@@ -23,8 +23,8 @@ public class LicenseModelFactory {
 	}
 
 	public NetlicensingLicenseModel createNewNetlicensingModel(NetlicensingLicenseType type, String key, String name,
-			String product, String secret, ZonedDateTime expireDate, ZonedDateTime offlineExpireDate) {
-		return new NetlicensingLicenseModel(type, key, name, product, secret, expireDate, offlineExpireDate);
+			String product, String secret, ZonedDateTime expireDate) {
+		return new NetlicensingLicenseModel(type, key, name, product, secret, expireDate);
 	}
 
 }

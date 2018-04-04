@@ -21,6 +21,7 @@ import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseType;
+import eu.jsparrow.license.netlicensing.testhelper.NetlicensingLicenseModelFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NetlicensingLicenseValidationTest {
@@ -41,8 +42,7 @@ public class NetlicensingLicenseValidationTest {
 	@SuppressWarnings("nls")
 	@Before
 	public void setUp() {
-		model = new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key", "name", "product", "secret",
-				ZonedDateTime.now(), null);
+		model = NetlicensingLicenseModelFactory.create();
 		netlicensingValidation = new NetlicensingLicenseValidation(model, cache, parametersFactory, request);
 	}
 
@@ -73,8 +73,7 @@ public class NetlicensingLicenseValidationTest {
 
 	@Test(expected = ValidationException.class)
 	public void checkIn_withBadLicenseType_shouldThrowException() throws ValidationException {
-		model = new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key", "name", "product", "secret",
-				ZonedDateTime.now(), null);
+		model = NetlicensingLicenseModelFactory.create(NetlicensingLicenseType.NODE_LOCKED);
 
 		netlicensingValidation.checkIn();
 
@@ -82,8 +81,7 @@ public class NetlicensingLicenseValidationTest {
 
 	@Test
 	public void checkIn_withFloatingLicensetype_shouldSendRequest() throws ValidationException {
-		model = new NetlicensingLicenseModel(NetlicensingLicenseType.FLOATING, "key", "name", "product", "secret",
-				ZonedDateTime.now(), null);
+		model = NetlicensingLicenseModelFactory.create(NetlicensingLicenseType.FLOATING);
 		netlicensingValidation = new NetlicensingLicenseValidation(model, cache, parametersFactory, request);
 
 		netlicensingValidation.checkIn();

@@ -13,6 +13,7 @@ import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.model.*;
 import eu.jsparrow.license.netlicensing.testhelper.DummyResponseGenerator;
+import eu.jsparrow.license.netlicensing.testhelper.NetlicensingLicenseModelFactory;
 
 @SuppressWarnings("nls")
 public class ResponseEvaluatorTest {
@@ -23,8 +24,7 @@ public class ResponseEvaluatorTest {
 	@Before
 	public void setUp() {
 		responseGenerator = new DummyResponseGenerator();
-		NetlicensingLicenseModel model = new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key",
-				"name", "product", "secret", ZonedDateTime.now(), null);
+		NetlicensingLicenseModel model = NetlicensingLicenseModelFactory.create();
 		responseEvaluator = new ResponseEvaluator(model);
 	}
 

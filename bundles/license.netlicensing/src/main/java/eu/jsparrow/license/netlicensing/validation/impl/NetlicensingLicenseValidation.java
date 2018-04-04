@@ -1,5 +1,10 @@
 package eu.jsparrow.license.netlicensing.validation.impl;
 
+import java.lang.invoke.MethodHandles;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
 import eu.jsparrow.license.api.LicenseValidationResult;
@@ -9,6 +14,9 @@ import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidation;
 
 public class NetlicensingLicenseValidation implements LicenseValidation {
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
+		.lookupClass());
 
 	private NetlicensingLicenseModel model;
 
@@ -53,10 +61,10 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 	@Override
 	public void checkIn() throws ValidationException {
 		if (model.getType() != NetlicensingLicenseType.FLOATING) {
-			throw new ValidationException(
-					String.format("Failed to check in license. Invalid license type '%s'", model.getType()));
+			logger.warn("Can only check in floating licenses. Ignoring check-in call");
+			return;
 		}
 		ValidationParameters validationParameters = parametersFactory.createFloatingCheckingParameters(model);
-		LicenseValidationResult checkInResult = validationRequest.send(model.getKey(), validationParameters);
+		validationRequest.send(model.getKey(), validationParameters);
 	}
 }
