@@ -153,7 +153,7 @@ public class LicenseUtil {
 
 	private LicenseUpdateResult trySaveToPersistence(LicenseValidationResult validationResult) {
 		try {
-			service.saveToPersistence(validationResult.getModel());
+			licenseService.saveToPersistence(validationResult.getModel());
 		} catch (PersistenceException e) {
 			String message = "License is valid but could not be persisted";
 			logger.error(message, e);
