@@ -8,17 +8,20 @@ public class LicenseValidationResult {
 	private String detail;
 
 	private LicenseModel model;
+	
+	private String key;
 
 	public LicenseValidationResult() {
-		this(null, false, null);
+		this(null, null, false, null);
 	}
 
-	public LicenseValidationResult(LicenseModel model, boolean valid) {
-		this(model, valid, "");
+	public LicenseValidationResult(LicenseModel model, String key, boolean valid) {
+		this(model, key, valid, "");
 	}
 
-	public LicenseValidationResult(LicenseModel model, boolean valid, String detail) {
+	public LicenseValidationResult(LicenseModel model, String key, boolean valid, String detail) {
 		this.model = model;
+		this.key = key;
 		this.valid = valid;
 		this.detail = detail;
 	}
@@ -39,6 +42,10 @@ public class LicenseValidationResult {
 		this.model = model;
 	}
 	
+	public String getKey() {
+		return key;
+	}
+
 	@Override
 	public String toString() {
 		return "LicenseValidationResult [valid=" + valid + ", detail=" + detail + ", model=" + model + "]";

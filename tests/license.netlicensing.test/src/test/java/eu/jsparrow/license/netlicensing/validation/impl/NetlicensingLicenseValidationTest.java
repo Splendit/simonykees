@@ -1,10 +1,10 @@
 package eu.jsparrow.license.netlicensing.validation.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.time.ZonedDateTime;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,9 +13,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
@@ -48,7 +45,7 @@ public class NetlicensingLicenseValidationTest {
 
 	@Test
 	public void validate_withInvalidCache_shouldSendRequestAndSaveToCache() throws ValidationException {
-		NetlicensingValidationResult validationResult = new NetlicensingValidationResult(model, true, null);
+		NetlicensingValidationResult validationResult = new NetlicensingValidationResult(model, null, true, null);
 		ValidationParameters validationParameters = new ValidationParameters();
 
 		when(cache.get(any())).thenReturn(null);

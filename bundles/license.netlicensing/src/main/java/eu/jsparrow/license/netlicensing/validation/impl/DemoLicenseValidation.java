@@ -31,7 +31,7 @@ public class DemoLicenseValidation implements LicenseValidation {
 		if (!valid) {
 			detail = "The free license has expired.";
 		}
-		LicenseValidationResult result = new LicenseValidationResult(demoLicenseModel, valid, detail);
+		LicenseValidationResult result = new LicenseValidationResult(demoLicenseModel, null, valid, detail);
 		logger.debug("Returning {}", result);
 		return result;
 	}
