@@ -13,13 +13,13 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.LicenseModelFactoryService;
+import eu.jsparrow.license.api.LicensePersistenceService;
 import eu.jsparrow.license.api.LicenseService;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
-import eu.jsparrow.license.netlicensing.LicenseModelFactory;
-import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import oshi.SystemInfo;
@@ -34,6 +34,9 @@ public class LicenseUtil {
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY)
 	private LicenseService licenseService;
+	
+	@Reference(cardinality = ReferenceCardinality.MANDATORY)
+	private LicensePersistenceService persistenceService;
 	
 	@Reference(cardinality = ReferenceCardinality.MANDATORY)
 	private LicenseModelFactoryService factoryService;
@@ -65,7 +68,7 @@ public class LicenseUtil {
 	public boolean checkAtStartUp(Shell shell) {
 		LicenseModel model = null;
 		try {
-			model = licenseService.loadFromPersistence();
+			model = persistenceService.loadFromPersistence();
 		} catch (PersistenceException e) {
 			handleStartUpPersistenceFailure(shell, e);
 			model = factoryService.createDemoLicenseModel();
@@ -133,7 +136,7 @@ public class LicenseUtil {
 	private LicenseModel tryLoadModelFromPersistence() {
 		LicenseModel model = null;
 		try {
-			model = licenseService.loadFromPersistence();
+			model = persistenceService.loadFromPersistence();
 		} catch (PersistenceException e) {
 			logger.error("Error while loading stored license, using default demo license", e);
 			model = factoryService.createDemoLicenseModel();
@@ -157,7 +160,7 @@ public class LicenseUtil {
 
 	private LicenseUpdateResult trySaveToPersistence(LicenseValidationResult validationResult) {
 		try {
-			licenseService.saveToPersistence(validationResult.getModel());
+			persistenceService.saveToPersistence(validationResult.getModel());
 		} catch (PersistenceException e) {
 			String message = "License is valid but could not be persisted";
 			logger.error(message, e);

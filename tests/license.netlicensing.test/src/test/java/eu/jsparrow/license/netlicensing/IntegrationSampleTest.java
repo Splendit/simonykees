@@ -20,23 +20,23 @@ import eu.jsparrow.license.netlicensing.validation.impl.NetlicensingLicenseCache
 
 public class IntegrationSampleTest {
 
-	private NetlicensingLicenseService licenseService;
+	private NetlicensingLicensePersistenceService persistenceService;
 	
 	@Before
 	public void setUp() {
-		licenseService = new NetlicensingLicenseService();
+		persistenceService = new NetlicensingLicensePersistenceService();
 	}
 	
 	@Test
 	public void whenSaving_expiredDemoLicense() throws PersistenceException {
-		licenseService.saveToPersistence(model);
 		LicenseModel model = new NetlicensingLicenseModelFactoryService().createDemoLicenseModel(ZonedDateTime.now().minusDays(5));
+		persistenceService.saveToPersistence(model);
 		
 	}
 	
 	@Test
 	public void whenSaving_validDemoLicense() throws PersistenceException {
-		licenseService.saveToPersistence(model);
 		LicenseModel model = new NetlicensingLicenseModelFactoryService().createDemoLicenseModel(ZonedDateTime.now().plusDays(5));
+		persistenceService.saveToPersistence(model);
 	}
 }
