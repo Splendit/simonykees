@@ -1,5 +1,7 @@
 package eu.jsparrow.license.api;
 
+import java.time.ZonedDateTime;
+
 @SuppressWarnings("nls")
 public class LicenseValidationResult {
 
@@ -7,23 +9,25 @@ public class LicenseValidationResult {
 
 	private String detail;
 
-	private LicenseModel model;
+	private LicenseType licenseType;
 	
 	private String key;
+	private ZonedDateTime expirationDate;
 
 	public LicenseValidationResult() {
-		this(null, null, false, null);
+		this(null, null, false, null, null);
 	}
 
-	public LicenseValidationResult(LicenseModel model, String key, boolean valid) {
-		this(model, key, valid, "");
+	public LicenseValidationResult(LicenseType licenseType, String key, boolean valid, ZonedDateTime expirationDate) {
+		this(licenseType, key, valid, "", expirationDate);
 	}
 
-	public LicenseValidationResult(LicenseModel model, String key, boolean valid, String detail) {
-		this.model = model;
+	public LicenseValidationResult(LicenseType licenseType, String key, boolean valid, String detail, ZonedDateTime expirationDate) {
+		this.licenseType = licenseType;
 		this.key = key;
 		this.valid = valid;
 		this.detail = detail;
+		this.expirationDate = expirationDate;
 	}
 
 	public boolean isValid() {
@@ -34,21 +38,25 @@ public class LicenseValidationResult {
 		return detail;
 	}
 
-	public LicenseModel getModel() {
-		return model;
+	public LicenseType getLicenseType() {
+		return licenseType;
 	}
 
-	public void setModel(LicenseModel model) {
-		this.model = model;
+	public void setLicenseType(LicenseType model) {
+		this.licenseType = model;
 	}
 	
 	public String getKey() {
 		return key;
 	}
+	
+	public ZonedDateTime getExpirationDate() {
+		return this.expirationDate;
+	}
 
 	@Override
 	public String toString() {
-		return "LicenseValidationResult [valid=" + valid + ", detail=" + detail + ", model=" + model + "]";
+		return "LicenseValidationResult [valid=" + valid + ", detail=" + detail + ", type=" + licenseType + ", expirationDate=" + expirationDate + "]";
 	}
 
 }

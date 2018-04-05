@@ -198,7 +198,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		StringBuilder licenseModelString = new StringBuilder();
 
 		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as);
-		if (result.getModel().getType() == LicenseType.DEMO) {
+		if (result.getLicenseType() == LicenseType.DEMO) {
 			licenseModelString.append("free license. ");
 		} else {
 			licenseModelString.append("full license ");
@@ -208,7 +208,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		}
 		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_valid_until);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
-		licenseModelString.append(result.getModel().getExpirationDate()
+		licenseModelString.append(result.getExpirationDate()
 			.format(formatter));
 		licenseModelString.append("."); //$NON-NLS-1$
 

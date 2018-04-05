@@ -30,13 +30,15 @@ public class IntegrationSampleTest {
 	@Test
 	public void whenSaving_expiredDemoLicense() throws PersistenceException {
 		LicenseModel model = new NetlicensingLicenseModelFactoryService().createDemoLicenseModel(ZonedDateTime.now().minusDays(5));
-		persistenceService.saveToPersistence(model);
+		LicenseValidationResult result = new LicenseValidationResult(model.getType(), "key", true, model.getExpirationDate());
+		persistenceService.saveToPersistence(result);
 		
 	}
 	
 	@Test
 	public void whenSaving_validDemoLicense() throws PersistenceException {
 		LicenseModel model = new NetlicensingLicenseModelFactoryService().createDemoLicenseModel(ZonedDateTime.now().plusDays(5));
-		persistenceService.saveToPersistence(model);
+		LicenseValidationResult result = new LicenseValidationResult(model.getType(), "key", true, model.getExpirationDate());
+		persistenceService.saveToPersistence(result);
 	}
 }

@@ -35,7 +35,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		this.model = model;
 		this.licenseCache = new NetlicensingLicenseCache();
 		this.parametersFactory = new NetlicensingValidationParametersFactory();
-		this.validationRequest = new NetlicensingValidationRequest(new ResponseEvaluator(model));
+		this.validationRequest = new NetlicensingValidationRequest(new ResponseEvaluator(model.getKey()));
 	}
 
 	public NetlicensingLicenseValidation(NetlicensingLicenseModel model, NetlicensingLicenseCache cache,

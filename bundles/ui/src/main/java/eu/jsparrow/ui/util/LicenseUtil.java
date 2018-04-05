@@ -80,7 +80,7 @@ public class LicenseUtil {
 			handleStartUpValidationFailure(shell, e);
 			return true;
 		}
-		if (result.getModel().getType() == LicenseType.DEMO && !result.isValid()) {
+		if (result.getLicenseType() == LicenseType.DEMO && !result.isValid()) {
 			BuyLicenseDialog dialog = new BuyLicenseDialog(shell);
 			return dialog.open() == 0;
 		}
@@ -91,7 +91,7 @@ public class LicenseUtil {
 		if (result == null) {
 			return true;
 		}
-		return result.getModel().getType() == LicenseType.DEMO;
+		return result.getLicenseType() == LicenseType.DEMO;
 	}
 
 	public LicenseUpdateResult update(String key) {
@@ -158,7 +158,7 @@ public class LicenseUtil {
 
 	private LicenseUpdateResult trySaveToPersistence(LicenseValidationResult validationResult) {
 		try {
-			persistenceService.saveToPersistence(validationResult.getModel());
+			persistenceService.saveToPersistence(validationResult);
 		} catch (PersistenceException e) {
 			logger.error("License is valid but could not be persisted", e); //$NON-NLS-1$
 			return new LicenseUpdateResult(false,

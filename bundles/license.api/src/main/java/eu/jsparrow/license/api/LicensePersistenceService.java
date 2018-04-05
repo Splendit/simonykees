@@ -6,5 +6,5 @@ public interface LicensePersistenceService {
 	
 	public LicenseModel loadFromPersistence() throws PersistenceException;
 
-	public void saveToPersistence(LicenseModel model) throws PersistenceException;	
+	public void saveToPersistence(LicenseValidationResult validationResult) throws PersistenceException;	
 }

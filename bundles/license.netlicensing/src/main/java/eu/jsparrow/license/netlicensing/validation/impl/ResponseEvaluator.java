@@ -9,12 +9,13 @@ import org.slf4j.LoggerFactory;
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 import eu.jsparrow.i18n.ExceptionMessages;
-import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.exception.ValidationException;
-import eu.jsparrow.license.netlicensing.model.*;
+import eu.jsparrow.license.netlicensing.model.StatusDetail;
 import eu.jsparrow.license.netlicensing.validation.impl.response.Parser;
-import eu.jsparrow.license.netlicensing.validation.impl.response.model.*;
+import eu.jsparrow.license.netlicensing.validation.impl.response.model.FloatingResponse;
+import eu.jsparrow.license.netlicensing.validation.impl.response.model.MultiFeatureResponse;
+import eu.jsparrow.license.netlicensing.validation.impl.response.model.SubscriptionResponse;
 
 public class ResponseEvaluator {
 
@@ -23,17 +24,12 @@ public class ResponseEvaluator {
 
 	private static final int OFFLINE_VALIDITY_DURATION_MINUTES = 60;
 
-	private NetlicensingLicenseModel netlicensingModel;
-
+	private String key;
 	private Parser parser;
 
-	public ResponseEvaluator(NetlicensingLicenseModel model) {
-		this.netlicensingModel = model;
+	public ResponseEvaluator(String key) {
 		this.parser = new Parser();
-	}
-
-	public NetlicensingLicenseModel getLicensingModel() {
-		return this.netlicensingModel;
+		this.key = key;
 	}
 
 	public NetlicensingValidationResult evaluateResult(ValidationResult response) throws ValidationException {
@@ -118,12 +114,7 @@ public class ResponseEvaluator {
 				"Creating validation result with type={}, valid={}, expireDate={}, offlineExpire={},statusInfo ={}", //$NON-NLS-1$
 				licenseType, valid, expireDate, offlineExpire, statusInfo);
 
-		String key = netlicensingModel.getKey();
-		String name = netlicensingModel.getName();
-		String secret = netlicensingModel.getSecret();
-
-		LicenseModel model = new NetlicensingLicenseModel(licenseType, key, name, secret, expireDate);
-		return new NetlicensingValidationResult(model, key, valid, statusInfo.getUserMessage(), offlineExpire);
+		return new NetlicensingValidationResult(licenseType, key, valid, statusInfo.getUserMessage(), expireDate, offlineExpire);
 	}
 
 }

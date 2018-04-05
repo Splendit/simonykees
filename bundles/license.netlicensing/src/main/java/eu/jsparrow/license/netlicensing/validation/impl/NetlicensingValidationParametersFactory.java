@@ -53,7 +53,7 @@ public class NetlicensingValidationParametersFactory {
 		return parameters;
 	}
 
-	protected ValidationParameters createFloatingParameters(String sessionId, String action) {
+	private ValidationParameters createFloatingParameters(String sessionId, String action) {
 		logger.debug("Creating floating parameters for sessionId {} and action {}", sessionId, action);  //$NON-NLS-1$
 		ValidationParameters parameters = new ValidationParameters();
 		HashMap<String, String> params = new HashMap<>();
@@ -64,10 +64,20 @@ public class NetlicensingValidationParametersFactory {
 
 	}
 
-	public ValidationParameters createNodeLockedParameters(String secretKey) {
+	private ValidationParameters createNodeLockedParameters(String secretKey) {
 		logger.debug("Creating node locked for secret {}", secretKey);  //$NON-NLS-1$
 		ValidationParameters parameters = new ValidationParameters();
 		parameters.setLicenseeSecret(secretKey);
+		return parameters;
+	}
+	
+	public ValidationParameters createValidationParameters(String secret) {
+		ValidationParameters parameters = new ValidationParameters();
+		HashMap<String, String> params = new HashMap<>();
+		params.put(SESSION_ID_KEY, secret);
+		params.put(ACTION_KEY, ACTION_CHECK_OUT_VAL);
+		parameters.setProductModuleValidationParameters(NetlicensingProperties.FLOATING_PRODUCT_MODULE_NUMBER, params);
+		parameters.setProductNumber(NetlicensingProperties.PRODUCT_NUMBER);
 		return parameters;
 	}
 

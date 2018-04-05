@@ -1,13 +1,13 @@
 package eu.jsparrow.license.netlicensing;
 
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.LicensePersistenceService;
+import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.netlicensing.persistence.AESEncryption;
 import eu.jsparrow.license.netlicensing.persistence.SecureStoragePersistence;
@@ -30,9 +30,11 @@ public class NetlicensingLicensePersistenceService implements LicensePersistence
 	}
 
 	@Override
-	public void saveToPersistence(LicenseModel model) throws PersistenceException {
-		logger.debug("Saving {}", model);
-		persistence.save(model);
+	public void saveToPersistence(LicenseValidationResult result) throws PersistenceException {
+		logger.debug("Saving {}", result);
+		NetlicensingLicenseModelFactoryService licenseFactory = new NetlicensingLicenseModelFactoryService();
+		LicenseModel model = licenseFactory.createNewModel(result.getLicenseType(), result.getKey(), "", "", "", result.getExpirationDate());
+		persistence.save(licenseFactory.createNewModel(result.getLicenseType(), result.getKey(), "", "", "", result.getExpirationDate()));
 	}
 
 }

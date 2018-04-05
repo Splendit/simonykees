@@ -2,35 +2,36 @@ package eu.jsparrow.license.netlicensing.validation.impl;
 
 import java.time.ZonedDateTime;
 
-import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 
 @SuppressWarnings("nls")
 public class NetlicensingValidationResult extends LicenseValidationResult {
 
-	private ZonedDateTime expirationTime;
+	private ZonedDateTime offlineExpirationTime;
 
-	public NetlicensingValidationResult(LicenseModel model, String key, boolean valid, ZonedDateTime expirationTime) {
-		this(model, key, valid, "", expirationTime);
+	public NetlicensingValidationResult(LicenseType licenseType, String key, boolean valid,
+			ZonedDateTime expirationDate, ZonedDateTime offlineExpirationTime) {
+		this(licenseType, key, valid, "", expirationDate, offlineExpirationTime);
 	}
 
-	public NetlicensingValidationResult(LicenseModel model, String key, boolean valid, String detail,
-			ZonedDateTime expirationTime) {
-		super(model, key, valid, detail);
-		this.expirationTime = expirationTime;
+	public NetlicensingValidationResult(LicenseType licenseType, String key, boolean valid, String detail,
+			ZonedDateTime expirationDate, ZonedDateTime offlineExpirationTime) {
+		super(licenseType, key, valid, detail, expirationDate);
+		this.offlineExpirationTime = offlineExpirationTime;
 	}
 
 	public boolean isExpired() {
 		return ZonedDateTime.now()
-			.isAfter(expirationTime);
+			.isAfter(offlineExpirationTime);
 	}
 
 	public ZonedDateTime getExpirationTime() {
-		return expirationTime;
+		return offlineExpirationTime;
 	}
 
 	public void setExpirationTime(ZonedDateTime expirationTime) {
-		this.expirationTime = expirationTime;
+		this.offlineExpirationTime = expirationTime;
 	}
 
 }
