@@ -8,13 +8,13 @@ import org.slf4j.LoggerFactory;
 
 import com.labs64.netlicensing.domain.vo.ValidationResult;
 
+import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.model.*;
 import eu.jsparrow.license.netlicensing.validation.impl.response.Parser;
 import eu.jsparrow.license.netlicensing.validation.impl.response.model.*;
 
-@SuppressWarnings("nls")
 public class ResponseEvaluator {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
@@ -36,14 +36,14 @@ public class ResponseEvaluator {
 	}
 
 	public NetlicensingValidationResult evaluateResult(ValidationResult response) throws ValidationException {
-		logger.debug("Evaluating {}", response);
+		logger.debug("Evaluating {}", response); //$NON-NLS-1$
 		parser.parseValidationResult(response);
 
 		SubscriptionResponse subscription = parser.getSubscription();
 
-		logger.debug("Received subscription {}", subscription);
+		logger.debug("Received subscription {}", subscription); //$NON-NLS-1$
 		if (subscription == null) {
-			throw new ValidationException("No subscription received from license server.");
+			throw new ValidationException(ExceptionMessages.Netlicensing_validationError_noSubscriptionReceived);
 		}
 
 		if (subscription.isValid()) {
@@ -54,7 +54,7 @@ public class ResponseEvaluator {
 	}
 
 	private NetlicensingValidationResult evaluateExpiredLicense() throws ValidationException {
-		logger.debug("Evaluating expired license");
+		logger.debug("Evaluating expired license"); //$NON-NLS-1$
 		MultiFeatureResponse multiFeature = parser.getMultiFeature();
 		SubscriptionResponse subscription = parser.getSubscription();
 		ZonedDateTime expireDate = subscription.getExpires();
@@ -76,12 +76,12 @@ public class ResponseEvaluator {
 					StatusDetail.NODE_LOCKED_HARDWARE_MISMATCH);
 		}
 
-		logger.warn("No fitting validation result found for validation response");
-		throw new ValidationException("Unexpected response from license server.");
+		logger.warn("No fitting validation result found for validation response"); //$NON-NLS-1$
+		throw new ValidationException(ExceptionMessages.Netlicensing_validationError_unexpectedResponse);
 	}
 
 	private NetlicensingValidationResult evaluateNonExpiredLicense() throws ValidationException {
-		logger.debug("Evaluating non expired license");
+		logger.debug("Evaluating non expired license"); //$NON-NLS-1$
 		MultiFeatureResponse multiFeature = parser.getMultiFeature();
 		SubscriptionResponse subscription = parser.getSubscription();
 		ZonedDateTime expireDate = subscription.getExpires();
@@ -93,7 +93,7 @@ public class ResponseEvaluator {
 
 		FloatingResponse floating = parser.getFloating();
 		if (floating == null) {
-			throw new ValidationException("License server response does not contain floating license.");
+			throw new ValidationException(ExceptionMessages.Netlicensing_validationError_noFloatingPresent);
 		}
 
 		if (floating.isValid()) {
@@ -114,7 +114,7 @@ public class ResponseEvaluator {
 	private NetlicensingValidationResult createValidationResult(NetlicensingLicenseType licenseType, boolean valid,
 			ZonedDateTime expireDate, ZonedDateTime offlineExpire, StatusDetail statusInfo) {
 		logger.debug(
-				"Creating validation result with type={}, valid={}, expireDate={}, offlineExpire={},statusInfo ={}",
+				"Creating validation result with type={}, valid={}, expireDate={}, offlineExpire={},statusInfo ={}", //$NON-NLS-1$
 				licenseType, valid, expireDate, offlineExpire, statusInfo);
 
 		String key = netlicensingModel.getKey();

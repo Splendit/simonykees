@@ -202,27 +202,6 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 		return container;
 	}
 
-	private void updateWarningInformation(boolean updated) {
-		if (!updated) {
-			updatedLabel.setText(Messages.SimonykeesUpdateLicenseDialog_invalid_license_key);
-			updatedLabel.setImage(scaledCloseRedIconImage);
-			updatedLabel.setVisible(true);
-
-			updatedIconLabel.setImage(scaledJSparrowImageInactive);
-			updatedIconLabel.setVisible(true);
-		} else {
-			updatedLabel.setText(Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);
-			updatedLabel.setImage(scaledTickmarkGreenIconImage);
-			updatedLabel.setVisible(true);
-
-			updatedIconLabel.setImage(scaledJSparrowImageActive);
-			updatedIconLabel.setVisible(true);
-		}
-
-		updatedIconLabel.getParent()
-			.layout();
-	}
-
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.CLOSE_LABEL, true);

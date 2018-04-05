@@ -13,7 +13,6 @@ import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidation;
 
-@SuppressWarnings("nls")
 public class NetlicensingLicenseValidation implements LicenseValidation {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
@@ -44,11 +43,11 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 
 	@Override
 	public LicenseValidationResult validate() throws ValidationException {
-		logger.debug("Validating netlicensing license");
+		logger.debug("Validating netlicensing license"); //$NON-NLS-1$
 		String licenseeNumber = model.getKey();
 		LicenseValidationResult result = licenseCache.get(licenseeNumber);
 		if (result != null) {
-			logger.debug("Found existing result {}", result);
+			logger.debug("Found existing result {}", result); //$NON-NLS-1$
 			return result;
 		}
 
@@ -58,14 +57,14 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		if (licensingValidationResult.isValid()) {
 			licenseCache.updateCache(licenseeNumber, licensingValidationResult);
 		}
-		logger.debug("Returning {}", licensingValidationResult);
+		logger.debug("Returning {}", licensingValidationResult); //$NON-NLS-1$
 		return licensingValidationResult;
 	}
 
 	@Override
 	public void checkIn() throws ValidationException {
 		if (model.getType() != NetlicensingLicenseType.FLOATING) {
-			logger.warn("Can only check in floating licenses. Ignoring check-in call");
+			logger.warn("Can only check in floating licenses. Ignoring check-in call"); //$NON-NLS-1$
 			return;
 		}
 		ValidationParameters validationParameters = parametersFactory.createFloatingCheckInParameters(model);

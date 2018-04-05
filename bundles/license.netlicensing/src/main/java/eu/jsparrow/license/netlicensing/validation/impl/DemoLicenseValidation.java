@@ -22,17 +22,16 @@ public class DemoLicenseValidation implements LicenseValidation {
 	}
 
 	@Override
-	@SuppressWarnings("nls")
 	public LicenseValidationResult validate() {
-		logger.debug("Start validating demo license");
+		logger.debug("Start validating demo license"); //$NON-NLS-1$
 		ZonedDateTime expirationDate = demoLicenseModel.getExpirationDate();
 		boolean valid = ZonedDateTime.now().isBefore(expirationDate);
-		String detail = "";
+		String detail = ""; //$NON-NLS-1$
 		if (!valid) {
-			detail = "The free license has expired.";
+			detail = Messages.Netlicensing_validationResult_freeLicenseExpired1;
 		}
 		LicenseValidationResult result = new LicenseValidationResult(demoLicenseModel, valid, detail);
-		logger.debug("Returning {}", result);
+		logger.debug("Returning {}", result); //$NON-NLS-1$
 		return result;
 	}
 
