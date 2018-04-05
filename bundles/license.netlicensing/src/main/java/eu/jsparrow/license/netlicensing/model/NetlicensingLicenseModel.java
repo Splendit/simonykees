@@ -3,6 +3,7 @@ package eu.jsparrow.license.netlicensing.model;
 import java.time.ZonedDateTime;
 
 import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.LicenseType;
 
 /**
  * Implementor of {@link Licensemodel} that represents a NetLicensing license.
@@ -15,16 +16,16 @@ public class NetlicensingLicenseModel implements LicenseModel {
 	private String name;
 	private String product;
 	private String secret;
-	private NetlicensingLicenseType type;
+	private LicenseType type;
 	private ZonedDateTime expireDate;
 
-	public NetlicensingLicenseModel(NetlicensingLicenseType type, String key, String secret) {
+	public NetlicensingLicenseModel(LicenseType type, String key, String secret) {
 		this.type = type;
 		this.key = key;
 		this.secret = secret;
 	}
 
-	public NetlicensingLicenseModel(NetlicensingLicenseType type, String key, String name, String product,
+	public NetlicensingLicenseModel(LicenseType type, String key, String name, String product,
 			String secret, ZonedDateTime expireDate) {
 		this(type, key, secret);
 		this.name = name;
@@ -52,7 +53,7 @@ public class NetlicensingLicenseModel implements LicenseModel {
 		return secret;
 	}
 
-	public NetlicensingLicenseType getType() {
+	public LicenseType getType() {
 		return this.type;
 	}
 

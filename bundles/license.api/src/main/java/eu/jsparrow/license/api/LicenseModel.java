@@ -6,5 +6,6 @@ import java.time.ZonedDateTime;
 public interface LicenseModel extends Serializable {
 	
 	public ZonedDateTime getExpirationDate();
-
+	
+	public LicenseType getType();
 }

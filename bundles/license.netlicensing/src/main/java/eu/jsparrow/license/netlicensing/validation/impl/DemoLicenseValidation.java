@@ -36,7 +36,7 @@ public class DemoLicenseValidation implements LicenseValidation {
 		if (!valid) {
 			detail = Messages.Netlicensing_validationResult_freeLicenseExpired0;
 		}
-		LicenseValidationResult result = new LicenseValidationResult(demoLicenseModel, valid, detail);
+		LicenseValidationResult result = new LicenseValidationResult(demoLicenseModel, null, valid, detail);
 		logger.debug("Returning {}", result); //$NON-NLS-1$
 		return result;
 	}

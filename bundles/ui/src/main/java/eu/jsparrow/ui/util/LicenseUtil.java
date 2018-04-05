@@ -14,12 +14,13 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.LicenseModelFactoryService;
+import eu.jsparrow.license.api.LicensePersistenceService;
 import eu.jsparrow.license.api.LicenseService;
+import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
-import eu.jsparrow.license.netlicensing.LicenseModelFactory;
-import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import oshi.SystemInfo;
@@ -34,6 +35,12 @@ public class LicenseUtil {
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY)
 	private LicenseService licenseService;
+	
+	@Reference(cardinality = ReferenceCardinality.MANDATORY)
+	private LicensePersistenceService persistenceService;
+	
+	@Reference(cardinality = ReferenceCardinality.MANDATORY)
+	private LicenseModelFactoryService factoryService;
 
 	private LicenseValidationResult result = null;
 
@@ -62,10 +69,10 @@ public class LicenseUtil {
 	public boolean checkAtStartUp(Shell shell) {
 		LicenseModel model = null;
 		try {
-			model = licenseService.loadFromPersistence();
+			model = persistenceService.loadFromPersistence();
 		} catch (PersistenceException e) {
 			handleStartUpPersistenceFailure(shell, e);
-			model = new LicenseModelFactory().createDemoLicenseModel();
+			model = factoryService.createDemoLicenseModel();
 		}
 		try {
 			result = licenseService.validate(model);
@@ -73,7 +80,7 @@ public class LicenseUtil {
 			handleStartUpValidationFailure(shell, e);
 			return true;
 		}
-		if (result.getModel() instanceof DemoLicenseModel && !result.isValid()) {
+		if (result.getModel().getType() == LicenseType.DEMO && !result.isValid()) {
 			BuyLicenseDialog dialog = new BuyLicenseDialog(shell);
 			return dialog.open() == 0;
 		}
@@ -84,12 +91,12 @@ public class LicenseUtil {
 		if (result == null) {
 			return true;
 		}
-		return result.getModel() instanceof DemoLicenseModel;
+		return result.getModel().getType() == LicenseType.DEMO;
 	}
 
 	public LicenseUpdateResult update(String key) {
 		String secret = createSecretFromHardware();
-		LicenseModel model = new LicenseModelFactory().createNewFloatingModel(key, secret);
+		LicenseModel model = factoryService.createNewFloatingModel(key, secret);
 		LicenseValidationResult validationResult = null;
 		try {
 			validationResult = licenseService.validate(model);
@@ -129,10 +136,10 @@ public class LicenseUtil {
 	private LicenseModel tryLoadModelFromPersistence() {
 		LicenseModel model = null;
 		try {
-			model = licenseService.loadFromPersistence();
+			model = persistenceService.loadFromPersistence();
 		} catch (PersistenceException e) {
 			logger.warn("Error while loading stored license, using default demo license", e); //$NON-NLS-1$
-			model = new LicenseModelFactory().createDemoLicenseModel();
+			model = factoryService.createDemoLicenseModel();
 		}
 		return model;
 	}
@@ -151,7 +158,7 @@ public class LicenseUtil {
 
 	private LicenseUpdateResult trySaveToPersistence(LicenseValidationResult validationResult) {
 		try {
-			licenseService.saveToPersistence(validationResult.getModel());
+			persistenceService.saveToPersistence(validationResult.getModel());
 		} catch (PersistenceException e) {
 			logger.error("License is valid but could not be persisted", e); //$NON-NLS-1$
 			return new LicenseUpdateResult(false,

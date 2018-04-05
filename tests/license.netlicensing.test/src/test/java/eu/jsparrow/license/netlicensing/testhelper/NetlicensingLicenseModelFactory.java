@@ -2,17 +2,17 @@ package eu.jsparrow.license.netlicensing.testhelper;
 
 import java.time.ZonedDateTime;
 
+import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
-import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseType;
 
 public class NetlicensingLicenseModelFactory {
 
 	public static NetlicensingLicenseModel create() {
-		return new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key", "name", "product", "secret",
+		return new NetlicensingLicenseModel(LicenseType.NODE_LOCKED, "key", "name", "product", "secret",
 				ZonedDateTime.now());
 	}
 
-	public static NetlicensingLicenseModel create(NetlicensingLicenseType type) {
+	public static NetlicensingLicenseModel create(LicenseType type) {
 		return new NetlicensingLicenseModel(type, "key", "name", "product", "secret", ZonedDateTime.now());
 	}
 
