@@ -34,6 +34,9 @@ public class LicenseUtil {
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY)
 	private LicenseService licenseService;
+	
+	@Reference(cardinality = ReferenceCardinality.MANDATORY)
+	private LicenseModelFactoryService factoryService;
 
 	private LicenseValidationResult result = null;
 
@@ -65,7 +68,7 @@ public class LicenseUtil {
 			model = licenseService.loadFromPersistence();
 		} catch (PersistenceException e) {
 			handleStartUpPersistenceFailure(shell, e);
-			model = new LicenseModelFactory().createDemoLicenseModel();
+			model = factoryService.createDemoLicenseModel();
 		}
 		try {
 			result = licenseService.validate(model);
@@ -89,7 +92,7 @@ public class LicenseUtil {
 
 	public LicenseUpdateResult update(String key) {
 		String secret = createSecretFromHardware();
-		LicenseModel model = new LicenseModelFactory().createNewFloatingModel(key, secret);
+		LicenseModel model = factoryService.createNewFloatingModel(key, secret);
 		LicenseValidationResult validationResult = null;
 		try {
 			validationResult = licenseService.validate(model);
@@ -133,7 +136,7 @@ public class LicenseUtil {
 			model = licenseService.loadFromPersistence();
 		} catch (PersistenceException e) {
 			logger.error("Error while loading stored license, using default demo license", e);
-			model = new LicenseModelFactory().createDemoLicenseModel();
+			model = factoryService.createDemoLicenseModel();
 		}
 		return model;
 	}
