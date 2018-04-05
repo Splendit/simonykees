@@ -11,7 +11,6 @@ public class NetlicensingLicenseModel implements LicenseModel {
 
 	private String key;
 	private String name;
-	private String product;
 	private String secret;
 	private NetlicensingLicenseType type;
 	private ZonedDateTime expireDate;
@@ -22,11 +21,10 @@ public class NetlicensingLicenseModel implements LicenseModel {
 		this.secret = secret;
 	}
 
-	public NetlicensingLicenseModel(NetlicensingLicenseType type, String key, String name, String product,
-			String secret, ZonedDateTime expireDate) {
+	public NetlicensingLicenseModel(NetlicensingLicenseType type, String key, String name, String secret,
+			ZonedDateTime expireDate) {
 		this(type, key, secret);
 		this.name = name;
-		this.product = product;
 		this.expireDate = expireDate;
 	}
 
@@ -42,10 +40,6 @@ public class NetlicensingLicenseModel implements LicenseModel {
 		return expireDate;
 	}
 
-	public String getProduct() {
-		return product;
-	}
-
 	public String getSecret() {
 		return secret;
 	}
@@ -56,7 +50,7 @@ public class NetlicensingLicenseModel implements LicenseModel {
 
 	@Override
 	public String toString() {
-		return "NetlicensingLicenseModel [key=" + key + ", name=" + name + ", product=" + product + ", secret=" + secret
+		return "NetlicensingLicenseModel [key=" + key + ", name=" + name + ", secret=" + secret
 				+ ", type=" + type + ", expireDate=" + expireDate + "]";
 	}
 

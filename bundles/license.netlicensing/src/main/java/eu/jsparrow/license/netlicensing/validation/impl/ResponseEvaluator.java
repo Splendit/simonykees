@@ -119,10 +119,9 @@ public class ResponseEvaluator {
 
 		String key = netlicensingModel.getKey();
 		String name = netlicensingModel.getName();
-		String product = netlicensingModel.getProduct();
 		String secret = netlicensingModel.getSecret();
 
-		LicenseModel model = new NetlicensingLicenseModel(licenseType, key, name, product, secret, expireDate);
+		LicenseModel model = new NetlicensingLicenseModel(licenseType, key, name, secret, expireDate);
 		return new NetlicensingValidationResult(model, valid, statusInfo.getUserMessage(), offlineExpire);
 	}
 
