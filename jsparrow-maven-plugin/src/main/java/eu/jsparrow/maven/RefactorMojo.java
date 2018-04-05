@@ -68,6 +68,9 @@ public class RefactorMojo extends AbstractMojo {
 	@Parameter(property = "license")
 	private String license;
 
+	@Parameter(property = "devMode")
+	private boolean devMode;
+
 	/**
 	 * MOJO entry point. Registers shutdown hook for clean up and starts equinox
 	 * with the given configuration
@@ -83,6 +86,7 @@ public class RefactorMojo extends AbstractMojo {
 				config.setMavenHome(mavenHome);
 				config.setProfile(profile);
 				config.setUseDefaultConfig(useDefaultConfig);
+				config.setDevMode(devMode);
 
 				boolean adapterLoadad = serviceInstance.lazyLoadMavenAdapter(config);
 				if (!adapterLoadad) {

@@ -26,6 +26,7 @@ public class MavenParameters {
 	private boolean useDefaultConfig;
 	private String ruleId;
 	private String license;
+	private boolean devMode;
 
 	public MavenParameters(MavenProject project, Log log, File defaultYamlFile, MavenSession mavenSession, String mode,
 			String license) {
@@ -97,4 +98,13 @@ public class MavenParameters {
 	public String getLicense() {
 		return license;
 	}
+
+	public boolean isDevMode() {
+		return devMode;
+	}
+
+	public void setDevMode(boolean devMode) {
+		this.devMode = devMode;
+	}
+
 }
