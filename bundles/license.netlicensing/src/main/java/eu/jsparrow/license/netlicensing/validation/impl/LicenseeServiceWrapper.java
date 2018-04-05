@@ -7,9 +7,9 @@ import com.labs64.netlicensing.service.LicenseeService;
 /**
  * A helper class to wrap the static call to {@link LicenseeService}.
  */
-class LicenseeServiceWrapper {
+public class LicenseeServiceWrapper {
 
-	ValidationResult validate(Context context, String key, ValidationParameters parameters)
+	public ValidationResult validate(Context context, String key, ValidationParameters parameters)
 			throws NetLicensingException {
 		return LicenseeService.validate(context, key, parameters);
 	}
