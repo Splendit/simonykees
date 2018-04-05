@@ -3,6 +3,7 @@ package eu.jsparrow.ui.util;
 import java.lang.invoke.MethodHandles;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -73,7 +74,7 @@ public class LicenseUtil {
 			return true;
 		}
 		if (result.getModel() instanceof DemoLicenseModel && !result.isValid()) {
-			BuyLicenseDialog dialog = new BuyLicenseDialog(shell, "Your free license has expired.");
+			BuyLicenseDialog dialog = new BuyLicenseDialog(shell);
 			return dialog.open() == 0;
 		}
 		return true;
@@ -93,14 +94,13 @@ public class LicenseUtil {
 		try {
 			validationResult = licenseService.validate(model);
 		} catch (ValidationException e) {
-			logger.error("Could not validate license", e);
-			return new LicenseUpdateResult(false, "Could not validate license.\n" + e.getMessage());
+			logger.error("Could not validate license", e); //$NON-NLS-1$
+			return new LicenseUpdateResult(false, Messages.UpdateLicenseDialog_error_couldNotValidate);
 		}
 
 		if (!validationResult.isValid()) {
-			String message = String.format("License with key '%s' is not valid. License not saved.", key);
-			logger.warn(message);
-			return new LicenseUpdateResult(false, message);
+			logger.warn("License with key '{}' is not valid. License not saved.", key); //$NON-NLS-1$
+			return new LicenseUpdateResult(false, Messages.UpdateLicenseDialog_error_licenseInvalid);
 
 		}
 		return trySaveToPersistence(validationResult);
@@ -111,7 +111,7 @@ public class LicenseUtil {
 		try {
 			licenseService.checkIn(model);
 		} catch (ValidationException e) {
-			logger.error("Failed to check in license.", e);
+			logger.error("Failed to check in license.", e); //$NON-NLS-1$
 		}
 		scheduler.shutDown();
 	}
@@ -121,7 +121,7 @@ public class LicenseUtil {
 		try {
 			result = licenseService.validate(model);
 		} catch (ValidationException e) {
-			logger.error("Failed to validate license", e);
+			logger.error("Failed to validate license", e); //$NON-NLS-1$
 		}
 		return result;
 	}
@@ -131,23 +131,21 @@ public class LicenseUtil {
 		try {
 			model = licenseService.loadFromPersistence();
 		} catch (PersistenceException e) {
-			logger.error("Error while loading stored license, using default demo license", e);
+			logger.warn("Error while loading stored license, using default demo license", e); //$NON-NLS-1$
 			model = new LicenseModelFactory().createDemoLicenseModel();
 		}
 		return model;
 	}
 
 	private void handleStartUpPersistenceFailure(Shell shell, PersistenceException e) {
-		String partMessage = "Failed to load stored license. Falling back to free license";
-		logger.error(partMessage, e);
-		String message = partMessage + "\nPlease view the jSparrow logs for more information.";
+		logger.error("Failed to load stored license. Falling back to free license.", e); //$NON-NLS-1$
+		String message = Messages.MessageDialog_licensingError_failedToLoad;
 		SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
 	}
 
 	private void handleStartUpValidationFailure(Shell shell, ValidationException e) {
-		String partMessage = "Failed to validate license. " + e.getMessage();
-		logger.error(partMessage, e);
-		String message = partMessage + "\nPlease view the jSparrow logs for more information.";
+		logger.error("Failed to validate license. ", e); //$NON-NLS-1$
+		String message = Messages.MessageDialog_licensingError_failedToValidate;
 		SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
 	}
 
@@ -155,9 +153,9 @@ public class LicenseUtil {
 		try {
 			licenseService.saveToPersistence(validationResult.getModel());
 		} catch (PersistenceException e) {
-			String message = "License is valid but could not be persisted";
-			logger.error(message, e);
-			return new LicenseUpdateResult(false, message + ".\nPlease see the log for details.");
+			logger.error("License is valid but could not be persisted", e); //$NON-NLS-1$
+			return new LicenseUpdateResult(false,
+					NLS.bind(Messages.UpdateLicenseDialog_error_couldNotSave, e.getMessage()));
 		}
 
 		return new LicenseUpdateResult(true, Messages.SimonykeesUpdateLicenseDialog_license_updated_successfully);

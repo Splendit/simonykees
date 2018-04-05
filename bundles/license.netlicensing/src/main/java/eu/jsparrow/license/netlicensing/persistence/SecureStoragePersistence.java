@@ -8,20 +8,20 @@ import org.eclipse.equinox.security.storage.StorageException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.netlicensing.LicenseModelFactory;
 import eu.jsparrow.license.netlicensing.LicensePersistence;
 
-@SuppressWarnings("nls")
 public class SecureStoragePersistence implements LicensePersistence {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	private static final String SECURE_PREFERENCES_KEY = "simonykees";
+	private static final String SECURE_PREFERENCES_KEY = "simonykees"; //$NON-NLS-1$
 
-	private static final String NODE_KEY = "license-model";
+	private static final String NODE_KEY = "license-model"; //$NON-NLS-1$
 
 	private ISecurePreferences securePreferences;
 	
@@ -36,7 +36,7 @@ public class SecureStoragePersistence implements LicensePersistence {
 	public LicenseModel load() throws PersistenceException {
 		byte[] encryptedModel = loadFromSecureStorage();
 		if(encryptedModel == null) {
-			logger.warn("Could not find existing license in storage, saving and returning default license");
+			logger.warn("Could not find existing license in storage, saving and returning default license"); //$NON-NLS-1$
 			LicenseModel defaultModel = new LicenseModelFactory().createDemoLicenseModel();
 			save(defaultModel);
 			return defaultModel;
@@ -51,7 +51,7 @@ public class SecureStoragePersistence implements LicensePersistence {
 	}
 
 	private void saveToSecureStorage(byte[] data) throws PersistenceException {
-		logger.debug("Saving data '{}' to sercure storage", data);
+		logger.debug("Saving data '{}' to secure storage", data); //$NON-NLS-1$
 		ISecurePreferences simonykeesNode = securePreferences.node(SECURE_PREFERENCES_KEY);
 		simonykeesNode.clear();
 		try {
@@ -59,17 +59,17 @@ public class SecureStoragePersistence implements LicensePersistence {
 			simonykeesNode.putByteArray(NODE_KEY, data, false);
 			simonykeesNode.flush();
 		} catch (IOException | StorageException e) {
-			throw new PersistenceException("Failed to save license in storage.", e);
+			throw new PersistenceException(Messages.Netlicensing_persistenceError_failedToSave, e);
 		}
 	}
 
 	private byte[] loadFromSecureStorage() throws PersistenceException {
-		logger.debug("Loading data from secure storage");
+		logger.debug("Loading data from secure storage"); //$NON-NLS-1$
 		try {
 			ISecurePreferences simonykeesNode = securePreferences.node(SECURE_PREFERENCES_KEY);
 			return simonykeesNode.getByteArray(NODE_KEY, null);
 		} catch (StorageException e) {
-			throw new PersistenceException("Failed to load license from storage",e);
+			throw new PersistenceException(Messages.Netlicensing_persistenceError_failedtoLoad,e);
 		}
 	}
 

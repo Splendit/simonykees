@@ -96,10 +96,9 @@ public class BuyLicenseDialog extends Dialog {
 	 * @since 2.0.2
 	 * 
 	 */
-	public BuyLicenseDialog(Shell parentShell, String message) {
+	public BuyLicenseDialog(Shell parentShell) {
 		super(parentShell);
-		this.message = message;
-
+		this.message = Messages.BuyLicenseDialog_TitleMessage_LicenseHasExpired;
 		bundle = Platform.getBundle(Activator.PLUGIN_ID);
 	}
 
