@@ -68,7 +68,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 			logger.warn("Can only check in floating licenses. Ignoring check-in call");
 			return;
 		}
-		ValidationParameters validationParameters = parametersFactory.createFloatingCheckingParameters(model);
+		ValidationParameters validationParameters = parametersFactory.createFloatingCheckInParameters(model);
 		validationRequest.send(model.getKey(), validationParameters);
 	}
 }

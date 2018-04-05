@@ -41,7 +41,7 @@ public class NetlicensingValidationParametersFactory {
 		return parameters;
 	}
 
-	public ValidationParameters createFloatingCheckingParameters(NetlicensingLicenseModel model) {
+	public ValidationParameters createFloatingCheckInParameters(NetlicensingLicenseModel model) {
 		ValidationParameters parameters = createFloatingParameters(model.getSecret(), ACTION_CHECK_IN_VAL);
 		parameters.setProductNumber(NetlicensingProperties.PRODUCT_NUMBER);
 		parameters.setLicenseeName(model.getName());

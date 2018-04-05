@@ -34,7 +34,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		NetlicensingLicenseModel model = new NetlicensingLicenseModel(NetlicensingLicenseType.FLOATING, "key", "name",
 				expectedSessionId, expireDate);
 
-		ValidationParameters parameters = parametersFactory.createFloatingCheckingParameters(model);
+		ValidationParameters parameters = parametersFactory.createFloatingCheckInParameters(model);
 
 		Map<String, String> map = parameters
 			.getProductModuleValidationParameters(NetlicensingProperties.FLOATING_PRODUCT_MODULE_NUMBER);
