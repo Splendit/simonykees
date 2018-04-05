@@ -13,6 +13,11 @@ import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidation;
 
+/**
+ * Implementor of {@link LicenseValidation} for NetLicensing. Validating a
+ * license using NetLicensing involves making a request to the NetLicensing API.
+ * 
+ */
 public class NetlicensingLicenseValidation implements LicenseValidation {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()

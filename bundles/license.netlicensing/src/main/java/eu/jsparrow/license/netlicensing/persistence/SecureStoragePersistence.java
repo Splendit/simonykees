@@ -14,6 +14,10 @@ import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.netlicensing.LicenseModelFactory;
 import eu.jsparrow.license.netlicensing.LicensePersistence;
 
+/**
+ * Implementor of {@link LicensePersistence}.
+ * 
+ */
 public class SecureStoragePersistence implements LicensePersistence {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
@@ -31,7 +35,7 @@ public class SecureStoragePersistence implements LicensePersistence {
 		this.securePreferences = securePreferences;
 		this.encryption = encryption;
 	}
-	
+
 	@Override
 	public LicenseModel load() throws PersistenceException {
 		byte[] encryptedModel = loadFromSecureStorage();

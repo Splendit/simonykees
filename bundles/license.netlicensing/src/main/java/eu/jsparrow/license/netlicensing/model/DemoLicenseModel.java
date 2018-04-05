@@ -4,15 +4,19 @@ import java.time.ZonedDateTime;
 
 import eu.jsparrow.license.api.LicenseModel;
 
-@SuppressWarnings("nls")
+/**
+ * Implementor of {@link LicenseModel} that represents a demo license. A demo
+ * license offers less functions than a full license.
+ */
 public class DemoLicenseModel implements LicenseModel {
 
 	private static final long serialVersionUID = 5753428747671948588L;
-	
+
 	private ZonedDateTime expirationDate;
-	
+
 	public DemoLicenseModel() {
-		expirationDate = ZonedDateTime.now().plusDays(5);
+		expirationDate = ZonedDateTime.now()
+			.plusDays(5);
 	}
 
 	public void setExpirationDate(ZonedDateTime expirationDate) {
@@ -22,14 +26,14 @@ public class DemoLicenseModel implements LicenseModel {
 	public DemoLicenseModel(ZonedDateTime expirationDate) {
 		this.expirationDate = expirationDate;
 	}
-	
+
 	public ZonedDateTime getExpirationDate() {
 		return expirationDate;
 	}
-	
+
 	@Override
 	public String toString() {
-		return "DemoLicenseModel [expirationDate=" + expirationDate + "]";
+		return "DemoLicenseModel [expirationDate=" + expirationDate + "]"; //$NON-NLS-1$
 	}
 
 }

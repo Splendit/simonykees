@@ -15,6 +15,9 @@ import eu.jsparrow.license.netlicensing.persistence.SecureStoragePersistence;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidation;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidationFactory;
 
+/**
+ * Implementor of {@link LicenseService} using <a href="http://www.netlicensing.io">NetLicensing</a>
+ */
 @Component
 @SuppressWarnings("nls")
 public class NetlicensingLicenseService implements LicenseService {

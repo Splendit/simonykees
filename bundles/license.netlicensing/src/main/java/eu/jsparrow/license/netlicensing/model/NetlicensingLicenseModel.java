@@ -4,7 +4,9 @@ import java.time.ZonedDateTime;
 
 import eu.jsparrow.license.api.LicenseModel;
 
-@SuppressWarnings("nls")
+/**
+ * Implementor of {@link Licensemodel} that represents a NetLicensing license.
+ */
 public class NetlicensingLicenseModel implements LicenseModel {
 
 	private static final long serialVersionUID = 7047162817207967199L;
@@ -56,7 +58,7 @@ public class NetlicensingLicenseModel implements LicenseModel {
 
 	@Override
 	public String toString() {
-		return "NetlicensingLicenseModel [key=" + key + ", name=" + name + ", product=" + product + ", secret=" + secret
+		return "NetlicensingLicenseModel [key=" + key + ", name=" + name + ", product=" + product + ", secret=" + secret //$NON-NLS-2$
 				+ ", type=" + type + ", expireDate=" + expireDate + "]";
 	}
 
