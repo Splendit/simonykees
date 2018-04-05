@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.license.api.LicenseValidationResult;
 
-@SuppressWarnings("nls")
 public class NetlicensingLicenseCache {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
@@ -18,25 +17,25 @@ public class NetlicensingLicenseCache {
 	private static Map<String, NetlicensingValidationResult> entries = new HashMap<>();
 
 	public void updateCache(String key, NetlicensingValidationResult newValidationResult) {
-		logger.debug("Updating cache with key {} and validation result {}", key, newValidationResult);
+		logger.debug("Updating cache with key {} and validation result {}", key, newValidationResult); //$NON-NLS-1$
 		NetlicensingValidationResult entry = entries.putIfAbsent(key, newValidationResult);
 		if (entry == null) {
-			logger.debug("Adding new entry {}", newValidationResult);
+			logger.debug("Adding new entry {}", newValidationResult); //$NON-NLS-1$
 			return;
 		}
-		logger.debug("Replacing existing entry with {}", newValidationResult);
+		logger.debug("Replacing existing entry with {}", newValidationResult); //$NON-NLS-1$
 		entries.replace(key, newValidationResult);
 	}
 
 	public LicenseValidationResult get(String key) {
-		logger.debug("Retrieving item with key {}", key);
+		logger.debug("Retrieving item with key {}", key); //$NON-NLS-1$
 		NetlicensingValidationResult entry = entries.get(key);
 		if (entry == null) {
-			logger.debug("No item found");
+			logger.debug("No item found"); //$NON-NLS-1$
 			return null;
 		}
 		if (entry.isExpired()) {
-			logger.debug("Expired item found");
+			logger.debug("Expired item found"); //$NON-NLS-1$
 			return null;
 		}
 		return entry;

@@ -2,13 +2,7 @@ package eu.jsparrow.i18n;
 
 import org.eclipse.osgi.util.NLS;
 
-/**
- * TODO SIM-103 add class description
- * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
- *         Matthias Webhofer, Hans-Jörg Schrödl
- * @since 0.9
- */
+@SuppressWarnings("squid:S3008")
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "eu.jsparrow.i18n.messages"; //$NON-NLS-1$
 
@@ -60,6 +54,8 @@ public class Messages extends NLS {
 	public static String BuyLicenseDialog_reason6;
 	public static String BuyLicenseDialog_reason7;
 	public static String BuyLicenseDialog_reasonsLabel;
+
+	public static String BuyLicenseDialog_TitleMessage_LicenseHasExpired;
 	public static String StartDialog_alwaysShowIntroText;
 	public static String StartDialog_appreciationLabel;
 	public static String StartDialog_buyLicenseLabel;
@@ -120,6 +116,10 @@ public class Messages extends NLS {
 	public static String EnhancedForLoopToStreamSumRule_name;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
+	public static String MessageDialog_licensingError_failedToLoad;
+
+	public static String MessageDialog_licensingError_failedToValidate;
+
 	public static String MultiCatchRule_description;
 	public static String MultiCatchRule_name;
 
@@ -231,6 +231,10 @@ public class Messages extends NLS {
 	public static String MultiVariableDeclarationLineRule_description;
 	public static String Java5Profile_profileName;
 	public static String Java7Profile_profileName;
+	public static String Netlicensing_persistenceError_failedtoLoad;
+
+	public static String Netlicensing_persistenceError_failedToSave;
+
 	public static String OrganiseImportsRule_description;
 	public static String OrganiseImportsRule_name;
 	public static String OverrideAnnotationRule_description;
@@ -420,6 +424,12 @@ public class Messages extends NLS {
 	public static String SummaryWizardPageModel_IssuesFixed;
 	public static String TryWithResourceRule_description;
 	public static String TryWithResourceRule_name;
+	public static String UpdateLicenseDialog_error_couldNotSave;
+
+	public static String UpdateLicenseDialog_error_couldNotValidate;
+
+	public static String UpdateLicenseDialog_error_licenseInvalid;
+
 	public static String UseIsEmptyOnCollectionsRule_description;
 	public static String UseIsEmptyOnCollectionsRule_name;
 	public static String ValidateExecutor_shutting_down_validation_scheduler;

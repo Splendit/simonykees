@@ -13,20 +13,19 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 import eu.jsparrow.license.netlicensing.validation.impl.response.model.*;
 
-@SuppressWarnings("nls")
 public class Parser {
 	
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 			.lookupClass());
 
-	private static final String LICENSING_MODEL_KEY = "licensingModel";
+	private static final String LICENSING_MODEL_KEY = "licensingModel"; //$NON-NLS-1$
 	
 	private SubscriptionResponse subscription;
 	private FloatingResponse floating;
 	private MultiFeatureResponse multiFeature;
 	
 	public void parseValidationResult(ValidationResult validationResult) {
-		logger.debug("Parsing {}", validationResult);
+		logger.debug("Parsing {}", validationResult); //$NON-NLS-1$
 		subscription = extractModels(validationResult, SubscriptionResponse.LICENSING_MODEL,
 				this::buildSubscription);
 		multiFeature = extractModels(validationResult, MultiFeatureResponse.LICENSING_MODEL,
@@ -36,7 +35,7 @@ public class Parser {
 
 	public <T extends NetlicensingResponse> T extractModels(ValidationResult response, String model,
 			Function<Map<String, Composition>, T> responseModelBuilder) {
-		logger.debug("Extracting models of type '{}' from {} with {}", model, response, responseModelBuilder);
+		logger.debug("Extracting models of type '{}' from {} with {}", model, response, responseModelBuilder); //$NON-NLS-1$
 		return response.getValidations()
 			.values()
 			.stream()
