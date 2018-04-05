@@ -95,12 +95,12 @@ public class LicenseUtil {
 			validationResult = licenseService.validate(model);
 		} catch (ValidationException e) {
 			logger.error("Could not validate license", e); //$NON-NLS-1$
-			return new LicenseUpdateResult(false, Messages.UpdateLicenseDialog_error_couldNotValidate);
+			return new LicenseUpdateResult(false, NLS.bind(Messages.UpdateLicenseDialog_error_couldNotValidate, e.getMessage()));
 		}
 
 		if (!validationResult.isValid()) {
 			logger.warn("License with key '{}' is not valid. License not saved.", key); //$NON-NLS-1$
-			return new LicenseUpdateResult(false, Messages.UpdateLicenseDialog_error_licenseInvalid);
+			return new LicenseUpdateResult(false, NLS.bind(Messages.UpdateLicenseDialog_error_licenseInvalid, key));
 
 		}
 		return trySaveToPersistence(validationResult);
