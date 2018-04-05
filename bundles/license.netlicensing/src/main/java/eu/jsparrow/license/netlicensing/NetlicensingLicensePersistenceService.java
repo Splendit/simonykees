@@ -19,8 +19,7 @@ public class NetlicensingLicensePersistenceService implements LicensePersistence
 
 	private LicensePersistence persistence;
 	
-	@Activate
-	public void activate() {
+	public NetlicensingLicensePersistenceService() {
 		this.persistence = new SecureStoragePersistence(SecurePreferencesFactory.getDefault(), new AESEncryption());
 	}
 	
