@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
@@ -184,11 +185,9 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		StringBuilder licenseModelString = new StringBuilder();
 
 		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as);
-		if (licenseModel instanceof DemoLicenseModel) {
+		if (result.getModel().getType() == LicenseType.DEMO) {
 			licenseModelString.append("free license. ");
-		}
-		if (licenseModel instanceof NetlicensingLicenseModel) {
-			NetlicensingLicenseModel netLicenseModel = (NetlicensingLicenseModel) licenseModel;
+		} else {
 			licenseModelString.append("full license ");
 			licenseModelString.append(Messages.SimonykeesPreferencePageLicense_under_key_label);
 			licenseModelString.append(netLicenseModel.getKey());

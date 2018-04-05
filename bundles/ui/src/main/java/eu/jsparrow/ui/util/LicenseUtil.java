@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.LicenseService;
+import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
@@ -72,7 +73,7 @@ public class LicenseUtil {
 			handleStartUpValidationFailure(shell, e);
 			return true;
 		}
-		if (result.getModel() instanceof DemoLicenseModel && !result.isValid()) {
+		if (result.getModel().getType() == LicenseType.DEMO && !result.isValid()) {
 			BuyLicenseDialog dialog = new BuyLicenseDialog(shell, "Your free license has expired.");
 			return dialog.open() == 0;
 		}
@@ -83,7 +84,7 @@ public class LicenseUtil {
 		if (result == null) {
 			return true;
 		}
-		return result.getModel() instanceof DemoLicenseModel;
+		return result.getModel().getType() == LicenseType.DEMO;
 	}
 
 	public LicenseUpdateResult update(String key) {
