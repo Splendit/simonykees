@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -17,8 +16,8 @@
 	<properties>
 		<snakeyaml.version>1.18</snakeyaml.version>
 		<proguard.extra.options>
-			<!-- <option> -libraryjars ${project.basedir}/../license.api/target/eu.jsparrow.license.api-${project.version}_proguard_base.jar 
-				</option> <option>-applymapping ${project.basedir}/../license.api/target/license.api.out</option> -->
+			-libraryjars
+			${project.basedir}/../license.api/target/eu.jsparrow.license.api-${project.version}_proguard_base.jar
 			-libraryjars
 			${project.basedir}/../rules.api/target/eu.jsparrow.rules.api-${project.version}_proguard_base.jar
 			-libraryjars
@@ -29,7 +28,37 @@
 	</properties>
 
 
+
+
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.github.wvengen</groupId>
+					<artifactId>proguard-maven-plugin</artifactId>
+					<configuration>
+						<exclusions>
+							<exclusion>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow.rules.api</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow.license.api</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow.logging</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow.core</artifactId>
+							</exclusion>
+						</exclusions>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -67,6 +96,7 @@
 					</execution>
 				</executions>
 			</plugin>
+
 		</plugins>
 	</build>
 
