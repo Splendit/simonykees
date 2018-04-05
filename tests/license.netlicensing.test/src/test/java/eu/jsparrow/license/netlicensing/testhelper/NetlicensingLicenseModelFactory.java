@@ -8,12 +8,12 @@ import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 public class NetlicensingLicenseModelFactory {
 
 	public static NetlicensingLicenseModel create() {
-		return new NetlicensingLicenseModel(LicenseType.NODE_LOCKED, "key", "name", "product", "secret",
+		return new NetlicensingLicenseModel(LicenseType.NODE_LOCKED, "key", "name", "secret",
 				ZonedDateTime.now());
 	}
 
 	public static NetlicensingLicenseModel create(LicenseType type) {
-		return new NetlicensingLicenseModel(type, "key", "name", "product", "secret", ZonedDateTime.now());
+		return new NetlicensingLicenseModel(type, "key", "name", "secret", ZonedDateTime.now());
 	}
 
 }

@@ -32,7 +32,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		String expectedSessionId = "secret";
 		String expectedAction = "checkIn";
 		NetlicensingLicenseModel model = new NetlicensingLicenseModel(LicenseType.FLOATING, "key", "name",
-				"product", expectedSessionId, expireDate);
+				expectedSessionId, expireDate);
 
 		ValidationParameters parameters = parametersFactory.createFloatingCheckInParameters(model);
 
@@ -50,7 +50,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		String expectedSecret = "secret";
 		String expectedName = "name";
 		NetlicensingLicenseModel model = new NetlicensingLicenseModel(LicenseType.NODE_LOCKED, "key",
-				expectedName, expectedProduct, expectedSecret, expireDate);
+				expectedName, expectedSecret, expireDate);
 
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
 
@@ -65,7 +65,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		String expectedAction = "checkOut";
 
 		NetlicensingLicenseModel model = new NetlicensingLicenseModel(LicenseType.FLOATING, "key", "name",
-				"product", expectedSessionId, expireDate);
+				expectedSessionId, expireDate);
 
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
 

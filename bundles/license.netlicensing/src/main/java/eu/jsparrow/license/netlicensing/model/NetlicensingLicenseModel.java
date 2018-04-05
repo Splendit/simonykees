@@ -24,7 +24,7 @@ public class NetlicensingLicenseModel implements LicenseModel {
 		this.secret = secret;
 	}
 
-	public NetlicensingLicenseModel(NetlicensingLicenseType type, String key, String name, String secret,
+	public NetlicensingLicenseModel(LicenseType type, String key, String name, String secret,
 			ZonedDateTime expireDate) {
 		this(type, key, secret);
 		this.name = name;
