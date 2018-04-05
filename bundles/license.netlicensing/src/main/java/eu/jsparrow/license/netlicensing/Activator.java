@@ -26,12 +26,6 @@ public class Activator extends Plugin {
 	public Activator() {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.
-	 * BundleContext)
-	 */
 	@Override
 	public void start(BundleContext context) throws Exception {
 		plugin = this;

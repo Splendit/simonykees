@@ -13,23 +13,27 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 import eu.jsparrow.license.netlicensing.validation.impl.response.model.*;
 
+/**
+ * Parses a {@link ValidationResult} into a number of
+ * {@link NetlicensingResponse}s. A ValidationResult from NetLicensing contains
+ * all licenses for a given licensees. The parser filters out the ones that are
+ * relevant to us and transforms them into objects.
+ */
 public class Parser {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
-			.lookupClass());
+		.lookupClass());
 
 	private static final String LICENSING_MODEL_KEY = "licensingModel"; //$NON-NLS-1$
-	
+
 	private SubscriptionResponse subscription;
 	private FloatingResponse floating;
 	private MultiFeatureResponse multiFeature;
-	
+
 	public void parseValidationResult(ValidationResult validationResult) {
 		logger.debug("Parsing {}", validationResult); //$NON-NLS-1$
-		subscription = extractModels(validationResult, SubscriptionResponse.LICENSING_MODEL,
-				this::buildSubscription);
-		multiFeature = extractModels(validationResult, MultiFeatureResponse.LICENSING_MODEL,
-				this::buildMultiFeature);
+		subscription = extractModels(validationResult, SubscriptionResponse.LICENSING_MODEL, this::buildSubscription);
+		multiFeature = extractModels(validationResult, MultiFeatureResponse.LICENSING_MODEL, this::buildMultiFeature);
 		floating = extractModels(validationResult, FloatingResponse.LICENSING_MODEL, this::buildFloating);
 	}
 
@@ -56,13 +60,13 @@ public class Parser {
 	}
 
 	public SubscriptionResponse buildSubscription(Map<String, Composition> properties) {
-		
+
 		if (!properties.containsKey(NetlicensingResponse.VALID_KEY)) {
 			return null;
 		}
 		Composition validComposition = properties.get(NetlicensingResponse.VALID_KEY);
 		boolean valid = Boolean.parseBoolean(validComposition.getValue());
-		
+
 		if (!properties.containsKey(SubscriptionResponse.EXPIRES_KEY)) {
 			return new SubscriptionResponse(valid);
 		}
@@ -79,7 +83,7 @@ public class Parser {
 		}
 		Composition validComposition = properties.get(NetlicensingResponse.VALID_KEY);
 		boolean valid = Boolean.parseBoolean(validComposition.getValue());
-		
+
 		if (!properties.containsKey(FloatingResponse.EXPIRATION_TIME_STAMP_KEY)) {
 			return new FloatingResponse(valid);
 		}
@@ -112,7 +116,7 @@ public class Parser {
 
 		return new MultiFeatureResponse(feature, valid);
 	}
-	
+
 	public SubscriptionResponse getSubscription() {
 		return subscription;
 	}

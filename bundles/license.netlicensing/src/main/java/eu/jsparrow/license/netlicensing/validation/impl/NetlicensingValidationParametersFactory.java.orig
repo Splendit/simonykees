@@ -22,11 +22,22 @@ public class NetlicensingValidationParametersFactory {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	private static final String SESSION_ID_KEY = "sessionId";  //$NON-NLS-1$
+	private static final String SESSION_ID_KEY = "sessionId"; //$NON-NLS-1$
 	private static final String ACTION_KEY = "action"; //$NON-NLS-1$
+<<<<<<< HEAD
+	private static final String ACTION_CHECK_OUT_VAL = "checkOut"; //$NON-NLS-1$
+	private static final String ACTION_CHECK_IN_VAL = "checkIn"; //$NON-NLS-1$
+
+	public ValidationParameters createValidationParameters(NetlicensingLicenseModel model) {
+		logger.debug("Creating validation parameters for {}", model); //$NON-NLS-1$
+		NetlicensingLicenseType type = model.getType();
+		ValidationParameters parameters;
+		String secret = model.getSecret();
+		if (NetlicensingLicenseType.FLOATING == type) {
+			logger.debug("License type is floating"); //$NON-NLS-1$
+=======
 	private static final String ACTION_CHECK_OUT_VAL = "checkOut";  //$NON-NLS-1$
 	private static final String ACTION_CHECK_IN_VAL = "checkIn";  //$NON-NLS-1$
-
 
 	public ValidationParameters createValidationParameters(NetlicensingLicenseModel model) {
 		logger.debug("Creating validation parameters for {}", model);  //$NON-NLS-1$
@@ -35,26 +46,27 @@ public class NetlicensingValidationParametersFactory {
 		String secret = model.getSecret();
 		if (LicenseType.FLOATING == type) {
 			logger.debug("License type is floating");  //$NON-NLS-1$
+>>>>>>> 703d90f35c83516f3abd9704b37b96357d7c8e68
 			parameters = createFloatingParameters(secret, ACTION_CHECK_OUT_VAL);
 		} else {
-			logger.debug("License type is node-locked");  //$NON-NLS-1$
+			logger.debug("License type is node-locked"); //$NON-NLS-1$
 			parameters = createNodeLockedParameters(secret);
 		}
-		parameters.setProductNumber(NetlicensingProperties.PRODUCT_NUMBER);
+		parameters.setProductNumber(model.getProduct());
 		parameters.setLicenseeName(model.getName());
 		logger.debug("Returning parameters {}", parameters); //$NON-NLS-1$
 		return parameters;
 	}
 
-	public ValidationParameters createFloatingCheckInParameters(NetlicensingLicenseModel model) {
+	public ValidationParameters createFloatingCheckingParameters(NetlicensingLicenseModel model) {
 		ValidationParameters parameters = createFloatingParameters(model.getSecret(), ACTION_CHECK_IN_VAL);
-		parameters.setProductNumber(NetlicensingProperties.PRODUCT_NUMBER);
+		parameters.setProductNumber(model.getProduct());
 		parameters.setLicenseeName(model.getName());
 		return parameters;
 	}
 
 	protected ValidationParameters createFloatingParameters(String sessionId, String action) {
-		logger.debug("Creating floating parameters for sessionId {} and action {}", sessionId, action);  //$NON-NLS-1$
+		logger.debug("Creating floating parameters for sessionId {} and action {}", sessionId, action); //$NON-NLS-1$
 		ValidationParameters parameters = new ValidationParameters();
 		HashMap<String, String> params = new HashMap<>();
 		params.put(SESSION_ID_KEY, sessionId);
@@ -65,7 +77,7 @@ public class NetlicensingValidationParametersFactory {
 	}
 
 	public ValidationParameters createNodeLockedParameters(String secretKey) {
-		logger.debug("Creating node locked for secret {}", secretKey);  //$NON-NLS-1$
+		logger.debug("Creating node locked for secret {}", secretKey); //$NON-NLS-1$
 		ValidationParameters parameters = new ValidationParameters();
 		parameters.setLicenseeSecret(secretKey);
 		return parameters;

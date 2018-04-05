@@ -10,6 +10,7 @@ import com.labs64.netlicensing.domain.vo.ValidationResult;
 
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.model.*;
 import eu.jsparrow.license.netlicensing.validation.impl.response.Parser;
@@ -60,19 +61,19 @@ public class ResponseEvaluator {
 		ZonedDateTime expireDate = subscription.getExpires();
 
 		if (multiFeature != null && multiFeature.isValid()) {
-			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, false, expireDate,
+			return createValidationResult(LicenseType.NODE_LOCKED, false, expireDate,
 					StatusDetail.NODE_LOCKED_EXPIRED);
 		}
 
 		FloatingResponse floating = parser.getFloating();
 		if (floating != null && floating.isValid()) {
-			return createValidationResult(NetlicensingLicenseType.FLOATING, false, expireDate,
+			return createValidationResult(LicenseType.FLOATING, false, expireDate,
 					floating.getExpirationTimeStamp(), StatusDetail.FLOATING_EXPIRED);
 		}
 
 		if (multiFeature != null && ZonedDateTime.now()
 			.isBefore(expireDate)) {
-			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, false, expireDate,
+			return createValidationResult(LicenseType.NODE_LOCKED, false, expireDate,
 					StatusDetail.NODE_LOCKED_HARDWARE_MISMATCH);
 		}
 
@@ -87,7 +88,7 @@ public class ResponseEvaluator {
 		ZonedDateTime expireDate = subscription.getExpires();
 
 		if (multiFeature != null && multiFeature.isValid()) {
-			return createValidationResult(NetlicensingLicenseType.NODE_LOCKED, true, expireDate,
+			return createValidationResult(LicenseType.NODE_LOCKED, true, expireDate,
 					StatusDetail.NODE_LOCKED);
 		}
 
@@ -97,21 +98,21 @@ public class ResponseEvaluator {
 		}
 
 		if (floating.isValid()) {
-			return createValidationResult(NetlicensingLicenseType.FLOATING, true, expireDate,
+			return createValidationResult(LicenseType.FLOATING, true, expireDate,
 					floating.getExpirationTimeStamp(), StatusDetail.FLOATING);
 		}
 
-		return createValidationResult(NetlicensingLicenseType.FLOATING, false, expireDate,
+		return createValidationResult(LicenseType.FLOATING, false, expireDate,
 				floating.getExpirationTimeStamp(), StatusDetail.FLOATING_OUT_OF_SESSIONS);
 	}
 
-	private NetlicensingValidationResult createValidationResult(NetlicensingLicenseType licenseType, boolean valid,
+	private NetlicensingValidationResult createValidationResult(LicenseType licenseType, boolean valid,
 			ZonedDateTime expireDate, StatusDetail statusInfo) {
 		return createValidationResult(licenseType, valid, expireDate, ZonedDateTime.now()
 			.plusMinutes(OFFLINE_VALIDITY_DURATION_MINUTES), statusInfo);
 	}
 
-	private NetlicensingValidationResult createValidationResult(NetlicensingLicenseType licenseType, boolean valid,
+	private NetlicensingValidationResult createValidationResult(LicenseType licenseType, boolean valid,
 			ZonedDateTime expireDate, ZonedDateTime offlineExpire, StatusDetail statusInfo) {
 		logger.debug(
 				"Creating validation result with type={}, valid={}, expireDate={}, offlineExpire={},statusInfo ={}", //$NON-NLS-1$
@@ -121,8 +122,8 @@ public class ResponseEvaluator {
 		String name = netlicensingModel.getName();
 		String secret = netlicensingModel.getSecret();
 
-		LicenseModel model = new NetlicensingLicenseModel(licenseType, key, name, secret, expireDate);
-		return new NetlicensingValidationResult(model, valid, statusInfo.getUserMessage(), offlineExpire);
+		LicenseModel model = new NetlicensingLicenseModel(licenseType, key, name, product, secret, expireDate);
+		return new NetlicensingValidationResult(model, key, valid, statusInfo.getUserMessage(), offlineExpire);
 	}
 
 }

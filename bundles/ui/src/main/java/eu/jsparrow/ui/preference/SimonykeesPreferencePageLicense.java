@@ -5,26 +5,40 @@ import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.FontDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.*;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.*;
-import org.eclipse.swt.widgets.*;
-import org.eclipse.ui.*;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
-import eu.jsparrow.license.netlicensing.model.DemoLicenseModel;
-import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.util.LicenseUtil;
 
@@ -158,7 +172,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 	private void updateDisplayedInformation() {
 		LicenseValidationResult result = newLicenseUtil.getValidationResult();
 
-		String licenseModelInfo = getLicenseModelString(result.getModel());
+		String licenseModelInfo = getLicenseModelString(result);
 		licenseLabel.setText(licenseModelInfo);
 
 		setLicenseStatusMessage(result);
@@ -180,23 +194,21 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		}
 	}
 
-	private String getLicenseModelString(LicenseModel licenseModel) {
+	private String getLicenseModelString(LicenseValidationResult result) {
 		StringBuilder licenseModelString = new StringBuilder();
 
 		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as);
-		if (licenseModel instanceof DemoLicenseModel) {
+		if (result.getModel().getType() == LicenseType.DEMO) {
 			licenseModelString.append("free license. ");
-		}
-		if (licenseModel instanceof NetlicensingLicenseModel) {
-			NetlicensingLicenseModel netLicenseModel = (NetlicensingLicenseModel) licenseModel;
+		} else {
 			licenseModelString.append("full license ");
 			licenseModelString.append(Messages.SimonykeesPreferencePageLicense_under_key_label);
-			licenseModelString.append(netLicenseModel.getKey());
+			licenseModelString.append(result.getKey());
 			licenseModelString.append(". "); //$NON-NLS-1$
 		}
 		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_valid_until);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
-		licenseModelString.append(licenseModel.getExpirationDate()
+		licenseModelString.append(result.getModel().getExpirationDate()
 			.format(formatter));
 		licenseModelString.append("."); //$NON-NLS-1$
 

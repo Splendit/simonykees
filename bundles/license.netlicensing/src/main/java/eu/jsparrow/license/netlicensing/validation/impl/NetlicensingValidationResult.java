@@ -10,13 +10,13 @@ public class NetlicensingValidationResult extends LicenseValidationResult {
 
 	private ZonedDateTime expirationTime;
 
-	public NetlicensingValidationResult(LicenseModel model, boolean valid, ZonedDateTime expirationTime) {
-		this(model, valid, "", expirationTime);
+	public NetlicensingValidationResult(LicenseModel model, String key, boolean valid, ZonedDateTime expirationTime) {
+		this(model, key, valid, "", expirationTime);
 	}
 
-	public NetlicensingValidationResult(LicenseModel model, boolean valid, String detail,
+	public NetlicensingValidationResult(LicenseModel model, String key, boolean valid, String detail,
 			ZonedDateTime expirationTime) {
-		super(model, valid, detail);
+		super(model, key, valid, detail);
 		this.expirationTime = expirationTime;
 	}
 

@@ -235,6 +235,8 @@ public class Messages extends NLS {
 
 	public static String Netlicensing_persistenceError_failedToSave;
 
+	public static String Netlicensing_validationResult_freeLicenseExpired0;
+
 	public static String OrganiseImportsRule_description;
 	public static String OrganiseImportsRule_name;
 	public static String OverrideAnnotationRule_description;

@@ -11,9 +11,13 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.exception.PersistenceException;
-import eu.jsparrow.license.netlicensing.LicenseModelFactory;
+import eu.jsparrow.license.netlicensing.NetlicensingLicenseModelFactoryService;
 import eu.jsparrow.license.netlicensing.LicensePersistence;
 
+/**
+ * Implementor of {@link LicensePersistence}.
+ * 
+ */
 public class SecureStoragePersistence implements LicensePersistence {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
@@ -31,13 +35,13 @@ public class SecureStoragePersistence implements LicensePersistence {
 		this.securePreferences = securePreferences;
 		this.encryption = encryption;
 	}
-	
+
 	@Override
 	public LicenseModel load() throws PersistenceException {
 		byte[] encryptedModel = loadFromSecureStorage();
 		if(encryptedModel == null) {
 			logger.warn("Could not find existing license in storage, saving and returning default license"); //$NON-NLS-1$
-			LicenseModel defaultModel = new LicenseModelFactory().createDemoLicenseModel();
+			LicenseModel defaultModel = new NetlicensingLicenseModelFactoryService().createDemoLicenseModel();
 			save(defaultModel);
 			return defaultModel;
 		}
