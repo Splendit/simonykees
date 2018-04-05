@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
+import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
-import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseType;
 
 @SuppressWarnings("nls")
 public class NetlicensingValidationParametersFactory {
@@ -17,22 +17,21 @@ public class NetlicensingValidationParametersFactory {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	private static final String SESSION_ID_KEY = "sessionId"; 
+	private static final String SESSION_ID_KEY = "sessionId";
 	private static final String ACTION_KEY = "action";
-	private static final String ACTION_CHECK_OUT_VAL = "checkOut"; 
-	private static final String ACTION_CHECK_IN_VAL = "checkIn"; 
-
+	private static final String ACTION_CHECK_OUT_VAL = "checkOut";
+	private static final String ACTION_CHECK_IN_VAL = "checkIn";
 
 	public ValidationParameters createValidationParameters(NetlicensingLicenseModel model) {
-		logger.debug("Creating validation parameters for {}", model); 
-		NetlicensingLicenseType type = model.getType();
+		logger.debug("Creating validation parameters for {}", model);
+		LicenseType type = model.getType();
 		ValidationParameters parameters;
 		String secret = model.getSecret();
-		if (NetlicensingLicenseType.FLOATING == type) {
-			logger.debug("License type is floating"); 
+		if (LicenseType.FLOATING == type) {
+			logger.debug("License type is floating");
 			parameters = createFloatingParameters(secret, ACTION_CHECK_OUT_VAL);
 		} else {
-			logger.debug("License type is node-locked"); 
+			logger.debug("License type is node-locked");
 			parameters = createNodeLockedParameters(secret);
 		}
 		parameters.setProductNumber(model.getProduct());
@@ -49,7 +48,7 @@ public class NetlicensingValidationParametersFactory {
 	}
 
 	protected ValidationParameters createFloatingParameters(String sessionId, String action) {
-		logger.debug("Creating floating parameters for sessionId {} and action {}", sessionId, action); 
+		logger.debug("Creating floating parameters for sessionId {} and action {}", sessionId, action);
 		ValidationParameters parameters = new ValidationParameters();
 		HashMap<String, String> params = new HashMap<>();
 		params.put(SESSION_ID_KEY, sessionId);
@@ -60,7 +59,7 @@ public class NetlicensingValidationParametersFactory {
 	}
 
 	public ValidationParameters createNodeLockedParameters(String secretKey) {
-		logger.debug("Creating node locked for secret {}", secretKey); 
+		logger.debug("Creating node locked for secret {}", secretKey);
 		ValidationParameters parameters = new ValidationParameters();
 		parameters.setLicenseeSecret(secretKey);
 		return parameters;

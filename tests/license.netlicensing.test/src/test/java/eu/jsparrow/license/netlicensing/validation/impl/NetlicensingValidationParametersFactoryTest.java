@@ -11,8 +11,8 @@ import org.junit.Test;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
+import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
-import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseType;
 
 @SuppressWarnings("nls")
 public class NetlicensingValidationParametersFactoryTest {
@@ -31,7 +31,7 @@ public class NetlicensingValidationParametersFactoryTest {
 	public void createFloatingCheckInParameters() {
 		String expectedSessionId = "secret";
 		String expectedAction = "checkIn";
-		NetlicensingLicenseModel model = new NetlicensingLicenseModel(NetlicensingLicenseType.FLOATING, "key", "name",
+		NetlicensingLicenseModel model = new NetlicensingLicenseModel(LicenseType.FLOATING, "key", "name",
 				"product", expectedSessionId, expireDate);
 
 		ValidationParameters parameters = parametersFactory.createFloatingCheckingParameters(model);
@@ -50,7 +50,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		String expectedSecret = "secret";
 		String expectedProduct = "product";
 		String expectedName = "name";
-		NetlicensingLicenseModel model = new NetlicensingLicenseModel(NetlicensingLicenseType.NODE_LOCKED, "key",
+		NetlicensingLicenseModel model = new NetlicensingLicenseModel(LicenseType.NODE_LOCKED, "key",
 				expectedName, expectedProduct, expectedSecret, expireDate);
 
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
@@ -65,7 +65,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		String expectedSessionId = "secret";
 		String expectedAction = "checkOut";
 
-		NetlicensingLicenseModel model = new NetlicensingLicenseModel(NetlicensingLicenseType.FLOATING, "key", "name",
+		NetlicensingLicenseModel model = new NetlicensingLicenseModel(LicenseType.FLOATING, "key", "name",
 				"product", expectedSessionId, expireDate);
 
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);

@@ -17,10 +17,10 @@ import com.labs64.netlicensing.domain.vo.ValidationParameters;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 
+import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
-import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.testhelper.NetlicensingLicenseModelFactory;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -73,7 +73,7 @@ public class NetlicensingLicenseValidationTest {
 
 	@Test
 	public void checkIn_withFloatingLicensetype_shouldSendRequest() throws ValidationException {
-		model = NetlicensingLicenseModelFactory.create(NetlicensingLicenseType.FLOATING);
+		model = NetlicensingLicenseModelFactory.create(LicenseType.FLOATING);
 		netlicensingValidation = new NetlicensingLicenseValidation(model, cache, parametersFactory, request);
 
 		netlicensingValidation.checkIn();

@@ -7,10 +7,10 @@ import org.slf4j.LoggerFactory;
 
 import com.labs64.netlicensing.domain.vo.ValidationParameters;
 
+import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
-import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseType;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidation;
 
 @SuppressWarnings("nls")
@@ -64,7 +64,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 
 	@Override
 	public void checkIn() throws ValidationException {
-		if (model.getType() != NetlicensingLicenseType.FLOATING) {
+		if (model.getType() != LicenseType.FLOATING) {
 			logger.warn("Can only check in floating licenses. Ignoring check-in call");
 			return;
 		}
