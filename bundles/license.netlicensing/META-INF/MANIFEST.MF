@@ -21,4 +21,6 @@ Export-Package:
  eu.jsparrow.license.netlicensing,
  eu.jsparrow.license.netlicensing.model,
  eu.jsparrow.license.netlicensing.validation
-Service-Component: OSGI-INF/eu.jsparrow.license.netlicensing.NetlicensingLicenseService.xml
+Service-Component: OSGI-INF/eu.jsparrow.license.netlicensing.NetlicensingLicenseService.xml,
+ OSGI-INF/eu.jsparrow.license.netlicensing.NetlicensingLicensePersistenceService.xml,
+ OSGI-INF/eu.jsparrow.license.netlicensing.NetlicensingLicenseModelFactoryService.xml
