@@ -6,11 +6,8 @@ import java.time.ZonedDateTime;
 public class LicenseValidationResult {
 
 	private boolean valid;
-
 	private String detail;
-
 	private LicenseType licenseType;
-	
 	private String key;
 	private ZonedDateTime expirationDate;
 

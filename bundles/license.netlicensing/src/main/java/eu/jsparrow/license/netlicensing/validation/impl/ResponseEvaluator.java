@@ -17,6 +17,11 @@ import eu.jsparrow.license.netlicensing.validation.impl.response.model.FloatingR
 import eu.jsparrow.license.netlicensing.validation.impl.response.model.MultiFeatureResponse;
 import eu.jsparrow.license.netlicensing.validation.impl.response.model.SubscriptionResponse;
 
+/**
+ * Parses the NetLicensing {@link ValidationResult} using the {@link Parser} and
+ * computes the {@link NetlicensingValidationResult} that it represents.
+ *
+ */
 public class ResponseEvaluator {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
@@ -50,6 +55,23 @@ public class ResponseEvaluator {
 		}
 	}
 
+	/**
+	 * Checks whether the parsed NetLicenisng response having an invalid
+	 * subscription represents either of the following:
+	 * 
+	 * <ul>
+	 * <li>Expired {@link LicenseType.NODE_LOCKED}</li>
+	 * <li>Expired {@link LicenseType.FLOATING}</li>
+	 * <li>Non-expired {@link LicenseType.NODE_LOCKED} having a secret key
+	 * mismatch</li>
+	 * </ul>
+	 * 
+	 * @return the {@link NetlicensingValidationResult} created with the
+	 *         evaluated information.
+	 * @throws ValidationException
+	 *             if the parsed response does not contain enough information to
+	 *             derive the represented license type.
+	 */
 	private NetlicensingValidationResult evaluateExpiredLicense() throws ValidationException {
 		logger.debug("Evaluating expired license"); //$NON-NLS-1$
 		MultiFeatureResponse multiFeature = parser.getMultiFeature();
@@ -57,14 +79,13 @@ public class ResponseEvaluator {
 		ZonedDateTime expireDate = subscription.getExpires();
 
 		if (multiFeature != null && multiFeature.isValid()) {
-			return createValidationResult(LicenseType.NODE_LOCKED, false, expireDate,
-					StatusDetail.NODE_LOCKED_EXPIRED);
+			return createValidationResult(LicenseType.NODE_LOCKED, false, expireDate, StatusDetail.NODE_LOCKED_EXPIRED);
 		}
 
 		FloatingResponse floating = parser.getFloating();
 		if (floating != null && floating.isValid()) {
-			return createValidationResult(LicenseType.FLOATING, false, expireDate,
-					floating.getExpirationTimeStamp(), StatusDetail.FLOATING_EXPIRED);
+			return createValidationResult(LicenseType.FLOATING, false, expireDate, floating.getExpirationTimeStamp(),
+					StatusDetail.FLOATING_EXPIRED);
 		}
 
 		if (multiFeature != null && ZonedDateTime.now()
@@ -77,6 +98,24 @@ public class ResponseEvaluator {
 		throw new ValidationException(ExceptionMessages.Netlicensing_validationError_unexpectedResponse);
 	}
 
+	/**
+	 * Checks whether the parsed NetLicenisng response having a valid
+	 * subscription represents either of the following:
+	 * 
+	 * <ul>
+	 * <li>Valid {@link LicenseType.NODE_LOCKED}</li>
+	 * <li>Valid {@link LicenseType.FLOATING}</li>
+	 * <li>Non-expired {@link LicenseType.FLOATING} running out of free
+	 * sessions.</li>
+	 * </ul>
+	 * 
+	 * @return the {@linkplain NetlicensingValidationResult} represented by the
+	 *         parsed response
+	 * @throws ValidationException
+	 *             if the parsed response doesn't represent a valid
+	 *             Node Locked license and has no information about
+	 *             any Floating license.
+	 */
 	private NetlicensingValidationResult evaluateNonExpiredLicense() throws ValidationException {
 		logger.debug("Evaluating non expired license"); //$NON-NLS-1$
 		MultiFeatureResponse multiFeature = parser.getMultiFeature();
@@ -84,8 +123,7 @@ public class ResponseEvaluator {
 		ZonedDateTime expireDate = subscription.getExpires();
 
 		if (multiFeature != null && multiFeature.isValid()) {
-			return createValidationResult(LicenseType.NODE_LOCKED, true, expireDate,
-					StatusDetail.NODE_LOCKED);
+			return createValidationResult(LicenseType.NODE_LOCKED, true, expireDate, StatusDetail.NODE_LOCKED);
 		}
 
 		FloatingResponse floating = parser.getFloating();
@@ -94,12 +132,12 @@ public class ResponseEvaluator {
 		}
 
 		if (floating.isValid()) {
-			return createValidationResult(LicenseType.FLOATING, true, expireDate,
-					floating.getExpirationTimeStamp(), StatusDetail.FLOATING);
+			return createValidationResult(LicenseType.FLOATING, true, expireDate, floating.getExpirationTimeStamp(),
+					StatusDetail.FLOATING);
 		}
 
-		return createValidationResult(LicenseType.FLOATING, false, expireDate,
-				floating.getExpirationTimeStamp(), StatusDetail.FLOATING_OUT_OF_SESSIONS);
+		return createValidationResult(LicenseType.FLOATING, false, expireDate, floating.getExpirationTimeStamp(),
+				StatusDetail.FLOATING_OUT_OF_SESSIONS);
 	}
 
 	private NetlicensingValidationResult createValidationResult(LicenseType licenseType, boolean valid,
@@ -114,7 +152,8 @@ public class ResponseEvaluator {
 				"Creating validation result with type={}, valid={}, expireDate={}, offlineExpire={},statusInfo ={}", //$NON-NLS-1$
 				licenseType, valid, expireDate, offlineExpire, statusInfo);
 
-		return new NetlicensingValidationResult(licenseType, key, valid, statusInfo.getUserMessage(), expireDate, offlineExpire);
+		return new NetlicensingValidationResult(licenseType, key, valid, statusInfo.getUserMessage(), expireDate,
+				offlineExpire);
 	}
 
 }

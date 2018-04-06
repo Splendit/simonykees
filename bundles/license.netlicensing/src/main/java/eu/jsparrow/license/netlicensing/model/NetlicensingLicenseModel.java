@@ -6,7 +6,7 @@ import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.LicenseType;
 
 /**
- * Implementor of {@link Licensemodel} that represents a NetLicensing license.
+ * Implementor of {@link LicenseModel} that represents a NetLicensing license.
  */
 public class NetlicensingLicenseModel implements LicenseModel {
 
@@ -50,6 +50,7 @@ public class NetlicensingLicenseModel implements LicenseModel {
 	public LicenseType getType() {
 		return this.type;
 	}
+
 
 	@Override
 	public String toString() {

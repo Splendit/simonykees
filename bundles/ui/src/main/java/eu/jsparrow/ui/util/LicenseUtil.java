@@ -97,6 +97,10 @@ public class LicenseUtil implements LicenseUtilService {
 		try {
 			validationResult = licenseService.verifyKey(key, secret);
 			String name = createNameFromHardware();
+			/*
+			 * The validation result can only be trusted when the validation 
+			 * request is based on a license model. 
+			 */
 			model = factoryService.createNewModel(validationResult.getLicenseType(), key, name, secret,
 					result.getExpirationDate());
 			validationResult = licenseService.validate(model);

@@ -43,7 +43,7 @@ public class NetlicensingLicenseCache {
 	}
 
 	/**
-	 * Get the cached valdiation result for a given key.
+	 * Get the cached validation result for a given key.
 	 * 
 	 * @param key
 	 *            the licensee key to get a validation result for.

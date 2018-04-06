@@ -11,6 +11,12 @@ import com.labs64.netlicensing.exception.*;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.license.api.exception.ValidationException;
 
+/**
+ * Allows for setting up the connection to NetLicensing API and sending
+ * validation requests. Makes use of {@link ResponseEvaluator} to construct
+ * the validation result. 
+ *
+ */
 public class NetlicensingValidationRequest {
 
 	static final String VALIDATION_BASE_URL = "https://go.netlicensing.io/core/v2/rest"; //$NON-NLS-1$

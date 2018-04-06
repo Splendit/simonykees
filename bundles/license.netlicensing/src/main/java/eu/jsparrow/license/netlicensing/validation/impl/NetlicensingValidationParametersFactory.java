@@ -14,7 +14,7 @@ import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 /**
  * This class is used to create validation parameters which will be sent to the
  * NetLicensing API. Depending on the {@link NetlicensingLicenseModel} that is
- * used different {@link ValidationParameters} are created. 
+ * used different {@link ValidationParameters} are created.
  * 
  */
 public class NetlicensingValidationParametersFactory {
@@ -22,22 +22,21 @@ public class NetlicensingValidationParametersFactory {
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	private static final String SESSION_ID_KEY = "sessionId";  //$NON-NLS-1$
+	private static final String SESSION_ID_KEY = "sessionId"; //$NON-NLS-1$
 	private static final String ACTION_KEY = "action"; //$NON-NLS-1$
-	private static final String ACTION_CHECK_OUT_VAL = "checkOut";  //$NON-NLS-1$
-	private static final String ACTION_CHECK_IN_VAL = "checkIn";  //$NON-NLS-1$
-
+	private static final String ACTION_CHECK_OUT_VAL = "checkOut"; //$NON-NLS-1$
+	private static final String ACTION_CHECK_IN_VAL = "checkIn"; //$NON-NLS-1$
 
 	public ValidationParameters createValidationParameters(NetlicensingLicenseModel model) {
-		logger.debug("Creating validation parameters for {}", model);  //$NON-NLS-1$
+		logger.debug("Creating validation parameters for {}", model); //$NON-NLS-1$
 		LicenseType type = model.getType();
 		ValidationParameters parameters;
 		String secret = model.getSecret();
 		if (LicenseType.FLOATING == type) {
-			logger.debug("License type is floating");  //$NON-NLS-1$
+			logger.debug("License type is floating"); //$NON-NLS-1$
 			parameters = createFloatingParameters(secret, ACTION_CHECK_OUT_VAL);
 		} else {
-			logger.debug("License type is node-locked");  //$NON-NLS-1$
+			logger.debug("License type is node-locked"); //$NON-NLS-1$
 			parameters = createNodeLockedParameters(secret);
 		}
 		parameters.setProductNumber(NetlicensingProperties.LICENSE_PRODUCT_NUMBER);
@@ -54,7 +53,7 @@ public class NetlicensingValidationParametersFactory {
 	}
 
 	private ValidationParameters createFloatingParameters(String sessionId, String action) {
-		logger.debug("Creating floating parameters for sessionId {} and action {}", sessionId, action);  //$NON-NLS-1$
+		logger.debug("Creating floating parameters for sessionId {} and action {}", sessionId, action); //$NON-NLS-1$
 		ValidationParameters parameters = new ValidationParameters();
 		HashMap<String, String> params = new HashMap<>();
 		params.put(SESSION_ID_KEY, sessionId);
@@ -65,12 +64,20 @@ public class NetlicensingValidationParametersFactory {
 	}
 
 	private ValidationParameters createNodeLockedParameters(String secretKey) {
-		logger.debug("Creating node locked for secret {}", secretKey);  //$NON-NLS-1$
+		logger.debug("Creating node locked for secret {}", secretKey); //$NON-NLS-1$
 		ValidationParameters parameters = new ValidationParameters();
 		parameters.setLicenseeSecret(secretKey);
 		return parameters;
 	}
-	
+
+	/**
+	 * Creates the validation parameters required to get the full information
+	 * about the licenses related to a licensee.
+	 * 
+	 * @param secret
+	 *            the value used as a session id.
+	 * @return the constructed {@link ValidationParameters}.
+	 */
 	public ValidationParameters createVerifyParameters(String secret) {
 		ValidationParameters parameters = new ValidationParameters();
 		HashMap<String, String> params = new HashMap<>();
