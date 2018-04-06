@@ -56,6 +56,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			List<ICompilationUnit> targetCompilationUnits, PublicFieldsRenamingRule rule) {
+		super();
 		this.refactoringPipeline = refactoringPipeline;
 		this.metaData = metadata;
 		this.documentChanges = documentChanges;

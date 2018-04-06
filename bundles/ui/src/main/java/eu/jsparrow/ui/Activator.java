@@ -1,14 +1,20 @@
 package eu.jsparrow.ui;
 
-import org.eclipse.e4.core.contexts.*;
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -38,6 +44,9 @@ public class Activator extends AbstractUIPlugin {
 	private static IEclipseContext eclipseContext;
 
 	private long loggingBundleID = 0;
+	
+	@Inject
+	private LicenseUtilService licenseUtil;
 
 	/**
 	 * The constructor
@@ -58,8 +67,9 @@ public class Activator extends AbstractUIPlugin {
 		plugin = this;
 		bundleContext = context;
 
-		eclipseContext = EclipseContextFactory.getServiceContext(context);
+		setEclipseContext(EclipseContextFactory.getServiceContext(context));
 		ContextInjectionFactory.inject(this, eclipseContext);
+		
 
 		// start jSparrow logging bundle
 		for (Bundle bundle : context.getBundles()) {
@@ -108,7 +118,7 @@ public class Activator extends AbstractUIPlugin {
 
 		setRunning(false);
 		
-		LicenseUtil.get().stop();
+		licenseUtil.stop();
 
 		// FIXME (see SIM-331) figure out better logging configuration
 		logger.info(Messages.Activator_stop);
@@ -165,5 +175,9 @@ public class Activator extends AbstractUIPlugin {
 
 	public static IEclipseContext getEclipseContext() {
 		return eclipseContext;
+	}
+
+	public static void setEclipseContext(IEclipseContext eclipseContext) {
+			Activator.eclipseContext = eclipseContext;
 	}
 }

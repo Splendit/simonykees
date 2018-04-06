@@ -3,19 +3,38 @@ package eu.jsparrow.ui.preference;
 import java.net.URL;
 import java.util.HashMap;
 
-import org.eclipse.core.runtime.*;
+import javax.inject.Inject;
+
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.jface.dialogs.*;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.events.*;
-import org.eclipse.swt.graphics.*;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.HelpEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.osgi.framework.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +42,8 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtil.LicenseUpdateResult;
+import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
  * Dialog for updating license key.
@@ -50,7 +69,8 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 	private Image scaledTickmarkGreenIconImage;
 	private Image scaledCloseRedIconImage;
 
-	private LicenseUtil licenseUtil = LicenseUtil.get();
+	@Inject
+	private LicenseUtilService licenseUtil;;
 
 	protected SimonykeesUpdateLicenseDialog(Shell parentShell) {
 		super(parentShell);
@@ -120,7 +140,7 @@ public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 			public void widgetSelected(SelectionEvent arg0) {
 				BusyIndicator.showWhile(Display.getDefault(), () -> {
 					
-					LicenseUpdateResult result = LicenseUtil.get().update(licenseKey);
+					LicenseUpdateResult result = licenseUtil.update(licenseKey);
 					if (!result.wasSuccessful()) {
 						updatedLabel.setImage(scaledCloseRedIconImage);
 						updatedIconLabel.setImage(scaledJSparrowImageInactive);

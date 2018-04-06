@@ -3,6 +3,8 @@ package eu.jsparrow.ui.preview;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 
+import javax.inject.Inject;
+
 import org.eclipse.compare.internal.ComparePreferencePage;
 import org.eclipse.compare.internal.CompareUIPlugin;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -10,6 +12,7 @@ import org.eclipse.core.databinding.UpdateValueStrategy;
 import org.eclipse.core.databinding.beans.BeanProperties;
 import org.eclipse.core.databinding.conversion.IConverter;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jface.databinding.swt.WidgetProperties;
@@ -41,13 +44,15 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.dialog.CompareInput;
 import eu.jsparrow.ui.preview.model.DurationFormatUtil;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
 import eu.jsparrow.ui.preview.model.summary.ChangedFilesModel;
 import eu.jsparrow.ui.preview.model.summary.RefactoringSummaryWizardPageModel;
-import eu.jsparrow.ui.util.*;
+import eu.jsparrow.ui.util.LicenseUtilService;
+import eu.jsparrow.ui.util.ResourceHelper;
 
 @SuppressWarnings({ "restriction" })
 public abstract class AbstractSummaryWizardPage extends WizardPage {
@@ -73,12 +78,16 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 	private RefactoringSummaryWizardPageModel summaryWizardPageModel;
 
 	private int displayHeight;
-	
-	private LicenseUtil newLicenseUtil = LicenseUtil.get();
+
+	@Inject
+	private LicenseUtilService licenseUtil;
 
 	protected AbstractSummaryWizardPage(RefactoringPipeline refactoringPipeline,
 			RefactoringPreviewWizardModel wizardModel) {
 		super("wizardPage"); //$NON-NLS-1$
+
+		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
+
 		setTitle(Messages.SummaryWizardPage_RunSummary);
 		this.summaryWizardPageModel = new RefactoringSummaryWizardPageModel(refactoringPipeline, wizardModel);
 		displayHeight = Display.getCurrent()
@@ -247,7 +256,7 @@ public abstract class AbstractSummaryWizardPage extends WizardPage {
 
 	private void setStatusInfo() {
 		StatusInfo statusInfo = new StatusInfo();
-		if (newLicenseUtil.isFreeLicense()) {
+		if (licenseUtil.isFreeLicense()) {
 			statusInfo.setWarning(Messages.RefactoringSummaryWizardPage_warn_disableFinishWhenFree);
 		}
 		StatusUtil.applyToStatusLine(this, statusInfo);

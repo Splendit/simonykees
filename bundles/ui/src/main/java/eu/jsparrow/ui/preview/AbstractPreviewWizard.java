@@ -1,10 +1,13 @@
 package eu.jsparrow.ui.preview;
 
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 
 import eu.jsparrow.ui.Activator;
-import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
  * A parent class for all preview wizards.
@@ -15,6 +18,13 @@ import eu.jsparrow.ui.util.LicenseUtil;
  */
 public abstract class AbstractPreviewWizard extends Wizard {
 
+	@Inject
+	private LicenseUtilService licenseUtil;
+
+	public AbstractPreviewWizard() {
+		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
+	}
+
 	@Override
 	public boolean performCancel() {
 		Activator.setRunning(false);
@@ -23,8 +33,7 @@ public abstract class AbstractPreviewWizard extends Wizard {
 
 	@Override
 	public boolean canFinish() {
-		if (LicenseUtil.get()
-			.isFreeLicense()) {
+		if (licenseUtil.isFreeLicense()) {
 			return false;
 		}
 		return super.canFinish();

@@ -5,6 +5,8 @@ import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -36,11 +38,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.LicenseType;
 import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.ui.Activator;
-import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
  * Preference page for displaying license information and updating license key.
@@ -71,14 +72,17 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private Label logoLabel;
 
-	private LicenseUtil newLicenseUtil = LicenseUtil.get();
+	@Inject
+	private LicenseUtilService licenseUtil;
 
 	public SimonykeesPreferencePageLicense() {
 		super();
+
+		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
+
 		Activator.setRunning(true);
 		setPreferenceStore(Activator.getDefault()
 			.getPreferenceStore());
-		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
 		noDefaultAndApplyButton();
 	}
 
@@ -170,7 +174,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 	}
 
 	private void updateDisplayedInformation() {
-		LicenseValidationResult result = newLicenseUtil.getValidationResult();
+		LicenseValidationResult result = licenseUtil.getValidationResult();
 
 		String licenseModelInfo = getLicenseModelString(result);
 		licenseLabel.setText(licenseModelInfo);
@@ -198,7 +202,8 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		StringBuilder licenseModelString = new StringBuilder();
 
 		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as);
-		if (result.getModel().getType() == LicenseType.DEMO) {
+		if (result.getModel()
+			.getType() == LicenseType.DEMO) {
 			licenseModelString.append("free license. ");
 		} else {
 			licenseModelString.append("full license ");
@@ -208,7 +213,8 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 		}
 		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_valid_until);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
-		licenseModelString.append(result.getModel().getExpirationDate()
+		licenseModelString.append(result.getModel()
+			.getExpirationDate()
 			.format(formatter));
 		licenseModelString.append("."); //$NON-NLS-1$
 

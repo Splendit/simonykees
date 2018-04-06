@@ -2,10 +2,12 @@ package eu.jsparrow.ui.util;
 
 import java.lang.invoke.MethodHandles;
 
+import javax.inject.Singleton;
+
+import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
@@ -28,17 +30,17 @@ import oshi.hardware.HWDiskStore;
 import oshi.hardware.HardwareAbstractionLayer;
 
 @Component
-public class LicenseUtil {
+public class LicenseUtil implements LicenseUtilService {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
 	@Reference(cardinality = ReferenceCardinality.MANDATORY)
 	private LicenseService licenseService;
-	
+
 	@Reference(cardinality = ReferenceCardinality.MANDATORY)
 	private LicensePersistenceService persistenceService;
-	
+
 	@Reference(cardinality = ReferenceCardinality.MANDATORY)
 	private LicenseModelFactoryService factoryService;
 
@@ -46,17 +48,9 @@ public class LicenseUtil {
 
 	private Scheduler scheduler;
 
-	private static LicenseUtil instance;
-
-	@Activate
-	public void activate() {
-		scheduler = new Scheduler();
+	public LicenseUtil() {
+		scheduler = new Scheduler(this);
 		scheduler.start();
-		instance = this;
-	}
-
-	public static LicenseUtil get() {
-		return instance;
 	}
 
 	/**
@@ -80,7 +74,8 @@ public class LicenseUtil {
 			handleStartUpValidationFailure(shell, e);
 			return true;
 		}
-		if (result.getModel().getType() == LicenseType.DEMO && !result.isValid()) {
+		if (result.getModel()
+			.getType() == LicenseType.DEMO && !result.isValid()) {
 			BuyLicenseDialog dialog = new BuyLicenseDialog(shell);
 			return dialog.open() == 0;
 		}
@@ -91,7 +86,8 @@ public class LicenseUtil {
 		if (result == null) {
 			return true;
 		}
-		return result.getModel().getType() == LicenseType.DEMO;
+		return result.getModel()
+			.getType() == LicenseType.DEMO;
 	}
 
 	public LicenseUpdateResult update(String key) {
@@ -102,7 +98,8 @@ public class LicenseUtil {
 			validationResult = licenseService.validate(model);
 		} catch (ValidationException e) {
 			logger.error("Could not validate license", e); //$NON-NLS-1$
-			return new LicenseUpdateResult(false, NLS.bind(Messages.UpdateLicenseDialog_error_couldNotValidate, e.getMessage()));
+			return new LicenseUpdateResult(false,
+					NLS.bind(Messages.UpdateLicenseDialog_error_couldNotValidate, e.getMessage()));
 		}
 
 		if (!validationResult.isValid()) {

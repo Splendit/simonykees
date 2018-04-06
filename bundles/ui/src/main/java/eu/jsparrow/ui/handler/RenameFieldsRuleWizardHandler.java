@@ -4,16 +4,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.commands.*;
-import org.eclipse.core.runtime.*;
+import javax.inject.Inject;
+
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jdt.core.*;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.*;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.slf4j.Logger;
@@ -26,7 +38,7 @@ import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -43,7 +55,12 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(RenameFieldsRuleWizardHandler.class);
 
-	private LicenseUtil newLicenseUtil = LicenseUtil.get();
+	@Inject
+	private LicenseUtilService licenseUtil;
+	
+	public RenameFieldsRuleWizardHandler() {
+		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
+	}
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -55,7 +72,7 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 			Activator.setRunning(true);
 			
 			final Shell shell = HandlerUtil.getActiveShell(event);
-			if(!newLicenseUtil.checkAtStartUp(shell)) {
+			if(!licenseUtil.checkAtStartUp(shell)) {
 				Activator.setRunning(false);
 				return null;
 			}

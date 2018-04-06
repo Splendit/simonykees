@@ -4,6 +4,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+
+import eu.jsparrow.ui.Activator;
+
 public class Scheduler {
 
 	private static final TimeUnit SCHEDULE_TIME_UNIT = TimeUnit.SECONDS;
@@ -12,7 +18,10 @@ public class Scheduler {
 
 	private ScheduledExecutorService scheduledExecutor;
 
-	public Scheduler() {
+	private LicenseUtil licenseUtil;
+
+	public Scheduler(LicenseUtil licenseUtil) {
+		this.licenseUtil = licenseUtil;
 		scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
 	}
 
@@ -22,11 +31,10 @@ public class Scheduler {
 	}
 
 	private void runValidation() {
-		LicenseUtil.get()
-			.getValidationResult();
+		licenseUtil.getValidationResult();
 	}
 
-	public void shutDown() {		
+	public void shutDown() {
 		scheduledExecutor.shutdown();
 	}
 
