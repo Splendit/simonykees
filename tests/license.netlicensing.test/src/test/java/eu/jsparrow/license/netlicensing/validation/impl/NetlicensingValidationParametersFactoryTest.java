@@ -55,7 +55,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
 
 		assertEquals(expectedSecret, parameters.getLicenseeSecret());
-		assertEquals(NetlicensingProperties.PRODUCT_NUMBER, parameters.getProductNumber());
+		assertEquals(NetlicensingProperties.LICENSE_PRODUCT_NUMBER, parameters.getProductNumber());
 		assertEquals(expectedName, parameters.getLicenseeName());
 	}
 

@@ -40,7 +40,7 @@ public class NetlicensingValidationParametersFactory {
 			logger.debug("License type is node-locked");  //$NON-NLS-1$
 			parameters = createNodeLockedParameters(secret);
 		}
-		parameters.setProductNumber(NetlicensingProperties.PRODUCT_NUMBER);
+		parameters.setProductNumber(NetlicensingProperties.LICENSE_PRODUCT_NUMBER);
 		parameters.setLicenseeName(model.getName());
 		logger.debug("Returning parameters {}", parameters); //$NON-NLS-1$
 		return parameters;
@@ -48,7 +48,7 @@ public class NetlicensingValidationParametersFactory {
 
 	public ValidationParameters createFloatingCheckInParameters(NetlicensingLicenseModel model) {
 		ValidationParameters parameters = createFloatingParameters(model.getSecret(), ACTION_CHECK_IN_VAL);
-		parameters.setProductNumber(NetlicensingProperties.PRODUCT_NUMBER);
+		parameters.setProductNumber(NetlicensingProperties.LICENSE_PRODUCT_NUMBER);
 		parameters.setLicenseeName(model.getName());
 		return parameters;
 	}
@@ -77,7 +77,7 @@ public class NetlicensingValidationParametersFactory {
 		params.put(SESSION_ID_KEY, secret);
 		params.put(ACTION_KEY, ACTION_CHECK_OUT_VAL);
 		parameters.setProductModuleValidationParameters(NetlicensingProperties.FLOATING_PRODUCT_MODULE_NUMBER, params);
-		parameters.setProductNumber(NetlicensingProperties.PRODUCT_NUMBER);
+		parameters.setProductNumber(NetlicensingProperties.LICENSE_PRODUCT_NUMBER);
 		return parameters;
 	}
 

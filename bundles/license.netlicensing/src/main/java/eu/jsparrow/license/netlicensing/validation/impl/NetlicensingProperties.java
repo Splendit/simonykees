@@ -16,5 +16,4 @@ public class NetlicensingProperties {
 	static final String LICENSE_PRODUCT_NUMBER = "PZ9HF95UJ";
 	static final String API_KEY = "bf7f1092-3c88-492f-8a52-d00823d225a8";
 	static final String FLOATING_PRODUCT_MODULE_NUMBER = "MXVUFV9RN";
-	static final String PRODUCT_NUMBER = "PZ9HF95UJ";
 }
