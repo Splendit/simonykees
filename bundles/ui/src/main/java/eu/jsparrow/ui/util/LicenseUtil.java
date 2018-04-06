@@ -1,6 +1,8 @@
 package eu.jsparrow.ui.util;
 
 import java.lang.invoke.MethodHandles;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
@@ -96,13 +98,13 @@ public class LicenseUtil {
 
 	public LicenseUpdateResult update(String key) {
 		String secret = createSecretFromHardware();
-		LicenseModel model = factoryService.createNewFloatingModel(key, secret);
 		LicenseValidationResult validationResult = null;
 		try {
-			validationResult = licenseService.validate(model);
+			validationResult = licenseService.verifyKey(key, secret);
 		} catch (ValidationException e) {
 			logger.error("Could not validate license", e); //$NON-NLS-1$
-			return new LicenseUpdateResult(false, NLS.bind(Messages.UpdateLicenseDialog_error_couldNotValidate, e.getMessage()));
+			return new LicenseUpdateResult(false,
+					NLS.bind(Messages.UpdateLicenseDialog_error_couldNotValidate, e.getMessage()));
 		}
 
 		if (!validationResult.isValid()) {
@@ -110,7 +112,11 @@ public class LicenseUtil {
 			return new LicenseUpdateResult(false, NLS.bind(Messages.UpdateLicenseDialog_error_licenseInvalid, key));
 
 		}
-		return trySaveToPersistence(validationResult);
+
+		String name = createNameFromHardware();
+		LicenseModel model = factoryService.createNewModel(validationResult.getLicenseType(), key, name, secret,
+				result.getExpirationDate());
+		return trySaveToPersistence(model);
 	}
 
 	public void stop() {
@@ -156,9 +162,9 @@ public class LicenseUtil {
 		SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
 	}
 
-	private LicenseUpdateResult trySaveToPersistence(LicenseValidationResult validationResult) {
+	private LicenseUpdateResult trySaveToPersistence(LicenseModel model) {
 		try {
-			persistenceService.saveToPersistence(validationResult);
+			persistenceService.saveToPersistence(model);
 		} catch (PersistenceException e) {
 			logger.error("License is valid but could not be persisted", e); //$NON-NLS-1$
 			return new LicenseUpdateResult(false,
@@ -181,6 +187,17 @@ public class LicenseUtil {
 		}
 
 		return diskSerial;
+	}
+	
+	private String createNameFromHardware() {
+		InetAddress addr;
+		try {
+			addr = InetAddress.getLocalHost();
+			return addr.getHostName();
+		} catch (UnknownHostException e) {
+			logger.warn("Error while reading the host name", e); //$NON-NLS-1$
+			return ""; //$NON-NLS-1$
+		}
 	}
 
 	public class LicenseUpdateResult {

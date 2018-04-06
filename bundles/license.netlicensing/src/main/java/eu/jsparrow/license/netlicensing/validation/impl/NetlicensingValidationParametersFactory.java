@@ -71,7 +71,7 @@ public class NetlicensingValidationParametersFactory {
 		return parameters;
 	}
 	
-	public ValidationParameters createValidationParameters(String secret) {
+	public ValidationParameters createVerifyParameters(String secret) {
 		ValidationParameters parameters = new ValidationParameters();
 		HashMap<String, String> params = new HashMap<>();
 		params.put(SESSION_ID_KEY, secret);
