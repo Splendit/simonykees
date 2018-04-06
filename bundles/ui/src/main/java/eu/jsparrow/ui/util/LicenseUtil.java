@@ -4,9 +4,6 @@ import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import javax.inject.Singleton;
-
-import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
@@ -62,6 +59,7 @@ public class LicenseUtil implements LicenseUtilService {
 	 *            shell to use for displaying messages
 	 * @return true if client should continue, false if not
 	 */
+	@Override
 	public boolean checkAtStartUp(Shell shell) {
 		LicenseModel model = null;
 		try {
@@ -83,6 +81,7 @@ public class LicenseUtil implements LicenseUtilService {
 		return true;
 	}
 
+	@Override
 	public boolean isFreeLicense() {
 		if (result == null) {
 			return true;
@@ -90,6 +89,7 @@ public class LicenseUtil implements LicenseUtilService {
 		return result.getLicenseType() == LicenseType.DEMO;
 	}
 
+	@Override
 	public LicenseUpdateResult update(String key) {
 		String secret = createSecretFromHardware();
 		LicenseValidationResult validationResult;
@@ -111,10 +111,11 @@ public class LicenseUtil implements LicenseUtilService {
 			return new LicenseUpdateResult(false, NLS.bind(Messages.UpdateLicenseDialog_error_licenseInvalid, key));
 
 		}
-		
+
 		return trySaveToPersistence(model);
 	}
 
+	@Override
 	public void stop() {
 		LicenseModel model = tryLoadModelFromPersistence();
 		try {
@@ -125,12 +126,16 @@ public class LicenseUtil implements LicenseUtilService {
 		scheduler.shutDown();
 	}
 
+	@Override
 	public LicenseValidationResult getValidationResult() {
 		LicenseModel model = tryLoadModelFromPersistence();
 		try {
 			result = licenseService.validate(model);
 		} catch (ValidationException e) {
 			logger.error("Failed to validate license", e); //$NON-NLS-1$
+			return new LicenseValidationResult(model.getType(), "", false, //$NON-NLS-1$
+					Messages.LicenseStatus_userMessage_CONNECTION_FAILURE, model.getExpirationDate());
+
 		}
 		return result;
 	}
@@ -184,7 +189,7 @@ public class LicenseUtil implements LicenseUtilService {
 
 		return diskSerial;
 	}
-	
+
 	private String createNameFromHardware() {
 		InetAddress addr;
 		try {

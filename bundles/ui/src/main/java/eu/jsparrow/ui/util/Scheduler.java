@@ -4,12 +4,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-
-import eu.jsparrow.ui.Activator;
-
 public class Scheduler {
 
 	private static final TimeUnit SCHEDULE_TIME_UNIT = TimeUnit.SECONDS;
