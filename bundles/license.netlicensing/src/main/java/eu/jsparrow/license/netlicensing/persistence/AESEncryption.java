@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.license.api.exception.PersistenceException;
 
+/**
+ * Implementor of {@link IEncryption} using AES.
+ */
 public class AESEncryption implements IEncryption {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()

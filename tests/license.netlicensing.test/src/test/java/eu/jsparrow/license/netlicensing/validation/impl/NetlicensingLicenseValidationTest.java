@@ -45,7 +45,7 @@ public class NetlicensingLicenseValidationTest {
 
 	@Test
 	public void validate_withInvalidCache_shouldSendRequestAndSaveToCache() throws ValidationException {
-		NetlicensingValidationResult validationResult = new NetlicensingValidationResult(model, null, true, null);
+		NetlicensingValidationResult validationResult = new NetlicensingValidationResult(model.getType(), null, true, null, null);
 		ValidationParameters validationParameters = new ValidationParameters();
 
 		when(cache.get(any())).thenReturn(null);

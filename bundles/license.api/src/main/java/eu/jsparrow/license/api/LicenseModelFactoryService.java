@@ -12,5 +12,5 @@ public interface LicenseModelFactoryService {
 	public LicenseModel createNewFloatingModel(String key, String secret);
 
 	public LicenseModel createNewModel(LicenseType type, String key, String name,
-			String product, String secret, ZonedDateTime expireDate);
+			String secret, ZonedDateTime expireDate);
 }

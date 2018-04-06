@@ -1,22 +1,12 @@
 package eu.jsparrow.license.netlicensing;
 
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
 import java.time.ZonedDateTime;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import eu.jsparrow.license.api.LicenseModel;
-import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.PersistenceException;
-import eu.jsparrow.license.api.exception.ValidationException;
-import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
-
-import eu.jsparrow.license.netlicensing.validation.impl.NetlicensingLicenseCache;
 
 public class IntegrationSampleTest {
 

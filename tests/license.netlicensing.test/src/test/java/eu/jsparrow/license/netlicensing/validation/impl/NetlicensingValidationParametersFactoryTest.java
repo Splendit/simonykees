@@ -32,9 +32,9 @@ public class NetlicensingValidationParametersFactoryTest {
 		String expectedSessionId = "secret";
 		String expectedAction = "checkIn";
 		NetlicensingLicenseModel model = new NetlicensingLicenseModel(LicenseType.FLOATING, "key", "name",
-				"product", expectedSessionId, expireDate);
+				expectedSessionId, expireDate);
 
-		ValidationParameters parameters = parametersFactory.createFloatingCheckingParameters(model);
+		ValidationParameters parameters = parametersFactory.createFloatingCheckInParameters(model);
 
 		Map<String, String> map = parameters
 			.getProductModuleValidationParameters(NetlicensingProperties.FLOATING_PRODUCT_MODULE_NUMBER);
@@ -48,15 +48,14 @@ public class NetlicensingValidationParametersFactoryTest {
 	public void createValidationParameters_nodeLockedLicense() {
 
 		String expectedSecret = "secret";
-		String expectedProduct = "product";
 		String expectedName = "name";
 		NetlicensingLicenseModel model = new NetlicensingLicenseModel(LicenseType.NODE_LOCKED, "key",
-				expectedName, expectedProduct, expectedSecret, expireDate);
+				expectedName, expectedSecret, expireDate);
 
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
 
 		assertEquals(expectedSecret, parameters.getLicenseeSecret());
-		assertEquals(expectedProduct, parameters.getProductNumber());
+		assertEquals(NetlicensingProperties.LICENSE_PRODUCT_NUMBER, parameters.getProductNumber());
 		assertEquals(expectedName, parameters.getLicenseeName());
 	}
 
@@ -66,7 +65,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		String expectedAction = "checkOut";
 
 		NetlicensingLicenseModel model = new NetlicensingLicenseModel(LicenseType.FLOATING, "key", "name",
-				"product", expectedSessionId, expireDate);
+				expectedSessionId, expireDate);
 
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
 

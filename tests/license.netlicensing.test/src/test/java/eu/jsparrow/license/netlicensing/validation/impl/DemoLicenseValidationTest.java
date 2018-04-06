@@ -28,7 +28,7 @@ public class DemoLicenseValidationTest {
 
 		LicenseValidationResult result = validation.validate();
 		
-		assertEquals(model, result.getModel());
+		assertEquals(model.getType(), result.getLicenseType());
 		assertTrue(result.isValid());
 	}
 
@@ -38,7 +38,7 @@ public class DemoLicenseValidationTest {
 
 		LicenseValidationResult result = validation.validate();
 		
-		assertEquals(model, result.getModel());
+		assertEquals(model.getType(), result.getLicenseType());
 		assertFalse(result.isValid());
 		
 	}

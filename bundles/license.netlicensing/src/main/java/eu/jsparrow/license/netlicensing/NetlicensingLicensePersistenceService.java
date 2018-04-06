@@ -1,7 +1,6 @@
 package eu.jsparrow.license.netlicensing;
 
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

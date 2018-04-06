@@ -5,14 +5,15 @@ import java.time.ZonedDateTime;
 import eu.jsparrow.license.api.LicenseModel;
 import eu.jsparrow.license.api.LicenseType;
 
-@SuppressWarnings("nls")
+/**
+ * Implementor of {@link Licensemodel} that represents a NetLicensing license.
+ */
 public class NetlicensingLicenseModel implements LicenseModel {
 
 	private static final long serialVersionUID = 7047162817207967199L;
 
 	private String key;
 	private String name;
-	private String product;
 	private String secret;
 	private LicenseType type;
 	private ZonedDateTime expireDate;
@@ -23,11 +24,10 @@ public class NetlicensingLicenseModel implements LicenseModel {
 		this.secret = secret;
 	}
 
-	public NetlicensingLicenseModel(LicenseType type, String key, String name, String product,
-			String secret, ZonedDateTime expireDate) {
+	public NetlicensingLicenseModel(LicenseType type, String key, String name, String secret,
+			ZonedDateTime expireDate) {
 		this(type, key, secret);
 		this.name = name;
-		this.product = product;
 		this.expireDate = expireDate;
 	}
 
@@ -43,10 +43,6 @@ public class NetlicensingLicenseModel implements LicenseModel {
 		return expireDate;
 	}
 
-	public String getProduct() {
-		return product;
-	}
-
 	public String getSecret() {
 		return secret;
 	}
@@ -57,7 +53,7 @@ public class NetlicensingLicenseModel implements LicenseModel {
 
 	@Override
 	public String toString() {
-		return "NetlicensingLicenseModel [key=" + key + ", name=" + name + ", product=" + product + ", secret=" + secret
+		return "NetlicensingLicenseModel [key=" + key + ", name=" + name + ", secret=" + secret
 				+ ", type=" + type + ", expireDate=" + expireDate + "]";
 	}
 

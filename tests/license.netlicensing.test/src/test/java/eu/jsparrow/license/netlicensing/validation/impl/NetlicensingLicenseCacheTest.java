@@ -2,14 +2,14 @@ package eu.jsparrow.license.netlicensing.validation.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.reset;
 
 import java.time.ZonedDateTime;
 
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import eu.jsparrow.license.api.LicenseValidationResult;
-import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.testhelper.NetlicensingValidationResultFactory;
 
 @SuppressWarnings("nls")

@@ -25,7 +25,7 @@ public class ResponseEvaluatorTest {
 	public void setUp() {
 		responseGenerator = new DummyResponseGenerator();
 		NetlicensingLicenseModel model = NetlicensingLicenseModelFactory.create();
-		responseEvaluator = new ResponseEvaluator(model);
+		responseEvaluator = new ResponseEvaluator(model.getKey());
 	}
 
 	@Test

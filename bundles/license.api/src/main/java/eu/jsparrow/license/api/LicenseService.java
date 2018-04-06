@@ -7,4 +7,6 @@ public interface LicenseService {
 	public LicenseValidationResult validate(LicenseModel model) throws ValidationException;
 	
 	public void checkIn(LicenseModel model) throws ValidationException;
+	
+	public LicenseValidationResult verifyKey(String key, String secret) throws ValidationException;
 }

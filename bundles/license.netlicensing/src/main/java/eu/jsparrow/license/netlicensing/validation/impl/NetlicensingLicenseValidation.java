@@ -13,6 +13,11 @@ import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
 import eu.jsparrow.license.netlicensing.validation.LicenseValidation;
 
+/**
+ * Implementor of {@link LicenseValidation} for NetLicensing. Validating a
+ * license using NetLicensing involves making a request to the NetLicensing API.
+ * 
+ */
 public class NetlicensingLicenseValidation implements LicenseValidation {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
@@ -30,7 +35,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		this.model = model;
 		this.licenseCache = new NetlicensingLicenseCache();
 		this.parametersFactory = new NetlicensingValidationParametersFactory();
-		this.validationRequest = new NetlicensingValidationRequest(new ResponseEvaluator(model));
+		this.validationRequest = new NetlicensingValidationRequest(new ResponseEvaluator(model.getKey()));
 	}
 
 	public NetlicensingLicenseValidation(NetlicensingLicenseModel model, NetlicensingLicenseCache cache,
@@ -67,7 +72,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 			logger.warn("Can only check in floating licenses. Ignoring check-in call"); //$NON-NLS-1$
 			return;
 		}
-		ValidationParameters validationParameters = parametersFactory.createFloatingCheckingParameters(model);
+		ValidationParameters validationParameters = parametersFactory.createFloatingCheckInParameters(model);
 		validationRequest.send(model.getKey(), validationParameters);
 	}
 }

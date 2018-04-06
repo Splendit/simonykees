@@ -29,8 +29,8 @@ public class NetlicensingLicenseModelFactoryService implements LicenseModelFacto
 	}
 
 	public LicenseModel createNewModel(LicenseType type, String key, String name,
-			String product, String secret, ZonedDateTime expireDate) {
-		return new NetlicensingLicenseModel(type, key, name, product, secret, expireDate);
+			String secret, ZonedDateTime expireDate) {
+		return new NetlicensingLicenseModel(type, key, name, secret, expireDate);
 	}
 
 }

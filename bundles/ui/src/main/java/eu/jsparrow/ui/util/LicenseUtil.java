@@ -1,6 +1,8 @@
 package eu.jsparrow.ui.util;
 
 import java.lang.invoke.MethodHandles;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import javax.inject.Singleton;
 
@@ -74,8 +76,7 @@ public class LicenseUtil implements LicenseUtilService {
 			handleStartUpValidationFailure(shell, e);
 			return true;
 		}
-		if (result.getModel()
-			.getType() == LicenseType.DEMO && !result.isValid()) {
+		if (result.getLicenseType() == LicenseType.DEMO && !result.isValid()) {
 			BuyLicenseDialog dialog = new BuyLicenseDialog(shell);
 			return dialog.open() == 0;
 		}
@@ -86,15 +87,18 @@ public class LicenseUtil implements LicenseUtilService {
 		if (result == null) {
 			return true;
 		}
-		return result.getModel()
-			.getType() == LicenseType.DEMO;
+		return result.getLicenseType() == LicenseType.DEMO;
 	}
 
 	public LicenseUpdateResult update(String key) {
 		String secret = createSecretFromHardware();
-		LicenseModel model = factoryService.createNewFloatingModel(key, secret);
-		LicenseValidationResult validationResult = null;
+		LicenseValidationResult validationResult;
+		LicenseModel model;
 		try {
+			validationResult = licenseService.verifyKey(key, secret);
+			String name = createNameFromHardware();
+			model = factoryService.createNewModel(validationResult.getLicenseType(), key, name, secret,
+					result.getExpirationDate());
 			validationResult = licenseService.validate(model);
 		} catch (ValidationException e) {
 			logger.error("Could not validate license", e); //$NON-NLS-1$
@@ -107,7 +111,8 @@ public class LicenseUtil implements LicenseUtilService {
 			return new LicenseUpdateResult(false, NLS.bind(Messages.UpdateLicenseDialog_error_licenseInvalid, key));
 
 		}
-		return trySaveToPersistence(validationResult);
+		
+		return trySaveToPersistence(model);
 	}
 
 	public void stop() {
@@ -153,9 +158,9 @@ public class LicenseUtil implements LicenseUtilService {
 		SimonykeesMessageDialog.openMessageDialog(shell, message, MessageDialog.ERROR);
 	}
 
-	private LicenseUpdateResult trySaveToPersistence(LicenseValidationResult validationResult) {
+	private LicenseUpdateResult trySaveToPersistence(LicenseModel model) {
 		try {
-			persistenceService.saveToPersistence(validationResult.getModel());
+			persistenceService.saveToPersistence(model);
 		} catch (PersistenceException e) {
 			logger.error("License is valid but could not be persisted", e); //$NON-NLS-1$
 			return new LicenseUpdateResult(false,
@@ -178,6 +183,17 @@ public class LicenseUtil implements LicenseUtilService {
 		}
 
 		return diskSerial;
+	}
+	
+	private String createNameFromHardware() {
+		InetAddress addr;
+		try {
+			addr = InetAddress.getLocalHost();
+			return addr.getHostName();
+		} catch (UnknownHostException e) {
+			logger.warn("Error while reading the host name", e); //$NON-NLS-1$
+			return ""; //$NON-NLS-1$
+		}
 	}
 
 	public class LicenseUpdateResult {
