@@ -98,9 +98,14 @@ public class LicenseUtil {
 
 	public LicenseUpdateResult update(String key) {
 		String secret = createSecretFromHardware();
-		LicenseValidationResult validationResult = null;
+		LicenseValidationResult validationResult;
+		LicenseModel model;
 		try {
 			validationResult = licenseService.verifyKey(key, secret);
+			String name = createNameFromHardware();
+			model = factoryService.createNewModel(validationResult.getLicenseType(), key, name, secret,
+					result.getExpirationDate());
+			validationResult = licenseService.validate(model);
 		} catch (ValidationException e) {
 			logger.error("Could not validate license", e); //$NON-NLS-1$
 			return new LicenseUpdateResult(false,
@@ -112,10 +117,7 @@ public class LicenseUtil {
 			return new LicenseUpdateResult(false, NLS.bind(Messages.UpdateLicenseDialog_error_licenseInvalid, key));
 
 		}
-
-		String name = createNameFromHardware();
-		LicenseModel model = factoryService.createNewModel(validationResult.getLicenseType(), key, name, secret,
-				result.getExpirationDate());
+		
 		return trySaveToPersistence(model);
 	}
 
