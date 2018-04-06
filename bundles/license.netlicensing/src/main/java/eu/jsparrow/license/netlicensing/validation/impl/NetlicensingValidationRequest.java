@@ -13,6 +13,8 @@ import eu.jsparrow.license.api.exception.ValidationException;
 
 public class NetlicensingValidationRequest {
 
+	static final String VALIDATION_BASE_URL = "https://go.netlicensing.io/core/v2/rest"; //$NON-NLS-1$
+
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
@@ -52,7 +54,7 @@ public class NetlicensingValidationRequest {
 
 	private Context createAPIContextCall() {
 		Context context = new Context();
-		context.setBaseUrl(NetlicensingProperties.VALIDATION_BASE_URL);
+		context.setBaseUrl(VALIDATION_BASE_URL);
 		context.setSecurityMode(SecurityMode.APIKEY_IDENTIFICATION);
 		context.setApiKey(NetlicensingProperties.API_KEY);
 		return context;
