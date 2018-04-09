@@ -14,9 +14,10 @@
 	<description>jSparrow Plugin for headless start</description>
 
 	<properties>
+		<snakeyaml.version>1.18</snakeyaml.version>
 		<proguard.extra.options>
-			<!-- <option> -libraryjars ${project.basedir}/../license.api/target/eu.jsparrow.license.api-${project.version}_proguard_base.jar 
-				</option> <option>-applymapping ${project.basedir}/../license.api/target/license.api.out</option> -->
+			-libraryjars
+			${project.basedir}/../license.api/target/eu.jsparrow.license.api-${project.version}_proguard_base.jar
 			-libraryjars
 			${project.basedir}/../rules.api/target/eu.jsparrow.rules.api-${project.version}_proguard_base.jar
 			-libraryjars
@@ -26,7 +27,38 @@
 		</proguard.extra.options>
 	</properties>
 
+
+
+
 	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.github.wvengen</groupId>
+					<artifactId>proguard-maven-plugin</artifactId>
+					<configuration>
+						<exclusions>
+							<exclusion>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow.rules.api</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow.license.api</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow.logging</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>at.splendit</groupId>
+								<artifactId>eu.jsparrow.core</artifactId>
+							</exclusion>
+						</exclusions>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -50,6 +82,11 @@
 									<artifactId>plexus-utils</artifactId>
 									<version>3.0.17</version>
 								</item>
+								<item>
+									<groupId>org.yaml</groupId>
+									<artifactId>snakeyaml</artifactId>
+									<version>${snakeyaml.version}</version>
+								</item>
 							</artifactItems>
 							<outputDirectory>lib</outputDirectory>
 							<stripVersion>true</stripVersion>
@@ -59,6 +96,8 @@
 					</execution>
 				</executions>
 			</plugin>
+
 		</plugins>
 	</build>
+
 </project>

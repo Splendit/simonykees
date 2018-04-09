@@ -272,8 +272,12 @@ public class Messages extends NLS {
 	public static String RefactoringSummaryWizardPage_eliminated_technical_debt;
 	public static String RefactoringSummaryWizardPage_title;
 	public static String RefactoringSummaryWizardPage_warn_disableFinishWhenFree;
+	public static String RefactoringInvoker_ConfigContainsInvalidSyntax;
+
 	public static String RefactoringInvoker_GetEnabledRulesForProject;
 	public static String RefactoringInvoker_GetSelectedRules;
+
+	public static String RefactoringInvoker_OverridingConfigWithCommandLine;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
@@ -378,6 +382,9 @@ public class Messages extends NLS {
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_title;
 	public static String SimonykeesUpdateLicenseDialog_update_llicense_dialog_button;
 	public static String SimonykeesUpdateLicenseDialog_update_license_dialog_group_title;
+	public static String StandaloneActivator_bundleStarted;
+	public static String StandaloneActivator_noValidLicenseFound;
+	public static String StandaloneActivator_startingBundle;
 	public static String StandaloneConfig_AddProjectNaturesToProjectDescription;
 	public static String StandaloneConfig_collectCompilationUnits;
 	public static String StandaloneConfig_CompilerComplianceSetTo;

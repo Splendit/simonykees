@@ -6,6 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,7 +32,6 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 public class RefactoringInvokerTest {
 
 	private IJavaProject javaProject;
-
 	private RefactoringInvoker refactoringInvoker;
 
 	@Before
@@ -64,12 +64,14 @@ public class RefactoringInvokerTest {
 		}
 
 		@Override
-		protected void loadStandaloneConfig(BundleContext context) {
-			standaloneConfig = mock(StandaloneConfig.class);
+		protected List<StandaloneConfig> loadStandaloneConfig(BundleContext context) {
+			standaloneConfigs = Arrays.asList(mock(StandaloneConfig.class));
+			return standaloneConfigs;
 		}
 
 		@Override
-		protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules() {
+		protected List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> getProjectRules(
+				StandaloneConfig config) {
 			return Collections.emptyList();
 		}
 
@@ -80,7 +82,7 @@ public class RefactoringInvokerTest {
 		}
 
 		@Override
-		protected IJavaProject getJavaProject() {
+		protected IJavaProject getJavaProject(StandaloneConfig standaloneConfig) {
 			return javaProject;
 		}
 	}
