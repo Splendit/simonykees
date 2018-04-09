@@ -192,15 +192,18 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			licenseStatusLabel.setText("");
 			logoLabel.setImage(jSparrowImageActive);
 		} else {
-			String invalidReason = "Your license is invalid. " + result.getDetail();
+			String invalidReason = result.getDetail();
 			licenseStatusLabel.setText(invalidReason);
 			logoLabel.setImage(jSparrowImageInactive);
 		}
 	}
 
-	private String getLicenseModelString(LicenseValidationResult result) {
-		StringBuilder licenseModelString = new StringBuilder();
+	private String getLicenseModelString(LicenseValidationResult result) {		
+		if(result.getLicenseType() != LicenseType.DEMO && !result.isValid()) {
+			return "";
+		}
 
+		StringBuilder licenseModelString = new StringBuilder();
 		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as);
 		if (result.getLicenseType() == LicenseType.DEMO) {
 			licenseModelString.append("free license. ");
@@ -209,7 +212,8 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 			licenseModelString.append(Messages.SimonykeesPreferencePageLicense_under_key_label);
 			licenseModelString.append(result.getKey());
 			licenseModelString.append(". "); //$NON-NLS-1$
-		}
+		} 
+		
 		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_valid_until);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT_PATTERN);
 		licenseModelString.append(result.getExpirationDate()
