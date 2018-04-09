@@ -83,7 +83,7 @@ public class LicenseUtil implements LicenseUtilService {
 
 	@Override
 	public boolean isFreeLicense() {
-		if (result == null) {
+		if (result == null || !result.isValid()) {
 			return true;
 		}
 		return result.getLicenseType() == LicenseType.DEMO;
@@ -103,7 +103,7 @@ public class LicenseUtil implements LicenseUtilService {
 			 * for finding out the license model.
 			 */
 			model = factoryService.createNewModel(validationResult.getLicenseType(), key, name, secret,
-					result.getExpirationDate());
+					validationResult.getExpirationDate());
 			validationResult = licenseService.validate(model);
 		} catch (ValidationException e) {
 			logger.error("Could not validate license", e); //$NON-NLS-1$
@@ -133,6 +133,11 @@ public class LicenseUtil implements LicenseUtilService {
 
 	@Override
 	public LicenseValidationResult getValidationResult() {
+		updateValidationResult();
+		return result;
+	}
+
+	public void updateValidationResult() {
 		LicenseModel model = tryLoadModelFromPersistence();
 		try {
 			result = licenseService.validate(model);
@@ -140,9 +145,7 @@ public class LicenseUtil implements LicenseUtilService {
 			logger.error("Failed to validate license", e); //$NON-NLS-1$
 			result = new LicenseValidationResult(model.getType(), "", false, //$NON-NLS-1$
 					Messages.MessageDialog_licensingError_failedToValidate, model.getExpirationDate());
-
 		}
-		return result;
 	}
 
 	private LicenseModel tryLoadModelFromPersistence() {

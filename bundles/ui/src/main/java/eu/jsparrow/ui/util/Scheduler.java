@@ -8,7 +8,7 @@ public class Scheduler {
 
 	private static final TimeUnit SCHEDULE_TIME_UNIT = TimeUnit.SECONDS;
 	private static final long SCHEDULE_TIME_PERIOD = 600;
-	private static final long SCHEDULE_INITIAL_DELAY = 10;
+	private static final long SCHEDULE_INITIAL_DELAY = 0;
 
 	private ScheduledExecutorService scheduledExecutor;
 
@@ -25,7 +25,7 @@ public class Scheduler {
 	}
 
 	private void runValidation() {
-		licenseUtil.getValidationResult();
+		licenseUtil.updateValidationResult();
 	}
 
 	public void shutDown() {
