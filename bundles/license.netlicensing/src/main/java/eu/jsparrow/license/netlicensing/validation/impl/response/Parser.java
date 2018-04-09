@@ -16,7 +16,7 @@ import eu.jsparrow.license.netlicensing.validation.impl.response.model.*;
 /**
  * Parses a {@link ValidationResult} into a number of
  * {@link NetlicensingResponse}s. A ValidationResult from NetLicensing contains
- * all licenses for a given licensees. The parser filters out the ones that are
+ * all licenses for a given licensee. The parser filters out the ones that are
  * relevant to us and transforms them into objects.
  */
 public class Parser {

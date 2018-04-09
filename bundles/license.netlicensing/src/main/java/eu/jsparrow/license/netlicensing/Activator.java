@@ -20,12 +20,6 @@ public class Activator extends Plugin {
 	// is used for configuring the test fragment
 	private static BundleActivator testFragmentActivator;
 
-	/**
-	 * The constructor
-	 */
-	public Activator() {
-	}
-
 	@Override
 	public void start(BundleContext context) throws Exception {
 		plugin = this;

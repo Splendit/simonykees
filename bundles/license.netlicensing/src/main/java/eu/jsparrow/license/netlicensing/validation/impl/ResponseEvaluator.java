@@ -19,7 +19,10 @@ import eu.jsparrow.license.netlicensing.validation.impl.response.model.Subscript
 
 /**
  * Parses the NetLicensing {@link ValidationResult} using the {@link Parser} and
- * computes the {@link NetlicensingValidationResult} that it represents.
+ * computes the {@link NetlicensingValidationResult} that it represents. A
+ * {@link LicenseType#NODE_LOCKED} license is a combination of Subscription and
+ * Multi-Feature, while a {@link LicenseType#FLOATING} license is a combination
+ * of Subscription and Floating NetLicensing models.
  *
  */
 public class ResponseEvaluator {
@@ -57,7 +60,7 @@ public class ResponseEvaluator {
 
 	/**
 	 * Checks whether the parsed NetLicenisng response having an invalid
-	 * subscription represents either of the following:
+	 * subscription represents any of the following:
 	 * 
 	 * <ul>
 	 * <li>Expired {@link LicenseType.NODE_LOCKED}</li>
@@ -100,7 +103,7 @@ public class ResponseEvaluator {
 
 	/**
 	 * Checks whether the parsed NetLicenisng response having a valid
-	 * subscription represents either of the following:
+	 * subscription represents any of the following:
 	 * 
 	 * <ul>
 	 * <li>Valid {@link LicenseType.NODE_LOCKED}</li>
@@ -112,9 +115,8 @@ public class ResponseEvaluator {
 	 * @return the {@linkplain NetlicensingValidationResult} represented by the
 	 *         parsed response
 	 * @throws ValidationException
-	 *             if the parsed response doesn't represent a valid
-	 *             Node Locked license and has no information about
-	 *             any Floating license.
+	 *             if the parsed response doesn't represent a valid Node Locked
+	 *             license and has no information about any Floating license.
 	 */
 	private NetlicensingValidationResult evaluateNonExpiredLicense() throws ValidationException {
 		logger.debug("Evaluating non expired license"); //$NON-NLS-1$

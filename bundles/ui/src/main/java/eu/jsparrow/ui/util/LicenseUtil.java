@@ -98,8 +98,9 @@ public class LicenseUtil implements LicenseUtilService {
 			validationResult = licenseService.verifyKey(key, secret);
 			String name = createNameFromHardware();
 			/*
-			 * The validation result can only be trusted when the validation 
-			 * request is based on a license model. 
+			 * The validation result can only be trusted when the validation
+			 * request is based on a license model. The verify step is only used
+			 * for finding out the license model.
 			 */
 			model = factoryService.createNewModel(validationResult.getLicenseType(), key, name, secret,
 					result.getExpirationDate());
@@ -137,8 +138,8 @@ public class LicenseUtil implements LicenseUtilService {
 			result = licenseService.validate(model);
 		} catch (ValidationException e) {
 			logger.error("Failed to validate license", e); //$NON-NLS-1$
-			return new LicenseValidationResult(model.getType(), "", false, //$NON-NLS-1$
-					Messages.LicenseStatus_userMessage_CONNECTION_FAILURE, model.getExpirationDate());
+			result = new LicenseValidationResult(model.getType(), "", false, //$NON-NLS-1$
+					Messages.MessageDialog_licensingError_failedToValidate, model.getExpirationDate());
 
 		}
 		return result;

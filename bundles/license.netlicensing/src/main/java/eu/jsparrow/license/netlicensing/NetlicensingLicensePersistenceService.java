@@ -1,5 +1,6 @@
 package eu.jsparrow.license.netlicensing;
 
+import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
@@ -11,6 +12,10 @@ import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.netlicensing.persistence.AESEncryption;
 import eu.jsparrow.license.netlicensing.persistence.SecureStoragePersistence;
 
+/**
+ * Implementor of {@link LicensePersistenceService} using {@link ISecurePreferences}.
+ *
+ */
 @Component
 public class NetlicensingLicensePersistenceService implements LicensePersistenceService {
 
