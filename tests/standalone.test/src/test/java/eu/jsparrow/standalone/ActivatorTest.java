@@ -2,9 +2,10 @@ package eu.jsparrow.standalone;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +20,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.license.api.LicenseValidationService;
 
 /**
  * test class for {@link Activator}
@@ -47,7 +47,7 @@ public class ActivatorTest {
 	private ListRulesUtil listRulesUtil;
 
 	@Mock
-	private LicenseValidationService licenseService;
+	private StandaloneLicenseUtilService licenseService;
 
 	@BeforeClass
 	public static void setUpClass() {
@@ -96,11 +96,10 @@ public class ActivatorTest {
 	public void start_withRefactorAndValidLicense_invokesRefactoringInvoker() throws Exception {
 		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("REFACTOR"); //$NON-NLS-1$
 		when(context.getBundles()).thenReturn(new Bundle[] {});
-		when(licenseService.isFullValidLicense()).thenReturn(true);
+		when(licenseService.validate(anyString())).thenReturn(true);
 
 		activator.start(context);
 
-		verify(licenseService).startValidation();
 		verify(refactoringInvoker).startRefactoring(any(), any(RefactoringPipeline.class));
 	}
 
@@ -108,11 +107,10 @@ public class ActivatorTest {
 	public void start_withRefactorAndInvalidLicense_refactoringInvokerNotInvoked() throws Exception {
 		when(context.getProperty(STANDALONE_MODE_KEY)).thenReturn("REFACTOR"); //$NON-NLS-1$
 		when(context.getBundles()).thenReturn(new Bundle[] {});
-		when(licenseService.isFullValidLicense()).thenReturn(false);
+		when(licenseService.validate(anyString())).thenReturn(false);
 
 		activator.start(context);
 
-		verify(licenseService).startValidation();
 		verify(refactoringInvoker, never()).startRefactoring(any(), any(RefactoringPipeline.class));
 	}
 
