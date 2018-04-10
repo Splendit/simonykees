@@ -19,9 +19,11 @@ Require-Bundle: eu.jsparrow.logging,
  eu.jsparrow.license.api,
  org.eclipse.e4.core.contexts,
  org.eclipse.e4.core.di;bundle-version="1.6.100",
- org.eclipse.osgi
+ org.eclipse.osgi,
+ org.eclipse.osgi.services;bundle-version="[3.6.0,4.0.0)"
 Bundle-Vendor: Splendit IT-Consulting GmbH
 Bundle-ClassPath: lib/plexus-utils.jar,
  lib/maven-invoker.jar,
  lib/snakeyaml.jar,
  .
+Service-Component: OSGI-INF/eu.jsparrow.standalone.StandaloneLicenseUtil.xml
