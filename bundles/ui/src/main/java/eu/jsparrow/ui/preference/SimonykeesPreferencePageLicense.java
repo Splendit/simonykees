@@ -34,8 +34,6 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.osgi.framework.Bundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.license.api.LicenseType;
@@ -51,8 +49,6 @@ import eu.jsparrow.ui.util.LicenseUtilService;
  *
  */
 public class SimonykeesPreferencePageLicense extends PreferencePage implements IWorkbenchPreferencePage {
-
-	private static final Logger logger = LoggerFactory.getLogger(SimonykeesPreferencePageLicense.class);
 
 	private static final int LICENSE_LABEL_MAX_WIDTH = 370;
 
@@ -189,7 +185,7 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private void setLicenseStatusMessage(LicenseValidationResult result) {
 		if (result.isValid()) {
-			licenseStatusLabel.setText("");
+			licenseStatusLabel.setText(""); //$NON-NLS-1$
 			logoLabel.setImage(jSparrowImageActive);
 		} else {
 			String invalidReason = result.getDetail();
@@ -200,15 +196,15 @@ public class SimonykeesPreferencePageLicense extends PreferencePage implements I
 
 	private String getLicenseModelString(LicenseValidationResult result) {		
 		if(result.getLicenseType() != LicenseType.DEMO && !result.isValid()) {
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 
 		StringBuilder licenseModelString = new StringBuilder();
 		licenseModelString.append(Messages.SimonykeesPreferencePageLicense_jsparrow_licensed_as);
 		if (result.getLicenseType() == LicenseType.DEMO) {
-			licenseModelString.append("free license. ");
+			licenseModelString.append(Messages.SimonykeesPreferencePageLicense_freeLicense);
 		} else {
-			licenseModelString.append("full license ");
+			licenseModelString.append(Messages.SimonykeesPreferencePageLicense_fulLicense);
 			licenseModelString.append(Messages.SimonykeesPreferencePageLicense_under_key_label);
 			licenseModelString.append(result.getKey());
 			licenseModelString.append(". "); //$NON-NLS-1$

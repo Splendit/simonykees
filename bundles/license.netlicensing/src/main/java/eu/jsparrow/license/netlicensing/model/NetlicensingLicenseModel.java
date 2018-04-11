@@ -51,11 +51,10 @@ public class NetlicensingLicenseModel implements LicenseModel {
 		return this.type;
 	}
 
-
 	@Override
 	public String toString() {
-		return "NetlicensingLicenseModel [key=" + key + ", name=" + name + ", secret=" + secret
-				+ ", type=" + type + ", expireDate=" + expireDate + "]";
+		return "NetlicensingLicenseModel [key=" + key + ", name=" + name + ", secret=" + secret + ", type=" + type
+				+ ", expireDate=" + expireDate + "]";
 	}
 
 }

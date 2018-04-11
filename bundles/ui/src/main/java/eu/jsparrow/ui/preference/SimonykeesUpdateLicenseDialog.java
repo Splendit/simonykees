@@ -36,8 +36,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.osgi.framework.Bundle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.Activator;
@@ -54,8 +52,6 @@ import eu.jsparrow.ui.util.LicenseUtilService;
  */
 public class SimonykeesUpdateLicenseDialog extends TitleAreaDialog {
 
-	private static final String DEFAULT_LICENSEE_NAME = ""; //$NON-NLS-1$
-	private static final Logger logger = LoggerFactory.getLogger(SimonykeesUpdateLicenseDialog.class);
 	private static final String LOGO_ACTIVE_LICENSE_PATH = "icons/jSparrow_active_icon_100.png"; //$NON-NLS-1$
 	private static final String LOGO_INACTIVE_LICENSE_PATH = "icons/jSparrow_inactive_icon_100.png"; //$NON-NLS-1$
 	private static final String TICKMARK_GREEN_ICON_PATH = "icons/if_Tick_Mark_20px.png"; //$NON-NLS-1$

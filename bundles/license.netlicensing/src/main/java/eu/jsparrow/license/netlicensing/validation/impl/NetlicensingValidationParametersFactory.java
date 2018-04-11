@@ -24,8 +24,8 @@ public class NetlicensingValidationParametersFactory {
 
 	private static final String SESSION_ID_KEY = "sessionId"; //$NON-NLS-1$
 	private static final String ACTION_KEY = "action"; //$NON-NLS-1$
-	private static final String ACTION_CHECK_OUT_VAL = "checkOut"; //$NON-NLS-1$
-	private static final String ACTION_CHECK_IN_VAL = "checkIn"; //$NON-NLS-1$
+	private static final String ACTION_CHECK_OUT_VALUE = "checkOut"; //$NON-NLS-1$
+	private static final String ACTION_CHECK_IN_VALUE = "checkIn"; //$NON-NLS-1$
 
 	public ValidationParameters createValidationParameters(NetlicensingLicenseModel model) {
 		logger.debug("Creating validation parameters for {}", model); //$NON-NLS-1$
@@ -34,7 +34,7 @@ public class NetlicensingValidationParametersFactory {
 		String secret = model.getSecret();
 		if (LicenseType.FLOATING == type) {
 			logger.debug("License type is floating"); //$NON-NLS-1$
-			parameters = createFloatingParameters(secret, ACTION_CHECK_OUT_VAL);
+			parameters = createFloatingParameters(secret, ACTION_CHECK_OUT_VALUE);
 		} else {
 			logger.debug("License type is node-locked"); //$NON-NLS-1$
 			parameters = createNodeLockedParameters(secret);
@@ -46,7 +46,7 @@ public class NetlicensingValidationParametersFactory {
 	}
 
 	public ValidationParameters createFloatingCheckInParameters(NetlicensingLicenseModel model) {
-		ValidationParameters parameters = createFloatingParameters(model.getSecret(), ACTION_CHECK_IN_VAL);
+		ValidationParameters parameters = createFloatingParameters(model.getSecret(), ACTION_CHECK_IN_VALUE);
 		parameters.setProductNumber(NetlicensingProperties.LICENSE_PRODUCT_NUMBER);
 		parameters.setLicenseeName(model.getName());
 		return parameters;
@@ -82,7 +82,7 @@ public class NetlicensingValidationParametersFactory {
 		ValidationParameters parameters = new ValidationParameters();
 		HashMap<String, String> params = new HashMap<>();
 		params.put(SESSION_ID_KEY, secret);
-		params.put(ACTION_KEY, ACTION_CHECK_OUT_VAL);
+		params.put(ACTION_KEY, ACTION_CHECK_OUT_VALUE);
 		parameters.setProductModuleValidationParameters(NetlicensingProperties.FLOATING_PRODUCT_MODULE_NUMBER, params);
 		parameters.setProductNumber(NetlicensingProperties.LICENSE_PRODUCT_NUMBER);
 		return parameters;
