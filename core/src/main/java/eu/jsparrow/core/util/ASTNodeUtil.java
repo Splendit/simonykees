@@ -546,11 +546,13 @@ public class ASTNodeUtil {
 	 *         type cannot be resolved or the condition is not met.
 	 */
 	public static boolean containsDiamondOperator(ClassInstanceCreation classInstanceCreation) {
-		ITypeBinding typeBinding = classInstanceCreation.resolveTypeBinding();
-		if (typeBinding == null || !typeBinding.isParameterizedType()) {
+		Type type = classInstanceCreation.getType();
+
+		if (!type.isParameterizedType()) {
 			return false;
 		}
-		List<Type> typeArguments = convertToTypedList(classInstanceCreation.typeArguments(), Type.class);
-		return typeArguments.isEmpty();
+		
+		ParameterizedType parameterizedType = (ParameterizedType)type;
+		return parameterizedType.typeArguments().isEmpty();
 	}
 }
