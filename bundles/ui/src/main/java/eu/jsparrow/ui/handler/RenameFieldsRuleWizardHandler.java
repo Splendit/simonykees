@@ -38,8 +38,7 @@ import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
-import eu.jsparrow.ui.util.LicenseUtilService;
-import eu.jsparrow.ui.util.WizardHandlerUtil;
+import eu.jsparrow.ui.util.*;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 import eu.jsparrow.ui.wizard.semiautomatic.ConfigureRenameFieldsRuleWizard;
@@ -55,11 +54,10 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(RenameFieldsRuleWizardHandler.class);
 
-	@Inject
-	private LicenseUtilService licenseUtil;
+	private LicenseUtilService licenseUtil = LicenseUtil.get();
 	
 	public RenameFieldsRuleWizardHandler() {
-		ContextInjectionFactory.inject(this, Activator.getEclipseContext());
+		
 	}
 	
 	@Override

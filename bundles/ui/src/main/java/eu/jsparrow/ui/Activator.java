@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
+import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
@@ -44,9 +45,6 @@ public class Activator extends AbstractUIPlugin {
 	private static IEclipseContext eclipseContext;
 
 	private long loggingBundleID = 0;
-	
-	@Inject
-	private LicenseUtilService licenseUtil;
 
 	/**
 	 * The constructor
@@ -66,10 +64,6 @@ public class Activator extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		bundleContext = context;
-
-		setEclipseContext(EclipseContextFactory.getServiceContext(context));
-		ContextInjectionFactory.inject(this, eclipseContext);
-		
 
 		// start jSparrow logging bundle
 		for (Bundle bundle : context.getBundles()) {
@@ -117,7 +111,7 @@ public class Activator extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 
 		setRunning(false);
-		
+		LicenseUtilService licenseUtil = LicenseUtil.get();
 		licenseUtil.stop();
 
 		// FIXME (see SIM-331) figure out better logging configuration
@@ -178,6 +172,6 @@ public class Activator extends AbstractUIPlugin {
 	}
 
 	public static void setEclipseContext(IEclipseContext eclipseContext) {
-			Activator.eclipseContext = eclipseContext;
+		Activator.eclipseContext = eclipseContext;
 	}
 }

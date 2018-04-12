@@ -7,49 +7,60 @@ import java.net.UnknownHostException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Shell;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.api.LicenseModel;
-import eu.jsparrow.license.api.LicenseModelFactoryService;
-import eu.jsparrow.license.api.LicensePersistenceService;
-import eu.jsparrow.license.api.LicenseService;
-import eu.jsparrow.license.api.LicenseType;
-import eu.jsparrow.license.api.LicenseValidationResult;
+import eu.jsparrow.license.api.*;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
+import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.BuyLicenseDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import oshi.SystemInfo;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HardwareAbstractionLayer;
 
-@Component
 public class LicenseUtil implements LicenseUtilService {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
 		.lookupClass());
 
-	@Reference(cardinality = ReferenceCardinality.MANDATORY)
+	private static LicenseUtil instance;
+
 	private LicenseService licenseService;
 
-	@Reference(cardinality = ReferenceCardinality.MANDATORY)
 	private LicensePersistenceService persistenceService;
 
-	@Reference(cardinality = ReferenceCardinality.MANDATORY)
 	private LicenseModelFactoryService factoryService;
 
 	private LicenseValidationResult result = null;
 
 	private Scheduler scheduler;
 
-	public LicenseUtil() {
+	private LicenseUtil() {
 		scheduler = new Scheduler(this);
 		scheduler.start();
+		ServiceReference<LicenseService> licenseReference = Activator.getBundleContext()
+			.getServiceReference(LicenseService.class);
+		licenseService = Activator.getBundleContext()
+			.getService(licenseReference);
+		ServiceReference<LicensePersistenceService> persistenceReference = Activator.getBundleContext()
+			.getServiceReference(LicensePersistenceService.class);
+		persistenceService = Activator.getBundleContext()
+			.getService(persistenceReference);
+		ServiceReference<LicenseModelFactoryService> factoryReference = Activator.getBundleContext()
+			.getServiceReference(LicenseModelFactoryService.class);
+		factoryService = Activator.getBundleContext()
+			.getService(factoryReference);
+	}
+
+	public static LicenseUtil get() {
+		if (instance == null) {
+			instance = new LicenseUtil();
+		}
+		return instance;
 	}
 
 	/**
