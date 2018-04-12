@@ -1,8 +1,7 @@
-package eu.jsparrow.sample.postRule.allRules;
+package eu.jsparrow.sample.postRule.immutableStaticFinalCollectionsJ7;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -15,6 +14,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Collections;
 
 /**
  * 
@@ -23,22 +23,22 @@ import java.util.TreeSet;
  */
 @SuppressWarnings({ "serial", "nls", "unchecked", "rawtypes", "unused" })
 public class ImmutableStaticFinalCollectionsRule {
-
+	
 	private static final List<String> CONSTANT_LIST = Collections.unmodifiableList(new ArrayList<String>() {
 		{
 			add("foo");
 			add("bar");
 		}
 	}// I don't want to break anything
-	);
+)
+	;
 
-	private static final Collection<String> CONSTANT_COLLECTION = Collections
-		.unmodifiableCollection(new ArrayList<String>() {
-			{
-				add("foo");
-				add("bar");
-			}
-		});
+	private static final Collection<String> CONSTANT_COLLECTION = Collections.unmodifiableCollection(new ArrayList<String>() {
+		{
+			add("foo");
+			add("bar");
+		}
+	});
 
 	private static final Map<String, String> CONSTANT_MAP = Collections.unmodifiableMap(new HashMap() {
 		{
@@ -53,27 +53,24 @@ public class ImmutableStaticFinalCollectionsRule {
 		}
 	});
 
-	private static final NavigableMap<String, String> CONSTANT_NAV_MAP = Collections
-		.unmodifiableNavigableMap(new TreeMap<String, String>() {
-			{
-				put("foo", "bar");
-			}
-		});
+	private static final NavigableMap<String, String> CONSTANT_NAV_MAP = Collections.unmodifiableNavigableMap(new TreeMap<String, String>() {
+		{
+			put("foo", "bar");
+		}
+	});
 
-	private static final NavigableSet<String> CONSTANT_NAV_SET = Collections
-		.unmodifiableNavigableSet(new TreeSet<String>() {
-			{
-				add("foo");
-				add("bar");
-			}
-		});
+	private static final NavigableSet<String> CONSTANT_NAV_SET = Collections.unmodifiableNavigableSet(new TreeSet<String>() {
+		{
+			add("foo");
+			add("bar");
+		}
+	});
 
-	private static final SortedMap<String, String> CONSTANT_SORT_MAP = Collections
-		.unmodifiableSortedMap(new TreeMap<String, String>() {
-			{
-				put("foo", "bar");
-			}
-		});
+	private static final SortedMap<String, String> CONSTANT_SORT_MAP = Collections.unmodifiableSortedMap(new TreeMap<String, String>() {
+		{
+			put("foo", "bar");
+		}
+	});
 
 	private static final SortedSet<String> CONSTANT_SORT_SET = Collections.unmodifiableSortedSet(new TreeSet<String>() {
 		{
@@ -82,16 +79,13 @@ public class ImmutableStaticFinalCollectionsRule {
 		}
 	});
 
-	/*
-	 * Should only be changed with java 8 or above
-	 */
-	private static final SortedSet<String> USING_DIAMOND_OPERATOR = Collections.unmodifiableSortedSet(new TreeSet<>());
-
-	private static final List<String> CONSTANT_LIST_2 = new LinkedList<>();
+	private static final List<String> CONSTANT_LIST_2 = new LinkedList<String>();
 
 	public static final List<String> CONSTANT_LIST_4 = new LinkedList<>();
 
-	private static List<String> constantList5 = new LinkedList<>();
+	private static List<String> CONSTANT_LIST_5 = new LinkedList<>();
+
+	private final List<String> CONSTANT_LIST_6 = new LinkedList<>();
 
 	static {
 		CONSTANT_LIST_2.add("foo");
@@ -100,8 +94,6 @@ public class ImmutableStaticFinalCollectionsRule {
 	}
 
 	private static final List<String> CONSTANT_LIST_3 = new LinkedList<>();
-
-	private final List<String> constantList6 = new LinkedList<>();
 
 	public void test() {
 		CONSTANT_LIST_3.add("foo");

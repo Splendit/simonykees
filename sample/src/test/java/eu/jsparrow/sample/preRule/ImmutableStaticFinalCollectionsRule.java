@@ -76,6 +76,11 @@ public class ImmutableStaticFinalCollectionsRule {
 			add("bar");
 		}
 	};
+	
+	/*
+	 * Should only be changed with java 8 or above
+	 */
+	private static final SortedSet<String> USING_DIAMOND_OPERATOR = new TreeSet<>();
 
 	private static final List<String> CONSTANT_LIST_2 = new LinkedList<String>();
 

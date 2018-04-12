@@ -1,8 +1,6 @@
 package eu.jsparrow.core;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -16,10 +14,10 @@ import eu.jsparrow.core.rule.impl.ImmutableStaticFinalCollectionsRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
 @SuppressWarnings("nls")
-public class ImmutableStaticFinalCollectionsRulesTest extends SingleRuleTest {
+public class ImmutableStaticFinalCollectionsRulesJ7Test extends SingleRuleTest {
 
 	private static final String SAMPLE_FILE = "ImmutableStaticFinalCollectionsRule.java";
-	private static final String POSTRULE_SUBDIRECTORY = "immutableStaticFinalCollections";
+	private static final String POSTRULE_SUBDIRECTORY = "immutableStaticFinalCollectionsJ7";
 
 	private ImmutableStaticFinalCollectionsRule rule;
 
@@ -31,33 +29,15 @@ public class ImmutableStaticFinalCollectionsRulesTest extends SingleRuleTest {
 
 	@Test
 	public void testTransformationWithDefaultFile() throws Exception {
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_7);
+		rule.ruleSpecificImplementation(testProject);
+
 		Path preRule = getPreRuleFile(SAMPLE_FILE);
 		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
-		
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
-		rule.ruleSpecificImplementation(testProject);
 
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
 		assertEquals(expected, actual);
-	}
-
-	@Test
-	public void calculateEnabledForProjectShouldBeEnabled() {
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_2);
-
-		rule.calculateEnabledForProject(testProject);
-
-		assertTrue(rule.isEnabled());
-	}
-
-	@Test
-	public void calculateEnabledforProjectShouldBeDisabled() {
-		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_1);
-
-		rule.calculateEnabledForProject(testProject);
-
-		assertFalse(rule.isEnabled());
 	}
 }
