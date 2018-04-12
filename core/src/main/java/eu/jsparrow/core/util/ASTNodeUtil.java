@@ -534,4 +534,23 @@ public class ASTNodeUtil {
 		return arguments.stream()
 			.anyMatch(argument -> isFollowedByLineComment(argument, commentRewriter));
 	}
+
+	/**
+	 * Checks if the given {@link ClassInstanceCreation} has a parameterized
+	 * type and the list of the provided type arguments is empty. For example:
+	 * {@code new HashMap<>()}.
+	 * 
+	 * @param classInstanceCreation
+	 *            node representing a new object creation.
+	 * @return {@code true} if the above condition is met and {@code false} if
+	 *         type cannot be resolved or the condition is not met.
+	 */
+	public static boolean containsDiamondOperator(ClassInstanceCreation classInstanceCreation) {
+		ITypeBinding typeBinding = classInstanceCreation.resolveTypeBinding();
+		if (typeBinding == null || !typeBinding.isParameterizedType()) {
+			return false;
+		}
+		List<Type> typeArguments = convertToTypedList(classInstanceCreation.typeArguments(), Type.class);
+		return typeArguments.isEmpty();
+	}
 }
