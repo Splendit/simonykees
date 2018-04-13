@@ -35,22 +35,28 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 	@Override
 	public boolean validate(String key) {
 		String sessionId = Integer.toString(random.nextInt());
+
+		if (key == null || key.isEmpty()) {
+			logger.error("No License Key has been specified.");
+			return false;
+		}
+
 		try {
 			model = factoryService.createNewFloatingModel(key, sessionId);
 			result = licenseService.validate(model);
 		} catch (ValidationException e) {
-			logger.debug("Error connecting to license server:", e);
-			logger.error("Error connecting to license server: ", e.getMessage());
+			logger.debug("Licensing Error:", e); //$NON-NLS-1$
+			logger.error("Licensing Error: {}", e.getMessage()); //$NON-NLS-1$
 			return false;
 		}
-		
-		if(result.getLicenseType() != LicenseType.FLOATING) {
-			logger.error("Unsupported License Type");
+
+		if (result.getLicenseType() != LicenseType.FLOATING) {
+			logger.error("Unsupported License Type"); //$NON-NLS-1$
 			return false;
 		}
-		
-		if(result.isValid()) {
-			logger.debug("License valid");
+
+		if (result.isValid()) {
+			logger.debug("License valid"); //$NON-NLS-1$
 			return true;
 		}
 
@@ -61,9 +67,12 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 	@Override
 	public void stop() {
 		try {
-			licenseService.checkIn(model);
+			if (model != null) {
+				licenseService.checkIn(model);
+			}
 		} catch (ValidationException e) {
-			logger.error("Failed to check in license.", e); //$NON-NLS-1$
+			logger.debug("Failed to check in License: ", e); //$NON-NLS-1$
+			logger.error("Failed to check in license: {}", e.getMessage()); //$NON-NLS-1$
 		}
 	}
 }
