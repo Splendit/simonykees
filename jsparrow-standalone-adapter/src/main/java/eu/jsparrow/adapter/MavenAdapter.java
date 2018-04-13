@@ -1,6 +1,7 @@
 package eu.jsparrow.adapter;
 
 import java.io.File;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -196,6 +197,14 @@ public class MavenAdapter {
 		configuration.put(Constants.FRAMEWORK_STORAGE_CLEAN, Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT);
 		configuration.put(Constants.FRAMEWORK_STORAGE, FRAMEWORK_STORAGE_VALUE);
 		configuration.put(INSTANCE_DATA_LOCATION_CONSTANT, System.getProperty(USER_DIR));
+
+		/*
+		 * This is solution B from this article:
+		 * https://spring.io/blog/2009/01/19/exposing-the-boot-classpath-in-
+		 * osgi/
+		 */
+		configuration.put(Constants.FRAMEWORK_BOOTDELEGATION, "javax.*,org.xml.*"); //$NON-NLS-1$
+
 		configuration.put(MAVEN_HOME_KEY, mavenHome);
 		configuration.put(DEBUG_ENABLED, Boolean.toString(log.isDebugEnabled()));
 		configuration.put(STANDALONE_MODE_KEY, config.getMode());
