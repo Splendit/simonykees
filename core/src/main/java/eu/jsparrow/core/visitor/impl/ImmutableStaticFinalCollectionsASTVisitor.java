@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.JavaVersion;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -85,6 +86,11 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 	private Set<String> excludedNames = new HashSet<>();
 	private Map<String, String> methodNames = new HashMap<>();
 	private Map<String, Expression> initializersToReplace = new HashMap<>();
+	private JavaVersion javaVersion;
+
+	public ImmutableStaticFinalCollectionsASTVisitor(JavaVersion javaVersion) {
+		this.javaVersion = javaVersion;
+	}
 
 	// allowed method names
 	@SuppressWarnings("nls")
@@ -137,7 +143,7 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 					&& ASTNodeUtil.hasModifier(parent.modifiers(), Modifier::isPrivate)) {
 
 				Expression initializer = fragmentNode.getInitializer();
-				if (initializer != null && ASTNode.CLASS_INSTANCE_CREATION == initializer.getNodeType()) {
+				if (verifyInitializerPrecondition(initializer)) {
 
 					ITypeBinding initializerTypeBinding = initializer.resolveTypeBinding();
 					List<String> parentTypeList = Collections.singletonList(parentTypeBinding.getErasure()
@@ -159,6 +165,22 @@ public class ImmutableStaticFinalCollectionsASTVisitor extends AbstractAddImport
 		}
 
 		return false;
+	}
+
+	private boolean verifyInitializerPrecondition(Expression initializer) {
+		if (initializer == null) {
+			return false;
+		}
+
+		if (ASTNode.CLASS_INSTANCE_CREATION != initializer.getNodeType()) {
+			return false;
+		}
+
+		if (this.javaVersion.atLeast(JavaVersion.JAVA_1_8)) {
+			return true;
+		}
+
+		return !ASTNodeUtil.containsDiamondOperator((ClassInstanceCreation) initializer);
 	}
 
 	@Override
