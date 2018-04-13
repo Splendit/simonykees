@@ -542,8 +542,7 @@ public class ASTNodeUtil {
 	 * 
 	 * @param classInstanceCreation
 	 *            node representing a new object creation.
-	 * @return {@code true} if the above condition is met and {@code false} if
-	 *         type cannot be resolved or the condition is not met.
+	 * @return if the above condition is met.
 	 */
 	public static boolean containsDiamondOperator(ClassInstanceCreation classInstanceCreation) {
 		Type type = classInstanceCreation.getType();
@@ -551,8 +550,9 @@ public class ASTNodeUtil {
 		if (!type.isParameterizedType()) {
 			return false;
 		}
-		
-		ParameterizedType parameterizedType = (ParameterizedType)type;
-		return parameterizedType.typeArguments().isEmpty();
+
+		ParameterizedType parameterizedType = (ParameterizedType) type;
+		return parameterizedType.typeArguments()
+			.isEmpty();
 	}
 }
