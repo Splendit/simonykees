@@ -112,12 +112,12 @@ public class RulesContainer {
 				 * Coding conventions
 				 */
 				new TryWithResourceRule(), new MultiCatchRule(), new FunctionalInterfaceRule(),
-				new CollectionRemoveAllRule(), new DiamondOperatorRule(), new OverrideAnnotationRule(),
-				new SerialVersionUidRule(), new RearrangeClassMembersRule(), new BracketsToControlRule(),
-				new FieldNameConventionRule(), new MultiVariableDeclarationLineRule(), new EnumsWithoutEqualsRule(),
-				new ReImplementingInterfaceRule(), new PutIfAbsentRule(), new DateDeprecatedRule(),
+				new CollectionRemoveAllRule(), new ImmutableStaticFinalCollectionsRule(), new DiamondOperatorRule(),
+				new OverrideAnnotationRule(), new SerialVersionUidRule(), new RearrangeClassMembersRule(),
+				new BracketsToControlRule(), new FieldNameConventionRule(), new MultiVariableDeclarationLineRule(),
+				new EnumsWithoutEqualsRule(), new ReImplementingInterfaceRule(), new PutIfAbsentRule(),
+				new DateDeprecatedRule(),
 
-				new ImmutableStaticFinalCollectionsRule(),
 				/*
 				 * String manipulations and arithmetic expressions
 				 */

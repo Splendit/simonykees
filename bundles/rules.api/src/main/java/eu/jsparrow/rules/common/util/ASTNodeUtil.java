@@ -541,6 +541,27 @@ public class ASTNodeUtil {
 	}
 
 	/**
+	 * Checks if the given {@link ClassInstanceCreation} has a parameterized
+	 * type and the list of the provided type arguments is empty. For example:
+	 * {@code new HashMap<>()}.
+	 * 
+	 * @param classInstanceCreation
+	 *            node representing a new object creation.
+	 * @return if the above condition is met.
+	 */
+	public static boolean containsDiamondOperator(ClassInstanceCreation classInstanceCreation) {
+		Type type = classInstanceCreation.getType();
+
+		if (!type.isParameterizedType()) {
+			return false;
+		}
+
+		ParameterizedType parameterizedType = (ParameterizedType) type;
+		return parameterizedType.typeArguments()
+			.isEmpty();
+	}
+	
+	/**
 	 * Finds the name of all fields declared in the provided type.
 	 * 
 	 * @param typeDeclaration

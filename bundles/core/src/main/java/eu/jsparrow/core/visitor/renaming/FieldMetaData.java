@@ -40,10 +40,8 @@ public class FieldMetaData {
 	public FieldMetaData(CompilationUnit cu, List<ReferenceSearchMatch> references,
 			VariableDeclarationFragment fragment, String newIdentifier) {
 		IJavaElement javaElement = cu.getJavaElement();
-		IPath path = javaElement.getPath();
-		String name = javaElement.getElementName();
-		setDeclarationPath(path);
-		setClassDeclarationName(name);
+		this.declarationPath = javaElement.getPath();
+		this.classDeclarationName = javaElement.getElementName();
 		this.references = references;
 		this.declarationFragment = fragment;
 		this.newIdentifier = newIdentifier;
@@ -52,17 +50,10 @@ public class FieldMetaData {
 
 	}
 
-	private void setClassDeclarationName(String name) {
-		this.classDeclarationName = name;
-	}
-
 	public String getClassDeclarationName() {
 		return this.classDeclarationName;
 	}
 
-	private void setDeclarationPath(IPath path) {
-		this.declarationPath = path;
-	}
 
 	/**
 	 * maps the access modifiers from the {@link VariableDeclarationFragment} to

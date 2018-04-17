@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -120,6 +121,16 @@ public class FieldDeclarationASTVisitor extends AbstractASTRewriteASTVisitor {
 		if (!typeDeclaration.isMemberTypeDeclaration()) {
 			newNamesPerType.clear();
 		}
+	}
+
+	@Override
+	public boolean visit(AnonymousClassDeclaration anonymousClass) {
+		/*
+		 * Fields declared in the body of an anonymous class are ignored because
+		 * the search engine does not find their references correctly. see
+		 * SIM-934
+		 */
+		return false;
 	}
 
 	@Override
