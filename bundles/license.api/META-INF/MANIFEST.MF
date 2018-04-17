@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: jSparrow Api
+Bundle-SymbolicName: eu.jsparrow.license.api
+Bundle-Version: 2.5.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: eu.jsparrow.license.api
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: Splendit IT-Consulting GmbH

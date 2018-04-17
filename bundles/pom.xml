@@ -1,0 +1,177 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>at.splendit</groupId>
+		<artifactId>eu.jsparrow</artifactId>
+		<version>2.5.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>bundles</artifactId>
+	<packaging>pom</packaging>
+	<name>jSparrow :: bundles</name>
+	<description>jSparrow OSGi bundle container</description>
+
+	<properties>
+		<!-- a proguard option can not be empty, because the property is interpreted 
+			as null which results in a wrong proguard configuration -->
+		<proguard.extra.options>#comment</proguard.extra.options>
+	</properties>
+
+
+	<modules>
+		<!-- logging and internationalisation (i18n) -->
+		<module>i18n</module>
+		<module>logging</module>
+
+		<!-- modular rules -->
+		<module>rules.api</module>
+		<module>rules.imports</module>
+
+		<!-- licensing -->
+		<module>license.api</module>
+		<module>license.netlicensing</module>
+
+		<!-- plug-in functionality -->
+		<module>core</module>
+		<module>ui</module>
+
+		<!-- standalone -->
+		<module>standalone</module>
+	</modules>
+
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.github.wvengen</groupId>
+					<artifactId>proguard-maven-plugin</artifactId>
+					<version>${proguard.plugin.version}</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>proguard</goal>
+							</goals>
+						</execution>
+					</executions>
+					<dependencies>
+						<!-- used maven obfuscation library -->
+						<dependency>
+							<groupId>net.sf.proguard</groupId>
+							<artifactId>proguard-base</artifactId>
+							<version>6.0.1</version>
+							<scope>runtime</scope>
+						</dependency>
+					</dependencies>
+					<configuration>
+						<obfuscate>true</obfuscate>
+						<!-- defines a proguard configuration that is loaded addition to the 
+							options and libs definition in the pom -->
+						<proguardInclude>${basedir}/proguard.conf</proguardInclude>
+						<libs>
+							<lib>${java.home}/lib/rt.jar</lib>
+							<lib>${java.home}/lib/jsse.jar</lib>
+						</libs>
+						<options>
+							<!-- Default parameters -->
+							<option>
+								-useuniqueclassmembernames
+							</option>
+							<!-- Otherwise everything that is not used by an kept class would 
+								be thrown away -->
+							<option>
+								-dontshrink
+								-dontoptimize
+							</option>
+							<!-- The SourceFile attribute is required, because Oracle/Sun's Java 
+								virtual machine otherwise does not include line numbers in stack traces, 
+								which is what you really want -->
+							<!-- https://stackoverflow.com/a/6740226 -->
+							<option>
+								-renamesourcefileattribute SourceFile
+							</option>
+							<!-- Following attributes are kept intact -->
+							<option>
+								-keepattributes
+								*Annotation*,Signature,LineNumberTable,SourceFile
+							</option>
+							<!-- lambdas are processed wrong, 2 variables in the same scope end 
+								as var0 -->
+							<!-- var0 is not really the problem, but only works if not obfuscated 
+								-> reason not found yet -->
+							<!-- helps with lambda errors in obfuscation -->
+							<option>
+								-keepclassmembers, includedescriptorclasses, allowobfuscation
+								class * {synthetic <![CDATA[<methods>]]>;}
+							</option>
+							<!-- Modify the manifest to ensure the export packages are intact -->
+							<option>
+								-adaptresourcefilecontents META-INF/MANIFEST.MF
+							</option>
+							<!-- default location of mapping out -->
+							<option>
+								-printmapping
+								${project.basedir}/../target/${project.artifactId}.out
+							</option>
+							<option>
+								-applymapping ${project.basedir}/../target/mapping.in
+							</option>
+							<!-- default location of proguard configuration -->
+							<option>
+								-printconfiguration
+								${project.build.directory}/${project.artifactId}.conf
+							</option>
+							<!-- is used to add additional options that can not be defined within 
+								the proguard.conf, because overriding the options section within a plugin 
+								definition replaces the whole options definition (i.e.: references to files) -->
+							<option>${proguard.extra.options}</option>
+						</options>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<profiles>
+		<!-- SIM-361 configure proguard to work with multiple modules -->
+		<profile>
+			<id>proguard</id>
+			<activation>
+				<property>
+					<!-- With this profile active, obfuscation will happen -->
+					<name>proguard</name>
+				</property>
+				<file>
+					<exists>${basedir}/proguard.conf</exists>
+				</file>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.github.wvengen</groupId>
+						<artifactId>proguard-maven-plugin</artifactId>
+					</plugin>
+					<plugin>
+						<artifactId>exec-maven-plugin</artifactId>
+						<groupId>org.codehaus.mojo</groupId>
+						<version>1.6.0</version>
+						<executions>
+							<execution><!-- Run our version calculation script -->
+								<id>Version Calculation</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<executable>${basedir}/../merge-proguard-out.sh</executable>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>
