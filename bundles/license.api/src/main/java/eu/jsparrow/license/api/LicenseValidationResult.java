@@ -2,7 +2,9 @@ package eu.jsparrow.license.api;
 
 import java.time.ZonedDateTime;
 
-@SuppressWarnings("nls")
+/**
+ * This class represents a validation result produced by {@link LicenseService}.
+ */
 public class LicenseValidationResult {
 
 	private boolean valid;
@@ -16,7 +18,7 @@ public class LicenseValidationResult {
 	}
 
 	public LicenseValidationResult(LicenseType licenseType, String key, boolean valid, ZonedDateTime expirationDate) {
-		this(licenseType, key, valid, "", expirationDate);
+		this(licenseType, key, valid, "", expirationDate); //$NON-NLS-1$
 	}
 
 	public LicenseValidationResult(LicenseType licenseType, String key, boolean valid, String detail, ZonedDateTime expirationDate) {
