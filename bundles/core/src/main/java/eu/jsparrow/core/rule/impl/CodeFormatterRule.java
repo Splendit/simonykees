@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jface.text.Document;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
@@ -51,7 +52,7 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 	}
 
 	@Override
-	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy, CompilationUnit cu)
 			throws ReflectiveOperationException, JavaModelException {
 
 		try {

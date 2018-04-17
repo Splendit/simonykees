@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
+import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -32,6 +34,7 @@ public class RefactoringState {
 	private ICompilationUnit original;
 
 	private ICompilationUnit workingCopy;
+	private final CompilationUnit astRoot;
 
 	private Map<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> initialChanges = new HashMap<>();
 
@@ -42,6 +45,7 @@ public class RefactoringState {
 	public RefactoringState(ICompilationUnit original, ICompilationUnit workingCopy) {
 		this.original = original;
 		this.workingCopy = workingCopy;
+		astRoot = RefactoringUtil.parse(workingCopy);
 	}
 
 	/**
@@ -104,8 +108,7 @@ public class RefactoringState {
 	 */
 	public void addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
 			boolean initialApply) throws JavaModelException, ReflectiveOperationException, RefactoringException {
-
-		DocumentChange documentChange = rule.applyRule(workingCopy);
+		DocumentChange documentChange = rule.applyRule(workingCopy, astRoot);
 		if (documentChange != null) {
 			changes.put(rule, documentChange);
 			if (initialApply) {
