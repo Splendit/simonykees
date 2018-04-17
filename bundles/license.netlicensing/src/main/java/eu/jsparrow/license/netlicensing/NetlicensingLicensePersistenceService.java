@@ -29,13 +29,13 @@ public class NetlicensingLicensePersistenceService implements LicensePersistence
 	
 	@Override
 	public LicenseModel loadFromPersistence() throws PersistenceException {
-		logger.debug("Loading model from persistence");
+		logger.debug("Loading model from persistence"); //$NON-NLS-1$
 		return persistence.load();
 	}
 
 	@Override
 	public void saveToPersistence(LicenseModel model) throws PersistenceException {
-		logger.debug("Saving {}", model);
+		logger.debug("Saving {}", model); //$NON-NLS-1$
 		persistence.save(model);
 	}
 

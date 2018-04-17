@@ -37,7 +37,7 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 		String sessionId = Integer.toString(random.nextInt());
 
 		if (key == null || key.isEmpty()) {
-			logger.error("No License Key has been specified.");
+			logger.error("No License Key has been specified."); //$NON-NLS-1$
 			return false;
 		}
 
