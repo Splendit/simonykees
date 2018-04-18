@@ -34,7 +34,6 @@ public class RefactoringState {
 	private ICompilationUnit original;
 
 	private ICompilationUnit workingCopy;
-	private final CompilationUnit astRoot;
 
 	private Map<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> initialChanges = new HashMap<>();
 
@@ -45,7 +44,6 @@ public class RefactoringState {
 	public RefactoringState(ICompilationUnit original, ICompilationUnit workingCopy) {
 		this.original = original;
 		this.workingCopy = workingCopy;
-		astRoot = RefactoringUtil.parse(workingCopy);
 	}
 
 	/**
@@ -108,7 +106,7 @@ public class RefactoringState {
 	 */
 	public void addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
 			boolean initialApply) throws JavaModelException, ReflectiveOperationException, RefactoringException {
-		DocumentChange documentChange = rule.applyRule(workingCopy, astRoot);
+		DocumentChange documentChange = rule.applyRule(workingCopy);
 		if (documentChange != null) {
 			changes.put(rule, documentChange);
 			if (initialApply) {

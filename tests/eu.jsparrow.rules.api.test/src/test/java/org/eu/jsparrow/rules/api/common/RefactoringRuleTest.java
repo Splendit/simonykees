@@ -18,7 +18,6 @@ import eu.jsparrow.jdtunit.util.JavaProjectBuilder;
 import eu.jsparrow.jdtunit.util.PackageFragmentBuilder;
 import eu.jsparrow.rules.api.test.dummies.DummyRefactoringRule;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
  * 
@@ -71,7 +70,7 @@ public class RefactoringRuleTest {
 			.build();
 		
 
-		DocumentChange result = rule.applyRule(workingCopy, RefactoringUtil.parse(workingCopy));
+		DocumentChange result = rule.applyRule(workingCopy);
 
 		assertNull(result);
 	}
