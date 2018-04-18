@@ -18,6 +18,7 @@ import eu.jsparrow.jdtunit.util.JavaProjectBuilder;
 import eu.jsparrow.jdtunit.util.PackageFragmentBuilder;
 import eu.jsparrow.rules.api.test.dummies.DummyRefactoringRule;
 import eu.jsparrow.rules.common.RefactoringRule;
+import eu.jsparrow.rules.common.util.RefactoringUtil;
 
 /**
  * 
@@ -68,8 +69,9 @@ public class RefactoringRuleTest {
 	public void appyRuleImpl_whenVisitorDoesNothing_shouldReturnNull() throws Exception {
 		ICompilationUnit workingCopy = new CompilationUnitBuilder(fragment).setContent("")
 			.build();
+		
 
-		DocumentChange result = rule.applyRule(workingCopy);
+		DocumentChange result = rule.applyRule(workingCopy, RefactoringUtil.parse(workingCopy));
 
 		assertNull(result);
 	}

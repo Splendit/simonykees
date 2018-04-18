@@ -56,7 +56,7 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 	}
 
 	@Override
-	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy, CompilationUnit cu)
 			throws ReflectiveOperationException, JavaModelException {
 
 		try {

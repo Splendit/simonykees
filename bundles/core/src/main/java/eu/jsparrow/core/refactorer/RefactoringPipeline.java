@@ -352,41 +352,73 @@ public class RefactoringPipeline {
 
 		// When starting a new refactoring clear the old application counters
 		RuleApplicationCount.clear();
-
+		
+		
+		
+		//>>>>>>>---------------------------------------------------------------------------
 		/*
 		 * Converts the monitor to a SubMonitor and sets name of task on
 		 * progress monitor dialog Size is set to number 100 and then scaled to
 		 * size of the rules list Each refactoring rule increases worked amount
 		 * for same size
 		 */
-		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
-			.setWorkRemaining(rules.size());
-		subMonitor.setTaskName(""); //$NON-NLS-1$
-
+//		SubMonitor subMonitor = SubMonitor.convert(monitor, 100)
+//			.setWorkRemaining(rules.size());
+//		subMonitor.setTaskName(""); //$NON-NLS-1$
+//
 		List<NotWorkingRuleModel> notWorkingRules = new ArrayList<>();
-		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
+//		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
+//
+//			subMonitor.subTask(refactoringRule.getRuleDescription()
+//				.getName());
+//
+//			/*
+//			 * Sends new child of subMonitor which takes in progress bar size of
+//			 * 1 of rules size In method that part of progress bar is split to
+//			 * number of compilation units
+//			 */
+//			applyRuleToAllStates(refactoringRule, subMonitor.newChild(1), notWorkingRules);
+//
+//			/*
+//			 * If cancel is pressed on progress monitor, abort all and return,
+//			 * else continue
+//			 */
+//			if (subMonitor.isCanceled()) {
+//				return;
+//			}
+//		}
+		//>>>>>>>---------------------------------------------------------------------------
+		
+		//<<<<<<<---------------------------------------------------------------------------
+		
+		
+		SubMonitor subMonitor1 = SubMonitor.convert(monitor, 100)
+				.setWorkRemaining(refactoringStates.size());
+			subMonitor1.setTaskName(""); //$NON-NLS-1$
 
-			subMonitor.subTask(refactoringRule.getRuleDescription()
-				.getName());
-
-			/*
-			 * Sends new child of subMonitor which takes in progress bar size of
-			 * 1 of rules size In method that part of progress bar is split to
-			 * number of compilation units
-			 */
-			applyRuleToAllStates(refactoringRule, subMonitor.newChild(1), notWorkingRules);
-
-			/*
-			 * If cancel is pressed on progress monitor, abort all and return,
-			 * else continue
-			 */
-			if (subMonitor.isCanceled()) {
-				return;
+			List<NotWorkingRuleModel> notWorkingRules1 = new ArrayList<>();
+			for(RefactoringState state : refactoringStates) {
+				subMonitor1.subTask(state.getWorkingCopyName());
+				/*
+				 * Sends new child of subMonitor which takes in progress bar size of
+				 * 1 of rules size In method that part of progress bar is split to
+				 * number of compilation units
+				 */
+				applyRulesToRefactoringStateState(state, subMonitor1, notWorkingRules);
+				
+				/*
+				 * If cancel is pressed on progress monitor, abort all and return,
+				 * else continue
+				 */
+				if (subMonitor1.isCanceled()) {
+					return;
+				}
 			}
-		}
+		
+		//<<<<<<<----------------------------------------------------------------------------
 
-		if (!notWorkingRules.isEmpty()) {
-			String notWorkingRulesCollected = NotWorkingRuleModel.asString(notWorkingRules);
+		if (!notWorkingRules1.isEmpty()) {
+			String notWorkingRulesCollected = NotWorkingRuleModel.asString(notWorkingRules1);
 			throw new RuleException(
 					NLS.bind(ExceptionMessages.RefactoringPipeline_rule_execute_failed, notWorkingRulesCollected),
 					NLS.bind(ExceptionMessages.RefactoringPipeline_user_rule_execute_failed, notWorkingRulesCollected));
@@ -585,6 +617,36 @@ public class RefactoringPipeline {
 			subMonitor.subTask(rule.getRuleDescription()
 				.getName() + ": " + refactoringState.getWorkingCopyName()); //$NON-NLS-1$
 
+			try {
+				refactoringState.addRuleAndGenerateDocumentChanges(rule, true);
+			} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
+				logger.error(e.getMessage(), e);
+				returnListNotWorkingRules.add(new NotWorkingRuleModel(rule.getRuleDescription()
+					.getName(), refactoringState.getWorkingCopyName()));
+			}
+
+			/*
+			 * If cancel is pressed on progress monitor, abort all and return,
+			 * else continue
+			 */
+			if (monitor.isCanceled()) {
+				return;
+			} else {
+				monitor.worked(1);
+			}
+		}
+	}
+	
+	private void applyRulesToRefactoringStateState(RefactoringState refactoringState, 
+			IProgressMonitor subMonitor, List<NotWorkingRuleModel> returnListNotWorkingRules) {
+		
+		SubMonitor monitor = SubMonitor.convert(subMonitor)
+				.setWorkRemaining(refactoringStates.size());
+		
+		for(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule : rules) {
+			subMonitor.subTask(rule.getRuleDescription()
+					.getName() + ": " + refactoringState.getWorkingCopyName());
+			
 			try {
 				refactoringState.addRuleAndGenerateDocumentChanges(rule, true);
 			} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
