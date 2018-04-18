@@ -18,15 +18,15 @@ public class NetlicensingLicenseModel implements LicenseModel {
 	private LicenseType type;
 	private ZonedDateTime expireDate;
 
-	public NetlicensingLicenseModel(LicenseType type, String key, String secret) {
+	public NetlicensingLicenseModel(String key, String secret, LicenseType type) {
 		this.type = type;
 		this.key = key;
 		this.secret = secret;
 	}
 
-	public NetlicensingLicenseModel(LicenseType type, String key, String name, String secret,
+	public NetlicensingLicenseModel(String key, String secret, LicenseType type, String name,
 			ZonedDateTime expireDate) {
-		this(type, key, secret);
+		this(key, secret, type);
 		this.name = name;
 		this.expireDate = expireDate;
 	}

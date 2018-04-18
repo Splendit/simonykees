@@ -7,6 +7,8 @@ import eu.jsparrow.license.api.LicenseType;
 
 public class DummyLicenseModel implements LicenseModel{
 
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public ZonedDateTime getExpirationDate() {
 		return ZonedDateTime.now();

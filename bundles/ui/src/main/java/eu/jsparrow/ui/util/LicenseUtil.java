@@ -113,7 +113,7 @@ public class LicenseUtil implements LicenseUtilService {
 			 * request is based on a license model. The verify step is only used
 			 * for finding out the license model.
 			 */
-			model = factoryService.createNewModel(validationResult.getLicenseType(), key, name, secret,
+			model = factoryService.createNewModel(key, secret, validationResult.getLicenseType(), name,
 					validationResult.getExpirationDate());
 			validationResult = licenseService.validate(model);
 		} catch (ValidationException e) {

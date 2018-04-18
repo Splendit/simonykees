@@ -18,11 +18,11 @@ public class DemoLicenseModel implements LicenseModel {
 		expirationDate = ZonedDateTime.now().plusDays(5);
 	}
 
-	public void setExpirationDate(ZonedDateTime expirationDate) {
+	public DemoLicenseModel(ZonedDateTime expirationDate) {
 		this.expirationDate = expirationDate;
 	}
-
-	public DemoLicenseModel(ZonedDateTime expirationDate) {
+	
+	public void setExpirationDate(ZonedDateTime expirationDate) {
 		this.expirationDate = expirationDate;
 	}
 	
