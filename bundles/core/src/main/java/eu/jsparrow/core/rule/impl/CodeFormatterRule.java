@@ -52,7 +52,7 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 	}
 
 	@Override
-	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy)
+	protected DocumentChange applyRuleImpl(ICompilationUnit workingCopy, CompilationUnit astRoot)
 			throws ReflectiveOperationException, JavaModelException {
 
 		try {
@@ -91,7 +91,7 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 					edit.copy());
 
 			workingCopy.applyTextEdit(edit, null);
-			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
+//			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
 
 		}
 

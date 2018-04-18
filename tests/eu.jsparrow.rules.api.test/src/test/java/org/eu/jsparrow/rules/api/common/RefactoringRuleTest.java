@@ -70,7 +70,7 @@ public class RefactoringRuleTest {
 			.build();
 		
 
-		DocumentChange result = rule.applyRule(workingCopy);
+		DocumentChange result = rule.applyRule(workingCopy, null);
 
 		assertNull(result);
 	}

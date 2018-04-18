@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.i18n.ExceptionMessages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.exception.RefactoringException;
-import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 
 /**
@@ -96,6 +95,9 @@ public class RefactoringState {
 	 * 
 	 * @param rule
 	 *            {@link RefactoringRule} to be applied
+	 * @param astRoot
+	 *            TODO
+	 * @return true if there was any change, false otherwise
 	 * @throws JavaModelException
 	 *             if this element does not exist or if an exception occurs
 	 *             while accessing its corresponding resource.
@@ -104,18 +106,21 @@ public class RefactoringState {
 	 *             is not present and the reflective construction fails.
 	 * @throws RefactoringException
 	 */
-	public void addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
-			boolean initialApply) throws JavaModelException, ReflectiveOperationException, RefactoringException {
-		DocumentChange documentChange = rule.applyRule(workingCopy);
+	public boolean addRuleAndGenerateDocumentChanges(RefactoringRule<? extends AbstractASTRewriteASTVisitor> rule,
+			CompilationUnit astRoot, boolean initialApply)
+			throws JavaModelException, ReflectiveOperationException, RefactoringException {
+		DocumentChange documentChange = rule.applyRule(workingCopy, astRoot);
 		if (documentChange != null) {
 			changes.put(rule, documentChange);
 			if (initialApply) {
 				initialChanges.put(rule, documentChange);
 			}
+			return true;
 		} else {
 			String message = NLS.bind(ExceptionMessages.RefactoringState_no_changes_found, rule.getRuleDescription()
 				.getName(), workingCopy.getElementName());
 			logger.trace(message);
+			return false;
 		}
 
 	}
