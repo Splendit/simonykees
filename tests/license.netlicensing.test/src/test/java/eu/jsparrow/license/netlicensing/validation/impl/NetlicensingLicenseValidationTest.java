@@ -36,7 +36,6 @@ public class NetlicensingLicenseValidationTest {
 
 	private NetlicensingLicenseValidation netlicensingValidation;
 
-	@SuppressWarnings("nls")
 	@Before
 	public void setUp() {
 		model = NetlicensingLicenseModelFactory.create();
@@ -60,7 +59,8 @@ public class NetlicensingLicenseValidationTest {
 
 	@Test
 	public void validate_withValidCache_shouldGetLastResultFromCache() throws ValidationException {
-		LicenseValidationResult expected = new LicenseValidationResult();
+		LicenseValidationResult expected = new LicenseValidationResult(null, null, false, null, null);
+		
 		when(cache.get(eq(model.getKey()))).thenReturn(expected);
 
 		LicenseValidationResult result = netlicensingValidation.validate();

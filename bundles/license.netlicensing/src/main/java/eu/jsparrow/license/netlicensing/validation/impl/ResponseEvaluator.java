@@ -53,13 +53,12 @@ public class ResponseEvaluator {
 
 		if (subscription.isValid()) {
 			return evaluateNonExpiredLicense();
-		} else {
-			return evaluateExpiredLicense();
-		}
+		} 
+		return evaluateExpiredLicense();
 	}
 
 	/**
-	 * Checks whether the parsed NetLicenisng response having an invalid
+	 * Checks whether the parsed NetLicensing response having an invalid
 	 * subscription represents any of the following:
 	 * 
 	 * <ul>
@@ -102,7 +101,7 @@ public class ResponseEvaluator {
 	}
 
 	/**
-	 * Checks whether the parsed NetLicenisng response having a valid
+	 * Checks whether the parsed NetLicensing response having a valid
 	 * subscription represents any of the following:
 	 * 
 	 * <ul>

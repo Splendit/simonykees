@@ -22,6 +22,13 @@ import oshi.SystemInfo;
 import oshi.hardware.HWDiskStore;
 import oshi.hardware.HardwareAbstractionLayer;
 
+/**
+ * Implements {@link LicenseUtilService}. The purpose of this class is to wrap
+ * some license management functions for the UI. For example, the flow for
+ * updating a license.
+ * 
+ * It uses various services from the License API package.
+ */
 public class LicenseUtil implements LicenseUtilService {
 
 	private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup()
@@ -63,13 +70,6 @@ public class LicenseUtil implements LicenseUtilService {
 		return instance;
 	}
 
-	/**
-	 * Performs a license check when running a wizard.
-	 * 
-	 * @param shell
-	 *            shell to use for displaying messages
-	 * @return true if client should continue, false if not
-	 */
 	@Override
 	public boolean checkAtStartUp(Shell shell) {
 		LicenseModel model = null;
@@ -85,6 +85,7 @@ public class LicenseUtil implements LicenseUtilService {
 			handleStartUpValidationFailure(shell, e);
 			return true;
 		}
+		// When starting with an expired demo license we show the wizard dialog
 		if (result.getLicenseType() == LicenseType.DEMO && !result.isValid()) {
 			BuyLicenseDialog dialog = new BuyLicenseDialog(shell);
 			return dialog.open() == 0;
@@ -220,6 +221,10 @@ public class LicenseUtil implements LicenseUtilService {
 		}
 	}
 
+	/**
+	 * This is a helper class. Only used to transport the result of an update
+	 * license and a detailed message if necessary.
+	 */
 	public class LicenseUpdateResult {
 
 		private boolean wasSuccessful;
