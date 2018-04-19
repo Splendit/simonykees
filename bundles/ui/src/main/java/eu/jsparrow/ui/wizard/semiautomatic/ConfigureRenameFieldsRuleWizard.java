@@ -141,7 +141,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 
 				SubMonitor subMonitor = SubMonitor.convert(monitor, 100);
 
-				SubMonitor child = subMonitor.split(40);
+				SubMonitor child = subMonitor.split(70);
 				child.setWorkRemaining(selectedJavaElements.size());
 				child.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
 				int prepareStatus = FieldDeclarationVisitorFactory.prepareRenaming(selectedJavaElements,
@@ -156,10 +156,11 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 					return Status.CANCEL_STATUS;
 				}
 
-				SubMonitor childSecondPart = subMonitor.split(50);
-				childSecondPart.setWorkRemaining(100);
+				SubMonitor childSecondPart = subMonitor.split(30);
+				childSecondPart.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
 
 				searchScopeAndPrepareRefactoringStates(childSecondPart, visitor);
+
 				if (!canRefactor) {
 					return Status.CANCEL_STATUS;
 				}
@@ -279,9 +280,8 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 		refactoringPipeline = new RefactoringPipeline();
 		refactoringPipeline.setRules(rules);
 
-		SubMonitor child = subMonitor.split(80);
-		child.setWorkRemaining(targetCompilationUnits.size());
-		child.setTaskName(Messages.RenameFieldsRuleWizard_taskName_collectingUnits);
+		subMonitor.setWorkRemaining(targetCompilationUnits.size());
+
 		List<RefactoringState> refactoringStates = new ArrayList<>();
 		for (ICompilationUnit compilationUnit : targetCompilationUnits) {
 			try {
@@ -294,10 +294,10 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 				canRefactor = false;
 				return;
 			}
-			if (child.isCanceled()) {
+			if (subMonitor.isCanceled()) {
 				return;
 			} else {
-				child.worked(1);
+				subMonitor.worked(1);
 			}
 		}
 

@@ -405,7 +405,7 @@ public class RefactoringPipeline {
 			 * 1 of rules size In method that part of progress bar is split to
 			 * number of compilation units
 			 */
-			applyRulesToRefactoringStateState(state, subMonitor1, notWorkingRules);
+			applyRulesToRefactoringStateState(state, subMonitor1.newChild(1), notWorkingRules);
 
 			/*
 			 * If cancel is pressed on progress monitor, abort all and return,
