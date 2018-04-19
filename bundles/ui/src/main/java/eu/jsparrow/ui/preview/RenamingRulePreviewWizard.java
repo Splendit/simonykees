@@ -1,9 +1,7 @@
 package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
@@ -13,9 +11,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.wizard.IWizardContainer;
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.jface.wizard.*;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +29,6 @@ import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
-import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
 
 /**
@@ -61,6 +56,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	public RenamingRulePreviewWizard(RefactoringPipeline refactoringPipeline, List<FieldMetaData> metadata,
 			Map<FieldMetaData, Map<ICompilationUnit, DocumentChange>> documentChanges,
 			List<ICompilationUnit> targetCompilationUnits, PublicFieldsRenamingRule rule) {
+		super();
 		this.refactoringPipeline = refactoringPipeline;
 		this.metaData = metadata;
 		this.documentChanges = documentChanges;
@@ -155,19 +151,14 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 * committing changes, message about exception is displayed.
 	 */
 	private void commitChanges() {
-		if (LicenseUtil.getInstance()
-			.isValid()) {
-			try {
-				refactoringPipeline.commitRefactoring();
-				Activator.setRunning(false);
-			} catch (RefactoringException | ReconcileException e) {
-				WizardMessageDialog.synchronizeWithUIShowError(e);
-				Activator.setRunning(false);
-			}
-		} else {
-			WizardMessageDialog.synchronizeWithUIShowLicenseError();
+		try {
+			refactoringPipeline.commitRefactoring();
+			Activator.setRunning(false);
+		} catch (RefactoringException | ReconcileException e) {
+			WizardMessageDialog.synchronizeWithUIShowError(e);
 			Activator.setRunning(false);
 		}
+
 	}
 
 	/**

@@ -11,7 +11,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -102,16 +101,6 @@ public class PublicFieldsRenamingASTVisitor extends AbstractASTRewriteASTVisitor
 			insertJavadocNode(fieldDeclaration, identifiers);
 		}
 		return true;
-	}
-
-	@Override
-	public boolean visit(AnonymousClassDeclaration anonymousClass) {
-		/*
-		 * Fields declared in the body of an anonymous class are ignored because
-		 * the search engine does not find their references correctly. 
-		 * see SIM-934
-		 */
-		return false;
 	}
 
 	/**

@@ -27,7 +27,7 @@
 		<!-- Java Class for production licenses -->
 		<javaLicenseProductionPropertiesClass>src/main/config-files/java-license-properties-production.txt</javaLicenseProductionPropertiesClass>
 		<!-- Target Java class -->
-		<targetJavaLicenseProperties>src/main/java/eu/jsparrow/license/netlicensing/LicenseProperties.java</targetJavaLicenseProperties>
+		<targetJavaLicenseProperties>src/main/java/eu/jsparrow/license/netlicensing/validation/impl/NetlicensingProperties.java</targetJavaLicenseProperties>
 
 		<proguard.extra.options>
 			-injars

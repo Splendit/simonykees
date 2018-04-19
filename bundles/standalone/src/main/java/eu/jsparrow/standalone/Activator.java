@@ -1,5 +1,6 @@
 package eu.jsparrow.standalone;
 
+import java.io.File;
 import java.io.IOException;
 
 import javax.inject.Inject;
@@ -23,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.config.YAMLConfigException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.api.LicenseValidationService;
 import eu.jsparrow.logging.LoggingUtil;
 
 /**
@@ -42,6 +42,7 @@ public class Activator implements BundleActivator {
 	private static final String STANDALONE_MODE_KEY = "STANDALONE.MODE"; //$NON-NLS-1$
 	private static final String DEBUG_ENABLED = "debug.enabled"; //$NON-NLS-1$
 	private static final String DEV_MODE_KEY = "dev.mode.enabled"; //$NON-NLS-1$
+	private static final String LICENSE_KEY = "LICENSE"; //$NON-NLS-1$
 
 	private static final String EQUINOX_DS_BUNDLE_NAME = "org.eclipse.equinox.ds"; //$NON-NLS-1$
 
@@ -49,7 +50,7 @@ public class Activator implements BundleActivator {
 	ListRulesUtil listRulesUtil;
 
 	@Inject
-	LicenseValidationService licenseService;
+	StandaloneLicenseUtilService licenseService;
 
 	public Activator() {
 		this(new RefactoringInvoker(), new ListRulesUtil());
@@ -89,8 +90,8 @@ public class Activator implements BundleActivator {
 			case REFACTOR:
 				try {
 					injectDependencies(context);
-					licenseService.startValidation();
-					if (licenseService.isFullValidLicense() || devModeEnabled) {
+					String key = getLicenseKey(context);
+					if (licenseService.validate(key) || devModeEnabled) {
 						refactoringInvoker.startRefactoring(context, new RefactoringPipeline());
 					} else {
 						String message = Messages.StandaloneActivator_noValidLicenseFound;
@@ -145,6 +146,7 @@ public class Activator implements BundleActivator {
 			logger.debug(e.getMessage(), e);
 			logger.error(e.getMessage());
 		} finally {
+			licenseService.stop();
 			try {
 				refactoringInvoker.cleanUp();
 			} catch (IOException e) {
@@ -160,6 +162,7 @@ public class Activator implements BundleActivator {
 	private void registerShutdownHook(BundleContext context) {
 		Runtime.getRuntime()
 			.addShutdownHook(new Thread(() -> {
+				licenseService.stop();
 				try {
 					refactoringInvoker.cleanUp();
 				} catch (IOException e) {
@@ -215,5 +218,26 @@ public class Activator implements BundleActivator {
 		} else {
 			System.setProperty(key, exitMessage);
 		}
+	}
+	
+	private String getLicenseKey(BundleContext context) {
+		String filePath = String.format("%s/.config/jsparrow-standalone/config.yaml", System.getProperty("user.home")); //$NON-NLS-1$ //$NON-NLS-2$
+		YAMLStandaloneConfig yamlStandaloneConfig = null;
+		try {
+			yamlStandaloneConfig = YAMLStandaloneConfig.load(new File(filePath));
+		} catch (YAMLStandaloneConfigException e) {
+			logger.warn(Messages.RefactoringInvoker_ConfigContainsInvalidSyntax);
+		}
+
+		String licenseKey = ""; //$NON-NLS-1$
+		if (yamlStandaloneConfig != null) {
+			licenseKey = yamlStandaloneConfig.getKey();
+		}
+		String cmdlineLicenseKey = context.getProperty(LICENSE_KEY);
+		if (cmdlineLicenseKey != null) {
+			logger.info(Messages.RefactoringInvoker_OverridingConfigWithCommandLine);
+			licenseKey = cmdlineLicenseKey;
+		}
+		return licenseKey;
 	}
 }

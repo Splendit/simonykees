@@ -1,9 +1,5 @@
 package eu.jsparrow.ui;
 
-import javax.inject.Inject;
-
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -14,7 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.api.LicenseValidationService;
+import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -45,9 +42,6 @@ public class Activator extends AbstractUIPlugin {
 
 	private long loggingBundleID = 0;
 
-	@Inject
-	private static LicenseValidationService licenseValidationService;
-
 	/**
 	 * The constructor
 	 */
@@ -66,9 +60,6 @@ public class Activator extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		bundleContext = context;
-
-		eclipseContext = EclipseContextFactory.getServiceContext(context);
-		ContextInjectionFactory.inject(this, eclipseContext);
 
 		// start jSparrow logging bundle
 		for (Bundle bundle : context.getBundles()) {
@@ -116,6 +107,8 @@ public class Activator extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 
 		setRunning(false);
+		LicenseUtilService licenseUtil = LicenseUtil.get();
+		licenseUtil.stop();
 
 		// FIXME (see SIM-331) figure out better logging configuration
 		logger.info(Messages.Activator_stop);
@@ -164,10 +157,6 @@ public class Activator extends AbstractUIPlugin {
 
 	public static void setRunning(boolean isRunning) {
 		running = isRunning;
-		if(isRunning) {
-			licenseValidationService.startValidation();
-		}
-		licenseValidationService.setJSparrowRunning(isRunning);
 	}
 
 	public static BundleContext getBundleContext() {
@@ -176,5 +165,9 @@ public class Activator extends AbstractUIPlugin {
 
 	public static IEclipseContext getEclipseContext() {
 		return eclipseContext;
+	}
+
+	public static void setEclipseContext(IEclipseContext eclipseContext) {
+		Activator.eclipseContext = eclipseContext;
 	}
 }

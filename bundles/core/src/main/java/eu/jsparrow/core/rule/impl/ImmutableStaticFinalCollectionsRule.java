@@ -4,12 +4,16 @@ import java.time.Duration;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.JavaVersion;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
 import eu.jsparrow.core.visitor.impl.ImmutableStaticFinalCollectionsASTVisitor;
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.RuleDescription;
 import eu.jsparrow.rules.common.Tag;
+import eu.jsparrow.rules.common.statistics.RuleApplicationCount;
+import eu.jsparrow.rules.common.util.PropertyUtil;
 
 /**
  * 
@@ -17,6 +21,8 @@ import eu.jsparrow.rules.common.Tag;
  * @since 2.1.1
  */
 public class ImmutableStaticFinalCollectionsRule extends RefactoringRule<ImmutableStaticFinalCollectionsASTVisitor> {
+
+	private JavaVersion javaVersion;
 
 	public ImmutableStaticFinalCollectionsRule() {
 		super();
@@ -31,5 +37,21 @@ public class ImmutableStaticFinalCollectionsRule extends RefactoringRule<Immutab
 	protected JavaVersion provideRequiredJavaVersion() {
 		return JavaVersion.JAVA_1_2;
 	}
+	
+	/**
+	 * Stores java compiler compliance level.
+	 */
+	@Override
+	public boolean ruleSpecificImplementation(IJavaProject project) {
+		String compilerCompliance = project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		javaVersion = PropertyUtil.stringToJavaVersion(compilerCompliance);
+		return true;
+	}
 
+	@Override
+	protected ImmutableStaticFinalCollectionsASTVisitor visitorFactory() {
+		ImmutableStaticFinalCollectionsASTVisitor visitor = new ImmutableStaticFinalCollectionsASTVisitor(javaVersion);
+		visitor.addRewriteListener(RuleApplicationCount.getFor(this));
+		return visitor;
+	}
 }

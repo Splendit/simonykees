@@ -1,5 +1,8 @@
 package eu.jsparrow.sample.postRule.renaming.publicFieldRenaming;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 @SuppressWarnings({"nls", "unused"})
 public class PublicFieldsRenamingRule {
 	
@@ -46,6 +49,18 @@ public class PublicFieldsRenamingRule {
 	private void referenceImplicitClashes() {
 		this.avoidImplicitClashes = "should be changed";
 		this.avoid_implicitClashes = "shall not be renamed";
+	}
+	
+	public void referencingInAnonymousClass() {
+		ActionListener listener = new ActionListener() {
+			public String skip_fields_in_anonymous_class = "because search engine cannot find the exact references ";
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				skip_fields_in_anonymous_class = "just for reference";
+				aPublicFieldSample = "reference in anonymous class";
+			}
+		};
 	}
 	
 	class InnerClass {

@@ -2,13 +2,7 @@ package eu.jsparrow.i18n;
 
 import org.eclipse.osgi.util.NLS;
 
-/**
- * TODO SIM-103 add class description
- * 
- * @author Martin Huter, Hannes Schweighofer, Ludwig Werzowa, Andreja Sambolec,
- *         Matthias Webhofer, Hans-Jörg Schrödl
- * @since 0.9
- */
+@SuppressWarnings("squid:S3008")
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "eu.jsparrow.i18n.messages"; //$NON-NLS-1$
 
@@ -60,6 +54,8 @@ public class Messages extends NLS {
 	public static String BuyLicenseDialog_reason6;
 	public static String BuyLicenseDialog_reason7;
 	public static String BuyLicenseDialog_reasonsLabel;
+
+	public static String BuyLicenseDialog_TitleMessage_LicenseHasExpired;
 	public static String StartDialog_alwaysShowIntroText;
 	public static String StartDialog_appreciationLabel;
 	public static String StartDialog_buyLicenseLabel;
@@ -95,9 +91,7 @@ public class Messages extends NLS {
 	public static String ConfigureProfileSelectRulesWizardPageModel_error_NameExists;
 	public static String ConfigureRenameFieldsRuleWizard_WizardTitle_RenameFields;
 	public static String DateDeprecatedRule_description;
-
 	public static String DateDeprecatedRule_name;
-
 	public static String DiamondOperatorASTVisitor_using_diamond_operator;
 	public static String DiamondOperatorRule_description;
 	public static String DiamondOperatorRule_name;
@@ -120,9 +114,10 @@ public class Messages extends NLS {
 	public static String EnhancedForLoopToStreamSumRule_name;
 	public static String HelpMessageDialog_default_message;
 	public static String HelpMessageDialog_homepage_url;
+	public static String MessageDialog_licensingError_failedToLoad;
+	public static String MessageDialog_licensingError_failedToValidate;
 	public static String MultiCatchRule_description;
 	public static String MultiCatchRule_name;
-
 	public static String FieldNameConventionRule_description;
 	public static String FieldNameConventionRule_name;
 	public static String FlatMapInsteadOfNestedLoopsRule_description;
@@ -174,46 +169,29 @@ public class Messages extends NLS {
 	public static String LoggerRuleWizardHandler_info_supportedFrameworkFound;
 	public static String LoggerRuleWizardHandler_noLogger;
 	public static String LoggerRuleWizardPage_alwaysAddExceptionParamInLoggerStatement;
-
 	public static String LoggerRuleWizardPage_alwaysUsePrintStacktraceOptionForLoggingException;
 	public static String LoggerRuleWizardPage_default_log_for_exception_example_after;
-
 	public static String LoggerRuleWizardPage_default_log_for_exception_example_before;
-
 	public static String LoggerRuleWizardPage_default_log_for_exception_popup_description;
-
 	public static String LoggerRuleWizardPage_description;
-
 	public static String LoggerRuleWizardPage_insertNewLoggerStatementInEmptyCatch;
-
 	public static String LoggerRuleWizardPage_log_exception_object_example_after;
-
 	public static String LoggerRuleWizardPage_log_exception_object_example_before;
-
 	public static String LoggerRuleWizardPage_log_exception_object_popup_description;
-
 	public static String LoggerRuleWizardPage_loggingExceptionsLabel;
 	public static String LoggerRuleWizardPage_missing_logger_example_after;
-
 	public static String LoggerRuleWizardPage_missing_logger_example_before;
-
 	public static String LoggerRuleWizardPage_missing_logger_pupup_description;
-
 	public static String LoggerRuleWizardPage_pageName;
-
 	public static String LoggerRuleWizardPage_print_stack_trace_example_after;
-
 	public static String LoggerRuleWizardPage_print_stack_trace_example_before;
-
 	public static String LoggerRuleWizardPage_print_stack_trace_popup_description;
-
 	public static String LoggerRuleWizardPage_replacePrintstacktraceWithLogger;
 	public static String LoggerRuleWizardPage_severityLevelLabel;
 	public static String LoggerRuleWizardPage_sysErrLabel;
 	public static String LoggerRuleWizardPage_sysErrMessageLabel;
 	public static String LoggerRuleWizardPage_sysOutLabel;
 	public static String LoggerRuleWizardPage_sysOutMessageLabel;
-
 	public static String LoggerRuleWizardPage_will_be_transformed_to;
 	public static String LoggerRuleWizardPageModel_err_noTransformation;
 	public static String LoggerRuleWizardPageModel_noSeverityLevel;
@@ -231,6 +209,9 @@ public class Messages extends NLS {
 	public static String MultiVariableDeclarationLineRule_description;
 	public static String Java5Profile_profileName;
 	public static String Java7Profile_profileName;
+	public static String Netlicensing_persistenceError_failedtoLoad;
+	public static String Netlicensing_persistenceError_failedToSave;
+	public static String Netlicensing_validationResult_freeLicenseExpired0;
 	public static String OrganiseImportsRule_description;
 	public static String OrganiseImportsRule_name;
 	public static String OverrideAnnotationRule_description;
@@ -267,17 +248,14 @@ public class Messages extends NLS {
 	public static String RefactoringSummaryWizardPage_title;
 	public static String RefactoringSummaryWizardPage_warn_disableFinishWhenFree;
 	public static String RefactoringInvoker_ConfigContainsInvalidSyntax;
-
 	public static String RefactoringInvoker_GetEnabledRulesForProject;
 	public static String RefactoringInvoker_GetSelectedRules;
-
 	public static String RefactoringInvoker_OverridingConfigWithCommandLine;
 	public static String RemoveToStringOnStringRule_description;
 	public static String RemoveToStringOnStringRule_name;
 	public static String RemoveNewStringConstructorRule_description;
 	public static String RemoveNewStringConstructorRule_name;
 	public static String RenameFieldsRuleWizard_taskName_collectingUnits;
-
 	public static String RenameFieldsRuleWizardHandler_performFinish_jobName;
 	public static String RenameFieldsRuleWizardPage_description;
 	public static String RenameFieldsRuleWizardPage_dollarSignReplacementLabelText;
@@ -324,7 +302,6 @@ public class Messages extends NLS {
 	public static String SelectRulesWizard_end_refactoring;
 	public static String SelectRulesWizard_rules_with_changes;
 	public static String SelectRulesWizard_start_refactoring;
-
 	public static String SelectRulesWizard_Summary;
 	public static String SelectRulesWizard_title;
 	public static String SelectRulesWizard_warning_no_refactorings;
@@ -364,6 +341,8 @@ public class Messages extends NLS {
 	public static String SimonykeesPreferencePage_useProfileOptionNoProfile;
 	public static String SimonykeesPreferencePage_useProfileOptionRadioGroupTitle;
 	public static String SimonykeesPreferencePage_useProfileOptionSelectedProfile;
+	public static String SimonykeesPreferencePageLicense_freeLicense;
+	public static String SimonykeesPreferencePageLicense_fulLicense;
 	public static String SimonykeesPreferencePageLicense_jsparrow_licensed_as;
 	public static String SimonykeesPreferencePageLicense_jsparrow_valid_until;
 	public static String SimonykeesPreferencePageLicense_to_obtain_new_license_visit_jsparrow;
@@ -427,6 +406,9 @@ public class Messages extends NLS {
 	public static String SummaryWizardPageModel_IssuesFixed;
 	public static String TryWithResourceRule_description;
 	public static String TryWithResourceRule_name;
+	public static String UpdateLicenseDialog_error_couldNotSave;
+	public static String UpdateLicenseDialog_error_couldNotValidate;
+	public static String UpdateLicenseDialog_error_licenseInvalid;
 	public static String UseIsEmptyOnCollectionsRule_description;
 	public static String UseIsEmptyOnCollectionsRule_name;
 	public static String ValidateExecutor_shutting_down_validation_scheduler;
@@ -435,7 +417,6 @@ public class Messages extends NLS {
 	public static String WhileToForEachRule_name;
 	public static String PutIfAbsentRule_description;
 	public static String PutIfAbsentRule_name;
-
 	public static String YAMLConfigUtil_providedPathNotLeadingToYAMLConfig;
 
 	static {

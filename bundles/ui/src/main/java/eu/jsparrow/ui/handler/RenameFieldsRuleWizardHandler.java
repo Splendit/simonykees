@@ -36,6 +36,7 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -52,6 +53,12 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(RenameFieldsRuleWizardHandler.class);
 
+	private LicenseUtilService licenseUtil = LicenseUtil.get();
+	
+	public RenameFieldsRuleWizardHandler() {
+		
+	}
+	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
@@ -60,19 +67,13 @@ public class RenameFieldsRuleWizardHandler extends AbstractHandler {
 				.getActiveShell(), Messages.SelectRulesWizardHandler_allready_running, MessageDialog.INFORMATION);
 		} else {
 			Activator.setRunning(true);
-
-			if (!LicenseUtil.getInstance()
-				.isValid()) {
-				/*
-				 * show License message before Wizard if the license is invalid
-				 */
-				final Shell shell = HandlerUtil.getActiveShell(event);
-				if (!LicenseUtil.getInstance()
-					.displayLicenseErrorDialog(shell)) {
-					Activator.setRunning(false);
-					return null;
-				}
+			
+			final Shell shell = HandlerUtil.getActiveShell(event);
+			if(!licenseUtil.checkAtStartUp(shell)) {
+				Activator.setRunning(false);
+				return null;
 			}
+
 			List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
 			if (!selectedJavaElements.isEmpty()) {
 

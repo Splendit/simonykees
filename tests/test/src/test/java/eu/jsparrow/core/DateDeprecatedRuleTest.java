@@ -1,7 +1,6 @@
 package eu.jsparrow.core;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
@@ -15,6 +14,7 @@ import org.junit.Test;
 import eu.jsparrow.core.rule.impl.DateDeprecatedRule;
 import eu.jsparrow.core.util.RulesTestUtil;
 
+@SuppressWarnings("nls")
 public class DateDeprecatedRuleTest extends SingleRuleTest {
 	private static final String SAMPLE_FILE = "DateDeprecatedRule.java";
 	private static final String POSTRULE_SUBDIRECTORY = "dateDeprecated";
