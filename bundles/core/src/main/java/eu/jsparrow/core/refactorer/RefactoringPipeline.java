@@ -204,7 +204,7 @@ public class RefactoringPipeline {
 
 		List<ICompilationUnit> containingErrorList = new ArrayList<>();
 
-//		try {
+		try {
 			if (compilationUnits.isEmpty()) {
 				logger.warn(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found);
 				throw new RefactoringException(ExceptionMessages.RefactoringPipeline_warn_no_compilation_units_found,
@@ -259,7 +259,9 @@ public class RefactoringPipeline {
 						logger.info(loggerInfo);
 						containingErrorList.add(compilationUnit);
 					} else {
-//						refactoringStates.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
+						// refactoringStates.add(new
+						// RefactoringState(compilationUnit,
+						// compilationUnit.getWorkingCopy(null)));
 						createRefactoringState(compilationUnit);
 					}
 
@@ -286,53 +288,39 @@ public class RefactoringPipeline {
 					logger.info(loggerInfo);
 
 				}
-				return containingErrorList;
-			}
-//		} catch (JavaModelException e) {
-//			logger.error(e.getMessage(), e);
-//			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
-//					ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e);
-//		}
-	}
-
-	public void createRefactoringStates(List<ICompilationUnit> compilationUnits) {
-		compilationUnits.forEach(compilationUnit -> {
-
-			final ProblemRequestor problemRequestor = new ProblemRequestor();
-			final WorkingCopyOwner wcOwner = createWorkingCopyOwner(problemRequestor);
-
-			try {
-				ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(wcOwner, null);
-				if (((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.isEmpty()) {
-					refactoringStates.add(new RefactoringState(compilationUnit, workingCopy, wcOwner));
-				} else {
-					String loggerInfo = NLS.bind(Messages.RefactoringPipeline_CompilationUnitWithCompilationErrors,
-							compilationUnit.getElementName(),
-							((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.get(0));
-					logger.info(loggerInfo);
-				}
-			} catch (JavaModelException e) {
-				logger.error(e.getMessage(), e);
-			}
-		});
-	}
-	
-	public void createRefactoringState(ICompilationUnit compilationUnit) {
-		final ProblemRequestor problemRequestor = new ProblemRequestor();
-		final WorkingCopyOwner wcOwner = createWorkingCopyOwner(problemRequestor);
-
-		try {
-			ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(wcOwner, null);
-			if (((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.isEmpty()) {
-				refactoringStates.add(new RefactoringState(compilationUnit, workingCopy, wcOwner));
-			} else {
-				String loggerInfo = NLS.bind(Messages.RefactoringPipeline_CompilationUnitWithCompilationErrors,
-						compilationUnit.getElementName(),
-						((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.get(0));
-				logger.info(loggerInfo);
 			}
 		} catch (JavaModelException e) {
 			logger.error(e.getMessage(), e);
+			throw new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+					ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e);
+		}
+		return containingErrorList;
+	}
+
+	public void createRefactoringStates(List<ICompilationUnit> compilationUnits) throws JavaModelException {
+		// compilationUnits.forEach(compilationUnit -> {
+
+		for (ICompilationUnit compilationUnit : compilationUnits) {
+			createRefactoringState(compilationUnit);
+			// } catch (JavaModelException e) {
+			// logger.error(e.getMessage(), e);
+			// }
+			// });
+		}
+	}
+
+	public void createRefactoringState(ICompilationUnit compilationUnit) throws JavaModelException {
+		final ProblemRequestor problemRequestor = new ProblemRequestor();
+		final WorkingCopyOwner wcOwner = createWorkingCopyOwner(problemRequestor);
+
+		ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(wcOwner, null);
+		if (((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.isEmpty()) {
+			refactoringStates.add(new RefactoringState(compilationUnit, workingCopy, wcOwner));
+		} else {
+			String loggerInfo = NLS.bind(Messages.RefactoringPipeline_CompilationUnitWithCompilationErrors,
+					compilationUnit.getElementName(),
+					((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.get(0));
+			logger.info(loggerInfo);
 		}
 	}
 
@@ -533,7 +521,7 @@ public class RefactoringPipeline {
 			.orElseThrow(RuleException::new);
 
 		refactoringState.resetWorkingCopy();
-		
+
 		CompilationUnit astRoot = RefactoringUtil.parse(refactoringState.getWorkingCopy());
 
 		for (RefactoringRule<? extends AbstractASTRewriteASTVisitor> refactoringRule : rules) {
@@ -675,7 +663,8 @@ public class RefactoringPipeline {
 			try {
 				boolean hasChanges = refactoringState.addRuleAndGenerateDocumentChanges(rule, astRoot, true);
 				if (hasChanges) {
-					astRoot = refactoringState.getWorkingCopy().reconcile(AST.JLS8, true, null, null);
+					astRoot = refactoringState.getWorkingCopy()
+						.reconcile(AST.JLS8, true, null, null);
 				}
 			} catch (JavaModelException | ReflectiveOperationException | RefactoringException e) {
 				logger.error(e.getMessage(), e);

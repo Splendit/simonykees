@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationVisitorFactory;
@@ -282,31 +281,21 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 
 		subMonitor.setWorkRemaining(targetCompilationUnits.size());
 
-		List<RefactoringState> refactoringStates = new ArrayList<>();
-		for (ICompilationUnit compilationUnit : targetCompilationUnits) {
-			try {
-				/*
-				 * TODO IProblemRequestor should be created when creating
-				 * working copy, and working copy owner should be set
-				 */
-				refactoringStates
-					.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null), null));
-			} catch (JavaModelException e) {
-				logger.error(e.getMessage(), e);
-				WizardMessageDialog.synchronizeWithUIShowInfo(
-						new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
-								ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
-				canRefactor = false;
-				return;
-			}
-			if (subMonitor.isCanceled()) {
-				return;
-			} else {
-				subMonitor.worked(1);
-			}
+		try {
+			refactoringPipeline.createRefactoringStates(targetCompilationUnits);
+		} catch (JavaModelException e) {
+			logger.error(e.getMessage(), e);
+			WizardMessageDialog.synchronizeWithUIShowInfo(
+					new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+							ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
+			canRefactor = false;
+			return;
 		}
-
-		refactoringPipeline.setRefactoringStates(refactoringStates);
+		if (subMonitor.isCanceled()) {
+			return;
+		} else {
+			subMonitor.worked(1);
+		}
 		refactoringPipeline.updateInitialSourceMap();
 	}
 

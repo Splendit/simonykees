@@ -1,17 +1,13 @@
 package eu.jsparrow.ui.preview;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -20,7 +16,6 @@ import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.eclipse.osgi.util.NLS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -184,13 +179,14 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 */
 	private IRunnableWithProgress createRecalculationJob() {
 		return monitor -> {
-
-			List<RefactoringState> refactoringStates = new ArrayList<>();
-			if (!createRefactoringStates(refactoringStates)) {
+			try {
+				refactoringPipeline.createRefactoringStates(targetCompilationUnits);
+			} catch (JavaModelException e) {
+				WizardMessageDialog.synchronizeWithUIShowInfo(
+						new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
+								ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
 				return;
 			}
-
-			refactoringPipeline.setRefactoringStates(refactoringStates);
 			refactoringPipeline.updateInitialSourceMap();
 			try {
 				refactoringPipeline.doRefactoring(monitor);
@@ -219,91 +215,22 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	 */
 	private boolean createRefactoringStates(List<RefactoringState> refactoringStates) {
 		for (ICompilationUnit compilationUnit : targetCompilationUnits) {
-//			try {
-//				/*
-//				 * TODO IProblemRequestor should be created when creating
-//				 * working copy, and working copy owner should be set
-//				 */
-//				refactoringStates.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null), null));
-//			} catch (JavaModelException e) {
-//				WizardMessageDialog.synchronizeWithUIShowInfo(
-//						new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
-//								ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
-//				return false;
-//			}
-//		}
-//		return true;
-//	}
-//
-//	
-//	public void createRefactoringStates(List<ICompilationUnit> compilationUnits) {
-//		targetCompilationUnits.forEach(compilationUnit -> {
-
-			final ProblemRequestor problemRequestor = new ProblemRequestor();
-			final WorkingCopyOwner wcOwner = createWorkingCopyOwner(problemRequestor);
-
 			try {
-				ICompilationUnit workingCopy = compilationUnit.getWorkingCopy(wcOwner, null);
-				if (((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.isEmpty()) {
-					refactoringStates.add(new RefactoringState(compilationUnit, workingCopy, wcOwner));
-				} else {
-					String loggerInfo = NLS.bind(Messages.RefactoringPipeline_CompilationUnitWithCompilationErrors,
-							compilationUnit.getElementName(),
-							((ProblemRequestor) wcOwner.getProblemRequestor(workingCopy)).problems.get(0));
-					logger.info(loggerInfo);
-				}
+				/*
+				 * TODO IProblemRequestor should be created when creating
+				 * working copy, and working copy owner should be set
+				 */
+				refactoringStates
+					.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null), null));
 			} catch (JavaModelException e) {
 				WizardMessageDialog.synchronizeWithUIShowInfo(
 						new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
 								ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
 				return false;
-
 			}
-		};
+		}
 		return true;
 	}
-	
-	private WorkingCopyOwner createWorkingCopyOwner(ProblemRequestor problemRequestor) {
-		return new WorkingCopyOwner() {
-
-			@Override
-			public IProblemRequestor getProblemRequestor(ICompilationUnit unit) {
-				return problemRequestor;
-			}
-		};
-	}
-
-	private class ProblemRequestor implements IProblemRequestor {
-
-		private List<IProblem> problems = new ArrayList<>();
-
-		@Override
-		public void acceptProblem(IProblem problem) {
-			if (problem.isError()) {
-				problems.add(problem);
-			}
-		}
-
-		@Override
-		public void beginReporting() {
-			// not used
-		}
-
-		@Override
-		public void endReporting() {
-			// not used
-		}
-
-		@Override
-		public boolean isActive() {
-			return true;
-		}
-
-	}
-
-	
-	
-	
 
 	@Override
 	public void updateViewsOnNavigation(IWizardPage page) {
