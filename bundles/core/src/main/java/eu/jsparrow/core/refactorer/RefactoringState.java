@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.osgi.util.NLS;
@@ -34,15 +35,19 @@ public class RefactoringState {
 
 	private ICompilationUnit workingCopy;
 
+	private WorkingCopyOwner workingCopyOwner;
+
 	private Map<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> initialChanges = new HashMap<>();
 
 	private Map<RefactoringRule<? extends AbstractASTRewriteASTVisitor>, DocumentChange> changes = new HashMap<>();
 
 	private List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> ignoredRules = new ArrayList<>();
 
-	public RefactoringState(ICompilationUnit original, ICompilationUnit workingCopy) {
+	public RefactoringState(ICompilationUnit original, ICompilationUnit workingCopy,
+			WorkingCopyOwner workingCopyOwner) {
 		this.original = original;
 		this.workingCopy = workingCopy;
+		this.workingCopyOwner = workingCopyOwner;
 	}
 
 	/**
@@ -87,6 +92,16 @@ public class RefactoringState {
 	 */
 	public ICompilationUnit getWorkingCopy() {
 		return workingCopy;
+	}
+
+	/**
+	 * Returns the working copy owner ({@link WorkingCopyOwner}) for this
+	 * {@link RefactoringState}.
+	 * 
+	 * @return the working copy owner related to this instances working copy
+	 */
+	public WorkingCopyOwner getworkingCopyOwner() {
+		return workingCopyOwner;
 	}
 
 	/**

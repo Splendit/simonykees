@@ -285,7 +285,12 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 		List<RefactoringState> refactoringStates = new ArrayList<>();
 		for (ICompilationUnit compilationUnit : targetCompilationUnits) {
 			try {
-				refactoringStates.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null)));
+				/*
+				 * TODO IProblemRequestor should be created when creating
+				 * working copy, and working copy owner should be set
+				 */
+				refactoringStates
+					.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null), null));
 			} catch (JavaModelException e) {
 				logger.error(e.getMessage(), e);
 				WizardMessageDialog.synchronizeWithUIShowInfo(
