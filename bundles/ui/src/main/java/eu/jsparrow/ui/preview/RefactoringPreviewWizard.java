@@ -8,9 +8,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.jface.wizard.Wizard;
-import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.jface.wizard.*;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -28,7 +26,6 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.preview.model.RefactoringPreviewWizardModel;
-import eu.jsparrow.ui.util.LicenseUtil;
 import eu.jsparrow.ui.util.ResourceHelper;
 
 /**
@@ -198,24 +195,18 @@ public class RefactoringPreviewWizard extends AbstractPreviewWizard {
 					((RefactoringPreviewWizardPage) page).applyUnselectedChange();
 				});
 
-			if (LicenseUtil.getInstance()
-				.isValid()) {
-				try {
-					refactoringPipeline.commitRefactoring();
-					Activator.setRunning(false);
-				} catch (RefactoringException e) {
-					synchronizeWithUIShowError(e);
-					Activator.setRunning(false);
-					return;
-				} catch (ReconcileException e) {
-					synchronizeWithUIShowError(e);
-					Activator.setRunning(false);
-				}
-			} else {
-				LicenseUtil.getInstance()
-					.displayLicenseErrorDialog(getShell());
+			try {
+				refactoringPipeline.commitRefactoring();
+				Activator.setRunning(false);
+			} catch (RefactoringException e) {
+				synchronizeWithUIShowError(e);
+				Activator.setRunning(false);
+				return;
+			} catch (ReconcileException e) {
+				synchronizeWithUIShowError(e);
 				Activator.setRunning(false);
 			}
+
 			return;
 		};
 

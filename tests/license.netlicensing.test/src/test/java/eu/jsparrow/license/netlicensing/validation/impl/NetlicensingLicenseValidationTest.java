@@ -1,0 +1,81 @@
+package eu.jsparrow.license.netlicensing.validation.impl;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import com.labs64.netlicensing.domain.vo.ValidationParameters;
+
+import eu.jsparrow.license.api.LicenseType;
+import eu.jsparrow.license.api.LicenseValidationResult;
+import eu.jsparrow.license.api.exception.ValidationException;
+import eu.jsparrow.license.netlicensing.model.NetlicensingLicenseModel;
+import eu.jsparrow.license.netlicensing.testhelper.NetlicensingLicenseModelFactory;
+
+@RunWith(MockitoJUnitRunner.class)
+public class NetlicensingLicenseValidationTest {
+
+	@Mock
+	NetlicensingLicenseCache cache;
+
+	@Mock
+	NetlicensingValidationParametersFactory parametersFactory;
+
+	@Mock
+	NetlicensingValidationRequest request;
+
+	private NetlicensingLicenseModel model;
+
+	private NetlicensingLicenseValidation netlicensingValidation;
+
+	@Before
+	public void setUp() {
+		model = NetlicensingLicenseModelFactory.create();
+		netlicensingValidation = new NetlicensingLicenseValidation(model, cache, parametersFactory, request);
+	}
+
+	@Test
+	public void validate_withInvalidCache_shouldSendRequestAndSaveToCache() throws ValidationException {
+		NetlicensingValidationResult validationResult = new NetlicensingValidationResult(model.getType(), null, true, null, null);
+		ValidationParameters validationParameters = new ValidationParameters();
+
+		when(cache.get(any())).thenReturn(null);
+		when(parametersFactory.createValidationParameters(eq(model))).thenReturn(validationParameters);
+		when(request.send(eq(model.getKey()), eq(validationParameters))).thenReturn(validationResult);
+
+		LicenseValidationResult result = netlicensingValidation.validate();
+
+		verify(cache).updateCache(eq(model.getKey()), eq(validationResult));
+		assertEquals(validationResult, result);
+	}
+
+	@Test
+	public void validate_withValidCache_shouldGetLastResultFromCache() throws ValidationException {
+		LicenseValidationResult expected = new LicenseValidationResult(null, null, false, null, null);
+		
+		when(cache.get(eq(model.getKey()))).thenReturn(expected);
+
+		LicenseValidationResult result = netlicensingValidation.validate();
+
+		assertEquals(expected, result);
+	}
+
+	@Test
+	public void checkIn_withFloatingLicensetype_shouldSendRequest() throws ValidationException {
+		model = NetlicensingLicenseModelFactory.create(LicenseType.FLOATING);
+		netlicensingValidation = new NetlicensingLicenseValidation(model, cache, parametersFactory, request);
+
+		netlicensingValidation.checkIn();
+
+		verify(request).send(eq(model.getKey()), any());
+	}
+
+}
