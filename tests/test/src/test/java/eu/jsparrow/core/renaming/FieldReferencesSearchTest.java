@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.Optional;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.junit.Before;
@@ -103,9 +101,10 @@ public class FieldReferencesSearchTest extends AbstractRulesTest  {
 	}
 	
 	@Test
-	public void findReferences() throws JavaModelException, IOException {
+	public void findReferences() throws Exception {
 
-		List<CompilationUnit> compilationUnits = RenamingTestHelper.loadCompilationUnitsFromString(packageFragment, compilationUnitNameContents);
+		List<CompilationUnit> compilationUnits = RenamingTestHelper
+				.loadCompilationUnitsFromString(packageFragment, compilationUnitNameContents);
 		/*
 		 * Having a FieldDeclarationASTVisitor and a field with unsafe type name
 		 * (i.e. having a $ in its name).
@@ -131,9 +130,10 @@ public class FieldReferencesSearchTest extends AbstractRulesTest  {
 	}
 	
 	@Test
-	public void findReferences_typeHavingDollarSign() throws JavaModelException, IOException {
+	public void findReferences_typeHavingDollarSign() throws Exception {
 
-		List<CompilationUnit> compilationUnits = RenamingTestHelper.loadCompilationUnitsFromString(packageFragment, compilationUnitNameContents); 
+		List<CompilationUnit> compilationUnits = RenamingTestHelper
+				.loadCompilationUnitsFromString(packageFragment, compilationUnitNameContents); 
 		/*
 		 * Having a FieldDeclarationASTVisitor and a field with 
 		 * unsafe type name (i.e. having a $ in its name).
@@ -162,9 +162,10 @@ public class FieldReferencesSearchTest extends AbstractRulesTest  {
 	}
 	
 	@Test
-	public void referencesOfFields_anonymousClasses() throws JavaModelException, IOException {
+	public void referencesOfFields_anonymousClasses() throws Exception {
 		
-		List<CompilationUnit> compilationUntis = RenamingTestHelper.loadCompilationUnitsFromString(packageFragment, compilationUnitHavingAnonymousClasses);
+		List<CompilationUnit> compilationUntis = RenamingTestHelper
+				.loadCompilationUnitsFromString(packageFragment, compilationUnitHavingAnonymousClasses);
 		/*
 		 * Having loaded two anonymous classes of the same type, both declaring
 		 * a field with the same name

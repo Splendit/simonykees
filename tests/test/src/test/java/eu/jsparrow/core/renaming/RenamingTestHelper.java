@@ -29,13 +29,10 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import eu.jsparrow.core.AbstractRulesTest;
-import eu.jsparrow.core.exception.ReconcileException;
-import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldDeclarationASTVisitor;
 import eu.jsparrow.rules.common.RefactoringRule;
-import eu.jsparrow.rules.common.exception.RefactoringException;
 import eu.jsparrow.rules.common.util.ASTNodeUtil;
 import eu.jsparrow.rules.common.util.RefactoringUtil;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
@@ -43,7 +40,30 @@ import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 @SuppressWarnings("nls")
 public class RenamingTestHelper {
 
-	public static FieldDeclarationASTVisitor findFields(String prerulePackage, String postRulePackagePath,
+	/**
+	 * Loads the compilation units in the provided package and finds the fields
+	 * to be renamed and their references.
+	 * 
+	 * @param prerulePackage
+	 *            the package name containing the original files
+	 * @param postRulePackagePath
+	 *            the path to the package containing the expected result
+	 * @param publicModifier
+	 *            flag for renaming public fields or not.
+	 * @param packagePrivate
+	 *            flag for renaming package private fields or not.
+	 * @param protectedModifier
+	 *            flag for renaming protected fields or not.
+	 * @param privateModifier
+	 *            flag for renaming private fields or not.
+	 * @param addTodos
+	 *            flag for adding todos in the fields that cannot be renamed.
+	 * @return the {@link FieldDeclarationASTVisitor} containing information
+	 *         about all fields to be renamed.
+	 * @throws Exception
+	 *             if the compilation units cannot be loaded from the package
+	 */
+	public static FieldDeclarationASTVisitor findFieldsToBeRenamed(String prerulePackage, String postRulePackagePath,
 			boolean publicModifier, boolean packagePrivate, boolean protectedModifier, boolean privateModifier,
 			boolean addTodos) throws Exception {
 		IPackageFragmentRoot root = AbstractRulesTest.createRootPackageFragment();
@@ -65,9 +85,6 @@ public class RenamingTestHelper {
 
 	private static List<CompilationUnit> loadCompilationUnits(IPackageFragment packageFragment, String packagePath)
 			throws Exception {
-		/*
-		 * Load iCompilationUnits on the prerule.renaming package
-		 */
 		List<CompilationUnit> compilationUnits = new ArrayList<>();
 		for (Path renamingPath : AbstractRulesTest.loadUtilityClasses(packagePath)) {
 			String renamingClassName = renamingPath.getFileName()
@@ -80,10 +97,23 @@ public class RenamingTestHelper {
 		return compilationUnits;
 	}
 
+	/**
+	 * Applies the {@link PublicFieldsRenamingRule} to the target compilation
+	 * units of the given {@link FieldDeclarationASTVisitor}.
+	 * 
+	 * 
+	 * @param referencesVisitor
+	 *            containing information about the fields to be renamed and
+	 *            their references
+	 * @param prerulePackageName
+	 *            package containing the original files
+	 * @return the list of the modified compilation units after applying the
+	 *         rule.
+	 * @throws Exception
+	 *             if the rule cannot be applied.
+	 */
 	public static List<ICompilationUnit> applyRenamingRule(FieldDeclarationASTVisitor referencesVisitor,
-			IPackageFragmentRoot root, String prerulePackageName)
-			throws JavaModelException, RefactoringException, RuleException, ReconcileException {
-		IPackageFragment packageFragment = root.createPackageFragment(prerulePackageName, true, null);
+			String prerulePackageName) throws Exception {
 		List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules = new ArrayList<>();
 		PublicFieldsRenamingRule rule = new PublicFieldsRenamingRule(referencesVisitor.getFieldMetaData(),
 				referencesVisitor.getUnmodifiableFieldMetaData());
@@ -93,9 +123,6 @@ public class RenamingTestHelper {
 
 		IProgressMonitor monitor = new NullProgressMonitor();
 
-		rules.stream()
-			.forEach(r -> r.calculateEnabledForProject(packageFragment.getJavaProject()));
-
 		List<ICompilationUnit> compilationUnits = referencesVisitor.getTargetIJavaElements()
 			.stream()
 			.collect(Collectors.toList());
@@ -103,11 +130,20 @@ public class RenamingTestHelper {
 		refactoringPipeline.doRefactoring(monitor);
 		refactoringPipeline.commitRefactoring();
 
-		return referencesVisitor.getTargetIJavaElements()
-			.stream()
-			.collect(Collectors.toList());
+		return compilationUnits;
 	}
 
+	/**
+	 * Loads the contents of the files in the given directory to a map having
+	 * file names as keys and their contents as values.
+	 * 
+	 * @param postruleDirectory
+	 *            path of the directory whose contents are to be loaded.
+	 * @return the constructed map or an empty map if the path is not a
+	 *         directory.
+	 * @throws IOException
+	 *             if the files cannot be read.
+	 */
 	public static Map<String, String> loadExpected(String postruleDirectory) throws IOException {
 		File directory = new File(postruleDirectory);
 		if (!directory.isDirectory()) {
@@ -124,21 +160,20 @@ public class RenamingTestHelper {
 		return expected;
 	}
 
-	static void assertMatch(Map<String, String> expected, List<ICompilationUnit> compilationUnits,
-			String prerulePackageName, String postRulePackageName) throws JavaModelException {
-		assertEquals(expected.keySet()
-			.size(), compilationUnits.size());
-		for (ICompilationUnit icu : compilationUnits) {
-			String name = icu.getPath()
-				.lastSegment();
-			String actual = icu.getSource();
-			actual = StringUtils.replace(actual, prerulePackageName, postRulePackageName);
-			assertEquals(expected.getOrDefault(name, ""), actual);
-		}
-	}
-
+	/**
+	 * Creates a list of compilation units from the given {@link Map}. Uses the
+	 * keys as names and values as contents.
+	 * 
+	 * @param packageFragment
+	 *            the package name to create compilation unit to.
+	 * @param compilationUnitNameContents
+	 *            contents of the compilation units to be created
+	 * @return list of the constructed compilation units.
+	 * @throws Exception
+	 *             if the compilation unit cannot be created
+	 */
 	public static List<CompilationUnit> loadCompilationUnitsFromString(IPackageFragment packageFragment,
-			Map<String, String> compilationUnitNameContents) throws JavaModelException, IOException {
+			Map<String, String> compilationUnitNameContents) throws Exception {
 
 		List<ICompilationUnit> iCompilationUnits = new ArrayList<>();
 		for (Map.Entry<String, String> entry : compilationUnitNameContents.entrySet()) {
@@ -158,4 +193,31 @@ public class RenamingTestHelper {
 			.collect(Collectors.toList());
 	}
 
+	/**
+	 * Asserts that the sorted concatenation of the given lists are the same.
+	 * 
+	 * @param expected
+	 *            expected values
+	 * @param actual
+	 *            actual values
+	 */
+	static void assertMatch(List<String> expected, List<String> actual) {
+		String sortedExpected = expected.stream()
+			.sorted()
+			.collect(Collectors.joining("\n"));
+		String sortedActual = actual.stream()
+			.sorted()
+			.collect(Collectors.joining("\n"));
+		assertEquals(sortedExpected, sortedActual);
+	}
+
+	static List<String> calculateActual(List<ICompilationUnit> compilationUnits, String prerulePackageName,
+			String postRulePackageName) throws JavaModelException {
+		List<String> actual = new ArrayList<>();
+		for (ICompilationUnit icu : compilationUnits) {
+			String content = icu.getSource();
+			actual.add(StringUtils.replace(content, prerulePackageName, postRulePackageName));
+		}
+		return actual;
+	}
 }
