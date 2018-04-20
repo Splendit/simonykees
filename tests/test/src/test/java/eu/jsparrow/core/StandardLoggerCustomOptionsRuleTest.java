@@ -30,6 +30,9 @@ public class StandardLoggerCustomOptionsRuleTest extends SingleRuleTest {
 	public void setUp() throws Exception {
 		rule = new StandardLoggerRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		testProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		testProject.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
 	}
 
 	@Test

@@ -34,6 +34,9 @@ public class StandardLoggerRuleLog4jTest extends SingleRuleTest {
 		options.put("system-out-print-exception", "error");
 		rule.activateOptions(options);
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
+		testProject.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_8);
+		testProject.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_8);
+		testProject.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_8);
 	}
 
 	@Test
