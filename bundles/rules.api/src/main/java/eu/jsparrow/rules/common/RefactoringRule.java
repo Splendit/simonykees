@@ -5,7 +5,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jface.text.Document;
@@ -173,8 +172,6 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 					document, edits.copy());
 
 			workingCopy.applyTextEdit(edits, null);
-
-//			astRoot = workingCopy.reconcile(AST.JLS8, true, null, null);
 
 			return documentChange;
 		} else {

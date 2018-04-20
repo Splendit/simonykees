@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import eu.jsparrow.core.exception.ReconcileException;
 import eu.jsparrow.core.exception.RuleException;
 import eu.jsparrow.core.refactorer.RefactoringPipeline;
-import eu.jsparrow.core.refactorer.RefactoringState;
 import eu.jsparrow.core.rule.impl.PublicFieldsRenamingRule;
 import eu.jsparrow.core.visitor.renaming.FieldMetaData;
 import eu.jsparrow.core.visitor.renaming.JavaAccessModifier;
@@ -180,6 +179,10 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 	private IRunnableWithProgress createRecalculationJob() {
 		return monitor -> {
 			try {
+				/*
+				 * Create refactoring states for all compilation units from
+				 * targetCompilationUnits list
+				 */
 				refactoringPipeline.createRefactoringStates(targetCompilationUnits);
 			} catch (JavaModelException e) {
 				WizardMessageDialog.synchronizeWithUIShowInfo(
@@ -203,33 +206,6 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				monitor.done();
 			}
 		};
-	}
-
-	/**
-	 * Creates refactoring states for all compilation units from
-	 * targetCompilationUnits list
-	 * 
-	 * @param refactoringStates
-	 *            result list containing all created refactoring states
-	 * @return false if exception occurred, true otherwise
-	 */
-	private boolean createRefactoringStates(List<RefactoringState> refactoringStates) {
-		for (ICompilationUnit compilationUnit : targetCompilationUnits) {
-			try {
-				/*
-				 * TODO IProblemRequestor should be created when creating
-				 * working copy, and working copy owner should be set
-				 */
-				refactoringStates
-					.add(new RefactoringState(compilationUnit, compilationUnit.getWorkingCopy(null), null));
-			} catch (JavaModelException e) {
-				WizardMessageDialog.synchronizeWithUIShowInfo(
-						new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
-								ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
-				return false;
-			}
-		}
-		return true;
 	}
 
 	@Override

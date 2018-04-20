@@ -133,7 +133,7 @@ public abstract class AbstractRulesTest {
 		List<ICompilationUnit> compilationUnits = new ArrayList<>();
 		compilationUnits.add(compilationUnit);
 
-		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules, true);
+		RefactoringPipeline refactoringPipeline = new RefactoringPipeline(rules);
 
 		/*
 		 * A default progress monitor implementation, used just for testing
