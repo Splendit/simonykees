@@ -26,6 +26,7 @@ public class StringUtilsClashingImportsRuleTest extends SingleRuleTest {
 	public void setUp() throws Exception {
 		rule = new OrganiseImportsRule();
 		testProject = RulesTestUtil.createJavaProject("javaVersionTestProject", "bin");
+
 	}
 
 	@Test
@@ -33,6 +34,8 @@ public class StringUtilsClashingImportsRuleTest extends SingleRuleTest {
 		Path preRule = getPreRuleFile(SAMPLE_FILE);
 		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
 
+		// A utility class is imported in StringUtilsClashingImportCornerCaseRule.java 
+		loadUtilities();
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
 		String expected = new String(Files.readAllBytes(postRule), StandardCharsets.UTF_8);
