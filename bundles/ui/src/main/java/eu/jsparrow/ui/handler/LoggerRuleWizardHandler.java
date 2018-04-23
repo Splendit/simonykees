@@ -38,6 +38,7 @@ import eu.jsparrow.ui.Activator;
 import eu.jsparrow.ui.dialog.CompilationErrorsMessageDialog;
 import eu.jsparrow.ui.dialog.SimonykeesMessageDialog;
 import eu.jsparrow.ui.util.LicenseUtil;
+import eu.jsparrow.ui.util.LicenseUtilService;
 import eu.jsparrow.ui.util.WizardHandlerUtil;
 import eu.jsparrow.ui.wizard.impl.SelectRulesWizard;
 import eu.jsparrow.ui.wizard.impl.WizardMessageDialog;
@@ -54,6 +55,12 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(LoggerRuleWizardHandler.class);
 
+	private LicenseUtilService licenseUtil = LicenseUtil.get();
+
+	public LoggerRuleWizardHandler() {
+
+	}
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
@@ -63,18 +70,12 @@ public class LoggerRuleWizardHandler extends AbstractHandler {
 		} else {
 			Activator.setRunning(true);
 
-			if (!LicenseUtil.getInstance()
-				.isValid()) {
-				/*
-				 * do not display the Wizard if the license is invalid
-				 */
-				final Shell shell = HandlerUtil.getActiveShell(event);
-				if (!LicenseUtil.getInstance()
-					.displayLicenseErrorDialog(shell)) {
-					Activator.setRunning(false);
-					return null;
-				}
+			final Shell shell = HandlerUtil.getActiveShell(event);
+			if (!licenseUtil.checkAtStartUp(shell)) {
+				Activator.setRunning(false);
+				return null;
 			}
+
 			List<IJavaElement> selectedJavaElements = WizardHandlerUtil.getSelectedJavaElements(event);
 			if (!selectedJavaElements.isEmpty()) {
 				IJavaProject selectedJavaProjekt = selectedJavaElements.get(0)

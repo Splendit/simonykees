@@ -2,12 +2,7 @@ package eu.jsparrow.i18n;
 
 import org.eclipse.osgi.util.NLS;
 
-/**
- * TODO SIM-103 add class description
- * 
- * @author Martin Huter
- * @since 0.9
- */
+@SuppressWarnings("squid:S3008")
 public class ExceptionMessages extends NLS {
 	private static final String BUNDLE_NAME = "eu.jsparrow.i18n.exceptionMessages"; //$NON-NLS-1$
 	public static String AbstractCompilationUnitAstVisitor_compilation_unit_no_context;
@@ -30,6 +25,16 @@ public class ExceptionMessages extends NLS {
 	public static String RefactoringState_warning_workingcopy_already_present;
 	public static String LicenseUtil_error_moreInformation;
 	public static String LicenseUtil_license_service_unavailable;
+	public static String Netlicensing_persistenceException_couldNotDeserialize;
+	public static String Netlicensing_persistenceException_couldNotSerialize;
+	public static String Netlicensing_persistenceException_failedToDecrypt;
+	public static String Netlicensing_persistenceException_failedToEncrypt;
+	public static String Netlicensing_validationError_noFloatingPresent;
+	public static String Netlicensing_validationError_noSubscriptionReceived;
+	public static String Netlicensing_validationError_unexpectedResponse;
+	public static String Netlicensing_validationException_failedtoConnectToServer;
+	public static String Netlicensing_validationException_productNumberNotExisting;
+	public static String Netlicensing_validationException_unknownError;
 	public static String PersistenceManager_decryption_error;
 	public static String PersistenceManager_encryption_error;
 	public static String SimonykeesException_default_ui_message;
