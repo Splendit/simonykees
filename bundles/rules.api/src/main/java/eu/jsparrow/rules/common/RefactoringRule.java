@@ -130,7 +130,7 @@ public abstract class RefactoringRule<T extends AbstractASTRewriteASTVisitor> im
 			.getName(), workingCopy.getElementName());
 		logger.trace(bind);
 
-		return applyRuleImpl(workingCopy,astRoot);
+		return applyRuleImpl(workingCopy, astRoot);
 	}
 
 	/**

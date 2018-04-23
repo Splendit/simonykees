@@ -92,7 +92,6 @@ public class OrganiseImportsRule extends RefactoringRule<AbstractASTRewriteASTVi
 					edit.copy());
 
 			workingCopy.applyTextEdit(edit, null);
-//			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
 
 		}
 

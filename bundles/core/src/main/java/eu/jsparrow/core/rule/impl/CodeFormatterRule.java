@@ -91,7 +91,6 @@ public class CodeFormatterRule extends RefactoringRule<AbstractASTRewriteASTVisi
 					edit.copy());
 
 			workingCopy.applyTextEdit(edit, null);
-//			workingCopy.reconcile(ICompilationUnit.NO_AST, false, null, null);
 
 		}
 
