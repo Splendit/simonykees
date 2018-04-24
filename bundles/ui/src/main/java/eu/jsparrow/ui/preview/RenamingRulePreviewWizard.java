@@ -180,6 +180,7 @@ public class RenamingRulePreviewWizard extends AbstractPreviewWizard {
 				 */
 				refactoringPipeline.createRefactoringStates(targetCompilationUnits);
 			} catch (JavaModelException e) {
+				logger.error(e.getMessage(), e);
 				WizardMessageDialog.synchronizeWithUIShowInfo(
 						new RefactoringException(ExceptionMessages.RefactoringPipeline_java_element_resolution_failed,
 								ExceptionMessages.RefactoringPipeline_user_java_element_resolution_failed, e));
