@@ -125,7 +125,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 			.getSimpleName(), selectedJavaProjekt.getElementName());
 		logger.info(message);
 
-		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
+		Job job = new Job(Messages.ProgressMonitor_searching_for_references) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
@@ -201,7 +201,7 @@ public class ConfigureRenameFieldsRuleWizard extends AbstractRuleWizard {
 	 * @return Job which does refactoring on collected refactoring states.
 	 */
 	private Job startRefactoringJob() {
-		Job refactorJob = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
+		Job refactorJob = new Job(Messages.ProgressMonitor_calculating_possible_refactorings) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

@@ -117,7 +117,7 @@ public class SelectRulesWizard extends AbstractRuleWizard {
 			.getPrimaryMonitor()
 			.getBounds();
 
-		Job job = new Job(Messages.ProgressMonitor_SelectRulesWizard_performFinish_jobName) {
+		Job job = new Job(Messages.ProgressMonitor_calculating_possible_refactorings) {
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
