@@ -169,7 +169,7 @@
 
 	<repositories>
 		<repository>
-			<id>splendit-nexus-2</id>
+			<id>neon</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/eclipse/updates/4.6</url>
 		</repository>
