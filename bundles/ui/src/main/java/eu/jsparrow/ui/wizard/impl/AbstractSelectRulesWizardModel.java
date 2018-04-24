@@ -311,19 +311,21 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 				&& !StringUtils.isEmpty(currentProfileId)) {
 			Set<Object> currentPosibilities = new HashSet<>();
 			currentPosibilities.addAll(posibilities);
-			currentPosibilities.stream()
-				.filter(posibility -> SimonykeesPreferenceManager.getProfileFromName(currentProfileId)
-					.containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
+			SimonykeesProfile profile = SimonykeesPreferenceManager.getProfileFromName(currentProfileId);
+			if (profile != null) {
+				currentPosibilities.stream()
+					.filter(posibility -> profile.containsRule(// SimonykeesPreferenceManager.isRuleSelectedInProfile(
 							// SimonykeesPreferenceManager.getAllProfileNamesAndIdsMap().get(profileId),
 							((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).getId()))
-				.forEach(posibility -> {
-					if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
-						selection.add(posibility);
-						posibilities.remove(posibility);
-					} else {
-						unapplicableRules.add(posibility);
-					}
-				});
+					.forEach(posibility -> {
+						if (((RefactoringRule<? extends AbstractASTRewriteASTVisitor>) posibility).isEnabled()) {
+							selection.add(posibility);
+							posibilities.remove(posibility);
+						} else {
+							unapplicableRules.add(posibility);
+						}
+					});
+			}
 		}
 
 		setChanged(true);

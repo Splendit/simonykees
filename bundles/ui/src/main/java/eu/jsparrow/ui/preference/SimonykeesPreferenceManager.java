@@ -168,6 +168,18 @@ public class SimonykeesPreferenceManager {
 
 	public static SimonykeesProfile getProfileFromName(String name) {
 		return profiles.stream().filter(profile -> profile.getProfileName().equals(name)).findFirst().orElse(null);
+	/**
+	 * checks if a profile with the given profileId exists
+	 * 
+	 * @param profileId
+	 *            profile id to search for
+	 * @return true if a profile with the given profileId exists, false
+	 *         otherwise
+	 */
+	public static boolean isExistingProfile(String profileId) {
+		return profiles.stream()
+			.anyMatch(profile -> profile.getProfileName()
+				.equals(profileId));
 	}
 
 	/**

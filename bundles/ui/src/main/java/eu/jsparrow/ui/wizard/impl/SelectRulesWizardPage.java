@@ -188,9 +188,17 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	 * preferences or to currently selected profile otherwise
 	 */
 	private void initializeGroupFilterCombo() {
-		selectProfileCombo.select(SimonykeesPreferenceManager.getAllProfileIds()
-				.indexOf(SimonykeesPreferenceManager.getCurrentProfileId()));
-		((SelectRulesWizardPageControler) controler).profileChanged(SimonykeesPreferenceManager.getCurrentProfileId());
+		String currentProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
+
+		if (!SimonykeesPreferenceManager.isExistingProfile(currentProfileId)) {
+			currentProfileId = Messages.EmptyProfile_profileName;
+		}
+
+		int selectionIndex = SimonykeesPreferenceManager.getAllProfileIds()
+			.indexOf(currentProfileId);
+
+		selectProfileCombo.select(selectionIndex);
+		((SelectRulesWizardPageControler) controler).profileChanged(currentProfileId);
 	}
 
 	/**
