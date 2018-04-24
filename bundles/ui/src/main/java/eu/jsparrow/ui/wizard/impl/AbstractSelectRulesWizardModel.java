@@ -15,6 +15,7 @@ import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.rules.common.RefactoringRule;
 import eu.jsparrow.rules.common.visitor.AbstractASTRewriteASTVisitor;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
+import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 import eu.jsparrow.ui.wizard.IValueChangeListener;
 import eu.jsparrow.ui.wizard.IWizardPageModel;
 
@@ -250,8 +251,10 @@ public abstract class AbstractSelectRulesWizardModel implements IWizardPageModel
 			.getAllRules(false);
 		for (int i = 0; i < sortedRules.size(); i++) {
 			if (sortedRules.get(i)
-				.getRuleDescription().getName()
-				.equals(searchedRule.getRuleDescription().getName())) {
+				.getRuleDescription()
+				.getName()
+				.equals(searchedRule.getRuleDescription()
+					.getName())) {
 				return i;
 			}
 		}
