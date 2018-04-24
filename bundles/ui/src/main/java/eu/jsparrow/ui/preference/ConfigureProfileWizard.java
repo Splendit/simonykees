@@ -28,15 +28,17 @@ public class ConfigureProfileWizard extends Wizard {
 	private ConfigureProfileSelectRulesWIzardPageModel model;
 
 	private String profileId;
+	private boolean isProfileSetAsDefault = false;
 	
 	private static final String WINDOW_ICON = "icons/jSparrow_active_icon_32.png"; //$NON-NLS-1$
 
 	private final List<RefactoringRule<? extends AbstractASTRewriteASTVisitor>> rules;
 
-	public ConfigureProfileWizard(String profileId) {
+	public ConfigureProfileWizard(String profileId, boolean isProfileSetAsDefault) {
 		super();
 		this.rules = RulesContainer.getAllRules(false);
 		this.profileId = profileId;
+		this.isProfileSetAsDefault = isProfileSetAsDefault;
 		WizardDialog.setDefaultImage(ResourceHelper.createImage(WINDOW_ICON));
 	}
 
@@ -62,7 +64,7 @@ public class ConfigureProfileWizard extends Wizard {
 		if (index >= 0) {
 			SimonykeesPreferenceManager.updateProfile(index, name, ruleIds.stream()
 				.map(RefactoringRule::getId)
-				.collect(Collectors.toList()));
+				.collect(Collectors.toList()), isProfileSetAsDefault);
 		} else {
 			SimonykeesPreferenceManager.addProfile(name, ruleIds.stream()
 				.map(RefactoringRule::getId)

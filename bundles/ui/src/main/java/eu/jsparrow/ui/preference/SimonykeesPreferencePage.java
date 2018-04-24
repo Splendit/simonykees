@@ -325,7 +325,9 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 	}
 
 	public void handleButtonClickedListener(String profileId) {
-		final WizardDialog dialog = new WizardDialog(getShell(), new ConfigureProfileWizard(profileId)) {
+		String currentDefaultProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
+		final WizardDialog dialog = new WizardDialog(getShell(),
+				new ConfigureProfileWizard(profileId, profileId.equals(currentDefaultProfileId))) {
 			/*
 			 * Removed unnecessary empty space on the bottom of the wizard
 			 * intended for ProgressMonitor that is not used
@@ -517,8 +519,7 @@ public class SimonykeesPreferencePage extends FieldEditorPreferencePage implemen
 					if (!nonExistentRules.isEmpty()) {
 						String nonExistentRulesMessage = NLS.bind(Messages.SimonykeesPreferencePage_profileAndName,
 								profile.getName()) + "\n" //$NON-NLS-1$
-								+ NLS.bind(Messages.Activator_standalone_RulesDoNotExist,
-										nonExistentRules.toString());
+								+ NLS.bind(Messages.Activator_standalone_RulesDoNotExist, nonExistentRules.toString());
 						SimonykeesMessageDialog.openMessageDialog(getShell(), nonExistentRulesMessage,
 								MessageDialog.INFORMATION);
 						profile.getRules()

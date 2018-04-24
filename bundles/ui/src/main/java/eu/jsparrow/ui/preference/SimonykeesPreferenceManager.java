@@ -64,10 +64,12 @@ public class SimonykeesPreferenceManager {
 		profiles.remove(getProfileFromName(name));
 	}
 
-	public static void updateProfile(int index, String name, List<String> ruleIds) {
+	public static void updateProfile(int index, String name, List<String> ruleIds, boolean isSetAsDefault) {
 		if (profiles.get(index) instanceof Profile) {
 			((Profile) profiles.get(index)).setProfileName(name);
-			setCurrentProfileId(name);
+			if (isSetAsDefault) {
+				setCurrentProfileId(name);
+			}
 		}
 		profiles.get(index)
 			.setEnabledRulesIds(ruleIds);
