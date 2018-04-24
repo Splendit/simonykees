@@ -292,6 +292,7 @@ public class Messages extends NLS {
 	public static String SelectRulesWizardPage_selectProfile;
 	public static String SelectRulesWizardPage_filterByName;
 	public static String SelectRulesWizardPage_page_name;
+	public static String SelectRulesWizardPage_profileDoesNotExist;
 	public static String SelectRulesWizardPage_removeAllButtonLabel;
 	public static String SelectRulesWizardPage_removeButtonLabel;
 	public static String SelectRulesWizardPage_removeDisabledRulesButtonText;

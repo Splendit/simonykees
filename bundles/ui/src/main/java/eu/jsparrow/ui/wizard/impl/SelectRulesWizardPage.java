@@ -8,6 +8,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.fieldassist.ContentProposalAdapter;
 import org.eclipse.jface.fieldassist.SimpleContentProposalProvider;
 import org.eclipse.jface.fieldassist.TextContentAdapter;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -25,6 +26,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
@@ -37,6 +40,8 @@ import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
  *
  */
 public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
+
+	private static final Logger logger = LoggerFactory.getLogger(SelectRulesWizardPage.class);
 
 	private Composite filterComposite;
 
@@ -195,6 +200,9 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		String currentProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
 
 		if (!SimonykeesPreferenceManager.isExistingProfile(currentProfileId)) {
+			String log = NLS.bind(Messages.SelectRulesWizardPage_profileDoesNotExist, currentProfileId);
+			logger.warn(log);
+
 			currentProfileId = Messages.EmptyProfile_profileName;
 		}
 
