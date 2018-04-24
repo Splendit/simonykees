@@ -222,10 +222,12 @@ public class Messages extends NLS {
 	public static String PrimitiveObjectUseEqualsRule_name;
 	public static String Profile_DefaultProfile_profileName;
 	public static String Profile_Java8Profile_profileName;
-	public static String ProgressMonitor_SelectRulesWizard_performFinish_jobName;
 	public static String ProgressMonitor_AbstractRefactorer_prepareRefactoring_taskName;
 	public static String ProgressMonitor_AbstractRefactorer_doRefactoring_taskName;
+	public static String ProgressMonitor_calculating_possible_refactorings;
+	public static String ProgressMonitor_searching_for_references;
 	public static String ProgressMonitor_SimonykeesUtil_collectICompilationUnits_taskName;
+	public static String ProgressMonitor_verifying_project_information;
 	public static String PublicFieldsRenamingRule_description;
 	public static String PublicFieldsRenamingRule_name;
 	public static String RearrangeClassMembersRule_description;
