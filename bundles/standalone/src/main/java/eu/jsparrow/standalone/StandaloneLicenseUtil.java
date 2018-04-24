@@ -28,7 +28,6 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 	@Reference(cardinality = ReferenceCardinality.MANDATORY)
 	private LicenseModelFactoryService factoryService;
 
-	private LicenseValidationResult result = null;
 	private Random random = new Random(System.currentTimeMillis());
 	private LicenseModel model;
 
@@ -40,9 +39,11 @@ public class StandaloneLicenseUtil implements StandaloneLicenseUtilService {
 			logger.error("No License Key has been specified."); //$NON-NLS-1$
 			return false;
 		}
-
+		
+		LicenseValidationResult result = null;
 		try {
-			model = factoryService.createNewFloatingModel(key, sessionId);
+			model = factoryService.createNewFloatingModel(key, sessionId, LicenseProperties.PRODUCT_NR,
+					LicenseProperties.MODULE_NR);
 			result = licenseService.validate(model);
 		} catch (ValidationException e) {
 			logger.debug("Licensing Error:", e); //$NON-NLS-1$

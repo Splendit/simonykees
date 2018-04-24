@@ -108,7 +108,8 @@ public class LicenseUtil implements LicenseUtilService {
 		LicenseModel model;
 		try {
 			String name = createNameFromHardware();
-			model = factoryService.createNewModel(key, secret, LicenseType.NONE, name, null);
+			model = factoryService.createNewModel(key, secret, LicenseProperties.LICENSE_PRODUCT_NUMBER,
+					LicenseProperties.FLOATING_PRODUCT_MODULE_NUMBER, LicenseType.NONE, name, null);
 			validationResult = licenseService.validate(model);
 		} catch (ValidationException e) {
 			logger.error("Could not validate license", e); //$NON-NLS-1$
