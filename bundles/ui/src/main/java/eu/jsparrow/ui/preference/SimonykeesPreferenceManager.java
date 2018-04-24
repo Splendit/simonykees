@@ -67,6 +67,7 @@ public class SimonykeesPreferenceManager {
 	public static void updateProfile(int index, String name, List<String> ruleIds) {
 		if (profiles.get(index) instanceof Profile) {
 			((Profile) profiles.get(index)).setProfileName(name);
+			setCurrentProfileId(name);
 		}
 		profiles.get(index)
 			.setEnabledRulesIds(ruleIds);
