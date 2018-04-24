@@ -171,7 +171,7 @@
 		<repository>
 			<id>splendit-nexus-2</id>
 			<layout>p2</layout>
-			<url>http://nexus-vm-02.splendit.loc/content/repositories/neon-p2/</url>
+			<url>http://download.eclipse.org/eclipse/updates/4.6</url>
 		</repository>
 		<repository>
 			<id>oxygen</id>
@@ -189,9 +189,9 @@
 			<url>http://download.eclipse.org/technology/epp/logging/stable/</url>
 		</repository>
 		<repository>
-			<id>m2e</id>
+			<id>mylyn</id>
 			<layout>p2</layout>
-			<url>http://download.eclipse.org/technology/m2e/releases/</url>
+			<url>http://download.eclipse.org/mylyn/releases/latest/</url>
 		</repository>
 	</repositories>
 
