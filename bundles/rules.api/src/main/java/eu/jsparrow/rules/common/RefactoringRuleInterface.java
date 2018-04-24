@@ -9,7 +9,6 @@ import org.eclipse.ltk.core.refactoring.DocumentChange;
 
 import eu.jsparrow.rules.common.exception.RefactoringException;
 
-
 public interface RefactoringRuleInterface {
 
 	public JavaVersion getRequiredJavaVersion();
@@ -30,6 +29,6 @@ public interface RefactoringRuleInterface {
 	public boolean isSatisfiedJavaVersion();
 
 	public boolean isSatisfiedLibraries();
-	
+
 	public RuleDescription getRuleDescription();
 }

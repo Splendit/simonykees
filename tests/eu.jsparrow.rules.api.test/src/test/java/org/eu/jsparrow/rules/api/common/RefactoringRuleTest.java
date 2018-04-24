@@ -69,9 +69,8 @@ public class RefactoringRuleTest {
 	public void appyRuleImpl_whenVisitorDoesNothing_shouldReturnNull() throws Exception {
 		ICompilationUnit workingCopy = new CompilationUnitBuilder(fragment).setContent("")
 			.build();
-		
 
-		DocumentChange result = rule.applyRule(workingCopy,  RefactoringUtil.parse(workingCopy));
+		DocumentChange result = rule.applyRule(workingCopy, RefactoringUtil.parse(workingCopy));
 
 		assertNull(result);
 	}

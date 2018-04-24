@@ -34,7 +34,8 @@ public class StringUtilsClashingImportsRuleTest extends SingleRuleTest {
 		Path preRule = getPreRuleFile(SAMPLE_FILE);
 		Path postRule = getPostRuleFile(SAMPLE_FILE, POSTRULE_SUBDIRECTORY);
 
-		// A utility class is imported in StringUtilsClashingImportCornerCaseRule.java 
+		// A utility class is imported in
+		// StringUtilsClashingImportCornerCaseRule.java
 		loadUtilities();
 		String actual = replacePackageName(applyRefactoring(rule, preRule), getPostRulePackage(POSTRULE_SUBDIRECTORY));
 
