@@ -65,8 +65,8 @@ public class NetlicensingLicenseModel implements LicenseModel {
 	
 	@Override
 	public String toString() {
-		return "NetlicensingLicenseModel [key=" + key + ", name=" + name + ", secret=" + secret + ", productNr="
-				+ productNr + ", moduleNr=" + moduleNr + ", type=" + type + ", expireDate=" + expireDate + "]";
+		return "NetlicensingLicenseModel [key=" + key + ", name=" + name + ", secret=" + secret + ", productNr=" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				+ productNr + ", moduleNr=" + moduleNr + ", type=" + type + ", expireDate=" + expireDate + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 
 

@@ -60,6 +60,6 @@ public interface LicenseModelFactoryService {
 	 *            the expiration date of the model
 	 * @return a license model the the given type
 	 */
-	public LicenseModel createNewModel(String key, String secret, String productNr, String moduleNr, LicenseType type, String name,
-			ZonedDateTime expireDate);
+	public LicenseModel createNewModel(String key, String secret, String productNr, String moduleNr, LicenseType type,
+			String name, ZonedDateTime expireDate);
 }

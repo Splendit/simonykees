@@ -2,7 +2,6 @@ package eu.jsparrow.license.netlicensing.validation.impl;
 
 import java.lang.invoke.MethodHandles;
 
-import org.eclipse.osgi.container.Module;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,10 +56,12 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 			logger.debug("Found existing result {}", result); //$NON-NLS-1$
 			return result;
 		}
-		// If no license type is defined we need to send one validation call
-		// first to get the license type. We need to do this because
-		// NetLicensing doesn't return the correct validation result for unknown
-		// license types.
+		/*
+		 * If no license type is defined we need to send one validation call
+		 * first to get the license type. We need to do this because
+		 * NetLicensing doesn't return the correct validation result for unknown
+		 * license types.
+		 */
 		if (model.getType() == LicenseType.NONE) {
 			setModelTypeByRequest();
 		}
@@ -79,7 +80,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 				parametersFactory.createVerifyParameters(model));
 		model = new NetlicensingLicenseModel(model.getKey(), model.getSecret(), model.getProductNr(),
 				model.getModuleNr(), result.getLicenseType(), model.getName(), result.getExpirationDate());
-	
+
 	}
 
 	@Override
