@@ -37,7 +37,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		ValidationParameters parameters = parametersFactory.createFloatingCheckInParameters(model);
 
 		Map<String, String> map = parameters
-			.getProductModuleValidationParameters(NetlicensingProperties.FLOATING_PRODUCT_MODULE_NUMBER);
+			.getProductModuleValidationParameters(model.getModuleNr());
 		assertTrue(map.containsKey("sessionId"));
 		assertTrue(map.containsKey("action"));
 		assertTrue(expectedSessionId.equals(map.get("sessionId")));
@@ -55,7 +55,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
 
 		assertEquals(expectedSecret, parameters.getLicenseeSecret());
-		assertEquals(NetlicensingProperties.LICENSE_PRODUCT_NUMBER, parameters.getProductNumber());
+		assertEquals(model.getProductNr(), parameters.getProductNumber());
 		assertEquals(expectedName, parameters.getLicenseeName());
 	}
 
@@ -70,7 +70,7 @@ public class NetlicensingValidationParametersFactoryTest {
 		ValidationParameters parameters = parametersFactory.createValidationParameters(model);
 
 		Map<String, String> map = parameters
-			.getProductModuleValidationParameters(NetlicensingProperties.FLOATING_PRODUCT_MODULE_NUMBER);
+			.getProductModuleValidationParameters(model.getModuleNr());
 		assertTrue(map.containsKey("sessionId"));
 		assertTrue(map.containsKey("action"));
 		assertTrue(expectedSessionId.equals(map.get("sessionId")));

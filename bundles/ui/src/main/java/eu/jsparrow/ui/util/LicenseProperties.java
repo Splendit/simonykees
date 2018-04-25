@@ -4,6 +4,5 @@ package eu.jsparrow.ui.util;
 public class LicenseProperties {
 	
 	static final String LICENSE_PRODUCT_NUMBER = "PZ9HF95UJ";
-	
 	static final String FLOATING_PRODUCT_MODULE_NUMBER = "MXVUFV9RN";
 }

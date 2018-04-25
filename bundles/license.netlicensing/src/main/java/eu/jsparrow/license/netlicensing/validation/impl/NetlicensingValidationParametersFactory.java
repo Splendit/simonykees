@@ -34,31 +34,31 @@ public class NetlicensingValidationParametersFactory {
 		String secret = model.getSecret();
 		if (LicenseType.FLOATING == type) {
 			logger.debug("License type is floating"); //$NON-NLS-1$
-			parameters = createFloatingParameters(secret, ACTION_CHECK_OUT_VALUE);
+			parameters = createFloatingParameters(model, ACTION_CHECK_OUT_VALUE);
 		} else {
 			logger.debug("License type is node-locked"); //$NON-NLS-1$
 			parameters = createNodeLockedParameters(secret);
 		}
-		parameters.setProductNumber(NetlicensingProperties.LICENSE_PRODUCT_NUMBER);
+		parameters.setProductNumber(model.getProductNr());
 		parameters.setLicenseeName(model.getName());
 		logger.debug("Returning parameters {}", parameters); //$NON-NLS-1$
 		return parameters;
 	}
 
 	public ValidationParameters createFloatingCheckInParameters(NetlicensingLicenseModel model) {
-		ValidationParameters parameters = createFloatingParameters(model.getSecret(), ACTION_CHECK_IN_VALUE);
-		parameters.setProductNumber(NetlicensingProperties.LICENSE_PRODUCT_NUMBER);
+		ValidationParameters parameters = createFloatingParameters(model, ACTION_CHECK_IN_VALUE);
+		parameters.setProductNumber(model.getProductNr());
 		parameters.setLicenseeName(model.getName());
 		return parameters;
 	}
 
-	private ValidationParameters createFloatingParameters(String sessionId, String action) {
-		logger.debug("Creating floating parameters for sessionId {} and action {}", sessionId, action); //$NON-NLS-1$
+	private ValidationParameters createFloatingParameters(NetlicensingLicenseModel model, String action) {
+		logger.debug("Creating floating parameters for sessionId {} and action {}", model.getSecret(), action); //$NON-NLS-1$
 		ValidationParameters parameters = new ValidationParameters();
 		HashMap<String, String> params = new HashMap<>();
-		params.put(SESSION_ID_KEY, sessionId);
+		params.put(SESSION_ID_KEY, model.getSecret());
 		params.put(ACTION_KEY, action);
-		parameters.setProductModuleValidationParameters(NetlicensingProperties.FLOATING_PRODUCT_MODULE_NUMBER, params);
+		parameters.setProductModuleValidationParameters(model.getProductNr(), params);
 		return parameters;
 
 	}
@@ -78,13 +78,13 @@ public class NetlicensingValidationParametersFactory {
 	 *            the value used as a session id.
 	 * @return the constructed {@link ValidationParameters}.
 	 */
-	public ValidationParameters createVerifyParameters(String secret) {
+	public ValidationParameters createVerifyParameters(NetlicensingLicenseModel model) {
 		ValidationParameters parameters = new ValidationParameters();
 		HashMap<String, String> params = new HashMap<>();
-		params.put(SESSION_ID_KEY, secret);
+		params.put(SESSION_ID_KEY, model.getSecret());
 		params.put(ACTION_KEY, ACTION_CHECK_OUT_VALUE);
-		parameters.setProductModuleValidationParameters(NetlicensingProperties.FLOATING_PRODUCT_MODULE_NUMBER, params);
-		parameters.setProductNumber(NetlicensingProperties.LICENSE_PRODUCT_NUMBER);
+		parameters.setProductModuleValidationParameters(model.getModuleNr(), params);
+		parameters.setProductNumber(model.getProductNr());
 		return parameters;
 	}
 

@@ -62,7 +62,7 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		// NetLicensing doesn't return the correct validation result for unknown
 		// license types.
 		if (model.getType() == LicenseType.NONE) {
-			model = getModelTypeByRequest();
+			setModelTypeByRequest();
 		}
 		ValidationParameters validationParameters = parametersFactory.createValidationParameters(model);
 		NetlicensingValidationResult licensingValidationResult = validationRequest.send(licenseeNumber,
@@ -74,12 +74,12 @@ public class NetlicensingLicenseValidation implements LicenseValidation {
 		return licensingValidationResult;
 	}
 
-	private NetlicensingLicenseModel getModelTypeByRequest() throws ValidationException {
+	private void setModelTypeByRequest() throws ValidationException {
 		LicenseValidationResult result = validationRequest.send(model.getKey(),
-				parametersFactory.createVerifyParameters(model.getSecret()));
+				parametersFactory.createVerifyParameters(model));
 		model = new NetlicensingLicenseModel(model.getKey(), model.getSecret(), model.getProductNr(),
 				model.getModuleNr(), result.getLicenseType(), model.getName(), result.getExpirationDate());
-		return model;
+	
 	}
 
 	@Override
