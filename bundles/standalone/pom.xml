@@ -32,6 +32,16 @@
 
 
 	<build>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>standalone.properties</include>
+				</includes>
+			</resource>
+		</resources>
+
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -60,14 +70,6 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<includes>
-					<include>standalone.properties</include>
-				</includes>
-			</resource>
-		</resources>
 
 		<plugins>
 			<plugin>
@@ -125,8 +127,31 @@
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>test</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<standalone.properties.sourceFile>src/main/resources/standalone.test.properties</standalone.properties.sourceFile>
+			</properties>
+
+		</profile>
+		<profile>
+			<id>production</id>
+			<activation>
+				<property>
+					<name>production</name>
+				</property>
+			</activation>
+			<properties>
+				<standalone.properties.sourceFile>src/main/resources/standalone.prod.properties</standalone.properties.sourceFile>
+			</properties>
+		</profile>
+
+	</profiles>
 </project>
