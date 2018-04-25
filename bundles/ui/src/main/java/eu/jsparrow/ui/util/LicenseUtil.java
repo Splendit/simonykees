@@ -1,7 +1,5 @@
 package eu.jsparrow.ui.util;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
@@ -17,7 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
-import eu.jsparrow.license.api.*;
+import eu.jsparrow.license.api.LicenseModel;
+import eu.jsparrow.license.api.LicenseModelFactoryService;
+import eu.jsparrow.license.api.LicensePersistenceService;
+import eu.jsparrow.license.api.LicenseService;
+import eu.jsparrow.license.api.LicenseType;
+import eu.jsparrow.license.api.LicenseValidationResult;
 import eu.jsparrow.license.api.exception.PersistenceException;
 import eu.jsparrow.license.api.exception.ValidationException;
 import eu.jsparrow.ui.Activator;
