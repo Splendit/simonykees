@@ -58,7 +58,7 @@ public class NetlicensingValidationParametersFactory {
 		HashMap<String, String> params = new HashMap<>();
 		params.put(SESSION_ID_KEY, model.getSecret());
 		params.put(ACTION_KEY, action);
-		parameters.setProductModuleValidationParameters(model.getProductNr(), params);
+		parameters.setProductModuleValidationParameters(model.getModuleNr(), params);
 		return parameters;
 
 	}

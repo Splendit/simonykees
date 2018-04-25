@@ -24,6 +24,8 @@ public class NetlicensingLicenseModel implements LicenseModel {
 		this.type = type;
 		this.key = key;
 		this.secret = secret;
+		this.productNr = productNr;
+		this.moduleNr = moduleNr;
 	}
 
 	public NetlicensingLicenseModel(String key, String secret, String productNr, String moduleNr, LicenseType type, String name, 
