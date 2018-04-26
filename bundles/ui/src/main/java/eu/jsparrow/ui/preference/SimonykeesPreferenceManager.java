@@ -3,6 +3,7 @@ package eu.jsparrow.ui.preference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +31,7 @@ public class SimonykeesPreferenceManager {
 
 	private static SimonykeesProfile defaultProfile = new DefaultProfile();
 	private static SimonykeesProfile emptyProfile = new EmptyProfile();
-	
+
 	private SimonykeesPreferenceManager() {
 		// Hide default constructor
 	}
@@ -65,7 +66,7 @@ public class SimonykeesPreferenceManager {
 	}
 
 	public static void removeProfile(String name) {
-		profiles.remove(getProfileFromName(name));
+		getProfileFromName(name).ifPresent(profile -> profiles.remove(profile));
 	}
 
 	public static void updateProfile(int index, String name, List<String> ruleIds, boolean isSetAsDefault) {
@@ -178,26 +179,11 @@ public class SimonykeesPreferenceManager {
 		return flattenArray(profilesAsString);
 	}
 
-	public static SimonykeesProfile getProfileFromName(String name) {
+	public static Optional<SimonykeesProfile> getProfileFromName(String name) {
 		return profiles.stream()
 			.filter(profile -> profile.getProfileName()
 				.equals(name))
-			.findFirst()
-			.orElse(null);
-	}
-
-	/**
-	 * checks if a profile with the given profileId exists
-	 * 
-	 * @param profileId
-	 *            profile id to search for
-	 * @return true if a profile with the given profileId exists, false
-	 *         otherwise
-	 */
-	public static boolean isExistingProfile(String profileId) {
-		return profiles.stream()
-			.anyMatch(profile -> profile.getProfileName()
-				.equals(profileId));
+			.findFirst();
 	}
 
 	/**

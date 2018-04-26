@@ -2,6 +2,7 @@
 package eu.jsparrow.ui.wizard.impl;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jface.dialogs.Dialog;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.jsparrow.i18n.Messages;
 import eu.jsparrow.ui.preference.SimonykeesPreferenceManager;
+import eu.jsparrow.ui.preference.profile.SimonykeesProfile;
 
 /**
  * Wizard page for selecting rules when applying rules to selected resources
@@ -47,9 +49,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 
 	private static final String CUSTOM_PROFILE = Messages.SelectRulesWizardPage_CustomProfileLabel;
 
-
 	private Combo selectProfileCombo;
-
 
 	private Text nameFilterText;
 
@@ -148,7 +148,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 				// nothing
 			}
 		});
-		
+
 		Label selectProfileLabel = new Label(filterComposite, SWT.NONE);
 		selectProfileLabel.setText(Messages.SelectRulesWizardPage_selectProfile);
 		gridData = new GridData(GridData.END, GridData.CENTER, true, false);
@@ -187,6 +187,8 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 		SimonykeesPreferenceManager.getAllProfileIds()
 			.stream()
 			.map(SimonykeesPreferenceManager::getProfileFromName)
+			.filter(Optional<SimonykeesProfile>::isPresent)
+			.map(Optional<SimonykeesProfile>::get)
 			.map(profile -> profile.getProfileName()
 					+ (profile.isBuiltInProfile() ? Messages.SimonykeesPreferencePage_profilesBuiltInSuffix : "")) //$NON-NLS-1$
 			.forEach(selectProfileCombo::add);
@@ -199,7 +201,7 @@ public class SelectRulesWizardPage extends AbstractSelectRulesWizardPage {
 	private void initializeGroupFilterCombo() {
 		String currentProfileId = SimonykeesPreferenceManager.getCurrentProfileId();
 
-		if (!SimonykeesPreferenceManager.isExistingProfile(currentProfileId)) {
+		if (!SimonykeesPreferenceManager.getProfileFromName(currentProfileId).isPresent()) {
 			String log = NLS.bind(Messages.SelectRulesWizardPage_profileDoesNotExist, currentProfileId);
 			logger.warn(log);
 
